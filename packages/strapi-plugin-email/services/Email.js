@@ -7,68 +7,56 @@
  */
 
 const _ = require('lodash');
-const config = require('../config/settings.json'); 
 
-let mailer; 
-
-if(config.EMAIL_METHOD === 'mailgun') {
-  const mailgun = require('mailgun-js')({
-    apiKey: config.MAILGUN_API_KEY, 
-    domain: config.MAILGUN_DOMAIN,
-    mute: false
+const createDefaultEnvConfig = async (env) => {
+  const pluginStore = strapi.store({
+    environment: env, 
+    type: 'plugin', 
+    name: 'email'
   });
 
-  mailer = (msg, mailerCallback) => {
-    // change reply to format for Mailgun
-    msg['h:Reply-To'] = msg.replyTo; 
-    mailgun.messages().send(msg, mailerCallback); 
-  };
-}
-else if(config.EMAIL_METHOD === 'sendgrid') {
-  const sendgrid = require('@sendgrid/mail'); 
-  sendgrid.setApiKey(config.SENDGRID_API_KEY); 
+  const provider = _.find(strapi.plugins.email.config.providers, {provider: 'sendmail'}); 
+  const value = _.assign({}, provider, {}); 
+  
+  await pluginStore.set({key: 'provider', value}); 
+  return await strapi.store({
+    environment: env, 
+    type: 'plugin', 
+    name: 'email'
+  }).get({key: 'provider'}); 
+};
 
-  mailer = (msg, mailerCallback) => {
-    // change capitalization for SendGrid
-    msg.reply_to = msg.replyTo; 
-    sendgrid.send(msg, mailerCallback);
-  };
-}
-else {
-  // Fallback to default email method
-  const sendmail = require('sendmail')({
-    silent: true
-  });
+const getProviderConfig = async (env) => {
+  let config = await strapi.store({
+    environment: env,
+    type: 'plugin',
+    name: 'email'
+  }).get({key: 'provider'});
 
-  mailer = (msg, mailerCallback) => {
-    sendmail(msg, mailerCallback); 
-  };
-}
+  if(!config) {
+    config = await createDefaultEnvConfig(env); 
+  }
+
+  return config; 
+};
 
 module.exports = {
-  send: (options, cb) => { // eslint-disable-line no-unused-vars
-    return new Promise((resolve, reject) => {
-      // Default values.
-      options = _.isObject(options) ? options : {};
-      options.from = options.from || '"Administration Panel" <no-reply@strapi.io>';
-      options.replyTo = options.replyTo || '"Administration Panel" <no-reply@strapi.io>';
-      options.text = options.text || options.html;
-      options.html = options.html || options.text;
+  getProviderConfig, 
+  send: async (options, config, cb) => {
+    // Get email provider settings to configure the provider to use.
+    if(!config) {
+      config = await getProviderConfig(strapi.config.environment); 
+    }
 
-      mailer({
-        from: options.from,
-        to: options.to,
-        replyTo: options.replyTo,
-        subject: options.subject,
-        text: options.text,
-        html: options.html
-      }, function (err) {
-        if (err) {
-          reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
-        } else {
-          resolve();
-        }
-      });  
-    });
+    const provider = _.find(strapi.plugins.email.config.providers, { provider: config.provider });
+
+    if (!provider) {
+      throw new Error(`The provider package isn't installed. Please run \`npm install strapi-email-${config.provider}\``);
+    }
+
+    const actions = provider.init(config);
+
+    // Execute email function of the provider for all files.
+    return actions.send(options, cb); 
   }
 };

@@ -32,14 +32,15 @@ class Row extends React.Component {
   }
 
   render() {
-    const uploadPath = `/plugins/upload/configurations/${this.context.currentEnvironment}`;
-    const icons = this.props.name === 'upload' ? [
+    // const uploadPath = `/plugins/upload/configurations/${this.context.currentEnvironment}`;
+    const settingsPath = `/plugins/${this.props.name}/configurations/${this.context.currentEnvironment}`; 
+    const icons = this.props.name === 'upload' || this.props.name === 'email' ? [
       {
         icoType: 'cog',
         onClick: (e) => {
           e.preventDefault();
           e.stopPropagation();
-          this.context.router.history.push(uploadPath);
+          this.context.router.history.push(settingsPath);
         },
       },
       {

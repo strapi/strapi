@@ -1,3 +1,36 @@
 {
-  "routes": []
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "handler": "Email.send",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/environments",
+      "handler": "Email.getEnvironments",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/settings/:environment",
+      "handler": "Email.getSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/settings/:environment",
+      "handler": "Email.updateSettings",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
 }

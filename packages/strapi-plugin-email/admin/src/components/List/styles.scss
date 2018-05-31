@@ -1,0 +1,48 @@
+.listWrapper {
+  margin-top: 9px;
+  padding: 0;
+
+  > div:first-child {
+    margin: 0;
+  }
+}
+
+.ulList {
+  width: 100%;
+  padding: 0 !important;
+  list-style: none;
+  > li:nth-child(2) {
+    height: 57px;
+    > div {
+      line-height: 54px !important;
+    }
+  }
+  > li {
+    width: 100%;
+    margin-top: 0;
+  }
+
+  > li:last-child {
+    > div {
+      border-bottom: 0 !important;
+    }
+    box-shadow: 0 2px 4px #E3E9F3;
+  }
+}
+
+.emptyLiWrapper {
+  height: 54px;
+  background-color: #fff;
+  padding-top: 5px;
+  cursor: pointer;
+  > div {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    padding-top: 1px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 54px;
+    text-transform: uppercase;
+  }
+}
