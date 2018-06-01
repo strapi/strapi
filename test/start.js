@@ -6,6 +6,12 @@ const strapiBin = path.resolve('./packages/strapi/bin/strapi.js');
 const appName = 'testApp';
 let appStart;
 
+const databases = {
+  mongo: `--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername="" --dbpassword=""`,
+  postgres: `--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi-test --dbusername="" --dbpassword=""`,
+  mysql: `--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi-test --dbusername="root" --dbpassword="root"`
+};
+
 const {runCLI: jest} = require('jest-cli/build/cli');
 
 const main = async () => {
@@ -21,10 +27,10 @@ const main = async () => {
     });
   };
 
-  const generate = () => {
+  const generate = (database) => {
     return new Promise((resolve) => {
       const appCreation = exec(
-        `node ${strapiBin} new ${appName} --dev --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername="" --dbpassword=""`,
+        `node ${strapiBin} new ${appName} --dev ${database}`,
       );
 
       appCreation.stdout.on('data', data => {
@@ -73,12 +79,18 @@ const main = async () => {
     });
   };
 
-  await clean();
-  await generate();
-  await start();
-  await test();
+  const testProcess = async (database) => {
+    await clean();
+    await generate(database);
+    await start();
+    await test();
 
-  appStart.kill();
+    appStart.kill();
+  };
+
+  await testProcess(databases.mongo);
+  await testProcess(databases.postgres);
+  await testProcess(databases.mysql);
 };
 
 main();

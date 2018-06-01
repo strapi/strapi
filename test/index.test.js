@@ -26,6 +26,13 @@ const rq = (options) => {
   });
 }
 
+const cleanDate = (entry) => {
+  delete entry.updatedAt;
+  delete entry.createdAt;
+  delete entry.created_at;
+  delete entry.updated_at;
+};
+
 let data;
 
 describe('App setup auth', () => {
@@ -234,8 +241,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
         tags: [data.tags[1]]
       });
 
-      delete entry.updatedAt;
-      delete entry.createdAt;
+      cleanDate(entry);
 
       let body = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
@@ -262,8 +268,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       entry.tags.push(data.tags[0]);
       entry.tags.push(data.tags[2]);
 
-      delete entry.updatedAt;
-      delete entry.createdAt;
+      cleanDate(entry);
 
       let body = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
@@ -288,8 +293,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       const entry = Object.assign({}, data.articles[0]);
       entry.tags = entry.tags.slice(1);
 
-      delete entry.updatedAt;
-      delete entry.createdAt;
+      cleanDate(entry);
 
       let body = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
@@ -315,8 +319,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
         tags: []
       });
 
-      delete entry.updatedAt;
-      delete entry.createdAt;
+      cleanDate(entry);
 
       let body = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
@@ -393,8 +396,8 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Create article1 with cat1',
     async () => {
       const entry = {
-        title: 'Article 3',
-        content: 'Content 3',
+        title: 'Article 1',
+        content: 'Content 1',
         category: data.categories[0]
       };
 
@@ -405,6 +408,8 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       });
 
       body = JSON.parse(body);
+
+      console.log(body);
 
       data.articles.push(body);
 
@@ -443,8 +448,8 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Create article2',
     async () => {
       const entry = {
-        title: 'Article 4',
-        content: 'Content 4'
+        title: 'Article 2',
+        content: 'Content 2'
       };
 
       let body = await rq({
