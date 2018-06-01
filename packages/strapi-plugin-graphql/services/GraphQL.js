@@ -608,18 +608,21 @@ module.exports = {
 
               switch (association.nature) {
                 case 'manyToMany': {
-                  const arrayOfIds = (obj[association.alias] || []).map(related => {
-                    return related[ref.primaryKey] || related;
-                  });
+                  if (association.dominant) {
+                    const arrayOfIds = (obj[association.alias] || []).map(related => {
+                      return related[ref.primaryKey] || related;
+                    });
 
-                  // Where.
-                  queryOpts.query = strapi.utils.models.convertParams(name, {
-                    // Construct the "where" query to only retrieve entries which are
-                    // related to this entry.
-                    [ref.primaryKey]: arrayOfIds,
-                    ...where.where
-                  }).where;
-                  break;
+                    // Where.
+                    queryOpts.query = strapi.utils.models.convertParams(name, {
+                      // Construct the "where" query to only retrieve entries which are
+                      // related to this entry.
+                      [ref.primaryKey]: arrayOfIds,
+                      ...where.where
+                    }).where;
+                    break;
+                  }
+                  // falls through
                 }
                 default:
                   // Where.

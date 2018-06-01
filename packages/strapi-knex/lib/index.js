@@ -119,6 +119,15 @@ module.exports = strapi => {
           delete options.connection.schema;
         }
 
+        if (options.client === 'mysql') {
+          options.connection.typeCast = (field, next) => {
+            if (field.type === 'TINY' && field.length === 1) {
+              return (field.string() === '1');
+            }
+            return next();
+          };
+        }
+
         // Finally, use the client via `knex`.
         // If anyone has a solution to use different paths for `knex` and clients
         // please drop us an email at support@strapi.io-- it would avoid the Strapi
