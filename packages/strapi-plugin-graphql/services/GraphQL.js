@@ -128,22 +128,17 @@ module.exports = {
 
   /**
    * Convert Strapi type to GraphQL type.
-   *
+   * @param {Object} attribute Information about the attribute.
+   * @param {Object} attribute.definition Definition of the attribute.
+   * @param {String} attribute.modelName Name of the model which owns the attribute.
+   * @param {String} attribute.attributeName Name of the attribute.
    * @return String
    */
 
-  convertType: (definition = {}) => {
-    // Type.
+  convertType: function ({ definition = {}, modelName = '', attributeName = '' }) {
+    // Type
     if (definition.type) {
       let type = 'String';
-
-      if (definition.type === 'enumeration') {
-        if (definition.enumNamea) {
-          type = definition.enumName;
-        } else {
-          type = `${definition.enum[0].toUpperCase()}_TYPE`;
-        }
-      }
 
       switch (definition.type) {
         case 'string':
@@ -159,6 +154,9 @@ module.exports = {
         case 'float':
           type = 'Float';
           break;
+        case 'enumeration':
+          type = this.convertEnumType(definition, modelName, attributeName);
+          break;
       }
 
       if (definition.required) {
@@ -170,9 +168,9 @@ module.exports = {
 
     const ref = definition.model || definition.collection;
 
-    // Association.
+    // Association
     if (ref && ref !== '*') {
-      // Add bracket or not.
+      // Add bracket or not
       const globalId = definition.plugin ?
         strapi.plugins[definition.plugin].models[ref].globalId:
         strapi.models[ref].globalId;
@@ -189,21 +187,14 @@ module.exports = {
   },
 
   /**
-   * Convert Strapi enum to GraphQL enum.
-   *
+   * Convert Strapi enumeration to GraphQL Enum.
+   * @param {Object} definition Definition of the attribute.
+   * @param {String} model Name of the model which owns the attribute.
+   * @param {String} field Name of the attribute.
    * @return String
    */
-
-  convertEnum: (definition) => {
-    let name = '';
-    if (definition.enumName) {
-      name = definition.enumName;
-    } else {
-      name = `${definition.enum[0].toUpperCase}_TYPE`;
-    }
-
-    return `enum ${name} { ${definition.enum.join('\n')} }`;
-  },
+  
+  convertEnumType: (definition, model, field) => definition.enumName ? definition.enumName : `ENUM_${model.toUpperCase()}_${field.toUpperCase()}`,
 
   /**
    * Execute policies before the specified resolver.
@@ -463,7 +454,11 @@ module.exports = {
       const attributes = Object.keys(model.attributes)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
-          acc[attribute] = this.convertType(model.attributes[attribute]);
+          acc[attribute] = this.convertType({
+            definition: model.attributes[attribute],
+            modelName: globalId,
+            attributeName: attribute,
+          });
 
           return acc;
         }, initialState);
@@ -474,7 +469,7 @@ module.exports = {
           const definition = model.attributes[attribute];
 
           if (definition.type && definition.type === 'enumeration') {
-            acc.push(this.convertEnum(definition));
+            acc.push(`enum ${this.convertEnumType(definition, globalId, attribute)} { ${definition.enum.join(' \n ')} }`);
           }
           return acc;
         }, []).join(' ');
