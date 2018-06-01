@@ -433,12 +433,7 @@ module.exports = function(strapi) {
                           return acc;
                         }, []);
 
-                        await Promise.all(queries.map(query =>
-                          new Promise(async (resolve) => {
-                            await ORM.knex.raw(query);
-                            resolve();
-                          })
-                        ));
+                        await Promise.all(queries.map(query => ORM.knex.raw(query)));
                       }
 
                       // Execute query to update column type
