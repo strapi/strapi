@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { isEmpty, isObject, toString } from 'lodash';
 
+import CustomInputCheckbox from 'components/CustomInputCheckbox';
 import IcoContainer from 'components/IcoContainer';
 
 import styles from './styles.scss';
@@ -68,31 +69,42 @@ class TableRow extends React.Component {
     this.context.router.history.push(`${this.props.destination}${this.props.redirectUrl}`);
   }
 
+  renderAction = () => (
+    <td key='action' className={styles.actions}>
+      <IcoContainer icons={[{ icoType: 'pencil', onClick: () => this.handleClick(this.props.destination) }, { id: this.props.record.id, icoType: 'trash', onClick: this.props.onDelete }]} />
+    </td>
+  );
+
+  renderCells = () => {
+    const { headers } = this.props;
+    return [this.renderDelete()]
+      .concat(
+        headers.map((header, i) => (
+          <td key={i}>
+            <div className={styles.truncate}>
+              <div className={styles.truncated}>
+                {this.getDisplayedValue(
+                  header.type,
+                  this.props.record[header.name],
+                  header.name,
+                )}
+              </div>
+            </div>
+          </td>
+        )))
+      .concat([this.renderAction()]);
+  }
+
+  renderDelete = () => (
+    <td onClick={(e) => e.stopPropagation()} key="i">
+      <CustomInputCheckbox name={this.props.record.id} />
+    </td>
+  );
+
   render() {
-    // Generate cells
-    const cells = this.props.headers.map((header, i) => (
-      <td key={i}>
-        <div className={styles.truncate}>
-          <div className={styles.truncated}>
-            {this.getDisplayedValue(
-              header.type,
-              this.props.record[header.name],
-              header.name,
-            )}
-          </div>
-        </div>
-      </td>
-    ));
-
-    cells.push(
-      <td key='action' className={styles.actions}>
-        <IcoContainer icons={[{ icoType: 'pencil', onClick: () => this.handleClick(this.props.destination) }, { id: this.props.record.id, icoType: 'trash', onClick: this.props.onDelete }]} />
-      </td>
-    );
-
     return (
       <tr className={styles.tableRow} onClick={() => this.handleClick(this.props.destination)}>
-        {cells}
+        {this.renderCells()}
       </tr>
     );
   }

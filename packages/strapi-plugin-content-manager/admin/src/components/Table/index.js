@@ -19,7 +19,7 @@ class Table extends React.Component {
       (
         <TableEmpty
           filters={this.props.filters}
-          colspan={this.props.headers.length}
+          colspan={this.props.headers.length + 1}
           contentType={this.props.routeParams.slug}
         />
       ) :

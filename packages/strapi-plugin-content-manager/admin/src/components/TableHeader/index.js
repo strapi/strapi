@@ -7,6 +7,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import CustomInputCheckbox from 'components/CustomInputCheckbox';
+
 import styles from './styles.scss';
 
 class TableHeader extends React.Component {
@@ -52,7 +54,7 @@ class TableHeader extends React.Component {
     return (
       <thead className={styles.tableHeader}>
         <tr >
-          {headers}
+          {[<th key="bulk_action"><CustomInputCheckbox isAll name="all" /></th>].concat(headers)}
         </tr>
       </thead>
     );
