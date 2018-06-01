@@ -18,14 +18,10 @@ function Filter({ filter, index, onClick, onClickOpen, schema }) {
   let value = filter.value;
 
   if (get(schema, [filter.attr, 'type']) === 'date') {
-    const format = filter.value
-      .slice(0, -1)
-      .split('T')[1]
-      .split(':')
-      .filter(x => x !== '00')
-      .length > 0 ? 'MMMM Do YYYY, h:mm:ss a' : 'MMMM Do YYYY';
-
-    value = moment(filter.value).format(format);
+    const date = moment(filter.value.slice(0, -1), moment.ISO_8601);
+    const format = date.valueOf() === date.startOf('day').valueOf() ?
+      'MMMM Do YYYY' :'MMMM Do YYYY, h:mm:ss a' ;
+    value = date.format(format);
   }
 
   return (
