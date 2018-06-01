@@ -7,9 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import TableHeader from '../TableHeader';
-import TableRow from '../TableRow';
-import TableEmpty from '../TableEmpty';
+import TableDelete from 'components/TableDelete';
+import TableHeader from 'components/TableHeader';
+import TableRow from 'components/TableRow';
+import TableEmpty from 'components/TableEmpty';
 
 import styles from './styles.scss';
 
@@ -35,6 +36,7 @@ class Table extends React.Component {
           redirectUrl={this.props.redirectUrl}
         />
       ));
+    const selectedEntriesNumber = this.props.selectedEntries.length;
 
     return (
       <table className={`table ${styles.table}`}>
@@ -45,6 +47,12 @@ class Table extends React.Component {
           primaryKey={this.props.primaryKey}
         />
         <tbody>
+          { selectedEntriesNumber > 1 && (
+            <TableDelete
+              colspan={this.props.headers.length + 1}
+              number={selectedEntriesNumber}
+            />
+          )}
           {rows}
         </tbody>
       </table>
@@ -54,6 +62,11 @@ class Table extends React.Component {
 
 Table.contextTypes = {
   router: PropTypes.object.isRequired,
+};
+
+Table.defaultProps = {
+  handleDelete: () => {},
+  selectedEntries: [],
 };
 
 Table.propTypes = {
@@ -70,11 +83,8 @@ Table.propTypes = {
   redirectUrl: PropTypes.string.isRequired,
   route: PropTypes.object.isRequired,
   routeParams: PropTypes.object.isRequired,
+  selectedEntries: PropTypes.array,
   sort: PropTypes.string.isRequired,
-};
-
-Table.defaultProps = {
-  handleDelete: () => {},
 };
 
 export default Table;
