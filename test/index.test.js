@@ -409,8 +409,6 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
       body = JSON.parse(body);
 
-      console.log(body);
-
       data.articles.push(body);
 
       expect(body.id);
@@ -426,6 +424,8 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       const entry = Object.assign({}, data.articles[0], {
         category: data.categories[1]
       });
+
+      cleanDate(entry);
 
       let body = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
@@ -475,6 +475,8 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
         category: data.categories[1]
       });
 
+      cleanDate(entry);
+
       let body = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
         method: 'PUT',
@@ -497,6 +499,8 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     async () => {
       const entry = Object.assign({}, data.categories[0]);
       entry.articles.push(data.articles[0]);
+
+      cleanDate(entry);
 
       let body = await rq({
         url: `/content-manager/explorer/category/${entry.id}?source=content-manager`,
@@ -536,6 +540,78 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       expect(Array.isArray(body.articles)).toBeTruthy();
       expect(body.articles.length).toBe(1);
       expect(body.name).toBe(entry.name);
+    }
+  );
+  test(
+    'Get article1 with cat3',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/article/${data.articles[0].id}?source=content-manager`,
+        method: 'GET'
+      });
+
+      body = JSON.parse(body);
+
+      expect(body.id);
+      expect(body.category.id).toBe(data.categories[2].id)
+    }
+  );
+  test(
+    'Get article2 with cat2',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/article/${data.articles[1].id}?source=content-manager`,
+        method: 'GET'
+      });
+
+      body = JSON.parse(body);
+
+      expect(body.id);
+      expect(body.category.id).toBe(data.categories[1].id)
+    }
+  );
+  test(
+    'Get cat1 without relations',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/category/${data.categories[0].id}?source=content-manager`,
+        method: 'GET'
+      });
+
+      body = JSON.parse(body);
+
+      expect(body.id);
+      expect(body.articles.length).toBe(0);
+    }
+  );
+  test(
+    'Get cat2 with article2',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/category/${data.categories[1].id}?source=content-manager`,
+        method: 'GET'
+      });
+
+      body = JSON.parse(body);
+
+      expect(body.id);
+      expect(body.articles.length).toBe(1);
+      expect(body.articles[0].id).toBe(data.articles[1].id);
+    }
+  );
+  test(
+    'Get cat3 with article1',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/category/${data.categories[2].id}?source=content-manager`,
+        method: 'GET'
+      });
+
+      body = JSON.parse(body);
+
+      expect(body.id);
+      expect(body.articles.length).toBe(1);
+      expect(body.articles[0].id).toBe(data.articles[0].id);
     }
   );
 });
@@ -598,8 +674,10 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
     'Update article1 with ref1',
     async () => {
       const entry = Object.assign({}, data.articles[0], {
-        reference: data.references[0]
+        reference: data.references[0].id
       });
+
+      cleanDate(entry);
 
       let body = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
@@ -614,7 +692,7 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(body.reference.name).toBe(entry.reference.name);
+      expect(body.reference.id).toBe(entry.reference);
     }
   );
   test(
@@ -623,7 +701,7 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       const entry = {
         title: 'Article 2',
         content: 'Content 2',
-        reference: data.references[0]
+        reference: data.references[0].id
       };
 
       let body = await rq({
@@ -639,7 +717,21 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       expect(body.id);
       expect(body.title).toBe(entry.title);
       expect(body.content).toBe(entry.content);
-      expect(body.reference.name).toBe(entry.reference.name);
+      expect(body.reference.id).toBe(entry.reference);
+    }
+  );
+  test(
+    'Get article1 without relations',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/article/${data.articles[0].id}?source=content-manager`,
+        method: 'GET'
+      });
+
+      body = JSON.parse(body);
+
+      expect(body.id);
+      expect(body.reference).toBe(null);
     }
   );
 });

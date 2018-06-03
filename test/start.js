@@ -7,9 +7,9 @@ const appName = 'testApp';
 let appStart;
 
 const databases = {
-  mongo: `--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername="" --dbpassword=""`,
-  postgres: `--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi-test --dbusername="" --dbpassword=""`,
-  mysql: `--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi-test --dbusername="root" --dbpassword="root"`
+  mongo: `--dbclient=mongo --dbhost=127.0.0.1 --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername="" --dbpassword=""`,
+  postgres: `--dbclient=postgres --dbhost=127.0.0.1 --dbport=5432 --dbname=strapi-test --dbusername="" --dbpassword=""`,
+  mysql: `--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi-test --dbusername="root" --dbpassword="root"`
 };
 
 const {runCLI: jest} = require('jest-cli/build/cli');
@@ -28,7 +28,7 @@ const main = async () => {
   };
 
   const generate = (database) => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const appCreation = exec(
         `node ${strapiBin} new ${appName} --dev ${database}`,
       );
