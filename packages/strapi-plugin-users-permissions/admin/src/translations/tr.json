@@ -27,7 +27,8 @@
   "Auth.form.register.username.label": "Kullanıcı Adı",
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.form.register.password.label": "Parola",
-  "Auth.form.register.confirmPassword.label": "Onay Şifresi",
+  "Auth.form.register.confirmPassword.label": "Parola Tekrarı",
+  "Auth.form.register.news.label": "Yeni özellikler ve yaklaşan iyileştirmeler hakkında beni haberdar edin.",
 
   "Auth.form.register-success.email.label": "E-posta başarıyla gönderildi, ",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",

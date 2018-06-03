@@ -52,6 +52,10 @@
   "form.attribute.item.json.name": "İsim",
   "form.attribute.item.boolean.name": "İsim",
   "form.attribute.item.string.name": "İsim",
+  "form.attribute.item.appearance.name": "Görünüm",
+  "form.attribute.item.appearance.label": "WYSIWYG olarak görüntüle",
+  "form.attribute.item.appearance.description":
+    "Aksi halde, değer temel bir textarea alanıyla düzenlenebilir",
   "form.attribute.item.settings.name": "Ayarlar",
   "form.attribute.item.requiredField": "Zorunlu alan",
   "form.attribute.item.uniqueField": "Benzersiz alan",
@@ -163,6 +167,7 @@
   "table.contentType.head.description": "Açıklama",
   "table.contentType.head.fields": "Alanlar",
 
+  "relation.oneWay": "tek yönlü",
   "relation.oneToOne": "biri var",
   "relation.oneToMany": "Birçoğuna ait",
   "relation.manyToOne": "Birçok var",
