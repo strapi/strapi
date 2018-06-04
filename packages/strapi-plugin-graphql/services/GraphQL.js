@@ -151,19 +151,29 @@ module.exports = {
   convertType: (definition = {}) => {
     // Type.
     if (definition.type) {
+      let type = 'String';
+
       switch (definition.type) {
         case 'string':
         case 'text':
-          return 'String';
+          type = 'String';
+          break;
         case 'boolean':
-          return 'Boolean';
+          type = 'Boolean';
+          break;
         case 'integer':
-          return 'Int';
+          type = 'Int';
+          break;
         case 'float':
-          return 'Float';
-        default:
-          return 'String';
+          type = 'Float';
+          break;
       }
+
+      if (definition.required) {
+        type += '!';
+      }
+
+      return type;
     }
 
     const ref = definition.model || definition.collection;
@@ -414,7 +424,7 @@ module.exports = {
       // Setup initial state with default attribute that should be displayed
       // but these attributes are not properly defined in the models.
       const initialState = {
-        [model.primaryKey]: 'String'
+        [model.primaryKey]: 'String!'
       };
 
       const globalId = model.globalId;
@@ -427,8 +437,8 @@ module.exports = {
       // Add timestamps attributes.
       if (_.get(model, 'options.timestamps') === true) {
         Object.assign(initialState, {
-          createdAt: 'String',
-          updatedAt: 'String'
+          createdAt: 'String!',
+          updatedAt: 'String!'
         });
 
         Object.assign(acc.resolver[globalId], {
@@ -598,18 +608,21 @@ module.exports = {
 
               switch (association.nature) {
                 case 'manyToMany': {
-                  const arrayOfIds = (obj[association.alias] || []).map(related => {
-                    return related[ref.primaryKey] || related;
-                  });
+                  if (association.dominant) {
+                    const arrayOfIds = (obj[association.alias] || []).map(related => {
+                      return related[ref.primaryKey] || related;
+                    });
 
-                  // Where.
-                  queryOpts.query = strapi.utils.models.convertParams(name, {
-                    // Construct the "where" query to only retrieve entries which are
-                    // related to this entry.
-                    [ref.primaryKey]: arrayOfIds,
-                    ...where.where
-                  }).where;
-                  break;
+                    // Where.
+                    queryOpts.query = strapi.utils.models.convertParams(name, {
+                      // Construct the "where" query to only retrieve entries which are
+                      // related to this entry.
+                      [ref.primaryKey]: arrayOfIds,
+                      ...where.where
+                    }).where;
+                    break;
+                  }
+                  // falls through
                 }
                 default:
                   // Where.
