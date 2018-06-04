@@ -1,7 +1,7 @@
 let request = require('request');
 
-const form = require('./helper/generators');
-const restart = require('./helper/restart');
+const form = require('./helpers/generators');
+const restart = require('./helpers/restart');
 
 request = request.defaults({
   baseUrl: 'http://localhost:1337'

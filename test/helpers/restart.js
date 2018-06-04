@@ -3,9 +3,14 @@ module.exports = function (rq) {
     const ping = async () => {
       try {
         await rq({
-          url: '/',
-          method: 'GET',
-          json: true
+          url: '/_health',
+          method: 'HEAD',
+          mode: 'no-cors',
+          json: true,
+          headers: {
+            'Content-Type': 'application/json',
+            'Keep-Alive': false,
+          }
         });
 
         return resolve();
@@ -15,13 +20,13 @@ module.exports = function (rq) {
         } else {
           return setTimeout(() => {
             ping();
-          }, 4000);
+          }, 1000);
         }
       }
     };
 
     setTimeout(() => {
       ping();
-    }, 4000);
+    }, 1000);
   });
 };

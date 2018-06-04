@@ -1,42 +1,14 @@
 {
-  "article": {
+  "product": {
     "attributes": {
-      "title": {
+      "name": {
         "appearance": ""
       },
-      "content": {
+      "price": {
+        "appearance": ""
+      },
+      "description": {
         "appearance": "WYSIWYG"
-      },
-      "published": {
-        "appearance": ""
-      }
-    }
-  },
-  "tag": {
-    "attributes": {
-      "name": {
-        "appearance": ""
-      }
-    }
-  },
-  "category": {
-    "attributes": {
-      "name": {
-        "appearance": ""
-      }
-    }
-  },
-  "artcle": {
-    "attributes": {
-      "azd": {
-        "appearance": ""
-      }
-    }
-  },
-  "reference": {
-    "attributes": {
-      "name": {
-        "appearance": ""
       }
     }
   }
