@@ -4,6 +4,7 @@
     "name": "user",
     "description": ""
   },
+  "collectionName": "users-permissions_user",
   "attributes": {
     "username": {
       "type": "string",
@@ -39,6 +40,5 @@
       "plugin": "users-permissions",
       "configurable": false
     }
-  },
-  "collectionName": "users-permissions_user"
+  }
 }

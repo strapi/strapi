@@ -418,6 +418,11 @@ module.exports = {
       throw new Error('You can\'t call the convert params method without passing the model\'s name as a first argument.');
     }
 
+    // Remove the source params (that can be sent from the ctm plugin) since it is not a filter
+    if (params.source) {
+      delete params.source;
+    }
+
     const model = entity.toLowerCase();
 
     const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
