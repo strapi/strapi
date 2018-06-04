@@ -1,15 +1,1 @@
-{
-  "product": {
-    "attributes": {
-      "name": {
-        "appearance": ""
-      },
-      "price": {
-        "appearance": ""
-      },
-      "description": {
-        "appearance": "WYSIWYG"
-      }
-    }
-  }
-}
+{}
