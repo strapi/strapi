@@ -13,6 +13,7 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
   ON_CLICK_REMOVE,
+  ON_CLICK_SELECT_ALL,
   ON_TOGGLE_FILTERS,
   OPEN_FILTERS_WITH_SELECTION,
   REMOVE_ALL_FILTERS,
@@ -80,6 +81,12 @@ export function onClickRemove(index) {
   return {
     type: ON_CLICK_REMOVE,
     index,
+  };
+}
+
+export function onClickSelectAll() {
+  return {
+    type: ON_CLICK_SELECT_ALL,
   };
 }
 

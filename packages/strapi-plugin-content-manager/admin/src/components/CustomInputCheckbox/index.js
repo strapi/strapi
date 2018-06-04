@@ -10,11 +10,8 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 class CustomInputCheckbox extends React.Component {
-  state = { value: true };
-
   render() {
-    const { value } = this.state;
-    const { isAll, name } = this.props;
+    const { isAll, name, onChange, value } = this.props;
     return (
       <span className={cn('form-check', styles.customSpan)}>
         <label
@@ -32,9 +29,7 @@ class CustomInputCheckbox extends React.Component {
             defaultChecked={value}
             id={name}
             name={name}
-            onChange={() => {
-              this.setState(prevState => ({ value: !prevState.value }));
-            }}
+            onChange={onChange}
             type="checkbox"
           />
         </label>
@@ -46,6 +41,7 @@ class CustomInputCheckbox extends React.Component {
 CustomInputCheckbox.defaultProps = {
   isAll: false,
   name: '',
+  value: false,
 };
 
 CustomInputCheckbox.propTypes = {
@@ -54,6 +50,8 @@ CustomInputCheckbox.propTypes = {
     PropTypes.number,
     PropTypes.string,
   ]),
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.bool,
 };
 
 export default CustomInputCheckbox;

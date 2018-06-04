@@ -14,6 +14,7 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
   ON_CLICK_REMOVE,
+  ON_CLICK_SELECT_ALL,
   ON_TOGGLE_FILTERS,
   OPEN_FILTERS_WITH_SELECTION,
   REMOVE_ALL_FILTERS,
@@ -25,6 +26,7 @@ import {
 const initialState = fromJS({
   appliedFilters: List([]),
   count: 0,
+  entriesToDelete: List([]),
   filters: List([]),
   filtersUpdated: false,
   filterToFocus: null,
@@ -66,6 +68,16 @@ function listPageReducer(state = initialState, action) {
         .update('appliedFilters', list => list.splice(action.index, 1))
         .update('filters', list => list.splice(action.index, 1))
         .update('filtersUpdated', v => v = !v);
+    case ON_CLICK_SELECT_ALL:
+      return state.update('entriesToDelete', () => {
+        if (state.get('entriesToDelete').size === 0) {
+          return state
+            .get('records')
+            .reduce((acc, current) => acc.concat(List([current.id])), List([]));
+        }
+        
+        return List([]);
+      });
     case ON_TOGGLE_FILTERS:
       return state
         .update('filterToFocus', () => null)

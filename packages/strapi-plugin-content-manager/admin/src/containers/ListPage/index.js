@@ -42,6 +42,7 @@ import {
   getData,
   onChange,
   onClickRemove,
+  onClickSelectAll,
   onToggleFilters,
   openFiltersWithSelections,
   removeAllFilters,
@@ -268,6 +269,12 @@ export class ListPage extends React.Component {
     }
   };
 
+  areAllEntriesSelected = () => {
+    const { listPage: { entriesToDelete, records } } = this.props;
+
+    return entriesToDelete.length === records.length && records.length > 0;
+  };
+
   toggleModalWarning = e => {
     if (!isUndefined(e)) {
       e.preventDefault();
@@ -284,9 +291,10 @@ export class ListPage extends React.Component {
     const {
       addFilter,
       listPage,
-      listPage: { appliedFilters, filters, filterToFocus, params, showFilter },
+      listPage: { appliedFilters, entriesToDelete, filters, filterToFocus, params, showFilter },
       onChange,
       onClickRemove,
+      onClickSelectAll,
       onToggleFilters,
       openFiltersWithSelections,
       removeAllFilters,
@@ -363,6 +371,8 @@ export class ListPage extends React.Component {
             <div className={cn('row', styles.row)}>
               <div className="col-md-12">
                 <Table
+                  onClickSelectAll={onClickSelectAll}
+                  deleteAllValue={this.areAllEntriesSelected()}
                   records={listPage.records}
                   route={this.props.match}
                   routeParams={this.props.match.params}
@@ -374,6 +384,7 @@ export class ListPage extends React.Component {
                   primaryKey={this.getCurrentModel().primaryKey || 'id'}
                   handleDelete={this.toggleModalWarning}
                   redirectUrl={this.generateRedirectURI()}
+                  entriesToDelete={entriesToDelete}
                 />
                 <PopUpWarning
                   isOpen={this.state.showWarning}
@@ -414,6 +425,7 @@ ListPage.propTypes = {
   models: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onClickRemove: PropTypes.func.isRequired,
+  onClickSelectAll: PropTypes.func.isRequired,
   onToggleFilters: PropTypes.func.isRequired,
   openFiltersWithSelections: PropTypes.func.isRequired,
   removeAllFilters: PropTypes.func.isRequired,
@@ -432,6 +444,7 @@ function mapDispatchToProps(dispatch) {
       getData,
       onChange,
       onClickRemove,
+      onClickSelectAll,
       onToggleFilters,
       openFiltersWithSelections,
       removeAllFilters,

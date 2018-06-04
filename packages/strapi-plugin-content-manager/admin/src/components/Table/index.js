@@ -36,21 +36,23 @@ class Table extends React.Component {
           redirectUrl={this.props.redirectUrl}
         />
       ));
-    const selectedEntriesNumber = this.props.selectedEntries.length;
+    const entriesToDeleteNumber = this.props.entriesToDelete.length;
 
     return (
       <table className={`table ${styles.table}`}>
         <TableHeader
+          onClickSelectAll={this.props.onClickSelectAll}
+          value={this.props.deleteAllValue}
           headers={this.props.headers}
           onChangeSort={this.props.onChangeSort}
           sort={this.props.sort}
           primaryKey={this.props.primaryKey}
         />
         <tbody>
-          { selectedEntriesNumber > 1 && (
+          { entriesToDeleteNumber > 1 && (
             <TableDelete
               colspan={this.props.headers.length + 1}
-              number={selectedEntriesNumber}
+              number={entriesToDeleteNumber}
             />
           )}
           {rows}
@@ -65,16 +67,19 @@ Table.contextTypes = {
 };
 
 Table.defaultProps = {
+  entriesToDelete: [],
   handleDelete: () => {},
-  selectedEntries: [],
 };
 
 Table.propTypes = {
+  deleteAllValue: PropTypes.bool.isRequired,
+  entriesToDelete: PropTypes.array,
   filters: PropTypes.array.isRequired,
   handleDelete: PropTypes.func,
   headers: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
   onChangeSort: PropTypes.func.isRequired,
+  onClickSelectAll: PropTypes.func.isRequired,
   primaryKey: PropTypes.string.isRequired,
   records: PropTypes.oneOfType([
     PropTypes.array,
@@ -83,7 +88,6 @@ Table.propTypes = {
   redirectUrl: PropTypes.string.isRequired,
   route: PropTypes.object.isRequired,
   routeParams: PropTypes.object.isRequired,
-  selectedEntries: PropTypes.array,
   sort: PropTypes.string.isRequired,
 };
 

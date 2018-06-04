@@ -13,6 +13,7 @@ export const GET_DATA = 'ContentManager/ListPage/GET_DATA';
 export const GET_DATA_SUCCEEDED = 'ContentManager/ListPage/GET_DATA_SUCCEEDED';
 export const ON_CHANGE = 'ContentManager/ListPage/ON_CHANGE';
 export const ON_CLICK_REMOVE = 'ContentManager/ListPage/ON_CLICK_REMOVE';
+export const ON_CLICK_SELECT_ALL = 'ContentManager/ListPage/ON_CLICK_SELECT_ALL';
 export const ON_TOGGLE_FILTERS = 'ContentManager/ListPage/ON_TOGGLE_FILTERS';
 export const OPEN_FILTERS_WITH_SELECTION = 'ContentManager/ListPage/OPEN_FILTERS_WITH_SELECTION';
 export const REMOVE_ALL_FILTERS = 'ContentManager/ListPage/REMOVE_ALL_FILTERS';

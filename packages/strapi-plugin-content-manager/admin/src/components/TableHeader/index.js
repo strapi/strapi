@@ -22,6 +22,17 @@ class TableHeader extends React.Component {
     }
   }
 
+  renderBulk = () => (
+    <th key="bulk_action">
+      <CustomInputCheckbox
+        isAll
+        name="all"
+        onChange={this.props.onClickSelectAll}
+        value={this.props.value}
+      />
+    </th>
+  );
+
   render() {
     // Generate headers list
     const headers = this.props.headers.map((header, i) => {
@@ -54,18 +65,24 @@ class TableHeader extends React.Component {
     return (
       <thead className={styles.tableHeader}>
         <tr >
-          {[<th key="bulk_action"><CustomInputCheckbox isAll name="all" /></th>].concat(headers)}
+          {[this.renderBulk()].concat(headers)}
         </tr>
       </thead>
     );
   }
 }
 
+TableHeader.defaultProps = {
+  value: false,
+};
+
 TableHeader.propTypes = {
   headers: PropTypes.array.isRequired,
   onChangeSort: PropTypes.func.isRequired,
+  onClickSelectAll: PropTypes.func.isRequired,
   primaryKey: PropTypes.string.isRequired,
   sort: PropTypes.string.isRequired,
+  value: PropTypes.bool,
 };
 
 export default TableHeader;
