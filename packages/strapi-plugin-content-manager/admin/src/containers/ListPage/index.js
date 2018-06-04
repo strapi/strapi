@@ -42,6 +42,7 @@ import {
   getData,
   onChange,
   onClickRemove,
+  onClickSelect,
   onClickSelectAll,
   onToggleFilters,
   openFiltersWithSelections,
@@ -294,6 +295,7 @@ export class ListPage extends React.Component {
       listPage: { appliedFilters, entriesToDelete, filters, filterToFocus, params, showFilter },
       onChange,
       onClickRemove,
+      onClickSelect,
       onClickSelectAll,
       onToggleFilters,
       openFiltersWithSelections,
@@ -372,6 +374,7 @@ export class ListPage extends React.Component {
               <div className="col-md-12">
                 <Table
                   onClickSelectAll={onClickSelectAll}
+                  onClickSelect={onClickSelect}
                   deleteAllValue={this.areAllEntriesSelected()}
                   records={listPage.records}
                   route={this.props.match}
@@ -425,6 +428,7 @@ ListPage.propTypes = {
   models: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onClickRemove: PropTypes.func.isRequired,
+  onClickSelect: PropTypes.func.isRequired,
   onClickSelectAll: PropTypes.func.isRequired,
   onToggleFilters: PropTypes.func.isRequired,
   openFiltersWithSelections: PropTypes.func.isRequired,
@@ -444,6 +448,7 @@ function mapDispatchToProps(dispatch) {
       getData,
       onChange,
       onClickRemove,
+      onClickSelect,
       onClickSelectAll,
       onToggleFilters,
       openFiltersWithSelections,

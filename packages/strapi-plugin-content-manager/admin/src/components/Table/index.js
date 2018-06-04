@@ -26,6 +26,7 @@ class Table extends React.Component {
       ) :
       this.props.records.map((record, key) => (
         <TableRow
+          onChange={this.props.onClickSelect}
           key={key}
           destination={`${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/${record[this.props.primaryKey]}`}
           headers={this.props.headers}
@@ -34,6 +35,7 @@ class Table extends React.Component {
           primaryKey={this.props.primaryKey}
           onDelete={this.props.handleDelete}
           redirectUrl={this.props.redirectUrl}
+          value={this.props.entriesToDelete.indexOf(record.id) !== -1}
         />
       ));
     const entriesToDeleteNumber = this.props.entriesToDelete.length;
@@ -49,7 +51,7 @@ class Table extends React.Component {
           primaryKey={this.props.primaryKey}
         />
         <tbody>
-          { entriesToDeleteNumber > 1 && (
+          { entriesToDeleteNumber > 0 && (
             <TableDelete
               colspan={this.props.headers.length + 1}
               number={entriesToDeleteNumber}
@@ -79,6 +81,7 @@ Table.propTypes = {
   headers: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
   onChangeSort: PropTypes.func.isRequired,
+  onClickSelect: PropTypes.func.isRequired,
   onClickSelectAll: PropTypes.func.isRequired,
   primaryKey: PropTypes.string.isRequired,
   records: PropTypes.oneOfType([

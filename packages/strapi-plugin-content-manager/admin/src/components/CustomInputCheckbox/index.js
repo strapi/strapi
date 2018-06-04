@@ -12,6 +12,7 @@ import styles from './styles.scss';
 class CustomInputCheckbox extends React.Component {
   render() {
     const { isAll, name, onChange, value } = this.props;
+    
     return (
       <span className={cn('form-check', styles.customSpan)}>
         <label

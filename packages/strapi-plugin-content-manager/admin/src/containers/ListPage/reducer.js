@@ -14,6 +14,7 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
   ON_CLICK_REMOVE,
+  ON_CLICK_SELECT,
   ON_CLICK_SELECT_ALL,
   ON_TOGGLE_FILTERS,
   OPEN_FILTERS_WITH_SELECTION,
@@ -68,6 +69,16 @@ function listPageReducer(state = initialState, action) {
         .update('appliedFilters', list => list.splice(action.index, 1))
         .update('filters', list => list.splice(action.index, 1))
         .update('filtersUpdated', v => v = !v);
+    case ON_CLICK_SELECT:
+      return state.update('entriesToDelete', list => {
+        const index = state.get('entriesToDelete').indexOf(action.id);
+
+        if (index !== -1) {
+          return list.splice(index, 1);
+        }
+
+        return list.concat(action.id);
+      });
     case ON_CLICK_SELECT_ALL:
       return state.update('entriesToDelete', () => {
         if (state.get('entriesToDelete').size === 0) {
@@ -75,7 +86,7 @@ function listPageReducer(state = initialState, action) {
             .get('records')
             .reduce((acc, current) => acc.concat(List([current.id])), List([]));
         }
-        
+
         return List([]);
       });
     case ON_TOGGLE_FILTERS:

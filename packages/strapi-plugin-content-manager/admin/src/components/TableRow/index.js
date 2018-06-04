@@ -97,7 +97,11 @@ class TableRow extends React.Component {
 
   renderDelete = () => (
     <td onClick={(e) => e.stopPropagation()} key="i">
-      <CustomInputCheckbox name={this.props.record.id} />
+      <CustomInputCheckbox
+        name={this.props.record.id}
+        onChange={this.props.onChange}
+        value={this.props.value}
+      />
     </td>
   );
 
@@ -114,12 +118,18 @@ TableRow.contextTypes = {
   router: PropTypes.object.isRequired,
 };
 
+TableRow.defaultProps = {
+  value: false,
+};
+
 TableRow.propTypes = {
   destination: PropTypes.string.isRequired,
   headers: PropTypes.array.isRequired,
+  onChange: PropTypes.func.isRequired,
   onDelete: PropTypes.func,
   record: PropTypes.object.isRequired,
   redirectUrl: PropTypes.string.isRequired,
+  value: PropTypes.bool,
 };
 
 TableRow.defaultProps = {
