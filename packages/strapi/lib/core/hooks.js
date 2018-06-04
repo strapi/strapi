@@ -25,7 +25,8 @@ module.exports = function() {
           './node_modules/strapi-middleware-*',
           './node_modules/strapi-upload-*',
           './node_modules/strapi-lint'
-        ]
+        ],
+        cwd: this.config.appPath
       }, (err, files) => {
         if (err) {
           return reject(err);
