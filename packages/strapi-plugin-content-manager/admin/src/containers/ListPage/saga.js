@@ -63,7 +63,6 @@ export function* dataGet(action) {
       call(request, countURL, { method: 'GET', params }),
       call(request, recordsURL, { method: 'GET', params }),
     ];
-    console.log(response[1]);
 
     yield put(getDataSucceeded(response));
   } catch(err) {

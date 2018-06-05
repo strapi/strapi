@@ -359,7 +359,8 @@ class Strapi extends EventEmitter {
       return acc[current] = queries[current].bind(Model), acc;
     }, {
       orm: connector,
-      primaryKey: Model.primaryKey
+      primaryKey: Model.primaryKey,
+      associations: Model.associations
     });
 
     return bindQueries;

@@ -100,6 +100,6 @@ module.exports = {
   },
 
   deleteAll: async ctx => {
-    ctx.body = { ok: true};
+    ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].deleteMany(ctx.params, ctx.request.query);
   }
 };

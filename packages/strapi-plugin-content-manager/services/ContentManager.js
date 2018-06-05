@@ -135,10 +135,13 @@ module.exports = {
   },
 
   delete: async (params, { source }) => {
-    const response = await strapi.query(params.model, source).findOne({
+    const query = strapi.query(params.model, source);
+    const primaryKey = query.primaryKey;
+    const response = await query.findOne({
       id: params.id
     });
 
+    params[primaryKey] = response[primaryKey];
     params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
       const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
 
@@ -160,4 +163,51 @@ module.exports = {
       id: params.id
     });
   },
+
+  deleteMany: async (params, query) => {
+    const { source } = query;
+    const { model } = params;
+    const primaryKey = strapi.query(model, source).primaryKey;
+    const toRemove = Object.keys(query).reduce((acc, curr) => {
+      if (curr !== 'source') {
+        return acc.concat([query[curr]]);
+      }
+
+      return acc;
+    }, []);
+
+    const filters = strapi.utils.models.convertParams(model, { [`${primaryKey}_in`]: toRemove });
+    const entries = await strapi.query(model, source).find({ where: filters.where }, null, true);
+    const associations = strapi.query(model, source).associations;
+
+    for (let i = 0; i < entries.length; ++i) {
+      const entry = entries[i];
+
+      associations.forEach(association => {
+        if (entry[association.alias]) {
+          switch (association.nature) {
+            case 'oneWay':
+            case 'oneToOne':
+            case 'manyToOne':
+              entry[association.alias] = null;
+              break;
+            case 'oneToMany':
+            case 'manyToMany':
+              entry[association.alias] = [];
+              break;
+            default:
+          }
+        }
+      });
+
+      await strapi.query(model, source).update({
+        [primaryKey]: entry[primaryKey],
+        values: _.pick(entry, associations.map(a => a.alias))
+      });
+    }
+
+    return strapi.query(model, source).deleteMany({
+      [primaryKey]: toRemove,
+    });
+  }
 };
