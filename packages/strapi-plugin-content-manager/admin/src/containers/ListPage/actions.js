@@ -57,10 +57,11 @@ export function deleteDataSuccess(id) {
   };
 }
 
-export function deleteSeveralData(entriesToDelete, source) {
+export function deleteSeveralData(entriesToDelete, model, source) {
   return {
     type: DELETE_SEVERAL_DATA,
     entriesToDelete,
+    model,
     source,
   };
 }

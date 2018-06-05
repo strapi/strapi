@@ -57,16 +57,16 @@
     },
     {
       "method": "DELETE",
-      "path": "/explorer/:model/:id",
-      "handler": "ContentManager.delete",
+      "path": "/explorer/deleteAll/:model",
+      "handler": "ContentManager.deleteAll",
       "config": {
         "policies": ["routing"]
       }
     },
     {
       "method": "DELETE",
-      "path": "/explorer/deleteAll",
-      "handler": "ContentManager.deleteAll",
+      "path": "/explorer/:model/:id",
+      "handler": "ContentManager.delete",
       "config": {
         "policies": ["routing"]
       }

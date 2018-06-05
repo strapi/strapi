@@ -431,7 +431,7 @@ export class ListPage extends React.Component {
                   }}
                   popUpWarningType="danger"
                   onConfirm={() => {
-                    deleteSeveralData(entriesToDelete, this.getSource());
+                    deleteSeveralData(entriesToDelete, this.getCurrentModelName(), this.getSource());
                   }}
                 />
                 <PageFooter

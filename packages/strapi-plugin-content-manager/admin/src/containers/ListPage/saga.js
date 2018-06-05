@@ -63,6 +63,7 @@ export function* dataGet(action) {
       call(request, countURL, { method: 'GET', params }),
       call(request, recordsURL, { method: 'GET', params }),
     ];
+    console.log(response[1]);
 
     yield put(getDataSucceeded(response));
   } catch(err) {
@@ -92,10 +93,10 @@ export function* dataDelete({ id, modelName, source }) {
   }
 }
 
-export function* dataDeleteAll({ entriesToDelete, source }) {
+export function* dataDeleteAll({ entriesToDelete, model, source }) {
   try {
     const params = Object.assign(entriesToDelete, source !== undefined ? { source } : {});
-    yield call(request, '/content-manager/explorer/deleteAll', {
+    yield call(request, `/content-manager/explorer/deleteAll/${model}`, {
       method: 'DELETE',
       params,
     });
