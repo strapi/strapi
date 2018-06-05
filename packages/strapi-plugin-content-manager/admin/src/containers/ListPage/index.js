@@ -20,7 +20,7 @@ import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
 // or strapi/packages/strapi-helper-plugin/lib/src
 import PageFooter from 'components/PageFooter';
 import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning/Loadable';
+import PopUpWarning from 'components/PopUpWarning';
 
 // Components from the plugin itself
 import AddFilterCTA from 'components/AddFilterCTA';
