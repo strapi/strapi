@@ -11,6 +11,7 @@ import {
   ADD_FILTER,
   CHANGE_PARAMS,
   DELETE_DATA_SUCCESS,
+  DELETE_SEVERAL_DATA_SUCCESS,
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
   ON_CLICK_REMOVE,
@@ -22,6 +23,7 @@ import {
   REMOVE_FILTER,
   SET_PARAMS,
   SUBMIT,
+  ON_TOGGLE_DELETE_ALL,
 } from './constants';
 
 const initialState = fromJS({
@@ -38,6 +40,7 @@ const initialState = fromJS({
   }),
   records: List([]),
   showFilter: false,
+  showWarningDeleteAll: false,
 });
 
 function listPageReducer(state = initialState, action) {
@@ -56,10 +59,15 @@ function listPageReducer(state = initialState, action) {
           })
         ))
         .update('count', (v) => v = v - 1);
+    case DELETE_SEVERAL_DATA_SUCCESS:
+      return state
+        .update('showWarningDeleteAll', () => false)
+        .update('entriesToDelete', () => List([]));
     case CHANGE_PARAMS:
       return state.updateIn(action.keys, () => action.value);
     case GET_DATA_SUCCEEDED:
       return state
+        .update('entriesToDelete', () => List([]))
         .update('count', () => action.data[0].count)
         .update('records', () => List(action.data[1]));
     case ON_CHANGE:
@@ -117,6 +125,8 @@ function listPageReducer(state = initialState, action) {
         .update('appliedFilters', (list) => list.filter(filter => filter.get('value') !== ''))
         .update('showFilter', () => false)
         .update('filtersUpdated', v => v = !v);
+    case ON_TOGGLE_DELETE_ALL:
+      return state.update('showWarningDeleteAll', v => v = !v);
     default:
       return state;
   }

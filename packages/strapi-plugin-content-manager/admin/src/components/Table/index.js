@@ -55,6 +55,7 @@ class Table extends React.Component {
             <TableDelete
               colspan={this.props.headers.length + 1}
               number={entriesToDeleteNumber}
+              onToggleDeleteAll={this.props.onToggleDeleteAll}
             />
           )}
           {rows}
@@ -83,6 +84,7 @@ Table.propTypes = {
   onChangeSort: PropTypes.func.isRequired,
   onClickSelect: PropTypes.func.isRequired,
   onClickSelectAll: PropTypes.func.isRequired,
+  onToggleDeleteAll: PropTypes.func.isRequired,
   primaryKey: PropTypes.string.isRequired,
   records: PropTypes.oneOfType([
     PropTypes.array,

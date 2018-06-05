@@ -9,12 +9,15 @@ import {
   CHANGE_PARAMS,
   DELETE_DATA,
   DELETE_DATA_SUCCESS,
+  DELETE_SEVERAL_DATA,
+  DELETE_SEVERAL_DATA_SUCCESS,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
   ON_CLICK_REMOVE,
   ON_CLICK_SELECT,
   ON_CLICK_SELECT_ALL,
+  ON_TOGGLE_DELETE_ALL,
   ON_TOGGLE_FILTERS,
   OPEN_FILTERS_WITH_SELECTION,
   REMOVE_ALL_FILTERS,
@@ -51,6 +54,20 @@ export function deleteDataSuccess(id) {
   return {
     type: DELETE_DATA_SUCCESS,
     id,
+  };
+}
+
+export function deleteSeveralData(entriesToDelete, source) {
+  return {
+    type: DELETE_SEVERAL_DATA,
+    entriesToDelete,
+    source,
+  };
+}
+
+export function deleteSeveralDataSuccess() {
+  return {
+    type: DELETE_SEVERAL_DATA_SUCCESS,
   };
 }
 
@@ -102,6 +119,12 @@ export function openFiltersWithSelections(index) {
   return {
     type: OPEN_FILTERS_WITH_SELECTION,
     index,
+  };
+}
+
+export function onToggleDeleteAll() {
+  return {
+    type: ON_TOGGLE_DELETE_ALL,
   };
 }
 

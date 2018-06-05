@@ -98,4 +98,8 @@ module.exports = {
   delete: async ctx => {
     ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].delete(ctx.params, ctx.request.query);
   },
+
+  deleteAll: async ctx => {
+    ctx.body = { ok: true};
+  }
 };

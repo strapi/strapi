@@ -10,7 +10,7 @@ import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
 
-function TableDelete({ colspan, number }) {
+function TableDelete({ colspan, number, onToggleDeleteAll }) {
   const suffix = number > 1 ? 'plural' : 'singular';
 
   return (
@@ -25,7 +25,7 @@ function TableDelete({ colspan, number }) {
         <FormattedMessage
           id="content-manager.components.TableDelete.delete"
         >
-          {message => <span className={styles.deleteAll}>{message}</span>}
+          {message => <span className={styles.deleteAll} onClick={onToggleDeleteAll}>{message}</span>}
         </FormattedMessage>
       </td>
     </tr>
@@ -40,6 +40,7 @@ TableDelete.defaultProps = {
 TableDelete.propTypes = {
   colspan: PropTypes.number,
   number: PropTypes.number,
+  onToggleDeleteAll: PropTypes.func.isRequired,
 };
 
 export default TableDelete;

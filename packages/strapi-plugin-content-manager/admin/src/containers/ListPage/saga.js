@@ -16,11 +16,13 @@ import request from 'utils/request';
 // Actions
 import {
   deleteDataSuccess,
+  deleteSeveralDataSuccess,
   getDataSucceeded,
 } from './actions';
 // Constants
 import {
   DELETE_DATA,
+  DELETE_SEVERAL_DATA,
   GET_DATA,
 } from './constants';
 // Selectors
@@ -68,7 +70,7 @@ export function* dataGet(action) {
   }
 }
 
-export function* dataDelete({ id, modelName, source}) {
+export function* dataDelete({ id, modelName, source }) {
   try {
     const requestUrl = `/content-manager/explorer/${modelName}/${id}`;
     const params = {};
@@ -90,10 +92,25 @@ export function* dataDelete({ id, modelName, source}) {
   }
 }
 
+export function* dataDeleteAll({ entriesToDelete, source }) {
+  try {
+    const params = Object.assign(entriesToDelete, source !== undefined ? { source } : {});
+    yield call(request, '/content-manager/explorer/deleteAll', {
+      method: 'DELETE',
+      params,
+    });
+
+    yield put(deleteSeveralDataSuccess());
+  } catch(err) {
+    strapi.notification.error('content-manager.error.record.delete');
+  }
+}
+
 // All sagas to be loaded
 function* defaultSaga() {
   const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
   yield fork(takeLatest, DELETE_DATA, dataDelete);
+  yield fork(takeLatest, DELETE_SEVERAL_DATA, dataDeleteAll);
 
   yield take(LOCATION_CHANGE);
 

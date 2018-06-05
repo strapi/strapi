@@ -77,5 +77,6 @@
   "popUpWarning.button.cancel": "Cancel",
   "popUpWarning.button.confirm": "Confirm",
   "popUpWarning.title": "Please confirm",
-  "popUpWarning.bodyMessage.contentType.delete": "Are you sure you want to delete this entry?"
+  "popUpWarning.bodyMessage.contentType.delete": "Are you sure you want to delete this entry?",
+  "popUpWarning.bodyMessage.contentType.delete.all": "Are you sure you want to delete theses entries?"
 }
