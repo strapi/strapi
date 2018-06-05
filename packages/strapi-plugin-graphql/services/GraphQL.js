@@ -624,6 +624,7 @@ module.exports = {
                   break;
                   // falls through
                 }
+                  break;
                 default:
                   // Where.
                   queryOpts.query = strapi.utils.models.convertParams(name, {

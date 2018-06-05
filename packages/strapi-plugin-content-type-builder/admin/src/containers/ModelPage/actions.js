@@ -177,6 +177,18 @@ function setParallelAttribute(data) {
   parallelAttribute.params.columnName = data.params.targetColumnName;
   parallelAttribute.params.targetColumnName = data.params.columnName;
   parallelAttribute.params.dominant = false;
+  
+  switch (data.params.nature) {
+    case 'manyToOne':
+      parallelAttribute.params.nature = 'oneToMany';
+      break;
+    case 'oneToMany':
+      parallelAttribute.params.nature = 'manyToOne';
+      break;
+    default:
+    //
+  }
+
 
   return parallelAttribute;
 }
