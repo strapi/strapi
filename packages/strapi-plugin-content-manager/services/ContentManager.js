@@ -9,8 +9,6 @@ const _ = require('lodash');
 module.exports = {
   fetchAll: async (params, query) => {
     const { limit, skip, sort, query : request, queryAttribute, source, page, populate = [] } = query; // eslint-disable-line no-unused-vars
-    // Remove the source key since it is not a filter
-    delete query.source;
     const filters = strapi.utils.models.convertParams(params.model, query);
     const where = !_.isEmpty(request) ? request : filters.where;
 
@@ -26,8 +24,6 @@ module.exports = {
 
   count: async (params, query) => {
     const { source } = query;
-    delete query.source;
-
     const filters = strapi.utils.models.convertParams(params.model, query);
 
     return await strapi.query(params.model, source).count({ where: filters.where });

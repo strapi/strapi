@@ -179,7 +179,11 @@ module.exports = {
                 );
               });
             } else if (_.get(this._attributes, `${current}.isVirtual`) !== true) {
-              acc[current] = params.values[current];
+              if (typeof params.values[current] === 'object') {
+                acc[current] = _.get(params.values[current], this.primaryKey);
+              } else {
+                acc[current] = params.values[current];
+              }
             }
 
             break;
