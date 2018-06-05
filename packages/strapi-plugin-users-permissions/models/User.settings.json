@@ -4,7 +4,6 @@
     "name": "user",
     "description": ""
   },
-  "collectionName": "users-permissions_user",
   "attributes": {
     "username": {
       "type": "string",

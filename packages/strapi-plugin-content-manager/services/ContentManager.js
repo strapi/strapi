@@ -24,8 +24,6 @@ module.exports = {
 
   count: async (params, query) => {
     const { source } = query;
-    delete query.source;
-
     const filters = strapi.utils.models.convertParams(params.model, query);
 
     return await strapi.query(params.model, source).count({ where: filters.where });
