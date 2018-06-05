@@ -10,6 +10,19 @@ export default function setParallelAttribute(newAttribute) {
     parallelAttribute.params.columnName = newAttribute.params.targetColumnName;
     parallelAttribute.params.targetColumnName = newAttribute.params.columnName;
     parallelAttribute.params.dominant = false;
+
+    if (newAttribute.params.nature) {
+      switch (newAttribute.params.nature) {
+        case 'manyToOne':
+          parallelAttribute.params.nature = 'oneToMany';
+          break;
+        case 'oneToMany':
+          parallelAttribute.params.nature = 'manyToOne';          
+          break;
+        default:
+        //
+      }
+    }
     return parallelAttribute;
   }
   return;
