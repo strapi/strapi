@@ -26,6 +26,7 @@ function InputNumber(props) {
           onChange={props.onChange}
           onFocus={props.onFocus}
           placeholder={message}
+          ref={props.inputRef}
           style={props.style}
           tabIndex={props.tabIndex}
           type="number"
@@ -42,6 +43,7 @@ InputNumber.defaultProps = {
   deactivateErrorHighlight: false,
   disabled: false,
   error: false,
+  inputRef: () => {},
   onBlur: () => {},
   onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
@@ -55,6 +57,7 @@ InputNumber.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  inputRef: PropTypes.func,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
