@@ -8,8 +8,6 @@ module.exports = {
           for (const value in where.value) {
             qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
           }
-        // } else if (where.symbol === 'IN') {
-        //   qb.whereIn(key, where.value);
         } else {
           qb.where(key, where.symbol, where.value);
         }

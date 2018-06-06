@@ -77,7 +77,7 @@ export class ListPage extends React.Component {
       location: { pathname, search },
     } = prevProps;
     const {
-      listPage: { deleteAllSuccess, filtersUpdated },
+      listPage: { filtersUpdated },
     } = this.props;
 
     if (pathname !== this.props.location.pathname) {
@@ -86,10 +86,6 @@ export class ListPage extends React.Component {
     }
 
     if (search !== this.props.location.search) {
-      this.getData(this.props);
-    }
-
-    if (prevProps.listPage.deleteAllSuccess !== deleteAllSuccess) {
       this.getData(this.props);
     }
 

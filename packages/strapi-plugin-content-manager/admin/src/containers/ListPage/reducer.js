@@ -30,7 +30,6 @@ import {
 const initialState = fromJS({
   appliedFilters: List([]),
   count: 0,
-  deleteAllSuccess: false,
   entriesToDelete: List([]),
   filters: List([]),
   filtersUpdated: false,
@@ -64,8 +63,7 @@ function listPageReducer(state = initialState, action) {
     case DELETE_SEVERAL_DATA_SUCCESS:
       return state
         .update('showWarningDeleteAll', () => false)
-        .update('entriesToDelete', () => List([]))
-        .update('deleteAllSuccess', v => v = !v);
+        .update('entriesToDelete', () => List([]));
     case CHANGE_PARAMS:
       return state.updateIn(action.keys, () => action.value);
     case GET_DATA_SUCCEEDED:
