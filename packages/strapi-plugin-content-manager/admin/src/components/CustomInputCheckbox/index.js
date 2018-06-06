@@ -9,34 +9,30 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-class CustomInputCheckbox extends React.Component {
-  render() {
-    const { isAll, name, onChange, value } = this.props;
-    
-    return (
-      <span className={cn('form-check', styles.customSpan)}>
-        <label
-          className={cn(
-            'form-check-label',
-            styles.customLabel,
-            isAll ? styles.customLabelHeader : styles.customLabelRow,
-            value && isAll && styles.customLabelCheckedHeader,
-            value && !isAll && styles.customLabelCheckedRow,
-          )}
-          htmlFor={name}
-        >
-          <input
-            className="form-check-input"
-            defaultChecked={value}
-            id={name}
-            name={name}
-            onChange={onChange}
-            type="checkbox"
-          />
-        </label>
-      </span>
-    );
-  }
+function CustomInputCheckbox({ isAll, name, onChange, value }) {
+  return (
+    <span className={cn('form-check', styles.customSpan)}>
+      <label
+        className={cn(
+          'form-check-label',
+          styles.customLabel,
+          isAll ? styles.customLabelHeader : styles.customLabelRow,
+          value && isAll && styles.customLabelCheckedHeader,
+          value && !isAll && styles.customLabelCheckedRow,
+        )}
+        htmlFor={name}
+      >
+        <input
+          className="form-check-input"
+          checked={value}
+          id={name}
+          name={name}
+          onChange={onChange}
+          type="checkbox"
+        />
+      </label>
+    </span>
+  );
 }
 
 CustomInputCheckbox.defaultProps = {

@@ -77,7 +77,7 @@ export class ListPage extends React.Component {
       location: { pathname, search },
     } = prevProps;
     const {
-      listPage: { filtersUpdated },
+      listPage: { deleteAllSuccess, filtersUpdated },
     } = this.props;
 
     if (pathname !== this.props.location.pathname) {
@@ -86,6 +86,10 @@ export class ListPage extends React.Component {
     }
 
     if (search !== this.props.location.search) {
+      this.getData(this.props);
+    }
+
+    if (prevProps.listPage.deleteAllSuccess !== deleteAllSuccess) {
       this.getData(this.props);
     }
 
@@ -293,7 +297,11 @@ export class ListPage extends React.Component {
       });
     }
 
-    this.setState({ showWarning: !this.state.showWarning });
+    if (this.props.listPage.entriesToDelete.length > 0) {
+      this.props.onClickSelectAll();
+    }
+    this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+
   };
 
   render() {

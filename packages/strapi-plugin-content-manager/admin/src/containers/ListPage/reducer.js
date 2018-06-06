@@ -5,6 +5,7 @@
  */
 
 import { fromJS, List, Map } from 'immutable';
+import { toString } from 'lodash';
 
 // ListPage constants
 import {
@@ -29,6 +30,7 @@ import {
 const initialState = fromJS({
   appliedFilters: List([]),
   count: 0,
+  deleteAllSuccess: false,
   entriesToDelete: List([]),
   filters: List([]),
   filtersUpdated: false,
@@ -62,7 +64,8 @@ function listPageReducer(state = initialState, action) {
     case DELETE_SEVERAL_DATA_SUCCESS:
       return state
         .update('showWarningDeleteAll', () => false)
-        .update('entriesToDelete', () => List([]));
+        .update('entriesToDelete', () => List([]))
+        .update('deleteAllSuccess', v => v = !v);
     case CHANGE_PARAMS:
       return state.updateIn(action.keys, () => action.value);
     case GET_DATA_SUCCEEDED:
@@ -79,20 +82,20 @@ function listPageReducer(state = initialState, action) {
         .update('filtersUpdated', v => v = !v);
     case ON_CLICK_SELECT:
       return state.update('entriesToDelete', list => {
-        const index = state.get('entriesToDelete').indexOf(action.id);
+        const index = state.get('entriesToDelete').indexOf(toString(action.id));
 
         if (index !== -1) {
           return list.splice(index, 1);
         }
 
-        return list.concat(action.id);
+        return list.concat(toString(action.id));
       });
     case ON_CLICK_SELECT_ALL:
       return state.update('entriesToDelete', () => {
         if (state.get('entriesToDelete').size === 0) {
           return state
             .get('records')
-            .reduce((acc, current) => acc.concat(List([current.id])), List([]));
+            .reduce((acc, current) => acc.concat(List([toString(current.id)])), List([]));
         }
 
         return List([]);
