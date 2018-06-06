@@ -18,6 +18,7 @@ class Table extends React.Component {
     const rows = this.props.records.length === 0 ?
       (
         <TableEmpty
+          filters={this.props.filters}
           colspan={this.props.headers.length}
           contentType={this.props.routeParams.slug}
         />
@@ -56,6 +57,7 @@ Table.contextTypes = {
 };
 
 Table.propTypes = {
+  filters: PropTypes.array.isRequired,
   handleDelete: PropTypes.func,
   headers: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
