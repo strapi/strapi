@@ -1,0 +1,24 @@
+.search{
+  position: fixed;
+  display: flex;
+  top: 0;
+  height: 6rem;
+  min-width: 44rem;
+  line-height: 6rem;
+  z-index: 999;
+  background-color: #FFFFFF;
+  color: #B3B5B9;
+  border-right: 1px solid #F3F4F4;
+  overflow: auto;
+  &:before {
+    content: '\f002';
+    margin-right: 10px;
+    font-family: 'FontAwesome';
+    font-size: 1.3rem;
+    font-weight: bolder;
+  }
+  input {
+    width: 60%;
+    outline: 0;
+  }
+}

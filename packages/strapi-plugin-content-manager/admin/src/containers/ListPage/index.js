@@ -26,6 +26,7 @@ import PopUpWarning from 'components/PopUpWarning';
 import AddFilterCTA from 'components/AddFilterCTA';
 import FiltersPickWrapper from 'components/FiltersPickWrapper/Loadable';
 import Filter from 'components/Filter/Loadable';
+import Search from 'components/Search';
 import Table from 'components/Table';
 
 // Utils located in `strapi/packages/strapi-helper-plugin/lib/src/utils`;
@@ -342,6 +343,7 @@ export class ListPage extends React.Component {
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
+          <Search />
           <PluginHeader
             actions={pluginHeaderActions}
             description={{
