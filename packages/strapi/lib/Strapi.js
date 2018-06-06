@@ -383,6 +383,7 @@ class Strapi extends EventEmitter {
       {
         orm: connector,
         primaryKey: Model.primaryKey,
+        associations: Model.associations
       },
     );
 
