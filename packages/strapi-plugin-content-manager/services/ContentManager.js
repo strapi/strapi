@@ -131,10 +131,13 @@ module.exports = {
   },
 
   delete: async (params, { source }) => {
-    const response = await strapi.query(params.model, source).findOne({
+    const query = strapi.query(params.model, source);
+    const primaryKey = query.primaryKey;
+    const response = await query.findOne({
       id: params.id
     });
 
+    params[primaryKey] = response[primaryKey];
     params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
       const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
 
