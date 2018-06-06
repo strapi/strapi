@@ -1,1 +1,9 @@
-{}
+{
+  "product": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      }
+    }
+  }
+}

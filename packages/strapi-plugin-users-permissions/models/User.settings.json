@@ -38,6 +38,10 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
+    },
+    "products": {
+      "collection": "product",
+      "via": "user"
     }
   }
 }

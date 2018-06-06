@@ -376,13 +376,16 @@ class Strapi extends EventEmitter {
     }
 
     // Bind queries with the current model to allow the use of `this`.
-    const bindQueries = Object.keys(queries).reduce((acc, current) => {
-      return acc[current] = queries[current].bind(Model), acc;
-    }, {
-      orm: connector,
-      primaryKey: Model.primaryKey,
-      associations: Model.associations
-    });
+    const bindQueries = Object.keys(queries).reduce(
+      (acc, current) => {
+        return (acc[current] = queries[current].bind(Model)), acc;
+      },
+      {
+        orm: connector,
+        primaryKey: Model.primaryKey,
+        associations: Model.associations
+      },
+    );
 
     return bindQueries;
   }
