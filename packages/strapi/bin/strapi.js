@@ -64,9 +64,11 @@ program
 
 // `$ strapi start`
 program
-  .command('start')
+  .command('start [appPath]')
   .description('start your Strapi application')
-  .action(require('./strapi-start'));
+  .action((appPath) => {
+    require('./strapi-start')(appPath);
+  });
 
 // `$ strapi generate:api`
 program

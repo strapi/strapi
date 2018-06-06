@@ -130,7 +130,10 @@ InputCheckbox.propTypes = {
   onFocus: PropTypes.func,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
-  value: PropTypes.bool,
+  value: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
 };
 
 export default InputCheckbox;
