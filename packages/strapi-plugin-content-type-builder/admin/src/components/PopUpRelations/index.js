@@ -53,19 +53,20 @@ class PopUpRelations extends React.Component {
   }
 
   setPlaceholders = (firstCTName, secondCTName, relationType, values = this.props.values) => {
-    if (relationType === 'oneToMany') {
-      firstCTName = pluralize(firstCTName);
+    switch (relationType) {
+      case 'oneToMany':
+        firstCTName = pluralize(firstCTName);
+        break;
+      case 'manyToOne':
+        secondCTName = pluralize(secondCTName);
+        break;
+      case 'manyToMany':
+        firstCTName = pluralize(firstCTName);
+        secondCTName = pluralize(secondCTName);
+        break;
+      default:
+        // Do nothing
     }
-
-    if (relationType === 'manyToOne') {
-      secondCTName = pluralize(secondCTName);
-    }
-
-    if (relationType === 'manyToMany') {
-      firstCTName = pluralize(firstCTName);
-      secondCTName = pluralize(secondCTName);
-    }
-
 
     if (get(this.props.contentType, 'name') !== get(values, 'params.target')) {
       this.props.onChange({ target: { name: 'name', value: firstCTName } });
