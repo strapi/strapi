@@ -44,7 +44,6 @@ module.exports = {
   },
 
   find: async ctx => {
-    console.log(ctx.request.query);
     // Search
     if (!_.isEmpty(ctx.request.query.q)) {
       ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].search(ctx.params, ctx.request.query);

@@ -60,14 +60,11 @@ module.exports = {
       // Search in columns which are not text value.
       searchNoText.forEach(attribute => {
         qb.orWhereRaw(`LOWER(${attribute}) LIKE '%${_.toLower(params.search).replace(/[^a-zA-Z. ]/g, '')}%'`);
-      })
+      });
 
       // Search in columns with text using index.
       switch (this.client) {
-        case 'mysql':
-          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${params.search.replace(/[^a-zA-Z. ]/g, '')}*`);
-          break;
-        case 'pg':
+        case 'pg': {
           const searchQuery = searchText.map(attribute =>
             _.toLower(attribute) === attribute
               ? `to_tsvector(${attribute})`
@@ -75,7 +72,11 @@ module.exports = {
           );
 
           qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, params.search.replace(/[^a-zA-Z. ]/g, ''));
+          break;
+        }
         default:
+          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${params.search.replace(/[^a-zA-Z. ]/g, '')}*`);
+          break;
       }
 
       if (params.sort) {
@@ -95,7 +96,38 @@ module.exports = {
   },
 
   countSearch: async function (params = {}) {
-    return 0;
+    const associations = this.associations.map(x => x.alias);
+    const searchText = Object.keys(this._attributes)
+      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+      .filter(attribute => ['string', 'type'].includes(this._attributes[attribute].type));
+
+    const searchNoText = Object.keys(this._attributes)
+      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+      .filter(attribute => !['string', 'type'].includes(this._attributes[attribute].type));
+
+    return this.query(qb => {
+      // Search in columns which are not text value.
+      searchNoText.forEach(attribute => {
+        qb.orWhereRaw(`LOWER(${attribute}) LIKE '%${_.toLower(params.search).replace(/[^a-zA-Z. ]/g, '')}%'`);
+      });
+
+      // Search in columns with text using index.
+      switch (this.client) {
+        case 'pg': {
+          const searchQuery = searchText.map(attribute =>
+            _.toLower(attribute) === attribute
+              ? `to_tsvector(${attribute})`
+              : `to_tsvector('${attribute}')`
+          );
+
+          qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, params.search.replace(/[^a-zA-Z. ]/g, ''));
+          break;
+        }
+        default:
+          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${params.search.replace(/[^a-zA-Z. ]/g, '')}*`);
+          break;
+      }
+    }).count();
   },
 
   findOne: async function (params, populate) {
