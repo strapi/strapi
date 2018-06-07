@@ -18,6 +18,14 @@ module.exports = {
       .count());
   },
 
+  search: async function (params, populate) {
+    return [];
+  },
+
+  countSearch: async function (params = {}) {
+    return 0;
+  },
+
   findOne: async function (params, populate, raw = true) {
     const query = this
       .findOne({

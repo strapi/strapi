@@ -44,12 +44,23 @@ module.exports = {
   },
 
   find: async ctx => {
+    console.log(ctx.request.query);
+    // Search
+    if (!_.isEmpty(ctx.request.query.q)) {
+      ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].search(ctx.params, ctx.request.query);
+
+      return;
+    }
+
+    // Default list with filters or not.
     ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll(ctx.params, ctx.request.query);
   },
 
   count: async ctx => {
-    // Count using `queries` system
-    const count = await strapi.plugins['content-manager'].services['contentmanager'].count(ctx.params, ctx.request.query);
+    // Search
+    const count = !_.isEmpty(ctx.request.query.q)
+      ? await strapi.plugins['content-manager'].services['contentmanager'].countSearch(ctx.params, ctx.request.query)
+      : await strapi.plugins['content-manager'].services['contentmanager'].count(ctx.params, ctx.request.query);
 
     ctx.body = {
       count: _.isNumber(count) ? count : _.toNumber(count)
