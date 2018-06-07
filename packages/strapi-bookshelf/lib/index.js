@@ -397,6 +397,26 @@ module.exports = function(strapi) {
                       }, start);
                     };
 
+                    const generateIndexes = async (table, attrs) => {
+                      try {
+                        const columns = Object.keys(attributes)
+                          .filter(attribute => ['string', 'text'].includes(attributes[attribute].type))
+                          .map(attribute => `\`${attribute}\``)
+                          .join(',');
+
+                        switch (definition.client) {
+                          case 'mysql':
+                            await ORM.knex.raw(`CREATE FULLTEXT INDEX SEARCH_${_.toUpper(_.snakeCase(table))} ON \`${table}\` (${columns})`);
+                            break;
+                          default:
+                        }
+                      } catch (e) {
+                        if (e.errno !== 1061) {
+                          console.log(e);
+                        }
+                      }
+                    };
+
                     if (!tableExist) {
                       const columns = generateColumns(attributes, [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`]).join(',\n\r');
 
@@ -406,9 +426,12 @@ module.exports = function(strapi) {
                           ${columns}
                         )
                       `);
+
+                      await generateIndexes(table, attributes);
                     } else {
                       const columns = Object.keys(attributes);
 
+                      await generateIndexes(table, attributes);
                       // Fetch existing column
                       const columnsExist = await Promise.all(columns.map(attribute =>
                         ORM.knex.schema.hasColumn(table, attribute)

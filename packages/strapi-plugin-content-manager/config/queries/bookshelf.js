@@ -46,8 +46,44 @@ module.exports = {
       .count();
   },
 
-  search: async function (params, populate) {
-    return [];
+  search: async function (params, populate, raw = false) {
+    const associations = this.associations.map(x => x.alias);
+    const searchText = Object.keys(this._attributes)
+      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+      .filter(attribute => ['string', 'type'].includes(this._attributes[attribute].type));
+
+    const searchNoText = Object.keys(this._attributes)
+      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+      .filter(attribute => !['string', 'type'].includes(this._attributes[attribute].type));
+
+    return this.query(qb => {
+      // Search in columns which are not text value.
+      searchNoText.forEach(attribute => {
+        qb.orWhereRaw(`LOWER(${attribute}) LIKE '%${_.toLower(params.search).replace(/[^a-zA-Z. ]/g, '')}%'`);
+      })
+
+      // Search in columns with text using index.
+      switch (this.client) {
+        case 'mysql':
+          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${params.search.replace(/[^a-zA-Z. ]/g, '')}*`);
+          break;
+        default:
+      }
+
+      if (params.sort) {
+        qb.orderBy(params.sort.key, params.sort.order);
+      }
+
+      if (params.skip) {
+        qb.offset(_.toNumber(params.skip));
+      }
+
+      if (params.limit) {
+        qb.limit(_.toNumber(params.limit));
+      }
+    }).fetchAll({
+      width: populate || associations
+    }).then(data => raw ? data.toJSON() : data);
   },
 
   countSearch: async function (params = {}) {
