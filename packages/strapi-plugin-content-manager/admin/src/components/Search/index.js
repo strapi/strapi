@@ -15,12 +15,12 @@ import styles from './styles.scss';
 const WAIT = 400;
 
 class Search extends React.Component {
-  state = { value: '' };
+  state = { value: this.props.initValue };
 
   componentDidUpdate(prevProps) {
     const { model, value } = this.props;
     
-    if (prevProps.model !== model || !isEmpty(prevProps.value) && isEmpty(value) && this.timer === null) {
+    if (prevProps.model !== model || !isEmpty(prevProps.value) && isEmpty(value)) {
       this.resetState();
     }
   }
@@ -85,6 +85,7 @@ Search.defaultProps = {
 
 Search.propTypes = {
   changeParams: PropTypes.func,
+  initValue: PropTypes.string.isRequired,
   model: PropTypes.string,
   value: PropTypes.string,
 };

@@ -231,7 +231,8 @@ export class ListPage extends React.Component {
       history,
       listPage: { filters, params },
     } = this.props;
-    const searchEnd  = `&_sort=${params._sort}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;  
+    const q = params.q !== '' ? `&q=${params.q}` : '';
+    const searchEnd  = `&_sort=${params._sort}${q}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
     const search =
       e.target.name === 'params._limit'
         ? `_page=${params._page}&_limit=${e.target.value}${searchEnd}`
@@ -253,11 +254,12 @@ export class ListPage extends React.Component {
     const {
       listPage: { filters, params },
     } = this.props;
+    const q = params.q !== '' ? `&q=${params.q}` : '';
     this.props.history.push({
       pathname: this.props.location.pathname,
       search: `?_page=${params._page}&_limit=${
         params._limit
-      }&_sort=${sort}&source=${this.getSource()}${generateSearchFromFilters(filters)}`,
+      }&_sort=${sort}${q}&source=${this.getSource()}${generateSearchFromFilters(filters)}`,
     });
 
     this.props.changeParams({ target });
@@ -345,8 +347,9 @@ export class ListPage extends React.Component {
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
           <Search
-            model={this.getCurrentModelName()}
             changeParams={this.props.changeParams}
+            initValue={getQueryParameters(this.props.location.search, 'q') || ''}
+            model={this.getCurrentModelName()}
             value={params.q}
           />
           <PluginHeader

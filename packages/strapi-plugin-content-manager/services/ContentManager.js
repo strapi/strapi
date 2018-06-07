@@ -26,8 +26,6 @@ module.exports = {
     const { limit, skip, sort, source, q, populate = [] } = query; // eslint-disable-line no-unused-vars
     const filters = strapi.utils.models.convertParams(params.model, query);
 
-    console.log("SEARCH", q);
-
     // Find entries using `queries` system
     return await strapi.query(params.model, source).search({
       limit: limit || filters.limit,

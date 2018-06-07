@@ -19,11 +19,69 @@ module.exports = {
   },
 
   search: async function (params, populate) { // eslint-disable-line  no-unused-vars
-    return [];
+    const $or = Object.keys(this.attributes).reduce((acc, curr) => {
+      switch (this.attributes[curr].type) {
+        case 'integer':
+        case 'float':
+        case 'decimal':
+          if (!_.isNaN(_.toNumber(params.search))) {
+            return acc.concat({ [curr]: params.search });
+          }
+
+          return acc;
+        case 'string':
+        case 'text':
+        case 'password':
+          return acc.concat({ [curr]: { $regex: params.search, $options: 'i' } });
+        case 'boolean':
+          if (params.search === 'true' || params.search === 'false') {
+            return acc.concat({ [curr]: params.search === 'true' });
+          }
+
+          return acc;
+        default:
+          return acc;
+      }
+    }, []);
+
+    return this
+      .find({ $or })
+      .limit(Number(params.limit))
+      .sort(params.sort)
+      .skip(Number(params.skip))
+      .populate(populate || this.associations.map(x => x.alias).join(' '))
+      .lean();   
   },
 
   countSearch: async function (params = {}) { // eslint-disable-line  no-unused-vars
-    return 0;
+    const $or = Object.keys(this.attributes).reduce((acc, curr) => {
+      switch (this.attributes[curr].type) {
+        case 'integer':
+        case 'float':
+        case 'decimal':
+          if (!_.isNaN(_.toNumber(params.search))) {
+            return acc.concat({ [curr]: params.search });
+          }
+
+          return acc;
+        case 'string':
+        case 'text':
+        case 'password':
+          return acc.concat({ [curr]: { $regex: params.search, $options: 'i' } });
+        case 'boolean':
+          if (params.search === 'true' || params.search === 'false') {
+            return acc.concat({ [curr]: params.search === 'true' });
+          }
+
+          return acc;
+        default:
+          return acc;
+      }
+    }, []);
+
+    return this
+      .find({ $or })
+      .count();
   },
 
   findOne: async function (params, populate, raw = true) {
