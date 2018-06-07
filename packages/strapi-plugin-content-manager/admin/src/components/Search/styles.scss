@@ -19,10 +19,12 @@
     font-weight: bolder;
   }
   input {
+    position: relative;
     width: 100%;
     outline: 0;
   }
   > div:first-child {
+    display: flex;
     flex: 2;
   }
 }
@@ -41,7 +43,7 @@
   line-height: 22px;
   color: #007EFF;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   > img {
     position: absolute;
@@ -50,5 +52,24 @@
     bottom: 0;
     left: 10px;
     height: 7px;
+  }
+}
+
+.clearable {
+  height: 13px;
+  width: 13px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #B3B5B9;
+  border-radius: 50%;
+  cursor: pointer;
+  &:after {
+    content: '\f00d';
+    margin: auto;
+    color: white;
+    font-family: FontAwesome;
+    font-size: 8px;
   }
 }

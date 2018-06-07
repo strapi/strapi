@@ -10,7 +10,7 @@ const generateFiltersFromSearch = search => search
     const arr = curr.split('=');
     const split = arr[0].split('_');
     const filter = split.length > 1 ? `_${split[1]}` : '=';
-    acc.push({ attr: split[0], filter, value: arr[1] });
+    acc.push({ attr: split[0], filter, value: decodeURIComponent(arr[1]) });
 
     return acc;
   }, []);

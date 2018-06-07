@@ -33,7 +33,7 @@ import {
 
 export function* dataGet(action) {
   try {
-    const { _limit, _page, _sort } = yield select(makeSelectParams());
+    const { _limit, _page, _sort, q } = yield select(makeSelectParams());
     const filters = yield select(makeSelectFilters());
     const source = action.source;
     const currentModel = action.currentModel;
@@ -56,9 +56,10 @@ export function* dataGet(action) {
       _limit,
       _start,
       _sort: sortValue,
+      q,
       source,
     });
-
+    
     const response = yield [
       call(request, countURL, { method: 'GET', params }),
       call(request, recordsURL, { method: 'GET', params }),
