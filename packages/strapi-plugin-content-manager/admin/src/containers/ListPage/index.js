@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { capitalize, get, isUndefined, map, toInteger } from 'lodash';
+import { capitalize, get, isUndefined, map, omit, toInteger } from 'lodash';
 import cn from 'classnames';
 
 // App selectors
@@ -125,7 +125,8 @@ export class ListPage extends React.Component {
     const _limit = toInteger(getQueryParameters(props.location.search, '_limit')) || 10;
     const _page = toInteger(getQueryParameters(props.location.search, '_page')) || 1;
     const _sort = this.findPageSort(props);
-    const params = { _limit, _page, _sort };
+    const q = getQueryParameters(props.location.search, 'q') || '';
+    const params = { _limit, _page, _sort, q };
     const filters = generateFiltersFromSearch(props.location.search);
 
     this.props.setParams(params, filters);
@@ -163,8 +164,8 @@ export class ListPage extends React.Component {
     const {
       listPage: { filters, params },
     } = this.props;
-
-    return `?${generateSearchFromParams(params)}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
+    
+    return `?${generateSearchFromParams(omit(params, 'q'))}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
   }
 
   /**
@@ -230,7 +231,7 @@ export class ListPage extends React.Component {
       history,
       listPage: { filters, params },
     } = this.props;
-    const searchEnd  = `&_sort=${params._sort}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
+    const searchEnd  = `&_sort=${params._sort}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;  
     const search =
       e.target.name === 'params._limit'
         ? `_page=${params._page}&_limit=${e.target.value}${searchEnd}`
@@ -345,6 +346,8 @@ export class ListPage extends React.Component {
         <div className={cn('container-fluid', styles.containerFluid)}>
           <Search
             model={this.getCurrentModelName()}
+            changeParams={this.props.changeParams}
+            value={params.q}
           />
           <PluginHeader
             actions={pluginHeaderActions}
