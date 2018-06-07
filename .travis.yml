@@ -22,3 +22,8 @@ install:
 
 script:
   - npm run doc
+  - npm run test
+
+cache:
+  directories:
+    - "node_modules"
