@@ -23,6 +23,7 @@ class Table extends React.Component {
           filters={this.props.filters}
           colspan={this.props.headers.length + 1}
           contentType={this.props.routeParams.slug}
+          search={this.props.search}
         />
       ) :
       this.props.records.map((record, key) => (
@@ -40,7 +41,7 @@ class Table extends React.Component {
         />
       ));
     const entriesToDeleteNumber = this.props.entriesToDelete.length;
-
+    
     return (
       <table className={`table ${styles.table}`}>
         <TableHeader
@@ -73,6 +74,7 @@ Table.contextTypes = {
 Table.defaultProps = {
   entriesToDelete: [],
   handleDelete: () => {},
+  search: '',
 };
 
 Table.propTypes = {
@@ -94,6 +96,7 @@ Table.propTypes = {
   redirectUrl: PropTypes.string.isRequired,
   route: PropTypes.object.isRequired,
   routeParams: PropTypes.object.isRequired,
+  search: PropTypes.string,
   sort: PropTypes.string.isRequired,
 };
 

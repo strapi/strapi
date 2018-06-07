@@ -40,14 +40,14 @@ class Search extends React.Component {
     this.triggerChange('');
   }
 
-  triggerChange = (value) => {
-    this.props.change({
+  triggerChange = (value) => (
+    this.props.changeParams({
       target: {
         name: 'params.q',
         value,
       },
-    });
-  }
+    })
+  );
 
   render() {
     const { model } = this.props;
@@ -78,13 +78,13 @@ class Search extends React.Component {
 }
 
 Search.defaultProps = {
-  change: () => {},
+  changeParams: () => {},
   model: '',
   value: '',
 };
 
 Search.propTypes = {
-  change: PropTypes.func,
+  changeParams: PropTypes.func,
   model: PropTypes.string,
   value: PropTypes.string,
 };

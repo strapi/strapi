@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { capitalize, get, isUndefined, map, omit, toInteger } from 'lodash';
+import { capitalize, get, isUndefined, map, toInteger } from 'lodash';
 import cn from 'classnames';
 
 // App selectors
@@ -165,7 +165,7 @@ export class ListPage extends React.Component {
       listPage: { filters, params },
     } = this.props;
     
-    return `?${generateSearchFromParams(omit(params, 'q'))}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
+    return `?${generateSearchFromParams(params)}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
   }
 
   /**
@@ -340,7 +340,7 @@ export class ListPage extends React.Component {
           }),
       },
     ];
-
+    
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
@@ -417,6 +417,7 @@ export class ListPage extends React.Component {
                   redirectUrl={this.generateRedirectURI()}
                   route={this.props.match}
                   routeParams={this.props.match.params}
+                  search={params.q}
                   sort={params._sort}
                 />
                 <PopUpWarning

@@ -56,9 +56,12 @@ export function* dataGet(action) {
       _limit,
       _start,
       _sort: sortValue,
-      q,
       source,
     });
+
+    if (q !== '') {
+      params.q = q;
+    }
     
     const response = yield [
       call(request, countURL, { method: 'GET', params }),

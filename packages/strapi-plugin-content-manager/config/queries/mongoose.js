@@ -18,11 +18,11 @@ module.exports = {
       .count());
   },
 
-  search: async function (params, populate) {
+  search: async function (params, populate) { // eslint-disable-line  no-unused-vars
     return [];
   },
 
-  countSearch: async function (params = {}) {
+  countSearch: async function (params = {}) { // eslint-disable-line  no-unused-vars
     return 0;
   },
 

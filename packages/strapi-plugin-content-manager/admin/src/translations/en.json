@@ -42,6 +42,7 @@
 
   "components.TableEmpty.withFilters": "There is no {contentType} with the applied filters...",
   "components.TableEmpty.withoutFilter": "There is no {contentType}...",
+  "components.TableEmpty.withSearch": "There is no {contentType} corresponding to the search ({search})...",
 
   "EditRelations.title": "Relational data",
 

@@ -5,7 +5,7 @@
  */
 const generateFiltersFromSearch = search => search
   .split('&')
-  .filter(x => !x.includes('_limit') && !x.includes('_page') && !x.includes('_sort') && !x.includes('source'))
+  .filter(x => !x.includes('_limit') && !x.includes('_page') && !x.includes('_sort') && !x.includes('source') && !x.includes('q'))
   .reduce((acc, curr) => {
     const arr = curr.split('=');
     const split = arr[0].split('_');
@@ -40,10 +40,12 @@ const generateSearchFromFilters = filters => {
  */
 const generateSearchFromParams = params =>
   Object.keys(params).reduce((acc, curr, index) => {
-    if (index === 0) {
-      acc = `${curr}=${params[curr]}`;
-    } else {
-      acc = `${acc}&${curr}=${params[curr]}`;
+    if (params[curr] !== '') {
+      if (index === 0) {
+        acc = `${curr}=${params[curr]}`;
+      } else {
+        acc = `${acc}&${curr}=${params[curr]}`;
+      }
     }
     return acc;
   }, '');
