@@ -38,8 +38,6 @@ module.exports = {
   countSearch: async (params, query) => {
     const { source, q } = query;
 
-    console.log("COUNT SEARCH", q);
-
     return await strapi.query(params.model, source).countSearch({ search: q });
   },
 
