@@ -67,6 +67,14 @@ module.exports = {
         case 'mysql':
           qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${params.search.replace(/[^a-zA-Z. ]/g, '')}*`);
           break;
+        case 'pg':
+          const searchQuery = searchText.map(attribute =>
+            _.toLower(attribute) === attribute
+              ? `to_tsvector(${attribute})`
+              : `to_tsvector('${attribute}')`
+          );
+
+          qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, params.search.replace(/[^a-zA-Z. ]/g, ''));
         default:
       }
 

@@ -399,20 +399,44 @@ module.exports = function(strapi) {
 
                     const generateIndexes = async (table, attrs) => {
                       try {
-                        const columns = Object.keys(attributes)
-                          .filter(attribute => ['string', 'text'].includes(attributes[attribute].type))
-                          .map(attribute => `\`${attribute}\``)
-                          .join(',');
+                        const connection = strapi.config.connections[definition.connection];
+                        let columns = Object.keys(attributes).filter(attribute => ['string', 'text'].includes(attributes[attribute].type));
 
-                        switch (definition.client) {
-                          case 'mysql':
-                            await ORM.knex.raw(`CREATE FULLTEXT INDEX SEARCH_${_.toUpper(_.snakeCase(table))} ON \`${table}\` (${columns})`);
+                        switch (connection.settings.client) {
+                          case 'pg':
+                            // Enable extension to allow GIN indexes.
+                            await ORM.knex.raw(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+
+                            // Create GIN indexes for every column.
+                            const indexes = columns
+                              .map(column => {
+                                const indexName = `${_.snakeCase(table)}_${column}`;
+                                const attribute = _.toLower(column) === column
+                                  ? column
+                                  : `"${column}"`;
+
+                                return ORM.knex.raw(`CREATE INDEX search_${_.toLower(indexName)} ON "${table}" USING gin(${attribute} gin_trgm_ops)`);
+                              });
+
+                            await Promise.all(indexes);
                             break;
                           default:
+                            columns = columns
+                              .map(attribute => `\`${attribute}\``)
+                              .join(',');
+
+                            // Create fulltext indexes for every column.
+                            await ORM.knex.raw(`CREATE FULLTEXT INDEX SEARCH_${_.toUpper(_.snakeCase(table))} ON \`${table}\` (${columns})`);
+                            break;
                         }
                       } catch (e) {
-                        if (e.errno !== 1061) {
-                          console.log(e);
+                        // Handle duplicate errors.
+                        if (e.errno !== 1061 && e.code !== '42P07') {
+                          if (_.get(connection, 'options.debug') === true) {
+                            console.log(e);
+                          }
+
+                          strapi.log.warn(`The SQL database indexes haven't been generated successfully. Please enable the debug mode for more details.`);
                         }
                       }
                     };
@@ -427,11 +451,11 @@ module.exports = function(strapi) {
                         )
                       `);
 
+                      // Generate indexes.
                       await generateIndexes(table, attributes);
                     } else {
                       const columns = Object.keys(attributes);
 
-                      await generateIndexes(table, attributes);
                       // Fetch existing column
                       const columnsExist = await Promise.all(columns.map(attribute =>
                         ORM.knex.schema.hasColumn(table, attribute)
@@ -447,6 +471,9 @@ module.exports = function(strapi) {
                           columnsToAdd[columns[index]] = attribute;
                         }
                       });
+
+                      // Generate indexes for new attributes.
+                      await generateIndexes(table, columnsToAdd);
 
                       // Generate and execute query to add missing column
                       if (Object.keys(columnsToAdd).length > 0) {
