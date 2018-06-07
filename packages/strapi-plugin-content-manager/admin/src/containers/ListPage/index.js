@@ -343,7 +343,9 @@ export class ListPage extends React.Component {
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
-          <Search />
+          <Search
+            model={this.getCurrentModelName()}
+          />
           <PluginHeader
             actions={pluginHeaderActions}
             description={{

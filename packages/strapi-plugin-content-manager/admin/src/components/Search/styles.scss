@@ -4,6 +4,7 @@
   top: 0;
   height: 6rem;
   min-width: 44rem;
+  padding-right: 30px;
   line-height: 6rem;
   z-index: 999;
   background-color: #FFFFFF;
@@ -18,7 +19,36 @@
     font-weight: bolder;
   }
   input {
-    width: 60%;
+    width: 100%;
     outline: 0;
+  }
+  > div:first-child {
+    flex: 2;
+  }
+}
+
+
+.searchLabel {
+  position: relative;
+  height: 22px;
+  margin: auto;
+  margin-left: 30px;
+  padding-right: 10px;
+  padding-left: 27px;
+  background: rgba(0,126,255,0.08);
+  border: 1px solid rgba(0,126,255,0.24);
+  border-radius: 2px;
+  line-height: 22px;
+  color: #007EFF;
+  font-size: 13px;
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  > img {
+    position: absolute;
+    top: 1px;
+    margin: auto;
+    bottom: 0;
+    left: 10px;
+    height: 7px;
   }
 }

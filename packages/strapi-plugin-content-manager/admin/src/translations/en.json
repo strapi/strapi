@@ -33,6 +33,8 @@
   "components.FilterOptions.FILTER_TYPES._contains": "contains",
   "components.FilterOptions.FILTER_TYPES._containss": "contains (case sensitive)",
 
+  "components.Search.placeholder": "Search for an entry...",
+
   "components.TableDelete.entries.plural": "{number} entries selected",
   "components.TableDelete.entries.singular": "{number} entry selected",
   "components.TableDelete.delete": "Delete all",
