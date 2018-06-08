@@ -361,7 +361,7 @@ module.exports = function(strapi) {
                             type = definition.client === 'pg' ? 'double precision' : 'double';
                             break;
                           case 'decimal':
-                            type = 'decimal';
+                            type = 'decimal(10,2)';
                             break;
                           case 'date':
                           case 'time':
@@ -431,9 +431,9 @@ module.exports = function(strapi) {
                         const queries = columns.reduce((acc, attribute) => {
                           acc.push(`ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`);
                           return acc;
-                        }, []).join('\n\r');
+                        }, []);
 
-                        await ORM.knex.raw(queries);
+                        await Promise.all(queries.map(query => ORM.knex.raw(query)));
                       }
 
                       // Execute query to update column type

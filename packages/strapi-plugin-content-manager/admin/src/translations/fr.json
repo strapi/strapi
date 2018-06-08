@@ -16,6 +16,27 @@
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
 
+  "components.AddFilterCTA.add": "Filtres",
+  "components.AddFilterCTA.hide": "Filtres",
+  "components.FilterOptions.button.apply": "Appliquer",
+  "components.FiltersPickWrapper.PluginHeader.actions.apply": "Appliquer",
+  "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Tout supprimer",
+  "components.FiltersPickWrapper.PluginHeader.description": "Définissez les conditions des filtres à appliquer",
+  "components.FiltersPickWrapper.PluginHeader.title.filter": "Filtres",
+  "components.FiltersPickWrapper.hide": "Fermer",
+
+  "components.TableEmpty.withFilters": "Aucun {contentType} n'a été trouvé avec ces filtres...",
+  "components.TableEmpty.withoutFilter": "Aucun {contentType} n'a été trouvé...",
+
+  "components.FilterOptions.FILTER_TYPES.=": "est",
+  "components.FilterOptions.FILTER_TYPES._ne": "n'est pas",
+  "components.FilterOptions.FILTER_TYPES._lt": "inférieur à",
+  "components.FilterOptions.FILTER_TYPES._lte": "inférieur ou égal à",
+  "components.FilterOptions.FILTER_TYPES._gt": "supérieur à",
+  "components.FilterOptions.FILTER_TYPES._gte": "supérieur ou égal à",
+  "components.FilterOptions.FILTER_TYPES._contains": "contient",
+  "components.FilterOptions.FILTER_TYPES._containss": "contient (sensible à la casse)",
+
   "EditRelations.title": "Données associées",
 
   "emptyAttributes.title": "Il n'y a pas encore de champs",

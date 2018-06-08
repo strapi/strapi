@@ -24,16 +24,18 @@ const { cli, logger } = require('strapi-utils');
  * (fire up the application in our working directory).
  */
 
-module.exports = function() {
+module.exports = function(appPath = '') {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return logger.error('This command can only be used inside a Strapi project.');
   }
 
+  appPath = path.join(process.cwd(), appPath);
+
   try {
     const strapi = function () {
       try {
-        return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
+        return require(path.resolve(appPath, 'node_modules', 'strapi'));
       } catch (e) {
         return require('strapi'); // eslint-disable-line import/no-unresolved
       }
@@ -46,7 +48,7 @@ module.exports = function() {
 
     // Require server configurations
     const server = require(path.resolve(
-      process.cwd(),
+      appPath,
       'config',
       'environments',
       'development',
@@ -81,7 +83,7 @@ module.exports = function() {
         });
       };
 
-      setFilesToWatch(process.cwd());
+      setFilesToWatch(appPath);
 
 
 
@@ -124,7 +126,9 @@ module.exports = function() {
           }
         });
 
-        return strapi.start(afterwards);
+        return strapi.start({
+          appPath
+        }, afterwards);
       } else {
         return;
       }
@@ -133,7 +137,9 @@ module.exports = function() {
     // Otherwise, if no workable local `strapi` module exists,
     // run the application using the currently running version
     // of `strapi`. This is probably always the global install.
-    strapi.start(afterwards);
+    strapi.start({
+      appPath
+    }, afterwards);
   } catch (e) {
     logger.error(e);
     process.exit(0);

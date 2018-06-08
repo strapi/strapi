@@ -127,6 +127,22 @@ module.exports = {
   },
 
   /**
+   * Security to avoid infinite limit.
+   *
+   * @return String
+   */
+
+  amountLimiting: (params) => {
+    if (params.limit && params.limit < 0) {
+      params.limit = 0;
+    } else if (params.limit && params.limit > 100) {
+      params.limit = 100;
+    }
+
+    return params;
+  },
+
+  /**
    * Convert Strapi type to GraphQL type.
    * @param {Object} attribute Information about the attribute.
    * @param {Object} attribute.definition Definition of the attribute.
@@ -219,19 +235,21 @@ module.exports = {
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
-    const queryName = isSingular ?
-      pluralize.singular(name):
-      pluralize.plural(name);
+    let queryName;
+
+    if (isSingular === 'force') {
+      queryName = name;
+    } else {
+      queryName = isSingular ?
+        pluralize.singular(name):
+        pluralize.plural(name);
+    }
 
     // Retrieve policies.
-    const policies = isSingular ?
-      _.get(handler, `Query.${pluralize.singular(name)}.policies`, []):
-      _.get(handler, `Query.${pluralize.plural(name)}.policies`, []);
+    const policies = _.get(handler, `Query.${queryName}.policies`, []);
 
     // Retrieve resolverOf.
-    const resolverOf = isSingular ?
-      _.get(handler, `Query.${pluralize.singular(name)}.resolverOf`, ''):
-      _.get(handler, `Query.${pluralize.plural(name)}.resolverOf`, '');
+    const resolverOf = _.get(handler, `Query.${queryName}.resolverOf`, '');
 
     const policiesFn = [];
 
@@ -242,13 +260,13 @@ module.exports = {
     // or the shadow CRUD resolver (aka Content-Manager).
     const resolver = (() => {
       // Try to retrieve custom resolver.
-      const resolver = isSingular ?
-        _.get(handler, `Query.${pluralize.singular(name)}.resolver`):
-        _.get(handler, `Query.${pluralize.plural(name)}.resolver`);
+      const resolver = _.get(handler, `Query.${queryName}.resolver`);
 
-      if (_.isString(resolver)) {
+      if (_.isString(resolver) || _.isPlainObject(resolver)) {
+        const { handler = resolver } = _.isPlainObject(resolver) ? resolver : {};
+
         // Retrieve the controller's action to be executed.
-        const [ name, action ] = resolver.split('.');
+        const [ name, action ] = handler.split('.');
 
         const controller = plugin ?
           _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`):
@@ -313,6 +331,7 @@ module.exports = {
 
       // Plural.
       return async (ctx, next) => {
+        ctx.params = this.amountLimiting(ctx.params);
         ctx.query = Object.assign(
           this.convertToParams(_.omit(ctx.params, 'where')),
           ctx.params.where
@@ -354,7 +373,7 @@ module.exports = {
 
     return async (obj, options, context) => {
       // Hack to be able to handle permissions for each query.
-      const ctx = Object.assign(context, {
+      const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
           graphql: null
         })
@@ -376,7 +395,7 @@ module.exports = {
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
         context.query = this.convertToParams(options);
-        context.params = options;
+        context.params = this.amountLimiting(options);
 
         if (isController) {
           const values = await resolver.call(null, context);
@@ -387,6 +406,7 @@ module.exports = {
 
           return values && values.toJSON ? values.toJSON() : values;
         }
+
 
         return resolver.call(null, obj, options, context);
       }
@@ -452,6 +472,7 @@ module.exports = {
 
       // Convert our layer Model to the GraphQL DL.
       const attributes = Object.keys(model.attributes)
+        .filter(attribute => model.attributes[attribute].private !== true)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
           acc[attribute] = this.convertType({
@@ -536,6 +557,21 @@ module.exports = {
       // Build associations queries.
       (model.associations || []).forEach(association => {
         switch (association.nature) {
+          case 'oneToManyMorph':
+            return _.merge(acc.resolver[globalId], {
+              [association.alias]: async (obj) => {
+                const withRelated = await resolvers.fetch({
+                  id: obj[model.primaryKey],
+                  model: name
+                }, plugin, [association.alias], false);
+
+                const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
+
+                entry[association.alias]._type = _.upperFirst(association.model);
+
+                return entry[association.alias];
+              }
+            });
           case 'manyMorphToOne':
           case 'manyMorphToMany':
           case 'manyToManyMorph':
@@ -554,6 +590,8 @@ module.exports = {
 
                 const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
+                // TODO:
+                // - Handle sort, limit and start (lodash or inside the query)
                 entry[association.alias].map((entry, index) => {
                   const type = _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
                   _.upperFirst(_.camelCase(_.get(withoutRelated, `${association.alias}.${index}.${association.alias}_type`))) ||
@@ -590,7 +628,7 @@ module.exports = {
                 strapi.models[params.model];
 
               // Apply optional arguments to make more precise nested request.
-              const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(options));
+              const convertedParams = strapi.utils.models.convertParams(name, this.convertToParams(this.amountLimiting(options)));
               const where = strapi.utils.models.convertParams(name, options.where || {});
 
               // Limit, order, etc.
@@ -601,18 +639,21 @@ module.exports = {
 
               switch (association.nature) {
                 case 'manyToMany': {
-                  const arrayOfIds = obj[association.alias].map(related => {
-                    return related[ref.primaryKey] || related;
-                  });
+                  if (association.dominant) {
+                    const arrayOfIds = (obj[association.alias] || []).map(related => {
+                      return related[ref.primaryKey] || related;
+                    });
 
-                  // Where.
-                  queryOpts.query = strapi.utils.models.convertParams(name, {
-                    // Construct the "where" query to only retrieve entries which are
-                    // related to this entry.
-                    [ref.primaryKey]: arrayOfIds,
-                    ...where.where
-                  }).where;
+                    // Where.
+                    queryOpts.query = strapi.utils.models.convertParams(name, {
+                      // Construct the "where" query to only retrieve entries which are
+                      // related to this entry.
+                      [ref.primaryKey]: arrayOfIds,
+                      ...where.where
+                    }).where;
+                  }
                   break;
+                  // falls through
                 }
                 default:
                   // Where.
@@ -683,9 +724,20 @@ module.exports = {
           return acc;
         }
 
-        acc[type][resolver] = _.isFunction(acc[type][resolver]) ?
-          acc[type][resolver]:
-          acc[type][resolver].resolver;
+        if (!_.isFunction(acc[type][resolver])) {
+          acc[type][resolver] = acc[type][resolver].resolver;
+        }
+
+        if (_.isString(acc[type][resolver]) || _.isPlainObject(acc[type][resolver])) {
+          const { plugin = '' } = _.isPlainObject(acc[type][resolver]) ? acc[type][resolver] : {};
+
+          acc[type][resolver] = this.composeResolver(
+            strapi.plugins.graphql.config._schema.graphql,
+            plugin,
+            resolver,
+            'force' // Avoid singular/pluralize and force query name.
+          );
+        }
 
         return acc;
       }, acc);
