@@ -154,6 +154,7 @@ module.exports = {
       let type = 'String';
 
       switch (definition.type) {
+        // TODO: Handle fields of type Array, Perhaps default to [Int] or [String] ...
         case 'boolean':
           type = 'Boolean';
           break;
