@@ -154,10 +154,6 @@ module.exports = {
       let type = 'String';
 
       switch (definition.type) {
-        case 'string':
-        case 'text':
-          type = 'String';
-          break;
         case 'boolean':
           type = 'Boolean';
           break;
