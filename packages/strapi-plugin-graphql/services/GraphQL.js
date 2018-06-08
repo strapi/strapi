@@ -465,16 +465,14 @@ module.exports = {
 
       // Detect enum and generate it for the schema definition
       const enums = Object.keys(model.attributes)
-        .reduce((acc, attribute) => {
+        .filter(definition => definition.type === 'enumeration')
+        .map((attribute) => {
           const definition = model.attributes[attribute];
 
-          if (definition.type && definition.type === 'enumeration') {
-            acc.push(`enum ${this.convertEnumType(definition, globalId, attribute)} { ${definition.enum.join(' \n ')} }`);
-          }
-          return acc;
-        }, []).join(' ');
+          return `enum ${this.convertEnumType(definition, globalId, attribute)} { ${definition.enum.join(' \n ')} }`;
+        }).join(' ');
 
-      acc.definition += `${enums}`;
+      acc.definition += enums;
 
       // Add parameters to optimize association query.
       (model.associations || [])
