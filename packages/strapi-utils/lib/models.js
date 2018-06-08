@@ -454,7 +454,11 @@ module.exports = {
       let formattedValue;
 
       try {
-        formattedValue = !_.isNaN(_.toNumber(value)) ? _.toNumber(value) : value;
+        formattedValue = _.isObject(value) // Do not format object or array values
+          ? value
+          : !_.isNaN(_.toNumber(value))
+            ? _.toNumber(value)
+            : value;
       } catch(err) {
         formattedValue = value;
       }
