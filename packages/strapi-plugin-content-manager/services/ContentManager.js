@@ -8,20 +8,25 @@ const _ = require('lodash');
 
 module.exports = {
   fetchAll: async (params, query) => {
-    const { limit, skip = 0, sort, query : request, queryAttribute, source, page, populate = [] } = query; // eslint-disable-line no-unused-vars
+    const { limit, skip, sort, query : request, queryAttribute, source, page, populate = [] } = query; // eslint-disable-line no-unused-vars
+    const filters = strapi.utils.models.convertParams(params.model, query);
+    const where = !_.isEmpty(request) ? request : filters.where;
 
     // Find entries using `queries` system
     return await strapi.query(params.model, source).find({
-      limit,
-      skip,
-      sort,
-      where: request,
+      limit: limit || filters.limit,
+      skip: skip || filters.start || 0,
+      sort: sort || filters.sort,
+      where,
       queryAttribute,
     }, populate);
   },
 
-  count: async (params, source) => {
-    return await strapi.query(params.model, source).count();
+  count: async (params, query) => {
+    const { source } = query;
+    const filters = strapi.utils.models.convertParams(params.model, query);
+
+    return await strapi.query(params.model, source).count({ where: filters.where });
   },
 
   fetch: async (params, source, populate, raw = true) => {
@@ -126,10 +131,13 @@ module.exports = {
   },
 
   delete: async (params, { source }) => {
-    const response = await strapi.query(params.model, source).findOne({
+    const query = strapi.query(params.model, source);
+    const primaryKey = query.primaryKey;
+    const response = await query.findOne({
       id: params.id
     });
 
+    params[primaryKey] = response[primaryKey];
     params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
       const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
 
