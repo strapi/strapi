@@ -146,9 +146,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   handleDelete = (attributeName) => {
-    const index = findIndex(this.props.modelPage.model.attributes, ['name', attributeName]);
-    const parallelAttributeIndex = findIndex(this.props.modelPage.model.attributes, (attr) => attr.params.key === attributeName);
-
+    const { modelPage: { model } } = this.props;
+    const index = findIndex(model.attributes, ['name', attributeName]);
+    const attributeToRemove = get(model, ['attributes', index]);
+    const parallelAttributeIndex = attributeToRemove.name === attributeToRemove.params.key ?
+      -1 : findIndex(model.attributes, (attr) => attr.params.key === attributeName);
+      
     this.props.deleteAttribute(index, this.props.match.params.modelName, parallelAttributeIndex !== -1);
   }
 
