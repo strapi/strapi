@@ -1,28 +1,40 @@
 .search{
   position: fixed;
-  display: flex;
   top: 0;
-  height: 6rem;
-  min-width: 44rem;
-  padding-right: 30px;
-  line-height: 6rem;
-  z-index: 999;
-  background-color: #FFFFFF;
-  color: #B3B5B9;
-  border-right: 1px solid #F3F4F4;
+  display: flex;
+  align-items: center;
   overflow: auto;
+  min-width: 44rem;
+  height: 6rem;
+  padding-right: 20px;
+  background-color: #FFFFFF;
+  border-right: 1px solid #F3F4F4;
+  z-index: 999;
+  color: #9EA7B8;
+  line-height: 6rem;
+  letter-spacing: 0;
+
   &:before {
-    content: '\f002';
+    content: '';
+    width: 16px;
+    height: 16px;
+    background-image: url('../../assets/images/icon-search.svg');
     margin-right: 10px;
-    font-family: 'FontAwesome';
-    font-size: 1.3rem;
-    font-weight: bolder;
+    color: #B3B5B9;
+    vertical-align: middle;
   }
+
   input {
     position: relative;
     width: 100%;
     outline: 0;
+
+    &::placeholder {
+      color: #9EA7B8 !important;
+      font-size: 13px !important;
+    }
   }
+
   > div:first-child {
     display: flex;
     flex: 2;
@@ -34,9 +46,10 @@
   position: relative;
   height: 22px;
   margin: auto;
-  margin-left: 30px;
+  margin-top: 19px;
+  margin-left: 20px;
   padding-right: 10px;
-  padding-left: 27px;
+  padding-left: 30px;
   background: rgba(0,126,255,0.08);
   border: 1px solid rgba(0,126,255,0.24);
   border-radius: 2px;
@@ -44,32 +57,33 @@
   color: #007EFF;
   font-size: 13px;
   font-weight: 400;
+  line-height: 20px;
   -webkit-font-smoothing: antialiased;
   > img {
     position: absolute;
     top: 1px;
     margin: auto;
     bottom: 0;
-    left: 10px;
+    left: 11px;
     height: 7px;
   }
 }
 
 .clearable {
-  height: 13px;
-  width: 13px;
-  margin: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: #B3B5B9;
+  width: 13px;
+  height: 13px;
+  margin: 25px auto 0;
   border-radius: 50%;
   cursor: pointer;
+
   &:after {
-    content: '\f00d';
+    content: '';
+    width: 8px;
+    height: 8px;
     margin: auto;
-    color: white;
-    font-family: FontAwesome;
-    font-size: 8px;
+    background-image: url('../../assets/images/icon-cross.svg');
   }
 }

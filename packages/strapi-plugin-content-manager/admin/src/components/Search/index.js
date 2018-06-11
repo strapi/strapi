@@ -9,7 +9,7 @@ import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-import Logo from 'assets/images/icon_filter.png';
+import Logo from 'assets/images/icon_filter_blue.svg';
 import styles from './styles.scss';
 
 const WAIT = 400;
@@ -19,7 +19,7 @@ class Search extends React.Component {
 
   componentDidUpdate(prevProps) {
     const { model, value } = this.props;
-    
+
     if (prevProps.model !== model || !isEmpty(prevProps.value) && isEmpty(value)) {
       this.resetState();
     }

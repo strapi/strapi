@@ -50,7 +50,7 @@ module.exports = {
       .sort(params.sort)
       .skip(Number(params.skip))
       .populate(populate || this.associations.map(x => x.alias).join(' '))
-      .lean();   
+      .lean();
   },
 
   countSearch: async function (params = {}) { // eslint-disable-line  no-unused-vars
