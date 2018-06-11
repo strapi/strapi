@@ -16,6 +16,7 @@ import messages from './messages.json';
 
 function LeftMenuLinkContainer({ layout, plugins }) {
   const pluginsObject = plugins.toJS();
+  
   // Generate the list of sections
   const pluginsSections = Object.keys(pluginsObject).reduce((acc, current) => {
     pluginsObject[current].leftMenuSections.forEach((section = {}) => {
@@ -38,7 +39,7 @@ function LeftMenuLinkContainer({ layout, plugins }) {
 
     return acc;
   }, {});
-
+  
   const linkSections = Object.keys(pluginsSections).map((current, j) => {
     const contentTypesToShow = get(layout, 'layout.contentTypesToShow');
     const contentTypes = contentTypesToShow
@@ -68,7 +69,7 @@ function LeftMenuLinkContainer({ layout, plugins }) {
   // Check if the plugins list is empty or not and display plugins by name
   const pluginsLinks = !isEmpty(pluginsObject) ? (
     map(sortBy(pluginsObject, 'name'), plugin => {
-      if (plugin.id !== 'email' && plugin.id !== 'content-manager') {
+      if (plugin.id !== 'email' && plugin.id !== 'content-manager' && plugin.id !== 'settings-manager') {
         return (
           <LeftMenuLink
             key={get(plugin, 'id')}
@@ -84,6 +85,8 @@ function LeftMenuLinkContainer({ layout, plugins }) {
       <FormattedMessage {...messages.noPluginsInstalled} />.
     </li>
   );
+
+  const hasSettingsManager = get(pluginsObject, 'settings-manager', null);
 
   return (
     <div className={styles.leftMenuLinkContainer}>
@@ -105,11 +108,13 @@ function LeftMenuLinkContainer({ layout, plugins }) {
             label={messages.installNewPlugin.id}
             destination="/install-plugin"
           />
-          <LeftMenuLink
-            icon="gear"
-            label={messages.configuration.id}
-            destination="/configuration"
-          />
+          {hasSettingsManager && (
+            <LeftMenuLink
+              icon="gear"
+              label={messages.configuration.id}
+              destination="/plugins/settings-manager"
+            />
+          )}
         </ul>
       </div>
     </div>
