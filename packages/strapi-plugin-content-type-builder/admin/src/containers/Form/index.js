@@ -76,6 +76,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.state = {
       showModal: false,
       popUpTitleEdit: '',
+      nodeToFocus: 0,
     };
 
     this.checkAttributeValidations = checkAttributeValidations.bind(this);
@@ -87,6 +88,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Get available db connections
     this.props.connectionsFetch();
     this.initComponent(this.props, true);
+    document.addEventListener('keydown', this.handleKeyBinding);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -127,6 +129,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     if (prevProps.modelLoading !== this.props.modelLoading && !isEmpty(this.props.hash)) {
       this.initComponent(this.props, true);
     }
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keyup', this.handleKeyBinding);
   }
 
   addAttributeToContentType = () => {
@@ -404,6 +410,43 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
+  handleKeyBinding = (e) => {
+    if (includes(this.props.hash, 'choose')) {
+      const { nodeToFocus } = this.state;
+      let toAdd = 0;
+  
+      switch(e.keyCode) {
+        case 37: // Left arrow
+        case 39: // Right arrow
+          toAdd = nodeToFocus % 2 === 0 ? 1 : -1;
+          break;
+        case 38:
+          if (nodeToFocus === 0 || nodeToFocus === 1) {
+            toAdd = 8;
+          } else {
+            toAdd = -2;
+          }
+          break;
+        case 40:
+          if (nodeToFocus === forms.attributesDisplay.items.length - 1 || nodeToFocus === forms.attributesDisplay.items.length - 2) {
+            toAdd = -8;
+          } else {
+            toAdd = 2;
+          }
+          break;
+        case 9: // Tab
+          e.preventDefault();
+          toAdd = nodeToFocus === 9 ? -9 : 1;
+          break;
+        default:
+          toAdd = 0;
+          break;
+      }
+  
+      this.setState(prevState => ({ nodeToFocus: prevState.nodeToFocus + toAdd }));
+    }
+  }
+
   handleSubmit = (e) => {
     e.preventDefault();
     const hashArray = split(this.props.hash, ('::'));
@@ -482,11 +525,15 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           autoFocus={key === 0}
           routePath={this.props.routePath}
           handleClick={this.goToAttributeTypeView}
+          nodeToFocus={this.state.nodeToFocus}
           tabIndex={key}
+          resetNodeToFocus={this.resetNodeToFocus}
         />
       ))
     );
   }
+
+  resetNodeToFocus = () => this.setState({ nodeToFocus: 0 });
 
   testContentType = (contentTypeName, cbSuccess, successData, cbFail, failData) => {
     // Check if the content type is in the localStorage (not saved) to prevent request error
