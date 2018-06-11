@@ -25,33 +25,44 @@ import {
 } from './constants';
 // Selectors
 import {
+  makeSelectFilters,
   makeSelectParams,
 } from './selectors';
 
 export function* dataGet(action) {
   try {
-    const { limit, page, sort } = yield select(makeSelectParams());
+    const { _limit, _page, _sort } = yield select(makeSelectParams());
+    const filters = yield select(makeSelectFilters());
     const source = action.source;
     const currentModel = action.currentModel;
     const countURL = `/content-manager/explorer/${currentModel}/count`;
-
     // Params to get the model's records
     const recordsURL = `/content-manager/explorer/${currentModel}`;
-    const skip = (page - 1 ) * limit;
-    const params = {
-      limit,
-      skip,
-      sort,
+    const filtersObj = filters.reduce((acc, curr) => {
+      const key = curr.filter === '=' ? curr.attr : `${curr.attr}${curr.filter}`;
+      const filter = {
+        [key]: curr.value,
+      };
+      acc = Object.assign(acc, filter);
+
+      return acc;
+    }, {});
+
+    const _start = (_page - 1 ) * _limit;
+    const sortValue = _sort.includes('-') ? `${_sort.replace('-', '')}:DESC` : `${_sort}:ASC`;
+    const params = Object.assign(filtersObj, {
+      _limit,
+      _start,
+      _sort: sortValue,
       source,
-    };
+    });
 
     const response = yield [
-      call(request, countURL, { method: 'GET', params: { source } }),
+      call(request, countURL, { method: 'GET', params }),
       call(request, recordsURL, { method: 'GET', params }),
     ];
 
     yield put(getDataSucceeded(response));
-
   } catch(err) {
     strapi.notification.error('notification.error');
   }

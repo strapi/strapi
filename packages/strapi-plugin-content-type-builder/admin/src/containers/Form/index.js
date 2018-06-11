@@ -402,8 +402,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
       if (target.name === 'params.nature' && target.value === 'oneWay') {
         this.props.changeInputAttribute('params.key', '-');
-      }else if (target.name === 'params.nature'){
-        this.props.changeInputAttribute('params.key', '');
       }
 
     } else {
@@ -544,7 +542,6 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   render() {
-
     // Ensure typeof(popUpFormType) is String
     const popUpFormType = split(this.props.hash, '::')[1] || '';
     const popUpTitle = this.generatePopUpTitle(popUpFormType);
@@ -581,6 +578,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
           isEditting={edit}
+          resetFormErrors={this.props.resetFormErrors}
         />
       );
     }

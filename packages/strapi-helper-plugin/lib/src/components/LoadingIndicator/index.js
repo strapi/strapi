@@ -1,11 +1,13 @@
 /**
  *
- *
  * LoadingIndicator
+ *
  */
 
 import React from 'react';
 
-const LoadingIndicator = () => <div>Loading....</div>;
+import Div from './Div';
+
+const LoadingIndicator = () => <Div>Loading....</Div>;
 
 export default LoadingIndicator;
