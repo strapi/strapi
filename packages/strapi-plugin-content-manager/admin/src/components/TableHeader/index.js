@@ -25,6 +25,7 @@ class TableHeader extends React.Component {
   renderBulk = () => (
     <th key="bulk_action">
       <CustomInputCheckbox
+        entriesToDelete={this.props.entriesToDelete}
         isAll
         name="all"
         onChange={this.props.onClickSelectAll}

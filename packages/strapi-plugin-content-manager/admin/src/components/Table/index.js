@@ -51,6 +51,7 @@ class Table extends React.Component {
           onChangeSort={this.props.onChangeSort}
           sort={this.props.sort}
           primaryKey={this.props.primaryKey}
+          entriesToDelete={this.props.entriesToDelete}
         />
         <tbody>
           { entriesToDeleteNumber > 0 && (
