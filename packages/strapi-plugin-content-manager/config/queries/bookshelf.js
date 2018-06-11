@@ -14,7 +14,7 @@ module.exports = {
       });
 
       if (params.sort) {
-        qb.orderBy(params.sort);
+        qb.orderBy(params.sort.key, params.sort.order);
       }
 
       if (params.skip) {
@@ -29,9 +29,20 @@ module.exports = {
     });
   },
 
-  count: async function () {
+  count: async function (params = {}) {
     return await this
       .forge()
+      .query(qb => {
+        _.forEach(params.where, (where, key) => {
+          if (_.isArray(where.value)) {
+            for (const value in where.value) {
+              qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
+            }
+          } else {
+            qb.where(key, where.symbol, where.value);
+          }
+        });
+      })
       .count();
   },
 
@@ -44,7 +55,7 @@ module.exports = {
         withRelated: populate || this.associations.map(x => x.alias)
       });
 
-    const data = record ? record.toJSON() : record;
+    const data = record.toJSON ? record.toJSON() : record;
 
     // Retrieve data manually.
     if (_.isEmpty(populate)) {

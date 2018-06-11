@@ -10,8 +10,9 @@ module.exports = {
       .populate(populate || this.associations.map(x => x.alias).join(' '));
   },
 
-  count: async function () {
+  count: async function (params) {
     return Number(await this
+      .where(params.where)
       .count());
   },
 

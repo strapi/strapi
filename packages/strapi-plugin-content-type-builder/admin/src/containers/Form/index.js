@@ -395,6 +395,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         this.props.changeInputAttribute('params.dominant', true);
       }
 
+      if (target.name === 'params.nature' && target.value === "oneWay") {
+        this.props.changeInputAttribute('params.key', '-');
+      }
+
     } else {
       this.props.changeInput(target.name, value, includes(this.props.hash, 'edit'));
     }
@@ -569,6 +573,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
           isEditting={edit}
+          resetFormErrors={this.props.resetFormErrors}
         />
       );
     }
