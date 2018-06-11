@@ -384,6 +384,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   handleChange = ({ target }) => {
     let value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
 
+    // Parse enumeration textarea to transform it into a array
+    if (target.name === 'params.enumValue') {
+      value = target.value.split(',');
+    }
+
     if (isObject(target.value) && target.value._isAMomentObject === true) {
       value = moment(target.value, 'YYYY-MM-DD HH:mm:ss').format();
     }
@@ -391,11 +396,11 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     if (includes(this.props.hash.split('::')[1], 'attribute')) {
       this.props.changeInputAttribute(target.name, value);
 
-      if (target.name === 'params.nature' && target.value === "manyToMany") {
+      if (target.name === 'params.nature' && target.value === 'manyToMany') {
         this.props.changeInputAttribute('params.dominant', true);
       }
 
-      if (target.name === 'params.nature' && target.value === "oneWay") {
+      if (target.name === 'params.nature' && target.value === 'oneWay') {
         this.props.changeInputAttribute('params.key', '-');
       }
 
