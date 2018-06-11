@@ -79,7 +79,9 @@ function formReducer(state = initialState, action) {
         .update('formErrors', (list) => list.splice(findIndex(state.get('formErrors').toJS(), ['target', 'name']), 1))
         .set('didCheckErrors', !state.get('didCheckErrors'));
     case RESET_FORM_ERRORS:
-      return state.set('formErrors', List());
+      return state
+        .update('didCheckErrors', v => v = !v)
+        .set('formErrors', List());
     case RESET_IS_FORM_SET:
       return state
         .set('isFormSet', false)
