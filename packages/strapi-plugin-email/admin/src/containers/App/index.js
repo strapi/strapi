@@ -13,7 +13,6 @@ import { pluginId } from 'app';
 
 // Containers
 import ConfigPage from 'containers/ConfigPage';
-import NotFoundPage from 'containers/NotFoundPage';
 
 function App() {
   return (
@@ -22,7 +21,6 @@ function App() {
         <Route path={`/plugins/${pluginId}/configurations/:env`} component={ConfigPage} exact />
         <Route path={`/plugins/${pluginId}/configurations/`} component={ConfigPage} exact />
         <Route path={`/plugins/${pluginId}`} component={ConfigPage} exact />
-        <Route component={NotFoundPage} />
       </Switch>
     </div>
   );

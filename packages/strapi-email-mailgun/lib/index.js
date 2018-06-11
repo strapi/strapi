@@ -4,9 +4,12 @@
  * Module dependencies
  */
 
+/* eslint-disable import/no-unresolved */
+/* eslint-disable prefer-template */
 // Public node modules.
 const _ = require('lodash');
-const mailgunFactory = require('mailgun-js'); 
+const mailgunFactory = require('mailgun-js');
+
 /* eslint-disable no-unused-vars */
 module.exports = {
   provider: 'mailgun',
@@ -32,7 +35,7 @@ module.exports = {
   init: (config) => {
 
     const mailgun = mailgunFactory({
-      apiKey: config.mailgun_api_key, 
+      apiKey: config.mailgun_api_key,
       domain: config.mailgun_domain,
       mute: false
     });
@@ -53,8 +56,8 @@ module.exports = {
             subject: options.subject,
             text: options.text,
             html: options.html
-          }; 
-          msg['h:Reply-To'] = options.replyTo; 
+          };
+          msg['h:Reply-To'] = options.replyTo;
 
           mailgun.messages().send(msg, function (err) {
             if (err) {
@@ -62,7 +65,7 @@ module.exports = {
             } else {
               resolve();
             }
-          }); 
+          });
         });
       }
     };

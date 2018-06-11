@@ -4,9 +4,12 @@
  * Module dependencies
  */
 
+/* eslint-disable import/no-unresolved */
+/* eslint-disable prefer-template */
 // Public node modules.
 const _ = require('lodash');
-const sendgrid = require('@sendgrid/mail'); 
+const sendgrid = require('@sendgrid/mail');
+
 /* eslint-disable no-unused-vars */
 module.exports = {
   provider: 'sendgrid',
@@ -27,7 +30,7 @@ module.exports = {
   },
   init: (config) => {
 
-    sendgrid.setApiKey(config.sendgrid_api_key); 
+    sendgrid.setApiKey(config.sendgrid_api_key);
 
     return {
       send: (options, cb) => {
@@ -46,7 +49,7 @@ module.exports = {
             subject: options.subject,
             text: options.text,
             html: options.html
-          }; 
+          };
 
           sendgrid.send(msg, function (err) {
             if (err) {
@@ -54,7 +57,7 @@ module.exports = {
             } else {
               resolve();
             }
-          }); 
+          });
         });
       }
     };

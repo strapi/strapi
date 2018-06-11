@@ -21,11 +21,11 @@
     "test": "echo \"Error: no test specified\""
   },
   "dependencies": {
-    "strapi-email-sendmail": "3.0.0-alpha.12.2"
+    "strapi-email-sendmail": "3.0.0-alpha.12.3"
   },
   "devDependencies": {
     "react-copy-to-clipboard": "5.0.1",
-    "strapi-helper-plugin": "3.0.0-alpha.12.2"
+    "strapi-helper-plugin": "3.0.0-alpha.12.3"
   },
   "author": {
     "name": "Strapi team",
