@@ -17,7 +17,7 @@ import InputWithAutoFocus from './InputWithAutoFocus';
 import Remove from './Remove';
 import styles from './styles.scss';
 
-import FILTER_TYPES from './filterTypes';
+import getFilters from './filterTypes';
 
 const defaultInputStyle = { width: '210px', marginRight: '10px', paddingTop: '4px' };
 const midSelectStyle = { minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' };
@@ -51,7 +51,7 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
           onChange={onChange}
           name={`${index}.filter`}
           value={get(filter, 'filter', '=')}
-          selectOptions={FILTER_TYPES}
+          selectOptions={getFilters(attrType)}
           style={midSelectStyle}
         />
         <div className={cn(isDate ? styles.filterOptionsInputWrapper : '')}>
