@@ -155,7 +155,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           <ModalBody className={styles.modalBody} style={modalBodyStyle}>
             <form onSubmit={this.props.onSubmit}>
               <div className="container-fluid">
-                <div className={`row ${this.props.renderModalBody ? 'justify-content-center' : ''}`}>
+                <div className="row">
                   {modalBody}
                 </div>
               </div>
