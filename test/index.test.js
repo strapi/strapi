@@ -736,6 +736,84 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
   );
 });
 
+describe('Test route /count from generated API', () => {
+  beforeAll(() => {
+    data = {
+      articles: [],
+      tags: []
+    };
+  });
+
+  beforeEach(async () => {
+    await restart(rq);
+  }, 60000);
+
+  test(
+    'Create new product API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models`,
+        method: 'POST',
+        body: form.product,
+        json: true
+      });
+    }
+  );
+  test(
+    'Create product1',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/product/?source=content-manager`,
+        method: 'POST',
+        formData: {
+          name: 'product1'
+        }
+      });
+
+      body = JSON.parse(body);
+
+      data.tags.push(body);
+
+      expect(body.id);
+      expect(body.name).toBe('product1');
+    }
+  );
+  test(
+    'Create product2',
+    async () => {
+      let body = await rq({
+        url: `/content-manager/explorer/product/?source=content-manager`,
+        method: 'POST',
+        formData: {
+          name: 'product2'
+        }
+      });
+
+      body = JSON.parse(body);
+
+      data.tags.push(body);
+
+      expect(body.id);
+      expect(body.name).toBe('product2');
+    }
+  );
+  test(
+    'Count products',
+    async () => {
+      let body = await rq({
+        url: `/product/count`,
+        method: 'GET'
+      });
+
+      body = JSON.parse(body);
+
+      data.tags.push(body);
+
+      expect(body).toBe(2);
+    }
+  );
+});
+
 describe('Delete test APIs', () => {
   beforeEach(async () => {
     await restart(rq);

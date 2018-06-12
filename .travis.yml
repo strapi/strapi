@@ -22,4 +22,3 @@ install:
 
 script:
   - npm run doc
-  - npm run test
