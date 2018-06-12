@@ -5,7 +5,7 @@
  */
 const generateFiltersFromSearch = search => search
   .split('&')
-  .filter(x => !x.includes('_limit') && !x.includes('_page') && !x.includes('_sort') && !x.includes('source') && !x.includes('q'))
+  .filter(x => !x.includes('_limit') && !x.includes('_page') && !x.includes('_sort') && !x.includes('source') && !x.includes('_q='))
   .reduce((acc, curr) => {
     const arr = curr.split('=');
     const split = arr[0].split('_');

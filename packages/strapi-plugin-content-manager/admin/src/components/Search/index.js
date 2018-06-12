@@ -43,7 +43,7 @@ class Search extends React.Component {
   triggerChange = (value) => (
     this.props.changeParams({
       target: {
-        name: 'params.q',
+        name: 'params._q',
         value,
       },
     })

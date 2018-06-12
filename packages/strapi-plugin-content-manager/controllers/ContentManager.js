@@ -45,7 +45,7 @@ module.exports = {
 
   find: async ctx => {
     // Search
-    if (!_.isEmpty(ctx.request.query.q)) {
+    if (!_.isEmpty(ctx.request.query._q)) {
       ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].search(ctx.params, ctx.request.query);
 
       return;
@@ -57,7 +57,7 @@ module.exports = {
 
   count: async ctx => {
     // Search
-    const count = !_.isEmpty(ctx.request.query.q)
+    const count = !_.isEmpty(ctx.request.query._q)
       ? await strapi.plugins['content-manager'].services['contentmanager'].countSearch(ctx.params, ctx.request.query)
       : await strapi.plugins['content-manager'].services['contentmanager'].count(ctx.params, ctx.request.query);
 

@@ -78,6 +78,7 @@ TableHeader.defaultProps = {
 };
 
 TableHeader.propTypes = {
+  entriesToDelete: PropTypes.array.isRequired,
   headers: PropTypes.array.isRequired,
   onChangeSort: PropTypes.func.isRequired,
   onClickSelectAll: PropTypes.func.isRequired,

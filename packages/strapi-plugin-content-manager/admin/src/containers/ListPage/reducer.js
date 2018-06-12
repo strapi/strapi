@@ -38,7 +38,7 @@ const initialState = fromJS({
     _limit: 10,
     _page: 1,
     _sort: '',
-    q: '',
+    _q: '',
   }),
   records: List([]),
   showFilter: false,
@@ -70,14 +70,14 @@ function listPageReducer(state = initialState, action) {
         .updateIn(action.keys, () => action.value)
         .update('filters', list => {
           // Remove the filters
-          if (action.keys.indexOf('q') !== -1) {
+          if (action.keys.indexOf('_q') !== -1) {
             return List([]);
           }
           return list;
         })
         .update('filtersUpdated', v => {
           // Change the URI
-          if (action.keys.indexOf('q') !== -1) {
+          if (action.keys.indexOf('_q') !== -1) {
             return !v;
           }
 
@@ -143,7 +143,7 @@ function listPageReducer(state = initialState, action) {
         .update('appliedFilters', (list) => list.filter(filter => filter.get('value') !== ''))
         .update('showFilter', () => false)
         .update('filtersUpdated', v => v = !v)
-        .updateIn(['params', 'q'], () => '');
+        .updateIn(['params', '_q'], () => '');
     case ON_TOGGLE_DELETE_ALL:
       return state.update('showWarningDeleteAll', v => v = !v);
     default:

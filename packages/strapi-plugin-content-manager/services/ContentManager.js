@@ -23,7 +23,7 @@ module.exports = {
   },
 
   search: async (params, query) => {
-    const { limit, skip, sort, source, q, populate = [] } = query; // eslint-disable-line no-unused-vars
+    const { limit, skip, sort, source, _q, populate = [] } = query; // eslint-disable-line no-unused-vars
     const filters = strapi.utils.models.convertParams(params.model, query);
 
     // Find entries using `queries` system
@@ -31,14 +31,14 @@ module.exports = {
       limit: limit || filters.limit,
       skip: skip || filters.start || 0,
       sort: sort || filters.sort,
-      search: q
+      search: _q
     }, populate);
   },
 
   countSearch: async (params, query) => {
-    const { source, q } = query;
+    const { source, _q } = query;
 
-    return await strapi.query(params.model, source).countSearch({ search: q });
+    return await strapi.query(params.model, source).countSearch({ search: _q });
   },
 
   count: async (params, query) => {
