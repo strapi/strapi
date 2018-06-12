@@ -1,1 +1,9 @@
-{}
+{
+  "product": {
+    "attributes": {
+      "description": {
+        "appearance": "WYSIWYG"
+      }
+    }
+  }
+}
