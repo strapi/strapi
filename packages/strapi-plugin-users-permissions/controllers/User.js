@@ -70,17 +70,25 @@ module.exports = {
    */
 
   create: async (ctx) => {
-    if ((await strapi.store({
+    const advanced = await strapi.store({
       environment: '',
       type: 'plugin',
       name: 'users-permissions',
       key: 'advanced'
-    }).get()).unique_email && ctx.request.body.email) {
+    }).get();
+
+    if (advanced.unique_email && ctx.request.body.email) {
       const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
 
       if (user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
       }
+    }
+
+    if (!ctx.request.body.role) {
+      const defaultRole = await strapi.query('role', 'users-permissions').findOne({ type: advanced.default_role }, []);
+
+      ctx.request.body.role = defaultRole._id || defaultRole.id;
     }
 
     try {
