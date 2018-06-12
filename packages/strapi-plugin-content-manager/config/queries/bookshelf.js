@@ -50,17 +50,39 @@ module.exports = {
     const associations = this.associations.map(x => x.alias);
     const searchText = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['string', 'type'].includes(this._attributes[attribute].type));
+      .filter(attribute => ['string', 'text'].includes(this._attributes[attribute].type));
 
     const searchNoText = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => !['string', 'type'].includes(this._attributes[attribute].type));
+      .filter(attribute => !['string', 'text', 'boolean', 'integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+
+    const searchInt = Object.keys(this._attributes)
+      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+      .filter(attribute => ['integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+
+    const searchBool = Object.keys(this._attributes)
+      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+      .filter(attribute => ['boolean'].includes(this._attributes[attribute].type));
+
+    const query = (params.search || '').replace(/[^a-zA-Z0-9.-\s]+/g, '');
 
     return this.query(qb => {
       // Search in columns which are not text value.
       searchNoText.forEach(attribute => {
-        qb.orWhereRaw(`LOWER(${attribute}) LIKE '%${_.toLower(params.search).replace(/[^a-zA-Z. ]/g, '')}%'`);
+        qb.orWhereRaw(`LOWER(${attribute}) LIKE '%${_.toLower(query)}%'`);
       });
+
+      if (!_.isNaN(_.toNumber(query))) {
+        searchInt.forEach(attribute => {
+          qb.orWhereRaw(`${attribute} = ${_.toNumber(query)}`);
+        });
+      }
+
+      if (query === 'true' || query === 'false') {
+        searchBool.forEach(attribute => {
+          qb.orWhereRaw(`${attribute} = ${_.toNumber(query === 'true')}`);
+        });
+      }
 
       // Search in columns with text using index.
       switch (this.client) {
@@ -71,11 +93,11 @@ module.exports = {
               : `to_tsvector('${attribute}')`
           );
 
-          qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, params.search.replace(/[^a-zA-Z. ]/g, ''));
+          qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
           break;
         }
         default:
-          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${params.search.replace(/[^a-zA-Z. ]/g, '')}*`);
+          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
           break;
       }
 
@@ -99,17 +121,40 @@ module.exports = {
     const associations = this.associations.map(x => x.alias);
     const searchText = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['string', 'type'].includes(this._attributes[attribute].type));
+      .filter(attribute => ['string', 'text'].includes(this._attributes[attribute].type));
 
     const searchNoText = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => !['string', 'type'].includes(this._attributes[attribute].type));
+      .filter(attribute => !['string', 'text', 'boolean', 'integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+
+    const searchInt = Object.keys(this._attributes)
+      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+      .filter(attribute => ['integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+
+    const searchBool = Object.keys(this._attributes)
+      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+      .filter(attribute => ['boolean'].includes(this._attributes[attribute].type));
+
+    const query = (params.search || '').replace(/[^a-zA-Z0-9.-\s]+/g, '');
+
 
     return this.query(qb => {
       // Search in columns which are not text value.
       searchNoText.forEach(attribute => {
-        qb.orWhereRaw(`LOWER(${attribute}) LIKE '%${_.toLower(params.search).replace(/[^a-zA-Z. ]/g, '')}%'`);
+        qb.orWhereRaw(`LOWER(${attribute}) LIKE '%${_.toLower(query)}%'`);
       });
+
+      if (!_.isNaN(_.toNumber(query))) {
+        searchInt.forEach(attribute => {
+          qb.orWhereRaw(`${attribute} = ${_.toNumber(query)}`);
+        });
+      }
+
+      if (query === 'true' || query === 'false') {
+        searchBool.forEach(attribute => {
+          qb.orWhereRaw(`${attribute} = ${_.toNumber(query === 'true')}`);
+        });
+      }
 
       // Search in columns with text using index.
       switch (this.client) {
@@ -120,11 +165,11 @@ module.exports = {
               : `to_tsvector('${attribute}')`
           );
 
-          qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, params.search.replace(/[^a-zA-Z. ]/g, ''));
+          qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
           break;
         }
         default:
-          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${params.search.replace(/[^a-zA-Z. ]/g, '')}*`);
+          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
           break;
       }
     }).count();
