@@ -52,6 +52,11 @@
   "form.attribute.item.json.name": "İsim",
   "form.attribute.item.boolean.name": "İsim",
   "form.attribute.item.string.name": "İsim",
+  "form.attribute.item.enumeration.name": "İsim",
+  "form.attribute.item.enumeration.rules": "Values (separate them with a comma)",
+  "form.attribute.item.enumeration.placeholder": "Ex: morning,noon,evening",
+  "form.attribute.item.enumeration.graphql": "Name override for GraphQL",
+  "form.attribute.item.enumeration.graphql.description": "Allows you to override the default generated name for GraphQL",
   "form.attribute.item.appearance.name": "Görünüm",
   "form.attribute.item.appearance.label": "WYSIWYG olarak görüntüle",
   "form.attribute.item.appearance.description":
@@ -114,11 +119,11 @@
   "notification.error.message": "Bir hata oluştu.",
   "notification.info.contentType.creating.notSaved":
     "Lütfen yeni bir tane oluşturmadan önce mevcut İçerik Türünüzü kaydedin",
+  "notification.info.disable": "This field is not editable for the moment...😮",
   "notification.info.optimized": "Bu eklenti, localStorage ile optimize edilmiştir",
   "notification.success.message.contentType.edit": "İçerik Türünüz güncellendi",
   "notification.success.message.contentType.create": "İçerik Türünüz oluşturuldu",
   "notification.success.contentTypeDeleted": "İçerik Türü silindi",
-  "notification.info.enumeration": "This field is not editable for the moment...😮",
 
   "popUpForm.attributes.string.description": "Başlıklar, adlar, paragraflar, isim listesi",
   "popUpForm.attributes.text.description": "Tanımlar, metin paragrafları, makaleler ",
@@ -130,7 +135,8 @@
   "popUpForm.attributes.relation.description": "Bir İçerik Türünü Belirtiyor",
   "popUpForm.attributes.email.description": "Kullanıcının e-postası...",
   "popUpForm.attributes.password.description": "Kullanıcı şifresi...",
-
+  "popUpForm.attributes.enumeration.description": "List of choices",
+  
   "popUpForm.attributes.string.name": "String",
   "popUpForm.attributes.text.name": "Yazı",
   "popUpForm.attributes.boolean.name": "Mantıksal",
@@ -141,6 +147,7 @@
   "popUpForm.attributes.relation.name": "İlişki",
   "popUpForm.attributes.email.name": "E-posta",
   "popUpForm.attributes.password.name": "Parola",
+  "popUpForm.attributes.enumeration.name": "Enumeration",  
   "popUpForm.create": "Yeni ekle",
   "popUpForm.edit": "Düzenle",
   "popUpForm.field": "Alan",

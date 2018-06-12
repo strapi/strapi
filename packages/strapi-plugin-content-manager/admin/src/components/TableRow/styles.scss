@@ -16,6 +16,9 @@
     border-collapse: collapse;
     border-top: 1px solid #F1F1F2 !important;
   }
+  > td:first-child {
+    width: 50px;    
+  }
 }
 
 .truncate {

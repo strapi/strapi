@@ -33,6 +33,11 @@
   "components.FilterOptions.FILTER_TYPES._contains": "contains",
   "components.FilterOptions.FILTER_TYPES._containss": "contains (case sensitive)",
 
+  "components.TableDelete.entries.plural": "{number} entries selected",
+  "components.TableDelete.entries.singular": "{number} entry selected",
+  "components.TableDelete.delete": "Delete all",
+
+
   "components.TableEmpty.withFilters": "There is no {contentType} with the applied filters...",
   "components.TableEmpty.withoutFilter": "There is no {contentType}...",
 
@@ -72,5 +77,6 @@
   "popUpWarning.button.cancel": "Cancel",
   "popUpWarning.button.confirm": "Confirm",
   "popUpWarning.title": "Please confirm",
-  "popUpWarning.bodyMessage.contentType.delete": "Are you sure you want to delete this entry?"
+  "popUpWarning.bodyMessage.contentType.delete": "Are you sure you want to delete this entry?",
+  "popUpWarning.bodyMessage.contentType.delete.all": "Are you sure you want to delete theses entries?"
 }
