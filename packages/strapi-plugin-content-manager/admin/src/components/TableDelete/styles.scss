@@ -1,0 +1,44 @@
+.tableDelete {
+  width: 100%;
+  height: 36px;
+  background: #F7F8F8;
+
+  td{
+    height: 36px;
+    line-height: 36px;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #333740;
+    text-align: left;
+    border-collapse: collapse;
+    border-top: 1px solid #F1F1F2 !important;
+  }
+}
+
+.tableDeleteSpan {
+  font-weight: 600;
+  &:after {
+    content: '—';
+    margin: 0 7px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  -webkit-font-smoothing: antialiased;
+}
+
+.deleteAll {
+  position: absolute;
+  color: #F64D0A;
+  font-weight: 500;
+  cursor: pointer;
+  &:after {
+    position: relative;
+    top: -1px;
+    content: '\f1f8';
+    margin-left: 7px;
+    // margin-top: -10px;
+    font-size: 13px;
+    font-family: FontAwesome;
+    -webkit-font-smoothing: antialiased;
+  }
+}
