@@ -25,6 +25,10 @@
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filtres",
   "components.FiltersPickWrapper.hide": "Fermer",
 
+  "components.TableDelete.entries.plural": "{number} entrées sélectionnées",
+  "components.TableDelete.entries.singular": "{number} entrée sélectionnée",
+  "components.TableDelete.delete": "Tout supprimer",
+
   "components.TableEmpty.withFilters": "Aucun {contentType} n'a été trouvé avec ces filtres...",
   "components.TableEmpty.withoutFilter": "Aucun {contentType} n'a été trouvé...",
 
@@ -71,5 +75,6 @@
   "popUpWarning.button.cancel": "Annuler",
   "popUpWarning.button.confirm": "Confirmer",
   "popUpWarning.title": "Confirmation requise",
-  "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûr de vouloir supprimer cette entrée ?"
+  "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûr de vouloir supprimer cette entrée ?",
+  "popUpWarning.bodyMessage.contentType.delete.all": "Êtes-vous sûr de vouloir supprimer ces entrées ?"
 }
