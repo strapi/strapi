@@ -1,13 +1,15 @@
 const _ = require('lodash');
 
 module.exports = {
-  find: async function (params, populate) {
-    return this
+  find: async function (params, populate, raw = false) {
+    const query = this
       .find(params.where)
       .limit(Number(params.limit))
       .sort(params.sort)
       .skip(Number(params.skip))
       .populate(populate || this.associations.map(x => x.alias).join(' '));
+
+    return raw ? query.lean() : query;
   },
 
   count: async function (params) {
@@ -76,6 +78,15 @@ module.exports = {
     return this
       .remove({
         [this.primaryKey]: params.id
+      });
+  },
+
+  deleteMany: async function (params) {
+    return this
+      .remove({
+        [this.primaryKey]: {
+          $in: params[this.primaryKey] || params.id
+        }
       });
   }
 };

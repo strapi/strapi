@@ -155,5 +155,12 @@ module.exports = {
 
     // Send 200 `ok`
     ctx.send(data);
+  },
+
+  destroyAll: async (ctx) => {
+    const data = await strapi.plugins['users-permissions'].services.user.removeAll(ctx.params, ctx.request.query);
+
+    // Send 200 `ok`
+    ctx.send(data);
   }
 };
