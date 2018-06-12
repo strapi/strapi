@@ -135,7 +135,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     document.removeEventListener('keyup', this.handleKeyBinding);
   }
 
-  addAttributeToContentType = () => {
+  addAttributeToContentType = (redirectToChoose = false) => {
     const formErrors = this.checkAttributeValidations(checkFormValidity(this.props.modifiedDataAttribute, this.props.formValidations));
 
     if (!isEmpty(formErrors)) {
@@ -154,11 +154,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.resetIsFormSet();
     // Empty errors
     this.props.resetFormErrors();
-    // Close modal
-    router.push(`${this.props.redirectRoute}/${replace(this.props.hash.split('::')[0], '#create', '')}`);
+    this.redirectAfterSave(redirectToChoose);
   }
 
-  addAttributeToTempContentType = () => {
+  addAttributeToTempContentType = (redirectToChoose = false) => {
     const formErrors = this.checkAttributeValidations(checkFormValidity(this.props.modifiedDataAttribute, this.props.formValidations));
 
     if (!isEmpty(formErrors)) {
@@ -181,8 +180,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     // Store the updated model in the localStorage
     storeData.setModel(model);
     this.props.resetFormErrors();
-    // Close modal
-    router.push(`${this.props.redirectRoute}/${contentType.name}`);
+    this.redirectAfterSave(redirectToChoose);
   }
 
   createContentType = (data) => {
@@ -267,7 +265,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     return this.props.contentTypeEdit(this.context);
   }
 
-  editContentTypeAttribute = () => {
+  editContentTypeAttribute = (redirectTochoose = false) => {
     const formErrors = this.checkAttributeValidations(checkFormValidity(this.props.modifiedDataAttribute, this.props.formValidations));
     const hashArray = split(this.props.hash, '::');
 
@@ -285,11 +283,10 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     this.props.resetIsFormSet();
     // Empty errors
     this.props.resetFormErrors();
-    // Close modal
-    router.push(`${this.props.redirectRoute}/${replace(hashArray[0], '#edit', '')}`);
+    this.redirectAfterSave(redirectTochoose);
   }
 
-  editTempContentTypeAttribute = () => {
+  editTempContentTypeAttribute = (redirectToChoose = false) => {
     const formErrors = this.checkAttributeValidations(checkFormValidity(this.props.modifiedDataAttribute, this.props.formValidations));
 
     if (!isEmpty(formErrors)) {
@@ -310,7 +307,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       contentType.attributes.splice(findIndex(contentType.attributes, ['name', oldAttribute.params.key]), 1);
     }
 
-    this.editContentTypeAttribute();
+    this.editContentTypeAttribute(redirectToChoose);
 
     const newContentType = contentType;
     // Empty errors
@@ -447,7 +444,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  handleSubmit = (e) => {
+  handleSubmit = (e, redirectToChoose = false) => {
     e.preventDefault();
     const hashArray = split(this.props.hash, ('::'));
     const valueToReplace = includes(this.props.hash, '#create') ? '#create' : '#edit';
@@ -461,14 +458,14 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
       case includes(hashArray[0], '#edit'): {
         // Check if the user is editing the attribute
         const isAttribute = includes(hashArray[1], 'attribute');
-        cbSuccess = isAttribute ? this.editTempContentTypeAttribute : this.createContentType;
+        cbSuccess = isAttribute ? () => this.editTempContentTypeAttribute(redirectToChoose) : this.createContentType;
         dataSucces = isAttribute ? null : this.props.modifiedDataEdit;
-        cbFail = isAttribute ? this.editContentTypeAttribute : this.contentTypeEdit;
+        cbFail = isAttribute ? () => this.editContentTypeAttribute(redirectToChoose) : this.contentTypeEdit;
         return this.testContentType(contentTypeName, cbSuccess, dataSucces, cbFail);
       }
       case includes(hashArray[0], 'create') && includes(this.props.hash.split('::')[1], 'attribute'): {
-        cbSuccess = this.addAttributeToTempContentType;
-        cbFail = this.addAttributeToContentType;
+        cbSuccess = () => this.addAttributeToTempContentType(redirectToChoose);
+        cbFail = () => this.addAttributeToContentType(redirectToChoose);
         return this.testContentType(contentTypeName, cbSuccess, dataSucces, cbFail);
       }
       default: {
@@ -531,6 +528,13 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
         />
       ))
     );
+  }
+
+  redirectAfterSave = (shouldOpenAttributesModal = false) => {
+    const { modelName, redirectRoute } = this.props;
+    const path = shouldOpenAttributesModal ? '#choose::attributes' : '';
+
+    router.push(`${redirectRoute}/${modelName}${path}`);
   }
 
   resetNodeToFocus = () => this.setState({ nodeToFocus: 0 });
