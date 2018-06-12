@@ -39,9 +39,13 @@ import {
   addFilter,
   changeParams,
   deleteData,
+  deleteSeveralData,
   getData,
   onChange,
   onClickRemove,
+  onClickSelect,
+  onClickSelectAll,
+  onToggleDeleteAll,
   onToggleFilters,
   openFiltersWithSelections,
   removeAllFilters,
@@ -141,11 +145,11 @@ export class ListPage extends React.Component {
     get(this.props.schema, [this.getCurrentModelName(), 'fields']) ||
     get(this.props.schema, ['plugins', this.getSource(), this.getCurrentModelName(), 'fields']);
 
-  shouldHideFilters = () => {
-    if (this.props.listPage.showFilter) {
-      this.props.onToggleFilters();
-    }
-  };
+  getPopUpDeleteAllMsg = () => (
+    this.props.listPage.entriesToDelete.length > 1 ?
+      'content-manager.popUpWarning.bodyMessage.contentType.delete.all'
+      : 'content-manager.popUpWarning.bodyMessage.contentType.delete'
+  );
 
   /**
    * Generate the redirect URI when editing an entry
@@ -183,6 +187,12 @@ export class ListPage extends React.Component {
     });
 
     return tableHeaders;
+  };
+
+  areAllEntriesSelected = () => {
+    const { listPage: { entriesToDelete, records } } = this.props;
+
+    return entriesToDelete.length === records.length && records.length > 0;
   };
 
   /**
@@ -268,6 +278,12 @@ export class ListPage extends React.Component {
     }
   };
 
+  shouldHideFilters = () => {
+    if (this.props.listPage.showFilter) {
+      this.props.onToggleFilters();
+    }
+  };
+
   toggleModalWarning = e => {
     if (!isUndefined(e)) {
       e.preventDefault();
@@ -277,16 +293,32 @@ export class ListPage extends React.Component {
       });
     }
 
-    this.setState({ showWarning: !this.state.showWarning });
+    if (this.props.listPage.entriesToDelete.length > 0) {
+      this.props.onClickSelectAll();
+    }
+    this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+
   };
 
   render() {
     const {
       addFilter,
+      deleteSeveralData,
       listPage,
-      listPage: { appliedFilters, filters, filterToFocus, params, showFilter },
+      listPage: {
+        appliedFilters,
+        entriesToDelete,
+        filters,
+        filterToFocus,
+        params,
+        showFilter,
+        showWarningDeleteAll,
+      },
       onChange,
       onClickRemove,
+      onClickSelect,
+      onClickSelectAll,
+      onToggleDeleteAll,
       onToggleFilters,
       openFiltersWithSelections,
       removeAllFilters,
@@ -363,17 +395,22 @@ export class ListPage extends React.Component {
             <div className={cn('row', styles.row)}>
               <div className="col-md-12">
                 <Table
+                  deleteAllValue={this.areAllEntriesSelected()}
+                  entriesToDelete={entriesToDelete}
+                  filters={filters}
+                  handleDelete={this.toggleModalWarning}
+                  headers={this.generateTableHeaders()}
+                  history={this.props.history}
+                  onChangeSort={this.handleChangeSort}
+                  onClickSelectAll={onClickSelectAll}
+                  onClickSelect={onClickSelect}
+                  onToggleDeleteAll={onToggleDeleteAll}
+                  primaryKey={this.getCurrentModel().primaryKey || 'id'}
                   records={listPage.records}
+                  redirectUrl={this.generateRedirectURI()}
                   route={this.props.match}
                   routeParams={this.props.match.params}
-                  headers={this.generateTableHeaders()}
-                  filters={filters}
-                  onChangeSort={this.handleChangeSort}
                   sort={params._sort}
-                  history={this.props.history}
-                  primaryKey={this.getCurrentModel().primaryKey || 'id'}
-                  handleDelete={this.toggleModalWarning}
-                  redirectUrl={this.generateRedirectURI()}
                 />
                 <PopUpWarning
                   isOpen={this.state.showWarning}
@@ -386,6 +423,20 @@ export class ListPage extends React.Component {
                   }}
                   popUpWarningType="danger"
                   onConfirm={this.handleDelete}
+                />
+                <PopUpWarning
+                  isOpen={showWarningDeleteAll}
+                  toggleModal={onToggleDeleteAll}
+                  content={{
+                    title: 'content-manager.popUpWarning.title',
+                    message: this.getPopUpDeleteAllMsg(),
+                    cancel: 'content-manager.popUpWarning.button.cancel',
+                    confirm: 'content-manager.popUpWarning.button.confirm',
+                  }}
+                  popUpWarningType="danger"
+                  onConfirm={() => {
+                    deleteSeveralData(entriesToDelete, this.getCurrentModelName(), this.getSource());
+                  }}
                 />
                 <PageFooter
                   count={listPage.count}
@@ -406,6 +457,7 @@ ListPage.propTypes = {
   addFilter: PropTypes.func.isRequired,
   changeParams: PropTypes.func.isRequired,
   deleteData: PropTypes.func.isRequired,
+  deleteSeveralData: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   listPage: PropTypes.object.isRequired,
@@ -414,6 +466,9 @@ ListPage.propTypes = {
   models: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onClickRemove: PropTypes.func.isRequired,
+  onClickSelect: PropTypes.func.isRequired,
+  onClickSelectAll: PropTypes.func.isRequired,
+  onToggleDeleteAll: PropTypes.func.isRequired,
   onToggleFilters: PropTypes.func.isRequired,
   openFiltersWithSelections: PropTypes.func.isRequired,
   removeAllFilters: PropTypes.func.isRequired,
@@ -429,9 +484,13 @@ function mapDispatchToProps(dispatch) {
       addFilter,
       changeParams,
       deleteData,
+      deleteSeveralData,
       getData,
       onChange,
       onClickRemove,
+      onClickSelect,
+      onClickSelectAll,
+      onToggleDeleteAll,
       onToggleFilters,
       openFiltersWithSelections,
       removeAllFilters,

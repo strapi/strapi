@@ -12,7 +12,6 @@ const { execSync } = require('child_process');
 const _ = require('lodash');
 const fs = require('fs-extra');
 const npm = require('enpeem');
-const getInstalledPath = require('get-installed-path');
 
 // Logger.
 const logger = require('strapi-utils').logger;
@@ -39,16 +38,17 @@ module.exports = (scope, cb) => {
   const dependencies = _.get(packageJSON, 'dependencies');
   const strapiDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') !== -1);
   const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1);
+  const globalRootPath = execSync('npm root -g');
 
   // Verify if the dependencies are available into the global
   _.forEach(strapiDependencies, (key) => {
     try {
-      const isInstalled = getInstalledPath.sync(key);
+      fs.accessSync(path.resolve(_.trim(globalRootPath.toString()), key), fs.constants.R_OK | fs.constants.F_OK);
 
       availableDependencies.push({
         key,
         global: true,
-        path: isInstalled
+        path: path.resolve(_.trim(globalRootPath.toString()), key)
       });
     } catch (e) {
       othersDependencies.push(key);
