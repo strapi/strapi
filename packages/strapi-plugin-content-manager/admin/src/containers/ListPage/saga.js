@@ -99,6 +99,7 @@ export function* dataDelete({ id, modelName, source }) {
 export function* dataDeleteAll({ entriesToDelete, model, source }) {
   try {
     const params = Object.assign(entriesToDelete, source !== undefined ? { source } : {});
+    
     yield call(request, `/content-manager/explorer/deleteAll/${model}`, {
       method: 'DELETE',
       params,

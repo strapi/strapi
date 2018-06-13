@@ -17,6 +17,7 @@ import cn from 'classnames';
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
 import BackHeader from 'components/BackHeader';
+import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
 
 // Plugin's components
@@ -108,7 +109,7 @@ export class EditPage extends React.Component {
    * @return {[type]} [description]
    */
   getLayout = () => (
-    bindLayout.call(this, this.props.editPage.layout)
+    bindLayout.call(this, get(this.props.editPage, ['layout', this.getModelName()], {}))
   )
 
   /**
@@ -149,6 +150,14 @@ export class EditPage extends React.Component {
   getSchema = () => this.getSource() !== 'content-manager' ?
     get(this.props.schema, ['plugins', this.getSource(), this.getModelName()])
     : get(this.props.schema, [this.getModelName()]);
+
+  getPluginHeaderTitle = () => {
+    if (this.isCreating()) {
+      return toString(this.props.editPage.pluginHeaderTitle);
+    }
+
+    return this.props.match.params.id;
+  }
 
   /**
    * Retrieve the model's source
@@ -236,6 +245,7 @@ export class EditPage extends React.Component {
         kind: 'secondary',
         onClick: this.props.onCancel,
         type: 'button',
+        disabled: this.showLoaders(),
       },
       {
         kind: 'primary',
@@ -244,9 +254,16 @@ export class EditPage extends React.Component {
         type: 'submit',
         loader: this.props.editPage.showLoader,
         style: this.props.editPage.showLoader ? { marginRight: '18px' } : {},
+        disabled: this.showLoaders(),
       },
     ]
   );
+
+  showLoaders = () => {
+    const { editPage: { isLoading, layout } } = this.props;
+
+    return isLoading && !this.isCreating() || isLoading && get(layout, this.getModelName()) === undefined;
+  }
 
   render() {
     const { editPage } = this.props;
@@ -258,24 +275,28 @@ export class EditPage extends React.Component {
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               actions={this.pluginHeaderActions()}
-              title={{ id: toString(editPage.pluginHeaderTitle) }}
+              title={{ id: this.getPluginHeaderTitle() }}
             />
             <div className="row">
               <div className={this.isRelationComponentNull() ? 'col-lg-12' : 'col-lg-9'}>
                 <div className={styles.main_wrapper}>
-                  <Edit
-                    attributes={this.getModelAttributes()}
-                    didCheckErrors={editPage.didCheckErrors}
-                    formValidations={editPage.formValidations}
-                    formErrors={editPage.formErrors}
-                    layout={this.getLayout()}
-                    modelName={this.getModelName()}
-                    onBlur={this.handleBlur}
-                    onChange={this.handleChange}
-                    record={editPage.record}
-                    resetProps={editPage.resetProps}
-                    schema={this.getSchema()}
-                  />
+                  {this.showLoaders() ? (
+                    <LoadingIndicator />
+                  ) : (
+                    <Edit
+                      attributes={this.getModelAttributes()}
+                      didCheckErrors={editPage.didCheckErrors}
+                      formValidations={editPage.formValidations}
+                      formErrors={editPage.formErrors}
+                      layout={this.getLayout()}
+                      modelName={this.getModelName()}
+                      onBlur={this.handleBlur}
+                      onChange={this.handleChange}
+                      record={editPage.record}
+                      resetProps={editPage.resetProps}
+                      schema={this.getSchema()}
+                    />
+                  )}
                 </div>
               </div>
               {!this.isRelationComponentNull() && (
@@ -360,3 +381,5 @@ export default compose(
   withSaga,
   withConnect,
 )(EditPage);
+
+
