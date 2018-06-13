@@ -26,6 +26,7 @@ import PopUpWarning from 'components/PopUpWarning';
 import AddFilterCTA from 'components/AddFilterCTA';
 import FiltersPickWrapper from 'components/FiltersPickWrapper/Loadable';
 import Filter from 'components/Filter/Loadable';
+import Search from 'components/Search';
 import Table from 'components/Table';
 
 // Utils located in `strapi/packages/strapi-helper-plugin/lib/src/utils`;
@@ -124,7 +125,8 @@ export class ListPage extends React.Component {
     const _limit = toInteger(getQueryParameters(props.location.search, '_limit')) || 10;
     const _page = toInteger(getQueryParameters(props.location.search, '_page')) || 1;
     const _sort = this.findPageSort(props);
-    const params = { _limit, _page, _sort };
+    const _q = getQueryParameters(props.location.search, '_q') || '';
+    const params = { _limit, _page, _sort, _q };
     const filters = generateFiltersFromSearch(props.location.search);
 
     this.props.setParams(params, filters);
@@ -229,7 +231,8 @@ export class ListPage extends React.Component {
       history,
       listPage: { filters, params },
     } = this.props;
-    const searchEnd  = `&_sort=${params._sort}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
+    const _q = params._q !== '' ? `&_q=${params._q}` : '';
+    const searchEnd  = `&_sort=${params._sort}${_q}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
     const search =
       e.target.name === 'params._limit'
         ? `_page=${params._page}&_limit=${e.target.value}${searchEnd}`
@@ -251,11 +254,12 @@ export class ListPage extends React.Component {
     const {
       listPage: { filters, params },
     } = this.props;
+    const _q = params._q !== '' ? `&_q=${params._q}` : '';
     this.props.history.push({
       pathname: this.props.location.pathname,
       search: `?_page=${params._page}&_limit=${
         params._limit
-      }&_sort=${sort}&source=${this.getSource()}${generateSearchFromFilters(filters)}`,
+      }&_sort=${sort}${_q}&source=${this.getSource()}${generateSearchFromFilters(filters)}`,
     });
 
     this.props.changeParams({ target });
@@ -342,6 +346,12 @@ export class ListPage extends React.Component {
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
+          <Search
+            changeParams={this.props.changeParams}
+            initValue={getQueryParameters(this.props.location.search, '_q') || ''}
+            model={this.getCurrentModelName()}
+            value={params._q}
+          />
           <PluginHeader
             actions={pluginHeaderActions}
             description={{
@@ -410,6 +420,7 @@ export class ListPage extends React.Component {
                   redirectUrl={this.generateRedirectURI()}
                   route={this.props.match}
                   routeParams={this.props.match.params}
+                  search={params._q}
                   sort={params._sort}
                 />
                 <PopUpWarning

@@ -86,7 +86,7 @@ module.exports = {
 
   updateModel: async ctx => {
     const { model } = ctx.params;
-    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
+    const { name, description, mainField, connection, collectionName, attributes = [], plugin } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
@@ -121,6 +121,10 @@ module.exports = {
         description
       };
       modelJSON.attributes = formatedAttributes;
+
+      if (mainField) {
+        modelJSON.info.mainField = mainField;
+      }
 
       const clearRelationsErrors = Service.clearRelations(model, plugin);
 
