@@ -486,7 +486,7 @@ module.exports = {
 
       // Detect enum and generate it for the schema definition
       const enums = Object.keys(model.attributes)
-        .filter(definition => definition.type === 'enumeration')
+        .filter(attribute => model.attributes[attribute].type === 'enumeration')
         .map((attribute) => {
           const definition = model.attributes[attribute];
 
