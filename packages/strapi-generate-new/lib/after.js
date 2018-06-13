@@ -104,9 +104,6 @@ module.exports = (scope, cb) => {
     },{
       name: 'upload',
       core: true
-    }, {
-      name: 'analytics',
-      core: false
     }];
 
     // Install each plugin.
@@ -142,6 +139,12 @@ module.exports = (scope, cb) => {
     });
 
     logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
+
+    logger.info('We are almost there !!!');
+    logger.info('cd ' + scope.name);
+    logger.info('strapi start');
+    logger.info('Open your browser to http://localhost:1337');
+    logger.info('Enjoy your strapi project :)');
 
     cb();
   }

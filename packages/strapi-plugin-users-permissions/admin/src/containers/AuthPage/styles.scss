@@ -51,7 +51,6 @@
   margin-bottom: 0;
   padding: 3.9rem 1.5rem 1.5rem 1.5rem;
   border-radius: 2px;
-  border-top: 2px solid #1C5DE7;
   background-color: #FFFFFF;
   box-shadow: 0 2px 4px 0 #E3E9F3;
 }
@@ -82,6 +81,13 @@
   }
 }
 
+.bordered {
+  border-top: 2px solid #1C5DE7;
+}
+
+.borderedSuccess {
+  border-top: 2px solid #5A9E06;
+}
 
 .logoContainer {
   position: absolute;
@@ -89,5 +95,24 @@
 
   > img {
     height: 34px;
+  }
+}
+
+.buttonForgotSuccess {
+  border: 1px solid #5A9E06;
+  color: #5A9E06;
+}
+
+.forgotSuccess {
+  width: 100%;
+  // margin-top: -2px;
+  text-align: center;
+  color: #5A9E06;
+  font-size: 13px;
+  font-weight: 500;
+  > p {
+    margin-top: 17px;
+    margin-bottom: 18px;
+    color: #333740;
   }
 }

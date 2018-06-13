@@ -25,12 +25,15 @@
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filtres",
   "components.FiltersPickWrapper.hide": "Fermer",
 
+  "components.Search.placeholder": "Rechercher une entrée...",
+
   "components.TableDelete.entries.plural": "{number} entrées sélectionnées",
   "components.TableDelete.entries.singular": "{number} entrée sélectionnée",
   "components.TableDelete.delete": "Tout supprimer",
 
   "components.TableEmpty.withFilters": "Aucun {contentType} n'a été trouvé avec ces filtres...",
   "components.TableEmpty.withoutFilter": "Aucun {contentType} n'a été trouvé...",
+  "components.TableEmpty.withSearch": "Aucun {contentType} n'a été trouvé avec cette recherche ({search})...",
 
   "components.FilterOptions.FILTER_TYPES.=": "est",
   "components.FilterOptions.FILTER_TYPES._ne": "n'est pas",
