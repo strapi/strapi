@@ -52,6 +52,11 @@
   "form.attribute.item.json.name": "Name",
   "form.attribute.item.boolean.name": "Name",
   "form.attribute.item.string.name": "Name",
+  "form.attribute.item.enumeration.name": "Name",
+  "form.attribute.item.enumeration.rules": "Values (separate them with a comma)",
+  "form.attribute.item.enumeration.placeholder": "Ex: morning,noon,evening",
+  "form.attribute.item.enumeration.graphql": "Name override for GraphQL",
+  "form.attribute.item.enumeration.graphql.description": "Allows you to override the default generated name for GraphQL",
   "form.attribute.item.appearance.name": "Appearance",
   "form.attribute.item.appearance.label": "Display as a WYSIWYG",
   "form.attribute.item.appearance.description":
@@ -113,11 +118,11 @@
   "notification.error.message": "发生错误",
   "notification.info.contentType.creating.notSaved": 
     "在创建新Content Type之前，请保存当前Content Type",
+  "notification.info.disable": "这个字段暂时不可编辑...😮",
   "notification.info.optimized": "这个插件是用本地存储优化的",
   "notification.success.message.contentType.edit": "你的Content Type已更新",
   "notification.success.message.contentType.create": "你的Content Type已创建",
   "notification.success.contentTypeDeleted": "这个Content Type已被删除",
-  "notification.info.enumeration": "这个字段暂时不可编辑...😮",
 
   "popUpForm.attributes.string.description": "标题、名称、段落、名称列表",
   "popUpForm.attributes.text.description": "描述、文本段落、文章",
@@ -129,7 +134,8 @@
   "popUpForm.attributes.relation.description": "引用其它 Content Type",
   "popUpForm.attributes.email.description": "用户email...",
   "popUpForm.attributes.password.description": "用户密码...",
-
+  "popUpForm.attributes.enumeration.description": "List of choices",
+  
   "popUpForm.attributes.string.name": "String",
   "popUpForm.attributes.text.name": "Text",
   "popUpForm.attributes.boolean.name": "Boolean",
@@ -140,6 +146,7 @@
   "popUpForm.attributes.relation.name": "Relation",
   "popUpForm.attributes.email.name": "Email",
   "popUpForm.attributes.password.name": "Password",
+  "popUpForm.attributes.enumeration.name": "Enumeration",  
   "popUpForm.create": "增加新的",
   "popUpForm.edit": "编辑",
   "popUpForm.field": "字段",

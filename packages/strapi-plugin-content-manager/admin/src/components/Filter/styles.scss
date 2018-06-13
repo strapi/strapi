@@ -30,13 +30,16 @@
 .remove {
   height: 28px;
   cursor: pointer;
-  vertical-align: bottom;
+  vertical-align: middle;
 
   &:after {
-    content: '\f00d';
-    font-family: FontAwesome;
-    font-size: 11px;
-    font-weight: 400;
+    display: inline-block;
+    content: '';
+    width: 8px;
+    height: 8px;
+    margin: auto;
+    margin-top: -3px;
+    background-image: url('../../assets/images/icon-cross-blue.svg');
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.0.0-alpha.12.3",
+  "version": "3.0.0-alpha.12.4",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Email",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "react-copy-to-clipboard": "5.0.1",
-    "strapi-helper-plugin": "3.0.0-alpha.12.3"
+    "strapi-helper-plugin": "3.0.0-alpha.12.4"
   },
   "author": {
     "name": "Strapi team",
