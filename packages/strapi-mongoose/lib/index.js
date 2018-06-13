@@ -510,6 +510,10 @@ module.exports = function (strapi) {
           result.key = `where.${key}.$regex`;
           result.value = value;
           break;
+        case '_in':
+          result.key = `where.${key}.$in`;
+          result.value = value;
+          break;
         default:
           result = undefined;
       }
