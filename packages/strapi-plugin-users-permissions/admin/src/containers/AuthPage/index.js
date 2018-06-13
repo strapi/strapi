@@ -92,6 +92,8 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
   }
 
   renderButton = () => {
+    const { match: { params: { authType } }, submitSuccess } = this.props;
+
     if (this.props.match.params.authType === 'login') {
       return (
         <div className={cn('col-md-6', styles.loginButton)}>
@@ -99,13 +101,16 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
         </div>
       );
     }
-    const label = this.props.match.params.authType === 'forgot-password' && this.props.submitSuccess ? 'users-permissions.Auth.form.button.forgot-password.success' : `users-permissions.Auth.form.button.${this.props.match.params.authType}`;
+    const isEmailForgotSent = authType === 'forgot-password' && submitSuccess;
+    const label = isEmailForgotSent ? 'users-permissions.Auth.form.button.forgot-password.success' : `users-permissions.Auth.form.button.${this.props.match.params.authType}`;
+  
     return (
       <div className={cn('col-md-12', styles.buttonContainer)}>
         <Button
+          className={cn(isEmailForgotSent && styles.buttonForgotSuccess)}
           label={label}
           style={{ width: '100%' }}
-          primary
+          primary={!isEmailForgotSent}
           type="submit"
         />
       </div>
@@ -133,15 +138,36 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     return <div />;
   }
 
+  renderInputs = () => {
+    const { match: { params: { authType } } } = this.props;
+    const inputs = get(form, ['form', authType]);
+
+    return map(inputs, (input, key) => (
+      <Input
+        autoFocus={key === 0}
+        customBootstrapClass={get(input, 'customBootstrapClass')}
+        didCheckErrors={this.props.didCheckErrors}
+        errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', input.name]), 'errors'])}
+        key={get(input, 'name')}
+        label={authType === 'forgot-password' && this.props.submitSuccess? { id: 'users-permissions.Auth.form.forgot-password.email.label.success' } : get(input, 'label')}
+        name={get(input, 'name')}
+        onChange={this.props.onChangeInput}
+        placeholder={get(input, 'placeholder')}
+        type={get(input, 'type')}
+        validations={{ required: true }}
+        value={get(this.props.modifiedData, get(input, 'name'), get(input, 'value'))}
+        noErrorsDescription={this.props.noErrorsDescription}
+      />
+    ));
+  }
+
   render() {
-    const inputs = get(form, ['form', this.props.match.params.authType]);
-    const divStyle = this.props.match.params.authType === 'register' ? { marginTop: '3.2rem' } : { marginTop: '.9rem' };
-    const withLogo = this.props.match.params.authType === 'register' ? (
-      <div className={styles.logoContainer}><img src={LogoStrapi} alt="logo" /></div>
-    ) : '';
-    const headerDescription = this.props.match.params.authType === 'register' ?
-      <FormattedMessage id="users-permissions.Auth.header.register.description" />
-      : <span />;
+    const { match: { params: { authType } }, modifiedData, submitSuccess } = this.props;
+    let divStyle = authType === 'register' ? { marginTop: '3.2rem' } : { marginTop: '.9rem' };
+
+    if (authType === 'forgot-password' && submitSuccess) {
+      divStyle = { marginTop: '.9rem', minHeight: '18.2rem' };
+    }
 
     return (
       <div className={styles.authPage}>
@@ -154,10 +180,16 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
             )}
           </div>
           <div className={styles.headerDescription}>
-            {headerDescription}
+            {authType === 'register' && <FormattedMessage id="users-permissions.Auth.header.register.description" />}
           </div>
 
-          <div className={styles.formContainer} style={divStyle}>
+          <div
+            className={cn(
+              styles.formContainer,
+              authType === 'forgot-password' && submitSuccess ? styles.borderedSuccess : styles.bordered,
+            )}
+            style={divStyle}
+          >
             <form onSubmit={this.handleSubmit}>
               <div className="container-fluid">
                 {this.props.noErrorsDescription && !isEmpty(get(this.props.formErrors, ['0', 'errors', '0', 'id']))? (
@@ -166,23 +198,14 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
                   </div>
                 ): ''}
                 <div className="row" style={{ textAlign: 'start' }}>
-                  {map(inputs, (input, key) => (
-                    <Input
-                      autoFocus={key === 0}
-                      customBootstrapClass={get(input, 'customBootstrapClass')}
-                      didCheckErrors={this.props.didCheckErrors}
-                      errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', input.name]), 'errors'])}
-                      key={get(input, 'name')}
-                      label={this.props.match.params.authType === 'forgot-password' && this.props.submitSuccess? { id: 'users-permissions.Auth.form.forgot-password.email.label.success' } : get(input, 'label')}
-                      name={get(input, 'name')}
-                      onChange={this.props.onChangeInput}
-                      placeholder={get(input, 'placeholder')}
-                      type={get(input, 'type')}
-                      validations={{ required: true }}
-                      value={get(this.props.modifiedData, get(input, 'name'), get(input, 'value'))}
-                      noErrorsDescription={this.props.noErrorsDescription}
-                    />
-                  ))}
+                  {!submitSuccess && this.renderInputs()}
+                  { authType === 'forgot-password' && submitSuccess && (
+                    <div className={styles.forgotSuccess}>
+                      <FormattedMessage id="users-permissions.Auth.form.forgot-password.email.label.success" />
+                      <br />
+                      <p>{get(modifiedData, 'email', '')}</p>
+                    </div>
+                  )}
                   {this.renderButton()}
                 </div>
               </div>
@@ -192,7 +215,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
             {this.renderLink()}
           </div>
         </div>
-        {withLogo}
+        {authType === 'register' && <div className={styles.logoContainer}><img src={LogoStrapi} alt="logo" /></div>}
       </div>
     );
   }
