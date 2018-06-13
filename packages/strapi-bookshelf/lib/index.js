@@ -918,6 +918,13 @@ module.exports = function(strapi) {
             value: `%${value}%`
           };
           break;
+        case '_in':
+          result.key = `where.${key}`;
+          result.value = {
+            symbol: 'IN',
+            value,
+          };
+          break;
         default:
           return undefined;
       }

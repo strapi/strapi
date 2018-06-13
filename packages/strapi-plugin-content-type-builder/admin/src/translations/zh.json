@@ -14,6 +14,7 @@
   "attribute.email": "Email",
   "attribute.password": "密碼",
   "attribute.relation": "關聯其他結構",
+  "attribute.enumeration": "Enumeration",
   "attribute.WYSIWYG": "Text (WYSIWYG)",
 
   "contentType.temporaryDisplay": "(未儲存)",
@@ -49,6 +50,11 @@
   "form.attribute.item.json.name": "名稱",
   "form.attribute.item.boolean.name": "名稱",
   "form.attribute.item.string.name": "名稱",
+  "form.attribute.item.enumeration.name": "名稱",
+  "form.attribute.item.enumeration.rules": "Values (separate them with a comma)",
+  "form.attribute.item.enumeration.placeholder": "Ex: morning,noon,evening",
+  "form.attribute.item.enumeration.graphql": "Name override for GraphQL",
+  "form.attribute.item.enumeration.graphql.description": "Allows you to override the default generated name for GraphQL",
   "form.attribute.item.settings.name": "設定",
   "form.attribute.item.requiredField": "必填欄位",
   "form.attribute.item.uniqueField": "唯一欄位",
@@ -105,6 +111,7 @@
 
   "notification.error.message": "有錯誤發生了",
   "notification.info.contentType.creating.notSaved": "建立新的資料結構前，請先儲存現在的。",
+  "notification.info.disable": "这个字段暂时不可编辑...😮",  
   "notification.info.optimized": "這個擴充功能使用您的 localstorage 來最佳化",
   "notification.success.message.contentType.edit": "您的資料結構已更新",
   "notification.success.message.contentType.create": "您的資料結構已建立",
@@ -120,7 +127,8 @@
   "popUpForm.attributes.relation.description": "關聯到一個資料結構",
   "popUpForm.attributes.email.description": "使用者的 email...",
   "popUpForm.attributes.password.description": "使用者密碼...",
-
+  "popUpForm.attributes.enumeration.description": "List of choices",
+  
   "popUpForm.attributes.string.name": "字串",
   "popUpForm.attributes.text.name": "文字",
   "popUpForm.attributes.boolean.name": "是/否",
@@ -131,6 +139,7 @@
   "popUpForm.attributes.relation.name": "關聯其他結構",
   "popUpForm.attributes.email.name": "Email",
   "popUpForm.attributes.password.name": "密碼",
+  "popUpForm.attributes.enumeration.name": "Enumeration",  
   "popUpForm.create": "增加新的",
   "popUpForm.edit": "編輯",
   "popUpForm.field": "欄位",

@@ -70,13 +70,13 @@ exports.connect = (provider, query) => {
           return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
         }
 
-        // Retrieve role `public`.
-        const publicRole = await strapi.query('role', 'users-permissions').findOne({ type: 'public' }, []);
+        // Retrieve default role.
+        const defaultRole = await strapi.query('role', 'users-permissions').findOne({ type: advanced.default_role }, []);
 
         // Create the new user.
         const params = _.assign(profile, {
           provider: provider,
-          role: publicRole._id || publicRole.id
+          role: defaultRole._id || defaultRole.id
         });
 
         const createdUser = await strapi.query('user', 'users-permissions').create(params);

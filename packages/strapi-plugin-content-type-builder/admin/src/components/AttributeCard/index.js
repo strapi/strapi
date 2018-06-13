@@ -18,6 +18,7 @@ import IcoNumber from '../../assets/images/icon_number.png';
 import IcoRelation from '../../assets/images/icon_relation.png';
 import IcoString from '../../assets/images/icon_string.png';
 import IcoText from '../../assets/images/icon_text.png';
+import IcoEnum from '../../assets/images/icon_enum.svg';
 
 import styles from './styles.scss';
 
@@ -34,6 +35,7 @@ const asset = {
   'relation': IcoRelation,
   'string': IcoString,
   'text': IcoText,
+  'enum': IcoEnum,
 };
 
 

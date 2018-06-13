@@ -1,10 +1,10 @@
 const _ = require('lodash');
 
 module.exports = {
-  find: async function (params, populate) {
+  find: async function (params, populate, raw = false) {
     return this.query(function(qb) {
       _.forEach(params.where, (where, key) => {
-        if (_.isArray(where.value)) {
+        if (_.isArray(where.value) && where.symbol !== 'IN') {
           for (const value in where.value) {
             qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
           }
@@ -26,7 +26,7 @@ module.exports = {
       }
     }).fetchAll({
       withRelated: populate || this.associations.map(x => x.alias)
-    });
+    }).then(data => raw ? data.toJSON() : data);
   },
 
   count: async function (params = {}) {
@@ -126,6 +126,14 @@ module.exports = {
     return await this
       .forge({
         [this.primaryKey]: params.id
+      })
+      .destroy();
+  },
+
+  deleteMany: async function (params) {
+    return await this
+      .query(function(qb) {
+        return qb.whereIn('id', params.id);
       })
       .destroy();
   }
