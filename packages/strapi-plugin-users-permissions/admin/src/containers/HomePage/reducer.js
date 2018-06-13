@@ -10,6 +10,7 @@ import {
   CANCEL_CHANGES,
   DELETE_DATA,
   DELETE_DATA_SUCCEEDED,
+  FETCH_DATA,
   FETCH_DATA_SUCCEEDED,
   ON_CHANGE,
   RESET_PROPS,
@@ -21,16 +22,18 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  data: List([]),
+  data: fromJS({}),
   dataToDelete: Map({}),
   dataToEdit: '',
   deleteEndPoint: '',
   didCheckErrors: false,
   formErrors: List([]),
   initialData: Map({}),
+  isLoading: true,
   modifiedData: Map({}),
   showButtons: false,
   didDeleteData: false,
+  endPoint: 'roles',
 });
 
 function homePageReducer(state = initialState, action) {
@@ -49,11 +52,14 @@ function homePageReducer(state = initialState, action) {
         .set('deleteEndPoint', '')
         .set('dataToDelete', Map({}))
         .update('didDeleteData', (v) => !v);
+    case FETCH_DATA:
+      return state
+        .update('endPoint', () => action.endPoint);
     case FETCH_DATA_SUCCEEDED:
       return state
-        .set('data', List(action.data))
-        .set('initialData', action.modifiedData)
-        .set('modifiedData', action.modifiedData);
+        .updateIn(['data', state.get('endPoint')], () => List(action.data))
+        .updateIn(['initialData', state.get('endPoint')], () => action.modifiedData)
+        .updateIn(['modifiedData', state.get('endPoint')], () => action.modifiedData);
     case ON_CHANGE:
       return state
         .updateIn(action.keys, () => action.value);

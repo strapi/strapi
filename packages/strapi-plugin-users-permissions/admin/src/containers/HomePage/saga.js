@@ -17,9 +17,6 @@ import {
   SUBMIT,
 } from './constants';
 
-// TODO uncomment to test design providers and so on...
-// import data from './data.json';
-
 import {
   makeSelectAllData,
   makeSelectDataToDelete,

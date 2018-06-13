@@ -96,6 +96,8 @@ export class HomePage extends React.Component {
     this.props.resetProps();
   }
 
+  getEndPoint = () => this.props.match.params.settingType;
+
   handleKeyBoardShortCut = (e) => {
     if (includes(keyBoardShortCuts, e.keyCode)) {
       const mapKey = clone(this.state.mapKey);
@@ -154,14 +156,14 @@ export class HomePage extends React.Component {
   ];
 
   render() {
-    const { didCheckErrors, formErrors, modifiedData, initialData, match, dataToEdit } = this.props;
+    const { data, didCheckErrors, formErrors, modifiedData, initialData, match, dataToEdit } = this.props;
     const headerActions = match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
       this.pluginHeaderActions : [];
     const noButtonList = match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
     const component = match.params.settingType === 'advanced' ?
       <EditForm onChange={this.props.onChange} values={modifiedData} /> : (
         <List
-          data={this.props.data}
+          data={get(data, this.getEndPoint(), [])}
           deleteData={this.props.deleteData}
           noButton={noButtonList}
           onButtonClick={this.handleButtonClick}
@@ -169,7 +171,10 @@ export class HomePage extends React.Component {
           values={modifiedData}
         />
       );
-
+    
+    console.log(this.props.match);
+    console.log(modifiedData)
+    console.log(this.props.endPoint);
     return (
       <div>
         <form onSubmit={(e) => e.preventDefault()}>
@@ -208,7 +213,7 @@ HomePage.defaultProps = {};
 
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
-  data: PropTypes.array.isRequired,
+  data: PropTypes.object.isRequired,
   dataToEdit: PropTypes.string.isRequired,
   deleteData: PropTypes.func.isRequired,
   didCheckErrors: PropTypes.bool.isRequired,

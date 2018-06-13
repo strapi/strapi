@@ -29,8 +29,8 @@ function Sub({ bordered, content, link, name, style, title, underline }) {
     <a className={cn(styles.subWrapper, bordered && styles.subBordered, styles.link)} href={`https://blog.strapi.io/${link}`} target="_blank">
       <span>{title}</span>
       {title === '' && <LoadingBar />}
+      {content === '' && <LoadingBar style={{ width: '40%' }} />}
       <p style={style}>
-        {content === '' && <LoadingBar style={{ width: '40%' }} />}
         {isFunction(content) ? content() : content}
       </p>
     </a>
