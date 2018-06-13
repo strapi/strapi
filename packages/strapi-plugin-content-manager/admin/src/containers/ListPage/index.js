@@ -164,7 +164,7 @@ export class ListPage extends React.Component {
     const {
       listPage: { filters, params },
     } = this.props;
-    
+
     return `?${generateSearchFromParams(params)}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
   }
 
@@ -342,7 +342,7 @@ export class ListPage extends React.Component {
           }),
       },
     ];
-    
+
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>

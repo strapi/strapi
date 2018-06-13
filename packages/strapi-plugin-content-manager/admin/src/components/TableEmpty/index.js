@@ -16,7 +16,7 @@ function TableEmpty({ colspan, contentType, filters, search }) {
   const model = upperFirst(contentType);
 
   if (search !== '') {
-    id = 'withSearch',
+    id = 'withSearch';
     values = { contentType: model, search };
   } else {
     id = filters.length > 0 ? 'withFilters' : 'withoutFilter';
