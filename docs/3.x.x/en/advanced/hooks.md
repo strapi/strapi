@@ -64,8 +64,9 @@ Every folder that follows this name pattern `strapi-*` in your `./node_modules` 
 A hook needs to follow the structure below:
 
 ```
-/lib
-- index.js
+/hook
+└─── lib
+     - index.js
 - LICENSE.md
 - package.json
 - README.md

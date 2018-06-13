@@ -34,12 +34,11 @@ function TableDelete({ colspan, number, onToggleDeleteAll }) {
 
 TableDelete.defaultProps = {
   colspan: 0,
-  number: [],
 };
 
 TableDelete.propTypes = {
   colspan: PropTypes.number,
-  number: PropTypes.number,
+  number: PropTypes.number.isRequired,
   onToggleDeleteAll: PropTypes.func.isRequired,
 };
 

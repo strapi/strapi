@@ -204,10 +204,12 @@ module.exports = {
             case 'oneWay':
             case 'oneToOne':
             case 'manyToOne':
+            case 'oneToManyMorph':
               entry[association.alias] = null;
               break;
             case 'oneToMany':
             case 'manyToMany':
+            case 'manyToManyMorph':
               entry[association.alias] = [];
               break;
             default:
