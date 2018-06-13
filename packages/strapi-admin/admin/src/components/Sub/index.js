@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isFunction, isObject } from 'lodash';
 import cn from 'classnames';
+import LoadingBar from 'components/LoadingBar';
 
 import styles from './styles.scss';
 
@@ -27,7 +28,9 @@ function Sub({ bordered, content, link, name, style, title, underline }) {
   return (
     <a className={cn(styles.subWrapper, bordered && styles.subBordered, styles.link)} href={`https://blog.strapi.io/${link}`} target="_blank">
       <span>{title}</span>
+      {title === '' && <LoadingBar />}
       <p style={style}>
+        {content === '' && <LoadingBar style={{ width: '40%' }} />}
         {isFunction(content) ? content() : content}
       </p>
     </a>
