@@ -83,7 +83,7 @@ const main = async () => {
       // Run tests in every packages.
       for (let i in packages) {
         await jest({
-          passWithNoTests: true
+          passWithNoTests: true,
         }, [`${process.cwd()}/packages/${packages[i]}`]);
       }
 
