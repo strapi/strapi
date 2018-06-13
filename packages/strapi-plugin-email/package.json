@@ -21,7 +21,7 @@
     "test": "echo \"Error: no test specified\""
   },
   "dependencies": {
-    "strapi-email-sendmail": "3.0.0-alpha.12.3"
+    "strapi-email-sendmail": "3.0.0-alpha.12.4"
   },
   "devDependencies": {
     "react-copy-to-clipboard": "5.0.1",
