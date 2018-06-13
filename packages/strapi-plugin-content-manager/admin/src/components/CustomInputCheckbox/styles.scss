@@ -60,3 +60,15 @@
 
   }
 }
+
+.customLabelUnCheckedHeader {
+  &:after {
+    content: '\f068';
+    position: absolute;
+    top: 5px; left: 18px;
+    font-size: 10px;
+    font-family: 'FontAwesome';
+    font-weight: 100;
+    color: #1C5DE7;
+  }
+}
