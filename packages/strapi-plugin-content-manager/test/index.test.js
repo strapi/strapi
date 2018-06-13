@@ -317,35 +317,83 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
   );
 
   test(
-    'Delete all tags should remove the association in each articles related to them',
+    'Delete all articles should remove the association in each tags related to them',
     async () => {
-      const tagsToCreate = ['tag11, tag12'].map(tag => 
-        rq({
-          url: `/content-manager/explorer/tag/?source=content-manager`,
-          method: 'POST',
-          json: true,
-          formData: {
-            name: tag
-          }
-        })
-      );
+      const tagToCreate = await rq({
+        url: `/content-manager/explorer/tag/?source=content-manager`,
+        method: 'POST',
+        json: true,
+        formData: {
+          name: 'tag11'
+        }
+      });
 
-      const tags = await Promise.all(tagsToCreate);
-
-      console.log(tags);
-
-      const article = await rq({
+      const article12 = await rq({
         url: `/content-manager/explorer/article/?source=content-manager`,
         method: 'POST',
         json: true,
         formData: {
-          title: 'Article 12',
+          title: 'article12',
           content: 'Content',
-          tags: [tags[0]]
+          tags: [tagToCreate.id]
         }
       });
 
-      expect(article.tags[0].id).toBe(tags[0].id);
+      const article13 = await rq({
+        url: `/content-manager/explorer/article/?source=content-manager`,
+        method: 'POST',
+        json: true,
+        formData: {
+          title: 'article13',
+          content: 'Content',
+          tags: [tagToCreate.id]
+        }
+      });
+
+      const articles = [article12, article13];
+
+      console.log(articles);
+
+      expect(Array.isArray(articles[0].tags)).toBeTruthy();
+      expect(articles[0].tags.length).toBe(1);
+      expect(Array.isArray(articles[1].tags)).toBeTruthy();
+      expect(articles[1].tags.length).toBe(1);
+
+      let tagToGet = await rq({
+        url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
+        method: 'GET',
+        json: true
+      });
+
+      console.log(tagToGet);
+
+      expect(Array.isArray(tagToGet.articles)).toBeTruthy();
+      expect(tagToGet.articles.length).toBe(2);
+
+      console.log({
+        url: `/content-manager/explorer/deleteAll/article/?source=content-manager&${articles.map(article => article.id).join('&')}`,
+        method: 'DELETE',
+        json: true
+      });
+
+
+      await rq({
+        url: `/content-manager/explorer/deleteAll/article/?source=content-manager&${articles.map(article => article.id).join('&')}`,
+        method: 'DELETE',
+        json: true
+      });
+
+      
+      tagToGet = await rq({
+        url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
+        method: 'GET',
+        json: true
+      });
+
+      console.log(tagToGet.articles);
+
+      expect(Array.isArray(tagToGet.articles)).toBeTruthy();
+      expect(tagToGet.articles.length).toBe(0);
     }
   );
 });
