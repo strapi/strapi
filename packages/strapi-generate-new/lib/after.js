@@ -104,9 +104,6 @@ module.exports = (scope, cb) => {
     },{
       name: 'upload',
       core: true
-    }, {
-      name: 'analytics',
-      core: false
     }];
 
     // Install each plugin.
