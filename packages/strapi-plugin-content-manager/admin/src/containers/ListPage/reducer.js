@@ -41,6 +41,7 @@ const initialState = fromJS({
     _limit: 10,
     _page: 1,
     _sort: '',
+    _q: '',
   }),
   // records: List([]),
   records: fromJS({}),
@@ -69,7 +70,23 @@ function listPageReducer(state = initialState, action) {
         .update('showWarningDeleteAll', () => false)
         .update('entriesToDelete', () => List([]));
     case CHANGE_PARAMS:
-      return state.updateIn(action.keys, () => action.value);
+      return state
+        .updateIn(action.keys, () => action.value)
+        .update('filters', list => {
+          // Remove the filters
+          if (action.keys.indexOf('_q') !== -1) {
+            return List([]);
+          }
+          return list;
+        })
+        .update('filtersUpdated', v => {
+          // Change the URI
+          if (action.keys.indexOf('_q') !== -1) {
+            return !v;
+          }
+
+          return v;
+        });
     case GET_DATA:
       return state
         .update('isLoading', () => true)
@@ -134,7 +151,8 @@ function listPageReducer(state = initialState, action) {
         .update('filters', () => state.get('appliedFilters').filter(filter => filter.get('value') !== ''))
         .update('appliedFilters', (list) => list.filter(filter => filter.get('value') !== ''))
         .update('showFilter', () => false)
-        .update('filtersUpdated', v => v = !v);
+        .update('filtersUpdated', v => v = !v)
+        .updateIn(['params', '_q'], () => '');
     case ON_TOGGLE_DELETE_ALL:
       return state.update('showWarningDeleteAll', v => v = !v);
     default:
