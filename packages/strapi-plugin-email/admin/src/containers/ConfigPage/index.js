@@ -43,14 +43,14 @@ class ConfigPage extends React.Component {
     this.getSettings(this.props);
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentDidUpdate(prevProps) {
     // Get new settings on navigation change
-    if (nextProps.match.params.env !== this.props.match.params.env) {
-      this.getSettings(nextProps);
+    if (prevProps.match.params.env !== this.props.match.params.env) {
+      this.getSettings(this.props);
     }
 
     // Redirect the user to the email list after modifying is provider
-    if (nextProps.submitSuccess !== this.props.submitSuccess) {
+    if (prevProps.submitSuccess !== this.props.submitSuccess) {
       this.props.history.push(`/plugins/email/configurations/${this.props.match.params.env}`);
     }
   }
