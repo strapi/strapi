@@ -12,14 +12,14 @@ import './public-path.js'; // eslint-disable-line import/extensions
 import React from 'react';
 import Loadable from 'react-loadable';
 import { Provider } from 'react-redux';
-import LoadingIndicator from 'components/LoadingIndicator';
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import configureStore from './store';
 import { translationMessages } from './i18n';
 
 
 const LoadableApp = Loadable({
   loader: () => import('containers/App'),
-  loading: LoadingIndicator,
+  loading: LoadingIndicatorPage,
 });
 
 const tryRequireRoot = (source) => {
