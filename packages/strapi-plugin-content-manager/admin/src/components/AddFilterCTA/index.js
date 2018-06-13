@@ -12,22 +12,29 @@ import PropTypes from 'prop-types';
 import Button from 'components/CustomButton';
 import Logo from '../../assets/images/icon_filter.png';
 
-const imgStyle = {
-  marginTop: '-3px',
-  marginRight: '10px',
-  height: '7px',
-  fontSize: '12px',
-};
+import styles from './styles.scss';
 
-function AddFilterCTA({ onClick, showHideText }) {
-  const id = showHideText ? 'hide' : 'add';
+class AddFilterCTA extends React.Component {
+  state = { imgLoaded: false };
 
-  return (
-    <Button type="button" onClick={onClick} marginTop>
-      <img src={Logo} alt="filter_logo" style={imgStyle} />
-      <FormattedMessage id={`content-manager.components.AddFilterCTA.${id}`} />
-    </Button>
-  );
+  handleImgLoaded = () => this.setState({ imgLoaded: true });
+
+  render() {
+    const { onClick, showHideText } = this.props;
+    const { imgLoaded } = this.state;
+    const id = showHideText ? 'hide' : 'add';
+    
+    return (
+      <Button type="button" onClick={onClick} marginTop>
+        <div className={styles.ctaWrapper}>
+          {!imgLoaded && <div className={styles.spinner}><div /></div>}
+          <img src={Logo} onLoad={this.handleImgLoaded} alt="filter_logo" className={styles.imgCta} />
+          <FormattedMessage id={`content-manager.components.AddFilterCTA.${id}`} /> 
+
+        </div>
+      </Button>
+    );
+  }
 }
 
 AddFilterCTA.defaultProps = {
