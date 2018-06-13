@@ -7,7 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, merge } from 'lodash';
-import Loadable from 'react-loadable';
 // Design
 import InputAddonWithErrors from 'components/InputAddonWithErrors';
 import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
@@ -21,12 +20,8 @@ import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
-// import WysiwygWithErrors from 'components/WysiwygWithErrors';
-const Loading = () => <div>Loading ...</div>;
-const LoadableWysiwyg = Loadable({
-  loader: () => import('components/WysiwygWithErrors'),
-  loading: Loading,
-});
+import WysiwygWithErrors from 'components/WysiwygWithErrors/Loadable';
+
 
 const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>;
 
@@ -44,7 +39,7 @@ const inputs = {
   text: InputTextWithErrors,
   textarea: InputTextAreaWithErrors,
   toggle: InputToggleWithErrors,
-  wysiwyg: LoadableWysiwyg,
+  wysiwyg: WysiwygWithErrors,
 };
 
 function InputsIndex(props) {
