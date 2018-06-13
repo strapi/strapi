@@ -1,7 +1,7 @@
 module.exports = {
   name: 'content-manager',
   displayName: 'Content Manager',
-  testMatch: ['test/?(*.)+(test).js'],
+  testMatch: ['**/test/?(*.)+(spec|test).js'],
   coveragePathIgnorePatterns: [
     '<rootDir>/admin/',
     '<rootDir>/dist/',

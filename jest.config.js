@@ -1,7 +1,7 @@
 module.exports = {
   name: 'setup',
   displayName: 'Setup',
-  testMatch: ['test/?(*.)+(test).js'],
+  testMatch: ['**/test/?(*.)+(spec|test).js'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/',
   ],

@@ -1,12 +1,7 @@
-let request = require('request');
-
-request = request.defaults({
-  baseUrl: 'http://localhost:1337'
-});
-
+// Helpers.
 const form = require('../../../test/helpers/generators');
 const restart = require('../../../test/helpers/restart');
-const rq = require('../../../test/helpers/request')(request);
+const rq = require('../../../test/helpers/request');
 
 const cleanDate = (entry) => {
   delete entry.updatedAt;
@@ -32,7 +27,7 @@ describe('App setup auth', () => {
         json: true
       });
 
-      request = request.defaults({
+      rq.defaults({
         headers: {
           'Authorization': `Bearer ${body.jwt}`
         }
@@ -318,6 +313,39 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       expect(body.content).toBe(entry.content);
       expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.tags.length).toBe(0);
+    }
+  );
+
+  test(
+    'Delete all tags should remove the association in each articles related to them',
+    async () => {
+      const tagsToCreate = ['tag11, tag12'].map(tag => 
+        rq({
+          url: `/content-manager/explorer/tag/?source=content-manager`,
+          method: 'POST',
+          json: true,
+          formData: {
+            name: tag
+          }
+        })
+      );
+
+      const tags = await Promise.all(tagsToCreate);
+
+      console.log(tags);
+
+      const article = await rq({
+        url: `/content-manager/explorer/article/?source=content-manager`,
+        method: 'POST',
+        json: true,
+        formData: {
+          title: 'Article 12',
+          content: 'Content',
+          tags: [tags[0]]
+        }
+      });
+
+      expect(article.tags[0].id).toBe(tags[0].id);
     }
   );
 });
