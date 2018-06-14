@@ -20,7 +20,7 @@ import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
-import WysiwygWithErrors from 'components/WysiwygWithErrors/Loadable';
+import WysiwygWithErrors from 'components/WysiwygWithErrors';
 
 
 const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>;
