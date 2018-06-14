@@ -66,7 +66,11 @@ function homePageReducer(state = initialState, action) {
       return state
         .updateIn(action.keys, () => action.value);
     case RESET_PROPS:
-      return initialState;
+      return initialState
+        .update('data', () => state.get('data'))
+        .update('initialData', () => state.get('initialData'))
+        .update('modifiedData', () => state.get('modifiedData'))
+        .update('endPoint', () => 'roles');
     case SET_DATA_TO_EDIT:
       return state.update('dataToEdit', () => action.dataToEdit);
     case SET_FORM:

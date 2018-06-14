@@ -30,3 +30,11 @@
   font-weight: bold;
   line-height: 18px;
 }
+
+.loaderWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 260px;
+  margin: auto;
+}
