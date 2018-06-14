@@ -275,10 +275,9 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       let body = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
         method: 'PUT',
-        formData: entry
+        formData: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles[0] = body;
 
@@ -335,7 +334,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
         formData: {
           title: 'article12',
           content: 'Content',
-          tags: [tagToCreate.id]
+          tags: [tagToCreate]
         }
       });
 
@@ -346,13 +345,11 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
         formData: {
           title: 'article13',
           content: 'Content',
-          tags: [tagToCreate.id]
+          tags: [tagToCreate]
         }
       });
 
       const articles = [article12, article13];
-
-      console.log(articles);
 
       expect(Array.isArray(articles[0].tags)).toBeTruthy();
       expect(articles[0].tags.length).toBe(1);
@@ -365,32 +362,20 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
         json: true
       });
 
-      console.log(tagToGet);
-
       expect(Array.isArray(tagToGet.articles)).toBeTruthy();
       expect(tagToGet.articles.length).toBe(2);
 
-      console.log({
-        url: `/content-manager/explorer/deleteAll/article/?source=content-manager&${articles.map(article => article.id).join('&')}`,
-        method: 'DELETE',
-        json: true
-      });
-
-
       await rq({
-        url: `/content-manager/explorer/deleteAll/article/?source=content-manager&${articles.map(article => article.id).join('&')}`,
+        url: `/content-manager/explorer/deleteAll/article/?source=content-manager&${articles.map((article, index) => `${index}=${article.id}`).join('&')}`,
         method: 'DELETE',
         json: true
       });
-
       
       tagToGet = await rq({
         url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
         method: 'GET',
         json: true
       });
-
-      console.log(tagToGet.articles);
 
       expect(Array.isArray(tagToGet.articles)).toBeTruthy();
       expect(tagToGet.articles.length).toBe(0);
