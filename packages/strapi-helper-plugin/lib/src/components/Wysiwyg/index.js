@@ -566,7 +566,10 @@ class Wysiwyg extends React.Component {
    * Update the parent reducer
    * @param  {Map} editorState [description]
    */
-  sendData = editorState =>
+  sendData = editorState => {
+    if (this.getEditorState().getCurrentContent() === editorState.getCurrentContent())
+      return;
+
     this.props.onChange({
       target: {
         value: editorState.getCurrentContent().getPlainText(),
@@ -574,6 +577,7 @@ class Wysiwyg extends React.Component {
         type: 'textarea',
       },
     });
+  }
 
   toggleFullScreen = e => {
     e.preventDefault();
