@@ -155,19 +155,27 @@ export class HomePage extends React.Component {
     },
   ];
 
+  showLoaders = () => {
+    const { data, isLoading, modifiedData } = this.props;
+    const isAdvanded = this.getEndPoint() === 'advanced';
+
+    return isLoading && get(data, this.getEndPoint()) === undefined && !isAdvanded || isLoading && isAdvanded &&  get(modifiedData, this.getEndPoint()) === undefined;
+  }
+
   render() {
     const { data, didCheckErrors, formErrors, modifiedData, initialData, match, dataToEdit } = this.props;
     const headerActions = match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
       this.pluginHeaderActions : [];
     const noButtonList = match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
     const component = match.params.settingType === 'advanced' ?
-      <EditForm onChange={this.props.onChange} values={modifiedData} /> : (
+      <EditForm onChange={this.props.onChange} values={get(modifiedData, this.getEndPoint(), {})} showLoaders={this.showLoaders()} /> : (
         <List
           data={get(data, this.getEndPoint(), [])}
           deleteData={this.props.deleteData}
           noButton={noButtonList}
           onButtonClick={this.handleButtonClick}
           settingType={match.params.settingType}
+          showLoaders={this.showLoaders()}
           values={get(modifiedData, this.getEndPoint(), {})}
         />
       );
@@ -219,6 +227,7 @@ HomePage.propTypes = {
   formErrors: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
   initialData: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,

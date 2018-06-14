@@ -54,11 +54,13 @@ function homePageReducer(state = initialState, action) {
         .update('didDeleteData', (v) => !v);
     case FETCH_DATA:
       return state
-        .update('endPoint', () => action.endPoint);
+        .update('endPoint', () => action.endPoint)
+        .update('isLoading', () => true);
     case FETCH_DATA_SUCCEEDED:
       return state
         .updateIn(['data', state.get('endPoint')], () => List(action.data))
         .updateIn(['initialData', state.get('endPoint')], () => action.modifiedData)
+        .update('isLoading', () => false)
         .updateIn(['modifiedData', state.get('endPoint')], () => action.modifiedData);
     case ON_CHANGE:
       return state
@@ -71,7 +73,7 @@ function homePageReducer(state = initialState, action) {
       return state
         .set('formErrors', List([]))
         .updateIn(['initialData', state.get('endPoint')], () => action.form)
-        .updateIn(['modifiedData', state.get('enPoint')], () => action.form);
+        .updateIn(['modifiedData', state.get('endPoint')], () => action.form);
     case SET_FORM_ERRORS:
       return state
         .update('didCheckErrors', (v) => v = !v)
