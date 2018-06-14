@@ -336,6 +336,7 @@ module.exports = function(strapi) {
                         switch (relation.nature) {
                           case 'oneToOne':
                           case 'manyToOne':
+                          case 'oneWay':
                             type = definition.client === 'pg' ? 'integer' : 'int';
                             break;
                           default:
