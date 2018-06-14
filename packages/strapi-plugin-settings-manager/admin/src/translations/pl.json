@@ -119,7 +119,7 @@
   "request.error.type.select": "Wartość musi znajdować się na uprzednio zdefiniowanej liście.",
 
   "request.error.validation.required": "Wpisanie wartości dla tego atrybutu jest wymagane.",
-  "request.error.validation.regex": "The value does not match the regex.",
+  "request.error.validation.regex": "Forma nie zgadza się z wymaganym wzorcem.",
   "request.error.validation.max": "Ta wartość jest za wysoka.",
   "request.error.validation.min": "Ta wartość jest za niska",
   "request.error.validation.maxLength": "Ta wartość jest za długa.",
