@@ -124,8 +124,8 @@ export class HomePage extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const modifiedObject = get(this.props.modifiedData, this.props.dataToEdit);
-    const initObject = get(this.props.initialData, this.props.dataToEdit);
+    const modifiedObject = get(this.props.modifiedData, [this.getEndPoint(), this.props.dataToEdit]);
+    const initObject = get(this.props.initialData, [this.getEndPoint(), this.props.dataToEdit]);
     const formErrors = checkFormValidity(this.props.match.params.settingType, modifiedObject, this.props.dataToEdit);
 
     if (isEqual(initObject, modifiedObject)) {
@@ -168,13 +168,10 @@ export class HomePage extends React.Component {
           noButton={noButtonList}
           onButtonClick={this.handleButtonClick}
           settingType={match.params.settingType}
-          values={modifiedData}
+          values={get(modifiedData, this.getEndPoint(), {})}
         />
       );
     
-    console.log(this.props.match);
-    console.log(modifiedData)
-    console.log(this.props.endPoint);
     return (
       <div>
         <form onSubmit={(e) => e.preventDefault()}>
@@ -196,7 +193,7 @@ export class HomePage extends React.Component {
             onChange={this.props.onChange}
             onSubmit={this.handleSubmit}
             settingType={match.params.settingType}
-            values={modifiedData[dataToEdit] || {}}
+            values={get(modifiedData,[this.getEndPoint(), dataToEdit], {})}
           />
         </form>
       </div>

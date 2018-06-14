@@ -48,7 +48,7 @@ function homePageReducer(state = initialState, action) {
         .set('deleteEndPoint', action.deleteEndPoint);
     case DELETE_DATA_SUCCEEDED:
       return state
-        .update('data', list => list.splice(action.indexDataToDelete, 1))
+        .updateIn(['data', state.get('endPoint')], list => list.splice(action.indexDataToDelete, 1))
         .set('deleteEndPoint', '')
         .set('dataToDelete', Map({}))
         .update('didDeleteData', (v) => !v);

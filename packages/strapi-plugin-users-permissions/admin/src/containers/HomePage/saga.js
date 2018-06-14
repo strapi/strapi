@@ -28,8 +28,8 @@ export function* dataDelete() {
   try {
     const allData = yield select(makeSelectAllData());
     const dataToDelete = yield select(makeSelectDataToDelete());
-    const indexDataToDelete = findIndex(allData, ['name', dataToDelete.name]);
     const endPointAPI = yield select(makeSelectDeleteEndPoint());
+    const indexDataToDelete = findIndex(allData[endPointAPI], ['name', dataToDelete.name]);
 
     if (indexDataToDelete !== -1) {
       const id = dataToDelete.id;
