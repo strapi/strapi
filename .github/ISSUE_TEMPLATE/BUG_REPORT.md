@@ -34,4 +34,4 @@ about: Create a report to help us improve 🤔.
 
 
 
-<!-- ⚠️ Make sure to browse the opened and closed issues before submit your issue. -->
+<!-- ⚠️ Make sure to browse the opened and closed issues before submitting your issue. -->
