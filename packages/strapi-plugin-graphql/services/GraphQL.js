@@ -440,7 +440,7 @@ module.exports = {
       // Setup initial state with default attribute that should be displayed
       // but these attributes are not properly defined in the models.
       const initialState = {
-        [model.primaryKey]: 'String!'
+        [model.primaryKey]: 'ID!'
       };
 
       const globalId = model.globalId;
@@ -540,7 +540,7 @@ module.exports = {
         if (_.isFunction(queries[type])) {
           if (type === 'singular') {
             Object.assign(acc.query, {
-              [`${pluralize.singular(name)}(id: String!)`]: model.globalId
+              [`${pluralize.singular(name)}(id: ID!)`]: model.globalId
             });
           } else {
             Object.assign(acc.query, {
