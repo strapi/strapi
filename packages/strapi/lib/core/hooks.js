@@ -24,6 +24,7 @@ module.exports = function() {
           './node_modules/strapi-helper-*',
           './node_modules/strapi-middleware-*',
           './node_modules/strapi-upload-*',
+          './node_modules/strapi-email-*',
           './node_modules/strapi-lint'
         ],
         cwd: this.config.appPath
