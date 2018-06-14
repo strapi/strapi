@@ -54,9 +54,13 @@
   "form.attribute.item.string.name": "Nazwa",
   "form.attribute.item.enumeration.name": "Nazwa",
   "form.attribute.item.enumeration.rules": "Values (separate them with a comma)",
-  "form.attribute.item.enumeration.placeholder": "Ex: morning,noon,evening",
   "form.attribute.item.enumeration.graphql": "Name override for GraphQL",
   "form.attribute.item.enumeration.graphql.description": "Allows you to override the default generated name for GraphQL",
+  "form.attribute.item.enumeration.placeholder": "Ex: morning,noon,evening",
+  "form.attribute.item.appearance.name": "Appearance",
+  "form.attribute.item.appearance.label": "Display as a WYSIWYG",
+  "form.attribute.item.appearance.description":
+    "Otherwise, the value will be editable through a basic textarea field",
   "form.attribute.item.settings.name": "Ustawienia",
   "form.attribute.item.requiredField": "Wymagany",
   "form.attribute.item.uniqueField": "Unikalny",
@@ -101,7 +105,8 @@
   "menu.section.documentation.tutorial": "Zobacz nasz",
   "menu.section.documentation.tutorialLink": "poradnik wideo.",
 
-  "modelPage.contentHeader.emptyDescription.description": "Ten model nie posiada opisu",
+  "modelPage.contentHeader.emptyDescription.description":
+  "Ten model nie posiada opisu",
   "modelPage.contentType.list.title.plural": "atrybutów",
   "modelPage.contentType.list.title.singular": "atrybut",
   "modelPage.contentType.list.title.including": "w tym",
@@ -132,7 +137,7 @@
   "popUpForm.attributes.email.description": "Email użytkownika...",
   "popUpForm.attributes.password.description": "Hasło użytkownika...",
   "popUpForm.attributes.enumeration.description": "List of choices",
-  
+
   "popUpForm.attributes.string.name": "Ciąg",
   "popUpForm.attributes.text.name": "Tekst",
   "popUpForm.attributes.boolean.name": "Typ logiczny",
@@ -160,7 +165,8 @@
   "popUpWarning.button.cancel": "Nie",
   "popUpWarning.button.confirm": "Tak",
   "popUpWarning.title": "Potwierdzenie",
-  "popUpWarning.bodyMessage.contentType.delete": "Czy na pewno chcesz usunąć ten model?",
+  "popUpWarning.bodyMessage.contentType.delete":
+  "Czy na pewno chcesz usunąć ten model?",
   "popUpWarning.bodyMessage.attribute.delete": "Czy na pewno chcesz usunąć ten atrybut?",
 
   "table.contentType.title.plural": "Modeli jest dostępnych",
@@ -169,6 +175,7 @@
   "table.contentType.head.description": "Opis",
   "table.contentType.head.fields": "Atrybuty",
 
+  "relation.oneWay": "has one",
   "relation.oneToOne": "ma jeden",
   "relation.oneToMany": "należy do wielu",
   "relation.manyToOne": "ma wiele",

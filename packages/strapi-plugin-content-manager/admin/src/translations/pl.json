@@ -15,6 +15,35 @@
   "components.LimitSelect.itemsPerPage": "Wpisów na stronę",
   "containers.List.errorFetchRecords": "Błąd",
 
+  "components.AddFilterCTA.add": "Filtry",
+  "components.AddFilterCTA.hide": "Filtry",
+  "components.FilterOptions.button.apply": "Apply",
+  "components.FiltersPickWrapper.PluginHeader.actions.apply": "Apply",
+  "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Clear all",
+  "components.FiltersPickWrapper.PluginHeader.description": "Set the conditions to apply to filter the entries",
+  "components.FiltersPickWrapper.PluginHeader.title.filter": "Filtry",
+  "components.FiltersPickWrapper.hide": "Ukryj",
+
+  "components.FilterOptions.FILTER_TYPES.=": "jest",
+  "components.FilterOptions.FILTER_TYPES._ne": "nie jest",
+  "components.FilterOptions.FILTER_TYPES._lt": "is lower than",
+  "components.FilterOptions.FILTER_TYPES._lte": "is lower than or equal to",
+  "components.FilterOptions.FILTER_TYPES._gt": "is greater than",
+  "components.FilterOptions.FILTER_TYPES._gte": "is greater than or equal to",
+  "components.FilterOptions.FILTER_TYPES._contains": "zawiera",
+  "components.FilterOptions.FILTER_TYPES._containss": "zawiera (rozróżnianie wielkości liter)",
+
+  "components.Search.placeholder": "Search for an entry...",
+
+  "components.TableDelete.entries.plural": "{number} entries selected",
+  "components.TableDelete.entries.singular": "{number} entry selected",
+  "components.TableDelete.delete": "Delete all",
+
+
+  "components.TableEmpty.withFilters": "There is no {contentType} with the applied filters...",
+  "components.TableEmpty.withoutFilter": "There is no {contentType}...",
+  "components.TableEmpty.withSearch": "There is no {contentType} corresponding to the search ({search})...",
+
   "EditRelations.title": "Dane relacyjne",
 
   "emptyAttributes.title": "Nie ma jeszcze żadnych atrybutów",

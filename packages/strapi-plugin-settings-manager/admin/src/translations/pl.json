@@ -30,6 +30,8 @@
   "form.database.item.username": "Nazwa użytkownika",
   "form.database.item.password": "Hasło",
   "form.database.item.database": "Baza danych",
+  "form.database.item.ssl": "SSL",
+  "form.database.item.authenticationDatabase": "Authentication Database",
   "form.database.item.default": "Ustaw jako domyślne połączenie",
   "form.database.item.provider.mongo": "Mongo",
   "form.database.item.provider.postgres": "PostgresSQL",

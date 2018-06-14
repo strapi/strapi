@@ -27,7 +27,9 @@
 
   "PluginInputFile.text": "Przeciągnij & upuść pliki w to miejsce lub {link} pliki do przesłania",
   "PluginInputFile.link": "przeglądaj",
+  "PluginInputFile.loading": "Your files are being uploaded...",
 
+  "notification.config.success": "The settings has been updated",
   "notification.delete.success": "Plik został usunięty",
   "notification.dropFile.success": "Plik został przesłany",
   "notification.dropFiles.success": "{number} plików zostało przesłanych"
