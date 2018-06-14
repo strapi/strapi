@@ -163,7 +163,7 @@ shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-content-type-builder...', 'npm link --no-optional', false);
 
 
-const pluginsToBuild = ['admin', 'content-manager', 'content-type-builder', 'upload', 'users-permissions', 'settings-manager'];
+const pluginsToBuild = ['admin', 'content-manager', 'content-type-builder', 'upload', 'email', 'users-permissions', 'settings-manager'];
 
 const buildPlugins = async () => {
   const build = (pckgName) => {
