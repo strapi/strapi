@@ -70,8 +70,8 @@ function homePageReducer(state = initialState, action) {
     case SET_FORM:
       return state
         .set('formErrors', List([]))
-        .set('initialData', action.form)
-        .set('modifiedData', action.form);
+        .updateIn(['initialData', state.get('endPoint')], () => action.form)
+        .updateIn(['modifiedData', state.get('enPoint')], () => action.form);
     case SET_FORM_ERRORS:
       return state
         .update('didCheckErrors', (v) => v = !v)
