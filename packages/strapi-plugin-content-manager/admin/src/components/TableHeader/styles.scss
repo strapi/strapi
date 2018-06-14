@@ -14,6 +14,12 @@
       cursor: pointer;
     }
   }
+
+  > tr {
+    th:first-child {
+      width: 50px;
+    }
+  }
 }
 
 .iconAsc{

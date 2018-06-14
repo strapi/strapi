@@ -279,25 +279,6 @@ class PopUpRelations extends React.Component {
   };
 
   render() {
-    const loader = this.props.showLoader ? (
-      <Button
-        onClick={this.props.onSubmit}
-        type="submit"
-        className={styles.primary}
-        disabled={this.props.showLoader}
-      >
-        <p className={styles.saving}>
-          <span>.</span>
-          <span>.</span>
-          <span>.</span>
-        </p>
-      </Button>
-    ) : (
-      <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
-        <FormattedMessage id="content-type-builder.form.button.continue" />
-      </Button>
-    );
-
     const modalBody = this.props.showRelation
       ? this.renderModalBodyRelations()
       : this.renderModalBodyAdvanced();
@@ -329,7 +310,10 @@ class PopUpRelations extends React.Component {
             <Button onClick={handleToggle} className={styles.secondary}>
               <FormattedMessage id="content-type-builder.form.button.cancel" />
             </Button>
-            {loader}{' '}
+            <Button type="submit" onClick={(e) => this.props.onSubmit(e, true)} className={styles.primaryAddShape}><FormattedMessage id="content-type-builder.button.attributes.add" /></Button>
+            <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
+              <FormattedMessage id="content-type-builder.form.button.continue" />
+            </Button>{' '}
           </ModalFooter>
         </Modal>
       </div>

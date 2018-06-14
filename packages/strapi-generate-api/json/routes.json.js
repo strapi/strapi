@@ -28,15 +28,15 @@ module.exports = scope => {
         }
       }, {
         method: 'GET',
-        path: '/' + scope.humanizeId + '/:' + tokenID,
-        handler: scope.globalID + '.findOne',
+        path: '/' + scope.humanizeId + '/count',
+        handler: scope.globalID + '.count',
         config: {
           policies: []
         }
       }, {
         method: 'GET',
-        path: '/' + scope.humanizeId + '/count',
-        handler: scope.globalID + '.count',
+        path: '/' + scope.humanizeId + '/:' + tokenID,
+        handler: scope.globalID + '.findOne',
         config: {
           policies: []
         }

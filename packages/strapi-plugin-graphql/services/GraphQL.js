@@ -144,12 +144,15 @@ module.exports = {
 
   /**
    * Convert Strapi type to GraphQL type.
-   *
+   * @param {Object} attribute Information about the attribute.
+   * @param {Object} attribute.definition Definition of the attribute.
+   * @param {String} attribute.modelName Name of the model which owns the attribute.
+   * @param {String} attribute.attributeName Name of the attribute.
    * @return String
    */
 
-  convertType: (definition = {}) => {
-    // Type.
+  convertType: function ({ definition = {}, modelName = '', attributeName = '' }) {
+    // Type
     if (definition.type) {
       let type = 'String';
 
@@ -167,6 +170,9 @@ module.exports = {
         case 'float':
           type = 'Float';
           break;
+        case 'enumeration':
+          type = this.convertEnumType(definition, modelName, attributeName);
+          break;
       }
 
       if (definition.required) {
@@ -178,9 +184,9 @@ module.exports = {
 
     const ref = definition.model || definition.collection;
 
-    // Association.
+    // Association
     if (ref && ref !== '*') {
-      // Add bracket or not.
+      // Add bracket or not
       const globalId = definition.plugin ?
         strapi.plugins[definition.plugin].models[ref].globalId:
         strapi.models[ref].globalId;
@@ -195,6 +201,16 @@ module.exports = {
 
     return definition.model ? 'Morph' : '[Morph]';
   },
+
+  /**
+   * Convert Strapi enumeration to GraphQL Enum.
+   * @param {Object} definition Definition of the attribute.
+   * @param {String} model Name of the model which owns the attribute.
+   * @param {String} field Name of the attribute.
+   * @return String
+   */
+  
+  convertEnumType: (definition, model, field) => definition.enumName ? definition.enumName : `ENUM_${model.toUpperCase()}_${field.toUpperCase()}`,
 
   /**
    * Execute policies before the specified resolver.
@@ -459,10 +475,25 @@ module.exports = {
         .filter(attribute => model.attributes[attribute].private !== true)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
-          acc[attribute] = this.convertType(model.attributes[attribute]);
+          acc[attribute] = this.convertType({
+            definition: model.attributes[attribute],
+            modelName: globalId,
+            attributeName: attribute,
+          });
 
           return acc;
         }, initialState);
+
+      // Detect enum and generate it for the schema definition
+      const enums = Object.keys(model.attributes)
+        .filter(attribute => model.attributes[attribute].type === 'enumeration')
+        .map((attribute) => {
+          const definition = model.attributes[attribute];
+
+          return `enum ${this.convertEnumType(definition, globalId, attribute)} { ${definition.enum.join(' \n ')} }`;
+        }).join(' ');
+
+      acc.definition += enums;
 
       // Add parameters to optimize association query.
       (model.associations || [])

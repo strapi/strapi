@@ -52,6 +52,11 @@
   "form.attribute.item.json.name": "Nazwa",
   "form.attribute.item.boolean.name": "Nazwa",
   "form.attribute.item.string.name": "Nazwa",
+  "form.attribute.item.enumeration.name": "Nazwa",
+  "form.attribute.item.enumeration.rules": "Values (separate them with a comma)",
+  "form.attribute.item.enumeration.placeholder": "Ex: morning,noon,evening",
+  "form.attribute.item.enumeration.graphql": "Name override for GraphQL",
+  "form.attribute.item.enumeration.graphql.description": "Allows you to override the default generated name for GraphQL",
   "form.attribute.item.settings.name": "Ustawienia",
   "form.attribute.item.requiredField": "Wymagany",
   "form.attribute.item.uniqueField": "Unikalny",
@@ -110,11 +115,11 @@
   "notification.error.message": "Wystąpił błąd",
   "notification.info.contentType.creating.notSaved":
     "Zapisz proszę aktualny model zanim stworzysz nowy",
+  "notification.info.disable": "Tego pola nie można obecnie edytować... 😮",
   "notification.info.optimized": "Ta wtyczka jest zoptymalizowana z localStorage",
   "notification.success.message.contentType.edit": "Model został zmieniony",
   "notification.success.message.contentType.create": "Model został utworzony",
   "notification.success.contentTypeDeleted": "Model został usunięty",
-  "notification.info.enumeration": "Tego pola nie można obecnie edytować... 😮",
 
   "popUpForm.attributes.string.description": "Tytuły, nazwy, paragrafy, lista nazwisk",
   "popUpForm.attributes.text.description": "Opisy, paragrafy, artykuły ",
@@ -126,7 +131,8 @@
   "popUpForm.attributes.relation.description": "Odnosi się do modelu",
   "popUpForm.attributes.email.description": "Email użytkownika...",
   "popUpForm.attributes.password.description": "Hasło użytkownika...",
-
+  "popUpForm.attributes.enumeration.description": "List of choices",
+  
   "popUpForm.attributes.string.name": "Ciąg",
   "popUpForm.attributes.text.name": "Tekst",
   "popUpForm.attributes.boolean.name": "Typ logiczny",
@@ -137,6 +143,7 @@
   "popUpForm.attributes.relation.name": "Relacja",
   "popUpForm.attributes.email.name": "Email",
   "popUpForm.attributes.password.name": "Hasło",
+  "popUpForm.attributes.enumeration.name": "Wyliczenie",
   "popUpForm.create": "Nowy",
   "popUpForm.edit": "Zmień",
   "popUpForm.field": "Atrybut",

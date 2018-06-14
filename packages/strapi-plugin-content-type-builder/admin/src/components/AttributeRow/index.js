@@ -22,6 +22,7 @@ import IcoPassword from '../../assets/images/icon_password.png';
 import IcoRelation from '../../assets/images/icon_relation.png';
 import IcoString from '../../assets/images/icon_string.png';
 import IcoText from '../../assets/images/icon_text.png';
+import IcoEnum from '../../assets/images/icon_enum.png';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -45,8 +46,7 @@ class AttributeRow extends React.Component {
       decimal: IcoNumber,
       email: IcoEmail,
       password: IcoPassword,
-      // TODO add Enumeration icon
-      enumeration: IcoJson,
+      enumeration: IcoEnum,
     };
     this.state = {
       showWarning: false,
