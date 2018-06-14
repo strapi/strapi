@@ -114,7 +114,7 @@ module.exports = {
 
       user.password =  await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
-      // Remove relations data to update user code.
+      // Remove relations data to update user password.
       const data = _.omit(user, strapi.plugins['users-permissions'].models.user.associations.map(ast => ast.alias));
 
       // Update the user.
