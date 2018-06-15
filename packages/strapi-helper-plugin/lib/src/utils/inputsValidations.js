@@ -47,6 +47,15 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
           errors.push({ id: 'components.Input.error.validation.regex' });
         }
         break;
+      case 'type':
+        if (validationValue === 'json') {
+          try {
+            value = JSON.parse(value);
+          } catch(err) {
+            errors.push({ id: 'components.Input.error.validation.json' });
+          }
+        }
+        break;
       default:
         errors = [];
     }
