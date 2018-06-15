@@ -130,7 +130,9 @@ module.exports = {
                     .populate([details.via])
                     .lean()
                     .then(entry => {
-                      value[details.via] = entry[details.via].map(entry => _.get(entry, '_id', entry)).concat(value[details.via]);
+                      if (_.isArray(entry[details.via])) {
+                        value[details.via] = entry[details.via].map(entry => _.get(entry, '_id', entry)).concat(value[details.via]);
+                      }
 
                       return module.exports.addRelation.call(model, {
                         id: getValuePrimaryKey(value, this.primaryKey),
