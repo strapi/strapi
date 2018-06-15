@@ -7,5 +7,5 @@ package-lock.json
 
 # Cruft
 .DS_Store
-npm-debug.loggi
+npm-debug.logg
 .idea
