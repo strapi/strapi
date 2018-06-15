@@ -119,6 +119,13 @@
           "key":"reference",
           "nature":"oneToOne"
         }
+      },
+      {
+        "name": "tag",
+        "params":{
+          "nature":"oneWay",
+          "target":"tag"
+        }
       }
     ],
     "connection":"default",
