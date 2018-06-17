@@ -19,6 +19,9 @@ if (!isSetup) {
     await strapi.load({
       environment: process.env.NODE_ENV,
     });
+
+    // Force exit process if an other process doen't exit during Strapi load.
+    process.exit();
   })();
 }
- 
+

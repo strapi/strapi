@@ -22,7 +22,7 @@ const appPath = (() => {
   return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
 })();
 // const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const isSetup = process.env.IS_MONOREPO; 
+const isSetup = process.env.IS_MONOREPO;
 
 const adminPath = (() => {
   if (isAdmin && isSetup) {
@@ -42,7 +42,13 @@ const URLs = {
 
 if (isAdmin && !isSetup) {
   // Load server configuration.
-  const serverConfig = path.resolve(appPath, 'config', 'environments', _.lowerCase(process.env.NODE_ENV), 'server.json');
+  const serverConfig = path.resolve(
+    appPath,
+    'config',
+    'environments',
+    _.lowerCase(process.env.NODE_ENV),
+    'server.json',
+  );
 
   try {
     const server = require(serverConfig);
@@ -88,21 +94,32 @@ if (process.env.npm_lifecycle_event === 'start') {
   // Read `plugins` directory and check if the plugin comes with an UI (it has an App container).
   // If we don't do this check webpack expects the plugin to have a containers/App/reducer.js to create
   // the plugin's store (redux).
-  plugins.src = isAdmin && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
-    let hasAdminFolder;
+  plugins.src =
+    isAdmin && !plugins.exist
+      ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
+          let hasAdminFolder;
 
-    try {
-      fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
-      hasAdminFolder = true;
-    } catch(err) {
-      hasAdminFolder = false;
-    }
-    return x[0] !== '.' && hasAdminFolder;
-  }) : [];
+          try {
+            fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+            hasAdminFolder = true;
+          } catch (err) {
+            hasAdminFolder = false;
+          }
+          return x[0] !== '.' && hasAdminFolder;
+        })
+      : [];
 
   // Construct object of plugin' paths.
   plugins.folders = plugins.src.reduce((acc, current) => {
-    acc[current] = path.resolve(appPath, 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
+    acc[current] = path.resolve(
+      appPath,
+      'plugins',
+      current,
+      'node_modules',
+      'strapi-helper-plugin',
+      'lib',
+      'src',
+    );
 
     return acc;
   }, {});
@@ -110,14 +127,16 @@ if (process.env.npm_lifecycle_event === 'start') {
 
 // Tell webpack to use a loader only for those files
 const foldersToInclude = [path.join(adminPath, 'admin', 'src')]
-  .concat(plugins.src.reduce((acc, current) => {
-    acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
+  .concat(
+    plugins.src.reduce((acc, current) => {
+      acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
 
-    return acc;
-  }, []))
+      return acc;
+    }, []),
+  )
   .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')]);
 
-module.exports = (options) => {
+module.exports = options => {
   // The disable option is only for production
   // Config from https://github.com/facebook/create-react-app/blob/next/packages/react-scripts/config/webpack.config.prod.js
   const extractSass = new ExtractTextPlugin({
@@ -127,11 +146,16 @@ module.exports = (options) => {
 
   return {
     entry: options.entry,
-    output: Object.assign({ // Compile into js/build.js
-      path: path.join(adminPath, 'admin', 'build'),
-    }, options.output), // Merge with env dependent settings
+    output: Object.assign(
+      {
+        // Compile into js/build.js
+        path: path.join(adminPath, 'admin', 'build'),
+      },
+      options.output,
+    ), // Merge with env dependent settings
     module: {
-      rules: [ // TODO: add eslint formatter
+      rules: [
+        // TODO: add eslint formatter
         {
           // "oneOf" will traverse all following loaders until one will
           // match the requirements. When no loader matches it will fall
@@ -145,9 +169,7 @@ module.exports = (options) => {
                 presets: options.babelPresets,
                 env: {
                   production: {
-                    only: [
-                      'src',
-                    ],
+                    only: ['src'],
                     plugins: [
                       require.resolve('babel-plugin-transform-react-remove-prop-types'),
                       require.resolve('babel-plugin-transform-react-constant-elements'),
@@ -159,9 +181,7 @@ module.exports = (options) => {
                     ],
                   },
                   test: {
-                    plugins: [
-                      'istanbul',
-                    ],
+                    plugins: ['istanbul'],
                   },
                 },
               },
@@ -305,16 +325,8 @@ module.exports = (options) => {
       ],
       alias: options.alias,
       symlinks: false,
-      extensions: [
-        '.js',
-        '.jsx',
-        '.react.js',
-      ],
-      mainFields: [
-        'browser',
-        'jsnext:main',
-        'main',
-      ],
+      extensions: ['.js', '.jsx', '.react.js'],
+      mainFields: ['browser', 'jsnext:main', 'main'],
     },
     externals: options.externals,
     resolveLoader: {

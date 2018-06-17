@@ -15,7 +15,7 @@
   "attribute.password": "Hasło",
   "attribute.relation": "Relacja",
   "attribute.enumeration": "Wyliczenie",
-  "attribute.WYSIWYG": "Text (WYSIWYG)",
+  "attribute.WYSIWYG": "Tekst (WYSIWYG)",
 
   "contentType.temporaryDisplay": "(Nie zapisany)",
   "from": "z",
@@ -52,6 +52,15 @@
   "form.attribute.item.json.name": "Nazwa",
   "form.attribute.item.boolean.name": "Nazwa",
   "form.attribute.item.string.name": "Nazwa",
+  "form.attribute.item.enumeration.name": "Nazwa",
+  "form.attribute.item.enumeration.rules": "Wartości (oddzielone przecinkiem)",
+  "form.attribute.item.enumeration.graphql": "Nadpisanie nazwy dla GraphQL",
+  "form.attribute.item.enumeration.graphql.description": "Pozwalaj na nadpisanie domyślnie wygenerowanej nazwy dla GraphQL.",
+  "form.attribute.item.enumeration.placeholder": "Przykład: rano,południe,wieczór",
+  "form.attribute.item.appearance.name": "Wygląd",
+  "form.attribute.item.appearance.label": "Wyświetlaj jako WYSIWYG",
+  "form.attribute.item.appearance.description":
+    "W przeciwnym razie zawartość będzie można edytować za pomocą podstawowego pola tekstowego.",
   "form.attribute.item.settings.name": "Ustawienia",
   "form.attribute.item.requiredField": "Wymagany",
   "form.attribute.item.uniqueField": "Unikalny",
@@ -71,8 +80,8 @@
   "form.attribute.item.number.type.integer": "całkowita (np: 10)",
   "form.attribute.item.number.type.float": "zmiennoprzecinkowa (np: 3.33333333)",
   "form.attribute.item.number.type.decimal": "dziesiętna (np: 2.22)",
-  "form.attribute.settings.default": "Default value",
-  "form.attribute.settings.default.checkboxLabel": "Set to true",
+  "form.attribute.settings.default": "Domyślnie",
+  "form.attribute.settings.default.checkboxLabel": "Ustawione na prawdę",
 
   "form.button.cancel": "Anuluj",
   "form.button.continue": "Kontynuuj",
@@ -96,7 +105,8 @@
   "menu.section.documentation.tutorial": "Zobacz nasz",
   "menu.section.documentation.tutorialLink": "poradnik wideo.",
 
-  "modelPage.contentHeader.emptyDescription.description": "Ten model nie posiada opisu",
+  "modelPage.contentHeader.emptyDescription.description":
+  "Ten model nie posiada opisu",
   "modelPage.contentType.list.title.plural": "atrybutów",
   "modelPage.contentType.list.title.singular": "atrybut",
   "modelPage.contentType.list.title.including": "w tym",
@@ -110,11 +120,11 @@
   "notification.error.message": "Wystąpił błąd",
   "notification.info.contentType.creating.notSaved":
     "Zapisz proszę aktualny model zanim stworzysz nowy",
+  "notification.info.disable": "Tego pola nie można obecnie edytować... 😮",
   "notification.info.optimized": "Ta wtyczka jest zoptymalizowana z localStorage",
   "notification.success.message.contentType.edit": "Model został zmieniony",
   "notification.success.message.contentType.create": "Model został utworzony",
   "notification.success.contentTypeDeleted": "Model został usunięty",
-  "notification.info.enumeration": "Tego pola nie można obecnie edytować... 😮",
 
   "popUpForm.attributes.string.description": "Tytuły, nazwy, paragrafy, lista nazwisk",
   "popUpForm.attributes.text.description": "Opisy, paragrafy, artykuły ",
@@ -126,6 +136,7 @@
   "popUpForm.attributes.relation.description": "Odnosi się do modelu",
   "popUpForm.attributes.email.description": "Email użytkownika...",
   "popUpForm.attributes.password.description": "Hasło użytkownika...",
+  "popUpForm.attributes.enumeration.description": "Lista wyborów",
 
   "popUpForm.attributes.string.name": "Ciąg",
   "popUpForm.attributes.text.name": "Tekst",
@@ -137,6 +148,7 @@
   "popUpForm.attributes.relation.name": "Relacja",
   "popUpForm.attributes.email.name": "Email",
   "popUpForm.attributes.password.name": "Hasło",
+  "popUpForm.attributes.enumeration.name": "Wyliczenie",
   "popUpForm.create": "Nowy",
   "popUpForm.edit": "Zmień",
   "popUpForm.field": "Atrybut",
@@ -153,7 +165,8 @@
   "popUpWarning.button.cancel": "Nie",
   "popUpWarning.button.confirm": "Tak",
   "popUpWarning.title": "Potwierdzenie",
-  "popUpWarning.bodyMessage.contentType.delete": "Czy na pewno chcesz usunąć ten model?",
+  "popUpWarning.bodyMessage.contentType.delete":
+  "Czy na pewno chcesz usunąć ten model?",
   "popUpWarning.bodyMessage.attribute.delete": "Czy na pewno chcesz usunąć ten atrybut?",
 
   "table.contentType.title.plural": "Modeli jest dostępnych",
@@ -162,9 +175,10 @@
   "table.contentType.head.description": "Opis",
   "table.contentType.head.fields": "Atrybuty",
 
-  "relation.oneToOne": "ma jeden",
+  "relation.oneWay": "zawiera",
+  "relation.oneToOne": "zawiera i należy do",
   "relation.oneToMany": "należy do wielu",
-  "relation.manyToOne": "ma wiele",
-  "relation.manyToMany": "ma i należy do wielu",
+  "relation.manyToOne": "zawiera wiele",
+  "relation.manyToMany": "zawiera i należy do wielu",
   "relation.attributeName.placeholder": "Np: autor, kategoria, tag"
 }

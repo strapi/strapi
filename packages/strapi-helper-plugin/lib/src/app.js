@@ -5,12 +5,15 @@
  * only setup and plugin code.
  */
 
+/* eslint-disable import/first */
+// Don't move this line!
+import './public-path.js'; // eslint-disable-line import/extensions
+
 import React from 'react';
 import { Provider } from 'react-redux';
 
 import App from 'containers/App'; // eslint-disable-line
 
-import './public-path.js'; // eslint-disable-line import/extensions
 import configureStore from './store';
 import { translationMessages } from './i18n';
 

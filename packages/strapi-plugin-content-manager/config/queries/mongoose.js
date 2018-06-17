@@ -1,18 +1,87 @@
 const _ = require('lodash');
 
 module.exports = {
-  find: async function (params, populate) {
-    return this
+  find: async function (params, populate, raw = false) {
+    const query = this
       .find(params.where)
       .limit(Number(params.limit))
       .sort(params.sort)
       .skip(Number(params.skip))
       .populate(populate || this.associations.map(x => x.alias).join(' '));
+
+    return raw ? query.lean() : query;
   },
 
-  count: async function () {
+  count: async function (params) {
     return Number(await this
+      .where(params.where)
       .count());
+  },
+
+  search: async function (params, populate) { // eslint-disable-line  no-unused-vars
+    const $or = Object.keys(this.attributes).reduce((acc, curr) => {
+      switch (this.attributes[curr].type) {
+        case 'integer':
+        case 'float':
+        case 'decimal':
+          if (!_.isNaN(_.toNumber(params.search))) {
+            return acc.concat({ [curr]: params.search });
+          }
+
+          return acc;
+        case 'string':
+        case 'text':
+        case 'password':
+          return acc.concat({ [curr]: { $regex: params.search, $options: 'i' } });
+        case 'boolean':
+          if (params.search === 'true' || params.search === 'false') {
+            return acc.concat({ [curr]: params.search === 'true' });
+          }
+
+          return acc;
+        default:
+          return acc;
+      }
+    }, []);
+
+    return this
+      .find({ $or })
+      .limit(Number(params.limit))
+      .sort(params.sort)
+      .skip(Number(params.skip))
+      .populate(populate || this.associations.map(x => x.alias).join(' '))
+      .lean();
+  },
+
+  countSearch: async function (params = {}) { // eslint-disable-line  no-unused-vars
+    const $or = Object.keys(this.attributes).reduce((acc, curr) => {
+      switch (this.attributes[curr].type) {
+        case 'integer':
+        case 'float':
+        case 'decimal':
+          if (!_.isNaN(_.toNumber(params.search))) {
+            return acc.concat({ [curr]: params.search });
+          }
+
+          return acc;
+        case 'string':
+        case 'text':
+        case 'password':
+          return acc.concat({ [curr]: { $regex: params.search, $options: 'i' } });
+        case 'boolean':
+          if (params.search === 'true' || params.search === 'false') {
+            return acc.concat({ [curr]: params.search === 'true' });
+          }
+
+          return acc;
+        default:
+          return acc;
+      }
+    }, []);
+
+    return this
+      .find({ $or })
+      .count();
   },
 
   findOne: async function (params, populate, raw = true) {
@@ -75,6 +144,15 @@ module.exports = {
     return this
       .remove({
         [this.primaryKey]: params.id
+      });
+  },
+
+  deleteMany: async function (params) {
+    return this
+      .remove({
+        [this.primaryKey]: {
+          $in: params[this.primaryKey] || params.id
+        }
       });
   }
 };

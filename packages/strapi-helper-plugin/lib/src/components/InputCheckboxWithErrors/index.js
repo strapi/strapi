@@ -197,7 +197,10 @@ InputCheckboxWithErrors.propTypes = {
       params: PropTypes.object,
     }),
   ]),
-  value: PropTypes.bool,
+  value: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
 };
 
 export default InputCheckboxWithErrors;

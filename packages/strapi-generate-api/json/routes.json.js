@@ -28,6 +28,13 @@ module.exports = scope => {
         }
       }, {
         method: 'GET',
+        path: '/' + scope.humanizeId + '/count',
+        handler: scope.globalID + '.count',
+        config: {
+          policies: []
+        }
+      }, {
+        method: 'GET',
         path: '/' + scope.humanizeId + '/:' + tokenID,
         handler: scope.globalID + '.findOne',
         config: {

@@ -54,6 +54,21 @@ module.exports = {
   },
 
   /**
+   * Promise to count <%= humanizeIdPluralized %>.
+   *
+   * @return {Promise}
+   */
+
+  count: (params) => {
+    // Convert `params` object to filters compatible with Mongo.
+    const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+
+    return <%= globalID %>
+      .count()
+      .where(filters.where);
+  },
+
+  /**
    * Promise to add a/an <%= id %>.
    *
    * @return {Promise}

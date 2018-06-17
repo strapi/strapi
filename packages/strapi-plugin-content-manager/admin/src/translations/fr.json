@@ -16,6 +16,34 @@
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
 
+  "components.AddFilterCTA.add": "Filtres",
+  "components.AddFilterCTA.hide": "Filtres",
+  "components.FilterOptions.button.apply": "Appliquer",
+  "components.FiltersPickWrapper.PluginHeader.actions.apply": "Appliquer",
+  "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Tout supprimer",
+  "components.FiltersPickWrapper.PluginHeader.description": "Définissez les conditions des filtres à appliquer",
+  "components.FiltersPickWrapper.PluginHeader.title.filter": "Filtres",
+  "components.FiltersPickWrapper.hide": "Fermer",
+
+  "components.Search.placeholder": "Rechercher une entrée...",
+
+  "components.TableDelete.entries.plural": "{number} entrées sélectionnées",
+  "components.TableDelete.entries.singular": "{number} entrée sélectionnée",
+  "components.TableDelete.delete": "Tout supprimer",
+
+  "components.TableEmpty.withFilters": "Aucun {contentType} n'a été trouvé avec ces filtres...",
+  "components.TableEmpty.withoutFilter": "Aucun {contentType} n'a été trouvé...",
+  "components.TableEmpty.withSearch": "Aucun {contentType} n'a été trouvé avec cette recherche ({search})...",
+
+  "components.FilterOptions.FILTER_TYPES.=": "est",
+  "components.FilterOptions.FILTER_TYPES._ne": "n'est pas",
+  "components.FilterOptions.FILTER_TYPES._lt": "inférieur à",
+  "components.FilterOptions.FILTER_TYPES._lte": "inférieur ou égal à",
+  "components.FilterOptions.FILTER_TYPES._gt": "supérieur à",
+  "components.FilterOptions.FILTER_TYPES._gte": "supérieur ou égal à",
+  "components.FilterOptions.FILTER_TYPES._contains": "contient",
+  "components.FilterOptions.FILTER_TYPES._containss": "contient (sensible à la casse)",
+
   "EditRelations.title": "Données associées",
 
   "emptyAttributes.title": "Il n'y a pas encore de champs",
@@ -50,5 +78,6 @@
   "popUpWarning.button.cancel": "Annuler",
   "popUpWarning.button.confirm": "Confirmer",
   "popUpWarning.title": "Confirmation requise",
-  "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûr de vouloir supprimer cette entrée ?"
+  "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûr de vouloir supprimer cette entrée ?",
+  "popUpWarning.bodyMessage.contentType.delete.all": "Êtes-vous sûr de vouloir supprimer ces entrées ?"
 }

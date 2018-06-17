@@ -63,7 +63,7 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 
 LocaleToggle.propTypes = {
   changeLocale: PropTypes.func.isRequired,
-  isLogged: PropTypes.string.isRequired,
+  isLogged: PropTypes.bool.isRequired,
   locale: PropTypes.string.isRequired,
 };
 

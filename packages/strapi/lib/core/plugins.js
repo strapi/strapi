@@ -8,13 +8,13 @@ const _ = require('lodash');
 module.exports = function() {
   return new Promise((resolve, reject) => {
     const folder = ((url = _.get(strapi.config.currentEnvironment.server, 'admin.path', 'admin')) =>
-      url[0] === '/' ? url.substring(1) : url
-    )().replace(/\/$/, '') ;
+      url[0] === '/' ? url.substring(1) : url)().replace(/\/$/, '');
 
     const configuratePlugin = (acc, current, source, name) => {
       switch (source) {
         case 'host': {
-          const host = _.get(this.config.environments[current].server, 'admin.build.host').replace(/\/$/, '') || '/';
+          const host =
+            _.get(this.config.environments[current].server, 'admin.build.host').replace(/\/$/, '') || '/';
 
           if (!host) {
             throw new Error(`You can't use \`remote\` as a source without set the \`host\` configuration.`);
@@ -32,12 +32,20 @@ module.exports = function() {
         }
         case 'custom':
           if (!_.isEmpty(_.get(this.plugins[name].config, `sources.${current}`, {}))) {
-            return acc[current] = this.plugins[name].config.sources[current];
+            return (acc[current] = this.plugins[name].config.sources[current]);
           }
 
-          throw new Error(`You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``);
+          throw new Error(
+            `You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``,
+          );
         case 'backend': {
-          const backend = _.get(this.config.environments[current], 'server.admin.build.backend', `http://${this.config.environments[current].server.host}:${this.config.environments[current].server.port}`).replace(/\/$/, '');
+          const backend = _.get(
+            this.config.environments[current],
+            'server.admin.build.backend',
+            `http://${this.config.environments[current].server.host}:${
+              this.config.environments[current].server.port
+            }`,
+          ).replace(/\/$/, '');
 
           return `${backend}/${folder.replace(/\/$/, '')}/${name}/main.js`;
         }
@@ -46,12 +54,30 @@ module.exports = function() {
       }
     };
 
-    const sourcePath = process.env.NODE_ENV !== 'test' ?
-      path.resolve(this.config.appPath, 'admin', 'admin', 'src', 'config', 'plugins.json'):
-      path.resolve(this.config.appPath, 'packages', 'strapi-admin', 'admin', 'src', 'config', 'plugins.json');
-    const buildPath = process.env.NODE_ENV !== 'test' ?
-      path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'config', 'plugins.json'):
-      path.resolve(this.config.appPath, 'packages', 'strapi-admin', 'admin', 'build', 'config', 'plugins.json');
+    const sourcePath =
+      this.config.environment !== 'test'
+        ? path.resolve(this.config.appPath, 'admin', 'admin', 'src', 'config', 'plugins.json')
+        : path.resolve(
+          this.config.appPath,
+          'packages',
+          'strapi-admin',
+          'admin',
+          'src',
+          'config',
+          'plugins.json',
+        );
+    const buildPath =
+      this.config.environment !== 'test'
+        ? path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'config', 'plugins.json')
+        : path.resolve(
+          this.config.appPath,
+          'packages',
+          'strapi-admin',
+          'admin',
+          'build',
+          'config',
+          'plugins.json',
+        );
 
     try {
       fs.access(path.resolve(this.config.appPath, 'admin', 'admin'), err => {
@@ -115,14 +141,16 @@ module.exports = function() {
 
             // Create `plugins.json` file.
             // Don't inject the plugins without an Admin
-            const data =  Object.keys(this.plugins)
+            const data = Object.keys(this.plugins)
               .filter(plugin => {
                 let hasAdminFolder;
 
                 try {
-                  fs.accessSync(path.resolve(this.config.appPath, 'plugins', plugin, 'admin', 'src', 'containers', 'App'));
+                  fs.accessSync(
+                    path.resolve(this.config.appPath, 'plugins', plugin, 'admin', 'src', 'containers', 'App'),
+                  );
                   hasAdminFolder = true;
-                } catch(err) {
+                } catch (err) {
                   hasAdminFolder = false;
                 }
                 return hasAdminFolder;
@@ -130,7 +158,11 @@ module.exports = function() {
               .map(name => ({
                 id: name,
                 source: Object.keys(this.config.environments).reduce((acc, current) => {
-                  const source = _.get(this.config.environments[current].server, 'admin.build.plugins.source', 'default');
+                  const source = _.get(
+                    this.config.environments[current].server,
+                    'admin.build.plugins.source',
+                    'default',
+                  );
 
                   if (_.isString(source)) {
                     acc[current] = configuratePlugin(acc, current, source, name);
@@ -139,7 +171,7 @@ module.exports = function() {
                   }
 
                   return acc;
-                }, {})
+                }, {}),
               }));
 
             fs.writeFileSync(sourcePath, JSON.stringify(data, null, 2), 'utf8');

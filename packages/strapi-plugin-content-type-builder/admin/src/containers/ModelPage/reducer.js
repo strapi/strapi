@@ -12,7 +12,6 @@ import {
   ADD_ATTRIBUTE_RELATION_TO_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_CONTENT_TYPE,
   CANCEL_CHANGES,
-  CHECK_IF_TABLE_EXISTS_SUCCEEDED,
   EDIT_CONTENT_TYPE_ATTRIBUTE,
   EDIT_CONTENT_TYPE_ATTRIBUTE_RELATION,
   DELETE_ATTRIBUTE,
@@ -37,7 +36,6 @@ const initialState = fromJS({
   showButtons: false,
   modelLoading: true,
   showButtonLoader: false,
-  tableExists: true,
 });
 
 function modelPageReducer(state = initialState, action) {
@@ -54,8 +52,6 @@ function modelPageReducer(state = initialState, action) {
       return state
         .set('showButtons', false)
         .set('model', state.get('initialModel'));
-    case CHECK_IF_TABLE_EXISTS_SUCCEEDED:
-      return state.set('tableExists', action.tableExists);
     case EDIT_CONTENT_TYPE_ATTRIBUTE: {
       if (action.shouldAddParralAttribute) {
         return state

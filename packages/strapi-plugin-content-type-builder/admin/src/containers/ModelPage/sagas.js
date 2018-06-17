@@ -5,7 +5,6 @@ import {
   forEach,
   get,
   includes,
-  isEmpty,
   map,
   replace,
   set,
@@ -22,9 +21,8 @@ import { temporaryContentTypePosted } from 'containers/App/actions';
 
 import { storeData } from '../../utils/storeData';
 
-import { CHECK_IF_TABLE_EXISTS, MODEL_FETCH, SUBMIT } from './constants';
+import { MODEL_FETCH, SUBMIT } from './constants';
 import {
-  checkIfTableExistsSucceeded,
   modelFetchSucceeded,
   postContentTypeSucceeded,
   resetShowButtonsProps,
@@ -33,21 +31,6 @@ import {
   submitActionSucceeded,
 } from './actions';
 import { makeSelectModel } from './selectors';
-
-export function* getTableExistance() {
-  try {
-    // TODO check table existance for plugin model
-    const model = yield select(makeSelectModel());
-    const modelName = !isEmpty(model.collectionName) ? model.collectionName : model.name;
-    const requestUrl = `/content-type-builder/checkTableExists/${model.connection}/${modelName}`;
-    const tableExists = yield call(request, requestUrl, { method: 'GET' });
-
-    yield put(checkIfTableExistsSucceeded(tableExists));
-
-  } catch(error) {
-    strapi.notification.error('notification.error');
-  }
-}
 
 export function* fetchModel(action) {
   try {
@@ -153,13 +136,11 @@ export function* submitChanges(action) {
 }
 
 function* defaultSaga() {
-  const loadExistanceTableWatcher = yield fork(takeLatest, CHECK_IF_TABLE_EXISTS, getTableExistance);
   const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
   const loadSubmitChanges = yield fork(takeLatest, SUBMIT, submitChanges);
 
   yield take(LOCATION_CHANGE);
 
-  yield cancel(loadExistanceTableWatcher);
   yield cancel(loadModelWatcher);
   yield cancel(loadSubmitChanges);
 }

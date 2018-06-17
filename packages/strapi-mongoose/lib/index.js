@@ -76,7 +76,7 @@ module.exports = function (strapi) {
         instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
 
         for (let key in options) {
-          instance.set(key, options[key])
+          instance.set(key, options[key]);
         }
 
         // Handle error
@@ -508,6 +508,10 @@ module.exports = function (strapi) {
           break;
         case '_containss':
           result.key = `where.${key}.$regex`;
+          result.value = value;
+          break;
+        case '_in':
+          result.key = `where.${key}.$in`;
           result.value = value;
           break;
         default:
