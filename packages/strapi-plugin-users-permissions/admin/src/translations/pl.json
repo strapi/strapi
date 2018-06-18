@@ -55,8 +55,8 @@
   "Controller.input.label": "{label} ",
   "Controller.selectAll": "Zaznacz wszystko",
 
-  "EditForm.inputSelect.label.role": "Default role for authenticated users",
-  "EditForm.inputSelect.description.role": "It will attach the new authenticated user to the selected role.",
+  "EditForm.inputSelect.label.role": "Domyślna rola dla uwierzytelnionych użytkowników",
+  "EditForm.inputSelect.description.role": "Połączy nowego uwierzytelnionego użytkownika z wybraną rolą.",
   "EditForm.inputSelect.subscriptions.label": "Rejestracje",
   "EditForm.inputSelect.subscriptions.description": "Ogranicz liczbę rejestracji z tego samego IP na godzinę.",
   "EditForm.inputSelect.durations.label": "Okres",

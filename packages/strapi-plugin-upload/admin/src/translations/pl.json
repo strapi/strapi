@@ -1,6 +1,6 @@
 {
-  "ConfigPage.title": "Przesyłanie - Ustawienia",
-  "ConfigPage.description": "KOnfiguracja wtyczki przesyłania plików",
+  "ConfigPage.title": "Pliki - Ustawienia",
+  "ConfigPage.description": "Konfiguracja wtyczki służącej do przesyłania plików.",
 
   "EditForm.Input.number.label": "Maksymalny dozwolony rozmiar (w MB)",
   "EditForm.Input.select.label": "Dostawcy",
@@ -12,8 +12,8 @@
   "EntriesNumber.number": "{number} plik znaleziony",
   "EntriesNumber.number.plural": "{number} plików znalezionych",
 
-  "HomePage.title": "Przesyłanie",
-  "HomePage.description": "Discover all the uploaded files Odkryj wszystkie ",
+  "HomePage.title": "Pliki",
+  "HomePage.description": "Przeglądaj wszystkie przesłane pliki.",
   "HomePage.InputSearch.placeholder": "Szukaj...",
 
   "Li.linkCopied": "Link został skopiowany do schowka",
@@ -25,9 +25,11 @@
   "ListHeader.size": "Rozmiar",
   "ListHeader.related": "Związany z",
 
-  "PluginInputFile.text": "Przeciągnij & upuść pliki w to miejsce lub {link} pliki do przesłania",
+  "PluginInputFile.text": "Przeciągnij & upuść pliki w to miejsce lub {link} pliki do przesłania.",
   "PluginInputFile.link": "przeglądaj",
+  "PluginInputFile.loading": "Twoje pliki są właśnie przesyłane...",
 
+  "notification.config.success": "Ustawienia zostały zaaktualizowane",
   "notification.delete.success": "Plik został usunięty",
   "notification.dropFile.success": "Plik został przesłany",
   "notification.dropFiles.success": "{number} plików zostało przesłanych"
