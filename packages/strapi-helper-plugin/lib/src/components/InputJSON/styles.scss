@@ -12,6 +12,11 @@
 .select {
   position: absolute;
   bottom: 0; right: 0;
+  background: white;
+  border-radius: 0 !important;
+  &:focus, &:active {
+    outline: 0;
+  }
 }
 
 .colored {

@@ -98,10 +98,12 @@ class InputJSON extends React.Component {
       10,
     ) - 1;
 
+    let content = this.getContentAtLine(line);
+
     if (content === '{') {
       line = line + 1;
+      content = this.getContentAtLine(line);
     }
-    const content = this.getContentAtLine(line);
     const chEnd = content.length;
     const chStart = chEnd - trimStart(content, ' ').length;
     const markedText = this.codeMirror.markText({ line, ch: chStart }, { line, ch: chEnd }, { className: styles.colored });
