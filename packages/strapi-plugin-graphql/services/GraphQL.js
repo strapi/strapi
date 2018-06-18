@@ -749,13 +749,16 @@ module.exports = {
 
       // Plural.
       return async (ctx, next) => {
-        ctx.params = this.amountLimiting(ctx.params);
-        ctx.query = Object.assign(
+        const queryOpts = {};
+        queryOpts.params = this.amountLimiting(ctx.params);
+        // Avoid using ctx.query = ... because it converts the object values to string
+        queryOpts.query = Object.assign(
+          {},
           this.convertToParams(_.omit(ctx.params, 'where')),
           ctx.params.where
         );
 
-        return controller(ctx, next);
+        return controller({ ...ctx, ...queryOpts }, next);
       };
     })();
 
