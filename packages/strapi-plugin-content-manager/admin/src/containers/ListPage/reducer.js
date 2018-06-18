@@ -43,10 +43,10 @@ const initialState = fromJS({
     _sort: '',
     _q: '',
   }),
-  // records: List([]),
   records: fromJS({}),
   showFilter: false,
   showWarningDeleteAll: false,
+  updatingParams: false,
 });
 
 function listPageReducer(state = initialState, action) {
@@ -86,17 +86,25 @@ function listPageReducer(state = initialState, action) {
           }
 
           return v;
-        });
+        })
+        .update('updatingParams', () => true);
     case GET_DATA:
       return state
         .update('isLoading', () => true)
-        .update('currentModel', () => action.currentModel);
+        .update('currentModel', () => action.currentModel)
+        .update('updatingParams', v => {
+          if (action.setUpdatingParams) {
+            return true;
+          }
+          return v;
+        });
     case GET_DATA_SUCCEEDED:
       return state
         .update('entriesToDelete', () => List([]))
         .updateIn(['count', state.get('currentModel')], () => action.data[0].count)
         .update('isLoading', () => false)
-        .updateIn(['records', state.get('currentModel')], () => List(action.data[1]));
+        .updateIn(['records', state.get('currentModel')], () => List(action.data[1]))
+        .update('updatingParams', () => false);
     case ON_CHANGE:
       return state.updateIn(['appliedFilters', action.index, action.key], () => action.value);
     case ON_CLICK_REMOVE:

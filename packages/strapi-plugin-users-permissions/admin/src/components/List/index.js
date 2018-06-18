@@ -72,7 +72,7 @@ function List({ data, deleteData, noButton, onButtonClick, settingType, showLoad
           )}
         </div>
       </div>
-      <div className={cn(styles.ulContainer, showLoaders && styles.loadingContainer)}>
+      <div className={cn(styles.ulContainer, showLoaders && styles.loadingContainer, showLoaders && settingType === 'roles' && styles.loadingContainerRole )}>
         {showLoaders ? <LoadingIndicator /> : (
           <ul className={noButton ? styles.listPadded : ''}>
             {map(object, item => (

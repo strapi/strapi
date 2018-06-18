@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
+import cn from 'classnames';
 
 import LoadingIndicator from 'components/LoadingIndicator';
 import Input from 'components/InputsIndex';
@@ -28,7 +29,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
   render() {
     if (this.props.showLoaders) {
       return (
-        <div className={styles.editForm}>
+        <div className={cn(styles.editForm, this.props.showLoaders && styles.loadIndicatorContainer)}>
           <LoadingIndicator />
         </div>
       );

@@ -87,7 +87,7 @@ export class ListPage extends React.Component {
     }
 
     if (search !== this.props.location.search) {
-      this.getData(this.props);
+      this.getData(this.props, true);
     }
 
     if (prevProps.listPage.filtersUpdated !== filtersUpdated) {
@@ -120,7 +120,7 @@ export class ListPage extends React.Component {
    * Function to fetch data
    * @param  {Object} props
    */
-  getData = props => {
+  getData = (props, setUpdatingParams = false) => {
     const source = getQueryParameters(props.location.search, 'source');
     const _limit = toInteger(getQueryParameters(props.location.search, '_limit')) || 10;
     const _page = toInteger(getQueryParameters(props.location.search, '_page')) || 1;
@@ -130,7 +130,7 @@ export class ListPage extends React.Component {
     const filters = generateFiltersFromSearch(props.location.search);
 
     this.props.setParams(params, filters);
-    this.props.getData(props.match.params.slug, source);
+    this.props.getData(props.match.params.slug, source, setUpdatingParams);
   };
 
   /**
@@ -306,9 +306,9 @@ export class ListPage extends React.Component {
   };
 
   showLoaders = () => {
-    const { listPage: { isLoading, records } } = this.props;
+    const { listPage: { isLoading, records, updatingParams } } = this.props;
 
-    return isLoading && get(records, this.getCurrentModelName()) === undefined;
+    return updatingParams || isLoading && get(records, this.getCurrentModelName()) === undefined;
   }
 
   render() {

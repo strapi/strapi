@@ -158,7 +158,7 @@ export class HomePage extends React.Component {
   showLoaders = () => {
     const { data, isLoading, modifiedData } = this.props;
     const isAdvanded = this.getEndPoint() === 'advanced';
-
+    
     return isLoading && get(data, this.getEndPoint()) === undefined && !isAdvanded || isLoading && isAdvanded &&  get(modifiedData, this.getEndPoint()) === undefined;
   }
 
