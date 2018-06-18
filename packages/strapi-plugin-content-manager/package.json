@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "react-select": "^1.0.0-rc.5",
+    "react-sortable-hoc": "^0.8.3",
     "strapi-helper-plugin": "3.0.0-alpha.12.5"
   },
   "author": {

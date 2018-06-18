@@ -6,14 +6,52 @@
 
 import React from 'react';
 import Select from 'react-select';
+import {SortableContainer, SortableElement, SortableHandle, arrayMove} from 'react-sortable-hoc';
+
 import PropTypes from 'prop-types';
-import 'react-select/dist/react-select.css';
+
 import { cloneDeep, isArray, isNull, isUndefined, get, findIndex, includes } from 'lodash';
+
+import IcoContainer from 'components/IcoContainer';
+import Ico from 'components/Ico';
 
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
 
+import 'react-select/dist/react-select.css';
 import styles from './styles.scss';
+
+const DragHandle = SortableHandle(() => <span><Ico icoType="bars" /></span>);
+
+const SortableItem = SortableElement(({idx, onRemove, value}) => {
+  const icons = [
+    {
+      icoType: 'trash',
+      onClick: () => onRemove(idx),
+    },
+  ];
+  return (
+    <li className={styles.sortableListItem}>
+      <span>
+        <DragHandle />
+        <span className="sortable-item--value">{value}</span>
+      </span>
+      <span className={styles.sortableListItemActions}>
+        <IcoContainer icons={icons} />
+      </span>
+    </li>
+  );
+});
+
+const SortableList = SortableContainer(({items, onRemove}) => {
+  return (
+    <ul className={styles.sortableList}>
+      {items.map((item, index) => (
+        <SortableItem key={`item-${index}`} index={index} idx={index} value={item.label} onRemove={onRemove} />
+      ))}
+    </ul>
+  );
+});
 
 class SelectMany extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -92,13 +130,12 @@ class SelectMany extends React.Component {
   };
 
   handleChange = value => {
-    const filteredValue = value.filter(
-      (data, index) => findIndex(value, o => o.value.id === data.value.id) === index
-    );
+    const values = get(this.props.record, this.props.relation.alias);
+
     const target = {
       name: `record.${this.props.relation.alias}`,
       type: 'select',
-      value: filteredValue,
+      value: [...values, value],
     };
 
     this.props.setRecordAttribute({ target });
@@ -121,6 +158,26 @@ class SelectMany extends React.Component {
     }
   }
 
+  handleSortEnd = ({oldIndex, newIndex}) => {
+    const values = get(this.props.record, this.props.relation.alias);
+    const target = {
+      name: `record.${this.props.relation.alias}`,
+      type: 'select',
+      value: arrayMove(values, oldIndex, newIndex),
+    };
+    this.props.setRecordAttribute({ target });
+  };
+
+  handleRemove = (index) => {
+    const values = get(this.props.record, this.props.relation.alias);
+    const target = {
+      name: `record.${this.props.relation.alias}`,
+      type: 'select',
+      value: values.filter( (item, idx) => idx !== index),
+    };
+    this.props.setRecordAttribute({ target });
+  }
+
   render() {
     const description = this.props.relation.description ? (
       <p>{this.props.relation.description}</p>
@@ -128,7 +185,7 @@ class SelectMany extends React.Component {
       ''
     );
 
-    const value = get(this.props.record, this.props.relation.alias);
+    const value = get(this.props.record, this.props.relation.alias) || [];
     /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectMany}`}>
@@ -140,9 +197,9 @@ class SelectMany extends React.Component {
           id={this.props.relation.alias}
           isLoading={this.state.isLoading}
           onMenuScrollToBottom={this.handleBottomScroll}
-          onInputChange={this.handleInputChange}
-          multi
-          value={
+        />
+        <SortableList
+          items={
             isNull(value) || isUndefined(value) || value.size === 0
               ? null
               : value.map(item => {
@@ -158,6 +215,9 @@ class SelectMany extends React.Component {
                 }
               })
           }
+          onSortEnd={this.handleSortEnd}
+          onRemove={this.handleRemove}
+          useDragHandle
         />
       </div>
     );
