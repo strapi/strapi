@@ -130,7 +130,7 @@ class SelectMany extends React.Component {
   };
 
   handleChange = value => {
-    const values = get(this.props.record, this.props.relation.alias);
+    const values = get(this.props.record, this.props.relation.alias) || [];
 
     const target = {
       name: `record.${this.props.relation.alias}`,
