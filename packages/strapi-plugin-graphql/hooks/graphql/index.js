@@ -123,7 +123,7 @@ module.exports = strapi => {
       })(ctx, next));
 
       // Disable GraphQL Playground in production environment.
-      if (strapi.config.environment !== 'production') {
+      if (strapi.config.environment !== 'production' || strapi.plugins.graphql.config.playgroundAlways) {
         router.get('/playground', koaPlayground({ endpoint: strapi.plugins.graphql.config.endpoint}));
       }
 
