@@ -135,8 +135,8 @@ module.exports = {
               toRemove.forEach(value => {
                 value = _.isString(value) ? { [this.primaryKey]: value } : value;
 
-                if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey]) || params[this.primaryKey]) {
-                  value[details.via] = value[details.via].filter(x => x.toString() !== params.values[this.primaryKey].toString());
+                if (association.nature === 'manyToMany' && !_.isArray(params.values[this.primaryKey] || params[this.primaryKey])) {
+                  value[details.via] = value[details.via].filter(x => _.toString(x) !== _.toString(params.values[this.primaryKey] || params[this.primaryKey]));
                 } else {
                   value[details.via] = null;
                 }

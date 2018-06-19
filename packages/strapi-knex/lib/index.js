@@ -78,8 +78,9 @@ module.exports = strapi => {
 
         // Make sure the client is installed in the application
         // `node_modules` directory.
+        let client;
         try {
-          require(path.resolve(strapi.config.appPath, 'node_modules', connection.settings.client));
+          client = require(path.resolve(strapi.config.appPath, 'node_modules', connection.settings.client));
         } catch (err) {
           strapi.log.error('The client `' + connection.settings.client + '` is not installed.');
           strapi.log.error('You can install it with `$ npm install ' + connection.settings.client + ' --save`.');
@@ -105,18 +106,22 @@ module.exports = strapi => {
           migrations: _.get(connection.options, 'migrations')
         }, strapi.config.hook.settings.knex);
 
-        if (options.client === 'pg' && _.isString(_.get(options.connection, 'schema'))) {
-          options.pool = {
-            min: _.get(connection.options, 'pool.min') || 0,
-            max: _.get(connection.options, 'pool.max') || 10,
-            afterCreate: (conn, cb) => {
-              conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, (err) => {
-                cb(err, conn);
-              });
-            }
-          };
-        } else {
-          delete options.connection.schema;
+        if (options.client === 'pg') {
+          client.types.setTypeParser(1700, 'text', parseFloat);
+
+          if (_.isString(_.get(options.connection, 'schema'))) {
+            options.pool = {
+              min: _.get(connection.options, 'pool.min') || 0,
+              max: _.get(connection.options, 'pool.max') || 10,
+              afterCreate: (conn, cb) => {
+                conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, (err) => {
+                  cb(err, conn);
+                });
+              }
+            };
+          } else {
+            delete options.connection.schema;
+          }
         }
 
         if (options.client === 'mysql') {

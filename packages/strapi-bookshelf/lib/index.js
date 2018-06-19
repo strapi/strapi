@@ -336,6 +336,7 @@ module.exports = function(strapi) {
                         switch (relation.nature) {
                           case 'oneToOne':
                           case 'manyToOne':
+                          case 'oneWay':
                             type = definition.client === 'pg' ? 'integer' : 'int';
                             break;
                           default:
@@ -361,7 +362,7 @@ module.exports = function(strapi) {
                             type = definition.client === 'pg' ? 'double precision' : 'double';
                             break;
                           case 'decimal':
-                            type = 'decimal';
+                            type = 'decimal(10,2)';
                             break;
                           case 'date':
                           case 'time':
@@ -397,6 +398,50 @@ module.exports = function(strapi) {
                       }, start);
                     };
 
+                    const generateIndexes = async (table, attrs) => {
+                      try {
+                        const connection = strapi.config.connections[definition.connection];
+                        let columns = Object.keys(attributes).filter(attribute => ['string', 'text'].includes(attributes[attribute].type));
+
+                        switch (connection.settings.client) {
+                          case 'pg':
+                            // Enable extension to allow GIN indexes.
+                            await ORM.knex.raw(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+
+                            // Create GIN indexes for every column.
+                            const indexes = columns
+                              .map(column => {
+                                const indexName = `${_.snakeCase(table)}_${column}`;
+                                const attribute = _.toLower(column) === column
+                                  ? column
+                                  : `"${column}"`;
+
+                                return ORM.knex.raw(`CREATE INDEX search_${_.toLower(indexName)} ON "${table}" USING gin(${attribute} gin_trgm_ops)`);
+                              });
+
+                            await Promise.all(indexes);
+                            break;
+                          default:
+                            columns = columns
+                              .map(attribute => `\`${attribute}\``)
+                              .join(',');
+
+                            // Create fulltext indexes for every column.
+                            await ORM.knex.raw(`CREATE FULLTEXT INDEX SEARCH_${_.toUpper(_.snakeCase(table))} ON \`${table}\` (${columns})`);
+                            break;
+                        }
+                      } catch (e) {
+                        // Handle duplicate errors.
+                        if (e.errno !== 1061 && e.code !== '42P07') {
+                          if (_.get(connection, 'options.debug') === true) {
+                            console.log(e);
+                          }
+
+                          strapi.log.warn(`The SQL database indexes haven't been generated successfully. Please enable the debug mode for more details.`);
+                        }
+                      }
+                    };
+
                     if (!tableExist) {
                       const columns = generateColumns(attributes, [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`]).join(',\n\r');
 
@@ -406,6 +451,9 @@ module.exports = function(strapi) {
                           ${columns}
                         )
                       `);
+
+                      // Generate indexes.
+                      await generateIndexes(table, attributes);
                     } else {
                       const columns = Object.keys(attributes);
 
@@ -424,6 +472,9 @@ module.exports = function(strapi) {
                           columnsToAdd[columns[index]] = attribute;
                         }
                       });
+
+                      // Generate indexes for new attributes.
+                      await generateIndexes(table, columnsToAdd);
 
                       // Generate and execute query to add missing column
                       if (Object.keys(columnsToAdd).length > 0) {
@@ -916,6 +967,13 @@ module.exports = function(strapi) {
           result.value = {
             symbol: 'like',
             value: `%${value}%`
+          };
+          break;
+        case '_in':
+          result.key = `where.${key}`;
+          result.value = {
+            symbol: 'IN',
+            value,
           };
           break;
         default:

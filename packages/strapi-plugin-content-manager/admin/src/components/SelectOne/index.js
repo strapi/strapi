@@ -38,15 +38,15 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
 
   getOptions = (query) => {
     const params = {
-      limit: 20,
-      skip: this.state.toSkip,
+      _limit: 20,
+      _start: this.state.toSkip,
       source: this.props.relation.plugin || 'content-manager',
     };
 
     // Set `query` parameter if necessary
     if (query) {
-      delete params.limit,
-      delete params.skip,
+      delete params._limit;
+      delete params._start;
       params[`${this.props.relation.displayedAttribute}_contains`] = query;
     }
 
@@ -84,7 +84,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
         });
       })
       .catch(() => {
-        strapi.notification.error('content-manager.notification.relationship.fetch');
+        strapi.notification.error('content-manager.notification.error.relationship.fetch');
       });
   }
 

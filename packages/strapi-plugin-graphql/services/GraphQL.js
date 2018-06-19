@@ -144,20 +144,20 @@ module.exports = {
 
   /**
    * Convert Strapi type to GraphQL type.
-   *
+   * @param {Object} attribute Information about the attribute.
+   * @param {Object} attribute.definition Definition of the attribute.
+   * @param {String} attribute.modelName Name of the model which owns the attribute.
+   * @param {String} attribute.attributeName Name of the attribute.
    * @return String
    */
 
-  convertType: (definition = {}) => {
-    // Type.
+  convertType: function ({ definition = {}, modelName = '', attributeName = '' }) {
+    // Type
     if (definition.type) {
       let type = 'String';
 
       switch (definition.type) {
-        case 'string':
-        case 'text':
-          type = 'String';
-          break;
+        // TODO: Handle fields of type Array, Perhaps default to [Int] or [String] ...
         case 'boolean':
           type = 'Boolean';
           break;
@@ -166,6 +166,9 @@ module.exports = {
           break;
         case 'float':
           type = 'Float';
+          break;
+        case 'enumeration':
+          type = this.convertEnumType(definition, modelName, attributeName);
           break;
       }
 
@@ -178,9 +181,9 @@ module.exports = {
 
     const ref = definition.model || definition.collection;
 
-    // Association.
+    // Association
     if (ref && ref !== '*') {
-      // Add bracket or not.
+      // Add bracket or not
       const globalId = definition.plugin ?
         strapi.plugins[definition.plugin].models[ref].globalId:
         strapi.models[ref].globalId;
@@ -195,6 +198,16 @@ module.exports = {
 
     return definition.model ? 'Morph' : '[Morph]';
   },
+
+  /**
+   * Convert Strapi enumeration to GraphQL Enum.
+   * @param {Object} definition Definition of the attribute.
+   * @param {String} model Name of the model which owns the attribute.
+   * @param {String} field Name of the attribute.
+   * @return String
+   */
+  
+  convertEnumType: (definition, model, field) => definition.enumName ? definition.enumName : `ENUM_${model.toUpperCase()}_${field.toUpperCase()}`,
 
   /**
    * Execute policies before the specified resolver.
@@ -424,7 +437,7 @@ module.exports = {
       // Setup initial state with default attribute that should be displayed
       // but these attributes are not properly defined in the models.
       const initialState = {
-        [model.primaryKey]: 'String!'
+        [model.primaryKey]: 'ID!'
       };
 
       const globalId = model.globalId;
@@ -459,10 +472,25 @@ module.exports = {
         .filter(attribute => model.attributes[attribute].private !== true)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
-          acc[attribute] = this.convertType(model.attributes[attribute]);
+          acc[attribute] = this.convertType({
+            definition: model.attributes[attribute],
+            modelName: globalId,
+            attributeName: attribute,
+          });
 
           return acc;
         }, initialState);
+
+      // Detect enum and generate it for the schema definition
+      const enums = Object.keys(model.attributes)
+        .filter(attribute => model.attributes[attribute].type === 'enumeration')
+        .map((attribute) => {
+          const definition = model.attributes[attribute];
+
+          return `enum ${this.convertEnumType(definition, globalId, attribute)} { ${definition.enum.join(' \n ')} }`;
+        }).join(' ');
+
+      acc.definition += enums;
 
       // Add parameters to optimize association query.
       (model.associations || [])
@@ -509,7 +537,7 @@ module.exports = {
         if (_.isFunction(queries[type])) {
           if (type === 'singular') {
             Object.assign(acc.query, {
-              [`${pluralize.singular(name)}(id: String!)`]: model.globalId
+              [`${pluralize.singular(name)}(id: ID!)`]: model.globalId
             });
           } else {
             Object.assign(acc.query, {
@@ -536,7 +564,10 @@ module.exports = {
 
                 const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
-                entry[association.alias]._type = _.upperFirst(association.model);
+                // Set the _type only when the value is defined
+                if (entry[association.alias]) {
+                  entry[association.alias]._type = _.upperFirst(association.model);
+                }
 
                 return entry[association.alias];
               }
@@ -624,7 +655,6 @@ module.exports = {
                   }
                   // falls through
                 }
-                  break;
                 default:
                   // Where.
                   queryOpts.query = strapi.utils.models.convertParams(name, {

@@ -3,7 +3,8 @@ module.exports = {
     actions: {
       create: 'User.create', // Use the User plugin's controller.
       update: 'User.update',
-      destroy: 'User.destroy'
+      destroy: 'User.destroy',
+      deleteall: 'User.destroyAll',
     },
     attributes: {
       username: {

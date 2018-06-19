@@ -125,5 +125,43 @@
     "name":"reference",
     "description":"",
     "collectionName":""
+  },
+  "product": {
+    "attributes":[
+      {
+        "name":"name",
+        "params":{
+          "appearance":{
+            "WYSIWYG":false
+          },
+          "multiple":false,
+          "type":"string"
+        }
+      },
+      {
+        "name":"description",
+        "params":{
+          "appearance":{
+            "WYSIWYG":true
+          },
+          "multiple":false,
+          "type":"text"
+        }
+      },
+      {
+        "name":"published",
+        "params":{
+          "appearance":{
+            "WYSIWYG":false
+          },
+          "multiple":false,
+          "type":"boolean"
+        }
+      }
+    ],
+    "connection":"default",
+    "name":"product",
+    "description":"",
+    "collectionName":""
   }
 }

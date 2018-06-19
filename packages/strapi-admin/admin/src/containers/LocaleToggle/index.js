@@ -29,6 +29,8 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
       case 'zh':
       case 'zh-Hans':
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cn.svg';
+      case 'ar':
+        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/sa.svg';
       default:
         return `https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/${locale}.svg`;
     }
@@ -63,7 +65,7 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 
 LocaleToggle.propTypes = {
   changeLocale: PropTypes.func.isRequired,
-  isLogged: PropTypes.string.isRequired,
+  isLogged: PropTypes.bool.isRequired,
   locale: PropTypes.string.isRequired,
 };
 

@@ -115,6 +115,30 @@ module.exports = {
     return strapi.query('user', 'users-permissions').delete(params);
   },
 
+  removeAll: async (params, query) => {
+    // Use Content Manager business logic to handle relation.
+    if (strapi.plugins['content-manager']) {
+      params.model = 'user';
+      query.source = 'users-permissions';
+
+      return await strapi.plugins['content-manager'].services['contentmanager'].deleteMany(params, query);
+    }
+
+    // TODO remove this logic when we develop plugins' dependencies
+    const primaryKey = strapi.query('user', 'users-permissions').primaryKey;
+    const toRemove = Object.keys(query).reduce((acc, curr) => {
+      if (curr !== 'source') {
+        return acc.concat([query[curr]]);
+      }
+
+      return acc;
+    }, []);
+
+    return strapi.query('user', 'users-permissions').deleteMany({
+      [primaryKey]: toRemove,
+    });
+  },
+
   validatePassword: (password, hash) => {
     return bcrypt.compareSync(password, hash);
   }
