@@ -2,7 +2,7 @@
 
 One of Strapi's main feature is its fully extendable and customizable admin panel. This section explains how the admin panel section is structured and how to customize it.
 
-See the [Contributing Guide](https://github.com/strapi/strapi/blob/master/.github/CONTRIBUTING.md) for informations on how to develop the Strapi's admin interface.
+See the [Contributing Guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for informations on how to develop the Strapi's admin interface.
 
 ## Files structure
 
