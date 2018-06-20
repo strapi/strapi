@@ -137,8 +137,18 @@ module.exports = function(strapi) {
             const done = _.after(_.size(definition.attributes), () => {
               try {
                 // External function to map key that has been updated with `columnName`
-                const mapper = (params = {}) =>
-                  _.mapKeys(params, (value, key) => {
+                const mapper = (params = {}) => {
+                  if (definition.client === 'mysql') {
+                    Object.keys(params).map((key) => {
+                      const attr = definition.attributes[key] || {};
+
+                      if (attr.type === 'json') {
+                        params[key] = JSON.stringify(params[key]);
+                      }
+                    });
+                  }
+
+                  return _.mapKeys(params, (value, key) => {
                     const attr = definition.attributes[key] || {};
 
                     return _.isPlainObject(attr) &&
@@ -146,6 +156,7 @@ module.exports = function(strapi) {
                       ? attr['columnName']
                       : key;
                   });
+                };
 
                 // Update serialize to reformat data for polymorphic associations.
                 loadedModel.serialize = function(options) {
@@ -289,6 +300,17 @@ module.exports = function(strapi) {
 
                   // Convert to JSON format stringify json for mysql database
                   if (definition.client === 'mysql') {
+                    const events = [{
+                      name: 'saved',
+                      target: 'afterSave'
+                    }, {
+                      name: 'fetched',
+                      target: 'afterFetch'
+                    }, {
+                      name: 'fetched:collection',
+                      target: 'afterFetchCollection'
+                    }];
+
                     const jsonFormatter = (attributes) => {
                       Object.keys(attributes).map((key) => {
                         const attr = definition.attributes[key] || {};
@@ -298,36 +320,23 @@ module.exports = function(strapi) {
                         }
                       });
                     };
-                    this.on('saved', (instance) => {
-                      jsonFormatter(instance.attributes);
 
-                      return _.isFunction(
-                        target[model.toLowerCase()]['afterSave']
-                      )
-                        ? target[model.toLowerCase()]['afterSave']
-                        : Promise.resolve();
-                    });
+                    events.forEach((event) => {
+                      this.on(event.name, (instance) => {
+                        if (instance.models) {
+                          instance.models.map((entry) => {
+                            jsonFormatter(entry.attributes);
+                          });
+                        } else {
+                          jsonFormatter(instance.attributes);
+                        }
 
-                    this.on('fetched', (instance) => {
-                      jsonFormatter(instance.attributes);
-
-                      return _.isFunction(
-                        target[model.toLowerCase()]['afterFetch']
-                      )
-                        ? target[model.toLowerCase()]['afterFetch']
-                        : Promise.resolve();
-                    });
-
-                    this.on('fetched:collection', (instance) => {
-                      instance.models.map((entry) => {
-                        jsonFormatter(entry.attributes);
+                        return _.isFunction(
+                          target[model.toLowerCase()][event.target]
+                        )
+                          ? target[model.toLowerCase()][event.target]
+                          : Promise.resolve();
                       });
-
-                      return _.isFunction(
-                        target[model.toLowerCase()]['afterFetchCollection']
-                      )
-                        ? target[model.toLowerCase()]['afterFetchCollection']
-                        : Promise.resolve();
                     });
                   }
                 };
