@@ -172,6 +172,8 @@ module.exports = {
           type = 'Float';
           break;
         case 'date':
+        case 'datetime':
+        case 'timestamp':
           type = 'DateTime';
           break;
         case 'enumeration':
