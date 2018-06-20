@@ -12,6 +12,7 @@ import TableDelete from 'components/TableDelete';
 import TableHeader from 'components/TableHeader';
 import TableRow from 'components/TableRow';
 import TableEmpty from 'components/TableEmpty';
+import TableLoading from 'components/TableLoading';
 
 import styles from './styles.scss';
 
@@ -61,7 +62,7 @@ class Table extends React.Component {
               onToggleDeleteAll={this.props.onToggleDeleteAll}
             />
           )}
-          {rows}
+          {this.props.showLoader ? <TableLoading colspan={this.props.headers.length + 1} /> : rows}
         </tbody>
       </table>
     );
@@ -76,6 +77,7 @@ Table.defaultProps = {
   entriesToDelete: [],
   handleDelete: () => {},
   search: '',
+  showLoader: false,
 };
 
 Table.propTypes = {
@@ -98,6 +100,7 @@ Table.propTypes = {
   route: PropTypes.object.isRequired,
   routeParams: PropTypes.object.isRequired,
   search: PropTypes.string,
+  showLoader: PropTypes.bool,
   sort: PropTypes.string.isRequired,
 };
 
