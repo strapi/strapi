@@ -163,8 +163,6 @@
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.redirectURL.front-end.label": "The redirect URL to your front-end app",
 
-
-
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "The redirect URL to add in your Facebook application configurations",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "The redirect URL to add in your Google application configurations",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "The redirect URL to add in your GitHub application configurations",
