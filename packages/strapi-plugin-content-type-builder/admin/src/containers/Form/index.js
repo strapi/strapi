@@ -561,7 +561,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   overrideCustomBootstrapClass = () => {
-    return includes(this.props.hash, 'attributenumber');
+    return this.props.hash.match(/attributenumber|attributedate/) !== null;
   }
 
   renderInput = (item, key) => (
@@ -606,7 +606,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const renderCustomPopUpHeader = !includes(this.props.hash, '#choose') && includes(this.props.hash, '::attribute') ? this.renderCustomPopUpHeader(popUpTitle) : false;
     const dropDownItems = take(get(this.props.menuData, ['0', 'items']), size(get(this.props.menuData[0], 'items')) - 1);
     const edit = includes(this.props.hash, '#edit');
-    const selectOptions = includes(this.props.hash, 'attributenumber') ? get(this.props.form, ['items', '1', 'items']) : this.props.selectOptions;
+    const selectOptions = this.props.hash.match(/attribute(?:number|date)/) !== null
+      ? get(this.props.form, ['items', '1', 'items'])
+      : this.props.selectOptions;
 
     if (includes(popUpFormType, 'relation')) {
       const contentType = this.props.modelName.split('&source=');
@@ -661,7 +663,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
           formErrors={this.props.formErrors}
           didCheckErrors={this.props.didCheckErrors}
           pluginID="content-type-builder"
-          overrideCustomBootstrapClass={includes(this.props.hash, 'attributenumber') && includes(this.props.hash, 'baseSettings')}
+          overrideCustomBootstrapClass={this.props.hash.match(/attribute(?:number|date)/) !== null && includes(this.props.hash, 'baseSettings')}
           customBootstrapClass='col-md-6'
         />
       </div>
