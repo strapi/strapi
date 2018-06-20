@@ -641,6 +641,23 @@
             "validations": {
               "required": true
             }
+          },
+          {
+            "label": {
+              "id": "content-type-builder.form.attribute.item.date.type"
+            },
+            "name": "params.type",
+            "type": "select",
+            "value": "datetime",
+            "items": [
+              { "name": "content-type-builder.form.attribute.item.date.type.datetime", "value": "datetime" },
+              { "name": "content-type-builder.form.attribute.item.date.type.date", "value": "date" },
+              { "name": "content-type-builder.form.attribute.item.date.type.time", "value": "time" },
+              { "name": "content-type-builder.form.attribute.item.date.type.timestamp", "value": "timestamp" }
+            ],
+            "validations": {
+              "required": true
+            }
           }
         ]
       },

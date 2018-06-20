@@ -48,7 +48,8 @@ import styles from './styles.scss';
 
 // Array of attributes that the ctb can handle at the moment
 const availableAttributes = Object.keys(forms.attribute);
-availableAttributes.push('integer', 'decimal', 'float');
+// Add special format for number & date
+availableAttributes.push('integer', 'decimal', 'float', 'datetime', 'time', 'timestamp');
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-wrap-multilines */
@@ -174,6 +175,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       case 'float':
       case 'decimal':
         attributeType = 'number';
+        break;
+      case 'datetime':
+      case 'time':
+      case 'timestamp':
+        attributeType = 'date';
         break;
       default:
         attributeType = attribute.params.type ? attribute.params.type : 'relation';

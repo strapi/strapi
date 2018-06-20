@@ -237,7 +237,12 @@ function setAttributeFormData(hash) {
   const formType = replace(hashArray[1], 'attribute', '');
   const settingsType = hashArray[2];
   const form = forms.attribute[formType][settingsType];
-  const type = formType === 'number' ? 'integer' : formType;
+  let type = formType;
+  if (formType === 'number') {
+    type = 'integer';
+  } else if (formType === 'date') {
+    type = 'datetime';
+  }
   let defaultValue = type === 'number' ? 0 : '';
 
   if (type === 'checkbox') {

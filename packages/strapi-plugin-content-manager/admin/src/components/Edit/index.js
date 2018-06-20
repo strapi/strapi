@@ -35,6 +35,7 @@ const getInputType = (type = '') => {
       return 'number';
     case 'date':
     case 'datetime':
+    case 'timestamp':
       return 'date';
     case 'email':
       return 'email';

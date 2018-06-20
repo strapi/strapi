@@ -35,6 +35,9 @@ class AttributeRow extends React.Component {
     this.asset = {
       boolean: IcoBoolean,
       date: IcoDate,
+      datetime: IcoDate,
+      time: IcoDate,
+      timestamp: IcoDate,
       media: IcoImage,
       number: IcoNumber,
       json: IcoJson,
