@@ -367,7 +367,7 @@ module.exports = function(strapi) {
                           case 'date':
                           case 'time':
                           case 'datetime':
-                            type = 'datetime';
+                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'datetime';
                             break;
                           case 'timestamp':
                             type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
