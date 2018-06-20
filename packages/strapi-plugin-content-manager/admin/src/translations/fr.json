@@ -69,6 +69,7 @@
   "error.attribute.key.taken": "Cette valeur existe déjà",
   "error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "error.validation.minSupMax": "Ne peut pas être plus grand",
+  "error.validation.json": "Le format JSON n'est pas respecté",
 
   "notification.error.relationship.fetch": "Une erreur est survenue en récupérant les relations.",
 
