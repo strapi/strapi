@@ -276,7 +276,7 @@ module.exports = function(strapi) {
                       : Promise.resolve();
                   });
 
-                  this.on('saving', (instance, attrs, options) => {
+                  this.on('saving', (instance, attrs) => {
                     instance.attributes = mapper(instance.attributes);
                     attrs = mapper(attrs);
 
@@ -286,6 +286,50 @@ module.exports = function(strapi) {
                       ? target[model.toLowerCase()]['beforeSave']
                       : Promise.resolve();
                   });
+
+                  // Convert to JSON format stringify json for mysql database
+                  if (definition.client === 'mysql') {
+                    const jsonFormatter = (attributes) => {
+                      Object.keys(attributes).map((key) => {
+                        const attr = definition.attributes[key] || {};
+
+                        if (attr.type === 'json') {
+                          attributes[key] = JSON.parse(attributes[key]);
+                        }
+                      });
+                    };
+                    this.on('saved', (instance) => {
+                      jsonFormatter(instance.attributes);
+
+                      return _.isFunction(
+                        target[model.toLowerCase()]['afterSave']
+                      )
+                        ? target[model.toLowerCase()]['afterSave']
+                        : Promise.resolve();
+                    });
+
+                    this.on('fetched', (instance) => {
+                      jsonFormatter(instance.attributes);
+
+                      return _.isFunction(
+                        target[model.toLowerCase()]['afterFetch']
+                      )
+                        ? target[model.toLowerCase()]['afterFetch']
+                        : Promise.resolve();
+                    });
+
+                    this.on('fetched:collection', (instance) => {
+                      instance.models.map((entry) => {
+                        jsonFormatter(entry.attributes);
+                      });
+
+                      return _.isFunction(
+                        target[model.toLowerCase()]['afterFetchCollection']
+                      )
+                        ? target[model.toLowerCase()]['afterFetchCollection']
+                        : Promise.resolve();
+                    });
+                  }
                 };
 
                 loadedModel.hidden = _.keys(
@@ -345,8 +389,10 @@ module.exports = function(strapi) {
                       } else {
                         switch (attribute.type) {
                           case 'text':
-                          case 'json':
                             type = 'text';
+                            break;
+                          case 'json':
+                            type = definition.client === 'pg' ? 'jsonb' : 'text';
                             break;
                           case 'string':
                           case 'enumeration':
