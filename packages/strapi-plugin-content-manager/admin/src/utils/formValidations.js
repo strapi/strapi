@@ -50,8 +50,6 @@ export function checkFormValidity(formData, formValidations) {
 }
 
 function validate(value, validations) {
-  // console.log('v', value);
-  // console.log('vza', validations);
   let errors = [];
   // Handle i18n
   const requiredError = { id: 'content-manager.error.validation.required' };
@@ -93,7 +91,7 @@ function validate(value, validations) {
             if (isObject(value)) {
               value = JSON.parse(JSON.stringify(value));
             } else {
-              errors.push({ id: 'content-manager.error.validation.json' });  
+              errors.push({ id: 'content-manager.error.validation.json' });
             }
           } catch(err) {
             errors.push({ id: 'content-manager.error.validation.json' });
