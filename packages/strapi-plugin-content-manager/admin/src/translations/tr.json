@@ -15,6 +15,36 @@
   "components.LimitSelect.itemsPerPage": "Sayfa başı",
   "containers.List.errorFetchRecords": "Hata",
 
+  "components.AddFilterCTA.add": "Filtreler",
+  "components.AddFilterCTA.hide": "Filtreler",
+  "components.FilterOptions.button.apply": "Uygula",
+  "components.FiltersPickWrapper.PluginHeader.actions.apply": "Uygula",
+  "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Hepsini temizle",
+  "components.FiltersPickWrapper.PluginHeader.description": "Filtrelemek için uygulanacak şartları ayarlayın",
+  "components.FiltersPickWrapper.PluginHeader.title.filter": "Filtreler",
+  "components.FiltersPickWrapper.hide": "Gizle",
+
+  "components.FilterOptions.FILTER_TYPES.=": "eşit",
+  "components.FilterOptions.FILTER_TYPES._ne": "eşit değil",
+  "components.FilterOptions.FILTER_TYPES._lt": "daha düşük",
+  "components.FilterOptions.FILTER_TYPES._lte": "daha düşük ya da eşit",
+  "components.FilterOptions.FILTER_TYPES._gt": "daha yüksek",
+  "components.FilterOptions.FILTER_TYPES._gte": "daha yüksek ya da eşit",
+  "components.FilterOptions.FILTER_TYPES._contains": "içermek",
+  "components.FilterOptions.FILTER_TYPES._containss": "içermek (büyük-küçük harfe duyarlı)",
+
+  "components.Search.placeholder": "Kayıt aramak için...",
+
+  "components.TableDelete.entries.plural": "{number} kayıt seçildi",
+  "components.TableDelete.entries.singular": "{number} kayıt seçildi",
+  "components.TableDelete.delete": "Hepsini sil",
+
+  "components.TableEmpty.withFilters": "Uygulanan filtrelerle {contentType} yoktur...",
+  "components.TableEmpty.withoutFilter": "{contentType} yoktur...",
+  "components.TableEmpty.withSearch": "Aramaya karşılık gelen {contentType} yoktur ({search})...",
+
+  "EditRelations.title": "İlişkili Data",
+
   "emptyAttributes.title": "Henüz bir alan yok",
   "emptyAttributes.description": "İçerik türüne ilk alanınızı ekleyin",
   "emptyAttributes.button": "Içerik türü oluşturucuya gidin",
@@ -49,5 +79,6 @@
   "popUpWarning.button.cancel": "İptal",
   "popUpWarning.button.confirm": "Onayla",
   "popUpWarning.title": "Lütfen onaylayın",
-  "popUpWarning.bodyMessage.contentType.delete": "Bu girişi silmek istediğinizden emin misiniz?"
+  "popUpWarning.bodyMessage.contentType.delete": "Bu kaydı silmek istediğinizden emin misiniz?",
+  "popUpWarning.bodyMessage.contentType.delete.all": "Bu kayıtları silmek istediğinizden emin misiniz?"
 }

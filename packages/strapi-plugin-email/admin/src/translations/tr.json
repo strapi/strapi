@@ -1,4 +1,14 @@
 {
+  "ConfigPage.title": "E-posta - Ayarlar",
+  "ConfigPage.description": "E-posta eklentisini yapılandırma",
+
+  "EditForm.Input.number.label": "İzin verilen maksimum boyut (MB cinsinden)",
+  "EditForm.Input.select.label": "Sağlayıcıları",
+  "EditForm.Input.select.inputDescription": "E-postalar varsayılan sağlayıcı (Sendmail) veya harici bir sağlayıcıyla gönderilebilir",
+  "EditForm.Input.toggle.label": "E-posta gönderimini etkinleştir",
+
   "plugin.description.short": "E-posta gönder.",
-  "plugin.description.long": "E-posta gönder."
+  "plugin.description.long": "E-posta gönder.",
+
+  "notification.config.success": "Ayarlar güncellendi"
 }

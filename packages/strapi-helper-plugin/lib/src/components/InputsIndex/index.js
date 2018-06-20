@@ -6,7 +6,8 @@
 /* eslint-disable react/require-default-props */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty, merge } from 'lodash';
+import { isEmpty, isObject, merge } from 'lodash';
+
 // Design
 import InputAddonWithErrors from 'components/InputAddonWithErrors';
 import InputCheckboxWithErrors from 'components/InputCheckboxWithErrors';
@@ -21,7 +22,7 @@ import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
 import WysiwygWithErrors from 'components/WysiwygWithErrors';
-
+import InputJSONWithErrors from 'components/InputJSONWithErrors';
 
 const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>;
 
@@ -31,6 +32,7 @@ const inputs = {
   date: InputDateWithErrors,
   email: InputEmailWithErrors,
   file: InputFileWithErrors,
+  json: InputJSONWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
   search: InputSearchWithErrors,
@@ -55,6 +57,9 @@ function InputsIndex(props) {
       break;
     case 'file':
       inputValue = props.value || [];
+      break;
+    case 'json':
+      inputValue = isObject(props.value) ? props.value : null;
       break;
     default:
       inputValue = props.value || '';
