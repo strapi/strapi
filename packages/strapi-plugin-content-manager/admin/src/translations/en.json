@@ -69,6 +69,7 @@
   "error.attribute.key.taken": "This value already exists",
   "error.attribute.sameKeyAndName": "Can't be equals",
   "error.validation.minSupMax": "Can't be superior",
+  "error.validation.json": "This is not a JSON",
 
   "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
 
