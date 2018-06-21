@@ -16,7 +16,7 @@ const inquirer = require('inquirer');
 const shell = require('shelljs');
 
 // Logger.
-const logger = require('strapi-utils').logger;
+const { logger, packageManager } = require('strapi-utils');
 
 /**
  * This `before` function is run before generating targets.
@@ -214,7 +214,15 @@ module.exports = (scope, cb) => {
               });
           }),
           new Promise(resolve => {
-            let cmd = `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha`;
+            const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM;
+            let packageCmd = packageManager.commands('install --prefix', scope.tmpPath);
+            // let cmd = `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha`;
+            // Manually create the temp directory for yarn
+            if (!isStrapiInstalledWithNPM) {
+              shell.exec('mkdir tmp');
+            }
+
+            let cmd = `${packageCmd} ${scope.client.connector}@alpha`;
 
             if (scope.client.module) {
               cmd += ` ${scope.client.module}`;

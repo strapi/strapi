@@ -12,9 +12,10 @@ const { execSync } = require('child_process');
 const _ = require('lodash');
 const fs = require('fs-extra');
 const npm = require('enpeem');
+const shell = require('shelljs');
 
 // Logger.
-const logger = require('strapi-utils').logger;
+const { logger, packageManager } = require('strapi-utils');
 
 /**
  * Runs after this generator has finished
@@ -38,17 +39,21 @@ module.exports = (scope, cb) => {
   const dependencies = _.get(packageJSON, 'dependencies');
   const strapiDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') !== -1);
   const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1);
-  const globalRootPath = execSync('npm root -g');
+  const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM;
+  const globalRootPath = execSync(packageManager.commands('root -g'));
+  // const globalRootPath = execSync('npm root -g');
 
   // Verify if the dependencies are available into the global
   _.forEach(strapiDependencies, (key) => {
     try {
-      fs.accessSync(path.resolve(_.trim(globalRootPath.toString()), key), fs.constants.R_OK | fs.constants.F_OK);
+      const depPath = isStrapiInstalledWithNPM ? path.resolve(_.trim(globalRootPath.toString()), key) : path.resolve(_.trim(globalRootPath.toString()), `node_modules/${key}`);
+      fs.accessSync(depPath, fs.constants.R_OK | fs.constants.F_OK);
 
       availableDependencies.push({
         key,
         global: true,
-        path: path.resolve(_.trim(globalRootPath.toString()), key)
+        // path: path.resolve(_.trim(globalRootPath.toString()), key)
+        path: depPath
       });
     } catch (e) {
       othersDependencies.push(key);
@@ -57,34 +62,50 @@ module.exports = (scope, cb) => {
 
   logger.info('Installing dependencies...');
   if (!_.isEmpty(othersDependencies)) {
-    npm.install({
-      dir: scope.rootPath,
-      dependencies: othersDependencies,
-      loglevel: 'silent',
-      production: true,
-      'cache-min': 999999999
-    }, err => {
-      if (err) {
-        console.log();
-        logger.warn('You should run `npm install` into your application before starting it.');
-        console.log();
-        logger.warn('Some dependencies could not be installed:');
-        _.forEach(othersDependencies, value => logger.warn('• ' + value));
-        console.log();
+    if (isStrapiInstalledWithNPM) {
+      npm.install({
+        dir: scope.rootPath,
+        dependencies: othersDependencies,
+        loglevel: 'silent',
+        production: true,
+        'cache-min': 999999999
+      }, err => {
+        if (err) {
+          console.log();
+          logger.warn('You should run `npm install` into your application before starting it.');
+          console.log();
+          logger.warn('Some dependencies could not be installed:');
+          _.forEach(othersDependencies, value => logger.warn('• ' + value));
+          console.log();
 
-        return cb();
+          return cb();
+        }
+
+        pluginsInstallation();
+      });
+    } else {
+      const alphaDependencies = othersDependencies.map(dep => {
+        if (_.includes(dep, 'strapi') && !_.includes(dep, '@alpha')) { // We need this for yarn
+          return `${dep}@alpha`;
+        }
+
+        return dep;
+      }).join(' ');
+      const data = shell.exec(`yarn --cwd ${scope.rootPath} add ${alphaDependencies} --production`, { silent: true });
+
+      if (data.stderr && data.code !== 0) {
+        cb();
       }
-
       pluginsInstallation();
-    });
+    }
   } else {
     pluginsInstallation();
   }
 
-  const strapiBin = path.join(scope.strapiRoot, scope.strapiPackageJSON.bin.strapi);
-
+  
   // Install default plugins and link dependencies.
   function pluginsInstallation() {
+    const strapiBin = path.join(scope.strapiRoot, scope.strapiPackageJSON.bin.strapi);
     // Define the list of default plugins.
     const defaultPlugins = [{
       name: 'settings-manager',

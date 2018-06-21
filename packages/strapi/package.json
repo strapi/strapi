@@ -64,7 +64,8 @@
     "strapi-generate-plugin": "3.0.0-alpha.12.4",
     "strapi-generate-policy": "3.0.0-alpha.12.4",
     "strapi-generate-service": "3.0.0-alpha.12.4",
-    "strapi-utils": "3.0.0-alpha.12.4"
+    "strapi-utils": "3.0.0-alpha.12.4",
+    "shelljs": "^0.7.7"
   },
   "author": {
     "email": "hi@strapi.io",
