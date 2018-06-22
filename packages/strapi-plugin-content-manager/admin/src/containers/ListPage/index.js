@@ -87,7 +87,7 @@ export class ListPage extends React.Component {
     }
 
     if (search !== this.props.location.search) {
-      this.getData(this.props);
+      this.getData(this.props, true);
     }
 
     if (prevProps.listPage.filtersUpdated !== filtersUpdated) {
@@ -120,7 +120,7 @@ export class ListPage extends React.Component {
    * Function to fetch data
    * @param  {Object} props
    */
-  getData = props => {
+  getData = (props, setUpdatingParams = false) => {
     const source = getQueryParameters(props.location.search, 'source');
     const _limit = toInteger(getQueryParameters(props.location.search, '_limit')) || 10;
     const _page = toInteger(getQueryParameters(props.location.search, '_page')) || 1;
@@ -130,7 +130,7 @@ export class ListPage extends React.Component {
     const filters = generateFiltersFromSearch(props.location.search);
 
     this.props.setParams(params, filters);
-    this.props.getData(props.match.params.slug, source);
+    this.props.getData(props.match.params.slug, source, setUpdatingParams);
   };
 
   /**
@@ -157,8 +157,9 @@ export class ListPage extends React.Component {
    * Generate the redirect URI when editing an entry
    * @type {String}
    */
-  generateRedirectURI = () =>
-    `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}${this.generateSearch()}`;
+  generateRedirectURI = () => (
+    `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}${this.generateSearch()}`
+  );
 
   generateSearch = () => {
     const {
@@ -194,7 +195,7 @@ export class ListPage extends React.Component {
   areAllEntriesSelected = () => {
     const { listPage: { entriesToDelete, records } } = this.props;
 
-    return entriesToDelete.length === records.length && records.length > 0;
+    return entriesToDelete.length === get(records, this.getCurrentModelName(), []).length && get(records, this.getCurrentModelName(), []).length > 0;
   };
 
   /**
@@ -304,6 +305,12 @@ export class ListPage extends React.Component {
 
   };
 
+  showLoaders = () => {
+    const { listPage: { isLoading, records, updatingParams } } = this.props;
+
+    return updatingParams || isLoading && get(records, this.getCurrentModelName()) === undefined;
+  }
+
   render() {
     const {
       addFilter,
@@ -311,9 +318,11 @@ export class ListPage extends React.Component {
       listPage,
       listPage: {
         appliedFilters,
+        count,
         entriesToDelete,
         filters,
         filterToFocus,
+        records,
         params,
         showFilter,
         showWarningDeleteAll,
@@ -356,16 +365,17 @@ export class ListPage extends React.Component {
             actions={pluginHeaderActions}
             description={{
               id:
-              listPage.count > 1
+              get(count, this.getCurrentModelName(), 0) > 1
                 ? 'content-manager.containers.List.pluginHeaderDescription'
                 : 'content-manager.containers.List.pluginHeaderDescription.singular',
               values: {
-                label: listPage.count,
+                label: get(count, this.getCurrentModelName(), 0),
               },
             }}
             title={{
               id: this.getCurrentModelName() || 'Content Manager',
             }}
+            withDescriptionAnim={this.showLoaders()}
           />
           <div className={cn(styles.wrapper)}>
             <FiltersPickWrapper
@@ -416,11 +426,12 @@ export class ListPage extends React.Component {
                   onClickSelect={onClickSelect}
                   onToggleDeleteAll={onToggleDeleteAll}
                   primaryKey={this.getCurrentModel().primaryKey || 'id'}
-                  records={listPage.records}
+                  records={get(records, this.getCurrentModelName(), [])}
                   redirectUrl={this.generateRedirectURI()}
                   route={this.props.match}
                   routeParams={this.props.match.params}
                   search={params._q}
+                  showLoader={this.showLoaders()}
                   sort={params._sort}
                 />
                 <PopUpWarning
@@ -450,7 +461,7 @@ export class ListPage extends React.Component {
                   }}
                 />
                 <PageFooter
-                  count={listPage.count}
+                  count={get(count, this.getCurrentModelName(), 0)}
                   onChangeParams={this.handleChangeParams}
                   params={listPage.params}
                   style={{ marginTop: '2.9rem', padding: '0 15px 0 15px' }}
