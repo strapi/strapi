@@ -49,7 +49,6 @@ module.exports = function (plugin, cliArguments) {
       process.exit(0);
     } catch (e) {
       logger.error('An error occurred during plugin installation.');
-      console.log('ERROR PLUGINS INSTALL', e);
       process.exit(1);
     }
   } else {
@@ -57,7 +56,7 @@ module.exports = function (plugin, cliArguments) {
     logger.debug('Installing the plugin from npm registry.');
 
     // Install the plugin from the npm registry.
-    const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM;
+    const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
 
     if (!isStrapiInstalledWithNPM) {
       // Create the directory yarn doesn't do it it

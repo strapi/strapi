@@ -25,7 +25,7 @@ module.exports =  (scope, cb) => {
   }
 
   // Install back-end admin `node_modules`.
-  const cmd = packageManager.isStrapiInstalledWithNPM ? 'npm install --production --ignore-scripts' : 'yarn install --production --ignore-scripts';
+  const cmd = packageManager.isStrapiInstalledWithNPM() ? 'npm install --production --ignore-scripts' : 'yarn install --production --ignore-scripts';
   exec(cmd, {
     cwd: path.resolve(scope.rootPath, 'admin')
   }, (err) => {
