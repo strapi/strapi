@@ -19,10 +19,10 @@ import getQueryParameters from 'utils/getQueryParameters';
 import Home from 'containers/Home';
 import EditPage from 'containers/EditPage';
 import ListPage from 'containers/ListPage';
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import EmptyAttributesView from 'components/EmptyAttributesView';
 
 import {
-  emptyStore,
   loadModels,
 } from './actions';
 import { makeSelectLoading, makeSelectModels, makeSelectModelEntries } from './selectors';
@@ -34,13 +34,9 @@ class App extends React.Component {
     this.props.loadModels();
   }
 
-  componentWillUnmount() {
-    this.props.emptyStore();
-  }
-
   render() {
     if (this.props.loading) {
-      return <div />;
+      return <LoadingIndicatorPage />;
     }
 
     const currentModelName = this.props.location.pathname.split('/')[3];
@@ -69,7 +65,6 @@ App.contextTypes = {
 };
 
 App.propTypes = {
-  emptyStore: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   loading: PropTypes.bool.isRequired,
   loadModels: PropTypes.func.isRequired,
@@ -84,8 +79,6 @@ App.propTypes = {
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      emptyStore,
-      // getModelEntries,
       loadModels,
     },
     dispatch,

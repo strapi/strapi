@@ -7,7 +7,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
+import cn from 'classnames';
 
+import LoadingIndicator from 'components/LoadingIndicator';
 import Input from 'components/InputsIndex';
 
 import styles from './styles.scss';
@@ -25,6 +27,14 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
   )
 
   render() {
+    if (this.props.showLoaders) {
+      return (
+        <div className={cn(styles.editForm, this.props.showLoaders && styles.loadIndicatorContainer)}>
+          <LoadingIndicator />
+        </div>
+      );
+    }
+    
     return (
       <div className={styles.editForm}>
         <div className="row">
@@ -94,6 +104,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
 
 EditForm.propTypes = {
   onChange: PropTypes.func.isRequired,
+  showLoaders: PropTypes.bool.isRequired,
   values: PropTypes.object.isRequired,
 };
 

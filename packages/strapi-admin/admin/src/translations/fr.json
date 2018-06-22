@@ -120,6 +120,7 @@
   "components.Input.error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "components.Input.error.validation.minSupMax": "Ne peut pas être plus grand",
   "components.Input.error.custom-error": "{errorMessage} ",
+  "components.Input.error.validation.json": "Le format JSON n'est pas respecté",
 
   "components.ListRow.empty": "Il n'y a pas de données à afficher.",
 

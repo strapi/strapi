@@ -1,0 +1,25 @@
+.jsonWrapper {
+  position: relative;
+  margin-top: 14px;
+  margin-bottom: -14px;
+  line-height: 18px;
+
+  div {
+    font-size: 1.3rem !important;
+  }
+}
+
+.select {
+  position: absolute;
+  bottom: 0; right: 0;
+  background: white;
+  border-radius: 0 !important;
+  &:focus, &:active {
+    outline: 0;
+  }
+}
+
+.colored {
+  background-color: yellow;
+  color: black !important;
+}

@@ -6,8 +6,12 @@
 
 import React from 'react';
 
-import Div from './Div';
+import styles from './styles.scss';
 
-const LoadingIndicator = () => <Div>Loading....</Div>;
+const LoadingIndicator = () => {
+  return (
+    <div className={styles.loader}><div /></div>
+  );
+};
 
 export default LoadingIndicator;

@@ -334,9 +334,9 @@ module.exports = {
 
 ### Polymorphic
 
-Refer to the [polymorphic concept](../concepts/concepts.md#polymorphic) for more informations.
-
 The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc).
+
+Refer to the [upload plugin](./upload.md) polymorphic implementation for more informations.
 
 #### Single vs Many
 

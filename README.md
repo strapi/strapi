@@ -68,7 +68,7 @@ Halfway between a CMS and a framework, Strapi takes advantages of both worlds. A
 
 ## Support
 
-For more information on the upcoming version, please take a look to our [ROADMAP](ROADMAP.md).
+For more information on the upcoming version, please take a look to our [ROADMAP](https://github.com/strapi/strapi/projects).
 
 ### Community support
 
@@ -86,7 +86,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ### Migration
 
-Follow our [migration guides](https://strapi.io/documentation/migration/migration-guide.html) on the website to keep your Strapi projects updated.
+Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki to keep your Strapi projects updated.
 
 ## License
 

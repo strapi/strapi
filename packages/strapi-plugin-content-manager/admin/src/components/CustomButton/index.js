@@ -17,6 +17,9 @@ const CustomButton = styled.button`
   &:hover {
     background: #F7F8F8;
   }
+  &:focus, &:active {
+    outline:0;
+  }
 `;
 
 export default CustomButton;

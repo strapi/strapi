@@ -23,8 +23,6 @@ try {
   isStrapiInstalledWithNPM = false;
 }
 
-console.log('packagaeManager', isStrapiInstalledWithNPM);
-
 module.exports = {
   isStrapiInstalledWithNPM,
 
@@ -42,4 +40,4 @@ module.exports = {
         return '';
     }
   }
-}
+};
