@@ -1,26 +1,38 @@
 const shell = require('shelljs');
-const _ = require('lodash');
+const { includes } = require('lodash');
 
 let isStrapiInstalledWithNPM;
+let skipCheck = false;
 
 const watcher = (cmd) => {
-
   const data = shell.exec(cmd, {
     silent: true,
   });
 
-  if (data.stderr && data.code !== 0) {
+  if (includes(data.stderr, 'command not found') && data.code !== 0) {
+    console.log('ERRRRR');
     throw new Error('Command not found');
   }
 
   return data.stdout.toString();
 };
 
-try {
-  const data = watcher('npm -g ls');
-  isStrapiInstalledWithNPM = _.includes(data, 'strapi');
-} catch(err) {
-  isStrapiInstalledWithNPM = false;
+// Check if we are in development mode (working with the monorepo)
+// So we don't run `npm -g ls` which takes time
+if (process.argv.indexOf('new') !== -1 && process.argv.indexOf('--dev') !== -1) {
+  skipCheck = true;
+}
+
+if (!skipCheck) {
+  try {
+    // Retrieve all the packages installed with NPM
+    const data = watcher('npm -g ls');
+    // Check if strapi is installed with NPM
+    isStrapiInstalledWithNPM = includes(data, 'strapi');
+  } catch(err) {
+    // If NPM is not installed strapi is installed with Yarn
+    isStrapiInstalledWithNPM = false;
+  }
 }
 
 module.exports = {
