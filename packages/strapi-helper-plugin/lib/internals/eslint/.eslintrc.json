@@ -87,6 +87,7 @@
     "redux-saga/no-yield-in-race": 2,
     "redux-saga/yield-effects": 2,
     "require-yield": 0,
+    "react/forbid-prop-types": 0,
     "react/no-unescaped-entities": 0,
     "react/prefer-stateless-function": 0,
     "react/sort-prop-types": 2,
