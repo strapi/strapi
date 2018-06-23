@@ -68,6 +68,11 @@ class InputJSONWithErrors extends React.Component { // eslint-disable-line react
     }
   }
 
+  handleChange = (e) => {
+    this.setState({ errors: [] });
+    this.props.onChange(e);
+  }
+
   render() {
     const {
       autoFocus,
@@ -87,7 +92,6 @@ class InputJSONWithErrors extends React.Component { // eslint-disable-line react
       name,
       noErrorsDescription,
       onBlur,
-      onChange,
       placeholder,
       resetProps,
       style,
@@ -124,7 +128,7 @@ class InputJSONWithErrors extends React.Component { // eslint-disable-line react
           deactivateErrorHighlight={deactivateErrorHighlight}
           name={name}
           onBlur={handleBlur}
-          onChange={onChange}
+          onChange={this.handleChange}
           placeholder={placeholder}
           resetProps={resetProps}
           style={inputStyle}

@@ -6,7 +6,7 @@ const glob = require('glob');
 const fs = require('fs');
 const listChangedFiles = require('../packages/strapi-lint/lib/internals/shared/listChangedFiles.js');
 const changedFiles = listChangedFiles();
-const { take } = require('lodash');
+const { includes, take } = require('lodash');
 
 const frontCmd =
   'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern \'/admin/build/\' --config ../../node_modules/strapi-lint/lib/internals/eslint/front/.eslintrc.json admin';
@@ -19,7 +19,8 @@ const backCmd =
 const watcher = (label, pckgName, type = 'front') => {
   shell.echo(label);
   shell.cd(pckgName);
-  const cmd = pckgName === 'strapi-helper-plugin' ? helperCmd : `${frontCmd} && ${backCmd}`;
+  const cmd = includes(pckgName, 'strapi-helper-plugin') ? helperCmd : `${frontCmd} && ${backCmd}`;
+  
   const data = shell.exec(cmd, { silent: true });
   shell.echo(chalk(eslintErrorsFormatter(data.stdout)));
   shell.cd('../..');
@@ -34,7 +35,7 @@ const files = glob
   .sync('**/*.js', { ignore: '**/node_modules/**' })
   .filter(f => changedFiles.has(f))
   .filter(
-    package =>
+    package => 
       !package.includes('README.md') &&
       !package.includes('strapi-middleware-views') &&
       !package.includes('strapi-lint') &&
@@ -48,6 +49,7 @@ const files = glob
 
     return take(directoryArray, toTake).join('/');
   });
+
 
 files
   .filter((directory, index) => files.indexOf(directory) === index)
