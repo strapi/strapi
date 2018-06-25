@@ -469,20 +469,16 @@ module.exports = {
         const [attr, order = 'ASC'] = formattedValue.split(':');
         result = convertor(order, key, attr);
       } else {
-        const suffix = key.split('_');
+        let type = '=';
 
-        // Mysql stores boolean as 1 or 0
-        if (client === 'mysql' && _.get(models, [model, 'attributes', suffix, 'type']) === 'boolean') {
-          formattedValue = value === 'true' ? '1' : '0';
+        if (key.match(/_{1}(?:ne|lte?|gte?|containss?|in)/)) {
+          type = key.match(/_{1}(?:ne|lte?|gte?|containss?|in)/)[0];
+          key = key.replace(type, '');
         }
 
-        let type;
-
-        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'containss', 'in'], _.last(suffix))) {
-          type = `_${_.last(suffix)}`;
-          key = _.dropRight(suffix).join('_');
-        } else {
-          type = '=';
+        // Mysql stores boolean as 1 or 0
+        if (client === 'mysql' && _.get(models, [model, 'attributes', key, 'type']) === 'boolean') {
+          formattedValue = value === 'true' ? '1' : '0';
         }
 
         result = convertor(formattedValue, type, key);
