@@ -28,36 +28,57 @@ module.exports = {
       type === 'Int' ||
       type === 'Float' ||
       type === 'String' ||
-      type === 'Boolean'
+      type === 'Boolean' ||
+      type === 'DateTime'
     );
   },
 
   /**
+   * Checks if the field is of type enum
+   */
+  isEnumType: (_type) => {
+    return _.startsWith(_type, 'ENUM_');
+  },
+
+  /**
    * Returns all fields that are not of type array
-   * 
+   *
    * @returns {Boolean}
-   * 
+   *
    * @example
-   * 
+   *
    * isNotOfTypeArray([String])
    * // => false
    * isNotOfTypeArray(String!)
    * // => true
    */
-  isNotOfTypeArray: (_type) => {
-    const arrayRegexp = /(\[\w+\])/;
-    const type = _type.replace('!', '');
-    return !arrayRegexp.test(type);
+  isNotOfTypeArray: (type) => {
+    return !/(\[\w+!?\])/.test(type);
+  },
+
+  /**
+   * Returns all fields of type Integer or float
+   */
+  isNumberType: (type) => {
+    return type === 'Int' || type === 'Float';
   },
 
   /**
    * Convert non-primitive type to string (non-primitive types corresponds to a reference to an other model)
    * 
+   * extractType(String!)
+   * // => String
+   *
+   * extractType(user)
+   * // => ID
+   *
    * @returns {String}
    */
   extractType: function (_type) {
     return this.isPrimitiveType(_type)
       ? _type.replace('!', '')
+      : this.isEnumType(_type)
+      ? 'String'
       : 'ID';
   },
 
@@ -93,11 +114,12 @@ module.exports = {
    * @return {Object}
    */
   createFieldsResolver: function(fields, resolver, typeCheck) {
-    return _.reduce(fields, (acc, field, key) => {
+    return Object.keys(fields).reduce((acc, fieldKey) => {
+      const field = fields[fieldKey];
       // Check if the field is of the correct type
       if (typeCheck(field)) {
-        return _.set(acc, key, (obj, options, context) => {
-          return resolver(obj, options, context, this.fieldResolver(field, key), key, obj, field);
+        return _.set(acc, fieldKey, (obj, options, context) => {
+          return resolver(obj, options, context, this.fieldResolver(field, fieldKey), fieldKey, obj, field);
         });
       }
       return acc;
@@ -232,6 +254,10 @@ module.exports = {
    *     age: Float
    *  }
    * 
+   *  type UserAggregateAvg {
+   *    age: Float
+   *  }
+   *
    *  type UserGroupBy {
    *     username: [UserConnectionUsername]
    *     age: [UserConnectionAge]
@@ -323,12 +349,9 @@ module.exports = {
       connection: `${globalId}Connection`,
     }));
 
-    let connectionFieldsTypes = '';
-    _.forEach(primitiveFields, (fieldValue, fieldKey) => {
-      connectionFieldsTypes += `type ${globalId}Connection${_.upperFirst(fieldKey)} {${this.formatGQL(connectionFields[fieldKey])}}\n\n`;
-    });
-
-    return connectionFieldsTypes;
+    return Object.keys(primitiveFields).map((fieldKey) =>
+      `type ${globalId}Connection${_.upperFirst(fieldKey)} {${this.formatGQL(connectionFields[fieldKey])}}`
+    ).join('\n\n');
   },
 
   formatConnectionGroupBy: function(fields, model, name) {
@@ -359,9 +382,7 @@ module.exports = {
     const { globalId } = model;
     
     // Extract all fields of type Integer and Float and change their type to Float
-    const numericFields = this.getFieldsByTypes(fields, (fieldType) => {
-      return fieldType === 'Int' || fieldType === 'Float';
-    }, () => 'Float');
+    const numericFields = this.getFieldsByTypes(fields, this.isNumberType, () => 'Float');
 
     // Don't create an aggregator field if the model has not number fields
     const aggregatorGlobalId = `${globalId}Aggregator`;
@@ -414,18 +435,10 @@ module.exports = {
 
       resolvers = {
         ...resolvers,
-        [`${aggregatorGlobalId}Sum`]: this.createAggregationFieldsResolver(model, fields, 'sum', (fieldType) => {
-          return fieldType === 'Int' || fieldType === 'Float';
-        }),
-        [`${aggregatorGlobalId}Avg`]: this.createAggregationFieldsResolver(model, fields, 'avg', (fieldType) => {
-          return fieldType === 'Int' || fieldType === 'Float';
-        }),
-        [`${aggregatorGlobalId}Min`]: this.createAggregationFieldsResolver(model, fields, 'min', (fieldType) => {
-          return fieldType === 'Int' || fieldType === 'Float';
-        }),
-        [`${aggregatorGlobalId}Max`]: this.createAggregationFieldsResolver(model, fields, 'max', (fieldType) => {
-          return fieldType === 'Int' || fieldType === 'Float';
-        })
+        [`${aggregatorGlobalId}Sum`]: this.createAggregationFieldsResolver(model, fields, 'sum', this.isNumberType),
+        [`${aggregatorGlobalId}Avg`]: this.createAggregationFieldsResolver(model, fields, 'avg', this.isNumberType),
+        [`${aggregatorGlobalId}Min`]: this.createAggregationFieldsResolver(model, fields, 'min', this.isNumberType),
+        [`${aggregatorGlobalId}Max`]: this.createAggregationFieldsResolver(model, fields, 'max', this.isNumberType)
       };
     }
 
@@ -758,7 +771,7 @@ module.exports = {
           ctx.params.where
         );
 
-        return controller({ ...ctx, ...queryOpts }, next);
+        return controller(Object.assign({}, ctx, queryOpts), next);
       };
     })();
 
