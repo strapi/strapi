@@ -486,19 +486,6 @@ module.exports = function (strapi) {
           result.key = `where.${key}.$gte`;
           result.value = value;
           break;
-        case '_sort':
-          result.key = `sort`;
-          result.value = (_.toLower(value) === 'desc') ? '-' : '';
-          result.value += key;
-          break;
-        case '_start':
-          result.key = `start`;
-          result.value = parseFloat(value);
-          break;
-        case '_limit':
-          result.key = `limit`;
-          result.value = parseFloat(value);
-          break;
         case '_contains':
           result.key = `where.${key}`;
           result.value = {
@@ -513,6 +500,19 @@ module.exports = function (strapi) {
         case '_in':
           result.key = `where.${key}.$in`;
           result.value = value;
+          break;
+        case '_sort':
+          result.key = 'sort';
+          result.value = (_.toLower(value) === 'desc') ? '-' : '';
+          result.value += key;
+          break;
+        case '_start':
+          result.key = 'start';
+          result.value = parseFloat(value);
+          break;
+        case '_limit':
+          result.key = 'limit';
+          result.value = parseFloat(value);
           break;
         default:
           result = undefined;

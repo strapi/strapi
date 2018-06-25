@@ -406,7 +406,7 @@ module.exports = function(strapi) {
                         switch (connection.settings.client) {
                           case 'pg':
                             // Enable extension to allow GIN indexes.
-                            await ORM.knex.raw(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+                            await ORM.knex.raw('CREATE EXTENSION IF NOT EXISTS pg_trgm');
 
                             // Create GIN indexes for every column.
                             const indexes = columns
@@ -437,7 +437,7 @@ module.exports = function(strapi) {
                             console.log(e);
                           }
 
-                          strapi.log.warn(`The SQL database indexes haven't been generated successfully. Please enable the debug mode for more details.`);
+                          strapi.log.warn('The SQL database indexes haven\'t been generated successfully. Please enable the debug mode for more details.');
                         }
                       }
                     };
@@ -946,21 +946,6 @@ module.exports = function(strapi) {
             value
           };
           break;
-        case '_sort':
-          result.key = `sort`;
-          result.value = {
-            key,
-            order: value.toUpperCase()
-          };
-          break;
-        case '_start':
-          result.key = `start`;
-          result.value = parseFloat(value);
-          break;
-        case '_limit':
-          result.key = `limit`;
-          result.value = parseFloat(value);
-          break;
         case '_contains':
         case '_containss':
           result.key = `where.${key}`;
@@ -975,6 +960,21 @@ module.exports = function(strapi) {
             symbol: 'IN',
             value,
           };
+          break;
+        case '_sort':
+          result.key = 'sort';
+          result.value = {
+            key,
+            order: value.toUpperCase()
+          };
+          break;
+        case '_start':
+          result.key = 'start';
+          result.value = parseFloat(value);
+          break;
+        case '_limit':
+          result.key = 'limit';
+          result.value = parseFloat(value);
           break;
         default:
           return undefined;
