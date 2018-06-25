@@ -4,16 +4,16 @@
 <br />
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi.svg" alt="Dependency Status" />
+    <img src="https://img.shields.io/npm/v/strapi/alpha.svg" alt="NPM Version" />
   </a>
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Dependency Status" />
+    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
   </a>
   <a href="https://travis-ci.org/strapi/strapi">
-    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Dependency Status" />
+    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
   </a>
   <a href="http://slack.strapi.io">
-    <img src="http://strapi-slack.herokuapp.com/badge.svg" alt="Dependency Status" />
+    <img src="https://strapi-slack.herokuapp.com/badge.svg" alt="Strapi on Slack" />
   </a>
 </p>
 
@@ -38,6 +38,15 @@ The alpha has support for the latest version of Node.js (v9) and npm (v5).
 ```bash
 npm install strapi@alpha -g
 ```
+
+##### Requirements
+```
+NodeJS >= 9
+MongoDB >= 2.6 
+MySQL >= 2.6
+PostgreSQL >= 10
+```
+
 
 #### Stable
 This is the production-ready version of Strapi (v1). You should also consider that the migration to v3 will not be easy due to many breaking changes.
