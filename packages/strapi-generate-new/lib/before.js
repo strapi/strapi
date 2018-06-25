@@ -44,7 +44,7 @@ module.exports = (scope, cb) => {
 
   // Make changes to the rootPath where the Strapi project will be created.
   scope.rootPath = path.resolve(process.cwd(), scope.name || '');
-  scope.tmpPath = path.resolve(os.tmpdir(), 'strapi' + crypto.randomBytes(6).toString('hex'));
+  scope.tmpPath = path.resolve(os.tmpdir(), `strapi${ crypto.randomBytes(6).toString('hex') }`);
 
   // Ensure we aren't going to inadvertently delete any files.
   try {
