@@ -27,7 +27,6 @@
     },
     "policy": {
       "type": "string",
-      "required": true,
       "configurable": false
     },
     "role": {
