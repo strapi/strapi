@@ -1,6 +1,6 @@
 {
   "name": "strapi-redis",
-  "version": "3.0.0-alpha.12.5",
+  "version": "3.0.0-alpha.12.6",
   "description": "Redis hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -18,7 +18,7 @@
     "ioredis": "^3.1.2",
     "lodash": "^4.17.4",
     "stack-trace": "0.0.10",
-    "strapi-utils": "3.0.0-alpha.12.5"
+    "strapi-utils": "3.0.0-alpha.12.6"
   },
   "strapi": {
     "isHook": true
