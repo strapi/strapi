@@ -96,6 +96,8 @@ export class HomePage extends React.Component {
     this.props.resetProps();
   }
 
+  getEndPoint = () => this.props.match.params.settingType;
+
   handleKeyBoardShortCut = (e) => {
     if (includes(keyBoardShortCuts, e.keyCode)) {
       const mapKey = clone(this.state.mapKey);
@@ -122,8 +124,8 @@ export class HomePage extends React.Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    const modifiedObject = get(this.props.modifiedData, this.props.dataToEdit);
-    const initObject = get(this.props.initialData, this.props.dataToEdit);
+    const modifiedObject = get(this.props.modifiedData, [this.getEndPoint(), this.props.dataToEdit]);
+    const initObject = get(this.props.initialData, [this.getEndPoint(), this.props.dataToEdit]);
     const formErrors = checkFormValidity(this.props.match.params.settingType, modifiedObject, this.props.dataToEdit);
 
     if (isEqual(initObject, modifiedObject)) {
@@ -153,23 +155,31 @@ export class HomePage extends React.Component {
     },
   ];
 
+  showLoaders = () => {
+    const { data, isLoading, modifiedData } = this.props;
+    const isAdvanded = this.getEndPoint() === 'advanced';
+    
+    return isLoading && get(data, this.getEndPoint()) === undefined && !isAdvanded || isLoading && isAdvanded &&  get(modifiedData, this.getEndPoint()) === undefined;
+  }
+
   render() {
-    const { didCheckErrors, formErrors, modifiedData, initialData, match, dataToEdit } = this.props;
+    const { data, didCheckErrors, formErrors, modifiedData, initialData, match, dataToEdit } = this.props;
     const headerActions = match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
       this.pluginHeaderActions : [];
     const noButtonList = match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
     const component = match.params.settingType === 'advanced' ?
-      <EditForm onChange={this.props.onChange} values={modifiedData} /> : (
+      <EditForm onChange={this.props.onChange} values={get(modifiedData, this.getEndPoint(), {})} showLoaders={this.showLoaders()} /> : (
         <List
-          data={this.props.data}
+          data={get(data, this.getEndPoint(), [])}
           deleteData={this.props.deleteData}
           noButton={noButtonList}
           onButtonClick={this.handleButtonClick}
           settingType={match.params.settingType}
-          values={modifiedData}
+          showLoaders={this.showLoaders()}
+          values={get(modifiedData, this.getEndPoint(), {})}
         />
       );
-
+    
     return (
       <div>
         <form onSubmit={(e) => e.preventDefault()}>
@@ -191,7 +201,7 @@ export class HomePage extends React.Component {
             onChange={this.props.onChange}
             onSubmit={this.handleSubmit}
             settingType={match.params.settingType}
-            values={modifiedData[dataToEdit] || {}}
+            values={get(modifiedData,[this.getEndPoint(), dataToEdit], {})}
           />
         </form>
       </div>
@@ -208,7 +218,7 @@ HomePage.defaultProps = {};
 
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
-  data: PropTypes.array.isRequired,
+  data: PropTypes.object.isRequired,
   dataToEdit: PropTypes.string.isRequired,
   deleteData: PropTypes.func.isRequired,
   didCheckErrors: PropTypes.bool.isRequired,
@@ -217,6 +227,7 @@ HomePage.propTypes = {
   formErrors: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
   initialData: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,

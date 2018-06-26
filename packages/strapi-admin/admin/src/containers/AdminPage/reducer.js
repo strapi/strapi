@@ -16,6 +16,7 @@ import {
 const initialState = fromJS({
   allowGa: true,
   currentEnvironment: 'development',
+  isLoading: true,
   layout: Map({}),
   strapiVersion: '3',
 });
@@ -23,7 +24,9 @@ const initialState = fromJS({
 function adminPageReducer(state = initialState, action) {
   switch (action.type) {
     case GET_CURR_ENV_SUCCEEDED:
-      return state.update('currentEnvironment', () => action.currentEnvironment);
+      return state
+        .update('isLoading', () => false)
+        .update('currentEnvironment', () => action.currentEnvironment);
     case GET_GA_STATUS_SUCCEEDED:
       return state.update('allowGa', () => action.allowGa);
     case GET_LAYOUT_SUCCEEDED:

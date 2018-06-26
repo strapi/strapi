@@ -80,7 +80,7 @@ class InputJSON extends React.Component {
     }
   }
 
-  setSize = () => this.codeMirror.setSize('100%', 600);
+  setSize = () => this.codeMirror.setSize('100%', 'auto');
 
   setTheme = (theme) => this.codeMirror.setOption('theme', theme);
 
