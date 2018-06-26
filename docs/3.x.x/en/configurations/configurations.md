@@ -178,6 +178,7 @@ Most of the application's configurations are defined by environment. It means th
        - `username` (string): Username used to establish the connection.
        - `password` (string): Password used to establish the connection.
        - `options` (object): List of additional options used by the connector.
+       - `timezone` (string): Set the default behavior for local time (used only for a SQL database). Default value: `utc`.
 
 #### Example
 
