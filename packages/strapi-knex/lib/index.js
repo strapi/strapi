@@ -98,8 +98,8 @@ module.exports = strapi => {
             schema: _.get(connection.settings, 'schema') || 'public',
             port: _.get(connection.settings, 'port'),
             socket: _.get(connection.settings, 'socketPath'),
-            ssl: _.get(connection.settings, 'ssl') || false
-
+            ssl: _.get(connection.settings, 'ssl') || false,
+            timezone: _.get(connection.settings, 'timezone') || 'utc',
           },
           debug: _.get(connection.options, 'debug') || false,
           acquireConnectionTimeout: _.get(connection.options, 'acquireConnectionTimeout'),
