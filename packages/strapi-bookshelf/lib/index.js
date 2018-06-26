@@ -401,7 +401,7 @@ module.exports = function(strapi) {
                             type = 'text';
                             break;
                           case 'json':
-                            type = definition.client === 'pg' ? 'jsonb' : 'text';
+                            type = definition.client === 'pg' ? 'jsonb' : 'longtext';
                             break;
                           case 'string':
                           case 'enumeration':
