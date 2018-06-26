@@ -15,6 +15,7 @@ import {
 const initialState = fromJS({
   currentEnvironment: 'development',
   deleteActionSucceeded: false,
+  isLoading: true,
   plugins: Map({}),
   pluginToDelete: '',
 });
@@ -35,7 +36,8 @@ function listPluginsPageReducer(state = initialState, action) {
       return state.update('currentEnvironment', () => action.currentEnvironment);
     case GET_PLUGINS_SUCCEEDED:
       return state
-        .set('plugins', Map(action.plugins));
+        .set('plugins', Map(action.plugins))
+        .update('isLoading', () => false);
     case ON_DELETE_PLUGIN_CLICK:
       return state
         .set('pluginToDelete', action.pluginToDelete);

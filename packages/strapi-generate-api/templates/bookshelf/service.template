@@ -133,11 +133,25 @@ module.exports = {
    */
 
   remove: async (params) => {
-    await Promise.all(
-      <%= globalID %>.associations.map(association =>
-        <%= globalID %>.forge(params)[association.alias]().detach()
-      )
-    );
+    params.values = {};
+    <%= globalID %>.associations.map(association => {
+      switch (association.nature) {
+        case 'oneWay':
+        case 'oneToOne':
+        case 'manyToOne':
+        case 'oneToManyMorph':
+          params.values[association.alias] = null;
+          break;
+        case 'oneToMany':
+        case 'manyToMany':
+        case 'manyToManyMorph':
+          params.values[association.alias] = [];
+          break;
+        default:
+      }
+    });
+
+    await <%= globalID %>.updateRelations(params);
 
     return <%= globalID %>.forge(params).destroy();
   }
