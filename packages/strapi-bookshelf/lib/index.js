@@ -322,14 +322,18 @@ module.exports = function(strapi) {
                     };
 
                     events.forEach((event) => {
+                      let fn;
+
+                      if (event.name.indexOf('collection') !== -1 ) {
+                        fn = (instance) => instance.models.map((entry) => {
+                          jsonFormatter(entry.attributes);
+                        });
+                      } else {
+                        fn = (instance) => jsonFormatter(instance.attributes);
+                      }
+
                       this.on(event.name, (instance) => {
-                        if (instance.models) {
-                          instance.models.map((entry) => {
-                            jsonFormatter(entry.attributes);
-                          });
-                        } else {
-                          jsonFormatter(instance.attributes);
-                        }
+                        fn(instance);
 
                         return _.isFunction(
                           target[model.toLowerCase()][event.target]
