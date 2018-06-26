@@ -29,15 +29,18 @@ module.exports = {
       type === 'Float' ||
       type === 'String' ||
       type === 'Boolean' ||
-      type === 'DateTime'
+      type === 'DateTime' ||
+      type === 'JSON'
     );
   },
 
   /**
    * Checks if the field is of type enum
+   *
+   * @returns {Boolean}
    */
-  isEnumType: (_type) => {
-    return _.startsWith(_type, 'ENUM_');
+  isEnumType: (type) => {
+    return type === 'enumeration';
   },
 
   /**
@@ -65,19 +68,25 @@ module.exports = {
 
   /**
    * Convert non-primitive type to string (non-primitive types corresponds to a reference to an other model)
-   * 
+   *
+   * @returns {String}
+   *
+   * @example
+   *
    * extractType(String!)
    * // => String
    *
    * extractType(user)
    * // => ID
    *
-   * @returns {String}
+   * extractType(ENUM_TEST_FIELD, enumeration)
+   * // => String
+   *
    */
-  extractType: function (_type) {
+  extractType: function (_type, attributeType) {
     return this.isPrimitiveType(_type)
       ? _type.replace('!', '')
-      : this.isEnumType(_type)
+      : this.isEnumType(attributeType)
       ? 'String'
       : 'ID';
   },
@@ -96,7 +105,7 @@ module.exports = {
 
   /**
    * Use the field resolver otherwise fall through the field value
-   * 
+   *
    * @returns {function}
    */
   fieldResolver: (field, key) => {
@@ -110,7 +119,7 @@ module.exports = {
 
   /**
    * Create fields resolvers
-   * 
+   *
    * @return {Object}
    */
   createFieldsResolver: function(fields, resolver, typeCheck) {
@@ -142,22 +151,22 @@ module.exports = {
 
   /**
    * Create the resolvers for each aggregation field
-   * 
+   *
    * @return {Object}
-   * 
+   *
    * @example
-   * 
+   *
    * const model = // Strapi model
-   * 
+   *
    * const fields = {
    *   username: String,
    *   age: Int,
    * }
-   * 
+   *
    * const typeCheck = (type) => type === 'Int' || type === 'Float',
-   * 
+   *
    * const fieldsResoler = createAggregationFieldsResolver(model, fields, 'sum', typeCheck);
-   * 
+   *
    * // => {
    *   age: function ageResolver() { .... }
    * }
@@ -257,7 +266,7 @@ module.exports = {
    *  type UserAggregateAvg {
    *    age: Float
    *  }
-   *
+   * 
    *  type UserGroupBy {
    *     username: [UserConnectionUsername]
    *     age: [UserConnectionAge]
@@ -336,12 +345,11 @@ module.exports = {
    * @return {String}
    */
   generateConnectionFieldsTypes: function (fields, model) {
-    const { globalId } = model;
-
+    const { globalId, attributes } = model;
     const primitiveFields = this.getFieldsByTypes(
       fields,
       this.isNotOfTypeArray,
-      type => this.extractType(type),
+      (type, name) => this.extractType(type, (attributes[name] || {}).type),
     );
 
     const connectionFields = _.mapValues(primitiveFields, (fieldType) => ({
