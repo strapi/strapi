@@ -17,6 +17,7 @@ import {
   ON_CHANGE_INPUT,
   ON_CLICK_ADD,
   ON_CLICK_DELETE,
+  RESET_PROPS,
   RESET_SHOULD_DISPLAY_POLICIES_HINT,
   SELECT_ALL_ACTIONS,
   SET_ACTION_TYPE,
@@ -85,6 +86,11 @@ function editPageReducer(state = initialState, action) {
       return state
         .set('didDeleteUser', !state.get('didDeleteUser'))
         .updateIn(['modifiedData', 'users'], list => list.filter(o => o[o.id ? 'id' : '_id'] !== action.itemToDelete[o.id ? 'id' : '_id']));
+    case RESET_PROPS:
+      return state
+        .updateIn(['modifiedData'], () => Map({}))
+        .update('initialData', () => Map({}))
+        .update('users', () => List([]));
     case RESET_SHOULD_DISPLAY_POLICIES_HINT:
       return state.set('shouldDisplayPoliciesHint', true);
     case SELECT_ALL_ACTIONS: {

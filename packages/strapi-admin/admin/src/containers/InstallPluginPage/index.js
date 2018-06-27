@@ -24,7 +24,8 @@ import DownloadInfo from 'components/DownloadInfo';
 import OverlayBlocker from 'components/OverlayBlocker';
 import PluginCard from 'components/PluginCard';
 import PluginHeader from 'components/PluginHeader';
-import SupportUsBanner from 'components/SupportUsBanner/Loadable';
+import SupportUsBanner from 'components/SupportUsBanner';
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -64,6 +65,10 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
   }
 
   render() {
+    if (!this.props.didFetchPlugins) {
+      return <LoadingIndicatorPage />;
+    }
+
     return (
       <div>
         <OverlayBlocker isOpen={this.props.blockApp}>

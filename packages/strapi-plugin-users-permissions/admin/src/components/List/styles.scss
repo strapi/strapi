@@ -11,6 +11,8 @@
 }
 
 .titleContainer {
+  flex: 2;
+  width: 20%;
   color: #333740;
   font-family: Lato;
   font-size: 1.8rem;
@@ -32,4 +34,17 @@
 
 .listPadded {
   padding-top: 3px !important;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  min-height: 162px;
+  padding-top: 20px;
+}
+
+.loadingContainerRole {
+  min-height: 142px !important;
+  padding-top: 0;
 }

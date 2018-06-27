@@ -1,0 +1,177 @@
+{
+  "Auth.form.button.register-success": "إعادة الإرسال",
+  "Auth.form.button.forgot-password.success": "إعادة الإرسال",
+  "Auth.form.button.forgot-password": "إرسال للبريد",
+  "Auth.form.button.reset-password": "تغيير كلمة السر",
+  "Auth.form.button.login": "تسجيل دخول",
+  "Auth.form.button.register": "مستعد للبدء",
+  "Auth.form.error.noAdminAccess": "لا تملك الصلاحية للدخول الى لوحة الإدارة.",
+
+  "Auth.form.forgot-password.email.label": "ادخل ايميلك",
+  "Auth.form.forgot-password.email.label.success": "تم إرسال الرسالة بنجاح الى",
+  "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.header.register.description": "لإنهاء الإعداد وتأمين تطبيقك ، يرجى إنشاء أول مستخدم (مسؤول أساسي) عن طريق إدخال المعلومات الضرورية أدناه.",
+  "Auth.form.header.login": "strapi",
+  "Auth.form.header.forgot-password": "strapi",
+  "Auth.form.header.register": "مرحبًا!",
+  "Auth.form.header.register-success": "strapi",
+
+  "Auth.form.login.password.label": "كلمة السر",
+  "Auth.form.login.rememberMe.label": "تذكرني",
+  "Auth.form.login.username.label": "اسم المستخدم",
+  "Auth.form.login.username.placeholder": "اكتب اسمك هنا (مثل: خالد سالم)",
+
+  "Auth.form.register.email.label": "البريد الإكتروني",
+  "Auth.form.register.email.placeholder": "mysuperemail@example.com",
+  "Auth.form.register.username.label": "اسم المستخدم",
+  "Auth.form.register.username.placeholder": "اكتب اسمك هنا (مثل: خالد سالم)",
+  "Auth.form.register.password.label": "كلمة السر",
+  "Auth.form.register.confirmPassword.label": "تأكيد كلمة السر",
+  "Auth.form.register.news.label": "ابقيني محدّثًا عن الميزات الجديدة والتحسينات القادمة.",
+
+  "Auth.form.register-success.email.label": "الأيميل ارسل بنجاح الى",
+  "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
+
+  "Auth.form.error.email.provide": "يرجى تقديم اسم المستخدم الخاص بك أو البريد الإلكتروني الخاص بك.",
+  "Auth.form.error.email.invalid": "هذا البريد الاكتروني غير صالح.",
+  "Auth.form.error.password.provide": "يرجى تقديم كلمة المرور الخاصة بك.",
+  "Auth.form.error.invalid": "المعرّف أو كلمة المرور غير صالحين.",
+  "Auth.form.error.password.local": "لم يقم هذا المستخدم بتعيين كلمة مرور محلية مطلقًا ، الرجاء تسجيل الدخول عبر الموفر المستخدم أثناء إنشاء الحساب.",
+  "Auth.form.error.password.format": "لا يمكن أن تحتوي كلمة مرورك على الرمز `$` أكثر من ثلاث مرات.",
+  "Auth.form.error.user.not-exist": "هذا الإميل غير موجود.",
+  "Auth.form.error.code.provide": "الرمز المقدم غير صحيح.",
+  "Auth.form.error.password.matching": "كلمة المرور غير مطابقة.",
+  "Auth.form.error.params.provide": "المعلومات المقدمة غير صحيحة.",
+  "Auth.form.error.username.taken": "اسم المستخدم مسجل بالفعل",
+  "Auth.form.error.email.taken": "البريد الإلكتروني مسجل بالفعل",
+
+  "Auth.link.forgot-password": "هل نسيت كلمة السر الخاصة بك؟",
+  "Auth.link.ready": "مستعد لتسجيل الدخول؟",
+
+  "BoundRoute.title": "Bound route to",
+
+  "components.Input.error.password.noMatch": "كلمات السر لا تتطابق",
+
+  "Controller.input.label": "{label} ",
+  "Controller.selectAll": "تحديد الكل",
+
+  "EditForm.inputSelect.label.role": "الدور الافتراضي للمستخدمين المصادقين",
+  "EditForm.inputSelect.description.role": "سيتم إرفاق المستخدم المصادق الجديد بالدور المحدد.",
+  "EditForm.inputSelect.subscriptions.label": "إدارة حصص الاشتراك",
+  "EditForm.inputSelect.subscriptions.description": "حدد عدد الاشتراكات لكل IP في الساعة.",
+  "EditForm.inputSelect.durations.label": "المدة",
+  "EditForm.inputSelect.durations.description": "عدد الساعات التي لا يمكن للمستخدم الاشتراك خلالها.",
+
+  "EditForm.inputToggle.label.email": "حساب واحد لكل بريد الاكتروني",
+  "EditForm.inputToggle.label.sign-up": "تفعيل التسجيل",
+  "EditForm.inputToggle.description.email": "عدم السماح للمستخدم بإنشاء حسابات متعددة باستخدام نفس عنوان البريد الإلكتروني مع موفري مصادقة مختلفين.",
+  "EditForm.inputToggle.description.sign-up": "عند تعطيل (OFF) ، يتم حظر عملية التسجيل. لا أحد يستطيع الاشتراك بعد الآن بغض النظر عن المزود المستخدم.",
+
+  "EditPage.cancel": "الغاء",
+  "EditPage.submit": "حفظ",
+  "EditPage.form.roles": "تفاصيل الدور",
+  "EditPage.form.roles.label.description": "الوصف",
+  "EditPage.form.roles.label.name": "الأسم",
+  "EditPage.form.roles.label.users": "المستخدمون المرتبطون بهذا الدور ({number})",
+  "EditPage.form.roles.name.error": "القيمة مطلوبة.",
+  "EditPage.header.title": "{name} ",
+  "EditPage.header.title.create": "إنشاء دور جديد",
+  "EditPage.header.description": "{description} ",
+  "EditPage.header.description.create": " ",
+
+  "EditPage.notification.permissions.error": "حدث خطأ أثناء جلب الأذونات",
+  "EditPage.notification.policies.error": "حدث خطأ أثناء جلب السياسات",
+  "EditPage.notification.role.error": "حدث خطأ أثناء جلب الدور",
+
+  "HeaderNav.link.advancedSettings": "إعدادات متقدمة",
+  "HeaderNav.link.emailTemplates": "قوالب الإيميل",
+  "HeaderNav.link.providers": "مزودين",
+  "HeaderNav.link.roles": "الأدوار والأذونات",
+
+  "HomePage.header.title": "الأدوار والأذونات",
+  "HomePage.header.description": "حدد الأدوار والأذونات للمستخدمين لديك.",
+
+  "InputSearch.placeholder": "ابحث عن مستخدم",
+
+  "List.button.roles": "إضافة دور جديد",
+  "List.button.providers": "إضافة موفر جديد",
+
+  "List.title.emailTemplates.singular": "يتوفر {number} نموذج للبريد الإلكتروني",
+  "List.title.emailTemplates.plural": "يتوفر {number} نماذج للبريد الإلكتروني",
+
+  "List.title.providers.disabled.singular": "{number} معطل",
+  "List.title.providers.disabled.plural": "{number} معطلين",
+  "List.title.providers.enabled.singular": "يتم تمكين {number} مزود و",
+  "List.title.providers.enabled.plural": "يتم تمكين {number} مزودين و",
+
+  "List.title.roles.singular": "{number} دور متوفر",
+  "List.title.roles.plural": "{number} ادوار متوفرة",
+
+  "notification.error.delete": "حدث خطأ أثناء محاولة حذف العنصر",
+  "notification.error.fetch": "حدث خطأ أثناء محاولة جلب البيانات",
+  "notification.error.fetchUser": "حدث خطأ أثناء محاولة جلب المستخدمين",
+  "notification.info.emailSent": "تم إرسال البريد الإلكتروني",
+  "notification.success.delete": "تم حذف هذا العنصر",
+  "notification.success.submit": "تم تحديث الإعدادات",
+
+  "plugin.description.short": "حماية الـAPI الخاص بك مع عملية مصادقة كاملة استناداً إلى JWT",
+  "plugin.description.long": "حماية الـAPI الخاص بك مع عملية مصادقة كاملة استناداً إلى JWT. يأتي هذا الملحق أيضًا مع إستراتيجية ACL التي تسمح لك بإدارة الأذونات بين مجموعات المستخدمين.",
+
+  "Plugin.permissions.application.description": "حدد جميع الإجراءات المسموح بها لمشروعك.",
+  "Plugin.permissions.plugins.description": "حدد جميع الإجراءات المسموح بها للإضافة {name}.",
+
+  "Plugins.header.title": "الصلاحيات",
+  "Plugins.header.description": "يتم سرد الإجراءات المحددة المرتبطة بالمسار أدناه.",
+
+  "Policies.InputSelect.empty": "لا شيء",
+  "Policies.InputSelect.label": "السماح بتنفيذ هذا الإجراء لـ:",
+  "Policies.header.hint": "حدد إجراءات التطبيق أو إجراءات الإضافة وانقر على رمز الترس لعرض المسار المرتبط",
+  "Policies.header.title": "إعدادات متقدمة",
+
+  "Email.template.validation_email": "التحقق من صحة عنوان البريد الإلكتروني",
+  "Email.template.reset_password": "إعادة تعيين كلمة المرور",
+  "Email.template.success_register": "التسجيل ناجح",
+
+  "Auth.advanced.allow_register": "",
+
+  "PopUpForm.button.cancel": "الغاء",
+  "PopUpForm.button.save": "حفظ",
+  "PopUpForm.header.add.providers": "إضافة موفر جديد",
+  "PopUpForm.header.edit.email-templates": "تحرير قوالب البريد الإلكتروني",
+  "PopUpForm.header.edit.providers": "تحرير موفر {provider}",
+  "PopUpForm.inputSelect.providers.label": "اختر الموفر",
+  "PopUpForm.Email.options.from.name.label": "أسم المورد",
+  "PopUpForm.Email.options.from.email.label": "البريد الإلكتروني للشاحن",
+  "PopUpForm.Email.options.response_email.label": "البريد الإلكتروني للاستجابة",
+  "PopUpForm.Email.options.object.label": "موضوع",
+  "PopUpForm.Email.options.message.label": "الرسالة",
+  "PopUpForm.Email.validation_email.options.object.placeholder": "يرجى تأكيد عنوان بريدك الإلكتروني لـ %APP_NAME%",
+  "PopUpForm.Email.reset_password.options.object.placeholder": "يرجى تأكيد عنوان بريدك الإلكتروني لـ %APP_NAME%",
+  "PopUpForm.Email.success_register.options.object.placeholder": "يرجى تأكيد عنوان بريدك الإلكتروني لـ %APP_NAME%",
+  "PopUpForm.Email.validation_email.options.message.placeholder": "<p>يرجى النقر على هذا الرابط لتأكيد حسابك</p>",
+  "PopUpForm.Email.reset_password.options.message.placeholder": "<p>يرجى النقر على هذا الرابط لتأكيد حسابك</p>",
+  "PopUpForm.Email.success_register.options.message.placeholder": "<p>يرجى النقر على هذا الرابط لتأكيد حسابك</p>",
+  "PopUpForm.Email.options.from.email.placeholder": "johndoe@gmail.com",
+  "PopUpForm.Email.options.response_email.placeholder": "johndoe@gmail.com",
+  "PopUpForm.Email.options.from.name.placeholder": "John Doe",
+  "PopUpForm.Providers.enabled.label": "مفعل",
+  "PopUpForm.Providers.enabled.description": "في حالة التعطيل ، لن يتمكن المستخدمون من استخدام هذا الموفر.",
+  "PopUpForm.Providers.key.label": "معرف العميل",
+  "PopUpForm.Providers.key.placeholder": "نص",
+  "PopUpForm.Providers.secret.label": "سر العميل (Client Secret)",
+  "PopUpForm.Providers.secret.placeholder": "نص",
+  "PopUpForm.Providers.redirectURL.front-end.label": "عنوان URL لإعادة التوجيه إلى تطبيق الواجهة الأمامية (front-end)",
+
+
+
+  "PopUpForm.Providers.facebook.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Facebook",
+  "PopUpForm.Providers.google.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Google",
+  "PopUpForm.Providers.github.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Github",
+  "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Linkedin",
+  "PopUpForm.Providers.twitter.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Twitter",
+
+  "PopUpForm.Providers.callback.placeholder": "نص",
+  "PopUpForm.Email.email_templates.inputDescription": "إذا كنت غير متأكد من كيفية استخدام المتغيرات ، {link}",
+  "PopUpForm.Email.link.documentation": "تحقق من وثائقنا."
+}

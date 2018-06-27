@@ -1,0 +1,55 @@
+{
+  "plugin.description.short": "طريقة سريعة لمشاهدة وتحرير وحذف البيانات في قاعدة البيانات الخاصة بك.",
+  "plugin.description.long": "طريقة سريعة لمشاهدة وتحرير وحذف البيانات في قاعدة البيانات الخاصة بك.",
+  "containers.Home.pluginHeaderTitle": "مدير المحتوى",
+  "containers.Home.introduction": "لتعديل الإدخالات انتقل إلى الرابط المحدد في القائمة اليمنى. لا يحتوي هذه الإضافة على طريقة مناسبة لتعديل الإعدادات ولا يزال قيد التطوير.",
+  "containers.Home.pluginHeaderDescription": "إدارة إدخالاتك من خلال واجهة قوية وجميلة.",
+  "containers.Edit.submit": "حفظ",
+  "containers.Edit.editing": "التعديل...",
+  "containers.Edit.delete": "حذف",
+  "containers.Edit.reset": "إعادة",
+  "containers.Edit.returnList": "العودة للقائمة",
+  "containers.List.addAnEntry": "مدخل جديد {entity}",
+  "containers.List.pluginHeaderDescription": "{label} مدخل تم العثور عليه",
+  "containers.List.pluginHeaderDescription.singular": "{label} مدخل عثر",
+  "components.LimitSelect.itemsPerPage": "عنصر بالصفحة",
+  "containers.List.errorFetchRecords": "خطأ",
+
+  "EditRelations.title": "البيانات العلائقية",
+  
+  "emptyAttributes.title": "لا توجد حقول بعد",
+  "emptyAttributes.description": "أضف حقلك الأول إلى نوع المحتوى الخاص بك",
+  "emptyAttributes.button": "انتقل إلى أداة إنشاء نوع المحتوى",
+
+  "error.schema.generation": "حدث خطأ أثناء توليد المخطط.",
+  "error.records.count": "حدث خطأ أثناء إحضار عدد السجلات.",
+  "error.records.fetch": "حدث خطأ أثناء جلب السجلات.",
+  "error.record.fetch": "حدث خطأ أثناء تسجيل الجلب.",
+  "error.record.create": "حدث خطأ أثناء إنشاء السجل.",
+  "error.record.update": "حدث خطأ أثناء تحديث السجل.",
+  "error.record.delete": "حدث خطأ أثناء حذف السجل.",
+  "error.model.fetch": "حدث خطأ أثناء إجراء عملية تكوين النماذج.",
+  "error.validation.required": "قيمة هذا الحقل مطلوبة.",
+  "error.validation.regex": "هذه القيمة لا تطابق regex.",
+  "error.validation.max": "هذه القيمة عالية جدًا.",
+  "error.validation.min": "هذه القيمة قليل جدًا.",
+  "error.validation.maxLength": "هذه القيمة طويلة جدًا.",
+  "error.validation.minLength": "هذه القيمة قصيرة جدًا.",
+  "error.contentTypeName.taken": "هذا الأسم موجود مسبقًا",
+  "error.attribute.taken": "اسم الحقل هذا موجود مسبقًا",
+  "error.attribute.key.taken": "هذه القيمة موجودة مسبقًا",
+  "error.attribute.sameKeyAndName": "لا تتطابق",
+  "error.validation.minSupMax": "لا يمكن أن تكون متفوقة",
+
+  "notification.error.relationship.fetch": "حدث خطأ أثناء جلب العلاقة.",
+
+  "success.record.delete": "حُذف",
+  "success.record.save": "حُفظ",
+
+  "pageNotFound": "الصفحة غير موجود",
+
+  "popUpWarning.button.cancel": "الغاء",
+  "popUpWarning.button.confirm": "تأكيد",
+  "popUpWarning.title": "الرجاء التأكيد",
+  "popUpWarning.bodyMessage.contentType.delete": "هل انت متأكد من حذف هذا المدخل؟"
+}

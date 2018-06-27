@@ -1,0 +1,16 @@
+{
+  "ConfigPage.title": "Email - Impostazioni",
+  "ConfigPage.description": "Configura il plugin Email",
+  
+  
+  "EditForm.Input.number.label": "Dimensione massima consentita (in MB)",
+  "EditForm.Input.select.label": "Providers",
+  "EditForm.Input.select.inputDescription": "Le e-mail possono essere inviate con il provider predefinito (Sendmail) o un provider esterno",
+  "EditForm.Input.toggle.label": "Abilita invio email",
+
+  "plugin.description.short": "Invia le email.",
+  "plugin.description.long": "Invia le email.",
+
+
+  "notification.config.success": "Le impostazioni sono state aggiornate"
+}

@@ -49,6 +49,8 @@ const getInputType = (type = '') => {
     case 'file':
     case 'files':
       return 'file';
+    case 'json':
+      return 'json';
     default:
       return 'text';
   }
@@ -140,7 +142,7 @@ class Edit extends React.PureComponent {
             const appearance = get(layout, 'appearance');
             const type = !isEmpty(appearance) ? appearance.toLowerCase() : get(layout, 'type', getInputType(details.type));
 
-            return (
+            return (  
               <Input
                 autoFocus={key === 0}
                 customBootstrapClass={get(layout, 'className')}
