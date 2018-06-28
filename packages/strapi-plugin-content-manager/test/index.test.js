@@ -370,7 +370,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
         method: 'DELETE',
         json: true
       });
-      
+
       tagToGet = await rq({
         url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
         method: 'GET',
@@ -880,6 +880,10 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
         method: 'GET',
         json: true
       });
+
+      if (Object.keys(referenceToGet.tag).length == 0) {
+        referenceToGet.tag = null;
+      }
 
       expect(referenceToGet.tag).toBe(null);
     }
