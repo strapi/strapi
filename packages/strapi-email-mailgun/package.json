@@ -1,6 +1,6 @@
 {
   "name": "strapi-email-mailgun",
-  "version": "3.0.0-alpha.12.5",
+  "version": "3.0.0-alpha.12.6",
   "description": "Mailgun provider for strapi email plugin",
   "homepage": "http://strapi.io",
   "keywords": [
