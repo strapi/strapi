@@ -43,7 +43,7 @@ const makeSelectLoading = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('loading'));
 
 const makeSelectSchema = () =>
-  createSelector(selectGlobalDomain(), substate => substate.get('schema'));
+  createSelector(selectGlobalDomain(), substate => substate.get('schema').toJS());
 
 export {
   selectGlobalDomain,

@@ -31,7 +31,7 @@ module.exports = async cb => {
   
   const buildSchema = (model, name, plugin = false) => {
     // Model data
-    const schemaModel = {
+    const schemaModel = Object.assign({
       label: _.upperFirst(name),
       labelPlural: _.upperFirst(pluralize(name)),
       orm: model.orm || 'mongoose',
@@ -40,7 +40,7 @@ module.exports = async cb => {
       bulkActions: true,
       pageEntries: 20,
       defaultSort: 'id'
-    };
+    }, model);
   
     // Fields (non relation)
     schemaModel.fields = _.mapValues(_.pickBy(model.attributes, attribute =>
@@ -59,6 +59,12 @@ module.exports = async cb => {
       .map(attr => Object.assign(schemaModel.fields[attr], { name: attr, sortable: true, searchable: true }))
       // Retrieve only the fourth first items
       .slice(0, 4);
+      
+    schemaModel.listDisplay.splice(0, 0, {
+      name: model.primaryKey || 'id',
+      label: 'Id',
+      type: 'string',
+    });
     
     if (model.associations) {
       // Model relations
@@ -101,7 +107,7 @@ module.exports = async cb => {
   });
   
   const pluginStore = strapi.store({
-    environment: strapi.config.environment,
+    environment: '',
     type: 'plugin',
     name: 'content-manager'
   });

@@ -12,7 +12,7 @@ const initialState = fromJS({
   modelEntries: 0,
   loading: true,
   models: false,
-  schema: false,
+  schema: fromJS({}),
   formValidations: List(),
 });
 
@@ -26,7 +26,9 @@ function appReducer(state = initialState, action) {
       return state;
     case LOADED_MODELS:
       return state
-        .set('models', action.models);
+        .set('models', action.models.models)
+        .set('schema', fromJS(action.models.models))
+        .set('loading', false);
     case UPDATE_SCHEMA:
       return state
         .set('loading', false)

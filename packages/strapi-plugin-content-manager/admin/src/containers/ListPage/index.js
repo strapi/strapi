@@ -9,11 +9,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { capitalize, get, isUndefined, map, toInteger } from 'lodash';
+import { capitalize, get, isUndefined, toInteger } from 'lodash';
 import cn from 'classnames';
 
 // App selectors
-import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
+import { makeSelectSchema } from 'containers/App/selectors';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -106,9 +106,10 @@ export class ListPage extends React.Component {
    * Helper to retrieve the current model data
    * @return {Object} the current model
    */
-  getCurrentModel = () =>
-    get(this.props.models, ['models', this.getCurrentModelName()]) ||
-    get(this.props.models, ['plugins', this.getSource(), 'models', this.getCurrentModelName()]);
+  getCurrentModel = () => (
+    get(this.props.schema, [this.getCurrentModelName()]) ||
+    get(this.props.schema, ['plugins', this.getSource(), this.getCurrentModelName()])
+  );
 
   /**
    * Helper to retrieve the current model name
@@ -153,6 +154,14 @@ export class ListPage extends React.Component {
       : 'content-manager.popUpWarning.bodyMessage.contentType.delete'
   );
 
+  getModelPrimaryKey = () => (
+    get(this.getCurrentModel(), ['primaryKey'], '_id')
+  );
+
+  getTableHeaders = () => (
+    get(this.getCurrentModel(), ['listDisplay'], [])
+  );
+
   /**
    * Generate the redirect URI when editing an entry
    * @type {String}
@@ -168,29 +177,6 @@ export class ListPage extends React.Component {
 
     return `?${generateSearchFromParams(params)}&source=${this.getSource()}${generateSearchFromFilters(filters)}`;
   }
-
-  /**
-   *  Function to generate the Table's headers
-   * @return {Array}
-   */
-  generateTableHeaders = () => {
-    const currentSchema =
-      get(this.props.schema, [this.getCurrentModelName()]) ||
-      get(this.props.schema, ['plugins', this.getSource(), this.getCurrentModelName()]);
-    const tableHeaders = map(currentSchema.list, value => ({
-      name: value,
-      label: currentSchema.fields[value].label,
-      type: currentSchema.fields[value].type,
-    }));
-
-    tableHeaders.splice(0, 0, {
-      name: this.getCurrentModel().primaryKey || 'id',
-      label: 'Id',
-      type: 'string',
-    });
-
-    return tableHeaders;
-  };
 
   areAllEntriesSelected = () => {
     const { listPage: { entriesToDelete, records } } = this.props;
@@ -210,15 +196,14 @@ export class ListPage extends React.Component {
       },
     } = props;
     const source = this.getSource();
-    const modelPrimaryKey = get(props.models, ['models', slug.toLowerCase(), 'primaryKey']);
+    const modelPrimaryKey = get(props.schema, [slug.toLowerCase(), 'primaryKey']);  
     // Check if the model is in a plugin
-    const pluginModelPrimaryKey = get(props.models.plugins, [
+    const pluginModelPrimaryKey = get(props.schema.plugins, [
       source,
-      'models',
       slug.toLowerCase(),
       'primaryKey',
     ]);
-
+  
     return (
       getQueryParameters(props.location.search, '_sort') ||
       modelPrimaryKey ||
@@ -337,6 +322,7 @@ export class ListPage extends React.Component {
       removeAllFilters,
       removeFilter,
     } = this.props;
+
     const pluginHeaderActions = [
       {
         label: 'content-manager.containers.List.addAnEntry',
@@ -419,13 +405,15 @@ export class ListPage extends React.Component {
                   entriesToDelete={entriesToDelete}
                   filters={filters}
                   handleDelete={this.toggleModalWarning}
-                  headers={this.generateTableHeaders()}
+                  // headers={this.generateTableHeaders()}
+                  headers={this.getTableHeaders()}
                   history={this.props.history}
                   onChangeSort={this.handleChangeSort}
                   onClickSelectAll={onClickSelectAll}
                   onClickSelect={onClickSelect}
                   onToggleDeleteAll={onToggleDeleteAll}
-                  primaryKey={this.getCurrentModel().primaryKey || 'id'}
+                  // primaryKey={this.getCurrentModel().primaryKey || 'id'}
+                  primaryKey={this.getModelPrimaryKey()}
                   records={get(records, this.getCurrentModelName(), [])}
                   redirectUrl={this.generateRedirectURI()}
                   route={this.props.match}
@@ -485,7 +473,6 @@ ListPage.propTypes = {
   listPage: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
-  models: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onClickRemove: PropTypes.func.isRequired,
   onClickSelect: PropTypes.func.isRequired,
@@ -526,7 +513,6 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   listPage: makeSelectListPage(),
-  models: makeSelectModels(),
   schema: makeSelectSchema(),
 });
 

@@ -33,15 +33,13 @@ const tryRequireRoot = (source) => {
 const bootstrap = tryRequireRoot('bootstrap');
 const pluginRequirements = tryRequireRoot('requirements');
 
-// NOTE: I'm commenting this line for the moment since we don't use the layout in the other plugins anymore
-// Initially it was developed for the content-manager but we acces the layout via a request instead of building it
-// const layout = (() => {
-//   try {
-//     return require('../../../../config/layout.js'); // eslint-disable-line import/no-unresolved
-//   } catch(err) {
-//     return null;
-//   }
-// })();
+const layout = (() => {
+  try {
+    return require('../../../../config/layout.js'); // eslint-disable-line import/no-unresolved
+  } catch(err) {
+    return null;
+  }
+})();
 
 const injectedComponents = (() => {
   try {
@@ -99,7 +97,7 @@ strapi.registerPlugin({
   icon: pluginPkg.strapi.icon,
   id: pluginId,
   injectedComponents,
-  layout: null,
+  layout,
   leftMenuLinks: [],
   mainComponent: Comp,
   name: pluginPkg.strapi.name,

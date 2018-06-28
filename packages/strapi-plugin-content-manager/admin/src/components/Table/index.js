@@ -42,7 +42,7 @@ class Table extends React.Component {
         />
       ));
     const entriesToDeleteNumber = this.props.entriesToDelete.length;
-    
+
     return (
       <table className={`table ${styles.table}`}>
         <TableHeader
