@@ -101,8 +101,8 @@ const main = async () => {
   };
 
   await testProcess(databases.mongo);
-  // await testProcess(databases.postgres);
-  // await testProcess(databases.mysql);
+  await testProcess(databases.postgres);
+  await testProcess(databases.mysql);
 };
 
 main();
