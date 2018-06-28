@@ -9,6 +9,9 @@
       },
       "bool": {
         "appearance": ""
+      },
+      "description": {
+        "appearance": "WYSIWYG"
       }
     }
   }
