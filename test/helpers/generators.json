@@ -22,16 +22,6 @@
         }
       },
       {
-        "name":"published",
-        "params":{
-          "appearance":{
-            "WYSIWYG":false
-          },
-          "multiple":false,
-          "type":"boolean"
-        }
-      },
-      {
         "name":"author",
         "params":{
           "nature":"manyToOne",
