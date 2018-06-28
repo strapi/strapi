@@ -6,6 +6,9 @@
       },
       "json": {
         "appearance": ""
+      },
+      "bool": {
+        "appearance": ""
       }
     }
   }

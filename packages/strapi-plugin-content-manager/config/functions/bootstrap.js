@@ -35,6 +35,11 @@ module.exports = async cb => {
       label: _.upperFirst(name),
       labelPlural: _.upperFirst(pluralize(name)),
       orm: model.orm || 'mongoose',
+      search: true,
+      filters: true,
+      bulkActions: true,
+      pageEntries: 20,
+      defaultSort: 'id'
     };
   
     // Fields (non relation)
@@ -50,10 +55,11 @@ module.exports = async cb => {
     // schemaModel.list = _.slice(_.keys(schemaModel.fields), 0, 4);
     schemaModel.listDisplay = Object.keys(schemaModel.fields)
       // Construct Array of attr ex { type: 'string', label: 'Foo', name: 'Foo', description: '' }
-      .map(attr => Object.assign(schemaModel.fields[attr], { name: attr }))
+      // NOTE: Do we allow sort on boolean?
+      .map(attr => Object.assign(schemaModel.fields[attr], { name: attr, sortable: true, searchable: true }))
       // Retrieve only the fourth first items
       .slice(0, 4);
-  
+    
     if (model.associations) {
       // Model relations
       schemaModel.relations = model.associations.reduce((acc, current) => {
@@ -101,7 +107,6 @@ module.exports = async cb => {
   });
   
   const buildSchemaKeys = (data) => Object.keys(data).reduce((acc, curr) => {
-
     if (curr !== 'plugins') {
 
       if (!data[curr].fields && _.isObject(data[curr])) {
