@@ -107,8 +107,8 @@ export class ListPage extends React.Component {
    * @return {Object} the current model
    */
   getCurrentModel = () => (
-    get(this.props.schema, [this.getCurrentModelName()]) ||
-    get(this.props.schema, ['plugins', this.getSource(), this.getCurrentModelName()])
+    get(this.props.schema, ['models', this.getCurrentModelName()]) ||
+    get(this.props.schema, ['models', 'plugins', this.getSource(), this.getCurrentModelName()])
   );
 
   /**

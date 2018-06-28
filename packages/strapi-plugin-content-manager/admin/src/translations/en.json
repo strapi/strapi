@@ -14,6 +14,9 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
+  "containers.SettingsPage.pluginHeaderDescription": "Configure the default settings for all your content types",
+  "containers.SettingsPage.Block.generalSettings.description": "Configure the default options for your content types",
+  "containers.SettingsPage.Block.generalSettings.title": "General",
 
   "components.AddFilterCTA.add": "Filters",
   "components.AddFilterCTA.hide": "Filters",
@@ -70,6 +73,12 @@
   "error.attribute.sameKeyAndName": "Can't be equals",
   "error.validation.minSupMax": "Can't be superior",
   "error.validation.json": "This is not a JSON",
+
+  "form.Input.search": "Enable search",
+  "form.Input.filters": "Enable filters",
+  "form.Input.bulkActions": "Enable bulk actions",
+  "form.Input.pageEntries": "Entries per page",
+  "form.Input.pageEntries.inputDescription": "Note: You can override this value in the Content Type settings page.",
 
   "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
 

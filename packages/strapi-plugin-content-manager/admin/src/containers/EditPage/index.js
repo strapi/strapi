@@ -100,11 +100,6 @@ export class EditPage extends React.Component {
     }
   }
 
-  componentDidCatch(error, info) {
-    console.log('err', err);
-    console.log('info', info);
-  }
-
   componentWillUnmount() {
     this.props.resetProps();
   }
@@ -128,7 +123,7 @@ export class EditPage extends React.Component {
    * Retrieve the model
    * @type {Object}
    */
-  getModel = () => get(this.props.schema, [this.getModelName()]) || get(this.props.schema, ['plugins', this.getSource(), this.getModelName()]);
+  getModel = () => get(this.props.schema, ['models', this.getModelName()]) || get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()]);
 
   /**
    * Retrieve specific attribute
@@ -153,8 +148,8 @@ export class EditPage extends React.Component {
    * @return {Object}
    */
   getSchema = () => this.getSource() !== 'content-manager' ?
-    get(this.props.schema, ['plugins', this.getSource(), this.getModelName()])
-    : get(this.props.schema, [this.getModelName()]);
+    get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()])
+    : get(this.props.schema, ['models', this.getModelName()]);
 
   getPluginHeaderTitle = () => {
     if (this.isCreating()) {

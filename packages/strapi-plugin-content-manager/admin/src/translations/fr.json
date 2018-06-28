@@ -15,6 +15,9 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entrée trouvée",
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
+  "containers.SettingsPage.pluginHeaderDescription": "Configurez les paramètres par défaut de vos modèles",
+  "containers.SettingsPage.Block.generalSettings.description": "Configurez  les options par défault de vos modèles",
+  "containers.SettingsPage.Block.generalSettings.title": "Général",
 
   "components.AddFilterCTA.add": "Filtres",
   "components.AddFilterCTA.hide": "Filtres",
@@ -70,6 +73,12 @@
   "error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "error.validation.minSupMax": "Ne peut pas être plus grand",
   "error.validation.json": "Le format JSON n'est pas respecté",
+
+  "form.Input.search": "Autoriser la search",
+  "form.Input.filters": "Autoriser les filtres",
+  "form.Input.bulkActions": "Autoriser les bulk actions",
+  "form.Input.pageEntries": "Nombre d'entrées par page",
+  "form.Input.pageEntries.inputDescription": "Note: Vous pouvez les modifier ces valeurs par modèle",
 
   "notification.error.relationship.fetch": "Une erreur est survenue en récupérant les relations.",
 

@@ -4,12 +4,14 @@
  *
  */
 
+import { includes } from 'lodash';
 import {
   EMPTY_STORE,
   GET_MODEL_ENTRIES,
   GET_MODEL_ENTRIES_SUCCEEDED,
   LOAD_MODELS,
   LOADED_MODELS,
+  ON_CHANGE,
 } from './constants';
 
 export function emptyStore() {
@@ -43,5 +45,15 @@ export function loadedModels(models) {
   return {
     type: LOADED_MODELS,
     models,
+  };
+}
+
+export function onChange({ target }) {
+  const value = includes(target.name, 'pageEntries') ? parseInt(target.value, 10) : target.value;
+
+  return {
+    type: ON_CHANGE,
+    keys: target.name.split('.'),
+    value,
   };
 }

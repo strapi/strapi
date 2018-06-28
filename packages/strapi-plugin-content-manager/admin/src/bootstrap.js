@@ -7,7 +7,7 @@ const bootstrap = (plugin) => new Promise((resolve, reject) => {
     .then(models => {
       const menu = [{
         name: 'Content Types',
-        links: map(omit(models.models, 'plugins'), (model, key) => ({
+        links: map(omit(models.models.models, 'plugins'), (model, key) => ({
           label: model.labelPlural || model.label || key,
           destination: key,
         })),

@@ -27,7 +27,17 @@ module.exports = async cb => {
   }, {});
   
   // Init schema
-  const schema = { plugins: {} };
+  const schema = {
+    generalSettings: {
+      search: true,
+      filters: true,
+      bulkActions: true,
+      pageEntries: 10,
+    },
+    models: {
+      plugins: {},
+    },
+  };
   
   const buildSchema = (model, name, plugin = false) => {
     // Model data
@@ -38,7 +48,7 @@ module.exports = async cb => {
       search: true,
       filters: true,
       bulkActions: true,
-      pageEntries: 20,
+      pageEntries: 10,
       defaultSort: 'id'
     }, model);
   
@@ -56,7 +66,12 @@ module.exports = async cb => {
     schemaModel.listDisplay = Object.keys(schemaModel.fields)
       // Construct Array of attr ex { type: 'string', label: 'Foo', name: 'Foo', description: '' }
       // NOTE: Do we allow sort on boolean?
-      .map(attr => Object.assign(schemaModel.fields[attr], { name: attr, sortable: true, searchable: true }))
+      .map(attr => {
+        const attrType = schemaModel.fields[attr].type;
+        const sortable = attrType !== 'json' && attrType !== 'array';
+
+        return Object.assign(schemaModel.fields[attr], { name: attr, sortable, searchable: sortable });
+      })
       // Retrieve only the fourth first items
       .slice(0, 4);
       
@@ -64,6 +79,8 @@ module.exports = async cb => {
       name: model.primaryKey || 'id',
       label: 'Id',
       type: 'string',
+      sortable: true,
+      searchable: true,
     });
     
     if (model.associations) {
@@ -88,11 +105,11 @@ module.exports = async cb => {
     }
   
     if (plugin) {
-      return _.set(schema.plugins, `${plugin}.${name}`, schemaModel);
+      return _.set(schema.models.plugins, `${plugin}.${name}`, schemaModel);
     }
   
     // Set the formatted model to the schema
-    schema[name] = schemaModel;
+    schema.models[name] = schemaModel;
   };
   
   _.forEach(pluginsModel, (plugin, pluginName) => {
@@ -130,11 +147,11 @@ module.exports = async cb => {
   
     if (!prevSchema) {
       pluginStore.set({ key: 'schema', value: schema });
-      cb(); 
+      return cb(); 
     }
   
-    const prevSchemaKeys = buildSchemaKeys(prevSchema);
-    const schemaKeys = buildSchemaKeys(schema);
+    const prevSchemaKeys = buildSchemaKeys(prevSchema.models);
+    const schemaKeys = buildSchemaKeys(schema.models);
   
     // Update the store with the new created APIs
     if (!_.isEqual(prevSchemaKeys, schemaKeys)) {

@@ -16,9 +16,9 @@ import { Switch, Route } from 'react-router-dom';
 import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 
-import Home from 'containers/Home';
 import EditPage from 'containers/EditPage';
 import ListPage from 'containers/ListPage';
+import SettingsPage from 'containers/SettingsPage';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import EmptyAttributesView from 'components/EmptyAttributesView';
 
@@ -41,7 +41,7 @@ class App extends React.Component {
 
     const currentModelName = this.props.location.pathname.split('/')[3];
     const source = getQueryParameters(this.props.location.search, 'source');
-    const attrPath = source === 'content-manager' ? [currentModelName, 'fields'] : ['plugins', source, currentModelName, 'fields'];
+    const attrPath = source === 'content-manager' ? ['models', currentModelName, 'fields'] : ['models', 'plugins', source, currentModelName, 'fields'];
 
     if (currentModelName && source && isEmpty(get(this.props.schema, attrPath))) {
       return <EmptyAttributesView currentModelName={currentModelName} history={this.props.history} modelEntries={this.props.modelEntries} />;
@@ -50,7 +50,7 @@ class App extends React.Component {
     return (
       <div className="content-manager">
         <Switch>
-          <Route path="/plugins/content-manager/ctm-configurations" component={Home} />
+          <Route path="/plugins/content-manager/ctm-configurations" component={SettingsPage} />
           <Route path="/plugins/content-manager/:slug/:id" component={EditPage} />
           <Route path="/plugins/content-manager/:slug" component={ListPage} />
         </Switch>
