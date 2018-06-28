@@ -50,9 +50,9 @@ class App extends React.Component {
     return (
       <div className="content-manager">
         <Switch>
+          <Route path="/plugins/content-manager/ctm-configurations" component={Home} />
           <Route path="/plugins/content-manager/:slug/:id" component={EditPage} />
           <Route path="/plugins/content-manager/:slug" component={ListPage} />
-          <Route path="/plugins/content-manager" component={Home} />
         </Switch>
       </div>
     );
