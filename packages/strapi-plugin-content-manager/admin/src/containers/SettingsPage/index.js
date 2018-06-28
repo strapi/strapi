@@ -11,11 +11,12 @@ import cn from 'classnames';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 
-import { onChange } from 'containers/App/actions';
-import { makeSelectSchema } from 'containers/App/selectors';
+import { onChange, onSubmit, onReset } from 'containers/App/actions';
+import { makeSelectModifiedSchema } from 'containers/App/selectors';
 
-import PluginHeader from 'components/PluginHeader';
 import Input from 'components/InputsIndex';
+import PluginHeader from 'components/PluginHeader';
+import PopUpWarning from 'components/PopUpWarning';
 
 import Block from 'components/Block';
 
@@ -30,18 +31,20 @@ import styles from './styles.scss';
 import forms from './forms.json';
 
 class SettingsPage extends React.PureComponent {
+  state = { showWarning: false };
+
   getPluginHeaderActions = () => (
     [
       {
         label: 'content-manager.popUpWarning.button.cancel',
         kind: 'secondary',
-        onClick: () => {},
+        onClick: this.props.onReset,
         type: 'button',
       },
       {
         kind: 'primary',
         label: 'content-manager.containers.Edit.submit',
-        onClick: () => {},
+        onClick: this.handleSubmit,
         type: 'submit',
       },
     ]
@@ -54,7 +57,17 @@ class SettingsPage extends React.PureComponent {
     return input.type === 'toggle' ? value : value.toString();
   }
 
+  handleSubmit = (e) => {
+    e.preventDefault();
+    this.setState({ showWarning: true });
+  }
+
+  toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+
   render() {
+    const { showWarning } = this.state;
+    const { onChange, onSubmit } = this.props;
+
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>
         <PluginHeader
@@ -62,12 +75,27 @@ class SettingsPage extends React.PureComponent {
           title="Content Manager"
           description={{ id: 'content-manager.containers.SettingsPage.pluginHeaderDescription' }}
         />
+        <PopUpWarning
+          isOpen={showWarning}
+          toggleModal={this.toggle}
+          content={{
+            title: 'content-manager.popUpWarning.title',
+            message: 'content-manager.popUpWarning.warning.updateAllSettings',
+            cancel: 'content-manager.popUpWarning.button.cancel',
+            confirm: 'content-manager.popUpWarning.button.confirm',
+          }}
+          popUpWarningType="danger"
+          onConfirm={() => {
+            onSubmit();
+            this.toggle();
+          }}
+        />
         <div className={cn('row', styles.container)}>
           <Block
             description="content-manager.containers.SettingsPage.Block.generalSettings.description"
             title="content-manager.containers.SettingsPage.Block.generalSettings.title"
           >
-            <form onSubmit={(e) => e.preventDefault()} className={styles.ctmForm}>
+            <form onSubmit={this.handleSubmit} className={styles.ctmForm}>
               <div className="row">
                 <div className="col-md-10">
                   <div className="row">
@@ -76,7 +104,7 @@ class SettingsPage extends React.PureComponent {
                       return (
                         <Input
                           key={input.name}
-                          onChange={this.props.onChange}
+                          onChange={onChange}
                           value={this.getValue(input)}
                           {...input}
                         />
@@ -97,6 +125,8 @@ SettingsPage.defaultProps = {};
 
 SettingsPage.propTypes = {
   onChange: PropTypes.func.isRequired,
+  onReset: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
 };
 
@@ -104,13 +134,15 @@ const mapDispatchToProps = (dispatch) => (
   bindActionCreators(
     {
       onChange,
+      onReset,
+      onSubmit,
     },
     dispatch,
   )
 );
 
 const mapStateToProps = createStructuredSelector({
-  schema: makeSelectSchema(),
+  schema: makeSelectModifiedSchema(),
   settingsPage: makeSelectSettingsPage(),
 });
 

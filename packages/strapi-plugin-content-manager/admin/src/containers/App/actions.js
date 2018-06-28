@@ -12,6 +12,8 @@ import {
   LOAD_MODELS,
   LOADED_MODELS,
   ON_CHANGE,
+  ON_RESET,
+  ON_SUBMIT,
 } from './constants';
 
 export function emptyStore() {
@@ -55,5 +57,17 @@ export function onChange({ target }) {
     type: ON_CHANGE,
     keys: target.name.split('.'),
     value,
+  };
+}
+
+export function onReset() {
+  return {
+    type: ON_RESET,
+  };
+}
+
+export function onSubmit() {
+  return {
+    type: ON_SUBMIT,
   };
 }

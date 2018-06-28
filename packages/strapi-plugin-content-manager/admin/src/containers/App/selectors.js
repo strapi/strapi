@@ -41,10 +41,14 @@ const makeSelectLoading = () =>
 const makeSelectSchema = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('schema').toJS());
 
+const makeSelectModifiedSchema = () =>
+  createSelector(selectGlobalDomain(), substate => substate.get('modifiedSchema').toJS());
+
 export {
   selectGlobalDomain,
   selectLocationState,
   makeSelectLoading,
   makeSelectModelEntries,
+  makeSelectModifiedSchema,
   makeSelectSchema,
 };

@@ -145,8 +145,8 @@ export class ListPage extends React.Component {
    * @return {Object} Fields
    */
   getCurrentSchema = () =>
-    get(this.props.schema, [this.getCurrentModelName(), 'fields']) ||
-    get(this.props.schema, ['plugins', this.getSource(), this.getCurrentModelName(), 'fields']);
+    get(this.props.schema, ['models', this.getCurrentModelName(), 'fields']) ||
+    get(this.props.schema, ['models', 'plugins', this.getSource(), this.getCurrentModelName(), 'fields']);
 
   getPopUpDeleteAllMsg = () => (
     this.props.listPage.entriesToDelete.length > 1 ?
@@ -296,6 +296,12 @@ export class ListPage extends React.Component {
     return updatingParams || isLoading && get(records, this.getCurrentModelName()) === undefined;
   }
 
+  showSearch = () => get(this.getCurrentModel(), ['search']);
+
+  showFilters = () => get(this.getCurrentModel(), ['filters']);
+
+  showBulkActions = () => get(this.getCurrentModel(), ['bulkActions']);
+
   render() {
     const {
       addFilter,
@@ -341,12 +347,14 @@ export class ListPage extends React.Component {
     return (
       <div>
         <div className={cn('container-fluid', styles.containerFluid)}>
-          <Search
-            changeParams={this.props.changeParams}
-            initValue={getQueryParameters(this.props.location.search, '_q') || ''}
-            model={this.getCurrentModelName()}
-            value={params._q}
-          />
+          {this.showSearch() && (
+            <Search
+              changeParams={this.props.changeParams}
+              initValue={getQueryParameters(this.props.location.search, '_q') || ''}
+              model={this.getCurrentModelName()}
+              value={params._q}
+            />
+          )}
           <PluginHeader
             actions={pluginHeaderActions}
             description={{
@@ -364,55 +372,58 @@ export class ListPage extends React.Component {
             withDescriptionAnim={this.showLoaders()}
           />
           <div className={cn(styles.wrapper)}>
-            <FiltersPickWrapper
-              addFilter={addFilter}
-              appliedFilters={appliedFilters}
-              close={onToggleFilters}
-              filterToFocus={filterToFocus}
-              modelName={this.getCurrentModelName()}
-              onChange={onChange}
-              onSubmit={this.handleSubmit}
-              removeAllFilters={removeAllFilters}
-              removeFilter={removeFilter}
-              schema={this.getCurrentSchema()}
-              show={showFilter}
-            />
-            <div className={cn('row', styles.row)}>
-              <div className="col-md-12">
-                <Div
-                  decreaseMarginBottom={filters.length > 0}
-                >
-                  <div className="row">
-                    <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} />
-                    {filters.map((filter, key) => (
-                      <Filter
-                        key={key}
-                        filter={filter}
-                        index={key}
-                        onClick={onClickRemove}
-                        onClickOpen={openFiltersWithSelections}
-                        schema={this.getCurrentSchema()}
-                      />
-                    ))}
+            {this.showFilters() && (
+              <React.Fragment>
+                <FiltersPickWrapper
+                  addFilter={addFilter}
+                  appliedFilters={appliedFilters}
+                  close={onToggleFilters}
+                  filterToFocus={filterToFocus}
+                  modelName={this.getCurrentModelName()}
+                  onChange={onChange}
+                  onSubmit={this.handleSubmit}
+                  removeAllFilters={removeAllFilters}
+                  removeFilter={removeFilter}
+                  schema={this.getCurrentSchema()}
+                  show={showFilter}
+                />
+                <div className={cn('row', styles.row)}>
+                  <div className="col-md-12">
+                    <Div
+                      decreaseMarginBottom={filters.length > 0}
+                    >
+                      <div className="row">
+                        <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} />
+                        {filters.map((filter, key) => (
+                          <Filter
+                            key={key}
+                            filter={filter}
+                            index={key}
+                            onClick={onClickRemove}
+                            onClickOpen={openFiltersWithSelections}
+                            schema={this.getCurrentSchema()}
+                          />
+                        ))}
+                      </div>
+                    </Div>
                   </div>
-                </Div>
-              </div>
-            </div>
+                </div>
+              </React.Fragment>
+            )}
             <div className={cn('row', styles.row)}>
               <div className="col-md-12">
                 <Table
                   deleteAllValue={this.areAllEntriesSelected()}
                   entriesToDelete={entriesToDelete}
+                  enableBulkActions={this.showBulkActions()}
                   filters={filters}
                   handleDelete={this.toggleModalWarning}
-                  // headers={this.generateTableHeaders()}
                   headers={this.getTableHeaders()}
                   history={this.props.history}
                   onChangeSort={this.handleChangeSort}
                   onClickSelectAll={onClickSelectAll}
                   onClickSelect={onClickSelect}
                   onToggleDeleteAll={onToggleDeleteAll}
-                  // primaryKey={this.getCurrentModel().primaryKey || 'id'}
                   primaryKey={this.getModelPrimaryKey()}
                   records={get(records, this.getCurrentModelName(), [])}
                   redirectUrl={this.generateRedirectURI()}

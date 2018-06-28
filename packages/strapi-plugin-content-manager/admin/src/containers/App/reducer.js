@@ -11,11 +11,14 @@ import {
   LOAD_MODELS,
   LOADED_MODELS,
   ON_CHANGE,
+  ON_RESET,
+  ON_SUBMIT,
 } from './constants';
 
 const initialState = fromJS({
   modelEntries: 0,
   loading: true,
+  modifiedSchema: fromJS({}),
   schema: fromJS({}),
   formValidations: List([]),
 });
@@ -31,11 +34,12 @@ function appReducer(state = initialState, action) {
     case LOADED_MODELS:
       return state
         .update('schema', () => fromJS(action.models.models))
+        .update('modifiedSchema', () => fromJS(action.models.models))
         .set('loading', false);
     case ON_CHANGE:
       return state
-        .updateIn(['schema'].concat(action.keys), () => action.value)
-        .updateIn(['schema', 'models'], models => {
+        .updateIn(['modifiedSchema'].concat(action.keys), () => action.value)
+        .updateIn(['modifiedSchema', 'models'], models => {
           return models
             .keySeq()
             .reduce((acc, current) => {
@@ -58,6 +62,12 @@ function appReducer(state = initialState, action) {
                 }, acc);
             }, models);
         });
+    case ON_RESET:
+      return state
+        .update('modifiedSchema', () => state.get('schema'));
+    case ON_SUBMIT:
+      return state
+        .update('schema', () => state.get('modifiedSchema'));
     default:
       return state;
   }

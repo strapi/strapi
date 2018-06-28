@@ -15,6 +15,14 @@
     }
   }
 
+  // > tr {
+  //   th:first-child {
+  //     width: 50px;
+  //   }
+  // }
+}
+
+.withBulk {
   > tr {
     th:first-child {
       width: 50px;
