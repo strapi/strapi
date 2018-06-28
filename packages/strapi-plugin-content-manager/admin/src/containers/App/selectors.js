@@ -29,10 +29,6 @@ const selectLocationState = () => {
  * Default selector used by List
  */
 
-const makeSelectModels = () =>
-  createSelector(selectGlobalDomain(), globalState =>
-    globalState.get('models')
-  );
 
 const makeSelectModelEntries = () =>
   createSelector(selectGlobalDomain(), globalState =>
@@ -50,6 +46,5 @@ export {
   selectLocationState,
   makeSelectLoading,
   makeSelectModelEntries,
-  makeSelectModels,
   makeSelectSchema,
 };

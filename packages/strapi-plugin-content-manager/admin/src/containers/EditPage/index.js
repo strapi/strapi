@@ -25,7 +25,7 @@ import Edit from 'components/Edit';
 import EditRelations from 'components/EditRelations';
 
 // App selectors
-import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
+import { makeSelectSchema } from 'containers/App/selectors';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
@@ -100,6 +100,11 @@ export class EditPage extends React.Component {
     }
   }
 
+  componentDidCatch(error, info) {
+    console.log('err', err);
+    console.log('info', info);
+  }
+
   componentWillUnmount() {
     this.props.resetProps();
   }
@@ -123,7 +128,7 @@ export class EditPage extends React.Component {
    * Retrieve the model
    * @type {Object}
    */
-  getModel = () => get(this.props.models, ['models', this.getModelName()]) || get(this.props.models, ['plugins', this.getSource(), 'models', this.getModelName()]);
+  getModel = () => get(this.props.schema, [this.getModelName()]) || get(this.props.schema, ['plugins', this.getSource(), this.getModelName()]);
 
   /**
    * Retrieve specific attribute
@@ -327,7 +332,7 @@ EditPage.contextTypes = {
 };
 
 EditPage.defaultProps = {
-  models: {},
+  schema: {},
 };
 
 EditPage.propTypes = {
@@ -339,10 +344,9 @@ EditPage.propTypes = {
   initModelProps: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
-  models: PropTypes.object,
   onCancel: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
-  schema: PropTypes.object.isRequired,
+  schema: PropTypes.object,
   setFileRelations: PropTypes.func.isRequired,
   setFormErrors: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
@@ -367,7 +371,6 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   editPage: makeSelectEditPage(),
-  models: makeSelectModels(),
   schema: makeSelectSchema(),
 });
 

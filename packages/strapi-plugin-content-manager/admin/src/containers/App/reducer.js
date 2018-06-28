@@ -6,14 +6,13 @@
 
 import { fromJS, List } from 'immutable';
 
-import { EMPTY_STORE, GET_MODEL_ENTRIES_SUCCEEDED, LOAD_MODELS, LOADED_MODELS, UPDATE_SCHEMA } from './constants';
+import { EMPTY_STORE, GET_MODEL_ENTRIES_SUCCEEDED, LOAD_MODELS, LOADED_MODELS } from './constants';
 
 const initialState = fromJS({
   modelEntries: 0,
   loading: true,
-  models: false,
   schema: fromJS({}),
-  formValidations: List(),
+  formValidations: List([]),
 });
 
 function appReducer(state = initialState, action) {
@@ -26,13 +25,8 @@ function appReducer(state = initialState, action) {
       return state;
     case LOADED_MODELS:
       return state
-        .set('models', action.models.models)
-        .set('schema', fromJS(action.models.models))
+        .update('schema', () => fromJS(action.models.models))
         .set('loading', false);
-    case UPDATE_SCHEMA:
-      return state
-        .set('loading', false)
-        .set('schema', action.schema);
     default:
       return state;
   }

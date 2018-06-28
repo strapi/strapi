@@ -10,7 +10,6 @@ import {
   GET_MODEL_ENTRIES_SUCCEEDED,
   LOAD_MODELS,
   LOADED_MODELS,
-  UPDATE_SCHEMA,
 } from './constants';
 
 export function emptyStore() {
@@ -44,12 +43,5 @@ export function loadedModels(models) {
   return {
     type: LOADED_MODELS,
     models,
-  };
-}
-
-export function updateSchema(schema) {
-  return {
-    type: UPDATE_SCHEMA,
-    schema,
   };
 }
