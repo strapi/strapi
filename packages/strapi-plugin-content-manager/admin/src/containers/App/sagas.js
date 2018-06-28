@@ -47,6 +47,7 @@ export function* getModels() {
       method: 'GET',
     });
 
+    // console.log('getModels', response);
     yield put(loadedModels(response));
   } catch (err) {
     strapi.notification.error('content-manager.error.model.fetch');
@@ -56,7 +57,7 @@ export function* getModels() {
 export function* modelsLoaded() {
   const models = yield select(makeSelectModels());
   let schema;
-
+  // console.log('modelsLoaded',  models);
   try {
     schema = generateSchema(models);
   } catch (err) {
