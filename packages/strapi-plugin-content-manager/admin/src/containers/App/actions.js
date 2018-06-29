@@ -12,6 +12,7 @@ import {
   LOAD_MODELS,
   LOADED_MODELS,
   ON_CHANGE,
+  ON_CHANGE_SETTINGS,
   ON_RESET,
   ON_SUBMIT,
 } from './constants';
@@ -55,6 +56,16 @@ export function onChange({ target }) {
 
   return {
     type: ON_CHANGE,
+    keys: target.name.split('.'),
+    value,
+  };
+}
+
+export function onChangeSettings({ target }) {
+  const value = includes(target.name, 'pageEntries') ? parseInt(target.value, 10) : target.value;
+
+  return {
+    type: ON_CHANGE_SETTINGS,
     keys: target.name.split('.'),
     value,
   };

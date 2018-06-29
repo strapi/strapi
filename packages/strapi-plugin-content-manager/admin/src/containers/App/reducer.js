@@ -11,6 +11,7 @@ import {
   LOAD_MODELS,
   LOADED_MODELS,
   ON_CHANGE,
+  ON_CHANGE_SETTINGS,
   ON_RESET,
   ON_SUBMIT,
 } from './constants';
@@ -62,6 +63,9 @@ function appReducer(state = initialState, action) {
                 }, acc);
             }, models);
         });
+    case ON_CHANGE_SETTINGS:
+      return state
+        .updateIn(['modifiedSchema', 'models'].concat(action.keys), () => action.value);
     case ON_RESET:
       return state
         .update('modifiedSchema', () => state.get('schema'));

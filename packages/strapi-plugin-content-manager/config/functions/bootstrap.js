@@ -49,7 +49,8 @@ module.exports = async cb => {
       filters: true,
       bulkActions: true,
       pageEntries: 10,
-      defaultSort: 'id'
+      defaultSort: model.primaryKey,
+      sort: 'ASC',
     }, model);
   
     // Fields (non relation)

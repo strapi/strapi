@@ -19,6 +19,7 @@ import getQueryParameters from 'utils/getQueryParameters';
 import EditPage from 'containers/EditPage';
 import ListPage from 'containers/ListPage';
 import SettingsPage from 'containers/SettingsPage';
+import SettingPage from 'containers/SettingPage';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import EmptyAttributesView from 'components/EmptyAttributesView';
 
@@ -50,6 +51,7 @@ class App extends React.Component {
     return (
       <div className="content-manager">
         <Switch>
+          <Route path="/plugins/content-manager/ctm-configurations/:slug" component={SettingPage} />
           <Route path="/plugins/content-manager/ctm-configurations" component={SettingsPage} />
           <Route path="/plugins/content-manager/:slug/:id" component={EditPage} />
           <Route path="/plugins/content-manager/:slug" component={ListPage} />

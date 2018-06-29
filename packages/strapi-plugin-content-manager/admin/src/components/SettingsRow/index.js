@@ -11,9 +11,9 @@ import IcoContainer from 'components/IcoContainer';
 import styles from './styles.scss';
 
 
-function SettingsRow({name }) {
+function SettingsRow({ destination, name, onClick }) {
   return (
-    <div className={styles.settingsRow}>
+    <div className={styles.settingsRow} onClick={() => onClick(destination)}>
       <div>
         <div className={styles.frame}>
           <div className={styles.icon}>
@@ -28,7 +28,9 @@ function SettingsRow({name }) {
 }
 
 SettingsRow.propTypes = {
+  destination: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default SettingsRow;

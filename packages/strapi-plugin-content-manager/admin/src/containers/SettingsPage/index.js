@@ -26,7 +26,6 @@ import injectSaga from 'utils/injectSaga';
 
 import reducer from './reducer';
 import saga from './saga';
-import makeSelectSettingsPage from './selectors';
 import styles from './styles.scss';
 
 import forms from './forms.json';
@@ -34,18 +33,18 @@ import forms from './forms.json';
 class SettingsPage extends React.PureComponent {
   state = { showWarning: false };
 
-  getModels = (data = this.props.schema.models, destination = '') => {
+  getModels = (data = this.props.schema.models, destination = '/') => {
     const models = Object.keys(data).reduce((acc, curr) => {
       if (curr !== 'plugins') {
   
         if (!data[curr].fields && _.isObject(data[curr])) {
-          return this.getModels(data[curr], `${destination}/${curr}`);
+          return this.getModels(data[curr], `${destination}${curr}::`);
         }
         
-        return acc.concat([{ name: curr, destination: `${destination}/${curr}` }]);
+        return acc.concat([{ name: curr, destination: `${destination}${curr}` }]);
       } 
     
-      return this.getModels(data[curr], `${destination}/${curr}`);
+      return this.getModels(data[curr], `${destination}${curr}::`);
     }, []);
 
     return sortBy(
@@ -76,6 +75,11 @@ class SettingsPage extends React.PureComponent {
     const value = get(generalSettings, input.name.split('.')[1], input.type === 'toggle' ? false : 10);
 
     return input.type === 'toggle' ? value : value.toString();
+  }
+
+  handleClick = (destination) => {
+    const { location: { pathname } } = this.props;
+    this.props.history.push(`${pathname}${destination}`);
   }
 
   handleSubmit = (e) => {
@@ -138,7 +142,7 @@ class SettingsPage extends React.PureComponent {
             description="content-manager.containers.SettingsPage.Block.contentType.description"
           >
             <div className={styles.contentTypesWrapper}>
-              {this.getModels().map(model => <SettingsRow key={model.name} {...model} />)}
+              {this.getModels().map(model => <SettingsRow key={model.name} {...model} onClick={this.handleClick} />)}
             </div>
           </Block>
         </div>
@@ -150,6 +154,8 @@ class SettingsPage extends React.PureComponent {
 SettingsPage.defaultProps = {};
 
 SettingsPage.propTypes = {
+  history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
@@ -169,7 +175,6 @@ const mapDispatchToProps = (dispatch) => (
 
 const mapStateToProps = createStructuredSelector({
   schema: makeSelectModifiedSchema(),
-  settingsPage: makeSelectSettingsPage(),
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

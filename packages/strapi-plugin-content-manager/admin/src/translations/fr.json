@@ -4,7 +4,6 @@
   "containers.Home.pluginHeaderTitle": "Type de contenu",
   "containers.Home.pluginHeaderDescription": "Créer et modifier votre type de contenu",
   "containers.Home.introduction": "Pour éditer du contenu, choisissez un type de données dans le menu de gauche.",
-  "containers.Home.pluginHeaderDescription": "Un outil complet pour gérer facilement vos données.",
   "containers.Edit.submit": "Valider",
   "containers.Edit.editing": "Édition en cours...",
   "containers.Edit.delete": "Supprimer",
@@ -15,6 +14,9 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entrée trouvée",
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
+  "containers.SettingPage.pluginHeaderDescription": "Configurez les paramètres de ce modèle",
+  "containers.SettingPage.listSettings.title": "Liste — Paramètres",
+  "containers.SettingPage.listSettings.description": "Configurez les options de ce modèle",
   "containers.SettingsPage.pluginHeaderDescription": "Configurez les paramètres par défaut de vos modèles",
   "containers.SettingsPage.Block.generalSettings.description": "Configurez  les options par défault de vos modèles",
   "containers.SettingsPage.Block.generalSettings.title": "Général",
@@ -79,6 +81,7 @@
   "form.Input.bulkActions": "Autoriser les bulk actions",
   "form.Input.pageEntries": "Nombre d'entrées par page",
   "form.Input.pageEntries.inputDescription": "Note: Vous pouvez les modifier ces valeurs par modèle",
+  "form.Input.defaultSort": "Attribut de trie par défault",
 
   "notification.error.relationship.fetch": "Une erreur est survenue en récupérant les relations.",
 

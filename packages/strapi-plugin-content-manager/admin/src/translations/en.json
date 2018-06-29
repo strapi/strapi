@@ -14,8 +14,11 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
-  "containers.SettingsPage.pluginHeaderDescription": "Configure the default settings for all your content types",
-  "containers.SettingsPage.Block.generalSettings.description": "Configure the default options for your content types",
+  "containers.SettingPage.listSettings.title": "List — Settings",
+  "containers.SettingPage.listSettings.description": "Configure the options for this content type",
+  "containers.SettingPage.pluginHeaderDescription": "Configure the specific settings for this Content Type",
+  "containers.SettingsPage.pluginHeaderDescription": "Configure the default settings for all your Content types",
+  "containers.SettingsPage.Block.generalSettings.description": "Configure the default options for your Content Types",
   "containers.SettingsPage.Block.generalSettings.title": "General",
   "containers.SettingsPage.Block.contentType.title": "Content Types",
   "containers.SettingsPage.Block.contentType.description": "Configure the specific settings",
@@ -81,6 +84,7 @@
   "form.Input.bulkActions": "Enable bulk actions",
   "form.Input.pageEntries": "Entries per page",
   "form.Input.pageEntries.inputDescription": "Note: You can override this value in the Content Type settings page.",
+  "form.Input.defaultSort": "Default sort attribute",
 
   "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
 
