@@ -111,6 +111,17 @@ export class ListPage extends React.Component {
     get(this.props.schema, ['models', 'plugins', this.getSource(), this.getCurrentModelName()])
   );
 
+  getCurrentModelDefaultLimit = () => (
+    get(this.getCurrentModel(), 'pageEntries', 10)
+  );
+
+  getCurrentModelDefaultSort = () => {
+    const sortAttr = get(this.getCurrentModel(), 'defaultSort', 'id');
+    const order = get(this.getCurrentModel(), 'sort', 'ASC');
+
+    return order === 'ASC' ? sortAttr : `-${sortAttr}`;
+  };
+
   /**
    * Helper to retrieve the current model name
    * @return {String} the current model's name
@@ -123,7 +134,7 @@ export class ListPage extends React.Component {
    */
   getData = (props, setUpdatingParams = false) => {
     const source = getQueryParameters(props.location.search, 'source');
-    const _limit = toInteger(getQueryParameters(props.location.search, '_limit')) || 10;
+    const _limit = toInteger(getQueryParameters(props.location.search, '_limit')) || this.getCurrentModelDefaultLimit();
     const _page = toInteger(getQueryParameters(props.location.search, '_page')) || 1;
     const _sort = this.findPageSort(props);
     const _q = getQueryParameters(props.location.search, '_q') || '';
@@ -190,25 +201,9 @@ export class ListPage extends React.Component {
    * @return {String}      the model's primaryKey
    */
   findPageSort = props => {
-    const {
-      match: {
-        params: { slug },
-      },
-    } = props;
-    const source = this.getSource();
-    const modelPrimaryKey = get(props.schema, [slug.toLowerCase(), 'primaryKey']);  
-    // Check if the model is in a plugin
-    const pluginModelPrimaryKey = get(props.schema.plugins, [
-      source,
-      slug.toLowerCase(),
-      'primaryKey',
-    ]);
-  
     return (
       getQueryParameters(props.location.search, '_sort') ||
-      modelPrimaryKey ||
-      pluginModelPrimaryKey ||
-      'id'
+      this.getCurrentModelDefaultSort()
     );
   };
 

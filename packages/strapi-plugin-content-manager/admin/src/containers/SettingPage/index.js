@@ -38,7 +38,7 @@ class SettingPage extends React.PureComponent {
   getModelName = () => {
     const { match: { params: { slug } } } = this.props;
 
-    return last(slug.split('::'));
+    return slug.split('::');
   }
 
   getPath = () => {
@@ -49,11 +49,11 @@ class SettingPage extends React.PureComponent {
 
   getSelectOptions = (input) => {
     const { schema: { models } } = this.props;
-    const currentAttributes = models[this.getModelName()].attributes;
-    const selectOptions = [models[this.getModelName()].primaryKey]
+    const currentAttributes = get(models, this.getModelName().concat(['attributes']), []);
+    const selectOptions = [get(models, this.getModelName().concat(['primaryKey']), 'id')]
       .concat(Object.keys(currentAttributes)
         .filter(attr => currentAttributes[attr].type !== 'json' && currentAttributes[attr].type !== 'array'));
-    
+
     return input.name === 'defaultSort' ? selectOptions : input.selectOptions;
   }
 
@@ -99,7 +99,7 @@ class SettingPage extends React.PureComponent {
         <div className={cn('container-fluid', styles.containerFluid)}>
           <PluginHeader
             actions={this.getPluginHeaderActions()}
-            title={`Content Manager - ${upperFirst(this.getModelName())}`}
+            title={`Content Manager - ${upperFirst(last(this.getModelName()))}`}
             description={{ id: 'content-manager.containers.SettingPage.pluginHeaderDescription' }}
           />
           <PopUpWarning
