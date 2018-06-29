@@ -31,7 +31,7 @@ module.exports = {
         const localField = !ast.dominant ? '_id' : ast.via === <%= globalID %>.collectionName ? '_id' : ast.alias;
         const foreignField = ast.dominant ?
            (ast.via === <%= globalID %>.collectionName ? ast.via : '_id') :
-           (ast.via === <%= globalID %>.collectionName ? '_id' : ast.via)
+           (ast.via === <%= globalID %>.collectionName ? '_id' : ast.via);
 
         acc.push({
           $lookup: {

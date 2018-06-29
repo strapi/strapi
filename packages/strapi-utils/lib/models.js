@@ -505,13 +505,13 @@ module.exports = {
             relationAttribute.hasOwnProperty('model')
           )) {
             // Mysql stores boolean as 1 or 0
-            const field = models[relationAttribute.collection ? relationAttribute.collection : relationAttribute.model].attributes[relationKey]
+            const field = models[relationAttribute.collection ? relationAttribute.collection : relationAttribute.model].attributes[relationKey];
             if (client === 'mysql' && field.type && field.type === 'boolena') {
               formattedValue = value === 'true' ? '1' : '0';
             }
 
             result = convertor(formattedValue, type, relationKey);
-            result.key = result.key.replace('where.', `relations.${relationName}.`)
+            result.key = result.key.replace('where.', `relations.${relationName}.`);
           }
         } else {
           // Mysql stores boolean as 1 or 0
