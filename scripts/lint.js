@@ -35,13 +35,14 @@ const files = glob
   .sync('**/*.js', { ignore: '**/node_modules/**' })
   .filter(f => changedFiles.has(f))
   .filter(
-    package => 
+    package =>
       !package.includes('README.md') &&
       !package.includes('strapi-middleware-views') &&
       !package.includes('strapi-lint') &&
       !package.includes('strapi-plugin-settings-manager') &&
       !package.includes('scripts') &&
-      !package.includes('test') 
+      !package.includes('test') &&
+      !package.includes('jest.config.js')
   )
   .map(file => {
     const directoryArray = file.split('/');
