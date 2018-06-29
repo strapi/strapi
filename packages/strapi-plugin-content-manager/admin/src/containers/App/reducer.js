@@ -10,6 +10,7 @@ import {
   GET_MODEL_ENTRIES_SUCCEEDED,
   LOAD_MODELS,
   LOADED_MODELS,
+  MOVE_ATTR,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
   ON_RESET,
@@ -37,6 +38,13 @@ function appReducer(state = initialState, action) {
         .update('schema', () => fromJS(action.models.models))
         .update('modifiedSchema', () => fromJS(action.models.models))
         .set('loading', false);
+    case MOVE_ATTR:
+      return state
+        .updateIn(['modifiedSchema', 'models'].concat(action.keys).concat(['listDisplay']), list => (
+          list
+            .delete(action.dragIndex)
+            .insert(action.hoverIndex, list.get(action.dragIndex))
+        ));
     case ON_CHANGE:
       return state
         .updateIn(['modifiedSchema'].concat(action.keys), () => action.value)

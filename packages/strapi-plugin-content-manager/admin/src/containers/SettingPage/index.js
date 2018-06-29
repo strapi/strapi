@@ -9,10 +9,12 @@ import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { get, last, upperFirst } from 'lodash';
 import cn from 'classnames';
+import HTML5Backend from 'react-dnd-html5-backend';
+import { DragDropContext } from 'react-dnd';
 
 import PropTypes from 'prop-types';
 
-import { onChangeSettings, onSubmit, onReset } from 'containers/App/actions';
+import { moveAttr, onChangeSettings, onSubmit, onReset } from 'containers/App/actions';
 import { makeSelectModifiedSchema } from 'containers/App/selectors';
 
 import BackHeader from 'components/BackHeader';
@@ -21,6 +23,7 @@ import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 
 import Block from 'components/Block';
+import DraggableAttr from 'components/DraggableAttr';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
@@ -34,6 +37,10 @@ import styles from './styles.scss';
 
 class SettingPage extends React.PureComponent {
   state = { showWarning: false };
+
+  getListDisplay = () => (
+    get(this.props.schema, ['models', this.getModelName()].concat(['listDisplay']), [])
+  );
 
   getModelName = () => {
     const { match: { params: { slug } } } = this.props;
@@ -90,7 +97,7 @@ class SettingPage extends React.PureComponent {
 
   render() {
     const { showWarning } = this.state;
-    const { onChangeSettings, onSubmit } = this.props;
+    const { moveAttr, onChangeSettings, onSubmit } = this.props;
     const namePath = this.getPath();
 
     return (
@@ -142,6 +149,25 @@ class SettingPage extends React.PureComponent {
                       })}
                     </div>
                   </div>
+                  <div className="col-md-12">
+                    <div className={styles.separator} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-5">
+                    {this.getListDisplay().map((attr, index) => (
+                      <div key={attr.name} style={{ display: 'flex' }}>
+                        <div>{index}</div>
+                        <DraggableAttr
+                          key={attr.name}
+                          keys={this.getPath()}
+                          index={index}
+                          name={attr.name}
+                          moveAttr={moveAttr}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </form>
             </Block>
@@ -157,6 +183,7 @@ SettingPage.defaultProps = {};
 SettingPage.propTypes = {
   history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
+  moveAttr: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
@@ -166,6 +193,7 @@ SettingPage.propTypes = {
 const mapDispatchToProps = (dispatch) => (
   bindActionCreators(
     {
+      moveAttr,
       onChangeSettings,
       onReset,
       onSubmit,
@@ -187,4 +215,4 @@ export default compose(
   withReducer,
   withSaga,
   withConnect,
-)(SettingPage);
+)(DragDropContext(HTML5Backend)(SettingPage));

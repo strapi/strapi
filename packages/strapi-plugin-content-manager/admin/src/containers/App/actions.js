@@ -11,6 +11,7 @@ import {
   GET_MODEL_ENTRIES_SUCCEEDED,
   LOAD_MODELS,
   LOADED_MODELS,
+  MOVE_ATTR,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
   ON_RESET,
@@ -48,6 +49,15 @@ export function loadedModels(models) {
   return {
     type: LOADED_MODELS,
     models,
+  };
+}
+
+export function moveAttr(dragIndex, hoverIndex, keys) {
+  return {
+    type: MOVE_ATTR,
+    dragIndex,
+    hoverIndex,
+    keys,
   };
 }
 

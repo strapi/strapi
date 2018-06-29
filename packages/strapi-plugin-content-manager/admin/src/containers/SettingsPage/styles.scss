@@ -24,10 +24,10 @@
   padding-top: 9px;
   margin-left: -28px;
   margin-right: -28px;
-  > div:first-child {
+  > div:last-child {
     > div {
 
-      border-top: none;
+      border-bottom: none;
     }
   }
 }
