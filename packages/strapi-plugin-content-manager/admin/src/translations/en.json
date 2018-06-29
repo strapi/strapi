@@ -17,6 +17,8 @@
   "containers.SettingsPage.pluginHeaderDescription": "Configure the default settings for all your content types",
   "containers.SettingsPage.Block.generalSettings.description": "Configure the default options for your content types",
   "containers.SettingsPage.Block.generalSettings.title": "General",
+  "containers.SettingsPage.Block.contentType.title": "Content Types",
+  "containers.SettingsPage.Block.contentType.description": "Configure the specific settings",
 
   "components.AddFilterCTA.add": "Filters",
   "components.AddFilterCTA.hide": "Filters",

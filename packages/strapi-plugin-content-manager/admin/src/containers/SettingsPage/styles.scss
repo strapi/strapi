@@ -19,3 +19,15 @@
 .ctmForm {
   padding-top: 2.6rem;
 }
+
+.contentTypesWrapper {
+  padding-top: 9px;
+  margin-left: -28px;
+  margin-right: -28px;
+  > div:first-child {
+    > div {
+
+      border-top: none;
+    }
+  }
+}

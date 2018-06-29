@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import cn from 'classnames';
-import { get } from 'lodash';
+import { get, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
 
 import { onChange, onSubmit, onReset } from 'containers/App/actions';
@@ -19,6 +19,7 @@ import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 
 import Block from 'components/Block';
+import SettingsRow from 'components/SettingsRow';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
@@ -32,6 +33,26 @@ import forms from './forms.json';
 
 class SettingsPage extends React.PureComponent {
   state = { showWarning: false };
+
+  getModels = (data = this.props.schema.models, destination = '') => {
+    const models = Object.keys(data).reduce((acc, curr) => {
+      if (curr !== 'plugins') {
+  
+        if (!data[curr].fields && _.isObject(data[curr])) {
+          return this.getModels(data[curr], `${destination}/${curr}`);
+        }
+        
+        return acc.concat([{ name: curr, destination: `${destination}/${curr}` }]);
+      } 
+    
+      return this.getModels(data[curr], `${destination}/${curr}`);
+    }, []);
+
+    return sortBy(
+      models.filter(obj => obj.name !== 'permission' && obj.name !== 'role'),
+      ['name'],
+    );
+  }
 
   getPluginHeaderActions = () => (
     [
@@ -99,21 +120,26 @@ class SettingsPage extends React.PureComponent {
               <div className="row">
                 <div className="col-md-10">
                   <div className="row">
-                    {forms.inputs.map(input => {
-
-                      return (
-                        <Input
-                          key={input.name}
-                          onChange={onChange}
-                          value={this.getValue(input)}
-                          {...input}
-                        />
-                      );
-                    })}
+                    {forms.inputs.map(input => (
+                      <Input
+                        key={input.name}
+                        onChange={onChange}
+                        value={this.getValue(input)}
+                        {...input}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
             </form>
+          </Block>
+          <Block
+            title="content-manager.containers.SettingsPage.Block.contentType.title"
+            description="content-manager.containers.SettingsPage.Block.contentType.description"
+          >
+            <div className={styles.contentTypesWrapper}>
+              {this.getModels().map(model => <SettingsRow key={model.name} {...model} />)}
+            </div>
           </Block>
         </div>
       </div>
