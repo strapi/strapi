@@ -20,19 +20,74 @@ module.exports = {
   fetchAll: (params) => {
     // Convert `params` object to filters compatible with Mongo.
     const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+
     // Select field to populate.
     const populate = <%= globalID %>.associations
-      .filter(ast => ast.autoPopulate !== false)
-      .map(ast => ast.alias)
-      .join(' ');
+      .filter(ast => ast.autoPopulate)
+      .reduce((acc, ast) => {
+        const from = ast.collection ? ast.collection : ast.model;
+        const as = ast.alias;
+        const localField = !ast.dominant ? '_id' : ast.via === <%= globalID %>.collectionName ? '_id' : ast.alias;
+        const foreignField = ast.dominant ?
+           (ast.via === <%= globalID %>.collectionName ? ast.via : '_id') :
+           (ast.via === <%= globalID %>.collectionName ? '_id' : ast.via)
 
-    return <%= globalID %>
-      .find()
-      .where(filters.where)
-      .sort(filters.sort)
+        acc.push({
+          $lookup: {
+            from,
+            localField,
+            foreignField,
+            as,
+          }
+        });
+
+        if (ast.type === 'collection' && ast.dominant) {
+          acc.push({
+            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: [`$${ast.alias}`, 0] }, '$$ROOT'] } },
+          });
+        } else if (ast.type === 'model') {
+          acc.push({
+            $unwind: `$${ast.alias}`,
+          });
+        }
+
+        if (filters.relations) {
+          Object.keys(filters.relations).forEach(
+            (relationName) => {
+              if (ast.alias === relationName) {
+                const association = <%= globalID %>.associations.find(a => a.alias === relationName);
+                if (association) {
+                  const relation = filters.relations[relationName];
+
+                  Object.keys(relation).forEach(
+                    (filter) => {
+                      acc.push({
+                        $match: { [`${relationName}.${filter}`]: relation[filter] }
+                      });
+                    }
+                  );
+                }
+              }
+            }
+          );
+        }
+
+        return acc;
+      }, []);
+
+    const result = <%= globalID %>
+      .aggregate([
+        {
+          $match: filters.where
+        },
+        ...populate,
+      ])
       .skip(filters.start)
-      .limit(filters.limit)
-      .populate(populate);
+      .limit(filters.limit);
+
+    if (filters.sort) result.sort(filters.sort);
+
+    return result;
   },
 
   /**

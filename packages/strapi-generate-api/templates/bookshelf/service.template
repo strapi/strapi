@@ -43,6 +43,43 @@ module.exports = {
         qb.orderBy(filters.sort.key, filters.sort.order);
       }
 
+      Object.keys(filters.relations).forEach(
+        (relationName) => {
+          const ast = <%= globalID %>.associations.find(a => a.alias === relationName);
+          if (ast) {
+            const relation = filters.relations[relationName];
+
+            qb.distinct();
+
+            if (ast.tableCollectionName) {
+              qb.innerJoin(
+                ast.tableCollectionName,
+                `${ast.tableCollectionName}.${<%= globalID %>.info.name}_${<%= globalID %>.primaryKey}`,
+                `${<%= globalID %>.collectionName}.${<%= globalID %>.primaryKey}`,
+              );
+              qb.innerJoin(
+                `${relationName}`,
+                `${relationName}.${<%= globalID %>.attributes[relationName].column}`,
+                `${ast.tableCollectionName}.${<%= globalID %>.attributes[relationName].attribute}_${<%= globalID %>.attributes[relationName].column}`,
+              );
+            } else {
+              if (ast.type === 'collection') {
+                qb.innerJoin(`${relationName}`, `${relationName}.${ast.via}`, `${<%= globalID %>.collectionName}.${<%= globalID %>.primaryKey}`);
+              } else if (ast.type === 'model') {
+                const model = strapi.models[ast.model];
+                qb.innerJoin(`${model.collectionName}`, `${model.collectionName}.${model.primaryKey}`, `${<%= globalID %>.collectionName}.${<%= globalID %>.primaryKey}`);
+              }
+            }
+
+            Object.keys(relation).forEach(
+              (filter) => {
+                qb.where(`${relationName}.${filter}`, `${relation[filter].symbol}`, `${relation[filter].value}`);
+              }
+            );
+          }
+        }
+      );
+
       qb.offset(filters.start);
       qb.limit(filters.limit);
     }).fetchAll({
