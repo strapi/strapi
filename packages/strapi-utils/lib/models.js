@@ -467,6 +467,7 @@ module.exports = {
     const convertor = strapi.hook[connector].load().getQueryParams;
     const convertParams = {
       where: {},
+      relations: {},
       sort: '',
       start: 0,
       limit: 100
@@ -494,15 +495,37 @@ module.exports = {
           key = key.replace(type, '');
         }
 
-        // Mysql stores boolean as 1 or 0
-        if (client === 'mysql' && _.get(models, [model, 'attributes', key, 'type']) === 'boolean') {
-          formattedValue = value === 'true' ? '1' : '0';
-        }
+        if (key.includes('.')) {
+          // Check if it's a valid relation
+          const [relationName, relationKey] = key.split('.');
+          const relationAttribute = models[model] && models[model].attributes[relationName];
 
-        result = convertor(formattedValue, type, key);
+          if (relationAttribute && (
+            relationAttribute.hasOwnProperty('collection') ||
+            relationAttribute.hasOwnProperty('model')
+          )) {
+            // Mysql stores boolean as 1 or 0
+            const field = models[relationAttribute.collection ? relationAttribute.collection : relationAttribute.model].attributes[relationKey]
+            if (client === 'mysql' && field.type && field.type === 'boolena') {
+              formattedValue = value === 'true' ? '1' : '0';
+            }
+
+            result = convertor(formattedValue, type, relationKey);
+            result.key = result.key.replace('where.', `relations.${relationName}.`)
+          }
+        } else {
+          // Mysql stores boolean as 1 or 0
+          if (client === 'mysql' && _.get(models, [model, 'attributes', key, 'type']) === 'boolean') {
+            formattedValue = value === 'true' ? '1' : '0';
+          }
+
+          result = convertor(formattedValue, type, key);
+        }
       }
 
-      _.set(convertParams, result.key, result.value);
+      if (result) {
+        _.set(convertParams, result.key, result.value);
+      }
     });
 
     return convertParams;
