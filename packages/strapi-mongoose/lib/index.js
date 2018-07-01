@@ -5,6 +5,7 @@
  */
 
 // Public node modules.
+const url = require('url');
 const _ = require('lodash');
 const mongoose = require('mongoose');
 const Mongoose = mongoose.Mongoose;
@@ -70,6 +71,9 @@ module.exports = function (strapi) {
         }
 
         connectOptions.ssl = ssl === true || ssl === 'true';
+
+        const uriParams = url.parse(uri, true).query;
+        Object.assign(connectOptions, uriParams);
 
         options.debug = debug === true || debug === 'true';
 
