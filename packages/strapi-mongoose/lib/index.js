@@ -73,11 +73,7 @@ module.exports = function (strapi) {
 
         options.debug = debug === true || debug === 'true';
 
-        if (uri) {
-          instance.connect(uri);
-        } else {
-          instance.connect(`mongodb://${host}:${port}/${database}`, connectOptions);
-        }
+        instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
 
         for (let key in options) {
           instance.set(key, options[key]);
