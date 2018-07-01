@@ -6,6 +6,8 @@
 
 // Node.js core.
 const path = require('path');
+const os = require('os');
+const crypto = require('crypto');
 const exec = require('child_process').exec;
 
 
@@ -42,7 +44,7 @@ module.exports = (scope, cb) => {
 
   // Make changes to the rootPath where the Strapi project will be created.
   scope.rootPath = path.resolve(process.cwd(), scope.name || '');
-  scope.tmpPath = path.resolve(process.cwd(), 'tmp');
+  scope.tmpPath = path.resolve(os.tmpdir(), `strapi${ crypto.randomBytes(6).toString('hex') }`);
 
   // Ensure we aren't going to inadvertently delete any files.
   try {
