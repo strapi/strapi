@@ -25,7 +25,7 @@ The entire logic of the admin panel is located in a single folder named `./admin
 |        └─── translations  // Directory containing text messages for each supported languages
 └─── config
 |    └─── routes.json // Admin's API routes
-|    └─── admin.json // Admin's specific settings
+|    └─── layout.json // Admin's specific settings
 └─── controllers // Admin's API controllers
 └─── services // Admin's API services
 └─── packages.json // Admin's npm dependencies
