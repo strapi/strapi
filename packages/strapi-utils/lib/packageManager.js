@@ -33,8 +33,9 @@ module.exports = {
         const data = watcher('npm -g ls');
         // Check if strapi is installed with NPM
         isNPM = includes(data, 'strapi');
+
         try {
-          const yarnData = watcher('yarn global -ls');
+          const yarnData = watcher('yarn global ls');
           isNPM = includes(yarnData, 'strapi');
         } catch(err) {
           isNPM = true;
@@ -48,8 +49,9 @@ module.exports = {
     return isNPM;
   },
 
-  commands: (cmdType, path = '') => {
-    const isNPM = module.isStrapiInstalledWithNPM();
+  commands: function (cmdType, path = '') {
+    const isNPM = this.isStrapiInstalledWithNPM();
+    
     switch(cmdType) {
       case 'install --prefix':
         return isNPM ? `npm install --prefix ${path}` : `yarn --cwd ${path} add`;

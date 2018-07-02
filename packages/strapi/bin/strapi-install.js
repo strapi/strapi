@@ -75,7 +75,7 @@ module.exports = function (plugin, cliArguments) {
 
       // Remove the created package.json needed for yarn
       if (!isStrapiInstalledWithNPM) {
-        shell.rm('r', `${pluginPath}/package.json`);
+        shell.rm('-r', `${pluginPath}/package.json`);
       }
 
       // Debug message.
