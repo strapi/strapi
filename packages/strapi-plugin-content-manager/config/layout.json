@@ -11,7 +11,20 @@
         "appearance": ""
       },
       "description": {
-        "appearance": "WYSIWYG"
+        "appearance": ""
+      },
+      "price": {
+        "appearance": ""
+      },
+      "sold": {
+        "appearance": ""
+      }
+    }
+  },
+  "tag": {
+    "attributes": {
+      "name": {
+        "appearance": ""
       }
     }
   }

@@ -11,7 +11,7 @@ import {
   DropTarget,
 } from 'react-dnd';
 import { flow } from 'lodash';
-
+import PropTypes from 'prop-types';
 import styles from './styles.scss';
 
 const draggableAttrSource = {

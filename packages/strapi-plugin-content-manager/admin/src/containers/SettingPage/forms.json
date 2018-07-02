@@ -2,7 +2,7 @@
   "inputs": [
     {
       "label": { "id": "content-manager.form.Input.search" },
-      "customBootstrapClass": "col-md-5",
+      "customBootstrapClass": "col-md-4",
       "didCheckErrors": false,
       "errors": [],
       "name": "search",
@@ -11,7 +11,7 @@
     },
     {
       "label": { "id": "content-manager.form.Input.filters" },
-      "customBootstrapClass": "col-md-5",
+      "customBootstrapClass": "col-md-4",
       "didCheckErrors": false,
       "errors": [],
       "name": "filters",
@@ -20,7 +20,7 @@
     },
     {
       "label": { "id": "content-manager.form.Input.bulkActions" },
-      "customBootstrapClass": "col-md-2",
+      "customBootstrapClass": "col-md-4",
       "didCheckErrors": false,
       "errors": [],
       "name": "bulkActions",
@@ -50,9 +50,10 @@
     },
     {
       "label": "",
-      "customBootstrapClass": "col-md-2",
+      "customBootstrapClass": "col-md-1",
       "didCheckErrors": false,
       "errors": [],
+      "inputStyle": { "maxWidth": "130px" },
       "name": "sort",
       "selectOptions": ["ASC", "DESC"],
       "type": "select",

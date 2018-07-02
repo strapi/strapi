@@ -7,7 +7,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { get, last, upperFirst } from 'lodash';
+import { get, upperFirst } from 'lodash';
 import cn from 'classnames';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
@@ -43,15 +43,17 @@ class SettingPage extends React.PureComponent {
   );
 
   getModelName = () => {
-    const { match: { params: { slug } } } = this.props;
+    const { match: { params: { slug, endPoint } } } = this.props;
 
-    return slug.split('::');
+    return endPoint || slug;
   }
 
   getPath = () => {
-    const { match: { params: { slug } } } = this.props;
+    const { match: { params: { slug, source, endPoint } } } = this.props;
 
-    return slug.split('::').join('.');
+    return [slug, source, endPoint]
+      .filter(param => param !== undefined)
+      .join('.');
   }
 
   getSelectOptions = (input) => {
@@ -106,7 +108,7 @@ class SettingPage extends React.PureComponent {
         <div className={cn('container-fluid', styles.containerFluid)}>
           <PluginHeader
             actions={this.getPluginHeaderActions()}
-            title={`Content Manager - ${upperFirst(last(this.getModelName()))}`}
+            title={`Content Manager - ${upperFirst(this.getModelName())}`}
             description={{ id: 'content-manager.containers.SettingPage.pluginHeaderDescription' }}
           />
           <PopUpWarning
@@ -131,7 +133,7 @@ class SettingPage extends React.PureComponent {
             >
               <form onSubmit={this.handleSubmit} className={styles.ctmForm}>
                 <div className="row">
-                  <div className="col-md-10">
+                  <div className="col-md-12">
                     <div className="row">
                       {forms.inputs.map(input => {
                         const inputName = `${namePath}.${input.name}`;
@@ -157,7 +159,7 @@ class SettingPage extends React.PureComponent {
                   <div className="col-md-5">
                     {this.getListDisplay().map((attr, index) => (
                       <div key={attr.name} style={{ display: 'flex' }}>
-                        <div>{index}</div>
+                        <div>{index}.</div>
                         <DraggableAttr
                           key={attr.name}
                           keys={this.getPath()}
