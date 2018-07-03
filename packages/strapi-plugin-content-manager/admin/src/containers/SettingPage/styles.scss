@@ -21,6 +21,30 @@
 }
 
 .separator {
-  margin-top: 15px;
+  margin-top: 19px;
   border-top: 1px solid #F6F6F6;
+}
+
+.draggedWrapper {
+  display: flex;
+  > div:first-child {
+    margin-right: 10px;
+    height: 30px;
+    line-height: 30px;
+  }
+}
+
+.listDisplayWrapper {
+  padding-top: 21px;
+}
+
+.draggedDescription {
+  color: #333740;
+  font-size: 13px;
+  font-weight: 500;
+
+  > p {
+    margin-bottom: 28px;
+    color: #787E8F;
+  }
 }

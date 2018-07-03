@@ -13,6 +13,7 @@ import {
   MOVE_ATTR,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
+  ON_REMOVE,
   ON_RESET,
   ON_SUBMIT,
 } from './constants';
@@ -40,7 +41,7 @@ function appReducer(state = initialState, action) {
         .set('loading', false);
     case MOVE_ATTR:
       return state
-        .updateIn(['modifiedSchema', 'models'].concat(action.keys).concat(['listDisplay']), list => (
+        .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => (
           list
             .delete(action.dragIndex)
             .insert(action.hoverIndex, list.get(action.dragIndex))
@@ -74,6 +75,10 @@ function appReducer(state = initialState, action) {
     case ON_CHANGE_SETTINGS:
       return state
         .updateIn(['modifiedSchema', 'models'].concat(action.keys), () => action.value);
+    case ON_REMOVE:
+      return state.updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => (
+        list.delete(action.index)
+      ));
     case ON_RESET:
       return state
         .update('modifiedSchema', () => state.get('schema'));

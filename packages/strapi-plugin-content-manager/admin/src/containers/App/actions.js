@@ -14,6 +14,7 @@ import {
   MOVE_ATTR,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
+  ON_REMOVE,
   ON_RESET,
   ON_SUBMIT,
 } from './constants';
@@ -78,6 +79,14 @@ export function onChangeSettings({ target }) {
     type: ON_CHANGE_SETTINGS,
     keys: target.name.split('.'),
     value,
+  };
+}
+
+export function onRemove(index, keys) {
+  return {
+    type: ON_REMOVE,
+    index,
+    keys,
   };
 }
 

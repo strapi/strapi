@@ -22,7 +22,7 @@ class Table extends React.Component {
       (
         <TableEmpty
           filters={this.props.filters}
-          colspan={this.props.headers.length + 1}
+          colspan={this.props.enableBulkActions ? this.props.headers.length + 1 : this.props.headers.length}
           contentType={this.props.routeParams.slug}
           search={this.props.search}
         />

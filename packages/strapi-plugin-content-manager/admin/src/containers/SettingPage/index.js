@@ -11,10 +11,17 @@ import { get, upperFirst } from 'lodash';
 import cn from 'classnames';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
+import { FormattedMessage } from 'react-intl';
 
 import PropTypes from 'prop-types';
 
-import { moveAttr, onChangeSettings, onSubmit, onReset } from 'containers/App/actions';
+import {
+  moveAttr,
+  onChangeSettings,
+  onRemove,
+  onReset,
+  onSubmit,
+} from 'containers/App/actions';
 import { makeSelectModifiedSchema } from 'containers/App/selectors';
 
 import BackHeader from 'components/BackHeader';
@@ -36,10 +43,10 @@ import styles from './styles.scss';
 
 
 class SettingPage extends React.PureComponent {
-  state = { showWarning: false };
+  state = { showWarning: false, isDraggingSibling: false };
 
   getListDisplay = () => (
-    get(this.props.schema, ['models', this.getModelName()].concat(['listDisplay']), [])
+    get(this.props.schema, `models.${this.getPath()}.listDisplay`, [])
   );
 
   getModelName = () => {
@@ -95,11 +102,15 @@ class SettingPage extends React.PureComponent {
     this.setState({ showWarning: true });
   }
 
+  updateSiblingHoverState = () => {
+    this.setState(prevState => ({ isDraggingSibling: !prevState.isDraggingSibling }));
+  };
+
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
   render() {
-    const { showWarning } = this.state;
-    const { moveAttr, onChangeSettings, onSubmit } = this.props;
+    const { isDraggingSibling, showWarning } = this.state;
+    const { moveAttr, onChangeSettings, onRemove, onSubmit } = this.props;
     const namePath = this.getPath();
 
     return (
@@ -155,20 +166,31 @@ class SettingPage extends React.PureComponent {
                     <div className={styles.separator} />
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-md-5">
-                    {this.getListDisplay().map((attr, index) => (
-                      <div key={attr.name} style={{ display: 'flex' }}>
-                        <div>{index}.</div>
-                        <DraggableAttr
-                          key={attr.name}
-                          keys={this.getPath()}
-                          index={index}
-                          name={attr.name}
-                          moveAttr={moveAttr}
-                        />
-                      </div>
-                    ))}
+                <div className={styles.listDisplayWrapper}>
+                  <div className="row">
+                    <div className={cn('col-md-12', styles.draggedDescription)}>
+                      <FormattedMessage id="content-manager.containers.SettingPage.attributes" />
+                      <p>
+                        <FormattedMessage id="content-manager.containers.SettingPage.attributes.description" />
+                      </p>
+                    </div>
+                    <div className="col-md-5">
+                      {this.getListDisplay().map((attr, index) => (
+                        <div key={attr.name} className={styles.draggedWrapper}>
+                          <div>{index}.</div>
+                          <DraggableAttr
+                            key={attr.name}
+                            keys={this.getPath()}
+                            index={index}
+                            name={attr.name}
+                            moveAttr={moveAttr}
+                            onRemove={onRemove}
+                            updateSiblingHoverState={this.updateSiblingHoverState}
+                            isDraggingSibling={isDraggingSibling}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </form>
@@ -187,6 +209,7 @@ SettingPage.propTypes = {
   match: PropTypes.object.isRequired,
   moveAttr: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
@@ -197,6 +220,7 @@ const mapDispatchToProps = (dispatch) => (
     {
       moveAttr,
       onChangeSettings,
+      onRemove,
       onReset,
       onSubmit,
     },

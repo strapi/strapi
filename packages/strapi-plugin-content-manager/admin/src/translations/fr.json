@@ -14,9 +14,13 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entrée trouvée",
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
+
+  "containers.SettingPage.attributes": "Attributs",
+  "containers.SettingPage.attributes.description": "Organiser les attributs du modèle",
   "containers.SettingPage.pluginHeaderDescription": "Configurez les paramètres de ce modèle",
   "containers.SettingPage.listSettings.title": "Liste — Paramètres",
   "containers.SettingPage.listSettings.description": "Configurez les options de ce modèle",
+
   "containers.SettingsPage.pluginHeaderDescription": "Configurez les paramètres par défaut de vos modèles",
   "containers.SettingsPage.Block.generalSettings.description": "Configurez  les options par défault de vos modèles",
   "containers.SettingsPage.Block.generalSettings.title": "Général",

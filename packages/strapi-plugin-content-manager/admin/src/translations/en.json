@@ -14,6 +14,10 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
+  
+  "containers.SettingPage.attributes": "Attributes fields",
+  "containers.SettingPage.attributes.description": "Define the order of the attributes",
+
   "containers.SettingPage.listSettings.title": "List — Settings",
   "containers.SettingPage.listSettings.description": "Configure the options for this content type",
   "containers.SettingPage.pluginHeaderDescription": "Configure the specific settings for this Content Type",

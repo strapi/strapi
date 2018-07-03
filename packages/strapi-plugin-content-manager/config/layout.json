@@ -18,6 +18,18 @@
       },
       "sold": {
         "appearance": ""
+      },
+      "date": {
+        "appearance": ""
+      },
+      "email": {
+        "appearance": ""
+      },
+      "password": {
+        "appearance": ""
+      },
+      "enum": {
+        "appearance": ""
       }
     }
   },
