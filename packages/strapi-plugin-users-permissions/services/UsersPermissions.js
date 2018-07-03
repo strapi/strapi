@@ -199,7 +199,11 @@ module.exports = {
   },
 
   updatePermissions: async function (cb) {
-    const actions = strapi.plugins['users-permissions'].config.actions || [];
+    // fetch all the current permissions from the database, and format them into an array of actions.
+    const databasePermissions = await strapi.query('permission', 'users-permissions').find();
+    const actions = databasePermissions
+      .map(permission => `${permission.type}.${permission.controller}.${permission.action}`);
+    
 
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
@@ -232,7 +236,7 @@ module.exports = {
     // Merge array into one.
     const currentActions = appActions.concat(pluginsActions);
     // Count permissions available.
-    const permissions = await strapi.query('permission', 'users-permissions').count();
+    const permissions = databasePermissions.length;
 
     // Compare to know if actions have been added or removed from controllers.
     if (!_.isEqual(actions, currentActions) || permissions < 1) {
