@@ -4,9 +4,6 @@
 const execSync = require('child_process').execSync;
 const path = require('path');
 
-// Logger.
-const logger = require('strapi-utils').logger;
-
 module.exports = (scope, success, error) => {
   const Mongoose = require(path.resolve(`${scope.tmpPath}/node_modules/mongoose`));
 
@@ -31,17 +28,13 @@ module.exports = (scope, success, error) => {
 
   Mongoose.connect(`mongodb://${scope.database.settings.host}:${scope.database.settings.port}/${scope.database.settings.database}`, connectOptions, function (err) {
     if (err) {
-      logger.warn('Database connection has failed! Make sure your database is running.');
+      console.log('⚠️ Database connection has failed! Make sure your database is running.');
       return error();
     }
-
-    logger.info('The app has been connected to the database successfully!');
 
     Mongoose.connection.close();
 
     execSync(`rm -r "${scope.tmpPath}"`);
-
-    logger.info('Copying the dashboard...');
 
     success();
   });
