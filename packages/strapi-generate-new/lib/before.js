@@ -214,7 +214,7 @@ module.exports = (scope, cb) => {
               });
           }),
           new Promise(resolve => {
-            const isStrapiInstalledWithNPM = process.argv.indexOf('new') !== -1 && process.argv.indexOf('--dev') !== -1 || packageManager.isStrapiInstalledWithNPM();
+            const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
             let packageCmd = isStrapiInstalledWithNPM ? `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha` : packageManager.commands('install --prefix', scope.tmpPath);
             // let cmd = `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha`;
             // Manually create the temp directory for yarn

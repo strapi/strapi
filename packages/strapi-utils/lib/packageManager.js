@@ -1,3 +1,4 @@
+const fs = require('fs');
 const shell = require('shelljs');
 const { includes } = require('lodash');
 
@@ -26,11 +27,14 @@ module.exports = {
     if (process.argv.indexOf('new') !== -1 && process.argv.indexOf('--dev') !== -1) {
       skipCheck = true;
     }
-    
+
     if (!skipCheck) {
       try {
         // Retrieve all the packages installed with NPM
-        const data = watcher('npm -g ls');
+        const npmPath = watcher('npm root -g');
+
+        const data = fs.readdirSync(npmPath.trim());
+
         // Check if strapi is installed with NPM
         isNPM = includes(data, 'strapi');
 
@@ -51,7 +55,7 @@ module.exports = {
 
   commands: function (cmdType, path = '') {
     const isNPM = this.isStrapiInstalledWithNPM();
-    
+
     switch(cmdType) {
       case 'install --prefix':
         return isNPM ? `npm install --prefix ${path}` : `yarn --cwd ${path} add`;
