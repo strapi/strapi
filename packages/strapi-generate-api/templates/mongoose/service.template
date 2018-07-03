@@ -34,6 +34,7 @@ module.exports = {
             (ast.via === <%= globalID %>.collectionName ? ast.via : '_id') :
             (ast.via === <%= globalID %>.collectionName ? '_id' : ast.via);
 
+        // Add the juncture like the `.populate()` function
         acc.push({
           $lookup: {
             from,
@@ -43,11 +44,8 @@ module.exports = {
           }
         });
 
-        if (ast.type === 'collection' && ast.dominant) {
-          acc.push({
-            $replaceRoot: { newRoot: { $mergeObjects: [{ $arrayElemAt: [`$${ast.alias}`, 0] }, '$$ROOT'] } },
-          });
-        } else if (ast.type === 'model') {
+        // Unwind the relation's result if only one is expected
+        if (ast.type === 'model') {
           acc.push({
             $unwind: {
               path: `$${ast.alias}`,
@@ -56,6 +54,16 @@ module.exports = {
           });
         }
 
+        // Preserve relation field if it is empty
+        acc.push({
+          $addFields: {
+            [ast.alias]: {
+              $ifNull: [`$${ast.alias}`, null]
+            }
+          }
+        });
+
+        // Filtrate the result depending of params
         if (filters.relations) {
           Object.keys(filters.relations).forEach(
             (relationName) => {
