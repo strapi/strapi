@@ -53,9 +53,9 @@ class TableRow extends React.Component {
 
         const date = value && isObject(value) && value._isAMomentObject === true ?
           value :
-          moment(value);
+          moment.utc(value);
 
-        return date.utc().format('YYYY-MM-DD HH:mm:ss');
+        return date.format('YYYY-MM-DD HH:mm:ss');
       }
       case 'password':
         return '••••••••';

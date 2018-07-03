@@ -1,6 +1,6 @@
 {
   "name": "strapi-mongoose",
-  "version": "3.0.0-alpha.12.5",
+  "version": "3.0.0-alpha.12.6",
   "description": "Mongoose hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -19,7 +19,7 @@
     "mongoose": "^5.0.16",
     "mongoose-float": "^1.0.2",
     "pluralize": "^6.0.0",
-    "strapi-utils": "3.0.0-alpha.12.5"
+    "strapi-utils": "3.0.0-alpha.12.6"
   },
   "strapi": {
     "isHook": true
