@@ -46,35 +46,40 @@ module.exports = {
 
       Object.keys(filters.relations).forEach(
         (relationName) => {
-          const ast = <%= globalID %>.associations.find(a => a.alias === relationName);
+          const ast = <%= globalID.toLowerCase() %>.associations.find(a => a.alias === relationName);
           if (ast) {
-            const relation = filters.relations[relationName];
+            const model = ast.plugin ?
+              strapi.plugins[ast.plugin].models[ast.model ? ast.model : ast.collection] :
+              strapi.models[ast.model ? ast.model : ast.collection];
 
             qb.distinct();
 
             if (ast.tableCollectionName) {
               qb.innerJoin(
                 ast.tableCollectionName,
-                `${ast.tableCollectionName}.${<%= globalID %>.info.name}_${<%= globalID %>.primaryKey}`,
-                `${<%= globalID %>.collectionName}.${<%= globalID %>.primaryKey}`,
+                `${ast.tableCollectionName}.${<%= globalID.toLowerCase() %>.info.name}_${<%= globalID.toLowerCase() %>.primaryKey}`,
+                `${<%= globalID.toLowerCase() %>.collectionName}.${<%= globalID.toLowerCase() %>.primaryKey}`,
               );
               qb.innerJoin(
                 `${relationName}`,
-                `${relationName}.${<%= globalID %>.attributes[relationName].column}`,
-                `${ast.tableCollectionName}.${<%= globalID %>.attributes[relationName].attribute}_${<%= globalID %>.attributes[relationName].column}`,
+                `${relationName}.${<%= globalID.toLowerCase() %>.attributes[relationName].column}`,
+                `${ast.tableCollectionName}.${<%= globalID.toLowerCase() %>.attributes[relationName].attribute}_${<%= globalID.toLowerCase() %>.attributes[relationName].column}`,
               );
             } else {
-              if (ast.type === 'collection') {
-                qb.innerJoin(`${relationName}`, `${relationName}.${ast.via}`, `${<%= globalID %>.collectionName}.${<%= globalID %>.primaryKey}`);
-              } else if (ast.type === 'model') {
-                const model = strapi.models[ast.model];
-                qb.innerJoin(`${model.collectionName}`, `${model.collectionName}.${model.primaryKey}`, `${<%= globalID %>.collectionName}.${<%= globalID %>.primaryKey}`);
-              }
+              const relationTable = model.collectionName;
+              const externalKey = ast.type === 'collection' ?
+                `${model.collectionName}.${ast.via}` :
+                `${model.collectionName}.${model.primaryKey}`;
+              const internalKey = !ast.dominant ? `${<%= globalID.toLowerCase() %>.collectionName}.${<%= globalID.toLowerCase() %>.primaryKey}` :
+                ast.via === <%= globalID.toLowerCase() %>.collectionName ? `${<%= globalID.toLowerCase() %>.collectionName}.${ast.alias}` : `${<%= globalID.toLowerCase() %>.collectionName}.${<%= globalID.toLowerCase() %>.primaryKey}`;
+
+              qb.innerJoin(relationTable, externalKey, internalKey);
             }
 
+            const relation = filters.relations[relationName];
             Object.keys(relation).forEach(
               (filter) => {
-                qb.where(`${relationName}.${filter}`, `${relation[filter].symbol}`, `${relation[filter].value}`);
+                qb.where(`${model.collectionName}.${filter}`, `${relation[filter].symbol}`, `${relation[filter].value}`);
               }
             );
           }

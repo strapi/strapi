@@ -26,12 +26,13 @@ module.exports = {
     const populate = <%= globalID %>.associations
       .filter(ast => ast.autoPopulate)
       .reduce((acc, ast) => {
-        const from = ast.collection ? ast.collection : ast.model;
+        const from = ast.plugin ? `${ast.plugin}_${ast.model}` : ast.collection ? ast.collection : ast.model;
         const as = ast.alias;
-        const localField = !ast.dominant ? '_id' : ast.via === <%= globalID %>.collectionName ? '_id' : ast.alias;
-        const foreignField = ast.dominant ?
-           (ast.via === <%= globalID %>.collectionName ? ast.via : '_id') :
-           (ast.via === <%= globalID %>.collectionName ? '_id' : ast.via);
+        const localField = !ast.dominant ? '_id' : ast.via === <%= globalID %>.collectionName || ast.via === 'related' ? '_id' : ast.alias;
+        const foreignField = ast.filter ? `${ast.via}.ref` :
+          ast.dominant ?
+            (ast.via === <%= globalID %>.collectionName ? ast.via : '_id') :
+            (ast.via === <%= globalID %>.collectionName ? '_id' : ast.via);
 
         acc.push({
           $lookup: {
@@ -48,7 +49,10 @@ module.exports = {
           });
         } else if (ast.type === 'model') {
           acc.push({
-            $unwind: `$${ast.alias}`,
+            $unwind: {
+              path: `$${ast.alias}`,
+              preserveNullAndEmptyArrays: true
+            }
           });
         }
 
