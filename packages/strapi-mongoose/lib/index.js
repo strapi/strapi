@@ -5,6 +5,7 @@
  */
 
 // Public node modules.
+const url = require('url');
 const _ = require('lodash');
 const mongoose = require('mongoose');
 const Mongoose = mongoose.Mongoose;
@@ -51,7 +52,8 @@ module.exports = function (strapi) {
       _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
         const { uri, host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
-        const { authenticationDatabase, ssl, debug } = _.defaults(connection.options, strapi.config.hook.settings.mongoose);
+        const uriOptions = uri ? url.parse(uri, true).query : {};
+        const { authenticationDatabase, ssl, debug } = _.defaults(connection.options, uriOptions, strapi.config.hook.settings.mongoose);
 
         // Connect to mongo database
         const connectOptions = {};
@@ -69,9 +71,9 @@ module.exports = function (strapi) {
           connectOptions.authSource = authenticationDatabase;
         }
 
-        connectOptions.ssl = Boolean(ssl);
+        connectOptions.ssl = ssl === true || ssl === 'true';
 
-        options.debug = Boolean(debug);
+        options.debug = debug === true || debug === 'true';
 
         instance.connect(uri || `mongodb://${host}:${port}/${database}`, connectOptions);
 

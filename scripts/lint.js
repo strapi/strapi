@@ -20,6 +20,7 @@ const watcher = (label, pckgName, type = 'front') => {
   shell.echo(label);
   shell.cd(pckgName);
   const cmd = includes(pckgName, 'strapi-helper-plugin') ? helperCmd : `${frontCmd} && ${backCmd}`;
+
   const data = shell.exec(cmd, { silent: true });
   shell.echo(chalk(eslintErrorsFormatter(data.stdout)));
   shell.cd('../..');
@@ -34,7 +35,7 @@ const files = glob
   .sync('**/*.js', { ignore: '**/node_modules/**' })
   .filter(f => changedFiles.has(f))
   .filter(
-    package =>
+    package => 
       !package.includes('README.md') &&
       !package.includes('strapi-middleware-views') &&
       !package.includes('strapi-lint') &&
@@ -48,6 +49,7 @@ const files = glob
 
     return take(directoryArray, toTake).join('/');
   });
+
 
 files
   .filter((directory, index) => files.indexOf(directory) === index)
