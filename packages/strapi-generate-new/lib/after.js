@@ -42,7 +42,6 @@ module.exports = (scope, cb) => {
   // Add this check to know if we are in development mode so the creation is faster.
   const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
   const globalRootPath = isStrapiInstalledWithNPM ? execSync('npm root -g') : execSync(packageManager.commands('root -g'));
-  // const globalRootPath = execSync('npm root -g');
 
   // Verify if the dependencies are available into the global
   _.forEach(strapiDependencies, (key) => {
@@ -53,7 +52,6 @@ module.exports = (scope, cb) => {
       availableDependencies.push({
         key,
         global: true,
-        // path: path.resolve(_.trim(globalRootPath.toString()), key)
         path: depPath
       });
     } catch (e) {
