@@ -13,7 +13,7 @@ import PopUpWarning from 'components/PopUpWarning';
 import IcoContainer from 'components/IcoContainer';
 
 import IcoBoolean from '../../assets/images/icon_boolean.png';
-import IcoDate from '../../assets/images/icon_date.png';
+import IcoMoment from '../../assets/images/icon_moment.png';
 import IcoEmail from '../../assets/images/icon_email.png';
 import IcoImage from '../../assets/images/icon_image.png';
 import IcoNumber from '../../assets/images/icon_number.png';
@@ -34,19 +34,20 @@ class AttributeRow extends React.Component {
     super(props);
     this.asset = {
       boolean: IcoBoolean,
-      date: IcoDate,
-      datetime: IcoDate,
-      time: IcoDate,
-      timestamp: IcoDate,
+      moment: IcoMoment,
+      date: IcoMoment,
+      datetime: IcoMoment,
+      time: IcoMoment,
+      timestamp: IcoMoment,
       media: IcoImage,
-      number: IcoNumber,
       json: IcoJson,
-      relation: IcoRelation,
-      string: IcoString,
-      text: IcoText,
+      number: IcoNumber,
       integer: IcoNumber,
       float: IcoNumber,
       decimal: IcoNumber,
+      relation: IcoRelation,
+      string: IcoString,
+      text: IcoText,
       email: IcoEmail,
       password: IcoPassword,
       enumeration: IcoEnum,

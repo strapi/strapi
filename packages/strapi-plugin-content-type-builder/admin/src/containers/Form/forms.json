@@ -93,8 +93,8 @@
         "description": "content-type-builder.popUpForm.attributes.boolean.description"
       },
       {
-        "type": "date",
-        "description": "content-type-builder.popUpForm.attributes.date.description"
+        "type": "moment",
+        "description": "content-type-builder.popUpForm.attributes.moment.description"
       },
       {
         "type": "json",
@@ -628,12 +628,12 @@
         ]
       }
     },
-    "date": {
+    "moment": {
       "baseSettings": {
         "items": [
           {
             "label": {
-              "id": "content-type-builder.form.attribute.item.date.name"
+              "id": "content-type-builder.form.attribute.item.moment.name"
             },
             "name": "name",
             "type": "string",
@@ -644,16 +644,16 @@
           },
           {
             "label": {
-              "id": "content-type-builder.form.attribute.item.date.type"
+              "id": "content-type-builder.form.attribute.item.moment.type"
             },
             "name": "params.type",
             "type": "select",
             "value": "datetime",
             "items": [
-              { "name": "content-type-builder.form.attribute.item.date.type.datetime", "value": "datetime" },
-              { "name": "content-type-builder.form.attribute.item.date.type.date", "value": "date" },
-              { "name": "content-type-builder.form.attribute.item.date.type.time", "value": "time" },
-              { "name": "content-type-builder.form.attribute.item.date.type.timestamp", "value": "timestamp" }
+              { "name": "content-type-builder.form.attribute.item.moment.type.datetime", "value": "datetime" },
+              { "name": "content-type-builder.form.attribute.item.moment.type.date", "value": "date" },
+              { "name": "content-type-builder.form.attribute.item.moment.type.time", "value": "time" },
+              { "name": "content-type-builder.form.attribute.item.moment.type.timestamp", "value": "timestamp" }
             ],
             "validations": {
               "required": true

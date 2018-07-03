@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import IcoBoolean from '../../assets/images/icon_boolean.png';
-import IcoDate from '../../assets/images/icon_date.png';
+import IcoMoment from '../../assets/images/icon_moment.png';
 import IcoEmail from '../../assets/images/icon_email.png';
 import IcoImage from '../../assets/images/icon_image.png';
 import IcoJson from '../../assets/images/icon_json.png';
@@ -26,7 +26,7 @@ import styles from './styles.scss';
 /* eslint-disable jsx-a11y/no-autofocus */
 const asset = {
   'boolean': IcoBoolean,
-  'date': IcoDate,
+  'moment': IcoMoment,
   'email': IcoEmail,
   'media': IcoImage,
   'number': IcoNumber,
