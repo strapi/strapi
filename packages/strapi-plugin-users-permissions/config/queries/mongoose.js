@@ -1,14 +1,78 @@
 const _ = require('lodash');
 
 module.exports = {
-  find: async function (params = {}, populate) {
-    return this
-      .find(params.where)
-      .limit(Number(params.limit))
-      .sort(params.sort)
-      .skip(Number(params.skip))
-      .populate(populate || this.associations.map(x => x.alias).join(' '))
-      .lean();
+  find: async function (params = {}) {
+    let collectionName = this.collectionName;
+    if (this.collectionName.split('_')) {
+      collectionName = this.collectionName.split('_')[this.collectionName.split('_').length - 1];
+    }
+
+    const populate = this.associations
+      .filter(ast => ast.autoPopulate)
+      .reduce((acc, ast) => {
+        const from = ast.plugin ? `${ast.plugin}_${ast.model}` : ast.collection ? ast.collection : ast.model;
+        const as = ast.alias;
+        const localField = !ast.dominant ? '_id' : ast.via === collectionName || ast.via === 'related' ? '_id' : ast.alias;
+        const foreignField = ast.filter ? `${ast.via}.ref` :
+          ast.dominant ?
+            (ast.via === collectionName ? ast.via : '_id') :
+            (ast.via === collectionName ? '_id' : ast.via);
+
+        acc.push({
+          $lookup: {
+            from,
+            localField,
+            foreignField,
+            as,
+          }
+        });
+
+        if (ast.type === 'model') {
+          acc.push({
+            $unwind: {
+              path: `$${ast.alias}`,
+              preserveNullAndEmptyArrays: true
+            }
+          });
+        }
+
+        if (params.relations) {
+          Object.keys(params.relations).forEach(
+            (relationName) => {
+              if (ast.alias === relationName) {
+                const association = this.associations.find(a => a.alias === relationName);
+                if (association) {
+                  const relation = params.relations[relationName];
+
+                  Object.keys(relation).forEach(
+                    (filter) => {
+                      acc.push({
+                        $match: { [`${relationName}.${filter}`]: relation[filter] }
+                      });
+                    }
+                  );
+                }
+              }
+            }
+          );
+        }
+
+        return acc;
+      }, []);
+
+    const result = this
+      .aggregate([
+        {
+          $match: params.where ? params.where : {}
+        },
+        ...populate,
+      ]);
+
+    if (params.start) result.skip(params.start);
+    if (params.limit) result.limit(params.limit);
+    if (params.sort) result.sort(params.sort);
+
+    return result;
   },
 
   count: async function (params = {}) {
