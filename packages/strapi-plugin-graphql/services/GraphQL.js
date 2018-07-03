@@ -171,6 +171,7 @@ module.exports = {
         case 'float':
           type = 'Float';
           break;
+        case 'time':
         case 'date':
         case 'datetime':
         case 'timestamp':
