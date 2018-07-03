@@ -26,6 +26,8 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
     switch (locale) {
       case 'en':
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/us.svg';
+      case 'pt-BR':
+        return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/br.svg';
       case 'zh':
       case 'zh-Hans':
         return 'https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.1.0/flags/4x3/cn.svg';

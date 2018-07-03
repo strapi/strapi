@@ -1,0 +1,14 @@
+{
+  "ConfigPage.title": "E-mail - Definições",
+  "ConfigPage.description": "Configure a extensão do email",
+
+  "EditForm.Input.number.label": "Tamanho máximo permitido (em MB)",
+  "EditForm.Input.select.label": "Provedores",
+  "EditForm.Input.select.inputDescription": "Os emails podem ser enviados com o provedor predefinido (Sendmail) ou por um provedor externo",
+  "EditForm.Input.toggle.label": "Ativar envio de email",
+
+  "plugin.description.short": "Enviar emails.",
+  "plugin.description.long": "Enviar emails.",
+
+  "notification.config.success": "As configurações foram atualizadas"
+}
