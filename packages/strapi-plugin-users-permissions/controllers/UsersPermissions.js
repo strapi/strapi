@@ -237,7 +237,7 @@ module.exports = {
       type: 'plugin',
       name: 'users-permissions',
       key: 'grant'
-    }).set({value: ctx.request.body});
+    }).set({value: ctx.request.body.providers});
 
     ctx.send({ ok: true });
   }
