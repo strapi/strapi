@@ -13,6 +13,7 @@ import {
   MOVE_ATTR,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
+  ON_CLICK_ADD_ATTR,
   ON_REMOVE,
   ON_RESET,
   ON_SUBMIT,
@@ -75,6 +76,9 @@ function appReducer(state = initialState, action) {
     case ON_CHANGE_SETTINGS:
       return state
         .updateIn(['modifiedSchema', 'models'].concat(action.keys), () => action.value);
+    case ON_CLICK_ADD_ATTR:
+      return state
+        .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => list.push(fromJS(action.data)));
     case ON_REMOVE:
       return state.updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => (
         list.delete(action.index)

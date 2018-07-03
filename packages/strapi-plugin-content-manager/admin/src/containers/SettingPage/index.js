@@ -7,17 +7,19 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { get, upperFirst } from 'lodash';
+import { findIndex, get, upperFirst } from 'lodash';
 import cn from 'classnames';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 import { FormattedMessage } from 'react-intl';
+import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 
 import PropTypes from 'prop-types';
 
 import {
   moveAttr,
   onChangeSettings,
+  onClickAddAttr,
   onRemove,
   onReset,
   onSubmit,
@@ -43,7 +45,21 @@ import styles from './styles.scss';
 
 
 class SettingPage extends React.PureComponent {
-  state = { showWarning: false, isDraggingSibling: false };
+  state = { showWarning: false, isDraggingSibling: false, isOpen: false };
+
+  getDropDownItems = () => {
+    const attributes = get(this.props.schema, `models.${this.getPath()}.attributes`, []);
+    return Object.keys(attributes)
+      .filter(attr => {
+        return findIndex(this.getListDisplay(), ['name', attr]) === -1 && !attributes[attr].hasOwnProperty('collection') && !attributes[attr].hasOwnProperty('model');
+      })
+      .map(attr => {
+        const searchable = attributes[attr].type !== 'json' && attributes[attr].type !== 'array';
+        const obj = Object.assign(attributes[attr], { name: attr, label: upperFirst(attr), searchable, sortable: searchable });
+
+        return obj;
+      });
+  }
 
   getListDisplay = () => (
     get(this.props.schema, `models.${this.getPath()}.listDisplay`, [])
@@ -108,9 +124,15 @@ class SettingPage extends React.PureComponent {
 
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
+  toggleDropdown = () => {
+    if (this.getListDisplay().length > 0) {
+      this.setState(prevState => ({ isOpen: !prevState.isOpen }));
+    }
+  }
+
   render() {
-    const { isDraggingSibling, showWarning } = this.state;
-    const { moveAttr, onChangeSettings, onRemove, onSubmit } = this.props;
+    const { isDraggingSibling, isOpen, showWarning } = this.state;
+    const { moveAttr, onChangeSettings, onClickAddAttr, onRemove, onSubmit } = this.props;
     const namePath = this.getPath();
 
     return (
@@ -190,6 +212,34 @@ class SettingPage extends React.PureComponent {
                           />
                         </div>
                       ))}
+                      <ButtonDropdown isOpen={isOpen} toggle={this.toggleDropdown}>
+                        <DropdownToggle caret>
+                          Button Dropdown
+                        </DropdownToggle>
+                        <DropdownMenu>
+                          {this.getDropDownItems().map((item, i) => {
+                            if (i !== this.getDropDownItems().length - 1 && this.getDropDownItems().length > 0) {
+                              return (
+                                <React.Fragment key={item.name}>
+                                  <DropdownItem onClick={() => onClickAddAttr(item, this.getPath())}>
+                                    {item.label}
+                                  </DropdownItem>
+                                  <DropdownItem divider />
+                                </React.Fragment>
+                              );
+                            }
+
+                            return (
+                              <DropdownItem
+                                key={item.name}
+                                onClick={() => onClickAddAttr(item, this.getPath())}
+                              >
+                                {item.label}
+                              </DropdownItem>
+                            );                
+                          })}
+                        </DropdownMenu>
+                      </ButtonDropdown>
                     </div>
                   </div>
                 </div>
@@ -209,6 +259,7 @@ SettingPage.propTypes = {
   match: PropTypes.object.isRequired,
   moveAttr: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
+  onClickAddAttr: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
@@ -220,6 +271,7 @@ const mapDispatchToProps = (dispatch) => (
     {
       moveAttr,
       onChangeSettings,
+      onClickAddAttr,
       onRemove,
       onReset,
       onSubmit,

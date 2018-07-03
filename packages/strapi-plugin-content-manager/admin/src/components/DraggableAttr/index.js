@@ -12,6 +12,8 @@ import {
 } from 'react-dnd';
 import { flow } from 'lodash';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+
 import styles from './styles.scss';
 
 const draggableAttrSource = {
@@ -119,7 +121,9 @@ class DraggableAttr extends React.Component {
             <i className="fa fa-th" aria-hidden="true"></i>
             <span>{name}</span>
             { isHover && !isDragging && (
-              <div className={styles.info}>Click to edit</div>
+              <div className={styles.info}>
+                <FormattedMessage id="content-manager.components.DraggableAttr.edit" />
+              </div>
             )}
             <span className={styles.removeIcon} onClick={this.handleRemove} />            
           </div>

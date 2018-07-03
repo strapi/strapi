@@ -14,6 +14,7 @@ import {
   MOVE_ATTR,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
+  ON_CLICK_ADD_ATTR,
   ON_REMOVE,
   ON_RESET,
   ON_SUBMIT,
@@ -79,6 +80,14 @@ export function onChangeSettings({ target }) {
     type: ON_CHANGE_SETTINGS,
     keys: target.name.split('.'),
     value,
+  };
+}
+
+export function onClickAddAttr(data, keys) {
+  return {
+    type: ON_CLICK_ADD_ATTR,
+    data,
+    keys,
   };
 }
 

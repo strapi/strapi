@@ -29,13 +29,16 @@
 
   "components.AddFilterCTA.add": "Filters",
   "components.AddFilterCTA.hide": "Filters",
-  "components.FilterOptions.button.apply": "Apply",
+
+  "components.DraggableAttr.edit": "Click to edit",
+
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Apply",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Clear all",
   "components.FiltersPickWrapper.PluginHeader.description": "Set the conditions to apply to filter the entries",
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filters",
   "components.FiltersPickWrapper.hide": "Hide",
-
+  
+  "components.FilterOptions.button.apply": "Apply",
   "components.FilterOptions.FILTER_TYPES.=": "is",
   "components.FilterOptions.FILTER_TYPES._ne": "is not",
   "components.FilterOptions.FILTER_TYPES._lt": "is lower than",
