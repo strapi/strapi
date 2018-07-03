@@ -83,8 +83,12 @@
   "error.validation.minSupMax": "Ne peut pas être plus grand",
   "error.validation.json": "Le format JSON n'est pas respecté",
 
+  "form.Input.label": "Label",
+  "form.Input.label.inputDescription": "Cette valeur modifie celle du champs de la table",
   "form.Input.search": "Autoriser la search",
+  "form.Input.search.field": "Autoriser la search sur ce champs",
   "form.Input.filters": "Autoriser les filtres",
+  "form.Input.sort.field": "Autoriser le trie sur ce champs",
   "form.Input.bulkActions": "Autoriser les bulk actions",
   "form.Input.pageEntries": "Nombre d'entrées par page",
   "form.Input.pageEntries.inputDescription": "Note: Vous pouvez les modifier ces valeurs par modèle",

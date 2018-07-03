@@ -56,7 +56,11 @@ class TableHeader extends React.Component {
       return (
         <th // eslint-disable-line jsx-a11y/no-static-element-interactions
           key={i}
-          onClick={() => this.handleChangeSort(header.name)}
+          onClick={() => {
+            if (header.sortable) {
+              this.handleChangeSort(header.name);
+            }
+          }}
         >
           <span>
             {header.label}

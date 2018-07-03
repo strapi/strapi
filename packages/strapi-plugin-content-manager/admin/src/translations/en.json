@@ -86,8 +86,12 @@
   "error.validation.minSupMax": "Can't be superior",
   "error.validation.json": "This is not a JSON",
 
+  "form.Input.label.inputDescription": "This value overrides the label displayed in the table's head",
+  "form.Input.label": "Label",
   "form.Input.search": "Enable search",
+  "form.Input.search.field": "Enable search on this field",
   "form.Input.filters": "Enable filters",
+  "form.Input.sort.field": "Enable sort on this field",
   "form.Input.bulkActions": "Enable bulk actions",
   "form.Input.pageEntries": "Entries per page",
   "form.Input.pageEntries.inputDescription": "Note: You can override this value in the Content Type settings page.",

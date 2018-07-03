@@ -13,7 +13,7 @@ const _ = require('lodash');
 const {green, cyan} = require('chalk');
 const fs = require('fs-extra');
 const npm = require('enpeem');
-const ora = require('ora');
+const ora = require('ora'); // eslint-disable-line import/no-unresolved
 
 /**
  * Runs after this generator has finished

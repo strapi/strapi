@@ -36,6 +36,7 @@ import DraggableAttr from 'components/DraggableAttr';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
+import { onClickEditListItem } from './actions';
 
 import forms from './forms.json';
 import reducer from './reducer';
@@ -125,14 +126,24 @@ class SettingPage extends React.PureComponent {
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
   toggleDropdown = () => {
-    if (this.getListDisplay().length > 0) {
+    if (this.getDropDownItems().length > 0) {
       this.setState(prevState => ({ isOpen: !prevState.isOpen }));
     }
   }
 
   render() {
     const { isDraggingSibling, isOpen, showWarning } = this.state;
-    const { moveAttr, onChangeSettings, onClickAddAttr, onRemove, onSubmit } = this.props;
+    const {
+      moveAttr,
+      onChangeSettings,
+      onClickAddAttr,
+      onClickEditListItem,
+      onRemove,
+      onSubmit,
+      settingPage: {
+        indexListItemToEdit,
+      },
+    } = this.props;
     const namePath = this.getPath();
 
     return (
@@ -201,11 +212,13 @@ class SettingPage extends React.PureComponent {
                         <div key={attr.name} className={styles.draggedWrapper}>
                           <div>{index}.</div>
                           <DraggableAttr
+                            index={index}
                             key={attr.name}
                             keys={this.getPath()}
-                            index={index}
+                            label={attr.label}
                             name={attr.name}
                             moveAttr={moveAttr}
+                            onClickEditListItem={onClickEditListItem}
                             onRemove={onRemove}
                             updateSiblingHoverState={this.updateSiblingHoverState}
                             isDraggingSibling={isDraggingSibling}
@@ -241,6 +254,25 @@ class SettingPage extends React.PureComponent {
                         </DropdownMenu>
                       </ButtonDropdown>
                     </div>
+                    <div className="col-md-7">
+                      <div className={styles.editWrapper}>
+                        <div className="row">
+                          {forms.editList.map(input => {
+                            const inputName = `${namePath}.listDisplay.${indexListItemToEdit}.${input.name}`;
+
+                            return (
+                              <Input
+                                key={input.name}
+                                onChange={onChangeSettings}
+                                value={this.getValue(inputName, input.type)}
+                                {...input}
+                                name={inputName}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </form>
@@ -260,10 +292,12 @@ SettingPage.propTypes = {
   moveAttr: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
   onClickAddAttr: PropTypes.func.isRequired,
+  onClickEditListItem: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
+  settingPage: PropTypes.object.isRequired,
 };
 
 const mapDispatchToProps = (dispatch) => (
@@ -272,6 +306,7 @@ const mapDispatchToProps = (dispatch) => (
       moveAttr,
       onChangeSettings,
       onClickAddAttr,
+      onClickEditListItem,
       onRemove,
       onReset,
       onSubmit,

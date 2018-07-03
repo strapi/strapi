@@ -60,5 +60,35 @@
       "validations": {}
     }
     
+  ],
+  "editList": [
+    {
+      "label": { "id": "content-manager.form.Input.label" },
+      "customBootstrapClass": "col-md-7",
+      "didCheckErrors": false,
+      "errors": [],
+      "inputDescription": { "id": "content-manager.form.Input.label.inputDescription" },
+      "name": "label",
+      "type": "string",
+      "validations": {}
+    },
+    {
+      "label": { "id": "content-manager.form.Input.sort.field" },
+      "customBootstrapClass": "col-md-6",
+      "didCheckErrors": false,
+      "errors": [],
+      "name": "sortable",
+      "type": "toggle",
+      "validations": {}
+    },
+    {
+      "label": { "id": "content-manager.form.Input.search.field" },
+      "customBootstrapClass": "col-md-6",
+      "didCheckErrors": false,
+      "errors": [],
+      "name": "searchable",
+      "type": "toggle",
+      "validations": {}
+    }
   ]
 }
