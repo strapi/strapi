@@ -619,7 +619,9 @@ module.exports = function(strapi) {
                   }
 
                   // Equilize tables
-                  await handler(loadedModel.tableName, definition.attributes);
+                  if (connection.options && connection.options.autoMigration !== false) {
+                    await handler(loadedModel.tableName, definition.attributes);
+                  }
 
                   // Equilize polymorphic releations
                   const morphRelations = definition.associations.find((association) => {
@@ -642,7 +644,9 @@ module.exports = function(strapi) {
                       }
                     };
 
-                    await handler(`${loadedModel.tableName}_morph`, attributes);
+                    if (connection.options && connection.options.autoMigration !== false) {
+                      await handler(`${loadedModel.tableName}_morph`, attributes);
+                    }
                   }
 
                   // Equilize many to many releations
