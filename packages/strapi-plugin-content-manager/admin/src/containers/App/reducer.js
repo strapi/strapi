@@ -80,9 +80,24 @@ function appReducer(state = initialState, action) {
       return state
         .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => list.push(fromJS(action.data)));
     case ON_REMOVE:
-      return state.updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => (
-        list.delete(action.index)
-      ));
+      return state.updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => {
+
+        // If the list is empty add the default Id attribute
+        if (list.size -1 === 0) {
+          const attrToAdd = state.getIn(['schema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']))
+            .filter(attr => {
+              return attr.get('name') === '_id' || attr.get('name') === 'id';
+            });
+          
+          attrToAdd.setIn(['0', 'sortable'], () => true);
+          
+          return list
+            .delete(action.index)
+            .push(attrToAdd.get('0'));
+        }
+
+        return list.delete(action.index);
+      });
     case ON_RESET:
       return state
         .update('modifiedSchema', () => state.get('schema'));

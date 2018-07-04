@@ -28,8 +28,10 @@
 .draggedWrapper {
   display: flex;
   > div:first-child {
-    margin-right: 10px;
     height: 30px;
+    width: 20px;
+    margin-right: 10px;
+    text-align: right;
     line-height: 30px;
   }
 }
@@ -54,4 +56,72 @@
   padding: 24px 30px;
   background-color: #FAFAFB;
   border-radius: 2px; 
+}
+
+.dropdownWrapper {
+  margin-left: 30px;
+  > div {
+    height: 28px;
+    width: 100%;
+    justify-content: space-between;
+    background: #ffffff;
+    color: #333740;
+    border: 1px solid #E3E9F3;
+    border-radius: 2px;
+    > button {
+      position: relative;
+      cursor: pointer;
+      padding-left: 10px !important;
+      line-height: 28px;
+      width: 100%;
+      color: #333740;
+      text-align: left;
+      background-color: #ffffff;
+      border: none;
+      font-size: 13px;
+      &:focus, &:active, &:hover, &:visited {
+        background-color: transparent!important;
+        box-shadow: none;
+        color: #333740;
+      }
+      > p {
+        height: 100%;
+        margin-left: 20px;
+        margin-bottom: 0;
+        margin-top: -1px;
+        color: #007EFF !important;
+        font-size: 13px !important;
+      }
+      &:before {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        content: '\f067';
+        font-family: FontAwesome;
+        font-size: 10px;
+        color: #007EFF;
+      }
+    }
+    > div {
+      max-height: 180px;
+      min-width: calc(100% + 2px);
+      margin-left: -1px;
+      margin-top: -1px;
+      border-top-left-radius: 0 !important;
+      border-top-right-radius: 0;
+
+      overflow: scroll;
+      
+      button {
+        height: 28px;
+        line-height: 28px;
+        div {
+          margin: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
 }

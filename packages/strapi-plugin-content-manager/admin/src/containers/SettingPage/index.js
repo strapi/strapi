@@ -48,8 +48,17 @@ import styles from './styles.scss';
 class SettingPage extends React.PureComponent {
   state = { showWarning: false, isDraggingSibling: false, isOpen: false };
 
+  componentDidMount() {
+    this.handleClickEditAttr(0);
+  }
+
+  getDefaultSort = () => this.getValue(`${this.getPath()}.defaultSort`, 'string');
+
   getDropDownItems = () => {
-    const attributes = get(this.props.schema, `models.${this.getPath()}.attributes`, []);
+    const name = get(this.props.schema, `models.${this.getPath()}.primaryKey`, 'id' );
+    const defaultAttr = { [name]: { name, label: 'Id', type: 'string', searchable: true, sortable: true } };
+    const attributes = Object.assign(get(this.props.schema, `models.${this.getPath()}.attributes`, {}), defaultAttr);
+
     return Object.keys(attributes)
       .filter(attr => {
         return findIndex(this.getListDisplay(), ['name', attr]) === -1 && !attributes[attr].hasOwnProperty('collection') && !attributes[attr].hasOwnProperty('model');
@@ -81,11 +90,18 @@ class SettingPage extends React.PureComponent {
   }
 
   getSelectOptions = (input) => {
-    const { schema: { models } } = this.props;
-    const currentAttributes = get(models, this.getModelName().concat(['attributes']), []);
-    const selectOptions = [get(models, this.getModelName().concat(['primaryKey']), 'id')]
-      .concat(Object.keys(currentAttributes)
-        .filter(attr => currentAttributes[attr].type !== 'json' && currentAttributes[attr].type !== 'array'));
+    const selectOptions = this.getListDisplay().reduce((acc, curr) => {
+
+      if (curr.sortable === true) {
+        return acc.concat([curr.name]);
+      }
+
+      return acc;
+    }, []);
+
+    if (selectOptions.length === 0) {
+      selectOptions.push(this.getPrimaryKey());
+    }
 
     return input.name === 'defaultSort' ? selectOptions : input.selectOptions;
   }
@@ -107,6 +123,8 @@ class SettingPage extends React.PureComponent {
     ]
   );
 
+  getPrimaryKey = () => get(this.props.schema, ['models', this.getModelName()].concat(['primaryKey']), 'id');
+
   getValue = (keys, type) => {
     const value =  get(this.props.schema, ['models'].concat(keys.split('.')));
 
@@ -114,9 +132,58 @@ class SettingPage extends React.PureComponent {
 
   }
 
+  handleChange = (e) => {
+    const defaultSort = this.getDefaultSort();
+    const name = e.target.name.split('.');
+    name.pop();
+    const attrName = get(this.props.schema.models, name.concat(['name']));
+    const isDisablingDefaultSort = attrName === defaultSort && e.target.value === false;
+
+    if (isDisablingDefaultSort) {
+      const enableAttrsSort = this.getSelectOptions({ name: 'defaultSort' }).filter(attr => attr !== attrName);
+      
+      if (enableAttrsSort.length === 0) {
+        strapi.notification.info('content-manager.notification.info.SettingPage.disableSort');
+      } else {
+        const newDefaultSort = enableAttrsSort.length === 0 ? this.getPrimaryKey() : enableAttrsSort[0];
+        const target = { name: `${this.getPath()}.defaultSort`, value: newDefaultSort };  
+        this.props.onChangeSettings({ target });
+        this.props.onChangeSettings(e);
+      }
+    } else {
+      this.props.onChangeSettings(e);
+    }
+  }
+
+  handleClickEditAttr = (index) => {
+    const attrToEdit = get(this.props.schema, ['models', this.getModelName()].concat(['listDisplay', index]), {});
+    this.props.onClickEditListItem(attrToEdit);
+  }
+
+  handleRemove = (index, keys) => {
+    const attrToRemove = get(this.getListDisplay(), index, {});
+    const defaultSort = this.getDefaultSort();
+    const isRemovingDefaultSort = defaultSort === attrToRemove.name;
+    
+    if (isRemovingDefaultSort) {
+      const enableAttrsSort = this.getSelectOptions({ name: 'defaultSort' }).filter(attr => attr !== attrToRemove.name);
+      const newDefaultSort = enableAttrsSort.length > 1 ? enableAttrsSort[0] : this.getPrimaryKey();
+      const target = { name: `${this.getPath()}.defaultSort`, value: newDefaultSort };  
+      this.props.onChangeSettings({ target });
+    }
+
+    this.props.onRemove(index, keys);
+  }
+
   handleSubmit = (e) => {
     e.preventDefault();
     this.setState({ showWarning: true });
+  }
+
+  findIndexListItemToEdit = () => {
+    const index = findIndex(this.getListDisplay(), ['name', get(this.props.settingPage, ['listItemToEdit', 'name'])]);
+
+    return index === -1 ? 0 : index;
   }
 
   updateSiblingHoverState = () => {
@@ -137,12 +204,7 @@ class SettingPage extends React.PureComponent {
       moveAttr,
       onChangeSettings,
       onClickAddAttr,
-      onClickEditListItem,
-      onRemove,
       onSubmit,
-      settingPage: {
-        indexListItemToEdit,
-      },
     } = this.props;
     const namePath = this.getPath();
 
@@ -213,57 +275,67 @@ class SettingPage extends React.PureComponent {
                           <div>{index}.</div>
                           <DraggableAttr
                             index={index}
+                            isDraggingSibling={isDraggingSibling}
+                            isEditing={index === this.findIndexListItemToEdit()}
                             key={attr.name}
                             keys={this.getPath()}
                             label={attr.label}
                             name={attr.name}
                             moveAttr={moveAttr}
-                            onClickEditListItem={onClickEditListItem}
-                            onRemove={onRemove}
+                            onClickEditListItem={this.handleClickEditAttr}
+                            onRemove={this.handleRemove}
                             updateSiblingHoverState={this.updateSiblingHoverState}
-                            isDraggingSibling={isDraggingSibling}
                           />
                         </div>
                       ))}
-                      <ButtonDropdown isOpen={isOpen} toggle={this.toggleDropdown}>
-                        <DropdownToggle caret>
-                          Button Dropdown
-                        </DropdownToggle>
-                        <DropdownMenu>
-                          {this.getDropDownItems().map((item, i) => {
-                            if (i !== this.getDropDownItems().length - 1 && this.getDropDownItems().length > 0) {
-                              return (
-                                <React.Fragment key={item.name}>
-                                  <DropdownItem onClick={() => onClickAddAttr(item, this.getPath())}>
-                                    {item.label}
-                                  </DropdownItem>
-                                  <DropdownItem divider />
-                                </React.Fragment>
-                              );
-                            }
+                      <div className={styles.dropdownWrapper}>
+                        <ButtonDropdown isOpen={isOpen} toggle={this.toggleDropdown}>
+                          <DropdownToggle>
+                            <FormattedMessage id="content-manager.containers.SettingPage.addField">
+                              {msg => <p>{msg}</p>}
+                            </FormattedMessage>
+                          </DropdownToggle>
+                          <DropdownMenu>
+                            {this.getDropDownItems().map((item, i) => {
+                              if (i !== this.getDropDownItems().length - 1 && this.getDropDownItems().length > 0) {
+                                return (
+                                  <React.Fragment key={item.name}>
+                                    <DropdownItem onClick={() => onClickAddAttr(item, this.getPath())}>
+                                      {item.label}
+                                    </DropdownItem>
+                                    <DropdownItem divider />
+                                  </React.Fragment>
+                                );
+                              }
 
-                            return (
-                              <DropdownItem
-                                key={item.name}
-                                onClick={() => onClickAddAttr(item, this.getPath())}
-                              >
-                                {item.label}
-                              </DropdownItem>
-                            );                
-                          })}
-                        </DropdownMenu>
-                      </ButtonDropdown>
+                              return (
+                                <DropdownItem
+                                  key={item.name}
+                                  onClick={() => onClickAddAttr(item, this.getPath())}
+                                >
+                                  {item.label}
+                                </DropdownItem>
+                              );                
+                            })}
+                          </DropdownMenu>
+                        </ButtonDropdown>
+                      </div>
                     </div>
                     <div className="col-md-7">
                       <div className={styles.editWrapper}>
                         <div className="row">
-                          {forms.editList.map(input => {
+                          {forms.editList.map((input, i) => {
+                            const indexListItemToEdit = this.findIndexListItemToEdit();
                             const inputName = `${namePath}.listDisplay.${indexListItemToEdit}.${input.name}`;
+
+                            if (indexListItemToEdit === -1) {
+                              return <div key={i} />;
+                            }
 
                             return (
                               <Input
                                 key={input.name}
-                                onChange={onChangeSettings}
+                                onChange={this.handleChange}
                                 value={this.getValue(inputName, input.type)}
                                 {...input}
                                 name={inputName}

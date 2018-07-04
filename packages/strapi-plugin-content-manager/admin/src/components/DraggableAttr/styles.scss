@@ -12,12 +12,16 @@
   border-radius: 2px;
   > i {
     margin-right: 10px;
-    font-size: 10px;
+    font-size: 11px;
     color: #B3B5B9;
   }
   &:hover {
     border: 1px solid #AED4FB!important;
   }
+}
+
+.editingAttr {
+  background: #E6F0FB!important;
 }
 
 .info {
@@ -44,6 +48,25 @@
     margin: auto;
     margin-top: -3px;
     background-image: url('../../assets/images/icon-cross-blue.svg');
+  }
+}
+
+.editIcon {
+  width: 30px;
+  background: #E6F0FB;
+  height: 26px;
+  cursor: pointer;
+  text-align: center;
+  float: right;
+
+  &:after {
+    display: inline-block;
+    content: '';
+    width: 10px;
+    height: 10px;
+    margin: auto;
+    margin-top: -3px;
+    background-image: url('../../assets/images/icon-edit-blue.svg');
   }
 }
 

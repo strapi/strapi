@@ -13,6 +13,7 @@ import {
 import { flow, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import cn from 'classnames';
 
 import styles from './styles.scss';
 
@@ -29,7 +30,8 @@ const draggableAttrSource = {
   },
   endDrag: (props, monitor, component) => {
     const el = findDOMNode(component);
-    el.className = styles.draggableAttr;
+    const className = props.isEditing ? `${styles.draggableAttr} ${styles.editingAttr}` : styles.draggableAttr;
+    el.className = className;
     props.updateSiblingHoverState();
 
     return {};
@@ -115,7 +117,7 @@ class DraggableAttr extends React.Component {
   }
 
   render() {
-    const { label, name, isDragging, connectDragSource, connectDropTarget } = this.props;
+    const { label, name, isDragging, isEditing, connectDragSource, connectDropTarget } = this.props;
     const { isHover } = this.state;
     const opacity = isDragging ? 0.2 : 1;
 
@@ -123,13 +125,13 @@ class DraggableAttr extends React.Component {
       connectDragSource(
         connectDropTarget(
           <div
-            className={styles.draggableAttr}
+            className={cn(styles.draggableAttr, isEditing && styles.editingAttr)}
             onMouseEnter={this.handleMouseEnter}
             onMouseLeave={this.handleMouseLeave}
             onClick={this.handleClickEdit}
             style={{ opacity }}
           >
-            <i className="fa fa-th" aria-hidden="true"></i>
+            <i className="fa fa-th" aria-hidden="true" />
             <span>{name}</span>
             { isHover && !isDragging && (
               <div className={styles.info}>
@@ -141,7 +143,11 @@ class DraggableAttr extends React.Component {
                 {label}
               </div>
             )}
-            <span className={styles.removeIcon} onClick={this.handleRemove} />            
+            {isEditing && !isHover? (
+              <span className={styles.editIcon} onClick={this.handleClickEdit} />            
+            ) : (
+              <span className={styles.removeIcon} onClick={this.handleRemove} />            
+            )}
           </div>
         ),
       )
@@ -150,6 +156,7 @@ class DraggableAttr extends React.Component {
 }
 
 DraggableAttr.defaultProps = {
+  isEditing: false,
   onRemove: () => {},
 };
 
@@ -159,6 +166,7 @@ DraggableAttr.propTypes = {
   index: PropTypes.number.isRequired,
   isDragging: PropTypes.bool.isRequired,
   isDraggingSibling: PropTypes.bool.isRequired,
+  isEditing: PropTypes.bool,
   keys: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,

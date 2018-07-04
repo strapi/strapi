@@ -15,6 +15,7 @@
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
   
+  "containers.SettingPage.addField": "Add new field",
   "containers.SettingPage.attributes": "Attributes fields",
   "containers.SettingPage.attributes.description": "Define the order of the attributes",
 
@@ -98,6 +99,7 @@
   "form.Input.defaultSort": "Default sort attribute",
 
   "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
+  "notification.info.SettingPage.disableSort": "You need to have one attribute with the sorting allowed",
 
   "success.record.delete": "Deleted",
   "success.record.save": "Saved",

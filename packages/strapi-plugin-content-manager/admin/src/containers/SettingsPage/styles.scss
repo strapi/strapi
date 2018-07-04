@@ -7,6 +7,11 @@
 
 .container {
   padding-top: 18px;
+  > div:last-child {
+    > div {
+      padding-bottom: 0 !important;
+    }
+  }
 }
 
 .main_wrapper{
