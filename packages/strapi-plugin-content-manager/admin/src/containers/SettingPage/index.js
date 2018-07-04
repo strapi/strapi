@@ -327,9 +327,15 @@ class SettingPage extends React.PureComponent {
                           {forms.editList.map((input, i) => {
                             const indexListItemToEdit = this.findIndexListItemToEdit();
                             const inputName = `${namePath}.listDisplay.${indexListItemToEdit}.${input.name}`;
+                            const inputType = this.getListDisplay()[indexListItemToEdit].type;
+
 
                             if (indexListItemToEdit === -1) {
                               return <div key={i} />;
+                            }
+
+                            if ((inputType === 'json' || inputType === 'array') && (input.name === 'sortable' || input.name === 'searchable')) {
+                              return null;
                             }
 
                             return (
@@ -341,6 +347,7 @@ class SettingPage extends React.PureComponent {
                                 name={inputName}
                               />
                             );
+
                           })}
                         </div>
                       </div>
