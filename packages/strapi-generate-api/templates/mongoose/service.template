@@ -150,7 +150,7 @@ module.exports = {
    * @return {Promise}
    */
 
-  search: async function (params) {
+  search: async (params) => {
     // Convert `params` object to filters compatible with Mongo.
     const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
     // Select field to populate.
