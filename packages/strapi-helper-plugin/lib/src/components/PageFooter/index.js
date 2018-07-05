@@ -14,6 +14,8 @@ import GlobalPagination from 'components/GlobalPagination';
 
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/label-has-for */
+
 function PageFooter(props) {
   return (
     <div className={cn('row', styles.pageFooter)} style={props.style}>

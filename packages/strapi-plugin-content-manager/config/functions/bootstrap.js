@@ -129,41 +129,109 @@ module.exports = async cb => {
     type: 'plugin',
     name: 'content-manager'
   });
-  
-  const buildSchemaKeys = (data) => Object.keys(data).reduce((acc, curr) => {
-    if (curr !== 'plugins') {
 
-      if (!data[curr].fields && _.isObject(data[curr])) {
-        return buildSchemaKeys(data[curr]);
-      }
+  const getApis = (data) => Object.keys(data).reduce((acc, curr) => {
+    if (data[curr].fields) {
+      return acc.concat([curr]);
+    }
 
-      return acc.concat([{ [curr]: Object.keys(data[curr].fields) }]);
-    } 
-  
-    return buildSchemaKeys(data[curr]);
+    if (curr === 'plugins') {
+      Object.keys(data[curr]).map(plugin => {
+        Object.keys(data[curr][plugin]).map(api => {
+          acc = acc.concat([`${curr}.${plugin}.${api}`]);
+        });
+      });
+    }
+
+    return acc;
   }, []);
+
+  const getApisKeys = (data, sameArray) => sameArray.map(apiPath => {
+    const fields = Object.keys(_.get(data.models, apiPath.concat(['fields'])));
+
+    return fields.map(field => `${apiPath.join('.')}.fields.${field}`);
+  });
   
   try {
     const prevSchema = await pluginStore.get({ key: 'schema' });
-  
+
     if (!prevSchema) {
       pluginStore.set({ key: 'schema', value: schema });
       return cb(); 
     }
+
+    const splitted = str => str.split('.');
+    const prevSchemaApis = getApis(prevSchema.models);
+    const schemaApis = getApis(schema.models);
+    const apisToAdd = schemaApis.filter(api => prevSchemaApis.indexOf(api) === -1).map(splitted);
+    const apisToRemove = prevSchemaApis.filter(api => schemaApis.indexOf(api) === -1).map(splitted);
+    const sameApis = schemaApis.filter(api => prevSchemaApis.indexOf(api) !== -1).map(splitted);
+    const schemaSameApisKeys = _.flattenDeep(getApisKeys(schema, sameApis));
+    const prevSchemaSameApisKeys = _.flattenDeep(getApisKeys(prevSchema, sameApis));
+    const sameApisAttrToAdd = schemaSameApisKeys.filter(attr => prevSchemaSameApisKeys.indexOf(attr) === -1).map(splitted);
+    const sameApisAttrToRemove = prevSchemaSameApisKeys.filter(attr => schemaSameApisKeys.indexOf(attr) === -1).map(splitted);
+
+    // Remove api
+    apisToRemove.map(apiPath => {
+      _.unset(prevSchema.models, apiPath);
+    });
+    
+    // Remove API attribute
+    sameApisAttrToRemove.map(attrPath => {
+      // Check default sort and change it if needed
+      _.unset(prevSchema.models, attrPath);
+      const apiPath = attrPath.length > 3 ? _.take(attrPath, 3) : _.take(attrPath, 1);
+      const listDisplayPath = apiPath.concat('listDisplay');
+      const prevListDisplay = _.get(prevSchema.models, listDisplayPath);
+      const defaultSortPath = apiPath.concat('defaultSort');
+      const currentAttr = attrPath.slice(-1);
+
+      const defaultSort = _.get(prevSchema.models, defaultSortPath);
+
+      if (_.includes(currentAttr, defaultSort)) {
+        _.set(prevSchema.models, defaultSortPath, _.get(schema.models, defaultSortPath));
+      }
+
+      // Update the displayed fields
+      const updatedListDisplay = prevListDisplay.filter(obj => obj.name !== currentAttr.join());
+
+      if (updatedListDisplay.length === 0) {
+        // Update it with the one from the generaeted schema
+        _.set(prevSchema.models, listDisplayPath, _.get(schema.models, listDisplayPath, []));
+      } else {
+        _.set(prevSchema.models, listDisplayPath, updatedListDisplay);
+      }
+    });
+
+    // Add API
+    apisToAdd.map(apiPath => {
+      const api = _.get(schema.models, apiPath);
+      _.set(prevSchema.models, apiPath, api);
+    });
   
-    const prevSchemaKeys = buildSchemaKeys(prevSchema.models);
-    const schemaKeys = buildSchemaKeys(schema.models);
-  
-    // Update the store with the new created APIs
-    if (!_.isEqual(prevSchemaKeys, schemaKeys)) {
-      pluginStore.set({ key: 'schema', value: _.merge(schema, prevSchema) });
-    }
-  
+    // Add attribute to existing API
+    sameApisAttrToAdd.map(attrPath => {
+      const attr = _.get(schema.models, attrPath);
+      _.set(prevSchema.models, attrPath, attr);
+    });
+
+
+    // Update other keys
+    sameApis.map(apiPath => {
+      const keysToUpdate = ['relations', 'loadedModel', 'associations', 'attributes'].map(key => apiPath.concat(key));
+
+      keysToUpdate.map(keyPath => {
+        const newValue = _.get(schema.models, keyPath);
+        
+        _.set(prevSchema.models, keyPath, newValue);
+      });
+    });
+
+    pluginStore.set({ key: 'schema', value: prevSchema });
   
   } catch(err) {
     console.log('error', err);
   }  
-  
 
   cb();
 };
