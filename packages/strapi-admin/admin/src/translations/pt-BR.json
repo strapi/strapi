@@ -3,7 +3,7 @@
   "app.components.Button.cancel": "Cancelar",
 
   "app.components.ComingSoonPage.comingSoon": "Em breve",
-  "app.components.ComingSoonPage.featuresNotAvailable": "Este recurso esta desenvolvimento",
+  "app.components.ComingSoonPage.featuresNotAvailable": "Este recurso está em desenvolvimento",
 
   "app.components.DownloadInfo.download": "Transferência em progresso...",
   "app.components.DownloadInfo.text": "Isto poderá levar alguns minutos. Obrigado pela sua paciência",
@@ -29,8 +29,8 @@
   "app.components.HomePage.support.link": "PEÇA SUA CAMISA AGORA!",
 
   "app.components.BlockLink.documentation": "Leia a documentação",
-  "app.components.BlockLink.documentation.content": "Descubra os conceitos do strapi, guias de referência e tutoriais.",
-  "app.components.BlockLink.code": "Códigos Exemplo",
+  "app.components.BlockLink.documentation.content": "Descubra os conceitos do Strapi, guias de referência e tutoriais.",
+  "app.components.BlockLink.code": "Códigos de Exemplo",
   "app.components.BlockLink.code.content": "Aprenda testando projetos reais desenvolvidos por nossa comunidade.",
 
 
@@ -40,7 +40,7 @@
   "app.components.InputFileDetails.originalName": "Nome original:",
   "app.components.InputFileDetails.size": "Tamanho:",
 
-  "app.components.ImgPreview.hint": "Arraste & solte o seu arquivo sobre a area ou {browse} um arquivo para fazer o envio",
+  "app.components.ImgPreview.hint": "Arraste e solte o seu arquivo sobre a área ou {browse} um arquivo para fazer o envio",
   "app.components.ImgPreview.hint.browse": "selecione",
 
   "app.components.InstallPluginPage.helmet": "Marketplace - Extensões",
@@ -97,17 +97,17 @@
   "components.ErrorBoundary.title": "Algo deu errado...",
 
   "components.OverlayBlocker.title": "Aguardando pela reinicialização...",
-  "components.OverlayBlocker.description": "Você está a usar um recurso que precisa que o servidor seja reiniciado. Por favor, aguarde até que o servidor esteja totalmente reiniciado.",
+  "components.OverlayBlocker.description": "Você está usando um recurso que precisa que o servidor seja reiniciado. Por favor, aguarde até que o servidor esteja totalmente reiniciado.",
 
   "components.PageFooter.select": "registros por página",
 
-  "components.ProductionBlocker.header": "Esta extensão está disponível apenas em modo desenvolvimento.",
+  "components.ProductionBlocker.header": "Esta extensão está disponível apenas em modo de desenvolvimento.",
   "components.ProductionBlocker.description": "Por motivos de segurança, temos que desativar esta extensão em outros ambientes.",
 
   "components.popUpWarning.button.cancel": "Cancelar",
   "components.popUpWarning.button.confirm": "Confirmar",
   "components.popUpWarning.title": "Por favor, confirme",
-  "components.popUpWarning.message": "Tem a certeza que deseja remover isso?",
+  "components.popUpWarning.message": "Tem certeza que deseja remover isso?",
 
   "components.Input.error.validation.email": "Isto não é um endereço de e-mail",
   "components.Input.error.validation.required": "Este valor é obrigatório.",
