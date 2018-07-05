@@ -39,6 +39,10 @@ class SettingsPage extends React.PureComponent {
     }
   }
 
+  componentWillUnmount() {
+    this.props.onReset();
+  }
+  
   getModels = (data = this.props.schema.models, destination = '/') => {
     const models = Object.keys(data).reduce((acc, curr) => {
       if (curr !== 'plugins') {
