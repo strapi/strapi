@@ -24,7 +24,7 @@ import {
   onReset,
   onSubmit,
 } from 'containers/App/actions';
-import { makeSelectModifiedSchema } from 'containers/App/selectors';
+import { makeSelectModifiedSchema , makeSelectSubmitSuccess } from 'containers/App/selectors';
 
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
@@ -50,6 +50,16 @@ class SettingPage extends React.PureComponent {
 
   componentDidMount() {
     this.handleClickEditAttr(0);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.submitSuccess !== this.props.submitSuccess) {
+      this.toggle();
+    }
+  }
+
+  componentWillUnmount() {
+    this.props.onReset();
   }
 
   getDefaultSort = () => this.getValue(`${this.getPath()}.defaultSort`, 'string');
@@ -129,7 +139,6 @@ class SettingPage extends React.PureComponent {
     const value =  get(this.props.schema, ['models'].concat(keys.split('.')));
 
     return type === 'toggle' ? value : value.toString();
-
   }
 
   handleChange = (e) => {
@@ -156,7 +165,7 @@ class SettingPage extends React.PureComponent {
   }
 
   handleClickEditAttr = (index) => {
-    const attrToEdit = get(this.props.schema, ['models', this.getModelName()].concat(['listDisplay', index]), {});
+    const attrToEdit = get(this.props.schema, ['models'].concat(this.getPath().split('.')).concat(['listDisplay', index]), {});
     this.props.onClickEditListItem(attrToEdit);
   }
 
@@ -229,7 +238,6 @@ class SettingPage extends React.PureComponent {
             popUpWarningType="danger"
             onConfirm={() => {
               onSubmit();
-              this.toggle();
             }}
           />
           <div className={cn('row', styles.container)}>
@@ -377,6 +385,7 @@ SettingPage.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
   settingPage: PropTypes.object.isRequired,
+  submitSuccess: PropTypes.bool.isRequired,
 };
 
 const mapDispatchToProps = (dispatch) => (
@@ -397,6 +406,7 @@ const mapDispatchToProps = (dispatch) => (
 const mapStateToProps = createStructuredSelector({
   schema: makeSelectModifiedSchema(),
   settingPage: makeSelectSettingPage(),
+  submitSuccess: makeSelectSubmitSuccess(),
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

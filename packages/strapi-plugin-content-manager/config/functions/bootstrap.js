@@ -227,7 +227,7 @@ module.exports = async cb => {
       });
     });
 
-    pluginStore.set({ key: 'schema', value: prevSchema });
+    await pluginStore.set({ key: 'schema', value: prevSchema });
   
   } catch(err) {
     console.log('error', err);

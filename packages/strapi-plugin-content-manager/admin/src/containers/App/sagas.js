@@ -1,10 +1,11 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { fork, put, call, takeLatest, take, cancel } from 'redux-saga/effects';
+import { fork, put, call, takeLatest, take, cancel, select } from 'redux-saga/effects';
 import request from 'utils/request';
 
 
-import { getModelEntriesSucceeded, loadedModels } from './actions';
-import { GET_MODEL_ENTRIES, LOAD_MODELS } from './constants';
+import { getModelEntriesSucceeded, loadedModels, submitSucceeded } from './actions';
+import { GET_MODEL_ENTRIES, LOAD_MODELS, ON_SUBMIT } from './constants';
+import { makeSelectModifiedSchema } from './selectors';
 
 export function* modelEntriesGet(action) {
   try {
@@ -29,10 +30,23 @@ export function* getModels() {
   }
 }
 
+export function* submit() {
+  try {
+    const schema = yield select(makeSelectModifiedSchema());
+    yield call(request, '/content-manager/models', { method: 'PUT', body: { schema } });
+
+    yield put(submitSucceeded());
+  } catch(err) {
+    // Silent
+    // NOTE: should we add another notification??
+  }
+}
+
 // Individual exports for testing
 export function* defaultSaga() {
   const loadModelsWatcher = yield fork(takeLatest, LOAD_MODELS, getModels);
   const loadEntriesWatcher = yield fork(takeLatest, GET_MODEL_ENTRIES, modelEntriesGet);
+  yield fork(takeLatest, ON_SUBMIT, submit);
 
   yield take(LOCATION_CHANGE);
 

@@ -16,3 +16,4 @@ export const ON_CLICK_ADD_ATTR = 'contentManager/App/ON_CLICK_ADD_ATTR';
 export const ON_REMOVE = 'contentManager/App/ON_REMOVE';
 export const ON_RESET = 'contentManager/App/ON_RESET';
 export const ON_SUBMIT = 'contentManager/App/ON_SUBMIT';
+export const SUBMIT_SUCCEEDED = 'contentManager/App/SUBMIT_SUCCEEDED';

@@ -12,7 +12,7 @@ import { get, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
 
 import { onChange, onSubmit, onReset } from 'containers/App/actions';
-import { makeSelectModifiedSchema } from 'containers/App/selectors';
+import { makeSelectModifiedSchema, makeSelectSubmitSuccess } from 'containers/App/selectors';
 
 import Input from 'components/InputsIndex';
 import PluginHeader from 'components/PluginHeader';
@@ -32,6 +32,12 @@ import forms from './forms.json';
 
 class SettingsPage extends React.PureComponent {
   state = { showWarning: false };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.submitSuccess !== this.props.submitSuccess) {
+      this.toggle();
+    }
+  }
 
   getModels = (data = this.props.schema.models, destination = '/') => {
     const models = Object.keys(data).reduce((acc, curr) => {
@@ -112,7 +118,6 @@ class SettingsPage extends React.PureComponent {
           popUpWarningType="danger"
           onConfirm={() => {
             onSubmit();
-            this.toggle();
           }}
         />
         <div className={cn('row', styles.container)}>
@@ -160,6 +165,7 @@ SettingsPage.propTypes = {
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
+  submitSuccess: PropTypes.bool.isRequired,
 };
 
 const mapDispatchToProps = (dispatch) => (
@@ -175,6 +181,7 @@ const mapDispatchToProps = (dispatch) => (
 
 const mapStateToProps = createStructuredSelector({
   schema: makeSelectModifiedSchema(),
+  submitSuccess: makeSelectSubmitSuccess(),
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);

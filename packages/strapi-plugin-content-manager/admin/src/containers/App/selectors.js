@@ -44,6 +44,9 @@ const makeSelectSchema = () =>
 const makeSelectModifiedSchema = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('modifiedSchema').toJS());
 
+const makeSelectSubmitSuccess = () =>
+  createSelector(selectGlobalDomain(), substate => substate.get('submitSuccess'));
+
 export {
   selectGlobalDomain,
   selectLocationState,
@@ -51,4 +54,5 @@ export {
   makeSelectModelEntries,
   makeSelectModifiedSchema,
   makeSelectSchema,
+  makeSelectSubmitSuccess,
 };

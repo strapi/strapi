@@ -18,6 +18,7 @@ import {
   ON_REMOVE,
   ON_RESET,
   ON_SUBMIT,
+  SUBMIT_SUCCEEDED,
 } from './constants';
 
 export function emptyStore() {
@@ -108,5 +109,11 @@ export function onReset() {
 export function onSubmit() {
   return {
     type: ON_SUBMIT,
+  };
+}
+
+export function submitSucceeded() {
+  return {
+    type: SUBMIT_SUCCEEDED,
   };
 }

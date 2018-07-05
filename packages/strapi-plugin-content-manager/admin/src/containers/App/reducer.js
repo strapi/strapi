@@ -16,15 +16,16 @@ import {
   ON_CLICK_ADD_ATTR,
   ON_REMOVE,
   ON_RESET,
-  ON_SUBMIT,
+  SUBMIT_SUCCEEDED,
 } from './constants';
 
 const initialState = fromJS({
-  modelEntries: 0,
+  formValidations: List([]),
   loading: true,
+  modelEntries: 0,
   modifiedSchema: fromJS({}),
   schema: fromJS({}),
-  formValidations: List([]),
+  submitSuccess: false,
 });
 
 function appReducer(state = initialState, action) {
@@ -101,8 +102,9 @@ function appReducer(state = initialState, action) {
     case ON_RESET:
       return state
         .update('modifiedSchema', () => state.get('schema'));
-    case ON_SUBMIT:
+    case SUBMIT_SUCCEEDED:
       return state
+        .update('submitSuccess', v => v = !v)
         .update('schema', () => state.get('modifiedSchema'));
     default:
       return state;
