@@ -6,15 +6,14 @@
 
 // Node.js core.
 const path = require('path');
-const { execSync } = require('child_process');
+const { exec, execSync } = require('child_process');
 
 // Public node modules.
 const _ = require('lodash');
+const {green, cyan} = require('chalk');
 const fs = require('fs-extra');
 const npm = require('enpeem');
-
-// Logger.
-const logger = require('strapi-utils').logger;
+const ora = require('ora');
 
 /**
  * Runs after this generator has finished
@@ -26,6 +25,13 @@ const logger = require('strapi-utils').logger;
 /* eslint-disable no-console */
 /* eslint-disable prefer-template */
 module.exports = (scope, cb) => {
+  console.log(`The app has been connected to the database ${green('successfully')}!`);
+  console.log();
+
+  console.log('🏗  Application generation:');
+
+  let loader = ora('Copy dashboard').start();
+
   const packageJSON = require(path.resolve(scope.rootPath, 'package.json'));
   // const strapiRootPath = path.resolve(scope.strapiRoot, '..');
 
@@ -34,7 +40,9 @@ module.exports = (scope, cb) => {
   // Copy the default files.
   fs.copySync(path.resolve(__dirname, '..', 'files'), path.resolve(scope.rootPath));
 
-  const availableDependencies = [];
+  loader.succeed();
+
+  let availableDependencies = [];
   const dependencies = _.get(packageJSON, 'dependencies');
   const strapiDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') !== -1);
   const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1);
@@ -55,7 +63,6 @@ module.exports = (scope, cb) => {
     }
   });
 
-  logger.info('Installing dependencies...');
   if (!_.isEmpty(othersDependencies)) {
     npm.install({
       dir: scope.rootPath,
@@ -66,10 +73,10 @@ module.exports = (scope, cb) => {
     }, err => {
       if (err) {
         console.log();
-        logger.warn('You should run `npm install` into your application before starting it.');
+        console.log('⚠️ You should run `npm install` into your application before starting it.');
         console.log();
-        logger.warn('Some dependencies could not be installed:');
-        _.forEach(othersDependencies, value => logger.warn('• ' + value));
+        console.log('⚠️ Some dependencies could not be installed:');
+        _.forEach(othersDependencies, value => console.log('• ' + value));
         console.log();
 
         return cb();
@@ -106,46 +113,64 @@ module.exports = (scope, cb) => {
       core: true
     }];
 
+    let installPlugin = new Promise(resolve => {
+      return resolve();
+    });
+
     // Install each plugin.
     defaultPlugins.forEach(defaultPlugin => {
-      try {
-        execSync(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`);
-        logger.info(`The plugin ${defaultPlugin.name} has been successfully installed.`);
-      } catch (error) {
-        logger.error(`An error occurred during ${defaultPlugin.name} plugin installation.`);
-        logger.error(error);
-      }
+      installPlugin = installPlugin.then(() => {
+        return new Promise(resolve => {
+          loader = ora(`Install plugin ${cyan(defaultPlugin.name)}.`).start();
+          exec(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`, (err) => {
+            if (err) {
+              loader.warn(`An error occurred during ${defaultPlugin.name} plugin installation.`);
+              console.log(err);
+              return resolve();
+            }
+
+            loader.succeed();
+            return resolve();
+          });
+        });
+      });
     });
 
-    // Link dependencies.
-    availableDependencies.forEach(dependency => {
-      logger.info(`Linking \`${dependency.key}\` dependency to the project...`);
+    installPlugin
+      .then(() => {
+        // Link dependencies.
+        availableDependencies.forEach(dependency => {
+          loader = ora(`Link ${cyan(dependency.key)} dependency to the project.`).start();
 
-      if (dependency.global) {
-        try {
-          fs.accessSync(dependency.path, fs.constants.R_OK | fs.constants.F_OK);
-          fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
-        } catch (e) {
-          // Silent.
-        }
-      } else {
-        try {
-          fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), fs.constants.R_OK | fs.constants.F_OK);
-          fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
-        } catch (e) {
-          // Silent.
-        }
-      }
-    });
+          if (dependency.global) {
+            try {
+              fs.accessSync(dependency.path, fs.constants.R_OK | fs.constants.F_OK);
+              fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+            } catch (e) {
+              // Silent.
+            }
+          } else {
+            try {
+              fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), fs.constants.R_OK | fs.constants.F_OK);
+              fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+            } catch (e) {
+              // Silent.
+            }
+          }
 
-    logger.info('Your new application `' + scope.name + '` is ready at `' + scope.rootPath + '`.');
+          loader.succeed();
+        });
 
-    logger.info('We are almost there !!!');
-    logger.info('cd ' + scope.name);
-    logger.info('strapi start');
-    logger.info('Open your browser to http://localhost:1337');
-    logger.info('Enjoy your strapi project :)');
+        console.log();
+        console.log(`👌 Your new application ${green(scope.name)} is ready at ${cyan(scope.rootPath)}.`);
+        console.log();
+        console.log('⚡️ change directory:');
+        console.log(`$ ${green(`cd ${scope.name}`)}`);
+        console.log();
+        console.log('⚡️ start application:');
+        console.log(`$ ${green('strapi start')}`);
 
-    cb();
+        cb();
+      });
   }
 };

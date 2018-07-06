@@ -517,7 +517,7 @@ import { LOCATION_CHANGE } from 'react-router-redux';
 import { takeLatest, put, fork, call, take, cancel } from 'redux-saga/effects';
 
 // Use our request helper
-import { request } from 'utils/request';
+import request from 'utils/request';
 
 // Actions
 import { dataFetchError, dataFetchSucceeded } from './actions';

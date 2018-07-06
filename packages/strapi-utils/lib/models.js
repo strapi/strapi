@@ -13,7 +13,7 @@ const _ = require('lodash');
 // Following this discussion https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric this function is the best implem to determine if a value is a valid number candidate
 const isNumeric = (value) => {
   return !isNaN(parseFloat(value)) && isFinite(value);
-}
+};
 
 /* eslint-disable prefer-template */
 /*
