@@ -59,6 +59,7 @@ class SettingPage extends React.PureComponent {
   }
 
   componentWillUnmount() {
+    // Reset the modified data
     this.props.onReset();
   }
 
@@ -66,6 +67,7 @@ class SettingPage extends React.PureComponent {
 
   getDropDownItems = () => {
     const name = get(this.props.schema, `models.${this.getPath()}.primaryKey`, 'id' );
+    // The id attribute is not present on schema so we need to add it manually
     const defaultAttr = { [name]: { name, label: 'Id', type: 'string', searchable: true, sortable: true } };
     const attributes = Object.assign(get(this.props.schema, `models.${this.getPath()}.attributes`, {}), defaultAttr);
 
@@ -195,6 +197,7 @@ class SettingPage extends React.PureComponent {
     return index === -1 ? 0 : index;
   }
 
+  // We need to remove the Over state on the DraggableAttr component
   updateSiblingHoverState = () => {
     this.setState(prevState => ({ isDraggingSibling: !prevState.isDraggingSibling }));
   };
@@ -251,14 +254,11 @@ class SettingPage extends React.PureComponent {
                     <div className="row">
                       {forms.inputs.map(input => {
                         const inputName = `${namePath}.${input.name}`;
-                        console.log(input.name)
-                        let inputStyle = input.name === 'defaulteSort' ? { marginRight: '-20px' } : {};
                 
                         return (
                           <Input
                             {...input}
                             key={input.name}
-                            // style={inputStyle}
                             name={inputName}
                             onChange={onChangeSettings}
                             selectOptions={this.getSelectOptions(input)}
