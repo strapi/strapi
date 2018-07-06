@@ -133,6 +133,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
           isLoading={this.state.isLoading}
           onMenuScrollToBottom={this.handleBottomScroll}
           onInputChange={this.handleInputChange}
+          onSelectResetsInput={false}
           simpleValue
           value={isNull(value) || isUndefined(value) ? null : {
             value: isFunction(value.toJS) ? value.toJS() : value,
