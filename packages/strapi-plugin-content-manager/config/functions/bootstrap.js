@@ -206,6 +206,12 @@ module.exports = async cb => {
     // Add API
     apisToAdd.map(apiPath => {
       const api = _.get(schema.models, apiPath);
+      const { search, filters, bulkActions, pageEntries } = _.get(prevSchema, 'generalSettings');
+
+      _.set(api, 'filters', filters);
+      _.set(api, 'search', search);
+      _.set(api, 'bulkActions', bulkActions);
+      _.set(api, 'pageEntries', pageEntries);
       _.set(prevSchema.models, apiPath, api);
     });
   
