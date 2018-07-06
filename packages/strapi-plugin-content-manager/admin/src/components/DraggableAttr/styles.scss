@@ -1,12 +1,12 @@
 .draggableAttr {
   position: relative;
-  height: 28px;
+  height: 30px;
   width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   padding-left: 10px;
   justify-content: space-between;
   background: #FAFAFB;
-  line-height: 28px;
+  line-height: 30px;
   color: #333740;
   border: 1px solid #E3E9F3;
   border-radius: 2px;
@@ -15,13 +15,15 @@
     font-size: 11px;
     color: #B3B5B9;
   }
-  &:hover {
-    border: 1px solid #AED4FB!important;
-  }
+}
+
+.draggableAttrOvered {
+  border: 1px solid #AED4FB!important;
 }
 
 .editingAttr {
   background: #E6F0FB!important;
+  border: 1px solid #AED4FB!important;
 }
 
 .info {
@@ -35,7 +37,26 @@
 .removeIcon {
   width: 30px;
   background: #F3F4F4;
-  height: 26px;
+  height: 28px;
+  cursor: pointer;
+  text-align: center;
+  float: right;
+
+  &:after {
+    display: inline-block;
+    content: '';
+    width: 8px;
+    height: 8px;
+    margin: auto;
+    margin-top: -3px;
+    background-image: url('../../assets/images/icon-cross.svg');
+  }
+}
+
+.removeIconDragged {
+  width: 30px;
+  background: #F3F4F4;
+  height: 28px;
   cursor: pointer;
   text-align: center;
   float: right;
@@ -54,7 +75,7 @@
 .editIcon {
   width: 30px;
   background: #E6F0FB;
-  height: 26px;
+  height: 28px;
   cursor: pointer;
   text-align: center;
   float: right;
@@ -72,15 +93,16 @@
 
 .dragged {
   position: relative;
-  height: 28px;
+  height: 30px !important;
   width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  box-shadow: 0!important;
   padding-left: 10px;
   justify-content: space-between;
-  background: #E6F0FB;
-  line-height: 28px;
+  background: #E6F0FB !important;
+  line-height: 30px;
   color: #333740;
-  border: 1px solid #AED4FB;
+  border: 1px solid darken(#AED4FB, 20%)!important;
   border-radius: 2px;
   > i {
     margin-right: 10px;

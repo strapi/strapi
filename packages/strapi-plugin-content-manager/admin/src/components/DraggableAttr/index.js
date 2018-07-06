@@ -18,9 +18,7 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 const draggableAttrSource = {
-  beginDrag: (props, monitor, component) => {
-    const el = findDOMNode(component);
-    el.className = styles.dragged;
+  beginDrag: (props) => {
     props.updateSiblingHoverState();
 
     return {
@@ -28,10 +26,7 @@ const draggableAttrSource = {
       index: props.index,
     };
   },
-  endDrag: (props, monitor, component) => {
-    const el = findDOMNode(component);
-    const className = props.isEditing ? `${styles.draggableAttr} ${styles.editingAttr}` : styles.draggableAttr;
-    el.className = className;
+  endDrag: (props) => {
     props.updateSiblingHoverState();
 
     return {};
@@ -86,7 +81,7 @@ const draggableAttrTarget = {
 };
 
 class DraggableAttr extends React.Component {
-  state = { isHover: false };
+  state = { isOver: false, dragStart: false };
 
   componentDidUpdate(prevProps) {
     const { isDraggingSibling } = this.props;
@@ -104,11 +99,11 @@ class DraggableAttr extends React.Component {
 
   handleMouseEnter = () => {
     if (!this.props.isDraggingSibling) {
-      this.setState({ isHover: true });
+      this.setState({ isOver: true });
     }
   };
 
-  handleMouseLeave = () => this.setState({ isHover: false });
+  handleMouseLeave = () => this.setState({ isOver: false });
 
   handleRemove = (e) => {
     e.preventDefault();
@@ -118,14 +113,18 @@ class DraggableAttr extends React.Component {
 
   render() {
     const { label, name, isDragging, isEditing, connectDragSource, connectDropTarget } = this.props;
-    const { isHover } = this.state;
+    const { isOver, dragStart } = this.state;
     const opacity = isDragging ? 0.2 : 1;
+    const overClass = isOver ? styles.draggableAttrOvered : '';
+    const className = dragStart ? styles.dragged : styles.draggableAttr;
 
     return (
       connectDragSource(
         connectDropTarget(
           <div
-            className={cn(styles.draggableAttr, isEditing && styles.editingAttr)}
+            className={cn(className, isEditing && styles.editingAttr, overClass)}
+            onDragStart={() => this.setState({ dragStart: true })}
+            onDragEnd={() => this.setState({ dragStart: false })}
             onMouseEnter={this.handleMouseEnter}
             onMouseLeave={this.handleMouseLeave}
             onClick={this.handleClickEdit}
@@ -133,20 +132,20 @@ class DraggableAttr extends React.Component {
           >
             <i className="fa fa-th" aria-hidden="true" />
             <span>{name}</span>
-            { isHover && !isDragging && (
+            { isOver && !isDragging && (
               <div className={styles.info}>
                 <FormattedMessage id="content-manager.components.DraggableAttr.edit" />
               </div>
             )}
-            { !isHover && upperFirst(name) !== label && (
+            { !isOver && upperFirst(name) !== label && (
               <div className={styles.info}>
                 {label}
               </div>
             )}
-            {isEditing && !isHover? (
+            {isEditing && !isOver? (
               <span className={styles.editIcon} onClick={this.handleClickEdit} />            
             ) : (
-              <span className={styles.removeIcon} onClick={this.handleRemove} />            
+              <span className={cn( dragStart ? styles.removeIconDragged : styles.removeIcon)} onClick={this.handleRemove} />            
             )}
           </div>
         ),

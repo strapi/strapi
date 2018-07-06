@@ -61,7 +61,7 @@
 .dropdownWrapper {
   margin-left: 30px;
   > div {
-    height: 28px;
+    height: 30px;
     width: 100%;
     justify-content: space-between;
     background: #ffffff;
@@ -72,13 +72,14 @@
       position: relative;
       cursor: pointer;
       padding-left: 10px !important;
-      line-height: 28px;
+      line-height: 30px;
       width: 100%;
       color: #333740;
       text-align: left;
       background-color: #ffffff;
       border: none;
       font-size: 13px;
+      font-weight: 500;
       &:focus, &:active, &:hover, &:visited {
         background-color: transparent!important;
         box-shadow: none;
@@ -113,8 +114,8 @@
       overflow: scroll;
       
       button {
-        height: 28px;
-        line-height: 28px;
+        height: 30px;
+        line-height: 30px;
         div {
           margin: 0;
           white-space: nowrap;

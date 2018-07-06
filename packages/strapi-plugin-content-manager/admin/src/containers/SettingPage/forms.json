@@ -43,6 +43,7 @@
       "customBootstrapClass": "col-md-4 ml-md-auto",
       "didCheckErrors": false,
       "errors": [],
+      "style": { "marginRight": "-20px" },
       "name": "defaultSort",
       "selectOptions": ["_id"],
       "type": "select",
@@ -53,7 +54,7 @@
       "customBootstrapClass": "col-md-1",
       "didCheckErrors": false,
       "errors": [],
-      "inputStyle": { "maxWidth": "130px" },
+      
       "name": "sort",
       "selectOptions": ["ASC", "DESC"],
       "type": "select",
@@ -78,15 +79,6 @@
       "didCheckErrors": false,
       "errors": [],
       "name": "sortable",
-      "type": "toggle",
-      "validations": {}
-    },
-    {
-      "label": { "id": "content-manager.form.Input.search.field" },
-      "customBootstrapClass": "col-md-6",
-      "didCheckErrors": false,
-      "errors": [],
-      "name": "searchable",
       "type": "toggle",
       "validations": {}
     }

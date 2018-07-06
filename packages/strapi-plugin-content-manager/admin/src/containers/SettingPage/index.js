@@ -251,11 +251,14 @@ class SettingPage extends React.PureComponent {
                     <div className="row">
                       {forms.inputs.map(input => {
                         const inputName = `${namePath}.${input.name}`;
-
+                        console.log(input.name)
+                        let inputStyle = input.name === 'defaulteSort' ? { marginRight: '-20px' } : {};
+                
                         return (
                           <Input
                             {...input}
                             key={input.name}
+                            // style={inputStyle}
                             name={inputName}
                             onChange={onChangeSettings}
                             selectOptions={this.getSelectOptions(input)}
