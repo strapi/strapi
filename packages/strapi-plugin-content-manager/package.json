@@ -22,7 +22,7 @@
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "devDependencies": {
-    "react-select": "^1.0.0-rc.5",
+    "react-select": "^1.2.1",
     "strapi-helper-plugin": "3.0.0-alpha.12.6"
   },
   "author": {
