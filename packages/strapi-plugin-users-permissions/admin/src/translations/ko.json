@@ -11,7 +11,7 @@
   "Auth.form.forgot-password.email.label.success": "메일을 보냈습니다.",
   "Auth.form.forgot-password.email.placeholder": "mysuperemail@gmail.com",
 
-  "Auth.header.register.description": "설정을 완료하고 애플리케이션 보안을 위해 첫 번째 사용자(root 관리자)를 생성하세요.",
+  "Auth.header.register.description": "애플리케이션 설정 및 보안을 위해 첫 번째 사용자(root 관리자)를 생성하세요.",
   "Auth.form.header.login": "strapi",
   "Auth.form.header.forgot-password": "strapi",
   "Auth.form.header.register": "환영합니다!",

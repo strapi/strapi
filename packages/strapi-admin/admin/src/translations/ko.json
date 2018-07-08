@@ -25,7 +25,7 @@
   "app.components.HomePage.button.quickStart": "퀵 스타트 튜토리얼 바로가기",
   "app.components.HomePage.button.blog": "블로그 보기",
   "app.components.HomePage.support": "SUPPORT US",
-  "app.components.HomePage.support.content": "티셔츠를 구매 하세요! 우리는 여러분에게 최고의 경험을 주기 위해 이 프로젝트를 계속 할 수 있습니다.",
+  "app.components.HomePage.support.content": "티셔츠를 구매하세요! 이를 통해 우리는 여러분에게 최고의 경험을 주기 위한 프로젝트 개발에 전념할 수 있습니다.",
   "app.components.HomePage.support.link": "지금 바로 구매하기",
 
   "app.components.BlockLink.documentation": "도큐먼트 바로가기",
@@ -46,7 +46,7 @@
   "app.components.InstallPluginPage.helmet": "마켓플레이스 - 플러그인",
   "app.components.InstallPluginPage.title": "마켓플레이스 - 플러그인",
   "app.components.InstallPluginPage.description": "빠르고 간단하게 기능을 확장해 보세요.",
-  "app.components.InstallPluginPage.plugin.support-us.description": "티셔츠를 구매 하세요! 우리는 여러분에게 최고의 경험을 주기 위해 이 프로젝트를 계속 할 수 있습니다.",
+  "app.components.InstallPluginPage.plugin.support-us.description": "티셔츠를 구매하세요! 이를 통해 우리는 여러분에게 최고의 경험을 주기 위한 프로젝트 개발에 전념할 수 있습니다.",
   "app.components.InstallPluginPage.InputSearch.label": " ",
   "app.components.InstallPluginPage.InputSearch.placeholder": "플러그인 검색 중... (예: authentication)",
   "app.components.InstallPluginPopup.downloads": "다운로드",
