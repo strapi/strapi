@@ -465,7 +465,7 @@ module.exports = function(strapi) {
                         switch (connection.settings.client) {
                           case 'pg':
                             // Enable extension to allow GIN indexes.
-                            await ORM.knex.raw(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+                            await ORM.knex.raw('CREATE EXTENSION IF NOT EXISTS pg_trgm');
 
                             // Create GIN indexes for every column.
                             const indexes = columns
@@ -496,7 +496,7 @@ module.exports = function(strapi) {
                             console.log(e);
                           }
 
-                          strapi.log.warn(`The SQL database indexes haven't been generated successfully. Please enable the debug mode for more details.`);
+                          strapi.log.warn('The SQL database indexes haven\'t been generated successfully. Please enable the debug mode for more details.');
                         }
                       }
                     };
@@ -628,25 +628,12 @@ module.exports = function(strapi) {
                       }
                     };
 
-                    const table = _.get(manyRelations, 'collectionName') ||
-                      _.map(
-                        _.sortBy(
-                          [
-                            collection.attributes[
-                              manyRelations.via
-                            ],
-                            manyRelations
-                          ],
-                          'collection'
-                        ),
-                        table => {
-                          return _.snakeCase(
-                            pluralize.plural(table.collection) +
-                              ' ' +
-                              pluralize.plural(table.via)
-                          );
-                        }
-                      ).join('__');
+                    const table =
+                      _.get(manyRelations, 'collectionName') ||
+                      utilsModels.getCollectionName(
+                        collection.attributes[manyRelations.via],
+                        manyRelations,
+                      );
 
                     await handler(table, attributes);
                   }
@@ -765,25 +752,12 @@ module.exports = function(strapi) {
                     strapi.plugins[details.plugin].models[details.collection]:
                     strapi.models[details.collection];
 
-                  const collectionName = _.get(details, 'collectionName') ||
-                    _.map(
-                      _.sortBy(
-                        [
-                          collection.attributes[
-                            details.via
-                          ],
-                          details
-                        ],
-                        'collection'
-                      ),
-                      table => {
-                        return _.snakeCase(
-                          pluralize.plural(table.collection) +
-                            ' ' +
-                            pluralize.plural(table.via)
-                        );
-                      }
-                    ).join('__');
+                  const collectionName =
+                    _.get(details, 'collectionName') ||
+                    utilsModels.getCollectionName(
+                      collection.attributes[details.via],
+                      details,
+                    );
 
                   const relationship = _.clone(
                     collection.attributes[details.via]
@@ -1005,21 +979,6 @@ module.exports = function(strapi) {
             value
           };
           break;
-        case '_sort':
-          result.key = `sort`;
-          result.value = {
-            key,
-            order: value.toUpperCase()
-          };
-          break;
-        case '_start':
-          result.key = `start`;
-          result.value = parseFloat(value);
-          break;
-        case '_limit':
-          result.key = `limit`;
-          result.value = parseFloat(value);
-          break;
         case '_contains':
         case '_containss':
           result.key = `where.${key}`;
@@ -1034,6 +993,21 @@ module.exports = function(strapi) {
             symbol: 'IN',
             value,
           };
+          break;
+        case '_sort':
+          result.key = 'sort';
+          result.value = {
+            key,
+            order: value.toUpperCase()
+          };
+          break;
+        case '_start':
+          result.key = 'start';
+          result.value = parseFloat(value);
+          break;
+        case '_limit':
+          result.key = 'limit';
+          result.value = parseFloat(value);
           break;
         default:
           return undefined;

@@ -9,6 +9,7 @@ const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
+const pluralize = require('pluralize');
 
 // Following this discussion https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric this function is the best implem to determine if a value is a valid number candidate
 const isNumeric = (value) => {
@@ -311,6 +312,17 @@ module.exports = {
     return _.get(strapi.models, collectionIdentity.toLowerCase() + '.orm');
   },
 
+
+  /**
+   * Return table name for a collection many-to-many
+   */
+  getCollectionName: (associationA, associationB) => {
+    return [associationA, associationB]
+      .sort((a, b) => a.collection < b.collection ? -1 : 1)
+      .map(table => _.snakeCase(`${pluralize.plural(table.collection)} ${pluralize.plural(table.via)}`))
+      .join('__');
+  },
+
   /**
    * Define associations key to models
    */
@@ -340,7 +352,7 @@ module.exports = {
 
       // Build associations object
       if (association.hasOwnProperty('collection') && association.collection !== '*') {
-        definition.associations.push({
+        const ast = {
           alias: key,
           type: 'collection',
           collection: association.collection,
@@ -350,7 +362,13 @@ module.exports = {
           dominant: details.dominant !== true,
           plugin: association.plugin || undefined,
           filter: details.filter,
-        });
+        };
+
+        if (infos.nature === 'manyToMany' && !association.plugin && definition.orm === 'bookshelf') {
+          ast.tableCollectionName = this.getCollectionName(association, details);
+        }
+
+        definition.associations.push(ast);
       } else if (association.hasOwnProperty('model') && association.model !== '*') {
         definition.associations.push({
           alias: key,
@@ -449,6 +467,7 @@ module.exports = {
     const convertor = strapi.hook[connector].load().getQueryParams;
     const convertParams = {
       where: {},
+      relations: {},
       sort: '',
       start: 0,
       limit: 100
@@ -469,26 +488,44 @@ module.exports = {
         const [attr, order = 'ASC'] = formattedValue.split(':');
         result = convertor(order, key, attr);
       } else {
-        const suffix = key.split('_');
+        let type = '=';
 
-        // Mysql stores boolean as 1 or 0
-        if (client === 'mysql' && _.get(models, [model, 'attributes', suffix, 'type']) === 'boolean') {
-          formattedValue = value === 'true' ? '1' : '0';
+        if (key.match(/_{1}(?:ne|lte?|gte?|containss?|in)/)) {
+          type = key.match(/_{1}(?:ne|lte?|gte?|containss?|in)/)[0];
+          key = key.replace(type, '');
         }
 
-        let type;
+        if (key.includes('.')) {
+          // Check if it's a valid relation
+          const [relationName, relationKey] = key.split('.');
+          const relationAttribute = models[model] && models[model].attributes[relationName];
 
-        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'containss', 'in'], _.last(suffix))) {
-          type = `_${_.last(suffix)}`;
-          key = _.dropRight(suffix).join('_');
+          if (relationAttribute && (
+            relationAttribute.hasOwnProperty('collection') ||
+            relationAttribute.hasOwnProperty('model')
+          )) {
+            // Mysql stores boolean as 1 or 0
+            const field = models[relationAttribute.collection ? relationAttribute.collection : relationAttribute.model].attributes[relationKey];
+            if (client === 'mysql' && field.type && field.type === 'boolena') {
+              formattedValue = value === 'true' ? '1' : '0';
+            }
+
+            result = convertor(formattedValue, type, relationKey);
+            result.key = result.key.replace('where.', `relations.${relationName}.`);
+          }
         } else {
-          type = '=';
-        }
+          // Mysql stores boolean as 1 or 0
+          if (client === 'mysql' && _.get(models, [model, 'attributes', key, 'type']) === 'boolean') {
+            formattedValue = value === 'true' ? '1' : '0';
+          }
 
-        result = convertor(formattedValue, type, key);
+          result = convertor(formattedValue, type, key);
+        }
       }
 
-      _.set(convertParams, result.key, result.value);
+      if (result) {
+        _.set(convertParams, result.key, result.value);
+      }
     });
 
     return convertParams;
