@@ -7,7 +7,7 @@
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs-extra');
-const { packageManager } = require('strapi-utils');
+const { packageManager } = require('strapi-utils'); // eslint-disable-line import/no-unresolved
 
 /**
  * Runs after this generator has finished
