@@ -501,6 +501,25 @@ module.exports = function(strapi) {
                       }
                     };
 
+                    const storeTable = async (table, attributes) => {
+                      const existTable = await StrapiConfigs.forge({key: `db_model_${table}`}).fetch();
+
+                      if (existTable) {
+                        await StrapiConfigs.forge({id: existTable.id}).save({
+                          value: JSON.stringify(attributes)
+                        }, {
+                          path: true
+                        });
+                      } else {
+                        await StrapiConfigs.forge({
+                          key: `db_model_${table}`,
+                          type: 'object',
+                          value: JSON.stringify(attributes)
+                        }).save();
+                      }
+                    };
+
+
                     if (!tableExist) {
                       const columns = generateColumns(attributes, [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`]).join(',\n\r');
 
@@ -513,7 +532,10 @@ module.exports = function(strapi) {
 
                       // Generate indexes.
                       await generateIndexes(table, attributes);
+
+                      await storeTable(table, attributes);
                     } else {
+
                       const columns = Object.keys(attributes);
 
                       // Fetch existing column
@@ -546,9 +568,21 @@ module.exports = function(strapi) {
                         await Promise.all(queries.map(query => ORM.knex.raw(query)));
                       }
 
+                      let previousAttributes;
+                      try {
+                        previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
+                      } catch (err) {
+                        await storeTable(table, attributes);
+                        previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
+                      }
+
                       // Execute query to update column type
                       await Promise.all(columns.map(attribute =>
                         new Promise(async (resolve) => {
+                          if (JSON.stringify(previousAttributes[attribute]) ===  JSON.stringify(attributes[attribute])) {
+                            return resolve();
+                          }
+
                           const type = getType(attributes[attribute], attribute);
 
                           if (type) {
@@ -567,6 +601,8 @@ module.exports = function(strapi) {
                           resolve();
                         })
                       ));
+
+                      await storeTable(table, attributes);
                     }
                   };
 
@@ -583,7 +619,9 @@ module.exports = function(strapi) {
                   }
 
                   // Equilize tables
-                  await handler(loadedModel.tableName, definition.attributes);
+                  if (connection.options && connection.options.autoMigration !== false) {
+                    await handler(loadedModel.tableName, definition.attributes);
+                  }
 
                   // Equilize polymorphic releations
                   const morphRelations = definition.associations.find((association) => {
@@ -606,7 +644,9 @@ module.exports = function(strapi) {
                       }
                     };
 
-                    await handler(`${loadedModel.tableName}_morph`, attributes);
+                    if (connection.options && connection.options.autoMigration !== false) {
+                      await handler(`${loadedModel.tableName}_morph`, attributes);
+                    }
                   }
 
                   // Equilize many to many releations
