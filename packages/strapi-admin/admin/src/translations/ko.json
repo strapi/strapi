@@ -71,7 +71,7 @@
   "app.components.listPluginsPage.deletePlugin.error": "플러그인을 제거하는데 에러가 발생했습니다.",
   "app.components.listPlugins.title.singular": "{number}개의 플러그인이 설치됐습니다.",
   "app.components.listPlugins.title.plural": "{number}개의 플러그인이 설치됐습니다.",
-  "app.components.listPlugins.title.none": "섶치된 플러그인이 없습니다.",
+  "app.components.listPlugins.title.none": "설치된 플러그인이 없습니다.",
   "app.components.listPlugins.button": "새로운 플러그인 추가하기",
 
   "app.components.NotFoundPage.description": "찾을 수 없는 페이지입니다.",
@@ -154,7 +154,7 @@
   "Settings Manager": "설정 관리",
   "Email": "이메일",
   "Password": "패스워드",
-  "Username": "사용자 이름",
+  "Username": "사용자 이름(Username)",
   "Provider": "프로바이더(provider)",
   "ResetPasswordToken": "패스워트 토큰 재설정",
   "Role": "역할",
