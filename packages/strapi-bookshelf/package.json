@@ -1,6 +1,6 @@
 {
   "name": "strapi-bookshelf",
-  "version": "3.0.0-alpha.12.7",
+  "version": "3.0.0-alpha.12.7.1",
   "description": "Bookshelf hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -20,8 +20,8 @@
     "inquirer": "^5.2.0",
     "lodash": "^4.17.4",
     "pluralize": "^6.0.0",
-    "strapi-knex": "3.0.0-alpha.12.7",
-    "strapi-utils": "3.0.0-alpha.12.7"
+    "strapi-knex": "3.0.0-alpha.12.7.1",
+    "strapi-utils": "3.0.0-alpha.12.7.1"
   },
   "strapi": {
     "isHook": true,
