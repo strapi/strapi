@@ -22,7 +22,8 @@
     "joi-json": "^2.0.1",
     "knex": "^0.13.0",
     "lodash": "^4.17.4",
-    "pino": "^4.7.1"
+    "pino": "^4.7.1",
+    "shelljs": "^0.7.7"
   },
   "author": {
     "email": "hi@strapi.io",
