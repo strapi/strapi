@@ -1,0 +1,36 @@
+{
+  "ConfigPage.title": "업로드 설정",
+  "ConfigPage.description": "업로드 플러그인 설정",
+
+  "EditForm.Input.number.label": "최대 허용 크기(MB)",
+  "EditForm.Input.select.label": "프로바이더(Providers)",
+  "EditForm.Input.select.inputDescription": "파일을 서버 또는 외부 프로바이더에 업로드할 수 있습니다.",
+  "EditForm.Input.toggle.label": "파일 업로드 허용",
+
+  "EmptyLi.message": "업로드된 파일이 없습니다.",
+
+  "EntriesNumber.number": "{number}개의 파일이 있습니다.",
+  "EntriesNumber.number.plural": "{number}개의 파일이 있습니다.",
+
+  "HomePage.title": "파일 업로드",
+  "HomePage.description": "파일을 업로드하고 관리합니다.",
+  "HomePage.InputSearch.placeholder": "파일 검색...",
+
+  "Li.linkCopied": "링크를 클립보드로 복사했습니다.",
+
+  "ListHeader.type": "타입",
+  "ListHeader.hash": "해시(Hash)",
+  "ListHeader.name": "이름",
+  "ListHeader.updated": "수정",
+  "ListHeader.size": "크기",
+  "ListHeader.related": "연관",
+
+  "PluginInputFile.text": "업로드 할 파일을 끌어 넣거나 {link} 하세요",
+  "PluginInputFile.link": "선택",
+  "PluginInputFile.loading": "파일을 업로드합니다.",
+
+  "notification.config.success": "설정을 업데이트했습니다.",
+  "notification.delete.success": "파일을 삭제했습니다.",
+  "notification.dropFile.success": "파일을 업로드했습니다.",
+  "notification.dropFiles.success": "{number}개의 파일을 업로드 했습니다."
+}

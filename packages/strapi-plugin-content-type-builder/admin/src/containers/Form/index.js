@@ -143,7 +143,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
 
     // Check if user is adding a relation with the same content type
-    if (includes(this.props.hash, 'attributerelation') && this.props.modifiedDataAttribute.params.target === this.props.modelName) {
+    
+    if (includes(this.props.hash, 'attributerelation') && this.props.modifiedDataAttribute.params.target === this.props.modelName && get(this.props.modifiedDataAttribute, ['params', 'nature'], '') !== 'oneWay') {
       // Insert two attributes
       this.props.addAttributeRelationToContentType(this.props.modifiedDataAttribute);
     } else {
@@ -168,7 +169,8 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     const contentType = this.props.modifiedDataEdit;
     // Add the new attribute to the content type attribute list
     const newAttribute = this.setTempAttribute();
-    contentType.attributes = compact(concat(contentType.attributes, newAttribute, this.setParallelAttribute(newAttribute)));
+    const parallelAttribute = this.props.modelName === get(newAttribute, ['params', 'target']) && get(newAttribute, ['params', 'nature'], '') === 'oneWay' ? null : this.setParallelAttribute(newAttribute);
+    contentType.attributes = compact(concat(contentType.attributes, newAttribute, parallelAttribute));
     // Reset the store and update the parent container
     this.props.contentTypeCreate(contentType);
     // Get the displayed model from the localStorage
