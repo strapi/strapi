@@ -38,6 +38,10 @@ module.exports = {
         // Check if strapi is installed with NPM
         isNPM = includes(data, 'strapi');
 
+        if (isNPM) {
+          return isNPM;
+        }
+
         try {
           const yarnData = watcher('yarn global ls');
           isNPM = includes(yarnData, 'strapi');
