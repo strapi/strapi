@@ -58,10 +58,10 @@
 
   "EditForm.inputSelect.label.role": "인증된 사용자의 기본 역할(role)",
   "EditForm.inputSelect.description.role": "인증된 사용자에 선택한 역할(role)을 부여합니다.",
-  "EditForm.inputSelect.subscriptions.label": "Manage subscription quotas",
-  "EditForm.inputSelect.subscriptions.description": "Limit the number of subscriptions per IP per hour.",
-  "EditForm.inputSelect.durations.label": "Duration",
-  "EditForm.inputSelect.durations.description": "Number of hours during which the user can't subscribe.",
+  "EditForm.inputSelect.subscriptions.label": "사용량 관리",
+  "EditForm.inputSelect.subscriptions.description": "동일 IP에서 시간당 사용할 수 있는 횟수를 제한합니다.",
+  "EditForm.inputSelect.durations.label": "기간(duration)",
+  "EditForm.inputSelect.durations.description": "사용자가 사용할 수 없는 시간을 설정합니다.",
 
   "EditForm.inputToggle.label.email": "이메일 주소 당 하나의 계정",
   "EditForm.inputToggle.label.sign-up": "사용자 등록",
