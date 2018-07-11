@@ -1,14 +1,13 @@
 {
-  "name": "strapi-bookshelf",
+  "name": "strapi-hook-redis",
   "version": "3.0.0-alpha.12.7.1",
-  "description": "Bookshelf hook for the Strapi framework",
+  "description": "Redis hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
-    "bookshelf",
+    "redis",
     "hook",
-    "migrations",
-    "orm",
-    "sql",
+    "memory",
+    "cache",
     "strapi"
   ],
   "directories": {
@@ -16,21 +15,10 @@
   },
   "main": "./lib",
   "dependencies": {
-    "bookshelf": "^0.12.1",
-    "inquirer": "^5.2.0",
+    "ioredis": "^3.1.2",
     "lodash": "^4.17.4",
-    "pluralize": "^6.0.0",
-    "strapi-knex": "3.0.0-alpha.12.7.1",
+    "stack-trace": "0.0.10",
     "strapi-utils": "3.0.0-alpha.12.7.1"
-  },
-  "strapi": {
-    "isHook": true,
-    "dependencies": [
-      "strapi-knex"
-    ]
-  },
-  "scripts": {
-    "prepublishOnly": "npm prune"
   },
   "author": {
     "email": "hi@strapi.io",

@@ -83,7 +83,7 @@ module.exports = async function() {
           }
 
           // Initialize array.
-          let previousDependencies = this.hook[hook].dependencies.map(x => x.replace('strapi-', '')) || [];
+          let previousDependencies = this.hook[hook].dependencies.map(x => x.replace('strapi-hook', '')) || [];
 
           // Add BEFORE middlewares to load and remove the current one
           // to avoid that it waits itself.

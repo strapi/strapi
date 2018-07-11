@@ -15,18 +15,7 @@ module.exports = function() {
       const cwd = '';
 
       // Load configurations.
-      glob('./node_modules/strapi-*', {
-        ignore: [
-          './node_modules/strapi-admin',
-          './node_modules/strapi-utils',
-          './node_modules/strapi-generate*',
-          './node_modules/strapi-plugin-*',
-          './node_modules/strapi-helper-*',
-          './node_modules/strapi-middleware-*',
-          './node_modules/strapi-upload-*',
-          './node_modules/strapi-email-*',
-          './node_modules/strapi-lint'
-        ],
+      glob('./node_modules/strapi-hook-*', {
         cwd: this.config.appPath
       }, (err, files) => {
         if (err) {
@@ -71,17 +60,9 @@ const mountHooks = function (files, cwd, isPlugin) {
   return (resolve, reject) =>
     parallel(
       files.map(p => cb => {
-        const extractStr = p
-          .split('/')
-          .pop()
-          .replace(/^strapi(-|\.)/, '')
-          .split('-');
-
-        const name = lowerFirst(
-          extractStr.length === 1
-            ? extractStr[0]
-            : extractStr.map(p => upperFirst(p)).join('')
-        );
+        const folders = p.replace(/^.\/node_modules\/strapi-hook-/, './')
+          .split('/');
+        const name = isPlugin ? folders[folders.length - 2] : folders[1];
 
         fs.readFile(path.resolve(this.config.appPath, cwd, p, 'package.json'), (err, content) => {
           try {

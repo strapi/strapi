@@ -1,11 +1,13 @@
 {
-  "name": "strapi-ejs",
+  "name": "strapi-hook-mongoose",
   "version": "3.0.0-alpha.12.7.1",
-  "description": "EJS hook for the Strapi framework",
+  "description": "Mongoose hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
-    "ejs",
+    "mongoose",
     "hook",
+    "orm",
+    "nosql",
     "strapi"
   ],
   "directories": {
@@ -13,14 +15,11 @@
   },
   "main": "./lib",
   "dependencies": {
-    "co": "^4.6.0",
-    "koa-ejs": "^4.1.0"
-  },
-  "strapi": {
-    "isHook": true
-  },
-  "scripts": {
-    "prepublishOnly": "npm prune"
+    "lodash": "^4.17.4",
+    "mongoose": "^5.0.16",
+    "mongoose-float": "^1.0.2",
+    "pluralize": "^6.0.0",
+    "strapi-utils": "3.0.0-alpha.12.7.1"
   },
   "author": {
     "email": "hi@strapi.io",

@@ -69,14 +69,14 @@ module.exports = (scope, cb) => {
         name: 'MongoDB (recommended)',
         value: {
           database: 'mongo',
-          connector: 'strapi-mongoose'
+          connector: 'strapi-hook-mongoose'
         }
       },
       {
         name: 'Postgres',
         value: {
           database: 'postgres',
-          connector: 'strapi-bookshelf',
+          connector: 'strapi-hook-bookshelf',
           module: 'pg'
         }
       },
@@ -84,7 +84,7 @@ module.exports = (scope, cb) => {
         name: 'MySQL',
         value: {
           database: 'mysql',
-          connector: 'strapi-bookshelf',
+          connector: 'strapi-hook-bookshelf',
           module: 'mysql'
         }
       }
@@ -223,10 +223,10 @@ module.exports = (scope, cb) => {
               cmd += ` ${scope.client.module}`;
             }
 
-            if (scope.client.connector === 'strapi-bookshelf') {
-              cmd += ` strapi-knex@alpha`;
+            if (scope.client.connector === 'strapi-hook-bookshelf') {
+              cmd += ` strapi-hook-knex@alpha`;
 
-              scope.additionalsDependencies = ['strapi-knex', 'knex'];
+              scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
             }
 
             exec(cmd, () => {
@@ -234,7 +234,7 @@ module.exports = (scope, cb) => {
                 const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
                 scope.client.version = lock.version;
 
-                if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
+                if (scope.developerMode === true && scope.client.connector === 'strapi-hook-bookshelf') {
                   const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
                   scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
                 }
