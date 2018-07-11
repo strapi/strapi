@@ -45,7 +45,7 @@ module.exports = function (name, cliArguments) {
     developerMode
   };
 
-  const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
+  const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword', 'dbssl', 'dbauth'];
   const matchingDbArguments = _.intersection(_.keys(cliArguments), dbArguments);
 
   if (matchingDbArguments.length) {
@@ -63,7 +63,10 @@ module.exports = function (name, cliArguments) {
         username: cliArguments.dbusername,
         password: cliArguments.dbpassword
       },
-      options: {}
+      options: {
+        authenticationDatabase: cliArguments.dbauth,
+        ssl: cliArguments.dbssl
+      }
     };
   }
 
