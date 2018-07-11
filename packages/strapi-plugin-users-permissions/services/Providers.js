@@ -66,7 +66,7 @@ exports.connect = (provider, query) => {
           return resolve([user, null]);
         }
 
-        if (!_.isEmpty(_.find(users, user => user.provider !== provider)) && advanced.unique_email) {
+        if (!_.isEmpty(_.find(users, user => user.provider !== provider && user.email === profile.email)) && advanced.unique_email) {
           return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
         }
 
