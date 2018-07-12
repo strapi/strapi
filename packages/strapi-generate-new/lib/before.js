@@ -192,7 +192,7 @@ module.exports = (scope, cb) => {
               ])
               .then(answers => {
                 if (hasDatabaseConfig) {
-                  answers = _.omit(scope.database.settings, ['client']);
+                  answers = _.merge((_.omit(scope.database.settings, ['client'])), scope.database.options);
                 }
 
                 scope.database.settings.host = answers.host;

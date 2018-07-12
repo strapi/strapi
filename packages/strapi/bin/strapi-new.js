@@ -45,7 +45,7 @@ module.exports = function (name, cliArguments) {
     developerMode
   };
 
-  const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword', 'dbssl', 'dbauth'];
+  const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
   const matchingDbArguments = _.intersection(_.keys(cliArguments), dbArguments);
 
   if (matchingDbArguments.length) {
