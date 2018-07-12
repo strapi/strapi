@@ -651,8 +651,8 @@ module.exports = {
                       [ref.primaryKey]: arrayOfIds,
                       ...where.where
                     }).where;
-                    break;
                   }
+                  break;
                   // falls through
                 }
                 default:
