@@ -304,24 +304,15 @@ module.exports.app = async function() {
 
   this.config.hook.settings = Object.keys(this.hook).reduce((acc, current) => {
     // Try to find the settings in the current environment, then in the main configurations.
-    const currentSettings = flattenHooksConfig[current] || this.config[current];
+    const currentSettings = merge(get(cloneDeep(this.hook[current]), ['defaults', current], {}), flattenHooksConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
+    acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
-    if (isString(currentSettings)) {
-      acc[current] = currentSettings;
-    } else {
-      acc[current] = !isObject(currentSettings) ? {} : currentSettings;
-
-      if (this.hook[current].isPlugin) {
-        acc[current].enabled = true;
-      }
-
-      if (!acc[current].hasOwnProperty('enabled')) {
-        this.log.warn(`(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
-      }
-
-      // Ensure that enabled key exist by forcing to false.
-      defaults(acc[current], { enabled : false });
+    if (!acc[current].hasOwnProperty('enabled')) {
+      this.log.warn(`(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
     }
+
+    // Ensure that enabled key exist by forcing to false.
+    defaults(acc[current], { enabled : false });
 
     return acc;
   }, {});
