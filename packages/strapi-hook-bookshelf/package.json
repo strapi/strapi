@@ -25,7 +25,7 @@
   },
   "strapi": {
     "dependencies": [
-      "strapi-hook-knex"
+      "knex"
     ]
   },
   "scripts": {

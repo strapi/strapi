@@ -79,7 +79,7 @@ module.exports = async function() {
           }
 
           // Initialize array.
-          let previousDependencies = [];
+          let previousDependencies = this.hook[hook].dependencies || [];
 
           // Add BEFORE middlewares to load and remove the current one
           // to avoid that it waits itself.
