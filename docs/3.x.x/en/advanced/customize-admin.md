@@ -101,13 +101,15 @@ Note: make sure the size of your image is the same as the existing one (434px x 
 
 ## Build
 
-To build the administration, run the following command from the root directory of your project, **not** the `./admin folder:
+To build the administration, run the following command from the root directory of your project.
 
 ```
-npm run build
+npm run setup
 ```
 
 This will replace the folder's content located at `./admin/admin/build`. Visit http://localhost:1337/admin/ to make sure your updates have been taken in account.
+
+After you have built the admininistration you can now create a new project to develop your API with the changes implemented. **Note:** You should now create a project without `--dev` 
 
 ***
 
