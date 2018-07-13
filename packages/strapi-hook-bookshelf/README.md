@@ -1,4 +1,4 @@
-# strapi-boohook-kshelf
+# strapi-hook-bookshelf
 
 [![npm version](https://img.shields.io/npm/v/strapi-hook-bookshelf.svg)](https://www.npmjs.org/package/strapi-hook-bookshelf)
 [![npm downloads](https://img.shields.io/npm/dm/strapi-hook-bookshelf.svg)](https://www.npmjs.org/package/strapi-hook-bookshelf)
