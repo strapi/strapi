@@ -41,6 +41,7 @@ module.exports = {
       // Add details to the file to be able to create the relationships.
       if (refId && ref && field) {
         Object.assign(file, {
+          path: `${ref}/${field}`,
           related: [{
             refId,
             ref,

@@ -71,7 +71,7 @@ module.exports = {
         return new Promise((resolve, reject) => {
           // upload file on S3 bucket
           S3.upload({
-            Key: `${file.hash}${file.ext}`,
+            Key: `${file.path}/${file.hash}${file.ext}`,
             Body: new Buffer(file.buffer, 'binary'),
             ACL: 'public-read'
           }, (err, data) => {
@@ -92,7 +92,7 @@ module.exports = {
           S3.deleteObjects({
             Delete: {
               Objects: [{
-                Key: `${file.hash}${file.ext}`
+                Key: `${file.path}/${file.hash}${file.ext}`
               }]
             }
           }, (err, data) => {
