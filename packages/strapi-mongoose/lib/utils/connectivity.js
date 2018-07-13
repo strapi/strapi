@@ -25,6 +25,7 @@ module.exports = (scope, success, error) => {
   }
 
   connectOptions.ssl = ssl ? true : false;
+  connectOptions.useNewUrlParser = true;
 
   Mongoose.connect(`mongodb://${scope.database.settings.host}:${scope.database.settings.port}/${scope.database.settings.database}`, connectOptions, function (err) {
     if (err) {

@@ -20,7 +20,7 @@ const watcher = (label, pckgName, type = 'front') => {
   shell.echo(label);
   shell.cd(pckgName);
   const cmd = includes(pckgName, 'strapi-helper-plugin') ? helperCmd : `${frontCmd} && ${backCmd}`;
-  
+
   const data = shell.exec(cmd, { silent: true });
   shell.echo(chalk(eslintErrorsFormatter(data.stdout)));
   shell.cd('../..');

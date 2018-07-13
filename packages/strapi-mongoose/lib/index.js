@@ -72,6 +72,7 @@ module.exports = function (strapi) {
         }
 
         connectOptions.ssl = ssl === true || ssl === 'true';
+        connectOptions.useNewUrlParser = true;
 
         options.debug = debug === true || debug === 'true';
 
