@@ -111,5 +111,6 @@
   "popUpWarning.title": "Please confirm",
   "popUpWarning.bodyMessage.contentType.delete": "Are you sure you want to delete this entry?",
   "popUpWarning.bodyMessage.contentType.delete.all": "Are you sure you want to delete theses entries?",
+  "popUpWarning.warning.cancelAllSettings": "Are you sure you want to cancel your modifications?",
   "popUpWarning.warning.updateAllSettings": "This will modify all your settings"
 }

@@ -106,5 +106,6 @@
   "popUpWarning.title": "Confirmation requise",
   "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûr de vouloir supprimer cette entrée ?",
   "popUpWarning.bodyMessage.contentType.delete.all": "Êtes-vous sûr de vouloir supprimer ces entrées ?",
+  "popUpWarning.warning.cancelAllSettings": "Êtes-vous sûr de vouloir vos modifications?",
   "popUpWarning.warning.updateAllSettings": "Cela modifiera tous vos précédents paramètres."
 }

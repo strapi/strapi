@@ -31,7 +31,7 @@ import styles from './styles.scss';
 import forms from './forms.json';
 
 class SettingsPage extends React.PureComponent {
-  state = { showWarning: false };
+  state = { showWarning: false, showWarningCancel: false };
 
   componentDidUpdate(prevProps) {
     if (prevProps.submitSuccess !== this.props.submitSuccess) {
@@ -68,7 +68,7 @@ class SettingsPage extends React.PureComponent {
       {
         label: 'content-manager.popUpWarning.button.cancel',
         kind: 'secondary',
-        onClick: this.props.onReset,
+        onClick: this.handleReset,
         type: 'button',
       },
       {
@@ -92,6 +92,11 @@ class SettingsPage extends React.PureComponent {
     this.props.history.push(`${pathname}${destination}`);
   }
 
+  handleReset = (e) => {
+    e.preventDefault();
+    this.setState({ showWarningCancel: true });
+  }
+
   handleSubmit = (e) => {
     e.preventDefault();
     this.setState({ showWarning: true });
@@ -99,9 +104,11 @@ class SettingsPage extends React.PureComponent {
 
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
+  toggleWarningCancel = () => this.setState(prevState => ({ showWarningCancel: !prevState.showWarningCancel }));
+
   render() {
-    const { showWarning } = this.state;
-    const { onChange, onSubmit } = this.props;
+    const { showWarning, showWarningCancel } = this.state;
+    const { onChange, onReset, onSubmit } = this.props;
 
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>
@@ -122,6 +129,21 @@ class SettingsPage extends React.PureComponent {
           popUpWarningType="danger"
           onConfirm={() => {
             onSubmit();
+          }}
+        />
+        <PopUpWarning
+          isOpen={showWarningCancel}
+          toggleModal={this.toggleWarningCancel}
+          content={{
+            title: 'content-manager.popUpWarning.title',
+            message: 'content-manager.popUpWarning.warning.cancelAllSettings',
+            cancel: 'content-manager.popUpWarning.button.cancel',
+            confirm: 'content-manager.popUpWarning.button.confirm',
+          }}
+          popUpWarningType="danger"
+          onConfirm={() => {
+            onReset();
+            this.toggleWarningCancel();
           }}
         />
         <div className={cn('row', styles.container)}>

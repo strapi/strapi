@@ -46,7 +46,12 @@ import styles from './styles.scss';
 
 
 class SettingPage extends React.PureComponent {
-  state = { showWarning: false, isDraggingSibling: false, isOpen: false };
+  state = {
+    isDraggingSibling: false,
+    isOpen: false,
+    showWarning: false,
+    showWarningCancel: false,
+  };
 
   componentDidMount() {
     this.handleClickEditAttr(0);
@@ -123,7 +128,7 @@ class SettingPage extends React.PureComponent {
       {
         label: 'content-manager.popUpWarning.button.cancel',
         kind: 'secondary',
-        onClick: this.props.onReset,
+        onClick: this.handleReset,
         type: 'button',
       },
       {
@@ -186,6 +191,11 @@ class SettingPage extends React.PureComponent {
     this.props.onRemove(index, keys);
   }
 
+  handleReset = (e) => {
+    e.preventDefault();
+    this.setState({ showWarningCancel: true });
+  }
+
   handleSubmit = (e) => {
     e.preventDefault();
     this.setState({ showWarning: true });
@@ -204,6 +214,8 @@ class SettingPage extends React.PureComponent {
 
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
+  toggleWarningCancel = () => this.setState(prevState => ({ showWarningCancel: !prevState.showWarningCancel }));
+  
   toggleDropdown = () => {
     if (this.getDropDownItems().length > 0) {
       this.setState(prevState => ({ isOpen: !prevState.isOpen }));
@@ -211,11 +223,12 @@ class SettingPage extends React.PureComponent {
   }
 
   render() {
-    const { isDraggingSibling, isOpen, showWarning } = this.state;
+    const { isDraggingSibling, isOpen, showWarning, showWarningCancel } = this.state;
     const {
       moveAttr,
       onChangeSettings,
       onClickAddAttr,
+      onReset,
       onSubmit,
     } = this.props;
     const namePath = this.getPath();
@@ -241,6 +254,21 @@ class SettingPage extends React.PureComponent {
             popUpWarningType="danger"
             onConfirm={() => {
               onSubmit();
+            }}
+          />
+          <PopUpWarning
+            isOpen={showWarningCancel}
+            toggleModal={this.toggleWarningCancel}
+            content={{
+              title: 'content-manager.popUpWarning.title',
+              message: 'content-manager.popUpWarning.warning.cancelAllSettings',
+              cancel: 'content-manager.popUpWarning.button.cancel',
+              confirm: 'content-manager.popUpWarning.button.confirm',
+            }}
+            popUpWarningType="danger"
+            onConfirm={() => {
+              onReset();
+              this.toggleWarningCancel();
             }}
           />
           <div className={cn('row', styles.container)}>
