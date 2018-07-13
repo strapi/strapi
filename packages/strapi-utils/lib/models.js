@@ -463,7 +463,10 @@ module.exports = {
       if (modelAttributes[key]) {
         fieldType = modelAttributes[key]['type'];
       } else {
-        let splitKey = key.split('_').pop();
+        // Remove the filter keyword at the end
+        let splitKey = key.split('_').slice(0,-1);
+        splitKey = splitKey.join('_');
+        
         if (modelAttributes[splitKey]) {
           fieldType = modelAttributes[splitKey]['type'];
         }
