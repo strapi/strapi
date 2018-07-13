@@ -43,8 +43,8 @@ module.exports = {
         }
 
         try {
-          const yarnData = watcher('yarn global ls');
-          isNPM = includes(yarnData, 'strapi');
+          const yarnData = watcher('yarn global list');
+          isNPM = !includes(yarnData, 'strapi');
         } catch(err) {
           isNPM = true;
         }

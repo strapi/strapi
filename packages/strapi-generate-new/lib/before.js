@@ -214,7 +214,7 @@ module.exports = (scope, cb) => {
             let packageCmd = packageManager.commands('install --prefix', scope.tmpPath);
             // Manually create the temp directory for yarn
             if (!isStrapiInstalledWithNPM) {
-              shell.exec('mkdir tmp');
+              shell.exec(`mkdir ${scope.tmpPath}`);
             }
 
             let cmd = `${packageCmd} ${scope.client.connector}@alpha`;
@@ -231,7 +231,7 @@ module.exports = (scope, cb) => {
 
             exec(cmd, () => {
               if (scope.client.module) {
-                const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
+                const lock = require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.module}/package.json`));
                 scope.client.version = lock.version;
 
                 if (scope.developerMode === true && scope.client.connector === 'strapi-hook-bookshelf') {
@@ -248,7 +248,7 @@ module.exports = (scope, cb) => {
         Promise.all(asyncFn)
           .then(() => {
             try {
-              require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
+              require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
             } catch(err) {
               shell.rm('-r', scope.tmpPath);
               cb.success();
