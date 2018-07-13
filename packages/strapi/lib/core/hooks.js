@@ -81,7 +81,7 @@ const mountHooks = function (files, cwd, source) {
           Object.defineProperty(this.hook[name], 'load', {
             configurable: false,
             enumerable: true,
-            get: () => require(path.resolve(cwd, p))(this),
+            get: () => require(path.resolve(cwd, p)),
             dependencies
           });
 

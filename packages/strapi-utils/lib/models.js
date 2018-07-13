@@ -446,7 +446,7 @@ module.exports = {
       throw new Error(`Impossible to determine the ORM used for the model ${model}.`);
     }
 
-    const convertor = strapi.hook[connector].getQueryParams;
+    const convertor = strapi.hook[connector].load().getQueryParams;
     const convertParams = {
       where: {},
       sort: '',

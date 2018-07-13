@@ -14,7 +14,7 @@ module.exports = async function() {
       }
     }, this.config.hook.timeout || 1000);
 
-    const loadedModule = module;
+    const loadedModule = module(this);
 
     loadedModule.initialize.call(module, err => {
       timeout = false;
