@@ -18,6 +18,9 @@ const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const shell = require('shelljs');
 
+// Logger.
+const { packageManager } = require('strapi-utils');
+
 /**
  * This `before` function is run before generating targets.
  * Validate, configure defaults, get extra dependencies, etc.
@@ -207,25 +210,32 @@ module.exports = (scope, cb) => {
               });
           }),
           new Promise(resolve => {
-            let cmd = `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha`;
+            const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
+            let packageCmd = packageManager.commands('install --prefix', scope.tmpPath);
+            // Manually create the temp directory for yarn
+            if (!isStrapiInstalledWithNPM) {
+              shell.exec(`mkdir ${scope.tmpPath}`);
+            }
+
+            let cmd = `${packageCmd} ${scope.client.connector}@alpha`;
 
             if (scope.client.module) {
               cmd += ` ${scope.client.module}`;
             }
 
             if (scope.client.connector === 'strapi-bookshelf') {
-              cmd += ` strapi-knex@alpha`;
+              cmd += ' strapi-knex@alpha';
 
               scope.additionalsDependencies = ['strapi-knex', 'knex'];
             }
 
             exec(cmd, () => {
               if (scope.client.module) {
-                const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
+                const lock = require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.module}/package.json`));
                 scope.client.version = lock.version;
 
                 if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
-                  const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
+                  const knexVersion = require(path.join(`${scope.tmpPath}`, '/node_modules/', 'knex/package.json'));
                   scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
                 }
               }
@@ -238,7 +248,7 @@ module.exports = (scope, cb) => {
         Promise.all(asyncFn)
           .then(() => {
             try {
-              require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
+              require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
             } catch(err) {
               shell.rm('-r', scope.tmpPath);
               cb.success();

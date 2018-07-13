@@ -7,6 +7,7 @@
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs-extra');
+const { packageManager } = require('strapi-utils'); // eslint-disable-line import/no-unresolved
 
 /**
  * Runs after this generator has finished
@@ -24,7 +25,8 @@ module.exports =  (scope, cb) => {
   }
 
   // Install back-end admin `node_modules`.
-  exec('npm install --production --ignore-scripts', {
+  const cmd = packageManager.isStrapiInstalledWithNPM() ? 'npm install --production --ignore-scripts' : 'yarn install --production --ignore-scripts';
+  exec(cmd, {
     cwd: path.resolve(scope.rootPath, 'admin')
   }, (err) => {
     if (err) {

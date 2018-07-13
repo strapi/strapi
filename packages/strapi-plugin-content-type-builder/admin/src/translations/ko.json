@@ -84,7 +84,7 @@
   "form.button.save": "저장",
 
   "form.contentType.item.connections": "연결",
-  "form.contentType.item.name": "dlfma",
+  "form.contentType.item.name": "이름",
   "form.contentType.item.name.description": "콘텐츠 타입 이름은 단수형이어야 합니다. {link}",
   "form.contentType.item.name.link.description": "문서를 참고하세요.",
   "form.contentType.item.description": "설명",
