@@ -21,7 +21,7 @@ function SettingsRow({ destination, name, onClick }) {
           </div>
           {upperFirst(name)}
         </div>
-        <IcoContainer icons={[{icoType: 'cog'}]} />
+        <IcoContainer icons={[{ icoType: 'cog', onClick: () => onClick(destination) }]} />
       </div>
     </div>
   );
