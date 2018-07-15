@@ -231,6 +231,8 @@ class Strapi extends EventEmitter {
 
     const reload = function() {
       if (state.shouldReload === false) {
+        // Reset the reloading state
+        reload.isReloading = false;
         return;
       }
 
