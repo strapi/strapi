@@ -374,13 +374,17 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
  * the native ES6 template string function.
  */
 const regex = /\$\{[^()]*\}/g;
-const templateConfigurations = function (obj) {
+const excludeConfigPaths = ['info.scripts'];
+const templateConfigurations = function (obj, configPath = '') {
   // Allow values which looks like such as
   // an ES6 literal string without parenthesis inside (aka function call).
+  // Exclude config with conflicting syntax (e.g. npm scripts).
   return Object.keys(obj).reduce((acc, key) => {
     if (isPlainObject(obj[key]) && !isString(obj[key])) {
-      acc[key] = templateConfigurations(obj[key]);
-    } else if (isString(obj[key]) && obj[key].match(regex) !== null) {
+      acc[key] = templateConfigurations(obj[key], `${configPath}.${key}`);
+    } else if (isString(obj[key])
+      && !excludeConfigPaths.includes(configPath.substr(1))
+      && obj[key].match(regex) !== null) {
       acc[key] = eval('`' + obj[key] + '`'); // eslint-disable-line prefer-template
     } else {
       acc[key] = obj[key];
