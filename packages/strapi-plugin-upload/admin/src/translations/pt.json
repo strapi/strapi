@@ -1,0 +1,37 @@
+{
+    "ConfigPage.title": "Transferência - Definições",
+    "ConfigPage.description": "Configure a extensão de transferência",
+  
+    "EditForm.Input.number.label": "Tamanho máximo permitido (em MB)",
+    "EditForm.Input.select.label": "Provedores",
+    "EditForm.Input.select.inputDescription": "Arquivos podem ser transferidos em seu servidor ou num provedor externo.",
+    "EditForm.Input.toggle.label": "Activar a transferência do arquivo",
+  
+    "EmptyLi.message": "Sem arquivos transferidos",
+  
+    "EntriesNumber.number": "{number} arquivo encontrado",
+    "EntriesNumber.number.plural": "{number} arquivos encontrados",
+  
+    "HomePage.title": "Transferir",
+    "HomePage.description": "Ver todos os ficheiros transferidos",
+    "HomePage.InputSearch.placeholder": "Procurar um arquivo...",
+  
+    "Li.linkCopied": "Link copiado para a área de transferência",
+  
+    "ListHeader.type": "Tipo",
+    "ListHeader.hash": "Hash",
+    "ListHeader.name": "Nome",
+    "ListHeader.updated": "Actualizado",
+    "ListHeader.size": "Tamanho",
+    "ListHeader.related": "Relacionado à",
+  
+    "PluginInputFile.text": "Arraste & solte os seus arquivos nesta area ou {link} um arquivo para transferir",
+    "PluginInputFile.link": "procure",
+    "PluginInputFile.loading": "Seus arquivos estão sendo transferidos...",
+  
+    "notification.config.success": "As configurações foram actualizadas",
+    "notification.delete.success": "O arquivo foi apagado",
+    "notification.dropFile.success": "Seu arquivo foi transferido com sucesso",
+    "notification.dropFiles.success": "{number} arquivos foram transferidos com sucesso"
+  }
+  

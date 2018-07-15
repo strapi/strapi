@@ -13,6 +13,7 @@ import {
   CHANGE_PARAMS,
   DELETE_DATA_SUCCESS,
   DELETE_SEVERAL_DATA_SUCCESS,
+  GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
   ON_CLICK_REMOVE,
@@ -29,20 +30,23 @@ import {
 
 const initialState = fromJS({
   appliedFilters: List([]),
-  count: 0,
+  count: fromJS({}),
+  currentModel: '',
   entriesToDelete: List([]),
   filters: List([]),
   filtersUpdated: false,
   filterToFocus: null,
+  isLoading: true,
   params: Map({
     _limit: 10,
     _page: 1,
     _sort: '',
     _q: '',
   }),
-  records: List([]),
+  records: fromJS({}),
   showFilter: false,
   showWarningDeleteAll: false,
+  updatingParams: false,
 });
 
 function listPageReducer(state = initialState, action) {
@@ -51,7 +55,7 @@ function listPageReducer(state = initialState, action) {
       return state.update('appliedFilters', list => list.push(Map(action.filter)));
     case DELETE_DATA_SUCCESS:
       return state
-        .update('records', (list) => (
+        .updateIn(['records', state.get('currentModel')], (list) => (
           list.filter(obj => {
             if (obj._id) {
               return obj._id !== action.id;
@@ -60,7 +64,7 @@ function listPageReducer(state = initialState, action) {
             return obj.id !== parseInt(action.id, 10);
           })
         ))
-        .update('count', (v) => v = v - 1);
+        .updateIn(['count', state.get('currentModel')], v => v = v - 1);
     case DELETE_SEVERAL_DATA_SUCCESS:
       return state
         .update('showWarningDeleteAll', () => false)
@@ -82,12 +86,25 @@ function listPageReducer(state = initialState, action) {
           }
 
           return v;
+        })
+        .update('updatingParams', () => true);
+    case GET_DATA:
+      return state
+        .update('isLoading', () => true)
+        .update('currentModel', () => action.currentModel)
+        .update('updatingParams', v => {
+          if (action.setUpdatingParams) {
+            return true;
+          }
+          return v;
         });
     case GET_DATA_SUCCEEDED:
       return state
         .update('entriesToDelete', () => List([]))
-        .update('count', () => action.data[0].count)
-        .update('records', () => List(action.data[1]));
+        .updateIn(['count', state.get('currentModel')], () => action.data[0].count)
+        .update('isLoading', () => false)
+        .updateIn(['records', state.get('currentModel')], () => List(action.data[1]))
+        .update('updatingParams', () => false);
     case ON_CHANGE:
       return state.updateIn(['appliedFilters', action.index, action.key], () => action.value);
     case ON_CLICK_REMOVE:
@@ -109,7 +126,7 @@ function listPageReducer(state = initialState, action) {
       return state.update('entriesToDelete', () => {
         if (state.get('entriesToDelete').size === 0) {
           return state
-            .get('records')
+            .getIn(['records', state.get('currentModel')])
             .reduce((acc, current) => acc.concat(List([toString(current.id)])), List([]));
         }
 

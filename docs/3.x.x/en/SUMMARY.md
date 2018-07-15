@@ -20,6 +20,7 @@
 * [Configurations](configurations/configurations.md)
 * [Controllers](guides/controllers.md)
 * [Deployment](guides/deployment.md)
+* [Email](guides/email.md)
 * [File Upload](guides/upload.md)
 * [Filters](guides/filters.md)
 * [GraphQL](guides/graphql.md)
@@ -55,9 +56,4 @@
 * [Table of contents](tutorials/README.md)
 
 ### Migration
-* [Migrating from v1 to v3](migration/migration-guide.md)
-* [Migrating from 3.0.0-alpha.7.4 to 3.0.0-alpha.8](migration/migration-guide-alpha-7-4-to-alpha-8.md)
-* [Migrating from 3.0.0-alpha.8 to 3.0.0-alpha.9](migration/migration-guide-alpha-8-to-alpha-9.md)
-* [Migrating from 3.0.0-alpha.9 to 3.0.0-alpha.10](migration/migration-guide-alpha-9-to-alpha-10.md)
-* [Migrating from 3.0.0-alpha.10 to 3.0.0-alpha.11](migration/migration-guide-alpha-10-to-alpha-11.md)
-* [Migrating from 3.0.0-alpha.11 to 3.0.0-alpha.12](migration/migration-guide-alpha-11-to-alpha-12.md)
+* [Migration guides](https://github.com/strapi/strapi/wiki)

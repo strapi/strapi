@@ -19,7 +19,7 @@ const initialState = fromJS({
 function appReducer(state = initialState, action) {
   switch (action.type) {
     case EMPTY_STORE:
-      return initialState;
+      return state;
     case GET_MODEL_ENTRIES_SUCCEEDED:
       return state.set('modelEntries', action.count);
     case LOAD_MODELS:

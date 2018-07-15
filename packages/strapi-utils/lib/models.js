@@ -10,6 +10,11 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 
+// Following this discussion https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric this function is the best implem to determine if a value is a valid number candidate
+const isNumeric = (value) => {
+  return !isNaN(parseFloat(value)) && isFinite(value);
+};
+
 /* eslint-disable prefer-template */
 /*
  * Set of utils for models
@@ -453,11 +458,10 @@ module.exports = {
       let result;
       let formattedValue;
 
-      try {
-        formattedValue = !_.isNaN(_.toNumber(value)) ? _.toNumber(value) : value;
-      } catch(err) {
-        formattedValue = value;
-      }
+      // Check if the value if a valid candidate to be converted to a number value
+      formattedValue = isNumeric(value)
+        ? _.toNumber(value)
+        : value;
 
       if (_.includes(['_start', '_limit'], key)) {
         result = convertor(formattedValue, key);

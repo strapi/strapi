@@ -137,8 +137,18 @@ module.exports = function(strapi) {
             const done = _.after(_.size(definition.attributes), () => {
               try {
                 // External function to map key that has been updated with `columnName`
-                const mapper = (params = {}) =>
-                  _.mapKeys(params, (value, key) => {
+                const mapper = (params = {}) => {
+                  if (definition.client === 'mysql') {
+                    Object.keys(params).map((key) => {
+                      const attr = definition.attributes[key] || {};
+
+                      if (attr.type === 'json') {
+                        params[key] = JSON.stringify(params[key]);
+                      }
+                    });
+                  }
+
+                  return _.mapKeys(params, (value, key) => {
                     const attr = definition.attributes[key] || {};
 
                     return _.isPlainObject(attr) &&
@@ -146,6 +156,7 @@ module.exports = function(strapi) {
                       ? attr['columnName']
                       : key;
                   });
+                };
 
                 // Update serialize to reformat data for polymorphic associations.
                 loadedModel.serialize = function(options) {
@@ -276,7 +287,7 @@ module.exports = function(strapi) {
                       : Promise.resolve();
                   });
 
-                  this.on('saving', (instance, attrs, options) => {
+                  this.on('saving', (instance, attrs) => {
                     instance.attributes = mapper(instance.attributes);
                     attrs = mapper(attrs);
 
@@ -286,6 +297,52 @@ module.exports = function(strapi) {
                       ? target[model.toLowerCase()]['beforeSave']
                       : Promise.resolve();
                   });
+
+                  // Convert to JSON format stringify json for mysql database
+                  if (definition.client === 'mysql') {
+                    const events = [{
+                      name: 'saved',
+                      target: 'afterSave'
+                    }, {
+                      name: 'fetched',
+                      target: 'afterFetch'
+                    }, {
+                      name: 'fetched:collection',
+                      target: 'afterFetchCollection'
+                    }];
+
+                    const jsonFormatter = (attributes) => {
+                      Object.keys(attributes).map((key) => {
+                        const attr = definition.attributes[key] || {};
+
+                        if (attr.type === 'json') {
+                          attributes[key] = JSON.parse(attributes[key]);
+                        }
+                      });
+                    };
+
+                    events.forEach((event) => {
+                      let fn;
+
+                      if (event.name.indexOf('collection') !== -1 ) {
+                        fn = (instance) => instance.models.map((entry) => {
+                          jsonFormatter(entry.attributes);
+                        });
+                      } else {
+                        fn = (instance) => jsonFormatter(instance.attributes);
+                      }
+
+                      this.on(event.name, (instance) => {
+                        fn(instance);
+
+                        return _.isFunction(
+                          target[model.toLowerCase()][event.target]
+                        )
+                          ? target[model.toLowerCase()][event.target]
+                          : Promise.resolve();
+                      });
+                    });
+                  }
                 };
 
                 loadedModel.hidden = _.keys(
@@ -345,8 +402,10 @@ module.exports = function(strapi) {
                       } else {
                         switch (attribute.type) {
                           case 'text':
-                          case 'json':
                             type = 'text';
+                            break;
+                          case 'json':
+                            type = definition.client === 'pg' ? 'jsonb' : 'longtext';
                             break;
                           case 'string':
                           case 'enumeration':
@@ -442,6 +501,25 @@ module.exports = function(strapi) {
                       }
                     };
 
+                    const storeTable = async (table, attributes) => {
+                      const existTable = await StrapiConfigs.forge({key: `db_model_${table}`}).fetch();
+
+                      if (existTable) {
+                        await StrapiConfigs.forge({id: existTable.id}).save({
+                          value: JSON.stringify(attributes)
+                        }, {
+                          path: true
+                        });
+                      } else {
+                        await StrapiConfigs.forge({
+                          key: `db_model_${table}`,
+                          type: 'object',
+                          value: JSON.stringify(attributes)
+                        }).save();
+                      }
+                    };
+
+
                     if (!tableExist) {
                       const columns = generateColumns(attributes, [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`]).join(',\n\r');
 
@@ -454,7 +532,10 @@ module.exports = function(strapi) {
 
                       // Generate indexes.
                       await generateIndexes(table, attributes);
+
+                      await storeTable(table, attributes);
                     } else {
+
                       const columns = Object.keys(attributes);
 
                       // Fetch existing column
@@ -487,9 +568,21 @@ module.exports = function(strapi) {
                         await Promise.all(queries.map(query => ORM.knex.raw(query)));
                       }
 
+                      let previousAttributes;
+                      try {
+                        previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
+                      } catch (err) {
+                        await storeTable(table, attributes);
+                        previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
+                      }
+
                       // Execute query to update column type
                       await Promise.all(columns.map(attribute =>
                         new Promise(async (resolve) => {
+                          if (JSON.stringify(previousAttributes[attribute]) ===  JSON.stringify(attributes[attribute])) {
+                            return resolve();
+                          }
+
                           const type = getType(attributes[attribute], attribute);
 
                           if (type) {
@@ -508,6 +601,8 @@ module.exports = function(strapi) {
                           resolve();
                         })
                       ));
+
+                      await storeTable(table, attributes);
                     }
                   };
 
@@ -524,7 +619,9 @@ module.exports = function(strapi) {
                   }
 
                   // Equilize tables
-                  await handler(loadedModel.tableName, definition.attributes);
+                  if (connection.options && connection.options.autoMigration !== false) {
+                    await handler(loadedModel.tableName, definition.attributes);
+                  }
 
                   // Equilize polymorphic releations
                   const morphRelations = definition.associations.find((association) => {
@@ -547,7 +644,9 @@ module.exports = function(strapi) {
                       }
                     };
 
-                    await handler(`${loadedModel.tableName}_morph`, attributes);
+                    if (connection.options && connection.options.autoMigration !== false) {
+                      await handler(`${loadedModel.tableName}_morph`, attributes);
+                    }
                   }
 
                   // Equilize many to many releations

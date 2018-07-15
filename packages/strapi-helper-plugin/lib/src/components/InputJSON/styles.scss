@@ -1,0 +1,40 @@
+.jsonWrapper {
+  position: relative;
+  margin-top: 14px;
+  margin-bottom: -14px;
+  line-height: 18px;
+
+  >div {
+    border-radius: 3px;
+
+    >div:last-of-type{
+      min-height: 320px;
+      max-height: 635px;
+      font-weight: 500;
+      font-size: 1.3rem !important;
+    }
+  }
+}
+
+.select {
+  z-index: 100;
+  position: absolute;
+  bottom: 0; right: 0;
+  height: 24px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0 !important;
+  border-top-left-radius: 3px !important;
+  -webkit-appearance: none;
+  text-transform: capitalize;
+  color: #787E8F;
+  
+  &:focus, &:active {
+    outline: 0;
+  }
+}
+
+.colored {
+  background-color: yellow;
+  color: black !important;
+}

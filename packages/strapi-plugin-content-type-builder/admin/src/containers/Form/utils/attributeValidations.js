@@ -5,7 +5,7 @@ export default function checkAttributeValidations(errors) {
   const attributeIndex = split(this.props.hash, '::')[3];
   const sameAttributes = filter(this.props.contentTypeData.attributes, (attr) => attr.name === this.props.modifiedDataAttribute.name);
   const sameParamsKey = filter(this.props.contentTypeData.attributes, (attr) =>
-    attr.params.key === this.props.modifiedDataAttribute.params.key && attr.params.target === this.props.modifiedDataAttribute.params.target);
+    attr.params.key !== '-' && attr.params.key === this.props.modifiedDataAttribute.params.key && attr.params.target === this.props.modifiedDataAttribute.params.target);
   const sameParamsKeyAndName = filter(this.props.contentTypeData.attributes, (attr) => attr.name === this.props.modifiedDataAttribute.params.key);
   const formErrors = concat(errors, hasNestedValue(this.props.modifiedDataAttribute));
   const isEditingParamsKey = this.props.modifiedDataAttribute.params.key !== get(this.props.contentTypeData.attributes, [attributeIndex, 'params', 'key']);

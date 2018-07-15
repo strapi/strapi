@@ -72,10 +72,11 @@ export function deleteSeveralDataSuccess() {
   };
 }
 
-export function getData(currentModel, source) {
+export function getData(currentModel, source, setUpdatingParams = false) {
   return {
     type: GET_DATA,
     currentModel,
+    setUpdatingParams,
     source,
   };
 }

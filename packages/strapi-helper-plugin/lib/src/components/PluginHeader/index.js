@@ -13,13 +13,14 @@ import PluginHeaderActions from 'components/PluginHeaderActions';
 
 import styles from './styles.scss';
 
-function PluginHeader({ actions, description, overrideRendering, subActions, title }) {
+function PluginHeader({ actions, description, overrideRendering, subActions, title, withDescriptionAnim }) {
   return (
     <div className={cn(styles.pluginHeader, 'row')}>
       <div className="col-lg-7">
         <PluginHeaderTitle
           title={title}
           description={description}
+          withDescriptionAnim={withDescriptionAnim}
         />
       </div>
       <div className="col-lg-2 justify-content-end">
@@ -43,6 +44,7 @@ PluginHeader.defaultProps = {
   overrideRendering: false,
   subActions: [],
   title: '',
+  withDescriptionAnim: false,  
 };
 
 PluginHeader.propTypes = {
@@ -68,6 +70,7 @@ PluginHeader.propTypes = {
       values: PropTypes.object,
     }),
   ]),
+  withDescriptionAnim: PropTypes.bool,
 };
 
 export default PluginHeader;
