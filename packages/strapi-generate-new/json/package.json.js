@@ -7,6 +7,7 @@
 // Public node modules.
 const _ = require('lodash');
 const uuid = require('uuid/v4');
+const { packageManager } = require('strapi-utils');
 
 /**
  * Expose main package JSON of the application
@@ -15,6 +16,8 @@ const uuid = require('uuid/v4');
 
 module.exports = scope => {
   const cliPkg = scope.strapiPackageJSON || {};
+  // Store the package manager info into the package.json
+  const pkgManager = packageManager.isStrapiInstalledWithNPM() ? 'npm' : 'yarn';
 
   // Let us install additional dependencies on a specific version.
   // Ex: it allows us to install the right version of knex.
@@ -68,6 +71,7 @@ module.exports = scope => {
       'url': scope.website || ''
     }],
     'strapi': {
+      'packageManager': pkgManager,
       'uuid': uuid()
     },
     'engines': {
