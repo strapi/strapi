@@ -17,6 +17,7 @@ import {
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
   ON_REMOVE,
+  ON_REMOVE_EDIT_VIEW_ATTR,
   ON_RESET,
   ON_SUBMIT,
   SUBMIT_SUCCEEDED,
@@ -105,6 +106,14 @@ export function onClickAddAttr(data, keys) {
 export function onRemove(index, keys) {
   return {
     type: ON_REMOVE,
+    index,
+    keys,
+  };
+}
+
+export function onRemoveEditViewAttr(index, keys) {
+  return {
+    type: ON_REMOVE_EDIT_VIEW_ATTR,
     index,
     keys,
   };

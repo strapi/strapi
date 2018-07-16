@@ -16,6 +16,7 @@ import {
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
   ON_REMOVE,
+  ON_REMOVE_EDIT_VIEW_ATTR,
   ON_RESET,
   SUBMIT_SUCCEEDED,
 } from './constants';
@@ -87,7 +88,7 @@ function appReducer(state = initialState, action) {
         .updateIn(['modifiedSchema', 'models'].concat(action.keys), () => action.value);
     case ON_CLICK_ADD_ATTR:
       return state
-        .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => list.push(fromJS(action.data)));
+        .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')), list => list.push(fromJS(action.data)));
     case ON_REMOVE:
       return state.updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => {
 
@@ -105,6 +106,10 @@ function appReducer(state = initialState, action) {
             .push(attrToAdd.get('0'));
         }
 
+        return list.delete(action.index);
+      });
+    case ON_REMOVE_EDIT_VIEW_ATTR:
+      return state.updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')), list => {
         return list.delete(action.index);
       });
     case ON_RESET:

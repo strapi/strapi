@@ -22,6 +22,7 @@ import {
   onChangeSettings,
   onClickAddAttr,
   onRemove,
+  onRemoveEditViewAttr,
   onReset,
   onSubmit,
 } from 'containers/App/actions';
@@ -50,6 +51,7 @@ class SettingPage extends React.PureComponent {
   state = {
     isDraggingSibling: false,
     isOpen: false,
+    isOpenRelation: false,
     showWarning: false,
     showWarningCancel: false,
   };
@@ -89,13 +91,22 @@ class SettingPage extends React.PureComponent {
       });
   }
 
+  getDropDownRelationsItems = () => {
+    const currentDisplayedRelations = this.getEditPageDisplayedRelations();
+
+    return this.getRelations()
+      .filter(relation => {
+        return currentDisplayedRelations.indexOf(relation) === -1;
+      });
+  }
+
   getEditPageDisplaySettings = () => {
     return get(this.props.schema, 'models.'.concat(this.getPath().concat('.editDisplay')), { fields: [], relations: [] });
   }
   
   getEditPageFields = () => get(this.getEditPageDisplaySettings(), ['fields'], []);
   
-  getEditPageRelations = () => get(this.getEditPageDisplaySettings(), ['relations'], []);
+  getEditPageDisplayedRelations = () => get(this.getEditPageDisplaySettings(), ['relations'], []);
 
   getListDisplay = () => (
     get(this.props.schema, `models.${this.getPath()}.listDisplay`, [])
@@ -113,6 +124,18 @@ class SettingPage extends React.PureComponent {
     return [slug, source, endPoint]
       .filter(param => param !== undefined)
       .join('.');
+  }
+
+  getRelations = () => {
+    const relations = get(this.props.schema, 'models.'.concat(this.getPath()).concat('.relations'), {});
+    
+    return Object.keys(relations)
+      .filter(relation => {
+        const isUploadRelation = get(relations, [relation, 'plugin'], '') === 'upload';
+        const isMorphSide = get(relations, [relation, 'nature'], '').toLowerCase().includes('morph') && get(relations, [relation, relation]) !== undefined;
+
+        return !isUploadRelation && !isMorphSide;
+      });
   }
 
   getSelectOptions = (input) => {
@@ -217,16 +240,7 @@ class SettingPage extends React.PureComponent {
   }
 
   hasRelations = () => {
-    const relations = get(this.props.schema, 'models.'.concat(this.getPath()).concat('.relations'), {});
-    
-    return Object.keys(relations)
-      .filter(relation => {
-        const isUploadRelation = get(relations, [relation, 'plugin'], '') === 'upload';
-        const isMorphSide = get(relations, [relation, 'nature'], '').toLowerCase().includes('morph') && get(relations, [relation, relation]) !== undefined;
-
-        return !isUploadRelation && !isMorphSide;
-      })
-      .length > 0;
+    return this.getRelations().length > 0;
   }
 
   // We need to remove the Over state on the DraggableAttr component
@@ -244,13 +258,20 @@ class SettingPage extends React.PureComponent {
     }
   }
 
+  toggleDropdownRelations = () => {
+    if (this.getDropDownRelationsItems().length > 0) {
+      this.setState(prevState => ({ isOpenRelation: !prevState.isOpenRelation }));
+    }
+  }
+
   render() {
-    const { isDraggingSibling, isOpen, showWarning, showWarningCancel } = this.state;
+    const { isDraggingSibling, isOpen, isOpenRelation, showWarning, showWarningCancel } = this.state;
     const {
       moveAttr,
       moveAttrEditView,
       onChangeSettings,
       onClickAddAttr,
+      onRemoveEditViewAttr,
       onReset,
       onSubmit,
     } = this.props;
@@ -365,22 +386,12 @@ class SettingPage extends React.PureComponent {
                             </FormattedMessage>
                           </DropdownToggle>
                           <DropdownMenu>
-                            {this.getDropDownItems().map((item, i) => {
-                              if (i !== this.getDropDownItems().length - 1 && this.getDropDownItems().length > 0) {
-                                return (
-                                  <React.Fragment key={item.name}>
-                                    <DropdownItem onClick={() => onClickAddAttr(item, namePath)}>
-                                      {item.label}
-                                    </DropdownItem>
-                                    <DropdownItem divider />
-                                  </React.Fragment>
-                                );
-                              }
+                            {this.getDropDownItems().map((item) => {
 
                               return (
                                 <DropdownItem
                                   key={item.name}
-                                  onClick={() => onClickAddAttr(item, namePath)}
+                                  onClick={() => onClickAddAttr(item, `${namePath}.listDisplay`)}
                                 >
                                   {item.label}
                                 </DropdownItem>
@@ -448,7 +459,7 @@ class SettingPage extends React.PureComponent {
                     <FormattedMessage id="content-manager.containers.SettingPage.relations" />
                     <div className={cn(styles.sort_wrapper, 'col-md-12')}>
                       <div className="row">
-                        {this.getEditPageRelations().map((attr, index) => {
+                        {this.getEditPageDisplayedRelations().map((attr, index) => {
                           return (
                             <DraggableAttr
                               index={index}
@@ -460,11 +471,33 @@ class SettingPage extends React.PureComponent {
                               label={attr}
                               moveAttr={moveAttrEditView}
                               onClickEditListItem={() => {}}
-                              onRemove={() => {}}
+                              onRemove={onRemoveEditViewAttr}
                               updateSiblingHoverState={() => {}}
                             />
                           );
                         })}
+
+                        <div className={cn(styles.dropdownRelations, styles.dropdownWrapper)}>
+                          <ButtonDropdown isOpen={isOpenRelation} toggle={this.toggleDropdownRelations}>
+                            <DropdownToggle>
+                              <FormattedMessage id="content-manager.containers.SettingPage.addField">
+                                {msg => <p>{msg}</p>}
+                              </FormattedMessage>
+                            </DropdownToggle>
+                            <DropdownMenu>
+                              {this.getDropDownRelationsItems().map((item) => {
+                                return (
+                                  <DropdownItem
+                                    key={item}
+                                    onClick={() => onClickAddAttr(item, `${namePath}.editDisplay.relations`)}
+                                  >
+                                    {item}
+                                  </DropdownItem>
+                                );                
+                              })}
+                            </DropdownMenu>
+                          </ButtonDropdown>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -490,6 +523,7 @@ SettingPage.propTypes = {
   onClickAddAttr: PropTypes.func.isRequired,
   onClickEditListItem: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
+  onRemoveEditViewAttr: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
@@ -506,6 +540,7 @@ const mapDispatchToProps = (dispatch) => (
       onClickAddAttr,
       onClickEditListItem,
       onRemove,
+      onRemoveEditViewAttr,
       onReset,
       onSubmit,
     },
