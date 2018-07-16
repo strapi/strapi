@@ -91,6 +91,20 @@ module.exports = async cb => {
       sortable: true,
       searchable: true,
     });
+
+    // This object will be used to customise the label and description and so on of an input.
+    // TODO: maybe add the customBootstrapClass in it;
+    schemaModel.editDisplay.availableFields = Object.keys(schemaModel.fields).reduce((acc, current) => {
+      // TODO: Add appearance in this object in order to get rid of the layout.json
+      acc[current] = Object.assign(
+        _.pick(_.get(schemaModel, ['fields', current], {}), ['label', 'type', 'description', 'name']),
+        {
+          editable: true,
+          placeholder: '',
+        });
+
+      return acc;
+    }, {});
     
     if (model.associations) {
       // Model relations
@@ -136,22 +150,8 @@ module.exports = async cb => {
         return acc;
       }, {});
 
-      const availableFields = Object.keys(schemaModel.fields).reduce((acc, current) => {
-        // TODO: Add appearance in this object in order to get rid of the layout.json
-        acc[current] = Object.assign(
-          _.pick(_.get(schemaModel, ['fields', current], {}), ['label', 'type', 'description', 'name']),
-          {
-            editable: true,
-            placeholder: '',
-          });
-
-        return acc;
-      }, uploadRelations);
-
-      schemaModel.editDisplay.availableFields = availableFields;
-
+      schemaModel.editDisplay.availableFields = _.merge(schemaModel.editDisplay.availableFields, uploadRelations);
       schemaModel.editDisplay.relations = relationsArray;
-
     }
 
     schemaModel.editDisplay.fields = Object.keys(schemaModel.editDisplay.availableFields);
