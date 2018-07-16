@@ -88,6 +88,14 @@ class SettingPage extends React.PureComponent {
       });
   }
 
+  getEditPageDisplaySettings = () => {
+    return get(this.props.schema, 'models.'.concat(this.getPath().concat('.editDisplay')), { fields: [], relations: [] });
+  }
+  
+  getEditPageFields = () => get(this.getEditPageDisplaySettings(), ['fields'], []);
+  
+  getEditPageRelations = () => get(this.getEditPageDisplaySettings(), ['relations'], []);
+
   getListDisplay = () => (
     get(this.props.schema, `models.${this.getPath()}.listDisplay`, [])
   );
@@ -207,6 +215,19 @@ class SettingPage extends React.PureComponent {
     return index === -1 ? 0 : index;
   }
 
+  hasRelations = () => {
+    const relations = get(this.props.schema, 'models.'.concat(this.getPath()).concat('.relations'), {});
+    
+    return Object.keys(relations)
+      .filter(relation => {
+        const isUploadRelation = get(relations, [relation, 'plugin'], '') === 'upload';
+        const isMorphSide = get(relations, [relation, 'nature'], '').toLowerCase().includes('morph') && get(relations, [relation, relation]) !== undefined;
+
+        return !isUploadRelation && !isMorphSide;
+      })
+      .length > 0;
+  }
+
   // We need to remove the Over state on the DraggableAttr component
   updateSiblingHoverState = () => {
     this.setState(prevState => ({ isDraggingSibling: !prevState.isDraggingSibling }));
@@ -234,7 +255,7 @@ class SettingPage extends React.PureComponent {
     const namePath = this.getPath();
 
     return (
-      <React.Fragment>
+      <form onSubmit={this.handleSubmit}>
         <BackHeader onClick={() => this.props.history.goBack()} />
         <div className={cn('container-fluid', styles.containerFluid)}>
           <PluginHeader
@@ -271,13 +292,16 @@ class SettingPage extends React.PureComponent {
               this.toggleWarningCancel();
             }}
           />
+
           <div className={cn('row', styles.container)}>
             <Block
               description="content-manager.containers.SettingPage.listSettings.description"
               title="content-manager.containers.SettingPage.listSettings.title"
+              style={{ marginBottom: '25px' }}
             >
-              <form onSubmit={this.handleSubmit} className={styles.ctmForm}>
+              <div className={styles.ctmForm}>
                 <div className="row">
+
                   <div className="col-md-12">
                     <div className="row">
                       {forms.inputs.map(input => {
@@ -296,22 +320,26 @@ class SettingPage extends React.PureComponent {
                       })}
                     </div>
                   </div>
+
                   <div className="col-md-12">
                     <div className={styles.separator} />
                   </div>
                 </div>
+
                 <div className={styles.listDisplayWrapper}>
                   <div className="row">
+
                     <div className={cn('col-md-12', styles.draggedDescription)}>
                       <FormattedMessage id="content-manager.containers.SettingPage.attributes" />
                       <p>
                         <FormattedMessage id="content-manager.containers.SettingPage.attributes.description" />
                       </p>
                     </div>
+
                     <div className="col-md-5">
                       {this.getListDisplay().map((attr, index) => (
                         <div key={attr.name} className={styles.draggedWrapper}>
-                          <div>{index}.</div>
+                          <div>{index + 1}.</div>
                           <DraggableAttr
                             index={index}
                             isDraggingSibling={isDraggingSibling}
@@ -360,6 +388,7 @@ class SettingPage extends React.PureComponent {
                         </ButtonDropdown>
                       </div>
                     </div>
+
                     <div className="col-md-7">
                       <div className={styles.editWrapper}>
                         <div className="row">
@@ -391,13 +420,59 @@ class SettingPage extends React.PureComponent {
                         </div>
                       </div>
                     </div>
+
                   </div>
                 </div>
-              </form>
+              </div>
+            </Block>
+
+            <Block
+              description="content-manager.containers.SettingPage.editSettings.description"
+              title="content-manager.containers.SettingPage.editSettings.title"
+            >
+              <div className="row">
+
+                <div className={cn('col-md-8', styles.draggedDescription, styles.edit_settings)}>
+                  <FormattedMessage id="content-manager.containers.SettingPage.attributes" />
+                  <div className={cn(styles.sort_wrapper, 'col-md-12')}>
+                    <div className="row">
+                      {/* GRID SORT */}
+                    </div>
+                  </div>
+                </div>
+
+                {this.hasRelations() && (
+                  <div className={cn('col-md-4', styles.draggedDescription, styles.edit_settings)}>
+                    <FormattedMessage id="content-manager.containers.SettingPage.relations" />
+                    <div className={cn(styles.sort_wrapper, 'col-md-12')}>
+                      <div className="row">
+                        {this.getEditPageRelations().map((attr, index) => {
+                          return (
+                            <DraggableAttr
+                              index={index}
+                              isDraggingSibling={false}
+                              isEditing={false}
+                              key={attr}
+                              keys=""
+                              name={attr}
+                              label={attr}
+                              moveAttr={() => {}}
+                              onClickEditListItem={() => {}}
+                              onRemove={() => {}}
+                              updateSiblingHoverState={() => {}}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </div>
             </Block>
           </div>
         </div>
-      </React.Fragment>
+      </form>
     );
   }
 }

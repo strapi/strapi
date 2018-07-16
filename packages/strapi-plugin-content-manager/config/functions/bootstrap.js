@@ -51,19 +51,26 @@ module.exports = async cb => {
       pageEntries: 10,
       defaultSort: model.primaryKey,
       sort: 'ASC',
+      editDisplay: {
+        fields: [],
+        relations: [],
+      },
     }, model);
   
     // Fields (non relation)
-    schemaModel.fields = _.mapValues(_.pickBy(model.attributes, attribute =>
+    const fields = _.mapValues(_.pickBy(model.attributes, attribute =>
       !attribute.model && !attribute.collection
     ), (value, attribute) => ({
       label: _.upperFirst(attribute),
       description: '',
       type: value.type || 'string',
     }));
+
+    schemaModel.fields = fields;
+    schemaModel.editDisplay.fields = Object.keys(fields);
+    
   
     // Select fields displayed in list view
-    // schemaModel.list = _.slice(_.keys(schemaModel.fields), 0, 4);
     schemaModel.listDisplay = Object.keys(schemaModel.fields)
       // Construct Array of attr ex { type: 'string', label: 'Foo', name: 'Foo', description: '' }
       // NOTE: Do we allow sort on boolean?
@@ -103,6 +110,15 @@ module.exports = async cb => {
   
         return acc;
       }, {});
+      const relationsArray = Object.keys(schemaModel.relations).filter(relation => {
+        const isUploadRelation = _.get(schemaModel, ['relations', relation, 'plugin'], '') === 'upload';
+        const isMorphSide = _.get(schemaModel, ['relations', relation, 'nature'], '').toLowerCase().includes('morp') &&  _.get(schemaModel, ['relations', relation, relation]) !== undefined;
+
+        return !isUploadRelation && !isMorphSide;
+      });
+
+      schemaModel.editDisplay.relations = relationsArray;
+
     }
   
     if (plugin) {

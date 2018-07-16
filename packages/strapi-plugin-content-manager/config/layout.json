@@ -1,1 +1,25 @@
-{}
+{
+  "product": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      },
+      "price": {
+        "appearance": ""
+      },
+      "description": {
+        "appearance": ""
+      },
+      "description_long": {
+        "appearance": "WYSIWYG"
+      }
+    }
+  },
+  "tag": {
+    "attributes": {
+      "name": {
+        "appearance": ""
+      }
+    }
+  }
+}
