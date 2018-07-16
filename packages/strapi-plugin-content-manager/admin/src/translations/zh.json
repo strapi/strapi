@@ -47,6 +47,9 @@
   "error.attribute.sameKeyAndName": "不能等於",
   "error.validation.minSupMax": "不能大於",
 
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+
   "notification.error.relationship.fetch": "讀取關聯資料時發生錯誤",
 
   "success.record.delete": "已刪除",

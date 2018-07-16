@@ -75,6 +75,9 @@
   "error.attribute.sameKeyAndName": "Nie mogą być takie same",
   "error.validation.minSupMax": "Nie może być większa",
 
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+
   "notification.error.relationship.fetch": "Wystąpił błąd podczas pobierania relacji.",
 
   "success.record.delete": "Usunięto",

@@ -75,6 +75,9 @@
     "error.attribute.sameKeyAndName": "Não pode ser igual",
     "error.validation.minSupMax": "Não pode ser superior",
     "error.validation.json": "Isto não corresponde com o formato JSON",
+
+    "form.Input.description": "Description",
+    "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
   
     "notification.error.relationship.fetch": "Ocorreu um erro durante a busca da relação.",
   

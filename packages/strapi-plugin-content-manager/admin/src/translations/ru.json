@@ -45,6 +45,9 @@
     "error.attribute.key.taken": "Это значение уже существует",
     "error.attribute.sameKeyAndName": "Не может быть одинаковым",
     "error.validation.minSupMax": "Не может быть выше",
+
+    "form.Input.description": "Description",
+    "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
   
     "notification.error.relationship.fetch": "Возникла ошибка при получении связей.",
   

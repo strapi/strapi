@@ -502,8 +502,26 @@ class SettingPage extends React.PureComponent {
                     </div>
                   </div>
                 )}
-
               </div>
+              <div className="row">
+                <div className="col-md-7">
+                  <div className={styles.editWrapper}>
+                    <div className="row">
+                      {forms.editView.relationForm.map((input, i) => {
+                        return (
+                          <Input
+                            key={i}
+                            onChange={() => {}}
+                            value=""
+                            {...input}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
             </Block>
           </div>
         </div>

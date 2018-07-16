@@ -74,6 +74,9 @@
   "error.attribute.sameKeyAndName": "Eşit olamaz",
   "error.validation.minSupMax": "Üstü olamaz",
 
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+
   "notification.error.relationship.fetch": "İlişki getirme sırasında bir hata oluştu.",
 
   "success.record.delete": "Silindi",

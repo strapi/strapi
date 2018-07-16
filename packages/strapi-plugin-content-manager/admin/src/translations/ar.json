@@ -46,6 +46,9 @@
   "error.attribute.sameKeyAndName": "لا تتطابق",
   "error.validation.minSupMax": "لا يمكن أن تكون متفوقة",
 
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+
   "notification.error.relationship.fetch": "حدث خطأ أثناء جلب العلاقة.",
 
   "success.record.delete": "حُذف",

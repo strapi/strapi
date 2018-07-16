@@ -46,6 +46,9 @@
   "error.attribute.sameKeyAndName": "不能相等",
   "error.validation.minSupMax": "最小值大于最大值。",
 
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+
   "notification.error.relationship.fetch": "获取关联数据时发生错误",
 
   "success.record.delete": "删除",

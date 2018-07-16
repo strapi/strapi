@@ -72,7 +72,10 @@
 	"error.attribute.taken": "Questo campo nome esiste già",
 	"error.attribute.key.taken": "Questo valore esiste già",
 	"error.attribute.sameKeyAndName": "Non può essere uguale",
-  "error.validation.minSupMax": "Non può essere superiore",
+	"error.validation.minSupMax": "Non può essere superiore",
+	
+	"form.Input.description": "Description",
+  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
   
   "notification.error.relationship.fetch": "Si è verificato un errore durante il rapporto di recupero.",
   

@@ -76,6 +76,9 @@
   "error.validation.minSupMax": "이 보다 더 클 수 없습니다.",
   "error.validation.json": "JSON 형식이 아닙니다.",
 
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+
   "notification.error.relationship.fetch": "데이터 관계를 가져오는 도중 에러가 발생했습니다.",
 
   "success.record.delete": "삭제",
