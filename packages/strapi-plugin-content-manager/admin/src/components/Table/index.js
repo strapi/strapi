@@ -22,13 +22,14 @@ class Table extends React.Component {
       (
         <TableEmpty
           filters={this.props.filters}
-          colspan={this.props.headers.length + 1}
+          colspan={this.props.enableBulkActions ? this.props.headers.length + 1 : this.props.headers.length}
           contentType={this.props.routeParams.slug}
           search={this.props.search}
         />
       ) :
       this.props.records.map((record, key) => (
         <TableRow
+          enableBulkActions={this.props.enableBulkActions}
           onChange={this.props.onClickSelect}
           key={key}
           destination={`${this.props.route.path.replace(':slug', this.props.routeParams.slug)}/${record[this.props.primaryKey]}`}
@@ -42,10 +43,11 @@ class Table extends React.Component {
         />
       ));
     const entriesToDeleteNumber = this.props.entriesToDelete.length;
-    
+
     return (
       <table className={`table ${styles.table}`}>
         <TableHeader
+          enableBulkActions={this.props.enableBulkActions}
           onClickSelectAll={this.props.onClickSelectAll}
           value={this.props.deleteAllValue}
           headers={this.props.headers}
@@ -74,6 +76,7 @@ Table.contextTypes = {
 };
 
 Table.defaultProps = {
+  enableBulkActions: true,
   entriesToDelete: [],
   handleDelete: () => {},
   search: '',
@@ -82,6 +85,7 @@ Table.defaultProps = {
 
 Table.propTypes = {
   deleteAllValue: PropTypes.bool.isRequired,
+  enableBulkActions: PropTypes.bool,
   entriesToDelete: PropTypes.array,
   filters: PropTypes.array.isRequired,
   handleDelete: PropTypes.func,
