@@ -18,6 +18,7 @@ import PropTypes from 'prop-types';
 
 import {
   moveAttr,
+  moveAttrEditView,
   onChangeSettings,
   onClickAddAttr,
   onRemove,
@@ -247,6 +248,7 @@ class SettingPage extends React.PureComponent {
     const { isDraggingSibling, isOpen, showWarning, showWarningCancel } = this.state;
     const {
       moveAttr,
+      moveAttrEditView,
       onChangeSettings,
       onClickAddAttr,
       onReset,
@@ -345,7 +347,7 @@ class SettingPage extends React.PureComponent {
                             isDraggingSibling={isDraggingSibling}
                             isEditing={index === this.findIndexListItemToEdit()}
                             key={attr.name}
-                            keys={this.getPath()}
+                            keys={namePath}
                             label={attr.label}
                             name={attr.name}
                             moveAttr={moveAttr}
@@ -367,7 +369,7 @@ class SettingPage extends React.PureComponent {
                               if (i !== this.getDropDownItems().length - 1 && this.getDropDownItems().length > 0) {
                                 return (
                                   <React.Fragment key={item.name}>
-                                    <DropdownItem onClick={() => onClickAddAttr(item, this.getPath())}>
+                                    <DropdownItem onClick={() => onClickAddAttr(item, namePath)}>
                                       {item.label}
                                     </DropdownItem>
                                     <DropdownItem divider />
@@ -378,7 +380,7 @@ class SettingPage extends React.PureComponent {
                               return (
                                 <DropdownItem
                                   key={item.name}
-                                  onClick={() => onClickAddAttr(item, this.getPath())}
+                                  onClick={() => onClickAddAttr(item, namePath)}
                                 >
                                   {item.label}
                                 </DropdownItem>
@@ -453,10 +455,10 @@ class SettingPage extends React.PureComponent {
                               isDraggingSibling={false}
                               isEditing={false}
                               key={attr}
-                              keys=""
+                              keys={`${namePath}.editDisplay.relations`}
                               name={attr}
                               label={attr}
-                              moveAttr={() => {}}
+                              moveAttr={moveAttrEditView}
                               onClickEditListItem={() => {}}
                               onRemove={() => {}}
                               updateSiblingHoverState={() => {}}
@@ -483,6 +485,7 @@ SettingPage.propTypes = {
   history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   moveAttr: PropTypes.func.isRequired,
+  moveAttrEditView: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
   onClickAddAttr: PropTypes.func.isRequired,
   onClickEditListItem: PropTypes.func.isRequired,
@@ -498,6 +501,7 @@ const mapDispatchToProps = (dispatch) => (
   bindActionCreators(
     {
       moveAttr,
+      moveAttrEditView,
       onChangeSettings,
       onClickAddAttr,
       onClickEditListItem,

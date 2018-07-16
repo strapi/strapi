@@ -11,6 +11,7 @@ import {
   LOAD_MODELS,
   LOADED_MODELS,
   MOVE_ATTR,
+  MOVE_ATTR_EDIT_VIEW,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
@@ -44,6 +45,13 @@ function appReducer(state = initialState, action) {
     case MOVE_ATTR:
       return state
         .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => (
+          list
+            .delete(action.dragIndex)
+            .insert(action.hoverIndex, list.get(action.dragIndex))
+        ));
+    case MOVE_ATTR_EDIT_VIEW:
+      return state
+        .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')), list => (
           list
             .delete(action.dragIndex)
             .insert(action.hoverIndex, list.get(action.dragIndex))

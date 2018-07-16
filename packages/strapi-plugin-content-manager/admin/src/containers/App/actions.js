@@ -12,6 +12,7 @@ import {
   LOAD_MODELS,
   LOADED_MODELS,
   MOVE_ATTR,
+  MOVE_ATTR_EDIT_VIEW,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
@@ -58,6 +59,15 @@ export function loadedModels(models) {
 export function moveAttr(dragIndex, hoverIndex, keys) {
   return {
     type: MOVE_ATTR,
+    dragIndex,
+    hoverIndex,
+    keys,
+  };
+}
+
+export function moveAttrEditView(dragIndex, hoverIndex, keys) {
+  return {
+    type: MOVE_ATTR_EDIT_VIEW,
     dragIndex,
     hoverIndex,
     keys,

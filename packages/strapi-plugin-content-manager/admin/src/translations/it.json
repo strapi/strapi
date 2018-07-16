@@ -13,7 +13,12 @@
 	"containers.List.pluginHeaderDescription": "{label} voci non trovato",
 	"containers.List.pluginHeaderDescription.singular": "{label} voce trovati",
 	"components.LimitSelect.itemsPerPage": "Elementi per pagina",
-  "containers.List.errorFetchRecords": "Errore",
+	"containers.List.errorFetchRecords": "Errore",
+	
+	"containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit - Settings",
   
 	"components.AddFilterCTA.add": "Filtri",
 	"components.AddFilterCTA.hide": "Filtri",

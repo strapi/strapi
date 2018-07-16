@@ -15,6 +15,11 @@
   "components.LimitSelect.itemsPerPage": "Sayfa başı",
   "containers.List.errorFetchRecords": "Hata",
 
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit - Settings",
+
   "components.AddFilterCTA.add": "Filtreler",
   "components.AddFilterCTA.hide": "Filtreler",
   "components.FilterOptions.button.apply": "Uygula",

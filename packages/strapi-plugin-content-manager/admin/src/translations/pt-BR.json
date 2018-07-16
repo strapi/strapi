@@ -14,6 +14,11 @@
   "containers.List.pluginHeaderDescription.singular": "{label} registro encontrado",
   "components.LimitSelect.itemsPerPage": "Registros por página",
   "containers.List.errorFetchRecords": "Erro",
+  
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit - Settings",
 
   "components.AddFilterCTA.add": "Filtros",
   "components.AddFilterCTA.hide": "Filtros",

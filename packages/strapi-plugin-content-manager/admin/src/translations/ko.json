@@ -15,6 +15,11 @@
   "components.LimitSelect.itemsPerPage": "항목 수 / 페이지",
   "containers.List.errorFetchRecords": "에러",
 
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit - Settings",
+
   "components.AddFilterCTA.add": "필터",
   "components.AddFilterCTA.hide": "필터",
   "components.FilterOptions.button.apply": "적용",

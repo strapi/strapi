@@ -15,6 +15,11 @@
   "components.LimitSelect.itemsPerPage": "每页显示数目",
   "containers.List.errorFetchRecords": "错误",
 
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit - Settings",
+
   "EditRelations.title": "关系数据",
   
   "emptyAttributes.title": "还没有字段",

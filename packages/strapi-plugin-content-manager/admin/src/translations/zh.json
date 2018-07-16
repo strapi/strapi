@@ -16,6 +16,11 @@
   "components.LimitSelect.itemsPerPage": "每個頁面檔案數量",
   "containers.List.errorFetchRecords": "錯誤",
 
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit - Settings",
+
   "EditRelations.title": "關聯式資料",
 
   "emptyAttributes.title": "目前還沒有欄位",
