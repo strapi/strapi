@@ -7,7 +7,7 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { get, map } from 'lodash';
+import { get } from 'lodash';
 
 // Components.
 import SelectOne from 'components/SelectOne';
@@ -15,29 +15,20 @@ import SelectMany from 'components/SelectMany';
 
 import styles from './styles.scss';
 
-const filterRelationsUpload = (data) => Object.keys(data).reduce((acc, current) => {
-  if (get(data, [current, 'plugin']) !== 'upload') {
-    acc[current] = data[current];
-  }
-
-  return acc;
-}, {});
-
 function EditRelations(props) {
   return (
     <div className={styles.editFormRelations}>
       <FormattedMessage id="content-manager.EditRelations.title">
         {(message) => <h3>{message}</h3>}
       </FormattedMessage>
-      {map(filterRelationsUpload(props.schema.relations), (relation, key) => {
-        if (relation.nature.toLowerCase().includes('morph') && relation[key]) return '';
-
+      {props.displayedRelations.map(relationName => {
+        const relation = get(props.schema, ['relations', relationName], {});
         const Select = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(relation.nature) ? SelectOne : SelectMany;
 
         return (
           <Select
             currentModelName={props.currentModelName}
-            key={key}
+            key={relationName}
             record={props.record}
             relation={relation}
             schema={props.schema}
@@ -51,6 +42,7 @@ function EditRelations(props) {
 }
 
 EditRelations.defaultProps = {
+  displayedRelations: [],
   record: {},
   schema: {},
 };
@@ -58,6 +50,7 @@ EditRelations.defaultProps = {
 EditRelations.propTypes = {
   changeData: PropTypes.func.isRequired,
   currentModelName: PropTypes.string.isRequired,
+  displayedRelations: PropTypes.array,
   location: PropTypes.object.isRequired,
   record: PropTypes.object,
   schema: PropTypes.object,

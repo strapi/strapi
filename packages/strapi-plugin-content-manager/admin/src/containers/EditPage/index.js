@@ -108,8 +108,16 @@ export class EditPage extends React.Component {
   }
 
   /**
-   * Retrive the model's custom layout
-   * @return {[type]} [description]
+   * Retrieve the model's displayed relations
+   * @return {Array}
+   */
+  getDisplayedRelations = () => {
+    return get(this.getSchema(), ['editDisplay', 'relations'], []);
+  }
+
+  /**
+   * Retrieve the model's custom layout
+   *
    */
   getLayout = () => (
     bindLayout.call(this, get(this.props.editPage, ['layout', this.getModelName()], {}))
@@ -223,6 +231,10 @@ export class EditPage extends React.Component {
     this.props.setFormErrors(formErrors);
   }
 
+  hasDisplayedRelations = () => {
+    return this.getDisplayedRelations().length > 0;
+  }
+
   isCreating = () => this.props.match.params.id === 'create';
 
   isRelationComponentNull = () => (
@@ -299,7 +311,7 @@ export class EditPage extends React.Component {
               }}
             />
             <div className="row">
-              <div className={this.isRelationComponentNull() ? 'col-lg-12' : 'col-lg-9'}>
+              <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
                 <div className={styles.main_wrapper}>
                   {this.showLoaders() ? (
                     <LoadingIndicator />
@@ -320,12 +332,13 @@ export class EditPage extends React.Component {
                   )}
                 </div>
               </div>
-              {!this.isRelationComponentNull() && (
+              {this.hasDisplayedRelations() && (
                 <div className={cn('col-lg-3')}>
                   <div className={styles.sub_wrapper}>
-                    {!this.isRelationComponentNull() && (
+                    {this.hasDisplayedRelations() && (
                       <EditRelations
                         currentModelName={this.getModelName()}
+                        displayedRelations={this.getDisplayedRelations()}
                         location={this.props.location}
                         changeData={this.props.changeData}
                         record={editPage.record}

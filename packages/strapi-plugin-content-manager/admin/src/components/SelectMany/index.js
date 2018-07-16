@@ -129,6 +129,7 @@ class SelectMany extends React.Component {
     );
 
     const value = get(this.props.record, this.props.relation.alias);
+
     /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectMany}`}>
@@ -147,6 +148,7 @@ class SelectMany extends React.Component {
             isNull(value) || isUndefined(value) || value.size === 0
               ? null
               : value.map(item => {
+
                 if (item) {
                   return {
                     value: get(item, 'value') || item,
@@ -154,7 +156,7 @@ class SelectMany extends React.Component {
                         get(item, 'label') ||
                         templateObject({ mainField: this.props.relation.displayedAttribute }, item)
                           .mainField ||
-                        item.value.id,
+                        item.id,
                   };
                 }
               })
