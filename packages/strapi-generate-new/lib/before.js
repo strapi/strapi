@@ -13,12 +13,13 @@ const exec = require('child_process').exec;
 
 // Public node modules.
 const _ = require('lodash');
+const {cyan} = require('chalk');
 const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const shell = require('shelljs');
 
 // Logger.
-const logger = require('strapi-utils').logger;
+const { packageManager } = require('strapi-utils');
 
 /**
  * This `before` function is run before generating targets.
@@ -50,22 +51,22 @@ module.exports = (scope, cb) => {
   try {
     const files = fs.readdirSync(scope.rootPath);
     if (files.length > 1) {
-      return logger.error('`$ strapi new` can only be called in an empty directory.');
+      return console.log(`⛔️ ${cyan('strapi new')} can only be called in an empty directory.`);
     }
   } catch (err) {
     // ...
   }
 
-  logger.info('Let\s configurate the connection to your database:');
+  console.log('Let\s configurate the connection to your database:');
 
   if (hasDatabaseConfig) {
-    logger.info(`Database determined by CLI args: ${scope.database.settings.client}`);
+    console.log(`Database determined by CLI args: ${scope.database.settings.client}`);
   }
 
   const connectionValidation = () => {
     const databaseChoices = [
       {
-        name: 'MongoDB (highly recommended)',
+        name: 'MongoDB (recommended)',
         value: {
           database: 'mongo',
           connector: 'strapi-mongoose'
@@ -94,7 +95,6 @@ module.exports = (scope, cb) => {
         {
           when: !hasDatabaseConfig,
           type: 'list',
-          prefix: '',
           name: 'client',
           message: 'Choose your main database:',
           choices: databaseChoices,
@@ -130,7 +130,6 @@ module.exports = (scope, cb) => {
                 {
                   when: !hasDatabaseConfig,
                   type: 'input',
-                  prefix: '',
                   name: 'database',
                   message: 'Database name:',
                   default: _.get(scope.database, 'database', 'strapi')
@@ -138,7 +137,6 @@ module.exports = (scope, cb) => {
                 {
                   when: !hasDatabaseConfig,
                   type: 'input',
-                  prefix: '',
                   name: 'host',
                   message: 'Host:',
                   default: _.get(scope.database, 'host', '127.0.0.1')
@@ -146,7 +144,6 @@ module.exports = (scope, cb) => {
                 {
                   when: !hasDatabaseConfig,
                   type: 'input',
-                  prefix: '',
                   name: 'port',
                   message: 'Port:',
                   default: (answers) => { // eslint-disable-line no-unused-vars
@@ -166,7 +163,6 @@ module.exports = (scope, cb) => {
                 {
                   when: !hasDatabaseConfig,
                   type: 'input',
-                  prefix: '',
                   name: 'username',
                   message: 'Username:',
                   default: _.get(scope.database, 'username', undefined)
@@ -174,7 +170,6 @@ module.exports = (scope, cb) => {
                 {
                   when: !hasDatabaseConfig,
                   type: 'password',
-                  prefix: '',
                   name: 'password',
                   message: 'Password:',
                   mask: '*',
@@ -183,7 +178,6 @@ module.exports = (scope, cb) => {
                 {
                   when: !hasDatabaseConfig && scope.client.database === 'mongo',
                   type: 'input',
-                  prefix: '',
                   name: 'authenticationDatabase',
                   message: 'Authentication database:',
                   default: _.get(scope.database, 'authenticationDatabase', undefined)
@@ -191,7 +185,6 @@ module.exports = (scope, cb) => {
                 {
                   when: !hasDatabaseConfig && scope.client.database === 'mongo',
                   type: 'boolean',
-                  prefix: '',
                   name: 'ssl',
                   message: 'Enable SSL connection:',
                   default: _.get(scope.database, 'ssl', false)
@@ -199,7 +192,7 @@ module.exports = (scope, cb) => {
               ])
               .then(answers => {
                 if (hasDatabaseConfig) {
-                  answers = _.omit(scope.database.settings, ['client']);
+                  answers = _.merge((_.omit(scope.database.settings, ['client'])), scope.database.options);
                 }
 
                 scope.database.settings.host = answers.host;
@@ -210,31 +203,39 @@ module.exports = (scope, cb) => {
                 scope.database.options.authenticationDatabase = answers.authenticationDatabase;
                 scope.database.options.ssl = _.toString(answers.ssl) === 'true';
 
-                logger.info('Testing database connection...');
+                console.log();
+                console.log('⏳ Testing database connection...');
 
                 resolve();
               });
           }),
           new Promise(resolve => {
-            let cmd = `npm install --prefix "${scope.tmpPath}" ${scope.client.connector}@alpha`;
+            const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
+            let packageCmd = packageManager.commands('install --prefix', scope.tmpPath);
+            // Manually create the temp directory for yarn
+            if (!isStrapiInstalledWithNPM) {
+              shell.exec(`mkdir ${scope.tmpPath}`);
+            }
+
+            let cmd = `${packageCmd} ${scope.client.connector}@alpha`;
 
             if (scope.client.module) {
               cmd += ` ${scope.client.module}`;
             }
 
             if (scope.client.connector === 'strapi-bookshelf') {
-              cmd += ` strapi-knex@alpha`;
+              cmd += ' strapi-knex@alpha';
 
               scope.additionalsDependencies = ['strapi-knex', 'knex'];
             }
 
             exec(cmd, () => {
               if (scope.client.module) {
-                const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
+                const lock = require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.module}/package.json`));
                 scope.client.version = lock.version;
 
                 if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
-                  const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
+                  const knexVersion = require(path.join(`${scope.tmpPath}`, '/node_modules/', 'knex/package.json'));
                   scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
                 }
               }
@@ -247,10 +248,9 @@ module.exports = (scope, cb) => {
         Promise.all(asyncFn)
           .then(() => {
             try {
-              require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
+              require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
             } catch(err) {
               shell.rm('-r', scope.tmpPath);
-              logger.info('Copying the dashboard...');
               cb.success();
             }
           });

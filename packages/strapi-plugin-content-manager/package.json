@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-alpha.12.6",
+  "version": "3.0.0-alpha.12.7.1",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -22,8 +22,13 @@
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "devDependencies": {
-    "react-select": "^1.0.0-rc.5",
-    "strapi-helper-plugin": "3.0.0-alpha.12.6"
+    "codemirror": "^5.39.0",
+    "draft-js": "^0.10.5",
+    "react-dnd": "^5.0.0",
+    "react-dnd-html5-backend": "^5.0.1",
+    "react-select": "^1.2.1",
+    "showdown": "^1.8.6",
+    "strapi-helper-plugin": "3.0.0-alpha.12.7.1"
   },
   "author": {
     "name": "Strapi team",

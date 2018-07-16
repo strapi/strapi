@@ -15,9 +15,6 @@ const _ = require('lodash');
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
 
-// Logger.
-const logger = require('strapi-utils').logger;
-
 // Local Strapi dependencies.
 const packageJSON = require('../package.json');
 
@@ -28,9 +25,15 @@ const packageJSON = require('../package.json');
  */
 
 module.exports = function (name, cliArguments) {
-  logger.info('Creating your application... It might take a few seconds.');
+  console.log('🚀 Start creating your Strapi application. It might take a minute, please take a coffee ☕️');
 
   const developerMode = cliArguments.dev !== undefined;
+
+  if (developerMode) {
+    console.log('🦄 Dev mode is activated!');
+  }
+
+  console.log();
 
   // Build initial scope.
   const scope = {
@@ -47,7 +50,7 @@ module.exports = function (name, cliArguments) {
 
   if (matchingDbArguments.length) {
     if (matchingDbArguments.length !== dbArguments.length) {
-      logger.warn(`Some database arguments are missing. Required arguments list: ${dbArguments}`);
+      console.log(`⛔️ Some database arguments are missing. Required arguments list: ${dbArguments}`);
       return process.exit(1);
     }
 
@@ -60,7 +63,10 @@ module.exports = function (name, cliArguments) {
         username: cliArguments.dbusername,
         password: cliArguments.dbpassword
       },
-      options: {}
+      options: {
+        authenticationDatabase: cliArguments.dbauth,
+        ssl: cliArguments.dbssl
+      }
     };
   }
 
@@ -70,7 +76,7 @@ module.exports = function (name, cliArguments) {
     // Log and exit the REPL in case there is an error
     // while we were trying to generate the new app.
     error: function returnError(err) {
-      logger.error(err);
+      console.log(err);
       process.exit(1);
     }
   });

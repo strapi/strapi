@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-new",
-  "version": "3.0.0-alpha.12.6",
+  "version": "3.0.0-alpha.12.7.1",
   "description": "Generate a new Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -16,8 +16,10 @@
     "enpeem": "^2.2.0",
     "fs-extra": "^4.0.0",
     "inquirer": "^4.0.2",
+    "listr": "^0.14.1",
     "lodash": "^4.17.4",
-    "strapi-utils": "3.0.0-alpha.12.6",
+    "ora": "^2.1.0",
+    "strapi-utils": "3.0.0-alpha.12.7.1",
     "uuid": "^3.1.0"
   },
   "scripts": {
