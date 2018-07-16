@@ -59,6 +59,8 @@ program
   .option('--dbname <dbname>', 'Database name')
   .option('--dbusername <dbusername>', 'Database username')
   .option('--dbpassword <dbpassword>', 'Database password')
+  .option('--dbssl <dbssl>', 'Database SSL')
+  .option('--dbauth <dbauth>', 'Authentication Database')
   .description('create a new application')
   .action(require('./strapi-new'));
 
