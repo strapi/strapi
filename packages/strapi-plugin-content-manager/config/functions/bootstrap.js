@@ -52,6 +52,7 @@ module.exports = async cb => {
       defaultSort: model.primaryKey,
       sort: 'ASC',
       editDisplay: {
+        availableFields: {},
         fields: [],
         relations: [],
       },
@@ -67,7 +68,7 @@ module.exports = async cb => {
     }));
 
     schemaModel.fields = fields;
-    schemaModel.editDisplay.fields = Object.keys(fields);
+    schemaModel.editDisplay.availableFields = fields;
     
   
     // Select fields displayed in list view
@@ -117,9 +118,43 @@ module.exports = async cb => {
         return !isUploadRelation && !isMorphSide;
       });
 
+      const uploadRelations = Object.keys(schemaModel.relations).reduce((acc, current) => {
+        if (_.get(schemaModel, ['relations', current, 'plugin']) === 'upload') {
+          const model = _.get(schemaModel, ['relations', current]);
+      
+          acc[current] = {
+            description: '',
+            editable: true,
+            label: _.upperFirst(current),
+            multiple: _.has(model, 'collection'),
+            name: current,
+            placeholder: '',
+            type: 'file',
+          };
+        }
+
+        return acc;
+      }, {});
+
+      const availableFields = Object.keys(schemaModel.fields).reduce((acc, current) => {
+        // TODO: Add appearance in this object in order to get rid of the layout.json
+        acc[current] = Object.assign(
+          _.pick(_.get(schemaModel, ['fields', current], {}), ['label', 'type', 'description', 'name']),
+          {
+            editable: true,
+            placeholder: '',
+          });
+
+        return acc;
+      }, uploadRelations);
+
+      schemaModel.editDisplay.availableFields = availableFields;
+
       schemaModel.editDisplay.relations = relationsArray;
 
     }
+
+    schemaModel.editDisplay.fields = Object.keys(schemaModel.editDisplay.availableFields);
   
     if (plugin) {
       return _.set(schema.models.plugins, `${plugin}.${name}`, schemaModel);
