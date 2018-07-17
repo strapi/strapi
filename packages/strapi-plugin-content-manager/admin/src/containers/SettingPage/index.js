@@ -208,6 +208,13 @@ class SettingPage extends React.PureComponent {
     this.props.onClickEditListItem(attrToEdit);
   }
 
+  handleConfirmReset = () => {
+    this.props.onReset();
+    this.toggleWarningCancel();
+  }
+
+  handleGoBack = () => this.props.history.goBack();
+
   handleRemove = (index, keys) => {
     const attrToRemove = get(this.getListDisplay(), index, {});
     const defaultSort = this.getDefaultSort();
@@ -264,22 +271,123 @@ class SettingPage extends React.PureComponent {
     }
   }
 
+  renderDraggableAttrEditSettingsRelation = (attr, index) => (
+    <DraggableAttr
+      index={index}
+      isDraggingSibling={false}
+      isEditing={false}
+      key={attr}
+      keys={`${this.getPath()}.editDisplay.relations`}
+      name={attr}
+      label={attr}
+      moveAttr={this.props.moveAttrEditView}
+      onClickEditListItem={() => {}}
+      onRemove={this.props.onRemoveEditViewAttr}
+      updateSiblingHoverState={() => {}}
+    />
+  );
+
+  renderDraggableAttrListSettings = (attr, index) => (
+    <div key={attr.name} className={styles.draggedWrapper}>
+      <div>{index + 1}.</div>
+      <DraggableAttr
+        index={index}
+        isDraggingSibling={this.state.isDraggingSibling}
+        isEditing={index === this.findIndexListItemToEdit()}
+        key={attr.name}
+        keys={this.getPath()}
+        label={attr.label}
+        name={attr.name}
+        moveAttr={this.props.moveAttr}
+        onClickEditListItem={this.handleClickEditAttr}
+        onRemove={this.handleRemove}
+        updateSiblingHoverState={this.updateSiblingHoverState}
+      />
+    </div>
+  );
+
+  renderDropDownItemEditSettingsRelation = item => (
+    <DropdownItem
+      key={item}
+      onClick={() => this.props.onClickAddAttr(item, `${this.getPath()}.editDisplay.relations`)}
+    >
+      {item}
+    </DropdownItem>
+  );
+
+  renderDropDownItemListSettings = item => (
+    <DropdownItem
+      key={item.name}
+      onClick={() => {
+        this.props.onClickAddAttr(item, `${this.getPath()}.listDisplay`);
+      }}
+    >
+      {item.label}
+    </DropdownItem>
+  );
+
+  renderDropDownP = msg => <p>{msg}</p>;
+
+  renderFormEditSettingsRelation = (input, i) => {
+    return  (
+      <Input
+        key={i}
+        onChange={() => {}}
+        value=""
+        {...input}
+      />
+    );
+  }
+
+  renderFormListAttrSettings = (input, i) => {
+    const indexListItemToEdit = this.findIndexListItemToEdit();
+    const inputName = `${this.getPath()}.listDisplay.${indexListItemToEdit}.${input.name}`;
+    const inputType = this.getListDisplay()[indexListItemToEdit].type;
+
+
+    if (indexListItemToEdit === -1) {
+      return <div key={i} />;
+    }
+
+    if ((inputType === 'json' || inputType === 'array') && (input.name === 'sortable' || input.name === 'searchable')) {
+      return null;
+    }
+
+    return (
+      <Input
+        key={input.name}
+        onChange={this.handleChange}
+        value={this.getValue(inputName, input.type)}
+        {...input}
+        name={inputName}
+      />
+    );
+  }
+
+  renderInputMainSettings = input => {
+    const inputName = `${this.getPath()}.${input.name}`;
+                    
+    return (
+      <Input
+        {...input}
+        key={input.name}
+        name={inputName}
+        onChange={this.props.onChangeSettings}
+        selectOptions={this.getSelectOptions(input)}
+        value={this.getValue(inputName, input.type)}
+      />
+    );
+  }
+
   render() {
-    const { isDraggingSibling, isOpen, isOpenRelation, showWarning, showWarningCancel } = this.state;
+    const { isOpen, isOpenRelation, showWarning, showWarningCancel } = this.state;
     const {
-      moveAttr,
-      moveAttrEditView,
-      onChangeSettings,
-      onClickAddAttr,
-      onRemoveEditViewAttr,
-      onReset,
       onSubmit,
     } = this.props;
-    const namePath = this.getPath();
 
     return (
       <form onSubmit={this.handleSubmit}>
-        <BackHeader onClick={() => this.props.history.goBack()} />
+        <BackHeader onClick={this.handleGoBack} />
         <div className={cn('container-fluid', styles.containerFluid)}>
           <PluginHeader
             actions={this.getPluginHeaderActions()}
@@ -296,9 +404,7 @@ class SettingPage extends React.PureComponent {
               confirm: 'content-manager.popUpWarning.button.confirm',
             }}
             popUpWarningType="danger"
-            onConfirm={() => {
-              onSubmit();
-            }}
+            onConfirm={onSubmit}
           />
           <PopUpWarning
             isOpen={showWarningCancel}
@@ -310,10 +416,7 @@ class SettingPage extends React.PureComponent {
               confirm: 'content-manager.popUpWarning.button.confirm',
             }}
             popUpWarningType="danger"
-            onConfirm={() => {
-              onReset();
-              this.toggleWarningCancel();
-            }}
+            onConfirm={this.handleConfirmReset}
           />
 
           <div className={cn('row', styles.container)}>
@@ -324,23 +427,10 @@ class SettingPage extends React.PureComponent {
             >
               <div className={styles.ctmForm}>
                 <div className="row">
-
+                  {/* GENERAL LIST SETTINGS FORM */}
                   <div className="col-md-12">
                     <div className="row">
-                      {forms.inputs.map(input => {
-                        const inputName = `${namePath}.${input.name}`;
-                
-                        return (
-                          <Input
-                            {...input}
-                            key={input.name}
-                            name={inputName}
-                            onChange={onChangeSettings}
-                            selectOptions={this.getSelectOptions(input)}
-                            value={this.getValue(inputName, input.type)}
-                          />
-                        );
-                      })}
+                      {forms.inputs.map(this.renderInputMainSettings)}
                     </div>
                   </div>
 
@@ -360,80 +450,30 @@ class SettingPage extends React.PureComponent {
                     </div>
 
                     <div className="col-md-5">
-                      {this.getListDisplay().map((attr, index) => (
-                        <div key={attr.name} className={styles.draggedWrapper}>
-                          <div>{index + 1}.</div>
-                          <DraggableAttr
-                            index={index}
-                            isDraggingSibling={isDraggingSibling}
-                            isEditing={index === this.findIndexListItemToEdit()}
-                            key={attr.name}
-                            keys={namePath}
-                            label={attr.label}
-                            name={attr.name}
-                            moveAttr={moveAttr}
-                            onClickEditListItem={this.handleClickEditAttr}
-                            onRemove={this.handleRemove}
-                            updateSiblingHoverState={this.updateSiblingHoverState}
-                          />
-                        </div>
-                      ))}
+                      {this.getListDisplay().map(this.renderDraggableAttrListSettings)}
                       <div className={styles.dropdownWrapper}>
                         <ButtonDropdown isOpen={isOpen} toggle={this.toggleDropdown}>
                           <DropdownToggle>
                             <FormattedMessage id="content-manager.containers.SettingPage.addField">
-                              {msg => <p>{msg}</p>}
+                              {this.renderDropDownP}
                             </FormattedMessage>
                           </DropdownToggle>
                           <DropdownMenu>
-                            {this.getDropDownItems().map((item) => {
-
-                              return (
-                                <DropdownItem
-                                  key={item.name}
-                                  onClick={() => onClickAddAttr(item, `${namePath}.listDisplay`)}
-                                >
-                                  {item.label}
-                                </DropdownItem>
-                              );                
-                            })}
+                            {this.getDropDownItems().map(this.renderDropDownItemListSettings)}
                           </DropdownMenu>
                         </ButtonDropdown>
                       </div>
                     </div>
 
+                    {/* LIST ATTR FORM */}
                     <div className="col-md-7">
                       <div className={styles.editWrapper}>
                         <div className="row">
-                          {forms.editList.map((input, i) => {
-                            const indexListItemToEdit = this.findIndexListItemToEdit();
-                            const inputName = `${namePath}.listDisplay.${indexListItemToEdit}.${input.name}`;
-                            const inputType = this.getListDisplay()[indexListItemToEdit].type;
-
-
-                            if (indexListItemToEdit === -1) {
-                              return <div key={i} />;
-                            }
-
-                            if ((inputType === 'json' || inputType === 'array') && (input.name === 'sortable' || input.name === 'searchable')) {
-                              return null;
-                            }
-
-                            return (
-                              <Input
-                                key={input.name}
-                                onChange={this.handleChange}
-                                value={this.getValue(inputName, input.type)}
-                                {...input}
-                                name={inputName}
-                              />
-                            );
-
-                          })}
+                          {forms.editList.map(this.renderFormListAttrSettings)}
                         </div>
                       </div>
                     </div>
-
+                    {/* LIST ATTR FORM */}
                   </div>
                 </div>
               </div>
@@ -444,7 +484,6 @@ class SettingPage extends React.PureComponent {
               title="content-manager.containers.SettingPage.editSettings.title"
             >
               <div className="row">
-
                 <div className={cn('col-md-8', styles.draggedDescription, styles.edit_settings)}>
                   <FormattedMessage id="content-manager.containers.SettingPage.attributes" />
                   <div className={cn(styles.sort_wrapper, 'col-md-12')}>
@@ -454,47 +493,24 @@ class SettingPage extends React.PureComponent {
                   </div>
                 </div>
 
+                {/* RELATIONS SORT */}
                 {this.hasRelations() && (
                   <div className={cn('col-md-4', styles.draggedDescription, styles.edit_settings)}>
                     <FormattedMessage id="content-manager.containers.SettingPage.relations" />
                     <div className={cn(styles.sort_wrapper, 'col-md-12')}>
                       <div className="row">
-                        {this.getEditPageDisplayedRelations().map((attr, index) => {
-                          return (
-                            <DraggableAttr
-                              index={index}
-                              isDraggingSibling={false}
-                              isEditing={false}
-                              key={attr}
-                              keys={`${namePath}.editDisplay.relations`}
-                              name={attr}
-                              label={attr}
-                              moveAttr={moveAttrEditView}
-                              onClickEditListItem={() => {}}
-                              onRemove={onRemoveEditViewAttr}
-                              updateSiblingHoverState={() => {}}
-                            />
-                          );
-                        })}
-
+                        {/* DRAGGABLE BLOCK */}
+                        {this.getEditPageDisplayedRelations().map(this.renderDraggableAttrEditSettingsRelation)}
+                        {/* DRAGGABLE BLOCK */}
                         <div className={cn(styles.dropdownRelations, styles.dropdownWrapper)}>
                           <ButtonDropdown isOpen={isOpenRelation} toggle={this.toggleDropdownRelations}>
                             <DropdownToggle>
                               <FormattedMessage id="content-manager.containers.SettingPage.addField">
-                                {msg => <p>{msg}</p>}
+                                {this.renderDropDownP}
                               </FormattedMessage>
                             </DropdownToggle>
                             <DropdownMenu>
-                              {this.getDropDownRelationsItems().map((item) => {
-                                return (
-                                  <DropdownItem
-                                    key={item}
-                                    onClick={() => onClickAddAttr(item, `${namePath}.editDisplay.relations`)}
-                                  >
-                                    {item}
-                                  </DropdownItem>
-                                );                
-                              })}
+                              {this.getDropDownRelationsItems().map(this.renderDropDownItemEditSettingsRelation)}
                             </DropdownMenu>
                           </ButtonDropdown>
                         </div>
@@ -502,26 +518,22 @@ class SettingPage extends React.PureComponent {
                     </div>
                   </div>
                 )}
+                {/* RELATIONS SORT */}
               </div>
+
+              {/* EDIT MAIN ATTR FORM */}
               <div className="row">
                 <div className="col-md-7">
                   <div className={styles.editWrapper}>
+
                     <div className="row">
-                      {forms.editView.relationForm.map((input, i) => {
-                        return (
-                          <Input
-                            key={i}
-                            onChange={() => {}}
-                            value=""
-                            {...input}
-                          />
-                        );
-                      })}
+                      {forms.editView.relationForm.map(this.renderFormEditSettingsRelation)}                    
                     </div>
+
                   </div>
                 </div>
               </div>
-              
+              {/* EDIT MAIN ATTR FORM */}
             </Block>
           </div>
         </div>
