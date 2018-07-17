@@ -124,7 +124,7 @@ class SettingsPage extends React.PureComponent {
 
   render() {
     const { showWarning, showWarningCancel } = this.state;
-    const { onChange, onReset, onSubmit } = this.props;
+    const { onSubmit } = this.props;
 
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>

@@ -297,33 +297,18 @@ export class ListPage extends React.Component {
 
   showBulkActions = () => get(this.getCurrentModel(), ['bulkActions']);
 
-  render() {
-    const {
-      addFilter,
-      deleteSeveralData,
-      listPage,
-      listPage: {
-        appliedFilters,
-        count,
-        entriesToDelete,
-        filters,
-        filterToFocus,
-        records,
-        params,
-        showFilter,
-        showWarningDeleteAll,
-      },
-      onChange,
-      onClickRemove,
-      onClickSelect,
-      onClickSelectAll,
-      onToggleDeleteAll,
-      onToggleFilters,
-      openFiltersWithSelections,
-      removeAllFilters,
-      removeFilter,
-    } = this.props;
+  renderFilter = (filter, key) => (
+    <Filter
+      key={key}
+      filter={filter}
+      index={key}
+      onClick={this.props.onClickRemove}
+      onClickOpen={this.props.openFiltersWithSelections} // eslint-disable-line react/jsx-handler-names
+      schema={this.getCurrentSchema()}
+    />
+  )
 
+  renderPluginHeader = () => {
     const pluginHeaderActions = [
       {
         label: 'content-manager.containers.List.addAnEntry',
@@ -338,6 +323,71 @@ export class ListPage extends React.Component {
           }),
       },
     ];
+    const { listPage: { count } } = this.props;
+
+    return (
+      <PluginHeader
+        actions={pluginHeaderActions}
+        description={{
+          id:
+          get(count, this.getCurrentModelName(), 0) > 1
+            ? 'content-manager.containers.List.pluginHeaderDescription'
+            : 'content-manager.containers.List.pluginHeaderDescription.singular',
+          values: {
+            label: get(count, this.getCurrentModelName(), 0),
+          },
+        }}
+        title={{
+          id: this.getCurrentModelName() || 'Content Manager',
+        }}
+        withDescriptionAnim={this.showLoaders()}
+      />
+    );
+  }
+
+  renderPopUpWarningDeleteAll = () => {
+    const { deleteSeveralData, listPage: { entriesToDelete, showWarningDeleteAll }, onToggleDeleteAll } = this.props;
+
+    return (
+      <PopUpWarning
+        isOpen={showWarningDeleteAll}
+        toggleModal={onToggleDeleteAll}
+        content={{
+          title: 'content-manager.popUpWarning.title',
+          message: this.getPopUpDeleteAllMsg(),
+          cancel: 'content-manager.popUpWarning.button.cancel',
+          confirm: 'content-manager.popUpWarning.button.confirm',
+        }}
+        popUpWarningType="danger"
+        onConfirm={() => {
+          deleteSeveralData(entriesToDelete, this.getCurrentModelName(), this.getSource());
+        }}
+      />
+    );
+  }
+
+  render() {
+    const {
+      addFilter,
+      listPage,
+      listPage: {
+        appliedFilters,
+        count,
+        entriesToDelete,
+        filters,
+        filterToFocus,
+        records,
+        params,
+        showFilter,
+      },
+      onChange,
+      onClickSelect,
+      onClickSelectAll,
+      onToggleDeleteAll,
+      onToggleFilters,
+      removeAllFilters,
+      removeFilter,
+    } = this.props;
 
     return (
       <div>
@@ -350,22 +400,8 @@ export class ListPage extends React.Component {
               value={params._q}
             />
           )}
-          <PluginHeader
-            actions={pluginHeaderActions}
-            description={{
-              id:
-              get(count, this.getCurrentModelName(), 0) > 1
-                ? 'content-manager.containers.List.pluginHeaderDescription'
-                : 'content-manager.containers.List.pluginHeaderDescription.singular',
-              values: {
-                label: get(count, this.getCurrentModelName(), 0),
-              },
-            }}
-            title={{
-              id: this.getCurrentModelName() || 'Content Manager',
-            }}
-            withDescriptionAnim={this.showLoaders()}
-          />
+          {this.renderPluginHeader()}
+
           <div className={cn(styles.wrapper)}>
             {this.showFilters() && (
               <React.Fragment>
@@ -389,16 +425,7 @@ export class ListPage extends React.Component {
                     >
                       <div className="row">
                         <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} />
-                        {filters.map((filter, key) => (
-                          <Filter
-                            key={key}
-                            filter={filter}
-                            index={key}
-                            onClick={onClickRemove}
-                            onClickOpen={openFiltersWithSelections}
-                            schema={this.getCurrentSchema()}
-                          />
-                        ))}
+                        {filters.map(this.renderFilter)}
                       </div>
                     </Div>
                   </div>
@@ -440,20 +467,7 @@ export class ListPage extends React.Component {
                   popUpWarningType="danger"
                   onConfirm={this.handleDelete}
                 />
-                <PopUpWarning
-                  isOpen={showWarningDeleteAll}
-                  toggleModal={onToggleDeleteAll}
-                  content={{
-                    title: 'content-manager.popUpWarning.title',
-                    message: this.getPopUpDeleteAllMsg(),
-                    cancel: 'content-manager.popUpWarning.button.cancel',
-                    confirm: 'content-manager.popUpWarning.button.confirm',
-                  }}
-                  popUpWarningType="danger"
-                  onConfirm={() => {
-                    deleteSeveralData(entriesToDelete, this.getCurrentModelName(), this.getSource());
-                  }}
-                />
+                {this.renderPopUpWarningDeleteAll()}
                 <PageFooter
                   count={get(count, this.getCurrentModelName(), 0)}
                   onChangeParams={this.handleChangeParams}
