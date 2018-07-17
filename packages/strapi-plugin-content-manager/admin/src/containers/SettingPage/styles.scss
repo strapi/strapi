@@ -59,7 +59,7 @@
 }
 
 .dropdownWrapper {
-  margin-left: 30px;
+  margin-left: 29px;
   > div {
     height: 30px;
     width: 100%;
@@ -142,8 +142,10 @@
 
 .sort_wrapper {
   margin-top: 7px;
+  margin-bottom: 10px;
   padding-top: 10px;
   border: 1px dashed #E3E9F3;
+  border-radius: 2px;
   > div {
     padding: 0 10px;
   }
@@ -153,4 +155,16 @@
   width: 100%;
   margin-left: 0 !important;
   margin-bottom: 10px;
+}
+
+.noPadding {
+  padding: 0 !important;
+
+  > div {
+    padding-left: 8px;
+  }
+}
+
+.padded {
+  padding-bottom: 1px;
 }

@@ -12,8 +12,10 @@ import {
 } from 'react-dnd';
 import { flow, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
+
+import ClickOverHint from 'components/ClickOverHint';
+import DraggedRemovedIcon from 'components/DraggedRemovedIcon';
 
 import styles from './styles.scss';
 
@@ -136,11 +138,7 @@ class DraggableAttr extends React.Component {
           >
             <i className="fa fa-th" aria-hidden="true" />
             <span>{name}</span>
-            { isOver && !isDragging && (
-              <div className={styles.info}>
-                <FormattedMessage id="content-manager.components.DraggableAttr.edit" />
-              </div>
-            )}
+            <ClickOverHint show={isOver && !isDragging} />
             { !isOver && upperFirst(name) !== label && (
               <div className={styles.info}>
                 {label}
@@ -149,7 +147,8 @@ class DraggableAttr extends React.Component {
             {isEditing && !isOver? (
               <span className={styles.editIcon} onClick={this.handleClickEdit} />            
             ) : (
-              <span className={cn( dragStart ? styles.removeIconDragged : styles.removeIcon)} onClick={this.handleRemove} />            
+              
+              <DraggedRemovedIcon isDragging={dragStart} />
             )}
           </div>
         ),

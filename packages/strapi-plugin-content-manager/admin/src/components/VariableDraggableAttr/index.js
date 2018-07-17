@@ -4,41 +4,98 @@
  */
 
 import React from 'react';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import cn from 'classnames';
+
+import ClickOverHint from 'components/ClickOverHint';
+import DraggedRemovedIcon  from 'components/DraggedRemovedIcon';
 
 import styles from './styles.scss';
 
 const getBootstrapClass = (attrType) => {
   switch(attrType) {
     case 'checkbox':
-      return cn('col-md-3', styles.normalHeight);
+    case 'boolean':
+      return {
+        bootstrap: 'col-md-3',
+        wrapper: cn(styles.attrWrapper),
+        withLargerHeight: false,
+      };
     case 'date':
-      return cn('col-md-4', styles.normalHeight);
+      return {
+        bootstrap: 'col-md-4',
+        wrapper: cn(styles.attrWrapper),
+        withLargerHeight: true,
+      };
     case 'json':
     case 'wysiwyg':
-      return cn('col-md-12', styles.customHeight);
+      return {
+        bootstrap: 'col-md-12', 
+        wrapper: cn(styles.attrWrapper, styles.customHeight),
+        withLargerHeight: true,
+      };
     case 'file':
-      return cn('col-md-6', styles.customHeight);
+      return {
+        bootstrap: 'col-md-6',
+        wrapper: cn(styles.attrWrapper, styles.customHeight),
+        withLargerHeight: true,
+      };
     default:
-      return cn('col-md-6', styles.normalHeight);
+      return {
+        bootstrap: 'col-md-6',
+        wrapper: cn(styles.attrWrapper),
+        withLargerHeight: false,
+      };
   }
 };
 
-function VariableDraggableAttr() {
-  // NOTE: waiting for the layout to be in the core_store
-  // const type = props.attr.name.includes('long') ? 'wysiwyg' : props.attr.type;
-  const type = 'text';
+class VariableDraggableAttr extends React.PureComponent {
+  state = { isOver: false };
 
-  return (
-    <div className={getBootstrapClass(type)}>
-      {/* yo */}
-    </div>
-  );
+  handleMouseEnter= () => {
+    if (this.props.data.type !== 'boolean') {
+      this.setState({ isOver: true });
+    }
+  }
+
+  handleMouseLeave = () => this.setState({ isOver: false });
+
+  render() {
+    const { isOver } = this.state;
+    const { data, name } = this.props;
+    // NOTE: waiting for the layout to be in the core_store
+    const type = name.includes('long') ? 'wysiwyg' : data.type;
+    const classNames = getBootstrapClass(type);
+  
+    return (
+      <div
+        className={classNames.bootstrap}
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+      >
+        <div className={classNames.wrapper}>
+          <i className="fa fa-th" aria-hidden="true" />
+          <span>
+            {name}
+          </span>
+          <ClickOverHint show={isOver} />
+          <DraggedRemovedIcon withLargerHeight={classNames.withLargerHeight} />
+        </div>
+      </div>
+    );
+  }
 }
 
-VariableDraggableAttr.defaultProps = {};
+VariableDraggableAttr.defaultProps = {
+  data: {
+    type: 'text',
+  },
+  name: '',
+};
 
-VariableDraggableAttr.propTypes = {};
+VariableDraggableAttr.propTypes = {
+  data: PropTypes.object,
+  name: PropTypes.string,
+};
 
 export default VariableDraggableAttr;

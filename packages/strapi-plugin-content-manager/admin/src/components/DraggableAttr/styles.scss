@@ -19,6 +19,7 @@
 
 .draggableAttrOvered {
   border: 1px solid #AED4FB!important;
+  cursor: pointer;
 }
 
 .editingAttr {
@@ -32,44 +33,6 @@
   right: 40px;
   color: #B4B6BA;
   font-style: italic;
-}
-
-.removeIcon {
-  width: 30px;
-  background: #F3F4F4;
-  height: 28px;
-  cursor: pointer;
-  text-align: center;
-  float: right;
-
-  &:after {
-    display: inline-block;
-    content: '';
-    width: 8px;
-    height: 8px;
-    margin: auto;
-    margin-top: -3px;
-    background-image: url('../../assets/images/icon-cross.svg');
-  }
-}
-
-.removeIconDragged {
-  width: 30px;
-  background: #F3F4F4;
-  height: 28px;
-  cursor: pointer;
-  text-align: center;
-  float: right;
-
-  &:after {
-    display: inline-block;
-    content: '';
-    width: 8px;
-    height: 8px;
-    margin: auto;
-    margin-top: -3px;
-    background-image: url('../../assets/images/icon-cross-blue.svg');
-  }
 }
 
 .editIcon {
@@ -104,6 +67,8 @@
   color: #333740;
   border: 1px solid darken(#AED4FB, 20%)!important;
   border-radius: 2px;
+  cursor: move !important;
+
   > i {
     margin-right: 10px;
     font-size: 10px;

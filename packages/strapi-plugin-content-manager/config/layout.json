@@ -12,6 +12,18 @@
       },
       "description_long": {
         "appearance": "WYSIWYG"
+      },
+      "checkbox1": {
+        "appearance": ""
+      },
+      "checkbox2": {
+        "appearance": ""
+      },
+      "checkbox3": {
+        "appearance": ""
+      },
+      "checkbox4": {
+        "appearance": ""
       }
     }
   },

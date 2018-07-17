@@ -35,6 +35,7 @@ import PopUpWarning from 'components/PopUpWarning';
 
 import Block from 'components/Block';
 import DraggableAttr from 'components/DraggableAttr';
+import VariableDraggableAttr from 'components/VariableDraggableAttr';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
@@ -71,6 +72,8 @@ class SettingPage extends React.PureComponent {
     this.props.onReset();
   }
 
+  getAttrData = attrName => get(this.getEditPageDisplaySettings(), ['availableFields', attrName], {});
+
   getDefaultSort = () => this.getValue(`${this.getPath()}.defaultSort`, 'string');
 
   getDropDownItems = () => {
@@ -104,7 +107,7 @@ class SettingPage extends React.PureComponent {
     return get(this.props.schema, 'models.'.concat(this.getPath().concat('.editDisplay')), { fields: [], relations: [] });
   }
   
-  getEditPageFields = () => get(this.getEditPageDisplaySettings(), ['fields'], []);
+  getEditPageDisplayedFields = () => get(this.getEditPageDisplaySettings(), ['fields'], []);
   
   getEditPageDisplayedRelations = () => get(this.getEditPageDisplaySettings(), ['relations'], []);
 
@@ -269,6 +272,16 @@ class SettingPage extends React.PureComponent {
     if (this.getDropDownRelationsItems().length > 0) {
       this.setState(prevState => ({ isOpenRelation: !prevState.isOpenRelation }));
     }
+  }
+
+  renderDraggableAttrEditSettingsField = (attr) => {
+    return (
+      <VariableDraggableAttr
+        key={attr}
+        name={attr}
+        data={this.getAttrData(attr)}
+      />
+    );
   }
 
   renderDraggableAttrEditSettingsRelation = (attr, index) => (
@@ -486,9 +499,9 @@ class SettingPage extends React.PureComponent {
               <div className="row">
                 <div className={cn('col-md-8', styles.draggedDescription, styles.edit_settings)}>
                   <FormattedMessage id="content-manager.containers.SettingPage.attributes" />
-                  <div className={cn(styles.sort_wrapper, 'col-md-12')}>
-                    <div className="row">
-                      {/* GRID SORT */}
+                  <div className={cn(styles.sort_wrapper, 'col-md-12', styles.padded)}>
+                    <div className={cn('row', styles.noPadding)}>
+                      {this.getEditPageDisplayedFields().map(this.renderDraggableAttrEditSettingsField)}
                     </div>
                   </div>
                 </div>

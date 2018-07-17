@@ -1,0 +1,22 @@
+.attrWrapper {
+  position: relative;
+  height: 30px;
+  width: 100%;
+  margin-bottom: 6px;
+  padding-left: 10px;
+  justify-content: space-between;
+  background: #FAFAFB;
+  line-height: 30px;
+  color: #333740;
+  border: 1px solid #E3E9F3;
+  border-radius: 2px;
+  > i {
+    margin-right: 10px;
+    font-size: 11px;
+    color: #B3B5B9;
+  }
+}
+
+.customHeight {
+  height: 84px !important;
+}
