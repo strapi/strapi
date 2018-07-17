@@ -108,14 +108,16 @@
       min-width: calc(100% + 2px);
       margin-left: -1px;
       margin-top: -1px;
+      padding: 0;
       border-top-left-radius: 0 !important;
       border-top-right-radius: 0;
+      border-color: #AED4FB !important;
 
       overflow: scroll;
       
       button {
-        height: 30px;
-        line-height: 30px;
+        height: 27px;
+        line-height: 18px;
         div {
           margin: 0;
           white-space: nowrap;
@@ -124,6 +126,13 @@
         }
       }
     }
+  }
+}
+
+.dropdownWrapperOpen {
+  > div {
+    background-color: #E6F0FB !important;
+    border-color: #AED4FB !important;
   }
 }
 

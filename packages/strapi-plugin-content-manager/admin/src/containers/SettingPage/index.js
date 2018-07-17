@@ -451,7 +451,7 @@ class SettingPage extends React.PureComponent {
 
                     <div className="col-md-5">
                       {this.getListDisplay().map(this.renderDraggableAttrListSettings)}
-                      <div className={styles.dropdownWrapper}>
+                      <div className={cn(styles.dropdownWrapper, isOpen && styles.dropdownWrapperOpen)}>
                         <ButtonDropdown isOpen={isOpen} toggle={this.toggleDropdown}>
                           <DropdownToggle>
                             <FormattedMessage id="content-manager.containers.SettingPage.addField">
@@ -502,7 +502,7 @@ class SettingPage extends React.PureComponent {
                         {/* DRAGGABLE BLOCK */}
                         {this.getEditPageDisplayedRelations().map(this.renderDraggableAttrEditSettingsRelation)}
                         {/* DRAGGABLE BLOCK */}
-                        <div className={cn(styles.dropdownRelations, styles.dropdownWrapper)}>
+                        <div className={cn(styles.dropdownRelations, styles.dropdownWrapper, isOpenRelation && styles.dropdownWrapperOpen)}>
                           <ButtonDropdown isOpen={isOpenRelation} toggle={this.toggleDropdownRelations}>
                             <DropdownToggle>
                               <FormattedMessage id="content-manager.containers.SettingPage.addField">
@@ -523,7 +523,7 @@ class SettingPage extends React.PureComponent {
 
               {/* EDIT MAIN ATTR FORM */}
               <div className="row">
-                <div className="col-md-7">
+                <div className="col-md-8">
                   <div className={styles.editWrapper}>
 
                     <div className="row">
