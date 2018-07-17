@@ -17,14 +17,16 @@ import cn from 'classnames';
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
 import BackHeader from 'components/BackHeader';
+import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
+import PopUpWarning from 'components/PopUpWarning';
 
 // Plugin's components
 import Edit from 'components/Edit';
 import EditRelations from 'components/EditRelations';
 
 // App selectors
-import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
+import { makeSelectSchema } from 'containers/App/selectors';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
@@ -52,6 +54,8 @@ import makeSelectEditPage from './selectors';
 import styles from './styles.scss';
 
 export class EditPage extends React.Component {
+  state = { showWarning: false };
+
   componentDidMount() {
     this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
 
@@ -108,7 +112,7 @@ export class EditPage extends React.Component {
    * @return {[type]} [description]
    */
   getLayout = () => (
-    bindLayout.call(this, this.props.editPage.layout)
+    bindLayout.call(this, get(this.props.editPage, ['layout', this.getModelName()], {}))
   )
 
   /**
@@ -122,7 +126,7 @@ export class EditPage extends React.Component {
    * Retrieve the model
    * @type {Object}
    */
-  getModel = () => get(this.props.models, ['models', this.getModelName()]) || get(this.props.models, ['plugins', this.getSource(), 'models', this.getModelName()]);
+  getModel = () => get(this.props.schema, ['models', this.getModelName()]) || get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()]);
 
   /**
    * Retrieve specific attribute
@@ -147,8 +151,16 @@ export class EditPage extends React.Component {
    * @return {Object}
    */
   getSchema = () => this.getSource() !== 'content-manager' ?
-    get(this.props.schema, ['plugins', this.getSource(), this.getModelName()])
-    : get(this.props.schema, [this.getModelName()]);
+    get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()])
+    : get(this.props.schema, ['models', this.getModelName()]);
+
+  getPluginHeaderTitle = () => {
+    if (this.isCreating()) {
+      return toString(this.props.editPage.pluginHeaderTitle);
+    }
+
+    return this.props.match.params.id;
+  }
 
   /**
    * Retrieve the model's source
@@ -234,8 +246,9 @@ export class EditPage extends React.Component {
       {
         label: 'content-manager.containers.Edit.reset',
         kind: 'secondary',
-        onClick: this.props.onCancel,
+        onClick: this.toggle,
         type: 'button',
+        disabled: this.showLoaders(),
       },
       {
         kind: 'primary',
@@ -244,12 +257,22 @@ export class EditPage extends React.Component {
         type: 'submit',
         loader: this.props.editPage.showLoader,
         style: this.props.editPage.showLoader ? { marginRight: '18px' } : {},
+        disabled: this.showLoaders(),
       },
     ]
   );
 
+  showLoaders = () => {
+    const { editPage: { isLoading, layout } } = this.props;
+
+    return isLoading && !this.isCreating() || isLoading && get(layout, this.getModelName()) === undefined;
+  }
+
+  toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+
   render() {
-    const { editPage } = this.props;
+    const { editPage, onCancel } = this.props;
+    const { showWarning } = this.state;
 
     return (
       <div>
@@ -258,24 +281,43 @@ export class EditPage extends React.Component {
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               actions={this.pluginHeaderActions()}
-              title={{ id: toString(editPage.pluginHeaderTitle) }}
+              title={{ id: this.getPluginHeaderTitle() }}
+            />
+            <PopUpWarning
+              isOpen={showWarning}
+              toggleModal={this.toggle}
+              content={{
+                title: 'content-manager.popUpWarning.title',
+                message: 'content-manager.popUpWarning.warning.cancelAllSettings',
+                cancel: 'content-manager.popUpWarning.button.cancel',
+                confirm: 'content-manager.popUpWarning.button.confirm',
+              }}
+              popUpWarningType="danger"
+              onConfirm={() => {
+                onCancel();
+                this.toggle();
+              }}
             />
             <div className="row">
               <div className={this.isRelationComponentNull() ? 'col-lg-12' : 'col-lg-9'}>
                 <div className={styles.main_wrapper}>
-                  <Edit
-                    attributes={this.getModelAttributes()}
-                    didCheckErrors={editPage.didCheckErrors}
-                    formValidations={editPage.formValidations}
-                    formErrors={editPage.formErrors}
-                    layout={this.getLayout()}
-                    modelName={this.getModelName()}
-                    onBlur={this.handleBlur}
-                    onChange={this.handleChange}
-                    record={editPage.record}
-                    resetProps={editPage.resetProps}
-                    schema={this.getSchema()}
-                  />
+                  {this.showLoaders() ? (
+                    <LoadingIndicator />
+                  ) : (
+                    <Edit
+                      attributes={this.getModelAttributes()}
+                      didCheckErrors={editPage.didCheckErrors}
+                      formValidations={editPage.formValidations}
+                      formErrors={editPage.formErrors}
+                      layout={this.getLayout()}
+                      modelName={this.getModelName()}
+                      onBlur={this.handleBlur}
+                      onChange={this.handleChange}
+                      record={editPage.record}
+                      resetProps={editPage.resetProps}
+                      schema={this.getSchema()}
+                    />
+                  )}
                 </div>
               </div>
               {!this.isRelationComponentNull() && (
@@ -306,7 +348,7 @@ EditPage.contextTypes = {
 };
 
 EditPage.defaultProps = {
-  models: {},
+  schema: {},
 };
 
 EditPage.propTypes = {
@@ -318,10 +360,9 @@ EditPage.propTypes = {
   initModelProps: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
-  models: PropTypes.object,
   onCancel: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
-  schema: PropTypes.object.isRequired,
+  schema: PropTypes.object,
   setFileRelations: PropTypes.func.isRequired,
   setFormErrors: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
@@ -346,7 +387,6 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   editPage: makeSelectEditPage(),
-  models: makeSelectModels(),
   schema: makeSelectSchema(),
 });
 
@@ -360,3 +400,5 @@ export default compose(
   withSaga,
   withConnect,
 )(EditPage);
+
+

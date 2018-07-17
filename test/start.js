@@ -51,29 +51,41 @@ const main = async () => {
 
   const start = () => {
     return new Promise((resolve) => {
-      appStart = exec(
-        `node ${strapiBin} start ${appName}`,
-      );
+      try {
+        appStart = exec(
+          `node ${strapiBin} start ${appName}`,
+        );
 
-      appStart.stdout.on('data', data => {
-        console.log(data.toString());
+        appStart.stdout.on('data', data => {
+          console.log(data.toString());
 
-        if (data.includes('To shut down your server')) {
-          return resolve();
-        }
-      });
+          if (data.includes('To shut down your server')) {
+            return resolve();
+          }
+        });
+
+      } catch (e) {
+        console.error(e);
+      }
     });
   };
 
   const test = () => {
-    console.log('Launch test suits');
     return new Promise(async (resolve) => {
-      const options = {
-        projects: [process.cwd()],
-        silent: false
-      };
+      // Run setup tests to generate the app.
+      await jest({
+        passWithNoTests: true
+      }, [process.cwd()]);
 
-      await jest(options, options.projects);
+      const packages = fs.readdirSync(path.resolve(process.cwd(), 'packages'))
+        .filter(file => file.indexOf('strapi') !== -1);
+
+      // Run tests in every packages.
+      for (let i in packages) {
+        await jest({
+          passWithNoTests: true,
+        }, [`${process.cwd()}/packages/${packages[i]}`]);
+      }
 
       resolve();
     });

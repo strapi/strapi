@@ -178,6 +178,11 @@ Most of the application's configurations are defined by environment. It means th
        - `username` (string): Username used to establish the connection.
        - `password` (string): Password used to establish the connection.
        - `options` (object): List of additional options used by the connector.
+       - `timezone` (string): Set the default behavior for local time (used only for a SQL database). Default value: `utc`.
+    - `options` Options used for database connection.
+      - `ssl` (boolean): For ssl database connection.
+      - `debug` (boolean): Show database exchanges and errors.
+      - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
 
 #### Example
 

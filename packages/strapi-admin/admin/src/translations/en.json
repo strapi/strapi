@@ -122,6 +122,7 @@
   "components.Input.error.attribute.sameKeyAndName": "Can't be equal",
   "components.Input.error.validation.minSupMax": "Can't be superior",
   "components.Input.error.custom-error": "{errorMessage} ",
+  "components.Input.error.validation.json": "This doesn't match the JSON format",
 
   "components.ListRow.empty": "There is no data to be shown.",
 
@@ -148,6 +149,8 @@
   "Users & Permissions": "Users & Permissions",
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content Type Builder",
+  "Files Upload": "Files Upload",
+  "Roles & Permissions": "Roles & Permission",
   "Settings Manager": "Settings Manager",
   "Email": "Email",
   "Password": "Password",

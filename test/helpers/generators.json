@@ -22,16 +22,6 @@
         }
       },
       {
-        "name":"published",
-        "params":{
-          "appearance":{
-            "WYSIWYG":false
-          },
-          "multiple":false,
-          "type":"boolean"
-        }
-      },
-      {
         "name":"author",
         "params":{
           "nature":"manyToOne",
@@ -118,6 +108,13 @@
           "target":"article",
           "key":"reference",
           "nature":"oneToOne"
+        }
+      },
+      {
+        "name": "tag",
+        "params":{
+          "nature":"oneWay",
+          "target":"tag"
         }
       }
     ],
