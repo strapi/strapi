@@ -22,6 +22,9 @@ import {
 // or strapi/packages/strapi-helper-plugin/lib/src
 import Input from 'components/InputsIndex';
 
+import InputJSONWithErrors from 'components/InputJSONWithErrors';
+import WysiwygWithErrors from 'components/WysiwygWithErrors';
+
 import styles from './styles.scss';
 
 const getInputType = (type = '') => {
@@ -49,6 +52,8 @@ const getInputType = (type = '') => {
     case 'file':
     case 'files':
       return 'file';
+    case 'json':
+      return 'json';
     default:
       return 'text';
   }
@@ -140,10 +145,11 @@ class Edit extends React.PureComponent {
             const appearance = get(layout, 'appearance');
             const type = !isEmpty(appearance) ? appearance.toLowerCase() : get(layout, 'type', getInputType(details.type));
 
-            return (
+            return (  
               <Input
                 autoFocus={key === 0}
                 customBootstrapClass={get(layout, 'className')}
+                customInputs={{ json: InputJSONWithErrors, wysiwyg: WysiwygWithErrors }}
                 didCheckErrors={this.props.didCheckErrors}
                 errors={this.getInputErrors(attr)}
                 key={attr}

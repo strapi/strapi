@@ -13,3 +13,11 @@
   margin-bottom: 2.1rem;
   background: #F6F6F6;
 }
+
+.loadIndicatorContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  min-height: 209px;
+  padding-top: 88px;
+}

@@ -133,6 +133,8 @@ To install a new provider run:
 $ npm install strapi-upload-aws-s3@alpha --save
 ```
 
-We have two providers available `strapi-upload-aws-s3` and `strapi-upload-cloudinary`, use the alpha tag to install one of them. Then, visit `/admin/plugins/upload/configurations/development` and configure the provider.
+We have two providers available `strapi-upload-aws-s3` and `strapi-upload-cloudinary`, use the alpha tag to install one of them. Then, visit `/admin/plugins/upload/configurations/development` on your web browser and configure the provider.
 
 If you want to create your own, make sure the name starts with `strapi-upload-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `upload` and `delete` functions.
+
+Check all community providers available on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-upload-)

@@ -15,10 +15,11 @@ import cn from 'classnames';
 
 import PluginHeader from 'components/PluginHeader';
 import ListPlugins from 'components/ListPlugins';
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import { makeSelectCurrentEnv, makeSelectPluginDeleteAction, makeSelectPlugins } from './selectors';
+import { makeSelectCurrentEnv, makeSelectPluginDeleteAction, makeSelectPlugins, makeSelectIsLoading } from './selectors';
 import { getPlugins, onDeletePluginClick, onDeletePluginConfirm } from './actions';
 import reducer from './reducer';
 import saga from './saga';
@@ -36,6 +37,10 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
   }
 
   render() {
+    if (this.props.isLoading) {
+      return <LoadingIndicatorPage />;
+    }
+
     return (
       <div>
         <FormattedMessage id="app.components.ListPluginsPage.helmet.title">
@@ -79,6 +84,7 @@ ListPluginsPage.propTypes = {
   currentEnvironment: PropTypes.string.isRequired,
   getPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   onDeletePluginClick: PropTypes.func.isRequired,
   onDeletePluginConfirm: PropTypes.func.isRequired,
   pluginActionSucceeded: PropTypes.bool.isRequired,
@@ -87,6 +93,7 @@ ListPluginsPage.propTypes = {
 
 const mapStateToProps = createStructuredSelector({
   currentEnvironment: makeSelectCurrentEnv(),
+  isLoading: makeSelectIsLoading(),
   pluginActionSucceeded: makeSelectPluginDeleteAction(),
   plugins: makeSelectPlugins(),
 });

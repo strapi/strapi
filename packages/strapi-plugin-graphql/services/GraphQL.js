@@ -158,10 +158,7 @@ module.exports = {
       let type = 'String';
 
       switch (definition.type) {
-        case 'string':
-        case 'text':
-          type = 'String';
-          break;
+        // TODO: Handle fields of type Array, Perhaps default to [Int] or [String] ...
         case 'boolean':
           type = 'Boolean';
           break;
@@ -574,7 +571,10 @@ module.exports = {
 
                 const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
-                entry[association.alias]._type = _.upperFirst(association.model);
+                // Set the _type only when the value is defined
+                if (entry[association.alias]) {
+                  entry[association.alias]._type = _.upperFirst(association.model);
+                }
 
                 return entry[association.alias];
               }

@@ -182,6 +182,7 @@ module.exports = {
   deleteMany: async (params, query) => {
     const { source } = query;
     const { model } = params;
+
     const primaryKey = strapi.query(model, source).primaryKey;
     const toRemove = Object.keys(query).reduce((acc, curr) => {
       if (curr !== 'source') {

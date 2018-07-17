@@ -13,6 +13,7 @@ module.exports = {
   knex: require('./knex'),
   logger: require('./logger'),
   models: require('./models'),
+  packageManager: require('./packageManager'),
   policy: require('./policy'),
   regex: require('./regex')
 };

@@ -1,13 +1,25 @@
 .gradientOff {
   background-image: linear-gradient( to bottom right, #F65A1D, #F68E0E );
   color: white !important;
-  box-shadow: inset -1px 1px 3px rgba(0,0,0,0.1);
+  z-index: 0!important;
+  
+  &:active, :hover {
+    box-shadow: inset -1px 1px 3px rgba(0,0,0,0.1);
+    background-image: linear-gradient( to bottom right, #F65A1D, #F68E0E );
+    color: white !important;
+    z-index: 0!important;
+  }
 }
 
 .gradientOn {
   background-image: linear-gradient( to bottom right, #005EEA, #0097F6);
   color: white !important;
   box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+  &:active, :hover {
+    background-image: linear-gradient( to bottom right, #005EEA, #0097F6);
+    color: white !important;
+    z-index: 0!important;
+  }
 }
 
 .inputToggleContainer {
