@@ -14,7 +14,9 @@
       cursor: pointer;
     }
   }
+}
 
+.withBulk {
   > tr {
     th:first-child {
       width: 50px;
