@@ -220,6 +220,13 @@ export class EditPage extends React.Component {
     this.props.changeData({ target });
   }
 
+  handleConfirm = () => {
+    this.props.onCancel();
+    this.toggle();
+  }
+
+  handleGoBack = () => this.props.history.goBack();
+
   handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = checkFormValidity(this.generateFormFromRecord(), this.props.editPage.formValidations);
@@ -283,13 +290,13 @@ export class EditPage extends React.Component {
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
   render() {
-    const { editPage, onCancel } = this.props;
+    const { editPage } = this.props;
     const { showWarning } = this.state;
 
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
-          <BackHeader onClick={() => this.props.history.goBack()} />
+          <BackHeader onClick={this.handleGoBack} />
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               actions={this.pluginHeaderActions()}
@@ -305,10 +312,7 @@ export class EditPage extends React.Component {
                 confirm: 'content-manager.popUpWarning.button.confirm',
               }}
               popUpWarningType="danger"
-              onConfirm={() => {
-                onCancel();
-                this.toggle();
-              }}
+              onConfirm={this.handleConfirm}
             />
             <div className="row">
               <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
