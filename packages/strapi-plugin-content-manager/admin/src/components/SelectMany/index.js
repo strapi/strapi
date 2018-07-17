@@ -141,6 +141,7 @@ class SelectMany extends React.Component {
           isLoading={this.state.isLoading}
           onMenuScrollToBottom={this.handleBottomScroll}
           onInputChange={this.handleInputChange}
+          onSelectResetsInput={false}
           multi
           value={
             isNull(value) || isUndefined(value) || value.size === 0
