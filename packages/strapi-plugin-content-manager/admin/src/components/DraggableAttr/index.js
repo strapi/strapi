@@ -97,6 +97,10 @@ class DraggableAttr extends React.Component {
     this.props.onClickEditListItem(this.props.index);
   }
 
+  handleDragEnd = () => this.setState({ dragStart: false });
+
+  handleDragStart = () => this.setState({ dragStart: true });
+
   handleMouseEnter = () => {
     if (!this.props.isDraggingSibling) {
       this.setState({ isOver: true });
@@ -123,8 +127,8 @@ class DraggableAttr extends React.Component {
         connectDropTarget(
           <div
             className={cn(className, isEditing && styles.editingAttr, overClass)}
-            onDragStart={() => this.setState({ dragStart: true })}
-            onDragEnd={() => this.setState({ dragStart: false })}
+            onDragStart={this.handleDragStart}
+            onDragEnd={this.handleDragEnd}
             onMouseEnter={this.handleMouseEnter}
             onMouseLeave={this.handleMouseLeave}
             onClick={this.handleClickEdit}

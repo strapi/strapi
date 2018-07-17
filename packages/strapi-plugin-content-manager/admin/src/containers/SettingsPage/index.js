@@ -92,6 +92,11 @@ class SettingsPage extends React.PureComponent {
     this.props.history.push(`${pathname}${destination}`);
   }
 
+  handleConfirmReset = () => {
+    this.props.onReset();
+    this.toggleWarningCancel();
+  }
+
   handleReset = (e) => {
     e.preventDefault();
     this.setState({ showWarningCancel: true });
@@ -105,6 +110,17 @@ class SettingsPage extends React.PureComponent {
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
   toggleWarningCancel = () => this.setState(prevState => ({ showWarningCancel: !prevState.showWarningCancel }));
+
+  renderForm = input => (
+    <Input
+      key={input.name}
+      onChange={this.props.onChange}
+      value={this.getValue(input)}
+      {...input}
+    />
+  );
+
+  renderRow = model => <SettingsRow key={model.name} {...model} onClick={this.handleClick} />;
 
   render() {
     const { showWarning, showWarningCancel } = this.state;
@@ -127,9 +143,7 @@ class SettingsPage extends React.PureComponent {
             confirm: 'content-manager.popUpWarning.button.confirm',
           }}
           popUpWarningType="danger"
-          onConfirm={() => {
-            onSubmit();
-          }}
+          onConfirm={onSubmit}
         />
         <PopUpWarning
           isOpen={showWarningCancel}
@@ -141,10 +155,7 @@ class SettingsPage extends React.PureComponent {
             confirm: 'content-manager.popUpWarning.button.confirm',
           }}
           popUpWarningType="danger"
-          onConfirm={() => {
-            onReset();
-            this.toggleWarningCancel();
-          }}
+          onConfirm={this.handleConfirmReset}
         />
         <div className={cn('row', styles.container)}>
           <Block
@@ -155,27 +166,22 @@ class SettingsPage extends React.PureComponent {
               <div className="row">
                 <div className="col-md-10">
                   <div className="row">
-                    {forms.inputs.map(input => (
-                      <Input
-                        key={input.name}
-                        onChange={onChange}
-                        value={this.getValue(input)}
-                        {...input}
-                      />
-                    ))}
+                    {forms.inputs.map(this.renderForm)}
                   </div>
                 </div>
               </div>
             </form>
           </Block>
+          {/* LIST */}
           <Block
             title="content-manager.containers.SettingsPage.Block.contentType.title"
             description="content-manager.containers.SettingsPage.Block.contentType.description"
           >
             <div className={styles.contentTypesWrapper}>
-              {this.getModels().map(model => <SettingsRow key={model.name} {...model} onClick={this.handleClick} />)}
+              {this.getModels().map(this.renderRow)}
             </div>
           </Block>
+          {/* LIST */}
         </div>
       </div>
     );
