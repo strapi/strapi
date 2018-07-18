@@ -176,7 +176,7 @@ function appReducer(state = initialState, action) {
 
           return acc += col;
         }, 0);
-       
+        
         // Retrieve the removed element default col
         const attrToRemoveIndex = action.index;
         const attrNameToRemove = getAttrName(attrToRemoveIndex);
@@ -207,7 +207,7 @@ function appReducer(state = initialState, action) {
           }
         });
 
-         /**
+        /**
          * 
          * @param {Bool} dir sup or min
          * @param {Number} pivot the center of 
@@ -216,7 +216,7 @@ function appReducer(state = initialState, action) {
         const getBound = (dir, pivot = attrToRemoveIndex) => {
           let result = {};
           let hasResult = false;
-
+      
           arrayOfLastLineElements.forEach(item => {
             const cond = dir === true ? item.index >= pivot && !hasResult : item.index <= pivot;
 
@@ -228,7 +228,6 @@ function appReducer(state = initialState, action) {
 
           return result;
         };
-        
 
         // Retrieve the removed element bounds
         const nodeBounds = { left: getBound(false), right: getBound(true) };
