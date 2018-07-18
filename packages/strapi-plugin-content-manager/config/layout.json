@@ -24,6 +24,9 @@
       },
       "checkbox4": {
         "appearance": ""
+      },
+      "date": {
+        "appearance": ""
       }
     }
   },

@@ -5,6 +5,7 @@
  */
 
 import { fromJS, List } from 'immutable';
+import { findIndex, get } from 'lodash';
 import {
   EMPTY_STORE,
   GET_MODEL_ENTRIES_SUCCEEDED,
@@ -139,59 +140,153 @@ function appReducer(state = initialState, action) {
       });
     case ON_REMOVE_EDIT_VIEW_FIELD_ATTR:
       return state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
-        const getType = (itemName) =>
-          state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'availableFields', itemName, 'type']);
-        
-        let sum = 0;
-        let indexToAddBreak = null;
-
-        list.forEach((item, i) => {
-          const type = item === 'w-100' ? 'wysiwyg' : getType(item);
-          const colNumber = item.includes('long') ? 12 : getBootStrapCol(type);
-          sum += colNumber;
-
-          // Removing the last element of a line
-          if ((sum === 12 || colNumber === 12) && i === action.index) {
-            sum = 0;
-            indexToAddBreak = i;
-          }
-
-          if (sum >= 12) {
-            sum = 0;
-          }
-
-          // Don't check if we already solved indexToAddBreak
-          if (i < list.size -1 && !indexToAddBreak) {
-            const nextItem = list.get(i + 1);
-            // Col-12
-            const nextType = nextItem === 'w-100' ? 'wysiwyg' : getType(nextItem);
-            // Simulates the layout
-            const nextColNumber = nextItem.includes('long') ? 12 : getBootStrapCol(nextType);
-
-            // Add a line break to the nearest node
-            if (sum + nextColNumber >= 12 && i + 1 > action.index) {
-              sum = 0;
-              indexToAddBreak = i + 1;
-            }
-          }
-
-        });
-
-        let newList = list.delete(action.index);
-
-        if (indexToAddBreak && indexToAddBreak !== -1 && action.index !== list.size - 1) {
-          newList = newList.insert(indexToAddBreak, 'w-100');
+        // Don't do any check if removing the item of the array
+        if (action.index === list.size - 1) {
+          return list.delete(action.index);
         }
 
-        return newList.filter((a, i) => {
-          // Remove the uneeded line break
-          if (i === 0 && a === 'w-100') {
-            return false;
+        // Helpers
+        /**
+         * 
+         * @param {String} itemName 
+         * @returns {String} the item's type
+         */
+        const getType = (itemName) => {
+          return state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'availableFields', itemName, 'type']);
+        };
+        /**
+         * 
+         * @param {Number} itemIndex
+         * @returns {String} The item's name
+         */
+        const getAttrName = itemIndex => {
+          return state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields', itemIndex]);
+        };
+        /**
+         * 
+         * @param {Number} leftBound 
+         * @param {Number} rightBound 
+         * @returns {Number} The line's col number sum
+         */
+        const getLineColSize = (leftBound, rightBound) => list.slice(leftBound + 1, rightBound).reduce((acc, current) => {
+          // Simulates the layout
+          const type = getType(current);
+          // Simulates the layout
+          const col = current.includes('long') ? 12 : getBootStrapCol(type);
+
+          return acc += col;
+        }, 0);
+        /**
+         * 
+         * @param {Bool} dir sup or min
+         * @param {Number} pivot the center of 
+         * @returns {Object} the first sup or last sup
+         */
+        const getBound = (dir, pivot = attrToRemoveIndex) => {
+          let result = {};
+          let hasResult = false;
+      
+          arrayOfLastLineElements.forEach(item => {
+            const cond = dir === true ? item.index >= pivot && !hasResult : item.index <= pivot;
+
+            if (cond) {
+              hasResult = true;
+              result = item;
+            }
+          });
+
+          return result;
+        };
+        
+        // Retrieve the removed element default col
+        const attrToRemoveIndex = action.index;
+        const attrNameToRemove = getAttrName(attrToRemoveIndex);
+        const attrToRemoveType = getType(attrNameToRemove);
+        const attrToRemoveBootstrapCol = attrNameToRemove.includes('long') ? 12 : getBootStrapCol(attrToRemoveType);
+
+        // TODO handle deleting the last visible element of line
+
+        const arrayOfLastLineElements = [];
+        let sum = 0;
+        
+        list.forEach((item, index) => {
+          // Retrieve the item's bootstrap col
+          // Simulates the layout that is not available in the core_store yet
+          const itemType = item.includes('long') ? 'wysiwyg' : getType(item);
+          const itemName = getAttrName(index);
+          const itemColNumber = getBootStrapCol(itemType);  
+          sum += itemColNumber;
+
+          if (sum === 12 || itemColNumber === 12) {
+            const isFullSize = itemColNumber === 12;
+            arrayOfLastLineElements.push({ itemName, index, isFullSize });
+            sum = 0;
           }
-          // Delete same elements that are in order
-          return newList.get(i - 1) !== a;
+
+          if (sum > 12) {
+            sum = 0;
+          }
         });
-          
+
+        // Retrieve the removed element bounds
+        const nodeBounds = { left: getBound(false), right: getBound(true) };
+        const isRemovingAFullWidthNode = attrToRemoveBootstrapCol === 12;
+
+        // If removing we need to add the corresponding missing col in the prev line
+        if (isRemovingAFullWidthNode) {
+          const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveIndex]);
+          const previousLineBounds = { left: getBound(false, attrToRemoveIndex - 1), right: getBound(true, attrToRemoveIndex - 1) };
+          const leftBoundIndex = get(previousLineBounds, ['left', 'index'], 0);
+          const rightBoundIndex = get(previousLineBounds, ['right', 'index'], 0);
+          const previousLineNumberOfItems = Math.abs(leftBoundIndex - rightBoundIndex) - 1;
+          const previousLineColNumber = getLineColSize(leftBoundIndex, rightBoundIndex);
+    
+
+          // Don't add node if removing from the first line or after a complete line
+          if (currentNodeLine === 0 || previousLineNumberOfItems === -1 || previousLineColNumber >= 10) {
+            return list.delete(action.index);
+          }
+
+          const colNumberToAdd = 12 - previousLineColNumber;
+          const colsToAdd = colNumberToAdd === 8 ? ['col-md-4'] : (() => {
+            switch(colNumberToAdd) {
+              case 9:
+                return ['col-md-3', 'col-md-6'];
+              case 6:
+                return ['col-md-6'];
+              default:
+                return ['col-md-3'];
+
+            }
+          })();
+
+          let newList = list.delete(attrToRemoveIndex);
+
+          if (colsToAdd.length > 1) {
+            const newList = newList
+              .insert(attrToRemoveIndex, colsToAdd[0])
+              .insert(attrToRemoveIndex, colsToAdd[1]);
+          } else {
+            newList = newList.insert(attrToRemoveIndex, colsToAdd[0]);
+          }
+
+          return newList;
+        } else {
+          const leftBoundIndex = get(nodeBounds, ['left', 'index'], 0);
+          const rightBoundIndex = get(nodeBounds, ['right', 'index'], 0);
+          const currentLineColSize = getLineColSize(leftBoundIndex, rightBoundIndex);
+          const isRemovingLine = currentLineColSize - attrToRemoveBootstrapCol === 0;
+
+          if (isRemovingLine) {
+            return list.delete(attrToRemoveIndex);
+          }
+
+          const lasLineIndexToAddCol = rightBoundIndex;
+          // Else, just replace the right bound with the corresponding removed col number
+          return list
+            .delete(attrToRemoveIndex)
+            .insert(lasLineIndexToAddCol, `col-md-${attrToRemoveBootstrapCol}`);
+        }
       });
     case ON_RESET:
       return state
