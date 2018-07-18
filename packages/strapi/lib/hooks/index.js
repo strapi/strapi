@@ -46,8 +46,8 @@ module.exports = async function() {
 
         const module = this.hook[hook].load;
 
-        if (module.beforeInitialize) {
-          await module.beforeInitialize.call(module);
+        if (module(this).beforeInitialize) {
+          await module(this).beforeInitialize.call(module);
         }
       }
     )
@@ -74,8 +74,8 @@ module.exports = async function() {
             set(this.config.hook, `settings.${hook}`, {});
           }
 
-          if (module.defaults && this.config.hook.settings[hook] !== false) {
-            defaultsDeep(this.config.hook.settings[hook], module.defaults[hook] || module.defaults);
+          if (module(this).defaults && this.config.hook.settings[hook] !== false) {
+            defaultsDeep(this.config.hook.settings[hook], module(this).defaults[hook] || module(this).defaults);
           }
 
           // Initialize array.
