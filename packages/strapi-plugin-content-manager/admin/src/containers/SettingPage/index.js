@@ -19,6 +19,7 @@ import PropTypes from 'prop-types';
 import {
   moveAttr,
   moveAttrEditView,
+  moveVariableAttrEditView,
   onChangeSettings,
   onClickAddAttr,
   onRemove,
@@ -284,6 +285,7 @@ class SettingPage extends React.PureComponent {
         key={index}
         keys={`${this.getPath()}.editDisplay`}
         name={attr}
+        moveAttr={this.props.moveVariableAttrEditView}
         onRemove={this.props.onRemoveEditViewFieldAttr}
       />
     );
@@ -567,6 +569,7 @@ SettingPage.propTypes = {
   match: PropTypes.object.isRequired,
   moveAttr: PropTypes.func.isRequired,
   moveAttrEditView: PropTypes.func.isRequired,
+  moveVariableAttrEditView: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
   onClickAddAttr: PropTypes.func.isRequired,
   onClickEditListItem: PropTypes.func.isRequired,
@@ -585,6 +588,7 @@ const mapDispatchToProps = (dispatch) => (
     {
       moveAttr,
       moveAttrEditView,
+      moveVariableAttrEditView,
       onChangeSettings,
       onClickAddAttr,
       onClickEditListItem,

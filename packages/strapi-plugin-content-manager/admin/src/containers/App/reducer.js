@@ -12,6 +12,7 @@ import {
   LOADED_MODELS,
   MOVE_ATTR,
   MOVE_ATTR_EDIT_VIEW,
+  MOVE_VARIABLE_ATTR_EDIT_VIEW,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
@@ -61,18 +62,25 @@ function appReducer(state = initialState, action) {
         .set('loading', false);
     case MOVE_ATTR:
       return state
-        .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => (
+        .updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'listDisplay'], list => (
           list
             .delete(action.dragIndex)
             .insert(action.hoverIndex, list.get(action.dragIndex))
         ));
     case MOVE_ATTR_EDIT_VIEW:
       return state
-        .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')), list => (
+        .updateIn(['modifiedSchema', 'models', ...action.keys.split('.')], list => (
           list
             .delete(action.dragIndex)
             .insert(action.hoverIndex, list.get(action.dragIndex))
         ));
+    case MOVE_VARIABLE_ATTR_EDIT_VIEW:
+      return state
+        .updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
+          return list
+            .delete(action.dragIndex)
+            .insert(action.hoverIndex, list.get(action.dragIndex));
+        });
     case ON_CHANGE:
       return state
         // NOTE: need comments
@@ -105,13 +113,12 @@ function appReducer(state = initialState, action) {
         .updateIn(['modifiedSchema', 'models'].concat(action.keys), () => action.value);
     case ON_CLICK_ADD_ATTR:
       return state
-        .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')), list => list.push(fromJS(action.data)));
+        .updateIn(['modifiedSchema', 'models', ...action.keys.split('.')], list => list.push(fromJS(action.data)));
     case ON_REMOVE:
-      return state.updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']), list => {
+      return state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'listDisplay'], list => {
 
         // If the list is empty add the default Id attribute
         if (list.size -1 === 0) {
-          // const attrToAdd = state.getIn(['schema', 'models'].concat(action.keys.split('.')).concat(['listDisplay']))
           const attrToAdd = state.getIn(['schema', 'models', ...action.keys.split('.'), 'listDisplay'])
             .filter(attr => {
               return attr.get('name') === '_id' || attr.get('name') === 'id';

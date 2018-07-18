@@ -11,6 +11,7 @@ export const LOAD_MODELS = 'contentManager/App/LOAD_MODELS';
 export const LOADED_MODELS = 'contentManager/App/LOADED_MODELS';
 export const MOVE_ATTR = 'contentManager/App/MOVE_ATTR';
 export const MOVE_ATTR_EDIT_VIEW = 'contentManager/App/MOVE_ATTR_EDIT_VIEW';
+export const MOVE_VARIABLE_ATTR_EDIT_VIEW = 'contentManager/App/MOVE_VARIABLE_ATTR_EDIT_VIEW';
 export const ON_CHANGE = 'contentManager/App/ON_CHANGE';
 export const ON_CHANGE_SETTINGS = 'contentManager/App/ON_CHANGE_SETTINGS';
 export const ON_CLICK_ADD_ATTR = 'contentManager/App/ON_CLICK_ADD_ATTR';
