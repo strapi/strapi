@@ -23,6 +23,7 @@ import {
   onClickAddAttr,
   onRemove,
   onRemoveEditViewAttr,
+  onRemoveEditViewFieldAttr,
   onReset,
   onSubmit,
 } from 'containers/App/actions';
@@ -274,12 +275,16 @@ class SettingPage extends React.PureComponent {
     }
   }
 
-  renderDraggableAttrEditSettingsField = (attr) => {
+  renderDraggableAttrEditSettingsField = (attr, index) => {
     return (
       <VariableDraggableAttr
-        key={attr}
-        name={attr}
         data={this.getAttrData(attr)}
+        index={index}
+        // key={attr}
+        key={index}
+        keys={`${this.getPath()}.editDisplay`}
+        name={attr}
+        onRemove={this.props.onRemoveEditViewFieldAttr}
       />
     );
   }
@@ -567,6 +572,7 @@ SettingPage.propTypes = {
   onClickEditListItem: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onRemoveEditViewAttr: PropTypes.func.isRequired,
+  onRemoveEditViewFieldAttr: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
@@ -584,6 +590,7 @@ const mapDispatchToProps = (dispatch) => (
       onClickEditListItem,
       onRemove,
       onRemoveEditViewAttr,
+      onRemoveEditViewFieldAttr,
       onReset,
       onSubmit,
     },

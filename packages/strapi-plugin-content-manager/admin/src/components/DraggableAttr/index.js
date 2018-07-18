@@ -148,7 +148,7 @@ class DraggableAttr extends React.Component {
               <span className={styles.editIcon} onClick={this.handleClickEdit} />            
             ) : (
               
-              <DraggedRemovedIcon isDragging={dragStart} />
+              <DraggedRemovedIcon isDragging={dragStart} onRemove={this.handleRemove} />
             )}
           </div>
         ),
