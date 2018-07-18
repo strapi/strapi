@@ -32,7 +32,7 @@ const getBootstrapClass = attrType => {
       return {
         bootstrap: 'col-md-4',
         wrapper: cn(styles.attrWrapper),
-        withLargerHeight: true,
+        withLargerHeight: false,
       };
     case 'json':
     case 'wysiwyg':
@@ -143,7 +143,7 @@ class VariableDraggableAttr extends React.PureComponent {
     if (!type) {
       style = { display: 'none' };
       classNames = {
-        bootstrap: 'w-100',
+        bootstrap: name,
         wrapper: cn(styles.attrWrapper),
         withLargerHeight: false,
       };
