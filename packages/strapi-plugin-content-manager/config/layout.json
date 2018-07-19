@@ -36,5 +36,30 @@
         "appearance": ""
       }
     }
+  },
+  "test": {
+    "attributes": {
+      "string1": {
+        "appearance": ""
+      },
+      "string2": {
+        "appearance": ""
+      },
+      "string3": {
+        "appearance": ""
+      },
+      "string4": {
+        "appearance": ""
+      },
+      "string6": {
+        "appearance": ""
+      },
+      "string7": {
+        "appearance": ""
+      },
+      "string8": {
+        "appearance": ""
+      }
+    }
   }
 }
