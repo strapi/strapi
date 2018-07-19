@@ -17,10 +17,10 @@ export default class Manager {
     const name = this.getAttrName(index);
     const type = this.getType(name);
     // Simulates the layout, need to be removed
-    const boostrapCol = name.includes('long') ? 12 : this.getBootStrapCol(type);
+    const bootstrapCol = name.includes('long') ? 12 : this.getBootStrapCol(type);
 
     const infos = {
-      boostrapCol,
+      bootstrapCol,
       index,
       name,
       type,
@@ -72,14 +72,14 @@ export default class Manager {
       // Similutes the layout that is not in the core store yet
       const { /*bootstrapCol, */ index, name /* type */ } = this.getAttrInfos(i); // TODO: use these variables when layout in core store
       const type = item.includes('long') ? 'wysiwyg' : this.getType(item);
-      const boostrapCol = this.getBootStrapCol(type);
+      const bootstrapCol = this.getBootStrapCol(type);
 
-      sum += boostrapCol;
+      sum += bootstrapCol;
 
-      if (sum === 12 || boostrapCol === 12) {
-        const isFullSize = boostrapCol === 12;
+      if (sum === 12 || bootstrapCol === 12) {
+        const isFullSize = bootstrapCol === 12;
         array.push({ name, index, isFullSize });
-        sum + 0;
+        sum = 0;
       }
 
       if (sum > 12) {

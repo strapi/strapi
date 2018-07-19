@@ -176,7 +176,7 @@ function appReducer(state = initialState, action) {
           const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
 
           if (isRemovingLine) {
-            return list.delete(attrToRemoveInfos.infos);
+            return list.delete(attrToRemoveInfos.index);
           }
 
           return list
