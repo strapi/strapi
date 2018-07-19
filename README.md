@@ -1,4 +1,12 @@
-<p align="center"><img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" /></p>
+<p align="center"><strong>We're hiring!</strong> Located in Paris 🇫🇷 and dreaming of being full-time on Strapi? <a href="https://strapi.io/company#looking-for-talents">Join us</a>!</p>
+
+---
+
+<p align="center">
+  <a href="https://strapi.io">
+    <img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" alt="Strapi logo" />
+  </a>
+</p>
 <h3 align="center">API creation made simple, secure and fast.</h3>
 <p align="center">The most advanced open-source Content Management Framework to build powerful API with no effort.</p>
 <br />
@@ -19,7 +27,11 @@
 
 <br>
 
-<p align="center"><img src="https://blog.strapi.io/content/images/2017/10/Github-Preview.png" /></p>
+<p align="center">
+  <a href="https://strapi.io">
+    <img src="https://blog.strapi.io/content/images/2017/10/Github-Preview.png" />
+  </a>
+</p>
 
 <br>
 
