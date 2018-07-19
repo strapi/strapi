@@ -83,7 +83,7 @@ module.exports = {
     const entry = await <%= globalID %>.create(data);
 
     // Create relational data and return the entry.
-    return <%= globalID %>.updateRelations({ id: entry.id, values: relations });
+    return <%= globalID %>.updateRelations({ _id: entry.id, values: relations });
   },
 
   /**

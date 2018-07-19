@@ -97,14 +97,13 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
     'Create tag1',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/tag/?source=content-manager`,
+        url: `/tag`,
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag1'
-        }
+        },
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.tags.push(body);
 
@@ -117,14 +116,13 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
     'Create tag2',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/tag/?source=content-manager`,
+        url: `/tag`,
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag2'
-        }
+        },
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.tags.push(body);
 
@@ -137,14 +135,13 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
     'Create tag3',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/tag/?source=content-manager`,
+        url: `/tag`,
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag3'
-        }
+        },
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.tags.push(body);
 
@@ -162,12 +159,11 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       };
 
       let body = await rq({
-        url: `/content-manager/explorer/article/?source=content-manager`,
+        url: `/article`,
         method: 'POST',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles.push(body);
 
@@ -188,12 +184,11 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       };
 
       let body = await rq({
-        url: `/content-manager/explorer/article/?source=content-manager`,
+        url: `/article`,
         method: 'POST',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles.push(body);
 
@@ -215,12 +210,11 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/article/${entry.id}`,
         method: 'PUT',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles[0] = body;
 
@@ -242,12 +236,11 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/article/${entry.id}`,
         method: 'PUT',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles[0] = body;
 
@@ -267,9 +260,9 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/article/${entry.id}`,
         method: 'PUT',
-        formData: entry,
+        body: entry,
         json: true
       });
 
@@ -292,12 +285,11 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/article/${entry.id}`,
         method: 'PUT',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles[0] = body;
 
@@ -306,73 +298,6 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       expect(body.content).toBe(entry.content);
       expect(Array.isArray(body.tags)).toBeTruthy();
       expect(body.tags.length).toBe(0);
-    }
-  );
-
-  test(
-    'Delete all articles should remove the association in each tags related to them',
-    async () => {
-      const tagToCreate = await rq({
-        url: `/content-manager/explorer/tag/?source=content-manager`,
-        method: 'POST',
-        json: true,
-        formData: {
-          name: 'tag11'
-        }
-      });
-
-      const article12 = await rq({
-        url: `/content-manager/explorer/article/?source=content-manager`,
-        method: 'POST',
-        json: true,
-        formData: {
-          title: 'article12',
-          content: 'Content',
-          tags: [tagToCreate]
-        }
-      });
-
-      const article13 = await rq({
-        url: `/content-manager/explorer/article/?source=content-manager`,
-        method: 'POST',
-        json: true,
-        formData: {
-          title: 'article13',
-          content: 'Content',
-          tags: [tagToCreate]
-        }
-      });
-
-      const articles = [article12, article13];
-
-      expect(Array.isArray(articles[0].tags)).toBeTruthy();
-      expect(articles[0].tags.length).toBe(1);
-      expect(Array.isArray(articles[1].tags)).toBeTruthy();
-      expect(articles[1].tags.length).toBe(1);
-
-      let tagToGet = await rq({
-        url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
-        method: 'GET',
-        json: true
-      });
-
-      expect(Array.isArray(tagToGet.articles)).toBeTruthy();
-      expect(tagToGet.articles.length).toBe(2);
-
-      await rq({
-        url: `/content-manager/explorer/deleteAll/article/?source=content-manager&${articles.map((article, index) => `${index}=${article.id}`).join('&')}`,
-        method: 'DELETE',
-        json: true
-      });
-
-      tagToGet = await rq({
-        url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
-        method: 'GET',
-        json: true
-      });
-
-      expect(Array.isArray(tagToGet.articles)).toBeTruthy();
-      expect(tagToGet.articles.length).toBe(0);
     }
   );
 });
@@ -393,14 +318,13 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Create cat1',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/category/?source=content-manager`,
+        url: `/category`,
         method: 'POST',
-        formData: {
+        body: {
           name: 'cat1'
-        }
+        },
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.categories.push(body);
 
@@ -413,14 +337,13 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Create cat2',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/category/?source=content-manager`,
+        url: `/category`,
         method: 'POST',
-        formData: {
+        body: {
           name: 'cat2'
-        }
+        },
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.categories.push(body);
 
@@ -439,12 +362,11 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       };
 
       let body = await rq({
-        url: `/content-manager/explorer/article/?source=content-manager`,
+        url: `/article`,
         method: 'POST',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles.push(body);
 
@@ -465,12 +387,11 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/article/${entry.id}`,
         method: 'PUT',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles[0] = body;
 
@@ -490,12 +411,11 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       };
 
       let body = await rq({
-        url: `/content-manager/explorer/article?source=content-manager`,
+        url: `/article`,
         method: 'POST',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles.push(body);
 
@@ -515,12 +435,11 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/article/${entry.id}`,
         method: 'PUT',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles[1] = body;
 
@@ -540,12 +459,11 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/content-manager/explorer/category/${entry.id}?source=content-manager`,
+        url: `/category/${entry.id}`,
         method: 'PUT',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.categories[0] = body;
 
@@ -564,12 +482,11 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       };
 
       let body = await rq({
-        url: `/content-manager/explorer/category/?source=content-manager`,
+        url: `/category`,
         method: 'POST',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.categories.push(body);
 
@@ -583,11 +500,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get article1 with cat3',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/article/${data.articles[0].id}?source=content-manager`,
-        method: 'GET'
+        url: `/article/${data.articles[0].id}`,
+        method: 'GET',
+        json: true
       });
-
-      body = JSON.parse(body);
 
       expect(body.id);
       expect(body.category.id).toBe(data.categories[2].id)
@@ -597,11 +513,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get article2 with cat2',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/article/${data.articles[1].id}?source=content-manager`,
-        method: 'GET'
+        url: `/article/${data.articles[1].id}`,
+        method: 'GET',
+        json: true
       });
-
-      body = JSON.parse(body);
 
       expect(body.id);
       expect(body.category.id).toBe(data.categories[1].id)
@@ -611,11 +526,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get cat1 without relations',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/category/${data.categories[0].id}?source=content-manager`,
-        method: 'GET'
+        url: `/category/${data.categories[0].id}`,
+        method: 'GET',
+        json: true
       });
-
-      body = JSON.parse(body);
 
       expect(body.id);
       expect(body.articles.length).toBe(0);
@@ -625,11 +539,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get cat2 with article2',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/category/${data.categories[1].id}?source=content-manager`,
-        method: 'GET'
+        url: `/category/${data.categories[1].id}`,
+        method: 'GET',
+        json: true
       });
-
-      body = JSON.parse(body);
 
       expect(body.id);
       expect(body.articles.length).toBe(1);
@@ -640,11 +553,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get cat3 with article1',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/category/${data.categories[2].id}?source=content-manager`,
-        method: 'GET'
+        url: `/category/${data.categories[2].id}`,
+        method: 'GET',
+        json: true
       });
-
-      body = JSON.parse(body);
 
       expect(body.id);
       expect(body.articles.length).toBe(1);
@@ -669,14 +581,13 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
     'Create ref1',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/reference/?source=content-manager`,
+        url: `/reference`,
         method: 'POST',
-        formData: {
+        body: {
           name: 'ref1'
-        }
+        },
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.references.push(body);
 
@@ -693,12 +604,11 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       };
 
       let body = await rq({
-        url: `/content-manager/explorer/article?source=content-manager`,
+        url: `/article`,
         method: 'POST',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles.push(body);
 
@@ -717,12 +627,11 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       cleanDate(entry);
 
       let body = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/article/${entry.id}`,
         method: 'PUT',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles[0] = body;
 
@@ -742,12 +651,11 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       };
 
       let body = await rq({
-        url: `/content-manager/explorer/article?source=content-manager`,
+        url: `/article`,
         method: 'POST',
-        formData: entry
+        body: entry,
+        json: true
       });
-
-      body = JSON.parse(body);
 
       data.articles.push(body);
 
@@ -761,11 +669,10 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
     'Get article1 without relations',
     async () => {
       let body = await rq({
-        url: `/content-manager/explorer/article/${data.articles[0].id}?source=content-manager`,
-        method: 'GET'
+        url: `/article/${data.articles[0].id}`,
+        method: 'GET',
+        json: true
       });
-
-      body = JSON.parse(body);
 
       expect(body.id);
       expect(body.reference).toBe(null);
@@ -782,19 +689,19 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
     'Attach Tag to a Reference',
     async () => {
       const tagToCreate = await rq({
-        url: `/content-manager/explorer/tag/?source=content-manager`,
+        url: `/tag`,
         method: 'POST',
         json: true,
-        formData: {
+        body: {
           name: 'tag111'
         }
       });
 
       const referenceToCreate = await rq({
-        url: `/content-manager/explorer/reference/?source=content-manager`,
+        url: `/reference`,
         method: 'POST',
         json: true,
-        formData: {
+        body: {
           name: 'cat111',
           tag: tagToCreate
         }
@@ -808,19 +715,19 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
     'Detach Tag to a Reference',
     async () => {
       const tagToCreate = await rq({
-        url: `/content-manager/explorer/tag/?source=content-manager`,
+        url: `/tag`,
         method: 'POST',
         json: true,
-        formData: {
+        body: {
           name: 'tag111'
         }
       });
 
       const referenceToCreate = await rq({
-        url: `/content-manager/explorer/reference/?source=content-manager`,
+        url: `/reference`,
         method: 'POST',
         json: true,
-        formData: {
+        body: {
           name: 'cat111',
           tag: tagToCreate
         }
@@ -829,10 +736,10 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
       expect(referenceToCreate.tag.id).toBe(tagToCreate.id);
 
       const referenceToUpdate = await rq({
-        url: `/content-manager/explorer/reference/${referenceToCreate.id}?source=content-manager`,
+        url: `/reference/${referenceToCreate.id}`,
         method: 'PUT',
         json: true,
-        formData: {
+        body: {
           tag: null
         }
       });
@@ -845,32 +752,32 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
     'Delete Tag so the relation in the Reference side should be removed',
     async () => {
       const tagToCreate = await rq({
-        url: `/content-manager/explorer/tag/?source=content-manager`,
+        url: `/tag`,
         method: 'POST',
         json: true,
-        formData: {
+        body: {
           name: 'tag111'
         }
       });
 
       const referenceToCreate = await rq({
-        url: `/content-manager/explorer/reference/?source=content-manager`,
+        url: `/reference`,
         method: 'POST',
         json: true,
-        formData: {
+        body: {
           name: 'cat111',
           tag: tagToCreate
         }
       });
 
       const tagToDelete = await rq({
-        url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
+        url: `/tag/${tagToCreate.id}`,
         method: 'DELETE',
         json: true
       });
 
       const referenceToGet = await rq({
-        url: `/content-manager/explorer/reference/${referenceToCreate.id}?source=content-manager`,
+        url: `/reference/${referenceToCreate.id}`,
         method: 'GET',
         json: true
       });
