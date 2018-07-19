@@ -5,6 +5,7 @@ export default class Manager {
     this.list = list;
     this.index = index;
     this.arrayOfEndLineElements = this.getLinesBound();
+    this.attrToRemoveInfos = this.attrToRemoveInfos();
   }
 
   /**
@@ -15,7 +16,8 @@ export default class Manager {
   getAttrInfos(index) {
     const name = this.getAttrName(index);
     const type = this.getType(name);
-    const boostrapCol = this.getBootStrapCol(type);
+    // Simulates the layout, need to be removed
+    const boostrapCol = name.includes('long') ? 12 : this.getBootStrapCol(type);
 
     const infos = {
       boostrapCol,
@@ -130,14 +132,14 @@ export default class Manager {
   /**
    * 
    * @param {Bool} dir sup or min
-   * @param {Number} pivot the center of 
+   * @param {Number} pivot the center
    * @returns {Object} the first sup or last sup
    */
-  getBound(dir, pivot = attrToRemoveIndex) {
+  getBound(dir, pivot = this.index) {
     let result = {};
     let hasResult = false;
 
-    arrayOfLastLineElements.forEach(item => {
+    this.arrayOfEndLineElements.forEach(item => {
       const cond = dir === true ? item.index >= pivot && !hasResult : item.index <= pivot;
 
       if (cond) {

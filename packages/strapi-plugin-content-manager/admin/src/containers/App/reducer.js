@@ -6,6 +6,7 @@
 
 import { fromJS, List } from 'immutable';
 import { findIndex, get } from 'lodash';
+import Manager from 'utils/Manager';
 import {
   EMPTY_STORE,
   GET_MODEL_ENTRIES_SUCCEEDED,
@@ -32,21 +33,6 @@ const initialState = fromJS({
   schema: fromJS({}),
   submitSuccess: false,
 });
-
-const getBootStrapCol = attrType => {
-  switch(attrType) {
-    case 'checkbox':
-    case 'boolean':
-      return 3;
-    case 'date':
-      return 4;
-    case 'json':
-    case 'wysiwyg':
-      return 12;
-    default:
-      return 6;
-  }
-};
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
@@ -144,105 +130,24 @@ function appReducer(state = initialState, action) {
         if (action.index === list.size - 1) {
           return list.delete(action.index);
         }
-
-        // Helpers
-        /**
-         * 
-         * @param {String} itemName 
-         * @returns {String} the item's type
-         */
-        const getType = (itemName) => {
-          return state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'availableFields', itemName, 'type']);
-        };
-        /**
-         * 
-         * @param {Number} itemIndex
-         * @returns {String} The item's name
-         */
-        const getAttrName = itemIndex => {
-          return state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields', itemIndex]);
-        };
-        /**
-         * 
-         * @param {Number} leftBound 
-         * @param {Number} rightBound 
-         * @returns {Number} The line's col number sum
-         */
-        const getLineColSize = (leftBound, rightBound) => list.slice(leftBound + 1, rightBound).reduce((acc, current) => {
-          // Simulates the layout
-          const type = getType(current);
-          // Simulates the layout
-          const col = current.includes('long') ? 12 : getBootStrapCol(type);
-
-          return acc += col;
-        }, 0);
         
-        // Retrieve the removed element default col
-        const attrToRemoveIndex = action.index;
-        const attrNameToRemove = getAttrName(attrToRemoveIndex);
-        const attrToRemoveType = getType(attrNameToRemove);
-        const attrToRemoveBootstrapCol = attrNameToRemove.includes('long') ? 12 : getBootStrapCol(attrToRemoveType);
-
-        // TODO handle deleting the last visible element of line
-
-        const arrayOfLastLineElements = [];
-        let sum = 0;
-        
-        list.forEach((item, index) => {
-          // Retrieve the item's bootstrap col
-          // Simulates the layout that is not available in the core_store yet
-          const itemType = item.includes('long') ? 'wysiwyg' : getType(item);
-          const itemName = getAttrName(index);
-          const itemColNumber = getBootStrapCol(itemType);  
-          sum += itemColNumber;
-
-          if (sum === 12 || itemColNumber === 12) {
-            const isFullSize = itemColNumber === 12;
-            arrayOfLastLineElements.push({ itemName, index, isFullSize });
-            sum = 0;
-          }
-
-          if (sum > 12) {
-            sum = 0;
-          }
-        });
-
-        /**
-         * 
-         * @param {Bool} dir sup or min
-         * @param {Number} pivot the center of 
-         * @returns {Object} the first sup or last sup
-         */
-        const getBound = (dir, pivot = attrToRemoveIndex) => {
-          let result = {};
-          let hasResult = false;
-      
-          arrayOfLastLineElements.forEach(item => {
-            const cond = dir === true ? item.index >= pivot && !hasResult : item.index <= pivot;
-
-            if (cond) {
-              hasResult = true;
-              result = item;
-            }
-          });
-
-          return result;
-        };
-
+        const manager = new Manager(state, list, action.keys, action.index);
+        // Retrieve the removed element infos
+        const attrToRemoveInfos = manager.attrToRemoveInfos;
+        const arrayOfLastLineElements = manager.arrayOfEndLineElements;
         // Retrieve the removed element bounds
-        const nodeBounds = { left: getBound(false), right: getBound(true) };
-        const isRemovingAFullWidthNode = attrToRemoveBootstrapCol === 12;
+        const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) };
+        const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
 
         // If removing we need to add the corresponding missing col in the prev line
         if (isRemovingAFullWidthNode) {
           const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveIndex]);
-          const previousLineBounds = { left: getBound(false, attrToRemoveIndex - 1), right: getBound(true, attrToRemoveIndex - 1) };
+          const previousLineBounds = { left: manager.getBound(false, attrToRemoveInfos.index - 1), right: getBound(true, attrToRemoveInfos.index - 1) };
           const leftBoundIndex = get(previousLineBounds, ['left', 'index'], 0);
           const rightBoundIndex = get(previousLineBounds, ['right', 'index'], 0);
           const previousLineNumberOfItems = Math.abs(leftBoundIndex - rightBoundIndex) - 1;
-          const previousLineColNumber = getLineColSize(leftBoundIndex, rightBoundIndex);
+          const previousLineColNumber = manager.getLineColSize(leftBoundIndex, rightBoundIndex);
     
-
           // Don't add node if removing from the first line or after a complete line
           if (currentNodeLine === 0 || previousLineNumberOfItems === -1 || previousLineColNumber >= 10) {
             return list.delete(action.index);
@@ -261,32 +166,22 @@ function appReducer(state = initialState, action) {
             }
           })();
 
-          let newList = list.delete(attrToRemoveIndex);
-
-          if (colsToAdd.length > 1) {
-            const newList = newList
-              .insert(attrToRemoveIndex, colsToAdd[0])
-              .insert(attrToRemoveIndex, colsToAdd[1]);
-          } else {
-            newList = newList.insert(attrToRemoveIndex, colsToAdd[0]);
-          }
-
-          return newList;
+          return list
+            .delete(attrToRemoveIndex)
+            .insert(attrToRemoveIndex, colsToAdd);
         } else {
           const leftBoundIndex = get(nodeBounds, ['left', 'index'], 0);
           const rightBoundIndex = get(nodeBounds, ['right', 'index'], 0);
-          const currentLineColSize = getLineColSize(leftBoundIndex, rightBoundIndex);
-          const isRemovingLine = currentLineColSize - attrToRemoveBootstrapCol === 0;
+          const currentLineColSize = manager.getLineColSize(leftBoundIndex, rightBoundIndex);
+          const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
 
           if (isRemovingLine) {
-            return list.delete(attrToRemoveIndex);
+            return list.delete(attrToRemoveInfos.infos);
           }
 
-          const lasLineIndexToAddCol = rightBoundIndex;
-          // Else, just replace the right bound with the corresponding removed col number
           return list
-            .delete(attrToRemoveIndex)
-            .insert(lasLineIndexToAddCol, `col-md-${attrToRemoveBootstrapCol}`);
+            .delete(attrToRemoveInfos.index)
+            .insert(rightBoundIndex, `col-md-${attrToRemoveInfos.bootstrapCol}`);
         }
       });
     case ON_RESET:
