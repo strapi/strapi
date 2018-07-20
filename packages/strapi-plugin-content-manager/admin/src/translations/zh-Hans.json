@@ -48,6 +48,7 @@
 
   "form.Input.description": "Description",
   "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+  "form.Input.disabled": "Editable field",
 
   "notification.error.relationship.fetch": "获取关联数据时发生错误",
 

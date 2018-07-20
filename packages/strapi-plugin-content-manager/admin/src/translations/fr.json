@@ -92,6 +92,7 @@
 
   "form.Input.description": "Description",
   "form.Input.description.placeholder": "N'oubliez pas de mettre l'URL complète!",
+  "form.Input.disabled": "Champ editable",
   "form.Input.label": "Label",
   "form.Input.label.inputDescription": "Cette valeur modifie celle du champs de la table",
   "form.Input.search": "Autoriser la search",

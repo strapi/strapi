@@ -78,6 +78,7 @@
 
   "form.Input.description": "Description",
   "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+  "form.Input.disabled": "Editable field",
 
   "notification.error.relationship.fetch": "데이터 관계를 가져오는 도중 에러가 발생했습니다.",
 

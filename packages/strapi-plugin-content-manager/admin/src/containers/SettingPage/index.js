@@ -7,7 +7,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { findIndex, get, upperFirst } from 'lodash';
+import { findIndex, get, isEmpty, upperFirst } from 'lodash';
 import cn from 'classnames';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
@@ -41,7 +41,7 @@ import VariableDraggableAttr from 'components/VariableDraggableAttr';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
-import { onClickEditListItem } from './actions';
+import { onClickEditField, onClickEditListItem, onClickEditRelation } from './actions';
 
 import forms from './forms.json';
 import reducer from './reducer';
@@ -61,6 +61,15 @@ class SettingPage extends React.PureComponent {
 
   componentDidMount() {
     this.handleClickEditAttr(0);
+    const fields = this.getEditPageDisplayedFields();
+    const relations = this.getEditPageDisplayedRelations();
+    
+    if (fields.length === 0) {
+      this.handleClickEditField(0);
+    } else if (relations.length > 0) {
+      this.handleClickEditRelation(0);
+    }
+
   }
 
   componentDidUpdate(prevProps) {
@@ -208,9 +217,23 @@ class SettingPage extends React.PureComponent {
     }
   }
 
-  handleClickEditAttr = (index) => {
+  handleClickEditAttr = index => {
     const attrToEdit = get(this.props.schema, ['models'].concat(this.getPath().split('.')).concat(['listDisplay', index]), {});
     this.props.onClickEditListItem(attrToEdit);
+  }
+
+  handleClickEditField = index => {
+    const fieldToEditName = get(this.props.schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'fields', index], '');
+    const fieldToEdit = get(this.props.schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'availableFields', fieldToEditName], {});
+    
+    return this.props.onClickEditField(fieldToEdit);
+  }
+
+  handleClickEditRelation = index => {
+    const relationToEditName = get(this.getEditPageDisplayedRelations(), index, '');
+    const relationToEdit = get(this.props.schema, ['models', ...this.getPath().split('.'), 'relations', relationToEditName]);
+
+    return this.props.onClickEditRelation(relationToEdit);
   }
 
   handleConfirmReset = () => {
@@ -348,13 +371,49 @@ class SettingPage extends React.PureComponent {
 
   renderDropDownP = msg => <p>{msg}</p>;
 
+  renderForm = () => {
+    const { settingPage: { fieldToEdit, relationToEdit } } = this.props;
+    
+    if (isEmpty(fieldToEdit)) {
+      return forms.editView.relationForm.map(this.renderFormEditSettingsRelation);
+    }
+    
+    if (isEmpty(relationToEdit)) {
+      return forms.editView.fieldForm.map(this.renderFormEditSettingsField);
+    }
+
+    return null;
+
+  }
+
+  renderFormEditSettingsField = (input, i) => {
+    const { onChangeSettings, schema, settingPage: { fieldToEdit: { name } } } = this.props;
+    const path = [...this.getPath().split('.'), 'editDisplay', 'availableFields', name, input.name];
+    const value = get(schema, ['models', ...path], '');  
+
+    return (
+      <Input
+        key={i}
+        onChange={onChangeSettings}
+        value={value}
+        {...input}
+        name={path.join('.')}
+      />
+    );
+  }
+
   renderFormEditSettingsRelation = (input, i) => {
+    const { onChangeSettings, schema, settingPage: { relationToEdit: { alias } } } = this.props;
+    const path = [...this.getPath().split('.'), 'relations', alias, input.name];
+    const value = get(schema, ['models', ...path], '');
+
     return  (
       <Input
         key={i}
-        onChange={() => {}}
-        value=""
+        onChange={onChangeSettings}
+        value={value}
         {...input}
+        name={path.join('.')}
       />
     );
   }
@@ -404,7 +463,6 @@ class SettingPage extends React.PureComponent {
     const {
       onSubmit,
     } = this.props;
-
     return (
       <form onSubmit={this.handleSubmit}>
         <BackHeader onClick={this.handleGoBack} />
@@ -547,7 +605,7 @@ class SettingPage extends React.PureComponent {
                   <div className={styles.editWrapper}>
 
                     <div className="row">
-                      {forms.editView.relationForm.map(this.renderFormEditSettingsRelation)}                    
+                      {this.renderForm()}
                     </div>
 
                   </div>
@@ -572,7 +630,9 @@ SettingPage.propTypes = {
   moveVariableAttrEditView: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
   onClickAddAttr: PropTypes.func.isRequired,
+  onClickEditField: PropTypes.func.isRequired,
   onClickEditListItem: PropTypes.func.isRequired,
+  onClickEditRelation: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onRemoveEditViewAttr: PropTypes.func.isRequired,
   onRemoveEditViewFieldAttr: PropTypes.func.isRequired,
@@ -591,7 +651,9 @@ const mapDispatchToProps = (dispatch) => (
       moveVariableAttrEditView,
       onChangeSettings,
       onClickAddAttr,
+      onClickEditField,
       onClickEditListItem,
+      onClickEditRelation,
       onRemove,
       onRemoveEditViewAttr,
       onRemoveEditViewFieldAttr,

@@ -105,6 +105,37 @@
         "type": "string",
         "validations": {}
       }
+    ],
+    "fieldForm": [
+      {
+        "label": { "id": "content-manager.form.Input.label" },
+        "customBootstrapClass": "col-md-8",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "label",
+        "placeholder": "SLUG (URL)",
+        "type": "string",
+        "validations": {}
+      },
+      {
+        "label": { "id": "content-manager.form.Input.disabled" },
+        "customBootstrapClass": "col-md-4",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "editable",
+        "type": "toggle",
+        "validations": {}
+      },
+      {
+        "label": { "id": "content-manager.form.Input.description" },
+        "customBootstrapClass": "col-md-12",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "description",
+        "placeholder": "content-manager.form.Input.description.placeholder",
+        "type": "string",
+        "validations": {}
+      }
     ]
   }
 }

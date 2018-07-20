@@ -46,6 +46,7 @@
   "error.attribute.sameKeyAndName": "Darf nicht gleich sein",
   "error.validation.minSupMax": "Darf nicht höher sein",
 
+  "form.Input.disabled": "Editable field",
   "form.Input.description": "Description",
   "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
 

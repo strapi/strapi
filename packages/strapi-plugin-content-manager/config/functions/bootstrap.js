@@ -65,6 +65,7 @@ module.exports = async cb => {
       label: _.upperFirst(attribute),
       description: '',
       type: value.type || 'string',
+      disabled: false,
     }));
 
     schemaModel.fields = fields;
@@ -109,7 +110,8 @@ module.exports = async cb => {
     if (model.associations) {
       // Model relations
       schemaModel.relations = model.associations.reduce((acc, current) => {
-        const displayedAttribute = current.plugin ?
+        const label = _.upperFirst(current.alias);
+        const displayedAttribute = current.plugin ? // Value to modified to custom what's displayed in the react-select
           _.get(pluginsModel, [current.plugin, 'models', current.model || current.collection, 'info', 'mainField']) ||
           _.findKey(_.get(pluginsModel, [current.plugin, 'models', current.model || current.collection, 'attributes']), { type : 'string'}) ||
           'id' :
@@ -120,6 +122,7 @@ module.exports = async cb => {
         acc[current.alias] = {
           ...current,
           description: '',
+          label,
           displayedAttribute,
         };
   
@@ -144,6 +147,7 @@ module.exports = async cb => {
             name: current,
             placeholder: '',
             type: 'file',
+            disabled: false,
           };
         }
 

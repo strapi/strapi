@@ -93,6 +93,7 @@
 
   "form.Input.description": "Description",
   "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+  "form.Input.disabled": "Editable field",
   "form.Input.label.inputDescription": "This value overrides the label displayed in the table's head",
   "form.Input.label": "Label",
   "form.Input.search": "Enable search",

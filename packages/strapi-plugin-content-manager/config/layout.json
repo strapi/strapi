@@ -27,6 +27,33 @@
       },
       "date": {
         "appearance": ""
+      },
+      "bool1": {
+        "appearance": ""
+      },
+      "bool2": {
+        "appearance": ""
+      },
+      "number": {
+        "appearance": ""
+      },
+      "enum": {
+        "appearance": ""
+      },
+      "json": {
+        "appearance": ""
+      },
+      "bool3": {
+        "appearance": ""
+      },
+      "bool4": {
+        "appearance": ""
+      },
+      "bool5": {
+        "appearance": ""
+      },
+      "bool6": {
+        "appearance": ""
       }
     }
   },
