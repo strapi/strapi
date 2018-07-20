@@ -99,17 +99,17 @@ shell.cd('../strapi-generate-new');
 watcher('', 'npm install ../strapi-utils');
 watcher('📦  Linking strapi-generate-new', 'npm link');
 
-shell.cd('../strapi-mongoose');
+shell.cd('../strapi-hook-mongoose');
 watcher('', 'npm install ../strapi-utils');
-watcher('📦  Linking strapi-mongoose...', 'npm link');
+watcher('📦  Linking strapi-hook-mongoose...', 'npm link');
 
-shell.cd('../strapi-knex');
-watcher('📦  Linking strapi-knex...', 'npm link');
+shell.cd('../strapi-hook-knex');
+watcher('📦  Linking strapi-hook-knex...', 'npm link');
 
-shell.cd('../strapi-bookshelf');
+shell.cd('../strapi-hook-bookshelf');
 watcher('', 'npm install ../strapi-utils');
-watcher('', 'npm install ../strapi-knex');
-watcher('📦  Linking strapi-bookshelf...', 'npm link');
+watcher('', 'npm install ../strapi-hook-knex');
+watcher('📦  Linking strapi-hook-bookshelf...', 'npm link');
 
 shell.cd('../strapi');
 watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');

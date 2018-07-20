@@ -49,7 +49,7 @@ module.exports = function (strapi) {
      */
 
     initialize: cb => {
-      _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-mongoose'}), (connection, connectionName) => {
+      _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-hook-mongoose'}), (connection, connectionName) => {
         const instance = new Mongoose();
         const { uri, host, port, username, password, database } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
         const uriOptions = uri ? url.parse(uri, true).query : {};
