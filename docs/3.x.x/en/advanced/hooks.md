@@ -1,6 +1,6 @@
 # Hooks
 
-The hooks are modules that add functionality to the core. They are loaded during the server boot. For example, if your project needs to work with a SQL database, your will have to add the hook `strapi-bookshelf` to be able to connect your app with your database.
+The hooks are modules that add functionality to the core. They are loaded during the server boot. For example, if your project needs to work with a SQL database, your will have to add the hook `strapi-hook-bookshelf` to be able to connect your app with your database.
 
 **Path —** `./hooks/documentation/lib/index.js`.
 ```js
@@ -76,13 +76,13 @@ The `index.js` is the entry point to your hook. It should look like the example 
 
 ## Dependencies
 
-It happens that a hook has a dependency to another one. For example, the `strapi-bookshelf` has a dependency to `strapi-knex`. Without it, the `strapi-bookshelf` can't work correctly. It also means that the `strapi-knex` hook has to be loaded before.
+It happens that a hook has a dependency to another one. For example, the `strapi-hook-bookshelf` has a dependency to `strapi-hook-knex`. Without it, the `strapi-hook-bookshelf` can't work correctly. It also means that the `strapi-hook-knex` hook has to be loaded before.
 
 To handle this case, you need to update the `package.json` at the root of your hook.
 
 ```json
 {
-  "name": "strapi-bookshelf",
+  "name": "strapi-hook-bookshelf",
   "version": "x.x.x",
   "description": "Bookshelf hook for the Strapi framework",
   "dependencies": {
@@ -90,10 +90,10 @@ To handle this case, you need to update the `package.json` at the root of your h
   },
   "strapi": {
     "dependencies": [
-      "strapi-knex"
+      "strapi-hook-knex"
     ]
   }
-}  
+}
 ```
 
 ## Custom hooks
@@ -107,7 +107,9 @@ The framework allows to load hooks from the project directly without having to i
 └─── config
 └─── hooks
 │   └─── strapi-documentation
+│        - index.js
 │   └─── strapi-server-side-rendering
+│        - index.js
 └─── plugins
 └─── public
 - favicon.ico

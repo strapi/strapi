@@ -1,26 +1,25 @@
 {
-  "name": "strapi-knex",
+  "name": "strapi-hook-mongoose",
   "version": "3.0.0-alpha.12.7.1",
-  "description": "Knex hook for the Strapi framework",
+  "description": "Mongoose hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
+    "mongoose",
     "hook",
-    "knex",
-    "migrations",
-    "sql",
-    "strapi",
-    "transactions"
+    "orm",
+    "nosql",
+    "strapi"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
   "dependencies": {
-    "knex": "^0.13.0",
-    "lodash": "^4.17.4"
-  },
-  "strapi": {
-    "isHook": true
+    "lodash": "^4.17.4",
+    "mongoose": "^5.0.16",
+    "mongoose-float": "^1.0.2",
+    "pluralize": "^6.0.0",
+    "strapi-utils": "3.0.0-alpha.12.7.1"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -43,7 +42,7 @@
   },
   "engines": {
     "node": ">= 9.0.0",
-    "npm": ">= 5.0.0"
+    "npm": ">= 5.3.0"
   },
   "license": "MIT"
 }

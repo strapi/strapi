@@ -45,7 +45,7 @@ module.exports = function(strapi) {
      */
 
     initialize: async cb => {
-      const connections = _.pickBy(strapi.config.connections, { connector: 'strapi-bookshelf' });
+      const connections = _.pickBy(strapi.config.connections, { connector: 'strapi-hook-bookshelf' });
 
       const databaseUpdate = [];
 

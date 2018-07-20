@@ -164,7 +164,7 @@ Most of the application's configurations are defined by environment. It means th
  - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
  - `connections` List of all available connections.
    - `default`
-     - `connector` (string): Connector used by the current connection. Default value: `strapi-mongoose`.
+     - `connector` (string): Connector used by the current connection. Default value: `strapi-hook-mongoose`.
      - `client` (string): Client used to store session. Default value: `cookie`.
      - `key` (string): Cookie key name. Default value: `strapi.sid`
      - `maxAge` (integer): Time in milliseconds before the session expire. Default value: `86400000`.
@@ -192,7 +192,7 @@ Most of the application's configurations are defined by environment. It means th
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-mongoose",
+      "connector": "strapi-hook-mongoose",
       "settings": {
         "client": "mongo",
         "host": "localhost",
@@ -208,7 +208,7 @@ Most of the application's configurations are defined by environment. It means th
       }
     },
     "postgres": {
-      "connector": "strapi-bookshelf",
+      "connector": "strapi-hook-bookshelf",
       "settings": {
         "client": "postgres",
         "host": "localhost",
@@ -223,7 +223,7 @@ Most of the application's configurations are defined by environment. It means th
       }
     },
     "mysql": {
-      "connector": "strapi-bookshelf",
+      "connector": "strapi-hook-bookshelf",
       "settings": {
         "client": "mysql",
         "host": "localhost",
@@ -367,7 +367,7 @@ In any JSON configurations files in your project, you can inject dynamic values 
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-mongoose",
+      "connector": "strapi-hook-mongoose",
       "settings": {
         "client": "mongo",
         "uri": "${process.env.DATABASE_URI || ''}",
