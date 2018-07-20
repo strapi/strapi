@@ -258,7 +258,7 @@ module.exports = {
     // Retrieve generic service from the Content Manager plugin.
     const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
 
-    const initialState = { definition: '', query: {}, resolver: { Query : {} } };
+    const initialState = { definition: '', query: {}, mutation: {}, resolver: { Query : {}, Mutation: {} } };
 
     if (_.isEmpty(models)) {
       return initialState;
@@ -384,6 +384,28 @@ module.exports = {
             [type === 'singular' ? pluralize.singular(name) : pluralize.plural(name)]: queries[type]
           });
         }
+      });
+
+      const mutations = {
+        create: () => {
+          console.log('create');
+        },
+        update: () => {
+          console.log('update');
+        },
+        delete: () => {
+          console.log('delete');
+        }
+      };
+
+      Object.keys(mutations).forEach(type => {
+        Object.assign(acc.mutation, {
+          [`${type}${_.capitalize(name)}(value: String)`]: model.globalId
+        });
+
+        _.merge(acc.resolver.Mutation, {
+          [`${type}${_.capitalize(name)}`]: mutations[type]
+        });
       });
 
       // Build associations queries.

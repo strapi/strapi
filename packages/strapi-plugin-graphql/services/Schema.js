@@ -54,7 +54,7 @@ module.exports = {
           return line;
         })
         .join('\n');
-    } else if (type === 'query') {
+    } else if (type === 'query' || type === 'mutation') {
       return lines
         .map((line, index) => {
           if (['{', '}'].includes(line)) {
@@ -129,17 +129,18 @@ module.exports = {
 
       // Reproduce the same pattern for each plugin.
       return Object.keys(strapi.plugins).reduce((acc, plugin) => {
-        const { definition, query, resolver } = Resolvers.shadowCRUD(Object.keys(strapi.plugins[plugin].models), plugin);
+        const { definition, query, mutation, resolver } = Resolvers.shadowCRUD(Object.keys(strapi.plugins[plugin].models), plugin);
 
         // We cannot put this in the merge because it's a string.
         acc.definition += definition || '';
 
         return _.merge(acc, {
           query,
-          resolver
+          resolver,
+          mutation,
         });
       }, Resolvers.shadowCRUD(models));
-    })() : { definition: '', query: '', resolver: '' };
+    })() : { definition: '', query: '', mutation: '', resolver: '' };
 
     // Extract custom definition, query or resolver.
     const { definition, query, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
@@ -189,6 +190,7 @@ module.exports = {
       ${definition}
       ${shadowCRUD.definition}
       type Query {${shadowCRUD.query && this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
+      type Mutation {${shadowCRUD.mutation && this.formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation')}}
       ${Types.addCustomScalar(resolvers)}
       ${polymorphicDef}
     `;
