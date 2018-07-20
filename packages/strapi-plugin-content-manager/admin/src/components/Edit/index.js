@@ -22,6 +22,9 @@ import {
 // or strapi/packages/strapi-helper-plugin/lib/src
 import Input from 'components/InputsIndex';
 
+import InputJSONWithErrors from 'components/InputJSONWithErrors';
+import WysiwygWithErrors from 'components/WysiwygWithErrors';
+
 import styles from './styles.scss';
 
 const getInputType = (type = '') => {
@@ -146,6 +149,7 @@ class Edit extends React.PureComponent {
               <Input
                 autoFocus={key === 0}
                 customBootstrapClass={get(layout, 'className')}
+                customInputs={{ json: InputJSONWithErrors, wysiwyg: WysiwygWithErrors }}
                 didCheckErrors={this.props.didCheckErrors}
                 errors={this.getInputErrors(attr)}
                 key={attr}
