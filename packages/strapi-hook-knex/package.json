@@ -1,36 +1,23 @@
 {
-  "name": "strapi-bookshelf",
+  "name": "strapi-hook-knex",
   "version": "3.0.0-alpha.12.7.1",
-  "description": "Bookshelf hook for the Strapi framework",
+  "description": "Knex hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
-    "bookshelf",
     "hook",
+    "knex",
     "migrations",
-    "orm",
     "sql",
-    "strapi"
+    "strapi",
+    "transactions"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
   "dependencies": {
-    "bookshelf": "^0.12.1",
-    "inquirer": "^5.2.0",
-    "lodash": "^4.17.4",
-    "pluralize": "^6.0.0",
-    "strapi-knex": "3.0.0-alpha.12.7.1",
-    "strapi-utils": "3.0.0-alpha.12.7.1"
-  },
-  "strapi": {
-    "isHook": true,
-    "dependencies": [
-      "strapi-knex"
-    ]
-  },
-  "scripts": {
-    "prepublishOnly": "npm prune"
+    "knex": "^0.13.0",
+    "lodash": "^4.17.4"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -53,7 +40,7 @@
   },
   "engines": {
     "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "npm": ">= 5.0.0"
   },
   "license": "MIT"
 }

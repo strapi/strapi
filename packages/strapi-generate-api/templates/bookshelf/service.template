@@ -10,7 +10,7 @@
 const _ = require('lodash');
 
 // Strapi utilities.
-const utils = require('strapi-bookshelf/lib/utils/');
+const utils = require('strapi-hook-bookshelf/lib/utils/');
 
 module.exports = {
 

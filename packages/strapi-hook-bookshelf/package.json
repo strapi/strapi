@@ -1,13 +1,14 @@
 {
-  "name": "strapi-mongoose",
+  "name": "strapi-hook-bookshelf",
   "version": "3.0.0-alpha.12.7.1",
-  "description": "Mongoose hook for the Strapi framework",
+  "description": "Bookshelf hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
-    "mongoose",
+    "bookshelf",
     "hook",
+    "migrations",
     "orm",
-    "nosql",
+    "sql",
     "strapi"
   ],
   "directories": {
@@ -15,14 +16,20 @@
   },
   "main": "./lib",
   "dependencies": {
+    "bookshelf": "^0.12.1",
+    "inquirer": "^5.2.0",
     "lodash": "^4.17.4",
-    "mongoose": "^5.0.16",
-    "mongoose-float": "^1.0.2",
     "pluralize": "^6.0.0",
+    "strapi-hook-knex": "3.0.0-alpha.12.7.1",
     "strapi-utils": "3.0.0-alpha.12.7.1"
   },
   "strapi": {
-    "isHook": true
+    "dependencies": [
+      "knex"
+    ]
+  },
+  "scripts": {
+    "prepublishOnly": "npm prune"
   },
   "author": {
     "email": "hi@strapi.io",

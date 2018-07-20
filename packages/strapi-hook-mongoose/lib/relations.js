@@ -174,7 +174,7 @@ module.exports = {
                 strapi.models[_.toLower(obj.ref)].globalId;
 
               // Define the object stored in database.
-              // The shape is this object is defined by the strapi-mongoose connector.
+              // The shape is this object is defined by the strapi-hook-mongoose connector.
               return {
                 ref: obj.refId,
                 kind: globalId,
