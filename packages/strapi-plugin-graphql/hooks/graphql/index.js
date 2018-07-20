@@ -100,7 +100,7 @@ module.exports = strapi => {
     },
 
     initialize: function(cb) {
-      const schema = strapi.plugins.graphql.services.graphql.generateSchema();
+      const schema = strapi.plugins.graphql.services.schema.generateSchema();
 
       if (_.isEmpty(schema)) {
         strapi.log.warn('GraphQL schema has not been generated because it\'s empty');

@@ -6,118 +6,19 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-
-const fs = require('fs');
-const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
-const graphql = require('graphql');
-const { makeExecutableSchema } = require('graphql-tools');
-const GraphQLJSON = require('graphql-type-json');
-const GraphQLDateTime = require('graphql-type-datetime');
 const policyUtils = require('strapi-utils').policy;
+const Types = require('./Types.js');
+const Schema = require('./Schema.js');
 
 module.exports = {
 
   /**
-   * Receive an Object and return a string which is following the GraphQL specs.
+   * Convert parameters to valid filters parameters.
    *
-   * @return String
+   * @return Object
    */
-
-  formatGQL: function (fields, description = {}, model = {}, type = 'field') {
-    const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, '');
-    const lines = typeFields.split('\n');
-
-    // Try to add description for field.
-    if (type === 'field') {
-      return lines
-        .map(line => {
-          if (['{', '}'].includes(line)) {
-            return '';
-          }
-
-          const split = line.split(':');
-          const attribute = _.trim(split[0]);
-          const info = (_.isString(description[attribute]) ? description[attribute] : _.get(description[attribute], 'description')) || _.get(model, `attributes.${attribute}.description`);
-          const deprecated = _.get(description[attribute], 'deprecated') || _.get(model, `attributes.${attribute}.deprecated`);
-
-          // Snakecase an attribute when we find a dash.
-          if (attribute.indexOf('-') !== -1) {
-            line = `  ${_.snakeCase(attribute)}: ${_.trim(split[1])}`;
-          }
-
-          if (info) {
-            line = `  """\n    ${info}\n  """\n${line}`;
-          }
-
-          if (deprecated) {
-            line = `${line} @deprecated(reason: "${deprecated}")`;
-          }
-
-          return line;
-        })
-        .join('\n');
-    } else if (type === 'query') {
-      return lines
-        .map((line, index) => {
-          if (['{', '}'].includes(line)) {
-            return '';
-          }
-
-          const split = Object.keys(fields)[index - 1].split('(');
-          const attribute = _.trim(split[0]);
-          const info = _.get(description[attribute], 'description');
-          const deprecated = _.get(description[attribute], 'deprecated');
-
-          // Snakecase an attribute when we find a dash.
-          if (attribute.indexOf('-') !== -1) {
-            line = `  ${_.snakeCase(attribute)}(${_.trim(split[1])}`;
-          }
-
-          if (info) {
-            line = `  """\n    ${info}\n  """\n${line}`;
-          }
-
-          if (deprecated) {
-            line = `${line} @deprecated(reason: "${deprecated}")`;
-          }
-
-          return line;
-        })
-        .join('\n');
-    }
-
-    return lines
-      .map((line, index) => {
-        if ([0, lines.length - 1].includes(index)) {
-          return '';
-        }
-
-        return line;
-      })
-      .join('\n');
-  },
-
-  /**
-   * Retrieve description from variable and return a string which follow the GraphQL specs.
-   *
-   * @return String
-   */
-
-  getDescription: (description, model = {}) => {
-    const format = '"""\n';
-
-    const str = _.get(description, '_description') ||
-      _.isString(description) ? description : undefined ||
-      _.get(model, 'info.description');
-
-    if (str) {
-      return `${format}${str}\n${format}`;
-    }
-
-    return '';
-  },
 
   convertToParams: (params) => {
     return Object.keys(params).reduce((acc, current) => {
@@ -142,79 +43,6 @@ module.exports = {
 
     return params;
   },
-
-  /**
-   * Convert Strapi type to GraphQL type.
-   * @param {Object} attribute Information about the attribute.
-   * @param {Object} attribute.definition Definition of the attribute.
-   * @param {String} attribute.modelName Name of the model which owns the attribute.
-   * @param {String} attribute.attributeName Name of the attribute.
-   * @return String
-   */
-
-  convertType: function ({ definition = {}, modelName = '', attributeName = '' }) {
-    // Type
-    if (definition.type) {
-      let type = 'String';
-
-      switch (definition.type) {
-        // TODO: Handle fields of type Array, Perhaps default to [Int] or [String] ...
-        case 'boolean':
-          type = 'Boolean';
-          break;
-        case 'integer':
-          type = 'Int';
-          break;
-        case 'float':
-          type = 'Float';
-          break;
-        case 'time':
-        case 'date':
-        case 'datetime':
-        case 'timestamp':
-          type = 'DateTime';
-          break;
-        case 'enumeration':
-          type = this.convertEnumType(definition, modelName, attributeName);
-          break;
-      }
-
-      if (definition.required) {
-        type += '!';
-      }
-
-      return type;
-    }
-
-    const ref = definition.model || definition.collection;
-
-    // Association
-    if (ref && ref !== '*') {
-      // Add bracket or not
-      const globalId = definition.plugin ?
-        strapi.plugins[definition.plugin].models[ref].globalId:
-        strapi.models[ref].globalId;
-      const plural = !_.isEmpty(definition.collection);
-
-      if (plural) {
-        return `[${globalId}]`;
-      }
-
-      return globalId;
-    }
-
-    return definition.model ? 'Morph' : '[Morph]';
-  },
-
-  /**
-   * Convert Strapi enumeration to GraphQL Enum.
-   * @param {Object} definition Definition of the attribute.
-   * @param {String} model Name of the model which owns the attribute.
-   * @param {String} field Name of the attribute.
-   * @return String
-   */
-  
-  convertEnumType: (definition, model, field) => definition.enumName ? definition.enumName : `ENUM_${model.toUpperCase()}_${field.toUpperCase()}`,
 
   /**
    * Execute policies before the specified resolver.
@@ -479,7 +307,7 @@ module.exports = {
         .filter(attribute => model.attributes[attribute].private !== true)
         .reduce((acc, attribute) => {
           // Convert our type to the GraphQL type.
-          acc[attribute] = this.convertType({
+          acc[attribute] = Types.convertType({
             definition: model.attributes[attribute],
             modelName: globalId,
             attributeName: attribute,
@@ -494,7 +322,7 @@ module.exports = {
         .map((attribute) => {
           const definition = model.attributes[attribute];
 
-          return `enum ${this.convertEnumType(definition, globalId, attribute)} { ${definition.enum.join(' \n ')} }`;
+          return `enum ${Types.convertEnumType(definition, globalId, attribute)} { ${definition.enum.join(' \n ')} }`;
         }).join(' ');
 
       acc.definition += enums;
@@ -508,7 +336,7 @@ module.exports = {
           delete attributes[association.alias];
         });
 
-      acc.definition += `${this.getDescription(type[globalId], model)}type ${globalId} {${this.formatGQL(attributes, type[globalId], model)}}\n\n`;
+      acc.definition += `${Schema.getDescription(type[globalId], model)}type ${globalId} {${Schema.formatGQL(attributes, type[globalId], model)}}\n\n`;
 
       // Add definition to the schema but this type won't be "queriable".
       if (type[model.globalId] === false || _.get(type, `${model.globalId}.enabled`) === false) {
@@ -684,169 +512,5 @@ module.exports = {
 
       return acc;
     }, initialState);
-  },
-
-  /**
-   * Generate GraphQL schema.
-   *
-   * @return Schema
-   */
-
-  generateSchema: function () {
-    // Generate type definition and query/mutation for models.
-    const shadowCRUD = strapi.plugins.graphql.config.shadowCRUD !== false ? (() => {
-      // Exclude core models.
-      const models = Object.keys(strapi.models).filter(model => model !== 'core_store');
-
-      // Reproduce the same pattern for each plugin.
-      return Object.keys(strapi.plugins).reduce((acc, plugin) => {
-        const { definition, query, resolver } = this.shadowCRUD(Object.keys(strapi.plugins[plugin].models), plugin);
-
-        // We cannot put this in the merge because it's a string.
-        acc.definition += definition || '';
-
-        return _.merge(acc, {
-          query,
-          resolver
-        });
-      }, this.shadowCRUD(models));
-    })() : { definition: '', query: '', resolver: '' };
-
-    // Extract custom definition, query or resolver.
-    const { definition, query, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
-
-    // Polymorphic.
-    const { polymorphicDef, polymorphicResolver } = this.addPolymorphicUnionType(definition, shadowCRUD.definition);
-
-    // Build resolvers.
-    const resolvers = _.omitBy(_.merge(shadowCRUD.resolver, resolver, polymorphicResolver), _.isEmpty) || {};
-
-    // Transform object to only contain function.
-    Object.keys(resolvers).reduce((acc, type) => {
-      return Object.keys(acc[type]).reduce((acc, resolver) => {
-        // Disabled this query.
-        if (acc[type][resolver] === false) {
-          delete acc[type][resolver];
-
-          return acc;
-        }
-
-        if (!_.isFunction(acc[type][resolver])) {
-          acc[type][resolver] = acc[type][resolver].resolver;
-        }
-
-        if (_.isString(acc[type][resolver]) || _.isPlainObject(acc[type][resolver])) {
-          const { plugin = '' } = _.isPlainObject(acc[type][resolver]) ? acc[type][resolver] : {};
-
-          acc[type][resolver] = this.composeResolver(
-            strapi.plugins.graphql.config._schema.graphql,
-            plugin,
-            resolver,
-            'force' // Avoid singular/pluralize and force query name.
-          );
-        }
-
-        return acc;
-      }, acc);
-    }, resolvers);
-
-    // Return empty schema when there is no model.
-    if (_.isEmpty(shadowCRUD.definition) && _.isEmpty(definition)) {
-      return {};
-    }
-
-    // Concatenate.
-    const typeDefs = `
-      ${definition}
-      ${shadowCRUD.definition}
-      type Query {${shadowCRUD.query && this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
-      ${this.addCustomScalar(resolvers)}
-      ${polymorphicDef}
-    `;
-
-    // Build schema.
-    const schema = makeExecutableSchema({
-      typeDefs,
-      resolvers,
-    });
-
-    // Write schema.
-    this.writeGenerateSchema(graphql.printSchema(schema));
-
-    return schema;
-  },
-
-  /**
-   * Add custom scalar type such as JSON.
-   *
-   * @return void
-   */
-
-  addCustomScalar: (resolvers) => {
-    Object.assign(resolvers, {
-      JSON: GraphQLJSON,
-      DateTime: GraphQLDateTime,
-    });
-
-    return 'scalar JSON \n scalar DateTime';
-  },
-
-  /**
-   * Add Union Type that contains the types defined by the user.
-   *
-   * @return string
-   */
-
-  addPolymorphicUnionType: (customDefs, defs) => {
-    const types = graphql.parse(customDefs + defs).definitions
-      .filter(def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query')
-      .map(def => def.name.value);
-
-    if (types.length > 0) {
-      return {
-        polymorphicDef: `union Morph = ${types.join(' | ')}`,
-        polymorphicResolver: {
-          Morph: {
-            __resolveType(obj, context, info) { // eslint-disable-line no-unused-vars
-              return obj.kind || obj._type;
-            }
-          }
-        }
-      };
-    }
-
-    return {
-      polymorphicDef: '',
-      polymorphicResolver: {}
-    };
-  },
-
-  /**
-   * Save into a file the readable GraphQL schema.
-   *
-   * @return void
-   */
-
-  writeGenerateSchema(schema) {
-    // Disable auto-reload.
-    strapi.reload.isWatching = false;
-
-    const generatedFolder = path.resolve(strapi.config.appPath, 'plugins', 'graphql', 'config', 'generated');
-
-    // Create folder if necessary.
-    try {
-      fs.accessSync(generatedFolder, fs.constants.R_OK | fs.constants.W_OK);
-    } catch (err) {
-      if (err && err.code === 'ENOENT') {
-        fs.mkdirSync(generatedFolder);
-      } else {
-        console.error(err);
-      }
-    }
-
-    fs.writeFileSync(path.join(generatedFolder, 'schema.graphql'), schema);
-
-    strapi.reload.isWatching = true;
   }
-
 };
