@@ -70,8 +70,9 @@ module.exports = {
       upload: (file) => {
         return new Promise((resolve, reject) => {
           // upload file on S3 bucket
+          const path = file.path ? `${file.path}/` : '';
           S3.upload({
-            Key: `${file.path}/${file.hash}${file.ext}`,
+            Key: `${path}${file.hash}${file.ext}`,
             Body: new Buffer(file.buffer, 'binary'),
             ACL: 'public-read',
             ContentType: file.mime,
@@ -90,10 +91,11 @@ module.exports = {
       delete: (file) => {
         return new Promise((resolve, reject) => {
           // delete file on S3 bucket
+          const path = file.path ? `${file.path}/` : '';
           S3.deleteObjects({
             Delete: {
               Objects: [{
-                Key: `${file.path}/${file.hash}${file.ext}`
+                Key: `${path}${file.hash}${file.ext}`
               }]
             }
           }, (err, data) => {
