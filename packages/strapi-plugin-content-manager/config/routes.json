@@ -33,6 +33,14 @@
       }
     },
     {
+      "method": "PUT",
+      "path": "/models",
+      "handler": "ContentManager.updateSettings",
+      "config": {
+        "policies": ["routing"]
+      }
+    },
+    {
       "method": "GET",
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.findOne",

@@ -1,0 +1,1 @@
+export const ON_CLICK_EDIT_LIST_ITEM = 'contentManager/SettingPage/ON_CLICK_EDIT_LIST_ITEM';

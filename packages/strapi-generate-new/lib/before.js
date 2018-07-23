@@ -69,14 +69,14 @@ module.exports = (scope, cb) => {
         name: 'MongoDB (recommended)',
         value: {
           database: 'mongo',
-          connector: 'strapi-mongoose'
+          connector: 'strapi-hook-mongoose'
         }
       },
       {
         name: 'Postgres',
         value: {
           database: 'postgres',
-          connector: 'strapi-bookshelf',
+          connector: 'strapi-hook-bookshelf',
           module: 'pg'
         }
       },
@@ -84,7 +84,7 @@ module.exports = (scope, cb) => {
         name: 'MySQL',
         value: {
           database: 'mysql',
-          connector: 'strapi-bookshelf',
+          connector: 'strapi-hook-bookshelf',
           module: 'mysql'
         }
       }
@@ -192,7 +192,7 @@ module.exports = (scope, cb) => {
               ])
               .then(answers => {
                 if (hasDatabaseConfig) {
-                  answers = _.omit(scope.database.settings, ['client']);
+                  answers = _.merge((_.omit(scope.database.settings, ['client'])), scope.database.options);
                 }
 
                 scope.database.settings.host = answers.host;
@@ -214,7 +214,7 @@ module.exports = (scope, cb) => {
             let packageCmd = packageManager.commands('install --prefix', scope.tmpPath);
             // Manually create the temp directory for yarn
             if (!isStrapiInstalledWithNPM) {
-              shell.exec('mkdir tmp');
+              shell.exec(`mkdir ${scope.tmpPath}`);
             }
 
             let cmd = `${packageCmd} ${scope.client.connector}@alpha`;
@@ -223,18 +223,18 @@ module.exports = (scope, cb) => {
               cmd += ` ${scope.client.module}`;
             }
 
-            if (scope.client.connector === 'strapi-bookshelf') {
-              cmd += ` strapi-knex@alpha`;
+            if (scope.client.connector === 'strapi-hook-bookshelf') {
+              cmd += ` strapi-hook-knex@alpha`;
 
-              scope.additionalsDependencies = ['strapi-knex', 'knex'];
+              scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
             }
 
             exec(cmd, () => {
               if (scope.client.module) {
-                const lock = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.module}/package.json`));
+                const lock = require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.module}/package.json`));
                 scope.client.version = lock.version;
 
-                if (scope.developerMode === true && scope.client.connector === 'strapi-bookshelf') {
+                if (scope.developerMode === true && scope.client.connector === 'strapi-hook-bookshelf') {
                   const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
                   scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
                 }
@@ -248,7 +248,7 @@ module.exports = (scope, cb) => {
         Promise.all(asyncFn)
           .then(() => {
             try {
-              require(path.join(`${scope.tmpPath}`,`/node_modules/`,`${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
+              require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
             } catch(err) {
               shell.rm('-r', scope.tmpPath);
               cb.success();

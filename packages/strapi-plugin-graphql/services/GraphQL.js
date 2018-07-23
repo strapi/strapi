@@ -14,6 +14,7 @@ const pluralize = require('pluralize');
 const graphql = require('graphql');
 const { makeExecutableSchema } = require('graphql-tools');
 const GraphQLJSON = require('graphql-type-json');
+const GraphQLDateTime = require('graphql-type-datetime');
 const policyUtils = require('strapi-utils').policy;
 
 module.exports = {
@@ -169,6 +170,12 @@ module.exports = {
           break;
         case 'json':
           type = 'JSON';
+          break;
+        case 'time':
+        case 'date':
+        case 'datetime':
+        case 'timestamp':
+          type = 'DateTime';
           break;
         case 'enumeration':
           type = this.convertEnumType(definition, modelName, attributeName);
@@ -453,8 +460,8 @@ module.exports = {
       // Add timestamps attributes.
       if (_.get(model, 'options.timestamps') === true) {
         Object.assign(initialState, {
-          createdAt: 'String!',
-          updatedAt: 'String!'
+          createdAt: 'DateTime!',
+          updatedAt: 'DateTime!'
         });
 
         Object.assign(acc.resolver[globalId], {
@@ -780,10 +787,11 @@ module.exports = {
 
   addCustomScalar: (resolvers) => {
     Object.assign(resolvers, {
-      JSON: GraphQLJSON
+      JSON: GraphQLJSON,
+      DateTime: GraphQLDateTime,
     });
 
-    return 'scalar JSON';
+    return 'scalar JSON \n scalar DateTime';
   },
 
   /**
