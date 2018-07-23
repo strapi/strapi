@@ -16,6 +16,18 @@ module.exports = async cb => {
     'associations'
   ]);
 
+  const tempLayout = Object.keys(strapi.plugins).reduce((acc, current) => {
+    const models = _.get(strapi.plugins, [current, 'config', 'layout'], {});
+
+    Object.keys(models).forEach(model => {
+      const layout = _.get(strapi.plugins, [current, 'config', 'layout', model], {});
+      acc[model] = layout;
+    });
+
+    return acc;
+  }, {});
+
+
   const models = _.mapValues(strapi.models, pickData);
   delete models['core_store'];
   const pluginsModel = Object.keys(strapi.plugins).reduce((acc, current) => {
@@ -59,15 +71,31 @@ module.exports = async cb => {
       },
     }, model);
 
+    const fieldsToRemove = [];
+
     // Fields (non relation)
     const fields = _.mapValues(_.pickBy(model.attributes, attribute =>
       !attribute.model && !attribute.collection
-    ), (value, attribute) => ({
-      label: _.upperFirst(attribute),
-      description: '',
-      type: value.type || 'string',
-      disabled: false,
-    }));
+    ), (value, attribute) => {
+      const fieldClassName = _.get(tempLayout, [name, 'attributes', attribute, 'className'], '');
+
+      if (fieldClassName === 'd-none') {
+        fieldsToRemove.push(attribute);
+      }
+
+      return {
+        label: _.upperFirst(attribute),
+        description: '',
+        type: value.type || 'string',
+        disabled: false,
+      };
+    });
+    
+    // Don't display fields that are hidden by default like the resetPasswordToken for the model user
+    fieldsToRemove.forEach(field => {
+      _.unset(fields, field);
+      _.unset(schemaModel.attributes, field);
+    });
 
     schemaModel.fields = fields;
     schemaModel.editDisplay.availableFields = fields;
@@ -211,17 +239,7 @@ module.exports = async cb => {
     const prevSchema = await pluginStore.get({ key: 'schema' });
 
     if (!prevSchema) {
-      const plugins = strapi.plugins;
-
-      Object.keys(plugins).forEach((plugin) => {
-        const models = _.get(strapi.plugins[plugin].config, 'layout', {});
-
-        Object.keys(models).forEach((model) => {
-          const layout = _.get(strapi.plugins[plugin].config.layout, model, {});
-
-          _.set(schema.layout, model, layout);
-        });
-      });
+      _.set(schema, 'layout', tempLayout);
 
       pluginStore.set({ key: 'schema', value: schema });
 
