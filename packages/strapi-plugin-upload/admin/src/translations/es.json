@@ -1,0 +1,36 @@
+{
+  "ConfigPage.title": "Cargar - Configuración",
+  "ConfigPage.description": "Configurar el plugin de carga",
+
+  "EditForm.Input.number.label": "Tamaño máximo permitido (en MB)",
+  "EditForm.Input.select.label": "Proveedores",
+  "EditForm.Input.select.inputDescription": "Los archivos se pueden cargar en su servidor o en proveedores externos.",
+  "EditForm.Input.toggle.label": "Habilitar la carga de archivos",
+
+  "EmptyLi.message": "No hay archivos cargados",
+
+  "EntriesNumber.number": "{number} archivo encontrado",
+  "EntriesNumber.number.plural": "{number} archivos encontrados",
+
+  "HomePage.title": "Cargar",
+  "HomePage.description": "Descubre todos los archivos subidos",
+  "HomePage.InputSearch.placeholder": "Buscar un archivo...",
+
+  "Li.linkCopied": "Enlace copiado en el portapapeles",
+
+  "ListHeader.type": "Tipo",
+  "ListHeader.hash": "Hash",
+  "ListHeader.name": "Nombre",
+  "ListHeader.updated": "Actualizado",
+  "ListHeader.size": "Tamaño",
+  "ListHeader.related": "Relacionado con",
+
+  "PluginInputFile.text": "Arrastre y suelte sus archivos en esta área o {link} desde un archivo para cargarlo",
+  "PluginInputFile.link": "buscar",
+  "PluginInputFile.loading": "Tus archivos están cargando....",
+
+  "notification.config.success": "Se ha actualizado la configuración",
+  "notification.delete.success": "El archivo ha sido borrado",
+  "notification.dropFile.success": "Su archivo esta cargado",
+  "notification.dropFiles.success": "{number} archivos han sido cargados"
+}
