@@ -18,8 +18,8 @@ import {
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
   ON_REMOVE,
-  ON_REMOVE_EDIT_VIEW_ATTR,
   ON_REMOVE_EDIT_VIEW_FIELD_ATTR,
+  ON_REMOVE_EDIT_VIEW_RELATION_ATTR,
   ON_RESET,
   ON_SUBMIT,
   SUBMIT_SUCCEEDED,
@@ -122,17 +122,17 @@ export function onRemove(index, keys) {
   };
 }
 
-export function onRemoveEditViewAttr(index, keys) {
+export function onRemoveEditViewFieldAttr(index, keys) {
   return {
-    type: ON_REMOVE_EDIT_VIEW_ATTR,
+    type: ON_REMOVE_EDIT_VIEW_FIELD_ATTR,
     index,
     keys,
   };
 }
 
-export function onRemoveEditViewFieldAttr(index, keys) {
+export function onRemoveEditViewRelationAttr(index, keys) {
   return {
-    type: ON_REMOVE_EDIT_VIEW_FIELD_ATTR,
+    type: ON_REMOVE_EDIT_VIEW_RELATION_ATTR,
     index,
     keys,
   };

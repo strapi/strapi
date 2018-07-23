@@ -5,7 +5,7 @@
  */
 
 import { fromJS, List } from 'immutable';
-import { findIndex, get } from 'lodash';
+import { findIndex, get, upperFirst } from 'lodash';
 import Manager from 'utils/Manager';
 import {
   EMPTY_STORE,
@@ -19,7 +19,7 @@ import {
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
   ON_REMOVE,
-  ON_REMOVE_EDIT_VIEW_ATTR,
+  ON_REMOVE_EDIT_VIEW_RELATION_ATTR,
   ON_REMOVE_EDIT_VIEW_FIELD_ATTR,
   ON_RESET,
   SUBMIT_SUCCEEDED,
@@ -120,10 +120,6 @@ function appReducer(state = initialState, action) {
 
         return list.delete(action.index);
       });
-    case ON_REMOVE_EDIT_VIEW_ATTR:
-      return state.updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')), list => {
-        return list.delete(action.index);
-      });
     case ON_REMOVE_EDIT_VIEW_FIELD_ATTR:
       return state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
         // Don't do any check if removing the item of the array
@@ -184,6 +180,19 @@ function appReducer(state = initialState, action) {
             .insert(rightBoundIndex, `col-md-${attrToRemoveInfos.bootstrapCol}`);
         }
       });
+    case ON_REMOVE_EDIT_VIEW_RELATION_ATTR: {
+      const relationName = state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), action.index]);
+
+      return state
+        .updateIn(['modifiedSchema', 'models', action.keys.split('.')[0], 'relations', relationName], relation => {
+          return relation
+            .update('description', () => '')
+            .update('label', () => upperFirst(relation.get('alias')));
+        })
+        .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')), list => {
+          return list.delete(action.index);
+        });
+    }
     case ON_RESET:
       return state
         .update('modifiedSchema', () => state.get('schema'));

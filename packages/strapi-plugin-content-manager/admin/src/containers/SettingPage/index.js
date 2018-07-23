@@ -23,8 +23,8 @@ import {
   onChangeSettings,
   onClickAddAttr,
   onRemove,
-  onRemoveEditViewAttr,
   onRemoveEditViewFieldAttr,
+  onRemoveEditViewRelationAttr,
   onReset,
   onSubmit,
 } from 'containers/App/actions';
@@ -138,6 +138,12 @@ class SettingPage extends React.PureComponent {
     return [slug, source, endPoint]
       .filter(param => param !== undefined)
       .join('.');
+  }
+
+  getRelationLabel = (attrName) => {
+    const attrLabel = get(this.props.schema, ['models', ...this.getPath().split('.'), 'relations', attrName, 'label'], 'iii');
+    
+    return attrLabel;
   }
 
   getRelations = () => {
@@ -258,6 +264,23 @@ class SettingPage extends React.PureComponent {
     this.props.onRemove(index, keys);
   }
 
+  handleRemoveRelation = (index, keys) => {
+    const { settingPage: { relationToEdit } } = this.props;
+    const relationToRemoveName = get(this.props.schema, ['models', ...keys.split('.'), index]);
+    const isRemovingSelectedItem = relationToRemoveName === relationToEdit.alias;
+    const displayedRelations = this.getEditPageDisplayedRelations();
+    const displayedFields = this.getEditPageDisplayedFields();
+
+    this.props.onRemoveEditViewRelationAttr(index, keys);
+
+    if (isRemovingSelectedItem && displayedRelations.length > 1) {
+      const nextIndex = index - 1 > -1 ? index - 1 : index + 1;
+      this.handleClickEditRelation(nextIndex);
+    } else if (displayedFields.length > 0) {
+      this.handleClickEditField(0);
+    } // Else add a field in the other drag and auto select it
+  }
+
   handleReset = (e) => {
     e.preventDefault();
     this.setState({ showWarningCancel: true });
@@ -348,10 +371,10 @@ class SettingPage extends React.PureComponent {
       key={attr}
       keys={`${this.getPath()}.editDisplay.relations`}
       name={attr}
-      label={attr}
+      label={this.getRelationLabel(attr)}
       moveAttr={this.props.moveAttrEditView}
       onClickEdit={this.handleClickEditRelation}
-      onRemove={this.props.onRemoveEditViewAttr}
+      onRemove={this.handleRemoveRelation}
       updateSiblingHoverState={() => {}}
     />
   );
@@ -661,8 +684,8 @@ SettingPage.propTypes = {
   onClickEditListItem: PropTypes.func.isRequired,
   onClickEditRelation: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
-  onRemoveEditViewAttr: PropTypes.func.isRequired,
   onRemoveEditViewFieldAttr: PropTypes.func.isRequired,
+  onRemoveEditViewRelationAttr: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
@@ -682,8 +705,8 @@ const mapDispatchToProps = (dispatch) => (
       onClickEditListItem,
       onClickEditRelation,
       onRemove,
-      onRemoveEditViewAttr,
       onRemoveEditViewFieldAttr,
+      onRemoveEditViewRelationAttr,
       onReset,
       onSubmit,
     },

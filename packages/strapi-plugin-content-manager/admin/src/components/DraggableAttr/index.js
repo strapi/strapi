@@ -10,7 +10,7 @@ import {
   DragSource,
   DropTarget,
 } from 'react-dnd';
-import { flow, upperFirst } from 'lodash';
+import { flow } from 'lodash';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 
@@ -140,7 +140,7 @@ class DraggableAttr extends React.Component {
             <i className="fa fa-th" aria-hidden="true" />
             <span>{name}</span>
             <ClickOverHint show={isOver && !isDragging} />
-            { !isOver && upperFirst(name) !== label && (
+            { !isOver && name.toLowerCase() !== label.toLowerCase() && (
               <div className={styles.info}>
                 {label}
               </div>
