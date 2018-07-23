@@ -124,17 +124,13 @@ class SelectMany extends React.Component {
   render() {
     const description = this.props.relation.description ? (
       <p>{this.props.relation.description}</p>
-    ) : (
-      ''
-    );
-
+    ) : '';
     const value = get(this.props.record, this.props.relation.alias);
 
     /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectMany}`}>
-        <label htmlFor={this.props.relation.alias}>{this.props.relation.alias}</label>
-        {description}
+        <label htmlFor={this.props.relation.alias}>{this.props.relation.label}</label>
         <Select
           onChange={this.handleChange}
           options={this.state.options}
@@ -162,6 +158,7 @@ class SelectMany extends React.Component {
               })
           }
         />
+        {description}
       </div>
     );
     /* eslint-disable jsx-a11y/label-has-for */

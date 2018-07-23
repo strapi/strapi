@@ -125,6 +125,7 @@ class Edit extends React.PureComponent {
             const layout = this.getInputLayout(attr);
             const appearance = get(layout, 'appearance');
             const type = !isEmpty(appearance) ? appearance.toLowerCase() : get(layout, 'type', getInputType(details.type));
+            const inputDescription = get(details, 'description', null);
 
             return (  
               <Input
@@ -133,6 +134,7 @@ class Edit extends React.PureComponent {
                 customInputs={{ json: InputJSONWithErrors, wysiwyg: WysiwygWithErrors }}
                 didCheckErrors={this.props.didCheckErrors}
                 errors={this.getInputErrors(attr)}
+                inputDescription={inputDescription}
                 key={attr}
                 label={get(layout, 'label') || details.label || ''}
                 multiple={this.fileRelationAllowMultipleUpload(attr)}
