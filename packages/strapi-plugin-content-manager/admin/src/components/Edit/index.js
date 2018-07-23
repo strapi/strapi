@@ -12,8 +12,6 @@ import {
   has,
   isEmpty,
   isFunction,
-  merge,
-  omit,
   upperFirst,
 } from 'lodash';
 
@@ -60,26 +58,6 @@ const getInputType = (type = '') => {
 };
 
 class Edit extends React.PureComponent {
-  state = { currentLayout: {}, displayedFields: {} };
-
-  componentDidMount() {
-    this.setLayout(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (isEmpty(this.props.layout) && !isEmpty(nextProps.layout)) {
-      this.setLayout(nextProps);
-    }
-  }
-
-  setLayout = (props) => {
-    // const currentLayout = get(props.layout, [props.modelName, 'attributes']);
-    const currentLayout = get(props.layout, ['attributes']);
-    const displayedFields = merge(this.getUploadRelations(props), get(currentLayout), omit(props.schema.fields, 'id'));
-
-    this.setState({ currentLayout, displayedFields });
-  }
-
   getInputErrors = (attr) => {
     const index = findIndex(this.props.formErrors, ['name', attr]);
     return index !== -1 ? this.props.formErrors[index].errors : [];
@@ -90,14 +68,17 @@ class Edit extends React.PureComponent {
    * @param  {String} attr [description]
    * @return {Object}      Object containing the Input's label customBootstrapClass, ...
    */
-  getInputLayout = (attr) => (
-    Object.keys(get(this.state.currentLayout, attr, {})).reduce((acc, current) => {
-      acc[current] = isFunction(this.state.currentLayout[attr][current]) ?
-        this.state.currentLayout[attr][current](this) :
-        this.state.currentLayout[attr][current];
+  getInputLayout = (attr) => {
+    const { layout } = this.props;
+
+    return Object.keys(get(layout, ['attributes', attr], {})).reduce((acc, current) => {
+      acc[current] = isFunction(layout.attributes[attr][current]) ?
+        layout.attributes[attr][current](this) :
+        layout.attributes[attr][current];
+
       return acc;
-    }, {})
-  )
+    }, {});
+  };
 
   /**
    * Retrieve the input's validations
@@ -132,15 +113,14 @@ class Edit extends React.PureComponent {
 
   fileRelationAllowMultipleUpload = (relationName) => has(this.props.schema, ['relations', relationName, 'collection']);
 
-  // orderAttributes = (displayedFields) => Object.keys(displayedFields).sort(name => Object.keys(this.getUploadRelations(this.props)).includes(name));
-  orderAttributes = (displayedFields) => Object.keys(displayedFields);
+  orderAttributes = () => get(this.props.schema, ['editDisplay', 'fields'], []);
 
   render(){
     return (
       <div className={styles.form}>
         <div className="row">
-          {this.orderAttributes(this.state.displayedFields).map((attr, key) => {
-            const details = this.state.displayedFields[attr];
+          {this.orderAttributes().map((attr, key) => {
+            const details = get(this.props.schema, ['editDisplay', 'availableFields', attr]);
             // Retrieve the input's bootstrapClass from the layout
             const layout = this.getInputLayout(attr);
             const appearance = get(layout, 'appearance');
@@ -159,7 +139,7 @@ class Edit extends React.PureComponent {
                 name={attr}
                 onBlur={this.props.onBlur}
                 onChange={this.props.onChange}
-                placeholder={get(layout, 'placeholder') || details.placeholder}
+                placeholder={get(layout, 'placeholder') || details.placeholder || ''}
                 resetProps={this.props.resetProps}
                 selectOptions={get(this.props.attributes, [attr, 'enum'])}
                 type={type}
