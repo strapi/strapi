@@ -10,15 +10,17 @@ const _ = require('lodash');
 // Utils
 const { models: { getValuePrimaryKey } } = require('strapi-utils');
 
-const transformToArrayID = (array) => {
+const transformToArrayID = (array, association) => {
   if(_.isArray(array)) {
-    return array.map(value => {
+    array = array.map(value => {
       if (_.isPlainObject(value)) {
-        return value._id || value.id;
+        return value._id || value.id || false;
       }
 
       return value;
     });
+
+    return array.filter(n => n);
   }
 
   if (association.type === 'model' || (association.type === 'collection' && _.isObject(array))) {
@@ -140,8 +142,8 @@ module.exports = {
           case 'manyToMany':
             if (response[current] && _.isArray(response[current]) && current !== 'id') {
               // Compare array of ID to find deleted files.
-              const currentValue = transformToArrayID(response[current]).map(id => id.toString());
-              const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
+              const currentValue = transformToArrayID(response[current], association).map(id => id.toString());
+              const storedValue = transformToArrayID(params.values[current], association).map(id => id.toString());
 
               const toAdd = _.difference(storedValue, currentValue);
               const toRemove = _.difference(currentValue, storedValue);
@@ -229,8 +231,8 @@ module.exports = {
           case 'oneToManyMorph':
           case 'manyToManyMorph': {
             // Compare array of ID to find deleted files.
-            const currentValue = transformToArrayID(response[current]).map(id => id.toString());
-            const storedValue = transformToArrayID(params.values[current]).map(id => id.toString());
+            const currentValue = transformToArrayID(response[current], association).map(id => id.toString());
+            const storedValue = transformToArrayID(params.values[current], association).map(id => id.toString());
 
             const toAdd = _.difference(storedValue, currentValue);
             const toRemove = _.difference(currentValue, storedValue);
