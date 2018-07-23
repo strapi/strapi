@@ -166,6 +166,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "The redirect URL to add in your Facebook application configurations",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "The redirect URL to add in your Google application configurations",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "The redirect URL to add in your GitHub application configurations",
+  "PopUpForm.Providers.microsoft.providerConfig.redirectURL": "The redirect URL to add in your Microsoft application configurations",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "The redirect URL to add in your Linkedin application configurations",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "The redirect URL to add in your Twitter application configurations",
 
