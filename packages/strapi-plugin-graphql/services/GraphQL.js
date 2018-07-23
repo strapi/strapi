@@ -168,6 +168,9 @@ module.exports = {
         case 'float':
           type = 'Float';
           break;
+        case 'json':
+          type = 'JSON';
+          break;
         case 'time':
         case 'date':
         case 'datetime':
