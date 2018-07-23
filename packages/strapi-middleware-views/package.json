@@ -1,7 +1,7 @@
 {
   "name": "strapi-middleware-views",
-  "version": "3.0.0-alpha.12.6",
-  "description": "Views hook to enable server-side rendering for the Strapi framework",
+  "version": "3.0.0-alpha.12.7.1",
+  "description": "Views middleware to enable server-side rendering for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
     "redis",
@@ -18,9 +18,6 @@
     "consolidate": "^0.14.5",
     "koa-views": "^6.1.1",
     "lodash": "^4.17.4"
-  },
-  "strapi": {
-    "isHook": true
   },
   "author": {
     "email": "hi@strapi.io",
