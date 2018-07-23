@@ -15,6 +15,7 @@ export const MOVE_VARIABLE_ATTR_EDIT_VIEW = 'contentManager/App/MOVE_VARIABLE_AT
 export const ON_CHANGE = 'contentManager/App/ON_CHANGE';
 export const ON_CHANGE_SETTINGS = 'contentManager/App/ON_CHANGE_SETTINGS';
 export const ON_CLICK_ADD_ATTR = 'contentManager/App/ON_CLICK_ADD_ATTR';
+export const ON_CLICK_ADD_ATTR_FIELD = 'contentManager/App/ON_CLICK_ADD_ATTR_FIELD';
 export const ON_REMOVE = 'contentManager/App/ON_REMOVE';
 export const ON_REMOVE_EDIT_VIEW_FIELD_ATTR = 'contentManager/App/ON_REMOVE_EDIT_VIEW_FIELD_ATTR';
 export const ON_REMOVE_EDIT_VIEW_RELATION_ATTR = 'contentManager/App/ON_REMOVE_EDIT_VIEW_RELATION_ATTR';

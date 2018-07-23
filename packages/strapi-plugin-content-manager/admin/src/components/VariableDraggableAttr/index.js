@@ -11,7 +11,7 @@ import {
   DragSource,
   DropTarget,
 } from 'react-dnd';
-import { flow } from 'lodash';
+import { get, flow } from 'lodash';
 import cn from 'classnames';
 
 import ClickOverHint from 'components/ClickOverHint';
@@ -131,7 +131,9 @@ class VariableDraggableAttr extends React.PureComponent {
 
   handleMouseLeave = () => this.setState({ isOver: false });
 
-  handleRemove = () => {
+  handleRemove = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     const { index, keys, onRemove } = this.props;
     onRemove(index, keys);
   }
@@ -176,7 +178,7 @@ class VariableDraggableAttr extends React.PureComponent {
               </span>
               <ClickOverHint show={isOver} />
 
-              {!isOver && data.name.toLowerCase() !== data.label.toLowerCase() && (
+              {!isOver && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
                 <div className={styles.info}>
                   {data.label}
                 </div>
