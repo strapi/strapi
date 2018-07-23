@@ -11,8 +11,6 @@ import {
   CHANGE_DATA,
   GET_DATA,
   GET_DATA_SUCCEEDED,
-  GET_LAYOUT,
-  GET_LAYOUT_SUCCEEDED,
   INIT_MODEL_PROPS,
   ON_CANCEL,
   RESET_PROPS,
@@ -47,20 +45,6 @@ export function getDataSucceeded(id, data, pluginHeaderTitle) {
     id,
     data,
     pluginHeaderTitle,
-  };
-}
-
-export function getLayout(source) {
-  return {
-    type: GET_LAYOUT,
-    source,
-  };
-}
-
-export function getLayoutSucceeded(layout) {
-  return {
-    type: GET_LAYOUT_SUCCEEDED,
-    layout,
   };
 }
 

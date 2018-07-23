@@ -8,7 +8,6 @@ import { fromJS, Map, List } from 'immutable';
 import {
   CHANGE_DATA,
   GET_DATA_SUCCEEDED,
-  GET_LAYOUT_SUCCEEDED,
   INIT_MODEL_PROPS,
   ON_CANCEL,
   RESET_PROPS,
@@ -28,7 +27,6 @@ const initialState = fromJS({
   id: '',
   initialRecord: Map({}),
   isLoading: true,
-  layout: fromJS({}),
   modelName: '',
   pluginHeaderTitle: 'New Entry',
   record: Map({}),
@@ -49,10 +47,6 @@ function editPageReducer(state = initialState, action) {
         .update('initialRecord', () => Map(action.data))
         .update('pluginHeaderTitle', () => action.pluginHeaderTitle)
         .update('record', () => Map(action.data));
-    case GET_LAYOUT_SUCCEEDED:
-      return state
-        .update('isLoading', () => false)
-        .updateIn(['layout', state.get('modelName')], () => Map(action.layout));
     case INIT_MODEL_PROPS:
       return state
         .update('formValidations', () => List(action.formValidations))
@@ -67,7 +61,7 @@ function editPageReducer(state = initialState, action) {
         .update('record', () => state.get('initialRecord'))
         .update('resetProps', (v) => v = !v);
     case RESET_PROPS:
-      return initialState.update('layout', () => state.get('layout'));
+      return initialState;
     case SET_FILE_RELATIONS:
       return state.set('fileRelations', List(action.fileRelations));
     case SET_FORM_ERRORS:

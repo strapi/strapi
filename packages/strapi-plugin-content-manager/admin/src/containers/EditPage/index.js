@@ -39,7 +39,6 @@ import { checkFormValidity } from 'utils/formValidations';
 import {
   changeData,
   getData,
-  getLayout,
   initModelProps,
   onCancel,
   resetProps,
@@ -62,8 +61,6 @@ export class EditPage extends React.Component {
     if (!this.isCreating()) {
       const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
       this.props.getData(this.props.match.params.id, this.getSource(), mainField);
-    } else {
-      this.props.getLayout(this.getSource());
     }
 
     // Get all relations made with the upload plugin
@@ -120,7 +117,7 @@ export class EditPage extends React.Component {
    *
    */
   getLayout = () => (
-    bindLayout.call(this, get(this.props.editPage, ['layout', this.getModelName()], {}))
+    bindLayout.call(this, get(this.props.schema, ['layout', this.getModelName()], {}))
   )
 
   /**
@@ -282,7 +279,7 @@ export class EditPage extends React.Component {
   );
 
   showLoaders = () => {
-    const { editPage: { isLoading, layout } } = this.props;
+    const { editPage: { isLoading }, schema: { layout } } = this.props;
 
     return isLoading && !this.isCreating() || isLoading && get(layout, this.getModelName()) === undefined;
   }
@@ -372,7 +369,6 @@ EditPage.propTypes = {
   changeData: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
   getData: PropTypes.func.isRequired,
-  getLayout: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   initModelProps: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
@@ -390,7 +386,6 @@ function mapDispatchToProps(dispatch) {
     {
       changeData,
       getData,
-      getLayout,
       initModelProps,
       onCancel,
       resetProps,

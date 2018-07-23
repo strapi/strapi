@@ -7,12 +7,6 @@ const _ = require('lodash');
  */
 
 module.exports = {
-  layout: async (ctx) => {
-    const {source} = ctx.query;
-
-    return ctx.send(_.get(strapi.plugins, [source, 'config', 'layout'], {}));
-  },
-
   models: async ctx => {
     const pluginsStore = strapi.store({
       environment: '',
