@@ -16,6 +16,7 @@ import cn from 'classnames';
 
 import ClickOverHint from 'components/ClickOverHint';
 import DraggedRemovedIcon from 'components/DraggedRemovedIcon';
+import VariableEditIcon from 'components/VariableEditIcon';
 
 import styles from './styles.scss';
 
@@ -96,7 +97,7 @@ class DraggableAttr extends React.Component {
   handleClickEdit = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.onClickEditListItem(this.props.index);
+    this.props.onClickEdit(this.props.index);
   }
 
   handleDragEnd = () => this.setState({ dragStart: false });
@@ -144,8 +145,8 @@ class DraggableAttr extends React.Component {
                 {label}
               </div>
             )}
-            {isEditing && !isOver? (
-              <span className={styles.editIcon} onClick={this.handleClickEdit} />            
+            {isEditing && !isOver ? (
+              <VariableEditIcon onClick={this.handleClickEdit} />            
             ) : (
               
               <DraggedRemovedIcon isDragging={dragStart} onRemove={this.handleRemove} />
@@ -172,7 +173,7 @@ DraggableAttr.propTypes = {
   keys: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  onClickEditListItem: PropTypes.func.isRequired,
+  onClickEdit: PropTypes.func.isRequired,
   onRemove: PropTypes.func,
 };
 

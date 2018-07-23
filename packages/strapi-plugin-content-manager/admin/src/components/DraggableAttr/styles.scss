@@ -35,25 +35,6 @@
   font-style: italic;
 }
 
-.editIcon {
-  width: 30px;
-  background: #E6F0FB;
-  height: 28px;
-  cursor: pointer;
-  text-align: center;
-  float: right;
-
-  &:after {
-    display: inline-block;
-    content: '';
-    width: 10px;
-    height: 10px;
-    margin: auto;
-    margin-top: -3px;
-    background-image: url('../../assets/images/icon-edit-blue.svg');
-  }
-}
-
 .dragged {
   position: relative;
   height: 30px !important;

@@ -64,7 +64,7 @@ class SettingPage extends React.PureComponent {
     const fields = this.getEditPageDisplayedFields();
     const relations = this.getEditPageDisplayedRelations();
     
-    if (fields.length === 0) {
+    if (fields.length > 0) {
       this.handleClickEditField(0);
     } else if (relations.length > 0) {
       this.handleClickEditRelation(0);
@@ -268,10 +268,34 @@ class SettingPage extends React.PureComponent {
     this.setState({ showWarning: true });
   }
 
+  findIndexFieldToEdit = () => {
+    const { settingPage: { fieldToEdit } } = this.props;
+
+    if (isEmpty(fieldToEdit)) {
+      return -1;
+    }
+
+    const index = this.getEditPageDisplayedFields().indexOf(fieldToEdit.name);
+
+    return index;
+  }
+
   findIndexListItemToEdit = () => {
     const index = findIndex(this.getListDisplay(), ['name', get(this.props.settingPage, ['listItemToEdit', 'name'])]);
 
     return index === -1 ? 0 : index;
+  }
+
+  findIndexRelationItemToEdit = () => {
+    const { settingPage: { relationToEdit } } = this.props;
+
+    if (isEmpty(relationToEdit)) {
+      return -1;
+    }
+
+    const index = this.getEditPageDisplayedRelations().indexOf(relationToEdit.alias);
+
+    return index;
   }
 
   hasRelations = () => {
@@ -305,11 +329,13 @@ class SettingPage extends React.PureComponent {
         data={this.getAttrData(attr)}
         index={index}
         // key={attr}
-        key={index}
+        isEditing={index === this.findIndexFieldToEdit()}
+        key={index} // Remove this
         keys={`${this.getPath()}.editDisplay`}
         name={attr}
         moveAttr={this.props.moveVariableAttrEditView}
         onRemove={this.props.onRemoveEditViewFieldAttr}
+        onClickEdit={this.handleClickEditField}
       />
     );
   }
@@ -318,13 +344,13 @@ class SettingPage extends React.PureComponent {
     <DraggableAttr
       index={index}
       isDraggingSibling={false}
-      isEditing={false}
+      isEditing={index === this.findIndexRelationItemToEdit()}
       key={attr}
       keys={`${this.getPath()}.editDisplay.relations`}
       name={attr}
       label={attr}
       moveAttr={this.props.moveAttrEditView}
-      onClickEditListItem={() => {}}
+      onClickEdit={this.handleClickEditRelation}
       onRemove={this.props.onRemoveEditViewAttr}
       updateSiblingHoverState={() => {}}
     />
@@ -342,7 +368,7 @@ class SettingPage extends React.PureComponent {
         label={attr.label}
         name={attr.name}
         moveAttr={this.props.moveAttr}
-        onClickEditListItem={this.handleClickEditAttr}
+        onClickEdit={this.handleClickEditAttr}
         onRemove={this.handleRemove}
         updateSiblingHoverState={this.updateSiblingHoverState}
       />
@@ -463,6 +489,7 @@ class SettingPage extends React.PureComponent {
     const {
       onSubmit,
     } = this.props;
+
     return (
       <form onSubmit={this.handleSubmit}>
         <BackHeader onClick={this.handleGoBack} />

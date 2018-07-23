@@ -16,6 +16,7 @@ import cn from 'classnames';
 
 import ClickOverHint from 'components/ClickOverHint';
 import DraggedRemovedIcon  from 'components/DraggedRemovedIcon';
+import VariableEditIcon from 'components/VariableEditIcon';
 
 import styles from './styles.scss';
 
@@ -26,32 +27,32 @@ const getBootstrapClass = attrType => {
       return {
         bootstrap: 'col-md-3',
         wrapper: cn(styles.attrWrapper),
-        withLargerHeight: false,
+        withLongerHeight: false,
       };
     case 'date':
       return {
         bootstrap: 'col-md-4',
         wrapper: cn(styles.attrWrapper),
-        withLargerHeight: false,
+        withLongerHeight: false,
       };
     case 'json':
     case 'wysiwyg':
       return {
         bootstrap: 'col-md-12', 
         wrapper: cn(styles.attrWrapper, styles.customHeight),
-        withLargerHeight: true,
+        withLongerHeight: true,
       };
     case 'file':
       return {
         bootstrap: 'col-md-6',
         wrapper: cn(styles.attrWrapper, styles.customHeight),
-        withLargerHeight: true,
+        withLongerHeight: true,
       };
     default:
       return {
         bootstrap: 'col-md-6',
         wrapper: cn(styles.attrWrapper),
-        withLargerHeight: false,
+        withLongerHeight: false,
       };
   }
 };
@@ -118,6 +119,10 @@ const variableDraggableAttrTarget = {
 class VariableDraggableAttr extends React.PureComponent {
   state = { isOver: false };
 
+  handleClickEdit = () => {
+    this.props.onClickEdit(this.props.index);
+  }
+
   handleMouseEnter= () => {
     if (this.props.data.type !== 'boolean') {
       this.setState({ isOver: true });
@@ -133,7 +138,13 @@ class VariableDraggableAttr extends React.PureComponent {
 
   render() {
     const { isOver } = this.state;
-    const { data, name, connectDragSource, connectDropTarget } = this.props;
+    const {
+      connectDragSource,
+      connectDropTarget,
+      data,
+      isEditing,
+      name,
+    } = this.props;
     // NOTE: waiting for the layout to be in the core_store
     let type = name.includes('long') ? 'wysiwyg' : data.type;
 
@@ -145,7 +156,7 @@ class VariableDraggableAttr extends React.PureComponent {
       classNames = {
         bootstrap: name,
         wrapper: cn(styles.attrWrapper),
-        withLargerHeight: false,
+        withLongerHeight: false,
       };
     }
 
@@ -153,39 +164,34 @@ class VariableDraggableAttr extends React.PureComponent {
       connectDragSource(
         connectDropTarget(
           <div
-            className={classNames.bootstrap}
+            className={cn(classNames.bootstrap)} // NOTE: bootstrap grid handles the weird effect when dragging
             onMouseEnter={this.handleMouseEnter}
             onMouseLeave={this.handleMouseLeave}
+            onClick={this.handleClickEdit}
           >
-            <div className={classNames.wrapper} style={style}>
+            <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
               <i className="fa fa-th" />
               <span>
                 {name}
               </span>
               <ClickOverHint show={isOver} />
-              <DraggedRemovedIcon withLargerHeight={classNames.withLargerHeight} onRemove={this.handleRemove} />
+
+              {!isOver && data.name.toLowerCase() !== data.label.toLowerCase() && (
+                <div className={styles.info}>
+                  {data.label}
+                </div>
+              )}
+
+              {isEditing && !isOver ? (
+                <VariableEditIcon withLongerHeight={classNames.withLongerHeight} onClick={this.handleClickEdit} />
+              ) : (
+                <DraggedRemovedIcon withLongerHeight={classNames.withLongerHeight} onRemove={this.handleRemove} />
+              )}
             </div>
           </div>
         ),
       )
     );
-
-    // return (
-    //   <div
-    //     className={classNames.bootstrap}
-    //     onMouseEnter={this.handleMouseEnter}
-    //     onMouseLeave={this.handleMouseLeave}
-    //   >
-    //     <div className={classNames.wrapper} style={style}>
-    //       <i className="fa fa-th" aria-hidden="true" />
-    //       <span>
-    //         {name}
-    //       </span>
-    //       <ClickOverHint show={isOver} />
-    //       <DraggedRemovedIcon withLargerHeight={classNames.withLargerHeight} onRemove={this.handleRemove} />
-    //     </div>
-    //   </div>
-    // );
   }
 }
 
@@ -194,8 +200,10 @@ VariableDraggableAttr.defaultProps = {
     type: 'text',
   },
   index: 0,
+  isEditing: false,
   keys: '',
   name: '',
+  onClickEdit: () => {},
   onRemove: () => {},
 };
 
@@ -204,8 +212,10 @@ VariableDraggableAttr.propTypes = {
   connectDropTarget: PropTypes.func.isRequired,
   data: PropTypes.object,
   index: PropTypes.number,
+  isEditing: PropTypes.bool,
   keys: PropTypes.string,
   name: PropTypes.string,
+  onClickEdit: PropTypes.func,
   onRemove: PropTypes.func,
 };
 

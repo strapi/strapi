@@ -10,10 +10,10 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-function DraggedRemovedIcon({ isDragging, onRemove, withLargerHeight, ...rest }) {
+function DraggedRemovedIcon({ isDragging, onRemove, withLongerHeight, ...rest }) {
   return (
     <span
-      className={cn( isDragging && styles.removeIconDragged, withLargerHeight ? styles.removeIconLarge : styles.removeIcon)}
+      className={cn( isDragging && styles.removeIconDragged, withLongerHeight ? styles.removeIconLonger : styles.removeIcon)}
       onClick={onRemove}
       {...rest}
     />
@@ -23,13 +23,13 @@ function DraggedRemovedIcon({ isDragging, onRemove, withLargerHeight, ...rest })
 DraggedRemovedIcon.defaultProps = {
   isDragging: false,
   onRemove: () => {},
-  withLargerHeight: false,
+  withLongerHeight: false,
 };
 
 DraggedRemovedIcon.propTypes = {
   isDragging: PropTypes.bool,
   onRemove: PropTypes.func,
-  withLargerHeight: PropTypes.bool,
+  withLongerHeight: PropTypes.bool,
 };
 
 export default DraggedRemovedIcon;
