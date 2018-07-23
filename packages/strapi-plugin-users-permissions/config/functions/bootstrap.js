@@ -66,6 +66,14 @@ module.exports = async cb => {
         'user:email'
       ]
     },
+    discord: {
+      enabled: false,
+      icon: 'discord',
+      key: '',
+      secret: '',
+      callback: '/auth/discord/callback',
+      scope: ['email']
+    },
     twitter: {
       enabled: false,
       icon: 'twitter',

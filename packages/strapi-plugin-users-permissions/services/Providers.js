@@ -174,6 +174,12 @@ const getProfile = async (provider, query, callback) => {
       });
       break;
     }
+    case 'discord': {
+      const discord = new Purest({
+        provider: 'discord',
+        
+      })
+    }
     case 'twitter': {
       const twitter = new Purest({
         provider: 'twitter',
