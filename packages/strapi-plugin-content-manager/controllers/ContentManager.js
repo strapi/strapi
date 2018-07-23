@@ -21,6 +21,7 @@ module.exports = {
     });
 
     const models = await pluginsStore.get({ key: 'schema' });
+
     ctx.body = {
       models,
     };

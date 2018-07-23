@@ -39,9 +39,9 @@
       "plugin": "users-permissions",
       "configurable": false
     },
-    "products": {
-      "collection": "product",
-      "via": "user"
+    "infoss": {
+      "type": "text"
     }
-  }
+  },
+  "collectionName": "users-permissions_user"
 }

@@ -15,17 +15,17 @@ module.exports = async cb => {
     'primaryKey',
     'associations'
   ]);
-  
+
   const models = _.mapValues(strapi.models, pickData);
   delete models['core_store'];
   const pluginsModel = Object.keys(strapi.plugins).reduce((acc, current) => {
     acc[current] = {
       models: _.mapValues(strapi.plugins[current].models, pickData),
     };
-  
+
     return acc;
   }, {});
-  
+
   // Init schema
   const schema = {
     generalSettings: {
@@ -37,8 +37,9 @@ module.exports = async cb => {
     models: {
       plugins: {},
     },
+    layout: {}
   };
-  
+
   const buildSchema = (model, name, plugin = false) => {
     // Model data
     const schemaModel = Object.assign({
@@ -57,7 +58,7 @@ module.exports = async cb => {
         relations: [],
       },
     }, model);
-  
+
     // Fields (non relation)
     const fields = _.mapValues(_.pickBy(model.attributes, attribute =>
       !attribute.model && !attribute.collection
@@ -70,8 +71,7 @@ module.exports = async cb => {
 
     schemaModel.fields = fields;
     schemaModel.editDisplay.availableFields = fields;
-    
-  
+
     // Select fields displayed in list view
     schemaModel.listDisplay = Object.keys(schemaModel.fields)
       // Construct Array of attr ex { type: 'string', label: 'Foo', name: 'Foo', description: '' }
@@ -84,7 +84,7 @@ module.exports = async cb => {
       })
       // Retrieve only the fourth first items
       .slice(0, 4);
-      
+
     schemaModel.listDisplay.splice(0, 0, {
       name: model.primaryKey || 'id',
       label: 'Id',
@@ -106,7 +106,7 @@ module.exports = async cb => {
 
       return acc;
     }, {});
-    
+
     if (model.associations) {
       // Model relations
       schemaModel.relations = model.associations.reduce((acc, current) => {
@@ -118,14 +118,14 @@ module.exports = async cb => {
           _.get(models, [current.model || current.collection, 'info', 'mainField']) ||
           _.findKey(_.get(models, [current.model || current.collection, 'attributes']), { type : 'string'}) ||
           'id';
-  
+
         acc[current.alias] = {
           ...current,
           description: '',
           label,
           displayedAttribute,
         };
-  
+
         return acc;
       }, {});
       const relationsArray = Object.keys(schemaModel.relations).filter(relation => {
@@ -138,7 +138,7 @@ module.exports = async cb => {
       const uploadRelations = Object.keys(schemaModel.relations).reduce((acc, current) => {
         if (_.get(schemaModel, ['relations', current, 'plugin']) === 'upload') {
           const model = _.get(schemaModel, ['relations', current]);
-      
+
           acc[current] = {
             description: '',
             editable: true,
@@ -159,26 +159,26 @@ module.exports = async cb => {
     }
 
     schemaModel.editDisplay.fields = Object.keys(schemaModel.editDisplay.availableFields);
-  
+
     if (plugin) {
       return _.set(schema.models.plugins, `${plugin}.${name}`, schemaModel);
     }
-  
+
     // Set the formatted model to the schema
     schema.models[name] = schemaModel;
   };
-  
+
   _.forEach(pluginsModel, (plugin, pluginName) => {
     _.forEach(plugin.models, (model, name) => {
       buildSchema(model, name, pluginName);
     });
   });
-  
+
   // Generate schema for models.
   _.forEach(models, (model, name) => {
     buildSchema(model, name);
   });
-  
+
   const pluginStore = strapi.store({
     environment: '',
     type: 'plugin',
@@ -206,13 +206,26 @@ module.exports = async cb => {
 
     return fields.map(field => `${apiPath.join('.')}.fields.${field}`);
   });
-  
+
   try {
     const prevSchema = await pluginStore.get({ key: 'schema' });
 
     if (!prevSchema) {
+      const plugins = strapi.plugins;
+
+      Object.keys(plugins).forEach((plugin) => {
+        const models = _.get(strapi.plugins[plugin].config, 'layout', {});
+
+        Object.keys(models).forEach((model) => {
+          const layout = _.get(strapi.plugins[plugin].config.layout, model, {});
+
+          _.set(schema.layout, model, layout);
+        });
+      });
+
       pluginStore.set({ key: 'schema', value: schema });
-      return cb(); 
+
+      return cb();
     }
 
     const splitted = str => str.split('.');
@@ -230,7 +243,7 @@ module.exports = async cb => {
     apisToRemove.map(apiPath => {
       _.unset(prevSchema.models, apiPath);
     });
-    
+
     // Remove API attribute
     sameApisAttrToRemove.map(attrPath => {
       // Check default sort and change it if needed
@@ -269,7 +282,7 @@ module.exports = async cb => {
       _.set(api, 'pageEntries', pageEntries);
       _.set(prevSchema.models, apiPath, api);
     });
-  
+
     // Add attribute to existing API
     sameApisAttrToAdd.map(attrPath => {
       const attr = _.get(schema.models, attrPath);
@@ -283,16 +296,16 @@ module.exports = async cb => {
 
       keysToUpdate.map(keyPath => {
         const newValue = _.get(schema.models, keyPath);
-        
+
         _.set(prevSchema.models, keyPath, newValue);
       });
     });
 
     await pluginStore.set({ key: 'schema', value: prevSchema });
-  
+
   } catch(err) {
     console.log('error', err);
-  }  
+  }
 
   cb();
 };

@@ -6,28 +6,29 @@ const _ = require('lodash');
 const generator = require('strapi-generate');
 
 module.exports = {
-  appearance: (attributes, model, source) => {
-    const layoutPath = path.join(strapi.config.appPath, 'plugins', source, 'config', 'layout.json');
-    let layout;
+  appearance: async (attributes, model) => {
+    const pluginStore = strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'content-manager'
+    });
 
-    try {
-      // NOTE: do we really need to parse the JSON?
-      // layout = JSON.parse(layoutPath, 'utf8');
-      layout = require(layoutPath);
-    } catch (err) {
-      layout = {};
-    }
+    const schema = await pluginStore.get({ key: 'schema' });
+
+    const layout = _.get(schema.layout, model, {});
 
     Object.keys(attributes).map(attribute => {
       const appearances = _.get(attributes, [attribute, 'appearance'], {});
       Object.keys(appearances).map(appearance => {
-        _.set(layout, [model, 'attributes', attribute, 'appearance'], appearances[appearance] ? appearance : '' );
+        _.set(layout, ['attributes', attribute, 'appearance'], appearances[appearance] ? appearance : '' );
       });
 
       _.unset(attributes, [attribute, 'appearance']);
     });
 
-    fs.writeFileSync(layoutPath, JSON.stringify(layout, null, 2), 'utf8');
+    schema.layout[model] = layout;
+
+    await pluginStore.set({ key: 'schema', value: schema });
   },
 
   getModels: () => {
@@ -67,10 +68,18 @@ module.exports = {
     return models.concat(pluginModels);
   },
 
-  getModel: (name, source) => {
+  getModel: async (name, source) => {
     name = _.toLower(name);
 
     const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
+
+    const pluginStore = strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'content-manager'
+    });
+
+    const schema = await pluginStore.get({ key: 'schema' });
 
     const attributes = [];
     _.forEach(model.attributes, (params, attr) => {
@@ -91,7 +100,7 @@ module.exports = {
         }
       }
 
-      const appearance = _.get(strapi.plugins, [source || 'content-manager', 'config', 'layout', name, 'attributes', attr, 'appearance']);
+      const appearance = _.get(schema, ['layout', name, 'attributes', attr, 'appearance']);
       if (appearance) {
         _.set(params, ['appearance', appearance], true);
       }
