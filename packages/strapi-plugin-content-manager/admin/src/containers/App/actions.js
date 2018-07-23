@@ -17,6 +17,7 @@ import {
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
+  ON_CLICK_ADD_ATTR_FIELD,
   ON_REMOVE,
   ON_REMOVE_EDIT_VIEW_FIELD_ATTR,
   ON_REMOVE_EDIT_VIEW_RELATION_ATTR,
@@ -109,6 +110,14 @@ export function onChangeSettings({ target }) {
 export function onClickAddAttr(data, keys) {
   return {
     type: ON_CLICK_ADD_ATTR,
+    data,
+    keys,
+  };
+}
+
+export function onClickAddAttrField(data, keys) {
+  return {
+    type: ON_CLICK_ADD_ATTR_FIELD,
     data,
     keys,
   };

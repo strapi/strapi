@@ -18,6 +18,7 @@ import {
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
+  ON_CLICK_ADD_ATTR_FIELD,
   ON_REMOVE,
   ON_REMOVE_EDIT_VIEW_RELATION_ATTR,
   ON_REMOVE_EDIT_VIEW_FIELD_ATTR,
@@ -101,6 +102,11 @@ function appReducer(state = initialState, action) {
     case ON_CLICK_ADD_ATTR:
       return state
         .updateIn(['modifiedSchema', 'models', ...action.keys.split('.')], list => list.push(fromJS(action.data)));
+    case ON_CLICK_ADD_ATTR_FIELD:
+      return state
+        .updateIn(['modifiedSchema', 'models', ...action.keys.split('.')], list => {
+          return list.push(action.data);
+        });
     case ON_REMOVE:
       return state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'listDisplay'], list => {
 

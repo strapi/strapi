@@ -22,6 +22,7 @@ import {
   moveVariableAttrEditView,
   onChangeSettings,
   onClickAddAttr,
+  onClickAddAttrField,
   onRemove,
   onRemoveEditViewFieldAttr,
   onRemoveEditViewRelationAttr,
@@ -54,6 +55,7 @@ class SettingPage extends React.PureComponent {
   state = {
     isDraggingSibling: false,
     isOpen: false,
+    isOpenField: false,
     isOpenRelation: false,
     showWarning: false,
     showWarningCancel: false,
@@ -102,6 +104,16 @@ class SettingPage extends React.PureComponent {
         const obj = Object.assign(attributes[attr], { name: attr, label: upperFirst(attr), searchable, sortable: searchable });
 
         return obj;
+      });
+  }
+
+  getDropDownFieldItems = () => {
+    const currentDisplayedFields = this.getEditPageDisplayedFields();
+    const availableFields = get(this.props.schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'availableFields'], {});
+
+    return Object.keys(availableFields)
+      .filter(field => {
+        return currentDisplayedFields.indexOf(field) === -1;
       });
   }
 
@@ -340,6 +352,12 @@ class SettingPage extends React.PureComponent {
     }
   }
 
+  toggleDropDownFields = () => {
+    if (this.getDropDownFieldItems().length > 0) {
+      this.setState(prevState => ({ isOpenField: !prevState.isOpenField }));
+    }
+  }
+
   toggleDropdownRelations = () => {
     if (this.getDropDownRelationsItems().length > 0) {
       this.setState(prevState => ({ isOpenRelation: !prevState.isOpenRelation }));
@@ -397,6 +415,15 @@ class SettingPage extends React.PureComponent {
       />
     </div>
   );
+
+  renderDropDownItemSettingField = item => (
+    <DropdownItem
+      key={item}
+      onClick={() => this.props.onClickAddAttrField(item, `${this.getPath()}.editDisplay.fields`)}
+    >
+      {item}
+    </DropdownItem>
+  )
 
   renderDropDownItemEditSettingsRelation = item => (
     <DropdownItem
@@ -508,7 +535,13 @@ class SettingPage extends React.PureComponent {
   }
 
   render() {
-    const { isOpen, isOpenRelation, showWarning, showWarningCancel } = this.state;
+    const {
+      isOpen,
+      isOpenField,
+      isOpenRelation,
+      showWarning,
+      showWarningCancel,
+    } = this.state;
     const {
       onSubmit,
     } = this.props;
@@ -617,6 +650,20 @@ class SettingPage extends React.PureComponent {
                   <div className={cn(styles.sort_wrapper, 'col-md-12', styles.padded)}>
                     <div className={cn('row', styles.noPadding)}>
                       {this.getEditPageDisplayedFields().map(this.renderDraggableAttrEditSettingsField)}
+                      <div className={cn('col-md-6')}>
+                        <div className={cn(styles.dropdownRelations, styles.dropdownWrapper)}>
+                          <ButtonDropdown isOpen={isOpenField} toggle={this.toggleDropDownFields}>
+                            <DropdownToggle>
+                              <FormattedMessage id="content-manager.containers.SettingPage.addField">
+                                {this.renderDropDownP}
+                              </FormattedMessage>
+                            </DropdownToggle>
+                            <DropdownMenu>
+                              {this.getDropDownFieldItems().map(this.renderDropDownItemSettingField)}
+                            </DropdownMenu>
+                          </ButtonDropdown>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -680,6 +727,7 @@ SettingPage.propTypes = {
   moveVariableAttrEditView: PropTypes.func.isRequired,
   onChangeSettings: PropTypes.func.isRequired,
   onClickAddAttr: PropTypes.func.isRequired,
+  onClickAddAttrField: PropTypes.func.isRequired,
   onClickEditField: PropTypes.func.isRequired,
   onClickEditListItem: PropTypes.func.isRequired,
   onClickEditRelation: PropTypes.func.isRequired,
@@ -701,6 +749,7 @@ const mapDispatchToProps = (dispatch) => (
       moveVariableAttrEditView,
       onChangeSettings,
       onClickAddAttr,
+      onClickAddAttrField,
       onClickEditField,
       onClickEditListItem,
       onClickEditRelation,
