@@ -41,6 +41,10 @@
     },
     "infoss": {
       "type": "text"
+    },
+    "products": {
+      "collection": "product",
+      "via": "user"
     }
   },
   "collectionName": "users-permissions_user"

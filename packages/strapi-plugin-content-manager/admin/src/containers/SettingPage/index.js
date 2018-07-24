@@ -134,9 +134,13 @@ class SettingPage extends React.PureComponent {
   
   getEditPageDisplayedRelations = () => get(this.getEditPageDisplaySettings(), ['relations'], []);
 
-  getListDisplay = () => (
-    get(this.props.schema, `models.${this.getPath()}.listDisplay`, [])
-  );
+  getLayout = () => {
+    const { match: { params: { slug, endPoint } }, schema: { layout } } = this.props;
+
+    return get(layout, [endPoint || slug, 'attributes' ], {});
+  }
+
+  getListDisplay = () => get(this.props.schema, `models.${this.getPath()}.listDisplay`, []);
 
   getModelName = () => {
     const { match: { params: { slug, endPoint } } } = this.props;
@@ -187,22 +191,24 @@ class SettingPage extends React.PureComponent {
     return input.name === 'defaultSort' ? selectOptions : input.selectOptions;
   }
 
-  getPluginHeaderActions = () => (
-    [
-      {
-        label: 'content-manager.popUpWarning.button.cancel',
-        kind: 'secondary',
-        onClick: this.handleReset,
-        type: 'button',
-      },
-      {
-        kind: 'primary',
-        label: 'content-manager.containers.Edit.submit',
-        onClick: this.handleSubmit,
-        type: 'submit',
-      },
-    ]
-  );
+  getPluginHeaderActions = () => {
+    return (
+      [
+        {
+          label: 'content-manager.popUpWarning.button.cancel',
+          kind: 'secondary',
+          onClick: this.handleReset,
+          type: 'button',
+        },
+        {
+          kind: 'primary',
+          label: 'content-manager.containers.Edit.submit',
+          onClick: this.handleSubmit,
+          type: 'submit',
+        },
+      ]
+    );
+  }
 
   getPrimaryKey = () => get(this.props.schema, ['models', this.getModelName()].concat(['primaryKey']), 'id');
 
@@ -373,6 +379,7 @@ class SettingPage extends React.PureComponent {
         isEditing={index === this.findIndexFieldToEdit()}
         key={index} // Remove this
         keys={`${this.getPath()}.editDisplay`}
+        layout={this.getLayout()}
         name={attr}
         moveAttr={this.props.moveVariableAttrEditView}
         onRemove={this.props.onRemoveEditViewFieldAttr}
@@ -381,69 +388,79 @@ class SettingPage extends React.PureComponent {
     );
   }
 
-  renderDraggableAttrEditSettingsRelation = (attr, index) => (
-    <DraggableAttr
-      index={index}
-      isDraggingSibling={false}
-      isEditing={index === this.findIndexRelationItemToEdit()}
-      key={attr}
-      keys={`${this.getPath()}.editDisplay.relations`}
-      name={attr}
-      label={this.getRelationLabel(attr)}
-      moveAttr={this.props.moveAttrEditView}
-      onClickEdit={this.handleClickEditRelation}
-      onRemove={this.handleRemoveRelation}
-      updateSiblingHoverState={() => {}}
-    />
-  );
-
-  renderDraggableAttrListSettings = (attr, index) => (
-    <div key={attr.name} className={styles.draggedWrapper}>
-      <div>{index + 1}.</div>
+  renderDraggableAttrEditSettingsRelation = (attr, index) => {
+    return (
       <DraggableAttr
         index={index}
-        isDraggingSibling={this.state.isDraggingSibling}
-        isEditing={index === this.findIndexListItemToEdit()}
-        key={attr.name}
-        keys={this.getPath()}
-        label={attr.label}
-        name={attr.name}
-        moveAttr={this.props.moveAttr}
-        onClickEdit={this.handleClickEditAttr}
-        onRemove={this.handleRemove}
-        updateSiblingHoverState={this.updateSiblingHoverState}
+        isDraggingSibling={false}
+        isEditing={index === this.findIndexRelationItemToEdit()}
+        key={attr}
+        keys={`${this.getPath()}.editDisplay.relations`}
+        name={attr}
+        label={this.getRelationLabel(attr)}
+        moveAttr={this.props.moveAttrEditView}
+        onClickEdit={this.handleClickEditRelation}
+        onRemove={this.handleRemoveRelation}
+        updateSiblingHoverState={() => {}}
       />
-    </div>
-  );
+    );
+  }
 
-  renderDropDownItemSettingField = item => (
-    <DropdownItem
-      key={item}
-      onClick={() => this.props.onClickAddAttrField(item, `${this.getPath()}.editDisplay.fields`)}
-    >
-      {item}
-    </DropdownItem>
-  )
+  renderDraggableAttrListSettings = (attr, index) => {
+    return (
+      <div key={attr.name} className={styles.draggedWrapper}>
+        <div>{index + 1}.</div>
+        <DraggableAttr
+          index={index}
+          isDraggingSibling={this.state.isDraggingSibling}
+          isEditing={index === this.findIndexListItemToEdit()}
+          key={attr.name}
+          keys={this.getPath()}
+          label={attr.label}
+          name={attr.name}
+          moveAttr={this.props.moveAttr}
+          onClickEdit={this.handleClickEditAttr}
+          onRemove={this.handleRemove}
+          updateSiblingHoverState={this.updateSiblingHoverState}
+        />
+      </div>
+    );
+  }
 
-  renderDropDownItemEditSettingsRelation = item => (
-    <DropdownItem
-      key={item}
-      onClick={() => this.props.onClickAddAttr(item, `${this.getPath()}.editDisplay.relations`)}
-    >
-      {item}
-    </DropdownItem>
-  );
+  renderDropDownItemSettingField = item => {
+    return (
+      <DropdownItem
+        key={item}
+        onClick={() => this.props.onClickAddAttrField(item, `${this.getPath()}.editDisplay.fields`)}
+      >
+        {item}
+      </DropdownItem>
+    );
+  }
 
-  renderDropDownItemListSettings = item => (
-    <DropdownItem
-      key={item.name}
-      onClick={() => {
-        this.props.onClickAddAttr(item, `${this.getPath()}.listDisplay`);
-      }}
-    >
-      {item.label}
-    </DropdownItem>
-  );
+  renderDropDownItemEditSettingsRelation = item => {
+    return (
+      <DropdownItem
+        key={item}
+        onClick={() => this.props.onClickAddAttr(item, `${this.getPath()}.editDisplay.relations`)}
+      >
+        {item}
+      </DropdownItem>
+    );
+  }
+
+  renderDropDownItemListSettings = item => {
+    return (
+      <DropdownItem
+        key={item.name}
+        onClick={() => {
+          this.props.onClickAddAttr(item, `${this.getPath()}.listDisplay`);
+        }}
+      >
+        {item.label}
+      </DropdownItem>
+    );
+  }
 
   renderDropDownP = msg => <p>{msg}</p>;
 
@@ -545,6 +562,7 @@ class SettingPage extends React.PureComponent {
     const {
       onSubmit,
     } = this.props;
+    // TODO: Add loader!
 
     return (
       <form onSubmit={this.handleSubmit}>

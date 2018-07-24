@@ -132,8 +132,11 @@ function appReducer(state = initialState, action) {
         if (action.index === list.size - 1) {
           return list.delete(action.index);
         }
+        const path = action.keys.split('.');
+        const modelName = path.length > 2 ? path[2] : path[0];
+        const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
         
-        const manager = new Manager(state, list, action.keys, action.index);
+        const manager = new Manager(state, list, action.keys, action.index, layout);
         // Retrieve the removed element infos
         const attrToRemoveInfos = manager.attrToRemoveInfos;
         const arrayOfLastLineElements = manager.arrayOfEndLineElements;

@@ -37,6 +37,7 @@ const getBootstrapClass = attrType => {
       };
     case 'json':
     case 'wysiwyg':
+    case 'WYSIWYG':
       return {
         bootstrap: 'col-md-12', 
         wrapper: cn(styles.attrWrapper, styles.customHeight),
@@ -145,16 +146,18 @@ class VariableDraggableAttr extends React.PureComponent {
       connectDropTarget,
       data,
       isEditing,
+      layout,
       name,
     } = this.props;
-    // NOTE: waiting for the layout to be in the core_store
-    let type = name.includes('long') ? 'wysiwyg' : data.type;
+    const appearance = get(layout, [name, 'appearance'], '');
+    const type = appearance !== '' ? appearance : data.type;
 
     let classNames = getBootstrapClass(type);
     let style = {};
 
     if (!type) {
-      style = { display: 'none' };
+      // style = { display: 'none' };
+      style = { backgroundColor: 'blue' };
       classNames = {
         bootstrap: name,
         wrapper: cn(styles.attrWrapper),
@@ -204,6 +207,7 @@ VariableDraggableAttr.defaultProps = {
   index: 0,
   isEditing: false,
   keys: '',
+  layout: {},
   name: '',
   onClickEdit: () => {},
   onRemove: () => {},
@@ -216,6 +220,7 @@ VariableDraggableAttr.propTypes = {
   index: PropTypes.number,
   isEditing: PropTypes.bool,
   keys: PropTypes.string,
+  layout: PropTypes.object,
   name: PropTypes.string,
   onClickEdit: PropTypes.func,
   onRemove: PropTypes.func,

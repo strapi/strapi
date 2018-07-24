@@ -1,7 +1,8 @@
 export default class Manager {
-  constructor(state, list, keys, index) {
+  constructor(state, list, keys, index, layout) {
     this.state = state;
     this.keys = keys.split('.');
+    this.layout = layout;
     this.list = list;
     this.index = index;
     this.arrayOfEndLineElements = this.getLinesBound();
@@ -15,9 +16,9 @@ export default class Manager {
    */
   getAttrInfos(index) {
     const name = this.getAttrName(index);
-    const type = this.getType(name);
-    // Simulates the layout, need to be removed
-    const bootstrapCol = name.includes('long') ? 12 : this.getBootStrapCol(type);
+    const appearance = this.layout.getIn([name, 'appearance']);
+    const type = appearance !== '' && appearance !== undefined ? appearance : this.getType(name);
+    const bootstrapCol = this.getBootStrapCol(type);
 
     const infos = {
       bootstrapCol,
@@ -44,6 +45,7 @@ export default class Manager {
         return 4;
       case 'json':
       case 'wysiwyg':
+      case 'WYSIWYG':
         return 12;
       default:
         return 6;
@@ -68,11 +70,7 @@ export default class Manager {
     let sum = 0;
 
     this.list.forEach((item, i) => {
-      // Retrieve the item's bootstrap col
-      // Similutes the layout that is not in the core store yet
-      const { /*bootstrapCol, */ index, name /* type */ } = this.getAttrInfos(i); // TODO: use these variables when layout in core store
-      const type = item.includes('long') ? 'wysiwyg' : this.getType(item);
-      const bootstrapCol = this.getBootStrapCol(type);
+      const { bootstrapCol, index, name } = this.getAttrInfos(i);
 
       sum += bootstrapCol;
 
@@ -121,9 +119,9 @@ export default class Manager {
     return this.list
       .slice(leftBound + 1, rightBound)
       .reduce((acc, current) => {
-        const type = this.getType(current);
-        // Simulates the layout => NEEDS TO BE REMOVED
-        const col = current.includes('long') ? 12 : this.getBootStrapCol(type);
+        const appearance = this.layout.getIn([current, 'appearance']);
+        const type = appearance !== '' && appearance !== undefined ? appearance : this.getType(current);
+        const col = this.getBootStrapCol(type);
 
         return acc += col;
       }, 0);
