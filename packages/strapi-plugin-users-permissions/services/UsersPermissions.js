@@ -97,7 +97,7 @@ module.exports = {
         }
       }, (err, response, body) => {
         if (err) {
-          return reject(err);
+          return resolve([]);
         }
 
         resolve(body);
