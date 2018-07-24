@@ -16,32 +16,28 @@ module.exports = {
   name: 'Amazon SES',
   auth: {
     amazon_ses_default_from: {
-      label: 'Amazon SES Default From',
+      label: 'Default From',
       type: 'text'
     },
     amazon_ses_default_replyto: {
-      label: 'Amazon SES Default Reply-To',
+      label: 'Default Reply-To',
       type: 'text'
     },
     amazon_ses_api_key: {
-      label: 'Amazon SES API Key',
+      label: 'Amazon Access key ID',
       type: 'text'
     },
     amazon_ses_secret: {
-      label: 'Amazon SES Secret',
-      type: 'text'
-    },
-    amazon_ses_endpoint: {
-      label: 'Amazon SES Endpoint',
+      label: 'Amazon Secret access key',
       type: 'text'
     }
   },
+
   init: (config) => {
 
     var client = nodeSES.createClient({
       key: config.amazon_ses_api_key,
-      secret: config.amazon_ses_secret,
-      amazon: config.amazon_ses_endpoint || null
+      secret: config.amazon_ses_secret
     });
 
     return {
