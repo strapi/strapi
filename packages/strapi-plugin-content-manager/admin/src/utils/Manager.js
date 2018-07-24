@@ -70,7 +70,11 @@ export default class Manager {
     let sum = 0;
 
     this.list.forEach((item, i) => {
-      const { bootstrapCol, index, name } = this.getAttrInfos(i);
+      let { bootstrapCol, index, name, type } = this.getAttrInfos(i);
+
+      if (!type && name.includes('__col')) {
+        bootstrapCol = parseInt(name.split('__')[1].split('-')[2], 10);
+      }
 
       sum += bootstrapCol;
 
@@ -82,6 +86,20 @@ export default class Manager {
 
       if (sum > 12) {
         sum = 0;
+      }
+
+      if (i < this.list.size - 1) {
+        let { bootstrapCol: nextBootstrapCol, name: nextName, type: nextType } = this.getAttrInfos(i + 1);
+        
+        if (!nextType && nextName.includes('__col')) {
+          nextBootstrapCol = parseInt(nextName.split('__')[1].split('-')[2], 10);
+        }
+
+        if (sum + nextBootstrapCol > 12) {
+          const isFullSize = bootstrapCol === 12;
+          array.push({ name, index, isFullSize });
+          sum = 0;
+        }
       }
     });
 
@@ -116,8 +134,10 @@ export default class Manager {
    * @returns {Number}
    */
   getLineColSize(leftBound, rightBound) {
+    const start = leftBound === 0 ? 1 : leftBound;
+
     return this.list
-      .slice(leftBound + 1, rightBound)
+      .slice(start, rightBound)
       .reduce((acc, current) => {
         const appearance = this.layout.getIn([current, 'appearance']);
         const type = appearance !== '' && appearance !== undefined ? appearance : this.getType(current);

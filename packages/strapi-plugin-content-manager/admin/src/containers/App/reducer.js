@@ -5,7 +5,7 @@
  */
 
 import { fromJS, List } from 'immutable';
-import { findIndex, get, upperFirst } from 'lodash';
+import { findIndex, get, pullAt, range, upperFirst } from 'lodash';
 import Manager from 'utils/Manager';
 import {
   EMPTY_STORE,
@@ -135,7 +135,6 @@ function appReducer(state = initialState, action) {
         const path = action.keys.split('.');
         const modelName = path.length > 2 ? path[2] : path[0];
         const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
-        
         const manager = new Manager(state, list, action.keys, action.index, layout);
         // Retrieve the removed element infos
         const attrToRemoveInfos = manager.attrToRemoveInfos;
@@ -143,11 +142,13 @@ function appReducer(state = initialState, action) {
         // Retrieve the removed element bounds
         const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) };
         const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
-
+        let newList;
+        
         // If removing we need to add the corresponding missing col in the prev line
         if (isRemovingAFullWidthNode) {
-          const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]);
-          const previousLineBounds = { left: manager.getBound(false, attrToRemoveInfos.index - 1), right: manager.getBound(true, attrToRemoveInfos.index - 1) };
+          const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]); // Used only to know if removing a full size element on the first line
+          const previousNodeLine = currentNodeLine - 1;
+          const previousLineBounds = previousNodeLine === 0 ? { left: 0, right: arrayOfLastLineElements[0].index } : { left: manager.getBound(false, attrToRemoveInfos.index - 1), right: manager.getBound(true, attrToRemoveInfos.index) };
           const leftBoundIndex = get(previousLineBounds, ['left', 'index'], 0);
           const rightBoundIndex = get(previousLineBounds, ['right', 'index'], 0);
           const previousLineNumberOfItems = Math.abs(leftBoundIndex - rightBoundIndex) - 1;
@@ -155,25 +156,33 @@ function appReducer(state = initialState, action) {
     
           // Don't add node if removing from the first line or after a complete line
           if (currentNodeLine === 0 || previousLineNumberOfItems === -1 || previousLineColNumber >= 10) {
-            return list.delete(action.index);
-          }
-
-          const colNumberToAdd = 12 - previousLineColNumber;
-          const colsToAdd = colNumberToAdd === 8 ? ['col-md-4'] : (() => {
-            switch(colNumberToAdd) {
-              case 9:
-                return ['col-md-3', 'col-md-6'];
-              case 6:
-                return ['col-md-6'];
-              default:
-                return ['col-md-3'];
-
+            newList = list
+              .delete(action.index);
+          } else {
+            const colNumberToAdd = 12 - previousLineColNumber;
+            const colsToAdd = (() => {
+              switch(colNumberToAdd) {
+                case 9:
+                  return ['__col-md-3__', '__col-md-6__'];
+                case 8:
+                  return ['__col-md-4__', '__col-md-4__'];
+                case 6:
+                  return ['__col-md-6__'];
+                default:
+                  return ['__col-md-3__'];
+  
+              }
+            })();
+            
+            newList = list
+              .delete(attrToRemoveInfos.index)
+              .insert(attrToRemoveInfos.index, colsToAdd[0]);
+            
+            if (colsToAdd.length > 1) {
+              newList = newList.insert(attrToRemoveInfos.index, colsToAdd[1]);
             }
-          })();
 
-          return list
-            .delete(attrToRemoveInfos.index)
-            .insert(attrToRemoveInfos.index, colsToAdd);
+          }
         } else {
           const leftBoundIndex = get(nodeBounds, ['left', 'index'], 0);
           const rightBoundIndex = get(nodeBounds, ['right', 'index'], 0);
@@ -181,13 +190,47 @@ function appReducer(state = initialState, action) {
           const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
 
           if (isRemovingLine) {
-            return list.delete(attrToRemoveInfos.index);
+            newList = list
+              .delete(attrToRemoveInfos.index);
+          } else {
+            newList = list
+              .delete(attrToRemoveInfos.index)
+              .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__`);
           }
-
-          return list
-            .delete(attrToRemoveInfos.index)
-            .insert(rightBoundIndex, `col-md-${attrToRemoveInfos.bootstrapCol}`);
         }
+
+        // This part is needed to remove the add __col-md-${something}__ that keeps the layout when removing an item
+        // It may happen that a line is composed by these divs therefore we need to remove then
+        // It's the same logic than above so we're using the manager
+        // NewState is the updated state
+        const newState = state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], () => newList);
+        const newManager = new Manager(newState, newList, action.keys, action.index, layout);
+        const newArrayOfLastLineElements = newManager.arrayOfEndLineElements;
+
+        // Array of element's index to remove from the new list
+        let addedElementsToRemove = [];
+
+        newArrayOfLastLineElements.forEach((item, i) => {
+          if (i < newArrayOfLastLineElements.length) {
+            const firstElementOnLine = i === 0 ? 0 : newArrayOfLastLineElements[i - 1].index + 1;
+            const lastElementOnLine = newArrayOfLastLineElements[i].index;
+            const rangeIndex = range(firstElementOnLine, lastElementOnLine + 1);
+            const elementsOnLine = pullAt(newList.toJS(), rangeIndex)
+              .filter(name => !name.includes('__col'));
+
+            if (elementsOnLine.length === 0) {
+              addedElementsToRemove = addedElementsToRemove.concat(rangeIndex);
+            }
+          }
+        });
+
+        newList = newList.filter((item, index) => {
+          const indexToKeep = addedElementsToRemove.indexOf(index) === -1;
+
+          return indexToKeep;
+        });
+        
+        return newList;
       });
     case ON_REMOVE_EDIT_VIEW_RELATION_ATTR: {
       const relationName = state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), action.index]);

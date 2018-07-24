@@ -156,10 +156,10 @@ class VariableDraggableAttr extends React.PureComponent {
     let style = {};
 
     if (!type) {
-      // style = { display: 'none' };
-      style = { backgroundColor: 'blue' };
+      style = { display: 'none' };
+      // style = { backgroundColor: 'blue' };
       classNames = {
-        bootstrap: name,
+        bootstrap: name.split('__')[1],
         wrapper: cn(styles.attrWrapper),
         withLongerHeight: false,
       };
