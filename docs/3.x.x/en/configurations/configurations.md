@@ -1,6 +1,6 @@
 # Configurations
 
-The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./api/**/config` folder of each APIs and plugins by creating JavaScript or JSON files.
+The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./api/**/config` folder of each API and plugin by creating JavaScript or JSON files.
 
 ## Application
 
@@ -153,7 +153,7 @@ Each JSON file located in the folder must have the name of its corresponding tra
 
 Most of the application's configurations are defined by environment. It means that you can specify settings for each environment (`development`, `production`, `test`, etc.).
 
-> Note: You can access to the config of the current environment through `strapi.config.currentEnvironment`.
+> Note: You can access the config of the current environment through `strapi.config.currentEnvironment`.
 
 ***
 
