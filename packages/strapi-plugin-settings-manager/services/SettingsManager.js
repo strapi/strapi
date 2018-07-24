@@ -650,9 +650,9 @@ module.exports = {
     const redisClients = ['redis'];
 
     let connector;
-    if (_.indexOf(bookshelfClients, client) !== -1) connector = 'strapi-bookshelf';
-    if (_.indexOf(mongooseClients, client) !== -1) connector = 'strapi-mongoose';
-    if (_.indexOf(redisClients, client) !== -1) connector = 'strapi-redis';
+    if (_.indexOf(bookshelfClients, client) !== -1) connector = 'strapi-hook-bookshelf';
+    if (_.indexOf(mongooseClients, client) !== -1) connector = 'strapi-hook-mongoose';
+    if (_.indexOf(redisClients, client) !== -1) connector = 'strapi-hook-redis';
 
     return connector;
   },
@@ -911,7 +911,7 @@ module.exports = {
   },
 
   cleanDependency: (env, config) => {
-    const availableConnectors = ['strapi-mongoose', 'strapi-bookshelf', 'strapi-redis'];
+    const availableConnectors = ['strapi-hook-mongoose', 'strapi-hook-bookshelf', 'strapi-hook-redis'];
     let usedConnectors = [];
     const errors = [];
 

@@ -1,4 +1,15 @@
-<p align="center"><img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" /></p>
+<p align="center">
+  <strong>We're hiring!</strong> Located in Paris 🇫🇷 and dreaming of being full-time on Strapi?
+  <a href="https://strapi.io/company#looking-for-talents">Join us</a>!
+</p>
+
+---
+
+<p align="center">
+  <a href="https://strapi.io">
+    <img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" alt="Strapi logo" />
+  </a>
+</p>
 <h3 align="center">API creation made simple, secure and fast.</h3>
 <p align="center">The most advanced open-source Content Management Framework to build powerful API with no effort.</p>
 <br />
@@ -19,7 +30,11 @@
 
 <br>
 
-<p align="center"><img src="https://blog.strapi.io/content/images/2017/10/Github-Preview.png" /></p>
+<p align="center">
+  <a href="https://strapi.io">
+    <img src="https://blog.strapi.io/content/images/2017/10/Github-Preview.png" />
+  </a>
+</p>
 
 <br>
 
@@ -68,7 +83,7 @@ Halfway between a CMS and a framework, Strapi takes advantages of both worlds. A
 
 ## Support
 
-For more information on the upcoming version, please take a look to our [ROADMAP](ROADMAP.md).
+For more information on the upcoming version, please take a look to our [ROADMAP](https://github.com/strapi/strapi/projects).
 
 ### Community support
 
@@ -86,7 +101,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 ### Migration
 
-Follow our [migration guides](https://strapi.io/documentation/migration/migration-guide.html) on the website to keep your Strapi projects updated.
+Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki to keep your Strapi projects updated.
 
 ## License
 

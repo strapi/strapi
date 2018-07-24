@@ -39,9 +39,15 @@ const makeSelectCurrentEnv = () => createSelector(
   (substate) => substate.get('currentEnvironment'),
 );
 
+const makeSelectIsLoading = () => createSelector(
+  selectListPluginsPageDomain(),
+  (substate) => substate.get('isLoading'),
+);
+
 export default makeSelectListPluginsPage;
 export {
   makeSelectCurrentEnv,
+  makeSelectIsLoading,
   selectListPluginsPageDomain,
   makeSelectPluginToDelete,
   makeSelectPluginDeleteAction,

@@ -1,6 +1,6 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.12.5",
+  "version": "3.0.0-alpha.12.7.1",
   "dependencies": {},
   "devDependencies": {
     "assert": "~1.3.0",
