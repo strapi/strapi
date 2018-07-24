@@ -177,8 +177,24 @@ const getProfile = async (provider, query, callback) => {
     case 'discord': {
       const discord = new Purest({
         provider: 'discord',
-        
-      })
+        config: {
+          'discord': {
+            'https://discordapp.com/api/': {
+              '__domain': {
+                'auth': {
+                  'auth': {'bearer': '[0]'}
+                }
+              },
+              'oauth2/{endpoint}': {
+                '__path': {
+                  'alias': '__default',
+                  'version': 'authorize'
+                }
+              }
+            }
+          }
+        }
+      });
     }
     case 'twitter': {
       const twitter = new Purest({
