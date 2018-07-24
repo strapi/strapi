@@ -174,6 +174,23 @@ const getProfile = async (provider, query, callback) => {
       });
       break;
     }
+    case 'twitch': {
+      const twitch = new Purest({
+        provider: 'twitch'
+      });
+
+      twitch.query().get('user').auth(access_token).request((err, res, body) => {
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, {
+            username: body.name,
+            email: body.email
+          });
+        }
+      });
+      break;
+    }
     case 'twitter': {
       const twitter = new Purest({
         provider: 'twitter',

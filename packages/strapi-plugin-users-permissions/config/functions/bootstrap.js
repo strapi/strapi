@@ -66,6 +66,14 @@ module.exports = async cb => {
         'user:email'
       ]
     },
+    twitch: {
+      enabled: false,
+      icon: 'twitch',
+      key: '',
+      secret: '',
+      callback: '/auth/twitch/callback',
+      scope: ['user_read']
+    },
     twitter: {
       enabled: false,
       icon: 'twitter',
