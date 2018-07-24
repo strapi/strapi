@@ -143,8 +143,8 @@ function appReducer(state = initialState, action) {
 
         // If removing we need to add the corresponding missing col in the prev line
         if (isRemovingAFullWidthNode) {
-          const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveIndex]);
-          const previousLineBounds = { left: manager.getBound(false, attrToRemoveInfos.index - 1), right: getBound(true, attrToRemoveInfos.index - 1) };
+          const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]);
+          const previousLineBounds = { left: manager.getBound(false, attrToRemoveInfos.index - 1), right: manager.getBound(true, attrToRemoveInfos.index - 1) };
           const leftBoundIndex = get(previousLineBounds, ['left', 'index'], 0);
           const rightBoundIndex = get(previousLineBounds, ['right', 'index'], 0);
           const previousLineNumberOfItems = Math.abs(leftBoundIndex - rightBoundIndex) - 1;
@@ -169,8 +169,8 @@ function appReducer(state = initialState, action) {
           })();
 
           return list
-            .delete(attrToRemoveIndex)
-            .insert(attrToRemoveIndex, colsToAdd);
+            .delete(attrToRemoveInfos.index)
+            .insert(attrToRemoveInfos.index, colsToAdd);
         } else {
           const leftBoundIndex = get(nodeBounds, ['left', 'index'], 0);
           const rightBoundIndex = get(nodeBounds, ['right', 'index'], 0);

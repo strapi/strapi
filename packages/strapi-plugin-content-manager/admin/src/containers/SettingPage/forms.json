@@ -135,6 +135,16 @@
         "placeholder": "content-manager.form.Input.description.placeholder",
         "type": "string",
         "validations": {}
+      },
+      {
+        "label": { "id": "content-manager.form.Input.description" },
+        "customBootstrapClass": "col-md-12",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "placeholder",
+        "placeholder": "content-manager.form.Input.description.placeholder",
+        "type": "string",
+        "validations": {}
       }
     ]
   }
