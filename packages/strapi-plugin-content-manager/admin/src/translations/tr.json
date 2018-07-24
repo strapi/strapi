@@ -84,7 +84,7 @@
   "error.attribute.key.taken": "Bu değer zaten var.",
   "error.attribute.sameKeyAndName": "Eşit olamaz",
   "error.validation.minSupMax": "Üstü olamaz",
-  "error.validation.json": "This is not a JSON",
+  "error.validation.json": "Bu JSON biçimi ile eşleşmiyor",
 
   "form.Input.label.inputDescription": "Bu değer, tablonun başında görüntülenen etiketi geçersiz kılar",
   "form.Input.label": "Etiket",
