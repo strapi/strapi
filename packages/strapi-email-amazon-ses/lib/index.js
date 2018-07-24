@@ -59,7 +59,7 @@ module.exports = {
             message: options.html
           };
 
-          nodeSES.sendEmail(msg, function (err) {
+          client.sendEmail(msg, function (err) {
             if (err) {
               reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
             } else {
