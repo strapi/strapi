@@ -5,6 +5,11 @@ module.exports = {
       files: {
         resolver: 'Upload.find'
       }
+    },
+    Mutation: {
+      createFile: false,
+      updateFile: false,
+      deleteFile: false
     }
   }
 };

@@ -192,6 +192,7 @@ module.exports = {
       type Query {${shadowCRUD.query && this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
       type Mutation {${shadowCRUD.mutation && this.formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation')}}
       ${Types.addCustomScalar(resolvers)}
+      ${Types.addInput()}
       ${polymorphicDef}
     `;
 

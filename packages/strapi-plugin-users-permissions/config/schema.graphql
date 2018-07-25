@@ -21,6 +21,32 @@ module.exports = {
           return ctx.body.roles;
         }
       }
+    },
+    Mutation: {
+      createRole: {
+        resolverOf: 'UsersPermissions.createRole',
+        resolver: async (obj, options, ctx) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.createRole(ctx);
+
+          return { ok: true };
+        }
+      },
+      updateRole: {
+        resolverOf: 'UsersPermissions.updateRole',
+        resolver: async (obj, options, ctx) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(ctx);
+
+          return { ok: true };
+        }
+      },
+      deleteRole: {
+        resolverOf: 'UsersPermissions.deleteRole',
+        resolver: async (obj, options, ctx) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(ctx);
+
+          return { ok: true };
+        }
+      }
     }
   }
 };

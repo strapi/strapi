@@ -10,6 +10,7 @@ const _ = require('lodash');
 const graphql = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const GraphQLDateTime = require('graphql-type-datetime');
+const pluralize = require('pluralize');
 
 module.exports = {
   /**
@@ -21,7 +22,7 @@ module.exports = {
    * @return String
    */
 
-  convertType: function ({ definition = {}, modelName = '', attributeName = '' }) {
+  convertType: function ({ definition = {}, modelName = '', attributeName = '', rootType = 'query' }) {
     // Type
     if (definition.type) {
       let type = 'String';
@@ -66,10 +67,22 @@ module.exports = {
       const plural = !_.isEmpty(definition.collection);
 
       if (plural) {
+        if (rootType === 'mutation') {
+          return '[ID]';
+        }
+
         return `[${globalId}]`;
       }
 
+      if (rootType === 'mutation') {
+        return 'ID';
+      }
+
       return globalId;
+    }
+
+    if (rootType === 'mutation') {
+      return definition.model ? 'ID' : '[ID]';
     }
 
     return definition.model ? 'Morph' : '[Morph]';
@@ -129,4 +142,59 @@ module.exports = {
       polymorphicResolver: {}
     };
   },
+
+  addInput: function () {
+    return `
+      input InputID { id: ID!}
+    `;
+  },
+
+  generateInputModel: function (model, name) {
+    const globalId = model.globalId;
+    const inputName = `${_.capitalize(name)}Input`;
+
+    /* eslint-disable */
+    return `
+      input ${inputName} {
+        ${Object.keys(model.attributes)
+          .filter(attribute => model.attributes[attribute].private !== true)
+          .map(attribute => {
+            return `${attribute}: ${this.convertType({
+              definition: model.attributes[attribute],
+              modelName: globalId,
+              attributeName: attribute,
+              rootType: 'mutation'
+            })}`;
+          })
+          .join('\n')
+        }
+      }
+    `;
+    /* eslint-enable */
+  },
+
+  generateInputPayloadArguments: function (model, name, type) {
+    const inputName = `${_.capitalize(name)}Input`;
+    const payloadName = `${_.capitalize(name)}Payload`;
+
+    switch(type) {
+      case 'create':
+        return `
+          input ${type}${inputName} { data: ${inputName} }
+          type ${type}${payloadName} { ${pluralize.singular(name)}: ${model.globalId} }
+        `;
+      case 'update':
+        return `
+          input ${type}${inputName}  { where: InputID, data: ${inputName} }
+          type ${type}${payloadName} { ${pluralize.singular(name)}: ${model.globalId} }
+        `;
+      case 'delete':
+        return `
+          input ${type}${inputName}  { where: InputID }
+          type ${type}${payloadName} { ${pluralize.singular(name)}: ${model.globalId} }  
+        `;
+      default:
+        // Nothing
+    }
+  }
 };
