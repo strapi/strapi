@@ -8,7 +8,7 @@
 const _ = require('lodash');
 const path = require('path');
 const glob = require('glob');
-const { graphqlKoa } = require('apollo-server-koa');
+const { ApolloServer, gql } = require('apollo-server-koa');
 const koaPlayground = require('graphql-playground-middleware-koa').default;
 const depthLimit = require('graphql-depth-limit');
 
@@ -100,34 +100,34 @@ module.exports = strapi => {
     },
 
     initialize: function(cb) {
-      const schema = strapi.plugins.graphql.services.schema.generateSchema();
+      const { typeDefs, resolvers } = strapi.plugins.graphql.services.schema.generateSchema();
 
-      if (_.isEmpty(schema)) {
+      if (_.isEmpty(typeDefs)) {
         strapi.log.warn('GraphQL schema has not been generated because it\'s empty');
 
         return cb();
       }
 
-      const router = strapi.koaMiddlewares.routerJoi();
-
-      router.post(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({
-        schema,
-        context: ctx,
-        validationRules: [ depthLimit(strapi.plugins.graphql.config.depthLimit) ]
-      })(ctx, next));
-
-      router.get(strapi.plugins.graphql.config.endpoint, async (ctx, next) => graphqlKoa({
-        schema,
-        context: ctx,
-        validationRules: [ depthLimit(strapi.plugins.graphql.config.depthLimit) ]
-      })(ctx, next));
+      const serverParams = { 
+        typeDefs, 
+        resolvers, 
+        context: async ({ ctx }) => ({
+          context: ctx
+        }), 
+        validationRules: [ depthLimit(strapi.plugins.graphql.config.depthLimit) ],
+        playground: false
+      };
 
       // Disable GraphQL Playground in production environment.
       if (strapi.config.environment !== 'production' || strapi.plugins.graphql.config.playgroundAlways) {
-        router.get('/playground', koaPlayground({ endpoint: strapi.plugins.graphql.config.endpoint}));
+        serverParams.playground = {
+          endpoint: strapi.plugins.graphql.config.endpoint
+        }
       }
 
-      strapi.app.use(router.middleware());
+      const server = new ApolloServer(serverParams);
+
+      server.applyMiddleware({ app: strapi.app, path: strapi.plugins.graphql.config.endpoint });
 
       cb();
     }

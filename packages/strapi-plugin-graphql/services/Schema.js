@@ -8,9 +8,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
-const { makeExecutableSchema } = require('graphql-tools');
 const Types = require('./Types.js');
 const Resolvers = require('./Resolvers.js');
 
@@ -205,7 +205,10 @@ module.exports = {
     // Write schema.
     this.writeGenerateSchema(graphql.printSchema(schema));
 
-    return schema;
+    return {
+      typeDefs: gql(typeDefs),
+      resolvers,
+    };
   },
 
   /**

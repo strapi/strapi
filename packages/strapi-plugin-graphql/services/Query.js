@@ -195,7 +195,7 @@ module.exports = {
     // Populate policies.
     policies.forEach(policy => policyUtils.get(policy, plugin, policiesFn, `GraphQL query "${queryName}"`, name));
 
-    return async (obj, options, context) => {
+    return async (obj, options, { context }) => {
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
