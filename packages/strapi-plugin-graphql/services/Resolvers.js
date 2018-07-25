@@ -171,7 +171,7 @@ module.exports = {
           _schema,
           plugin,
           name,
-          'update'
+          'delete'
         ) : null,
       };
 
