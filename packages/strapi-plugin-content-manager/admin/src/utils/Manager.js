@@ -1,3 +1,5 @@
+import { findIndex } from 'lodash';
+
 export default class Manager {
   constructor(state, list, keys, index, layout) {
     this.state = state;
@@ -128,23 +130,20 @@ export default class Manager {
   }
 
   /**
-   * Retrieves the studiedField's line boostrap col length
+   * Retrieve the line bootstrap col sum
    * @param {Number} leftBound 
    * @param {Number} rightBound 
    * @returns {Number}
    */
-  getLineColSize(leftBound, rightBound) {
-    const start = leftBound === 0 ? 1 : leftBound;
 
-    return this.list
-      .slice(start, rightBound)
-      .reduce((acc, current) => {
-        const appearance = this.layout.getIn([current, 'appearance']);
-        const type = appearance !== '' && appearance !== undefined ? appearance : this.getType(current);
-        const col = this.getBootStrapCol(type);
+  getLineSize(elements) {
+    return elements.reduce((acc, current) => {
+      const appearance = this.layout.getIn([current, 'appearance']);
+      const type = appearance !== '' && appearance !== undefined ? appearance : this.getType(current);
+      const col = current.includes('__col') ? parseInt(current.split('__')[1].split('-')[2], 10) : this.getBootStrapCol(type);
 
-        return acc += col;
-      }, 0);
+      return acc += col;
+    }, 0);
   }
 
   /**
@@ -158,11 +157,12 @@ export default class Manager {
     let hasResult = false;
 
     this.arrayOfEndLineElements.forEach(item => {
-      const cond = dir === true ? item.index >= pivot && !hasResult : item.index <= pivot;
+      const rightBondCond = findIndex(this.arrayOfEndLineElements, ['index', pivot]) !== -1 ? item.index < pivot : item.index <= pivot;
+      const cond = dir === true ? item.index >= pivot && !hasResult : rightBondCond;
 
       if (cond) {
         hasResult = true;
-        result = item;
+        result = dir === true ? item : this.list.get(item.index + 1);
       }
     });
 

@@ -139,54 +139,61 @@ function appReducer(state = initialState, action) {
         // Retrieve the removed element infos
         const attrToRemoveInfos = manager.attrToRemoveInfos;
         const arrayOfLastLineElements = manager.arrayOfEndLineElements;
-        // Retrieve the removed element bounds
-        const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) };
         const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
+
         let newList;
         
         // If removing we need to add the corresponding missing col in the prev line
         if (isRemovingAFullWidthNode) {
           const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]); // Used only to know if removing a full size element on the first line
-          const previousNodeLine = currentNodeLine - 1;
-          const previousLineBounds = previousNodeLine === 0 ? { left: 0, right: arrayOfLastLineElements[0].index } : { left: manager.getBound(false, attrToRemoveInfos.index - 1), right: manager.getBound(true, attrToRemoveInfos.index) };
-          const leftBoundIndex = get(previousLineBounds, ['left', 'index'], 0);
-          const rightBoundIndex = get(previousLineBounds, ['right', 'index'], 0);
-          const previousLineNumberOfItems = Math.abs(leftBoundIndex - rightBoundIndex) - 1;
-          const previousLineColNumber = manager.getLineColSize(leftBoundIndex, rightBoundIndex);
-    
-          // Don't add node if removing from the first line or after a complete line
-          if (currentNodeLine === 0 || previousLineNumberOfItems === -1 || previousLineColNumber >= 10) {
+
+          if (currentNodeLine === 0) {
             newList = list
               .delete(action.index);
           } else {
-            const colNumberToAdd = 12 - previousLineColNumber;
-            const colsToAdd = (() => {
-              switch(colNumberToAdd) {
-                case 9:
-                  return ['__col-md-3__', '__col-md-6__'];
-                case 8:
-                  return ['__col-md-4__', '__col-md-4__'];
-                case 6:
-                  return ['__col-md-6__'];
-                default:
-                  return ['__col-md-3__'];
-  
-              }
-            })();
-            
-            newList = list
-              .delete(attrToRemoveInfos.index)
-              .insert(attrToRemoveInfos.index, colsToAdd[0]);
-            
-            if (colsToAdd.length > 1) {
-              newList = newList.insert(attrToRemoveInfos.index, colsToAdd[1]);
-            }
+            const previousNodeLine = currentNodeLine - 1;
+            const firstElementOnLine = previousNodeLine === 0 ? 0 : arrayOfLastLineElements[previousNodeLine - 1].index + 1;
+            const lastElementOnLine = arrayOfLastLineElements[previousNodeLine].index + 1;
+            const previousLineRangeIndexes = firstElementOnLine === lastElementOnLine ? [firstElementOnLine] : range(firstElementOnLine, lastElementOnLine);
+            const elementsOnLine = pullAt(list.toJS(), previousLineRangeIndexes);
+            const previousLineColNumber = manager.getLineSize(elementsOnLine);
 
+            if (previousLineColNumber >= 10) {
+              newList = list
+                .delete(action.index);
+            } else {
+              const colNumberToAdd = 12 - previousLineColNumber;
+              const colsToAdd = (() => {
+                switch(colNumberToAdd) {
+                  case 9:
+                    return ['__col-md-3__', '__col-md-6__'];
+                  case 8:
+                    return ['__col-md-4__', '__col-md-4__'];
+                  case 6:
+                    return ['__col-md-6__'];
+                  default:
+                    return ['__col-md-3__'];
+    
+                }
+              })();
+
+              newList = list
+                .delete(attrToRemoveInfos.index)
+                .insert(attrToRemoveInfos.index, colsToAdd[0]);
+            
+              if (colsToAdd.length > 1) {
+                newList = newList
+                  .insert(attrToRemoveInfos.index, colsToAdd[1]);
+              }
+            }
           }
         } else {
-          const leftBoundIndex = get(nodeBounds, ['left', 'index'], 0);
-          const rightBoundIndex = get(nodeBounds, ['right', 'index'], 0);
-          const currentLineColSize = manager.getLineColSize(leftBoundIndex, rightBoundIndex);
+          // Retrieve the removed element bounds
+          const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) };
+          const leftBoundIndex = get(nodeBounds, ['left', 'index'], 0) + 1;
+          const rightBoundIndex = get(nodeBounds, ['right', 'index'], list.size -1);
+          const elementsOnLine = pullAt(list.toJS(), range(leftBoundIndex - 1, rightBoundIndex + 1));
+          const currentLineColSize = manager.getLineSize(elementsOnLine);
           const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
 
           if (isRemovingLine) {
@@ -205,7 +212,10 @@ function appReducer(state = initialState, action) {
         // NewState is the updated state
         const newState = state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], () => newList);
         const newManager = new Manager(newState, newList, action.keys, action.index, layout);
-        const newArrayOfLastLineElements = newManager.arrayOfEndLineElements;
+        const lastListItem = newManager.getAttrInfos(newList.size - 1);
+        const isLastItemFullSize = lastListItem.bootstrapCol === 12;
+        const newArrayOfLastLineElements = newManager.arrayOfEndLineElements
+          .concat({ name: lastListItem.name, index: lastListItem.index, isFullSize: isLastItemFullSize });
 
         // Array of element's index to remove from the new list
         let addedElementsToRemove = [];
