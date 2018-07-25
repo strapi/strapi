@@ -4,7 +4,9 @@
  *
  */
 
+export const BEGIN_MOVE = 'contentManager/App/BEGIN_MOVE';
 export const EMPTY_STORE = 'contentManager/App/EMPTY_STORE';
+export const END_MOVE = 'contentManager/App/END_MOVE';
 export const GET_MODEL_ENTRIES = 'contentManager/App/GET_MODEL_ENTRIES';
 export const GET_MODEL_ENTRIES_SUCCEEDED = 'contentManager/App/GET_MODEL_ENTRIES_SUCCEEDED';
 export const LOAD_MODELS = 'contentManager/App/LOAD_MODELS';
@@ -21,4 +23,5 @@ export const ON_REMOVE_EDIT_VIEW_FIELD_ATTR = 'contentManager/App/ON_REMOVE_EDIT
 export const ON_REMOVE_EDIT_VIEW_RELATION_ATTR = 'contentManager/App/ON_REMOVE_EDIT_VIEW_RELATION_ATTR';
 export const ON_RESET = 'contentManager/App/ON_RESET';
 export const ON_SUBMIT = 'contentManager/App/ON_SUBMIT';
+export const SET_LAYOUT = 'contentManager/App/SET_LAYOUT';
 export const SUBMIT_SUCCEEDED = 'contentManager/App/SUBMIT_SUCCEEDED';

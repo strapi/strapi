@@ -17,6 +17,8 @@ import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reac
 import PropTypes from 'prop-types';
 
 import {
+  beginMove,
+  endMove,
   moveAttr,
   moveAttrEditView,
   moveVariableAttrEditView,
@@ -28,6 +30,7 @@ import {
   onRemoveEditViewRelationAttr,
   onReset,
   onSubmit,
+  setLayout,
 } from 'containers/App/actions';
 import { makeSelectModifiedSchema , makeSelectSubmitSuccess } from 'containers/App/selectors';
 
@@ -65,6 +68,7 @@ class SettingPage extends React.PureComponent {
     this.handleClickEditAttr(0);
     const fields = this.getEditPageDisplayedFields();
     const relations = this.getEditPageDisplayedRelations();
+    this.props.setLayout(`${this.getPath()}.editDisplay`);
     
     if (fields.length > 0) {
       this.handleClickEditField(0);
@@ -373,7 +377,9 @@ class SettingPage extends React.PureComponent {
   renderDraggableAttrEditSettingsField = (attr, index) => {
     return (
       <VariableDraggableAttr
+        beginMove={this.props.beginMove}
         data={this.getAttrData(attr)}
+        endMove={this.props.endMove}
         index={index}
         // key={attr}
         isEditing={index === this.findIndexFieldToEdit()}
@@ -738,6 +744,8 @@ class SettingPage extends React.PureComponent {
 SettingPage.defaultProps = {};
 
 SettingPage.propTypes = {
+  beginMove: PropTypes.func.isRequired,
+  endMove: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   moveAttr: PropTypes.func.isRequired,
@@ -755,6 +763,7 @@ SettingPage.propTypes = {
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
+  setLayout: PropTypes.func.isRequired,
   settingPage: PropTypes.object.isRequired,
   submitSuccess: PropTypes.bool.isRequired,
 };
@@ -762,6 +771,8 @@ SettingPage.propTypes = {
 const mapDispatchToProps = (dispatch) => (
   bindActionCreators(
     {
+      beginMove,
+      endMove,
       moveAttr,
       moveAttrEditView,
       moveVariableAttrEditView,
@@ -776,6 +787,7 @@ const mapDispatchToProps = (dispatch) => (
       onRemoveEditViewRelationAttr,
       onReset,
       onSubmit,
+      setLayout,
     },
     dispatch,
   )

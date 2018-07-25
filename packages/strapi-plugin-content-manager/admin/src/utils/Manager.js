@@ -32,6 +32,19 @@ export default class Manager {
     return infos;
   }
 
+  getColsToAdd(number) {
+    switch(number) {
+      case 9:
+        return ['__col-md-3__', '__col-md-6__'];
+      case 8:
+        return ['__col-md-4__', '__col-md-4__'];
+      case 6:
+        return ['__col-md-6__'];
+      default:
+        return ['__col-md-3__'];
+    }
+  }
+
   /**
    * Retrieve a field default bootstrap col
    * NOTE: will change if we add the customisation of an input's width
@@ -162,7 +175,7 @@ export default class Manager {
 
       if (cond) {
         hasResult = true;
-        result = dir === true ? item : this.list.get(item.index + 1);
+        result = dir === true ? item : { name: this.list.get(item.index + 1), index: item.index + 1, isFullSize: false };
       }
     });
 

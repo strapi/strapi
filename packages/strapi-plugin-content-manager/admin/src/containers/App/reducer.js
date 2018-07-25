@@ -8,7 +8,9 @@ import { fromJS, List } from 'immutable';
 import { findIndex, get, pullAt, range, upperFirst } from 'lodash';
 import Manager from 'utils/Manager';
 import {
+  BEGIN_MOVE,
   EMPTY_STORE,
+  END_MOVE,
   GET_MODEL_ENTRIES_SUCCEEDED,
   LOAD_MODELS,
   LOADED_MODELS,
@@ -23,10 +25,13 @@ import {
   ON_REMOVE_EDIT_VIEW_RELATION_ATTR,
   ON_REMOVE_EDIT_VIEW_FIELD_ATTR,
   ON_RESET,
+  SET_LAYOUT,
   SUBMIT_SUCCEEDED,
 } from './constants';
 
 const initialState = fromJS({
+  draggedItemName: null,
+  hasMoved: false,
   formValidations: List([]),
   loading: true,
   modelEntries: 0,
@@ -37,8 +42,12 @@ const initialState = fromJS({
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
+    case BEGIN_MOVE:
+      return state.update('draggedItemName', () => action.name);
     case EMPTY_STORE:
       return state;
+    case END_MOVE:
+      return state.update('hasMoved', () => false).update('draggedItemName', () => null);
     case GET_MODEL_ENTRIES_SUCCEEDED:
       return state.set('modelEntries', action.count);
     case LOAD_MODELS:
@@ -65,10 +74,25 @@ function appReducer(state = initialState, action) {
     case MOVE_VARIABLE_ATTR_EDIT_VIEW:
       return state
         .updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
+          // const draggedItemName = state.get('draggedItemName');
+          // const draggedItemIndex = list.indexOf(draggedItemName);
+          // const path = action.keys.split('.');
+          // const modelName = path.length > 2 ? path[2] : path[0];
+          // const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
+          // const manager = new Manager(state, list, action.keys, draggedItemIndex, layout);
+          // const itemInfos = manager.getAttrInfos(draggedItemIndex);
+          // const isFullSize = itemInfos.bootstrapCol === 12;
+          
+          // if (isFullSize) {
+          //   const dropLineBounds = { left: manager.getBound(false, action.hoverIndex), right: manager.getBound(true, action.hoverIndex) };
+          //   const indexToDrop = manager.getBound(true, action.hoverIndex).index + 1;
+          // }
+
           return list
             .delete(action.dragIndex)
             .insert(action.hoverIndex, list.get(action.dragIndex));
-        });
+        })
+        .update('hasMoved', () => true);
     case ON_CHANGE:
       return state
         // NOTE: need comments
@@ -262,6 +286,39 @@ function appReducer(state = initialState, action) {
       return state
         .update('submitSuccess', v => v = !v)
         .update('schema', () => state.get('modifiedSchema'));
+    case SET_LAYOUT:
+      return state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
+        const path = action.keys.split('.');
+        const modelName = path.length > 2 ? path[2] : path[0];
+        const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
+        const manager = new Manager(state, list, action.keys, 0, layout);
+
+        let newList = list;
+        let sum = 0;
+        const arrayOfLastLineElements = manager.arrayOfEndLineElements;
+
+        arrayOfLastLineElements.forEach((item, i) => {
+          const firstLineItem = i === 0 ? 0 : arrayOfLastLineElements[i - 1].index +1;
+          const lastLineItem = item.index + 1;
+          const lineRange = firstLineItem === lastLineItem ? [firstLineItem] : range(firstLineItem, lastLineItem);
+          const lineItems = pullAt(list.toJS(), lineRange);
+          const lineSize = manager.getLineSize(lineItems);
+          
+          if (lineSize < 10 && i < arrayOfLastLineElements.length - 1) {
+            const colsToAdd = manager.getColsToAdd(12 - lineSize);
+            newList = newList.insert(lastLineItem + sum, colsToAdd[0]);
+            
+            if (colsToAdd.length > 1) {
+              newList = newList.insert(lastLineItem + sum, colsToAdd[1]);
+            }
+            sum += 1;
+            
+          }
+        });
+
+        return newList;
+      });
+
     default:
       return state;
   }

@@ -60,12 +60,13 @@ const getBootstrapClass = attrType => {
 
 const variableDraggableAttrSource = {
   beginDrag: props => {
-
+    props.beginMove(props.name, props.index);
     return {
       index: props.index,
     };
   },
-  endDrag: () => {
+  endDrag: props => {
+    props.endMove();
     return {};
   },
 };
@@ -84,7 +85,7 @@ const variableDraggableAttrTarget = {
     const hoverBoundingRect = findDOMNode(component).getBoundingClientRect(); // This appears to be changer the DOM
 
     // Get vertical middle
-    const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+    const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 8;
 
     // Determine mouse position
     const clientOffset = monitor.getClientOffset();
@@ -156,8 +157,8 @@ class VariableDraggableAttr extends React.PureComponent {
     let style = {};
 
     if (!type) {
-      style = { display: 'none' };
-      // style = { backgroundColor: 'blue' };
+      // style = { display: 'none' };
+      style = { backgroundColor: 'blue' };
       classNames = {
         bootstrap: name.split('__')[1],
         wrapper: cn(styles.attrWrapper),

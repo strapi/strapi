@@ -6,7 +6,9 @@
 
 import { includes } from 'lodash';
 import {
+  BEGIN_MOVE,
   EMPTY_STORE,
+  END_MOVE,
   GET_MODEL_ENTRIES,
   GET_MODEL_ENTRIES_SUCCEEDED,
   LOAD_MODELS,
@@ -23,12 +25,26 @@ import {
   ON_REMOVE_EDIT_VIEW_RELATION_ATTR,
   ON_RESET,
   ON_SUBMIT,
+  SET_LAYOUT,
   SUBMIT_SUCCEEDED,
 } from './constants';
+
+export function beginMove(name) {
+  return {
+    type: BEGIN_MOVE,
+    name,
+  };
+}
 
 export function emptyStore() {
   return {
     type: EMPTY_STORE,
+  };
+}
+
+export function endMove() {
+  return {
+    type: END_MOVE,
   };
 }
 
@@ -156,6 +172,13 @@ export function onReset() {
 export function onSubmit() {
   return {
     type: ON_SUBMIT,
+  };
+}
+
+export function setLayout(keys) {
+  return {
+    type: SET_LAYOUT,
+    keys,
   };
 }
 
