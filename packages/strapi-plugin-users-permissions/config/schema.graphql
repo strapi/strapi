@@ -24,6 +24,7 @@ module.exports = {
     },
     Mutation: {
       createRole: {
+        description: 'Create a new role',
         resolverOf: 'UsersPermissions.createRole',
         resolver: async (obj, options, ctx) => {
           await strapi.plugins['users-permissions'].controllers.userspermissions.createRole(ctx);
@@ -32,6 +33,7 @@ module.exports = {
         }
       },
       updateRole: {
+        description: 'Update an existing role',
         resolverOf: 'UsersPermissions.updateRole',
         resolver: async (obj, options, ctx) => {
           await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(ctx);
@@ -40,6 +42,7 @@ module.exports = {
         }
       },
       deleteRole: {
+        description: 'Delete an existing role',
         resolverOf: 'UsersPermissions.deleteRole',
         resolver: async (obj, options, ctx) => {
           await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(ctx);
