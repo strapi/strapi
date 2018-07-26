@@ -82,10 +82,10 @@ const variableDraggableAttrTarget = {
     }
 
     // Determine rectangle on screen
-    const hoverBoundingRect = findDOMNode(component).getBoundingClientRect(); // This appears to be changer the DOM
+    const hoverBoundingRect = findDOMNode(component).getBoundingClientRect();
 
     // Get vertical middle
-    const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 8;
+    const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2; // NOTE: Change the divider for wysiwyg
 
     // Determine mouse position
     const clientOffset = monitor.getClientOffset();
@@ -181,13 +181,11 @@ class VariableDraggableAttr extends React.PureComponent {
                 {name}
               </span>
               <ClickOverHint show={isOver} />
-
               {!isOver && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
                 <div className={styles.info}>
                   {data.label}
                 </div>
               )}
-
               {isEditing && !isOver ? (
                 <VariableEditIcon withLongerHeight={classNames.withLongerHeight} onClick={this.handleClickEdit} />
               ) : (

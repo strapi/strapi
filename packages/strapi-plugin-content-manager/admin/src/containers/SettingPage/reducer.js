@@ -12,7 +12,6 @@ import {
 
 const initialState = fromJS({
   fieldToEdit: fromJS({}),
-  indexListItemToEdit: 0, // NOTE: need to check if this used in the code...
   listItemToEdit: fromJS({}),
   relationToEdit: fromJS({}),
 });
@@ -22,7 +21,7 @@ function settingPageReducer(state = initialState, action) {
     case ON_CLICK_EDIT_FIELD: 
       return state
         .update('fieldToEdit', () => fromJS(action.fieldToEdit))
-        .update('relationToEdit', () => fromJS({})); // Both these object will be used to set the form so in order to know which form to display we set an empty object
+        .update('relationToEdit', () => fromJS({})); // Both these objects will be used to set the form in order to know which form needs to be displayed
     case ON_CLICK_EDIT_LIST_ITEM:
       return state.update('listItemToEdit', () => fromJS(action.listItemToEdit));
     case ON_CLICK_EDIT_RELATION:

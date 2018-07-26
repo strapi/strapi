@@ -13,9 +13,7 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 import { FormattedMessage } from 'react-intl';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
-
 import PropTypes from 'prop-types';
-
 import {
   beginMove,
   endMove,
@@ -33,26 +31,21 @@ import {
   setLayout,
 } from 'containers/App/actions';
 import { makeSelectModifiedSchema , makeSelectSubmitSuccess } from 'containers/App/selectors';
-
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
-
 import Block from 'components/Block';
 import DraggableAttr from 'components/DraggableAttr';
 import VariableDraggableAttr from 'components/VariableDraggableAttr';
-
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import { onClickEditField, onClickEditListItem, onClickEditRelation } from './actions';
-
 import forms from './forms.json';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectSettingPage from './selectors';
 import styles from './styles.scss';
-
 
 class SettingPage extends React.PureComponent {
   state = {
@@ -62,6 +55,8 @@ class SettingPage extends React.PureComponent {
     isOpenRelation: false,
     showWarning: false,
     showWarningCancel: false,
+    shouldSelectField: false,
+    shouldSelectRelation: false,
   };
 
   componentDidMount() {
@@ -75,12 +70,25 @@ class SettingPage extends React.PureComponent {
     } else if (relations.length > 0) {
       this.handleClickEditRelation(0);
     }
-
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
+    const { schema } = prevProps;
+    const prevDisplayedFields = get(schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'fields'], []);
+    const prevDisplayedRelations = get(schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'relations'], []);
+    const currentDisplayedFields = get(this.props.schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'fields'], []);
+    const currentDisplayedRelations = get(this.props.schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'relations'], []);
+    
     if (prevProps.submitSuccess !== this.props.submitSuccess) {
       this.toggle();
+    }
+
+    if (prevDisplayedFields.length === 0 && currentDisplayedFields.length > 0 && prevState.shouldSelectField !== this.state.shouldSelectField) {
+      this.handleClickEditField(0);
+    }
+
+    if (prevDisplayedRelations.length === 0 && currentDisplayedRelations.length > 0 && prevState.shouldSelectRelation !== this.state.shouldSelectRelation) {
+      this.handleClickEditRelation(0);
     }
   }
 
@@ -286,21 +294,52 @@ class SettingPage extends React.PureComponent {
     this.props.onRemove(index, keys);
   }
 
+  handleRemoveField = (index, keys) => {
+    const { settingPage: { fieldToEdit } } = this.props;
+    const fieldToEditName = get(this.props.schema, ['models', ...keys.split('.'), 'fields', index], '');
+    this.manageRemove(index, keys, fieldToEditName, fieldToEdit, false);
+  }
+
   handleRemoveRelation = (index, keys) => {
     const { settingPage: { relationToEdit } } = this.props;
     const relationToRemoveName = get(this.props.schema, ['models', ...keys.split('.'), index]);
-    const isRemovingSelectedItem = relationToRemoveName === relationToEdit.alias;
+    this.manageRemove(index, keys, relationToRemoveName, relationToEdit);
+  }
+
+  manageRemove = (index, keys, itemName, data, isRelation = true) => {
+    const isRemovingSelectedItem = isRelation ? itemName === data.alias : itemName === data.name;
     const displayedRelations = this.getEditPageDisplayedRelations();
     const displayedFields = this.getEditPageDisplayedFields();
+    
+    if (isRelation) {
+      this.props.onRemoveEditViewRelationAttr(index, keys);
+    } else {
+      this.props.onRemoveEditViewFieldAttr(index, keys);
+    }
 
-    this.props.onRemoveEditViewRelationAttr(index, keys);
+    if (isRemovingSelectedItem) {
+      const selectNextItemCond = isRelation ? displayedRelations.length > 2 : displayedFields.length > 2;
+      const selectOtherItemCond = isRelation ? displayedFields.length > 0 : displayedRelations.length > 0;
+      const selectNextFunc = isRelation ? this.handleClickEditRelation : this.handleClickEditField;
+      const selectOtherFunc = !isRelation ? this.handleClickEditRelation : this.handleClickEditField;
 
-    if (isRemovingSelectedItem && displayedRelations.length > 1) {
-      const nextIndex = index - 1 > -1 ? index - 1 : index + 1;
-      this.handleClickEditRelation(nextIndex);
-    } else if (displayedFields.length > 0) {
-      this.handleClickEditField(0);
-    } // Else add a field in the other drag and auto select it
+      if (selectNextItemCond) {
+        const nextIndex = index - 1 > 0 ? index - 1 : index + 1;
+        selectNextFunc(nextIndex);
+      } else if (selectOtherItemCond) {
+        selectOtherFunc(0);
+      } else {
+        const toAdd = isRelation ? this.getDropDownFieldItems()[0] : this.getDropDownRelationsItems()[0];
+
+        if (isRelation) {
+          this.props.onClickAddAttrField(toAdd, `${this.getPath()}.editDisplay.fields`);
+          this.setState(prevState => ({ shouldSelectField: !prevState.shouldSelectField }));
+        } else {
+          this.props.onClickAddAttr(toAdd, `${this.getPath()}.editDisplay.relations`);
+          this.setState(prevState => ({ shouldSelectRelation: !prevState.shouldSelectRelation }));
+        }
+      }
+    }
   }
 
   handleReset = (e) => {
@@ -388,7 +427,7 @@ class SettingPage extends React.PureComponent {
         layout={this.getLayout()}
         name={attr}
         moveAttr={this.props.moveVariableAttrEditView}
-        onRemove={this.props.onRemoveEditViewFieldAttr}
+        onRemove={this.handleRemoveField}
         onClickEdit={this.handleClickEditField}
       />
     );
@@ -482,7 +521,6 @@ class SettingPage extends React.PureComponent {
     }
 
     return null;
-
   }
 
   renderFormEditSettingsField = (input, i) => {
@@ -792,13 +830,11 @@ const mapDispatchToProps = (dispatch) => (
     dispatch,
   )
 );
-
 const mapStateToProps = createStructuredSelector({
   schema: makeSelectModifiedSchema(),
   settingPage: makeSelectSettingPage(),
   submitSuccess: makeSelectSubmitSuccess(),
 });
-
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withReducer = injectReducer({ key: 'settingPage', reducer });
 const withSaga = injectSaga({ key: 'settingPage', saga });

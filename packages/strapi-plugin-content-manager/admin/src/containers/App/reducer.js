@@ -179,7 +179,7 @@ function appReducer(state = initialState, action) {
             const firstElementOnLine = previousNodeLine === 0 ? 0 : arrayOfLastLineElements[previousNodeLine - 1].index + 1;
             const lastElementOnLine = arrayOfLastLineElements[previousNodeLine].index + 1;
             const previousLineRangeIndexes = firstElementOnLine === lastElementOnLine ? [firstElementOnLine] : range(firstElementOnLine, lastElementOnLine);
-            const elementsOnLine = pullAt(list.toJS(), previousLineRangeIndexes);
+            const elementsOnLine = pullAt(list.toJS(), previousLineRangeIndexes); // NOTE: Should be handled by the manager
             const previousLineColNumber = manager.getLineSize(elementsOnLine);
 
             if (previousLineColNumber >= 10) {
@@ -197,7 +197,6 @@ function appReducer(state = initialState, action) {
                     return ['__col-md-6__'];
                   default:
                     return ['__col-md-3__'];
-    
                 }
               })();
 
@@ -213,10 +212,10 @@ function appReducer(state = initialState, action) {
           }
         } else {
           // Retrieve the removed element bounds
-          const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) };
+          const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) }; // NOTE: could be refacto
           const leftBoundIndex = get(nodeBounds, ['left', 'index'], 0) + 1;
           const rightBoundIndex = get(nodeBounds, ['right', 'index'], list.size -1);
-          const elementsOnLine = pullAt(list.toJS(), range(leftBoundIndex - 1, rightBoundIndex + 1));
+          const elementsOnLine = pullAt(list.toJS(), range(leftBoundIndex - 1, rightBoundIndex + 1)); // NOTE: Same here
           const currentLineColSize = manager.getLineSize(elementsOnLine);
           const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
 
@@ -246,7 +245,7 @@ function appReducer(state = initialState, action) {
 
         newArrayOfLastLineElements.forEach((item, i) => {
           if (i < newArrayOfLastLineElements.length) {
-            const firstElementOnLine = i === 0 ? 0 : newArrayOfLastLineElements[i - 1].index + 1;
+            const firstElementOnLine = i === 0 ? 0 : newArrayOfLastLineElements[i - 1].index + 1; // NOTE: Should be a function
             const lastElementOnLine = newArrayOfLastLineElements[i].index;
             const rangeIndex = range(firstElementOnLine, lastElementOnLine + 1);
             const elementsOnLine = pullAt(newList.toJS(), rangeIndex)
@@ -297,7 +296,7 @@ function appReducer(state = initialState, action) {
         let sum = 0;
         const arrayOfLastLineElements = manager.arrayOfEndLineElements;
 
-        arrayOfLastLineElements.forEach((item, i) => {
+        arrayOfLastLineElements.forEach((item, i) => { // NOTE: Should be refactored
           const firstLineItem = i === 0 ? 0 : arrayOfLastLineElements[i - 1].index +1;
           const lastLineItem = item.index + 1;
           const lineRange = firstLineItem === lastLineItem ? [firstLineItem] : range(firstLineItem, lastLineItem);
