@@ -16,9 +16,8 @@ module.exports = async cb => {
     'associations'
   ]);
 
-  const tempLayout = Object.keys(strapi.plugins).reduce((acc, current) => {
+  const pluginsLayout = Object.keys(strapi.plugins).reduce((acc, current) => {
     const models = _.get(strapi.plugins, [current, 'config', 'layout'], {});
-
     Object.keys(models).forEach(model => {
       const layout = _.get(strapi.plugins, [current, 'config', 'layout', model], {});
       acc[model] = layout;
@@ -27,6 +26,13 @@ module.exports = async cb => {
     return acc;
   }, {});
 
+  const tempLayout = Object.keys(strapi.models)
+    .filter(m => m !== 'core_store')
+    .reduce((acc, current) => {
+      acc[current] = { attributes: {} };
+
+      return acc;
+    }, pluginsLayout);
 
   const models = _.mapValues(strapi.models, pickData);
   delete models['core_store'];
