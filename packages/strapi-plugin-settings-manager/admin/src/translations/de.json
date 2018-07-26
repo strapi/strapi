@@ -112,6 +112,7 @@
   "form.language.choose": "Wähle eine Sprache:",
 
   "request.error.database.exist": "Diese Verbindung gibt es bereits",
+  "request.error.database.unknow": "Keine solche Verbindung",
   "request.error.type.string": "Ein Text ist erforderlich.",
   "request.error.type.number": "Eine Nummer ist erforderlich.",
   "request.error.type.boolean": "Ein Boolean ist erforderlich.",
