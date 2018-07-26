@@ -16,7 +16,7 @@ module.exports = {
       updateFile: false,
       deleteFile: false,
       upload: {
-        description: 'Upload a single file',
+        description: 'Upload one or many files',
         resolver: async (obj, { file, ...fields}, { context }) => {
           // Construct context to fit with koa-parser guidelines
           // and avoid to update our business logic too much.
