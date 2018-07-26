@@ -239,9 +239,11 @@ module.exports = {
 
 - `definition` (string): let's you define new type, input, etc.
 - `query` (string): where you add custom query.
+- `mutation` (string): where you add custom mutation.
 - `type` (object): allows you to add description, deprecated field or disable the [Shadow CRUD](#shadow-crud) feature on a specific type.
 - `resolver` (object):
   - `Query` (object): let's you define custom resolver, policies for a query.
+  - `Mutation` (object): let's you define custom resolver, policies for a mutation.
 
 
 #### Example
@@ -261,8 +263,11 @@ module.exports = {
     }
   `,
   query: `
-    postsByAuthor(id: String, status: PostStatusInput, limit: Int): [Post]!
+    postsByAuthor(id: ID, status: PostStatusInput, limit: Int): [Post]!
   `,
+  mutation: `
+    attachPostToAuthor(id: ID, authorID: ID): Post!
+  `
   resolver: {
     Query: {
       post: {
@@ -286,6 +291,13 @@ module.exports = {
 
           return ctx.body.posts || `There is no post.`;
         }
+      }
+    },
+    Mutation: {
+      attachPostToAuthor: {
+        description: 'Attach a post to an author',
+        policy: ['plugins.users-permissions.isAuthenticated', 'isOwner'],
+        resolver: 'Post.attachToAuthor'
       }
     }
   }
@@ -415,6 +427,12 @@ module.exports = {
         description: 'Return a list of posts', // Add a description to the query.
         deprecated: 'This query should not be used anymore. Please consider using postsByAuthor instead.' // Deprecate the query and explain the reason why.
       }
+    },
+    Mutation: {
+      createPost: {
+        description: 'Create a new post',
+        deprecated: 'Please use the dashboard UI instead'
+      }
     }
   }
 };
@@ -432,6 +450,12 @@ module.exports = {
         description: 'Return a list of posts',
         policy: ['plugins.users-permissions.isAuthenticated', 'isOwner', 'global.logging']
       }
+    },
+    Mutation: {
+      createPost: {
+        description: 'Create a new post',
+        policy: ['plugins.users-permissions.isAuthenticated', 'global.logging']
+      }
     }
   }
 };
@@ -439,9 +463,11 @@ module.exports = {
 
 In this example, the policy `isAuthenticated` located in `./plugins/users-permissions/config/policies/isAuthenticated.js` will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
+The same process is applied to the `createPost` mutation.
+
 > Note: There is no custom resolver in that case, so it will execute the default resolver (Post.find) provided by the Shadow CRUD feature.
 
-### Link a query to a controller action
+### Link a query or mutation to a controller action
 
 By default, the plugin will execute the actions located in the controllers that has been generated via the Content-Type Builder plugin or the CLI. For example, the query `posts` is going to execute the logic inside the `find` action in the `Post.js` controller. It might happens that you want to execute another action or a custom logic for one of your query.
 
@@ -453,6 +479,12 @@ module.exports = {
         description: 'Return a list of posts by author',
         resolver: 'Post.findByAuthor'
       }
+    },
+    Mutation: {
+      createPost: {
+        description: 'Create a new post',
+        resolver: 'Post.customCreate'
+      }
     }
   }
 };
@@ -462,6 +494,10 @@ In this example, it will execute the `findByAuthor` action of the `Post` control
 
 > Note: The `obj` parameter is available via `ctx.params` and the `options` are available via `ctx.query` in the controller's action.
 
+The same process is also applied for the `createPost` mutation. It will execute the `customCreate` action of the `Post` controller.
+
+> Note: The `where` parameter is available via `ctx.params` and the `data` are available via `ctx.request.body` in the controller's action.
+
 ### Define a custom resolver
 
 ```js
@@ -470,13 +506,26 @@ module.exports = {
     Query: {
       posts: {
         description: 'Return a list of posts by author',
-        resolver: (obj, options, context) => {
+        resolver: (obj, options, { context }) => {
           // You can return a raw JSON object or a promise.
 
           return [{
             title: 'My first blog post',
             content: 'Whatever you want...'
           }];
+        }
+      }
+    },
+    Mutation: {
+      updatePost: {
+        description: 'Update an existing post',
+        resolver: (obj, options, { context }) => {
+          // The `where` and `data` parameters passed as arguments
+          // of the GraphQL mutation are available via the `context` object.
+          const where = context.params;
+          const data = context.request.body;
+
+          return await strapi.api.post.services.post.addPost(data, where);
         }
       }
     }
@@ -506,6 +555,18 @@ module.exports = {
           }];
         }
       }
+    },
+    Mutation: {
+      updatePost: {
+        description: 'Update an existing post',
+        resolverOf: 'Post.update', // Will apply the same policy on the custom resolver than the controller's action `update` located in `Post.js`.
+        resolver: (obj, options, { context }) => {
+          const where = context.params;
+          const data = context.request.body;
+
+          return await strapi.api.post.services.post.addPost(data, where);
+        }
+      }
     }
   }
 };
@@ -518,11 +579,15 @@ To do that, we need to use the `schema.graphql` like below:
 ```js
 module.exports = {
   type: {
-    Post: false // The Post type won't be "queriable".
+    Post: false // The Post type won't be "queriable" or "mutable".
   }
   resolver: {
     Query: {
       posts: false // The `posts` query will no longer be in the GraphQL schema.
+    },
+    Mutation: {
+      createPost: false,
+      deletePOst: false
     }
   }
 };
