@@ -77,7 +77,7 @@ At this point, your application is empty. To create your first API is to use the
 
 ![Content Type Builder - Home](../assets/getting-started_no_content_type.png)
 
-**#2 —** Create a Content Type name `Product` and submit the form.
+**#2 —** Create a Content Type named `Product` and submit the form.
 
 ![Content Type Builder - Create a new Content Type](../assets/getting-started_create_content_type.png)
 
@@ -92,7 +92,7 @@ At this point, your application is empty. To create your first API is to use the
 **#4 —** Save. That's it!
 
 
-> Note: See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for informations about how to do it the hacker way.
+> Note: See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for more information on how to do it the hacker way.
 
 ### Files structure
 
