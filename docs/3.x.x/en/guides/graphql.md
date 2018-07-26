@@ -68,8 +68,10 @@ mutation {
       email: "john@doe.com"
     }
   }) {
-    username
-    email
+    user {
+      username
+      email
+    }
   }
 }
 ```
@@ -77,7 +79,7 @@ mutation {
 ##### Update an existing entry
 
 - `input`: Object
-  - `where`: Object - Entry's ID
+  - `where`: Object - Entry's ID to update
   - `data`: Object — Values to update
 
 ```
@@ -91,23 +93,30 @@ mutation {
       email: "john@doe.com"
     }
   }) {
-    username
-    email
+    user {
+      username
+      email
+    }
   }
 }
 ```
 
 ##### Delete an entry
 
+- `input`: Object
+  - `where`: Object - Entry's ID to delete
+
 ```
 mutation {
-  updateUser(input: {
+  deleteUser(input: {
     where: {
       id: "5b28f1747c739e4afb48605c"
     }
   }) {
-    username
-    email
+    user {
+      username
+      email
+    }
   }
 }
 ```
@@ -156,7 +165,7 @@ query {
 
 ## Shadow CRUD
 
-To simplify and automate the build of the GraphQL schema, we introduced the Shadow CRUD feature. It automatically generates the type definition, queries and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
+To simplify and automate the build of the GraphQL schema, we introduced the Shadow CRUD feature. It automatically generates the type definition, queries, mutations and resolvers based on your models. The feature also lets you make complex query with many arguments such as `limit`, `sort`, `start` and `where`.
 
 
 #### Example
@@ -186,6 +195,7 @@ If you've generated an API called `Post` using the CLI `strapi generate:api post
 
 The generated GraphQL type and queries will be:
 ```
+// Post's Type definition
 type Post {
   _id: String
   created_at: String
@@ -195,13 +205,21 @@ type Post {
   published: Boolean
 }
 
+// Queries to retrieve one or multiple posts.
 type Query {
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
   post(id: String!): Post
 }
+
+// Mutations to create, update or delete a post.
+type Mutation {
+  createProduct(input: createProductInput): createProductPayload!
+  updateProduct(input: updateProductInput): updateProductPayload!
+  deleteProduct(input: deleteProductInput): deleteProductPayload!
+}
 ```
 
-The query will use the generated controller's actions as resolvers. It means that the `posts` query will execute the `Post.find` action and the `post` query will use the `Post.findOne` action.
+The queries and mutations will use the generated controller's actions as resolvers. It means that the `posts` query will execute the `Post.find` action, the `post` query will use the `Post.findOne` action and the `createProduct` mutation will use the `Post.create` action, etc.
 
 ## Customise the GraphQL schema
 
