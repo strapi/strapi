@@ -28,6 +28,7 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.form.register.password.label": "Passwort",
   "Auth.form.register.confirmPassword.label": "Passwort-Bestätigung",
+  "Auth.form.register.news.label": "Halten Sie mich auf dem Laufenden über die neuen Funktionen und kommenden Verbesserungen.",
 
   "Auth.form.register-success.email.label": "Eine E-Mail wurde erfolgreich verschickt an",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
