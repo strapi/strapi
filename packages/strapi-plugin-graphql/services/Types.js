@@ -7,6 +7,7 @@
  */
 
 const _ = require('lodash');
+const { GraphQLUpload } = require('apollo-server-koa');
 const graphql = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const GraphQLDateTime = require('graphql-type-datetime');
@@ -99,6 +100,18 @@ module.exports = {
   convertEnumType: (definition, model, field) => definition.enumName ? definition.enumName : `ENUM_${model.toUpperCase()}_${field.toUpperCase()}`,
 
   /**
+   * Remove custom scalar type such as Upload because Apollo automatically adds it in the schema.
+   * but we need to add it to print the schema on our side.
+   *
+   * @return void
+   */
+
+  removeCustomScalar: (typeDefs, resolvers) => {
+    delete resolvers.Upload;
+    return typeDefs.replace('scalar Upload', '');
+  },
+
+  /**
    * Add custom scalar type such as JSON.
    *
    * @return void
@@ -108,9 +121,10 @@ module.exports = {
     Object.assign(resolvers, {
       JSON: GraphQLJSON,
       DateTime: GraphQLDateTime,
+      Upload: GraphQLUpload
     });
 
-    return 'scalar JSON \n scalar DateTime';
+    return 'scalar JSON \n scalar DateTime \n scalar Upload';
   },
 
   /**
@@ -173,7 +187,11 @@ module.exports = {
     /* eslint-enable */
   },
 
-  generateInputPayloadArguments: function (model, name, type) {
+  generateInputPayloadArguments: function (model, name, type, resolver) {
+    if (_.get(resolver, `Mutation.${type}${_.capitalize(name)}`) === false) {
+      return ``;
+    }
+
     const inputName = `${_.capitalize(name)}Input`;
     const payloadName = `${_.capitalize(name)}Payload`;
 

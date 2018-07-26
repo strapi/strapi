@@ -11,6 +11,8 @@ const path = require('path');
 const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
+const Query = require('./Query.js');
+const Mutation =  require('./Mutation.js');
 const Types = require('./Types.js');
 const Resolvers = require('./Resolvers.js');
 
@@ -143,7 +145,7 @@ module.exports = {
     })() : { definition: '', query: '', mutation: '', resolver: '' };
 
     // Extract custom definition, query or resolver.
-    const { definition, query, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
+    const { definition, query, mutation, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
 
     // Polymorphic.
     const { polymorphicDef, polymorphicResolver } = Types.addPolymorphicUnionType(definition, shadowCRUD.definition);
@@ -162,18 +164,34 @@ module.exports = {
         }
 
         if (!_.isFunction(acc[type][resolver])) {
+          console.log(type, resolver);
+   
           acc[type][resolver] = acc[type][resolver].resolver;
         }
 
         if (_.isString(acc[type][resolver]) || _.isPlainObject(acc[type][resolver])) {
           const { plugin = '' } = _.isPlainObject(acc[type][resolver]) ? acc[type][resolver] : {};
 
-          acc[type][resolver] = Resolver.composeResolver(
-            strapi.plugins.graphql.config._schema.graphql,
-            plugin,
-            resolver,
-            'force' // Avoid singular/pluralize and force query name.
-          );
+          switch (type) {
+            case 'Mutation':
+              // TODO: Verify this...
+              acc[type][resolver] = Mutation.composeMutationResolver(
+                strapi.plugins.graphql.config._schema.graphql,
+                plugin,
+                resolver
+              );
+              break;
+            case 'Query':
+            default:
+              acc[type][resolver] = Query.composeQueryResolver(
+                strapi.plugins.graphql.config._schema.graphql,
+                plugin,
+                resolver,
+                'force' // Avoid singular/pluralize and force query name.
+              );
+              break;
+          }
+          
         }
 
         return acc;
@@ -186,11 +204,11 @@ module.exports = {
     }
 
     // Concatenate.
-    const typeDefs = `
+    let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
       type Query {${shadowCRUD.query && this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
-      type Mutation {${shadowCRUD.mutation && this.formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation')}}
+      type Mutation {${shadowCRUD.mutation && this.formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation')}${mutation}}
       ${Types.addCustomScalar(resolvers)}
       ${Types.addInput()}
       ${polymorphicDef}
@@ -204,6 +222,9 @@ module.exports = {
 
     // Write schema.
     this.writeGenerateSchema(graphql.printSchema(schema));
+
+    // Remove custom scaler (like Upload);
+    typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
 
     return {
       typeDefs: gql(typeDefs),

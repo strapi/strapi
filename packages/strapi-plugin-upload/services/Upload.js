@@ -23,11 +23,20 @@ module.exports = {
     // transform all files in buffer
     return Promise.all(
       files.map(async stream => {
-        const parts = await toArray(fs.createReadStream(stream.path));
+        const parts = stream.path ?
+          await toArray(fs.createReadStream(stream.path)):
+          await toArray(stream.stream);
+
         const buffers = parts.map(
           part => _.isBuffer(part) ? part : Buffer.from(part)
         );
 
+        if (!stream.path) {
+          stream.name = stream.filename;
+          stream.type = stream.mimetype;
+          stream.size = parseInt(stream.encoding.replace('bit', ''));
+        }
+        
         return {
           name: stream.name,
           hash: uuid().replace(/-/g, ''),

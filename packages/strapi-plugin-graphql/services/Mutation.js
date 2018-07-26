@@ -54,7 +54,7 @@ module.exports = {
     const resolver = (() => {
       // Try to retrieve custom resolver.
       const resolver = _.get(handler, `Mutation.${queryName}.resolver`);
-
+      
       if (_.isString(resolver) || _.isPlainObject(resolver)) {
         const { handler = resolver } = _.isPlainObject(resolver) ? resolver : {};
 

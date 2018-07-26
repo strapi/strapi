@@ -179,42 +179,43 @@ module.exports = {
       acc.definition += Types.generateInputModel(model, name);
 
       Object.keys(mutations).forEach(type => {
-        let mutationDefinition;
-        let mutationName = `${type}${_.capitalize(name)}`;
+        if (_.isFunction(mutations[type])) {
+          let mutationDefinition;
+          let mutationName = `${type}${_.capitalize(name)}`;
 
-        // Generate the Input for this specific action.
-        acc.definition += Types.generateInputPayloadArguments(model, name, type);
-        
-        switch(type) {
-          case 'create':
-            mutationDefinition = {
-              [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`
-            };
+          // Generate the Input for this specific action.
+          acc.definition += Types.generateInputPayloadArguments(model, name, type);
+          
+          switch(type) {
+            case 'create':
+              mutationDefinition = {
+                [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`
+              };
 
-            break;
-          case 'update':
-            mutationDefinition = {
-              [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`
-            };
+              break;
+            case 'update':
+              mutationDefinition = {
+                [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`
+              };
 
-            break;
-          case 'delete':
-            mutationDefinition = {
-              [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`
-            };
+              break;
+            case 'delete':
+              mutationDefinition = {
+                [`${mutationName}(input: ${mutationName}Input)`]: `${mutationName}Payload`
+              };
+              break;
+            default:
+              // Nothing.
+          }
 
-            break;
-          default:
-            // Nothing.
+          // Assign mutation definition to global definition.
+          Object.assign(acc.mutation, mutationDefinition);
+
+          // Assign resolver to this mutation and merge it with the others.
+          _.merge(acc.resolver.Mutation, {
+            [`${mutationName}`]: mutations[type]
+          });
         }
-
-        // Assign mutation definition to global definition.
-        Object.assign(acc.mutation, mutationDefinition);
-
-        // Assign resolver to this mutation and merge it with the others.
-        _.merge(acc.resolver.Mutation, {
-          [`${mutationName}`]: mutations[type]
-        });
       });
 
       // Build associations queries.
