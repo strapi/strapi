@@ -402,7 +402,7 @@ module.exports = function(strapi) {
                       } else {
                         switch (attribute.type) {
                           case 'text':
-                            type = 'text';
+                            type = definition.client === 'pg' ? type = 'text' : 'longtext';
                             break;
                           case 'json':
                             type = definition.client === 'pg' ? 'jsonb' : 'longtext';
