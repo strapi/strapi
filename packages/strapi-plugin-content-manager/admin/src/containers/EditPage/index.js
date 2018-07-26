@@ -12,30 +12,25 @@ import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
 import { cloneDeep, findIndex, get, includes, isEmpty, isObject, toNumber, toString, replace } from 'lodash';
 import cn from 'classnames';
-
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
 import BackHeader from 'components/BackHeader';
+import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
-
 // Plugin's components
 import Edit from 'components/Edit';
 import EditRelations from 'components/EditRelations';
-
 // App selectors
 import { makeSelectSchema } from 'containers/App/selectors';
-
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 import { bindLayout } from 'utils/bindLayout';
 import inputValidations from 'utils/inputsValidations';
-
 import { checkFormValidity } from 'utils/formValidations';
-
 import {
   changeData,
   getData,
@@ -46,7 +41,6 @@ import {
   setFormErrors,
   submit,
 } from './actions';
-
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectEditPage from './selectors';
@@ -239,6 +233,10 @@ export class EditPage extends React.Component {
     return this.getDisplayedRelations().length > 0;
   }
 
+  hasDisplayedFields = () => {
+    return get(this.getModel(), ['editDisplay', 'fields'], []).length > 0;
+  }
+
   isCreating = () => this.props.match.params.id === 'create';
 
   isRelationComponentNull = () => (
@@ -286,6 +284,63 @@ export class EditPage extends React.Component {
 
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
+  renderEdit = () => {
+    const { editPage, location: { search } } = this.props;
+    const source = getQueryParameters(search, 'source');
+    const basePath = '/plugins/content-manager/ctm-configurations';
+    const pathname = source !== 'content-manager'
+      ? `${basePath}/plugins/${source}/${this.getModelName()}`
+      : `${basePath}/${this.getModelName()}`;
+
+    const Wrapper = ({ children }) => (
+      <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
+        {children}
+      </div>
+    );
+    
+    if (this.showLoaders()) {
+      return (
+        <Wrapper>
+          <div className={styles.main_wrapper}>  
+            <LoadingIndicator />
+          </div>
+        </Wrapper>
+      );
+    }
+
+    if (!this.hasDisplayedFields()) {
+      return (
+        <Wrapper>
+          <EmptyAttributesBlock
+            description="content-manager.components.EmptyAttributesBlock.description"
+            label="content-manager.components.EmptyAttributesBlock.button"
+            onClick={() => this.props.history.push(pathname)}
+          />
+        </Wrapper>
+      );
+    }
+
+    return (
+      <Wrapper>
+        <div className={styles.main_wrapper}>
+          <Edit
+            attributes={this.getModelAttributes()}
+            didCheckErrors={editPage.didCheckErrors}
+            formValidations={editPage.formValidations}
+            formErrors={editPage.formErrors}
+            layout={this.getLayout()}
+            modelName={this.getModelName()}
+            onBlur={this.handleBlur}
+            onChange={this.handleChange}
+            record={editPage.record}
+            resetProps={editPage.resetProps}
+            schema={this.getSchema()}
+          />
+        </div>
+      </Wrapper>
+    );
+  }
+
   render() {
     const { editPage } = this.props;
     const { showWarning } = this.state;
@@ -312,27 +367,7 @@ export class EditPage extends React.Component {
               onConfirm={this.handleConfirm}
             />
             <div className="row">
-              <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
-                <div className={styles.main_wrapper}>
-                  {this.showLoaders() ? (
-                    <LoadingIndicator />
-                  ) : (
-                    <Edit
-                      attributes={this.getModelAttributes()}
-                      didCheckErrors={editPage.didCheckErrors}
-                      formValidations={editPage.formValidations}
-                      formErrors={editPage.formErrors}
-                      layout={this.getLayout()}
-                      modelName={this.getModelName()}
-                      onBlur={this.handleBlur}
-                      onChange={this.handleChange}
-                      record={editPage.record}
-                      resetProps={editPage.resetProps}
-                      schema={this.getSchema()}
-                    />
-                  )}
-                </div>
-              </div>
+              {this.renderEdit()}
               {this.hasDisplayedRelations() && (
                 <div className={cn('col-lg-3')}>
                   <div className={styles.sub_wrapper}>

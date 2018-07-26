@@ -37,6 +37,9 @@
 
   "components.DraggableAttr.edit": "Click to edit",
 
+  "components.EmptyAttributesBlock.description": "You can change your settings",
+  "components.EmptyAttributesBlock.button": "Go to settings page",
+
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Apply",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Clear all",
   "components.FiltersPickWrapper.PluginHeader.description": "Set the conditions to apply to filter the entries",
