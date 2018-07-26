@@ -34,16 +34,24 @@ export default class Manager {
   }
 
   getColsToAdd(number) {
+    let ret;
+
     switch(number) {
       case 9:
-        return ['__col-md-3__', '__col-md-6__'];
+        ret = ['__col-md-3__', '__col-md-6__'];
+        break;
       case 8:
-        return ['__col-md-4__', '__col-md-4__'];
+        ret = ['__col-md-4__', '__col-md-4__'];
+        break;
       case 6:
-        return ['__col-md-6__'];
+        ret = ['__col-md-6__'];
+        break;
       default:
-        return ['__col-md-3__'];
+        ret = ['__col-md-3__'];
     }
+    const random = Math.floor(Math.random() * 1000);
+
+    return ret.map(v => `${v}${random}`);
   }
 
   /**

@@ -13,11 +13,9 @@ import {
 } from 'react-dnd';
 import { get, flow } from 'lodash';
 import cn from 'classnames';
-
 import ClickOverHint from 'components/ClickOverHint';
 import DraggedRemovedIcon  from 'components/DraggedRemovedIcon';
 import VariableEditIcon from 'components/VariableEditIcon';
-
 import styles from './styles.scss';
 
 const getBootstrapClass = attrType => {
@@ -57,11 +55,12 @@ const getBootstrapClass = attrType => {
       };
   }
 };
-
 const variableDraggableAttrSource = {
-  beginDrag: props => {
+  beginDrag: (props) => {
     props.beginMove(props.name, props.index);
+
     return {
+      id: props.id,
       index: props.index,
     };
   },
@@ -70,7 +69,6 @@ const variableDraggableAttrSource = {
     return {};
   },
 };
-
 const variableDraggableAttrTarget = {
   hover: (props, monitor, component) => {
     const dragIndex = monitor.getItem().index;
@@ -119,11 +117,35 @@ const variableDraggableAttrTarget = {
 };
 
 class VariableDraggableAttr extends React.PureComponent {
-  state = { isOver: false };
+  constructor(props) {
+    super(props);
+    const { data, layout, name } = this.props;
+    const appearance = get(layout, [name, 'appearance'], '');
+    const type = appearance !== '' ? appearance : data.type;    
+    let classNames = getBootstrapClass(type);
+    let style = {};
+
+    if (!type) {
+      style = { backgroundColor: 'blue', opacity: 0.2 };
+      classNames = {
+        bootstrap: name.split('__')[1],
+        wrapper: cn(styles.attrWrapper),
+        withLongerHeight: false,
+      };
+    }
+    this.state = {
+      classNames,
+      dragStart: false,
+      isOver: false,
+      style,
+    };
+  }
 
   handleClickEdit = () => {
     this.props.onClickEdit(this.props.index);
   }
+
+  handleDragEffect = () => this.setState(prevState => ({ dragStart: !prevState.dragStart }));
 
   handleMouseEnter= () => {
     if (this.props.data.type !== 'boolean') {
@@ -140,44 +162,67 @@ class VariableDraggableAttr extends React.PureComponent {
     onRemove(index, keys);
   }
 
+  renderContent = () => {
+    const { classNames, isOver, style } = this.state;
+    const { data, isEditing, name } = this.props;
+
+    return (
+      <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
+        <i className="fa fa-th" />
+        <span className={styles.truncated}>
+          {name}
+        </span>
+        <ClickOverHint show={isOver} />
+        {!isOver && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
+          <div className={styles.info}>
+            {data.label}
+          </div>
+        )}
+        {isEditing && !isOver ? (
+          <VariableEditIcon withLongerHeight={classNames.withLongerHeight} onClick={this.handleClickEdit} />
+        ) : (
+          <DraggedRemovedIcon withLongerHeight={classNames.withLongerHeight} onRemove={this.handleRemove} />
+        )}
+      </div>
+    );
+  }
+
+  renderSource = () => {
+    const { classNames } = this.state;
+
+    if (classNames.bootstrap.includes('12')) { // TODO: design
+      return <div style={{ width: '100%', height: '10px', background: 'red' }} />;
+    }
+
+    return this.renderContent();
+  }
+
   render() {
-    const { isOver } = this.state;
+    const { classNames } = this.state;
     const {
       connectDragSource,
       connectDropTarget,
-      data,
-      isEditing,
-      layout,
-      name,
+      isDragging,
     } = this.props;
-    const appearance = get(layout, [name, 'appearance'], '');
-    const type = appearance !== '' ? appearance : data.type;
-
-    let classNames = getBootstrapClass(type);
-    let style = {};
-
-    if (!type) {
-      // style = { display: 'none' };
-      style = { backgroundColor: 'blue' };
-      classNames = {
-        bootstrap: name.split('__')[1],
-        wrapper: cn(styles.attrWrapper),
-        withLongerHeight: false,
-      };
-    }
+    const divStyle = isDragging ? { opacity: 0.2 } : {};
 
     return (
       connectDragSource(
         connectDropTarget(
           <div
             className={cn(classNames.bootstrap)} // NOTE: bootstrap grid handles the weird effect when dragging
+            onDragStart={this.handleDragEffect}
+            onDragEnd={this.handleDragEffect}
             onMouseEnter={this.handleMouseEnter}
             onMouseLeave={this.handleMouseLeave}
             onClick={this.handleClickEdit}
+            style={divStyle}
           >
-            <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
+            {/* {this.renderContent()} */}
+            {isDragging ? this.renderSource() : this.renderContent()}
+            {/* <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
               <i className="fa fa-th" />
-              <span>
+              <span className={styles.truncated}>
                 {name}
               </span>
               <ClickOverHint show={isOver} />
@@ -191,7 +236,7 @@ class VariableDraggableAttr extends React.PureComponent {
               ) : (
                 <DraggedRemovedIcon withLongerHeight={classNames.withLongerHeight} onRemove={this.handleRemove} />
               )}
-            </div>
+            </div> */}
           </div>
         ),
       )
@@ -204,6 +249,7 @@ VariableDraggableAttr.defaultProps = {
     type: 'text',
   },
   index: 0,
+  isDragging: false,
   isEditing: false,
   keys: '',
   layout: {},
@@ -217,6 +263,7 @@ VariableDraggableAttr.propTypes = {
   connectDropTarget: PropTypes.func.isRequired,
   data: PropTypes.object,
   index: PropTypes.number,
+  isDragging: PropTypes.bool,
   isEditing: PropTypes.bool,
   keys: PropTypes.string,
   layout: PropTypes.object,
@@ -225,10 +272,9 @@ VariableDraggableAttr.propTypes = {
   onRemove: PropTypes.func,
 };
 
-const withDropTarget = DropTarget('variableDraggableAttr', variableDraggableAttrTarget, connect => ({
+const withDropTarget = DropTarget('variableDraggableAttr', variableDraggableAttrTarget, (connect) => ({
   connectDropTarget: connect.dropTarget(),
 }));
-
 const withDragSource = DragSource('variableDraggableAttr', variableDraggableAttrSource, (connect, monitor) => ({
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging(),

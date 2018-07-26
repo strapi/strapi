@@ -270,7 +270,7 @@ function appReducer(state = initialState, action) {
         const modelName = path.length > 2 ? path[2] : path[0];
         const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
         const manager = new Manager(state, list, action.keys, 0, layout);
-        const newList = manager.setLayout();
+        const newList = manager.getLayout();
 
         return newList;
       });

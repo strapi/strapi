@@ -25,7 +25,7 @@ const draggableAttrSource = {
     props.updateSiblingHoverState();
 
     return {
-      id: props.id, // This returns undefined
+      id: props.name, // This returns undefined
       index: props.index,
     };
   },

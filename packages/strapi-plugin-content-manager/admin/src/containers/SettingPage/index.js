@@ -419,10 +419,10 @@ class SettingPage extends React.PureComponent {
         beginMove={this.props.beginMove}
         data={this.getAttrData(attr)}
         endMove={this.props.endMove}
+        id={attr}
         index={index}
-        // key={attr}
         isEditing={index === this.findIndexFieldToEdit()}
-        key={index} // Remove this
+        key={attr}
         keys={`${this.getPath()}.editDisplay`}
         layout={this.getLayout()}
         name={attr}

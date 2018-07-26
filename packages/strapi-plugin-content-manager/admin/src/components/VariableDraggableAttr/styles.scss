@@ -3,6 +3,7 @@
   height: 30px;
   width: 100%;
   margin-bottom: 6px;
+  display: flex;
   padding-left: 10px;
   justify-content: space-between;
   background: #FAFAFB;
@@ -11,6 +12,7 @@
   border: 1px solid #E3E9F3;
   border-radius: 2px;
   > i {
+    margin-top: 12px;
     margin-right: 10px;
     font-size: 11px;
     color: #B3B5B9;
@@ -51,4 +53,16 @@
   right: 40px;
   color: #B4B6BA;
   font-style: italic;
+}
+
+.truncated {
+  overflow: hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  width: calc(100% - 50px);
+  display: block;
+}
+
+.shrink {
+  transform: scale(0.5);
 }
