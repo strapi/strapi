@@ -10,7 +10,7 @@ To get started with GraphQL in your app, please install the plugin first. To do 
 strapi install graphql
 ```
 
-Then, start your app and open your browser at [http://localhost:1337/playground](http://localhost:1337/playground). You should see the interface (GraphQL Playground) that will help you to write GraphQL query to explore your data.
+Then, start your app and open your browser at [http://localhost:1337/graphql](http://localhost:1337/graphql). You should see the interface (GraphQL Playground) that will help you to write GraphQL query to explore your data.
 
 > Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
 
@@ -29,7 +29,7 @@ By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL i
 
 ### Query API
 
-In the section, we assume that the [Shadow CRUD](#shadow-crud) feature is enabled. For each model, the plugin auto-generates queries which just fit to your needs.
+In the section, we assume that the [Shadow CRUD](#shadow-crud) feature is enabled. For each model, the plugin auto-generates queries and mutations which just fit to your needs.
 
 ##### Fetch a single entry
 
@@ -49,6 +49,63 @@ query {
 ```
 query {
   users {
+    username
+    email
+  }
+}
+```
+
+##### Create a new entry
+
+- `input`: Object
+  - `data`: Object — Values to insert
+
+```
+mutation {
+  createUser(input: {
+    data: {
+      username: "John",
+      email: "john@doe.com"
+    }
+  }) {
+    username
+    email
+  }
+}
+```
+
+##### Update an existing entry
+
+- `input`: Object
+  - `where`: Object - Entry's ID
+  - `data`: Object — Values to update
+
+```
+mutation {
+  updateUser(input: {
+    where: {
+      id: "5b28f1747c739e4afb48605c"
+    },
+    data: {
+      username: "John",
+      email: "john@doe.com"
+    }
+  }) {
+    username
+    email
+  }
+}
+```
+
+##### Delete an entry
+
+```
+mutation {
+  updateUser(input: {
+    where: {
+      id: "5b28f1747c739e4afb48605c"
+    }
+  }) {
     username
     email
   }
