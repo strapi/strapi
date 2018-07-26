@@ -42,6 +42,7 @@
   "error.attribute.key.taken": "Dieser Wert existiert bereits",
   "error.attribute.sameKeyAndName": "Darf nicht gleich sein",
   "error.validation.minSupMax": "Darf nicht höher sein",
+  "error.attribute.forbidden": "Dieser Attributname ist reserviert",
 
   "form.attribute.item.textarea.name": "Name",
   "form.attribute.item.number.name": "Name",
@@ -72,6 +73,9 @@
   "form.attribute.item.number.type.integer": "integer (z.B.: 10)",
   "form.attribute.item.number.type.float": "float (z.B.: 3.33333333)",
   "form.attribute.item.number.type.decimal": "decimal (z.B.: 2.22)",
+  "form.attribute.item.appearance.name": "Aussehen",
+  "form.attribute.item.appearance.label": "Als WYSIWYG anzeigen",
+  "form.attribute.item.appearance.description": "Andernfalls ist der Wert über ein einfaches Textfeld editierbar",
   "form.attribute.settings.default": "Standardwert",
   "form.attribute.settings.default.checkboxLabel": "Set to true",
 
@@ -114,6 +118,8 @@
   "notification.success.message.contentType.edit": "Der Content-Typ wurde aktualisiert",
   "notification.success.message.contentType.create": "Der Content-Typ wurde angelegt",
   "notification.success.contentTypeDeleted": "Der Content-Typ wurde gelöscht",
+
+  "relation.oneWay": "hat eine",
 
   "popUpForm.attributes.string.description": "Titel, Namen, Namenslisten",
   "popUpForm.attributes.text.description": "Beschreibungen, Paragraphen, Artikel",
