@@ -103,7 +103,7 @@ class SettingPage extends React.PureComponent {
 
   getDropDownItems = () => {
     const name = get(this.props.schema, `models.${this.getPath()}.primaryKey`, 'id' );
-    // The id attribute is not present on schema so we need to add it manually
+    // The id attribute is not present on the schema so we need to add it manually
     const defaultAttr = { [name]: { name, label: 'Id', type: 'string', searchable: true, sortable: true } };
     const attributes = Object.assign(get(this.props.schema, `models.${this.getPath()}.attributes`, {}), defaultAttr);
 
@@ -559,7 +559,6 @@ class SettingPage extends React.PureComponent {
     const indexListItemToEdit = this.findIndexListItemToEdit();
     const inputName = `${this.getPath()}.listDisplay.${indexListItemToEdit}.${input.name}`;
     const inputType = this.getListDisplay()[indexListItemToEdit].type;
-
 
     if (indexListItemToEdit === -1) {
       return <div key={i} />;

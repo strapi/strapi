@@ -1,4 +1,5 @@
-import { findIndex } from 'lodash';
+import { findIndex, pullAt, range } from 'lodash';
+import { List } from 'immutable';
 
 export default class Manager {
   constructor(state, list, keys, index, layout) {
@@ -65,6 +66,12 @@ export default class Manager {
       default:
         return 6;
     }
+  }
+
+  getElementsOnALine(itemsToPull, arr = this.list) {
+    const array = List.isList(arr) ? arr.toJS() : arr;
+
+    return pullAt(array, itemsToPull);
   }
 
   /**
@@ -180,5 +187,30 @@ export default class Manager {
     });
 
     return result;
+  }
+
+  getLayout() {
+    let newList = this.list;
+    let sum = 0;
+
+    this.arrayOfEndLineElements.forEach((item, i) => {
+      const firstLineItem = i === 0 ? 0 : this.arrayOfEndLineElements[i - 1].index +1;
+      const lastLineItem = item.index + 1;
+      const lineRange = firstLineItem === lastLineItem ? [firstLineItem] : range(firstLineItem, lastLineItem);
+      const lineItems = this.getElementsOnALine(lineRange);
+      const lineSize = this.getLineSize(lineItems);
+
+      if (lineSize < 10 && i < this.arrayOfEndLineElements.length - 1) {
+        const colsToAdd = this.getColsToAdd(12 - lineSize);
+        newList = newList.insert(lastLineItem + sum, colsToAdd[0]);
+        
+        if (colsToAdd.length > 1) {
+          newList = newList.insert(lastLineItem + sum, colsToAdd[1]);
+        }
+        sum += 1;
+      }
+    });
+
+    return newList;
   }
 }
