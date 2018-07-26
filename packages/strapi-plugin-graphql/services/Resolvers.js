@@ -105,7 +105,7 @@ module.exports = {
 
       acc.definition += `${Schema.getDescription(type[globalId], model)}type ${globalId} {${Schema.formatGQL(attributes, type[globalId], model)}}\n\n`;
 
-      // Add definition to the schema but this type won't be "queriable".
+      // Add definition to the schema but this type won't be "queriable" or "mutable".
       if (type[model.globalId] === false || _.get(type, `${model.globalId}.enabled`) === false) {
         return acc;
       }
