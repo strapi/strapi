@@ -1,4 +1,12 @@
 {
+    "app.components.Button.save": "Speichern",
+    "app.components.Button.cancel": "Abbrechen",
+
+    "app.components.BlockLink.documentation": "Lesen Sie die Dokumentation",
+    "app.components.BlockLink.documentation.content": "Entdecken Sie die Konzepte, Referenzanleitungen und Tutorials.",
+    "app.components.BlockLink.code": "Code Beispiele",
+    "app.components.BlockLink.code.content": "Lernen Sie durch das Testen realer Projekte, die die Community entwickelt haben.",
+
     "app.components.ComingSoonPage.comingSoon": "Bald verfügbar",
     "app.components.ComingSoonPage.featuresNotAvailable": "Dieses Feature ist derzeit noch in aktiver Entwicklung.",
 
@@ -6,6 +14,7 @@
     "app.components.DownloadInfo.text": "Dies könnte kurz dauern. Danke für deine Geduld.",
 
     "app.components.HomePage.welcome": "Willkommen an Bord!",
+    "app.components.HomePage.welcome.again": "Willkommen",
     "app.components.HomePage.create": "Erstelle deinen ersten Content-Typ",
     "app.components.HomePage.welcomeBlock.content": "Wir freuen uns, dich als Mitglied der Community zu haben. Wir sind offen für Feedback, senden uns einfach eine direkt Nachricht an\u0020",
     "app.components.HomePage.welcomeBlock.content.issues": "Fehler",
@@ -13,6 +22,16 @@
     "app.components.HomePage.createBlock.content.first": "Das\u0020",
     "app.components.HomePage.createBlock.content.second": "\u0020Plugin wird dir helfen, die Datenstruktur deiner Modelle zu definieren. Wenn du neu hier bist, empfehlen wir dir unsere\u0020",
     "app.components.HomePage.createBlock.content.tutorial": "\u0020Anleitung.",
+    "app.components.HomePage.welcomeBlock.content.again": "Wir hoffen, Sie machen Fortschritte bei Ihrem Projekt.... Lesen Sie das Neueste über Strapi. Wir geben unser Bestes, um das Produkt auf der Grundlage Ihres Feedbacks zu verbessern.",
+    "app.components.HomePage.cta": "BESTÄTIGEN",
+    "app.components.HomePage.community": "Finden Sie die Community im Web",
+    "app.components.HomePage.community.content": "Diskutieren Sie mit Teammitgliedern, Mitwirkenden und Entwicklern auf verschiedenen Kanälen.",
+    "app.components.HomePage.newsLetter": "Abonnieren Sie den Newsletter, um sich über Strapi zu informieren.",
+    "app.components.HomePage.button.quickStart" : "STARTEN SIE DAS QUICK-START-TUTORIAL",
+    "app.components.HomePage.button.blog": "MEHR DAZU IM BLOG",
+    "app.components.HomePage.support": "UNTERSTÜTZEN SIE UNS",
+    "app.components.HomePage.support.content": "Durch den Kauf des T-Shirts können wir unsere Arbeit am Projekt fortsetzen, um Ihnen das bestmögliche Erlebnis zu bieten!",
+    "app.components.HomePage.support.link": "HOLEN SIE SICH JETZT IHR T-SHIRT",
 
     "app.components.InputFile.newFile": "Neue Datei hinzufügen",
     "app.components.InputFileDetails.open": "In einem neuen Tab öffnen",
@@ -69,6 +88,8 @@
 
     "app.utils.placeholder.defaultMessage": "\u0020",
     "app.utils.SelectOption.defaultMessage": "\u0020",
+    "app.utils.defaultMessage": "",
+
 
     "components.AutoReloadBlocker.header": "Dieses Plugin benötigt das Neuladen-Feature.",
     "components.AutoReloadBlocker.description": "Öffne die folgende Datei und aktiviere das Feature.",
@@ -77,6 +98,8 @@
 
     "components.OverlayBlocker.title": "Auf Neustart warten...",
     "components.OverlayBlocker.description": "Du verwendest ein Feature, das einen Neustart des Servers erfordert. Bitte warte, bis der Server wieder gestartet wurde.",
+
+    "components.PageFooter.select": "Einträge pro Seite",
 
     "components.ProductionBlocker.header": "Dieses Plugin ist nur in der Entwicklungsumgebung verfügbar.",
     "components.ProductionBlocker.description": "Aus Sicherheitsgründen müssen wir dieses Plugin in anderen Umgebungen deaktivieren.",
@@ -93,6 +116,7 @@
     "components.Input.error.validation.min": "Dieser Wert ist zu niedrig.",
     "components.Input.error.validation.maxLength": "Dieser Wert ist zu lang.",
     "components.Input.error.validation.minLength": "Dieser Wert ist zu kurz.",
+    "components.Input.error.validation.json": "Dies entspricht nicht dem JSON-Format.",
     "components.Input.error.contentTypeName.taken": "Dieser Name existiert bereits",
     "components.Input.error.attribute.taken": "Dieser Feldname ist bereits vergeben",
     "components.Input.error.attribute.key.taken": "Dieser Wert existiert bereits",
@@ -117,18 +141,26 @@
     "components.WysiwygBottomControls.uploadFiles.browse": "selecting them",
     "components.WysiwygBottomControls.fullscreen": "Expand",
 
-    "notification.error": "Ein Fehler ist aufgetreten",
+    "HomePage.notification.newsLetter.success": "Newsletter erfolgreich abonniert",
 
+    "notification.error": "Ein Fehler ist aufgetreten",
+    "notification.error.layout": "Das Layout konnte nicht abgerufen werden.",
+
+    "Analytics": "Analytics",
     "Auth & Permissions": "Authentifizierung & Berechtigungen",
     "Content Manager": "Content-Manager",
     "Content Type Builder": "Content-Typ-Manager",
+    "Files Upload": "Dateien hochladen",
     "Settings Manager": "Einstellungs-Manager",
     "Email": "E-Mail",
     "Password": "Passwort",
+    "Users": "Benutzer",
     "Username": "Benutzername",
+    "Users & Permissions": "Benutzer & Berechtigungen",
     "Provider": "Methode",
     "ResetPasswordToken": "Passwort-Token zurücksetzen",
     "Role": "Rolle",
+    "Roles & Permissions" : "Rollen & Berechtigungen",
     "New entry": "Neuer Eintrag",
     "request.error.model.unknown": "Dieses Schema existiert nicht"
   }
