@@ -25,7 +25,6 @@ module.exports = async cb => {
 
     return acc;
   }, {});
-
   const tempLayout = Object.keys(strapi.models)
     .filter(m => m !== 'core_store')
     .reduce((acc, current) => {
@@ -33,7 +32,6 @@ module.exports = async cb => {
 
       return acc;
     }, pluginsLayout);
-
   const models = _.mapValues(strapi.models, pickData);
   delete models['core_store'];
   const pluginsModel = Object.keys(strapi.plugins).reduce((acc, current) => {
@@ -43,7 +41,6 @@ module.exports = async cb => {
 
     return acc;
   }, {});
-
   // Init schema
   const schema = {
     generalSettings: {
@@ -76,9 +73,7 @@ module.exports = async cb => {
         relations: [],
       },
     }, model);
-
     const fieldsToRemove = [];
-
     // Fields (non relation)
     const fields = _.mapValues(_.pickBy(model.attributes, attribute =>
       !attribute.model && !attribute.collection
@@ -241,6 +236,9 @@ module.exports = async cb => {
     return fields.map(field => `${apiPath.join('.')}.fields.${field}`);
   });
 
+  const getEditDisplayAvailableFieldsPath = attrPath => [..._.take(attrPath, attrPath.length -2), 'editDisplay', 'availableFields', attrPath[attrPath.length - 1]];
+  const getEditDisplayFieldsPath = attrPath => [..._.take(attrPath, attrPath.length -2), 'editDisplay', 'fields'];
+
   try {
     const prevSchema = await pluginStore.get({ key: 'schema' });
 
@@ -270,6 +268,9 @@ module.exports = async cb => {
 
     // Remove API attribute
     sameApisAttrToRemove.map(attrPath => {
+      const editDisplayPath = getEditDisplayAvailableFieldsPath(attrPath);
+      // Remove the field from the available fields in the editDisplayObject
+      _.unset(prevSchema.models, editDisplayPath);
       // Check default sort and change it if needed
       _.unset(prevSchema.models, attrPath);
       const apiPath = attrPath.length > 3 ? _.take(attrPath, 3) : _.take(attrPath, 1);
@@ -277,7 +278,6 @@ module.exports = async cb => {
       const prevListDisplay = _.get(prevSchema.models, listDisplayPath);
       const defaultSortPath = apiPath.concat('defaultSort');
       const currentAttr = attrPath.slice(-1);
-
       const defaultSort = _.get(prevSchema.models, defaultSortPath);
 
       if (_.includes(currentAttr, defaultSort)) {
@@ -311,8 +311,18 @@ module.exports = async cb => {
     sameApisAttrToAdd.map(attrPath => {
       const attr = _.get(schema.models, attrPath);
       _.set(prevSchema.models, attrPath, attr);
-    });
 
+      // Add the field in the editDisplay object
+      const path = getEditDisplayAvailableFieldsPath(attrPath);
+      const availableAttrToAdd = _.get(schema.models, path);
+      _.set(prevSchema.models, path, availableAttrToAdd);
+
+      // Push the attr into the list
+      const fieldsPath = getEditDisplayFieldsPath(attrPath);
+      const currentFields = _.get(prevSchema.models, fieldsPath, []);
+      currentFields.push(availableAttrToAdd.name);
+      _.set(prevSchema.models, fieldsPath, currentFields);
+    });
 
     // Update other keys
     sameApis.map(apiPath => {
@@ -326,7 +336,6 @@ module.exports = async cb => {
     });
 
     await pluginStore.set({ key: 'schema', value: prevSchema });
-
   } catch(err) {
     console.log('error', err);
   }

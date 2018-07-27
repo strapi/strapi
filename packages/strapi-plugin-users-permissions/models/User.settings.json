@@ -18,33 +18,19 @@
       "configurable": false,
       "required": true
     },
-    "provider": {
-      "type": "string",
-      "configurable": false
-    },
     "password": {
       "type": "password",
       "minLength": 6,
       "configurable": false,
       "private": true
     },
-    "resetPasswordToken": {
-      "type": "string",
-      "configurable": false,
-      "private": true
-    },
     "role": {
       "model": "role",
       "via": "users",
-      "plugin": "users-permissions",
-      "configurable": false
+      "plugin": "users-permissions"
     },
-    "infoss": {
-      "type": "text"
-    },
-    "products": {
-      "collection": "product",
-      "via": "user"
+    "newField": {
+      "type": "string"
     }
   },
   "collectionName": "users-permissions_user"

@@ -32,8 +32,7 @@
     "role": {
       "model": "role",
       "via": "permissions",
-      "plugin": "users-permissions",
-      "configurable": false
+      "plugin": "users-permissions"
     }
   }
 }

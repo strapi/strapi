@@ -94,7 +94,9 @@
   "error.validation.json": "Le format JSON n'est pas respecté",
 
   "form.Input.description": "Description",
+  "form.Input.placeholder": "Placeholder",
   "form.Input.description.placeholder": "N'oubliez pas de mettre l'URL complète!",
+  "form.Input.placeholder.placeholder": "Mon super placeholder",
   "form.Input.disabled": "Champ editable",
   "form.Input.label": "Label",
   "form.Input.label.inputDescription": "Cette valeur modifie celle du champs de la table",

@@ -95,7 +95,9 @@
   "error.validation.json": "This is not a JSON",
 
   "form.Input.description": "Description",
+  "form.Input.placeholder": "Placeholder",
   "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+  "form.Input.placeholder.placeholder": "My awesome value",
   "form.Input.disabled": "Editable field",
   "form.Input.label.inputDescription": "This value overrides the label displayed in the table's head",
   "form.Input.label": "Label",

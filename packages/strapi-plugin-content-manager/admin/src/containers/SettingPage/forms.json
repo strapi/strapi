@@ -137,12 +137,12 @@
         "validations": {}
       },
       {
-        "label": { "id": "content-manager.form.Input.description" },
+        "label": { "id": "content-manager.form.Input.placeholder" },
         "customBootstrapClass": "col-md-12",
         "didCheckErrors": false,
         "errors": [],
         "name": "placeholder",
-        "placeholder": "content-manager.form.Input.description.placeholder",
+        "placeholder": "content-manager.form.Input.placeholder.placeholder",
         "type": "string",
         "validations": {}
       }
