@@ -281,7 +281,7 @@ module.exports.app = async function() {
   // Enable hooks and dependencies related to the connections.
   for (let name in this.config.connections) {
     const connection = this.config.connections[name];
-    const connector = connection.connector.replace('strapi-', '');
+    const connector = connection.connector.replace('strapi-hook-', '');
 
     enableHookNestedDependencies.call(this, connector, flattenHooksConfig);
   }
@@ -304,24 +304,15 @@ module.exports.app = async function() {
 
   this.config.hook.settings = Object.keys(this.hook).reduce((acc, current) => {
     // Try to find the settings in the current environment, then in the main configurations.
-    const currentSettings = flattenHooksConfig[current] || this.config[current];
+    const currentSettings = merge(get(cloneDeep(this.hook[current]), ['defaults', current], {}), flattenHooksConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
+    acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
-    if (isString(currentSettings)) {
-      acc[current] = currentSettings;
-    } else {
-      acc[current] = !isObject(currentSettings) ? {} : currentSettings;
-
-      if (this.hook[current].isPlugin) {
-        acc[current].enabled = true;
-      }
-
-      if (!acc[current].hasOwnProperty('enabled')) {
-        this.log.warn(`(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
-      }
-
-      // Ensure that enabled key exist by forcing to false.
-      defaults(acc[current], { enabled : false });
+    if (!acc[current].hasOwnProperty('enabled')) {
+      this.log.warn(`(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`);
     }
+
+    // Ensure that enabled key exist by forcing to false.
+    defaults(acc[current], { enabled : false });
 
     return acc;
   }, {});
@@ -333,7 +324,7 @@ module.exports.app = async function() {
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig, force = false) {
   if (!this.hook[name]) {
-    this.log.warn(`(hook:${name}) \`strapi-${name}\` is missing in your dependencies. Please run \`npm install strapi-${name}\``);
+    this.log.warn(`(hook:${name}) \`strapi-hook-${name}\` is missing in your dependencies. Please run \`npm install strapi-hook-${name}\``);
   }
 
   // Couldn't find configurations for this hook.
@@ -347,7 +338,7 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
           const connector = get(this.config.connections, models[model].connection, {}).connector;
 
           if (connector) {
-            return connector.replace('strapi-', '') === name;
+            return connector.replace('strapi-hook-', '') === name;
           }
 
           return false;
@@ -363,7 +354,7 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
     // Enabled dependencies.
     if (get(this.hook, `${name}.dependencies`, []).length > 0) {
       this.hook[name].dependencies.forEach(dependency => {
-        enableHookNestedDependencies.call(this, dependency.replace('strapi-', ''), flattenHooksConfig, true);
+        enableHookNestedDependencies.call(this, dependency.replace('strapi-hook-', ''), flattenHooksConfig, true);
       });
     }
   }

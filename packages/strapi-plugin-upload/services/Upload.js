@@ -101,6 +101,8 @@ module.exports = {
   },
 
   remove: async (params, config) => {
+    params.id = (params._id || params.id);
+
     const file = await strapi.plugins['upload'].services.upload.fetch(params);
 
     // get upload provider settings to configure the provider to use
@@ -116,7 +118,6 @@ module.exports = {
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {
       params.model = 'file';
-      params.id = (params._id || params.id);
 
       await strapi.plugins['content-manager'].services['contentmanager'].delete(params, {source: 'upload'});
     }
