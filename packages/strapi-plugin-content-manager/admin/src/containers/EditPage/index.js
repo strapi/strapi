@@ -291,37 +291,31 @@ export class EditPage extends React.Component {
     const pathname = source !== 'content-manager'
       ? `${basePath}/plugins/${source}/${this.getModelName()}`
       : `${basePath}/${this.getModelName()}`;
-
-    const Wrapper = ({ children }) => (
-      <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
-        {children}
-      </div>
-    );
     
     if (this.showLoaders()) {
       return (
-        <Wrapper>
+        <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
           <div className={styles.main_wrapper}>  
             <LoadingIndicator />
           </div>
-        </Wrapper>
+        </div>
       );
     }
 
     if (!this.hasDisplayedFields()) {
       return (
-        <Wrapper>
+        <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
           <EmptyAttributesBlock
             description="content-manager.components.EmptyAttributesBlock.description"
             label="content-manager.components.EmptyAttributesBlock.button"
             onClick={() => this.props.history.push(pathname)}
           />
-        </Wrapper>
+        </div>
       );
     }
 
     return (
-      <Wrapper>
+      <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
         <div className={styles.main_wrapper}>
           <Edit
             attributes={this.getModelAttributes()}
@@ -337,7 +331,7 @@ export class EditPage extends React.Component {
             schema={this.getSchema()}
           />
         </div>
-      </Wrapper>
+      </div>
     );
   }
 

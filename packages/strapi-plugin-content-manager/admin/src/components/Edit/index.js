@@ -25,7 +25,7 @@ import styles from './styles.scss';
 const getInputType = (type = '') => {
   switch (type.toLowerCase()) {
     case 'boolean':
-      return 'checkbox';
+      return 'toggle';
     case 'bigint':
     case 'decimal':
     case 'float':
@@ -125,11 +125,16 @@ class Edit extends React.PureComponent {
     const appearance = get(layout, 'appearance');
     const type = !isEmpty(appearance) ? appearance.toLowerCase() : get(layout, 'type', getInputType(details.type));
     const inputDescription = get(details, 'description', null);
+    let className = get(layout, 'className');
+
+    if (type === 'toggle' && !className) {
+      className = 'col-md-4';
+    }
 
     return (  
       <Input
         autoFocus={key === 0}
-        customBootstrapClass={get(layout, 'className')}
+        customBootstrapClass={className}
         customInputs={{ json: InputJSONWithErrors, wysiwyg: WysiwygWithErrors }}
         didCheckErrors={this.props.didCheckErrors}
         errors={this.getInputErrors(attr)}
