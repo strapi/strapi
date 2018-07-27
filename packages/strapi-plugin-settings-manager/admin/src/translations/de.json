@@ -142,7 +142,7 @@
   "list.databases.title.plural": "Verbindungen in dieser Umgebung",
 
   "popUpWarning.title": "Bitte bestätigen",
-  "popUpWarning.databases.danger.message": "Es gibt noch hiermit verbundene Content-Typen. Durch das Löschen könntest du deine Anwendung beschädigen. Sei vorsichtig...",
+  "popUpWarning.databases.danger.message": "Es gibt noch hiermit verbundene Inhaltstypen. Durch das Löschen könntest du deine Anwendung beschädigen. Sei vorsichtig...",
   "popUpWarning.danger.ok.message": "Ich stimme zu",
   "popUpWarning.databases.delete.message": "Bist du sicher, dass du diese Datenbank löschen möchtest?",
   "popUpWarning.languages.delete.message": "Bist du sicher, dass du diese Sprache entfernen möchtest?",

@@ -15,7 +15,7 @@
 
     "app.components.HomePage.welcome": "Willkommen an Bord!",
     "app.components.HomePage.welcome.again": "Willkommen",
-    "app.components.HomePage.create": "Erstelle deinen ersten Content-Typ",
+    "app.components.HomePage.create": "Erstelle deinen ersten Inhaltstyp",
     "app.components.HomePage.welcomeBlock.content": "Wir freuen uns, dich als Mitglied der Community zu haben. Wir sind offen für Feedback, senden uns einfach eine direkt Nachricht an\u0020",
     "app.components.HomePage.welcomeBlock.content.issues": "Fehler",
     "app.components.HomePage.welcomeBlock.content.raise": "\u0020oder erhöhen\u0020",
@@ -149,7 +149,7 @@
     "Analytics": "Analytics",
     "Auth & Permissions": "Authentifizierung & Berechtigungen",
     "Content Manager": "Content-Manager",
-    "Content Type Builder": "Content-Typ-Manager",
+    "Content Type Builder": "Inhaltstyp-Manager",
     "Files Upload": "Dateien hochladen",
     "Settings Manager": "Einstellungs-Manager",
     "Email": "E-Mail",
