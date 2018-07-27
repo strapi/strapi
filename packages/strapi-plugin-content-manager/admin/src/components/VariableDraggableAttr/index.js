@@ -22,11 +22,7 @@ const getBootstrapClass = attrType => {
   switch(attrType) {
     case 'checkbox':
     case 'boolean':
-      return {
-        bootstrap: 'col-md-3',
-        wrapper: cn(styles.attrWrapper),
-        withLongerHeight: false,
-      };
+    case 'toggle':
     case 'date':
       return {
         bootstrap: 'col-md-4',
@@ -148,9 +144,7 @@ class VariableDraggableAttr extends React.PureComponent {
   handleDragEffect = () => this.setState(prevState => ({ dragStart: !prevState.dragStart }));
 
   handleMouseEnter= () => {
-    if (this.props.data.type !== 'boolean') {
-      this.setState({ isOver: true });
-    }
+    this.setState({ isOver: true });
   }
 
   handleMouseLeave = () => this.setState({ isOver: false });
@@ -165,6 +159,7 @@ class VariableDraggableAttr extends React.PureComponent {
   renderContent = () => {
     const { classNames, isOver, style } = this.state;
     const { data, isEditing, name } = this.props;
+    const showHint = data.type !== 'boolean';
 
     return (
       <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
@@ -172,7 +167,7 @@ class VariableDraggableAttr extends React.PureComponent {
         <span className={styles.truncated}>
           {name}
         </span>
-        <ClickOverHint show={isOver} />
+        {showHint && <ClickOverHint show={isOver} /> }
         {!isOver && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
           <div className={styles.info}>
             {data.label}

@@ -43,6 +43,9 @@ class Manager {
       case 8:
         ret = ['__col-md-4__', '__col-md-4__'];
         break;
+      case 4:
+        ret = ['__col-md-4__'];
+        break;
       case 6:
         ret = ['__col-md-6__'];
         break;
@@ -62,9 +65,8 @@ class Manager {
    */
   getBootStrapCol(type) {
     switch(type) {
-      // case 'checkbox':
-      // case 'boolean':
-      //   return 3;
+      case 'checkbox':
+      case 'boolean':
       case 'date':
         return 4;
       case 'json':

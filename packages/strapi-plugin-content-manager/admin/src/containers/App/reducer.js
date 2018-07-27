@@ -205,9 +205,10 @@ function appReducer(state = initialState, action) {
             newList = list
               .delete(attrToRemoveInfos.index);
           } else {
+            const random = Math.floor(Math.random() * 1000); 
             newList = list
               .delete(attrToRemoveInfos.index)
-              .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__`);
+              .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__${random}`);
           }
         }
         // This part is needed to remove the add __col-md-${something}__ that keeps the layout when removing an item

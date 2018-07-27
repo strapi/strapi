@@ -324,7 +324,16 @@ class SettingPage extends React.PureComponent {
       const selectOtherFunc = !isRelation ? this.handleClickEditRelation : this.handleClickEditField;
 
       if (selectNextItemCond) {
-        const nextIndex = index - 1 > 0 ? index - 1 : index + 1;
+        let nextIndex = index - 1 > 0 ? index - 1 : index + 1;
+
+        if (!isRelation) {
+          const nextItem = get(this.getEditPageDisplayedFields(), nextIndex);
+          
+          if (nextItem.includes('__col-md')) {
+            nextIndex = index - 2 > 0 ? index - 2 : index + 2;
+          }
+
+        }
         selectNextFunc(nextIndex);
       } else if (selectOtherItemCond) {
         selectOtherFunc(0);
