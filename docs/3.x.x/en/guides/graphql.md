@@ -76,6 +76,29 @@ mutation {
 }
 ```
 
+The implementation of the mutations also supports relational attributes. For example, you can create a new `User` and attach many `Post` to it by writing your query like this:
+```
+mutation {
+  createUser(input: {
+    data: {
+      username: "John",
+      email: "john@doe.com",
+      posts: ["5b51e3949db573a586ad22de", "5b5b26619b0820c1c2fb79c9"]
+    }
+  }) {
+    user {
+      username
+      email
+      posts {
+        title
+        content
+        publishedAt
+      }
+    }
+  }
+}
+```
+
 ##### Update an existing entry
 
 - `input`: Object
@@ -96,6 +119,27 @@ mutation {
     user {
       username
       email
+    }
+  }
+}
+```
+
+You can also update relational attributes by passing an ID or an array of IDs (depending of the relationship).
+```
+mutation {
+  updatePost(input: {
+    where: {
+      id: "5b5b27f8164f75c29c728110"
+    },
+    data: {
+      author: "5b51e3949db573a586ad22de" // User ID
+    }
+  }) {
+    post {
+      author {
+        username
+        email
+      }
     }
   }
 }
