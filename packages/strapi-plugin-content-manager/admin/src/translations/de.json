@@ -19,19 +19,19 @@
   "containers.SettingPage.attributes": "Attribut Felder",
   "containers.SettingPage.attributes.description": "Reihenfolge der Attribute festlegen",
   "containers.SettingPage.listSettings.title": "Liste - Einstellungen",
-  "containers.SettingPage.listSettings.description": "Konfigurieren Sie die Optionen für diesen Inhaltstyp.",
-  "containers.SettingPage.pluginHeaderDescription": "Konfigurieren Sie die spezifischen Einstellungen für diesen Inhaltstyp.",
-  "containers.SettingsPage.Block.generalSettings.description": "Konfigurieren Sie die Standardoptionen für Ihre Inhaltstypen.",
+  "containers.SettingPage.listSettings.description": "Konfiguriere die Optionen für diesen Inhaltstyp.",
+  "containers.SettingPage.pluginHeaderDescription": "Konfiguriere die spezifischen Einstellungen für diesen Inhaltstyp.",
+  "containers.SettingsPage.Block.generalSettings.description": "Konfiguriere die Standardoptionen für deine Inhaltstypen.",
   "containers.SettingsPage.Block.generalSettings.title" : "Allgemeines",
   "containers.SettingsPage.Block.contentType.title": "Inhaltstypen",
-  "containers.SettingsPage.Block.contentType.description": "Konfigurieren Sie die spezifischen Einstellungen",
+  "containers.SettingsPage.Block.contentType.description": "Konfiguriere die spezifischen Einstellungen",
 
   "components.AddFilterCTA.add": "Filter",
   "components.AddFilterCTA.hide": "Filter",
-  "components.DraggableAttr.edit": "Klicken Sie zum Bearbeiten",
+  "components.DraggableAttr.edit": "Klicken zum Bearbeiten",
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Anwenden",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Alle löschen",
-  "components.FiltersPickWrapper.PluginHeader.description": "Legen Sie die Bedingungen fest, unter denen die Einträge gefiltert werden sollen.",
+  "components.FiltersPickWrapper.PluginHeader.description": "Lege die Bedingungen fest, unter denen die Einträge gefiltert werden sollen.",
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filter",
   "components.FiltersPickWrapper.hide": "Ausblenden",
   "components.FilterOptions.button.apply": "Anwenden",
@@ -58,7 +58,7 @@
   "form.Input.sort.field": "Sortierung in diesem Feld aktivieren",
   "form.Input.bulkActions": "Bulk-Bearbeitung aktivieren",
   "form.Input.pageEntries": "Einträge pro Seite",
-  "form.Input.pageEntries.inputDescription": "Hinweis: Sie können diesen Wert auf der Inhaltstypen Einstellungsseite überschreiben.",
+  "form.Input.pageEntries.inputDescription": "Hinweis: Du kannst diesen Wert auf der Inhaltstypen Einstellungsseite überschreiben.",
   "form.Input.defaultSort": "Standard-Sortierattribut",
 
   "EditRelations.title": "Relationale Daten",
@@ -89,7 +89,7 @@
   "error.validation.minSupMax": "Darf nicht höher sein",
 
   "notification.error.relationship.fetch": "Beim Abruf von Beziehungen ist ein Fehler aufgetreten.",
-  "notification.info.SettingPage.disableSort": "Sie müssen ein Attribut mit aktivierter Sortierung haben.",
+  "notification.info.SettingPage.disableSort": "Du musst ein Attribut mit aktivierter Sortierung haben.",
 
   "success.record.delete": "Gelöscht",
   "success.record.save": "Gespeichert",
@@ -100,8 +100,8 @@
   "popUpWarning.button.confirm": "Bestätigen",
   "popUpWarning.title": "Bitte bestätigen",
   "popUpWarning.bodyMessage.contentType.delete": "Bist du sicher, dass du diesen Inhaltstyp löschen willst?",
-  "popUpWarning.bodyMessage.contentType.delete.all": "Sind Sie sicher, dass Sie diese Einträge löschen wollen?",
-  "popUpWarning.warning.cancelAllSettings": "Sind Sie sicher, dass Sie Ihre Änderungen rückgängig machen wollen?",
-  "popUpWarning.warning.updateAllSettings": "Dadurch werden alle Ihre Einstellungen geändert."
+  "popUpWarning.bodyMessage.contentType.delete.all": "Bist du sicher, dass du diese Einträge löschen willst?",
+  "popUpWarning.warning.cancelAllSettings": "Bist du sicher, dass du deine Änderungen rückgängig machen willst?",
+  "popUpWarning.warning.updateAllSettings": "Dadurch werden alle deine Einstellungen geändert."
 
 }

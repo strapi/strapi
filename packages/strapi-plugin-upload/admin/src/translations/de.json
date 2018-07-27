@@ -28,10 +28,10 @@
 
   "PluginInputFile.text": "Ziehe eine Datei hierher oder {link} eine Datei zum hochladen aus",
   "PluginInputFile.link": "wähle",
-  "PluginInputFile.loading": "Ihre Dateien werden hochgeladen...",
+  "PluginInputFile.loading": "Deine Dateien werden hochgeladen...",
   
   "notification.delete.success": "Die Datei wurde gelöscht",
-  "notification.dropFile.success": "Ihre Datei wurde hochgeladen",
+  "notification.dropFile.success": "Deine Datei wurde hochgeladen",
   "notification.dropFiles.success": "{number} Dateien wurden hochgeladen",
   "notification.config.success": "Die Einstellungen wurden aktualisiert"
 }
