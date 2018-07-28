@@ -27,9 +27,12 @@
   "containers.SettingsPage.Block.generalSettings.title": "Geral",
   "containers.SettingsPage.Block.contentType.title": "Tipos de Conteúdo",
   "containers.SettingsPage.Block.contentType.description": "Defina as configurações específicas",
+
   "components.AddFilterCTA.add": "Filtros",
   "components.AddFilterCTA.hide": "Filtros",
+
   "components.DraggableAttr.edit": "Clique para editar",
+
   "components.FilterOptions.button.apply": "Aplicar",
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Aplicar",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Limpar tudo",
@@ -83,6 +86,7 @@
   "error.attribute.sameKeyAndName": "Não pode ser igual",
   "error.validation.minSupMax": "Não pode ser superior",
   "error.validation.json": "Isto não corresponde com o formato JSON",
+
   "form.Input.label.inputDescription": "Este valor substitui o rótulo apresentado no cabeçalho da tabela",
   "form.Input.label": "Rótulo",
   "form.Input.search": "Habilitar busca",
