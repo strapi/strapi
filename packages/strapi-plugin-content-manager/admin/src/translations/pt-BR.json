@@ -15,8 +15,21 @@
   "components.LimitSelect.itemsPerPage": "Registros por página",
   "containers.List.errorFetchRecords": "Erro",
 
+  "containers.SettingPage.addField": "Adicionar campo",
+  "containers.SettingPage.attributes": "Atributos",
+  "containers.SettingPage.attributes.description": "Define a ordem dos atributos",
+
+  "containers.SettingPage.listSettings.title": "Lista — Configurações",
+  "containers.SettingPage.listSettings.description": "Configure as opções para este Tipo de Conteúdo",
+  "containers.SettingPage.pluginHeaderDescription": "Defina as configurações específicas para este Tipo de Conteúdo",
+  "containers.SettingsPage.pluginHeaderDescription": "Configure as opções padrões para todos os seus Tipos de Conteúdo",
+  "containers.SettingsPage.Block.generalSettings.description": "Configure as opções padrões para seu Tipo de Conteúdo",
+  "containers.SettingsPage.Block.generalSettings.title": "Geral",
+  "containers.SettingsPage.Block.contentType.title": "Tipos de Conteúdo",
+  "containers.SettingsPage.Block.contentType.description": "Defina as configurações específicas",
   "components.AddFilterCTA.add": "Filtros",
   "components.AddFilterCTA.hide": "Filtros",
+  "components.DraggableAttr.edit": "Clique para editar",
   "components.FilterOptions.button.apply": "Aplicar",
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Aplicar",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Limpar tudo",
@@ -70,8 +83,19 @@
   "error.attribute.sameKeyAndName": "Não pode ser igual",
   "error.validation.minSupMax": "Não pode ser superior",
   "error.validation.json": "Isto não corresponde com o formato JSON",
+  "form.Input.label.inputDescription": "Este valor substitui o rótulo apresentado no cabeçalho da tabela",
+  "form.Input.label": "Rótulo",
+  "form.Input.search": "Habilitar busca",
+  "form.Input.search.field": "Habilitar busca neste campo",
+  "form.Input.filters": "Habilitar filtros",
+  "form.Input.sort.field": "Habilitar ordenação neste campo",
+  "form.Input.bulkActions": "Habilitar ações em lote",
+  "form.Input.pageEntries": "Entradas por página",
+  "form.Input.pageEntries.inputDescription": "Nota: Você pode substituir este valor na página de configurações do Tipo de Conteúdo.",
+  "form.Input.defaultSort": "Atributo de ordenação padrão",
 
   "notification.error.relationship.fetch": "Ocorreu um erro durante a busca da relação.",
+  "notification.info.SettingPage.disableSort": "Você precisa de um atributo com permissão de ordenação",
 
   "success.record.delete": "Removido",
   "success.record.save": "Salvo",
@@ -82,5 +106,7 @@
   "popUpWarning.button.confirm": "Confirmar",
   "popUpWarning.title": "Por favor, confirme",
   "popUpWarning.bodyMessage.contentType.delete": "Tem a certeza de que deseja remover este registro?",
-  "popUpWarning.bodyMessage.contentType.delete.all": "Tem a certeza de que deseja remover estes registros?"
+  "popUpWarning.bodyMessage.contentType.delete.all": "Tem a certeza de que deseja remover estes registros?",
+  "popUpWarning.warning.cancelAllSettings": "Você tem certeza de que deseja cancelar suas modificações?",
+  "popUpWarning.warning.updateAllSettings": "Isto irá modificar todas as suas configurações"
 }
