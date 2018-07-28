@@ -34,6 +34,14 @@ module.exports = {
       jsonfile: database
     },
 
+    'config/environments/production/database.json': {
+      jsonfile: database
+    },
+
+    'config/environments/staging/database.json': {
+      jsonfile: database
+    },
+
     // Copy dot files.
     '.editorconfig': {
       copy: 'editorconfig'
