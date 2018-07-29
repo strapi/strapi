@@ -779,7 +779,7 @@ module.exports = {
           ctx.params.where
         );
 
-        return controller(Object.assign({}, ctx, queryOpts), next);
+        return controller(Object.assign({}, ctx, queryOpts, { send: ctx.send }), next); // send method doesn't get copied when using object.assign        
       };
     })();
 
