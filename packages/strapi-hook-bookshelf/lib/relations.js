@@ -381,7 +381,7 @@ module.exports = {
         [`${params.alias}_id`]: params.refId,
         [`${params.alias}_type`]: params.ref,
         field: params.field
-      }, _.isEmpty))
+      }, _.isUndefined))
       .destroy();
   }
 };
