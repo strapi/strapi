@@ -213,9 +213,9 @@ Most of the application's configurations are defined by environment. It means th
         "client": "postgres",
         "host": "localhost",
         "port": 5432,
-        "username": "aureliengeorget",
-        "password": "${process.env.USERNAME}",
-        "database": "${process.env.PWD}",
+        "username": "${process.env.USERNAME}",
+        "password": "${process.env.PWD}",
+        "database": "aureliengeorget",
         "schema": "public"
       },
       "options": {
