@@ -117,7 +117,7 @@ module.exports = {
   },
 
   generateAPI: (name, description, connection, collectionName, attributes) => {
-    const template = _.get(strapi.config.currentEnvironment, `database.connections.${connection}.connector`, 'strapi-mongoose').split('-')[1];
+    const template = _.get(strapi.config.currentEnvironment, `database.connections.${connection}.connector`, 'strapi-hook-mongoose').split('-')[2];
 
     return new Promise((resolve, reject) => {
       const scope = {

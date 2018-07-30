@@ -13,7 +13,7 @@ Here is the list of the collected data and why we need them.
   *Understand how the developers are using the different configurations? How many projects are started in production mode?*
 - **Node modules names**
   *Are developers integrating Strapi with Stripe? It means that we should develop a plugin to simplify the development process with Stripe.
-  Are developers using Strapi with strapi-bookshelf or strapi-mongoose? It helps us prioritize the issues.*
+  Are developers using Strapi with strapi-hook-bookshelf or strapi-hook-mongoose? It helps us prioritize the issues.*
 - **OS**
   *Is the community using Windows, Linux or Mac? It helps us prioritize the issues.*
 - **Build configurations**

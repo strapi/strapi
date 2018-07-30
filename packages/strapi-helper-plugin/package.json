@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.12.6",
+  "version": "3.0.0-alpha.13.0.1",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 9.0.0",
@@ -48,11 +48,9 @@
     "bootstrap": "^4.0.0-alpha.6",
     "chalk": "^2.1.0",
     "classnames": "^2.2.5",
-    "codemirror": "^5.38.0",
     "copy-webpack-plugin": "^4.3.1",
     "cross-env": "^5.0.5",
     "css-loader": "^0.28.5",
-    "draft-js": "^0.10.5",
     "eslint": "4.4.1",
     "eslint-config-airbnb": "15.1.0",
     "eslint-config-airbnb-base": "11.3.1",
@@ -108,7 +106,6 @@
     "rimraf": "^2.6.1",
     "sass-loader": "^6.0.6",
     "shelljs": "^0.7.8",
-    "showdown": "^1.8.6",
     "style-loader": "^0.18.2",
     "styled-components": "^3.2.6",
     "url-loader": "^0.5.9",

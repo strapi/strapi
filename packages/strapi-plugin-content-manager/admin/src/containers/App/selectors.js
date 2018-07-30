@@ -29,10 +29,6 @@ const selectLocationState = () => {
  * Default selector used by List
  */
 
-const makeSelectModels = () =>
-  createSelector(selectGlobalDomain(), globalState =>
-    globalState.get('models')
-  );
 
 const makeSelectModelEntries = () =>
   createSelector(selectGlobalDomain(), globalState =>
@@ -43,13 +39,20 @@ const makeSelectLoading = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('loading'));
 
 const makeSelectSchema = () =>
-  createSelector(selectGlobalDomain(), substate => substate.get('schema'));
+  createSelector(selectGlobalDomain(), substate => substate.get('schema').toJS());
+
+const makeSelectModifiedSchema = () =>
+  createSelector(selectGlobalDomain(), substate => substate.get('modifiedSchema').toJS());
+
+const makeSelectSubmitSuccess = () =>
+  createSelector(selectGlobalDomain(), substate => substate.get('submitSuccess'));
 
 export {
   selectGlobalDomain,
   selectLocationState,
   makeSelectLoading,
   makeSelectModelEntries,
-  makeSelectModels,
+  makeSelectModifiedSchema,
   makeSelectSchema,
+  makeSelectSubmitSuccess,
 };

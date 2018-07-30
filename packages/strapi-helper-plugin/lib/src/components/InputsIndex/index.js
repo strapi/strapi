@@ -21,8 +21,6 @@ import InputPasswordWithErrors from 'components/InputPasswordWithErrors';
 import InputTextAreaWithErrors from 'components/InputTextAreaWithErrors';
 import InputTextWithErrors from 'components/InputTextWithErrors';
 import InputToggleWithErrors from 'components/InputToggleWithErrors';
-import WysiwygWithErrors from 'components/WysiwygWithErrors';
-import InputJSONWithErrors from 'components/InputJSONWithErrors';
 
 const DefaultInputError = ({ type }) => <div>Your input type: <b>{type}</b> does not exist</div>;
 
@@ -32,7 +30,6 @@ const inputs = {
   date: InputDateWithErrors,
   email: InputEmailWithErrors,
   file: InputFileWithErrors,
-  json: InputJSONWithErrors,
   number: InputNumberWithErrors,
   password: InputPasswordWithErrors,
   search: InputSearchWithErrors,
@@ -41,7 +38,6 @@ const inputs = {
   text: InputTextWithErrors,
   textarea: InputTextAreaWithErrors,
   toggle: InputToggleWithErrors,
-  wysiwyg: WysiwygWithErrors,
 };
 
 function InputsIndex(props) {

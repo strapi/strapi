@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import { isEmpty, isObject, toString } from 'lodash';
+import cn from 'classnames';
 
 import CustomInputCheckbox from 'components/CustomInputCheckbox';
 import IcoContainer from 'components/IcoContainer';
@@ -100,19 +101,25 @@ class TableRow extends React.Component {
       .concat([this.renderAction()]);
   }
 
-  renderDelete = () => (
-    <td onClick={(e) => e.stopPropagation()} key="i">
-      <CustomInputCheckbox
-        name={this.props.record.id}
-        onChange={this.props.onChange}
-        value={this.props.value}
-      />
-    </td>
-  );
+  renderDelete = () => {
+    if (this.props.enableBulkActions) {
+      return (
+        <td onClick={(e) => e.stopPropagation()} key="i">
+          <CustomInputCheckbox
+            name={this.props.record.id}
+            onChange={this.props.onChange}
+            value={this.props.value}
+          />
+        </td>
+      );
+    }
+
+    return null;
+  }
 
   render() {
     return (
-      <tr className={styles.tableRow} onClick={() => this.handleClick(this.props.destination)}>
+      <tr className={cn(styles.tableRow, this.props.enableBulkActions && styles.tableRowWithBulk)} onClick={() => this.handleClick(this.props.destination)}>
         {this.renderCells()}
       </tr>
     );
@@ -124,11 +131,13 @@ TableRow.contextTypes = {
 };
 
 TableRow.defaultProps = {
+  enableBulkActions: true,
   value: false,
 };
 
 TableRow.propTypes = {
   destination: PropTypes.string.isRequired,
+  enableBulkActions: PropTypes.bool,
   headers: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
   onDelete: PropTypes.func,
