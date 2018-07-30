@@ -36,6 +36,7 @@ import Input from 'components/InputsIndex';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 import Block from 'components/Block';
+import CustomDragLayer from 'components/CustomDragLayer';
 import DraggableAttr from 'components/DraggableAttr';
 import VariableDraggableAttr from 'components/VariableDraggableAttr';
 import injectReducer from 'utils/injectReducer';
@@ -614,7 +615,7 @@ class SettingPage extends React.PureComponent {
     const {
       onSubmit,
     } = this.props;
-    console.log(this.props.schema);
+    // console.log(this.props.schema);
     // TODO: Add loader!
 
     return (
@@ -719,6 +720,7 @@ class SettingPage extends React.PureComponent {
                 <div className={cn('col-md-8', styles.draggedDescription, styles.edit_settings)}>
                   <FormattedMessage id="content-manager.containers.SettingPage.attributes" />
                   <div className={cn(styles.sort_wrapper, 'col-md-12', styles.padded)}>
+                    <CustomDragLayer />
                     <div className={cn('row', styles.noPadding)}>
                       {this.getEditPageDisplayedFields().map(this.renderDraggableAttrEditSettingsField)}
                       <div className={cn('col-md-6')}>

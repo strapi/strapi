@@ -10,6 +10,7 @@ import {
   DragSource,
   DropTarget,
 } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { flow } from 'lodash';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
@@ -17,6 +18,7 @@ import cn from 'classnames';
 import ClickOverHint from 'components/ClickOverHint';
 import DraggedRemovedIcon from 'components/DraggedRemovedIcon';
 import VariableEditIcon from 'components/VariableEditIcon';
+import ItemTypes from 'utils/ItemTypes';
 
 import styles from './styles.scss';
 
@@ -85,6 +87,17 @@ const draggableAttrTarget = {
 
 class DraggableAttr extends React.Component {
   state = { isOver: false, dragStart: false };
+  
+  componentDidMount() {
+    // Use empty image as a drag preview so browsers don't draw it
+    // and we can draw whatever we want on the custom drag layer instead.
+    this.props.connectDragPreview(getEmptyImage(), {
+      // IE fallback: specify that we'd rather screenshot the node
+      // when it already knows it's being dragged so we can hide it with CSS.
+      // Removginv the fallabck makes it handle variable height elements
+      // captureDraggingState: true,
+    });
+  }
 
   componentDidUpdate(prevProps) {
     const { isDraggingSibling } = this.props;
@@ -164,6 +177,7 @@ DraggableAttr.defaultProps = {
 };
 
 DraggableAttr.propTypes = {
+  connectDragPreview: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   index: PropTypes.number.isRequired,
@@ -177,11 +191,12 @@ DraggableAttr.propTypes = {
   onRemove: PropTypes.func,
 };
 
-const withDropTarget = DropTarget('draggableAttr', draggableAttrTarget, connect => ({
+const withDropTarget = DropTarget(ItemTypes.NORMAL, draggableAttrTarget, connect => ({
   connectDropTarget: connect.dropTarget(),
 }));
 
-const withDragSource = DragSource('draggableAttr', draggableAttrSource, (connect, monitor) => ({
+const withDragSource = DragSource(ItemTypes.NORMAL, draggableAttrSource, (connect, monitor) => ({
+  connectDragPreview: connect.dragPreview(),
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging(),
 }));
