@@ -176,16 +176,35 @@ const getProfile = async (provider, query, callback) => {
     }
     case 'twitch': {
       const twitch = new Purest({
-        provider: 'twitch'
+        provider: 'twitch',
+        config: {
+          'twitch': {
+            'https://api.twitch.tv': {
+              '__domain': {
+                'auth': {
+                  'headers': {
+                    'Authorization': 'Bearer [0]',
+                    'Client-ID': '[1]'
+                  }
+                }
+              },
+              'helix/{endpoint}': {
+                '__path': {
+                  'alias': 'helix'
+                }
+              }
+            }
+          }
+        }
       });
 
-      twitch.query().get('user').auth(access_token).request((err, res, body) => {
+      twitch.query('helix').get('users').auth(access_token, grant.twitch.key).request((err, res, body) => {
         if (err) {
           callback(err);
         } else {
           callback(null, {
-            username: body.name,
-            email: body.email
+            username: body.data[0].login,
+            email: body.data[0].email
           });
         }
       });
