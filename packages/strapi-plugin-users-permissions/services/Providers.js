@@ -109,6 +109,40 @@ const getProfile = async (provider, query, callback) => {
   }).get();
 
   switch (provider) {
+    case 'discord': {
+      const discord = new Purest({
+        provider: 'discord',
+        config: {
+          'discord': {
+            'https://discordapp.com/api/': {
+              '__domain': {
+                'auth': {
+                  'auth': {'bearer': '[0]'}
+                }
+              },
+              '{endpoint}': {
+                '__path': {
+                  'alias': '__default'
+                }
+              }
+            }
+          }
+        }
+      });
+      discord.query().get('users/@me').auth(access_token).request((err, res, body) => {
+        if (err) {
+          callback(err);
+        } else {
+          // Combine username and discriminator because discord username is not unique
+          var username = body.username + '#' + body.discriminator;
+          callback(null, {
+            username: username,
+            email: body.email
+          });
+        }
+      });
+      break;
+    }
     case 'facebook': {
       const facebook = new Purest({
         provider: 'facebook'
@@ -173,28 +207,6 @@ const getProfile = async (provider, query, callback) => {
         });
       });
       break;
-    }
-    case 'discord': {
-      const discord = new Purest({
-        provider: 'discord',
-        config: {
-          'discord': {
-            'https://discordapp.com/api/': {
-              '__domain': {
-                'auth': {
-                  'auth': {'bearer': '[0]'}
-                }
-              },
-              'oauth2/{endpoint}': {
-                '__path': {
-                  'alias': '__default',
-                  'version': 'authorize'
-                }
-              }
-            }
-          }
-        }
-      });
     }
     case 'twitter': {
       const twitter = new Purest({
