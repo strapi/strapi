@@ -326,7 +326,9 @@ module.exports = async cb => {
 
     // Update other keys
     sameApis.map(apiPath => {
-      const keysToUpdate = ['relations', 'loadedModel', 'associations', 'attributes'].map(key => apiPath.concat(key));
+      // This doesn't keep the prevSettings for the relations,  the user will have to reset it.
+      // We might have to improve this if we want the order of the relations to be kept
+      const keysToUpdate = ['relations', 'loadedModel', 'associations', 'attributes', ['editDisplay', 'relations']].map(key => apiPath.concat(key));
 
       keysToUpdate.map(keyPath => {
         const newValue = _.get(schema.models, keyPath);

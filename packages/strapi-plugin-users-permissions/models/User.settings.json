@@ -28,9 +28,6 @@
       "model": "role",
       "via": "users",
       "plugin": "users-permissions"
-    },
-    "newField": {
-      "type": "string"
     }
   },
   "collectionName": "users-permissions_user"

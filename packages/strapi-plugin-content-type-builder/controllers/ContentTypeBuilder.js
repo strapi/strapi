@@ -111,7 +111,7 @@ module.exports = {
       await Service.generateAPI(name, description, connection, collectionName, []);
     }
 
-    await Service.appearance(formatedAttributes, name);
+    await Service.appearance(formatedAttributes, name, plugin);
 
     try {
       const modelJSON = _.cloneDeep(require(modelFilePath));

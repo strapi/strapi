@@ -4,9 +4,11 @@ const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 const generator = require('strapi-generate');
+const { fromJS } = require('immutable');
+const Manager = require('../utils/Manager.js');
 
 module.exports = {
-  appearance: async (attributes, model) => {
+  appearance: async (attributes, model, plugin) => {
     const pluginStore = strapi.store({
       environment: '',
       type: 'plugin',
@@ -16,6 +18,107 @@ module.exports = {
     const schema = await pluginStore.get({ key: 'schema' });
 
     const layout = _.get(schema.layout, model, {});
+
+    // If updating a content-type
+    if (!_.isEmpty(layout)) {
+      const state = fromJS({
+        schema: fromJS(schema),
+      });
+      const schemaPath = plugin ? ['models', 'plugins', plugin, model] : ['models', model];
+      const keys = plugin ? `plugins.${plugin}.${model}.editDisplay` : `${model}.editDisplay`;
+      const prevList = state.getIn(['schema', ...schemaPath, 'editDisplay', 'fields']);
+      const prevFields =  Object.keys(state.getIn(['schema', ...schemaPath, 'editDisplay', 'availableFields']).toJS());
+      const currentFields = Object.keys(attributes);
+      const fieldsToRemove = _.difference(prevFields, currentFields);
+      let newList = prevList;
+
+      fieldsToRemove.forEach((field) => {
+        const index = newList.indexOf(field);
+        const manager = new Manager(state, prevList, keys, index, fromJS(layout.attributes || {}));
+        const attrToRemoveInfos = manager.attrToRemoveInfos; // Retrieve the removed item infos
+        const arrayOfLastLineElements = manager.arrayOfEndLineElements;
+        const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
+        
+        if (isRemovingAFullWidthNode) {
+          const currentNodeLine = _.findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]); // Used only to know if removing a full size element on the first line
+          if (currentNodeLine === 0) {
+            newList = newList
+              .delete(index);
+          } else {
+            const previousNodeLine = currentNodeLine - 1;
+            const firstElementOnLine = previousNodeLine === 0 ? 0 : arrayOfLastLineElements[previousNodeLine - 1].index + 1;
+            const lastElementOnLine = arrayOfLastLineElements[previousNodeLine].index + 1;
+            const previousLineRangeIndexes = firstElementOnLine === lastElementOnLine ? [firstElementOnLine] : _.range(firstElementOnLine, lastElementOnLine);
+            const elementsOnLine = manager.getElementsOnALine(previousLineRangeIndexes);
+            const previousLineColNumber = manager.getLineSize(elementsOnLine);
+  
+            if (previousLineColNumber >= 10) {
+              newList = newList
+                .delete(index);
+            } else {
+              const colNumberToAdd = 12 - previousLineColNumber;
+              const colsToAdd = manager.getColsToAdd(colNumberToAdd);
+              newList = newList
+                .delete(index)
+                .insert(index, colsToAdd[0]);
+            
+              if (colsToAdd.length > 1) {
+                newList = newList
+                  .insert(index, colsToAdd[1]);
+              }
+            }
+          }
+        } else {
+          const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) }; // Retrieve the removed element's bounds
+          const leftBoundIndex = _.get(nodeBounds, ['left', 'index'], 0) + 1;
+          const rightBoundIndex = _.get(nodeBounds, ['right', 'index'], prevList.size -1);
+          const elementsOnLine = manager.getElementsOnALine(_.range(leftBoundIndex - 1, rightBoundIndex + 1));
+          const currentLineColSize = manager.getLineSize(elementsOnLine);
+          const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
+
+          if (isRemovingLine) {
+            newList = newList
+              .delete(attrToRemoveInfos.index);
+          } else {
+            const random = Math.floor(Math.random() * 1000); 
+            newList = newList
+              .delete(attrToRemoveInfos.index)
+              .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__${random}`);
+          }
+        }
+
+        const newState = state.updateIn(['schema', 'models', ...keys.split('.'), 'fields'], () => newList);
+        const newManager = new Manager(newState, newList, keys, index, fromJS(layout));
+        const lastListItem = newManager.getAttrInfos(newList.size - 1);
+        const isLastItemFullSize = lastListItem.bootstrapCol === 12;
+        const newArrayOfLastLineElements = newManager.arrayOfEndLineElements
+          .concat({ name: lastListItem.name, index: lastListItem.index, isFullSize: isLastItemFullSize });
+        // Array of element's index to remove from the new list
+        let addedElementsToRemove = [];
+
+        newArrayOfLastLineElements.forEach((item, i) => {
+          if (i < newArrayOfLastLineElements.length) {
+            const firstElementOnLine = i === 0 ? 0 : newArrayOfLastLineElements[i - 1].index + 1;
+            const lastElementOnLine = newArrayOfLastLineElements[i].index;
+            const rangeIndex = _.range(firstElementOnLine, lastElementOnLine + 1);
+            const elementsOnLine = newManager.getElementsOnALine(rangeIndex)
+              .filter(name => !name.includes('__col'));
+
+            if (elementsOnLine.length === 0) {
+              addedElementsToRemove = addedElementsToRemove.concat(rangeIndex);
+            }
+          }
+        });
+
+        newList = newList.filter((item, index) => { // Remove the unnecessary divs
+          const indexToKeep = addedElementsToRemove.indexOf(index) === -1;
+
+          return indexToKeep;
+        });
+      });
+
+      _.set(schema, [...schemaPath, 'editDisplay', 'fields'], newList.toJS());
+    }
 
     Object.keys(attributes).map(attribute => {
       const appearances = _.get(attributes, [attribute, 'appearance'], {});
