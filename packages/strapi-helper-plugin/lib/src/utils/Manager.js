@@ -53,8 +53,16 @@ class Manager {
         ret = ['__col-md-3__'];
     }
     const random = Math.floor(Math.random() * 1000);
+    const random1 = Math.floor(Math.random() * 1000);
 
-    return ret.map(v => `${v}${random}`);
+    return ret.map((v, i) => {
+
+      if (i === 0) {
+        return `${v}${random}`;
+      }
+
+      return `${v}${random1}`;
+    });
   }
 
   /**

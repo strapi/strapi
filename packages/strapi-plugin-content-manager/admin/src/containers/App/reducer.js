@@ -273,6 +273,7 @@ function appReducer(state = initialState, action) {
         const manager = new Manager(state, list, action.keys, 0, layout);
         const newList = manager.getLayout();
 
+        // return list;
         return newList;
       });
     default:
