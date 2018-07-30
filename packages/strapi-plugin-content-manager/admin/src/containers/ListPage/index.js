@@ -62,6 +62,7 @@ import {
   generateFiltersFromSearch,
   generateSearchFromFilters,
   generateSearchFromParams,
+  generateRedirectURI,
 } from './utils';
 
 import styles from './styles.scss';
@@ -157,9 +158,7 @@ export class ListPage extends React.Component {
    * Generate the redirect URI when editing an entry
    * @type {String}
    */
-  generateRedirectURI = () => (
-    `?redirectUrl=/plugins/content-manager/${this.getCurrentModelName().toLowerCase()}${this.generateSearch()}`
-  );
+  generateRedirectURI = generateRedirectURI.bind(this);
 
   generateSearch = () => {
     const {

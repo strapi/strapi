@@ -32,6 +32,7 @@ import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 import { bindLayout } from 'utils/bindLayout';
 import inputValidations from 'utils/inputsValidations';
+import { generateRedirectURI } from 'containers/ListPage/utils';
 
 import { checkFormValidity } from 'utils/formValidations';
 
@@ -54,35 +55,15 @@ import styles from './styles.scss';
 
 export class EditPage extends React.Component {
   componentDidMount() {
-    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
-
-    if (!this.isCreating()) {
-      const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
-      this.props.getData(this.props.match.params.id, this.getSource(), mainField);
-    } else {
-      this.props.getLayout(this.getSource());
-    }
-
-    // Get all relations made with the upload plugin
-    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
-      const association = get(this.getSchema(), ['relations', current], {});
-
-      if (association.plugin === 'upload' && association[association.type] === 'file') {
-        const relation = {
-          name: current,
-          multiple: association.nature === 'manyToManyMorph',
-        };
-
-        acc.push(relation);
-      }
-      return acc;
-    }, []);
-
-    // Update the reducer so we can use it to create the appropriate FormData in the saga
-    this.props.setFileRelations(fileRelations);
+    this.initComponent(this.props);
   }
 
   componentDidUpdate(prevProps) {
+    if (prevProps.location.pathname !== this.props.location.pathname) {
+      this.props.resetProps();
+      this.initComponent(this.props);
+    }
+
     if (prevProps.editPage.submitSuccess !== this.props.editPage.submitSuccess) {
       if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
         const redirectUrl = this.props.location.search.split('?redirectUrl=')[1];
@@ -165,6 +146,38 @@ export class EditPage extends React.Component {
    */
   getSource = () => getQueryParameters(this.props.location.search, 'source');
 
+  /**
+   * Initialize component
+   */
+  initComponent = (props) => {
+    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
+
+    if (!this.isCreating()) {
+      const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
+      this.props.getData(props.match.params.id, this.getSource(), mainField);
+    } else {
+      this.props.getLayout(this.getSource());
+    }
+
+    // Get all relations made with the upload plugin
+    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
+      const association = get(this.getSchema(), ['relations', current], {});
+
+      if (association.plugin === 'upload' && association[association.type] === 'file') {
+        const relation = {
+          name: current,
+          multiple: association.nature === 'manyToManyMorph',
+        };
+
+        acc.push(relation);
+      }
+      return acc;
+    }, []);
+
+    // Update the reducer so we can use it to create the appropriate FormData in the saga
+    this.props.setFileRelations(fileRelations);
+  }
+
   handleBlur = ({ target }) => {
     const defaultValue = get(this.getModelAttribute(target.name), 'default');
 
@@ -207,6 +220,15 @@ export class EditPage extends React.Component {
     };
 
     this.props.changeData({ target });
+  }
+
+  handleRedirect = ({ model, id, source = 'content-manager'}) => {
+    const pathname = `${this.props.match.path.replace(':slug', model).replace(':id', id)}`;
+
+    this.props.history.push({
+      pathname,
+      search: `?source=${source}&redirectURI=${generateRedirectURI({ model, search: `?source=${source}` })}`,
+    });
   }
 
   handleSubmit = (e) => {
@@ -267,7 +289,7 @@ export class EditPage extends React.Component {
 
   render() {
     const { editPage } = this.props;
-
+    console.log(this.props);
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
@@ -309,6 +331,7 @@ export class EditPage extends React.Component {
                         changeData={this.props.changeData}
                         record={editPage.record}
                         schema={this.getSchema()}
+                        onRedirect={this.handleRedirect}
                       />
                     )}
                   </div>
