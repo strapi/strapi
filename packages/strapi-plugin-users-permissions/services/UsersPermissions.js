@@ -88,7 +88,7 @@ module.exports = {
   },
 
   getPlugins: (plugin, lang = 'en') => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       request({
         uri: `https://marketplace.strapi.io/plugins?lang=${lang}`,
         json: true,
@@ -97,7 +97,7 @@ module.exports = {
         }
       }, (err, response, body) => {
         if (err) {
-          return reject(err);
+          return resolve([]);
         }
 
         resolve(body);
