@@ -180,7 +180,7 @@ module.exports = {
       environment: '',
       type: 'plugin',
       name: 'users-permissions'
-    }).get({ key: 'email' }))['reset_password'].options;
+    }).get({ key: 'email' }))['email-templates']['reset_password'].options;
 
     settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
       URL: url,
