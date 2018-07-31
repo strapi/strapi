@@ -41,7 +41,7 @@ module.exports = async cb => {
     },
     discord: {
       enabled: false,
-      icon: 'discord',
+      icon: 'comments',
       key: '',
       secret: '',
       callback: '/auth/discord/callback',
