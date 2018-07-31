@@ -59,7 +59,8 @@ $.ajax({
 
 Thanks to [Grant](https://github.com/simov/grant) and [Purest](https://github.com/simov/purest), you can easily use OAuth and OAuth2
 providers to enable authentication in your application. By default,
-Strapi comes with four providers:
+Strapi comes with the following providers: 
+- [Discord](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/discord_setup.md) 
 - [Facebook](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/fb_setup.md)
 - [Google](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/google_setup.md)
 - [Github](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/github_setup.md)
