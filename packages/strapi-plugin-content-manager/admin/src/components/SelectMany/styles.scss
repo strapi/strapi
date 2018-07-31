@@ -7,7 +7,7 @@
   }
 
   label + div{
-    margin: 5px 0 26px;
+    margin: 3px 0 26px;
 
     &:focus{
       outline: none;
@@ -21,6 +21,119 @@
         span{
           border-color: #B3B5B9 transparent transparent;
         }
+      }
+    }
+  }
+}
+
+.sortableList {
+  margin-top: -21px;
+  padding-left: 0 !important;
+  list-style: none !important;
+
+}
+
+.sortableListItem {
+  display: flex;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: space-between;
+  height: 27px;
+
+
+  &:hover{
+    cursor: pointer;
+
+  }
+
+  &:active{
+    .dragHandle{
+      cursor: pointer;
+  
+      > span {
+        background: #AED4FB;
+      } 
+    }
+  }
+
+  .dragHandle{
+    outline: none;
+    text-decoration: none;
+    margin-top: -1px;
+  
+    > span {
+      vertical-align: middle;
+      position: relative;
+      display: inline-block;
+      width: 6px;
+      height: 1px;
+      padding: 0px !important;
+      background: #B3B5B9;
+      overflow: visible !important;
+      transition: background .25s ease-out;
+      
+      &:before, &:after{
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 1px;
+        background: inherit;
+      }
+  
+      &:before{
+        position: absolute;
+        top: -2px;
+        left: 0;
+      }
+  
+      &:after{
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+      }
+    }
+    
+  }
+
+  > div {
+    span {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    &:first-of-type{
+      display: flex;
+      align-items: center;
+      transition: color .25s ease-out;
+
+      &:hover{
+        .dragHandle{
+          > span {
+            background: #007EFF;
+          }
+        }
+
+        color: #007EFF;
+      }
+
+      span {
+        &:last-of-type{
+          padding-left: 10px;
+        }
+      }
+    }
+
+    &:last-of-type{
+      display: inline-block;
+      height: 100%;
+      line-height: 27px;
+      text-align: right;
+      padding-right: 0px;
+
+      img{
+        display: inline-block;
+        height: 14px;
       }
     }
   }
