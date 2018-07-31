@@ -42,6 +42,7 @@
   "error.attribute.taken": "Поле с таким названием уже существует",
   "error.attribute.key.taken": "Это значение уже существует",
   "error.attribute.sameKeyAndName": "Не может быть одинаковым",
+  "error.attribute.forbidden": "Такое имя атрибута зарезервировано",
   "error.validation.minSupMax": "Не может быть выше",
 
   "form.attribute.item.textarea.name": "Название",
@@ -175,6 +176,7 @@
   "table.contentType.head.description": "Описание",
   "table.contentType.head.fields": "Поля",
 
+  "relation.oneWay": "один принадлежит",
   "relation.oneToOne": "имеет один",
   "relation.oneToMany": "принадлежит многим",
   "relation.manyToOne": "имеет много",
