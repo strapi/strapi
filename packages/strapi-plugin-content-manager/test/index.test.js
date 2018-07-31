@@ -1,4 +1,5 @@
 // Helpers.
+const {login} = require('../../../test/helpers/auth');
 const form = require('../../../test/helpers/generators');
 const restart = require('../../../test/helpers/restart');
 const rq = require('../../../test/helpers/request');
@@ -14,18 +15,11 @@ let data;
 
 describe('App setup auth', () => {
   test(
-    'Register admin user',
+    'Login admin user',
     async () => {
-      const body = await rq({
-        url: `/auth/local/register`,
-        method: 'POST',
-        body: {
-          username: 'admin',
-          email: 'admin@strapi.io',
-          password: 'pcw123'
-        },
-        json: true
-      });
+      await restart(rq);
+
+      const body = await login();
 
       rq.defaults({
         headers: {
@@ -881,8 +875,12 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
         json: true
       });
 
-      if (Object.keys(referenceToGet.tag).length == 0) {
-        referenceToGet.tag = null;
+      try {
+        if (Object.keys(referenceToGet.tag).length == 0) {
+          referenceToGet.tag = null;
+        }
+      } catch(err) {
+        // Silent
       }
 
       expect(referenceToGet.tag).toBe(null);
@@ -920,6 +918,16 @@ describe('Delete test APIs', () => {
     async () => {
       await rq({
         url: `/content-type-builder/models/category`,
+        method: 'DELETE',
+        json: true
+      });
+    }
+  );
+  test(
+    'Delete reference API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models/reference`,
         method: 'DELETE',
         json: true
       });

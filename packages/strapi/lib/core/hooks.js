@@ -2,46 +2,34 @@
 
 // Dependencies.
 const path = require('path');
-const fs = require('fs');
 const glob = require('glob');
 const { parallel } = require('async');
-const { upperFirst, lowerFirst, get } = require('lodash');
+const { endsWith, get } = require('lodash');
 
 module.exports = function() {
   this.hook = {};
 
   return Promise.all([
     new Promise((resolve, reject) => {
-      const cwd = '';
+      const cwd = this.config.appPath;
 
       // Load configurations.
-      glob('./node_modules/strapi-*', {
-        ignore: [
-          './node_modules/strapi-admin',
-          './node_modules/strapi-utils',
-          './node_modules/strapi-generate*',
-          './node_modules/strapi-plugin-*',
-          './node_modules/strapi-helper-*',
-          './node_modules/strapi-middleware-*',
-          './node_modules/strapi-upload-*',
-          './node_modules/strapi-email-*',
-          './node_modules/strapi-lint'
-        ],
-        cwd: this.config.appPath
+      glob('./node_modules/*(strapi-hook-*)/*/*(index|defaults).*(js|json)', {
+        cwd
       }, (err, files) => {
         if (err) {
           return reject(err);
         }
 
-        mountHooks.call(this, files, cwd)(resolve, reject);
+        mountHooks.call(this, files, cwd, 'node_modules')(resolve, reject);
       });
     }),
     new Promise((resolve, reject) => {
-      const cwd = 'hooks';
+      const cwd = path.resolve(this.config.appPath, 'hooks');
 
       // Load configurations.
-      glob('./*', {
-        cwd: path.resolve(this.config.appPath, 'hooks')
+      glob('./*/*(index|defaults).*(js|json)', {
+        cwd
       }, (err, files) => {
         if (err) {
           return reject(err);
@@ -54,59 +42,55 @@ module.exports = function() {
       const cwd = path.resolve(this.config.appPath, 'plugins');
 
       // Load configurations.
-      glob('./*/hooks/*', {
+      glob('./*/hooks/*/*(index|defaults).*(js|json)', {
         cwd
       }, (err, files) => {
         if (err) {
           return reject(err);
         }
 
-        mountHooks.call(this, files, cwd, true)(resolve, reject);
+        mountHooks.call(this, files, cwd, 'plugins')(resolve, reject);
       });
     })
   ]);
 };
 
-const mountHooks = function (files, cwd, isPlugin) {
+const mountHooks = function (files, cwd, source) {
   return (resolve, reject) =>
     parallel(
       files.map(p => cb => {
-        const extractStr = p
-          .split('/')
-          .pop()
-          .replace(/^strapi(-|\.)/, '')
-          .split('-');
+        const folders = p.replace(/^.\/node_modules\/strapi-hook-/, './')
+          .split('/');
+        const name = source === 'plugins' ? folders[folders.length - 2] : folders[1];
 
-        const name = lowerFirst(
-          extractStr.length === 1
-            ? extractStr[0]
-            : extractStr.map(p => upperFirst(p)).join('')
-        );
+        this.hook[name] = this.hook[name] || {
+          loaded: false
+        };
 
-        fs.readFile(path.resolve(this.config.appPath, cwd, p, 'package.json'), (err, content) => {
+        let dependencies = [];
+        if (source === 'node_modules') {
           try {
-            const pkg = isPlugin ? {} : JSON.parse(content);
-
-            this.hook[name] = {
-              isPlugin,
-              loaded: false,
-              identity: name,
-              dependencies: get(pkg, 'strapi.dependencies') || []
-            };
-
-            // Lazy loading.
-            Object.defineProperty(this.hook[name], 'load', {
-              configurable: false,
-              enumerable: true,
-              get: () => require(path.resolve(this.config.appPath, cwd, p))
-            });
-
-            cb();
-          } catch (e) {
-            cb(e);
+            dependencies = get(require(path.resolve(this.config.appPath, 'node_modules', `strapi-hook-${name}`, 'package.json')), 'strapi.dependencies', []);
+          } catch(err) {
+            // Silent
           }
+        }
 
-        });
+        if (endsWith(p, 'index.js') && !this.hook[name].load) {
+          // Lazy loading.
+          Object.defineProperty(this.hook[name], 'load', {
+            configurable: false,
+            enumerable: true,
+            get: () => require(path.resolve(cwd, p)),
+            dependencies
+          });
+
+          this.hook[name].dependencies = dependencies;
+        } else if (endsWith(p, 'defaults.json')) {
+          this.hook[name].defaults = require(path.resolve(cwd, p));
+        }
+
+        cb();
       }),
       (err) => {
         if (err) {

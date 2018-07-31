@@ -1,0 +1,128 @@
+.containerFluid {
+  padding: 18px 30px;
+  > div:first-child {
+    max-height: 33px;
+  }
+}
+
+.container {
+  padding-top: 18px;
+}
+
+.main_wrapper{
+  background: #ffffff;
+  padding: 22px 28px 0px;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px #E3E9F3;
+}
+
+.ctmForm {
+  padding-top: 2.6rem;
+}
+
+.separator {
+  margin-top: 19px;
+  border-top: 1px solid #F6F6F6;
+}
+
+.draggedWrapper {
+  display: flex;
+  > div:first-child {
+    height: 30px;
+    width: 20px;
+    margin-right: 10px;
+    text-align: right;
+    line-height: 30px;
+  }
+}
+
+.listDisplayWrapper {
+  padding-top: 21px;
+}
+
+.draggedDescription {
+  color: #333740;
+  font-size: 13px;
+  font-weight: 500;
+
+  > p {
+    margin-bottom: 28px;
+    color: #787E8F;
+  }
+}
+
+.editWrapper {
+  min-height: 246px;
+  padding: 24px 30px;
+  background-color: #FAFAFB;
+  border-radius: 2px; 
+}
+
+.dropdownWrapper {
+  margin-left: 30px;
+  > div {
+    height: 30px;
+    width: 100%;
+    justify-content: space-between;
+    background: #ffffff;
+    color: #333740;
+    border: 1px solid #E3E9F3;
+    border-radius: 2px;
+    > button {
+      position: relative;
+      cursor: pointer;
+      padding-left: 10px !important;
+      line-height: 30px;
+      width: 100%;
+      color: #333740;
+      text-align: left;
+      background-color: #ffffff;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      &:focus, &:active, &:hover, &:visited {
+        background-color: transparent!important;
+        box-shadow: none;
+        color: #333740;
+      }
+      > p {
+        height: 100%;
+        margin-left: 20px;
+        margin-bottom: 0;
+        margin-top: -1px;
+        color: #007EFF !important;
+        font-size: 13px !important;
+      }
+      &:before {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        content: '\f067';
+        font-family: FontAwesome;
+        font-size: 10px;
+        color: #007EFF;
+      }
+    }
+    > div {
+      max-height: 180px;
+      min-width: calc(100% + 2px);
+      margin-left: -1px;
+      margin-top: -1px;
+      border-top-left-radius: 0 !important;
+      border-top-right-radius: 0;
+
+      overflow: scroll;
+      
+      button {
+        height: 30px;
+        line-height: 30px;
+        div {
+          margin: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+}

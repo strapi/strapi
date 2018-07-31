@@ -207,7 +207,7 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Connection doesn\'t exist' }] }]);
     }
 
-    if (connector === 'strapi-bookshelf') {
+    if (connector === 'strapi-hook-bookshelf') {
       try {
         const tableExists = await strapi.connections[connection].schema.hasTable(model);
 

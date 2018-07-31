@@ -64,8 +64,14 @@ export function* pluginsGet() {
       },
     };
 
-    // Retrieve plugins list.
-    const availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', opts);
+    let availablePlugins;
+
+    try {
+      // Retrieve plugins list.
+      availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', opts);
+    } catch (e) {
+      availablePlugins = [];
+    }
 
     yield put(getPluginsSucceeded(availablePlugins));
   } catch(err) {
