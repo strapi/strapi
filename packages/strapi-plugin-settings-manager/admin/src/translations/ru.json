@@ -35,6 +35,8 @@
   "form.database.item.provider.postgres": "PostgresSQL",
   "form.database.item.provider.mysql": "MySQL",
   "form.database.item.provider.redis": "Redis",
+  "form.database.item.ssl": "SSL",
+  "form.database.item.authenticationDatabase": "База данных аутентификации",
 
   "form.application.name": "Приложение",
   "form.application.description": "Зайдайте настройки вашего приложения.",

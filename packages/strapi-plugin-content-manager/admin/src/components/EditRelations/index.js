@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get, map } from 'lodash';
 
@@ -26,9 +25,6 @@ const filterRelationsUpload = (data) => Object.keys(data).reduce((acc, current) 
 function EditRelations(props) {
   return (
     <div className={styles.editFormRelations}>
-      <FormattedMessage id="content-manager.EditRelations.title">
-        {(message) => <h3>{message}</h3>}
-      </FormattedMessage>
       {map(filterRelationsUpload(props.schema.relations), (relation, key) => {
         if (relation.nature.toLowerCase().includes('morph') && relation[key]) return '';
 
@@ -43,6 +39,7 @@ function EditRelations(props) {
             schema={props.schema}
             setRecordAttribute={props.changeData}
             location={props.location}
+            onRedirect={props.onRedirect}
           />
         );
       })}
@@ -59,6 +56,7 @@ EditRelations.propTypes = {
   changeData: PropTypes.func.isRequired,
   currentModelName: PropTypes.string.isRequired,
   location: PropTypes.object.isRequired,
+  onRedirect: PropTypes.func.isRequired,
   record: PropTypes.object,
   schema: PropTypes.object,
 };
