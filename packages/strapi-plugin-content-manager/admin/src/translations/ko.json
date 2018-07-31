@@ -109,8 +109,8 @@
   "popUpWarning.button.cancel": "취소",
   "popUpWarning.button.confirm": "확인",
   "popUpWarning.title": "확인",
-  "popUpWarning.bodyMessage.contentType.delete": "삭제 하시겠습니까?",
-  "popUpWarning.bodyMessage.contentType.delete.all": "모두 삭제 하시겠습니까?",
+  "popUpWarning.bodyMessage.contentType.delete": "삭제하시겠습니까?",
+  "popUpWarning.bodyMessage.contentType.delete.all": "모두 삭제하시겠습니까?",
   "popUpWarning.warning.cancelAllSettings": "수정 사항을 취소하시겠습니까?",
   "popUpWarning.warning.updateAllSettings": "모든 설정에 적용됩니다."
 }
