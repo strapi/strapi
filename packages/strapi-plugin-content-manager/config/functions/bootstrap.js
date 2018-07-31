@@ -229,11 +229,20 @@ module.exports = async cb => {
 
     return acc;
   }, []);
-
   const getApisKeys = (data, sameArray) => sameArray.map(apiPath => {
     const fields = Object.keys(_.get(data.models, apiPath.concat(['fields'])));
 
     return fields.map(field => `${apiPath.join('.')}.fields.${field}`);
+  });
+  const getApisUploadRelations = (data, sameArray) => sameArray.map(apiPath => {
+    const relationPath = [...apiPath, 'relations'];
+    const relationsObject = _.get(data.models, relationPath, {});
+    const relations = Object.keys(relationsObject)
+      .filter(relationName => {
+        return _.get(data.models, [...relationPath, relationName, 'plugin' ]) === 'upload';
+      });
+    
+    return relations.map(relation => `${apiPath.join('.')}.editDisplay.availableFields.${relation}`);
   });
 
   const getEditDisplayAvailableFieldsPath = attrPath => [..._.take(attrPath, attrPath.length -2), 'editDisplay', 'availableFields', attrPath[attrPath.length - 1]];
@@ -259,6 +268,9 @@ module.exports = async cb => {
     const schemaSameApisKeys = _.flattenDeep(getApisKeys(schema, sameApis));
     const prevSchemaSameApisKeys = _.flattenDeep(getApisKeys(prevSchema, sameApis));
     const sameApisAttrToAdd = schemaSameApisKeys.filter(attr => prevSchemaSameApisKeys.indexOf(attr) === -1).map(splitted);
+    const prevSchemaSameApisUploadRelations = _.flattenDeep(getApisUploadRelations(prevSchema, sameApis));
+    const schemaSameApisUploadRelations = _.flattenDeep(getApisUploadRelations(schema, sameApis));
+    const sameApisUploadRelationsToAdd = schemaSameApisUploadRelations.filter(attr => prevSchemaSameApisUploadRelations.indexOf(attr) === -1).map(splitted);
     const sameApisAttrToRemove = prevSchemaSameApisKeys.filter(attr => schemaSameApisKeys.indexOf(attr) === -1).map(splitted);
 
     // Remove api
@@ -335,6 +347,17 @@ module.exports = async cb => {
 
         _.set(prevSchema.models, keyPath, newValue);
       });
+    });
+
+    // Special handler for the upload relations
+    sameApisUploadRelationsToAdd.forEach(attrPath => {
+      const attr = _.get(schema.models, attrPath);
+      _.set(prevSchema.models, attrPath, attr);
+
+      const fieldsPath = [..._.take(attrPath, attrPath.length -2), 'fields'];
+      const currentFields = _.get(prevSchema.models, fieldsPath, []);
+      currentFields.push(attr.name);
+      _.set(prevSchema.models, fieldsPath, currentFields);
     });
 
     await pluginStore.set({ key: 'schema', value: prevSchema });

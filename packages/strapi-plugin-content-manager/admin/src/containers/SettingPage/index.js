@@ -615,7 +615,7 @@ class SettingPage extends React.PureComponent {
     const {
       onSubmit,
     } = this.props;
-    // console.log(this.props.schema);
+    console.log(this.props.schema);
     // TODO: Add loader!
 
     return (

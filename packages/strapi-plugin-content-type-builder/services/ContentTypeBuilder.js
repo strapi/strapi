@@ -117,6 +117,11 @@ module.exports = {
         });
       });
 
+      // Delete them from the available fields
+      fieldsToRemove.forEach(field => {
+        _.unset(schema, [...schemaPath, 'editDisplay', 'availableFields', field]);
+      });
+
       _.set(schema, [...schemaPath, 'editDisplay', 'fields'], newList.toJS());
     }
 
