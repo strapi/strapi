@@ -14,6 +14,8 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entrée trouvée",
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
+  "containers.SettingsPage.Block.contentType.title": "Types de contenu",
+  "containers.SettingsPage.Block.contentType.description": "Configurer les paramètres spécifiques",
 
   "containers.SettingPage.addField": "Ajouter un nouveau champs",
   "containers.SettingPage.attributes": "Attributs",
@@ -107,5 +109,7 @@
   "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûr de vouloir supprimer cette entrée ?",
   "popUpWarning.bodyMessage.contentType.delete.all": "Êtes-vous sûr de vouloir supprimer ces entrées ?",
   "popUpWarning.warning.cancelAllSettings": "Êtes-vous sûr de vouloir vos modifications?",
-  "popUpWarning.warning.updateAllSettings": "Cela modifiera tous vos précédents paramètres."
+  "popUpWarning.warning.updateAllSettings": "Cela modifiera tous vos précédents paramètres.",
+
+  "pageNotFound" : "Page non trouvée"
 }

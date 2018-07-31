@@ -35,6 +35,8 @@
   "form.database.item.provider.postgres": "PostgresSQL",
   "form.database.item.provider.mysql": "MySQL",
   "form.database.item.provider.redis": "Redis",
+  "form.database.item.ssl": "SSL",
+  "form.database.item.authenticationDatabase": "Base de données d'authentification",
 
   "form.application.name": "Application",
   "form.application.description": "Modification des configurations de l'application.",
@@ -110,6 +112,7 @@
   "form.language.choose": "Choisissez un langage",
 
   "request.error.database.exist": "Cette connexion est déjà utilisée",
+  "request.error.database.unknow": "Il n'y a pas de connexion de ce genre",
   "request.error.type.string": "Un texte est demandé.",
   "request.error.type.number": "Un nombre est demandé.",
   "request.error.type.boolean": "Un boolean est demandé.",
@@ -141,6 +144,8 @@
   "popUpWarning.title": "Merci de confirmer",
   "popUpWarning.databases.delete.message": "Etes-vous sûre de vouloir supprimer cette connexion ?",
   "popUpWarning.danger.message": "Des models sont toujours reliés à cette connexion.....",
+  "popUpWarning.databases.danger.message": "Les types de contenu sont toujours liés à cette connexion. En le supprimant, vous pourriez causer des problèmes critiques à votre application. Soyez prudent...",
+  "popUpWarning.danger.ok.message": "Je comprends",
   "popUpWarning.databases.danger.ok.message": "J'ai compris",
   "popUpWarning.languages.delete.message": "Etes-vous sûre de vouloir supprimer ce language ?",
 
