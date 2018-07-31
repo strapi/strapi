@@ -1,26 +1,27 @@
 {
-  "name": "strapi-email-sendmail",
-  "version": "3.0.0-alpha.13.0.1",
-  "description": "Sendmail provider for strapi email",
+  "name": "strapi-email-amazon-ses",
+  "version": "3.0.0-alpha.13",
+  "description": "Amazon SES provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
     "email",
-    "strapi"
+    "strapi",
+    "amazon",
+    "ses"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
   "dependencies": {
-    "sendmail": "^1.2.0"
+    "node-ses": "^2.1.0"
   },
   "strapi": {
     "isProvider": true
   },
   "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
+    "email": "nikolay@tsenkov.net",
+    "name": "Nikolay tsenkov"
   },
   "maintainers": [
     {
