@@ -1,8 +1,6 @@
 module.exports = async (ctx, next) => {
   let role;
 
-  console.log("ljqskljdkls");
-
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
       const { _id, id } = await strapi.plugins['users-permissions'].services.jwt.getToken(ctx);
