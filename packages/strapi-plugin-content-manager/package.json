@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-alpha.13",
+  "version": "3.0.0-alpha.13.0.1",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -28,7 +28,7 @@
     "react-dnd-html5-backend": "^5.0.1",
     "react-select": "^1.2.1",
     "showdown": "^1.8.6",
-    "strapi-helper-plugin": "3.0.0-alpha.13"
+    "strapi-helper-plugin": "3.0.0-alpha.13.0.1"
   },
   "author": {
     "name": "Strapi team",

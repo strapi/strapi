@@ -1,6 +1,6 @@
 {
-  "Auth.form.button.register-success": "Enviar de nuevo",
-  "Auth.form.button.forgot-password.success": "Enviar de nuevo",
+  "Auth.form.button.register-success": "Enviar nuevamente",
+  "Auth.form.button.forgot-password.success": "Enviar nuevamente",
   "Auth.form.button.forgot-password": "Enviar Email",
   "Auth.form.button.reset-password": "Cambiar contraseña",
   "Auth.form.button.login": "Iniciar sesión",
@@ -59,7 +59,7 @@
   "EditForm.inputSelect.label.role": "Rol predeterminado para usuarios autenticados",
   "EditForm.inputSelect.description.role": "Adjuntará el nuevo usuario autenticado al rol seleccionado.",
   "EditForm.inputSelect.subscriptions.label": "Gestionar cuotas de suscripción",
-  "EditForm.inputSelect.subscriptions.description": "Limite el número de suscripciones por IP por hora.",
+  "EditForm.inputSelect.subscriptions.description": "Limite el número de suscripciones de IP por hora.",
   "EditForm.inputSelect.durations.label": "Duración",
   "EditForm.inputSelect.durations.description": "Número de horas durante las cuales el usuario no puede suscribirse.",
 
@@ -121,7 +121,7 @@
   "Plugin.permissions.application.description": "Defina todas las acciones permitidas de su proyecto.",
   "Plugin.permissions.plugins.description": "Defina todas las acciones permitidas para el plugin {name}.",
 
-  "Plugins.header.title": "Permisiones",
+  "Plugins.header.title": "Permisos",
   "Plugins.header.description": "Sólo las acciones vinculadas a una ruta se enumeran a continuación.",
 
   "Policies.InputSelect.empty": "Ninguno",
@@ -139,7 +139,7 @@
   "PopUpForm.button.save": "Guardar",
   "PopUpForm.header.add.providers": "Añadir nuevo proveedor",
   "PopUpForm.header.edit.email-templates": "Editar Plantillas de Email",
-  "PopUpForm.header.edit.providers": "Editar {provider} Proveedor",
+  "PopUpForm.header.edit.providers": "Editar Proveedor {provider}",
   "PopUpForm.inputSelect.providers.label": "Elija el proveedor",
   "PopUpForm.Email.options.from.name.label": "Nombre del remitente",
   "PopUpForm.Email.options.from.email.label": "Email del remitente",

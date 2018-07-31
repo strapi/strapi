@@ -213,9 +213,9 @@ Most of the application's configurations are defined by environment. It means th
         "client": "postgres",
         "host": "localhost",
         "port": 5432,
-        "username": "aureliengeorget",
-        "password": "${process.env.USERNAME}",
-        "database": "${process.env.PWD}",
+        "username": "${process.env.USERNAME}",
+        "password": "${process.env.PWD}",
+        "database": "strapi",
         "schema": "public"
       },
       "options": {
@@ -228,7 +228,7 @@ Most of the application's configurations are defined by environment. It means th
         "client": "mysql",
         "host": "localhost",
         "port": 5432,
-        "username": "aureliengeorget",
+        "username": "strapi",
         "password": "root",
         "database": ""
       },
