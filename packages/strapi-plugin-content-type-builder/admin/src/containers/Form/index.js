@@ -451,7 +451,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  handleSubmit = (e, redirectToChoose = false) => {
+  handleSubmit = (e, redirectToChoose = true) => {
     e.preventDefault();
     const hashArray = split(this.props.hash, ('::'));
     const valueToReplace = includes(this.props.hash, '#create') ? '#create' : '#edit';
