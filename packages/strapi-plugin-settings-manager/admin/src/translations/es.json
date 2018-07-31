@@ -52,8 +52,8 @@
   "form.advanced.item.prefix": "API de prefijos",
 
   "form.request.name": "Solicitud",
-  "formulario.de.solicitud.de.descripción": "Configure los ajustes de su solicitud",
-  "formulario.para.solicitar.item.parser": "Parser",
+  "form.request.description": "Configure los ajustes de su solicitud.",
+  "form.request.item.parser": "Parser",
   "form.request.item.parser.multipart": "Parser Multiparte",
   "form.request.item.prefix": "Prefijo",
   "form.request.item.prefix.prefix": "Prefijo",
