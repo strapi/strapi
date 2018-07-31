@@ -1,4 +1,6 @@
 .selectOne { /* stylelint-disable */
+  position: relative;
+
   label{
     font-size: 1.3rem;
     font-weight: 500;
@@ -6,7 +8,7 @@
     margin-top: 3px;
   }
 
-  label + div{
+  nav + div{
     height: 34px;
     margin: 3px 0 26px;
 
@@ -25,6 +27,22 @@
           border-color: #B3B5B9 transparent transparent;
         }
       }
+    }
+  }
+}
+
+.headline{
+  display: flex;
+  justify-content: space-between;
+
+  a{
+    color: #007EFF !important;
+    font-size: 1.3rem;
+    padding-top: 3px;
+
+    &:hover{
+      text-decoration: underline !important;
+      cursor: pointer;
     }
   }
 }

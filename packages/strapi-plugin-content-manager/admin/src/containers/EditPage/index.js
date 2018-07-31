@@ -226,12 +226,24 @@ export class EditPage extends React.Component {
   }
 
   handleRedirect = ({ model, id, source = 'content-manager'}) => {
-    const pathname = `${this.props.match.path.replace(':slug', model).replace(':id', id)}`;
-
-    this.props.history.push({
-      pathname,
-      search: `?source=${source}&redirectURI=${generateRedirectURI({ model, search: `?source=${source}` })}`,
-    });
+    /* eslint-disable */
+    switch (model) {
+      case 'permission':
+      case 'role':
+      case 'file':
+        // Exclude special models which are handled by plugins.
+        if (source !== 'content-manager') {
+          break;
+        }
+      default:
+        const pathname = `${this.props.match.path.replace(':slug', model).replace(':id', id)}`;
+      
+        this.props.history.push({
+          pathname,
+          search: `?source=${source}&redirectURI=${generateRedirectURI({ model, search: `?source=${source}` })}`,
+        });
+    }
+    /* eslint-enable */
   }
 
   handleSubmit = (e) => {
