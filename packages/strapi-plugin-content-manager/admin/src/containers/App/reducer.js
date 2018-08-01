@@ -83,49 +83,17 @@ function appReducer(state = initialState, action) {
           const itemInfos = manager.getAttrInfos(draggedItemIndex);
           const isFullSize = itemInfos.bootstrapCol === 12;
           const dropLineBounds = { left: manager.getBound(false, action.hoverIndex), right: manager.getBound(true, action.hoverIndex) };
-          const hasMoved = state.get('hasMoved');
-          let newList = list;
           
           if (isFullSize) {
             const upwards = action.dragIndex > action.hoverIndex;
             const indexToDrop = upwards ? get(dropLineBounds, 'left.index', 0) : get(dropLineBounds, 'right.index', list.size -1);
 
-            newList = list
+            return list
               .delete(draggedItemIndex)
               .insert(indexToDrop, draggedItemName);
-          } else {
-            const { left, right } = dropLineBounds;
-            const elementsOnLine = manager.getElementsOnALine(range(get(left, 'index', 0), get(right, 'index', list.size -1) + 1));
-            const isMovingOnTheSameLine = elementsOnLine.indexOf(draggedItemName) !== -1;
-            const replacedItem = list.get(action.hoverIndex);
-            const isReplacedItemField = !replacedItem.includes('__col-md');
-            const canDrop = isReplacedItemField && replacedItem !== draggedItemName;
-
-            if (isMovingOnTheSameLine) {
-              if (canDrop) {
-                newList = list
-                  .delete(action.dragIndex)
-                  .insert(action.hoverIndex, list.get(action.dragIndex));
-              }
-            } else {
-              if (!hasMoved) {
-                const replacer = `__col-md-${itemInfos.bootstrapCol}__${Math.floor(Math.random() * 1000)}`;
-                if (isReplacedItemField) {
-                  newList = list
-                    .insert(action.dragIndex, replacer)
-                    .delete(action.dragIndex + 1)
-                    .insert(action.hoverIndex, draggedItemName);
-                } else {
-                  newList = list
-                    .insert(action.dragIndex, replacer)
-                    .delete(action.dragIndex + 1)
-                    .insert(action.hoverIndex, draggedItemName);
-                }
-              }
-            }
           }
 
-          return newList;
+          return list;
         })
         .update('hasMoved', () => true);
     case ON_CHANGE:
