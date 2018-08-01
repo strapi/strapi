@@ -1,9 +1,18 @@
 .selectMany { /* stylelint-disable */
+  padding-bottom: 19px;
+  margin-bottom: 0px;
+  overflow-x: hidden;
+
   label{
     font-size: 1.3rem;
     font-weight: 500;
     text-transform: capitalize;
     margin-top: 3px;
+
+    > span {
+      font-weight: 400;
+      font-size: 1.2rem;
+    }
   }
 
   label + div{
@@ -26,11 +35,40 @@
   }
 }
 
-.sortableList {
-  margin-top: -21px;
-  padding-left: 0 !important;
-  list-style: none !important;
+.selectManyUpdate{
+  padding-bottom: 18px !important;
+}
 
+.sortableList {
+  max-height: 110px;
+
+  > ul {
+    margin: -21px -20px 0;
+    padding: 0 20px !important;
+    list-style: none !important;
+    overflow: scroll;
+    max-height: 110px;
+  }
+ 
+}
+
+.sortableListLong {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 0px;
+
+  &:after {
+    position: absolute;
+    top: -15px;
+    left: -5px;
+    content: '';
+    display: inline-block;
+    width: calc(100% + 10px);
+    height: 1px;
+    margin-bottom: -25px;
+    box-shadow: 0px -2px 4px 0px rgba(227, 233, 243, .5);
+  }
 }
 
 .sortableListItem {
