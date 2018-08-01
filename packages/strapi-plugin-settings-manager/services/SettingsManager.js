@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
-const exec = require('child_process').execSync;
+const exec = require('child_process').spawnSync;
 
 module.exports = {
   menu: {
@@ -901,12 +901,12 @@ module.exports = {
 
     if (connector && !installedConnector) {
       strapi.log.info(`Installing ${connector} dependency ...`);
-      exec(`npm install ${connector}@alpha`);
+      exec('npm', ['install', `${connector}@alpha`]);
     }
 
     if (client && !installedClient) {
       strapi.log.info(`Installing ${client} dependency ...`);
-      exec(`npm install ${client}`);
+      exec('npm', ['install', client]);
     }
   },
 
