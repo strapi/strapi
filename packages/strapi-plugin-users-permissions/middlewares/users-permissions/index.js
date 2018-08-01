@@ -14,13 +14,11 @@ module.exports = strapi => {
     },
 
     initialize: function(cb) {
-      console.log();
       _.forEach(strapi.admin.config.routes, value => {
         if (_.get(value.config, 'policies')) {
           value.config.policies.unshift('plugins.users-permissions.permissions');
         }
       });
-
 
       _.forEach(strapi.config.routes, value => {
         if (_.get(value.config, 'policies')) {
