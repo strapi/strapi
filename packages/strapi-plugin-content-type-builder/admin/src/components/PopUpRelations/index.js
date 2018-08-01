@@ -123,8 +123,9 @@ class PopUpRelations extends React.Component {
           value[0],
         );
       } else {
+        const keyValue = get(this.props.values, 'params.nature') === 'oneWay' ? '-' : '';
         this.props.onChange({ target: { name: 'name', value: '' } });
-        this.props.onChange({ target: { name: 'params.key', value: '' } });
+        this.props.onChange({ target: { name: 'params.key', value: keyValue } });
       }
     }
   };
@@ -237,6 +238,8 @@ class PopUpRelations extends React.Component {
 
     const errs = findIndex(this.props.formErrors, ['name',get(this.props.form, ['items', '0', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '0', 'name'])])].errors: [];
     const errors = findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])]) !== -1 ? this.props.formErrors[findIndex(this.props.formErrors, ['name', get(this.props.form, ['items', '1', 'name'])])].errors : [];
+    const contentTypeTargetPlaceholder = get(this.props.values, 'params.nature', '') === 'oneWay' ? '-' : get(this.props.contentType, 'name');
+    const contentTypeTargetValue = get(this.props.values, 'params.nature') === 'oneWay' ? '-' : get(this.props.values, ['params', 'key']);
 
     return (
       <ModalBody className={`${styles.modalBody} ${styles.flex}`}>
@@ -262,12 +265,12 @@ class PopUpRelations extends React.Component {
         />
         <RelationBox
           tabIndex="2"
-          contentTypeTargetPlaceholder={get(this.props.contentType, 'name')}
+          contentTypeTargetPlaceholder={contentTypeTargetPlaceholder}
           relationType={get(this.props.values, ['params', 'nature'])}
           onSubmit={this.props.onSubmit}
           header={header}
           input={get(this.props.form, ['items', '1'])}
-          value={get(this.props.values, ['params', 'key'])}
+          value={contentTypeTargetValue}
           onChange={this.props.onChange}
           didCheckErrors={this.props.didCheckErrors}
           errors={errors}
@@ -279,25 +282,6 @@ class PopUpRelations extends React.Component {
   };
 
   render() {
-    const loader = this.props.showLoader ? (
-      <Button
-        onClick={this.props.onSubmit}
-        type="submit"
-        className={styles.primary}
-        disabled={this.props.showLoader}
-      >
-        <p className={styles.saving}>
-          <span>.</span>
-          <span>.</span>
-          <span>.</span>
-        </p>
-      </Button>
-    ) : (
-      <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
-        <FormattedMessage id="content-type-builder.form.button.continue" />
-      </Button>
-    );
-
     const modalBody = this.props.showRelation
       ? this.renderModalBodyRelations()
       : this.renderModalBodyAdvanced();
@@ -329,7 +313,10 @@ class PopUpRelations extends React.Component {
             <Button onClick={handleToggle} className={styles.secondary}>
               <FormattedMessage id="content-type-builder.form.button.cancel" />
             </Button>
-            {loader}{' '}
+            <Button type="submit" onClick={(e) => this.props.onSubmit(e, true)} className={styles.primaryAddShape}><FormattedMessage id="content-type-builder.button.attributes.add" /></Button>
+            <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
+              <FormattedMessage id="content-type-builder.form.button.continue" />
+            </Button>{' '}
           </ModalFooter>
         </Modal>
       </div>

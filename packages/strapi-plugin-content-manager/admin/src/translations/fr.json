@@ -4,7 +4,6 @@
   "containers.Home.pluginHeaderTitle": "Type de contenu",
   "containers.Home.pluginHeaderDescription": "Créer et modifier votre type de contenu",
   "containers.Home.introduction": "Pour éditer du contenu, choisissez un type de données dans le menu de gauche.",
-  "containers.Home.pluginHeaderDescription": "Un outil complet pour gérer facilement vos données.",
   "containers.Edit.submit": "Valider",
   "containers.Edit.editing": "Édition en cours...",
   "containers.Edit.delete": "Supprimer",
@@ -16,18 +15,39 @@
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "containers.List.errorFetchRecords": "Erreur",
 
+  "containers.SettingPage.addField": "Ajouter un nouveau champs",
+  "containers.SettingPage.attributes": "Attributs",
+  "containers.SettingPage.attributes.description": "Organiser les attributs du modèle",
+  "containers.SettingPage.pluginHeaderDescription": "Configurez les paramètres de ce modèle",
+  "containers.SettingPage.listSettings.title": "Liste — Paramètres",
+  "containers.SettingPage.listSettings.description": "Configurez les options de ce modèle",
+
+  "containers.SettingsPage.pluginHeaderDescription": "Configurez les paramètres par défaut de vos modèles",
+  "containers.SettingsPage.Block.generalSettings.description": "Configurez  les options par défault de vos modèles",
+  "containers.SettingsPage.Block.generalSettings.title": "Général",
+
   "components.AddFilterCTA.add": "Filtres",
   "components.AddFilterCTA.hide": "Filtres",
-  "components.FilterOptions.button.apply": "Appliquer",
+
+  "components.DraggableAttr.edit": "Clicquez pour modifier",
+
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Appliquer",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Tout supprimer",
   "components.FiltersPickWrapper.PluginHeader.description": "Définissez les conditions des filtres à appliquer",
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filtres",
   "components.FiltersPickWrapper.hide": "Fermer",
-
+  
+  "components.Search.placeholder": "Rechercher une entrée...",
+  
+  "components.TableDelete.entries.plural": "{number} entrées sélectionnées",
+  "components.TableDelete.entries.singular": "{number} entrée sélectionnée",
+  "components.TableDelete.delete": "Tout supprimer",
+  
   "components.TableEmpty.withFilters": "Aucun {contentType} n'a été trouvé avec ces filtres...",
   "components.TableEmpty.withoutFilter": "Aucun {contentType} n'a été trouvé...",
-
+  "components.TableEmpty.withSearch": "Aucun {contentType} n'a été trouvé avec cette recherche ({search})...",
+  
+  "components.FilterOptions.button.apply": "Appliquer",
   "components.FilterOptions.FILTER_TYPES.=": "est",
   "components.FilterOptions.FILTER_TYPES._ne": "n'est pas",
   "components.FilterOptions.FILTER_TYPES._lt": "inférieur à",
@@ -62,8 +82,21 @@
   "error.attribute.key.taken": "Cette valeur existe déjà",
   "error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "error.validation.minSupMax": "Ne peut pas être plus grand",
+  "error.validation.json": "Le format JSON n'est pas respecté",
+
+  "form.Input.label": "Label",
+  "form.Input.label.inputDescription": "Cette valeur modifie celle du champs de la table",
+  "form.Input.search": "Autoriser la search",
+  "form.Input.search.field": "Autoriser la search sur ce champs",
+  "form.Input.filters": "Autoriser les filtres",
+  "form.Input.sort.field": "Autoriser le tri sur ce champs",
+  "form.Input.bulkActions": "Autoriser les actions groupées",
+  "form.Input.pageEntries": "Nombre d'entrées par page",
+  "form.Input.pageEntries.inputDescription": "Note: Vous pouvez modifier ces valeurs par modèle",
+  "form.Input.defaultSort": "Attribut de tri par défault",
 
   "notification.error.relationship.fetch": "Une erreur est survenue en récupérant les relations.",
+  "notification.info.SettingPage.disableSort": "Vous devez avoir au moins un attribut de tri par défaut",
 
   "success.record.delete": "Supprimé",
   "success.record.save": "Sauvegardé",
@@ -71,5 +104,8 @@
   "popUpWarning.button.cancel": "Annuler",
   "popUpWarning.button.confirm": "Confirmer",
   "popUpWarning.title": "Confirmation requise",
-  "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûr de vouloir supprimer cette entrée ?"
+  "popUpWarning.bodyMessage.contentType.delete": "Êtes-vous sûr de vouloir supprimer cette entrée ?",
+  "popUpWarning.bodyMessage.contentType.delete.all": "Êtes-vous sûr de vouloir supprimer ces entrées ?",
+  "popUpWarning.warning.cancelAllSettings": "Êtes-vous sûr de vouloir vos modifications?",
+  "popUpWarning.warning.updateAllSettings": "Cela modifiera tous vos précédents paramètres."
 }

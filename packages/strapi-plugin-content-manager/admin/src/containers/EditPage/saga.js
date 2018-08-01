@@ -10,6 +10,8 @@ import {
   takeLatest,
 } from 'redux-saga/effects';
 
+import { makeSelectSchema } from 'containers/App/selectors';
+
 // Utils.
 import cleanData from 'utils/cleanData';
 import request from 'utils/request';
@@ -78,13 +80,16 @@ export function* submit() {
   const isCreating = yield select(makeSelectIsCreating());
   const record = yield select(makeSelectRecord());
   const source = yield select(makeSelectSource());
+  const schema = yield select(makeSelectSchema());
   let shouldAddTranslationSuffix = false;
 
   try {
     // Show button loader
     yield put(setLoader());
     const recordCleaned = Object.keys(record).reduce((acc, current) => {
-      const cleanedData = cleanData(record[current], 'value', 'id');
+      const attrType = source !== 'content-manager' ? get(schema, ['models', 'plugins', source, currentModelName, 'fields', current, 'type'], null) : get(schema, ['models', currentModelName, 'fields', current, 'type'], null);
+      const cleanedData = attrType === 'json' ? record[current] : cleanData(record[current], 'value', 'id');
+
 
       if (isString(cleanedData) || isNumber(cleanedData)) {
         acc.append(current, cleanedData);
@@ -104,11 +109,16 @@ export function* submit() {
           acc.append(current, JSON.stringify(data));
         }
       } else {
-        acc.append(current, JSON.stringify(cleanedData));
+        acc.append(current,  JSON.stringify(cleanedData));
       }
 
       return acc;
     }, new FormData());
+
+    // Helper to visualize FormData
+    // for(var pair of recordCleaned.entries()) {
+    //   console.log(pair[0]+ ', '+ pair[1]);
+    // }
 
     const id = isCreating ? '' : record.id || record._id;
     const params = { source };

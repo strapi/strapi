@@ -105,6 +105,7 @@ module.exports = {
     return {
       name: _.get(model, 'info.name', 'model.name.missing'),
       description: _.get(model, 'info.description', 'model.description.missing'),
+      mainField: _.get(model, 'info.mainField', ''),
       connection: model.connection,
       collectionName: model.collectionName,
       attributes: attributes
@@ -116,7 +117,7 @@ module.exports = {
   },
 
   generateAPI: (name, description, connection, collectionName, attributes) => {
-    const template = _.get(strapi.config.currentEnvironment, `database.connections.${connection}.connector`, 'strapi-mongoose').split('-')[1];
+    const template = _.get(strapi.config.currentEnvironment, `database.connections.${connection}.connector`, 'strapi-hook-mongoose').split('-')[2];
 
     return new Promise((resolve, reject) => {
       const scope = {
@@ -240,7 +241,7 @@ module.exports = {
     return [attributesNotConfigurable, errors];
   },
 
-  clearRelations: (model, source) => {
+  clearRelations: (model, source, force) => {
     const errors = [];
     const structure = {
       models: strapi.models,
@@ -258,10 +259,10 @@ module.exports = {
       Object.keys(models).forEach(name => {
         const relationsToDelete = _.get(plugin ? strapi.plugins[plugin].models[name] : strapi.models[name], 'associations', []).filter(association => {
           if (source) {
-            return association[association.type] === model && association.plugin === source;
+            return association[association.type] === model && association.plugin === source && (association.nature !== 'oneWay' || force);
           }
 
-          return association[association.type] === model;
+          return association[association.type] === model && (association.nature !== 'oneWay' || force);
         });
 
         if (!_.isEmpty(relationsToDelete)) {

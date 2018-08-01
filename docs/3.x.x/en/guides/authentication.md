@@ -59,11 +59,16 @@ $.ajax({
 
 Thanks to [Grant](https://github.com/simov/grant) and [Purest](https://github.com/simov/purest), you can easily use OAuth and OAuth2
 providers to enable authentication in your application. By default,
-Strapi comes with four providers:
-- Facebook
-- Google
-- Github
-- Linkedin2 (Oauth2 Provider for Linkedin)
+Strapi comes with the following providers: 
+- [Discord](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/discord_setup.md) 
+- [Facebook](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/fb_setup.md)
+- [Google](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/google_setup.md)
+- [Github](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/github_setup.md)
+- [Twitter](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/twitter_setup.md)
+
+[👀   See our complete example with detailed tutorials for each provider (with React)](https://github.com/strapi/strapi-examples/tree/master/login-react)
+
+---
 
 To use the providers authentication, set your credentials in the admin interface (Plugin Users & Permissions > Providers).
 Then update and enable the provider you want use.

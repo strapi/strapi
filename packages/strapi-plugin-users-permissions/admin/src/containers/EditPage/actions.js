@@ -20,6 +20,7 @@ import {
   ON_CHANGE_INPUT,
   ON_CLICK_ADD,
   ON_CLICK_DELETE,
+  RESET_PROPS,
   RESET_SHOULD_DISPLAY_POLICIES_HINT,
   SELECT_ALL_ACTIONS,
   SET_ACTION_TYPE,
@@ -146,6 +147,10 @@ export function onClickDelete(itemToDelete) {
     itemToDelete,
   };
 }
+
+export const resetProps = () => ({
+  type: RESET_PROPS,
+});
 
 export function resetShouldDisplayPoliciesHint() {
   return {

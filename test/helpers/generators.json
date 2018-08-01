@@ -22,16 +22,6 @@
         }
       },
       {
-        "name":"published",
-        "params":{
-          "appearance":{
-            "WYSIWYG":false
-          },
-          "multiple":false,
-          "type":"boolean"
-        }
-      },
-      {
         "name":"author",
         "params":{
           "nature":"manyToOne",
@@ -119,10 +109,55 @@
           "key":"reference",
           "nature":"oneToOne"
         }
+      },
+      {
+        "name": "tag",
+        "params":{
+          "nature":"oneWay",
+          "target":"tag"
+        }
       }
     ],
     "connection":"default",
     "name":"reference",
+    "description":"",
+    "collectionName":""
+  },
+  "product": {
+    "attributes":[
+      {
+        "name":"name",
+        "params":{
+          "appearance":{
+            "WYSIWYG":false
+          },
+          "multiple":false,
+          "type":"string"
+        }
+      },
+      {
+        "name":"description",
+        "params":{
+          "appearance":{
+            "WYSIWYG":true
+          },
+          "multiple":false,
+          "type":"text"
+        }
+      },
+      {
+        "name":"published",
+        "params":{
+          "appearance":{
+            "WYSIWYG":false
+          },
+          "multiple":false,
+          "type":"boolean"
+        }
+      }
+    ],
+    "connection":"default",
+    "name":"product",
     "description":"",
     "collectionName":""
   }

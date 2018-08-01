@@ -27,7 +27,8 @@ const initialState = fromJS({
   isCreating: false,
   id: '',
   initialRecord: Map({}),
-  layout: Map({}),
+  isLoading: true,
+  layout: fromJS({}),
   modelName: '',
   pluginHeaderTitle: 'New Entry',
   record: Map({}),
@@ -44,11 +45,14 @@ function editPageReducer(state = initialState, action) {
     case GET_DATA_SUCCEEDED:
       return state
         .update('id', () => action.id)
+        .update('isLoading', () => false)
         .update('initialRecord', () => Map(action.data))
         .update('pluginHeaderTitle', () => action.pluginHeaderTitle)
         .update('record', () => Map(action.data));
     case GET_LAYOUT_SUCCEEDED:
-      return state.update('layout', () => Map(action.layout));
+      return state
+        .update('isLoading', () => false)
+        .updateIn(['layout', state.get('modelName')], () => Map(action.layout));
     case INIT_MODEL_PROPS:
       return state
         .update('formValidations', () => List(action.formValidations))
@@ -63,7 +67,7 @@ function editPageReducer(state = initialState, action) {
         .update('record', () => state.get('initialRecord'))
         .update('resetProps', (v) => v = !v);
     case RESET_PROPS:
-      return initialState;
+      return initialState.update('layout', () => state.get('layout'));
     case SET_FILE_RELATIONS:
       return state.set('fileRelations', List(action.fileRelations));
     case SET_FORM_ERRORS:

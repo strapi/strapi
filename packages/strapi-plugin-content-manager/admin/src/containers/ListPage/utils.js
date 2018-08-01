@@ -5,12 +5,12 @@
  */
 const generateFiltersFromSearch = search => search
   .split('&')
-  .filter(x => !x.includes('_limit') && !x.includes('_page') && !x.includes('_sort') && !x.includes('source'))
+  .filter(x => !x.includes('_limit') && !x.includes('_page') && !x.includes('_sort') && !x.includes('source') && !x.includes('_q='))
   .reduce((acc, curr) => {
     const arr = curr.split('=');
     const split = arr[0].split('_');
     const filter = split.length > 1 ? `_${split[1]}` : '=';
-    acc.push({ attr: split[0], filter, value: arr[1] });
+    acc.push({ attr: split[0], filter, value: decodeURIComponent(arr[1]) });
 
     return acc;
   }, []);
@@ -40,16 +40,27 @@ const generateSearchFromFilters = filters => {
  */
 const generateSearchFromParams = params =>
   Object.keys(params).reduce((acc, curr, index) => {
-    if (index === 0) {
-      acc = `${curr}=${params[curr]}`;
-    } else {
-      acc = `${acc}&${curr}=${params[curr]}`;
+    if (params[curr] !== '') {
+      if (index === 0) {
+        acc = `${curr}=${params[curr]}`;
+      } else {
+        acc = `${acc}&${curr}=${params[curr]}`;
+      }
     }
     return acc;
   }, '');
+
+  /**
+* Generate the redirect URI when editing an entry
+* @type {String}
+*/
+const generateRedirectURI = function ({ model, search } = {}) {
+  return `?redirectUrl=/plugins/content-manager/${(model || this.getCurrentModelName()).toLowerCase()}${(search || this.generateSearch())}`;
+};
 
 export {
   generateFiltersFromSearch,
   generateSearchFromFilters,
   generateSearchFromParams,
+  generateRedirectURI,
 };

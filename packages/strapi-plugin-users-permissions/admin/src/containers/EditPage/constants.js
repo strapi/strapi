@@ -18,6 +18,7 @@ export const ON_CANCEL = 'UsersPermissions/EditPage/ON_CANCEL';
 export const ON_CHANGE_INPUT = 'UsersPermissions/EditPage/ON_CHANGE_INPUT';
 export const ON_CLICK_ADD = 'UsersPermissions/EditPage/ON_CLICK_ADD';
 export const ON_CLICK_DELETE = 'UsersPermissions/EditPage/ON_CLICK_DELETE';
+export const RESET_PROPS = 'UsersPermissions/EditPage/RESET_PROPS';
 export const RESET_SHOULD_DISPLAY_POLICIES_HINT = 'UsersPermissions/EditPage/RESET_SHOULD_DISPLAY_POLICIES_HINT';
 export const SELECT_ALL_ACTIONS = 'UsersPermissions/EditPage/SELECT_ALL_ACTIONS';
 export const SET_ACTION_TYPE = 'UsersPermissions/EditPage/SET_ACTION_TYPE';

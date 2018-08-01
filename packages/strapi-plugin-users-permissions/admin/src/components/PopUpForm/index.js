@@ -43,6 +43,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
   getRedirectURIProviderConf = () => { // NOTE: Still testings providers so the switch statement is likely to change
     switch (this.props.dataToEdit) {
+      case 'discord':
+        return `${strapi.backendURL}/connect/discord/callback`;
       case 'facebook':
         return `${strapi.backendURL}/connect/facebook/callback`;
       case 'google':
@@ -104,7 +106,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
           <Input
             inputDescription={{ id: 'users-permissions.PopUpForm.Providers.enabled.description' }}
             label={{ id: 'users-permissions.PopUpForm.Providers.enabled.label' }}
-            name={`${dataToEdit}.enabled`}
+            name={`${settingType}.${dataToEdit}.enabled`}
             onChange={this.handleChange}
             type="toggle"
             validations={{}}
@@ -121,7 +123,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
               errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
               key={value}
               label={{ id: `users-permissions.PopUpForm.Providers.${ includes(value, 'callback') || includes(value, 'redirect_uri') ? 'redirectURL.front-end' : value}.label` }}
-              name={`${dataToEdit}.${value}`}
+              name={`${settingType}.${dataToEdit}.${value}`}
               onFocus={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleFocus : () => {}}
               onBlur={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleBlur : false}
               onChange={this.props.onChange}
@@ -163,7 +165,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             didCheckErrors={this.props.didCheckErrors}
             errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
             label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
-            name={`${dataToEdit}.${value}`}
+            name={`${settingType}.${dataToEdit}.${value}`}
             onChange={this.props.onChange}
             placeholder={`users-permissions.PopUpForm.Email.${value}.placeholder`}
             type={includes(value, 'email') ? 'email' : 'text'}
@@ -179,7 +181,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             didCheckErrors={this.props.didCheckErrors}
             errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
             label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
-            name={`${dataToEdit}.${value}`}
+            name={`${settingType}.${dataToEdit}.${value}`}
             inputDescription={{
               id: includes(value, 'object') ? 'users-permissions.PopUpForm.Email.email_templates.inputDescription' : '',
               params,
