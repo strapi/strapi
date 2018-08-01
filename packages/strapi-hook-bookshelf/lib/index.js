@@ -398,7 +398,7 @@ module.exports = function(strapi) {
                       } else {
                         switch (attribute.type) {
                           case 'uuid':
-                            type = definition.client === 'pg' ? 'uuid' : 'varchar(255)';
+                            type = definition.client === 'pg' ? 'uuid' : 'varchar(36)';
                             break;
                           case 'text':
                             type = definition.client === 'pg' ? type = 'text' : 'longtext';
