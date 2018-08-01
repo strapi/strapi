@@ -18,6 +18,7 @@ import ClickOverHint from 'components/ClickOverHint';
 import DraggedRemovedIcon  from 'components/DraggedRemovedIcon';
 import VariableEditIcon from 'components/VariableEditIcon';
 import ItemTypes from 'utils/ItemTypes';
+import Carret from './Carret';
 import styles from './styles.scss';
 
 const getBootstrapClass = attrType => {
@@ -55,7 +56,7 @@ const getBootstrapClass = attrType => {
 };
 const variableDraggableAttrSource = {
   beginDrag: (props, monitor, component) => {
-    props.beginMove(props.name, props.index);
+    props.beginMove(props.name, props.index, props.keys);
 
     return {
       component,
@@ -64,7 +65,7 @@ const variableDraggableAttrSource = {
     };
   },
   endDrag: props => {
-    props.endMove();
+    props.endMove(props.keys);
     return {};
   },
 };
@@ -125,7 +126,7 @@ class VariableDraggableAttr extends React.Component {
     let style = {};
 
     if (!type) {
-      style = { backgroundColor: 'blue', opacity: 0.2 };
+      style = { backgroundColor: 'blue', opacity: 1, display: 'none' };
       classNames = {
         bootstrap: name.split('__')[1],
         wrapper: cn(styles.attrWrapper),
@@ -153,7 +154,6 @@ class VariableDraggableAttr extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.isDragging !== this.props.isDragging) {
-      // console.log('ooo');
       this.handleDragEffect();
     }
   }
@@ -179,33 +179,53 @@ class VariableDraggableAttr extends React.Component {
   }
 
   renderContent = () => {
-    const { classNames, isOver, style, dragStart } = this.state;
-    const { data, isEditing, name } = this.props;
+    let { classNames, isOver, style, dragStart } = this.state;
+    const { data, hoverIndex, index, isEditing, name } = this.props;
+    const isFullSize = classNames.bootstrap === 'col-md-12';
     const showHint = data.type !== 'boolean';
+    const showCarret = hoverIndex === index && !isFullSize;
+    const carretStyle = (() => {
+      let style = { height: '30px' };
 
-    if (dragStart) {
-      return <div style={{ width: '100%', height: '10px', background: 'red', opacity: 0.2 }} />;
+      if (classNames.withLongerHeight) {
+        style = { height: '84px' };
+      }
+
+      if (isFullSize) {
+        style = { width: '100%', height: '10px', marginBottom: '6px' };
+      }
+
+      return style;
+    })();
+
+    if (dragStart && isFullSize) {
+      return <Carret style={carretStyle} />;
     }
 
-
-
+    if (hoverIndex === index) {
+      style = { backgroundColor: 'red' };
+    }
+    
     return (
-      <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
-        <i className="fa fa-th" />
-        <span className={styles.truncated}>
-          {name}
-        </span>
-        {showHint && <ClickOverHint show={isOver} /> }
-        {!isOver && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
-          <div className={styles.info}>
-            {data.label}
-          </div>
-        )}
-        {isEditing && !isOver ? (
-          <VariableEditIcon withLongerHeight={classNames.withLongerHeight} onClick={this.handleClickEdit} />
-        ) : (
-          <DraggedRemovedIcon withLongerHeight={classNames.withLongerHeight} onRemove={this.handleRemove} />
-        )}
+      <div style={{ display: 'flex' }}>
+        { showCarret && <Carret style={carretStyle} />}
+        <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
+          <i className="fa fa-th" />
+          <span className={styles.truncated}>
+            {name}
+          </span>
+          {showHint && <ClickOverHint show={isOver} /> }
+          {!isOver && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
+            <div className={styles.info}>
+              {data.label}
+            </div>
+          )}
+          {isEditing && !isOver ? (
+            <VariableEditIcon withLongerHeight={classNames.withLongerHeight} onClick={this.handleClickEdit} />
+          ) : (
+            <DraggedRemovedIcon withLongerHeight={classNames.withLongerHeight} onRemove={this.handleRemove} />
+          )}
+        </div>
       </div>
     );
   }
@@ -238,6 +258,7 @@ VariableDraggableAttr.defaultProps = {
   data: {
     type: 'text',
   },
+  hoverIndex: -1,
   index: 0,
   isDragging: false,
   isEditing: false,
@@ -253,6 +274,7 @@ VariableDraggableAttr.propTypes = {
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   data: PropTypes.object,
+  hoverIndex: PropTypes.number,
   index: PropTypes.number,
   isDragging: PropTypes.bool,
   isEditing: PropTypes.bool,

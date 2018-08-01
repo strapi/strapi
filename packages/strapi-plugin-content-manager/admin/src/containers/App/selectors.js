@@ -25,31 +25,27 @@ const selectLocationState = () => {
   };
 };
 
-/**
- * Default selector used by List
- */
-
-
+const makeSelectHoverIndex = () =>
+  createSelector(selectGlobalDomain(), globalState =>
+    globalState.get('hoverIndex')
+  );
 const makeSelectModelEntries = () =>
   createSelector(selectGlobalDomain(), globalState =>
     globalState.get('modelEntries')
   );
-
 const makeSelectLoading = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('loading'));
-
 const makeSelectSchema = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('schema').toJS());
-
 const makeSelectModifiedSchema = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('modifiedSchema').toJS());
-
 const makeSelectSubmitSuccess = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('submitSuccess'));
 
 export {
   selectGlobalDomain,
   selectLocationState,
+  makeSelectHoverIndex,
   makeSelectLoading,
   makeSelectModelEntries,
   makeSelectModifiedSchema,

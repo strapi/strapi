@@ -19,7 +19,7 @@ function getItemStyles(props) {
   }
 
   const { x, y } = mouseOffset;
-  const transform = `translate(${x -50}px, ${y - 35}px)`;
+  const transform = `translate(${x -50}px, ${y-5}px)`;
 
   return {
     transform,

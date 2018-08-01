@@ -29,10 +29,12 @@ import {
   SUBMIT_SUCCEEDED,
 } from './constants';
 
-export function beginMove(name) {
+export function beginMove(name, index, keys) {
   return {
     type: BEGIN_MOVE,
     name,
+    index,
+    keys,
   };
 }
 
@@ -42,9 +44,10 @@ export function emptyStore() {
   };
 }
 
-export function endMove() {
+export function endMove(keys) {
   return {
     type: END_MOVE,
+    keys,
   };
 }
 

@@ -30,7 +30,7 @@ import {
   onSubmit,
   setLayout,
 } from 'containers/App/actions';
-import { makeSelectModifiedSchema , makeSelectSubmitSuccess } from 'containers/App/selectors';
+import { makeSelectHoverIndex, makeSelectModifiedSchema , makeSelectSubmitSuccess } from 'containers/App/selectors';
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
 import PluginHeader from 'components/PluginHeader';
@@ -429,6 +429,7 @@ class SettingPage extends React.PureComponent {
         beginMove={this.props.beginMove}
         data={this.getAttrData(attr)}
         endMove={this.props.endMove}
+        hoverIndex={this.props.hoverIndex}
         id={attr}
         index={index}
         isEditing={index === this.findIndexFieldToEdit()}
@@ -615,8 +616,6 @@ class SettingPage extends React.PureComponent {
     const {
       onSubmit,
     } = this.props;
-    console.log(this.props.schema);
-    // TODO: Add loader!
 
     return (
       <form onSubmit={this.handleSubmit}>
@@ -796,6 +795,7 @@ SettingPage.propTypes = {
   beginMove: PropTypes.func.isRequired,
   endMove: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  hoverIndex: PropTypes.number.isRequired,
   match: PropTypes.object.isRequired,
   moveAttr: PropTypes.func.isRequired,
   moveAttrEditView: PropTypes.func.isRequired,
@@ -842,6 +842,7 @@ const mapDispatchToProps = (dispatch) => (
   )
 );
 const mapStateToProps = createStructuredSelector({
+  hoverIndex: makeSelectHoverIndex(),
   schema: makeSelectModifiedSchema(),
   settingPage: makeSelectSettingPage(),
   submitSuccess: makeSelectSubmitSuccess(),
