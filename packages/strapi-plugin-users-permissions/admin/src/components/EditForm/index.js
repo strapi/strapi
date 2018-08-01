@@ -42,7 +42,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             inputDescription={{ id: 'users-permissions.EditForm.inputSelect.description.role' }}
             inputClassName={styles.inputStyle}
             label={{ id: 'users-permissions.EditForm.inputSelect.label.role' }}
-            name="settings.default_role"
+            name="advanced.settings.default_role"
             onChange={this.props.onChange}
             selectOptions={this.generateSelectOptions()}
             type="select"
@@ -54,7 +54,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
           <Input
             label={{ id: 'users-permissions.EditForm.inputToggle.label.email' }}
             inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.email' }}
-            name="settings.unique_email"
+            name="advanced.settings.unique_email"
             onChange={this.props.onChange}
             type="toggle"
             value={get(this.props.values.settings, 'unique_email')}
@@ -91,7 +91,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
           <Input
             label={{ id: 'users-permissions.EditForm.inputToggle.label.sign-up' }}
             inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.sign-up' }}
-            name="settings.allow_register"
+            name="advanced.settings.allow_register"
             onChange={this.props.onChange}
             type="toggle"
             value={get(this.props.values.settings, 'allow_register')}
