@@ -10,7 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { SortableContainer, SortableElement, arrayMove } from 'react-sortable-hoc';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import { cloneDeep, isArray, isNull, isUndefined, get, findIndex, includes } from 'lodash';
+import { cloneDeep, isArray, isNull, isUndefined, get, findIndex, includes, isEmpty } from 'lodash';
 
 // Utils.
 import request from 'utils/request';
@@ -64,23 +64,29 @@ const SortableList = SortableContainer(({items, onRemove, onClick}) => {
   );
 });
 
-class SelectMany extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isLoading: true,
-      options: [],
-      toSkip: 0,
-    };
-  }
+class SelectMany extends React.PureComponent {
+  state = {
+    isLoading: true,
+    options: [],
+    toSkip: 0,
+  };
 
   componentDidMount() {
     this.getOptions('');
   }
 
   componentDidUpdate(prevProps, prevState) {
+    if (isEmpty(prevProps.record) && !isEmpty(this.props.record)) {
+      const values = (get(this.props.record, this.props.relation.alias) || [])
+        .map(el => (el.id || el._id));
+
+      const options = this.state.options.filter(el => {
+        return !values.includes(el.value.id || el.value._id);
+      });
+
+      this.state.options = options;
+    }
+
     if (prevState.toSkip !== this.state.toSkip) {
       this.getOptions('');
     }
@@ -146,8 +152,17 @@ class SelectMany extends React.Component {
     const target = {
       name: `record.${this.props.relation.alias}`,
       type: 'select',
-      value: [...values, value],
+      value: [...values, value.value],
     };
+
+    // Remove new added value from available option;
+    this.state.options = this.state.options.filter(el => {
+      if (el.value._id || el.value.id === value.value.id || value.value._id) {
+        return false;
+      }
+
+      return true;
+    });
 
     this.props.setRecordAttribute({ target });
   };
@@ -176,6 +191,7 @@ class SelectMany extends React.Component {
       type: 'select',
       value: arrayMove(values, oldIndex, newIndex),
     };
+
     this.props.setRecordAttribute({ target });
   };
 
@@ -186,6 +202,14 @@ class SelectMany extends React.Component {
       type: 'select',
       value: values.filter( (item, idx) => idx !== index),
     };
+
+    // Add removed value from available option;
+    this.state.options.push({
+      value: values[index],
+      label: templateObject({ mainField: this.props.relation.displayedAttribute }, values[index])
+        .mainField,
+    });
+
     this.props.setRecordAttribute({ target });
   }
 
