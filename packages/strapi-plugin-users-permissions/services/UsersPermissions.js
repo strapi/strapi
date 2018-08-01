@@ -116,7 +116,9 @@ module.exports = {
       }, {}));
 
     const appControllers = Object.keys(strapi.api || {}).reduce((acc, key) => {
-      acc.controllers[key] = generateActions(strapi.api[key].controllers[key]);
+      Object.keys(strapi.api[key].controllers).forEach((controller) => {
+        acc.controllers[controller] = generateActions(strapi.api[key].controllers[controller]);
+      });
 
       return acc;
     }, { controllers: {} });
@@ -203,7 +205,7 @@ module.exports = {
     const databasePermissions = await strapi.query('permission', 'users-permissions').find();
     const actions = databasePermissions
       .map(permission => `${permission.type}.${permission.controller}.${permission.action}`);
-    
+
 
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
