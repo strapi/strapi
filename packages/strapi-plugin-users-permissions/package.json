@@ -26,6 +26,7 @@
     "grant-koa": "^3.8.1",
     "jsonwebtoken": "^8.1.0",
     "koa": "^2.1.0",
+    "koa2-ratelimit": "^0.6.1",
     "purest": "^2.0.1",
     "request": "^2.83.0",
     "uuid": "^3.1.0"
