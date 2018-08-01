@@ -30,7 +30,7 @@ import {
   onSubmit,
   setLayout,
 } from 'containers/App/actions';
-import { makeSelectHoverIndex, makeSelectModifiedSchema , makeSelectSubmitSuccess } from 'containers/App/selectors';
+import { makeSelectAddedField, makeSelectHoverIndex, makeSelectModifiedSchema , makeSelectSubmitSuccess } from 'containers/App/selectors';
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
 import PluginHeader from 'components/PluginHeader';
@@ -90,6 +90,10 @@ class SettingPage extends React.PureComponent {
 
     if (prevDisplayedRelations.length === 0 && currentDisplayedRelations.length > 0 && prevState.shouldSelectRelation !== this.state.shouldSelectRelation) {
       this.handleClickEditRelation(0);
+    }
+
+    if (prevProps.addedField !== this.props.addedField) {
+      this.props.setLayout(`${this.getPath()}.editDisplay`);
     }
   }
 
@@ -792,6 +796,7 @@ class SettingPage extends React.PureComponent {
 SettingPage.defaultProps = {};
 
 SettingPage.propTypes = {
+  addedField: PropTypes.bool.isRequired,
   beginMove: PropTypes.func.isRequired,
   endMove: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
@@ -842,6 +847,7 @@ const mapDispatchToProps = (dispatch) => (
   )
 );
 const mapStateToProps = createStructuredSelector({
+  addedField: makeSelectAddedField(),
   hoverIndex: makeSelectHoverIndex(),
   schema: makeSelectModifiedSchema(),
   settingPage: makeSelectSettingPage(),

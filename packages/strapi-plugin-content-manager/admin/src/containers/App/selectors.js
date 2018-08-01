@@ -25,6 +25,10 @@ const selectLocationState = () => {
   };
 };
 
+const makeSelectAddedField = () =>
+  createSelector(selectGlobalDomain(), globalState =>
+    globalState.get('addedField')
+  );
 const makeSelectHoverIndex = () =>
   createSelector(selectGlobalDomain(), globalState =>
     globalState.get('hoverIndex')
@@ -45,6 +49,7 @@ const makeSelectSubmitSuccess = () =>
 export {
   selectGlobalDomain,
   selectLocationState,
+  makeSelectAddedField,
   makeSelectHoverIndex,
   makeSelectLoading,
   makeSelectModelEntries,

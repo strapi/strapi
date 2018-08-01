@@ -31,6 +31,7 @@ import {
 
 const initialState = fromJS({
   addedElementName: null,
+  addedField: false,
   draggedItemName: null,
   formValidations: List([]),
   initDragLine: -1,
@@ -45,12 +46,18 @@ const initialState = fromJS({
 });
 const stateUpdater = (obj, array, keys) => obj.updateIn(['modifiedSchema', 'models', ...keys.split('.'), 'fields'], () => array);
 const createManager = (obj, array, keys, dropIndex, layout) => new Manager(stateUpdater(obj, array, keys), array, keys, dropIndex, layout);
-const getElementsOnALine = (manager, line) => {
+const getElementsOnALine = (manager, line, list) => {
   const firstElIndex = line === 0 ? 0 : manager.arrayOfEndLineElements[line - 1].index + 1;
-  const lastElIndex = manager.arrayOfEndLineElements[line].index + 1;
+  const lastElIndex = get(manager.arrayOfEndLineElements[line], 'index', list.size -1) + 1;
   const elements = manager.getElementsOnALine(range(firstElIndex, lastElIndex));
 
   return { elements, lastElIndex };
+};
+const createArrayOfLastEls = (manager, list) => {
+  const { name, index, bootstrapCol } = manager.getAttrInfos(list.size - 1);
+  const isFullSize = bootstrapCol === 12;
+
+  return manager.arrayOfEndLineElements.concat({ name, index, isFullSize });
 };
 
 function appReducer(state = initialState, action) {
@@ -90,10 +97,9 @@ function appReducer(state = initialState, action) {
               newList = newList.delete(addedElementIndex);
             }
 
-            //Layout reorder
             const newManager = createManager(state, newList, action.keys, dropIndex, layout);
-            const { elements: previousStateLineEls } = getElementsOnALine(createManager(state, list, action.keys, dropIndex, layout), dropLine);
-            const { elements: currentStateLineEls } = getElementsOnALine(newManager, dropLine);
+            const { elements: previousStateLineEls } = getElementsOnALine(createManager(state, list, action.keys, dropIndex, layout), dropLine, list);
+            const { elements: currentStateLineEls } = getElementsOnALine(newManager, dropLine, newList);
 
             if (dropLine !== initDragLine) {
               const diff = difference(previousStateLineEls, currentStateLineEls);
@@ -111,14 +117,11 @@ function appReducer(state = initialState, action) {
               });
             }
             const nextManager = createManager(state, newList, action.keys, dropIndex, layout);
-            const lastListItem = nextManager.getAttrInfos(newList.size - 1);
-            const isLastItemFullSize = lastListItem.bootstrapCol === 12;
-            const newArrayOfLastLineElements = nextManager.arrayOfEndLineElements
-              .concat({ name: lastListItem.name, index: lastListItem.index, isFullSize: isLastItemFullSize });
+            const newArrayOfLastLineElements = createArrayOfLastEls(nextManager, newList);
             // Array of element's index to remove from the new list
             let addedElementsToRemove = [];
 
-            newArrayOfLastLineElements.forEach((item, i) => {
+            newArrayOfLastLineElements.forEach((item, i) => { // Should be a function in the manager
               if (i < newArrayOfLastLineElements.length) {
                 const firstElementOnLine = i === 0 ? 0 : newArrayOfLastLineElements[i - 1].index + 1;
                 const lastElementOnLine = newArrayOfLastLineElements[i].index;
@@ -131,28 +134,31 @@ function appReducer(state = initialState, action) {
                 }
               }
             });
-
             newList = newList.filter((item, index) => { // Remove the unnecessary divs
               const indexToKeep = addedElementsToRemove.indexOf(index) === -1;
 
               return indexToKeep;
             });
             const lastManager = createManager(state, newList, action.keys, dropIndex, layout);
-            const lastArrayOfLastLineElements = lastManager.arrayOfEndLineElements;
+            const lastArrayOfLastLineElements = createArrayOfLastEls(lastManager, newList);
             const lines = [];
+
             lastArrayOfLastLineElements.forEach((item, i) => {
-              const { elements } = getElementsOnALine(lastManager, i);
+              const { elements } = getElementsOnALine(lastManager, i, newList);
               lines.push(elements);
             });
+
+            //Layout reorder
             const reordered = lines.reduce((acc, curr) => {
               const line = curr.sort((a) => a.includes('__col-md'));
-              
+
               return acc.concat(line);
             }, []);
-
-            newList = List(flattenDeep(reordered));
+            // // Make sure all the lines are full
+            // // This step is needed when we create a line before a full size element like
+            // // The JSON input or the WYSIWYG
+            newList = createManager(state, List(flattenDeep(reordered)), action.keys, dropIndex, layout).getLayout();
           }
-
 
           return newList;
         })
@@ -203,7 +209,7 @@ function appReducer(state = initialState, action) {
           const dropLineBounds = { left: manager.getBound(false, action.hoverIndex), right: manager.getBound(true, action.hoverIndex) };
           const hasMoved = state.get('hasMoved');
           
-          if (isFullSize) {
+          if (isFullSize && draggedItemIndex !== -1) {
             const upwards = action.dragIndex > action.hoverIndex;
             const indexToDrop = upwards ? get(dropLineBounds, 'left.index', 0) : get(dropLineBounds, 'right.index', list.size -1);
             updateHoverIndex = false;
@@ -214,7 +220,7 @@ function appReducer(state = initialState, action) {
               .insert(indexToDrop, draggedItemName);
           }
 
-          if (!hasMoved && !isFullSize) {
+          if (!hasMoved && !isFullSize && draggedItemIndex !== -1) {
             const nodeBound = manager.getBound(true);
             const currentLine = findIndex(arrayOfLastLineElements, ['index', nodeBound.index]);
             initDragLine = currentLine;
@@ -225,7 +231,6 @@ function appReducer(state = initialState, action) {
             return list
               .delete(action.dragIndex)
               .insert(action.dragIndex, toAdd);
-
           }
 
           return list;
@@ -283,7 +288,8 @@ function appReducer(state = initialState, action) {
       return state
         .updateIn(['modifiedSchema', 'models', ...action.keys.split('.')], list => {
           return list.push(action.data);
-        });
+        })
+        .update('addedField', v => !v);
     case ON_REMOVE:
       return state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'listDisplay'], list => {
 
@@ -428,7 +434,6 @@ function appReducer(state = initialState, action) {
         const manager = new Manager(state, list, action.keys, 0, layout);
         const newList = manager.getLayout();
 
-        // return list;
         return newList;
       });
     default:

@@ -183,7 +183,7 @@ class VariableDraggableAttr extends React.Component {
     const { data, hoverIndex, index, isEditing, name } = this.props;
     const isFullSize = classNames.bootstrap === 'col-md-12';
     const showHint = data.type !== 'boolean';
-    const showCarret = hoverIndex === index && !isFullSize;
+    const showCarret = hoverIndex === index;
     const carretStyle = (() => {
       let style = { height: '30px' };
 
@@ -202,9 +202,9 @@ class VariableDraggableAttr extends React.Component {
       return <Carret style={carretStyle} />;
     }
 
-    if (hoverIndex === index) {
-      style = { backgroundColor: 'red' };
-    }
+    // if (hoverIndex === index) {
+    //   style = { : 'red' };
+    // }
     
     return (
       <div style={{ display: 'flex' }}>

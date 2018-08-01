@@ -15,7 +15,7 @@ class InputToggle extends React.Component {
     const target = {
       name: this.props.name,
       type: 'toggle',
-      value: e.target.id === 'on',
+      value: e.target.id.includes('on'),
     };
 
     this.props.onChange({ target });
@@ -32,6 +32,7 @@ class InputToggle extends React.Component {
       tabIndex,
       value,
     } = this.props;
+    const random = Math.floor(Math.random() * 1000);
 
     return (
       <div
@@ -47,7 +48,7 @@ class InputToggle extends React.Component {
           autoFocus={autoFocus}
           disabled={disabled}
           className={cn('btn', !value && styles.gradientOff)}
-          id="off"
+          id={`off_${random}`}
           onClick={this.handleClick}
           tabIndex={tabIndex}
           type="button"
@@ -57,7 +58,7 @@ class InputToggle extends React.Component {
         <button
           disabled={disabled}
           className={cn('btn', value && styles.gradientOn)}
-          id="on"
+          id={`on_${random}`}
           onClick={this.handleClick}
           type="button"
         >
