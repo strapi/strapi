@@ -27,8 +27,8 @@
     "role": {
       "model": "role",
       "via": "users",
-      "plugin": "users-permissions"
+      "plugin": "users-permissions",
+      "configurable": false
     }
-  },
-  "collectionName": "users-permissions_user"
+  }
 }

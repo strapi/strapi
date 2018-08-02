@@ -66,7 +66,7 @@ module.exports = function(appPath = '') {
       };
 
       const setFilesToWatch = (src) => {
-        var files = _.includes(src, '/admin') || _.includes(src, 'components') ? [] : fs.readdirSync(src);
+        let files = _.includes(src, '/admin') || _.includes(src, 'components') ? [] : fs.readdirSync(src);
 
         _.forEach(files, file => {
           if (

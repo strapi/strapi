@@ -30,15 +30,19 @@ import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 import { bindLayout } from 'utils/bindLayout';
 import inputValidations from 'utils/inputsValidations';
+import { generateRedirectURI } from 'containers/ListPage/utils';
 import { checkFormValidity } from 'utils/formValidations';
 import {
+  addRelationItem,
   changeData,
   getData,
   initModelProps,
   onCancel,
+  removeRelationItem,
   resetProps,
   setFileRelations,
   setFormErrors,
+  sortRelations,
   submit,
 } from './actions';
 import reducer from './reducer';
@@ -50,33 +54,15 @@ export class EditPage extends React.Component {
   state = { showWarning: false };
 
   componentDidMount() {
-    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
-
-    if (!this.isCreating()) {
-      const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
-      this.props.getData(this.props.match.params.id, this.getSource(), mainField);
-    }
-
-    // Get all relations made with the upload plugin
-    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
-      const association = get(this.getSchema(), ['relations', current], {});
-
-      if (association.plugin === 'upload' && association[association.type] === 'file') {
-        const relation = {
-          name: current,
-          multiple: association.nature === 'manyToManyMorph',
-        };
-
-        acc.push(relation);
-      }
-      return acc;
-    }, []);
-
-    // Update the reducer so we can use it to create the appropriate FormData in the saga
-    this.props.setFileRelations(fileRelations);
+    this.initComponent(this.props);
   }
 
   componentDidUpdate(prevProps) {
+    if (prevProps.location.pathname !== this.props.location.pathname) {
+      this.props.resetProps();
+      this.initComponent(this.props);
+    }
+
     if (prevProps.editPage.submitSuccess !== this.props.editPage.submitSuccess) {
       if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
         const redirectUrl = this.props.location.search.split('?redirectUrl=')[1];
@@ -167,6 +153,43 @@ export class EditPage extends React.Component {
    */
   getSource = () => getQueryParameters(this.props.location.search, 'source');
 
+  /**
+   * Initialize component
+   */
+  initComponent = (props) => {
+    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
+
+    if (!this.isCreating()) {
+      const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
+      this.props.getData(props.match.params.id, this.getSource(), mainField);
+    }
+
+    // Get all relations made with the upload plugin
+    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
+      const association = get(this.getSchema(), ['relations', current], {});
+
+      if (association.plugin === 'upload' && association[association.type] === 'file') {
+        const relation = {
+          name: current,
+          multiple: association.nature === 'manyToManyMorph',
+        };
+
+        acc.push(relation);
+      }
+      return acc;
+    }, []);
+
+    // Update the reducer so we can use it to create the appropriate FormData in the saga
+    this.props.setFileRelations(fileRelations);
+  }
+
+  handleAddRelationItem = ({ key, value }) => {
+    this.props.addRelationItem({
+      key,
+      value,
+    });
+  }
+
   handleBlur = ({ target }) => {
     const defaultValue = get(this.getModelAttribute(target.name), 'default');
 
@@ -217,6 +240,36 @@ export class EditPage extends React.Component {
   }
 
   handleGoBack = () => this.props.history.goBack();
+
+  handleRedirect = ({ model, id, source = 'content-manager'}) => {
+    /* eslint-disable */
+    switch (model) {
+      case 'permission':
+      case 'role':
+      case 'file':
+        // Exclude special models which are handled by plugins.
+        if (source !== 'content-manager') {
+          break;
+        }
+      default:
+        const pathname = `${this.props.match.path.replace(':slug', model).replace(':id', id)}`;
+      
+        this.props.history.push({
+          pathname,
+          search: `?source=${source}&redirectURI=${generateRedirectURI({ model, search: `?source=${source}` })}`,
+        });
+    }
+    /* eslint-enable */
+  }
+
+  handleRemoveRelationItem = ({ key, index }) => {
+    this.props.removeRelationItem({ key, index });
+  }
+
+  handleSortRelations = ({ key, oldIndex, newIndex }) => {
+    console.log(key, oldIndex, newIndex);
+    this.props.sortRelations({ key, oldIndex, newIndex });
+  }
 
   handleSubmit = (e) => {
     e.preventDefault();
@@ -373,6 +426,10 @@ export class EditPage extends React.Component {
                         changeData={this.props.changeData}
                         record={editPage.record}
                         schema={this.getSchema()}
+                        onAddRelationalItem={this.handleAddRelationItem}
+                        onRedirect={this.handleRedirect}
+                        onRemoveRelationItem={this.handleRemoveRelationItem}
+                        onSort={this.handleSortRelations}
                       />
                     )}
                   </div>
@@ -395,6 +452,7 @@ EditPage.defaultProps = {
 };
 
 EditPage.propTypes = {
+  addRelationItem: PropTypes.func.isRequired,
   changeData: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
   getData: PropTypes.func.isRequired,
@@ -403,23 +461,28 @@ EditPage.propTypes = {
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
+  removeRelationItem: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   schema: PropTypes.object,
   setFileRelations: PropTypes.func.isRequired,
   setFormErrors: PropTypes.func.isRequired,
+  sortRelations: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addRelationItem,
       changeData,
       getData,
       initModelProps,
       onCancel,
+      removeRelationItem,
       resetProps,
       setFileRelations,
       setFormErrors,
+      sortRelations,
       submit,
     },
     dispatch,

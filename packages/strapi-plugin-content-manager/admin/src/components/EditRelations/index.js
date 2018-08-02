@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
@@ -18,22 +17,36 @@ import styles from './styles.scss';
 function EditRelations(props) {
   return (
     <div className={styles.editFormRelations}>
-      <FormattedMessage id="content-manager.EditRelations.title">
-        {(message) => <h3>{message}</h3>}
-      </FormattedMessage>
       {props.displayedRelations.map(relationName => {
         const relation = get(props.schema, ['relations', relationName], {});
-        const Select = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(relation.nature) ? SelectOne : SelectMany;
 
+        if(['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(relation.nature)) {
+          return (
+            <SelectOne
+              currentModelName={props.currentModelName}
+              key={relationName}
+              record={props.record}
+              relation={relation}
+              schema={props.schema}
+              setRecordAttribute={props.changeData}
+              location={props.location}
+              onRedirect={props.onRedirect}
+            />
+          );
+        } 
+        
         return (
-          <Select
+          <SelectMany
             currentModelName={props.currentModelName}
             key={relationName}
             record={props.record}
             relation={relation}
             schema={props.schema}
-            setRecordAttribute={props.changeData}
             location={props.location}
+            onAddRelationalItem={props.onAddRelationalItem}
+            onRedirect={props.onRedirect}
+            onRemoveRelationItem={props.onRemoveRelationItem}
+            onSort={props.onSort}
           />
         );
       })}
@@ -48,10 +61,13 @@ EditRelations.defaultProps = {
 };
 
 EditRelations.propTypes = {
-  changeData: PropTypes.func.isRequired,
   currentModelName: PropTypes.string.isRequired,
   displayedRelations: PropTypes.array,
   location: PropTypes.object.isRequired,
+  onAddRelationalItem: PropTypes.func.isRequired,
+  onRedirect: PropTypes.func.isRequired,
+  onRemoveRelationItem: PropTypes.func.isRequired,
+  onSort: PropTypes.func.isRequired,
   record: PropTypes.object,
   schema: PropTypes.object,
 };
