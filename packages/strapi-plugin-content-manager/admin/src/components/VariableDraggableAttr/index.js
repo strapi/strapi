@@ -126,7 +126,7 @@ class VariableDraggableAttr extends React.Component {
     let style = {};
 
     if (!type) {
-      style = { backgroundColor: 'blue', opacity: 1, display: 'none' };
+      style = { display: 'none' };
       classNames = {
         bootstrap: name.split('__')[1],
         wrapper: cn(styles.attrWrapper),
@@ -158,7 +158,6 @@ class VariableDraggableAttr extends React.Component {
     }
   }
 
-
   handleClickEdit = () => {
     this.props.onClickEdit(this.props.index);
   }
@@ -182,7 +181,6 @@ class VariableDraggableAttr extends React.Component {
     let { classNames, isOver, style, dragStart } = this.state;
     const { data, hoverIndex, index, isEditing, name } = this.props;
     const isFullSize = classNames.bootstrap === 'col-md-12';
-    const showHint = data.type !== 'boolean';
     const showCarret = hoverIndex === index;
     const carretStyle = (() => {
       let style = { height: '30px' };
@@ -201,10 +199,6 @@ class VariableDraggableAttr extends React.Component {
     if (dragStart && isFullSize) {
       return <Carret style={carretStyle} />;
     }
-
-    // if (hoverIndex === index) {
-    //   style = { : 'red' };
-    // }
     
     return (
       <div style={{ display: 'flex' }}>
@@ -214,7 +208,7 @@ class VariableDraggableAttr extends React.Component {
           <span className={styles.truncated}>
             {name}
           </span>
-          {showHint && <ClickOverHint show={isOver} /> }
+          <ClickOverHint show={isOver} />
           {!isOver && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
             <div className={styles.info}>
               {data.label}
