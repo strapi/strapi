@@ -14,7 +14,6 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { flow } from 'lodash';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-
 import ClickOverHint from 'components/ClickOverHint';
 import DraggedRemovedIcon from 'components/DraggedRemovedIcon';
 import VariableEditIcon from 'components/VariableEditIcon';

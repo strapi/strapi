@@ -6,6 +6,11 @@ const _ = require('lodash');
 const generator = require('strapi-generate');
 const { fromJS } = require('immutable');
 const Manager = require('../utils/Manager.js');
+const {
+  createManager,
+  removeColsLine,
+  reorderList,
+} = require('../utils/helpers.js');
 
 module.exports = {
   appearance: async (attributes, model, plugin) => {
@@ -16,7 +21,6 @@ module.exports = {
     });
 
     const schema = await pluginStore.get({ key: 'schema' });
-
     const layout = _.get(schema.layout, model, {});
 
     // If updating a content-type
@@ -87,35 +91,12 @@ module.exports = {
           }
         }
 
-        const newState = state.updateIn(['schema', 'models', ...keys.split('.'), 'fields'], () => newList);
-        const newManager = new Manager(newState, newList, keys, index, fromJS(layout));
-        const lastListItem = newManager.getAttrInfos(newList.size - 1);
-        const isLastItemFullSize = lastListItem.bootstrapCol === 12;
-        const newArrayOfLastLineElements = newManager.arrayOfEndLineElements
-          .concat({ name: lastListItem.name, index: lastListItem.index, isFullSize: isLastItemFullSize });
-        // Array of element's index to remove from the new list
-        let addedElementsToRemove = [];
-
-        newArrayOfLastLineElements.forEach((item, i) => {
-          if (i < newArrayOfLastLineElements.length) {
-            const firstElementOnLine = i === 0 ? 0 : newArrayOfLastLineElements[i - 1].index + 1;
-            const lastElementOnLine = newArrayOfLastLineElements[i].index;
-            const rangeIndex = _.range(firstElementOnLine, lastElementOnLine + 1);
-            const elementsOnLine = newManager.getElementsOnALine(rangeIndex)
-              .filter(name => !name.includes('__col'));
-
-            if (elementsOnLine.length === 0) {
-              addedElementsToRemove = addedElementsToRemove.concat(rangeIndex);
-            }
-          }
-        });
-
-        newList = newList.filter((item, index) => { // Remove the unnecessary divs
-          const indexToKeep = addedElementsToRemove.indexOf(index) === -1;
-
-          return indexToKeep;
-        });
+        const newManager = createManager(state, newList, keys, 0, fromJS(layout.attributes));
+        newList = removeColsLine(newManager, newList);
+        const lastManager = createManager(state, newList, keys, 0, fromJS(layout.attributes));
+        newList = reorderList(lastManager, lastManager.getLayout());
       });
+      
 
       // Delete them from the available fields
       fieldsToRemove.forEach(field => {

@@ -5,7 +5,7 @@
  */
 
 import { fromJS, List } from 'immutable';
-import { difference, findIndex, flattenDeep, get, range, upperFirst } from 'lodash';
+import { difference, findIndex, get, range, upperFirst } from 'lodash';
 import Manager from 'utils/Manager';
 import {
   BEGIN_MOVE,
@@ -28,6 +28,12 @@ import {
   SET_LAYOUT,
   SUBMIT_SUCCEEDED,
 } from './constants';
+import {
+  createManager,
+  getElementsOnALine,
+  removeColsLine,
+  reorderList,
+} from './helpers';
 
 const initialState = fromJS({
   addedElementName: null,
@@ -44,21 +50,7 @@ const initialState = fromJS({
   shouldUpdateListOnDrop: true,
   submitSuccess: false,
 });
-const stateUpdater = (obj, array, keys) => obj.updateIn(['modifiedSchema', 'models', ...keys.split('.'), 'fields'], () => array);
-const createManager = (obj, array, keys, dropIndex, layout) => new Manager(stateUpdater(obj, array, keys), array, keys, dropIndex, layout);
-const getElementsOnALine = (manager, line, list) => {
-  const firstElIndex = line === 0 ? 0 : manager.arrayOfEndLineElements[line - 1].index + 1;
-  const lastElIndex = get(manager.arrayOfEndLineElements[line], 'index', list.size -1) + 1;
-  const elements = manager.getElementsOnALine(range(firstElIndex, lastElIndex));
 
-  return { elements, lastElIndex };
-};
-const createArrayOfLastEls = (manager, list) => {
-  const { name, index, bootstrapCol } = manager.getAttrInfos(list.size - 1);
-  const isFullSize = bootstrapCol === 12;
-
-  return manager.arrayOfEndLineElements.concat({ name, index, isFullSize });
-};
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
@@ -117,47 +109,12 @@ function appReducer(state = initialState, action) {
               });
             }
             const nextManager = createManager(state, newList, action.keys, dropIndex, layout);
-            const newArrayOfLastLineElements = createArrayOfLastEls(nextManager, newList);
-            // Array of element's index to remove from the new list
-            let addedElementsToRemove = [];
-
-            newArrayOfLastLineElements.forEach((item, i) => { // Should be a function in the manager
-              if (i < newArrayOfLastLineElements.length) {
-                const firstElementOnLine = i === 0 ? 0 : newArrayOfLastLineElements[i - 1].index + 1;
-                const lastElementOnLine = newArrayOfLastLineElements[i].index;
-                const rangeIndex = range(firstElementOnLine, lastElementOnLine + 1);
-                const elementsOnLine = nextManager.getElementsOnALine(rangeIndex)
-                  .filter(name => !name.includes('__col'));
-
-                if (elementsOnLine.length === 0) {
-                  addedElementsToRemove = addedElementsToRemove.concat(rangeIndex);
-                }
-              }
-            });
-            newList = newList.filter((item, index) => { // Remove the unnecessary divs
-              const indexToKeep = addedElementsToRemove.indexOf(index) === -1;
-
-              return indexToKeep;
-            });
+            newList = removeColsLine(nextManager, newList);
             const lastManager = createManager(state, newList, action.keys, dropIndex, layout);
-            const lastArrayOfLastLineElements = createArrayOfLastEls(lastManager, newList);
-            const lines = [];
-
-            lastArrayOfLastLineElements.forEach((item, i) => {
-              const { elements } = getElementsOnALine(lastManager, i, newList);
-              lines.push(elements);
-            });
-
-            //Layout reorder
-            const reordered = lines.reduce((acc, curr) => {
-              const line = curr.sort((a) => a.includes('__col-md'));
-
-              return acc.concat(line);
-            }, []);
-            // // Make sure all the lines are full
-            // // This step is needed when we create a line before a full size element like
-            // // The JSON input or the WYSIWYG
-            newList = createManager(state, List(flattenDeep(reordered)), action.keys, dropIndex, layout).getLayout();
+            // Make sure all the lines are full
+            // This step is needed when we create a line before a full size element like
+            // The JSON input or the WYSIWYG
+            newList = createManager(state, reorderList(lastManager, newList), action.keys, dropIndex, layout).getLayout();
           }
 
           return newList;
@@ -373,39 +330,10 @@ function appReducer(state = initialState, action) {
           }
         }
         // This part is needed to remove the add __col-md-${something}__ that keeps the layout when removing an item
-        // It may happen that a line is composed by these divs therefore we need to remove then
-        // It's the same logic than above so we're using the manager
-        // NewState is the updated state
-        const newState = state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], () => newList);
-        const newManager = new Manager(newState, newList, action.keys, action.index, layout);
-        const lastListItem = newManager.getAttrInfos(newList.size - 1);
-        const isLastItemFullSize = lastListItem.bootstrapCol === 12;
-        const newArrayOfLastLineElements = newManager.arrayOfEndLineElements
-          .concat({ name: lastListItem.name, index: lastListItem.index, isFullSize: isLastItemFullSize });
-        // Array of element's index to remove from the new list
-        let addedElementsToRemove = [];
+        // It may happen that a line is composed by these divs therefore we need to remove them
+        const newManager = createManager(state, newList, action.keys, action.index, layout);
 
-        newArrayOfLastLineElements.forEach((item, i) => {
-          if (i < newArrayOfLastLineElements.length) {
-            const firstElementOnLine = i === 0 ? 0 : newArrayOfLastLineElements[i - 1].index + 1;
-            const lastElementOnLine = newArrayOfLastLineElements[i].index;
-            const rangeIndex = range(firstElementOnLine, lastElementOnLine + 1);
-            const elementsOnLine = newManager.getElementsOnALine(rangeIndex)
-              .filter(name => !name.includes('__col'));
-
-            if (elementsOnLine.length === 0) {
-              addedElementsToRemove = addedElementsToRemove.concat(rangeIndex);
-            }
-          }
-        });
-
-        newList = newList.filter((item, index) => { // Remove the unnecessary divs
-          const indexToKeep = addedElementsToRemove.indexOf(index) === -1;
-
-          return indexToKeep;
-        });
-        
-        return newList;
+        return removeColsLine(newManager, newList);
       });
     case ON_REMOVE_EDIT_VIEW_RELATION_ATTR: {
       const relationName = state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), action.index]);
@@ -432,7 +360,7 @@ function appReducer(state = initialState, action) {
         const modelName = path.length > 2 ? path[2] : path[0];
         const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
         const manager = new Manager(state, list, action.keys, 0, layout);
-        const newList = manager.getLayout();
+        const newList = reorderList(manager, manager.getLayout());
 
         return newList;
       });
