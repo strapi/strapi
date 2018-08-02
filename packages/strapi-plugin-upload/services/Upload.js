@@ -9,7 +9,16 @@
 const fs = require('fs');
 const _ = require('lodash');
 const toArray = require('stream-to-array');
-const uuid = require('uuid/v4');
+const crypto = require('crypto');
+
+function niceHash(buffer) {
+  return crypto.createHash('sha256')
+    .update(buffer)
+    .digest('base64')
+    .replace(/=/g, '')
+    .replace(/\//g, '-')
+    .replace(/\+/, '_')
+}
 
 module.exports = {
   bufferize: async files => {
@@ -28,11 +37,13 @@ module.exports = {
           part => _.isBuffer(part) ? part : Buffer.from(part)
         );
 
+        const buffer = Buffer.concat(buffers);
+
         return {
           name: stream.name,
-          hash: uuid().replace(/-/g, ''),
+          hash: niceHash(buffer),
           ext: stream.name.split('.').length > 1 ? `.${_.last(stream.name.split('.'))}` : '',
-          buffer: Buffer.concat(buffers),
+          buffer,
           mime: stream.type,
           size: (stream.size / 1000).toFixed(2)
         };
