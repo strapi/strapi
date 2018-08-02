@@ -107,6 +107,8 @@ export class EditPage extends React.Component {
    */
   getAttributeValidations = (name) => get(this.props.editPage.formValidations, [findIndex(this.props.editPage.formValidations, ['name', name]), 'validations'], {})
 
+  getDisplayedFields = () => get(this.getSchema(), ['editDisplay', 'fields'], []);
+
   /**
    * Retrieve the model
    * @type {Object}
@@ -157,7 +159,7 @@ export class EditPage extends React.Component {
    * Initialize component
    */
   initComponent = (props) => {
-    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
+    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes(), this.getDisplayedFields());
 
     if (!this.isCreating()) {
       const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;

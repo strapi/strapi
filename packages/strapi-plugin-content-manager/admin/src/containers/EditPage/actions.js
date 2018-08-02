@@ -59,11 +59,18 @@ export function getDataSucceeded(id, data, pluginHeaderTitle) {
   };
 }
 
-export function initModelProps(modelName, isCreating, source, attributes) {
+export function initModelProps(modelName, isCreating, source, attributes, displayedAttributes) {
   const formValidations = getValidationsFromForm(
     Object.keys(attributes).map(attr => ({ name: attr, validations: get(attributes, attr, {}) })),
     [],
-  );
+  ).filter(field => {
+    if (get(field, ['validations', 'required'], false) === true) {
+      return displayedAttributes.indexOf(field.name) !== -1;
+    }
+
+    return true;
+  });
+
   const record = Object.keys(attributes).reduce((acc, current) => {
     if (attributes[current].default) {
       acc[current] = attributes[current].default;
