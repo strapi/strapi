@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { getValidationsFromForm } from 'utils/formValidations';
 
 import {
+  ADD_RELATION_ITEM,
   CHANGE_DATA,
   GET_DATA,
   GET_DATA_SUCCEEDED,
@@ -15,14 +16,24 @@ import {
   GET_LAYOUT_SUCCEEDED,
   INIT_MODEL_PROPS,
   ON_CANCEL,
+  REMOVE_RELATION_ITEM,
   RESET_PROPS,
   SET_FILE_RELATIONS,
   SET_LOADER,
   SET_FORM_ERRORS,
+  SORT_RELATIONS,
   SUBMIT,
   SUBMIT_SUCCESS,
   UNSET_LOADER,
 } from './constants';
+
+export function addRelationItem({ key, value }) {
+  return {
+    type: ADD_RELATION_ITEM,
+    key,
+    value,
+  };
+}
 
 export function changeData({ target }) {
   return {
@@ -92,6 +103,14 @@ export function onCancel() {
   };
 }
 
+export function removeRelationItem({ key, index }) {
+  return {
+    type: REMOVE_RELATION_ITEM,
+    key,
+    index,
+  };
+}
+
 export function resetProps() {
   return {
     type: RESET_PROPS,
@@ -115,6 +134,15 @@ export function setFormErrors(formErrors) {
 export function setLoader() {
   return {
     type: SET_LOADER,
+  };
+}
+
+export function sortRelations({ key, oldIndex, newIndex }) {
+  return {
+    type: SORT_RELATIONS,
+    key,
+    oldIndex,
+    newIndex,
   };
 }
 
