@@ -31,6 +31,7 @@ import {
 import {
   createManager,
   getElementsOnALine,
+  getLines,
   removeColsLine,
   reorderList,
 } from './helpers';
@@ -49,6 +50,8 @@ const initialState = fromJS({
   schema: fromJS({}),
   shouldUpdateListOnDrop: true,
   submitSuccess: false,
+  grid: List([]),
+  shouldResetGrid: false,
 });
 
 
@@ -71,7 +74,6 @@ function appReducer(state = initialState, action) {
           const modelName = path.length > 2 ? path[2] : path[0];
           const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
           let newList = list;
-
           // We don't need to update the list onDrop for the full size elements since it's already handled by the MOVE_VARIABLE_ATTR
           if (shouldUpdateListOnDrop && canDrop) {
             newList = list
@@ -86,7 +88,12 @@ function appReducer(state = initialState, action) {
 
             // We need to remove the added element if dropping on the same line that the element was initially
             if (dropLine === initDragLine) {
-              newList = newList.delete(addedElementIndex);
+              const toDropIndex = dropIndex > addedElementIndex ? dropIndex + 1 : dropIndex;
+
+              newList = newList
+                .delete(dropIndex)
+                .insert(toDropIndex, toAdd)
+                .delete(addedElementIndex);
             }
 
             const newManager = createManager(state, newList, action.keys, dropIndex, layout);
@@ -122,7 +129,8 @@ function appReducer(state = initialState, action) {
         .update('draggedItemName', () => null)
         .update('hasMoved', () => false)
         .update('hoverIndex', () =>  -1)
-        .update('shouldUpdateListOnDrop', () => true);
+        .update('shouldUpdateListOnDrop', () => true)
+        .update('shouldResetGrid', v => !v);
     case GET_MODEL_ENTRIES_SUCCEEDED:
       return state.set('modelEntries', action.count);
     case LOAD_MODELS:
@@ -267,74 +275,76 @@ function appReducer(state = initialState, action) {
         return list.delete(action.index);
       });
     case ON_REMOVE_EDIT_VIEW_FIELD_ATTR:
-      return state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
-        // Don't do any check if removing the last item of the array
-        if (action.index === list.size - 1) {
-          return list.delete(action.index);
-        }
-        const path = action.keys.split('.');
-        const modelName = path.length > 2 ? path[2] : path[0];
-        const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
-        const manager = new Manager(state, list, action.keys, action.index, layout);
-        const attrToRemoveInfos = manager.attrToRemoveInfos; // Retrieve the removed item infos
-        const arrayOfLastLineElements = manager.arrayOfEndLineElements;
-        const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
-        let newList;
-        
-        if (isRemovingAFullWidthNode) { // If removing we need to add the corresponding missing col in the prev line
-          const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]); // Used only to know if removing a full size element on the first line
+      return state
+        .updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
+          // Don't do any check if removing the last item of the array
+          if (action.index === list.size - 1) {
+            return list.delete(action.index);
+          }
+          const path = action.keys.split('.');
+          const modelName = path.length > 2 ? path[2] : path[0];
+          const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
+          const manager = new Manager(state, list, action.keys, action.index, layout);
+          const attrToRemoveInfos = manager.attrToRemoveInfos; // Retrieve the removed item infos
+          const arrayOfLastLineElements = manager.arrayOfEndLineElements;
+          const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
+          let newList;
+          
+          if (isRemovingAFullWidthNode) { // If removing we need to add the corresponding missing col in the prev line
+            const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]); // Used only to know if removing a full size element on the first line
 
-          if (currentNodeLine === 0) {
-            newList = list
-              .delete(action.index);
-          } else {
-            const previousNodeLine = currentNodeLine - 1;
-            const firstElementOnLine = previousNodeLine === 0 ? 0 : arrayOfLastLineElements[previousNodeLine - 1].index + 1;
-            const lastElementOnLine = arrayOfLastLineElements[previousNodeLine].index + 1;
-            const previousLineRangeIndexes = firstElementOnLine === lastElementOnLine ? [firstElementOnLine] : range(firstElementOnLine, lastElementOnLine);
-            const elementsOnLine = manager.getElementsOnALine(previousLineRangeIndexes);
-            const previousLineColNumber = manager.getLineSize(elementsOnLine);
-
-            if (previousLineColNumber >= 10) {
+            if (currentNodeLine === 0) {
               newList = list
                 .delete(action.index);
             } else {
-              const colNumberToAdd = 12 - previousLineColNumber;
-              const colsToAdd = manager.getColsToAdd(colNumberToAdd);
-              newList = list
-                .delete(attrToRemoveInfos.index)
-                .insert(attrToRemoveInfos.index, colsToAdd[0]);
-            
-              if (colsToAdd.length > 1) {
-                newList = newList
-                  .insert(attrToRemoveInfos.index, colsToAdd[1]);
+              const previousNodeLine = currentNodeLine - 1;
+              const firstElementOnLine = previousNodeLine === 0 ? 0 : arrayOfLastLineElements[previousNodeLine - 1].index + 1;
+              const lastElementOnLine = arrayOfLastLineElements[previousNodeLine].index + 1;
+              const previousLineRangeIndexes = firstElementOnLine === lastElementOnLine ? [firstElementOnLine] : range(firstElementOnLine, lastElementOnLine);
+              const elementsOnLine = manager.getElementsOnALine(previousLineRangeIndexes);
+              const previousLineColNumber = manager.getLineSize(elementsOnLine);
+
+              if (previousLineColNumber >= 10) {
+                newList = list
+                  .delete(action.index);
+              } else {
+                const colNumberToAdd = 12 - previousLineColNumber;
+                const colsToAdd = manager.getColsToAdd(colNumberToAdd);
+                newList = list
+                  .delete(attrToRemoveInfos.index)
+                  .insert(attrToRemoveInfos.index, colsToAdd[0]);
+              
+                if (colsToAdd.length > 1) {
+                  newList = newList
+                    .insert(attrToRemoveInfos.index, colsToAdd[1]);
+                }
               }
             }
-          }
-        } else {
-          const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) }; // Retrieve the removed element's bounds
-          const leftBoundIndex = get(nodeBounds, ['left', 'index'], 0) + 1;
-          const rightBoundIndex = get(nodeBounds, ['right', 'index'], list.size -1);
-          const elementsOnLine = manager.getElementsOnALine(range(leftBoundIndex - 1, rightBoundIndex + 1));
-          const currentLineColSize = manager.getLineSize(elementsOnLine);
-          const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
-
-          if (isRemovingLine) {
-            newList = list
-              .delete(attrToRemoveInfos.index);
           } else {
-            const random = Math.floor(Math.random() * 1000); 
-            newList = list
-              .delete(attrToRemoveInfos.index)
-              .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__${random}`);
-          }
-        }
-        // This part is needed to remove the add __col-md-${something}__ that keeps the layout when removing an item
-        // It may happen that a line is composed by these divs therefore we need to remove them
-        const newManager = createManager(state, newList, action.keys, action.index, layout);
+            const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) }; // Retrieve the removed element's bounds
+            const leftBoundIndex = get(nodeBounds, ['left', 'index'], 0) + 1;
+            const rightBoundIndex = get(nodeBounds, ['right', 'index'], list.size -1);
+            const elementsOnLine = manager.getElementsOnALine(range(leftBoundIndex - 1, rightBoundIndex + 1));
+            const currentLineColSize = manager.getLineSize(elementsOnLine);
+            const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
 
-        return removeColsLine(newManager, newList);
-      });
+            if (isRemovingLine) {
+              newList = list
+                .delete(attrToRemoveInfos.index);
+            } else {
+              const random = Math.floor(Math.random() * 1000); 
+              newList = list
+                .delete(attrToRemoveInfos.index)
+                .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__${random}`);
+            }
+          }
+          // This part is needed to remove the add __col-md-${something}__ that keeps the layout when removing an item
+          // It may happen that a line is composed by these divs therefore we need to remove them
+          const newManager = createManager(state, newList, action.keys, action.index, layout);
+
+          return removeColsLine(newManager, newList);
+        })
+        .update('shouldResetGrid', v => !v);
     case ON_REMOVE_EDIT_VIEW_RELATION_ATTR: {
       const relationName = state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), action.index]);
 
@@ -354,16 +364,27 @@ function appReducer(state = initialState, action) {
       return state
         .update('submitSuccess', v => v = !v)
         .update('schema', () => state.get('modifiedSchema'));
-    case SET_LAYOUT:
-      return state.updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
-        const path = action.keys.split('.');
-        const modelName = path.length > 2 ? path[2] : path[0];
-        const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
-        const manager = new Manager(state, list, action.keys, 0, layout);
-        const newList = reorderList(manager, manager.getLayout());
+    case SET_LAYOUT: {
+      let updatedList = List([]);
+      const path = action.keys.split('.');
+      const modelName = path.length > 2 ? path[2] : path[0];
+      const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
 
-        return newList;
-      });
+      return state
+        .updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
+          const manager = new Manager(state, list, action.keys, 0, layout);
+          const newList = reorderList(manager, manager.getLayout());
+          updatedList = newList;
+
+          return newList;
+        })
+        .update('grid', () => {
+          const fields = updatedList;
+          const lines = getLines(new Manager(state, fields, action.keys, 0, layout), fields);
+
+          return List(lines);
+        });
+    }
     default:
       return state;
   }

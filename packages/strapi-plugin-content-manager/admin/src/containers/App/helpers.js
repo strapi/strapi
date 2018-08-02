@@ -42,6 +42,25 @@ const removeColsLine = (manager, list) => {
   });
 };
 const reorderList = (manager, list) => {
+  const lines = getLines(manager, list);
+  const reordered = lines
+    .reduce((acc, curr) => {
+      const line = curr.reduce((acc, current, index) => {
+        if (current.includes('__col-md')) {
+          acc.splice(index, 1);
+          acc.splice(curr.length -1, 0, current);
+        }
+
+        return acc;
+      }, [...curr]);
+
+      return acc.concat(line);
+    }, [])
+    .filter(a => a !== undefined);
+
+  return List(flattenDeep(reordered));
+};
+const getLines = (manager, list) => {
   const array = createArrayOfLastEls(manager, list);
   const lines = [];
   
@@ -50,21 +69,14 @@ const reorderList = (manager, list) => {
     lines.push(elements);
   });
 
-  const reordered = lines
-    .reduce((acc, curr) => {
-      const line = curr.sort((a) => a.includes('__col-md'));
-
-      return acc.concat(line);
-    }, [])
-    .filter(a => a !== undefined);
-
-  return List(flattenDeep(reordered));
+  return lines;
 };
 
 export {
   createArrayOfLastEls,
   createManager,
   getElementsOnALine,
+  getLines,
   removeColsLine,
   reorderList,
 };

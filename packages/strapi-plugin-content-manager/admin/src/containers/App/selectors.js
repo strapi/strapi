@@ -37,12 +37,16 @@ const makeSelectModelEntries = () =>
   createSelector(selectGlobalDomain(), globalState =>
     globalState.get('modelEntries')
   );
+const makeSelectGrid = () =>
+  createSelector(selectGlobalDomain(), substate => substate.get('grid').toJS());
 const makeSelectLoading = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('loading'));
 const makeSelectSchema = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('schema').toJS());
 const makeSelectModifiedSchema = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('modifiedSchema').toJS());
+const makeSelectShouldResetGrid = () =>
+  createSelector(selectGlobalDomain(), substate => substate.get('shouldResetGrid'));
 const makeSelectSubmitSuccess = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('submitSuccess'));
 
@@ -51,9 +55,11 @@ export {
   selectLocationState,
   makeSelectAddedField,
   makeSelectHoverIndex,
+  makeSelectGrid,
   makeSelectLoading,
   makeSelectModelEntries,
   makeSelectModifiedSchema,
   makeSelectSchema,
+  makeSelectShouldResetGrid,
   makeSelectSubmitSuccess,
 };

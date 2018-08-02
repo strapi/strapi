@@ -269,7 +269,6 @@ export class EditPage extends React.Component {
   }
 
   handleSortRelations = ({ key, oldIndex, newIndex }) => {
-    console.log(key, oldIndex, newIndex);
     this.props.sortRelations({ key, oldIndex, newIndex });
   }
 

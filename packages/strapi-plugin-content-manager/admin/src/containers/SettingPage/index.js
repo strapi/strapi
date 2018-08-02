@@ -30,7 +30,14 @@ import {
   onSubmit,
   setLayout,
 } from 'containers/App/actions';
-import { makeSelectAddedField, makeSelectHoverIndex, makeSelectModifiedSchema , makeSelectSubmitSuccess } from 'containers/App/selectors';
+import {
+  makeSelectAddedField,
+  makeSelectGrid,
+  makeSelectHoverIndex,
+  makeSelectModifiedSchema,
+  makeSelectShouldResetGrid,
+  makeSelectSubmitSuccess,
+} from 'containers/App/selectors';
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
 import PluginHeader from 'components/PluginHeader';
@@ -93,6 +100,10 @@ class SettingPage extends React.PureComponent {
     }
 
     if (prevProps.addedField !== this.props.addedField) {
+      this.props.setLayout(`${this.getPath()}.editDisplay`);
+    }
+
+    if (prevProps.shouldResetGrid !== this.props.shouldResetGrid) {
       this.props.setLayout(`${this.getPath()}.editDisplay`);
     }
   }
@@ -793,12 +804,15 @@ class SettingPage extends React.PureComponent {
   }
 }
 
-SettingPage.defaultProps = {};
+SettingPage.defaultProps = {
+  grid: [],
+};
 
 SettingPage.propTypes = {
   addedField: PropTypes.bool.isRequired,
   beginMove: PropTypes.func.isRequired,
   endMove: PropTypes.func.isRequired,
+  grid: PropTypes.array,
   history: PropTypes.object.isRequired,
   hoverIndex: PropTypes.number.isRequired,
   match: PropTypes.object.isRequired,
@@ -819,6 +833,7 @@ SettingPage.propTypes = {
   schema: PropTypes.object.isRequired,
   setLayout: PropTypes.func.isRequired,
   settingPage: PropTypes.object.isRequired,
+  shouldResetGrid: PropTypes.bool.isRequired,
   submitSuccess: PropTypes.bool.isRequired,
 };
 
@@ -848,9 +863,11 @@ const mapDispatchToProps = (dispatch) => (
 );
 const mapStateToProps = createStructuredSelector({
   addedField: makeSelectAddedField(),
+  grid: makeSelectGrid(),
   hoverIndex: makeSelectHoverIndex(),
   schema: makeSelectModifiedSchema(),
   settingPage: makeSelectSettingPage(),
+  shouldResetGrid: makeSelectShouldResetGrid(),
   submitSuccess: makeSelectSubmitSuccess(),
 });
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
