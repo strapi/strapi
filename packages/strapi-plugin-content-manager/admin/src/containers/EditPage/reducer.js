@@ -46,7 +46,12 @@ function editPageReducer(state = initialState, action) {
     case ADD_RELATION_ITEM:
       return state
         .updateIn(['record', action.key], (list) => {
-          return list 
+          if (List.isList(list)) {
+            return list 
+              .push(action.value);
+          }
+          
+          return List([])
             .push(action.value);
         });
     case CHANGE_DATA:
