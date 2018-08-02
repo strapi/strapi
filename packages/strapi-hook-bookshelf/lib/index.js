@@ -524,7 +524,7 @@ module.exports = function(strapi) {
                       if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
                         idAttributeBuilder = ['id uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY'];
                       } else if (definition.primaryKeyType !== 'integer') {
-                        idAttributeBuilder = [`id ${definition.primaryKeyType} NOT NULL PRIMARY KEY`];
+                        idAttributeBuilder = [`id ${getType({type: definition.primaryKeyType})} NOT NULL PRIMARY KEY`];
                       }
                       const columns = generateColumns(attributes, idAttributeBuilder).join(',\n\r');
 
@@ -598,8 +598,6 @@ module.exports = function(strapi) {
                             const changeRequired = definition.client === 'pg'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} ${attributes[attribute].required ? 'SET' : 'DROP'} NOT NULL`
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
-                            //console.log(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
-                            //console.log(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
                           }
