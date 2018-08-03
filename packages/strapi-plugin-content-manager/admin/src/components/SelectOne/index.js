@@ -164,7 +164,6 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
             label: templateObject({ mainField: this.props.relation.displayedAttribute }, isFunction(value.toJS) ? value.toJS() : value).mainField || (isFunction(value.toJS) ? get(value.toJS(), 'id') : get(value, 'id')),
           }}
         />
-        
       </div>
     );
     /* eslint-disable jsx-a11y/label-has-for */

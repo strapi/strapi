@@ -202,7 +202,6 @@ class SelectMany extends React.PureComponent {
           distance={1}
           onClick={this.handleClick}
         />
-        {description}
       </div>
     );
     /* eslint-disable jsx-a11y/label-has-for */
