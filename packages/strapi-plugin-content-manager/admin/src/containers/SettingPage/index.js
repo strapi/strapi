@@ -32,8 +32,10 @@ import {
 } from 'containers/App/actions';
 import {
   makeSelectAddedField,
+  makeSelectDraggedItemName,
   makeSelectGrid,
   makeSelectHoverIndex,
+  makeSelectInitDragLine,
   makeSelectModifiedSchema,
   makeSelectShouldResetGrid,
   makeSelectSubmitSuccess,
@@ -443,10 +445,13 @@ class SettingPage extends React.PureComponent {
       <VariableDraggableAttr
         beginMove={this.props.beginMove}
         data={this.getAttrData(attr)}
+        draggedItemName={this.props.draggedItemName}
         endMove={this.props.endMove}
+        grid={this.props.grid}
         hoverIndex={this.props.hoverIndex}
         id={attr}
         index={index}
+        initDragLine={this.props.initDragLine}
         isEditing={index === this.findIndexFieldToEdit()}
         key={attr}
         keys={`${this.getPath()}.editDisplay`}
@@ -805,16 +810,19 @@ class SettingPage extends React.PureComponent {
 }
 
 SettingPage.defaultProps = {
+  draggedItemName: null,
   grid: [],
 };
 
 SettingPage.propTypes = {
   addedField: PropTypes.bool.isRequired,
   beginMove: PropTypes.func.isRequired,
+  draggedItemName: PropTypes.string,
   endMove: PropTypes.func.isRequired,
   grid: PropTypes.array,
   history: PropTypes.object.isRequired,
   hoverIndex: PropTypes.number.isRequired,
+  initDragLine: PropTypes.number.isRequired,
   match: PropTypes.object.isRequired,
   moveAttr: PropTypes.func.isRequired,
   moveAttrEditView: PropTypes.func.isRequired,
@@ -863,8 +871,10 @@ const mapDispatchToProps = (dispatch) => (
 );
 const mapStateToProps = createStructuredSelector({
   addedField: makeSelectAddedField(),
+  draggedItemName: makeSelectDraggedItemName(),
   grid: makeSelectGrid(),
   hoverIndex: makeSelectHoverIndex(),
+  initDragLine: makeSelectInitDragLine(),
   schema: makeSelectModifiedSchema(),
   settingPage: makeSelectSettingPage(),
   shouldResetGrid: makeSelectShouldResetGrid(),

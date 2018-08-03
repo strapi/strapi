@@ -29,6 +29,10 @@ const makeSelectAddedField = () =>
   createSelector(selectGlobalDomain(), globalState =>
     globalState.get('addedField')
   );
+const makeSelectDraggedItemName = () =>
+  createSelector(selectGlobalDomain(), globalState =>
+    globalState.get('draggedItemName')
+  );
 const makeSelectHoverIndex = () =>
   createSelector(selectGlobalDomain(), globalState =>
     globalState.get('hoverIndex')
@@ -39,6 +43,8 @@ const makeSelectModelEntries = () =>
   );
 const makeSelectGrid = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('grid').toJS());
+const makeSelectInitDragLine = () =>
+  createSelector(selectGlobalDomain(), substate => substate.get('initDragLine'));
 const makeSelectLoading = () =>
   createSelector(selectGlobalDomain(), substate => substate.get('loading'));
 const makeSelectSchema = () =>
@@ -54,8 +60,10 @@ export {
   selectGlobalDomain,
   selectLocationState,
   makeSelectAddedField,
+  makeSelectDraggedItemName,
   makeSelectHoverIndex,
   makeSelectGrid,
+  makeSelectInitDragLine,
   makeSelectLoading,
   makeSelectModelEntries,
   makeSelectModifiedSchema,

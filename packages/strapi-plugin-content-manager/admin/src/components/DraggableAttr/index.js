@@ -104,6 +104,10 @@ class DraggableAttr extends React.Component {
     if (isDraggingSibling !== prevProps.isDraggingSibling && isDraggingSibling) {
       this.handleMouseLeave();
     }
+
+    if (prevProps.isDragging !== this.props.isDragging && this.props.isDragging) {
+      this.props.onClickEdit(this.props.index);
+    }
   }
 
   handleClickEdit = (e) => {

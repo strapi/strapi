@@ -57,8 +57,20 @@ const reorderList = (manager, list) => {
       return acc.concat(line);
     }, [])
     .filter(a => a !== undefined);
+  
+  const uniqueIdList = reordered.reduce((acc, current, index) => {
+    if (reordered.indexOf(current) === index) {
+      acc.push(current);
+    } else {
+      const bootstrapCol =  parseInt(current.split('__')[1].split('-')[2], 10);
+      const random = Math.random().toString(36).substring(7);
+      acc.push(`__col-md-${bootstrapCol}__${random}`);
+    }
 
-  return List(flattenDeep(reordered));
+    return acc;
+  }, []);
+
+  return List(flattenDeep(uniqueIdList));
 };
 const getLines = (manager, list) => {
   const array = createArrayOfLastEls(manager, list);

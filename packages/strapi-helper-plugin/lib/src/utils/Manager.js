@@ -52,8 +52,9 @@ class Manager {
       default:
         ret = ['__col-md-3__'];
     }
-    const random = Math.floor(Math.random() * 1000);
-    const random1 = Math.floor(Math.random() * 1000);
+
+    const random = Math.random().toString(36).substring(7);
+    const random1 = Math.random().toString(36).substring(8);
 
     return ret.map((v, i) => {
 

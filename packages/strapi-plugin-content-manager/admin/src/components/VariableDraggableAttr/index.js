@@ -156,6 +156,10 @@ class VariableDraggableAttr extends React.Component {
     if (prevProps.isDragging !== this.props.isDragging) {
       this.handleDragEffect();
     }
+
+    if (prevProps.isDragging !== this.props.isDragging && this.props.isDragging) {
+      this.handleClickEdit();
+    }
   }
 
   handleClickEdit = () => {
@@ -179,18 +183,41 @@ class VariableDraggableAttr extends React.Component {
 
   renderContent = () => {
     let { classNames, isOver, style, dragStart } = this.state;
-    const { data, hoverIndex, index, isEditing, name } = this.props;
+    const { data, draggedItemName, grid, hoverIndex, index, initDragLine, isEditing, name } = this.props;
     const isFullSize = classNames.bootstrap === 'col-md-12';
-    const showCarret = hoverIndex === index;
+    let itemLine = -1;
+    let itemLineEls = [];
+    grid.forEach((line, index) => {
+      if (line.indexOf(name) !== -1) {
+        itemLine = index;
+        itemLineEls = line;
+      }
+    });
+    const itemPosition = get(grid, itemLine, []).indexOf(name);
+    const draggedItemLineIndex = get(grid, itemLine, []).indexOf(draggedItemName);
+    let showLeftCarret = hoverIndex === index && initDragLine !== itemLine;
+    let showRightCarret = hoverIndex === index && initDragLine === itemLine;
+
+    if (hoverIndex === index && initDragLine === itemLine && (itemPosition === 0 || itemPosition === 1 && itemLineEls.length > 2)) {
+      if (itemLineEls.length < 3 || itemPosition === 0 || draggedItemLineIndex > itemPosition) {
+        showLeftCarret = true;
+        showRightCarret = false;
+      }
+    }
+  
     const carretStyle = (() => {
-      let style = { height: '30px' };
+      let style = { height: '30px', marginRight: '3px' };
 
       if (classNames.withLongerHeight) {
-        style = { height: '84px' };
+        style = { height: '84px', marginRight: '3px' };
       }
 
       if (isFullSize) {
         style = { width: '100%', height: '10px', marginBottom: '6px' };
+      }
+
+      if (showRightCarret) {
+        style = { height: '30px', marginLeft: '3px' };
       }
 
       return style;
@@ -202,7 +229,7 @@ class VariableDraggableAttr extends React.Component {
     
     return (
       <div style={{ display: 'flex' }}>
-        { showCarret && <Carret style={carretStyle} />}
+        { showLeftCarret && <Carret style={carretStyle} />}
         <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
           <i className="fa fa-th" />
           <span className={styles.truncated}>
@@ -220,6 +247,7 @@ class VariableDraggableAttr extends React.Component {
             <DraggedRemovedIcon withLongerHeight={classNames.withLongerHeight} onRemove={this.handleRemove} />
           )}
         </div>
+        { showRightCarret && <Carret style={carretStyle} />}
       </div>
     );
   }
@@ -252,8 +280,11 @@ VariableDraggableAttr.defaultProps = {
   data: {
     type: 'text',
   },
+  draggedItemName: null,
+  grid: [],
   hoverIndex: -1,
   index: 0,
+  initDragLine: -1,
   isDragging: false,
   isEditing: false,
   keys: '',
@@ -268,8 +299,11 @@ VariableDraggableAttr.propTypes = {
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   data: PropTypes.object,
+  draggedItemName: PropTypes.string,
+  grid: PropTypes.array,
   hoverIndex: PropTypes.number,
   index: PropTypes.number,
+  initDragLine: PropTypes.number,
   isDragging: PropTypes.bool,
   isEditing: PropTypes.bool,
   keys: PropTypes.string,
