@@ -46,7 +46,7 @@ const reorderList = (manager, list) => {
   const reordered = lines
     .reduce((acc, curr) => {
       const line = curr.reduce((acc, current, index) => {
-        if (current.includes('__col-md')) {
+        if (current && current.includes('__col-md')) {
           acc.splice(index, 1);
           acc.splice(curr.length -1, 0, current);
         }
