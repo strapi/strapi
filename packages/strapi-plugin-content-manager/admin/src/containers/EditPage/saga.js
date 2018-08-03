@@ -42,19 +42,6 @@ function* dataGet(action) {
     ];
     const pluginHeaderTitle = yield call(templateObject, { mainField: action.mainField }, response);
 
-    // Remove the updated_at & created_at fields so it is updated correctly when using Postgres or MySQL db
-    if (response.updated_at) {
-      delete response.created_at;
-      delete response.updated_at;
-    }
-
-    // Remove the updatedAt & createdAt fields so it is updated correctly when using MongoDB
-    if (response.updatedAt) {
-      delete response.createdAt;
-      delete response.updatedAt;
-
-    }
-
     yield put(getDataSucceeded(action.id, response, pluginHeaderTitle.mainField));
   } catch(err) {
     strapi.notification.error('content-manager.error.record.fetch');
@@ -69,6 +56,17 @@ export function* submit() {
   const source = yield select(makeSelectSource());
   const schema = yield select(makeSelectSchema());
   let shouldAddTranslationSuffix = false;
+  // Remove the updated_at & created_at fields so it is updated correctly when using Postgres or MySQL db
+  if (record.updated_at) {
+    delete record.created_at;
+    delete record.updated_at;
+  }
+
+  // Remove the updatedAt & createdAt fields so it is updated correctly when using MongoDB
+  if (record.updatedAt) {
+    delete record.createdAt;
+    delete record.updatedAt;
+  }
 
   try {
     // Show button loader

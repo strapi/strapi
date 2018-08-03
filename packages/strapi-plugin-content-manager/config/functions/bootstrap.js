@@ -91,6 +91,18 @@ module.exports = async cb => {
         disabled: false,
       };
     });
+
+    if (model.orm === 'mongoose') {
+      fields.createdAt = { label: 'createdAt', description: '', type: 'date', disabled: true };
+      fields.updatedAt = { label: 'updatedAt', description: '', type: 'date', disabled: true };
+      schemaModel.attributes.updatedAt = { type: 'date' };
+      schemaModel.attributes.createdAt = { type: 'date' };
+    } else {
+      fields.created_at = { label: 'created_at', description: '', type: 'date', disabled: true };
+      fields.updated_at = { label: 'updated_at', description: '', type: 'date', disabled: true };
+      schemaModel.attributes.created_at = { type: 'date' };
+      schemaModel.attributes.updated_at = { type: 'date' };
+    }
     
     // Don't display fields that are hidden by default like the resetPasswordToken for the model user
     fieldsToRemove.forEach(field => {
@@ -104,7 +116,6 @@ module.exports = async cb => {
     // Select fields displayed in list view
     schemaModel.listDisplay = Object.keys(schemaModel.fields)
       // Construct Array of attr ex { type: 'string', label: 'Foo', name: 'Foo', description: '' }
-      // NOTE: Do we allow sort on boolean?
       .map(attr => {
         const attrType = schemaModel.fields[attr].type;
         const sortable = attrType !== 'json' && attrType !== 'array';
@@ -125,11 +136,10 @@ module.exports = async cb => {
     // This object will be used to customise the label and description and so on of an input.
     // TODO: maybe add the customBootstrapClass in it;
     schemaModel.editDisplay.availableFields = Object.keys(schemaModel.fields).reduce((acc, current) => {
-      // TODO: Add appearance in this object in order to get rid of the layout.json
       acc[current] = Object.assign(
         _.pick(_.get(schemaModel, ['fields', current], {}), ['label', 'type', 'description', 'name']),
         {
-          editable: true,
+          editable: ['updatedAt', 'createdAt', 'updated_at', 'created_at'].indexOf(current) === -1,
           placeholder: '',
         });
 
