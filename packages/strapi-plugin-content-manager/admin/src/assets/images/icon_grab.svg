@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="8px" height="8px" viewBox="0 0 8 8" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49.3 (51167) - http://www.bohemiancoding.com/sketch -->
+    <title>Icon grab</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Pages" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Content-Manager---Settings-view---Single" transform="translate(-335.000000, -698.000000)" fill="#B3B5B9">
+            <g id="Container" transform="translate(261.000000, 84.000000)">
+                <g id="Forms" transform="translate(3.000000, 77.000000)">
+                    <g id="Settings">
+                        <g id="Attributes" transform="translate(4.000000, 456.000000)">
+                            <g id="Order-attributes" transform="translate(0.000000, 23.000000)">
+                                <g id="Link" transform="translate(0.000000, 19.000000)">
+                                    <g id="Icon-grab" transform="translate(67.000000, 39.000000)">
+                                        <rect id="Rectangle-4" x="0" y="0" width="2" height="2"></rect>
+                                        <rect id="Rectangle-4" x="3" y="0" width="2" height="2"></rect>
+                                        <rect id="Rectangle-4" x="6" y="0" width="2" height="2"></rect>
+                                        <rect id="Rectangle-4" x="0" y="3" width="2" height="2"></rect>
+                                        <rect id="Rectangle-4" x="3" y="3" width="2" height="2"></rect>
+                                        <rect id="Rectangle-4" x="6" y="3" width="2" height="2"></rect>
+                                        <rect id="Rectangle-4" x="0" y="6" width="2" height="2"></rect>
+                                        <rect id="Rectangle-4" x="3" y="6" width="2" height="2"></rect>
+                                        <rect id="Rectangle-4" x="6" y="6" width="2" height="2"></rect>
+                                    </g>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

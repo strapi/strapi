@@ -39,6 +39,17 @@ module.exports = async cb => {
       enabled: true,
       icon: 'envelope'
     },
+    discord: {
+      enabled: false,
+      icon: 'comments',
+      key: '',
+      secret: '',
+      callback: '/auth/discord/callback',
+      scope: [
+        'identify',
+        'email'
+      ]
+    },
     facebook: {
       enabled: false,
       icon: 'facebook-official',
