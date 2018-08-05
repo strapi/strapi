@@ -67,12 +67,14 @@ module.exports = async cb => {
       ]
     },
     twitch: {
+      access_url: 'https://id.twitch.tv/oauth2/token',
+      authorize_url: 'https://id.twitch.tv/oauth2/authorize',
       enabled: false,
       icon: 'twitch',
       key: '',
       secret: '',
       callback: '/auth/twitch/callback',
-      scope: ['user_read']
+      scope: ['user:read:email']
     },
     twitter: {
       enabled: false,
@@ -131,6 +133,6 @@ module.exports = async cb => {
 
     await pluginStore.set({key: 'advanced', value});
   }
-  
+
   strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
 };
