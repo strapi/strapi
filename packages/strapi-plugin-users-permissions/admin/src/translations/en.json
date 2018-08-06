@@ -43,8 +43,9 @@
   "Auth.form.error.code.provide": "Incorrect code provided.",
   "Auth.form.error.password.matching": "Passwords do not match.",
   "Auth.form.error.params.provide": "Incorrect params provided.",
-  "Auth.form.error.username.taken": "Username is already taken",
-  "Auth.form.error.email.taken": "Email is already taken",
+  "Auth.form.error.username.taken": "Username is already taken.",
+  "Auth.form.error.email.taken": "Email is already taken.",
+  "Auth.form.error.blocked": "Your account has been blocked by the administrator.",
 
   "Auth.link.forgot-password": "Forgot your password?",
   "Auth.link.ready": "Ready to sign in?",
