@@ -129,6 +129,7 @@
   "notification.success.message.contentType.create": "Votre modèle a bien été créée",
   "notification.success.contentTypeDeleted": "Le modèle a bien été supprimé.",
 
+  "popUpForm.attributes.enumeration.name": "Énumération",
   "popUpForm.attributes.string.description": "Titres, noms,...",
   "popUpForm.attributes.text.description": "Descriptions, paragraphes texte, articles ",
   "popUpForm.attributes.number.description": "Tout ce qui est nombre",
@@ -178,6 +179,7 @@
 
   "relation.oneToOne": "a un ",
   "relation.oneToMany": "appartient a",
+  "relation.oneWay": "a un",
   "relation.manyToOne": "a plusieurs",
   "relation.manyToMany": "a plusieurs",
   "relation.attributeName.placeholder": "Ex: auteur, catégorie, tag"
