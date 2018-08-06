@@ -25,6 +25,7 @@
   "containers.SettingsPage.Block.generalSettings.title" : "Allgemeines",
   "containers.SettingsPage.Block.contentType.title": "Inhaltstypen",
   "containers.SettingsPage.Block.contentType.description": "Konfiguriere die spezifischen Einstellungen",
+  "containers.SettingsPage.pluginHeaderDescription": "Konfigurieren Sie die Standardeinstellungen für alle Ihre Inhaltstypen.",
 
   "components.AddFilterCTA.add": "Filter",
   "components.AddFilterCTA.hide": "Filter",
@@ -52,6 +53,7 @@
   "components.TableEmpty.withSearch": "Es gibt keinen {contentType}, der der Suche entspricht ({search})...",
 
   "form.Input.label": "Label",
+  "form.Input.label.inputDescription": "Dieser Wert überschreibt das im Kopf der Tabelle angezeigte Label.",
   "form.Input.search": "Suche aktivieren",
   "form.Input.search.field": "Suche in diesem Feld aktivieren",
   "form.Input.filters": "Filter aktivieren",

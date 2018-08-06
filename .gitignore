@@ -78,6 +78,7 @@ $RECYCLE.BIN/
 *#
 .idea
 nbproject
+.vscode/
 
 
 ############################
