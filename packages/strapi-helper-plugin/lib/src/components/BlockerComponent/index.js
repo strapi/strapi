@@ -59,7 +59,7 @@ const renderIde = () => (
           &nbsp;"port": 1337,
           <br />
           <span style={{ color: '#006EE7'}}>
-            &nbsp;"autoReload": true,
+            &nbsp;"autoReload": { enabled: true },
           </span>
           <br />
           &nbsp;"proxi": &#123;
