@@ -38,14 +38,6 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
-    },
-    "products": {
-      "via": "users",
-      "collection": "product"
-    },
-    "product": {
-      "via": "creator",
-      "model": "product"
     }
   }
 }
