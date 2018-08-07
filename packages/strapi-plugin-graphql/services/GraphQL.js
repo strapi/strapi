@@ -630,7 +630,7 @@ module.exports = {
             };
 
             if (association.type === 'model') {
-              params.id = obj[association.alias];
+              params.id = obj[association.alias].id;
             } else {
               // Get refering model.
               const ref = association.plugin ?
