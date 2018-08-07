@@ -630,7 +630,8 @@ module.exports = {
             };
 
             if (association.type === 'model') {
-              params.id = obj[association.alias].id;
+              const rel = obj[association.alias];
+              params.id = typeof rel === 'object' && 'id' in rel ? rel.id : rel;
             } else {
               // Get refering model.
               const ref = association.plugin ?
