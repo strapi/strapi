@@ -8,8 +8,7 @@
 const _ = require('lodash');
 const path = require('path');
 const glob = require('glob');
-const { ApolloServer, gql } = require('apollo-server-koa');
-const koaPlayground = require('graphql-playground-middleware-koa').default;
+const { ApolloServer } = require('apollo-server-koa');
 const depthLimit = require('graphql-depth-limit');
 
 module.exports = strapi => {
