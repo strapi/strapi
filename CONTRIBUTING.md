@@ -51,13 +51,13 @@ Go to the root of the repository.
 cd strapi
 ```
 
-**Two setup are available... with or without the front-end build.**
+**Two setup are available... with or without the front-end builds.**
 
-Without the front-end build, you won't be able to access to the administration panel via http://localhost:1337/admin, you'll have to run the administration separately and access it through http://localhost:4000/admin.
+Without the front-end builds, you won't be able to access to the administration panel via http://localhost:1337/admin, you'll have to run the administration separately and access it through http://localhost:4000/admin.
 
 <br>
 
-Without the front-end build (recommended)
+Without the front-end builds (recommended)
 ```bash
 npm run setup
 ```
