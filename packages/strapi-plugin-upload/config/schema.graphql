@@ -29,7 +29,7 @@ module.exports = {
 
           // Call controller action.
           await strapi.plugins.upload.controllers.upload.upload(context);
-
+       
           // Handle case when the user is uploading only one file.
           if (_.isArray(context.body) && context.body.length === 1) {
             return context.body[0];
