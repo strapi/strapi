@@ -304,7 +304,7 @@ module.exports.app = async function() {
 
   this.config.hook.settings = Object.keys(this.hook).reduce((acc, current) => {
     // Try to find the settings in the current environment, then in the main configurations.
-    const currentSettings = merge(get(cloneDeep(this.hook[current]), ['defaults', current], {}), flattenHooksConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
+    const currentSettings = merge(get(cloneDeep(this.hook[current]), ['defaults', current], {}), flattenHooksConfig[current] || get(this.config.currentEnvironment, ['hook', current]) || get(this.config, ['hook', current]));
     acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
     if (!acc[current].hasOwnProperty('enabled')) {
