@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 module.exports = async (ctx, next) => {
   let role;
 
@@ -22,6 +24,16 @@ module.exports = async (ctx, next) => {
 
     if (role.type === 'root') {
       return await next();
+    }
+
+    const store = await strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'users-permissions'
+    });
+
+    if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && ctx.state.user.confirmed !== true) {
+      return ctx.unauthorized('Your account email is not confirmed.');
     }
   }
   // Retrieve `public` role.

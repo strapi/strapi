@@ -33,6 +33,10 @@
       "configurable": false,
       "private": true
     },
+    "confirmed": {
+      "type": "boolean",
+      "configurable": false
+    },
     "role": {
       "model": "role",
       "via": "users",
