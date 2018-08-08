@@ -32,7 +32,7 @@
 
 <p align="center">
   <a href="https://strapi.io">
-    <img src="https://blog.strapi.io/content/images/2018/08/github_preview.png" />
+    <img src="https://blog.strapi.io/content/images/2018/08/github_preview-1.png" />
   </a>
 </p>
 
