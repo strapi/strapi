@@ -136,7 +136,7 @@ class Strapi extends EventEmitter {
           cb();
         }
 
-        if (this.config.environment === 'development') {
+        if (this.config.environment === 'development' && get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) {
           utils.openBrowser.call(this);
         }
       });
