@@ -29,6 +29,7 @@
   "PluginInputFile.link": "recherchez",
   "PluginInputFile.loading": "Vos fichiers sont en train d'être téléchargés...",
 
+  "notification.config.success": "Les paramètres ont été mis à jour.",
   "notification.delete.success": "Le fichier a bien été supprimé",
   "notification.dropFile.success": "Votre fichier a été téléchargé",
   "notification.dropFiles.success": "{number} fichiers ont été téléchargées"
