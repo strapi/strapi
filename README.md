@@ -116,7 +116,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 [Drop us an email](mailto:support@strapi.io) to see how we can help you.
 
-### Migration
+## Migration
 
 Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki to keep your projects up-to-date.
 
