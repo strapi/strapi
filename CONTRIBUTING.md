@@ -1,6 +1,6 @@
 # Contribute to Strapi
 
-👍🎉 First off, thanks for taking the time to contribute! 🎉👍
+First off, thanks for taking the time to contribute! 🎉👍
 
 The following is a set of guidelines for contributing to Strapi and its packages.
 
@@ -34,11 +34,11 @@ To facilitate the contribution, we drastically reduce the amount of commands nec
 
 Then, please follow the instructions below:
 
-#### 1. Fork the repository
+#### 1. ▪️ Fork the repository
 
 [Go to the repository](https://github.com/strapi/strapi) and fork it to your own GitHub account.
 
-#### 2. Clone the repository
+#### 2. 💿 Clone the repository
 
 ```bash
 git clone git@github.com:strapi/strapi.git
@@ -108,14 +108,14 @@ The administration panel is available at http://localhost:4000/admin
 
 To create a new plugin, you'll have to run the following commands:
 
-#### 1. Generate a new plugin
+#### 1. 🏗 Generate a new plugin
 
 ```bash
 cd ./my-project
 strapi generate:plugin my-plugin
 ```
 
-#### 2. Verify the symlink
+#### 2. ✅ Verify the symlink
 
 Make you that the `strapi-helper-plugin` is linked to your project.
 
@@ -131,7 +131,7 @@ cd ./my-project/plugins/my-plugin
 npm link strapi-helper-plugin
 ```
 
-#### 3. Start the project
+#### 3. 🚀 Start the project
 
 ```bash
 cd ./my-project/admin
