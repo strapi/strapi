@@ -40,17 +40,18 @@
 
 ## Getting Started
 
-[Read the Getting Started tutorial](https://strapi.io/getting-started) or follow the steps below:
+<a href="https://strapi.io/getting-started)" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
-#### Installation
+#### ⏳ Installation
 
 ```bash
 npm install strapi@alpha -g
 ````
 
-**We recommend to use the latest version of Strapi** to start your new project. Some breaking changes might happen, new releases are shipped every two weeks.
+**We recommend to use the latest version of Strapi to start your new project**. 
+Some breaking changes might happen, new releases are shipped every two weeks to fix/enhance the product.
 
-#### Create a new project
+#### 🏗 Create a new project
 
 ```bash
 strapi new my-project
@@ -58,18 +59,18 @@ strapi new my-project
 
 It will generate a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
 
-Then, you're ready to start your project:
+#### 🚀 Start your project
 
 ```bash
 cd my-project
 strapi start
 ```
 
-**Congratulations, you made it! Enjoy 🎉**
+Congratulations, you made it! Enjoy 🎉
 
----
+<br>
 
-You can also give it a try using Heroku. However one of the main feature (content type builder) won't work due to the  writing files restriction of Heroku. 
+You can also give it a try using Heroku! Be aware that one of the content type builder won't work due to the writing files restriction on the Heroku servers. 
 
 <a href="https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
