@@ -49,7 +49,7 @@
     "koa-router-joi": "^1.0.1",
     "koa-session": "^5.5.1",
     "koa-static": "^4.0.1",
-    "lodash": "^4.16.5",
+    "lodash": "^4.17.5",
     "node-fetch": "^1.7.3",
     "node-schedule": "^1.2.0",
     "rimraf": "^2.6.2",

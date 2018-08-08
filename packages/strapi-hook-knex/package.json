@@ -17,7 +17,7 @@
   "main": "./lib",
   "dependencies": {
     "knex": "^0.13.0",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.5"
   },
   "author": {
     "email": "hi@strapi.io",
