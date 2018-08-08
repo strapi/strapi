@@ -40,7 +40,7 @@ The global policies can be associated to any routes in your project.
   "routes": [
     {
       "method": "GET",
-      "path": "/car",
+      "path": "/cars",
       "handler": "Car.find",
       "config": {
         "policies": [
@@ -66,7 +66,7 @@ Plugins can add and expose policies into your app. For example, the plugin `Auth
   "routes": [
     {
       "method": "GET",
-      "path": "/car",
+      "path": "/cars",
       "handler": "Car.find",
       "config": {
         "policies": [
@@ -102,7 +102,7 @@ module.exports = async (ctx, next) => {
   "routes": [
     {
       "method": "GET",
-      "path": "/car",
+      "path": "/cars",
       "handler": "Car.find",
       "config": {
         "policies": [
