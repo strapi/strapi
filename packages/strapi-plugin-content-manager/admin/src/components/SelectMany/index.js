@@ -123,23 +123,18 @@ class SelectMany extends React.PureComponent {
     });
   }
 
-  handleSortEnd = ({ oldIndex, newIndex }) => {
-    this.props.onSort({
-      key: this.props.relation.alias,
-      oldIndex,
-      newIndex,
-    });
-  };
-
   handleRemove = (index) => {
     const values = get(this.props.record, this.props.relation.alias);
 
     // Add removed value from available option;
-    this.state.options.push({
+    const toAdd = {
       value: values[index],
-      label: templateObject({ mainField: this.props.relation.displayedAttribute }, values[index])
-        .mainField,
-    });
+      label: templateObject({ mainField: this.props.relation.displayedAttribute }, values[index]).mainField,
+    };
+
+    this.setState(prevState => ({
+      options: prevState.options.concat([toAdd]),
+    }));
 
     this.props.onRemoveRelationItem({
       key: this.props.relation.alias,
@@ -162,7 +157,6 @@ class SelectMany extends React.PureComponent {
     ) : (
       ''
     );
-
     const value = get(this.props.record, this.props.relation.alias) || [];
 
     /* eslint-disable jsx-a11y/label-has-for */
@@ -197,9 +191,10 @@ class SelectMany extends React.PureComponent {
                 }
               })
           }
+          isDraggingSibling={this.props.isDraggingSibling}
           keys={this.props.relation.alias}
           moveAttr={this.props.moveAttr}
-          onSortEnd={this.handleSortEnd}
+          moveAttrEnd={this.props.moveAttrEnd}
           onRemove={this.handleRemove}
           distance={1}
           onClick={this.handleClick}
@@ -211,15 +206,18 @@ class SelectMany extends React.PureComponent {
 }
 
 SelectMany.defaultProps = {
+  isDraggingSibling: false,
   moveAttr: () => {},
+  moveAttrEnd: () => {},
 };
 
 SelectMany.propTypes = {
+  isDraggingSibling: PropTypes.bool,
   moveAttr: PropTypes.func,
+  moveAttrEnd: PropTypes.func,
   onAddRelationalItem: PropTypes.func.isRequired,
   onRedirect: PropTypes.func.isRequired,
   onRemoveRelationItem: PropTypes.func.isRequired,
-  onSort: PropTypes.func.isRequired,
   record: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
   relation: PropTypes.object.isRequired,
 };

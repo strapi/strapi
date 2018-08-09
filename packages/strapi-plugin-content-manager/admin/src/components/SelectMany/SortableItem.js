@@ -8,14 +8,12 @@
 import React from 'react';
 import { findDOMNode } from 'react-dom';
 import { DragSource, DropTarget } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import { flow, get } from 'lodash';
-// import { SortableElement } from 'react-sortable-hoc';
-// Icons.
-import IconRemove from 'assets/images/icon_remove.svg';
+import cn from 'classnames';
+import SelectManyDraggedItem from 'components/SelectManyDraggedItem';
 import ItemTypes from 'utils/ItemTypes';
-// CSS.
 import styles from './styles.scss';
 
 const sortableItemSource = {
@@ -23,9 +21,11 @@ const sortableItemSource = {
     return {
       id: get(props, ['item', 'value', 'id' ]) || get(props, ['item', 'value', '_id'], ''),
       index: props.index,
+      data: props.item,
     };
   },
-  endDrag: () => {
+  endDrag: props => {
+    props.moveAttrEnd();
     return {};
   },
 };
@@ -80,21 +80,39 @@ const sortableItemTarget = {
 };
 
 class SortableItem extends React.Component {
+  componentDidMount() {
+    // Use empty image as a drag preview so browsers don't draw it
+    // and we can draw whatever we want on the custom drag layer instead.
+    this.props.connectDragPreview(getEmptyImage(), {
+      // IE fallback: specify that we'd rather screenshot the node
+      // when it already knows it's being dragged so we can hide it with CSS.
+      // Removginv the fallabck makes it handle variable height elements
+      // captureDraggingState: true,
+    });
+  }
+
   render() {
     const {
       connectDragSource,
       connectDropTarget,
+      index,
       item,
+      isDragging,
+      isDraggingSibling,
       onClick,
       onRemove,
-      sortIndex,
     } = this.props;
+    const opacity = isDragging ? 0.2 : 1;
 
     return (
       connectDragSource(
         connectDropTarget(
-          <li className={styles.sortableListItem}>
-            <div>
+          <li
+            className={cn(styles.sortableListItem, !isDraggingSibling && styles.sortableListItemHover)}
+            style={{ opacity }}
+          >
+            <SelectManyDraggedItem index={index} item={item} onClick={onClick} onRemove={onRemove} />
+            {/* <div>
               <div className={styles.dragHandle}><span></span></div>
               <FormattedMessage id='content-manager.containers.Edit.clickToJump'>
                 {title => (
@@ -110,8 +128,8 @@ class SortableItem extends React.Component {
             
             </div>
             <div className={styles.sortableListItemActions}>
-              <img src={IconRemove} alt="Remove Icon" onClick={() => onRemove(sortIndex)} />
-            </div>
+              <img src={IconRemove} alt="Remove Icon" onClick={() => onRemove(index)} />
+            </div> */}
           </li>
         ),
       )
@@ -124,18 +142,25 @@ const withDropTarget = DropTarget(ItemTypes.SORTABLEITEM, sortableItemTarget, co
 }));
 
 const withDragSource = DragSource(ItemTypes.SORTABLEITEM, sortableItemSource, (connect, monitor) => ({
+  connectDragPreview: connect.dragPreview(),
   connectDragSource: connect.dragSource(),
   isDragging: monitor.isDragging(),
 }));
 
+SortableItem.defaultProps = {
+  isDraggingSibling: false,
+};
 
 SortableItem.propTypes = {
+  connectDragPreview: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
+  index: PropTypes.number.isRequired,
+  isDragging: PropTypes.bool.isRequired,
+  isDraggingSibling: PropTypes.bool,
   item: PropTypes.object.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
-  sortIndex: PropTypes.number.isRequired,
 };
 
 export default flow([withDropTarget, withDragSource])(SortableItem);

@@ -23,6 +23,7 @@ import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 // Plugin's components
+import CustomDragLayer from 'components/CustomDragLayer';
 import Edit from 'components/Edit';
 import EditRelations from 'components/EditRelations';
 // App selectors
@@ -40,12 +41,12 @@ import {
   getData,
   initModelProps,
   moveAttr,
+  moveAttrEnd,
   onCancel,
-  removeRelationItem,
+  onRemoveRelationItem,
   resetProps,
   setFileRelations,
   setFormErrors,
-  sortRelations,
   submit,
 } from './actions';
 import reducer from './reducer';
@@ -267,14 +268,6 @@ export class EditPage extends React.Component {
     /* eslint-enable */
   }
 
-  handleRemoveRelationItem = ({ key, index }) => {
-    this.props.removeRelationItem({ key, index });
-  }
-
-  handleSortRelations = ({ key, oldIndex, newIndex }) => {
-    this.props.sortRelations({ key, oldIndex, newIndex });
-  }
-
   handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = checkFormValidity(this.generateFormFromRecord(), this.props.editPage.formValidations);
@@ -393,13 +386,14 @@ export class EditPage extends React.Component {
   }
 
   render() {
-    const { editPage, moveAttr } = this.props;
+    const { editPage, moveAttr, moveAttrEnd } = this.props;
     const { showWarning } = this.state;
 
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
           <BackHeader onClick={this.handleGoBack} />
+          <CustomDragLayer />
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               actions={this.pluginHeaderActions()}
@@ -424,17 +418,18 @@ export class EditPage extends React.Component {
                   <div className={styles.sub_wrapper}>
                     {this.hasDisplayedRelations() && (
                       <EditRelations
+                        changeData={this.props.changeData}
                         currentModelName={this.getModelName()}
                         displayedRelations={this.getDisplayedRelations()}
+                        isDraggingSibling={editPage.isDraggingSibling}
                         location={this.props.location}
-                        changeData={this.props.changeData}
-                        record={editPage.record}
-                        schema={this.getSchema()}
                         moveAttr={moveAttr}
+                        moveAttrEnd={moveAttrEnd}
                         onAddRelationalItem={this.handleAddRelationItem}
                         onRedirect={this.handleRedirect}
-                        onRemoveRelationItem={this.handleRemoveRelationItem}
-                        onSort={this.handleSortRelations}
+                        onRemoveRelationItem={this.props.onRemoveRelationItem}
+                        record={editPage.record}
+                        schema={this.getSchema()}
                       />
                     )}
                   </div>
@@ -466,13 +461,13 @@ EditPage.propTypes = {
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   moveAttr: PropTypes.func.isRequired,
+  moveAttrEnd: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-  removeRelationItem: PropTypes.func.isRequired,
+  onRemoveRelationItem: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   schema: PropTypes.object,
   setFileRelations: PropTypes.func.isRequired,
   setFormErrors: PropTypes.func.isRequired,
-  sortRelations: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
 };
 
@@ -484,12 +479,12 @@ function mapDispatchToProps(dispatch) {
       getData,
       initModelProps,
       moveAttr,
+      moveAttrEnd,
       onCancel,
-      removeRelationItem,
+      onRemoveRelationItem,
       resetProps,
       setFileRelations,
       setFormErrors,
-      sortRelations,
       submit,
     },
     dispatch,

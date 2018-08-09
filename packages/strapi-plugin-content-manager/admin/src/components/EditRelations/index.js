@@ -39,15 +39,16 @@ function EditRelations(props) {
           <SelectMany
             currentModelName={props.currentModelName}
             key={relationName}
-            record={props.record}
-            relation={relation}
-            schema={props.schema}
+            isDraggingSibling={props.isDraggingSibling}
             location={props.location}
             moveAttr={props.moveAttr}
+            moveAttrEnd={props.moveAttrEnd}
             onAddRelationalItem={props.onAddRelationalItem}
             onRedirect={props.onRedirect}
             onRemoveRelationItem={props.onRemoveRelationItem}
-            onSort={props.onSort}
+            record={props.record}
+            relation={relation}
+            schema={props.schema}
           />
         );
       })}
@@ -57,7 +58,9 @@ function EditRelations(props) {
 
 EditRelations.defaultProps = {
   displayedRelations: [],
+  isDraggingSibling: false,
   moveAttr: () => {},
+  moveAttrEnd: () => {},
   record: {},
   schema: {},
 };
@@ -65,12 +68,13 @@ EditRelations.defaultProps = {
 EditRelations.propTypes = {
   currentModelName: PropTypes.string.isRequired,
   displayedRelations: PropTypes.array,
+  isDraggingSibling: PropTypes.bool,
   location: PropTypes.object.isRequired,
   moveAttr: PropTypes.func,
+  moveAttrEnd: PropTypes.func,
   onAddRelationalItem: PropTypes.func.isRequired,
   onRedirect: PropTypes.func.isRequired,
   onRemoveRelationItem: PropTypes.func.isRequired,
-  onSort: PropTypes.func.isRequired,
   record: PropTypes.object,
   schema: PropTypes.object,
 };

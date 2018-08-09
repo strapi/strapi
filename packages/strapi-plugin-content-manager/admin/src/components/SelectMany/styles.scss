@@ -50,7 +50,7 @@
     margin: 4px -20px 0;
     padding: 0 20px !important;
     list-style: none !important;
-    overflow: scroll;
+    overflow: auto;
     max-height: 110px;
   }
  
@@ -75,22 +75,23 @@
   }
 }
 
+.sortableListItemHover {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
 .sortableListItem {
   display: flex;
   flex-wrap: nowrap;
   align-content: center;
   justify-content: space-between;
   height: 27px;
-
-
-  &:hover{
-    cursor: pointer;
-
-  }
+  background-color: transparent !important;
 
   &:active{
     .dragHandle{
-      cursor: pointer;
+      // cursor: pointer;
   
       > span {
         background: #AED4FB;

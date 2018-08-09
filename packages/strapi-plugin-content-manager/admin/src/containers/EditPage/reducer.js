@@ -11,13 +11,13 @@ import {
   GET_DATA_SUCCEEDED,
   INIT_MODEL_PROPS,
   MOVE_ATTR,
+  MOVE_ATTR_END,
   ON_CANCEL,
-  REMOVE_RELATION_ITEM,
+  ON_REMOVE_RELATION_ITEM,
   RESET_PROPS,
   SET_FILE_RELATIONS,
   SET_FORM_ERRORS,
   SET_LOADER,
-  SORT_RELATIONS,
   SUBMIT_SUCCESS,
   UNSET_LOADER,
 } from './constants';
@@ -30,6 +30,7 @@ const initialState = fromJS({
   isCreating: false,
   id: '',
   initialRecord: Map({}),
+  isDraggingSibling: false,
   isLoading: true,
   modelName: '',
   pluginHeaderTitle: 'New Entry',
@@ -70,18 +71,22 @@ function editPageReducer(state = initialState, action) {
         .update('record', () => fromJS(action.record))
         .update('source', () => action.source);
     case MOVE_ATTR:
-      return state.updateIn(['record', action.keys], list => {
-        return list
-          .delete(action.dragIndex)
-          .insert(action.hoverIndex, list.get(action.dragIndex));
-      });
+      return state
+        .updateIn(['record', action.keys], list => {
+          return list
+            .delete(action.dragIndex)
+            .insert(action.hoverIndex, list.get(action.dragIndex));
+        })
+        .update('isDraggingSibling', () => true);
+    case MOVE_ATTR_END:
+      return state.update('isDraggingSibling', () => false);
     case ON_CANCEL:
       return state
         .update('didCheckErrors', (v) => v = !v)
         .update('formErrors', () => List([]))
         .update('record', () => state.get('initialRecord'))
         .update('resetProps', (v) => v = !v);
-    case REMOVE_RELATION_ITEM:
+    case ON_REMOVE_RELATION_ITEM:
       return state
         .updateIn(['record', action.key], (list) => {
           return list 
@@ -98,16 +103,6 @@ function editPageReducer(state = initialState, action) {
     case SET_LOADER:
       return state
         .update('showLoader', () => true);
-    case SORT_RELATIONS: {
-      const item = state.getIn(['record', action.key, action.oldIndex]);
-
-      return state
-        .updateIn(['record', action.key], (list) => {
-          return list 
-            .delete(action.oldIndex)
-            .insert(action.newIndex, item);
-        });
-    }
     case SUBMIT_SUCCESS:
       return state.update('submitSuccess', (v) => v = !v);
     case UNSET_LOADER:

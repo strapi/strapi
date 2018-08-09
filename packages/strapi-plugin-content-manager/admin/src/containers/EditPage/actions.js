@@ -14,13 +14,13 @@ import {
   GET_DATA_SUCCEEDED,
   INIT_MODEL_PROPS,
   MOVE_ATTR,
+  MOVE_ATTR_END,
   ON_CANCEL,
-  REMOVE_RELATION_ITEM,
+  ON_REMOVE_RELATION_ITEM,
   RESET_PROPS,
   SET_FILE_RELATIONS,
   SET_LOADER,
   SET_FORM_ERRORS,
-  SORT_RELATIONS,
   SUBMIT,
   SUBMIT_SUCCESS,
   UNSET_LOADER,
@@ -98,15 +98,21 @@ export function moveAttr(dragIndex, hoverIndex, keys) {
   };
 }
 
+export function moveAttrEnd() {
+  return {
+    type: MOVE_ATTR_END,
+  };
+}
+
 export function onCancel() {
   return {
     type: ON_CANCEL,
   };
 }
 
-export function removeRelationItem({ key, index }) {
+export function onRemoveRelationItem({ key, index }) {
   return {
-    type: REMOVE_RELATION_ITEM,
+    type: ON_REMOVE_RELATION_ITEM,
     key,
     index,
   };
@@ -135,15 +141,6 @@ export function setFormErrors(formErrors) {
 export function setLoader() {
   return {
     type: SET_LOADER,
-  };
-}
-
-export function sortRelations({ key, oldIndex, newIndex }) {
-  return {
-    type: SORT_RELATIONS,
-    key,
-    oldIndex,
-    newIndex,
   };
 }
 

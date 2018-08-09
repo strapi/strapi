@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { DragLayer } from 'react-dnd';
 import { flow } from 'lodash';
 import DragBox from 'components/DragBox';
+import SelectManyDraggedItem from 'components/SelectManyDraggedItem';
 import ItemTypes from 'utils/ItemTypes';
 import styles from './styles.scss';
 
@@ -33,6 +34,8 @@ class CustomDragLayer extends React.Component {
       case ItemTypes.VARIABLE:
       case ItemTypes.NORMAL:
         return <DragBox name={item.id} />;
+      case ItemTypes.SORTABLEITEM:
+        return <SelectManyDraggedItem item={item.data} withLiWrapper />;
       default:
         return null;
     }

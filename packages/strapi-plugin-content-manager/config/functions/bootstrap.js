@@ -92,17 +92,17 @@ module.exports = async cb => {
       };
     });
 
-    if (model.orm === 'mongoose') {
-      fields.createdAt = { label: 'createdAt', description: '', type: 'date', disabled: true };
-      fields.updatedAt = { label: 'updatedAt', description: '', type: 'date', disabled: true };
-      schemaModel.attributes.updatedAt = { type: 'date' };
-      schemaModel.attributes.createdAt = { type: 'date' };
-    } else {
-      fields.created_at = { label: 'created_at', description: '', type: 'date', disabled: true };
-      fields.updated_at = { label: 'updated_at', description: '', type: 'date', disabled: true };
-      schemaModel.attributes.created_at = { type: 'date' };
-      schemaModel.attributes.updated_at = { type: 'date' };
-    }
+    // if (model.orm === 'mongoose') {
+    //   fields.createdAt = { label: 'createdAt', description: '', type: 'date', disabled: true };
+    //   fields.updatedAt = { label: 'updatedAt', description: '', type: 'date', disabled: true };
+    //   schemaModel.attributes.updatedAt = { type: 'date' };
+    //   schemaModel.attributes.createdAt = { type: 'date' };
+    // } else {
+    //   fields.created_at = { label: 'created_at', description: '', type: 'date', disabled: true };
+    //   fields.updated_at = { label: 'updated_at', description: '', type: 'date', disabled: true };
+    //   schemaModel.attributes.created_at = { type: 'date' };
+    //   schemaModel.attributes.updated_at = { type: 'date' };
+    // }
     
     // Don't display fields that are hidden by default like the resetPasswordToken for the model user
     fieldsToRemove.forEach(field => {
