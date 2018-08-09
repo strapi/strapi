@@ -90,6 +90,8 @@
     "prop-types": "^15.5.10",
     "react": "^16.0.0",
     "react-datetime": "^2.8.6",
+    "react-dnd": "^5.0.0",
+    "react-dnd-html5-backend": "^5.0.1",
     "react-dom": "^16.0.0",
     "react-helmet": "^5.1.3",
     "react-intl": "^2.3.0",
