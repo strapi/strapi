@@ -43,6 +43,7 @@ function EditRelations(props) {
             relation={relation}
             schema={props.schema}
             location={props.location}
+            moveAttr={props.moveAttr}
             onAddRelationalItem={props.onAddRelationalItem}
             onRedirect={props.onRedirect}
             onRemoveRelationItem={props.onRemoveRelationItem}
@@ -56,6 +57,7 @@ function EditRelations(props) {
 
 EditRelations.defaultProps = {
   displayedRelations: [],
+  moveAttr: () => {},
   record: {},
   schema: {},
 };
@@ -64,6 +66,7 @@ EditRelations.propTypes = {
   currentModelName: PropTypes.string.isRequired,
   displayedRelations: PropTypes.array,
   location: PropTypes.object.isRequired,
+  moveAttr: PropTypes.func,
   onAddRelationalItem: PropTypes.func.isRequired,
   onRedirect: PropTypes.func.isRequired,
   onRemoveRelationItem: PropTypes.func.isRequired,

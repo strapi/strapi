@@ -10,6 +10,7 @@ import {
   CHANGE_DATA,
   GET_DATA_SUCCEEDED,
   INIT_MODEL_PROPS,
+  MOVE_ATTR,
   ON_CANCEL,
   REMOVE_RELATION_ITEM,
   RESET_PROPS,
@@ -68,6 +69,12 @@ function editPageReducer(state = initialState, action) {
         .update('modelName', () => action.modelName)
         .update('record', () => fromJS(action.record))
         .update('source', () => action.source);
+    case MOVE_ATTR:
+      return state.updateIn(['record', action.keys], list => {
+        return list
+          .delete(action.dragIndex)
+          .insert(action.hoverIndex, list.get(action.dragIndex));
+      });
     case ON_CANCEL:
       return state
         .update('didCheckErrors', (v) => v = !v)

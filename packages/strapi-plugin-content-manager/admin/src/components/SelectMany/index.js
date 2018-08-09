@@ -197,6 +197,8 @@ class SelectMany extends React.PureComponent {
                 }
               })
           }
+          keys={this.props.relation.alias}
+          moveAttr={this.props.moveAttr}
           onSortEnd={this.handleSortEnd}
           onRemove={this.handleRemove}
           distance={1}
@@ -208,7 +210,12 @@ class SelectMany extends React.PureComponent {
   }
 }
 
+SelectMany.defaultProps = {
+  moveAttr: () => {},
+};
+
 SelectMany.propTypes = {
+  moveAttr: PropTypes.func,
   onAddRelationalItem: PropTypes.func.isRequired,
   onRedirect: PropTypes.func.isRequired,
   onRemoveRelationItem: PropTypes.func.isRequired,

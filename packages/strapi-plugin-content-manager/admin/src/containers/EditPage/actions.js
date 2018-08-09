@@ -13,6 +13,7 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   INIT_MODEL_PROPS,
+  MOVE_ATTR,
   ON_CANCEL,
   REMOVE_RELATION_ITEM,
   RESET_PROPS,
@@ -85,6 +86,15 @@ export function initModelProps(modelName, isCreating, source, attributes, displa
     modelName,
     record,
     source,
+  };
+}
+
+export function moveAttr(dragIndex, hoverIndex, keys) {
+  return {
+    type: MOVE_ATTR,
+    dragIndex,
+    hoverIndex,
+    keys,
   };
 }
 

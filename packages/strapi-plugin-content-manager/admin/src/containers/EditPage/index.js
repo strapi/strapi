@@ -11,6 +11,8 @@ import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
 import { cloneDeep, findIndex, get, includes, isEmpty, isObject, toNumber, toString, replace } from 'lodash';
+import HTML5Backend from 'react-dnd-html5-backend';
+import { DragDropContext } from 'react-dnd';
 import cn from 'classnames';
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -37,6 +39,7 @@ import {
   changeData,
   getData,
   initModelProps,
+  moveAttr,
   onCancel,
   removeRelationItem,
   resetProps,
@@ -390,7 +393,7 @@ export class EditPage extends React.Component {
   }
 
   render() {
-    const { editPage } = this.props;
+    const { editPage, moveAttr } = this.props;
     const { showWarning } = this.state;
 
     return (
@@ -427,6 +430,7 @@ export class EditPage extends React.Component {
                         changeData={this.props.changeData}
                         record={editPage.record}
                         schema={this.getSchema()}
+                        moveAttr={moveAttr}
                         onAddRelationalItem={this.handleAddRelationItem}
                         onRedirect={this.handleRedirect}
                         onRemoveRelationItem={this.handleRemoveRelationItem}
@@ -461,6 +465,7 @@ EditPage.propTypes = {
   initModelProps: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
+  moveAttr: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
   removeRelationItem: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
@@ -478,6 +483,7 @@ function mapDispatchToProps(dispatch) {
       changeData,
       getData,
       initModelProps,
+      moveAttr,
       onCancel,
       removeRelationItem,
       resetProps,
@@ -504,6 +510,6 @@ export default compose(
   withReducer,
   withSaga,
   withConnect,
-)(EditPage);
+)(DragDropContext(HTML5Backend)(EditPage));
 
 
