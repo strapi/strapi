@@ -45,6 +45,7 @@
   "Auth.form.error.params.provide": "Incorrect params provided.",
   "Auth.form.error.username.taken": "Username is already taken",
   "Auth.form.error.email.taken": "Email is already taken",
+  "Auth.form.error.ratelimit": "Too many attempts, please try again in a minute.",
 
   "Auth.link.forgot-password": "Forgot your password?",
   "Auth.link.ready": "Ready to sign in?",
