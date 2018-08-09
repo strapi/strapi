@@ -45,10 +45,11 @@ function editPageReducer(state = initialState, action) {
       return state
         .updateIn(['record', action.key], (list) => {
           if (List.isList(list)) {
-            return list.push(action.value);
+            return list 
+              .push(action.value);
           }
-
-          return List([]) 
+          
+          return List([])
             .push(action.value);
         });
     case CHANGE_DATA:
