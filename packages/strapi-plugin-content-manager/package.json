@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-alpha.13.0.1",
+  "version": "3.0.0-alpha.13.1",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -29,7 +29,7 @@
     "react-select": "^1.2.1",
     "react-sortable-hoc": "^0.8.3",
     "showdown": "^1.8.6",
-    "strapi-helper-plugin": "3.0.0-alpha.13.0.1"
+    "strapi-helper-plugin": "3.0.0-alpha.13.1"
   },
   "author": {
     "name": "Strapi team",
