@@ -10,6 +10,7 @@ const fs = require('fs');
 const _ = require('lodash');
 const toArray = require('stream-to-array');
 const crypto = require('crypto');
+const uuid = require('uuid/v4');
 
 function niceHash(buffer) {
   return crypto.createHash('sha256')
@@ -41,7 +42,8 @@ module.exports = {
 
         return {
           name: stream.name,
-          hash: niceHash(buffer),
+          sha256: niceHash(buffer),
+          hash: uuid().replace(/-/g, ''),
           ext: stream.name.split('.').length > 1 ? `.${_.last(stream.name.split('.'))}` : '',
           buffer,
           mime: stream.type,
