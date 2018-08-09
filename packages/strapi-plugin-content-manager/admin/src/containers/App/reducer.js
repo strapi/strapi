@@ -373,8 +373,8 @@ function appReducer(state = initialState, action) {
       return state
         .updateIn(['modifiedSchema', 'models', ...action.keys.split('.'), 'fields'], list => {
           const manager = new Manager(state, list, action.keys, 0, layout);
-          const newList = reorderList(manager, manager.getLayout());
-          updatedList = newList;
+          const newList = manager.getLayout();
+          updatedList = reorderList(manager, newList);
 
           return newList;
         })

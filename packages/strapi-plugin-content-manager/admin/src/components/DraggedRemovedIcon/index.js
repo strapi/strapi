@@ -6,13 +6,26 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 import styles from './styles.scss';
 
 function DraggedRemovedIcon({ isDragging, onRemove, withLongerHeight, ...rest }) {
+  let className = styles.removeIcon;
+
+  if (isDragging) {
+    className = styles.removeIconDragged;
+  }
+
+  if (withLongerHeight) {
+    className = styles.removeIconLonger;
+  }
+
+  if (isDragging && withLongerHeight) {
+    className = styles.removeIconLongerDragged;
+  }
+
   return (
     <span
-      className={cn( isDragging && styles.removeIconDragged, withLongerHeight ? styles.removeIconLonger : styles.removeIcon)}
+      className={className}
       onClick={onRemove}
       {...rest}
     />

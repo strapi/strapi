@@ -37,6 +37,9 @@ class Manager {
     let ret;
 
     switch(number) {
+      case 12:
+        ret = [];
+        break;
       case 9:
         ret = ['__col-md-3__', '__col-md-6__'];
         break;
@@ -77,6 +80,11 @@ class Manager {
       case 'checkbox':
       case 'boolean':
       case 'date':
+      case 'bigint':
+      case 'decimal':
+      case 'float':
+      case 'integer':
+      case 'number':
         return 4;
       case 'json':
       case 'wysiwyg':

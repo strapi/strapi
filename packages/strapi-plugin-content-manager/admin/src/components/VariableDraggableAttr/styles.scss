@@ -55,6 +55,14 @@
   font-style: italic;
 }
 
+.infoLabel {
+  position: absolute;
+  top: 0;
+  right: 40px;
+  color: #858B9A;
+  font-weight: 400;
+}
+
 .truncated {
   overflow: hidden;
   white-space:nowrap;
@@ -70,4 +78,9 @@
 .carret {
   width: 10px;
   background: blue;
+}
+
+.editing {
+  color: #007EFF;
+  font-weight: 500;
 }

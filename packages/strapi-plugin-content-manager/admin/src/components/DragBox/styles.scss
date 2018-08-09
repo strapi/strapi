@@ -7,10 +7,11 @@
   justify-content: space-between;
   background: #E6F0FB !important;
   line-height: 30px;
-  color: #333740;
-  border: 1px solid darken(#AED4FB, 20%)!important;
+  // box-sizing: border-box;
+  border: 1px solid #AED4FB!important;
   border-radius: 2px;
-  cursor: move !important;
+  color: #007EFF;
+  font-weight: 500;
 
   > i {
     margin-right: 10px;

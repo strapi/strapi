@@ -27,6 +27,11 @@ const getBootstrapClass = attrType => {
     case 'boolean':
     case 'toggle':
     case 'date':
+    case 'bigint':
+    case 'decimal':
+    case 'float':
+    case 'integer':
+    case 'number':
       return {
         bootstrap: 'col-md-4',
         wrapper: cn(styles.attrWrapper),
@@ -41,6 +46,7 @@ const getBootstrapClass = attrType => {
         withLongerHeight: true,
       };
     case 'file':
+    case 'text':
       return {
         bootstrap: 'col-md-6',
         wrapper: cn(styles.attrWrapper, styles.customHeight),
@@ -226,25 +232,25 @@ class VariableDraggableAttr extends React.Component {
     if (dragStart && isFullSize) {
       return <Carret style={carretStyle} />;
     }
-    
+
     return (
       <div style={{ display: 'flex' }}>
         { showLeftCarret && <Carret style={carretStyle} />}
         <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
           <i className="fa fa-th" />
-          <span className={styles.truncated}>
+          <span className={cn(isEditing && styles.editing, styles.truncated)}>
             {name}
           </span>
-          <ClickOverHint show={isOver} />
-          {!isOver && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
-            <div className={styles.info}>
+          <ClickOverHint show={isOver && !isEditing} />
+          {(!isOver || isEditing) && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
+            <div className={styles.infoLabel}>
               {data.label}
             </div>
           )}
           {isEditing && !isOver ? (
             <VariableEditIcon withLongerHeight={classNames.withLongerHeight} onClick={this.handleClickEdit} />
           ) : (
-            <DraggedRemovedIcon withLongerHeight={classNames.withLongerHeight} onRemove={this.handleRemove} />
+            <DraggedRemovedIcon isDragging={isEditing} withLongerHeight={classNames.withLongerHeight} onRemove={this.handleRemove} />
           )}
         </div>
         { showRightCarret && <Carret style={carretStyle} />}

@@ -155,9 +155,9 @@ class DraggableAttr extends React.Component {
           >
             <i className="fa fa-th" aria-hidden="true" />
             <span>{name}</span>
-            <ClickOverHint show={isOver && !isDragging} />
-            { !isOver && name.toLowerCase() !== label.toLowerCase() && (
-              <div className={styles.info}>
+            <ClickOverHint show={isOver && !isDragging && !isEditing} />
+            { (!isOver || isEditing) && name.toLowerCase() !== label.toLowerCase() && (
+              <div className={styles.infoLabel}>
                 {label}
               </div>
             )}
@@ -165,7 +165,7 @@ class DraggableAttr extends React.Component {
               <VariableEditIcon onClick={this.handleClickEdit} />            
             ) : (
               
-              <DraggedRemovedIcon isDragging={dragStart} onRemove={this.handleRemove} />
+              <DraggedRemovedIcon isDragging={dragStart || isEditing} onRemove={this.handleRemove} />
             )}
           </div>
         ),

@@ -25,6 +25,8 @@
 .editingAttr {
   background: #E6F0FB!important;
   border: 1px solid #AED4FB!important;
+  color: #007EFF;
+  font-weight: 500;
 }
 
 .info {
@@ -33,6 +35,14 @@
   right: 40px;
   color: #B4B6BA;
   font-style: italic;
+}
+
+.infoLabel {
+  position: absolute;
+  top: 0;
+  right: 40px;
+  color: #858B9A;
+  font-weight: 400;
 }
 
 .dragged {

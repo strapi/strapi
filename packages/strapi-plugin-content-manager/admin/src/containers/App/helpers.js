@@ -5,7 +5,7 @@ import Manager from 'utils/Manager';
 const stateUpdater = (obj, array, keys) => obj.updateIn(['modifiedSchema', 'models', ...keys.split('.'), 'fields'], () => array);
 const createManager = (obj, array, keys, dropIndex, layout) => new Manager(stateUpdater(obj, array, keys), array, keys, dropIndex, layout);
 const getElementsOnALine = (manager, line, list) => {
-  const firstElIndex = line === 0 ? 0 : manager.arrayOfEndLineElements[line - 1].index + 1;
+  const firstElIndex = line === 0 ? 0 : get(manager.arrayOfEndLineElements[line - 1], 'index', list.size -1) + 1;
   const lastElIndex = get(manager.arrayOfEndLineElements[line], 'index', list.size -1) + 1;
   const elements = manager.getElementsOnALine(range(firstElIndex, lastElIndex));
 
