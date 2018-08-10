@@ -47,7 +47,7 @@ module.exports = async (ctx, next) => {
       return ctx.request.graphql = strapi.errors.forbidden();
     }
 
-    ctx.forbidden();
+    return ctx.forbidden();
   }
 
   // Execute the policies.
