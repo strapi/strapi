@@ -19,12 +19,13 @@
   "containers.List.errorFetchRecords": "Error",
   
   "containers.SettingPage.addField": "Add new field",
+  "containers.SettingPage.addRelationalField": "Add new relational field",
   "containers.SettingPage.attributes": "Attributes fields",
   "containers.SettingPage.attributes.description": "Define the order of the attributes",
   "containers.SettingPage.relations": "Relational fields",
 
   "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
-  "containers.SettingPage.editSettings.title": "Edit - Settings",
+  "containers.SettingPage.editSettings.title": "Edit — Settings",
 
   "containers.SettingPage.listSettings.title": "List — Settings",
   "containers.SettingPage.listSettings.description": "Configure the options for this content type",
@@ -99,7 +100,7 @@
 
   "form.Input.description": "Description",
   "form.Input.placeholder": "Placeholder",
-  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+  "form.Input.description.placeholder": "Display name in the profile",
   "form.Input.placeholder.placeholder": "My awesome value",
   "form.Input.disabled": "Editable field",
   "form.Input.label.inputDescription": "This value overrides the label displayed in the table's head",

@@ -79,6 +79,7 @@
       "didCheckErrors": false,
       "errors": [],
       "name": "sortable",
+      "style": { "marginTop": "18px" },
       "type": "toggle",
       "validations": {}
     }
@@ -142,7 +143,6 @@
         "didCheckErrors": false,
         "errors": [],
         "name": "placeholder",
-        "placeholder": "content-manager.form.Input.placeholder.placeholder",
         "type": "string",
         "validations": {}
       }

@@ -17,7 +17,6 @@
     "containers.SettingPage.addField": "Добавить новое поле",
     "containers.SettingPage.attributes": "Поля атрибутов",
     "containers.SettingPage.attributes.description": "Определить порядок атребутов",
-    "containers.SettingPage.listSettings.title": "Список — Настройки",
     "containers.SettingPage.listSettings.description": "Указать порядок атрибутов",
     "containers.SettingPage.listSettings.title": "Список — Настройки",
     "containers.SettingPage.pluginHeaderDescription": "Отдельные настройки для этого Типа Данных",
@@ -93,7 +92,7 @@
     "error.validation.minSupMax": "Не может быть выше",
 
     "form.Input.description": "Description",
-    "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+    "form.Input.description.placeholder": "Display name in the profile",
     "form.Input.disabled": "Editable field",
   
     "notification.error.relationship.fetch": "Возникла ошибка при получении связей.",

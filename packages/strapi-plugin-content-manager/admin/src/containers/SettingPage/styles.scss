@@ -59,6 +59,14 @@
   border-radius: 2px; 
 }
 
+.dropDownNotAllowed {
+  > div {
+    > button {
+      cursor: not-allowed !important;
+    }
+  }
+}
+
 .dropdownWrapper {
   margin-left: 29px;
   > div {
@@ -112,13 +120,21 @@
       padding: 0;
       border-top-left-radius: 0 !important;
       border-top-right-radius: 0;
-      border-color: #AED4FB !important;
+      border-color: #E3E9F3 !important;
+      border-top-color: #AED4FB !important;
+      box-shadow: 0 2px 2px #E3E9F3;
 
       overflow: scroll;
       
       button {
         height: 27px;
+        padding-left:  10px !important;
         line-height: 18px;
+        cursor: pointer;
+        font-size: 13px !important;
+        &:hover {
+          background-color: #FAFAFB !important;
+        } 
         div {
           margin: 0;
           white-space: nowrap;
@@ -145,6 +161,7 @@
   margin-top: 7px;
   margin-bottom: 10px;
   padding-top: 10px;
+  padding-left: 15px !important;
   border: 1px dashed #E3E9F3;
   border-radius: 2px;
   > div {
@@ -160,9 +177,11 @@
 
 .noPadding {
   padding: 0 !important;
+  padding-right: 10px !important;
 
   > div {
-    padding-left: 8px;
+    padding-left: 10px;
+    padding-right: 0px;
   }
 }
 

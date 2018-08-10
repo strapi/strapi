@@ -19,7 +19,7 @@
   "containers.SettingPage.relations": "Relational fields",
 
   "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
-  "containers.SettingPage.editSettings.title": "Edit - Settings",
+  "containers.SettingPage.editSettings.title": "Edit — Settings",
 
   "EditRelations.title": "關聯式資料",
 
@@ -48,7 +48,7 @@
   "error.validation.minSupMax": "不能大於",
 
   "form.Input.description": "Description",
-  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+  "form.Input.description.placeholder": "Display name in the profile",
   "form.Input.disabled": "Editable field",
 
   "notification.error.relationship.fetch": "讀取關聯資料時發生錯誤",

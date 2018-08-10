@@ -18,7 +18,7 @@
     "containers.SettingPage.relations": "Relational fields",
 
     "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
-    "containers.SettingPage.editSettings.title": "Edit - Settings",
+    "containers.SettingPage.editSettings.title": "Edit — Settings",
   
     "components.AddFilterCTA.add": "Filtros",
     "components.AddFilterCTA.hide": "Filtros",
@@ -77,7 +77,7 @@
     "error.validation.json": "Isto não corresponde com o formato JSON",
 
     "form.Input.description": "Description",
-    "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+    "form.Input.description.placeholder": "Display name in the profile",
     "form.Input.disabled": "Editable field",
   
     "notification.error.relationship.fetch": "Ocorreu um erro durante a busca da relação.",

@@ -413,10 +413,18 @@ class SettingPage extends React.PureComponent {
     return this.getRelations().length > 0;
   }
 
-  // We need to remove the Over state on the DraggableAttr component
-  updateSiblingHoverState = () => {
-    this.setState(prevState => ({ isDraggingSibling: !prevState.isDraggingSibling }));
-  };
+  shouldDisplayCursorNotAllowed = (dropdownType) => {
+    switch (dropdownType) {
+      case 'list':
+        return this.getDropDownItems().length === 0;
+      case 'relations':
+        return this.getDropDownRelationsItems().length === 0;
+      case 'fields':
+        return this.getDropDownFieldItems().length === 0;
+      default:
+        return false;
+    }
+  }
 
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
@@ -439,6 +447,11 @@ class SettingPage extends React.PureComponent {
       this.setState(prevState => ({ isOpenRelation: !prevState.isOpenRelation }));
     }
   }
+
+  // We need to remove the Over state on the DraggableAttr component
+  updateSiblingHoverState = () => {
+    this.setState(prevState => ({ isDraggingSibling: !prevState.isDraggingSibling }));
+  };
 
   renderDraggableAttrEditSettingsField = (attr, index) => {
     return (
@@ -675,7 +688,7 @@ class SettingPage extends React.PureComponent {
             <Block
               description="content-manager.containers.SettingPage.listSettings.description"
               title="content-manager.containers.SettingPage.listSettings.title"
-              style={{ marginBottom: '25px' }}
+              style={{ marginBottom: '13px', paddingBottom: '30px' }}
             >
               <div className={styles.ctmForm}>
                 <div className="row">
@@ -703,7 +716,15 @@ class SettingPage extends React.PureComponent {
 
                     <div className="col-md-5">
                       {this.getListDisplay().map(this.renderDraggableAttrListSettings)}
-                      <div className={cn(styles.dropdownWrapper, isOpen && styles.dropdownWrapperOpen)}>
+                      <div
+                        className={
+                          cn(
+                            styles.dropdownWrapper,
+                            isOpen && styles.dropdownWrapperOpen,
+                            this.shouldDisplayCursorNotAllowed('list') && styles.dropDownNotAllowed,
+                          )
+                        }
+                      >
                         <ButtonDropdown isOpen={isOpen} toggle={this.toggleDropdown}>
                           <DropdownToggle>
                             <FormattedMessage id="content-manager.containers.SettingPage.addField">
@@ -734,6 +755,7 @@ class SettingPage extends React.PureComponent {
             <Block
               description="content-manager.containers.SettingPage.editSettings.description"
               title="content-manager.containers.SettingPage.editSettings.title"
+              style={{ paddingBottom: '30px' }}
             >
               <div className="row">
                 <div className={cn('col-md-8', styles.draggedDescription, styles.edit_settings)}>
@@ -743,7 +765,16 @@ class SettingPage extends React.PureComponent {
                     <div className={cn('row', styles.noPadding)}>
                       {this.getEditPageDisplayedFields().map(this.renderDraggableAttrEditSettingsField)}
                       <div className={cn('col-md-6')}>
-                        <div className={cn(styles.dropdownRelations, styles.dropdownWrapper)}>
+                        <div
+                          className={
+                            cn(
+                              styles.dropdownRelations,
+                              styles.dropdownWrapper,
+                              isOpenField && styles.dropdownWrapperOpen,
+                              this.shouldDisplayCursorNotAllowed('fields') && styles.dropDownNotAllowed,
+                            )
+                          }
+                        >
                           <ButtonDropdown isOpen={isOpenField} toggle={this.toggleDropDownFields}>
                             <DropdownToggle>
                               <FormattedMessage id="content-manager.containers.SettingPage.addField">
@@ -769,10 +800,19 @@ class SettingPage extends React.PureComponent {
                         {/* DRAGGABLE BLOCK */}
                         {this.getEditPageDisplayedRelations().map(this.renderDraggableAttrEditSettingsRelation)}
                         {/* DRAGGABLE BLOCK */}
-                        <div className={cn(styles.dropdownRelations, styles.dropdownWrapper, isOpenRelation && styles.dropdownWrapperOpen)}>
+                        <div
+                          className={
+                            cn(
+                              styles.dropdownRelations,
+                              styles.dropdownWrapper,
+                              isOpenRelation && styles.dropdownWrapperOpen,
+                              this.shouldDisplayCursorNotAllowed('relations') && styles.dropDownNotAllowed
+                            )
+                          }
+                        >
                           <ButtonDropdown isOpen={isOpenRelation} toggle={this.toggleDropdownRelations}>
                             <DropdownToggle>
-                              <FormattedMessage id="content-manager.containers.SettingPage.addField">
+                              <FormattedMessage id="content-manager.containers.SettingPage.addRelationalField">
                                 {this.renderDropDownP}
                               </FormattedMessage>
                             </DropdownToggle>

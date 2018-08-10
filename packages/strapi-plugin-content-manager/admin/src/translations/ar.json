@@ -48,7 +48,7 @@
 
   "form.Input.disabled": "Editable field",
   "form.Input.description": "Description",
-  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+  "form.Input.description.placeholder": "Display name in the profile",
 
   "notification.error.relationship.fetch": "حدث خطأ أثناء جلب العلاقة.",
 

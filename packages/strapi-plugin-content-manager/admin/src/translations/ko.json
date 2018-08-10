@@ -18,7 +18,7 @@
   "containers.SettingPage.relations": "Relational fields",
 
   "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
-  "containers.SettingPage.editSettings.title": "Edit - Settings",
+  "containers.SettingPage.editSettings.title": "Edit — Settings",
 
   "components.AddFilterCTA.add": "필터",
   "components.AddFilterCTA.hide": "필터",
@@ -77,7 +77,7 @@
   "error.validation.json": "JSON 형식이 아닙니다.",
 
   "form.Input.description": "Description",
-  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+  "form.Input.description.placeholder": "Display name in the profile",
   "form.Input.disabled": "Editable field",
 
   "notification.error.relationship.fetch": "데이터 관계를 가져오는 도중 에러가 발생했습니다.",

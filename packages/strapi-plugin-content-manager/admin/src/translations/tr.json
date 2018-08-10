@@ -98,7 +98,7 @@
   "form.Input.defaultSort": "Varsayılan sıralama özelliği",
 
   "form.Input.description": "Description",
-  "form.Input.description.placeholder": "Please don't forget to fill the full URL!",
+  "form.Input.description.placeholder": "Display name in the profile",
   "form.Input.disabled": "Editable field",
 
   "notification.error.relationship.fetch": "İlişki getirme sırasında bir hata oluştu.",

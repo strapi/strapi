@@ -18,7 +18,7 @@
   "containers.SettingPage.relations": "Relational fields",
 
   "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
-  "containers.SettingPage.editSettings.title": "Edit - Settings",
+  "containers.SettingPage.editSettings.title": "Edit — Settings",
 
   "containers.SettingPage.addField": "Adicionar campo",
   "containers.SettingPage.attributes": "Atributos",

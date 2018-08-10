@@ -1,5 +1,5 @@
 .selectMany { /* stylelint-disable */
-  padding-bottom: 19px;
+  padding-bottom: 20px;
   margin-bottom: 0px;
 
   label{
@@ -45,6 +45,7 @@
 .sortableList {
   overflow: hidden;
   max-height: 116px;
+  margin-bottom: -9px;
 
   > ul {
     margin: 4px -20px 0;

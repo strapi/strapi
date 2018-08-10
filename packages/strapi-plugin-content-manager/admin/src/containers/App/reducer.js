@@ -345,11 +345,9 @@ function appReducer(state = initialState, action) {
           return removeColsLine(newManager, newList);
         })
         .update('shouldResetGrid', v => !v);
-    case ON_REMOVE_EDIT_VIEW_RELATION_ATTR: {
-      const relationName = state.getIn(['modifiedSchema', 'models', ...action.keys.split('.'), action.index]);
-
+    case ON_REMOVE_EDIT_VIEW_RELATION_ATTR:
       return state
-        .updateIn(['modifiedSchema', 'models', action.keys.split('.')[0], 'relations', relationName], relation => {
+        .updateIn(['modifiedSchema', 'models', ...action.keys.split('.')], relation => {
           return relation
             .update('description', () => '')
             .update('label', () => upperFirst(relation.get('alias')));
@@ -357,7 +355,6 @@ function appReducer(state = initialState, action) {
         .updateIn(['modifiedSchema', 'models'].concat(action.keys.split('.')), list => {
           return list.delete(action.index);
         });
-    }
     case ON_RESET:
       return state.update('modifiedSchema', () => state.get('schema'));
     case SUBMIT_SUCCEEDED:
