@@ -72,8 +72,9 @@ export function* submit() {
     // Show button loader
     yield put(setLoader());
     const recordCleaned = Object.keys(record).reduce((acc, current) => {
-      const attrType = source !== 'content-manager' ? get(schema, ['plugins', source, currentModelName, 'fields', current, 'type'], null) : get(schema, [currentModelName, 'fields', current, 'type'], null);
+      const attrType = source !== 'content-manager' ? get(schema, ['models', 'plugins', source, currentModelName, 'fields', current, 'type'], null) : get(schema, ['models', currentModelName, 'fields', current, 'type'], null);
       const cleanedData = attrType === 'json' ? record[current] : cleanData(record[current], 'value', 'id');
+
 
       if (isString(cleanedData) || isNumber(cleanedData)) {
         acc.append(current, cleanedData);
@@ -98,6 +99,11 @@ export function* submit() {
 
       return acc;
     }, new FormData());
+
+    // Helper to visualize FormData
+    // for(var pair of recordCleaned.entries()) {
+    //   console.log(pair[0]+ ', '+ pair[1]);
+    // }
 
     const id = isCreating ? '' : record.id || record._id;
     const params = { source };

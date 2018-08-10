@@ -75,7 +75,10 @@ export function initModelProps(modelName, isCreating, source, attributes, displa
   const record = Object.keys(attributes).reduce((acc, current) => {
     if (attributes[current].default) {
       acc[current] = attributes[current].default;
+    } else if (attributes[current].type === 'json') {
+      acc[current] = {};
     }
+
     return acc;
   }, {});
 

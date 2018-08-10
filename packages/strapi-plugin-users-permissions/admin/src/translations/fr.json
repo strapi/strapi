@@ -1,6 +1,7 @@
 {
   "Auth.form.button.register-success": "Envoyer à nouveau",
   "Auth.form.button.forgot-password": "Envoyer à nouveau",
+  "Auth.form.button.forgot-password.success": "Envoyer à nouveau",
   "Auth.form.button.reset-password": "Changez votre mot de passe",
   "Auth.form.button.login": "Se connecter",
   "Auth.form.button.register": "Prêt à commencer",
