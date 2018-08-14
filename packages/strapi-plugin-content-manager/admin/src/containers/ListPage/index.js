@@ -11,6 +11,7 @@ import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { capitalize, findIndex, get, isUndefined, toInteger, upperFirst } from 'lodash';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 // App selectors
 import { makeSelectSchema } from 'containers/App/selectors';
@@ -31,6 +32,7 @@ import Table from 'components/Table';
 import getQueryParameters from 'utils/getQueryParameters';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
+import storeData from 'utils/storeData';
 import Div from './Div';
 import {
   addAttr,
@@ -49,6 +51,7 @@ import {
   removeAllFilters,
   removeAttr,
   removeFilter,
+  resetDisplayedFields,
   setDisplayedFields,
   setParams,
   submit,
@@ -77,7 +80,7 @@ export class ListPage extends React.Component {
       location: { pathname, search },
     } = prevProps;
     const {
-      listPage: { filtersUpdated },
+      listPage: { didChangeDisplayedFields, filtersUpdated, displayedFields, params: { _sort } },
     } = this.props;
 
     if (pathname !== this.props.location.pathname) {
@@ -93,6 +96,16 @@ export class ListPage extends React.Component {
     if (prevProps.listPage.filtersUpdated !== filtersUpdated) {
       const updatedSearch = this.generateSearch();
       this.props.history.push({ pathname, search: updatedSearch });
+    }
+
+    if (prevProps.listPage.didChangeDisplayedFields !== didChangeDisplayedFields) {
+      const dataToStore = {
+        [this.getCurrentModelName()]: {
+          displayedFields,
+          _sort,
+        },
+      };
+      storeData.set(this.getCurrentModelName(), dataToStore);
     }
   }
 
@@ -153,7 +166,7 @@ export class ListPage extends React.Component {
     const source = getQueryParameters(props.location.search, 'source');
     const _limit = toInteger(getQueryParameters(props.location.search, '_limit')) || this.getCurrentModelDefaultLimit();
     const _page = toInteger(getQueryParameters(props.location.search, '_page')) || 1;
-    const _sort = this.findPageSort(props);
+    const _sort = this.findPageSort(props); // TODO sort
     const _q = getQueryParameters(props.location.search, '_q') || '';
     const params = { _limit, _page, _sort, _q };
     const filters = generateFiltersFromSearch(props.location.search);
@@ -161,6 +174,10 @@ export class ListPage extends React.Component {
     this.props.setParams(params, filters);
     this.props.getData(props.match.params.slug, source, setUpdatingParams);
   };
+
+  getDataFromStore = (key) => {
+    return get(storeData.get(this.getCurrentModelName()),[this.getCurrentModelName(), key]);
+  }
 
   /**
    * Helper to retrieve the model's source
@@ -191,7 +208,7 @@ export class ListPage extends React.Component {
   );
 
   setTableHeaders = () => {
-    const defaultTableHeaders = get(this.getCurrentModel(), ['listDisplay'], []);
+    const defaultTableHeaders = this.getDataFromStore('displayedFields') || get(this.getCurrentModel(), ['listDisplay'], []);
     this.props.setDisplayedFields(defaultTableHeaders);
   }
 
@@ -227,6 +244,7 @@ export class ListPage extends React.Component {
   findPageSort = props => {
     return (
       getQueryParameters(props.location.search, '_sort') ||
+      this.getDataFromStore('_sort') ||
       this.getCurrentModelDefaultSort()
     );
   };
@@ -315,6 +333,11 @@ export class ListPage extends React.Component {
     this.setState({ showWarning: false });
   };
 
+  handleResetDisplayedFields = () => {
+    storeData.clear(this.getCurrentModelName());
+    this.props.resetDisplayedFields(get(this.getCurrentModel(), ['listDisplay'], []));
+  }
+
   handleSubmit = e => {
     try {
       e.preventDefault();
@@ -370,6 +393,25 @@ export class ListPage extends React.Component {
       <DropdownItem key={item}>
         <div>
           <InputCheckbox onChange={this.handleChangeHeader} name={item} value={this.isAttrInitiallyDisplayed(item)} />
+        </div>
+      </DropdownItem>
+    );
+  }
+
+  renderDropdownHeader = msg => {
+    return (
+      <DropdownItem>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <span>
+            {msg}
+          </span>
+          <FormattedMessage id="content-manager.containers.Edit.reset">
+            {m => (
+              <span onClick={this.handleResetDisplayedFields}>
+                {m}
+              </span>
+            )}
+          </FormattedMessage>
         </div>
       </DropdownItem>
     );
@@ -515,9 +557,9 @@ export class ListPage extends React.Component {
                       <ButtonDropdown isOpen={isOpen} toggle={this.toggle} direction="left">
                         <DropdownToggle />
                         <DropdownMenu>
-                          <DropdownItem>
-                            Displayed fields RESET
-                          </DropdownItem>
+                          <FormattedMessage id="content-manager.containers.ListPage.displayedFields">
+                            {this.renderDropdownHeader}
+                          </FormattedMessage>
                           {this.getAllModelFields().map(this.renderDropdown)}
                         </DropdownMenu>
                       </ButtonDropdown>
@@ -598,6 +640,7 @@ ListPage.propTypes = {
   removeAllFilters: PropTypes.func.isRequired,
   removeAttr: PropTypes.func.isRequired,
   removeFilter: PropTypes.func.isRequired,
+  resetDisplayedFields: PropTypes.func.isRequired,
   schema: PropTypes.object.isRequired,
   setDisplayedFields: PropTypes.func.isRequired,
   setParams: PropTypes.func.isRequired,
@@ -623,6 +666,7 @@ function mapDispatchToProps(dispatch) {
       removeAllFilters,
       removeAttr,
       removeFilter,
+      resetDisplayedFields,
       setDisplayedFields,
       setParams,
       submit,

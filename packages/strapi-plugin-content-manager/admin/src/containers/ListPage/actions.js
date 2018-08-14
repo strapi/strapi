@@ -24,6 +24,7 @@ import {
   REMOVE_ALL_FILTERS,
   REMOVE_ATTR,
   REMOVE_FILTER,
+  RESET_DISPLAYED_FIELDS,
   SET_DISPLAYED_FIELDS,
   SET_PARAMS,
   SUBMIT,
@@ -164,6 +165,13 @@ export function removeFilter(index) {
   return {
     type: REMOVE_FILTER,
     index,
+  };
+}
+
+export function resetDisplayedFields(fields) {
+  return {
+    type: RESET_DISPLAYED_FIELDS,
+    fields,
   };
 }
 

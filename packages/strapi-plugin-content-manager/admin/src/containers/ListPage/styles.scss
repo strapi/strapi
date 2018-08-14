@@ -26,6 +26,8 @@
 .listPageDropdownWrapper {
   display: flex;
   justify-content: flex-end;
+  font-family: Lato;
+  -webkit-font-smoothing: antialiased;
   > div {
     height: 30px;
     button {
@@ -50,8 +52,16 @@
       }
       > button:first-child {
         margin-bottom: 2px;
+        font-weight: 600;
         &:hover {
           background-color: #ffffff !important;
+        }
+        > div {
+          > span:last-child {
+            color: #007EFF;
+            font-weight: 400;
+            cursor: pointer;
+          }
         }
       }
     }

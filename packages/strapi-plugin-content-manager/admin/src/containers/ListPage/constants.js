@@ -24,6 +24,7 @@ export const OPEN_FILTERS_WITH_SELECTION = 'ContentManager/ListPage/OPEN_FILTERS
 export const REMOVE_ALL_FILTERS = 'ContentManager/ListPage/REMOVE_ALL_FILTERS';
 export const REMOVE_ATTR = 'ContentManager/ListPage/REMOVE_ATTR';
 export const REMOVE_FILTER = 'ContentManager/ListPage/REMOVE_FILTER';
+export const RESET_DISPLAYED_FIELDS = 'ContentManager/ListPage/RESET_DISPLAYED_FIELDS';
 export const SET_DISPLAYED_FIELDS = 'ContentManager/ListPage/SET_DISPLAYED_FIELDS';
 export const SET_PARAMS = 'ContentManager/ListPage/SET_PARAMS';
 export const SUBMIT = 'ContentManager/ListPage/SUBMIT';

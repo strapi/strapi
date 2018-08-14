@@ -25,6 +25,7 @@ import {
   REMOVE_ALL_FILTERS,
   REMOVE_ATTR,
   REMOVE_FILTER,
+  RESET_DISPLAYED_FIELDS,
   SET_DISPLAYED_FIELDS,
   SET_PARAMS,
   SUBMIT,
@@ -35,6 +36,7 @@ const initialState = fromJS({
   appliedFilters: List([]),
   count: fromJS({}),
   currentModel: '',
+  didChangeDisplayedFields: false,
   displayedFields: fromJS([]),
   entriesToDelete: List([]),
   filters: List([]),
@@ -56,13 +58,15 @@ const initialState = fromJS({
 function listPageReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_ATTR:
-      return state.update('displayedFields', list => {
-        if (action.index !== -1) {
-          return list.splice(action.index, 0, fromJS(action.attr));
-        }
+      return state
+        .update('displayedFields', list => {
+          if (action.index !== -1) {
+            return list.splice(action.index, 0, fromJS(action.attr));
+          }
 
-        return list.push(fromJS(action.attr));
-      });
+          return list.push(fromJS(action.attr));
+        })
+        .update('didChangeDisplayedFields', v => !v);
     case ADD_FILTER:
       return state.update('appliedFilters', list => list.push(Map(action.filter)));
     case DELETE_DATA_SUCCESS:
@@ -160,11 +164,17 @@ function listPageReducer(state = initialState, action) {
         .update('filters', () => List([]))
         .update('filtersUpdated', v => v = !v);
     case REMOVE_ATTR:
-      return state.update('displayedFields', list => {
-        return list.splice(action.index, 1);
-      });
+      return state
+        .update('displayedFields', list => {
+          return list.splice(action.index, 1);
+        })
+        .update('didChangeDisplayedFields', v => !v);
     case REMOVE_FILTER:
       return state.update('appliedFilters', list => list.splice(action.index, 1));
+    case RESET_DISPLAYED_FIELDS:
+      return state
+        .update('displayedFields', () => fromJS(action.fields))
+        .update('didChangeDisplayedFields', v => !v);
     case SET_DISPLAYED_FIELDS:
       return state.update('displayedFields', () => fromJS(action.fields));
     case SET_PARAMS:

@@ -17,6 +17,7 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
+  "containers.ListPage.displayedFields": "Displayed Fields",
   
   "containers.SettingPage.addField": "Add new field",
   "containers.SettingPage.addRelationalField": "Add new relational field",
