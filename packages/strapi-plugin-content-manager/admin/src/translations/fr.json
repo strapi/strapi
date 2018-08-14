@@ -115,6 +115,7 @@
   "form.Input.pageEntries.inputDescription": "Note: Vous pouvez modifier ces valeurs par modèle",
   "form.Input.defaultSort": "Attribut de tri par défault",
 
+  "notification.error.displayedFields": "Vous devez avoir au moins un champ d'affiché",
   "notification.error.relationship.fetch": "Une erreur est survenue en récupérant les relations.",
   "notification.info.SettingPage.disableSort": "Vous devez avoir au moins un attribut de tri par défaut",
 

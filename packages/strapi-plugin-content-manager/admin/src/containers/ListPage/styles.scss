@@ -1,7 +1,6 @@
 .containerFluid { /* stylelint-disable */
   position: relative;
   padding: 18px 30px;
-
   .modal-content{
     padding: 0;
   }
@@ -22,4 +21,96 @@
   top: 100px;
   left: 30px;
   width: calc(100% - 60px);
+}
+
+.listPageDropdownWrapper {
+  display: flex;
+  justify-content: flex-end;
+  > div {
+    height: 30px;
+    button {
+      &:focus {
+        outline: 0;
+      }
+    }
+    > div {
+      min-width: 230px;
+      top: 28px !important; left: 47px !important;
+      padding-bottom: 0 !important;
+      border-top-right-radius: 0;
+      > button:not(:first-child) {
+        padding: 0;
+      }
+      > button {
+        &:active, :focus {
+          background-color: #f7f7f9 !important;
+          color: #333740;
+          font-weight: 500;
+        }
+      }
+      > button:first-child {
+        margin-bottom: 2px;
+        &:hover {
+          background-color: #ffffff !important;
+        }
+      }
+    }
+  }
+}
+
+.listPageDropdownWrapperOpen {
+  > div {
+    > button {
+      background: #E6F0FB;
+      border: 1px solid #AED4FB !important;
+      border-bottom-right-radius: 0;
+      &:before {
+        content: '\f0db';
+        font-family: FontAwesome;
+        color: #007EFF;
+      }
+      &:after {
+        content: '\f0d7';
+        margin-left: 10px;
+        font-family: FontAwesome;
+        color: #007EFF;
+      }
+
+      &:hover, :active, :focus {
+        background: #E6F0FB;
+        border: 1px solid #AED4FB;
+      }
+
+    }
+    > div {
+      border-top-color: #AED4FB !important;
+      border-top-right-radius: 0;
+    }
+  }
+}
+
+.listPageDropdownWrapperClose {
+
+  > div {
+    > button {
+      background: #ffffff !important;
+      border: 1px solid #E3E9F3;
+      border-radius: 2px;
+      &:before {
+        content: '\f0db';
+        font-family: FontAwesome;
+        color: #323740;
+      }
+      &:after {
+        content: '\f0d8';
+        margin-left: 10px;
+        font-family: FontAwesome;
+        color: #323740;
+      }
+      &:hover, :focus, :active  {
+        background: #ffffff !important;
+        border: 1px solid #E3E9F3;
+      }
+    }
+  }
 }

@@ -114,6 +114,7 @@
   "form.Input.pageEntries.inputDescription": "Note: You can override this value in the Content Type settings page.",
   "form.Input.defaultSort": "Default sort attribute",
 
+  "notification.error.displayedFields": "You need at least one displayed field",
   "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
   "notification.info.SettingPage.disableSort": "You need to have one attribute with the sorting allowed",
 
