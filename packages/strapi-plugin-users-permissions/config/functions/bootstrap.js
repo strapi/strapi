@@ -77,6 +77,14 @@ module.exports = async cb => {
         'user:email'
       ]
     },
+    microsoft: {
+      enabled: false,
+      icon: 'windows',
+      key: '',
+      secret: '',
+      callback: '/auth/microsoft/callback',
+      scope: ['user.read']
+    },
     twitch: {
       access_url: 'https://id.twitch.tv/oauth2/token',
       authorize_url: 'https://id.twitch.tv/oauth2/authorize',

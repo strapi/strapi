@@ -134,7 +134,7 @@ const getProfile = async (provider, query, callback) => {
           callback(err);
         } else {
           // Combine username and discriminator because discord username is not unique
-          var username = body.username + '#' + body.discriminator;
+          var username = `${body.username}#${body.discriminator}`;
           callback(null, {
             username: username,
             email: body.email
@@ -205,6 +205,40 @@ const getProfile = async (provider, query, callback) => {
             });
           }
         });
+      });
+      break;
+    }
+    case 'microsoft': {
+      const microsoft = new Purest({
+        provider: 'microsoft',
+        config:{
+          'microsoft': {
+            'https://graph.microsoft.com': {
+              '__domain': {
+                'auth': {
+                  'auth': {'bearer': '[0]'}
+                }
+              },
+              '[version]/{endpoint}': {
+                '__path': {
+                  'alias': '__default',
+                  'version': 'v1.0'
+                }
+              }
+            }
+          }
+        }
+      });
+
+      microsoft.query().get('me').auth(access_token).request((err, res, body) => {
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, {
+            username: body.userPrincipalName,
+            email: body.userPrincipalName
+          });
+        }
       });
       break;
     }
