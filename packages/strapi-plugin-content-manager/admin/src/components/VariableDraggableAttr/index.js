@@ -18,6 +18,10 @@ import ClickOverHint from 'components/ClickOverHint';
 import DraggedRemovedIcon  from 'components/DraggedRemovedIcon';
 import VariableEditIcon from 'components/VariableEditIcon';
 import ItemTypes from 'utils/ItemTypes';
+
+import GrabIconBlue from 'assets/images/icon_grab_blue.svg';
+import GrabIcon from 'assets/images/icon_grab.svg';
+
 import Carret from './Carret';
 import styles from './styles.scss';
 
@@ -237,13 +241,13 @@ class VariableDraggableAttr extends React.Component {
       <div style={{ display: 'flex' }}>
         { showLeftCarret && <Carret style={carretStyle} />}
         <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
-          <i className="fa fa-th" />
+          <img src={(isEditing ? GrabIconBlue : GrabIcon)} alt="Grab Icon" />
           <span className={cn(isEditing && styles.editing, styles.truncated)}>
             {name}
           </span>
           <ClickOverHint show={isOver && !isEditing} />
           {(!isOver || isEditing) && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
-            <div className={styles.infoLabel}>
+            <div className={cn(styles.infoLabel, isEditing && styles.infoLabelHover)}>
               {data.label}
             </div>
           )}

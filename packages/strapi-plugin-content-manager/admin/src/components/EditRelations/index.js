@@ -66,6 +66,7 @@ EditRelations.defaultProps = {
 };
 
 EditRelations.propTypes = {
+  changeData: PropTypes.func.isRequired,
   currentModelName: PropTypes.string.isRequired,
   displayedRelations: PropTypes.array,
   isDraggingSibling: PropTypes.bool,

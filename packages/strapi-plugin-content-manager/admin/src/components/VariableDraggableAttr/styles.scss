@@ -7,15 +7,19 @@
   padding-left: 10px;
   justify-content: space-between;
   background: #FAFAFB;
-  line-height: 30px;
+  line-height: 28px;
   color: #333740;
   border: 1px solid #E3E9F3;
   border-radius: 2px;
-  > i {
-    margin-top: 12px;
+  &:hover{
+    cursor: move;
+  }
+  > img {
+    align-self: flex-start;
+    vertical-align: top;
+    max-width: 8px;
     margin-right: 10px;
-    font-size: 11px;
-    color: #B3B5B9;
+    margin-top: 11px;
   }
 }
 
@@ -63,6 +67,10 @@
   font-weight: 400;
 }
 
+.infoLabelHover{
+  color: #007EFF; 
+}
+
 .truncated {
   overflow: hidden;
   white-space:nowrap;
@@ -76,8 +84,9 @@
 }
 
 .carret {
-  width: 10px;
-  background: blue;
+  width: 2px;
+  border-radius: 2px;
+  background: #007EFF;
 }
 
 .editing {

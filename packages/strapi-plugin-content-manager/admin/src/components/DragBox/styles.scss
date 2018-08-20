@@ -13,10 +13,10 @@
   color: #007EFF;
   font-weight: 500;
 
-  > i {
+  > img {
+    max-width: 8px;
     margin-right: 10px;
-    font-size: 10px;
-    color: #B3B5B9;
+    margin-top: -1px;
   }
 
   > span:last-child {

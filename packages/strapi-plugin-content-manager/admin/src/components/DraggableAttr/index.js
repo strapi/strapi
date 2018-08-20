@@ -19,6 +19,9 @@ import DraggedRemovedIcon from 'components/DraggedRemovedIcon';
 import VariableEditIcon from 'components/VariableEditIcon';
 import ItemTypes from 'utils/ItemTypes';
 
+import GrabIconBlue from 'assets/images/icon_grab_blue.svg';
+import GrabIcon from 'assets/images/icon_grab.svg';
+
 import styles from './styles.scss';
 
 const draggableAttrSource = {
@@ -153,12 +156,12 @@ class DraggableAttr extends React.Component {
             onClick={this.handleClickEdit}
             style={{ opacity }}
           >
-            <i className="fa fa-th" aria-hidden="true" />
+            <img src={(isEditing ? GrabIconBlue : GrabIcon)} alt="Grab Icon" />
             <span>{name}</span>
             <ClickOverHint show={isOver && !isDragging && !isEditing} />
             { (!isOver || isEditing) && name.toLowerCase() !== label.toLowerCase() && (
-              <div className={styles.infoLabel}>
-                {label}
+              <div className={cn(styles.infoLabel, isEditing && styles.infoLabelHover)}>
+                {label.toLowerCase() === 'id' ? 'ID' : label}
               </div>
             )}
             {isEditing && !isOver ? (

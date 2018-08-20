@@ -623,10 +623,9 @@ class SettingPage extends React.PureComponent {
     );
   }
 
-  renderInputMainSettings = input => {
+  renderInputMainSettings = (input, i) => {
     const inputName = `${this.getPath()}.${input.name}`;
-                    
-    return (
+    const content = (
       <Input
         {...input}
         key={input.name}
@@ -636,6 +635,19 @@ class SettingPage extends React.PureComponent {
         value={this.getValue(inputName, input.type)}
       />
     );
+
+    if (i === 3) {
+      return (
+        <React.Fragment>
+          <div className="col-md-12">
+            <div className={styles.separator} />
+          </div>
+          {content}
+        </React.Fragment>
+      );
+    } 
+                    
+    return content;
   }
 
   render() {
@@ -700,7 +712,7 @@ class SettingPage extends React.PureComponent {
                   </div>
 
                   <div className="col-md-12">
-                    <div className={styles.separator} />
+                    <div className={styles.separatorHigher} />
                   </div>
                 </div>
 
