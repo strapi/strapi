@@ -8,8 +8,10 @@ import {
   DOWNLOAD_PLUGIN,
   DOWNLOAD_PLUGIN_ERROR,
   DOWNLOAD_PLUGIN_SUCCEEDED,
-  GET_PLUGINS,
-  GET_PLUGINS_SUCCEEDED,
+  GET_AVAILABLE_PLUGINS,
+  GET_AVAILABLE_PLUGINS_SUCCEEDED,
+  GET_INSTALLED_PLUGINS,
+  GET_INSTALLED_PLUGINS_SUCCEEDED,
   ON_CHANGE,
 } from './constants';
 
@@ -32,16 +34,29 @@ export function downloadPluginSucceeded() {
   };
 }
 
-export function getPlugins() {
+export function getAvailablePlugins() {
   return {
-    type: GET_PLUGINS,
+    type: GET_AVAILABLE_PLUGINS,
   };
 }
 
-export function getPluginsSucceeded(availablePlugins) {
+export function getAvailablePluginsSucceeded(availablePlugins) {
   return {
-    type: GET_PLUGINS_SUCCEEDED,
+    type: GET_AVAILABLE_PLUGINS_SUCCEEDED,
     availablePlugins,
+  };
+}
+
+export function getInstalledPlugins() {
+  return {
+    type: GET_INSTALLED_PLUGINS,
+  };
+}
+
+export function getInstalledPluginsSucceeded(installedPlugins) {
+  return {
+    type: GET_INSTALLED_PLUGINS_SUCCEEDED,
+    installedPlugins,
   };
 }
 
