@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.13.0.1",
+  "version": "3.0.0-alpha.13.1",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 9.0.0",
@@ -73,7 +73,7 @@
     "intl": "^1.2.5",
     "invariant": "2.2.1",
     "json-loader": "^0.5.7",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.5",
     "lodash-webpack-plugin": "^0.11.4",
     "mocha": "3.1.2",
     "moment": "^2.16.0",
