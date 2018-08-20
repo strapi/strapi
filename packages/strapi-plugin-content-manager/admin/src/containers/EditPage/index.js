@@ -38,14 +38,17 @@ import { generateRedirectURI } from 'containers/ListPage/utils';
 import { checkFormValidity } from 'utils/formValidations';
 
 import {
+  addRelationItem,
   changeData,
   getData,
   getLayout,
   initModelProps,
   onCancel,
+  removeRelationItem,
   resetProps,
   setFileRelations,
   setFormErrors,
+  sortRelations,
   submit,
 } from './actions';
 
@@ -181,6 +184,13 @@ export class EditPage extends React.Component {
     this.props.setFileRelations(fileRelations);
   }
 
+  handleAddRelationItem = ({ key, value }) => {
+    this.props.addRelationItem({
+      key,
+      value,
+    });
+  }
+
   handleBlur = ({ target }) => {
     const defaultValue = get(this.getModelAttribute(target.name), 'default');
 
@@ -244,6 +254,15 @@ export class EditPage extends React.Component {
         });
     }
     /* eslint-enable */
+  }
+
+  handleRemoveRelationItem = ({ key, index }) => {
+    this.props.removeRelationItem({ key, index });
+  }
+
+  handleSortRelations = ({ key, oldIndex, newIndex }) => {
+    console.log(key, oldIndex, newIndex);
+    this.props.sortRelations({ key, oldIndex, newIndex });
   }
 
   handleSubmit = (e) => {
@@ -364,7 +383,10 @@ export class EditPage extends React.Component {
                         changeData={this.props.changeData}
                         record={editPage.record}
                         schema={this.getSchema()}
+                        onAddRelationalItem={this.handleAddRelationItem}
                         onRedirect={this.handleRedirect}
+                        onRemoveRelationItem={this.handleRemoveRelationItem}
+                        onSort={this.handleSortRelations}
                       />
                     )}
                   </div>
@@ -387,6 +409,7 @@ EditPage.defaultProps = {
 };
 
 EditPage.propTypes = {
+  addRelationItem: PropTypes.func.isRequired,
   changeData: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
   getData: PropTypes.func.isRequired,
@@ -396,24 +419,29 @@ EditPage.propTypes = {
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
+  removeRelationItem: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   schema: PropTypes.object,
   setFileRelations: PropTypes.func.isRequired,
   setFormErrors: PropTypes.func.isRequired,
+  sortRelations: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addRelationItem,
       changeData,
       getData,
       getLayout,
       initModelProps,
       onCancel,
+      removeRelationItem,
       resetProps,
       setFileRelations,
       setFormErrors,
+      sortRelations,
       submit,
     },
     dispatch,

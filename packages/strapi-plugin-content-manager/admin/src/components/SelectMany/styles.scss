@@ -1,7 +1,6 @@
 .selectMany { /* stylelint-disable */
   padding-bottom: 19px;
   margin-bottom: 0px;
-  overflow-x: hidden;
 
   label{
     font-size: 1.3rem;
@@ -36,14 +35,19 @@
 }
 
 .selectManyUpdate{
-  padding-bottom: 18px !important;
+  padding-bottom: 15px !important;
+}
+
+.select{
+  margin-bottom: 0px !important;
 }
 
 .sortableList {
-  max-height: 110px;
+  overflow: hidden;
+  max-height: 116px;
 
   > ul {
-    margin: -21px -20px 0;
+    margin: 4px -20px 0;
     padding: 0 20px !important;
     list-style: none !important;
     overflow: scroll;

@@ -28,18 +28,33 @@ function EditRelations(props) {
       {map(filterRelationsUpload(props.schema.relations), (relation, key) => {
         if (relation.nature.toLowerCase().includes('morph') && relation[key]) return '';
 
-        const Select = ['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(relation.nature) ? SelectOne : SelectMany;
-
+        if(['oneWay', 'oneToOne', 'manyToOne', 'oneToManyMorph', 'oneToOneMorph'].includes(relation.nature)) {
+          return (
+            <SelectOne
+              currentModelName={props.currentModelName}
+              key={key}
+              record={props.record}
+              relation={relation}
+              schema={props.schema}
+              setRecordAttribute={props.changeData}
+              location={props.location}
+              onRedirect={props.onRedirect}
+            />
+          );
+        } 
+        
         return (
-          <Select
+          <SelectMany
             currentModelName={props.currentModelName}
             key={key}
             record={props.record}
             relation={relation}
             schema={props.schema}
-            setRecordAttribute={props.changeData}
             location={props.location}
+            onAddRelationalItem={props.onAddRelationalItem}
             onRedirect={props.onRedirect}
+            onRemoveRelationItem={props.onRemoveRelationItem}
+            onSort={props.onSort}
           />
         );
       })}
@@ -53,10 +68,12 @@ EditRelations.defaultProps = {
 };
 
 EditRelations.propTypes = {
-  changeData: PropTypes.func.isRequired,
   currentModelName: PropTypes.string.isRequired,
   location: PropTypes.object.isRequired,
+  onAddRelationalItem: PropTypes.func.isRequired,
   onRedirect: PropTypes.func.isRequired,
+  onRemoveRelationItem: PropTypes.func.isRequired,
+  onSort: PropTypes.func.isRequired,
   record: PropTypes.object,
   schema: PropTypes.object,
 };
