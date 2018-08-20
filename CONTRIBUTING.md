@@ -1,6 +1,6 @@
 # Contribute to Strapi
 
-👍🎉 First off, thanks for taking the time to contribute! 🎉👍
+First off, thanks for taking the time to contribute! 🎉👍
 
 The following is a set of guidelines for contributing to Strapi and its packages.
 
@@ -32,40 +32,115 @@ If you send a pull request, please do it again the `master` branch. We are devel
 ## Setup Development Environment
 To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the recommended versions of Node.js (v8) and npm (v5).
 
-**Then, please follow the instructions below:**
+Then, please follow the instructions below:
 
-1. [Fork the repository](https://github.com/strapi/strapi) to your own GitHub account.
-2. Clone it to your computer `git clone git@github.com:strapi/strapi.git`.
-3. Run `npm run setup` at the root of the directory.
+#### 1. ▪️ Fork the repository
 
-> Note: If the installation failed, please remove the global packages related to Strapi. The command `npm ls strapi` will help you to find where your packages are installed globally.
+[Go to the repository](https://github.com/strapi/strapi) and fork it to your own GitHub account.
 
-> Note: You can run `npm run setup:build` to build the plugins' admin (the setup time will be longer).
+#### 2. 💿 Clone the repository
 
+```bash
+git clone git@github.com:strapi/strapi.git
+```
 
-The development environment has been installed. Now, you have to create a development project to live-test your updates.
+#### 3. ⏳ Installation
+ 
+Go to the root of the repository.
+```bash
+cd strapi
+```
 
-1. Go to a folder on your computer `cd /path/to/my/folder`.
-2. Create a new project `strapi new myDevelopmentProject --dev`.
-3. Start your app with `strapi start`.
+**Two setup are available... with or without the front-end builds.**
 
-Awesome! You are now able to make bug fixes or enhancements in the framework layer of Strapi. **To make updates in the administration panel, you need to go a little bit further.**
+Without the front-end builds, you won't be able to access to the administration panel via http://localhost:1337/admin, you'll have to run the administration separately and access it through http://localhost:4000/admin.
 
-4. Open a new tab or new terminal window.
-5. Go to the `my-app/admin` folder of your currently running app.
-6. Run `npm start` and go to the following url [http://localhost:4000/admin](http://localhost:4000/admin)
+<br>
+
+Without the front-end builds (recommended)
+```bash
+npm run setup
+```
+or with the front-end builds
+```bash
+npm run setup:build
+```
+
+> ⚠️  If the installation failed, please remove the global packages related to Strapi. The command `npm ls strapi` will help you to find where your packages are installed globally.
+
+#### 4. 🏗 Create a new project
+
+You can open a new terminal window and go into any folder you want for the next steps.
+```bash
+cd /.../workspace/
+```
+
+The command to generate a project is the same, except you have to add the `--dev` argument at the end of line.
+```bash
+strapi new my-project --dev
+```
+
+#### 5. 🚀 Start the project
+
+First, you have to start the server.
+```bash
+cd ./my-project
+strapi start
+```
+
+The server (API) is available at http://localhost:1337
+
+> ⚠️  If you've followed the recommended setup, you should not be able to reach the administration panel at http://localhost:1337/admin.
+
+Then, you have to start the Webpack server to build and run the administration.
+```bash
+cd ./my-project/admin
+npm run start
+```
+
+The administration panel is available at http://localhost:4000/admin
+
+**Awesome! You are now able to contribute to Strapi.**
+
+---
 
 ## Plugin Development Setup
 
-To create a new plugin, you'll have to run the following commands
+To create a new plugin, you'll have to run the following commands:
 
-1. In your project folder `cd myDevelopmentProject && strapi generate:plugin my-plugin`.
-2. Make sure that the `strapi-helper-plugin` is linked to your plugin
-  - In the folder where strapi is cloned `cd pathToStrapiRepo/strapi/packages/strapi-helper-plugin && npm link`.
-  - In your project folder `cd pathToMyProject/myDevelopmentProject/plugins/my-plugin && npm link strapi-helper-plugin`.
-3. Start the server in the admin folder `cd pathToMyProject/myDevelopmentProject/admin && npm start` and go to the following url [http://localhost:4000/admin](http://localhost:4000/admin).
+#### 1. 🏗 Generate a new plugin
 
-***
+```bash
+cd ./my-project
+strapi generate:plugin my-plugin
+```
+
+#### 2. ✅ Verify the symlink
+
+Make you that the `strapi-helper-plugin` is linked to your project.
+
+Please run this command in the repository folder where Strapi is cloned:
+```bash
+cd /repository/strapi/packages/strapi-helper-plugin
+npm link
+```
+
+Link the `strapi-helper-plugin` node_modules in the plugin folder:
+```bash
+cd ./my-project/plugins/my-plugin
+npm link strapi-helper-plugin
+```
+
+#### 3. 🚀 Start the project
+
+```bash
+cd ./my-project/admin
+npm run start
+```
+
+The administration panel is available at http://localhost:4000/admin
+
+---
 
 ## Reporting an issue
 
