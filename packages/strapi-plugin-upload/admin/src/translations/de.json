@@ -13,8 +13,8 @@
   "EntriesNumber.number": "{number} Datei gefunden",
   "EntriesNumber.number.plural": "{number} Dateien gefunden",
 
-  "HomePage.title": "Hochladen",
-  "HomePage.description": "Übersicht über alle hochgeladenen Dateien",
+  "HomePage.title": "Dateien hochladen",
+  "HomePage.description": "Übersicht über alle hochgeladenen Dateien.",
   "HomePage.InputSearch.placeholder": "Suche nach einer Datei...",
 
   "Li.linkCopied": "Link in die Zwischenablage kopiert",
