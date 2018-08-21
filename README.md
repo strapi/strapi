@@ -34,18 +34,23 @@ ecosystem has been introduced. **Both versions are available, we still recommend
 
 #### Alpha
 
-The alpha has support for the latest version of Node.js (v9) and npm (v5).
+The alpha has support for the latest version of Node.js (v10) and npm (v6).
 ```bash
 npm install strapi@alpha -g
 ```
 
 ##### Requirements
-```
-NodeJS >= 9
-MongoDB >= 2.6 
-MySQL >= 2.6
-PostgreSQL >= 10
-```
+
+Node:
+ * NodeJS >= 10.x
+ * NPM >= 6.x
+
+Database:
+ * MongoDB >= 3.x 
+ * MySQL >= 5.6
+ * MariaDB >= 10.1
+ * PostgreSQL >= 10
+
 
 
 #### Stable
