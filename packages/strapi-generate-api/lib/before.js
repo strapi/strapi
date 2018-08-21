@@ -39,7 +39,7 @@ module.exports = (scope, cb) => {
     idPluralized: pluralize.plural(_.trim(_.camelCase(scope.id))),
     parentId: _.isEmpty(parent) ? undefined : _.trim(_.deburr(parent)),
     parentIdPluralized: _.isEmpty(scope.parentId) ? undefined : pluralize.plural(_.trim(_.camelCase(scope.parentId))),
-    environment: process.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development'
   });
 
   // Determine default values based on the available scope.
