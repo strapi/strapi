@@ -112,19 +112,21 @@ class Strapi extends EventEmitter {
       // Launch server.
       this.server.listen(this.config.port, err => {
         if (err) {
-          this.log.debug(`Server wasn't able to start properly.`);
-          console.error(err);
+          this.log.debug(`⚠️ Server wasn't able to start properly.`);
+          this.log.error(err);
           return this.stop();
         }
 
-        this.log.info('Server started in ' + this.config.appPath);
-        this.log.info('Your server is running at ' + this.config.url);
-        this.log.debug('Time: ' + new Date());
-        this.log.debug('Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms');
-        this.log.debug('Environment: ' + this.config.environment);
-        this.log.debug('Process PID: ' + process.pid);
-        this.log.debug(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
+        this.log.info('Time: ' + new Date());
+        this.log.info('Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms');
+        this.log.info('Environment: ' + this.config.environment);
+        this.log.info('Process PID: ' + process.pid);
+        this.log.info(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
         this.log.info('To shut down your server, press <CTRL> + C at any time');
+        console.log();
+        this.log.info(`☄️  Admin panel: ${this.config.url}/admin`);
+        this.log.info(`⚡️ Server: ${this.config.url}`);
+        console.log();
 
         // Emit started event.
         this.emit('server:started');
@@ -134,8 +136,8 @@ class Strapi extends EventEmitter {
         }
       });
     } catch (err) {
-      this.log.debug(`Server wasn't able to start properly.`);
-      console.error(err);
+      this.log.debug(`⛔️ Server wasn't able to start properly.`);
+      this.log.error(err);
       this.stop();
     }
   }
@@ -154,7 +156,7 @@ class Strapi extends EventEmitter {
 
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
-        this.log.debug(`Server wasn't able to start properly.`);
+        this.log.debug(`⛔️ Server wasn't able to start properly.`);
         this.log.error(`The port ${err.port} is already used by another application.`);
         this.stop();
         return;
@@ -231,6 +233,8 @@ class Strapi extends EventEmitter {
 
     const reload = function() {
       if (state.shouldReload === false) {
+        // Reset the reloading state
+        reload.isReloading = false;
         return;
       }
 

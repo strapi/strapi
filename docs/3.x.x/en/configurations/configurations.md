@@ -1,6 +1,6 @@
 # Configurations
 
-The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./api/**/config` folder of each APIs and plugins by creating JavaScript or JSON files.
+The main configurations of the project are located in the `./config` directory. Additional configs can be added in the `./api/**/config` folder of each API and plugin by creating JavaScript or JSON files.
 
 ## Application
 
@@ -153,7 +153,7 @@ Each JSON file located in the folder must have the name of its corresponding tra
 
 Most of the application's configurations are defined by environment. It means that you can specify settings for each environment (`development`, `production`, `test`, etc.).
 
-> Note: You can access to the config of the current environment through `strapi.config.currentEnvironment`.
+> Note: You can access the config of the current environment through `strapi.config.currentEnvironment`.
 
 ***
 
@@ -164,7 +164,7 @@ Most of the application's configurations are defined by environment. It means th
  - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
  - `connections` List of all available connections.
    - `default`
-     - `connector` (string): Connector used by the current connection. Default value: `strapi-mongoose`.
+     - `connector` (string): Connector used by the current connection. Default value: `strapi-hook-mongoose`.
      - `client` (string): Client used to store session. Default value: `cookie`.
      - `key` (string): Cookie key name. Default value: `strapi.sid`
      - `maxAge` (integer): Time in milliseconds before the session expire. Default value: `86400000`.
@@ -178,6 +178,11 @@ Most of the application's configurations are defined by environment. It means th
        - `username` (string): Username used to establish the connection.
        - `password` (string): Password used to establish the connection.
        - `options` (object): List of additional options used by the connector.
+       - `timezone` (string): Set the default behavior for local time (used only for a SQL database). Default value: `utc`.
+    - `options` Options used for database connection.
+      - `ssl` (boolean): For ssl database connection.
+      - `debug` (boolean): Show database exchanges and errors.
+      - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
 
 #### Example
 
@@ -187,7 +192,7 @@ Most of the application's configurations are defined by environment. It means th
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-mongoose",
+      "connector": "strapi-hook-mongoose",
       "settings": {
         "client": "mongo",
         "host": "localhost",
@@ -203,14 +208,14 @@ Most of the application's configurations are defined by environment. It means th
       }
     },
     "postgres": {
-      "connector": "strapi-bookshelf",
+      "connector": "strapi-hook-bookshelf",
       "settings": {
         "client": "postgres",
         "host": "localhost",
         "port": 5432,
-        "username": "aureliengeorget",
-        "password": "${process.env.USERNAME}",
-        "database": "${process.env.PWD}",
+        "username": "${process.env.USERNAME}",
+        "password": "${process.env.PWD}",
+        "database": "strapi",
         "schema": "public"
       },
       "options": {
@@ -218,12 +223,12 @@ Most of the application's configurations are defined by environment. It means th
       }
     },
     "mysql": {
-      "connector": "strapi-bookshelf",
+      "connector": "strapi-hook-bookshelf",
       "settings": {
         "client": "mysql",
         "host": "localhost",
         "port": 5432,
-        "username": "aureliengeorget",
+        "username": "strapi",
         "password": "root",
         "database": ""
       },
@@ -362,7 +367,7 @@ In any JSON configurations files in your project, you can inject dynamic values 
   "defaultConnection": "default",
   "connections": {
     "default": {
-      "connector": "strapi-mongoose",
+      "connector": "strapi-hook-mongoose",
       "settings": {
         "client": "mongo",
         "uri": "${process.env.DATABASE_URI || ''}",

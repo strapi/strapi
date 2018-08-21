@@ -1,5 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { findIndex } from 'lodash';
+import { findIndex, get } from 'lodash';
 import { takeLatest, put, fork, take, cancel, select, call } from 'redux-saga/effects';
 
 import request from 'utils/request';
@@ -17,9 +17,6 @@ import {
   SUBMIT,
 } from './constants';
 
-// TODO uncomment to test design providers and so on...
-// import data from './data.json';
-
 import {
   makeSelectAllData,
   makeSelectDataToDelete,
@@ -31,8 +28,8 @@ export function* dataDelete() {
   try {
     const allData = yield select(makeSelectAllData());
     const dataToDelete = yield select(makeSelectDataToDelete());
-    const indexDataToDelete = findIndex(allData, ['name', dataToDelete.name]);
     const endPointAPI = yield select(makeSelectDeleteEndPoint());
+    const indexDataToDelete = findIndex(allData[endPointAPI], ['name', dataToDelete.name]);
 
     if (indexDataToDelete !== -1) {
       const id = dataToDelete.id;
@@ -67,7 +64,7 @@ export function* dataFetch(action) {
 export function* submitData(action) {
   try {
     const body = yield select(makeSelectModifiedData());
-    const opts = { method: 'PUT', body: (action.endPoint === 'advanced') ? body.settings : body };
+    const opts = { method: 'PUT', body: (action.endPoint === 'advanced') ? get(body, ['advanced', 'settings'], {}) : body };
 
     yield call(request, `/users-permissions/${action.endPoint}`, opts);
     yield put(submitSucceeded());

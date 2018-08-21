@@ -5,6 +5,7 @@ manifest.json
 plugins.json
 stats.json
 package-lock.json
+yarn.lock
 
 # Cruft
 .DS_Store

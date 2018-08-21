@@ -9,21 +9,40 @@
   "containers.Edit.delete": "Delete",
   "containers.Edit.reset": "Reset",
   "containers.Edit.returnList": "Return to list",
+  "containers.Edit.addAnItem": "Add an item...",
+  "containers.Edit.clickToJump": "Click to jump to the entry",
+  "containers.Edit.seeDetails": "Details",
   "containers.List.addAnEntry": "Add New {entity}",
   "containers.List.pluginHeaderDescription": "{label} entries found",
   "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
+  
+  "containers.SettingPage.addField": "Add new field",
+  "containers.SettingPage.attributes": "Attributes fields",
+  "containers.SettingPage.attributes.description": "Define the order of the attributes",
+
+  "containers.SettingPage.listSettings.title": "List — Settings",
+  "containers.SettingPage.listSettings.description": "Configure the options for this content type",
+  "containers.SettingPage.pluginHeaderDescription": "Configure the specific settings for this Content Type",
+  "containers.SettingsPage.pluginHeaderDescription": "Configure the default settings for all your Content types",
+  "containers.SettingsPage.Block.generalSettings.description": "Configure the default options for your Content Types",
+  "containers.SettingsPage.Block.generalSettings.title": "General",
+  "containers.SettingsPage.Block.contentType.title": "Content Types",
+  "containers.SettingsPage.Block.contentType.description": "Configure the specific settings",
 
   "components.AddFilterCTA.add": "Filters",
   "components.AddFilterCTA.hide": "Filters",
-  "components.FilterOptions.button.apply": "Apply",
+
+  "components.DraggableAttr.edit": "Click to edit",
+
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Apply",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Clear all",
   "components.FiltersPickWrapper.PluginHeader.description": "Set the conditions to apply to filter the entries",
   "components.FiltersPickWrapper.PluginHeader.title.filter": "Filters",
   "components.FiltersPickWrapper.hide": "Hide",
-
+  
+  "components.FilterOptions.button.apply": "Apply",
   "components.FilterOptions.FILTER_TYPES.=": "is",
   "components.FilterOptions.FILTER_TYPES._ne": "is not",
   "components.FilterOptions.FILTER_TYPES._lt": "is lower than",
@@ -69,8 +88,21 @@
   "error.attribute.key.taken": "This value already exists",
   "error.attribute.sameKeyAndName": "Can't be equals",
   "error.validation.minSupMax": "Can't be superior",
+  "error.validation.json": "This is not a JSON",
+
+  "form.Input.label.inputDescription": "This value overrides the label displayed in the table's head",
+  "form.Input.label": "Label",
+  "form.Input.search": "Enable search",
+  "form.Input.search.field": "Enable search on this field",
+  "form.Input.filters": "Enable filters",
+  "form.Input.sort.field": "Enable sort on this field",
+  "form.Input.bulkActions": "Enable bulk actions",
+  "form.Input.pageEntries": "Entries per page",
+  "form.Input.pageEntries.inputDescription": "Note: You can override this value in the Content Type settings page.",
+  "form.Input.defaultSort": "Default sort attribute",
 
   "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
+  "notification.info.SettingPage.disableSort": "You need to have one attribute with the sorting allowed",
 
   "success.record.delete": "Deleted",
   "success.record.save": "Saved",
@@ -81,5 +113,7 @@
   "popUpWarning.button.confirm": "Confirm",
   "popUpWarning.title": "Please confirm",
   "popUpWarning.bodyMessage.contentType.delete": "Are you sure you want to delete this entry?",
-  "popUpWarning.bodyMessage.contentType.delete.all": "Are you sure you want to delete theses entries?"
+  "popUpWarning.bodyMessage.contentType.delete.all": "Are you sure you want to delete theses entries?",
+  "popUpWarning.warning.cancelAllSettings": "Are you sure you want to cancel your modifications?",
+  "popUpWarning.warning.updateAllSettings": "This will modify all your settings"
 }

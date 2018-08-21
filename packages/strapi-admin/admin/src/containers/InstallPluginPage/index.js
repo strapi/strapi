@@ -11,7 +11,7 @@ import { Helmet } from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
-import { get, isUndefined, map } from 'lodash';
+import { map } from 'lodash';
 
 import {
   disableGlobalOverlayBlocker,
@@ -24,14 +24,16 @@ import DownloadInfo from 'components/DownloadInfo';
 import OverlayBlocker from 'components/OverlayBlocker';
 import PluginCard from 'components/PluginCard';
 import PluginHeader from 'components/PluginHeader';
-import SupportUsBanner from 'components/SupportUsBanner/Loadable';
+import SupportUsBanner from 'components/SupportUsBanner';
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 
 import {
   downloadPlugin,
-  getPlugins,
+  getAvailablePlugins,
+  getInstalledPlugins,
   onChange,
 } from './actions';
 
@@ -54,8 +56,11 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
 
     // Don't fetch the available plugins if it has already been done
     if (!this.props.didFetchPlugins) {
-      this.props.getPlugins();
+      this.props.getAvailablePlugins();
     }
+
+    // Get installed plugins
+    this.props.getInstalledPlugins();
   }
 
   componentWillUnmount() {
@@ -64,6 +69,10 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
   }
 
   render() {
+    if (!this.props.didFetchPlugins || !this.props.didFetchInstalledPlugins) {
+      return <LoadingIndicatorPage />;
+    }
+    
     return (
       <div>
         <OverlayBlocker isOpen={this.props.blockApp}>
@@ -107,7 +116,7 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
                 key={plugin.id}
                 plugin={plugin}
                 showSupportUsButton={plugin.id === 'support-us'}
-                isAlreadyInstalled={!isUndefined(get(this.context.plugins.toJS(), plugin.id))}
+                isAlreadyInstalled={this.props.installedPlugins.includes(plugin.id)}
                 downloadPlugin={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -129,19 +138,18 @@ InstallPluginPage.childContextTypes = {
   downloadPlugin: PropTypes.func.isRequired,
 };
 
-InstallPluginPage.contextTypes = {
-  plugins: PropTypes.object.isRequired,
-};
-
 InstallPluginPage.propTypes = {
   availablePlugins: PropTypes.array.isRequired,
   blockApp: PropTypes.bool.isRequired,
+  didFetchInstalledPlugins: PropTypes.bool.isRequired,
   didFetchPlugins: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   downloadPlugin: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
-  getPlugins: PropTypes.func.isRequired,
+  getAvailablePlugins: PropTypes.func.isRequired,
+  getInstalledPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  installedPlugins: PropTypes.array.isRequired,
   // onChange: PropTypes.func.isRequired,
   // search: PropTypes.string.isRequired,
 };
@@ -154,7 +162,8 @@ function mapDispatchToProps(dispatch) {
       disableGlobalOverlayBlocker,
       downloadPlugin,
       enableGlobalOverlayBlocker,
-      getPlugins,
+      getAvailablePlugins,
+      getInstalledPlugins,
       onChange,
     },
     dispatch,

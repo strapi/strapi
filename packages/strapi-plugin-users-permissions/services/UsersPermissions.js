@@ -88,7 +88,7 @@ module.exports = {
   },
 
   getPlugins: (plugin, lang = 'en') => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       request({
         uri: `https://marketplace.strapi.io/plugins?lang=${lang}`,
         json: true,
@@ -97,7 +97,7 @@ module.exports = {
         }
       }, (err, response, body) => {
         if (err) {
-          return reject(err);
+          return resolve([]);
         }
 
         resolve(body);
@@ -116,7 +116,9 @@ module.exports = {
       }, {}));
 
     const appControllers = Object.keys(strapi.api || {}).reduce((acc, key) => {
-      acc.controllers[key] = generateActions(strapi.api[key].controllers[key]);
+      Object.keys(strapi.api[key].controllers).forEach((controller) => {
+        acc.controllers[controller] = generateActions(strapi.api[key].controllers[controller]);
+      });
 
       return acc;
     }, { controllers: {} });
@@ -199,7 +201,11 @@ module.exports = {
   },
 
   updatePermissions: async function (cb) {
-    const actions = strapi.plugins['users-permissions'].config.actions || [];
+    // fetch all the current permissions from the database, and format them into an array of actions.
+    const databasePermissions = await strapi.query('permission', 'users-permissions').find();
+    const actions = databasePermissions
+      .map(permission => `${permission.type}.${permission.controller}.${permission.action}`);
+
 
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
@@ -232,7 +238,7 @@ module.exports = {
     // Merge array into one.
     const currentActions = appActions.concat(pluginsActions);
     // Count permissions available.
-    const permissions = await strapi.query('permission', 'users-permissions').count();
+    const permissions = databasePermissions.length;
 
     // Compare to know if actions have been added or removed from controllers.
     if (!_.isEqual(actions, currentActions) || permissions < 1) {

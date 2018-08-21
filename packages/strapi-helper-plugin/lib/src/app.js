@@ -10,12 +10,17 @@
 import './public-path.js'; // eslint-disable-line import/extensions
 
 import React from 'react';
+import Loadable from 'react-loadable';
 import { Provider } from 'react-redux';
-
-import App from 'containers/App'; // eslint-disable-line
-
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import configureStore from './store';
 import { translationMessages } from './i18n';
+
+
+const LoadableApp = Loadable({
+  loader: () => import('containers/App'),
+  loading: LoadingIndicatorPage,
+});
 
 const tryRequireRoot = (source) => {
   try {
@@ -62,7 +67,7 @@ const store = configureStore({}, strapi.router, pluginName);
 function Comp(props) {
   return (
     <Provider store={store}>
-      <App {...props} />
+      <LoadableApp {...props} />
     </Provider>
   );
 }

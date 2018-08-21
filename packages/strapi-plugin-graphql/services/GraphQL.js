@@ -14,6 +14,7 @@ const pluralize = require('pluralize');
 const graphql = require('graphql');
 const { makeExecutableSchema } = require('graphql-tools');
 const GraphQLJSON = require('graphql-type-json');
+const GraphQLDateTime = require('graphql-type-datetime');
 const policyUtils = require('strapi-utils').policy;
 
 module.exports = {
@@ -596,10 +597,7 @@ module.exports = {
       let type = 'String';
 
       switch (definition.type) {
-        case 'string':
-        case 'text':
-          type = 'String';
-          break;
+        // TODO: Handle fields of type Array, Perhaps default to [Int] or [String] ...
         case 'boolean':
           type = 'Boolean';
           break;
@@ -608,6 +606,15 @@ module.exports = {
           break;
         case 'float':
           type = 'Float';
+          break;
+        case 'json':
+          type = 'JSON';
+          break;
+        case 'time':
+        case 'date':
+        case 'datetime':
+        case 'timestamp':
+          type = 'DateTime';
           break;
         case 'enumeration':
           type = this.convertEnumType(definition, modelName, attributeName);
@@ -895,8 +902,8 @@ module.exports = {
       // Add timestamps attributes.
       if (_.get(model, 'options.timestamps') === true) {
         Object.assign(initialState, {
-          createdAt: 'String!',
-          updatedAt: 'String!'
+          createdAt: 'DateTime!',
+          updatedAt: 'DateTime!'
         });
 
         Object.assign(acc.resolver[globalId], {
@@ -1025,7 +1032,10 @@ module.exports = {
 
                 const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
-                entry[association.alias]._type = _.upperFirst(association.model);
+                // Set the _type only when the value is defined
+                if (entry[association.alias]) {
+                  entry[association.alias]._type = _.upperFirst(association.model);
+                }
 
                 return entry[association.alias];
               }
@@ -1078,7 +1088,8 @@ module.exports = {
             };
 
             if (association.type === 'model') {
-              params.id = obj[association.alias];
+              const rel = obj[association.alias];
+              params.id = typeof rel === 'object' && 'id' in rel ? rel.id : rel;
             } else {
               // Get refering model.
               const ref = association.plugin ?
@@ -1235,10 +1246,11 @@ module.exports = {
 
   addCustomScalar: (resolvers) => {
     Object.assign(resolvers, {
-      JSON: GraphQLJSON
+      JSON: GraphQLJSON,
+      DateTime: GraphQLDateTime,
     });
 
-    return 'scalar JSON';
+    return 'scalar JSON \n scalar DateTime';
   },
 
   /**

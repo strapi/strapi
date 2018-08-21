@@ -56,8 +56,8 @@
   "Controller.input.label": "{label} ",
   "Controller.selectAll": "Hepsini seç",
 
-  "EditForm.inputSelect.label.role": "Default role for authenticated users",
-  "EditForm.inputSelect.description.role": "It will attach the new authenticated user to the selected role.",
+  "EditForm.inputSelect.label.role": "Kimliği doğrulanmış kullanıcılar için varsayılan rol",
+  "EditForm.inputSelect.description.role": "Yeni kimliği doğrulanmış kullanıcıyı seçilen rolü ekler.",
   "EditForm.inputSelect.subscriptions.label": "Abonelik kotalarını yönetme",
   "EditForm.inputSelect.subscriptions.description": "Saat başına IP için abone sayısını sınırlayın.",
   "EditForm.inputSelect.durations.label": "Süre",
@@ -157,13 +157,11 @@
   "PopUpForm.Email.options.from.name.placeholder": "John Doe",
   "PopUpForm.Providers.enabled.label": "Etkinleştirme",
   "PopUpForm.Providers.enabled.description": "Devre dışı bırakıldıysa kullanıcılar bu sağlayıcıyı kullanamaz.",
-  "PopUpForm.Providers.key.label": "Client ID",
+  "PopUpForm.Providers.key.label": "Web istemcisi ID",
   "PopUpForm.Providers.key.placeholder": "METİN",
-  "PopUpForm.Providers.secret.label": "Client Secret",
+  "PopUpForm.Providers.secret.label": "Web istemcisi Secret",
   "PopUpForm.Providers.secret.placeholder": "METİN",
   "PopUpForm.Providers.redirectURL.front-end.label": "Arayüz uygulamanızın yönlendirme URL'si",
-
-
 
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Facebook uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Google uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",

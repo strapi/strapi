@@ -13,8 +13,8 @@
   "EntriesNumber.number": "{number} Datei gefunden",
   "EntriesNumber.number.plural": "{number} Dateien gefunden",
 
-  "HomePage.title": "Hochladen",
-  "HomePage.description": "Übersicht über alle hochgeladenen Dateien",
+  "HomePage.title": "Dateien hochladen",
+  "HomePage.description": "Übersicht über alle hochgeladenen Dateien.",
   "HomePage.InputSearch.placeholder": "Suche nach einer Datei...",
 
   "Li.linkCopied": "Link in die Zwischenablage kopiert",
@@ -28,8 +28,10 @@
 
   "PluginInputFile.text": "Ziehe eine Datei hierher oder {link} eine Datei zum hochladen aus",
   "PluginInputFile.link": "wähle",
+  "PluginInputFile.loading": "Deine Dateien werden hochgeladen...",
   
   "notification.delete.success": "Die Datei wurde gelöscht",
-  "notification.dropFile.success": "Ihre Datei wurde hochgeladen",
-  "notification.dropFiles.success": "{number} Dateien wurden hochgeladen"
+  "notification.dropFile.success": "Deine Datei wurde hochgeladen",
+  "notification.dropFiles.success": "{number} Dateien wurden hochgeladen",
+  "notification.config.success": "Die Einstellungen wurden aktualisiert"
 }

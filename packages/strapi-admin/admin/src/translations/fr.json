@@ -26,6 +26,7 @@
   "app.components.HomePage.support": "SUPPORT US",
   "app.components.HomePage.support.content": "En achetant notre T-shirt, vous nous aidez à poursuivre à maintenir le projet pour que nous puissions vous donner la meilleure expérience possible!",
   "app.components.HomePage.support.link": "OBTENEZ VOTRE T-SHIRT!",
+  "app.components.HomePage.newsLetter": "Inscrivez-vous à la newsletter pour être contacté à propos de Strapi",
 
   "app.components.BlockLink.documentation": "Voir la documentation",
   "app.components.BlockLink.documentation.content": "Découvrez les concepts, guides et tutoriaux.",
@@ -120,6 +121,7 @@
   "components.Input.error.attribute.sameKeyAndName": "Ne peuvent pas être égaux",
   "components.Input.error.validation.minSupMax": "Ne peut pas être plus grand",
   "components.Input.error.custom-error": "{errorMessage} ",
+  "components.Input.error.validation.json": "Le format JSON n'est pas respecté",
 
   "components.ListRow.empty": "Il n'y a pas de données à afficher.",
 
@@ -143,16 +145,21 @@
   "notification.error": "Une erreur est survenue",
   "notification.error.layout": "Impossible de récupérer le layout de l'admin",
 
+  "Analytics": "Statistiques",
   "Auth & Permissions": "Auth & Permissions",
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content Type Builder",
+  "Files Upload": "Téléversement de fichiers",
   "Settings Manager": "Settings Manager",
   "Email": "Email",
   "Password": "Mot de passe",
   "Username": "Nom d'utilisateur",
+  "Users": "Utilisateurs",
+  "Users & Permissions": "Utilisateurs et autorisations",
   "Provider": "Provider",
   "ResetPasswordToken": "ResetPasswordToken",
   "Role": "Rôle",
+  "Roles & Permissions": "Rôles et autorisations",
   "New entry": "Nouvelle entrée",
   "request.error.model.unknown": "Le model n'existe pas"
 }

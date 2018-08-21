@@ -52,6 +52,10 @@ module.exports = {
       // Check if the user exists.
       const user = await strapi.query('user', 'users-permissions').findOne(query, ['role']);
 
+      if (user.blocked === true) {
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }] : 'Your account has been blocked by the administrator.');
+      }
+
       if (!user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       }
@@ -114,8 +118,11 @@ module.exports = {
 
       user.password =  await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
+      // Remove relations data to update user password.
+      const data = _.omit(user, strapi.plugins['users-permissions'].models.user.associations.map(ast => ast.alias));
+
       // Update the user.
-      await strapi.query('user', 'users-permissions').update(user);
+      await strapi.query('user', 'users-permissions').update(data);
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
@@ -203,8 +210,11 @@ module.exports = {
       return ctx.badRequest(null, err);
     }
 
+    // Remove relations data to update user code.
+    const data = _.omit(user, strapi.plugins['users-permissions'].models.user.associations.map(ast => ast.alias));
+
     // Update the user.
-    await strapi.query('user', 'users-permissions').update(user);
+    await strapi.query('user', 'users-permissions').update(data);
 
     ctx.send({ ok: true });
   },

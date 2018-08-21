@@ -4,18 +4,6 @@
       "items": [
         {
           "label": {
-            "id": "content-type-builder.form.contentType.item.connections"
-          },
-          "name": "connection",
-          "type": "select",
-          "value": "default",
-          "items": [{}],
-          "validations": {
-            "required": true
-          }
-        },
-        {
-          "label": {
             "id": "content-type-builder.form.contentType.item.name"
           },
           "name": "name",
@@ -31,7 +19,7 @@
                 "parent": {
                   "type": "a",
                   "attr": {
-                    "href": "https://v3.strapi.io/documentation/concepts/concepts.html#models",
+                    "href": "https://strapi.io/documentation/concepts/concepts.html#models",
                     "target": "_blank"
                   }
                 },
@@ -43,6 +31,18 @@
                 }
               }
             }
+          }
+        },
+        {
+          "label": {
+            "id": "content-type-builder.form.contentType.item.connections"
+          },
+          "name": "connection",
+          "type": "select",
+          "value": "default",
+          "items": [{}],
+          "validations": {
+            "required": true
           }
         },
         {

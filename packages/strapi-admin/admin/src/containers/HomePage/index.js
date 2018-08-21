@@ -14,12 +14,12 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, upperFirst } from 'lodash';
 import cn from 'classnames';
 
-import Block from 'components/HomePageBlock/Loadable';
+import Block from 'components/HomePageBlock';
 import Button from 'components/Button';
-import Sub from 'components/Sub/Loadable';
+import Sub from 'components/Sub';
 import Input from 'components/InputText';
-import SupportUsCta from 'components/SupportUsCta/Loadable';
-import SupportUsTitle from 'components/SupportUsTitle/Loadable';
+import SupportUsCta from 'components/SupportUsCta';
+import SupportUsTitle from 'components/SupportUsTitle';
 
 import { selectPlugins } from 'containers/App/selectors';
 
@@ -137,7 +137,7 @@ export class HomePage extends React.PureComponent {
     const data = this.showFirstBlock()
       ? {
         className: styles.homePageTutorialButton,
-        href: 'https://strapi.io/documentation/getting-started/quick-start.html',
+        href: 'https://strapi.io/documentation/getting-started/quick-start.html#create-your-first-api',
         id: 'app.components.HomePage.button.quickStart',
         primary: true,
       }

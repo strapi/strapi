@@ -17,6 +17,8 @@ import cn from 'classnames';
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
 import InputSearch from 'components/InputSearchContainer';
+import LoadingIndicator from 'components/LoadingIndicator';
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import PluginHeader from 'components/PluginHeader';
 import Plugins from 'components/Plugins';
 import Policies from 'components/Policies';
@@ -43,6 +45,7 @@ import {
   setRoleId,
   setShouldDisplayPolicieshint,
   submit,
+  resetProps,
   resetShouldDisplayPoliciesHint,
 } from './actions';
 
@@ -90,6 +93,8 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
   componentWillUnmount() {
     // Empty formErrors
     this.props.setErrors([]);
+    // Empty modifiedData so prev values aren't displayed when loading
+    this.props.resetProps();
     this.props.resetShouldDisplayPoliciesHint();
   }
 
@@ -101,6 +106,73 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
 
     this.props.submit();
   }
+
+  showLoaderForm = () => {
+    const { editPage: { modifiedData }, match: { params: { actionType } } } = this.props;
+
+    return actionType !== 'create' && get(modifiedData, ['name'], '') === '';
+  }
+
+  showLoaderPermissions = () => {
+    const { editPage: { modifiedData } } = this.props;
+
+    return isEmpty(get(modifiedData, ['permissions']));
+  }
+
+  renderFirstBlock = () => (
+    <React.Fragment>
+      <div className="col-md-6">
+        <div className="row">
+          <Input
+            autoFocus
+            customBootstrapClass="col-md-12"
+            errors={get(this.props.editPage, ['formErrors', findIndex(this.props.editPage.formErrors, ['name', 'name']), 'errors'])}
+            didCheckErrors={this.props.editPage.didCheckErrors}
+            label={{ id: 'users-permissions.EditPage.form.roles.label.name' }}
+            name="name"
+            onChange={this.props.onChangeInput}
+            type="text"
+            validations={{ required: true }}
+            value={get(this.props.editPage, ['modifiedData', 'name'])}
+          />
+        </div>
+        <div className="row">
+          <Input
+            customBootstrapClass="col-md-12"
+            label={{ id: 'users-permissions.EditPage.form.roles.label.description' }}
+            name="description"
+            onChange={this.props.onChangeInput}
+            type="textarea"
+            validations={{ required: true }}
+            value={get(this.props.editPage, ['modifiedData', 'description'])}
+          />
+        </div>
+      </div>
+      <InputSearch
+        addUser={this.props.addUser}
+        didDeleteUser={this.props.editPage.didDeleteUser}
+        didFetchUsers={this.props.editPage.didFetchUsers}
+        didGetUsers={this.props.editPage.didGetUsers}
+        getUser={this.props.getUser}
+        label={{
+          id: 'users-permissions.EditPage.form.roles.label.users',
+          params: {
+            number: size(get(this.props.editPage, ['modifiedData', 'users'])),
+          },
+        }}
+        onClickAdd={this.props.onClickAdd}
+        onClickDelete={this.props.onClickDelete}
+        name="users"
+        type="text"
+        users={get(this.props.editPage, 'users')}
+        validations={{ required: true }}
+        values={get(this.props.editPage, ['modifiedData', 'users'])}
+      />
+      <div className="col-md-12">
+        <div className={styles.separator} />
+      </div>
+    </React.Fragment>
+  )
 
   render() {
     const pluginHeaderTitle = this.props.match.params.actionType === 'create' ?
@@ -124,6 +196,10 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
         disabled: isEqual(this.props.editPage.modifiedData, this.props.editPage.initialData),
       },
     ];
+ 
+    if (this.showLoaderForm()) {
+      return <LoadingIndicatorPage />;
+    }
 
     return (
       <div>
@@ -152,61 +228,21 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
                 </div>
                 <form className={styles.form}>
                   <div className="row">
-                    <div className="col-md-6">
-                      <div className="row">
-                        <Input
-                          autoFocus
-                          customBootstrapClass="col-md-12"
-                          errors={get(this.props.editPage, ['formErrors', findIndex(this.props.editPage.formErrors, ['name', 'name']), 'errors'])}
-                          didCheckErrors={this.props.editPage.didCheckErrors}
-                          label={{ id: 'users-permissions.EditPage.form.roles.label.name' }}
-                          name="name"
-                          onChange={this.props.onChangeInput}
-                          type="text"
-                          validations={{ required: true }}
-                          value={get(this.props.editPage, ['modifiedData', 'name'])}
-                        />
-                      </div>
-                      <div className="row">
-                        <Input
-                          customBootstrapClass="col-md-12"
-                          label={{ id: 'users-permissions.EditPage.form.roles.label.description' }}
-                          name="description"
-                          onChange={this.props.onChangeInput}
-                          type="textarea"
-                          validations={{ required: true }}
-                          value={get(this.props.editPage, ['modifiedData', 'description'])}
-                        />
-                      </div>
-                    </div>
-                    <InputSearch
-                      addUser={this.props.addUser}
-                      didDeleteUser={this.props.editPage.didDeleteUser}
-                      didFetchUsers={this.props.editPage.didFetchUsers}
-                      didGetUsers={this.props.editPage.didGetUsers}
-                      getUser={this.props.getUser}
-                      label={{
-                        id: 'users-permissions.EditPage.form.roles.label.users',
-                        params: {
-                          number: size(get(this.props.editPage, ['modifiedData', 'users'])),
-                        },
-                      }}
-                      onClickAdd={this.props.onClickAdd}
-                      onClickDelete={this.props.onClickDelete}
-                      name="users"
-                      type="text"
-                      users={get(this.props.editPage, 'users')}
-                      validations={{ required: true }}
-                      values={get(this.props.editPage, ['modifiedData', 'users'])}
-                    />
-                    <div className="col-md-12">
-                      <div className={styles.separator} />
-                    </div>
+                    {this.showLoaderForm() ? (
+                      <div className={styles.loaderWrapper}><LoadingIndicator /></div>
+                    ) : this.renderFirstBlock()}
                   </div>
                   <div className="row" style={{ marginRight: '-30px'}}>
-                    <Plugins
-                      plugins={get(this.props.editPage, ['modifiedData', 'permissions'])}
-                    />
+                    {this.showLoaderPermissions() && (
+                      <div className={styles.loaderWrapper} style={{ minHeight: '400px' }}>
+                        <LoadingIndicator />
+                      </div>
+                    )}
+                    {!this.showLoaderPermissions() && (
+                      <Plugins
+                        plugins={get(this.props.editPage, ['modifiedData', 'permissions'])}
+                      />
+                    )}
                     <Policies
                       shouldDisplayPoliciesHint={this.props.editPage.shouldDisplayPoliciesHint}
                       inputSelectName={this.props.editPage.inputPoliciesPath}
@@ -246,6 +282,7 @@ EditPage.propTypes = {
   onChangeInput: PropTypes.func.isRequired,
   onClickAdd: PropTypes.func.isRequired,
   onClickDelete: PropTypes.func.isRequired,
+  resetProps: PropTypes.func.isRequired,
   resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
   selectAllActions: PropTypes.func.isRequired,
   setActionType: PropTypes.func.isRequired,
@@ -281,6 +318,7 @@ function mapDispatchToProps(dispatch) {
       setRoleId,
       setShouldDisplayPolicieshint,
       submit,
+      resetProps,
       resetShouldDisplayPoliciesHint,
     },
     dispatch,
