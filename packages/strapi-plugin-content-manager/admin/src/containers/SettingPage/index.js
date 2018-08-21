@@ -637,8 +637,9 @@ class SettingPage extends React.PureComponent {
     );
 
     if (i === 3) {
+
       return (
-        <React.Fragment>
+        <React.Fragment key={input.name}>
           <div className="col-md-12">
             <div className={styles.separator} />
           </div>

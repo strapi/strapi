@@ -223,7 +223,7 @@ class VariableDraggableAttr extends React.Component {
       }
 
       if (isFullSize) {
-        style = { width: '100%', height: '10px', marginBottom: '6px' };
+        style = { width: '100%', height: '2px', marginBottom: '6px' };
       }
 
       if (showRightCarret) {

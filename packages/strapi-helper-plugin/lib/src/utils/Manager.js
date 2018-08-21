@@ -1,4 +1,4 @@
-const { findIndex, pullAt, range } = require('lodash');
+const { findIndex, lowerCase, pullAt, range } = require('lodash');
 const { List } = require('immutable');
 
 class Manager {
@@ -76,7 +76,7 @@ class Manager {
    * @returns {Number}
    */
   getBootStrapCol(type) {
-    switch(type) {
+    switch(lowerCase(type)) {
       case 'checkbox':
       case 'boolean':
       case 'date':
@@ -88,7 +88,6 @@ class Manager {
         return 4;
       case 'json':
       case 'wysiwyg':
-      case 'WYSIWYG':
         return 12;
       default:
         return 6;
@@ -114,7 +113,7 @@ class Manager {
    * Retrieve the last element of each bootstrap line
    * @returns {Array}
    */
-  getLinesBound() { // NOTE: doesn't work for the last element if the line is not full!
+  getLinesBound() {
     const array = [];
     let sum = 0;
 
