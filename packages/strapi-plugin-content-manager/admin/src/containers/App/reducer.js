@@ -172,7 +172,7 @@ function appReducer(state = initialState, action) {
           const itemInfos = manager.getAttrInfos(draggedItemIndex);
           const isFullSize = itemInfos.bootstrapCol === 12;
           const dropLineBounds = { left: manager.getBound(false, action.hoverIndex), right: manager.getBound(true, action.hoverIndex) };
-          const hasMoved = state.get('hasMoved');
+          const hasMoved = state.get('hasMoved'); // Used only for non full-width elements
           
           if (isFullSize && draggedItemIndex !== -1) {
             const upwards = action.dragIndex > action.hoverIndex;
@@ -185,6 +185,8 @@ function appReducer(state = initialState, action) {
               .insert(indexToDrop, draggedItemName);
           }
 
+          // We allow the reorder for full width elements since they don't modify the current layout of the view.
+          // Allowing it for the other types will be impossible to reorder the view and keep the current layout.
           if (!hasMoved && !isFullSize && draggedItemIndex !== -1) {
             const nodeBound = manager.getBound(true);
             const currentLine = findIndex(arrayOfLastLineElements, ['index', nodeBound.index]);

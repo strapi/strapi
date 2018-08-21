@@ -112,24 +112,6 @@ class SortableItem extends React.Component {
             style={{ opacity }}
           >
             <SelectManyDraggedItem index={index} item={item} onClick={onClick} onRemove={onRemove} />
-            {/* <div>
-              <div className={styles.dragHandle}><span></span></div>
-              <FormattedMessage id='content-manager.containers.Edit.clickToJump'>
-                {title => (
-                  <span 
-                    className='sortable-item--value'
-                    onClick={() => onClick(item)} 
-                    title={title}
-                  >
-                    {item.label}
-                  </span>
-                )}
-              </FormattedMessage> 
-            
-            </div>
-            <div className={styles.sortableListItemActions}>
-              <img src={IconRemove} alt="Remove Icon" onClick={() => onRemove(index)} />
-            </div> */}
           </li>
         ),
       )

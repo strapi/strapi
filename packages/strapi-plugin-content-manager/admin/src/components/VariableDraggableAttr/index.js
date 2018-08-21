@@ -93,7 +93,7 @@ const variableDraggableAttrTarget = {
     const hoverBoundingRect = findDOMNode(component).getBoundingClientRect();
 
     // Get vertical middle
-    const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2; // NOTE: Change the divider for wysiwyg
+    const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
 
     // Determine mouse position
     const clientOffset = monitor.getClientOffset();
@@ -197,14 +197,18 @@ class VariableDraggableAttr extends React.Component {
     const isFullSize = classNames.bootstrap === 'col-md-12';
     let itemLine = -1;
     let itemLineEls = [];
+    // Retrieve from the grid the attr's y coordinate
     grid.forEach((line, index) => {
       if (line.indexOf(name) !== -1) {
         itemLine = index;
         itemLineEls = line;
       }
     });
+    // Retrieve from the grid the attr's x coordinate
     const itemPosition = get(grid, itemLine, []).indexOf(name);
+    // Retrieve the draggedItem's y coordinate in order to display a custom dropTarget (the blue caret).
     const draggedItemLineIndex = get(grid, itemLine, []).indexOf(draggedItemName);
+    // The source target can either located on the left or right of an attr
     let showLeftCarret = hoverIndex === index && initDragLine !== itemLine;
     let showRightCarret = hoverIndex === index && initDragLine === itemLine;
 
@@ -214,7 +218,10 @@ class VariableDraggableAttr extends React.Component {
         showRightCarret = false;
       }
     }
-  
+    
+    /**
+     * Retrieve the blue Caret custom style depending on its position and attr's height
+     */
     const carretStyle = (() => {
       let style = { height: '30px', marginRight: '3px' };
 
@@ -233,6 +240,7 @@ class VariableDraggableAttr extends React.Component {
       return style;
     })();
 
+    // If the draggedItem is full size, for instance the WYSIWYG or the json field return a full size blue caret
     if (dragStart && isFullSize) {
       return <Carret style={carretStyle} />;
     }
