@@ -186,7 +186,7 @@ module.exports = {
       type: 'plugin',
       name: 'users-permissions',
       key: 'email'
-    }).set({value: ctx.request.body});
+    }).set({value: ctx.request.body['email-templates']});
 
     ctx.send({ ok: true });
   },
