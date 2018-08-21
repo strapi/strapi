@@ -15,9 +15,10 @@ import { selectLocale } from '../LanguageProvider/selectors';
 import {
   downloadPluginError,
   downloadPluginSucceeded,
-  getPluginsSucceeded,
+  getAvailablePluginsSucceeded,
+  getInstalledPluginsSucceeded,
 } from './actions';
-import { DOWNLOAD_PLUGIN, GET_PLUGINS } from './constants';
+import { DOWNLOAD_PLUGIN, GET_AVAILABLE_PLUGINS, GET_INSTALLED_PLUGINS } from './constants';
 import { makeSelectPluginToDownload } from './selectors';
 
 
@@ -49,7 +50,7 @@ export function* pluginDownload() {
   }
 }
 
-export function* pluginsGet() {
+export function* getAvailablePlugins() {
   try {
     // Get current locale.
     const locale = yield select(selectLocale());
@@ -73,20 +74,44 @@ export function* pluginsGet() {
       availablePlugins = [];
     }
 
-    yield put(getPluginsSucceeded(availablePlugins));
+    yield put(getAvailablePluginsSucceeded(availablePlugins));
   } catch(err) {
     strapi.notification.error('notification.error');
   }
 }
 
+export function* getInstalledPlugins() {
+  try {
+    const opts = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
 
+    let installedPlugins;
+
+    try {
+      // Retrieve plugins list.
+      installedPlugins = yield call(request, '/admin/plugins', opts);
+    } catch (e) {
+      installedPlugins = [];
+    }
+
+    yield put(getInstalledPluginsSucceeded(Object.keys(installedPlugins.plugins)));
+  } catch(err) {
+    strapi.notification.error('notification.error');
+  }
+}
 
 // Individual exports for testing
 export default function* defaultSaga() {
-  const loadPluginsWatcher = yield fork(takeLatest, GET_PLUGINS, pluginsGet);
+  const loadAvailablePluginsWatcher = yield fork(takeLatest, GET_AVAILABLE_PLUGINS, getAvailablePlugins);
+  const loadInstalledPluginsWatcher = yield fork(takeLatest, GET_INSTALLED_PLUGINS, getInstalledPlugins);
   yield fork(takeLatest, DOWNLOAD_PLUGIN, pluginDownload);
 
   yield take(LOCATION_CHANGE);
 
-  yield cancel(loadPluginsWatcher);
+  yield cancel(loadAvailablePluginsWatcher);
+  yield cancel(loadInstalledPluginsWatcher);
 }
