@@ -1,6 +1,6 @@
 {
   "name": "strapi-middleware-views",
-  "version": "3.0.0-alpha.13.0.1",
+  "version": "3.0.0-alpha.13.1",
   "description": "Views middleware to enable server-side rendering for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -17,7 +17,7 @@
   "dependencies": {
     "consolidate": "^0.14.5",
     "koa-views": "^6.1.1",
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.5"
   },
   "author": {
     "email": "hi@strapi.io",
