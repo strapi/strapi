@@ -240,7 +240,7 @@ function setAttributeFormData(hash) {
   const type = formType === 'number' ? 'integer' : formType;
   let defaultValue = type === 'number' ? 0 : '';
 
-  if (type === 'checkbox') {
+  if (type === 'boolean') {
     defaultValue = false;
   }
 

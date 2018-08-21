@@ -23,6 +23,10 @@ module.exports = async (ctx, next) => {
     if (role.type === 'root') {
       return await next();
     }
+
+    if (ctx.state.user.blocked === true) {
+      return ctx.unauthorized(`Your account has been blocked by the administrator.`);
+    }
   }
   // Retrieve `public` role.
   if (!role) {
