@@ -77,6 +77,14 @@ module.exports = async cb => {
         'user:email'
       ]
     },
+    microsoft: {
+      enabled: false,
+      icon: 'windows',
+      key: '',
+      secret: '',
+      callback: '/auth/microsoft/callback',
+      scope: ['user.read']
+    },
     twitter: {
       enabled: false,
       icon: 'twitter',

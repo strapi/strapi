@@ -80,7 +80,7 @@
         },
         "name": "news",
         "type": "checkbox",
-        "value": true
+        "value": false
       }
     ],
     "register-success": [
