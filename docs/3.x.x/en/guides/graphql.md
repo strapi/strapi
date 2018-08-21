@@ -146,6 +146,149 @@ type Query {
 
 The query will use the generated controller's actions as resolvers. It means that the `posts` query will execute the `Post.find` action and the `post` query will use the `Post.findOne` action.
 
+## Aggregation & Grouping
+> This feature is only available on Mongoose ORM.
+
+Strapi now supports Aggregation & Grouping.
+Let's consider again the model mentioned above:
+```
+type Post {
+  _id: ID
+  createdAt: String
+  updatedAt: String
+  title: String
+  content: String
+  nb_likes: Int,
+  published: Boolean
+}
+
+```
+Strapi will generate automatically for you the following queries & types:
+
+### Aggregation
+```
+type PostConnection {
+  values: [Post]
+  groupBy: PostGroupBy
+  aggregate: PostAggregator
+}
+
+type PostGroupBy {
+  _id: [PostConnection_id]
+  createdAt: [PostConnectionCreatedAt]
+  updatedAt: [PostConnectionUpdatedAt]
+  title: [PostConnectionTitle]
+  content: [PostConnectionContent]
+  nb_likes: [PostConnectionNbLikes],
+  published: [PostConnectionPublished]
+}
+
+type PostConnectionPublished {
+  key: Boolean
+  connection: PostConnection
+}
+
+type PostAggregator {
+  count: Int
+  sum: PostAggregatorSum
+  avg: PostAggregatorAvg
+  min: PostAggregatorMin
+  max: PostAggregatorMax
+}
+
+type PostAggregatorAvg {
+  nb_likes: Float
+}
+
+type PostAggregatorMin { // Same for max and sum
+  nb_likes: Int
+}
+
+type Query {
+  postsConnection(sort: String, limit: Int, start: Int, where: JSON): PostConnection
+}
+```
+
+Getting the total count and the average likes of posts:
+
+```
+postsConnection {
+  aggregate {
+    count
+    avg {
+      nb_likes
+    }
+  }
+
+}
+```
+
+Let's say we want to do the same query but for only published posts
+```
+postsConnection(where: { published: true }) {
+  aggregate {
+    count
+    avg {
+      nb_likes
+    }
+  }
+
+}
+```
+
+Gettings the average likes of published and unpublished posts
+
+```
+postsConnection {
+  groupBy {
+    published: {
+      key
+      connection {
+        aggregate {
+          avg {
+            nb_likes
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Result
+```JSON
+{
+  data: {
+    postsConnection: {
+      groupBy: {
+        published: [
+          {
+            key: true,
+            connection: {
+              aggregate: {
+                avg {
+                  nb_likes: 10
+                }
+              }
+            }
+          },
+          {
+            key: false,
+            connection: {
+              aggregate: {
+                avg {
+                  nb_likes: 0
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
 ## Customise the GraphQL schema
 
 If you want to define a new scalar, input or enum types, this section is for you. To do so, you will have to create a `schema.graphql` file. This file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./plugins/*/config/schema.graphql`.
