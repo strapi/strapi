@@ -1,6 +1,6 @@
 {
   "name": "strapi-hook-knex",
-  "version": "3.0.0-alpha.13.0.1",
+  "version": "3.0.0-alpha.13.1",
   "description": "Knex hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
