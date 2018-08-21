@@ -10,9 +10,10 @@
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs-extra');
+const shell = require('shelljs');
 
 // Logger.
-const { cli, logger } = require('strapi-utils');
+const { cli, logger, packageManager } = require('strapi-utils');
 
 /**
  * `$ strapi install`
@@ -55,10 +56,26 @@ module.exports = function (plugin, cliArguments) {
     logger.debug('Installing the plugin from npm registry.');
 
     // Install the plugin from the npm registry.
-    exec(`npm install ${pluginID}@alpha --ignore-scripts --no-save --prefix ${pluginPath}`, (err) => {
+    const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
+
+    if (!isStrapiInstalledWithNPM) {
+      // Create the directory yarn doesn't do it it
+      shell.exec('mkdir', [pluginPath]);
+      // Add a package.json so it installs the dependencies
+      shell.touch(`${pluginPath}/package.json`);
+      fs.writeFileSync(`${pluginPath}/package.json`, JSON.stringify({}), 'utf8');
+    }
+
+    const cmd = isStrapiInstalledWithNPM ? `npm install ${pluginID}@alpha --ignore-scripts --no-save --prefix ${pluginPath}` : `yarn --cwd ${pluginPath} add ${pluginID}@alpha --ignore-scripts --no-save`;
+    exec(cmd, (err) => {
       if (err) {
         logger.error(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginID}`);
         process.exit(1);
+      }
+
+      // Remove the created package.json needed for yarn
+      if (!isStrapiInstalledWithNPM) {
+        shell.rm('-r', `${pluginPath}/package.json`);
       }
 
       // Debug message.
@@ -67,10 +84,11 @@ module.exports = function (plugin, cliArguments) {
       try {
         // Debug message.
         logger.debug(`Moving the \`node_modules/${pluginID}\` folder to the \`./plugins\` folder.`);
-
         // Move the plugin from the `node_modules` folder to the `./plugins` folder.
-        fs.copySync(`${pluginPath}/node_modules/${pluginID}`, pluginPath);
-
+        fs.copySync(`${pluginPath}/node_modules/${pluginID}`, pluginPath, {
+          overwrite: true,
+          dereference: true,
+        });
         // Copy .gitignore because the file is ignored during `npm publish`
         // and we need it to build the plugin.
         try {

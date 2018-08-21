@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
-const exec = require('child_process').execSync;
+const exec = require('child_process').spawnSync;
 
 module.exports = {
   menu: {
@@ -650,9 +650,9 @@ module.exports = {
     const redisClients = ['redis'];
 
     let connector;
-    if (_.indexOf(bookshelfClients, client) !== -1) connector = 'strapi-bookshelf';
-    if (_.indexOf(mongooseClients, client) !== -1) connector = 'strapi-mongoose';
-    if (_.indexOf(redisClients, client) !== -1) connector = 'strapi-redis';
+    if (_.indexOf(bookshelfClients, client) !== -1) connector = 'strapi-hook-bookshelf';
+    if (_.indexOf(mongooseClients, client) !== -1) connector = 'strapi-hook-mongoose';
+    if (_.indexOf(redisClients, client) !== -1) connector = 'strapi-hook-redis';
 
     return connector;
   },
@@ -901,17 +901,17 @@ module.exports = {
 
     if (connector && !installedConnector) {
       strapi.log.info(`Installing ${connector} dependency ...`);
-      exec(`npm install ${connector}@alpha`);
+      exec('npm', ['install', `${connector}@alpha`]);
     }
 
     if (client && !installedClient) {
       strapi.log.info(`Installing ${client} dependency ...`);
-      exec(`npm install ${client}`);
+      exec('npm', ['install', client]);
     }
   },
 
   cleanDependency: (env, config) => {
-    const availableConnectors = ['strapi-mongoose', 'strapi-bookshelf', 'strapi-redis'];
+    const availableConnectors = ['strapi-hook-mongoose', 'strapi-hook-bookshelf', 'strapi-hook-redis'];
     let usedConnectors = [];
     const errors = [];
 

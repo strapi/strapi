@@ -19,19 +19,21 @@ import cn from 'classnames';
 import BackHeader from 'components/BackHeader';
 import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
+import PopUpWarning from 'components/PopUpWarning';
 
 // Plugin's components
 import Edit from 'components/Edit';
 import EditRelations from 'components/EditRelations';
 
 // App selectors
-import { makeSelectModels, makeSelectSchema } from 'containers/App/selectors';
+import { makeSelectSchema } from 'containers/App/selectors';
 
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 import { bindLayout } from 'utils/bindLayout';
 import inputValidations from 'utils/inputsValidations';
+import { generateRedirectURI } from 'containers/ListPage/utils';
 
 import { checkFormValidity } from 'utils/formValidations';
 
@@ -53,36 +55,18 @@ import makeSelectEditPage from './selectors';
 import styles from './styles.scss';
 
 export class EditPage extends React.Component {
+  state = { showWarning: false };
+
   componentDidMount() {
-    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
-
-    if (!this.isCreating()) {
-      const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
-      this.props.getData(this.props.match.params.id, this.getSource(), mainField);
-    } else {
-      this.props.getLayout(this.getSource());
-    }
-
-    // Get all relations made with the upload plugin
-    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
-      const association = get(this.getSchema(), ['relations', current], {});
-
-      if (association.plugin === 'upload' && association[association.type] === 'file') {
-        const relation = {
-          name: current,
-          multiple: association.nature === 'manyToManyMorph',
-        };
-
-        acc.push(relation);
-      }
-      return acc;
-    }, []);
-
-    // Update the reducer so we can use it to create the appropriate FormData in the saga
-    this.props.setFileRelations(fileRelations);
+    this.initComponent(this.props);
   }
 
   componentDidUpdate(prevProps) {
+    if (prevProps.location.pathname !== this.props.location.pathname) {
+      this.props.resetProps();
+      this.initComponent(this.props);
+    }
+
     if (prevProps.editPage.submitSuccess !== this.props.editPage.submitSuccess) {
       if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
         const redirectUrl = this.props.location.search.split('?redirectUrl=')[1];
@@ -123,7 +107,7 @@ export class EditPage extends React.Component {
    * Retrieve the model
    * @type {Object}
    */
-  getModel = () => get(this.props.models, ['models', this.getModelName()]) || get(this.props.models, ['plugins', this.getSource(), 'models', this.getModelName()]);
+  getModel = () => get(this.props.schema, ['models', this.getModelName()]) || get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()]);
 
   /**
    * Retrieve specific attribute
@@ -148,8 +132,8 @@ export class EditPage extends React.Component {
    * @return {Object}
    */
   getSchema = () => this.getSource() !== 'content-manager' ?
-    get(this.props.schema, ['plugins', this.getSource(), this.getModelName()])
-    : get(this.props.schema, [this.getModelName()]);
+    get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()])
+    : get(this.props.schema, ['models', this.getModelName()]);
 
   getPluginHeaderTitle = () => {
     if (this.isCreating()) {
@@ -164,6 +148,38 @@ export class EditPage extends React.Component {
    * @return {String}
    */
   getSource = () => getQueryParameters(this.props.location.search, 'source');
+
+  /**
+   * Initialize component
+   */
+  initComponent = (props) => {
+    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
+
+    if (!this.isCreating()) {
+      const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
+      this.props.getData(props.match.params.id, this.getSource(), mainField);
+    } else {
+      this.props.getLayout(this.getSource());
+    }
+
+    // Get all relations made with the upload plugin
+    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
+      const association = get(this.getSchema(), ['relations', current], {});
+
+      if (association.plugin === 'upload' && association[association.type] === 'file') {
+        const relation = {
+          name: current,
+          multiple: association.nature === 'manyToManyMorph',
+        };
+
+        acc.push(relation);
+      }
+      return acc;
+    }, []);
+
+    // Update the reducer so we can use it to create the appropriate FormData in the saga
+    this.props.setFileRelations(fileRelations);
+  }
 
   handleBlur = ({ target }) => {
     const defaultValue = get(this.getModelAttribute(target.name), 'default');
@@ -209,6 +225,27 @@ export class EditPage extends React.Component {
     this.props.changeData({ target });
   }
 
+  handleRedirect = ({ model, id, source = 'content-manager'}) => {
+    /* eslint-disable */
+    switch (model) {
+      case 'permission':
+      case 'role':
+      case 'file':
+        // Exclude special models which are handled by plugins.
+        if (source !== 'content-manager') {
+          break;
+        }
+      default:
+        const pathname = `${this.props.match.path.replace(':slug', model).replace(':id', id)}`;
+      
+        this.props.history.push({
+          pathname,
+          search: `?source=${source}&redirectURI=${generateRedirectURI({ model, search: `?source=${source}` })}`,
+        });
+    }
+    /* eslint-enable */
+  }
+
   handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = checkFormValidity(this.generateFormFromRecord(), this.props.editPage.formValidations);
@@ -243,7 +280,7 @@ export class EditPage extends React.Component {
       {
         label: 'content-manager.containers.Edit.reset',
         kind: 'secondary',
-        onClick: this.props.onCancel,
+        onClick: this.toggle,
         type: 'button',
         disabled: this.showLoaders(),
       },
@@ -265,8 +302,11 @@ export class EditPage extends React.Component {
     return isLoading && !this.isCreating() || isLoading && get(layout, this.getModelName()) === undefined;
   }
 
+  toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+
   render() {
-    const { editPage } = this.props;
+    const { editPage, onCancel } = this.props;
+    const { showWarning } = this.state;
 
     return (
       <div>
@@ -276,6 +316,21 @@ export class EditPage extends React.Component {
             <PluginHeader
               actions={this.pluginHeaderActions()}
               title={{ id: this.getPluginHeaderTitle() }}
+            />
+            <PopUpWarning
+              isOpen={showWarning}
+              toggleModal={this.toggle}
+              content={{
+                title: 'content-manager.popUpWarning.title',
+                message: 'content-manager.popUpWarning.warning.cancelAllSettings',
+                cancel: 'content-manager.popUpWarning.button.cancel',
+                confirm: 'content-manager.popUpWarning.button.confirm',
+              }}
+              popUpWarningType="danger"
+              onConfirm={() => {
+                onCancel();
+                this.toggle();
+              }}
             />
             <div className="row">
               <div className={this.isRelationComponentNull() ? 'col-lg-12' : 'col-lg-9'}>
@@ -309,6 +364,7 @@ export class EditPage extends React.Component {
                         changeData={this.props.changeData}
                         record={editPage.record}
                         schema={this.getSchema()}
+                        onRedirect={this.handleRedirect}
                       />
                     )}
                   </div>
@@ -327,7 +383,7 @@ EditPage.contextTypes = {
 };
 
 EditPage.defaultProps = {
-  models: {},
+  schema: {},
 };
 
 EditPage.propTypes = {
@@ -339,10 +395,9 @@ EditPage.propTypes = {
   initModelProps: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
-  models: PropTypes.object,
   onCancel: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
-  schema: PropTypes.object.isRequired,
+  schema: PropTypes.object,
   setFileRelations: PropTypes.func.isRequired,
   setFormErrors: PropTypes.func.isRequired,
   submit: PropTypes.func.isRequired,
@@ -367,7 +422,6 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = createStructuredSelector({
   editPage: makeSelectEditPage(),
-  models: makeSelectModels(),
   schema: makeSelectSchema(),
 });
 

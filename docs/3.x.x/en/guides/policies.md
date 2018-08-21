@@ -11,7 +11,7 @@ There are several ways to create a policy.
 **Path —** `./config/policies/isAuthenticated.js`.
 ```js
 module.exports = async (ctx, next) => {
-  if (ctx.session.isAuthenticated === true) {
+  if (ctx.state.user) {
     // Go to next policy or will reach the controller's action.
     return await next();
   }
@@ -87,7 +87,7 @@ The scoped policies can only be associated to the routes defined in the API wher
 **Path —** `./api/car/config/policies/isAdmin.js`.
 ```js
 module.exports = async (ctx, next) => {
-  if (ctx.session.user.role === 'administrator') {
+  if (ctx.state.user.role.name === 'Administrator') {
     // Go to next policy or will reach the controller's action.
     return await next();
   }

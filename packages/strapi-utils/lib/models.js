@@ -13,7 +13,7 @@ const _ = require('lodash');
 // Following this discussion https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric this function is the best implem to determine if a value is a valid number candidate
 const isNumeric = (value) => {
   return !isNaN(parseFloat(value)) && isFinite(value);
-}
+};
 
 /* eslint-disable prefer-template */
 /*
@@ -457,11 +457,28 @@ module.exports = {
     _.forEach(params, (value, key)  => {
       let result;
       let formattedValue;
-
-      // Check if the value if a valid candidate to be converted to a number value
-      formattedValue = isNumeric(value)
-        ? _.toNumber(value)
-        : value;
+      let modelAttributes = models[model]['attributes'];
+      let fieldType;
+      // Get the field type to later check if it's a string before number conversion
+      if (modelAttributes[key]) {
+        fieldType = modelAttributes[key]['type'];
+      } else {
+        // Remove the filter keyword at the end
+        let splitKey = key.split('_').slice(0,-1);
+        splitKey = splitKey.join('_');
+        
+        if (modelAttributes[splitKey]) {
+          fieldType = modelAttributes[splitKey]['type'];
+        }
+      }
+      // Check if the value is a valid candidate to be converted to a number value
+      if (fieldType !== 'string') {
+        formattedValue = isNumeric(value)
+          ? _.toNumber(value)
+          : value;
+      } else {
+        formattedValue = value;
+      }
 
       if (_.includes(['_start', '_limit'], key)) {
         result = convertor(formattedValue, key);

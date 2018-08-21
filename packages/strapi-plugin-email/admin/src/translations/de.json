@@ -1,4 +1,14 @@
 {
+  "ConfigPage.title": "E-Mail - Einstellungen",
+  "ConfigPage.description": "E-Mail-Plugin konfigurieren",
+  
+  "EditForm.Input.number.label": "Maximal zulässige Größe (in MB)",
+  "EditForm.Input.select.label": "Anbieter",
+  "EditForm.Input.select.inputDescription": "E-Mails können mit dem Standardanbieter (Sendmail) oder einem externen Anbieter versendet werden",
+  "EditForm.Input.toggle.label": "E-Mail-Versand aktivieren",
+
+  "notification.config.success": "Die Einstellungen wurden aktualisiert",
+
   "plugin.description.short": "Zum Versand von E-Mails.",
   "plugin.description.long": "Zum Versand von E-Mails."
 }
