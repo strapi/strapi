@@ -4,7 +4,8 @@
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
-const { merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, assign, clone, cloneDeep, camelCase } = require('lodash');
+const { merge, setWith, get, upperFirst, isEmpty, isObject, pullAll, defaults, assign, clone, cloneDeep, camelCase } = require('lodash');
+const { templateConfiguration } = require('strapi-utils');
 const utils = require('../utils');
 
 module.exports.nested = function() {
@@ -85,14 +86,14 @@ module.exports.app = async function() {
   this.config.currentEnvironment = this.config.environments[this.config.environment] || {};
 
   // Set current connections.
-  this.config.connections = get(this.config.currentEnvironment, `database.connections`, {});
+  this.config.connections = get(this.config.currentEnvironment, 'database.connections', {});
 
   if (get(this.config, 'language.enabled')) {
     this.config.language.locales = Object.keys(get(strapi.config, 'locales', {}));
   }
 
   // Template literal string.
-  this.config = templateConfigurations(this.config);
+  this.config = templateConfiguration(this.config);
 
   // Initialize main router to use it in middlewares.
   this.router = this.koaMiddlewares.routerJoi();
@@ -365,27 +366,6 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
       });
     }
   }
-};
-
-/**
- * Allow dynamic config values through
- * the native ES6 template string function.
- */
-const regex = /\$\{[^()]*\}/g;
-const templateConfigurations = function (obj) {
-  // Allow values which looks like such as
-  // an ES6 literal string without parenthesis inside (aka function call).
-  return Object.keys(obj).reduce((acc, key) => {
-    if (isPlainObject(obj[key]) && !isString(obj[key])) {
-      acc[key] = templateConfigurations(obj[key]);
-    } else if (isString(obj[key]) && obj[key].match(regex) !== null) {
-      acc[key] = eval('`' + obj[key] + '`'); // eslint-disable-line prefer-template
-    } else {
-      acc[key] = obj[key];
-    }
-
-    return acc;
-  }, {});
 };
 
 const isAdminInDevMode = function () {
