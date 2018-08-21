@@ -44,8 +44,10 @@
   "Auth.form.error.code.provide": "Incorrect code provided.",
   "Auth.form.error.password.matching": "Passwords do not match.",
   "Auth.form.error.params.provide": "Incorrect params provided.",
-  "Auth.form.error.username.taken": "Username is already taken",
-  "Auth.form.error.email.taken": "Email is already taken",
+  "Auth.form.error.username.taken": "Username is already taken.",
+  "Auth.form.error.email.taken": "Email is already taken.",
+  "Auth.form.error.blocked": "Your account has been blocked by the administrator.",
+  "Auth.form.error.ratelimit": "Too many attempts, please try again in a minute.",
 
   "Auth.link.forgot-password": "Forgot your password?",
   "Auth.link.ready": "Ready to sign in?",
@@ -172,6 +174,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "The redirect URL to add in your Facebook application configurations",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "The redirect URL to add in your Google application configurations",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "The redirect URL to add in your GitHub application configurations",
+  "PopUpForm.Providers.microsoft.providerConfig.redirectURL": "The redirect URL to add in your Microsoft application configurations",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "The redirect URL to add in your Linkedin application configurations",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "The redirect URL to add in your Twitter application configurations",
 

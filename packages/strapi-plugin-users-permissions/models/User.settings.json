@@ -35,6 +35,12 @@
     },
     "confirmed": {
       "type": "boolean",
+      "default": false,
+      "configurable": false
+    }, 
+    "blocked": {
+      "type": "boolean",
+      "default": false,
       "configurable": false
     },
     "role": {
