@@ -50,7 +50,7 @@ export function setForm(formType, email) {
       data = {
         identifier: '',
         password: '',
-        rememberMe: false,
+        rememberMe: true,
       };
 
       break;
