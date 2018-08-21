@@ -34,13 +34,13 @@ class Li extends React.Component {
     let divider;
     
     switch (true) {
-      case value > 10000:
+      case value > 1000000:
         unit = 'GB';
-        divider = 1000;
+        divider = 1000000;
         break;
       case value < 1:
         unit = 'B';
-        divider = 1;
+        divider = .001;
         break;
       case value > 1000:
         unit = 'MB';
