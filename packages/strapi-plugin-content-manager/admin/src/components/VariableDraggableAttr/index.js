@@ -154,12 +154,7 @@ class VariableDraggableAttr extends React.Component {
   componentDidMount() {
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead.
-    this.props.connectDragPreview(getEmptyImage(), {
-    // IE fallback: specify that we'd rather screenshot the node
-    // when it already knows it's being dragged so we can hide it with CSS.
-    // Removginv the fallabck makes it handle variable height elements
-      // captureDraggingState: true,
-    });
+    this.props.connectDragPreview(getEmptyImage(), {});
   }
 
   componentDidUpdate(prevProps) {

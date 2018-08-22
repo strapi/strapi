@@ -110,29 +110,29 @@ class Manager {
 
   /**
    * 
-   * Retrieve the last element of each bootstrap line
+   * Retrieve the last element of each line of a bootstrap grid and push it into an array
    * @returns {Array}
    */
   getLinesBound() {
     const array = [];
-    let sum = 0;
+    let sum = 0; // sum of each element associated bootstrap col (max sum === 12)
 
     this.list.forEach((item, i) => {
       let { bootstrapCol, index, name, type } = this.getAttrInfos(i);
 
-      if (!type && name.includes('__col')) {
+      if (!type && name.includes('__col')) { // Only for the added elements
         bootstrapCol = parseInt(name.split('__')[1].split('-')[2], 10);
       }
 
       sum += bootstrapCol;
 
-      if (sum === 12 || bootstrapCol === 12) {
+      if (sum === 12 || bootstrapCol === 12) { // Push into the array the element so we know each right bound of a grid line
         const isFullSize = bootstrapCol === 12;
         array.push({ name, index, isFullSize });
         sum = 0;
       }
 
-      if (sum > 12) {
+      if (sum > 12) { // Reset the sum
         sum = 0;
       }
 
@@ -193,21 +193,25 @@ class Manager {
   }
 
   /**
-   * 
+   * Given an attribute index from the list retrieve the elements' bound (loeft or right)
    * @param {Bool} dir sup or min
    * @param {Number} pivot the center
    * @returns {Object} the first sup or last sup
    */
   getBound(dir, pivot = this.index) {
     let result = {};
-    let hasResult = false;
+    let didFindResult = false;
 
     this.arrayOfEndLineElements.forEach(item => {
-      const rightBondCond = findIndex(this.arrayOfEndLineElements, ['index', pivot]) !== -1 ? item.index < pivot : item.index <= pivot;
-      const cond = dir === true ? item.index >= pivot && !hasResult : rightBondCond;
 
-      if (cond) {
-        hasResult = true;
+      const rightBondCondition = findIndex(this.arrayOfEndLineElements, ['index', pivot]) !== -1 ?
+        item.index < pivot
+        : item.index <= pivot;
+      const condition = dir === true ? item.index >= pivot && !didFindResult : rightBondCondition; // Left or right bound of an item in the bootstrap grid.
+
+
+      if (condition) {
+        didFindResult = true;
         result = dir === true ? item : { name: this.list.get(item.index + 1), index: item.index + 1, isFullSize: false };
       }
     });
@@ -215,6 +219,10 @@ class Manager {
     return result;
   }
 
+  /**
+   * Make sure to complete each line with __col-md-the-missing-number to complete a line on the bootstrap grid
+   * @returns {List}
+   */
   getLayout() {
     let newList = this.list;
     let sum = 0;
