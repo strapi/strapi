@@ -1,3 +1,7 @@
+// This file contains all the methods required to get the number of inputs
+// that will be displayed in the content manager edit view.
+// Since we want to keep the shape of the layout when we remove a field from
+// the content type builder form builder we duplicated this file already used in the content manager. 
 const { findIndex, pullAt, range } = require('lodash');
 const { List } = require('immutable');
 
@@ -33,6 +37,11 @@ class Manager {
     return infos;
   }
 
+  /**
+   * Returns the number of divs to add to a row so each row is complete.
+   * @param {Number} number
+   * @returns {Array} Array of bootstrap cols to add to make a row of size 12.
+   */
   getColsToAdd(number) {
     let ret;
 

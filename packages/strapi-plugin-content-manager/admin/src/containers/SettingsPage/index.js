@@ -158,7 +158,7 @@ class SettingsPage extends React.PureComponent {
           >
             <form onSubmit={this.handleSubmit} className={styles.ctmForm}>
               <div className="row">
-                <div className="col-md-10">
+                <div className="col-md-12">
                   <div className="row">
                     {forms.inputs.map(this.renderForm)}
                   </div>

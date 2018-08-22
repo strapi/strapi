@@ -18,6 +18,10 @@ import ClickOverHint from 'components/ClickOverHint';
 import DraggedRemovedIcon  from 'components/DraggedRemovedIcon';
 import VariableEditIcon from 'components/VariableEditIcon';
 import ItemTypes from 'utils/ItemTypes';
+
+import GrabIconBlue from 'assets/images/icon_grab_blue.svg';
+import GrabIcon from 'assets/images/icon_grab.svg';
+
 import Carret from './Carret';
 import styles from './styles.scss';
 
@@ -89,7 +93,7 @@ const variableDraggableAttrTarget = {
     const hoverBoundingRect = findDOMNode(component).getBoundingClientRect();
 
     // Get vertical middle
-    const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2; // NOTE: Change the divider for wysiwyg
+    const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
 
     // Determine mouse position
     const clientOffset = monitor.getClientOffset();
@@ -150,12 +154,7 @@ class VariableDraggableAttr extends React.Component {
   componentDidMount() {
     // Use empty image as a drag preview so browsers don't draw it
     // and we can draw whatever we want on the custom drag layer instead.
-    this.props.connectDragPreview(getEmptyImage(), {
-    // IE fallback: specify that we'd rather screenshot the node
-    // when it already knows it's being dragged so we can hide it with CSS.
-    // Removginv the fallabck makes it handle variable height elements
-      // captureDraggingState: true,
-    });
+    this.props.connectDragPreview(getEmptyImage(), {});
   }
 
   componentDidUpdate(prevProps) {
@@ -193,14 +192,18 @@ class VariableDraggableAttr extends React.Component {
     const isFullSize = classNames.bootstrap === 'col-md-12';
     let itemLine = -1;
     let itemLineEls = [];
+    // Retrieve from the grid the attr's y coordinate
     grid.forEach((line, index) => {
       if (line.indexOf(name) !== -1) {
         itemLine = index;
         itemLineEls = line;
       }
     });
+    // Retrieve from the grid the attr's x coordinate
     const itemPosition = get(grid, itemLine, []).indexOf(name);
+    // Retrieve the draggedItem's y coordinate in order to display a custom dropTarget (the blue caret).
     const draggedItemLineIndex = get(grid, itemLine, []).indexOf(draggedItemName);
+    // The source target can either located on the left or right of an attr
     let showLeftCarret = hoverIndex === index && initDragLine !== itemLine;
     let showRightCarret = hoverIndex === index && initDragLine === itemLine;
 
@@ -210,7 +213,10 @@ class VariableDraggableAttr extends React.Component {
         showRightCarret = false;
       }
     }
-  
+    
+    /**
+     * Retrieve the blue Caret custom style depending on its position and attr's height
+     */
     const carretStyle = (() => {
       let style = { height: '30px', marginRight: '3px' };
 
@@ -219,7 +225,7 @@ class VariableDraggableAttr extends React.Component {
       }
 
       if (isFullSize) {
-        style = { width: '100%', height: '10px', marginBottom: '6px' };
+        style = { width: '100%', height: '2px', marginBottom: '6px' };
       }
 
       if (showRightCarret) {
@@ -229,6 +235,7 @@ class VariableDraggableAttr extends React.Component {
       return style;
     })();
 
+    // If the draggedItem is full size, for instance the WYSIWYG or the json field return a full size blue caret
     if (dragStart && isFullSize) {
       return <Carret style={carretStyle} />;
     }
@@ -237,13 +244,13 @@ class VariableDraggableAttr extends React.Component {
       <div style={{ display: 'flex' }}>
         { showLeftCarret && <Carret style={carretStyle} />}
         <div className={cn(classNames.wrapper, isEditing && styles.editingVariableAttr)} style={style}>
-          <i className="fa fa-th" />
+          <img src={(isEditing ? GrabIconBlue : GrabIcon)} alt="Grab Icon" />
           <span className={cn(isEditing && styles.editing, styles.truncated)}>
             {name}
           </span>
           <ClickOverHint show={isOver && !isEditing} />
           {(!isOver || isEditing) && get(data, 'name', '').toLowerCase() !== get(data, 'label', '').toLowerCase() && (
-            <div className={styles.infoLabel}>
+            <div className={cn(styles.infoLabel, isEditing && styles.infoLabelHover)}>
               {data.label}
             </div>
           )}

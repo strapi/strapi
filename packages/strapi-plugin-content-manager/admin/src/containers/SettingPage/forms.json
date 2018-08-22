@@ -20,7 +20,7 @@
     },
     {
       "label": { "id": "content-manager.form.Input.bulkActions" },
-      "customBootstrapClass": "col-md-2",
+      "customBootstrapClass": "col-md-4",
       "didCheckErrors": false,
       "errors": [],
       "name": "bulkActions",

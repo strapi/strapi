@@ -15,7 +15,7 @@ const style = {
   top: '0',
   right: '0',
   display: 'flex',
-  zIndex: '1060',
+  zIndex: '1050',
 };
 
 CTAWrapper.propTypes = {
