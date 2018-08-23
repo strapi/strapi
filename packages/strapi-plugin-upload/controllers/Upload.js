@@ -24,7 +24,7 @@ module.exports = {
     }
 
     // Extract optional relational data.
-    const { refId, ref, source, field } = ctx.request.body.fields;
+    const { refId, ref, source, field, path } = ctx.request.body.fields;
     const { files = {} } = ctx.request.body.files;
 
     if (_.isEmpty(files)) {
@@ -41,13 +41,19 @@ module.exports = {
       // Add details to the file to be able to create the relationships.
       if (refId && ref && field) {
         Object.assign(file, {
-          path: `${ref}/${field}`,
           related: [{
             refId,
             ref,
             source,
             field
           }]
+        });
+      }
+
+      // Update uploading folder path for the file.
+      if (path) {
+        Object.assign(file, {
+          path
         });
       }
 

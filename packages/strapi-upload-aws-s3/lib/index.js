@@ -93,11 +93,7 @@ module.exports = {
           // delete file on S3 bucket
           const path = file.path ? `${file.path}/` : '';
           S3.deleteObjects({
-            Delete: {
-              Objects: [{
-                Key: `${path}${file.hash}${file.ext}`
-              }]
-            }
+            Key: `${path}${file.hash}${file.ext}`
           }, (err, data) => {
             if (err) {
               return reject(err);
