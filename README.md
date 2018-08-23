@@ -15,16 +15,16 @@
 <br />
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi.svg" alt="Dependency Status" />
+    <img src="https://img.shields.io/npm/v/strapi/alpha.svg" alt="NPM Version" />
   </a>
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Dependency Status" />
+    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
   </a>
   <a href="https://travis-ci.org/strapi/strapi">
-    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Dependency Status" />
+    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
   </a>
   <a href="http://slack.strapi.io">
-    <img src="http://strapi-slack.herokuapp.com/badge.svg" alt="Dependency Status" />
+    <img src="https://strapi-slack.herokuapp.com/badge.svg" alt="Strapi on Slack" />
   </a>
 </p>
 
@@ -41,6 +41,18 @@
 ## Getting Started
 
 <a href="https://strapi.io/getting-started" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+
+#### 🖐 Requirements
+
+Node:
+ * NodeJS >= 10.x
+ * NPM >= 6.x
+
+Database:
+ * MongoDB >= 3.x 
+ * MySQL >= 5.6
+ * MariaDB >= 10.1
+ * PostgreSQL >= 10
 
 #### ⏳ Installation
 
