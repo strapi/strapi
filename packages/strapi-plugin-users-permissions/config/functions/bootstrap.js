@@ -89,7 +89,7 @@ module.exports = async cb => {
       enabled: false,
       icon: 'twitter',
       key: '',
-      secret: '',
+      secret: '',ad
       callback: '/auth/twitter/callback'
     }
   };
@@ -140,7 +140,7 @@ module.exports = async cb => {
           object: 'Account confirmation',
           message: `<p>Thank you to register!</p>
 
-<p>You have to confirm your email addresse. Please click on the link below.</p>
+<p>You have to confirm your email address. Please click on the link below.</p>
 
 <p><%= URL %>?confirmation=<%= CODE %></p>
 
