@@ -17,7 +17,7 @@
   "containers.SettingPage.addField" : "Aggiungi un nuovo campo",
   "containers.SettingPage.attributes" : "Attributi",
   "containers.SettingPage.attributes.description" : "Definisci l'ordine degli attributi",
-  "containers.SettingPage.listSettings.title" : "Lista - Impostazioni",
+  "containers.SettingPage.listSettings.title" : "Lista — Impostazioni",
   "containers.SettingPage.listSettings.description" : "Configura le opzioni per questo Tipo di Contenuto",
   "containers.SettingPage.pluginHeaderDescription" : "Configura le impostazioni specifiche per questo Tipo di Contenuto",
   "containers.SettingsPage.pluginHeaderDescription" : "Configura le impostazioni di default per tutti i tuoi Tipi di Contenuto",
@@ -79,7 +79,11 @@
 	"error.attribute.taken": "Questo campo nome esiste già",
 	"error.attribute.key.taken": "Questo valore esiste già",
 	"error.attribute.sameKeyAndName": "Non può essere uguale",
-  "error.validation.minSupMax": "Non può essere superiore",
+	"error.validation.minSupMax": "Non può essere superiore",
+	
+	"form.Input.description": "Description",
+	"form.Input.description.placeholder": "Display name in the profile",
+	"form.Input.disabled": "Editable field",
   
   "form.Input.label.inputDescription" : "Questo valore sovrascrive l'etichetta mostrata nell'intestazione della tabella",
   "form.Input.label" : "Etichetta",

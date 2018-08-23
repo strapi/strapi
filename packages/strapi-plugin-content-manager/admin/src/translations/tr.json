@@ -97,6 +97,10 @@
   "form.Input.pageEntries.inputDescription": "Not: Bu değeri İçerik Türü ayarları sayfasında geçersiz kılabilirsiniz..",
   "form.Input.defaultSort": "Varsayılan sıralama özelliği",
 
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Display name in the profile",
+  "form.Input.disabled": "Editable field",
+
   "notification.error.relationship.fetch": "İlişki getirme sırasında bir hata oluştu.",
   "notification.info.SettingPage.disableSort": "Sıralamaya izin verilen tek bir özelliğe sahip olmanız gerekir",
 
