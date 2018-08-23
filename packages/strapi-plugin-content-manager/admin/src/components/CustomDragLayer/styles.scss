@@ -1,0 +1,34 @@
+.layer {
+  position: fixed;
+  pointer-events: none;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.customDragLayer {
+  height: 30px !important;
+  width: 100%;
+  margin-bottom: 6px;
+  box-shadow: 0!important;
+  padding-left: 10px;
+  justify-content: space-between;
+  background: #E6F0FB !important;
+  line-height: 30px;
+  color: #333740;
+  border: 1px solid darken(#AED4FB, 20%)!important;
+  border-radius: 2px;
+  // cursor: move !important;
+
+  > i {
+    margin-right: 10px;
+    font-size: 10px;
+    color: #B3B5B9;
+  }
+
+  > span:last-child {
+    background:#AED4FB;
+  }
+}

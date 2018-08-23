@@ -17,10 +17,16 @@
   "containers.List.pluginHeaderDescription.singular": "{label} entry found",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "containers.List.errorFetchRecords": "Error",
+  "containers.ListPage.displayedFields": "Displayed Fields",
   
   "containers.SettingPage.addField": "Add new field",
+  "containers.SettingPage.addRelationalField": "Add new relational field",
   "containers.SettingPage.attributes": "Attributes fields",
   "containers.SettingPage.attributes.description": "Define the order of the attributes",
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit — Settings",
 
   "containers.SettingPage.listSettings.title": "List — Settings",
   "containers.SettingPage.listSettings.description": "Configure the options for this content type",
@@ -35,6 +41,9 @@
   "components.AddFilterCTA.hide": "Filters",
 
   "components.DraggableAttr.edit": "Click to edit",
+
+  "components.EmptyAttributesBlock.description": "You can change your settings",
+  "components.EmptyAttributesBlock.button": "Go to settings page",
 
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Apply",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Clear all",
@@ -90,6 +99,11 @@
   "error.validation.minSupMax": "Can't be superior",
   "error.validation.json": "This is not a JSON",
 
+  "form.Input.description": "Description",
+  "form.Input.placeholder": "Placeholder",
+  "form.Input.description.placeholder": "Display name in the profile",
+  "form.Input.placeholder.placeholder": "My awesome value",
+  "form.Input.disabled": "Editable field",
   "form.Input.label.inputDescription": "This value overrides the label displayed in the table's head",
   "form.Input.label": "Label",
   "form.Input.search": "Enable search",
@@ -101,6 +115,7 @@
   "form.Input.pageEntries.inputDescription": "Note: You can override this value in the Content Type settings page.",
   "form.Input.defaultSort": "Default sort attribute",
 
+  "notification.error.displayedFields": "You need at least one displayed field",
   "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
   "notification.info.SettingPage.disableSort": "You need to have one attribute with the sorting allowed",
 

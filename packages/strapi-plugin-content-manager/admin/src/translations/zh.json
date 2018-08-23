@@ -16,6 +16,11 @@
   "components.LimitSelect.itemsPerPage": "每個頁面檔案數量",
   "containers.List.errorFetchRecords": "錯誤",
 
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit — Settings",
+
   "EditRelations.title": "關聯式資料",
 
   "emptyAttributes.title": "目前還沒有欄位",
@@ -41,6 +46,10 @@
   "error.attribute.key.taken": "這個數值已存在",
   "error.attribute.sameKeyAndName": "不能等於",
   "error.validation.minSupMax": "不能大於",
+
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Display name in the profile",
+  "form.Input.disabled": "Editable field",
 
   "notification.error.relationship.fetch": "讀取關聯資料時發生錯誤",
 

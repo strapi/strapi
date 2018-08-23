@@ -5,6 +5,7 @@
  */
 
 import {
+  ADD_ATTR,
   ADD_FILTER,
   CHANGE_PARAMS,
   DELETE_DATA,
@@ -21,10 +22,21 @@ import {
   ON_TOGGLE_FILTERS,
   OPEN_FILTERS_WITH_SELECTION,
   REMOVE_ALL_FILTERS,
+  REMOVE_ATTR,
   REMOVE_FILTER,
+  RESET_DISPLAYED_FIELDS,
+  SET_DISPLAYED_FIELDS,
   SET_PARAMS,
   SUBMIT,
 } from './constants';
+
+export function addAttr(attr, index) {
+  return {
+    type: ADD_ATTR,
+    attr,
+    index,
+  };
+}
 
 export function addFilter(filter) {
   return {
@@ -142,10 +154,31 @@ export function removeAllFilters() {
   };
 }
 
+export function removeAttr(index) {
+  return {
+    type: REMOVE_ATTR,
+    index,
+  };
+}
+
 export function removeFilter(index) {
   return {
     type: REMOVE_FILTER,
     index,
+  };
+}
+
+export function resetDisplayedFields(fields) {
+  return {
+    type: RESET_DISPLAYED_FIELDS,
+    fields,
+  };
+}
+
+export function setDisplayedFields(fields) {
+  return {
+    type: SET_DISPLAYED_FIELDS,
+    fields,
   };
 }
 

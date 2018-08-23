@@ -22,6 +22,7 @@
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
+    "immutable": "^3.8.2",
     "pluralize": "^7.0.0",
     "strapi-generate": "3.0.0-alpha.13.1",
     "strapi-generate-api": "3.0.0-alpha.13.1"
