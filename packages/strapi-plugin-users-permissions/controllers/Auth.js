@@ -55,7 +55,7 @@ module.exports = {
       if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && user.confirmed !== true) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }] : 'Your account email is not confirmed.');
       }
-      
+
       if (user.blocked === true) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }] : 'Your account has been blocked by the administrator.');
       }
@@ -224,12 +224,15 @@ module.exports = {
   },
 
   register: async (ctx) => {
-    const settings = await strapi.store({
+    const pluginStore = await strapi.store({
       environment: '',
       type: 'plugin',
-      name: 'users-permissions',
+      name: 'users-permissions'
+    });
+
+    const settings = await pluginStore.get({
       key: 'advanced'
-    }).get();
+    });
 
     if (!settings.allow_register) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }] : 'Register action is currently disabled.');
@@ -287,16 +290,20 @@ module.exports = {
     }
 
     try {
+      if (!settings.email_confirmation) {
+        params.confirmed = true;
+      }
+
       const user = await strapi.query('user', 'users-permissions').create(params);
 
       const jwt = strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']));
 
       if (settings.email_confirmation) {
-        const settings = (await strapi.store({
-          environment: '',
-          type: 'plugin',
-          name: 'users-permissions'
-        }).get({ key: 'email' }))['email_confirmation'].options;
+        const storeEmail = (await pluginStore.get({
+          key: 'email'
+        })) || {};
+
+        const settings = storeEmail['email_confirmation'] ? storeEmail['email_confirmation'].options : {};
 
         settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
           URL: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/auth/email-confirmation`,
@@ -312,7 +319,7 @@ module.exports = {
           // Send an email to the user.
           await strapi.plugins['email'].services.email.send({
             to: user.email,
-            from: (settings.from.email || settings.from.name) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
+            from: (settings.from.email && settings.from.name) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
             replyTo: settings.response_email,
             subject: settings.object,
             text: settings.message,
@@ -348,6 +355,6 @@ module.exports = {
       key: 'advanced'
     }).get();
 
-    ctx.redirect(settings.email_confirmation_redirection);
+    ctx.redirect(settings.email_confirmation_redirection || '/');
   }
 };

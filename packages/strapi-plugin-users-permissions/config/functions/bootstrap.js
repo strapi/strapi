@@ -89,7 +89,7 @@ module.exports = async cb => {
       enabled: false,
       icon: 'twitter',
       key: '',
-      secret: '',ad
+      secret: '',
       callback: '/auth/twitter/callback'
     }
   };
