@@ -42,7 +42,7 @@
 
 <a href="https://strapi.io/getting-started" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
-#### Requirements
+#### 🖐 Requirements
 
 Node:
  * NodeJS >= 10.x
