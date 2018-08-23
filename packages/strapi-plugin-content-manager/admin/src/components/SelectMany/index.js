@@ -7,10 +7,8 @@
 import React from 'react';
 import Select from 'react-select';
 import { FormattedMessage } from 'react-intl';
-import { SortableContainer, SortableElement, arrayMove } from 'react-sortable-hoc';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
-import { cloneDeep, isArray, isNull, isUndefined, get, findIndex, includes, isEmpty } from 'lodash';
+import { cloneDeep, isArray, isNull, isUndefined, get, findIndex, isEmpty } from 'lodash';
 
 // Utils.
 import request from 'utils/request';
@@ -18,51 +16,10 @@ import templateObject from 'utils/templateObject';
 
 // CSS.
 import 'react-select/dist/react-select.css';
-
-// Icons.
-import IconRemove from '../../assets/images/icon_remove.svg';
-
+// Component.
+import SortableList from './SortableList';
+// CSS.
 import styles from './styles.scss';
-
-const SortableItem = SortableElement(({idx, onRemove, item, onClick}) => {
-  return (
-    <li className={styles.sortableListItem}>
-      <div>
-        <div className={styles.dragHandle}><span></span></div>
-        <FormattedMessage id='content-manager.containers.Edit.clickToJump'>
-          {title => (
-            <span 
-              className='sortable-item--value'
-              onClick={() => onClick(item)} 
-              title={title}
-            >
-              {item.label}
-            </span>
-          )}
-        </FormattedMessage> 
-       
-      </div>
-      <div className={styles.sortableListItemActions}>
-        <img src={IconRemove} alt="Remove Icon" onClick={() => onRemove(idx)} />
-      </div>
-    </li>
-  );
-});
-
-const SortableList = SortableContainer(({items, onRemove, onClick}) => {
-  const shadowList = (items.length > 4 ? <div className={styles.sortableListLong}></div> : '');
-
-  return (
-    <div className={cn(styles.sortableList)}>
-      <ul>
-        {items.map((item, index) => (
-          <SortableItem key={`item-${index}`} index={index} idx={index} item={item} onRemove={onRemove} onClick={onClick} />
-        ))}
-      </ul>
-      {shadowList}
-    </div>
-  );
-});
 
 class SelectMany extends React.PureComponent {
   state = {
@@ -147,24 +104,15 @@ class SelectMany extends React.PureComponent {
   };
 
   handleChange = value => {
-    const values = get(this.props.record, this.props.relation.alias) || [];
-
-    const target = {
-      name: `record.${this.props.relation.alias}`,
-      type: 'select',
-      value: [...values, value.value],
-    };
-
     // Remove new added value from available option;
-    this.state.options = this.state.options.filter(el => {
-      if (el.value._id || el.value.id === value.value.id || value.value._id) {
-        return false;
-      }
+    this.state.options = this.state.options.filter(el => 
+      !((el.value._id || el.value.id) === (value.value.id || value.value._id))
+    );
 
-      return true;
+    this.props.onAddRelationalItem({
+      key: this.props.relation.alias,
+      value: value.value,
     });
-
-    this.props.setRecordAttribute({ target });
   };
 
   handleBottomScroll = () => {
@@ -175,42 +123,23 @@ class SelectMany extends React.PureComponent {
     });
   }
 
-  handleInputChange = (value) => {
-    const clonedOptions = this.state.options;
-    const filteredValues = clonedOptions.filter(data => includes(data.label, value));
-
-    if (filteredValues.length === 0) {
-      return this.getOptions(value);
-    }
-  }
-
-  handleSortEnd = ({oldIndex, newIndex}) => {
-    const values = get(this.props.record, this.props.relation.alias);
-    const target = {
-      name: `record.${this.props.relation.alias}`,
-      type: 'select',
-      value: arrayMove(values, oldIndex, newIndex),
-    };
-
-    this.props.setRecordAttribute({ target });
-  };
-
   handleRemove = (index) => {
     const values = get(this.props.record, this.props.relation.alias);
-    const target = {
-      name: `record.${this.props.relation.alias}`,
-      type: 'select',
-      value: values.filter( (item, idx) => idx !== index),
-    };
 
     // Add removed value from available option;
-    this.state.options.push({
+    const toAdd = {
       value: values[index],
-      label: templateObject({ mainField: this.props.relation.displayedAttribute }, values[index])
-        .mainField,
-    });
+      label: templateObject({ mainField: this.props.relation.displayedAttribute }, values[index]).mainField,
+    };
 
-    this.props.setRecordAttribute({ target });
+    this.setState(prevState => ({
+      options: prevState.options.concat([toAdd]),
+    }));
+
+    this.props.onRemoveRelationItem({
+      key: this.props.relation.alias,
+      index,
+    });
   }
 
   // Redirect to the edit page
@@ -228,7 +157,6 @@ class SelectMany extends React.PureComponent {
     ) : (
       ''
     );
-
     const value = get(this.props.record, this.props.relation.alias) || [];
 
     /* eslint-disable jsx-a11y/label-has-for */
@@ -237,11 +165,12 @@ class SelectMany extends React.PureComponent {
         <label htmlFor={this.props.relation.alias}>{this.props.relation.alias} <span>({value.length})</span></label>
         {description}
         <Select
-          onChange={this.handleChange}
-          options={this.state.options}
+          className={`${styles.select}`}
           id={this.props.relation.alias}
           isLoading={this.state.isLoading}
+          onChange={this.handleChange}
           onMenuScrollToBottom={this.handleBottomScroll}
+          options={this.state.options}    
           placeholder={<FormattedMessage id='content-manager.containers.Edit.addAnItem' />}
         />
         <SortableList
@@ -249,6 +178,7 @@ class SelectMany extends React.PureComponent {
             isNull(value) || isUndefined(value) || value.size === 0
               ? null
               : value.map(item => {
+
                 if (item) {
                   return {
                     value: get(item, 'value') || item,
@@ -256,12 +186,15 @@ class SelectMany extends React.PureComponent {
                         get(item, 'label') ||
                         templateObject({ mainField: this.props.relation.displayedAttribute }, item)
                           .mainField ||
-                        item.value.id,
+                        item.id,
                   };
                 }
               })
           }
-          onSortEnd={this.handleSortEnd}
+          isDraggingSibling={this.props.isDraggingSibling}
+          keys={this.props.relation.alias}
+          moveAttr={this.props.moveAttr}
+          moveAttrEnd={this.props.moveAttrEnd}
           onRemove={this.handleRemove}
           distance={1}
           onClick={this.handleClick}
@@ -272,11 +205,21 @@ class SelectMany extends React.PureComponent {
   }
 }
 
+SelectMany.defaultProps = {
+  isDraggingSibling: false,
+  moveAttr: () => {},
+  moveAttrEnd: () => {},
+};
+
 SelectMany.propTypes = {
+  isDraggingSibling: PropTypes.bool,
+  moveAttr: PropTypes.func,
+  moveAttrEnd: PropTypes.func,
+  onAddRelationalItem: PropTypes.func.isRequired,
   onRedirect: PropTypes.func.isRequired,
+  onRemoveRelationItem: PropTypes.func.isRequired,
   record: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
   relation: PropTypes.object.isRequired,
-  setRecordAttribute: PropTypes.func.isRequired,
 };
 
 export default SelectMany;

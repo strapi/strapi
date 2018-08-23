@@ -88,8 +88,8 @@ module.exports = {
     return this.isPrimitiveType(_type)
       ? _type.replace('!', '')
       : this.isEnumType(attributeType)
-      ? 'String'
-      : 'ID';
+        ? 'String'
+        : 'ID';
   },
 
   /**

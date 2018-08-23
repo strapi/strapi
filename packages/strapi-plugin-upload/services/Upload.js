@@ -7,9 +7,9 @@
  */
 
 const fs = require('fs');
+const crypto = require('crypto');
 const _ = require('lodash');
 const toArray = require('stream-to-array');
-const crypto = require('crypto');
 const uuid = require('uuid/v4');
 
 function niceHash(buffer) {
@@ -18,7 +18,7 @@ function niceHash(buffer) {
     .digest('base64')
     .replace(/=/g, '')
     .replace(/\//g, '-')
-    .replace(/\+/, '_')
+    .replace(/\+/, '_');
 }
 
 module.exports = {

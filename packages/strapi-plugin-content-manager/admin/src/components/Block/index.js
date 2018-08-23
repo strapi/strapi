@@ -9,13 +9,15 @@ import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
 
-const Block = ({ children, description, title }) => (
+const renderMsg = msg => <p>{msg}</p>;
+
+const Block = ({ children, description, style, title }) => (
   <div className="col-md-12">
-    <div className={styles.ctmBlock}>
+    <div className={styles.ctmBlock} style={style}>
       <div className={styles.ctmBlockTitle}>
         <FormattedMessage id={title} />
         <FormattedMessage id={description}>
-          {msg => <p>{msg}</p>}
+          {renderMsg}
         </FormattedMessage>
       </div>
       {children}
@@ -27,12 +29,14 @@ const Block = ({ children, description, title }) => (
 Block.defaultProps = {
   children: null,
   description: 'app.utils.defaultMessage',
+  style: {},
   title: 'app.utils.defaultMessage',
 };
 
 Block.propTypes = {
   children: PropTypes.any,
   description: PropTypes.string,
+  style: PropTypes.object,
   title: PropTypes.string,
 };
 
