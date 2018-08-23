@@ -52,8 +52,14 @@ export function* pluginsGet() {
       },
     };
 
-    // Fetch plugins informations.
-    const availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', opts);
+    let availablePlugins;
+
+    try {
+      // Fetch plugins informations.
+      availablePlugins = yield call(request, 'https://marketplace.strapi.io/plugins', opts);
+    } catch (e) {
+      availablePlugins = [];
+    }
 
     // Add logo URL to object.
     Object.keys(response[0].plugins).map(name => {

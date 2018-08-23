@@ -122,10 +122,11 @@
   "components.Input.error.attribute.sameKeyAndName": "Eşit olamaz",
   "components.Input.error.validation.minSupMax": "Üstü olamaz",
   "components.Input.error.custom-error": "{errorMessage} ",
+  "components.Input.error.validation.json": "Bu JSON biçimi ile eşleşmiyor",
 
   "components.ListRow.empty": "Gösterilecek veri bulunmamaktadır.",
 
-  "components.Wysiwyg.collapse": "Collapse",
+  "components.Wysiwyg.collapse": "Daralt",
   "components.Wysiwyg.selectOptions.title": "Başlık ekle",
   "components.Wysiwyg.selectOptions.H1": "H1 başlık",
   "components.Wysiwyg.selectOptions.H2": "H2 başlık",
@@ -143,11 +144,13 @@
   "HomePage.notification.newsLetter.success": "Bültene başarıyla abone olundu",
 
   "notification.error": "Bir hata oluştu",
-  "notification.error.layout": "Couldn't retrieve the layout",
+  "notification.error.layout": "Düzen alınamadı",
 
   "Users & Permissions": "Kullanıcılar & İzinler",
   "Content Manager": "İçerik Yönetimi",
   "Content Type Builder": "İçerik Türü Oluşturucusu",
+  "Files Upload": "Dosya yükleme",
+  "Roles & Permissions": "Roller & İzinler",
   "Settings Manager": "Yönetici Ayarları",
   "Email": "E-posta",
   "Password": "Şifre",

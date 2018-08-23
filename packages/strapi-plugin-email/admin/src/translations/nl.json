@@ -1,0 +1,14 @@
+{
+  "ConfigPage.title": "E-mail - Instellingen",
+  "ConfigPage.description": "Configureer de e-mail extensie",
+
+  "EditForm.Input.number.label": "Maximum grootte toegestaan (in MB)",
+  "EditForm.Input.select.label": "Leveranciers",
+  "EditForm.Input.select.inputDescription": "E-mails kunnen worden verstuurd via de standaard leverancier (Sendmail) of via een externe leverancier",
+  "EditForm.Input.toggle.label": "E-mail versturen inschakelen",
+
+  "plugin.description.short": "Verstuur e-mails.",
+  "plugin.description.long": "Verstuur e-mails.",
+
+  "notification.config.success": "De instellingen zijn opgeslagen."
+}

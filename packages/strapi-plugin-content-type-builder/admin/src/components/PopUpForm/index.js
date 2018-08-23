@@ -49,7 +49,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
   }
 
   handleSubmit = (e) => {
-    this.props.onSubmit(e, true);
+    this.props.onSubmit(e, false);
   }
 
   renderInput = (item, key) => {
@@ -138,8 +138,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     return (
       <ModalFooter className={styles.modalFooter}>
         <Button onClick={handleToggle} className={styles.secondary}><FormattedMessage id="content-type-builder.form.button.cancel" /></Button>
-        {popUpFormType !== 'contentType' && <Button type="submit" onClick={this.handleSubmit} className={styles.primaryAddShape}><FormattedMessage id="content-type-builder.button.attributes.add" /></Button>}
-        <Button type="submit" onClick={onSubmit} className={styles.primary}><FormattedMessage id={`content-type-builder.${buttonSubmitMessage}`} /></Button>{' '}
+        {popUpFormType !== 'contentType' && <Button type="submit" onClick={onSubmit} className={styles.primaryAddShape}><FormattedMessage id="content-type-builder.button.attributes.add" /></Button>}
+        <Button type="button" onClick={this.handleSubmit} className={styles.primary}><FormattedMessage id={`content-type-builder.${buttonSubmitMessage}`} /></Button>{' '}
       </ModalFooter>
     );
   }

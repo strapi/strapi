@@ -6,39 +6,35 @@ const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set,
 module.exports = async function() {
   // Method to initialize hooks and emit an event.
   const initialize = (module, hook) => (resolve, reject) => {
-    if (typeof module === 'function') {
-      let timeout = true;
+    let timeout = true;
 
-      setTimeout(() => {
-        if (timeout) {
-          reject(`(hook:${hook}) takes too long to load`);
-        }
-      }, this.config.hook.timeout || 1000);
+    setTimeout(() => {
+      if (timeout) {
+        reject(`(hook:${hook}) takes too long to load`);
+      }
+    }, this.config.hook.timeout || 1000);
 
-      const loadedModule = module(this);
+    const loadedModule = module(this);
 
-      loadedModule.initialize.call(module, err => {
-        timeout = false;
+    loadedModule.initialize.call(module, err => {
+      timeout = false;
 
-        if (err) {
-          this.emit('hook:' + hook + ':error');
+      if (err) {
+        this.emit('hook:' + hook + ':error');
 
-          return reject(err);
-        }
+        return reject(err);
+      }
 
-        this.hook[hook].loaded = true;
+      this.hook[hook].loaded = true;
 
-        this.hook[hook] = merge(this.hook[hook], loadedModule);
+      this.hook[hook] = merge(this.hook[hook], loadedModule);
 
-        this.emit('hook:' + hook + ':loaded');
-        // Remove listeners.
-        this.removeAllListeners('hook:' + hook + ':loaded');
+      this.emit('hook:' + hook + ':loaded');
+      // Remove listeners.
+      this.removeAllListeners('hook:' + hook + ':loaded');
 
-        resolve();
-      });
-    } else {
       resolve();
-    }
+    });
   };
 
   await Promise.all(
@@ -83,7 +79,7 @@ module.exports = async function() {
           }
 
           // Initialize array.
-          let previousDependencies = this.hook[hook].dependencies.map(x => x.replace('strapi-', '')) || [];
+          let previousDependencies = this.hook[hook].dependencies || [];
 
           // Add BEFORE middlewares to load and remove the current one
           // to avoid that it waits itself.

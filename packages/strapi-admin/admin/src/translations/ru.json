@@ -17,10 +17,13 @@
     "app.components.HomePage.welcomeBlock.content": "Мы рады, что вы вступили в сообщество. Нам необходима обратная связь для развития проекта, поэтому не стесняйтесь писать нам\u0020",
     "app.components.HomePage.welcomeBlock.content.issues": "проблема.",
     "app.components.HomePage.welcomeBlock.content.raise": "\u0020или поднять\u0020",
+    "app.components.HomePage.welcome.again": "Добро пожаловать",
+    "app.components.HomePage.welcomeBlock.content.again": "Надеемся у вы делаете успехи в вашем проекте... Следите с последними новостями о Strapi. Мы стараемся изо всех сил, чтобы улучшить продукт основываясь на ваших пожеланиях.",
     "app.components.HomePage.createBlock.content.first": "\u0020",
     "app.components.HomePage.createBlock.content.second": "\u0020плагин поможет вам создать структуру ваших данных. Если вы новичок, мы настоятельно рекомендуем вам следить за нашими\u0020",
     "app.components.HomePage.createBlock.content.tutorial": "\u0020руководство.",
     "app.components.HomePage.button.quickStart": "ОЗНАКОМТЕСЬ С РУКОВОДСТВОМ ПО БЫСТРОМУ СТАРТУ",
+    "app.components.HomePage.button.blog": "СМОТРИТЕ БОЛЬШЕ В БЛОГЕ",
     "app.components.HomePage.support": "ПОДДЕРЖИТЕ НАС",
     "app.components.HomePage.support.content": "Купите футболку, это поможет нам продолжать работу над проектом, чтобы предоставить вам наилучшее из возможных решений!",
     "app.components.HomePage.support.link": "ЗАКАЗАТЬ НАШУ ФУТБОЛКУ СЕЙЧАС",
@@ -113,6 +116,7 @@
     "components.Input.error.validation.min": "Слишком маленькое.",
     "components.Input.error.validation.maxLength": "Слишком длинное.",
     "components.Input.error.validation.minLength": "Слишком короткое.",
+    "components.Input.error.validation.json": "Не соответствует JSON формату",
     "components.Input.error.contentTypeName.taken": "Это название уже существует",
     "components.Input.error.attribute.taken": "Поле с таким названием уже существует",
     "components.Input.error.attribute.key.taken": "Это значение уже существует",
@@ -136,6 +140,8 @@
     "components.WysiwygBottomControls.uploadFiles": "Перетащите файлы в эту область, добавляйте из буфер обмена или {browse}.",
     "components.WysiwygBottomControls.uploadFiles.browse": "выделите их",
     "components.WysiwygBottomControls.fullscreen": "Развернуть",
+    "Files Upload": "Загрузка файлов",
+  
 
     "HomePage.notification.newsLetter.success": "Успешная подписка на рассылку новостей",
 
@@ -143,6 +149,7 @@
     "notification.error.layout": "Не удалось получить макет",
 
     "Users & Permissions": "Пользователи & Доступы",
+    "Roles & Permissions": "Роли и доступы",
     "Content Manager": "Редактор контента",
     "Content Type Builder": "Конструктор Типов Контента",
     "Settings Manager": "Менеджер Настроек",

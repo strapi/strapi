@@ -65,8 +65,12 @@ The core of Strapi embraces a small list of middlewares for performances, securi
 A middleware needs to follow the structure below:
 
 ```
-/lib
-- index.js
+/middleware
+└─── lib
+     - index.js
+- LICENSE.md
+- package.json
+- README.md
 ```
 
 The `index.js` is the entry point to your middleware. It should look like the example above.
@@ -82,7 +86,9 @@ The framework allows the application to override the default middlewares and add
 └─── config
 └─── middlewares
 │   └─── responseTime // It will override the core default responseTime middleware
+│        - index.js
 │   └─── views // It will be added into the stack of middleware
+│        - index.js
 └─── plugins
 └─── public
 - favicon.ico
