@@ -20,7 +20,7 @@
     },
     {
       "label": { "id": "content-manager.form.Input.bulkActions" },
-      "customBootstrapClass": "col-md-2",
+      "customBootstrapClass": "col-md-4",
       "didCheckErrors": false,
       "errors": [],
       "name": "bulkActions",
@@ -79,8 +79,73 @@
       "didCheckErrors": false,
       "errors": [],
       "name": "sortable",
+      "style": { "marginTop": "18px" },
       "type": "toggle",
       "validations": {}
     }
-  ]
+  ],
+  "editView": {
+    "relationForm": [
+      {
+        "label": { "id": "content-manager.form.Input.label" },
+        "customBootstrapClass": "col-md-8",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "label",
+        "placeholder": "SLUG (URL)",
+        "type": "string",
+        "validations": {}
+      },
+      {
+        "label": { "id": "content-manager.form.Input.description" },
+        "customBootstrapClass": "col-md-12",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "description",
+        "placeholder": "content-manager.form.Input.description.placeholder",
+        "type": "string",
+        "validations": {}
+      }
+    ],
+    "fieldForm": [
+      {
+        "label": { "id": "content-manager.form.Input.label" },
+        "customBootstrapClass": "col-md-8",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "label",
+        "placeholder": "SLUG (URL)",
+        "type": "string",
+        "validations": {}
+      },
+      {
+        "label": { "id": "content-manager.form.Input.disabled" },
+        "customBootstrapClass": "col-md-4",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "editable",
+        "type": "toggle",
+        "validations": {}
+      },
+      {
+        "label": { "id": "content-manager.form.Input.description" },
+        "customBootstrapClass": "col-md-12",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "description",
+        "placeholder": "content-manager.form.Input.description.placeholder",
+        "type": "string",
+        "validations": {}
+      },
+      {
+        "label": { "id": "content-manager.form.Input.placeholder" },
+        "customBootstrapClass": "col-md-12",
+        "didCheckErrors": false,
+        "errors": [],
+        "name": "placeholder",
+        "type": "string",
+        "validations": {}
+      }
+    ]
+  }
 }

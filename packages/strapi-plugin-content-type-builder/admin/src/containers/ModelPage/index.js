@@ -20,7 +20,7 @@ import { makeSelectContentTypeUpdated } from 'containers/Form/selectors';
 
 import AttributeRow from 'components/AttributeRow';
 import ContentHeader from 'components/ContentHeader';
-import EmptyAttributesView from 'components/EmptyAttributesView';
+import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import Form from 'containers/Form';
 import List from 'components/List';
 import PluginLeftMenu from 'components/PluginLeftMenu';
@@ -265,7 +265,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const addButtons  = get(storeData.getContentType(), 'name') === this.props.match.params.modelName && size(get(storeData.getContentType(), 'attributes')) > 0 || this.props.modelPage.showButtons;
     const contentHeaderDescription = this.props.modelPage.model.description || 'content-type-builder.modelPage.contentHeader.emptyDescription.description';
     const content = size(this.props.modelPage.model.attributes) === 0 ?
-      <EmptyAttributesView onClickAddAttribute={this.handleClickAddAttribute} /> :
+      <EmptyAttributesBlock title="content-type-builder.home.emptyAttributes.title" description="content-type-builder.home.emptyAttributes.description" label="content-type-builder.button.attributes.add" onClick={this.handleClickAddAttribute} /> :
       <List
         listContent={this.props.modelPage.model}
         renderCustomListTitle={this.renderListTitle}

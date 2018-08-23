@@ -132,7 +132,7 @@ module.exports = (scope, cb) => {
                   type: 'input',
                   name: 'database',
                   message: 'Database name:',
-                  default: _.get(scope.database, 'database', 'strapi')
+                  default: _.get(scope.database, 'database', scope.name)
                 },
                 {
                   when: !hasDatabaseConfig,

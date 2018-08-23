@@ -1,6 +1,6 @@
 {
-  "plugin.description.short": "Greife blitzschnell auf alle Daten in der Datenbank zu und manipuliere sie.",
-  "plugin.description.long": "Greife blitzschnell auf alle Daten in der Datenbank zu und manipuliere sie.",
+  "plugin.description.short": "Greife blitzschnell auf alle Daten in der Datenbank zu und änder sie.",
+  "plugin.description.long": "Greife blitzschnell auf alle Daten in der Datenbank zu und änder sie.",
 
   "containers.Home.pluginHeaderTitle": "Inhalts-Manager",
   "containers.Home.introduction": "Um deine Einträge zu verwalten, klicke auf den entsprechenden Link im Menü links. Dieses Plugin ist noch in aktiver Entwicklung und seine Einstellungen können nicht optimal angepasst werden.",
@@ -24,7 +24,7 @@
   "containers.SettingsPage.Block.generalSettings.description": "Konfiguriere die Standardoptionen für deine Inhaltstypen.",
   "containers.SettingsPage.Block.generalSettings.title" : "Allgemeines",
   "containers.SettingsPage.Block.contentType.title": "Inhaltstypen",
-  "containers.SettingsPage.Block.contentType.description": "Konfiguriere die spezifischen Einstellungen",
+  "containers.SettingsPage.Block.contentType.description": "Konfiguriere die spezifischen Einstellungen.",
   "containers.SettingsPage.pluginHeaderDescription": "Konfigurieren Sie die Standardeinstellungen für alle Ihre Inhaltstypen.",
 
   "components.AddFilterCTA.add": "Filter",
@@ -63,6 +63,11 @@
   "form.Input.pageEntries.inputDescription": "Hinweis: Du kannst diesen Wert auf der Inhaltstypen Einstellungsseite überschreiben.",
   "form.Input.defaultSort": "Standard-Sortierattribut",
 
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit — Settings",
+
   "EditRelations.title": "Relationale Daten",
 
   "emptyAttributes.title": "Es gibt noch keine Felder",
@@ -89,6 +94,10 @@
   "error.attribute.key.taken": "Dieser Wert existiert bereits",
   "error.attribute.sameKeyAndName": "Darf nicht gleich sein",
   "error.validation.minSupMax": "Darf nicht höher sein",
+
+  "form.Input.disabled": "Editable field",
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Display name in the profile",
 
   "notification.error.relationship.fetch": "Beim Abruf von Beziehungen ist ein Fehler aufgetreten.",
   "notification.info.SettingPage.disableSort": "Du musst ein Attribut mit aktivierter Sortierung haben.",

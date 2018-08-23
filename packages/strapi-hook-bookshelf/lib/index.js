@@ -26,9 +26,6 @@ const GLOBALS = {};
  * Bookshelf hook
  */
 
-/* eslint-disable no-unused-vars */
-/* eslint-disable prefer-template */
-/* eslint-disable no-case-declarations */
 module.exports = function(strapi) {
   const hook = _.merge({
     /**
@@ -79,17 +76,16 @@ module.exports = function(strapi) {
           _.forEach(models, (definition, model) => {
             definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
 
-            _.defaults(definition, {
-              primaryKey: 'id'
-            });
-
             // Define local GLOBALS to expose every models in this file.
             GLOBALS[definition.globalId] = {};
 
             // Add some informations about ORM & client connection & tableName
             definition.orm = 'bookshelf';
             definition.client = _.get(connection.settings, 'client');
-
+            _.defaults(definition, {
+              primaryKey: 'id',
+              primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer')
+            });
             // Register the final model for Bookshelf.
             const loadedModel = _.assign({
               tableName: definition.collectionName,
@@ -287,7 +283,7 @@ module.exports = function(strapi) {
                       : Promise.resolve();
                   });
 
-                  this.on('saving', (instance, attrs) => {
+                  this.on('saving', (instance, attrs, options) => { //eslint-disable-line
                     instance.attributes = mapper(instance.attributes);
                     attrs = mapper(attrs);
 
@@ -394,13 +390,16 @@ module.exports = function(strapi) {
                           case 'oneToOne':
                           case 'manyToOne':
                           case 'oneWay':
-                            type = definition.client === 'pg' ? 'integer' : 'int';
+                            type = definition.primaryKeyType;
                             break;
                           default:
                             return null;
                         }
                       } else {
                         switch (attribute.type) {
+                          case 'uuid':
+                            type = definition.client === 'pg' ? 'uuid' : 'varchar(36)';
+                            break;
                           case 'text':
                             type = definition.client === 'pg' ? type = 'text' : 'longtext';
                             break;
@@ -457,15 +456,15 @@ module.exports = function(strapi) {
                       }, start);
                     };
 
-                    const generateIndexes = async (table, attrs) => {
+                    const generateIndexes = async (table) => {
                       try {
                         const connection = strapi.config.connections[definition.connection];
                         let columns = Object.keys(attributes).filter(attribute => ['string', 'text'].includes(attributes[attribute].type));
 
                         switch (connection.settings.client) {
-                          case 'pg':
+                          case 'pg': {
                             // Enable extension to allow GIN indexes.
-                            await ORM.knex.raw(`CREATE EXTENSION IF NOT EXISTS pg_trgm`);
+                            await ORM.knex.raw('CREATE EXTENSION IF NOT EXISTS pg_trgm');
 
                             // Create GIN indexes for every column.
                             const indexes = columns
@@ -480,6 +479,8 @@ module.exports = function(strapi) {
 
                             await Promise.all(indexes);
                             break;
+                          }
+
                           default:
                             columns = columns
                               .map(attribute => `\`${attribute}\``)
@@ -521,7 +522,13 @@ module.exports = function(strapi) {
 
 
                     if (!tableExist) {
-                      const columns = generateColumns(attributes, [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`]).join(',\n\r');
+                      let idAttributeBuilder = [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`];
+                      if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
+                        idAttributeBuilder = ['id uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY'];
+                      } else if (definition.primaryKeyType !== 'integer') {
+                        idAttributeBuilder = [`id ${getType({type: definition.primaryKeyType})} NOT NULL PRIMARY KEY`];
+                      }
+                      const columns = generateColumns(attributes, idAttributeBuilder).join(',\n\r');
 
                       // Create table
                       await ORM.knex.raw(`
@@ -593,7 +600,6 @@ module.exports = function(strapi) {
                             const changeRequired = definition.client === 'pg'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} ${attributes[attribute].required ? 'SET' : 'DROP'} NOT NULL`
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
-
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
                           }
@@ -631,10 +637,10 @@ module.exports = function(strapi) {
                   if (morphRelations) {
                     const attributes = {
                       [`${loadedModel.tableName}_id`]: {
-                        type: 'integer'
+                        type: definition.primaryKeyType
                       },
                       [`${morphRelations.alias}_id`]: {
-                        type: 'integer'
+                        type: definition.primaryKeyType
                       },
                       [`${morphRelations.alias}_type`]: {
                         type: 'text'
@@ -661,10 +667,10 @@ module.exports = function(strapi) {
 
                     const attributes = {
                       [`${pluralize.singular(manyRelations.collection)}_id`]: {
-                        type: 'integer'
+                        type: definition.primaryKeyType
                       },
                       [`${pluralize.singular(definition.globalId.toLowerCase())}_id`]: {
-                        type: 'integer'
+                        type: definition.primaryKeyType
                       }
                     };
 
@@ -681,9 +687,8 @@ module.exports = function(strapi) {
                         ),
                         table => {
                           return _.snakeCase(
-                            pluralize.plural(table.collection) +
-                              ' ' +
-                              pluralize.plural(table.via)
+                            // eslint-disable-next-line prefer-template
+                            pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via)
                           );
                         }
                       ).join('__');
@@ -700,7 +705,7 @@ module.exports = function(strapi) {
                   resolve();
                 }));
               } catch (err) {
-                strapi.log.error('Impossible to register the `' + model + '` model.');
+                strapi.log.error(`Impossible to register the '${model}' model.`);
                 strapi.log.error(err);
                 strapi.stop();
               }
@@ -818,9 +823,8 @@ module.exports = function(strapi) {
                       ),
                       table => {
                         return _.snakeCase(
-                          pluralize.plural(table.collection) +
-                            ' ' +
-                            pluralize.plural(table.via)
+                          // eslint-disable-next-line prefer-template
+                          pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via)
                         );
                       }
                     ).join('__');
@@ -844,10 +848,7 @@ module.exports = function(strapi) {
 
                   // Sometimes the many-to-many relationships
                   // is on the same keys on the same models (ex: `friends` key in model `User`)
-                  if (
-                    details.attribute + '_' + details.column ===
-                    relationship.attribute + '_' + relationship.column
-                  ) {
+                  if (`${details.attribute}_${details.column}` === `${relationship.attribute}_${relationship.column}`) {
                     relationship.attribute = pluralize.singular(details.via);
                   }
 
@@ -862,16 +863,16 @@ module.exports = function(strapi) {
                       return this.belongsToMany(
                         GLOBALS[globalId],
                         collectionName,
-                        relationship.attribute + '_' + relationship.column,
-                        details.attribute + '_' + details.column
+                        `${relationship.attribute}_${relationship.column}`,
+                        `${details.attribute}_${details.column}`
                       ).withPivot(details.withPivot);
                     }
 
                     return this.belongsToMany(
                       GLOBALS[globalId],
                       collectionName,
-                      relationship.attribute + '_' + relationship.column,
-                      details.attribute + '_' + details.column
+                      `${relationship.attribute}_${relationship.column}`,
+                      `${details.attribute}_${details.column}`
                     );
                   };
                   break;
@@ -929,7 +930,7 @@ module.exports = function(strapi) {
                     }
 
                     if (models.length === 0) {
-                      strapi.log.error('Impossible to register the `' + model + '` model.');
+                      strapi.log.error(`Impossible to register the '${model}' model.`);
                       strapi.log.error('The collection name cannot be found for the morphTo method.');
                       strapi.stop();
                     }
@@ -999,7 +1000,7 @@ module.exports = function(strapi) {
       cb();
     },
 
-    getQueryParams: (value, type, key) => {
+    getQueryParams: (value, type, key) =>{
       const result = {};
 
       switch (type) {
@@ -1046,18 +1047,18 @@ module.exports = function(strapi) {
           };
           break;
         case '_sort':
-          result.key = `sort`;
+          result.key = 'sort';
           result.value = {
             key,
             order: value.toUpperCase()
           };
           break;
         case '_start':
-          result.key = `start`;
+          result.key = 'start';
           result.value = parseFloat(value);
           break;
         case '_limit':
-          result.key = `limit`;
+          result.key = 'limit';
           result.value = parseFloat(value);
           break;
         case '_contains':
