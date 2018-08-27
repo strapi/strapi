@@ -138,7 +138,7 @@ module.exports = async cb => {
           },
           response_email: '',
           object: 'Account confirmation',
-          message: `<p>Thank you to register!</p>
+          message: `<p>Thank you for registering!</p>
 
 <p>You have to confirm your email address. Please click on the link below.</p>
 
