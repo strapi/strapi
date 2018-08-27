@@ -320,7 +320,23 @@ module.exports.app = async function() {
 
   this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
   this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
-  this.config.url = `http://${this.config.host}:${this.config.port}`;
+  
+  // Global proxy support settings
+  this.config.proxy.enabled = get(this.config.currentEnvironment, 'server.proxy.enabled') || this.config.proxy.enabled;
+  this.config.proxy.port = get(this.config.currentEnvironment, 'server.proxy.port') || this.config.proxy.port;
+  this.config.proxy.host = get(this.config.currentEnvironment, 'server.proxy.host') || this.config.proxy.host;
+  this.config.proxy.ssl = get(this.config.currentEnvironment, 'server.proxy.ssl') || this.config.proxy.ssl;
+
+  // check if proxy is enabled and use the defined settings or if false use default
+  if (this.config.proxy.enabled = true) {
+    if (this.config.proxy.ssl = true) {
+      this.config.url = `https://${this.config.proxy.host}:${this.config.proxy.port}`;
+    } else {
+      this.config.url = `http://${this.config.proxy.host}:${this.config.proxy.port}`;
+    }
+  } else {
+    this.config.url = `http://${this.config.host}:${this.config.port}`;
+  }
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig, force = false) {
