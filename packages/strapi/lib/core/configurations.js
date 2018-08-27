@@ -333,8 +333,8 @@ module.exports.app = async function() {
 
   // check if SSL enabled and construct url
   function getProxyUrl(ssl, url) {
-  if (ssl) return `https://${url}`
-    return `http://${url}`
+  if (ssl) return `https://${url}`;
+    return `http://${url}`;
   }
 
   // check if proxy is enabled and construct url
