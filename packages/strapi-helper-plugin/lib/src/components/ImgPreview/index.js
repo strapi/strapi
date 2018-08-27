@@ -143,7 +143,7 @@ class ImgPreview extends React.Component {
 
   renderContent = () => {
     const fileType = this.getFileType(this.state.imgURL);
-    
+
     if (this.state.isImg) {
       const imgURL = startsWith(this.state.imgURL, '/') ? `${strapi.backendURL}${this.state.imgURL}` : this.state.imgURL;
 
@@ -168,7 +168,6 @@ class ImgPreview extends React.Component {
         backgroundImage: `url(${BkgImg})`,
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
-        zIndex: 9999,
       } : {};
 
     return (
