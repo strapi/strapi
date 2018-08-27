@@ -1,6 +1,6 @@
 {
   "name": "strapi-email-amazon-ses",
-  "version": "3.0.0-alpha.13.1",
+  "version": "3.0.0-alpha.14",
   "description": "Amazon SES provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
