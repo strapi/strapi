@@ -28,6 +28,9 @@
     "showdown": "^1.8.6",
     "strapi-helper-plugin": "3.0.0-alpha.13.1"
   },
+  "dependencies": {
+    "pluralize": "^7.0.0"
+  },
   "author": {
     "name": "Strapi team",
     "email": "hi@strapi.io",
