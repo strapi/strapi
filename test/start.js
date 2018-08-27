@@ -74,7 +74,8 @@ const main = async () => {
     return new Promise(async (resolve) => {
       // Run setup tests to generate the app.
       await jest({
-        passWithNoTests: true
+        passWithNoTests: true,
+        testURL: 'http://localhost/'
       }, [process.cwd()]);
 
       const packages = fs.readdirSync(path.resolve(process.cwd(), 'packages'))
@@ -84,6 +85,7 @@ const main = async () => {
       for (let i in packages) {
         await jest({
           passWithNoTests: true,
+          testURL: 'http://localhost/'
         }, [`${process.cwd()}/packages/${packages[i]}`]);
       }
 
