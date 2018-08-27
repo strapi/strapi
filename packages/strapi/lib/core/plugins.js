@@ -81,7 +81,7 @@ module.exports = async function() {
   const isAdmin = await fs.pathExists(path.resolve(this.config.appPath, 'admin', 'admin'));
   if (!isAdmin) return;
 
-  // arrenge system directories
+  // arrange system directories
   await Promise.all([
     fs.remove(sourcePath),
 
