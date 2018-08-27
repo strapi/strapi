@@ -145,14 +145,14 @@ module.exports = (scope, cb) => {
                   when: !hasDatabaseConfig && scope.client.database === 'mongo',
                   type: 'boolean',
                   name: 'srv',
-                  message: '+srv connection::',
+                  message: '+srv connection:',
                   default: _.get(scope.database, 'srv', false)
                 },
                 {
                   when: !hasDatabaseConfig,
                   type: 'input',
                   name: 'port',
-                  message: 'Port(It will be ignored if you enable +srv):',
+                  message: 'Port (It will be ignored if you enable +srv):',
                   default: (answers) => { // eslint-disable-line no-unused-vars
                     if (_.get(scope.database, 'port')) {
                       return scope.database.port;
@@ -259,7 +259,7 @@ module.exports = (scope, cb) => {
               require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
             } catch(err) {
               shell.rm('-r', scope.tmpPath);
-              console.log(err)
+              console.log(err);
               cb.success();
             }
           });
