@@ -368,7 +368,7 @@ As an example using this configuration with Nginx your server would respond to `
     "enabled": true,
     "ssl": true,
     "host": "example.com",
-    "port": "8443"
+    "port": 8443
   },
   "autoReload": {
     "enabled": true
