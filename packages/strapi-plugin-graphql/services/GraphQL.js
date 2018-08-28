@@ -675,6 +675,14 @@ module.exports = {
                   }).where;
               }
             }
+            
+            if (queryOpts.hasOwnProperty('query') &&
+                queryOpts.query.hasOwnProperty('id') && 
+                queryOpts.query.id.hasOwnProperty('value') && 
+                Array.isArray(queryOpts.query.id.value)
+            ){
+              queryOpts.query.id.symbol = 'IN';
+            }
 
             const value = await (association.model ?
               resolvers.fetch(params, association.plugin, []):
