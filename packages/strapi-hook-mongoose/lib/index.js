@@ -79,13 +79,16 @@ module.exports = function (strapi) {
         options.debug = debug === true || debug === 'true';
 
         try {
-          await instance.connect(uri || `mongodb${isSrv ? "+srv" : ""}://${host}${!isSrv ? ":" + port : ""}/`, connectOptions)
+          await instance.connect(
+            uri || `mongodb${isSrv ? '+srv' : ''}://${host}${!isSrv ? ':' + port : ''}/`,
+            connectOptions
+          );
         } catch (err) {
-          if (error.message.indexOf(`:${port}`)) {
+          if (err.message.indexOf(`:${port}`)) {
             return cb('Make sure your MongoDB database is running...');
           }
 
-          cb(error);
+          cb(err);
         }
 
         Object.keys(options, key => instance.set(key, options[key]))
