@@ -107,6 +107,11 @@
   "form.server.item.port": "Port",
   "form.server.item.cron": "Cron",
 
+  "form.server.item.proxy.enabled": "Proxy Enabled",
+  "form.server.item.proxy.ssl": "Proxy SSL",
+  "form.server.item.proxy.host": "Proxy Host",
+  "form.server.item.proxy.port": "Proxy Port",
+
   "form.language.name": "Languages",
   "form.language.description": "Configure your languages.",
   "form.language.choose": "Choose a language:",
