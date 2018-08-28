@@ -340,7 +340,7 @@ module.exports.app = async function() {
 
   // check if proxy is enabled and construct url
   if (get(this.config, 'proxy.enabled')) {
-    this.config.url = getProxyUrl(this.config.proxy.ssl, '${this.config.proxy.host}:${this.config.proxy.port}');
+    this.config.url = getProxyUrl(this.config.proxy.ssl, `${this.config.proxy.host}:${this.config.proxy.port}`);
   }
 };
 
