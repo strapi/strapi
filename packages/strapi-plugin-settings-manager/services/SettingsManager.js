@@ -446,7 +446,13 @@ module.exports = {
             validations: {}
           },
           {
-            name: 'form.server.item.proxyenabled',
+            name: 'form.server.item.cron',
+            target: 'server.cron.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.server.cron.enabled`, null)
+          },
+          {
+            name: 'form.server.item.proxyenable',
             target: 'server.proxy.enabled',
             type: 'boolean',
             value: _.get(strapi.config, `environments.${env}.server.proxy.enabled`, null),
@@ -472,12 +478,6 @@ module.exports = {
             type: 'number',
             value: _.get(strapi.config, `environments.${env}.server.proxy.port`, null),
             validations: {}
-          },
-          {
-            name: 'form.server.item.cron',
-            target: 'server.cron.enabled',
-            type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.server.cron.enabled`, null)
           }
         ]
       }

@@ -107,7 +107,7 @@
   "form.server.item.port": "Port",
   "form.server.item.cron": "Cron",
 
-  "form.server.item.proxyenabled": "Proxy Enabled",
+  "form.server.item.proxyenable": "Proxy Enable",
   "form.server.item.proxyssl": "Proxy SSL",
   "form.server.item.proxyhost": "Proxy Host",
   "form.server.item.proxyport": "Proxy Port",
