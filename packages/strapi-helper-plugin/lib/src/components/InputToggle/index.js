@@ -15,7 +15,7 @@ class InputToggle extends React.Component {
     const target = {
       name: this.props.name,
       type: 'toggle',
-      value: e.target.id.includes('on'),
+      value: e.target.id.includes('__ON__'),
     };
 
     this.props.onChange({ target });
@@ -48,7 +48,7 @@ class InputToggle extends React.Component {
           autoFocus={autoFocus}
           disabled={disabled}
           className={cn('btn', !value && styles.gradientOff)}
-          id={`off_${name}`}
+          id={`__OFF__${name}`}
           onClick={this.handleClick}
           tabIndex={tabIndex}
           type="button"
@@ -58,7 +58,7 @@ class InputToggle extends React.Component {
         <button
           disabled={disabled}
           className={cn('btn', value && styles.gradientOn)}
-          id={`on_${name}`}
+          id={`__ON__${name}`}
           onClick={this.handleClick}
           type="button"
         >

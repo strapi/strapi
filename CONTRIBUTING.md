@@ -21,11 +21,11 @@ Every user can send a feature request using the [issues](https://github.com/stra
 ## Repository Organization
 We made the choice to use a monorepo design such as [React](https://github.com/facebook/react/tree/master/packages), [Babel](https://github.com/babel/babel/tree/master/packages), [Meteor](https://github.com/meteor/meteor/tree/devel/packages) or [Ember](https://github.com/emberjs/ember.js/tree/master/packages) do. It allows the community to easily maintain the whole ecosystem up-to-date and consistent.
 
-The Babel team wrotes an excellent short post about [the pros and cons of the monorepo design](https://github.com/babel/babel/blob/master/doc/design/monorepo.md).
+The Babel team wrote an excellent short post about [the pros and cons of the monorepo design](https://github.com/babel/babel/blob/master/doc/design/monorepo.md).
 
-We will do our best to keep the master branch clean as possible, with tests passing all the times. However, it can happen that the master branch moves faster than the release cycle. To ensure to use the latest stable version, please refers to the [release on npm](https://www.npmjs.com/package/strapi).
+We will do our best to keep the master branch as clean as possible, with tests passing all the times. However, it can happen that the master branch moves faster than the release cycle. To ensure you have the latest stable version, please refer to the [release on npm](https://www.npmjs.com/package/strapi).
 
-If you send a pull request, please do it again the `master` branch. We are developing upcoming versions separately to ensure non-breaking changes from master to the latest stable major version.
+If you send a pull request, please do it against the `master` branch. We are developing upcoming versions separately to ensure non-breaking changes from master to the latest stable major version.
 
 ***
 
@@ -53,7 +53,7 @@ cd strapi
 
 **Two setup are available... with or without the front-end builds.**
 
-Without the front-end builds, you won't be able to access to the administration panel via http://localhost:1337/admin, you'll have to run the administration separately and access it through http://localhost:4000/admin.
+Without the front-end builds, you won't be able to access the administration panel via http://localhost:1337/admin. You'll have to run the administration separately and access it through http://localhost:4000/admin.
 
 <br>
 
