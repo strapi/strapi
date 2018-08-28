@@ -80,7 +80,7 @@ module.exports = function (strapi) {
 
         try {
           await instance.connect(
-            uri || `mongodb${isSrv ? '+srv' : ''}://${host}${!isSrv ? ':' + port : ''}/`,
+            uri || `mongodb${isSrv ? '+srv' : ''}://${username}:${password}@${host}${!isSrv ? ':' + port : ''}/`,
             connectOptions
           );
         } catch (err) {
