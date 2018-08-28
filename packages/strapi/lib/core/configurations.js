@@ -321,11 +321,12 @@ module.exports.app = async function() {
   // default settings
   this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
   this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
-  
+
   // default construct url
   this.config.url = `http://${this.config.host}:${this.config.port}`
 
   // proxy settings
+  this.config.proxy = this.config.currentEnvironment.server.proxy;
   this.config.proxy.enabled = get(this.config.currentEnvironment, 'server.proxy.enabled') || this.config.proxy.enabled;
   this.config.proxy.port = get(this.config.currentEnvironment, 'server.proxy.port') || this.config.proxy.port;
   this.config.proxy.host = get(this.config.currentEnvironment, 'server.proxy.host') || this.config.proxy.host;
