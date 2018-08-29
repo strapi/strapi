@@ -335,7 +335,8 @@ Most of the application's configurations are defined by environment. It means th
 
  - `host` (string): Host name. Default value: `localhost`.
  - `port` (integer): Port on which the server should be running. Default value: `1337`.
- - `autoReload` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
+ - `autoReload`
+   - `enabled` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
  - `proxy`
   - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
   - `ssl` (boolean): Enable proxy SSL support
