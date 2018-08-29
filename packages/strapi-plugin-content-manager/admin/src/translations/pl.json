@@ -15,6 +15,11 @@
   "components.LimitSelect.itemsPerPage": "Elementów na stronę",
   "containers.List.errorFetchRecords": "Błąd",
 
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit — Settings",
+
   "components.AddFilterCTA.add": "Filtry",
   "components.AddFilterCTA.hide": "Filtry",
   "components.FilterOptions.button.apply": "Zastosuj",
@@ -69,6 +74,10 @@
   "error.attribute.key.taken": "Ta wartość już istnieje",
   "error.attribute.sameKeyAndName": "Nie mogą być takie same",
   "error.validation.minSupMax": "Nie może być większa",
+
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Display name in the profile",
+  "form.Input.disabled": "Editable field",
 
   "notification.error.relationship.fetch": "Wystąpił błąd podczas pobierania relacji.",
 

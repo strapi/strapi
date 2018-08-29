@@ -8,8 +8,10 @@ import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-autofocus */
 function InputNumber(props) {
+  const formattedPlaceholder = props.placeholder === '' ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
+  
   return (
-    <FormattedMessage id={props.placeholder} defaultMessage={props.placeholder}>
+    <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
       {(message) => (
         <input
           autoFocus={props.autoFocus}

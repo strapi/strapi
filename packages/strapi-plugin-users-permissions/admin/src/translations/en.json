@@ -6,6 +6,7 @@
   "Auth.form.button.login": "Log in",
   "Auth.form.button.register": "Ready to start",
   "Auth.form.error.noAdminAccess": "You can't access the administration panel.",
+  "Auth.form.error.confirmed": "Your account email is not confirmed.",
 
   "Auth.form.forgot-password.email.label": "Enter your email",
   "Auth.form.forgot-password.email.label.success": "Email successfully sent to",
@@ -43,8 +44,9 @@
   "Auth.form.error.code.provide": "Incorrect code provided.",
   "Auth.form.error.password.matching": "Passwords do not match.",
   "Auth.form.error.params.provide": "Incorrect params provided.",
-  "Auth.form.error.username.taken": "Username is already taken",
-  "Auth.form.error.email.taken": "Email is already taken",
+  "Auth.form.error.username.taken": "Username is already taken.",
+  "Auth.form.error.email.taken": "Email is already taken.",
+  "Auth.form.error.blocked": "Your account has been blocked by the administrator.",
   "Auth.form.error.ratelimit": "Too many attempts, please try again in a minute.",
 
   "Auth.link.forgot-password": "Forgot your password?",
@@ -66,8 +68,12 @@
 
   "EditForm.inputToggle.label.email": "One account per email address",
   "EditForm.inputToggle.label.sign-up": "Enable sign-ups",
+  "EditForm.inputToggle.label.email-confirmation": "Enable email confirmation",
+  "EditForm.inputToggle.label.email-confirmation-redirection": "Redirection url",
   "EditForm.inputToggle.description.email": "Disallow the user to create multiple accounts using the same email address with different authentication providers.",
   "EditForm.inputToggle.description.sign-up": "When disabled (OFF), the registration process is forbidden. No one can subscribe anymore no matter the used provider.",
+  "EditForm.inputToggle.description.email-confirmation": "When enabled (ON), new registred users receive a confirmation email.",
+  "EditForm.inputToggle.description.email-confirmation-redirection": "After confirmed your email, chose where you will be redirected.",
 
   "EditPage.cancel": "Cancel",
   "EditPage.submit": "Save",
@@ -130,7 +136,7 @@
   "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
   "Policies.header.title": "Advanced settings",
 
-  "Email.template.validation_email": "Email address validation",
+  "Email.template.email_confirmation": "Email address confirmation",
   "Email.template.reset_password": "Reset password",
   "Email.template.success_register": "Registration successful",
 
