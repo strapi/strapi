@@ -326,16 +326,15 @@ module.exports.app = async function() {
   this.config.url = `http://${this.config.host}:${this.config.port}`
 
   // proxy settings
-  this.config.proxy = this.config.currentEnvironment.server.proxy;
+  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy' || {});
   this.config.proxy.enabled = get(this.config.currentEnvironment, 'server.proxy.enabled') || this.config.proxy.enabled;
   this.config.proxy.port = get(this.config.currentEnvironment, 'server.proxy.port') || this.config.proxy.port;
   this.config.proxy.host = get(this.config.currentEnvironment, 'server.proxy.host') || this.config.proxy.host;
   this.config.proxy.ssl = get(this.config.currentEnvironment, 'server.proxy.ssl') || this.config.proxy.ssl;
 
-  // check if SSL enabled and construct url
+  // check if SSL enabled and construct proxy url
   function getProxyUrl(ssl, url) {
-  if (ssl) return `https://${url}`;
-    return `http://${url}`;
+    return `http${ssl ? 's' : ''}://${url}`;
   }
 
   // check if proxy is enabled and construct url
