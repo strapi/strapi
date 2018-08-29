@@ -28,7 +28,7 @@ module.exports = (scope, success, error) => {
   connectOptions.useNewUrlParser = true;
   connectOptions.dbName = scope.database.settings.database;
 
-  Mongoose.connect(`mongodb${srv ? "+srv" : ""}://${scope.database.settings.host}:${!srv ? ":" + scope.database.settings.port : ""}/`, connectOptions, function (err) {
+  Mongoose.connect(`mongodb${srv ? '+srv' : ''}://${scope.database.settings.host}${!srv ? `:${scope.database.settings.port}` : ''}/`, connectOptions, function (err) {
     if (err) {
       console.log('⚠️ Database connection has failed! Make sure your database is running.');
       return error();
