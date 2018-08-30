@@ -165,13 +165,8 @@ Most of the application's configurations are defined by environment. It means th
  - `connections` List of all available connections.
    - `default`
      - `connector` (string): Connector used by the current connection. Default value: `strapi-hook-mongoose`.
-     - `client` (string): Client used to store session. Default value: `cookie`.
-     - `key` (string): Cookie key name. Default value: `strapi.sid`
-     - `maxAge` (integer): Time in milliseconds before the session expire. Default value: `86400000`.
-     - `rolling` (boolean): Force a session identifier cookie to be set on every response. Default value: `false`.
-     - `signed` (boolean): httpOnly or not. Default value: `true`.
-     - `overwrite` (boolean): Can overwrite or not. Default value: `true`.
      - `settings` Useful for external session stores such as Redis.
+       - `client` (string): Database client to create the connection. Default value: `mongo`.
        - `host` (string): Database host name. Default value: `localhost`.
        - `port` (integer): Database port. Default value: `27017`.
        - `database` (string): Database name. Default value: `development`.
