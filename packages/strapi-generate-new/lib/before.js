@@ -187,7 +187,7 @@ module.exports = (scope, cb) => {
                   type: 'input',
                   name: 'authenticationDatabase',
                   message: 'Authentication database:',
-                  default: _.get(scope.database, 'authenticationDatabase', undefined)
+                  default: _.get(scope.database, 'authenticationDatabase', 'admin')
                 },
                 {
                   when: !hasDatabaseConfig && scope.client.database === 'mongo',
