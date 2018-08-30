@@ -318,9 +318,25 @@ module.exports.app = async function() {
     return acc;
   }, {});
 
+  // default settings
   this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
   this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
-  this.config.url = `http://${this.config.host}:${this.config.port}`;
+
+  // default construct url
+  this.config.url = `http://${this.config.host}:${this.config.port}`
+
+  // proxy settings
+  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy' || {});
+
+  // check if SSL enabled and construct proxy url
+  function getProxyUrl(ssl, url) {
+    return `http${ssl ? 's' : ''}://${url}`;
+  }
+
+  // check if proxy is enabled and construct url
+  if (get(this.config, 'proxy.enabled')) {
+    this.config.url = getProxyUrl(this.config.proxy.ssl, `${this.config.proxy.host}:${this.config.proxy.port}`);
+  }
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig, force = false) {

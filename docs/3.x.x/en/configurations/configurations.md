@@ -337,6 +337,11 @@ Most of the application's configurations are defined by environment. It means th
  - `port` (integer): Port on which the server should be running. Default value: `1337`.
  - `autoReload`
    - `enabled` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
+ - `proxy`
+  - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
+  - `ssl` (boolean): Enable proxy SSL support
+  - `host` (string): Host name your proxy service uses for Strapi.
+  - `port` (integer): Port that your proxy service accepts connections on.
  - [`cron`](https://en.wikipedia.org/wiki/Cron)
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
  - `admin`
@@ -347,6 +352,33 @@ Most of the application's configurations are defined by environment. It means th
       - `plugins`
         - `source` (string): Define the source mode (origin, host, custom).
         - `folder` (string): Indicate what the plugins folder in `host` source mode.
+
+#### Example
+
+**Path —** `./config/environments/**/server.json`.
+
+As an example using this configuration with Nginx your server would respond to `https://example.com:8443` instead of `http://localhost:1337`
+
+**Note:** you will need to configure Nginx or Apache as a proxy before configuring this example.
+
+```json
+{
+  "host": "localhost",
+  "port": 1337,
+  "proxy": {
+    "enabled": true,
+    "ssl": true,
+    "host": "example.com",
+    "port": 8443
+  },
+  "autoReload": {
+    "enabled": true
+  },
+  "cron": {
+    "enabled": true
+  }
+}
+```
 
 ***
 
