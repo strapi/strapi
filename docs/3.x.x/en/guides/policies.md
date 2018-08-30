@@ -22,7 +22,7 @@ module.exports = async (ctx, next) => {
 
 In this example, we are verifying that a session is open. If it is the case, we call the `next()` method that will execute the next policy or controller's action. Otherwise, a 401 error is returned.
 
-> Note: You can access to any controllers, services or models thanks to the global variable `strapi` in a policy.
+> Note: You can access any controllers, services, or models by using the global variable `strapi` in a policy.
 
 ## Usage
 

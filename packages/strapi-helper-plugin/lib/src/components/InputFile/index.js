@@ -39,6 +39,10 @@ class InputFile extends React.Component {
   handleChange = ({ target }) => this.addFilesToProps(target.files);
 
   addFilesToProps = (files) => {
+    if (files.length === 0) {
+      return;
+    }
+
     const initAcc = this.props.multiple ? cloneDeep(this.props.value) : {};
     const value = Object.keys(files).reduce((acc, current) => {
 
