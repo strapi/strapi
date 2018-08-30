@@ -463,13 +463,6 @@ module.exports = {
             value: _.get(strapi.config, `environments.${env}.server.proxy.enabled`, null),
             items: [
               {
-                name: 'form.server.item.proxy.ssl',
-                target: 'server.proxy.ssl',
-                type: 'boolean',
-                value: _.get(strapi.config, `environments.${env}.server.proxy.ssl`, null),
-                validations: {}
-              },
-              {
                 name: 'form.server.item.proxy.host',
                 target: 'server.proxy.host',
                 type: 'string',
@@ -481,6 +474,13 @@ module.exports = {
                 target: 'server.proxy.port',
                 type: 'number',
                 value: _.get(strapi.config, `environments.${env}.server.proxy.port`, null),
+                validations: {}
+              },
+              {
+                name: 'form.server.item.proxy.ssl',
+                target: 'server.proxy.ssl',
+                type: 'boolean',
+                value: _.get(strapi.config, `environments.${env}.server.proxy.ssl`, null),
                 validations: {}
               }
             ],
