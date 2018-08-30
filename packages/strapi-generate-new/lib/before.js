@@ -203,7 +203,7 @@ module.exports = (scope, cb) => {
                 }
 
                 scope.database.settings.host = answers.host;
-                scope.database.settings.srv = answers.srv;
+                scope.database.settings.srv = _.toString(answers.srv) === 'true';
                 scope.database.settings.port = answers.port;
                 scope.database.settings.database = answers.database;
                 scope.database.settings.username = answers.username;

@@ -54,7 +54,7 @@ module.exports = function (strapi) {
         const { uri, host, port, username, password, database, srv } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
         const uriOptions = uri ? url.parse(uri, true).query : {};
         const { authenticationDatabase, ssl, debug } = _.defaults(connection.options, uriOptions, strapi.config.hook.settings.mongoose);
-        const isSrv = srv === 'true';
+        const isSrv = srv === true || srv === 'true';
 
         // Connect to mongo database
         const connectOptions = {};
