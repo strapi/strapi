@@ -152,7 +152,7 @@ module.exports = (scope, cb) => {
                   when: !hasDatabaseConfig,
                   type: 'input',
                   name: 'port',
-                  message: 'Port (It will be ignored if you enable +srv):',
+                  message: `Port${scope.client.database === 'mongo' ? ' (It will be ignored if you enable +srv)' : ''}:`,
                   default: (answers) => { // eslint-disable-line no-unused-vars
                     if (_.get(scope.database, 'port')) {
                       return scope.database.port;
