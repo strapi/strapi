@@ -150,7 +150,7 @@ module.exports = {
     _.defaultsDeep(grantConfig, {
       server: {
         protocol: 'http',
-        host: `${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`
+        host: `${strapi.config.url}`
       }
     });
 
@@ -306,7 +306,7 @@ module.exports = {
         const settings = storeEmail['email_confirmation'] ? storeEmail['email_confirmation'].options : {};
 
         settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
-          URL: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/auth/email-confirmation`,
+          URL: `${strapi.config.url}/auth/email-confirmation`,
           USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider']),
           CODE: jwt
         });
