@@ -87,8 +87,6 @@ module.exports = function(appPath = '') {
 
       setFilesToWatch(appPath);
 
-
-
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {
           switch (message) {
