@@ -5,6 +5,8 @@
  */
 
 /* eslint-disable prefer-template */
+/* eslint-disable no-console */
+
 // Node.js core.
 const fs = require('fs');
 const path = require('path');
