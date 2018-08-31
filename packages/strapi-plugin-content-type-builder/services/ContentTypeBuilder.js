@@ -178,7 +178,8 @@ module.exports = {
         if (params.plugin === 'upload' && relation.model || relation.collection === 'file') {
           params = {
             type: 'media',
-            multiple: params.collection ? true : false
+            multiple: params.collection ? true : false,
+            required: params.required
           };
         } else {
           params = _.omit(params, ['collection', 'model', 'via']);
@@ -288,7 +289,8 @@ module.exports = {
           attrs[attribute.name] = {
             [attribute.params.multiple ? 'collection' : 'model']: 'file',
             via,
-            plugin: 'upload'
+            plugin: 'upload',
+            required: attribute.params.required === true ? true : false
           };
         }
       } else if (_.has(attribute, 'params.target')) {
