@@ -1,29 +1,14 @@
-const fs = require('fs');
+/**
+ * Set the version from the main `package.json` into all other inner libraries.
+ */
+
 const path = require('path');
-let currentPackage;
 
-try {
-  const pkgJSON = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'package.json'), 'utf8'));
-  const packages = fs.readdirSync(path.resolve(process.cwd(),'packages'), 'utf8');
+const shell = require('shelljs');
+const VERSION = require(path.resolve(process.cwd(), 'package.json')).version;
 
-  packages.filter(pkg => pkg.indexOf('strapi') !== -1).forEach(pkg => {
-    currentPackage = pkg;
-    const packageJSON = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'packages', pkg, 'package.json'), 'utf8'));
 
-    packageJSON.version = pkgJSON.version;
-
-    Object.keys(packageJSON.dependencies || []).filter(dependency => dependency.indexOf('strapi-') !== -1).forEach(dependency => {
-      packageJSON.dependencies[dependency] = pkgJSON.version;
-    });
-
-    if (packageJSON.devDependencies) {
-      Object.keys(packageJSON.devDependencies || []).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
-        packageJSON.devDependencies[devDependency] = pkgJSON.version;
-      });
-    }
-
-    fs.writeFileSync(path.resolve(process.cwd(), 'packages', pkg, 'package.json'), JSON.stringify(packageJSON, null, 2), 'utf8');
+shell.ls('./packages/strapi*/package.json')
+  .forEach(file => {
+    shell.sed('-i', /^(\s*"(version|strapi-[a-z-]*)":\s*").*(",?\s*)$/, `$1${VERSION}$3`, file);
   });
-} catch (error) {
-  console.error(currentPackage, error);
-}
