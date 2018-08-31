@@ -473,7 +473,7 @@ module.exports = {
       }
       // Check if the value is a valid candidate to be converted to a number value
       if (fieldType !== 'string') {
-        formattedValue = isNumeric(value)
+        formattedValue = !Array.isArray(value) && isNumeric(value)
           ? _.toNumber(value)
           : value;
       } else {
