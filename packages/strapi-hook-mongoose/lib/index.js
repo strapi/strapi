@@ -78,6 +78,8 @@ module.exports = function (strapi) {
 
         options.debug = debug === true || debug === 'true';
 
+        /* FIXME: for now, mongoose doesn't support srv auth except the way including user/pass in URI.
+         * https://github.com/Automattic/mongoose/issues/6881 */
         instance.connect(uri ||
           `mongodb${isSrv ? '+srv' : ''}://${username}:${password}@${host}${ !isSrv ? ':' + port : '' }/`,
            connectOptions
