@@ -107,15 +107,14 @@ Models are a representation of the database's structure and lifecyle. They are s
 module.exports = {
   // Before saving a value.
   // Fired before an `insert` or `update` query.
-  beforeSave: (next) => {
-    // Use `this` to get your current object
-    next();
+  beforeSave: async (model) => {
+    // your logic before saving a document.
   },
 
   // After saving a value.
   // Fired after an `insert` or `update` query.
-  afterSave: (doc, next) => {
-    next();
+  afterSave: (model, result) => {
+    // your logic after saving a document.
   },
 
   // ... and more
