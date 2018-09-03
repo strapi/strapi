@@ -11,6 +11,7 @@ var execSync = require('child_process').execSync;
 var chalk = require('chalk');
 var spawn = require('cross-spawn');
 var opn = require('opn');
+const fetch = require('node-fetch');
 
 // https://github.com/sindresorhus/opn#app
 var OSX_CHROME = 'google chrome';
@@ -105,12 +106,39 @@ function startBrowserProcess(browser, url) {
   }
 }
 
+async function pingDashboard(url, multipleTime = false) {
+  try {
+    await fetch(url, { method:'HEAD', timeout: 300, body: null });
+    // Inform the user that we're going to open the administration panel.
+    this.log.info("⏳ Opening the admin panel...");
+  } catch (e) {
+    if (e.code !== 'ECONNREFUSED' && e.type !== 'request-timeout') {
+      return console.error(e);
+    }
+    
+    // Only display once.
+    if (!multipleTime) {
+      this.log.warn(`⚠️  The admin panel is unavailable... Impossible to open it in the browser.`);
+    }
+
+    // Only retry if the user is running the administration on another server.
+    if (this.config.admin.devMode) {
+      // Wait 1 second until the next ping.
+      await new Promise((resolve) => { setTimeout(resolve, 1000); });
+      await pingDashboard.call(this, url, true);
+    }
+  }
+}
+
 /**
  * Reads the BROWSER evironment variable and decides what to do with it. Returns
  * true if it opened a browser or ran a node.js script, otherwise false.
  */
-function openBrowser() {
+async function openBrowser() {
   const url = this.config.admin.url;
+
+  // Ping the dashboard to ensure it's available.
+  await pingDashboard.call(this, url);
 
   const { action, value } = getBrowserEnv();
   switch (action) {

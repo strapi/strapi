@@ -111,7 +111,7 @@ class Strapi extends EventEmitter {
       // Update source admin.
       await admin.call(this);
       // Launch server.
-      this.server.listen(this.config.port, err => {
+      this.server.listen(this.config.port, async (err) => {
         if (err) {
           this.log.debug(`⚠️ Server wasn't able to start properly.`);
           this.log.error(err);
@@ -137,7 +137,7 @@ class Strapi extends EventEmitter {
         }
 
         if (this.config.environment === 'development' && get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) {
-          utils.openBrowser.call(this);
+          await utils.openBrowser.call(this);
         }
       });
     } catch (err) {
