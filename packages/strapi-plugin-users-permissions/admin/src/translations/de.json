@@ -89,8 +89,8 @@
   "HeaderNav.link.providers": "Methoden",
   "HeaderNav.link.roles": "Rollen",
 
-  "HomePage.header.title": "Benutzer & Befugnisse",
-  "HomePage.header.description": "Lege Rollen und deren Befugnisse fest",
+  "HomePage.header.title": "Benutzer & Berechtigungen",
+  "HomePage.header.description": "Lege Rollen und deren Berechtigungen fest.",
 
   "InputSearch.placeholder": "Suche nach einem Benutzer",
 

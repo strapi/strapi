@@ -20,9 +20,10 @@ class LeftMenuLink extends React.Component {
     // We need to create our own active url checker,
     // because of the two levels router.
     const isLinkActive = startsWith(
-      window.location.pathname.replace('/admin', ''),
-      this.props.destination,
+      window.location.pathname.replace('/admin', '').concat('/'),
+      this.props.destination.concat('/'),
     );
+
     const plugin =
       this.props.source !== 'content-manager' && this.props.source !== '' ? (
         <div className={styles.plugin}>
