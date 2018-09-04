@@ -285,7 +285,7 @@ module.exports = {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
     }
 
-    if (user && user.provider !== params.provider && strapi.plugins['users-permissions'].config.advanced.unique_email) {
+    if (user && user.provider !== params.provider && settings.unique_email) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
     }
 
