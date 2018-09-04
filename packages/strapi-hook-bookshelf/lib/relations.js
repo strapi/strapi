@@ -97,7 +97,7 @@ module.exports = {
                 module.exports.findOne
                   .call(model, { [model.primaryKey]: recordId }, [details.via])
                   .then(record => {
-                    if (record && _.isObject(record[details.via])) {
+                    if (record && _.isObject(record[details.via]) && record.id !== record[details.via][current]) {
                       return module.exports.update.call(this, {
                         id: getValuePrimaryKey(record[details.via], model.primaryKey),
                         values: {

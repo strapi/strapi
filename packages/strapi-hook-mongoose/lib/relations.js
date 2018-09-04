@@ -50,7 +50,7 @@ module.exports = {
                   .findOne({ [model.primaryKey]: value[current] })
                   .populate(details.via)
                   .then(record => {
-                    if (record && _.isObject(record[details.via])) {
+                    if (record && _.isObject(record[details.via]) && record._id.toString() !== record[details.via][current].toString()) {
                       return module.exports.update.call(this, {
                         id: getValuePrimaryKey(record[details.via], model.primaryKey),
                         values: {
