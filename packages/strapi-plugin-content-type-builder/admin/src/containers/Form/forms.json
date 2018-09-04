@@ -926,7 +926,10 @@
             },
             "name": "name",
             "type": "string",
-            "value": ""
+            "value": "",
+            "validations": {
+              "required": true
+            }
           },
           {
             "label": {
