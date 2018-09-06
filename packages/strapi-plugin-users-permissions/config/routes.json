@@ -5,8 +5,7 @@
       "path": "/",
       "handler": "UsersPermissions.index",
       "config": {
-        "policies": [],
-        "description": "Check if the first admin user has already been registered"
+        "policies": []
       }
     },
     {
@@ -14,7 +13,12 @@
       "path": "/init",
       "handler": "UsersPermissions.init",
       "config": {
-        "policies": []
+        "policies": [],
+        "description": "Check if the first admin user has already been registered",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "Role"
+        }
       }
     },
     {
@@ -23,7 +27,12 @@
       "handler": "UsersPermissions.searchUsers",
       "config": {
         "policies": [],
-        "description": "Search for users"
+        "description": "Search for users",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User",
+          "responseType": "find"
+        }
       }
     },
     {
@@ -32,7 +41,12 @@
       "handler": "UsersPermissions.getPermissions",
       "config": {
         "policies": [],
-        "description": "Retrieve all the permissions of your project"
+        "description": "Retrieve all the permissions of your project",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "Permission",
+          "responseType": "find"
+        }
       }
     },
     {
@@ -40,8 +54,7 @@
       "path": "/policies",
       "handler": "UsersPermissions.getPolicies",
       "config": {
-        "policies": [],
-        "description": "Retrieve all policies of your project"
+        "policies": []
       }
     },
     {
@@ -50,7 +63,12 @@
       "handler": "UsersPermissions.getRole",
       "config": {
         "policies": [],
-        "description": "Retrieve a role depending on its id"
+        "description": "Retrieve a role depending on its id",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "Role",
+          "responseType": "findOne"
+        }
       }
     },
     {
@@ -59,7 +77,12 @@
       "handler": "UsersPermissions.getRoles",
       "config": {
         "policies": [],
-        "description": "Retrieve all role documents"
+        "description": "Retrieve all role documents",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "Role",
+          "responseType": "find"
+        }
       }
     },
     {
@@ -67,8 +90,7 @@
       "path": "/routes",
       "handler": "UsersPermissions.getRoutes",
       "config": {
-        "policies": [],
-        "description": "Retrieve all the routes of your strapi project"
+        "policies": []
       }
     },
     {
@@ -128,7 +150,12 @@
       "handler": "UsersPermissions.createRole",
       "config": {
         "policies": [],
-        "description": "Create a new role"
+        "description": "Create a new role",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "Role",
+          "responseType": "create"
+        }
       }
     },
     {
@@ -137,7 +164,12 @@
       "handler": "UsersPermissions.updateRole",
       "config": {
         "policies": [],
-        "description": "Update a role"
+        "description": "Update a role",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "Role",
+          "responseType": "update"
+        }
       }
     },
     {
@@ -146,7 +178,12 @@
       "handler": "UsersPermissions.deleteRole",
       "config": {
         "policies": [],
-        "description": "Delete a role"
+        "description": "Delete a role",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "Role",
+          "responseType": "destroy"
+        }
       }
     },
     {
@@ -165,7 +202,11 @@
       "config": {
         "policies": ["plugins.users-permissions.ratelimit"],
         "prefix": "",
-        "description": "Connect a provider"
+        "description": "Connect a provider",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -175,7 +216,11 @@
       "config": {
         "policies": ["plugins.users-permissions.ratelimit"],
         "prefix": "",
-        "description": "Log in a user"
+        "description": "Login a user using the identifiers email and password",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -185,7 +230,11 @@
       "config": {
         "policies": ["plugins.users-permissions.ratelimit"],
         "prefix": "",
-        "description": "Register a new user"
+        "description": "Register a new user with the default role",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -195,7 +244,11 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Log in a user using a custom provider"
+        "description": "Login a user using a custom provider",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -205,7 +258,11 @@
       "config": {
         "policies": ["plugins.users-permissions.ratelimit"],
         "prefix": "",
-        "description": "Send the reset password email link"
+        "description": "Send the reset password email link",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -215,7 +272,11 @@
       "config": {
         "policies": ["plugins.users-permissions.ratelimit"],
         "prefix": "",
-        "description": "Change a user's password"
+        "description": "Change a user's password",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -225,7 +286,11 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Validate a user account"
+        "description": "Validate a user account",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
 
@@ -236,7 +301,11 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Retrieve all user documents"
+        "description": "Retrieve all user documents",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -246,7 +315,11 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Retrieve the logged in user informations"
+        "description": "Retrieve the logged in user informations",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -256,7 +329,11 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Retrieve a single user depending on his id"
+        "description": "Retrieve a single user depending on his id",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -265,8 +342,7 @@
       "handler": "User.create",
       "config": {
         "policies": [],
-        "prefix": "",
-        "description": "Create a new user"
+        "prefix": ""
       }
     },
     {
@@ -276,7 +352,11 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Update an existing user"
+        "description": "Update an existing user",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     },
     {
@@ -286,7 +366,11 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Delete an existing user"
+        "description": "Delete an existing user",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
       }
     }
   ]
