@@ -19,9 +19,9 @@ import InputErrors from 'components/InputErrors';
 // Styles
 import styles from './styles.scss';
 
-class InputFileWithErrors extends React.Component {
-  state = { errors: [], label: false, hasValue: false };
-
+class InputFileWithErrors extends React.PureComponent {
+  state = {  errors: [], label: null, hasValue: false };
+  
   componentDidMount() {
     const { errors } = this.props;
     let newState = Object.assign({}, this.state);
@@ -37,9 +37,11 @@ class InputFileWithErrors extends React.Component {
     this.setState(newState);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (!this.state.hasValue && !isEmpty(nextProps.value) && nextProps.multiple && differenceBy(nextProps.value, this.props.value, 'name').length > 0) {
-      this.setState({ label: 1, hasValue: true });
+  componentDidUpdate(prevProps) {
+    if (!this.state.hasValue && !isEmpty(this.props.value) && this.props.multiple && differenceBy(this.props.value, prevProps.value, 'name').length > 0) {
+      this.updateState({ label: 1, hasValue: true });
+    } else if(isEmpty(this.props.value)) {
+      this.updateState({ label: null });
     }
     // Check if errors have been updated during validations
     if (nextProps.didCheckErrors !== this.props.didCheckErrors) {
@@ -52,6 +54,11 @@ class InputFileWithErrors extends React.Component {
   setLabel = (label) => {
     this.setState({ label });
   }
+
+  updateState = state => {
+    this.setState(state);
+  }
+
   // TODO handle errors lifecycle
   render() {
     const {
