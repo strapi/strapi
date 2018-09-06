@@ -5,7 +5,8 @@
       "path": "/",
       "handler": "Upload.upload",
       "config": {
-        "policies": []
+        "policies": [],
+        "description": "Upload a file"
       }
     },
     {
@@ -37,7 +38,8 @@
       "path": "/files/count",
       "handler": "Upload.count",
       "config": {
-        "policies": []
+        "policies": [],
+        "description": "Retrieve the total number of uploaded files"
       }
     },
     {
@@ -45,7 +47,8 @@
       "path": "/files",
       "handler": "Upload.find",
       "config": {
-        "policies": []
+        "policies": [],
+        "description": "Retrieve all file documents"
       }
     },
     {
@@ -53,7 +56,8 @@
       "path": "/files/:_id",
       "handler": "Upload.findOne",
       "config": {
-        "policies": []
+        "policies": [],
+        "description": "Retrieve a single file depending on its id"
       }
     },
     {
@@ -61,7 +65,8 @@
       "path": "/search/:id",
       "handler": "Upload.search",
       "config": {
-        "policies": []
+        "policies": [],
+        "description": "Search for an uploaded file"
       }
     },
     {
@@ -69,7 +74,8 @@
       "path": "/files/:_id",
       "handler": "Upload.destroy",
       "config": {
-        "policies": []
+        "policies": [],
+        "description": "Delete an uploaded file"
       }
     }
   ]
