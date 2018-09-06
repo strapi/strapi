@@ -5,7 +5,8 @@
       "path": "/",
       "handler": "Email.send",
       "config": {
-        "policies": []
+        "policies": [],
+        "description": "Send an email"
       }
     },
     {
