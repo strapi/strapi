@@ -84,7 +84,7 @@ module.exports = {
             newList = newList
               .delete(attrToRemoveInfos.index);
           } else {
-            const random = Math.floor(Math.random() * 1000);
+            const random = Math.random().toString(36).substring(7);
             newList = newList
               .delete(attrToRemoveInfos.index)
               .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__${random}`);
