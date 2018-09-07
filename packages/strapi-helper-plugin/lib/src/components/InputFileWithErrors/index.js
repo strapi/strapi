@@ -14,32 +14,59 @@ import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputFile from 'components/InputFile';
 import InputSpacer from 'components/InputSpacer';
+import InputErrors from 'components/InputErrors';
 
+// Styles
 import styles from './styles.scss';
 
-class InputFileWithErrors extends React.Component {
-  state = { label: false, hasValue: false };
-
+class InputFileWithErrors extends React.PureComponent {
+  state = {  errors: [], label: null, hasValue: false };
+  
   componentDidMount() {
+    const { errors } = this.props;
+    let newState = Object.assign({}, this.state);
+
     if (this.props.multiple && !isEmpty(this.props.value)) {
-      this.setState({ label: 1, hasValue: true });
+      newState = Object.assign({}, newState, { label: 1, hasValue: true });
     }
+
+    if (!isEmpty(errors)) {
+      newState = Object.assign({}, newState, { errors });
+    }
+
+    this.setState(newState);
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (!this.state.hasValue && !isEmpty(nextProps.value) && nextProps.multiple && differenceBy(nextProps.value, this.props.value, 'name').length > 0) {
-      this.setState({ label: 1, hasValue: true });
+  componentDidUpdate(prevProps) {
+    if (!this.state.hasValue && !isEmpty(this.props.value) && this.props.multiple && differenceBy(this.props.value, prevProps.value, 'name').length > 0) {
+      this.updateState({ label: 1, hasValue: true });
+    } else if(isEmpty(this.props.value)) {
+      this.updateState({ label: null });
+    }
+    // Check if errors have been updated during validations
+    if (nextProps.didCheckErrors !== this.props.didCheckErrors) {
+      // Remove from the state the errors that have already been set
+      const errors = isEmpty(nextProps.errors) ? [] : nextProps.errors;
+      this.setState({ errors });
     }
   }
 
   setLabel = (label) => {
     this.setState({ label });
   }
+
+  updateState = state => {
+    this.setState(state);
+  }
+
   // TODO handle errors lifecycle
   render() {
     const {
       className,
       customBootstrapClass,
+      errorsClassName,
+      errorsStyle,
+      noErrorsDescription,
       inputDescription,
       inputDescriptionClassName,
       inputDescriptionStyle,
@@ -76,6 +103,7 @@ class InputFileWithErrors extends React.Component {
         )}
         <InputFile
           multiple={multiple}
+          error={!isEmpty(this.state.errors)}
           name={name}
           onChange={onChange}
           setLabel={this.setLabel}
@@ -86,6 +114,11 @@ class InputFileWithErrors extends React.Component {
           message={inputDescription}
           style={inputDescriptionStyle}
         />
+        <InputErrors
+          className={errorsClassName}
+          errors={!noErrorsDescription && this.state.errors || []}
+          style={errorsStyle}
+        />
         {spacer}
       </div>
     );
@@ -93,8 +126,12 @@ class InputFileWithErrors extends React.Component {
 }
 
 InputFileWithErrors.defaultProps = {
+  errors: [],
+  errorsClassName: '',
+  errorsStyle: {},
   className: '',
   customBootstrapClass: 'col-md-6',
+  didCheckErrors: false,
   inputDescription: '',
   inputDescriptionClassName: '',
   inputDescriptionStyle: {},
@@ -102,6 +139,7 @@ InputFileWithErrors.defaultProps = {
   labelClassName: '',
   labelStyle: {},
   multiple: false,
+  noErrorsDescription: false,
   style: {},
   value: [],
 };
@@ -109,6 +147,10 @@ InputFileWithErrors.defaultProps = {
 InputFileWithErrors.propTypes = {
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
+  didCheckErrors: PropTypes.bool,
+  errors: PropTypes.array,
+  errorsClassName: PropTypes.string,
+  errorsStyle: PropTypes.object,
   inputDescription: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,
@@ -131,6 +173,7 @@ InputFileWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   multiple: PropTypes.bool,
   name: PropTypes.string.isRequired,
+  noErrorsDescription: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
   style: PropTypes.object,
   value: PropTypes.oneOfType([

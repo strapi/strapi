@@ -7,6 +7,7 @@
 
   "app.components.DownloadInfo.download": "Téléchargement en cours...",
   "app.components.DownloadInfo.text": "Cela peut prendre une minute. Merci de patienter.",
+  "app.components.EmptyAttributes.title": "Il n'y a pas encore de champ",
 
   "app.components.HomePage.welcome": "Bienvenue à bord!",
   "app.components.HomePage.welcome.again": "Bienvenue ",

@@ -24,7 +24,9 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknown' }] }]);
     }
 
-    ctx.send({ model: Service.getModel(model, source) });
+    const modelLayout = await Service.getModel(model, source);
+
+    ctx.send({ model: modelLayout });
   },
 
   getConnections: async ctx => {
@@ -47,11 +49,11 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    await Service.appearance(formatedAttributes, name, 'content-manager');
+    await Service.appearance(formatedAttributes, name);
 
     await Service.generateAPI(name, description, connection, collectionName, []);
 
-    const modelFilePath = Service.getModelPath(name, plugin);
+    const modelFilePath = await Service.getModelPath(name, plugin);
 
     try {
       const modelJSON = _.cloneDeep(require(modelFilePath));
@@ -109,7 +111,7 @@ module.exports = {
       await Service.generateAPI(name, description, connection, collectionName, []);
     }
 
-    await Service.appearance(formatedAttributes, name, plugin ? plugin : 'content-manager');
+    await Service.appearance(formatedAttributes, name, plugin);
 
     try {
       const modelJSON = _.cloneDeep(require(modelFilePath));
@@ -188,7 +190,7 @@ module.exports = {
 
   autoReload: async ctx => {
     ctx.send({
-      autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false),
+      autoReload: _.get(strapi.config.currentEnvironment, 'server.autoReload', { enabled: false })
     });
   },
 

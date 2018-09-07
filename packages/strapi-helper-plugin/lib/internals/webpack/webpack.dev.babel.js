@@ -203,6 +203,20 @@ module.exports = require('./webpack.base.babel')({
       'node_modules',
       'styled-components',
     ),
+    'react-dnd': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react-dnd',
+    ),
+    'react-dnd-html5-backend': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react-dnd-html5-backend',
+    ),
   },
 
   // Emit a source map for easier debugging
