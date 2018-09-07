@@ -60,7 +60,8 @@ class InputFile extends React.Component {
       type: 'file',
       value,
     };
-
+    
+    this.inputFile.value = '';
     this.setState({ isUploading: !this.state.isUploading });
     this.props.onChange({ target });
   }
