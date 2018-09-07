@@ -37,18 +37,6 @@
     },
     {
       "method": "GET",
-      "path": "/permissionss",
-      "handler": "UsersPermissions.getPermissions",
-      "config": {
-        "policies": [],
-        "description": "Fuck test",
-        "tag": "Product"
-      }
-    },
-
-
-    {
-      "method": "GET",
       "path": "/policies",
       "handler": "UsersPermissions.getPolicies",
       "config": {
@@ -140,8 +128,6 @@
         "policies": []
       }
     },
-
-
     {
       "method": "POST",
       "path": "/roles",
@@ -192,7 +178,6 @@
         "policies": []
       }
     },
-
     {
       "method": "GET",
       "path": "/connect/*",
@@ -231,7 +216,8 @@
         "description": "Register a new user with the default role",
         "tag": {
           "plugin": "users-permissions",
-          "name": "User"
+          "name": "User",
+          "actionType": "create"
         }
       }
     },
@@ -291,7 +277,6 @@
         }
       }
     },
-
     {
       "method": "GET",
       "path": "/user",
