@@ -44,7 +44,7 @@ import ListPluginsPage from 'containers/ListPluginsPage/Loadable';
 import Logout from 'components/Logout';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import OverlayBlocker from 'components/OverlayBlocker';
-import PluginPage from 'containers/PluginPage/Loadable';
+import PluginPage from 'containers/PluginPage';
 
 // Utils
 import auth from 'utils/auth';
