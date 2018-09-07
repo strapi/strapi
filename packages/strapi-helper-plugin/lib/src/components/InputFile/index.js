@@ -137,7 +137,7 @@ class InputFile extends React.Component {
             position={this.state.position}
             updateFilePosition={this.updateFilePosition}
           />
-          <label style={{"margin-bottom": 0, width: '100%'}}>
+          <label style={{ marginBottom: 0, width: '100%' }}>
             <input
               className={styles.inputFile}
               multiple={multiple}
