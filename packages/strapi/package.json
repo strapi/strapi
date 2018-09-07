@@ -53,6 +53,7 @@
     "lodash": "^4.17.5",
     "node-fetch": "^1.7.3",
     "node-schedule": "^1.2.0",
+    "opn": "^5.3.0",
     "rimraf": "^2.6.2",
     "semver": "^5.4.1",
     "stack-trace": "0.0.10",

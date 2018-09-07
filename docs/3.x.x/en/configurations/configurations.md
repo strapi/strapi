@@ -341,6 +341,7 @@ Most of the application's configurations are defined by environment. It means th
  - [`cron`](https://en.wikipedia.org/wiki/Cron)
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
  - `admin`
+  - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
   - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
   - `build`
     - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
