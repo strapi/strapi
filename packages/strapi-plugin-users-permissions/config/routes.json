@@ -31,24 +31,22 @@
         "tag": {
           "plugin": "users-permissions",
           "name": "User",
-          "responseType": "find"
+          "actionType": "find"
         }
       }
     },
     {
       "method": "GET",
-      "path": "/permissions",
+      "path": "/permissionss",
       "handler": "UsersPermissions.getPermissions",
       "config": {
         "policies": [],
-        "description": "Retrieve all the permissions of your project",
-        "tag": {
-          "plugin": "users-permissions",
-          "name": "Permission",
-          "responseType": "find"
-        }
+        "description": "Fuck test",
+        "tag": "Product"
       }
     },
+
+
     {
       "method": "GET",
       "path": "/policies",
@@ -67,7 +65,7 @@
         "tag": {
           "plugin": "users-permissions",
           "name": "Role",
-          "responseType": "findOne"
+          "actionType": "findOne"
         }
       }
     },
@@ -81,7 +79,7 @@
         "tag": {
           "plugin": "users-permissions",
           "name": "Role",
-          "responseType": "find"
+          "actionType": "find"
         }
       }
     },
@@ -154,7 +152,7 @@
         "tag": {
           "plugin": "users-permissions",
           "name": "Role",
-          "responseType": "create"
+          "actionType": "create"
         }
       }
     },
@@ -168,7 +166,7 @@
         "tag": {
           "plugin": "users-permissions",
           "name": "Role",
-          "responseType": "update"
+          "actionType": "update"
         }
       }
     },
@@ -182,7 +180,7 @@
         "tag": {
           "plugin": "users-permissions",
           "name": "Role",
-          "responseType": "destroy"
+          "actionType": "destroy"
         }
       }
     },
@@ -304,7 +302,8 @@
         "description": "Retrieve all user documents",
         "tag": {
           "plugin": "users-permissions",
-          "name": "User"
+          "name": "User",
+          "actionType": "find"
         }
       }
     },
@@ -318,7 +317,8 @@
         "description": "Retrieve the logged in user informations",
         "tag": {
           "plugin": "users-permissions",
-          "name": "User"
+          "name": "User",
+          "actionType": "findOne"
         }
       }
     },
@@ -332,7 +332,8 @@
         "description": "Retrieve a single user depending on his id",
         "tag": {
           "plugin": "users-permissions",
-          "name": "User"
+          "name": "User",
+          "actionType": "findOne"
         }
       }
     },
@@ -355,7 +356,8 @@
         "description": "Update an existing user",
         "tag": {
           "plugin": "users-permissions",
-          "name": "User"
+          "name": "User",
+          "actionType": "update"
         }
       }
     },
@@ -369,7 +371,8 @@
         "description": "Delete an existing user",
         "tag": {
           "plugin": "users-permissions",
-          "name": "User"
+          "name": "User",
+          "actionType": "destroy"
         }
       }
     }

@@ -323,7 +323,7 @@ module.exports.app = async function() {
   this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
 
   // default construct url
-  this.config.url = `http://${this.config.host}:${this.config.port}`
+  this.config.url = `http://${this.config.host}:${this.config.port}`;
 
   // proxy settings
   this.config.proxy = get(this.config.currentEnvironment, 'server.proxy' || {});

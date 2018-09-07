@@ -57,26 +57,26 @@ module.exports = async function() {
     this.config.environment !== 'test'
       ? path.resolve(this.config.appPath, 'admin', 'admin', 'src', 'config', 'plugins.json')
       : path.resolve(
-          this.config.appPath,
-          'packages',
-          'strapi-admin',
-          'admin',
-          'src',
-          'config',
-          'plugins.json',
-        );
+        this.config.appPath,
+        'packages',
+        'strapi-admin',
+        'admin',
+        'src',
+        'config',
+        'plugins.json',
+      );
   const buildPath =
     this.config.environment !== 'test'
       ? path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'config', 'plugins.json')
       : path.resolve(
-          this.config.appPath,
-          'packages',
-          'strapi-admin',
-          'admin',
-          'build',
-          'config',
-          'plugins.json',
-        );
+        this.config.appPath,
+        'packages',
+        'strapi-admin',
+        'admin',
+        'build',
+        'config',
+        'plugins.json',
+      );
 
   const isAdmin = await fs.pathExists(path.resolve(this.config.appPath, 'admin', 'admin'));
   if (!isAdmin) return;
