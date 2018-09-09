@@ -183,6 +183,18 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: removeModelErrors }]);
     }
 
+    const pluginStore = strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'content-manager'
+    });
+
+    const schema = await pluginStore.get({ key: 'schema' });
+
+    delete schema.layout[model];
+
+    await pluginStore.set({ key: 'schema', value: schema });
+
     ctx.send({ ok: true });
 
     strapi.reload();

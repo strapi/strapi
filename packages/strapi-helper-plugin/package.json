@@ -109,7 +109,7 @@
     "sass-loader": "^6.0.6",
     "shelljs": "^0.7.8",
     "style-loader": "^0.18.2",
-    "styled-components": "^3.2.6",
+    "styled-components": "3.2.6",
     "url-loader": "^0.5.9",
     "webpack": "^3.5.5",
     "webpack-bundle-analyzer": "^2.9.0",
