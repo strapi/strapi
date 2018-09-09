@@ -227,7 +227,7 @@ export class EditPage extends React.Component {
     let value = e.target.value;
     // Check if date
     if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
-      value = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
+      value = moment(e.target.value).format('YYYY-MM-DD HH:mm:ss');
     } else if (['float', 'integer', 'biginteger', 'decimal'].indexOf(get(this.getSchema(), ['fields', e.target.name, 'type'])) !== -1) {
       value = toNumber(e.target.value);
     }
@@ -259,7 +259,7 @@ export class EditPage extends React.Component {
         }
       default:
         const pathname = `${this.props.match.path.replace(':slug', model).replace(':id', id)}`;
-      
+
         this.props.history.push({
           pathname,
           search: `?source=${source}&redirectURI=${generateRedirectURI({ model, search: `?source=${source}` })}`,
@@ -341,11 +341,11 @@ export class EditPage extends React.Component {
     const pathname = source !== 'content-manager'
       ? `${basePath}/plugins/${source}/${this.getModelName()}`
       : `${basePath}/${this.getModelName()}`;
-    
+
     if (this.showLoaders()) {
       return (
         <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
-          <div className={styles.main_wrapper}>  
+          <div className={styles.main_wrapper}>
             <LoadingIndicator />
           </div>
         </div>
@@ -506,5 +506,3 @@ export default compose(
   withSaga,
   withConnect,
 )(DragDropContext(HTML5Backend)(EditPage));
-
-

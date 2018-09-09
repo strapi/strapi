@@ -60,7 +60,8 @@ class InputFile extends React.Component {
       type: 'file',
       value,
     };
-
+    
+    this.inputFile.value = '';
     this.setState({ isUploading: !this.state.isUploading });
     this.props.onChange({ target });
   }
@@ -136,7 +137,7 @@ class InputFile extends React.Component {
             position={this.state.position}
             updateFilePosition={this.updateFilePosition}
           />
-          <label style={{"margin-bottom": 0, width: '100%'}}>
+          <label style={{ marginBottom: 0, width: '100%' }}>
             <input
               className={styles.inputFile}
               multiple={multiple}

@@ -332,6 +332,7 @@ Most of the application's configurations are defined by environment. It means th
  - `port` (integer): Port on which the server should be running. Default value: `1337`.
  - `autoReload`
    - `enabled` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
+ - `emitErrors` (boolean): Enable errors to be emited to `koa` when they happen in order to attach custom logic or use error reporting services.
  - `proxy`
   - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
   - `ssl` (boolean): Enable proxy SSL support
@@ -340,6 +341,7 @@ Most of the application's configurations are defined by environment. It means th
  - [`cron`](https://en.wikipedia.org/wiki/Cron)
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
  - `admin`
+  - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
   - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
   - `build`
     - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
