@@ -74,7 +74,7 @@ Controllers are JavaScript files which contain a set of methods called **actions
 ```js
 module.exports = {
   // GET /hello
-  index: async (ctx) => {
+  hello: async (ctx) => {
     ctx.send('Hello World!');
   }
 };
