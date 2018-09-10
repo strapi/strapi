@@ -13,7 +13,7 @@ const cluster = require('cluster');
 // Public dependencies
 const fs = require('fs');
 const _ = require('lodash');
-const {cyan} = require('chalk');
+const { cyan } = require('chalk');
 
 // Logger.
 const { cli, logger } = require('strapi-utils');
@@ -86,8 +86,6 @@ module.exports = function(appPath = '') {
       };
 
       setFilesToWatch(appPath);
-
-
 
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {
