@@ -70,7 +70,6 @@ class Strapi extends EventEmitter {
       port: process.env.PORT || 1337,
       environment: toLower(process.env.NODE_ENV) || 'development',
       environments: {},
-      admin: {},
       paths: {
         admin: 'admin',
         api: 'api',
@@ -111,21 +110,27 @@ class Strapi extends EventEmitter {
       // Update source admin.
       await admin.call(this);
       // Launch server.
-      this.server.listen(this.config.port, async (err) => {
+      this.server.listen(this.config.port, err => {
         if (err) {
-          this.log.debug(`⚠️ Server wasn't able to start properly.`);
+          this.log.debug('⚠️ Server wasn\'t able to start properly.');
           this.log.error(err);
           return this.stop();
         }
 
         this.log.info('Time: ' + new Date());
-        this.log.info('Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms');
+        this.log.info(
+          'Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms',
+        );
         this.log.info('Environment: ' + this.config.environment);
         this.log.info('Process PID: ' + process.pid);
-        this.log.info(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
+        this.log.info(
+          `Version: ${this.config.info.strapi} (node v${
+            this.config.info.node
+          })`,
+        );
         this.log.info('To shut down your server, press <CTRL> + C at any time');
         console.log();
-        this.log.info(`☄️  Admin panel: ${this.config.admin.url}`);
+        this.log.info(`☄️  Admin panel: ${this.config.url}/admin`);
         this.log.info(`⚡️ Server: ${this.config.url}`);
         console.log();
 
@@ -135,15 +140,11 @@ class Strapi extends EventEmitter {
         if (cb && typeof cb === 'function') {
           cb();
         }
-
-        if (this.config.environment === 'development' && get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) {
-          await utils.openBrowser.call(this);
-        }
       });
     } catch (err) {
-      this.log.debug(`⛔️ Server wasn't able to start properly.`);
+      this.log.debug('⛔️ Server wasn\'t able to start properly.');
       this.log.error(err);
-      console.log(err);
+      console.error(err);
       this.stop();
     }
   }
@@ -162,8 +163,10 @@ class Strapi extends EventEmitter {
 
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
-        this.log.debug(`⛔️ Server wasn't able to start properly.`);
-        this.log.error(`The port ${err.port} is already used by another application.`);
+        this.log.debug('⛔️ Server wasn\'t able to start properly.');
+        this.log.error(
+          `The port ${err.port} is already used by another application.`,
+        );
         this.stop();
         return;
       }
@@ -187,7 +190,8 @@ class Strapi extends EventEmitter {
     if (
       cluster.isWorker &&
       this.config.environment === 'development' &&
-      get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true
+      get(this.config, 'currentEnvironment.server.autoReload.enabled', true) ===
+        true
     ) {
       process.send('stop');
     }
@@ -226,7 +230,10 @@ class Strapi extends EventEmitter {
     await store.call(this);
 
     // Initialize hooks and middlewares.
-    await Promise.all([initializeMiddlewares.call(this), initializeHooks.call(this)]);
+    await Promise.all([
+      initializeMiddlewares.call(this),
+      initializeHooks.call(this),
+    ]);
 
     // Harmonize plugins configuration.
     await plugins.call(this);
@@ -247,7 +254,11 @@ class Strapi extends EventEmitter {
       if (
         cluster.isWorker &&
         this.config.environment === 'development' &&
-        get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true
+        get(
+          this.config,
+          'currentEnvironment.server.autoReload.enabled',
+          true,
+        ) === true
       ) {
         process.send('reload');
       }
@@ -280,8 +291,8 @@ class Strapi extends EventEmitter {
           const timeoutMs = this.config.bootstrapTimeout || 3500;
           const timer = setTimeout(() => {
             this.log.warn(
-              `Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`,
-            );
+                `Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`,
+              );
             this.log.warn('Perhaps you forgot to call it?');
           }, timeoutMs);
 
@@ -290,7 +301,9 @@ class Strapi extends EventEmitter {
           try {
             fn(err => {
               if (ranBootstrapFn) {
-                this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
+                this.log.error(
+                    'You called the callback in `strapi.config.boostrap` more than once!',
+                  );
 
                 return reject();
               }
@@ -302,7 +315,9 @@ class Strapi extends EventEmitter {
             });
           } catch (e) {
             if (ranBootstrapFn) {
-              this.log.error('The bootstrap function threw an error after its callback was called.');
+              this.log.error(
+                  'The bootstrap function threw an error after its callback was called.',
+                );
 
               return reject(e);
             }
@@ -315,7 +330,9 @@ class Strapi extends EventEmitter {
         });
 
     return Promise.all(
-      Object.values(this.plugins).map(x => execBootstrap(get(x, 'config.functions.bootstrap'))),
+      Object.values(this.plugins).map(x =>
+        execBootstrap(get(x, 'config.functions.bootstrap')),
+      ),
     ).then(() => execBootstrap(this.config.functions.bootstrap));
   }
 
@@ -335,14 +352,16 @@ class Strapi extends EventEmitter {
   query(entity, plugin) {
     if (!entity) {
       return this.log.error(
-        `You can't call the query method without passing the model's name as a first argument.`,
+        'You can\'t call the query method without passing the model\'s name as a first argument.',
       );
     }
 
     const model = entity.toLowerCase();
 
     const Model =
-      get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+      get(strapi.plugins, [plugin, 'models', model]) ||
+      get(strapi, ['models', model]) ||
+      undefined;
 
     if (!Model) {
       return this.log.error(`The model ${model} can't be found.`);
@@ -351,7 +370,9 @@ class Strapi extends EventEmitter {
     const connector = Model.orm;
 
     if (!connector) {
-      return this.log.error(`Impossible to determine the use ORM for the model ${model}.`);
+      return this.log.error(
+        `Impossible to determine the use ORM for the model ${model}.`,
+      );
     }
 
     // Get stack trace.
@@ -363,7 +384,9 @@ class Strapi extends EventEmitter {
     let pluginPath = undefined;
 
     if (file.indexOf('strapi-plugin-') !== -1) {
-      pluginPath = file.split(path.sep).filter(x => x.indexOf('strapi-plugin-') !== -1)[0];
+      pluginPath = file
+        .split(path.sep)
+        .filter(x => x.indexOf('strapi-plugin-') !== -1)[0];
     } else if (file.indexOf(path.sep + 'plugins' + path.sep) !== -1) {
       const pathTerms = file.split(path.sep);
       const index = pathTerms.indexOf('plugins');
@@ -374,15 +397,22 @@ class Strapi extends EventEmitter {
     }
 
     if (!pluginPath) {
-      return this.log.error('Impossible to find the plugin where `strapi.query` has been called.');
+      return this.log.error(
+        'Impossible to find the plugin where `strapi.query` has been called.',
+      );
     }
 
     // Get plugin name.
     const pluginName = pluginPath.replace('strapi-plugin-', '').toLowerCase();
-    const queries = get(this.plugins, `${pluginName}.config.queries.${connector}`);
+    const queries = get(
+      this.plugins,
+      `${pluginName}.config.queries.${connector}`,
+    );
 
     if (!queries) {
-      return this.log.error(`There is no query available for the model ${model}.`);
+      return this.log.error(
+        `There is no query available for the model ${model}.`,
+      );
     }
 
     // Bind queries with the current model to allow the use of `this`.
@@ -393,7 +423,7 @@ class Strapi extends EventEmitter {
       {
         orm: connector,
         primaryKey: Model.primaryKey,
-        associations: Model.associations
+        associations: Model.associations,
       },
     );
 
