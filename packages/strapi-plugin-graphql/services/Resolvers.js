@@ -218,6 +218,56 @@ module.exports = {
         }
       });
 
+
+
+      const subscriptions = {
+        created: _.get(resolver, `Subscription.${name}Created`) !== false ? Subscription.composeSubscribeResolver(
+          _schema,
+          plugin,
+          name,
+          'created'
+        ) : null,
+        updated: _.get(resolver, `Subscription.${name}Updated`) !== false ? Subscription.composeSubscribeResolver(
+          _schema,
+          plugin,
+          name,
+          'updated'
+        ) : null,
+        deleted: _.get(resolver, `Subscription.${name}Deleted`) !== false ? Subscription.composeSubscribeResolver(
+          _schema,
+          plugin,
+          name,
+          'deleted'
+        ) : null,
+      };
+
+      if (name !== 'file' && name !== 'role' && name !== 'user') {
+        Object.keys(subscriptions).forEach(type => {
+            let subscriptionDefinition;
+            let subscriptionName = `${name}${_.capitalize(type)}`;
+
+          switch(type) {
+            case 'created':
+            case 'updated':
+            case 'deleted':
+              subscriptionDefinition = {
+                [`${subscriptionName}(where: JSON)`]: `${_.capitalize(name)}`
+              };
+              break;
+              default:
+              // Nothing.
+            }
+
+          // Assign subscription definition to global definition.
+          Object.assign(acc.subscription, subscriptionDefinition);
+
+          // Assign resolver to this subscription and merge it with the others.
+          _.merge(acc.resolver.Subscription, {
+            [`${subscriptionName}`]: subscriptions[type]
+          });
+        });
+      }
+
       // Build associations queries.
       (model.associations || []).forEach(association => {
         switch (association.nature) {

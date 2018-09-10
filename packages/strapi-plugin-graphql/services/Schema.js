@@ -56,7 +56,7 @@ module.exports = {
           return line;
         })
         .join('\n');
-    } else if (type === 'query' || type === 'mutation') {
+    } else if (['query', 'mutation', 'subscription'].includes(type)) {
       return lines
         .map((line, index) => {
           if (['{', '}'].includes(line)) {
@@ -131,7 +131,7 @@ module.exports = {
 
       // Reproduce the same pattern for each plugin.
       return Object.keys(strapi.plugins).reduce((acc, plugin) => {
-        const { definition, query, mutation, resolver } = Resolvers.shadowCRUD(Object.keys(strapi.plugins[plugin].models), plugin);
+        const { definition, query, mutation, subscription, resolver } = Resolvers.shadowCRUD(Object.keys(strapi.plugins[plugin].models), plugin);
 
         // We cannot put this in the merge because it's a string.
         acc.definition += definition || '';
@@ -140,12 +140,13 @@ module.exports = {
           query,
           resolver,
           mutation,
+          subscription,
         });
       }, Resolvers.shadowCRUD(models));
-    })() : { definition: '', query: '', mutation: '', resolver: '' };
+    })() : { definition: '', query: '', mutation: '', subscription: '', resolver: '' };
 
     // Extract custom definition, query or resolver.
-    const { definition, query, mutation, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
+    const { definition, query, mutation, subscription, resolver = {} } = strapi.plugins.graphql.config._schema.graphql;
 
     // Polymorphic.
     const { polymorphicDef, polymorphicResolver } = Types.addPolymorphicUnionType(definition, shadowCRUD.definition);
@@ -207,8 +208,26 @@ module.exports = {
     let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
-      type Query {${shadowCRUD.query && this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
-      type Mutation {${shadowCRUD.mutation && this.formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation')}${mutation}}
+      type Query {${shadowCRUD.query &&
+        this.formatGQL(
+          shadowCRUD.query,
+          resolver.Query,
+          null,
+          'query'
+        )}${query}}
+      type Mutation {${shadowCRUD.mutation &&
+        this.formatGQL(shadowCRUD.mutation,
+        resolver.Mutation,
+        null,
+        'mutation'
+      )}${mutation}}
+      type Subscription {${shadowCRUD.subscription &&
+        this.formatGQL(
+          shadowCRUD.subscription,
+          resolver.subscription,
+          null,
+          'subscription'
+        )}${subscription}}
       ${Types.addCustomScalar(resolvers)}
       ${Types.addInput()}
       ${polymorphicDef}
@@ -229,6 +248,7 @@ module.exports = {
     return {
       typeDefs: gql(typeDefs),
       resolvers,
+      schema
     };
   },
 

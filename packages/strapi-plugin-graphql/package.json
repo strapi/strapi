@@ -25,10 +25,13 @@
     "glob": "^7.1.2",
     "graphql": "^0.13.2",
     "graphql-depth-limit": "^1.1.0",
+    "graphql-redis-subscriptions": "^1.5.0",
+    "graphql-subscriptions": "^0.5.8",
     "graphql-type-datetime": "^0.2.2",
     "graphql-type-json": "^0.2.1",
     "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.0-alpha.13.0.1"
+    "strapi-utils": "3.0.0-alpha.13.0.1",
+    "subscriptions-transport-ws": "^0.9.14"
   },
   "author": {
     "name": "A Strapi developer",

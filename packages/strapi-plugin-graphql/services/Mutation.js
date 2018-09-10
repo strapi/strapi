@@ -8,8 +8,16 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
+
 const policyUtils = require('strapi-utils').policy;
+const pubsub = require('../utils/pubsub');
 const Query = require('./Query.js');
+
+const ACTION_MAP = {
+  create: 'created',
+  update: 'updated',
+  delete: 'deleted',
+}
 
 module.exports = {
   /**
@@ -109,7 +117,12 @@ module.exports = {
       // Make the query compatible with our controller by
       // setting in the context the parameters.
       return async (ctx, next) => {
-        return controller(ctx, next);
+        const response = await controller(ctx, next);
+        const event = ACTION_MAP[action];
+        const modelSubscriptionName = `${name}${_.capitalize(event)}`;
+        const body = response && response.toJSON ? response.toJSON() : response;
+        pubsub.publish(modelSubscriptionName, { [modelSubscriptionName]: body });
+        return response;
       };
     })();
 

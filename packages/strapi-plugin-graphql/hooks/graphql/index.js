@@ -10,6 +10,7 @@ const path = require('path');
 const glob = require('glob');
 const { ApolloServer } = require('apollo-server-koa');
 const depthLimit = require('graphql-depth-limit');
+const createSubscriptionsServer = require('./create-subscription-server');
 
 module.exports = strapi => {
   return {
@@ -101,7 +102,7 @@ module.exports = strapi => {
     },
 
     initialize: function(cb) {
-      const { typeDefs, resolvers } = strapi.plugins.graphql.services.schema.generateSchema();
+      const { typeDefs, resolvers, schema } = strapi.plugins.graphql.services.schema.generateSchema();
 
       if (_.isEmpty(typeDefs)) {
         strapi.log.warn('GraphQL schema has not been generated because it\'s empty');
@@ -123,12 +124,13 @@ module.exports = strapi => {
       if (strapi.config.environment !== 'production' || strapi.plugins.graphql.config.playgroundAlways) {
         serverParams.playground = {
           endpoint: strapi.plugins.graphql.config.endpoint
-        }
+        };
       }
 
       const server = new ApolloServer(serverParams);
 
       server.applyMiddleware({ app: strapi.app, path: strapi.plugins.graphql.config.endpoint });
+      createSubscriptionsServer(strapi.server, schema, '/graphql');
 
       cb();
     }

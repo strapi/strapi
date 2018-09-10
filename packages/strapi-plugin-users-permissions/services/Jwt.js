@@ -12,26 +12,27 @@ const jwt = require('jsonwebtoken');
 const defaultJwtOptions = { expiresIn: '30d' };
 
 module.exports = {
+  retrieveToken: function (authorizationString) {
+    const parts = authorizationString.split(' ');
+
+    if (parts.length === 2) {
+      const scheme = parts[0];
+      const credentials = parts[1];
+      if (/^Bearer$/i.test(scheme)) {
+        return credentials;
+      }
+    } else {
+      throw new Error('Invalid authorization header format. Format is Authorization: Bearer [token]');
+    }
+  },
+
   getToken: function (ctx) {
     const params = _.assign({}, ctx.request.body, ctx.request.query);
+    const token = _.get(ctx, 'request.header.authorization')
+      ? this.retrieveToken(ctx.request.header.authorization)
+      : params.token;
 
-    let token = '';
-
-    if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
-      const parts = ctx.request.header.authorization.split(' ');
-
-      if (parts.length === 2) {
-        const scheme = parts[0];
-        const credentials = parts[1];
-        if (/^Bearer$/i.test(scheme)) {
-          token = credentials;
-        }
-      } else {
-        throw new Error('Invalid authorization header format. Format is Authorization: Bearer [token]');
-      }
-    } else if (params.token) {
-      token = params.token;
-    } else {
+    if (!token) {
       throw new Error('No authorization header was found');
     }
 
@@ -47,8 +48,8 @@ module.exports = {
     );
   },
 
-  verify: (token) => {
-    return new Promise(function (resolve, reject) {
+  verify: function (token) {
+    return new Promise((resolve, reject) => {
       jwt.verify(
         token,
         process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
