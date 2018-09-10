@@ -70,6 +70,7 @@ class Strapi extends EventEmitter {
       port: process.env.PORT || 1337,
       environment: toLower(process.env.NODE_ENV) || 'development',
       environments: {},
+      admin: {},
       paths: {
         admin: 'admin',
         api: 'api',
@@ -110,7 +111,7 @@ class Strapi extends EventEmitter {
       // Update source admin.
       await admin.call(this);
       // Launch server.
-      this.server.listen(this.config.port, err => {
+      this.server.listen(this.config.port, async (err) => {
         if (err) {
           this.log.debug(`⚠️ Server wasn't able to start properly.`);
           this.log.error(err);
@@ -124,7 +125,7 @@ class Strapi extends EventEmitter {
         this.log.info(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
         this.log.info('To shut down your server, press <CTRL> + C at any time');
         console.log();
-        this.log.info(`☄️  Admin panel: ${this.config.url}/admin`);
+        this.log.info(`☄️  Admin panel: ${this.config.admin.url}`);
         this.log.info(`⚡️ Server: ${this.config.url}`);
         console.log();
 
@@ -134,10 +135,15 @@ class Strapi extends EventEmitter {
         if (cb && typeof cb === 'function') {
           cb();
         }
+
+        if (this.config.environment === 'development' && get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) {
+          await utils.openBrowser.call(this);
+        }
       });
     } catch (err) {
       this.log.debug(`⛔️ Server wasn't able to start properly.`);
       this.log.error(err);
+      console.log(err);
       this.stop();
     }
   }
@@ -228,11 +234,14 @@ class Strapi extends EventEmitter {
 
   reload() {
     const state = {
-      shouldReload: true,
+      shouldReload: 0
     };
 
     const reload = function() {
-      if (state.shouldReload === false) {
+      if (state.shouldReload > 0) {
+        // Reset the reloading state
+        state.shouldReload -= 1;
+        reload.isReloading = false;
         return;
       }
 
@@ -250,7 +259,9 @@ class Strapi extends EventEmitter {
       enumerable: true,
       set: value => {
         // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
-        state.shouldReload = !(state.isWatching === false && value === true);
+        if (state.isWatching === false && value === true) {
+          state.shouldReload += 1;
+        }
         state.isWatching = value;
       },
       get: () => {

@@ -51,7 +51,10 @@ if (isAdmin && !isSetup) {
   );
 
   try {
-    const server = require(serverConfig);
+    const { templateConfiguration } = require(path.join(adminPath, 'node_modules', 'strapi-utils'));
+
+    let server = require(serverConfig);
+    server = templateConfiguration(server);
 
     if (process.env.PWD.indexOf('/admin') !== -1) {
       if (_.get(server, 'admin.build.host')) {
@@ -61,7 +64,7 @@ if (isAdmin && !isSetup) {
       }
 
       URLs.publicPath = URLs.host;
-      URLs.backend = _.get(server, 'admin.build.backend', `/`);
+      URLs.backend = _.get(server, 'admin.build.backend', '/');
 
       if (_.get(server, 'admin.build.plugins.source') === 'backend') {
         URLs.mode = 'backend';

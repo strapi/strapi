@@ -1,15 +1,16 @@
-const exec = require('child_process').exec;
+const spawn = require('child_process').spawn;
 const fs = require('fs-extra');
 const path = require('path');
 
 const strapiBin = path.resolve('./packages/strapi/bin/strapi.js');
 const appName = 'testApp';
+let testExitCode = 0;
 let appStart;
 
 const databases = {
-  mongo: `--dbclient=mongo --dbhost=127.0.0.1 --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername="" --dbpassword=""`,
-  postgres: `--dbclient=postgres --dbhost=127.0.0.1 --dbport=5432 --dbname=strapi-test --dbusername="" --dbpassword=""`,
-  mysql: `--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi-test --dbusername="root" --dbpassword="root"`
+  mongo: `--dbclient=mongo --dbhost=127.0.0.1 --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername= --dbpassword=`,
+  postgres: '--dbclient=postgres --dbhost=127.0.0.1 --dbport=5432 --dbname=strapi-test --dbusername= --dbpassword=',
+  mysql: '--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi-test --dbusername=root --dbpassword=root'
 };
 
 const {runCLI: jest} = require('jest-cli/build/cli');
@@ -29,32 +30,28 @@ const main = async () => {
 
   const generate = (database) => {
     return new Promise((resolve, reject) => {
-      const appCreation = exec(
-        `node ${strapiBin} new ${appName} --dev ${database}`,
-      );
+      const appCreation = spawn('node', `${strapiBin} new ${appName} --dev ${database}`.split(' '), { detached: true });
 
       appCreation.stdout.on('data', data => {
         console.log(data.toString());
 
         if (data.includes('is ready at')) {
-          appCreation.kill();
+          process.kill(-appCreation.pid);
           return resolve();
         }
 
         if (data.includes('Database connection has failed')) {
-          appCreation.kill();
-          return reject();
+          process.kill(-appCreation.pid);
+          return reject(new Error('Database connection has failed'));
         }
       });
     });
   };
 
   const start = () => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       try {
-        appStart = exec(
-          `node ${strapiBin} start ${appName}`,
-        );
+        appStart = spawn('node', `${strapiBin} start ${appName}`.split(' '), {detached: true});
 
         appStart.stdout.on('data', data => {
           console.log(data.toString());
@@ -65,7 +62,10 @@ const main = async () => {
         });
 
       } catch (e) {
-        console.error(e);
+        if (typeof appStart !== 'undefined') {
+          process.kill(-appStart.pid);
+        }
+        return reject(e);
       }
     });
   };
@@ -74,7 +74,8 @@ const main = async () => {
     return new Promise(async (resolve) => {
       // Run setup tests to generate the app.
       await jest({
-        passWithNoTests: true
+        passWithNoTests: true,
+        testURL: 'http://localhost/'
       }, [process.cwd()]);
 
       const packages = fs.readdirSync(path.resolve(process.cwd(), 'packages'))
@@ -84,6 +85,7 @@ const main = async () => {
       for (let i in packages) {
         await jest({
           passWithNoTests: true,
+          testURL: 'http://localhost/'
         }, [`${process.cwd()}/packages/${packages[i]}`]);
       }
 
@@ -92,17 +94,22 @@ const main = async () => {
   };
 
   const testProcess = async (database) => {
-    await clean();
-    await generate(database);
-    await start();
-    await test();
-
-    appStart.kill();
+    try {
+      await clean();
+      await generate(database);
+      await start();
+      await test();
+      process.kill(-appStart.pid);
+    } catch (e) {
+      console.error(e.message);
+      testExitCode = 1;
+    }
   };
 
   await testProcess(databases.mongo);
   await testProcess(databases.postgres);
   await testProcess(databases.mysql);
+  process.exit(testExitCode);
 };
 
 main();

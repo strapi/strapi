@@ -11,7 +11,7 @@ Create a new project
 ```bash
 strapi new <name>
 
-options: [--dev|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbname=<dbname> --dbusername=<dbusername> --dbpassword=<dbpassword>]
+options: [--dev|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbname=<dbname> --dbusername=<dbusername> --dbpassword=<dbpassword> --dbssl=<dbssl> --dbauth=<dbauth>]
 ```
 
 - **strapi new &#60;name&#62;**<br/>
@@ -20,8 +20,8 @@ options: [--dev|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbna
 - **strapi new &#60;name&#62; --dev**<br/>
   Generates a new project called **&#60;name&#62;** and creates symlinks for the `./admin` folder and each plugin inside the `./plugin` folder. It means that the Strapi's development workflow has been set up on the machine earlier.
 
-- **strapi new &#60;name&#62; --dbclient=&#60;dbclient&#62; --dbhost=&#60;dbhost&#62; --dbport=&#60;dbport&#62; --dbname=&#60;dbname&#62; --dbusername=&#60;dbusername&#62; --dbpassword=&#60;dbpassword&#62;**<br/>
-  Generates a new project called **&#60;name&#62;** and skip the interactive database configuration and initilize with these options. **&#60;dbclient&#62;** can be `mongo`, `postgres`, `mysql`, `sqlite3` or `redis`. **&#60;dbusername&#62;** and **&#60;dbpassword&#62;** are optional.
+- **strapi new &#60;name&#62; --dbclient=&#60;dbclient&#62; --dbhost=&#60;dbhost&#62; --dbport=&#60;dbport&#62; --dbname=&#60;dbname&#62; --dbusername=&#60;dbusername&#62; --dbpassword=&#60;dbpassword&#62; --dbssl=&#60;dbssl&#62; --dbauth=&#60;dbauth&#62;**<br/>
+  Generates a new project called **&#60;name&#62;** and skip the interactive database configuration and initilize with these options. **&#60;dbclient&#62;** can be `mongo`, `postgres`, `mysql`, `sqlite3` or `redis`. **&#60;dbssl&#62;** and **&#60;dbauth&#62;** are optional.
   
 
   See the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details.

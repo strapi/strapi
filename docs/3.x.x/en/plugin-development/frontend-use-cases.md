@@ -346,7 +346,7 @@ const send = require('koa-send');
 
 module.exports = {
   autoReload: async ctx => {
-    ctx.send({ autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false) });
+    ctx.send({ autoReload: _.get(strapi.config.currentEnvironment, 'server.autoReload', { enabled: false }) });
   }
 }
 ```
@@ -374,8 +374,8 @@ import request from 'utils/request';
 const shouldRenderCompo = (plugin) => new Promise((resolve, request) => {
   request('/my-plugin/autoReload')
     .then(response => {
-      // If autoReload is enabled the response is `{ autoReload: true }`
-      plugin.preventComponentRendering = !response.autoReload;
+      // If autoReload is enabled the response is `{ autoReload: { enabled: true } }`
+      plugin.preventComponentRendering = !response.autoReload.enabled;
       // Set the BlockerComponent props
       plugin.blockerComponentProps = {
         blockerComponentTitle: 'my-plugin.blocker.title',
@@ -407,8 +407,8 @@ import MyCustomBlockerComponent from 'components/MyCustomBlockerComponent';
 const shouldRenderCompo = (plugin) => new Promise((resolve, request) => {
   request('/my-plugin/autoReload')
     .then(response => {
-      // If autoReload is enabled the response is `{ autoReload: true }`
-      plugin.preventComponentRendering = !response.autoReload;
+      // If autoReload is enabled the response is `{ autoReload: { enabled: true } }`
+      plugin.preventComponentRendering = !response.autoReload.enabled;
 
       // Tell which component to be rendered instead
       plugin.blockerComponent = MyCustomBlockerComponent;

@@ -63,7 +63,10 @@ module.exports = function (name, cliArguments) {
         username: cliArguments.dbusername,
         password: cliArguments.dbpassword
       },
-      options: {}
+      options: {
+        authenticationDatabase: cliArguments.dbauth,
+        ssl: cliArguments.dbssl
+      }
     };
   }
 

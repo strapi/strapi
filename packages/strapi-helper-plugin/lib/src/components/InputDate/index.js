@@ -18,9 +18,10 @@ import styles from './styles.scss';
 /* eslint-disable react/jsx-boolean-value */
 function InputDate(props) {
   const value = isObject(props.value) && props.value._isAMomentObject === true ? props.value : moment(props.value);
+  const formattedPlaceholder = props.placeholder === '' ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
 
   return (
-    <FormattedMessage id={props.placeholder} defaultMessage={props.placeholder}>
+    <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
       {(placeholder) => (
         <DateTime
           dateFormat='YYYY-MM-DD'

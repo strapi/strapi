@@ -15,6 +15,11 @@
   "components.LimitSelect.itemsPerPage": "عنصر بالصفحة",
   "containers.List.errorFetchRecords": "خطأ",
 
+  "containers.SettingPage.relations": "Relational fields",
+
+  "containers.SettingPage.editSettings.description": "Drag & drop the fields to build the layout",
+  "containers.SettingPage.editSettings.title": "Edit - Settings",
+
   "EditRelations.title": "البيانات العلائقية",
   
   "emptyAttributes.title": "لا توجد حقول بعد",
@@ -40,6 +45,10 @@
   "error.attribute.key.taken": "هذه القيمة موجودة مسبقًا",
   "error.attribute.sameKeyAndName": "لا تتطابق",
   "error.validation.minSupMax": "لا يمكن أن تكون متفوقة",
+
+  "form.Input.disabled": "Editable field",
+  "form.Input.description": "Description",
+  "form.Input.description.placeholder": "Display name in the profile",
 
   "notification.error.relationship.fetch": "حدث خطأ أثناء جلب العلاقة.",
 

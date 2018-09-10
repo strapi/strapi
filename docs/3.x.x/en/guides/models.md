@@ -19,6 +19,11 @@ The info key on the model-json states information about the model. This informat
    - `description`: The description of the model.
    - `mainField`: Determines which model-attribute is shown when displaying the model.
 
+## Model options
+The options key on the model-json states.
+   - `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id').
+   - `idAttributeType`: Data type of `idAttribute`, accepted list of value bellow:
+
 ## Define the attributes
 
 The following types are currently available:

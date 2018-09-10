@@ -1,0 +1,36 @@
+{
+  "ConfigPage.title": "Upload - Instellingen",
+  "ConfigPage.description": "Configureer de upload extensie",
+
+  "EditForm.Input.number.label": "Maximale toegestane grootte (in MB)",
+  "EditForm.Input.select.label": "Leveranciers",
+  "EditForm.Input.select.inputDescription": "Bestanden kunnen of geüpload worden op jouw server of bij een externe leverancier",
+  "EditForm.Input.toggle.label": "Bestand upload inschakelen",
+
+  "EmptyLi.message": "Er zijn geen geüploade bestanden",
+
+  "EntriesNumber.number": "{number} bestand gevonden",
+  "EntriesNumber.number.plural": "{number} bestanden gevonden",
+
+  "HomePage.title": "Upload",
+  "HomePage.description": "Bekijk alle geüploade bestanden",
+  "HomePage.InputSearch.placeholder": "Naar een bestand zoeken...",
+
+  "Li.linkCopied": "Link gekopieerd naar klembord",
+
+  "ListHeader.type": "Type",
+  "ListHeader.hash": "Hash",
+  "ListHeader.name": "Naam",
+  "ListHeader.updated": "Geüpdatet",
+  "ListHeader.size": "Grootte",
+  "ListHeader.related": "Gerelateerd aan",
+
+  "PluginInputFile.text": "Sleep bestanden in dit gebied of {link} van een bestand om te uploaden",
+  "PluginInputFile.link": "doorbladeren",
+  "PluginInputFile.loading": "Je bestanden worden geüpload...",
+
+  "notification.config.success": "De instellingen zijn geüpdatet",
+  "notification.delete.success": "Het bestand is verwijderd",
+  "notification.dropFile.success": "Je bestand is geüpload",
+  "notification.dropFiles.success": "{number} bestanden zijn geüpload"
+}

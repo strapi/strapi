@@ -11,7 +11,7 @@ There are several ways to create a policy.
 **Path —** `./config/policies/isAuthenticated.js`.
 ```js
 module.exports = async (ctx, next) => {
-  if (ctx.session.isAuthenticated === true) {
+  if (ctx.state.user) {
     // Go to next policy or will reach the controller's action.
     return await next();
   }
@@ -22,7 +22,7 @@ module.exports = async (ctx, next) => {
 
 In this example, we are verifying that a session is open. If it is the case, we call the `next()` method that will execute the next policy or controller's action. Otherwise, a 401 error is returned.
 
-> Note: You can access to any controllers, services or models thanks to the global variable `strapi` in a policy.
+> Note: You can access any controllers, services, or models by using the global variable `strapi` in a policy.
 
 ## Usage
 
@@ -87,7 +87,7 @@ The scoped policies can only be associated to the routes defined in the API wher
 **Path —** `./api/car/config/policies/isAdmin.js`.
 ```js
 module.exports = async (ctx, next) => {
-  if (ctx.session.user.role === 'administrator') {
+  if (ctx.state.user.role.name === 'Administrator') {
     // Go to next policy or will reach the controller's action.
     return await next();
   }

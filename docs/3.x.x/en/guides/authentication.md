@@ -59,7 +59,8 @@ $.ajax({
 
 Thanks to [Grant](https://github.com/simov/grant) and [Purest](https://github.com/simov/purest), you can easily use OAuth and OAuth2
 providers to enable authentication in your application. By default,
-Strapi comes with four providers:
+Strapi comes with the following providers: 
+- [Discord](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/discord_setup.md) 
 - [Facebook](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/fb_setup.md)
 - [Google](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/google_setup.md)
 - [Github](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/github_setup.md)
@@ -187,6 +188,140 @@ The User object is available to successfully authenticated requests.
   }
 
 ```
+
+
+## Add a new provider
+
+To add a new provider on strapi, you will need to perform changes onto the following files:
+
+```
+packages/strapi-plugin-users-permissions/services/Providers.js
+packages/strapi-plugin-users-permissions/config/functions/bootstrap.js
+packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js
+packages/strapi-plugin-users-permissions/admin/src/translations/en.json
+```
+
+We will go step by step.
+
+### Configure your Provider request
+First, we need to configure our new provider onto `Provider.js` file.
+
+Jump onto the `getProfile` function, you will see the list of currently available providers in the form of a `switch...case`.
+
+As you can see, `getProfile` take three params:
+
+1. provider :: The name of the used provider as a string.
+2. query :: The query is the result of the provider callback.
+3. callback :: The callback function who will continue the internal strapi login logic.
+
+Let's take the `discord` one as an example since it's not the easier, it should cover most of the case you may encounter trying to implement your own provider.
+
+#### Configure your oauth generic information
+
+```js
+    case 'discord': {
+      const discord = new Purest({
+        provider: 'discord',
+        config: {
+          'discord': {
+            'https://discordapp.com/api/': {
+              '__domain': {
+                'auth': {
+                  'auth': {'bearer': '[0]'}
+                }
+              },
+              '{endpoint}': {
+                '__path': {
+                  'alias': '__default'
+                }
+              }
+            }
+          }
+        }
+      });
+```
+
+So here, you can see that we use a module called `Purest`. This module gives us with a generic way to interact with the REST API.
+
+To understand each value usage, and the templating syntax, I invite you to read the [Official Purest Documentation](https://github.com/simov/purest/tree/2.x)
+
+You may also want to take a look onto the numerous already made configurations [here](https://github.com/simov/purest-providers/blob/master/config/providers.json).
+
+#### Retrieve your user informations:
+```js
+      discord.query().get('users/@me').auth(access_token).request((err, res, body) => {
+        if (err) {
+          callback(err);
+        } else {
+          // Combine username and discriminator because discord username is not unique
+          var username = `${body.username}#${body.discriminator}`;
+          callback(null, {
+            username: username,
+            email: body.email
+          });
+        }
+      });
+      break;
+    }
+```
+
+Here is the next part of our switch. Now that we have properly configured our provider, we want to use it to retrieve user information.
+
+Here you see the real power of `purest`, you can simply make a get request on the desired URL, using the `access_token` from the `query` parameter to authenticate.
+
+That way, you should be able to retrieve the user info you need.
+
+Now, you can simply call the `callback` function with the username and email of your user. That way, strapi will be able to retrieve your user from the database and log you in.
+
+#### Configure the new provider model onto database
+
+Now, we need to configure our 'model' for our new provider. That way, our settings can be stored in the database, and managed from the admin panel.
+
+Into: `packages/strapi-plugin-users-permissions/config/functions/bootstrap.js`
+
+Simply add the fields your provider need into the `grantConfig` object.
+For our discord provider it will look like:
+
+```js
+    discord: {
+      enabled: false,  // make this provider disabled by default
+      icon: 'comments', // The icon to use on the UI
+      key: '',  // our provider app id (leave it blank, you will fill it with the content manager)
+      secret: '', // our provider secret key (leave it blank, you will fill it with the content manager)
+      callback: '/auth/discord/callback', // the callback endpoint of our provider
+      scope: [  // the scope that we need from our user to retrieve infos
+        'identify',
+        'email'
+      ]
+    },
+```
+
+
+You have already done the hard part, now, we simply need to make our new provider available from the front side of our application. So let's do it!
+
+
+<!-- #### Tests -->
+<!-- TODO Add documentation about how to configure unit test for the new provider -->
+
+### Configure frontend for your new provider
+
+First, let's edit: `packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js`
+As for backend, we have a `switch...case` where we need to put our new provider info.
+
+```js
+      case 'discord':
+        return `${strapi.backendURL}/connect/discord/callback`;
+```
+
+Add the corresponding translation into: `packages/strapi-plugin-users-permissions/admin/src/translations/en.json`
+
+```js
+  "PopUpForm.Providers.discord.providerConfig.redirectURL": "The redirect URL to add in your Discord application configurations",
+````
+
+These two change will set up the popup message who appear on the UI when we will configure our new provider.
+
+That's it, now you should be able to use your new provider.
 
 
 ## Email templates
