@@ -150,8 +150,7 @@ module.exports = {
     _.defaultsDeep(grantConfig, {
       server: {
         protocol: (strapi.config.proxy.enabled && strapi.config.proxy.ssl) ? 'https' : 'http',
-        host: `${strapi.config.url}`
-      }
+        host: (strapi.config.proxy.enabled) ? `${strapi.config.host}:${strapi.config.port}` : `${this.config.proxy.host}:${this.config.proxy.port}`
     });
 
     const provider = process.platform === 'win32' ? ctx.request.url.split('\\')[2] : ctx.request.url.split('/')[2];
