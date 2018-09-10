@@ -25,7 +25,17 @@ module.exports = {
     // Retrieve generic service from the Content Manager plugin.
     const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
 
-    const initialState = { definition: '', query: {}, mutation: {}, resolver: { Query : {}, Mutation: {} } };
+    const initialState = {
+      definition: '',
+      query: {},
+      mutation: {},
+      subscription: {},
+      resolver: {
+        Query : {},
+        Mutation: {},
+        Subscription: {},
+      }
+    };
 
     if (_.isEmpty(models)) {
       return initialState;
