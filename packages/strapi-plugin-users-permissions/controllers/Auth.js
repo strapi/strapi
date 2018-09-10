@@ -150,12 +150,15 @@ module.exports = {
     _.defaultsDeep(grantConfig, {
       server: {
         protocol: (strapi.config.proxy.enabled && strapi.config.proxy.ssl) ? 'https' : 'http',
-        host: (strapi.config.proxy.enabled) ? `${this.config.proxy.host}:${this.config.proxy.port}` : `${strapi.config.host}:${strapi.config.port}`
+        host: (strapi.config.proxy.enabled) ? `${strapi.config.proxy.host}:${strapi.config.proxy.port}` : `${strapi.config.host}:${strapi.config.port}`
       }
     });
 
     const provider = process.platform === 'win32' ? ctx.request.url.split('\\')[2] : ctx.request.url.split('/')[2];
     const config = grantConfig[provider];
+
+    console.log('provider', provider);
+    console.log('url', ctx.request.url);
 
     if (!_.get(config, 'enabled')) {
       return ctx.badRequest(null, 'This provider is disabled.');
