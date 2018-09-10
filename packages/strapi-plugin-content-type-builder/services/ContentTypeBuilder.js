@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 const generator = require('strapi-generate');
-const { fromJS } = require('immutable');
+const { fromJS, List, Map } = require('immutable');
 const Manager = require('../utils/Manager.js');
 const {
   createManager,
@@ -30,8 +30,8 @@ module.exports = {
       });
       const schemaPath = plugin ? ['models', 'plugins', plugin, model] : ['models', model];
       const keys = plugin ? `plugins.${plugin}.${model}.editDisplay` : `${model}.editDisplay`;
-      const prevList = state.getIn(['schema', ...schemaPath, 'editDisplay', 'fields']);
-      const prevFields =  Object.keys(state.getIn(['schema', ...schemaPath, 'editDisplay', 'availableFields']).toJS());
+      const prevList = state.getIn(['schema', ...schemaPath, 'editDisplay', 'fields'], List());
+      const prevFields =  Object.keys(state.getIn(['schema', ...schemaPath, 'editDisplay', 'availableFields'], Map()).toJS());
       const currentFields = Object.keys(attributes);
       const fieldsToRemove = _.difference(prevFields, currentFields);
       let newList = prevList;
@@ -42,7 +42,7 @@ module.exports = {
         const attrToRemoveInfos = manager.attrToRemoveInfos; // Retrieve the removed item infos
         const arrayOfLastLineElements = manager.arrayOfEndLineElements;
         const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
-        
+
         if (isRemovingAFullWidthNode) {
           const currentNodeLine = _.findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]); // Used only to know if removing a full size element on the first line
           if (currentNodeLine === 0) {
@@ -55,7 +55,7 @@ module.exports = {
             const previousLineRangeIndexes = firstElementOnLine === lastElementOnLine ? [firstElementOnLine] : _.range(firstElementOnLine, lastElementOnLine);
             const elementsOnLine = manager.getElementsOnALine(previousLineRangeIndexes);
             const previousLineColNumber = manager.getLineSize(elementsOnLine);
-  
+
             if (previousLineColNumber >= 10) {
               newList = newList
                 .delete(index);
@@ -65,7 +65,7 @@ module.exports = {
               newList = newList
                 .delete(index)
                 .insert(index, colsToAdd[0]);
-            
+
               if (colsToAdd.length > 1) {
                 newList = newList
                   .insert(index, colsToAdd[1]);
@@ -84,7 +84,7 @@ module.exports = {
             newList = newList
               .delete(attrToRemoveInfos.index);
           } else {
-            const random = Math.floor(Math.random() * 1000); 
+            const random = Math.random().toString(36).substring(7);
             newList = newList
               .delete(attrToRemoveInfos.index)
               .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__${random}`);
@@ -96,7 +96,6 @@ module.exports = {
         const lastManager = createManager(state, newList, keys, 0, fromJS(layout.attributes));
         newList = reorderList(lastManager, lastManager.getLayout());
       });
-      
 
       // Delete them from the available fields
       fieldsToRemove.forEach(field => {

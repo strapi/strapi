@@ -44,10 +44,10 @@ class InputFileWithErrors extends React.PureComponent {
       this.updateState({ label: null });
     }
     // Check if errors have been updated during validations
-    if (nextProps.didCheckErrors !== this.props.didCheckErrors) {
+    if (prevProps.didCheckErrors !== this.props.didCheckErrors) {
       // Remove from the state the errors that have already been set
-      const errors = isEmpty(nextProps.errors) ? [] : nextProps.errors;
-      this.setState({ errors });
+      const errors = isEmpty(this.props.errors) ? [] : this.props.errors;
+      this.updateState({ errors });
     }
   }
 
