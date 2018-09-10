@@ -531,14 +531,60 @@ module.exports = function(strapi) {
                       } else if (definition.primaryKeyType !== 'integer') {
                         idAttributeBuilder = [`id ${getType({type: definition.primaryKeyType})} NOT NULL PRIMARY KEY`];
                       }
-                      const columns = generateColumns(attributes, idAttributeBuilder).join(',\n\r');
+                      const columns = generateColumns(attributes, idAttributeBuilder).join(', ');
+
+                      // FIXME: For temporary debugging. This should be eliminated.
+                      const orgQuery = `CREATE TABLE ${quote}${table}${quote} (${columns})`;
+
+                      const newQuery = ORM.knex.schema.createTable(table, dbTable => {
+                        // TODO: Manage UUID-Primary key
+                        dbTable.increments();
+
+                        _.mapKeys(attributes, (field, fieldName) => {
+                          try {
+                            if (!field.type) {
+                              // Creating integer column for foreign key as the original implementation
+                              // ROOM FOR IMPROVEMENT -- Use actual foreign keys
+                              field.model && dbTable.integer(field.model);
+                              return;
+                            }
+
+                            switch(field.type) {
+                              // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
+                              case 'email':
+                              case 'password':
+                                dbTable.string(fieldName);
+                                break;
+
+                              case 'timestamp':
+                              case 'timestampUpdate':
+                                // TODO: 'ON UPDATE' for column 'updated_at' in MySQL
+                                // NOTE: Knex.js has a method `timestamps` that maybe solve this
+                                dbTable.timestamp(fieldName).defaultTo(ORM.knex.fn.now());
+                                break;
+
+                              default:
+                                dbTable[field.type](fieldName);
+                            }
+
+                          } catch (e) {
+                            strapi.log.error(`Field type '${field.type}' (for table '${table}') not recognized.`);
+                            // FIXME: For temporary debugging. This should be eliminated.
+                            console.log({field});
+                          }
+                        });
+
+                      }).toString();
+
+                      // FIXME: For temporary debugging. This should be eliminated.
+                      // eslint-disable-next-line prefer-template
+                      console.log('< ' + orgQuery.toLowerCase() + ';');
+                      // eslint-disable-next-line prefer-template
+                      console.log('> ' + newQuery.toLowerCase() + ';');
+                      console.log('');
 
                       // Create table
-                      await ORM.knex.raw(`
-                        CREATE TABLE ${quote}${table}${quote} (
-                          ${columns}
-                        )
-                      `);
+                      await ORM.knex.raw(newQuery);
 
                       // Generate indexes.
                       await generateIndexes(table, attributes);
