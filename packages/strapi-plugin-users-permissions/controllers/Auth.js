@@ -149,7 +149,7 @@ module.exports = {
 
     _.defaultsDeep(grantConfig, {
       server: {
-        protocol: 'http',
+        protocol: (strapi.config.proxy.enabled && strapi.config.proxy.ssl) ? 'https' : 'http',
         host: `${strapi.config.url}`
       }
     });
