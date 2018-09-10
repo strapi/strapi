@@ -2,7 +2,6 @@
   "paths": {
     "/users-permissions/init": {
       "get": {
-        "deprecated": false,
         "responses": {
           "200": {
             "description": "Response",
