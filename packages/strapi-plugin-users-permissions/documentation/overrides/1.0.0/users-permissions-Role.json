@@ -1,0 +1,25 @@
+{
+  "paths": {
+    "/users-permissions/init": {
+      "get": {
+        "deprecated": false,
+        "responses": {
+          "200": {
+            "description": "Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "hasAdmin": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
