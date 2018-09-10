@@ -46,7 +46,7 @@ module.exports = {
       );
     } else if (
       !_.startsWith(policy, globalPolicyPrefix, 0) &&
-      plugin &&
+      !_.isEmpty(plugin) &&
       !_.isUndefined(
         _.get(
           strapi.plugins,
