@@ -154,12 +154,20 @@ module.exports = {
       }
     });
 
-    const provider = process.platform === 'win32' ? ctx.request.url.split('\\')[2] : ctx.request.url.split('/')[2];
+    let provider = process.platform === 'win32' ? ctx.request.url.split('\\')[2] : ctx.request.url.split('/')[2];
     provider = provider.split('?')[0];
     const config = grantConfig[provider];
 
-    console.log('provider', provider);
-    console.log('url', ctx.request.url);
+    console.log('=== grantConfig ===');
+    console.log(grantConfig);
+    console.log('=== process.platform ===');
+    console.log(process.platform);
+    console.log('=== ctx.request.url ===');
+    console.log(ctx.request.url);
+    console.log('=== provider ===');
+    console.log(provider);
+    console.log('=== config ===');
+    console.log(config);
 
     if (!_.get(config, 'enabled')) {
       return ctx.badRequest(null, 'This provider is disabled.');
