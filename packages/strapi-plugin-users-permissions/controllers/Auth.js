@@ -155,6 +155,7 @@ module.exports = {
     });
 
     const provider = process.platform === 'win32' ? ctx.request.url.split('\\')[2] : ctx.request.url.split('/')[2];
+    provider = provider.split('?')[0];
     const config = grantConfig[provider];
 
     console.log('provider', provider);
