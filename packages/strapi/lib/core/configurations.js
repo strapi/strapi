@@ -385,9 +385,9 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
 const isAdminInDevMode = function () {
   try {
     fs.accessSync(path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'index.html'), fs.constants.R_OK | fs.constants.W_OK);
-    
-    return true;
-  } catch (e) {
+
     return false;
+  } catch (e) {
+    return true;
   }
 };
