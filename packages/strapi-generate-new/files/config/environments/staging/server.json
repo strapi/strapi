@@ -1,6 +1,9 @@
 {
   "host": "localhost",
   "port": "${process.env.PORT || 1337}",
+  "proxy": {
+    "enabled": false
+  },
   "autoReload": {
     "enabled": false
   },
