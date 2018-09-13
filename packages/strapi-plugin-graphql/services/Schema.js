@@ -216,11 +216,12 @@ module.exports = {
           'query'
         )}${query}}
       type Mutation {${shadowCRUD.mutation &&
-        this.formatGQL(shadowCRUD.mutation,
-        resolver.Mutation,
-        null,
-        'mutation'
-      )}${mutation}}
+        this.formatGQL(
+          shadowCRUD.mutation,
+          resolver.Mutation,
+          null,
+          'mutation'
+        )}${mutation}}
       type Subscription {${shadowCRUD.subscription &&
         this.formatGQL(
           shadowCRUD.subscription,

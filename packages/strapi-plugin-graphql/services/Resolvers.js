@@ -10,6 +10,7 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 const Query = require('./Query.js');
 const Mutation = require('./Mutation.js');
+const Subscription = require('./Subscription.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
 
@@ -253,8 +254,8 @@ module.exports = {
 
       if (name !== 'file' && name !== 'role' && name !== 'user') {
         Object.keys(subscriptions).forEach(type => {
-            let subscriptionDefinition;
-            let subscriptionName = `${name}${_.capitalize(type)}`;
+          let subscriptionDefinition;
+          let subscriptionName = `${name}${_.capitalize(type)}`;
 
           switch(type) {
             case 'created':
@@ -264,9 +265,9 @@ module.exports = {
                 [`${subscriptionName}(where: JSON)`]: `${_.capitalize(name)}`
               };
               break;
-              default:
+            default:
               // Nothing.
-            }
+          }
 
           // Assign subscription definition to global definition.
           Object.assign(acc.subscription, subscriptionDefinition);

@@ -17,7 +17,7 @@ const ACTION_MAP = {
   create: 'created',
   update: 'updated',
   delete: 'deleted',
-}
+};
 
 module.exports = {
   /**

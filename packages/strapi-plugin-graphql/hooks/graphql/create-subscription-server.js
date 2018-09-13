@@ -14,7 +14,7 @@ const getUserFromParams = async connectionParams => {
     throw new Error('Invalid token: Token did not contain required fields');
   }
 
-  const user =  strapi.plugins['users-permissions'].models.user.findOne({ _id, id });
+  const user = strapi.query('user', 'users-permissions').findOne({ _id, id });
   if (!user) {
     throw new Error('User is not found');
   }

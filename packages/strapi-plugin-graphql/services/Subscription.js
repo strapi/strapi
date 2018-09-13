@@ -14,7 +14,7 @@ module.exports = {
     const policies = _.get(handler, `Subscription.${queryName}.policies`, []);
 
     return {
-      subscribe: withFilter(() => pubsub.asyncIterator(queryName), async (payload, variables, { context, user }, info) => {
+      subscribe: withFilter(() => pubsub.asyncIterator(queryName), async (payload, variables, { context, user }) => {
         const policiesFn = [];
         // Populate policies.
         policies.forEach(policy => policyUtils.get(policy, plugin, policiesFn, `GraphQL query "${queryName}"`, name));
