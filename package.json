@@ -26,7 +26,7 @@
     "strapi-lint": "file:packages/strapi-lint"
   },
   "scripts": {
-    "clean": "npm run removesymlinkdependencies && rimaraf package-lock.json && rimraf packages/*/package-lock.json",
+    "clean": "npm run removesymlinkdependencies && rimraf package-lock.json && rimraf packages/*/package-lock.json",
     "clean:all": "npm run removesymlinkdependencies && rimraf package-lock.json && rimraf packages/*/package-lock.json && rimraf packages/*/node_modules",
     "doc": "node ./scripts/documentation.js",
     "release": "npm run clean:all && npm install && npm run createsymlinkdependencies && lerna exec --concurrency 1 -- npm install && npm run removesymlinkdependencies && node ./scripts/publish.js $TAG",
