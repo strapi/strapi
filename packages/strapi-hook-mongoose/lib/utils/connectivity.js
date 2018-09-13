@@ -1,11 +1,7 @@
 'use strict';
 
-// Node.js core.
-const execSync = require('child_process').execSync;
-const path = require('path');
-
 module.exports = (scope, success, error) => {
-  const Mongoose = require(path.resolve(`${scope.tmpPath}/node_modules/mongoose`));
+  const Mongoose = require('mongoose');
 
   const { username, password, srv } = scope.database.settings;
   const { authenticationDatabase, ssl } = scope.database.options;
@@ -36,7 +32,7 @@ module.exports = (scope, success, error) => {
 
     Mongoose.connection.close();
 
-    execSync(`rm -r "${scope.tmpPath}"`);
+    rimraf(scope.tmpPath);
 
     success();
   });
