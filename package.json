@@ -21,12 +21,13 @@
     "pre-commit": "~1.1.2",
     "redux-saga": "^0.14.3",
     "request": "^2.87.0",
+    "rimraf": "^2.6.2",
     "shelljs": "^0.7.7",
     "strapi-lint": "file:packages/strapi-lint"
   },
   "scripts": {
-    "clean": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json",
-    "clean:all": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json && rm -rf packages/*/node_modules",
+    "clean": "npm run removesymlinkdependencies && rimaraf package-lock.json && rimraf packages/*/package-lock.json",
+    "clean:all": "npm run removesymlinkdependencies && rimraf package-lock.json && rimraf packages/*/package-lock.json && rimraf packages/*/node_modules",
     "doc": "node ./scripts/documentation.js",
     "release": "npm run clean:all && npm install && npm run createsymlinkdependencies && lerna exec --concurrency 1 -- npm install && npm run removesymlinkdependencies && node ./scripts/publish.js $TAG",
     "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
