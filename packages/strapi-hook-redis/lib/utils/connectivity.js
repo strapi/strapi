@@ -1,5 +1,8 @@
 'use strict';
 
+// Public node modules
+const rimraf = require('rimraf');
+
 // Logger.
 const logger = require('strapi-utils').logger;
 

@@ -2,6 +2,7 @@
 
 // Public node modules
 const inquirer = require('inquirer');
+const rimraf = require('rimraf');
 
 module.exports = (scope, success, error) => {
   const knex = require('knex')({

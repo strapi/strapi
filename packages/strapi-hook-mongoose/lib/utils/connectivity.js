@@ -1,5 +1,8 @@
 'use strict';
 
+// Public node modules
+const rimraf = require('rimraf');
+
 module.exports = (scope, success, error) => {
   const Mongoose = require('mongoose');
 
