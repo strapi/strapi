@@ -17,9 +17,12 @@ module.exports = (scope, success, error) => {
       knex.destroy();
 
       const next = () => {
-        rimraf(scope.tmpPath);
-
-        success();
+        rimraf(scope.tmpPath, (err) => {
+          if (err) {
+            console.log(`Error removing connection test folder: ${scope.tmpPath}`);
+          }
+          success();
+        });
       };
 
       if (tables.rows && tables.rows.length !== 0) {

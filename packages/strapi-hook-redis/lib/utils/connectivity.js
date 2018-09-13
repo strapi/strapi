@@ -25,10 +25,14 @@ module.exports = (scope, success, error) => {
 
     logger.info('The app has been connected to the database successfully!');
 
-    rimraf(scope.tmpPath);
+    rimraf(scope.tmpPath, (err) => {
+      if (err) {
+        console.log(`Error removing connection test folder: ${scope.tmpPath}`);
+      }
+      logger.info('Copying the dashboard...');
 
-    logger.info('Copying the dashboard...');
+      success();
+    });
 
-    success();
   });
 };

@@ -35,8 +35,11 @@ module.exports = (scope, success, error) => {
 
     Mongoose.connection.close();
 
-    rimraf(scope.tmpPath);
-
-    success();
+    rimraf(scope.tmpPath, (err) => {
+      if (err) {
+        console.log(`Error removing connection test folder: ${scope.tmpPath}`);
+      }
+      success();
+    });
   });
 };
