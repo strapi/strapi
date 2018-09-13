@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params = {}, populate) {
-    const records = await this.query(function(qb) {
+    const records = await this.query((qb) => {
       _.forEach(params.where, (where, key) => {
         if (_.isArray(where.value)) {
           for (const value in where.value) {
@@ -28,10 +28,54 @@ module.exports = {
           qb.orderBy(params.sort);
         }
       }
+
+      if (params.relations) {
+        Object.keys(params.relations).forEach(
+          (relationName) => {
+            const ast = this.associations.find(a => a.alias === relationName);
+            if (ast) {
+              const model = ast.plugin ?
+                strapi.plugins[ast.plugin].models[ast.model ? ast.model : ast.collection] :
+                strapi.models[ast.model ? ast.model : ast.collection];
+
+              qb.distinct();
+
+              if (ast.tableCollectionName) {
+                qb.innerJoin(
+                  ast.tableCollectionName,
+                  `${ast.tableCollectionName}.${this.info.name}_${this.primaryKey}`,
+                  `${this.collectionName}.${this.primaryKey}`,
+                );
+                qb.innerJoin(
+                  `${relationName}`,
+                  `${relationName}.${this.attributes[relationName].column}`,
+                  `${ast.tableCollectionName}.${this.attributes[relationName].attribute}_${this.attributes[relationName].column}`,
+                );
+              } else {
+                const relationTable = model.collectionName;
+                const externalKey = ast.type === 'collection' ?
+                  `${model.collectionName}.${ast.via}` :
+                  `${model.collectionName}.${model.primaryKey}`;
+                const internalKey = !ast.dominant ? `${this.collectionName}.${this.primaryKey}` :
+                  ast.via === this.collectionName ? `${this.collectionName}.${ast.alias}` : `${this.collectionName}.${this.primaryKey}`;
+
+                qb.innerJoin(relationTable, externalKey, internalKey);
+              }
+
+              const relation = params.relations[relationName];
+              Object.keys(params.relations[relationName]).forEach(
+                (filter) => {
+                  qb.where(`${model.collectionName}.${filter}`, `${relation[filter].symbol}`, `${relation[filter].value}`);
+                }
+              );
+            }
+          }
+        );
+      }
     })
-      .fetchAll({
-        withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
-      });
+    .fetchAll({
+      withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
+    });
 
 
     return records ? records.toJSON() : records;
