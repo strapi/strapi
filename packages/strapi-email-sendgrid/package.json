@@ -1,6 +1,6 @@
 {
   "name": "strapi-email-sendgrid",
-  "version": "3.0.0-alpha.14",
+  "version": "3.0.0-alpha.14.1",
   "description": "Sendgrid provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
