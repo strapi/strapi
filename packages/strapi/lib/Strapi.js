@@ -70,6 +70,7 @@ class Strapi extends EventEmitter {
       port: process.env.PORT || 1337,
       environment: toLower(process.env.NODE_ENV) || 'development',
       environments: {},
+      admin: {},
       paths: {
         admin: 'admin',
         api: 'api',
