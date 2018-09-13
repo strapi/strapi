@@ -1,4 +1,5 @@
 'use strict';
+/* global <%= globalID %> */
 
 /**
  * <%= filename %> service
@@ -20,19 +21,86 @@ module.exports = {
   fetchAll: (params) => {
     // Convert `params` object to filters compatible with Mongo.
     const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+
     // Select field to populate.
     const populate = <%= globalID %>.associations
-      .filter(ast => ast.autoPopulate !== false)
-      .map(ast => ast.alias)
-      .join(' ');
+      .filter(ast => ast.autoPopulate)
+      .reduce((acc, ast) => {
+        const from = ast.plugin ? `${ast.plugin}_${ast.model}` : ast.collection ? ast.collection : ast.model;
+        const as = ast.alias;
+        const localField = !ast.dominant ? '_id' : ast.via === <%= globalID %>.collectionName || ast.via === 'related' ? '_id' : ast.alias;
+        const foreignField = ast.filter ? `${ast.via}.ref` :
+          ast.dominant ?
+            (ast.via === <%= globalID %>.collectionName ? ast.via : '_id') :
+            (ast.via === <%= globalID %>.collectionName ? '_id' : ast.via);
 
-    return <%= globalID %>
-      .find()
-      .where(filters.where)
-      .sort(filters.sort)
+        // Add the juncture like the `.populate()` function
+        acc.push({
+          $lookup: {
+            from,
+            localField,
+            foreignField,
+            as,
+          }
+        });
+
+        // Unwind the relation's result if only one is expected
+        if (ast.type === 'model') {
+          acc.push({
+            $unwind: {
+              path: `$${ast.alias}`,
+              preserveNullAndEmptyArrays: true
+            }
+          });
+        }
+
+        // Preserve relation field if it is empty
+        acc.push({
+          $addFields: {
+            [ast.alias]: {
+              $ifNull: [`$${ast.alias}`, null]
+            }
+          }
+        });
+
+        // Filtrate the result depending of params
+        if (filters.relations) {
+          Object.keys(filters.relations).forEach(
+            (relationName) => {
+              if (ast.alias === relationName) {
+                const association = <%= globalID %>.associations.find(a => a.alias === relationName);
+                if (association) {
+                  const relation = filters.relations[relationName];
+
+                  Object.keys(relation).forEach(
+                    (filter) => {
+                      acc.push({
+                        $match: { [`${relationName}.${filter}`]: relation[filter] }
+                      });
+                    }
+                  );
+                }
+              }
+            }
+          );
+        }
+
+        return acc;
+      }, []);
+
+    const result = <%= globalID %>
+      .aggregate([
+        {
+          $match: filters.where
+        },
+        ...populate,
+      ])
       .skip(filters.start)
-      .limit(filters.limit)
-      .populate(populate);
+      .limit(filters.limit);
+
+    if (filters.sort) result.sort(filters.sort);
+
+    return result;
   },
 
   /**
@@ -146,7 +214,7 @@ module.exports = {
     );
 
     return data;
-  },
+    },
 
   /**
    * Promise to search a/an <%= id %>.
