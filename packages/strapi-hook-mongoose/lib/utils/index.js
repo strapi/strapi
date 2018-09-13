@@ -4,9 +4,13 @@
  * Module dependencies
  */
 
-module.exports = mongoose => {
-  var Decimal = require('mongoose-float').loadType(mongoose, 2);
-  var Float = require('mongoose-float').loadType(mongoose, 20);
+// Public node modules.
+const mongoose = require('mongoose');
+const Mongoose = mongoose.Mongoose;
+
+module.exports = (mongoose = new Mongoose()) => {
+  const Decimal = require('mongoose-float').loadType(mongoose, 2);
+  const Float = require('mongoose-float').loadType(mongoose, 20);
 
   return {
     convertType: mongooseType => {
@@ -42,5 +46,7 @@ module.exports = mongoose => {
         default:
       }
     },
+    isObjectId: v => mongoose.Types.ObjectId.isValid(v),
+    toObjectId:  v => mongoose.Types.ObjectId(v),
   };
 };

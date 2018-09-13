@@ -464,6 +464,8 @@ module.exports = {
     }
 
     const convertor = strapi.hook[connector].load().getQueryParams;
+    const _utils = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + connector, 'lib', 'utils'));
+    const utils = _utils();
     const convertParams = {
       where: {},
       relations: {},
@@ -484,7 +486,6 @@ module.exports = {
         // Remove the filter keyword at the end
         let splitKey = key.split('_').slice(0,-1);
         splitKey = splitKey.join('_');
-
         if (modelAttributes[splitKey]) {
           fieldType = modelAttributes[splitKey]['type'];
         }
@@ -495,7 +496,11 @@ module.exports = {
           ? _.toNumber(value)
           : value;
       } else {
-        formattedValue = value;
+        formattedValue = connector === 'mongoose' ?
+          utils.isObjectId(value)
+            ? utils.toObjectId(value) // This is required in order to be used inside of aggregate $match metakey
+            : value
+          : value;
       }
 
       if (_.includes(['_start', '_limit'], key)) {
