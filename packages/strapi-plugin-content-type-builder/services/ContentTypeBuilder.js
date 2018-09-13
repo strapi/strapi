@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 const generator = require('strapi-generate');
-const { fromJS } = require('immutable');
+const { fromJS, List, Map } = require('immutable');
 const Manager = require('../utils/Manager.js');
 const {
   createManager,
@@ -30,8 +30,8 @@ module.exports = {
       });
       const schemaPath = plugin ? ['models', 'plugins', plugin, model] : ['models', model];
       const keys = plugin ? `plugins.${plugin}.${model}.editDisplay` : `${model}.editDisplay`;
-      const prevList = state.getIn(['schema', ...schemaPath, 'editDisplay', 'fields']);
-      const prevFields =  Object.keys(state.getIn(['schema', ...schemaPath, 'editDisplay', 'availableFields']).toJS());
+      const prevList = state.getIn(['schema', ...schemaPath, 'editDisplay', 'fields'], List());
+      const prevFields =  Object.keys(state.getIn(['schema', ...schemaPath, 'editDisplay', 'availableFields'], Map()).toJS());
       const currentFields = Object.keys(attributes);
       const fieldsToRemove = _.difference(prevFields, currentFields);
       let newList = prevList;

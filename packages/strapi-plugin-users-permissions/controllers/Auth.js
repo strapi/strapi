@@ -267,11 +267,11 @@ module.exports = {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');
     }
 
-    // Check if the provided identifier is an email or not.
-    const isEmail = emailRegExp.test(params.identifier);
+    // Check if the provided email is valid or not.
+    const isEmail = emailRegExp.test(params.email);
 
     if (isEmail) {
-      params.identifier = params.identifier.toLowerCase();
+      params.email = params.email.toLowerCase();
     }
 
     params.role = role._id || role.id;
