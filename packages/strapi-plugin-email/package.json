@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.0.0-alpha.14.1",
+  "version": "3.0.0-alpha.14.1.1",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Email",
@@ -22,11 +22,11 @@
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
-    "strapi-email-sendmail": "3.0.0-alpha.14.1"
+    "strapi-email-sendmail": "3.0.0-alpha.14.1.1"
   },
   "devDependencies": {
     "react-copy-to-clipboard": "5.0.1",
-    "strapi-helper-plugin": "3.0.0-alpha.14.1"
+    "strapi-helper-plugin": "3.0.0-alpha.14.1.1"
   },
   "author": {
     "name": "Strapi team",
