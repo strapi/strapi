@@ -25,12 +25,15 @@ function EditRelations(props) {
             <SelectOne
               currentModelName={props.currentModelName}
               key={relationName}
+              isCreating={props.isCreating}
               record={props.record}
               relation={relation}
               schema={props.schema}
               setRecordAttribute={props.changeData}
               location={props.location}
               onRedirect={props.onRedirect}
+              addRelatedElement={props.addRelatedElement}
+
             />
           );
         } 
@@ -40,12 +43,14 @@ function EditRelations(props) {
             currentModelName={props.currentModelName}
             key={relationName}
             isDraggingSibling={props.isDraggingSibling}
+            isCreating={props.isCreating}
             location={props.location}
             moveAttr={props.moveAttr}
             moveAttrEnd={props.moveAttrEnd}
             onAddRelationalItem={props.onAddRelationalItem}
             onRedirect={props.onRedirect}
             onRemoveRelationItem={props.onRemoveRelationItem}
+            addRelatedElement={props.addRelatedElement}
             record={props.record}
             relation={relation}
             schema={props.schema}
