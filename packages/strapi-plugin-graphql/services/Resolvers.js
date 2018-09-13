@@ -398,7 +398,7 @@ module.exports = {
               queryOpts.skip = convertedParams.start;
 
               switch (association.nature) {
-                case 'manyToMany': {
+                case 'manyToMany':
                   if (association.dominant) {
                     const arrayOfIds = (obj[association.alias] || []).map(
                       related => {
@@ -413,10 +413,9 @@ module.exports = {
                       [ref.primaryKey]: arrayOfIds,
                       ...where.where,
                     }).where;
+                    break;
                   }
-                  break;
                   // falls through
-                }
                 default:
                   // Where.
                   queryOpts.query = strapi.utils.models.convertParams(name, {
