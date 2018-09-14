@@ -331,7 +331,7 @@ module.exports.app = async function() {
     `${this.config.url}/${get(this.config.currentEnvironment.server, 'admin.path', 'admin')}`;
 
   // proxy settings
-  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy' || {});
+  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy', {});
 
   // check if SSL enabled and construct proxy url
   function getProxyUrl(ssl, url) {
