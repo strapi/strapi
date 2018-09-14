@@ -537,8 +537,21 @@ module.exports = function(strapi) {
                       const orgQuery = `CREATE TABLE ${quote}${table}${quote} (${columns})`;
 
                       const newQuery = ORM.knex.schema.createTable(table, dbTable => {
-                        // TODO: Manage UUID-Primary key
-                        dbTable.increments();
+
+                        if (definition.primaryKeyType === 'integer') {
+                          // Common case, numeric incrementable key
+                          dbTable.increments();
+
+                        } else {
+                          // Build primary key with a peculiar field type
+                          const pk = dbTable[definition.primaryKeyType]('id')
+                            .primary()
+                            .notNullable();
+
+                          if (definition.client === 'pg' && definition.primaryKeyType === 'uuid') {
+                            pk.defaultTo(ORM.knex.raw('uuid_generate_v4()'));
+                          }
+                        }
 
                         _.mapKeys(attributes, (field, fieldName) => {
                           try {
@@ -577,6 +590,8 @@ module.exports = function(strapi) {
                       }).toString();
 
                       // FIXME: For temporary debugging. This should be eliminated.
+                      // eslint-disable-next-line prefer-template
+                      console.log('- ' + definition.primaryKeyType);
                       // eslint-disable-next-line prefer-template
                       console.log('< ' + orgQuery.toLowerCase() + ';');
                       // eslint-disable-next-line prefer-template
