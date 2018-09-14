@@ -448,7 +448,7 @@ export class EditPage extends React.Component {
                   <div className={styles.sub_wrapper}>
                     {this.hasDisplayedRelations() && (
                       <EditRelations
-                        ddRelatedElement={this.addRelatedElement}
+                        addRelatedElement={this.addRelatedElement}
                         isCreating={this.isCreating()}
                         changeData={this.props.changeData}
                         currentModelName={this.getModelName()}
