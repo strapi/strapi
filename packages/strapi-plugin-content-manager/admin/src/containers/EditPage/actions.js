@@ -8,13 +8,15 @@ import { get } from 'lodash';
 import { getValidationsFromForm } from 'utils/formValidations';
 
 import {
+  ADD_RELATION_ITEM,
   CHANGE_DATA,
   GET_DATA,
   GET_DATA_SUCCEEDED,
-  GET_LAYOUT,
-  GET_LAYOUT_SUCCEEDED,
   INIT_MODEL_PROPS,
+  MOVE_ATTR,
+  MOVE_ATTR_END,
   ON_CANCEL,
+  ON_REMOVE_RELATION_ITEM,
   RESET_PROPS,
   SET_FILE_RELATIONS,
   SET_LOADER,
@@ -23,6 +25,14 @@ import {
   SUBMIT_SUCCESS,
   UNSET_LOADER,
 } from './constants';
+
+export function addRelationItem({ key, value }) {
+  return {
+    type: ADD_RELATION_ITEM,
+    key,
+    value,
+  };
+}
 
 export function changeData({ target }) {
   return {
@@ -50,29 +60,25 @@ export function getDataSucceeded(id, data, pluginHeaderTitle) {
   };
 }
 
-export function getLayout(source) {
-  return {
-    type: GET_LAYOUT,
-    source,
-  };
-}
-
-export function getLayoutSucceeded(layout) {
-  return {
-    type: GET_LAYOUT_SUCCEEDED,
-    layout,
-  };
-}
-
-export function initModelProps(modelName, isCreating, source, attributes) {
+export function initModelProps(modelName, isCreating, source, attributes, displayedAttributes) {
   const formValidations = getValidationsFromForm(
     Object.keys(attributes).map(attr => ({ name: attr, validations: get(attributes, attr, {}) })),
     [],
-  );
+  ).filter(field => {
+    if (get(field, ['validations', 'required'], false) === true) {
+      return displayedAttributes.indexOf(field.name) !== -1;
+    }
+
+    return true;
+  });
+
   const record = Object.keys(attributes).reduce((acc, current) => {
     if (attributes[current].default) {
       acc[current] = attributes[current].default;
+    } else if (attributes[current].type === 'json') {
+      acc[current] = {};
     }
+
     return acc;
   }, {});
 
@@ -86,9 +92,32 @@ export function initModelProps(modelName, isCreating, source, attributes) {
   };
 }
 
+export function moveAttr(dragIndex, hoverIndex, keys) {
+  return {
+    type: MOVE_ATTR,
+    dragIndex,
+    hoverIndex,
+    keys,
+  };
+}
+
+export function moveAttrEnd() {
+  return {
+    type: MOVE_ATTR_END,
+  };
+}
+
 export function onCancel() {
   return {
     type: ON_CANCEL,
+  };
+}
+
+export function onRemoveRelationItem({ key, index }) {
+  return {
+    type: ON_REMOVE_RELATION_ITEM,
+    key,
+    index,
   };
 }
 

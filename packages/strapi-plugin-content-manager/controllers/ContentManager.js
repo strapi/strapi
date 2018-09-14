@@ -7,39 +7,17 @@ const _ = require('lodash');
  */
 
 module.exports = {
-  layout: async (ctx) => {
-    const {source} = ctx.query;
-
-    return ctx.send(_.get(strapi.plugins, [source, 'config', 'layout'], {}));
-  },
-
   models: async ctx => {
-    const pickData = (model) => _.pick(model, [
-      'info',
-      'connection',
-      'collectionName',
-      'attributes',
-      'identity',
-      'globalId',
-      'globalName',
-      'orm',
-      'loadedModel',
-      'primaryKey',
-      'associations'
-    ]);
+    const pluginsStore = strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'content-manager',
+    });
 
-    const models = _.mapValues(strapi.models, pickData);
-    delete models['core_store'];
+    const models = await pluginsStore.get({ key: 'schema' });
 
     ctx.body = {
       models,
-      plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
-        acc[current] = {
-          models: _.mapValues(strapi.plugins[current].models, pickData)
-        };
-
-        return acc;
-      }, {})
     };
   },
 
@@ -103,6 +81,18 @@ module.exports = {
       strapi.log.error(error);
       ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: error.message, field: error.field }] }] : error.message);
     }
+  },
+
+  updateSettings: async ctx => {
+    const { schema } = ctx.request.body;
+    const pluginStore = strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'content-manager'
+    });
+    await pluginStore.set({ key: 'schema', value: schema });
+
+    return ctx.body = { ok: true };
   },
 
   delete: async ctx => {

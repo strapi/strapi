@@ -67,6 +67,9 @@ module.exports = {
       'react-dom': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
       'react-transition-group': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
       'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap'),
+      'react-dnd': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dnd'),
+      'react-dnd-hmtl5-backend': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dnd-html5-backend'),
+      'styled-components': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'styled-components'),
     },
     symlinks: false,
     extensions: [

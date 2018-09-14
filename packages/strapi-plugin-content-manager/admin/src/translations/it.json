@@ -14,16 +14,27 @@
 	"containers.List.pluginHeaderDescription.singular": "{label} voce trovati",
 	"components.LimitSelect.itemsPerPage": "Elementi per pagina",
   "containers.List.errorFetchRecords": "Errore",
+  "containers.SettingPage.addField" : "Aggiungi un nuovo campo",
+  "containers.SettingPage.attributes" : "Attributi",
+  "containers.SettingPage.attributes.description" : "Definisci l'ordine degli attributi",
+  "containers.SettingPage.listSettings.title" : "Lista — Impostazioni",
+  "containers.SettingPage.listSettings.description" : "Configura le opzioni per questo Tipo di Contenuto",
+  "containers.SettingPage.pluginHeaderDescription" : "Configura le impostazioni specifiche per questo Tipo di Contenuto",
+  "containers.SettingsPage.pluginHeaderDescription" : "Configura le impostazioni di default per tutti i tuoi Tipi di Contenuto",
+  "containers.SettingsPage.Block.generalSettings.description" : "Configura le opzioni di default per i Tipi di Contenuto",
+  "containers.SettingsPage.Block.generalSettings.title" : "Generali",
+  "containers.SettingsPage.Block.contentType.title" : "Tipi di Contenuto",
+  "containers.SettingsPage.Block.contentType.description" : "Configura le impostazioni specifiche",
   
 	"components.AddFilterCTA.add": "Filtri",
 	"components.AddFilterCTA.hide": "Filtri",
+  "components.DraggableAttr.edit" : "Clicca per modificare",
 	"components.FilterOptions.button.apply": "Applica",
 	"components.FiltersPickWrapper.PluginHeader.actions.apply": "Applica",
 	"components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Cancella tutto",
 	"components.FiltersPickWrapper.PluginHeader.description": "Impostare le condizioni da applicare per filtrare le voci",
 	"components.FiltersPickWrapper.PluginHeader.title.filter": "Filtri",
   "components.FiltersPickWrapper.hide": "Nascondi",
-  
 	"components.FilterOptions.FILTER_TYPES.=": "si",
 	"components.FilterOptions.FILTER_TYPES._ne": "non è",
 	"components.FilterOptions.FILTER_TYPES._lt": "è inferiore",
@@ -59,6 +70,7 @@
 	"error.model.fetch": "Si è verificato un errore durante il caricamento dei modelli di configurazione.",
 	"error.validation.required": "Questo valore è richiesto.",
 	"error.validation.regex": "Il valore non corrisponde alla regex.",
+  "error.validation.json" : "Non è un JSON",
 	"error.validation.max": "Il valore è troppo alto.",
 	"error.validation.min": "Il valore è troppo basso.",
 	"error.validation.maxLength": "Il valore è troppo lungo.",
@@ -67,9 +79,25 @@
 	"error.attribute.taken": "Questo campo nome esiste già",
 	"error.attribute.key.taken": "Questo valore esiste già",
 	"error.attribute.sameKeyAndName": "Non può essere uguale",
-  "error.validation.minSupMax": "Non può essere superiore",
+	"error.validation.minSupMax": "Non può essere superiore",
+	
+	"form.Input.description": "Description",
+	"form.Input.description.placeholder": "Display name in the profile",
+	"form.Input.disabled": "Editable field",
+  
+  "form.Input.label.inputDescription" : "Questo valore sovrascrive l'etichetta mostrata nell'intestazione della tabella",
+  "form.Input.label" : "Etichetta",
+  "form.Input.search" : "Abilita ricerca",
+  "form.Input.search.field" : "Abilita la ricerca su questo campo",
+  "form.Input.filters" : "Abilita filtri",
+  "form.Input.sort.field" : "Abilita ordinamento su questo campo",
+  "form.Input.bulkActions" : "Abilita caricamento",
+  "form.Input.pageEntries" : "Righe per pagina",
+  "form.Input.pageEntries.inputDescription" : "Attenzione: Puoi sovrascrivere questo valore nella pagina delle impostazioni del Tipo di Contenuto",
+  "form.Input.defaultSort" : "Attributo di ordinamento di default",
   
   "notification.error.relationship.fetch": "Si è verificato un errore durante il rapporto di recupero.",
+  "notification.info.SettingPage.disableSort" : "E' necessario un attributo con l'ordinamento abilitato",
   
 	"success.record.delete": "Eliminato",
   "success.record.save": "Salvato",
@@ -80,5 +108,8 @@
 	"popUpWarning.button.confirm": "Conferma",
 	"popUpWarning.title": "Si prega di confermare",
 	"popUpWarning.bodyMessage.contentType.delete": "Sei sicuro di voler cancellare questa voce?",
-	"popUpWarning.bodyMessage.contentType.delete.all": "Sei sicuro di voler eliminare queste voci?"
+	"popUpWarning.bodyMessage.contentType.delete.all": "Sei sicuro di voler eliminare queste voci?",
+  "popUpWarning.warning.cancelAllSettings" : "Sei sicuro di voler cancellare le tue modifiche?",
+  "popUpWarning.warning.updateAllSettings" : "Questa operazione modificherà tutte le tue impostazioni"
+  
 }

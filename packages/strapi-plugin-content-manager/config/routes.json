@@ -2,14 +2,6 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/layout",
-      "handler": "ContentManager.layout",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/models",
       "handler": "ContentManager.models",
       "config": {
@@ -28,6 +20,14 @@
       "method": "GET",
       "path": "/explorer/:model/count",
       "handler": "ContentManager.count",
+      "config": {
+        "policies": ["routing"]
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/models",
+      "handler": "ContentManager.updateSettings",
       "config": {
         "policies": ["routing"]
       }

@@ -28,6 +28,7 @@
   "Auth.form.register.username.placeholder": "John Doe",
   "Auth.form.register.password.label": "Passwort",
   "Auth.form.register.confirmPassword.label": "Passwort-Bestätigung",
+  "Auth.form.register.news.label": "Haltet mich auf dem Laufenden über die neuen Funktionen und kommenden Verbesserungen.",
 
   "Auth.form.register-success.email.label": "Eine E-Mail wurde erfolgreich verschickt an",
   "Auth.form.register-success.email.placeholder": "mysuperemail@gmail.com",
@@ -88,8 +89,8 @@
   "HeaderNav.link.providers": "Methoden",
   "HeaderNav.link.roles": "Rollen",
 
-  "HomePage.header.title": "Benutzer & Befugnisse",
-  "HomePage.header.description": "Lege Rollen und deren Befugnisse fest",
+  "HomePage.header.title": "Benutzer & Berechtigungen",
+  "HomePage.header.description": "Lege Rollen und deren Berechtigungen fest.",
 
   "InputSearch.placeholder": "Suche nach einem Benutzer",
 

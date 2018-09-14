@@ -1,6 +1,6 @@
 {
   "name": "strapi-upload-aws-s3",
-  "version": "3.0.0-alpha.12.7.1",
+  "version": "3.0.0-alpha.14.1.1",
   "description": "AWS S3 provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
