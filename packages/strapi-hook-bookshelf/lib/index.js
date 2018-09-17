@@ -417,10 +417,10 @@ module.exports = function(strapi) {
                             type = definition.client === 'pg' ? 'integer' : 'int';
                             break;
                           case 'float':
-                            type = definition.client === 'pg' ? 'double precision' : 'double';
+                            type = definition.client === 'pg' ? 'double precision' : 'double     ';
                             break;
                           case 'decimal':
-                            type = 'decimal(10,2)';
+                            type = 'decimal(10, 2)';
                             break;
                           case 'date':
                           case 'time':
@@ -525,7 +525,7 @@ module.exports = function(strapi) {
 
 
                     if (!tableExist) {
-                      let idAttributeBuilder = [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`];
+                      let idAttributeBuilder = [` id  ${definition.client === 'pg' ? 'SERIAL' : 'INT          AUTO_INCREMENT NOT NULL'} PRIMARY KEY`];
                       if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
                         idAttributeBuilder = ['id uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY'];
                       } else if (definition.primaryKeyType !== 'integer') {
@@ -564,11 +564,28 @@ module.exports = function(strapi) {
 
                             switch(field.type) {
                               // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
+                              case 'text':
+                                dbTable.text(fieldName, 'longtext');
+                                break;
+
+                              case 'decimal':
+                                dbTable.decimal(fieldName, 10, 2);
+                                break;
+
+                              case 'json':
+                                // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
+                                definition.client === 'pg'
+                                  ? dbTable.jsonb(fieldName)
+                                  : dbTable.text(fieldName, 'longtext');
+                                break;
+
                               case 'email':
                               case 'password':
+                              case 'enumeration': // Manage native type is too complicated
                                 dbTable.string(fieldName);
                                 break;
 
+                              case 'date':
                               case 'timestamp':
                               case 'timestampUpdate':
                                 dbTable.timestamp(fieldName).defaultTo(
@@ -586,7 +603,7 @@ module.exports = function(strapi) {
                           } catch (e) {
                             strapi.log.error(`Field type '${field.type}' (for table '${table}') not recognized.`);
                             // FIXME: For temporary debugging. This should be eliminated.
-                            console.log({field});
+                            console.log({field}, e);
                           }
                         });
 
@@ -594,11 +611,9 @@ module.exports = function(strapi) {
 
                       // FIXME: For temporary debugging. This should be eliminated.
                       // eslint-disable-next-line prefer-template
-                      console.log('- ' + definition.primaryKeyType);
+                      console.log('- ' + orgQuery.toLowerCase() + ';');
                       // eslint-disable-next-line prefer-template
-                      console.log('< ' + orgQuery.toLowerCase() + ';');
-                      // eslint-disable-next-line prefer-template
-                      console.log('> ' + newQuery.toLowerCase() + ';');
+                      console.log('+ ' + newQuery.toLowerCase() + ';');
                       console.log('');
 
                       // Create table
