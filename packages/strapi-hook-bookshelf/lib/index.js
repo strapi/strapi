@@ -571,9 +571,12 @@ module.exports = function(strapi) {
 
                               case 'timestamp':
                               case 'timestampUpdate':
-                                // TODO: 'ON UPDATE' for column 'updated_at' in MySQL
-                                // NOTE: Knex.js has a method `timestamps` that maybe solve this
-                                dbTable.timestamp(fieldName).defaultTo(ORM.knex.fn.now());
+                                dbTable.timestamp(fieldName).defaultTo(
+                                  // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
+                                  definition.client === 'mysql' && field.type === 'timestampUpdate'
+                                    ? ORM.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
+                                    : ORM.knex.fn.now()
+                                );
                                 break;
 
                               default:
