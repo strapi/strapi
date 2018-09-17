@@ -8,7 +8,7 @@ import React from 'react';
 import Select from 'react-select';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { cloneDeep, isArray, isNull, isUndefined, get, findIndex, isEmpty } from 'lodash';
+import { cloneDeep, includes, isArray, isNull, isUndefined, get, findIndex, isEmpty } from 'lodash';
 
 // Utils.
 import request from 'utils/request';
@@ -46,6 +46,15 @@ class SelectMany extends React.PureComponent {
 
     if (prevState.toSkip !== this.state.toSkip) {
       this.getOptions('');
+    }
+  }
+
+  handleInputChange = (value) => {
+    const clonedOptions = this.state.options;
+    const filteredValues = clonedOptions.filter(data => includes(data.label, value));
+
+    if (filteredValues.length === 0) {
+      return this.getOptions(value);
     }
   }
 
@@ -169,6 +178,7 @@ class SelectMany extends React.PureComponent {
           id={this.props.relation.alias}
           isLoading={this.state.isLoading}
           onChange={this.handleChange}
+          onInputChange={this.handleInputChange}
           onMenuScrollToBottom={this.handleBottomScroll}
           options={this.state.options}    
           placeholder={<FormattedMessage id='content-manager.containers.Edit.addAnItem' />}
