@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.14.1",
+  "version": "3.0.0-alpha.14.1.1",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 9.0.0",
