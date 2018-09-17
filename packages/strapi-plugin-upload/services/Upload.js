@@ -7,9 +7,20 @@
  */
 
 const fs = require('fs');
+const crypto = require('crypto');
 const _ = require('lodash');
 const toArray = require('stream-to-array');
 const uuid = require('uuid/v4');
+
+function niceHash(buffer) {
+  return crypto
+    .createHash('sha256')
+    .update(buffer)
+    .digest('base64')
+    .replace(/=/g, '')
+    .replace(/\//g, '-')
+    .replace(/\+/, '_');
+}
 
 module.exports = {
   bufferize: async files => {
@@ -23,28 +34,22 @@ module.exports = {
     // transform all files in buffer
     return Promise.all(
       files.map(async stream => {
-        const parts = stream.path
-          ? await toArray(fs.createReadStream(stream.path))
-          : await toArray(stream.stream);
-
+        const parts = await toArray(fs.createReadStream(stream.path));
         const buffers = parts.map(
           part => (_.isBuffer(part) ? part : Buffer.from(part)),
         );
 
-        if (!stream.path) {
-          stream.name = stream.filename;
-          stream.type = stream.mimetype;
-          stream.size = parseInt(stream.encoding.replace('bit', ''));
-        }
+        const buffer = Buffer.concat(buffers);
 
         return {
           name: stream.name,
+          sha256: niceHash(buffer),
           hash: uuid().replace(/-/g, ''),
           ext:
             stream.name.split('.').length > 1
               ? `.${_.last(stream.name.split('.'))}`
               : '',
-          buffer: Buffer.concat(buffers),
+          buffer,
           mime: stream.type,
           size: (stream.size / 1000).toFixed(2),
         };
