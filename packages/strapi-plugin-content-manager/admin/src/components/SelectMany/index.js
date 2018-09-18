@@ -174,7 +174,7 @@ class SelectMany extends React.PureComponent {
     const attrSchema =  this.props.schema.attributes[this.props.relation.alias];
     console.log('this.props',this.props);
     console.log('attrSchema',attrSchema);
-    const buttonCreate = this.props.isCreating || ! (attrSchema.hasOwnProperty('createButton') && attrSchema.createButton) ? '' : (
+    const buttonCreate = this.props.isCreating ? '' : (
       <Button
         kind='primaryAddShape'
         label={`Add ${this.props.relation.alias.toLowerCase()}`}
