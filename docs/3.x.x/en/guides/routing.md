@@ -12,17 +12,17 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
   "routes": [
     {
       "method": "GET",
-      "path": "/product",
+      "path": "/products",
       "handler": "Product.find",
     },
     {
       "method": ["POST", "PUT"],
-      "path": "/product/:id",
+      "path": "/products/:id",
       "handler": "Product.createOrUpdate",
     },
     {
       "method": "POST",
-      "path": "/product/:id/buy",
+      "path": "/products/:id/buy",
       "handler": "Product.buy",
       "config": {
         "policies": ["isAuthenticated", "hasCreditCard"]
@@ -33,7 +33,7 @@ You have to edit the `routes.json` file in one of your APIs folders (`./api/**/c
 ```
 
 - `method` (string): Method or array of methods to hit the route (ex: `GET`, `POST`, `PUT`, `HEAD`, `DELETE`, `PATCH`)
-- `path` (string): URL starting with `/` (ex: `/product`)
+- `path` (string): URL starting with `/` (ex: `/products`)
 - `handler` (string): Action to executed when the route is hit following this syntax `<Controller>.<action>`
 - `config`
   - `policies` (array): Array of policies names or path ([see more](../guides/policies.md))
@@ -48,12 +48,12 @@ The router used by Strapi allows you to create dynamic routes where you can use 
   "routes": [
     {
       "method": "GET",
-      "path": "/product/:category/:id",
+      "path": "/products/:category/:id",
       "handler": "Product.findOneByCategory",
     },
     {
       "method": "GET",
-      "path": "/product/:region(\\d{2}|\\d{3})/:id", // Only match when the first parameter contains 2 or 3 digits.
+      "path": "/products/:region(\\d{2}|\\d{3})/:id", // Only match when the first parameter contains 2 or 3 digits.
       "handler": "Product.findOneByRegion",
     }
   ]
