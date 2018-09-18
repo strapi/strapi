@@ -211,10 +211,9 @@
         "prefix": ""
       }
     },
-
     {
       "method": "GET",
-      "path": "/user",
+      "path": "/users",
       "handler": "User.find",
       "config": {
         "policies": [],
@@ -223,7 +222,7 @@
     },
     {
       "method": "GET",
-      "path": "/user/me",
+      "path": "/users/me",
       "handler": "User.me",
       "config": {
         "policies": [],
@@ -232,7 +231,7 @@
     },
     {
       "method": "GET",
-      "path": "/user/:_id",
+      "path": "/users/:_id",
       "handler": "User.findOne",
       "config": {
         "policies": [],
@@ -241,7 +240,7 @@
     },
     {
       "method": "POST",
-      "path": "/user",
+      "path": "/users",
       "handler": "User.create",
       "config": {
         "policies": [],
@@ -250,7 +249,7 @@
     },
     {
       "method": "PUT",
-      "path": "/user/:_id",
+      "path": "/users/:_id",
       "handler": "User.update",
       "config": {
         "policies": [],
@@ -259,7 +258,7 @@
     },
     {
       "method": "DELETE",
-      "path": "/user/:_id",
+      "path": "/users/:_id",
       "handler": "User.destroy",
       "config": {
         "policies": [],

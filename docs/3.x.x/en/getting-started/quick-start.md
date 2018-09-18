@@ -137,16 +137,16 @@ In order to do so, you'll need to allow access to other users (identified as 'Gu
 
 ### List entries (GET)
 
-To retrieve the list of products, use the `GET /your-content-type` route.
+To retrieve the list of products, use the `GET /products` route.
 
-Generated APIs provide a handy way to filter and order queries. In that way, ordering products by price is as easy as `GET http://localhost:1337/product?_sort=price:asc`. For more informations, read the [filters documentation](../guides/filters.md)
+Generated APIs provide a handy way to filter and order queries. In that way, ordering products by price is as easy as `GET http://localhost:1337/products?_sort=price:asc`. For more informations, read the [filters documentation](../guides/filters.md)
 
 Here is an example using jQuery.
 
 ```js
 $.ajax({
   type: 'GET',
-  url: 'http://localhost:1337/product?_sort=price:asc', // Order by price.
+  url: 'http://localhost:1337/products?_sort=price:asc', // Order by price.
   done: function(products) {
     console.log('Well done, here is the list of products: ', products);
   },
@@ -163,7 +163,7 @@ If you want to get a specific entry, add the `id` of the wanted product at the e
 ```js
 $.ajax({
   type: 'GET',
-  url: 'http://localhost:1337/product/123', // Where `123` is the `id` of the product.
+  url: 'http://localhost:1337/products/123', // Where `123` is the `id` of the product.
   done: function(product) {
     console.log('Well done, here is the product having the `id` 123: ', product);
   },
@@ -182,7 +182,7 @@ jQuery example:
 ```js
 $.ajax({
   type: 'POST',
-  url: 'http://localhost:1337/product',
+  url: 'http://localhost:1337/products',
   data: {
     name: 'Cheese cake',
     description: 'Chocolate cheese cake with ice cream',
@@ -206,7 +206,7 @@ jQuery example:
 ```js
 $.ajax({
   type: 'PUT',
-  url: 'http://localhost:1337/product/123', // Where `123` is the `id` of the product.
+  url: 'http://localhost:1337/products/123', // Where `123` is the `id` of the product.
   data: {
     description: 'This is the new description'
   },
@@ -228,7 +228,7 @@ jQuery example:
 ```js
 $.ajax({
   type: 'DELETE',
-  url: 'http://localhost:1337/product/123', // Where `123` is the `id` of the product.
+  url: 'http://localhost:1337/products/123', // Where `123` is the `id` of the product.
   done: function(product) {
     console.log('Congrats, your product has been successfully deleted: ', product);
   },
