@@ -351,11 +351,11 @@ export class EditPage extends React.Component {
     this.props.resetProps();
     this.componentDidMount();
     const url = `/plugins/content-manager/${relation.collection}`;
-    this.props.history.push(`${url}/create?redirectUrl=${url}?source=content-manager`);
-    /*    this.props.history.replace({
-		  pathname:`${url}/create`,
-		  search: `?redirectUrl=${url}?source=content-manager`
-		});*/
+    this.props.history.push({
+      pathname: `${url}/create`,
+      search: `?redirectUrl=${url}?source=content-manager`
+    });
+
 
     console.log("relation", relation);
     console.log("target", target);
