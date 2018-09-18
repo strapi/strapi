@@ -77,6 +77,14 @@ module.exports = async cb => {
         'user:email'
       ]
     },
+    microsoft: {
+      enabled: false,
+      icon: 'windows',
+      key: '',
+      secret: '',
+      callback: '/auth/microsoft/callback',
+      scope: ['user.read']
+    },
     twitter: {
       enabled: false,
       icon: 'twitter',
@@ -119,6 +127,25 @@ module.exports = async cb => {
 
 <p>Thanks.</p>`
         }
+      },
+      'email_confirmation': {
+        display: 'Email.template.email_confirmation',
+        icon: 'check-square-o',
+        options: {
+          from: {
+            name: 'Administration Panel',
+            email: 'no-reply@strapi.io'
+          },
+          response_email: '',
+          object: 'Account confirmation',
+          message: `<p>Thank you for registering!</p>
+
+<p>You have to confirm your email address. Please click on the link below.</p>
+
+<p><%= URL %>?confirmation=<%= CODE %></p>
+
+<p>Thanks.</p>`
+        }
       }
     };
 
@@ -129,11 +156,13 @@ module.exports = async cb => {
     const value = {
       unique_email: true,
       allow_register: true,
+      email_confirmation: false,
+      email_confirmation_redirection: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
       default_role: 'authenticated'
     };
 
     await pluginStore.set({key: 'advanced', value});
   }
-  
+
   strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
 };

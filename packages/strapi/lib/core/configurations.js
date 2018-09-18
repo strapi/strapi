@@ -1,9 +1,11 @@
 'use strict';
 
 // Dependencies.
+const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
-const { merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, assign, clone, cloneDeep, camelCase } = require('lodash');
+const { merge, setWith, get, upperFirst, isEmpty, isObject, pullAll, defaults, assign, clone, cloneDeep, camelCase } = require('lodash');
+const { templateConfiguration } = require('strapi-utils');
 const utils = require('../utils');
 
 module.exports.nested = function() {
@@ -84,14 +86,14 @@ module.exports.app = async function() {
   this.config.currentEnvironment = this.config.environments[this.config.environment] || {};
 
   // Set current connections.
-  this.config.connections = get(this.config.currentEnvironment, `database.connections`, {});
+  this.config.connections = get(this.config.currentEnvironment, 'database.connections', {});
 
   if (get(this.config, 'language.enabled')) {
     this.config.language.locales = Object.keys(get(strapi.config, 'locales', {}));
   }
 
   // Template literal string.
-  this.config = templateConfigurations(this.config);
+  this.config = templateConfiguration(this.config);
 
   // Initialize main router to use it in middlewares.
   this.router = this.koaMiddlewares.routerJoi();
@@ -304,7 +306,7 @@ module.exports.app = async function() {
 
   this.config.hook.settings = Object.keys(this.hook).reduce((acc, current) => {
     // Try to find the settings in the current environment, then in the main configurations.
-    const currentSettings = merge(get(cloneDeep(this.hook[current]), ['defaults', current], {}), flattenHooksConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
+    const currentSettings = merge(get(cloneDeep(this.hook[current]), ['defaults', current], {}), flattenHooksConfig[current] || get(this.config.currentEnvironment, ['hook', current]) || get(this.config, ['hook', current]));
     acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
     if (!acc[current].hasOwnProperty('enabled')) {
@@ -317,9 +319,29 @@ module.exports.app = async function() {
     return acc;
   }, {});
 
+  // default settings
   this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
   this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
   this.config.url = `http://${this.config.host}:${this.config.port}`;
+
+  // Admin.
+  this.config.admin.devMode = isAdminInDevMode.call(this);
+  this.config.admin.url = this.config.admin.devMode ?
+    `http://${this.config.host}:4000/${get(this.config.currentEnvironment.server, 'admin.path', 'admin')}`:
+    `${this.config.url}/${get(this.config.currentEnvironment.server, 'admin.path', 'admin')}`;
+
+  // proxy settings
+  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy', {});
+
+  // check if SSL enabled and construct proxy url
+  function getProxyUrl(ssl, url) {
+    return `http${ssl ? 's' : ''}://${url}`;
+  }
+
+  // check if proxy is enabled and construct url
+  if (get(this.config, 'proxy.enabled')) {
+    this.config.url = getProxyUrl(this.config.proxy.ssl, `${this.config.proxy.host}:${this.config.proxy.port}`);
+  }
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig, force = false) {
@@ -365,13 +387,17 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
  * the native ES6 template string function.
  */
 const regex = /\$\{[^()]*\}/g;
-const templateConfigurations = function (obj) {
+const excludeConfigPaths = ['info.scripts'];
+const templateConfigurations = function (obj, configPath = '') {
   // Allow values which looks like such as
   // an ES6 literal string without parenthesis inside (aka function call).
+  // Exclude config with conflicting syntax (e.g. npm scripts).
   return Object.keys(obj).reduce((acc, key) => {
     if (isPlainObject(obj[key]) && !isString(obj[key])) {
-      acc[key] = templateConfigurations(obj[key]);
-    } else if (isString(obj[key]) && obj[key].match(regex) !== null) {
+      acc[key] = templateConfigurations(obj[key], `${configPath}.${key}`);
+    } else if (isString(obj[key])
+      && !excludeConfigPaths.includes(configPath.substr(1))
+      && obj[key].match(regex) !== null) {
       acc[key] = eval('`' + obj[key] + '`'); // eslint-disable-line prefer-template
     } else {
       acc[key] = obj[key];
@@ -379,4 +405,14 @@ const templateConfigurations = function (obj) {
 
     return acc;
   }, {});
+};
+    
+const isAdminInDevMode = function () {
+  try {
+    fs.accessSync(path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'index.html'), fs.constants.R_OK | fs.constants.W_OK);
+
+    return false;
+  } catch (e) {
+    return true;
+  }
 };

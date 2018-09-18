@@ -10,24 +10,18 @@ import { createStructuredSelector } from 'reselect';
 import cn from 'classnames';
 import { get, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
-
 import { onChange, onSubmit, onReset } from 'containers/App/actions';
 import { makeSelectModifiedSchema, makeSelectSubmitSuccess } from 'containers/App/selectors';
-
 import Input from 'components/InputsIndex';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
-
 import Block from 'components/Block';
 import SettingsRow from 'components/SettingsRow';
-
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
-
 import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';
-
 import forms from './forms.json';
 
 class SettingsPage extends React.PureComponent {
@@ -92,6 +86,11 @@ class SettingsPage extends React.PureComponent {
     this.props.history.push(`${pathname}${destination}`);
   }
 
+  handleConfirmReset = () => {
+    this.props.onReset();
+    this.toggleWarningCancel();
+  }
+
   handleReset = (e) => {
     e.preventDefault();
     this.setState({ showWarningCancel: true });
@@ -106,9 +105,20 @@ class SettingsPage extends React.PureComponent {
 
   toggleWarningCancel = () => this.setState(prevState => ({ showWarningCancel: !prevState.showWarningCancel }));
 
+  renderForm = input => (
+    <Input
+      key={input.name}
+      onChange={this.props.onChange}
+      value={this.getValue(input)}
+      {...input}
+    />
+  );
+
+  renderRow = model => <SettingsRow key={model.name} {...model} onClick={this.handleClick} />;
+
   render() {
     const { showWarning, showWarningCancel } = this.state;
-    const { onChange, onReset, onSubmit } = this.props;
+    const { onSubmit } = this.props;
 
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>
@@ -127,9 +137,7 @@ class SettingsPage extends React.PureComponent {
             confirm: 'content-manager.popUpWarning.button.confirm',
           }}
           popUpWarningType="danger"
-          onConfirm={() => {
-            onSubmit();
-          }}
+          onConfirm={onSubmit}
         />
         <PopUpWarning
           isOpen={showWarningCancel}
@@ -141,10 +149,7 @@ class SettingsPage extends React.PureComponent {
             confirm: 'content-manager.popUpWarning.button.confirm',
           }}
           popUpWarningType="danger"
-          onConfirm={() => {
-            onReset();
-            this.toggleWarningCancel();
-          }}
+          onConfirm={this.handleConfirmReset}
         />
         <div className={cn('row', styles.container)}>
           <Block
@@ -153,29 +158,24 @@ class SettingsPage extends React.PureComponent {
           >
             <form onSubmit={this.handleSubmit} className={styles.ctmForm}>
               <div className="row">
-                <div className="col-md-10">
+                <div className="col-md-12">
                   <div className="row">
-                    {forms.inputs.map(input => (
-                      <Input
-                        key={input.name}
-                        onChange={onChange}
-                        value={this.getValue(input)}
-                        {...input}
-                      />
-                    ))}
+                    {forms.inputs.map(this.renderForm)}
                   </div>
                 </div>
               </div>
             </form>
           </Block>
+          {/* LIST */}
           <Block
             title="content-manager.containers.SettingsPage.Block.contentType.title"
             description="content-manager.containers.SettingsPage.Block.contentType.description"
           >
             <div className={styles.contentTypesWrapper}>
-              {this.getModels().map(model => <SettingsRow key={model.name} {...model} onClick={this.handleClick} />)}
+              {this.getModels().map(this.renderRow)}
             </div>
           </Block>
+          {/* LIST */}
         </div>
       </div>
     );
@@ -204,12 +204,10 @@ const mapDispatchToProps = (dispatch) => (
     dispatch,
   )
 );
-
 const mapStateToProps = createStructuredSelector({
   schema: makeSelectModifiedSchema(),
   submitSuccess: makeSelectSubmitSuccess(),
 });
-
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withReducer = injectReducer({ key: 'settingsPage', reducer });
 const withSaga = injectSaga({ key: 'settingsPage', saga });

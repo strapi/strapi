@@ -165,13 +165,8 @@ Most of the application's configurations are defined by environment. It means th
  - `connections` List of all available connections.
    - `default`
      - `connector` (string): Connector used by the current connection. Default value: `strapi-hook-mongoose`.
-     - `client` (string): Client used to store session. Default value: `cookie`.
-     - `key` (string): Cookie key name. Default value: `strapi.sid`
-     - `maxAge` (integer): Time in milliseconds before the session expire. Default value: `86400000`.
-     - `rolling` (boolean): Force a session identifier cookie to be set on every response. Default value: `false`.
-     - `signed` (boolean): httpOnly or not. Default value: `true`.
-     - `overwrite` (boolean): Can overwrite or not. Default value: `true`.
      - `settings` Useful for external session stores such as Redis.
+       - `client` (string): Database client to create the connection. Default value: `mongo`.
        - `host` (string): Database host name. Default value: `localhost`.
        - `port` (integer): Database port. Default value: `27017`.
        - `database` (string): Database name. Default value: `development`.
@@ -335,10 +330,18 @@ Most of the application's configurations are defined by environment. It means th
 
  - `host` (string): Host name. Default value: `localhost`.
  - `port` (integer): Port on which the server should be running. Default value: `1337`.
- - `autoReload` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
+ - `autoReload`
+   - `enabled` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
+ - `emitErrors` (boolean): Enable errors to be emited to `koa` when they happen in order to attach custom logic or use error reporting services.
+ - `proxy`
+  - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
+  - `ssl` (boolean): Enable proxy SSL support
+  - `host` (string): Host name your proxy service uses for Strapi.
+  - `port` (integer): Port that your proxy service accepts connections on.
  - [`cron`](https://en.wikipedia.org/wiki/Cron)
   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
  - `admin`
+  - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
   - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
   - `build`
     - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
@@ -346,6 +349,33 @@ Most of the application's configurations are defined by environment. It means th
       - `plugins`
         - `source` (string): Define the source mode (origin, host, custom).
         - `folder` (string): Indicate what the plugins folder in `host` source mode.
+
+#### Example
+
+**Path —** `./config/environments/**/server.json`.
+
+As an example using this configuration with Nginx your server would respond to `https://example.com:8443` instead of `http://localhost:1337`
+
+**Note:** you will need to configure Nginx or Apache as a proxy before configuring this example.
+
+```json
+{
+  "host": "localhost",
+  "port": 1337,
+  "proxy": {
+    "enabled": true,
+    "ssl": true,
+    "host": "example.com",
+    "port": 8443
+  },
+  "autoReload": {
+    "enabled": true
+  },
+  "cron": {
+    "enabled": true
+  }
+}
+```
 
 ***
 

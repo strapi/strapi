@@ -6,24 +6,48 @@
 
 import { includes } from 'lodash';
 import {
+  BEGIN_MOVE,
   EMPTY_STORE,
+  END_MOVE,
   GET_MODEL_ENTRIES,
   GET_MODEL_ENTRIES_SUCCEEDED,
   LOAD_MODELS,
   LOADED_MODELS,
   MOVE_ATTR,
+  MOVE_ATTR_EDIT_VIEW,
+  MOVE_VARIABLE_ATTR_EDIT_VIEW,
   ON_CHANGE,
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
+  ON_CLICK_ADD_ATTR_FIELD,
   ON_REMOVE,
+  ON_REMOVE_EDIT_VIEW_FIELD_ATTR,
+  ON_REMOVE_EDIT_VIEW_RELATION_ATTR,
   ON_RESET,
   ON_SUBMIT,
+  SET_LAYOUT,
   SUBMIT_SUCCEEDED,
 } from './constants';
+
+export function beginMove(name, index, keys) {
+  return {
+    type: BEGIN_MOVE,
+    name,
+    index,
+    keys,
+  };
+}
 
 export function emptyStore() {
   return {
     type: EMPTY_STORE,
+  };
+}
+
+export function endMove(keys) {
+  return {
+    type: END_MOVE,
+    keys,
   };
 }
 
@@ -64,6 +88,24 @@ export function moveAttr(dragIndex, hoverIndex, keys) {
   };
 }
 
+export function moveAttrEditView(dragIndex, hoverIndex, keys) {
+  return {
+    type: MOVE_ATTR_EDIT_VIEW,
+    dragIndex,
+    hoverIndex,
+    keys,
+  };
+}
+
+export function moveVariableAttrEditView(dragIndex, hoverIndex, keys) {
+  return {
+    type: MOVE_VARIABLE_ATTR_EDIT_VIEW,
+    dragIndex,
+    hoverIndex,
+    keys,
+  };
+}
+
 export function onChange({ target }) {
   const value = includes(target.name, 'pageEntries') ? parseInt(target.value, 10) : target.value;
 
@@ -92,9 +134,33 @@ export function onClickAddAttr(data, keys) {
   };
 }
 
+export function onClickAddAttrField(data, keys) {
+  return {
+    type: ON_CLICK_ADD_ATTR_FIELD,
+    data,
+    keys,
+  };
+}
+
 export function onRemove(index, keys) {
   return {
     type: ON_REMOVE,
+    index,
+    keys,
+  };
+}
+
+export function onRemoveEditViewFieldAttr(index, keys) {
+  return {
+    type: ON_REMOVE_EDIT_VIEW_FIELD_ATTR,
+    index,
+    keys,
+  };
+}
+
+export function onRemoveEditViewRelationAttr(index, keys) {
+  return {
+    type: ON_REMOVE_EDIT_VIEW_RELATION_ATTR,
     index,
     keys,
   };
@@ -109,6 +175,13 @@ export function onReset() {
 export function onSubmit() {
   return {
     type: ON_SUBMIT,
+  };
+}
+
+export function setLayout(keys) {
+  return {
+    type: SET_LAYOUT,
+    keys,
   };
 }
 

@@ -15,5 +15,6 @@ module.exports = {
   models: require('./models'),
   packageManager: require('./packageManager'),
   policy: require('./policy'),
-  regex: require('./regex')
+  regex: require('./regex'),
+  templateConfiguration: require('./templateConfiguration')
 };

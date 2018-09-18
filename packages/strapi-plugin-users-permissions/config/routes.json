@@ -153,7 +153,7 @@
       "path": "/connect/*",
       "handler": "Auth.connect",
       "config": {
-        "policies": [],
+        "policies": ["plugins.users-permissions.ratelimit"],
         "prefix": ""
       }
     },
@@ -162,7 +162,7 @@
       "path": "/auth/local",
       "handler": "Auth.callback",
       "config": {
-        "policies": [],
+        "policies": ["plugins.users-permissions.ratelimit"],
         "prefix": ""
       }
     },
@@ -171,7 +171,7 @@
       "path": "/auth/local/register",
       "handler": "Auth.register",
       "config": {
-        "policies": [],
+        "policies": ["plugins.users-permissions.ratelimit"],
         "prefix": ""
       }
     },
@@ -189,7 +189,7 @@
       "path": "/auth/forgot-password",
       "handler": "Auth.forgotPassword",
       "config": {
-        "policies": [],
+        "policies": ["plugins.users-permissions.ratelimit"],
         "prefix": ""
       }
     },
@@ -197,6 +197,15 @@
       "method": "POST",
       "path": "/auth/reset-password",
       "handler": "Auth.changePassword",
+      "config": {
+        "policies": ["plugins.users-permissions.ratelimit"],
+        "prefix": ""
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/auth/email-confirmation",
+      "handler": "Auth.emailConfirmation",
       "config": {
         "policies": [],
         "prefix": ""
