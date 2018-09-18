@@ -97,7 +97,7 @@ By default, each API request is identified as `guest` role (see permissions of `
 ```js
 $.ajax({
   type: 'GET',
-  url: 'http://localhost:1337/article',
+  url: 'http://localhost:1337/articles',
   headers: {
     Authorization: `Bearer ${token}`
   },

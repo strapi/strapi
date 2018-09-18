@@ -29,11 +29,11 @@ Easily filter results according to fields values.
 
 Find users having `John` as first name.
 
-`GET /user?firstName=John`
+`GET /users?firstName=John`
 
 Find products having a price equal or greater than `3`.
 
-`GET /product?price_gte=3`
+`GET /products?price_gte=3`
 
 ### Sort
 
@@ -43,8 +43,8 @@ Sort according to a specific field.
 
 Sort users by email.
 
- - ASC: `GET /user?_sort=email:asc`
- - DESC: `GET /user?_sort=email:desc`
+ - ASC: `GET /users?_sort=email:asc`
+ - DESC: `GET /users?_sort=email:desc`
 
 ### Limit
 
@@ -54,7 +54,7 @@ Limit the size of the returned results.
 
 Limit the result length to 30.
 
-`GET /user?_limit=30`
+`GET /users?_limit=30`
 
 ### Start
 
@@ -64,7 +64,7 @@ Skip a specific number of entries (especially useful for pagination).
 
 Get the second page of results.
 
-`GET /user?_start=10&_limit=10`
+`GET /users?_start=10&_limit=10`
 
 ## Programmatic usage
 

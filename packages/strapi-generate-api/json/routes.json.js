@@ -21,42 +21,42 @@ module.exports = scope => {
     const routes = {
       routes: [{
         method: 'GET',
-        path: '/' + scope.humanizeId,
+        path: '/' + scope.idPluralized,
         handler: scope.globalID + '.find',
         config: {
           policies: []
         }
       }, {
         method: 'GET',
-        path: '/' + scope.humanizeId + '/count',
+        path: '/' + scope.idPluralized + '/count',
         handler: scope.globalID + '.count',
         config: {
           policies: []
         }
       }, {
         method: 'GET',
-        path: '/' + scope.humanizeId + '/:' + tokenID,
+        path: '/' + scope.idPluralized + '/:' + tokenID,
         handler: scope.globalID + '.findOne',
         config: {
           policies: []
         }
       }, {
         method: 'POST',
-        path: '/' + scope.humanizeId,
+        path: '/' + scope.idPluralized,
         handler: scope.globalID + '.create',
         config: {
           policies: []
         }
       }, {
         method: 'PUT',
-        path: '/' + scope.humanizeId + '/:' + tokenID,
+        path: '/' + scope.idPluralized + '/:' + tokenID,
         handler: scope.globalID + '.update',
         config: {
           policies: []
         }
       }, {
         method: 'DELETE',
-        path: '/' + scope.humanizeId + '/:' + tokenID,
+        path: '/' + scope.idPluralized + '/:' + tokenID,
         handler: scope.globalID + '.destroy',
         config: {
           policies: []
@@ -67,21 +67,21 @@ module.exports = scope => {
     if (scope.args.tpl && scope.args.tpl !== 'mongoose') {
       routes.routes.push({
         method: 'POST',
-        path: '/' + scope.humanizeId + '/:' + tokenID + '/relationships/:relation',
+        path: '/' + scope.idPluralized + '/:' + tokenID + '/relationships/:relation',
         handler: scope.globalID + '.createRelation',
         config: {
           policies: []
         }
       }, {
         method: 'PUT',
-        path: '/' + scope.humanizeId + '/:' + tokenID + '/relationships/:relation',
+        path: '/' + scope.idPluralized + '/:' + tokenID + '/relationships/:relation',
         handler: scope.globalID + '.updateRelation',
         config: {
           policies: []
         }
       }, {
         method: 'DELETE',
-        path: '/' + scope.humanizeId + '/:' + tokenID + '/relationships/:relation',
+        path: '/' + scope.idPluralized + '/:' + tokenID + '/relationships/:relation',
         handler: scope.globalID + '.destroyRelation',
         config: {
           policies: []
