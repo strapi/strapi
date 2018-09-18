@@ -320,7 +320,7 @@ As for backend, we have a `switch...case` where we need to put our new provider 
 Add the corresponding translation into: `packages/strapi-plugin-users-permissions/admin/src/translations/en.json`
 
 ```js
-  "PopUpForm.Providers.discord.providerConfig.redirectURL": "The redirect URL to add in your Discord config",
+  "PopUpForm.Providers.discord.providerConfig.redirectURL": "The redirect URL to add in your Discord application configurations",
 ````
 
 These two change will set up the popup message who appear on the UI when we will configure our new provider.
