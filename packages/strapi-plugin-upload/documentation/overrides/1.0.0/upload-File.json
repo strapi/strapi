@@ -1,0 +1,165 @@
+{
+  "paths": {
+    "/upload/files/count": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/files": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UploadFile"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/search/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "",
+            "deprecated": false,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UploadFile"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/upload/files/{_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "description": "",
+            "deprecated": false,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadFile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "parameters": [
+          {
+            "name": "_id",
+            "in": "path",
+            "description": "",
+            "deprecated": false,
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document deleted"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UploadFile": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string"
+          },
+          "ext": {
+            "type": "string"
+          },
+          "size": {
+            "type": "string"
+          },
+          "mime": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "type":"string"
+            }
+          }
+        }
+      }
+    }
+  }
+}

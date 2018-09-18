@@ -228,7 +228,7 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Login a user using a custom provider",
+        "description": "Successfull redirection after approving a provider",
         "tag": {
           "plugin": "users-permissions",
           "name": "User"
