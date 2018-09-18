@@ -451,7 +451,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  handleSubmit = (e, redirectToChoose = false) => {
+  handleSubmit = (e, redirectToChoose = true) => {
     e.preventDefault();
     const hashArray = split(this.props.hash, ('::'));
     const valueToReplace = includes(this.props.hash, '#create') ? '#create' : '#edit';
@@ -526,12 +526,9 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   renderModalBodyChooseAttributes = () => {
-    const attributesDisplay = forms.attributesDisplay.items;
-
-    // Don't display the media field if the upload plugin isn't installed
-    if (!has(this.context.plugins.toJS(), 'upload')) {
-      attributesDisplay.splice(8, 1);
-    }
+    const attributesDisplay = has(this.context.plugins.toJS(), 'upload')
+      ? forms.attributesDisplay.items
+      : forms.attributesDisplay.items.filter(obj => obj.type !== 'media'); // Don't display the media field if the upload plugin isn't installed
 
     return (
       map(attributesDisplay, (attribute, key) => (
