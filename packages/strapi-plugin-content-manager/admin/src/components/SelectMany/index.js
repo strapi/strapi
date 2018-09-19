@@ -13,8 +13,6 @@ import { cloneDeep, includes, isArray, isNull, isUndefined, get, findIndex, isEm
 // Utils.
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
-import Button from "strapi-helper-plugin/lib/src/components/Button/index";
-
 
 // CSS.
 import 'react-select/dist/react-select.css';
@@ -174,18 +172,24 @@ class SelectMany extends React.PureComponent {
     const attrSchema =  this.props.schema.attributes[this.props.relation.alias];
     console.log('this.props',this.props);
     console.log('attrSchema',attrSchema);
-    const buttonCreate = this.props.isCreating || ! (attrSchema.hasOwnProperty('createButton') && attrSchema.createButton) ? '' : (
-      <Button
-        kind='primaryAddShape'
-        label={`Add ${this.props.relation.alias.toLowerCase()}`}
-        onClick={() => this.props.addRelatedElement(this.props.relation)}
-      />
+    const createLink = (this.props.isCreating || ! (attrSchema.hasOwnProperty('createButton') && attrSchema.createButton)?
+        '' :
+        (
+          <FormattedMessage id='content-manager.containers.Edit.clickToAddNewRelatedContent'>
+            {title => (
+              <a onClick={() => this.props.addRelatedElement(this.props.relation)} title={title}><FormattedMessage id='content-manager.containers.Edit.addContent' /></a>
+            )}
+          </FormattedMessage>
+        )
     );
 
     /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectMany} ${value.length > 4 && styles.selectManyUpdate}`}>
+        <nav className={styles.headline}>
         <label htmlFor={this.props.relation.alias}>{this.props.relation.alias} <span>({value.length})</span></label>
+        {createLink}
+        </nav>
         {description}
         <Select
           className={`${styles.select}`}
@@ -223,7 +227,6 @@ class SelectMany extends React.PureComponent {
           distance={1}
           onClick={this.handleClick}
         />
-        {buttonCreate}
       </div>
     );
     /* eslint-disable jsx-a11y/label-has-for */
