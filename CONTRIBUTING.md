@@ -45,7 +45,7 @@ git clone git@github.com:strapi/strapi.git
 ```
 
 #### 3. ⏳ Installation
- 
+
 Go to the root of the repository.
 ```bash
 cd strapi
