@@ -37,7 +37,6 @@ module.exports = async function() {
       }
 
       this.middleware[middleware].loaded = true;
-      console.log('middleware:' + middleware + ':loaded');
       this.emit('middleware:' + middleware + ':loaded');
       // Remove listeners.
       this.removeAllListeners('middleware:' + middleware + ':loaded');
