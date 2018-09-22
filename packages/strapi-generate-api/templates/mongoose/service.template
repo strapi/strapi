@@ -26,9 +26,14 @@ module.exports = {
     const populate = <%= globalID %>.associations
       .filter(ast => ast.autoPopulate)
       .reduce((acc, ast) => {
-        const from = ast.plugin ? `${ast.plugin}_${ast.model}` : ast.collection ? ast.collection : ast.model;
+        // Strapi Model
+        const model = ast.plugin
+          ? strapi.plugins[ast.plugin].models[ast.collection || ast.model]
+          : strapi.models[ast.collection || ast.model];
+
+        const from = model.collectionName;
         const as = ast.alias;
-        const localField = !ast.dominant ? '_id' : ast.via === <%= globalID %>.collectionName || ast.via === 'related' ? '_id' : ast.alias;
+        const localField = ast.dominant ? '_id' : ast.via === <%= globalID %>.collectionName || ast.via === 'related' ? '_id' : ast.alias;
         const foreignField = ast.filter ? `${ast.via}.ref` :
           ast.dominant ?
             (ast.via === <%= globalID %>.collectionName ? ast.via : '_id') :
