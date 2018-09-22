@@ -38,7 +38,6 @@ module.exports = {
   getPK: function (collectionIdentity, collection, models) {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
-
       try {
         const GraphQLFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
 
@@ -464,7 +463,7 @@ module.exports = {
     }
 
     const convertor = strapi.hook[connector].load().getQueryParams;
-    const _utils = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + connector, 'lib', 'utils'));
+    const _utils = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-hook-' + connector, 'lib', 'utils'));
     const utils = _utils();
     const convertParams = {
       where: {},
