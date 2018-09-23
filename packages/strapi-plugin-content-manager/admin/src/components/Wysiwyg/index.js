@@ -173,9 +173,7 @@ class Wysiwyg extends React.Component {
     if (selectedText !== '') {
       return this.setState(
         {
-          // Move the cursor to the end (this line forces the cursor to be at the end of the content)
-          // It may go at the end of the last block
-          editorState: EditorState.moveFocusToEnd(newEditorState),
+          editorState: newEditorState,
         },
         () => {
           this.focus();
@@ -309,7 +307,14 @@ class Wysiwyg extends React.Component {
     const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = this.createNewEditorState(newContentState, text);
 
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+    return this.setState(
+      {
+        editorState: newEditorState,
+      },
+      () => {
+        this.focus();
+      },
+    );
   };
 
   /**

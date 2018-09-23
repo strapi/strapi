@@ -331,7 +331,7 @@ module.exports.app = async function() {
     `${this.config.url}/${get(this.config.currentEnvironment.server, 'admin.path', 'admin')}`;
 
   // proxy settings
-  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy' || {});
+  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy', {});
 
   // check if SSL enabled and construct proxy url
   function getProxyUrl(ssl, url) {
@@ -382,12 +382,37 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
   }
 };
 
+/**
+ * Allow dynamic config values through
+ * the native ES6 template string function.
+ */
+const regex = /\$\{[^()]*\}/g;
+const excludeConfigPaths = ['info.scripts'];
+const templateConfigurations = function (obj, configPath = '') {
+  // Allow values which looks like such as
+  // an ES6 literal string without parenthesis inside (aka function call).
+  // Exclude config with conflicting syntax (e.g. npm scripts).
+  return Object.keys(obj).reduce((acc, key) => {
+    if (isPlainObject(obj[key]) && !isString(obj[key])) {
+      acc[key] = templateConfigurations(obj[key], `${configPath}.${key}`);
+    } else if (isString(obj[key])
+      && !excludeConfigPaths.includes(configPath.substr(1))
+      && obj[key].match(regex) !== null) {
+      acc[key] = eval('`' + obj[key] + '`'); // eslint-disable-line prefer-template
+    } else {
+      acc[key] = obj[key];
+    }
+
+    return acc;
+  }, {});
+};
+    
 const isAdminInDevMode = function () {
   try {
     fs.accessSync(path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'index.html'), fs.constants.R_OK | fs.constants.W_OK);
-    
-    return true;
-  } catch (e) {
+
     return false;
+  } catch (e) {
+    return true;
   }
 };
