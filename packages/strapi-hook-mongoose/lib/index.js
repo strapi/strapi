@@ -488,16 +488,16 @@ module.exports = function (strapi) {
           result.value = value;
           break;
         case '_sort':
-          result.key = `sort`;
+          result.key = 'sort';
           result.value = (_.toLower(value) === 'desc') ? '-' : '';
           result.value += key;
           break;
         case '_start':
-          result.key = `start`;
+          result.key = 'start';
           result.value = parseFloat(value);
           break;
         case '_limit':
-          result.key = `limit`;
+          result.key = 'limit';
           result.value = parseFloat(value);
           break;
         case '_contains':
@@ -520,8 +520,27 @@ module.exports = function (strapi) {
       }
 
       return result;
+    },
+
+    postProcessValue: (value) => {
+      if (_.isArray(value)) {
+        return value.map(valueToId);
+      }
+      return valueToId(value);
     }
   }, relations);
 
   return hook;
+};
+
+const valueToId = value => {
+  return isMongoId(value)
+    ? mongoose.Types.ObjectId(value)
+    : value;
+};
+
+const isMongoId = (value) => {
+  const hexadecimal = /^[0-9A-F]+$/i;
+
+  return hexadecimal.test(value) && value.length === 24;
 };
