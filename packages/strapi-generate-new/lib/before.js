@@ -260,7 +260,7 @@ module.exports = (scope, cb) => {
             } catch(err) {
               shell.rm('-r', scope.tmpPath);
               console.log(err);
-              cb.success();
+              cb.error();
             }
           });
       });

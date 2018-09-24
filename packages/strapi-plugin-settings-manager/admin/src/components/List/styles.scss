@@ -113,14 +113,16 @@ button {
   margin-left: 1rem;
 }
 
-.flexed {
+.flexed,
+.label {
   display: flex;
 }
 
 .label {
+  align-items: center;
+  line-height: 1;
   width: 15rem;
   height: 5.2rem;
-  line-height: 5.2rem;
   margin-left: 5rem;
   color: #333740;
   font-weight: 600;
