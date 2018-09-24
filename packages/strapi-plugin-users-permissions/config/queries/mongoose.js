@@ -1,76 +1,159 @@
 const _ = require('lodash');
 
-module.exports = {
-  find: async function (params = {}) {
-    let collectionName = this.collectionName;
-    if (this.collectionName.split('_')) {
-      collectionName = this.collectionName.split('_')[this.collectionName.split('_').length - 1];
-    }
+const buildTempFieldPath = field => {
+  return `__${field}`;
+};
 
-    const populate = this.associations
-      .filter(ast => ast.autoPopulate)
-      .reduce((acc, ast) => {
-        const from = ast.plugin ? `${ast.plugin}_${ast.model}` : ast.collection ? ast.collection : ast.model;
-        const as = ast.alias;
-        const localField = !ast.dominant ? '_id' : ast.via === collectionName || ast.via === 'related' ? '_id' : ast.alias;
-        const foreignField = ast.filter ? `${ast.via}.ref` :
-          ast.dominant ?
-            (ast.via === collectionName ? ast.via : '_id') :
-            (ast.via === collectionName ? '_id' : ast.via);
+const restoreRealFieldPath = (field, prefix) => {
+  return `${prefix}${field}`;
+};
 
+export const generateLookupStage = (
+  strapiModel,
+  { whitelistedPopulate = null, prefixPath = '' } = {}
+) => {
+  const result = strapiModel.associations
+    .filter(ast => {
+      if (whitelistedPopulate) {
+        return _.includes(whitelistedPopulate, ast.alias);
+      }
+      return ast.autoPopulate;
+    })
+    .reduce((acc, ast) => {
+      const model = ast.plugin
+        ? strapi.plugins[ast.plugin].models[ast.collection || ast.model]
+        : strapi.models[ast.collection || ast.model];
+
+      const from = model.collectionName;
+      const isDominantAssociation = ast.dominant || !!ast.model;
+
+      const _localField = !isDominantAssociation
+        ? '_id'
+        : ast.via === strapiModel.collectionName || ast.via === 'related'
+          ? '_id'
+          : ast.alias;
+
+      const localField = `${prefixPath}${_localField}`;
+
+      const foreignField = ast.filter
+        ? `${ast.via}.ref`
+        : isDominantAssociation
+          ? ast.via === strapiModel.collectionName
+            ? ast.via
+            : '_id'
+          : ast.via === strapiModel.collectionName
+            ? '_id'
+            : ast.via;
+
+      // Add the juncture like the `.populate()` function
+      const asTempPath = buildTempFieldPath(ast.alias, prefixPath);
+      const asRealPath = restoreRealFieldPath(ast.alias, prefixPath);
+      acc.push({
+        $lookup: {
+          from,
+          localField,
+          foreignField,
+          as: asTempPath,
+        },
+      });
+
+      // Unwind the relation's result if only one is expected
+      if (ast.type === 'model') {
         acc.push({
-          $lookup: {
-            from,
-            localField,
-            foreignField,
-            as,
-          }
+          $unwind: {
+            path: `$${asTempPath}`,
+            preserveNullAndEmptyArrays: true,
+          },
         });
+      }
 
-        if (ast.type === 'model') {
+      // Preserve relation field if it is empty
+      acc.push({
+        $addFields: {
+          [asRealPath]: {
+            $ifNull: [`$${asTempPath}`, null],
+          },
+        },
+      });
+
+      // Remove temp field
+      acc.push({
+        $project: {
+          [asTempPath]: 0,
+        },
+      });
+
+      return acc;
+    }, []);
+
+  return result;
+};
+
+export const generateMatchStage = (
+  strapiModel,
+  filters,
+  { prefixPath = '' } = {}
+) => {
+  const result = _.chain(filters)
+    .get('relations')
+    .reduce((acc, relationFilters, relationName) => {
+      const association = strapiModel.associations.find(
+        a => a.alias === relationName
+      );
+
+      // Ignore association if it's not been found
+      if (!association) {
+        return acc;
+      }
+
+      const model = association.plugin
+        ? strapi.plugins[association.plugin].models[
+            association.collection || association.model
+          ]
+        : strapi.models[association.collection || association.model];
+
+      _.forEach(relationFilters, (value, key) => {
+        if (key !== 'relations') {
           acc.push({
-            $unwind: {
-              path: `$${ast.alias}`,
-              preserveNullAndEmptyArrays: true
-            }
+            $match: { [`${prefixPath}${relationName}.${key}`]: value },
           });
-        }
-
-        if (params.relations) {
-          Object.keys(params.relations).forEach(
-            (relationName) => {
-              if (ast.alias === relationName) {
-                const association = this.associations.find(a => a.alias === relationName);
-                if (association) {
-                  const relation = params.relations[relationName];
-
-                  Object.keys(relation).forEach(
-                    (filter) => {
-                      acc.push({
-                        $match: { [`${relationName}.${filter}`]: relation[filter] }
-                      });
-                    }
-                  );
-                }
-              }
-            }
+        } else {
+          const nextPrefixedPath = `${prefixPath}${relationName}.`;
+          acc.push(
+            ...generateLookupStage(model, {
+              whitelistedPopulate: _.keys(value),
+              prefixPath: nextPrefixedPath,
+            }),
+            ...generateMatchStage(model, relationFilters, {
+              prefixPath: nextPrefixedPath,
+            })
           );
         }
+      });
+      return acc;
+    }, [])
+    .value();
 
-        return acc;
-      }, []);
+  return result;
+};
 
-    const result = this
-      .aggregate([
-        {
-          $match: params.where ? params.where : {}
-        },
-        ...populate,
-      ]);
+module.exports = {
+  find: async function (filters = {}, populate) {
+    // Generate stages.
+    const populateStage = generateLookupStage(this, { whitelistedPopulate: populate });
+    const matchStage = generateMatchStage(this, filters);
 
-    if (params.start) result.skip(params.start);
-    if (params.limit) result.limit(params.limit);
-    if (params.sort) result.sort(params.sort);
+    const result = this.aggregate([
+      {
+        $match: filters.where || {}, // Direct relation filter
+      },
+      ...populateStage, // Nested-Population
+      ...matchStage, // Nested relation filter
+    ]);
+
+    if (_.has(filters, 'start')) result.skip(filters.start);
+    if (_.has(filters, 'limit')) result.limit(filters.limit);
+    if (_.has(filters, 'sort')) result.sort(filters.sort);
 
     return result;
   },
