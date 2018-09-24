@@ -504,22 +504,6 @@ module.exports = {
     };
   },
 
-<<<<<<< HEAD
-    _.forEach(params, (value, key)  => {
-      let result;
-      let formattedValue;
-      let modelAttributes = models[model]['attributes'];
-      let fieldType;
-      // Get the field type to later check if it's a string before number conversion
-      if (modelAttributes[key]) {
-        fieldType = modelAttributes[key]['type'];
-      } else {
-        // Remove the filter keyword at the end
-        let splitKey = key.split('_').slice(0,-1);
-        splitKey = splitKey.join('_');
-        if (modelAttributes[splitKey]) {
-          fieldType = modelAttributes[splitKey]['type'];
-=======
   splitPrimitiveAndRelationValues: _query => {
     const result = _.reduce(
       _query,
@@ -530,7 +514,6 @@ module.exports = {
           acc.where[key] = value;
         } else {
           _.set(acc.relations, this.injectRelationInKey(key), value);
->>>>>>> 93889db... Split convertParams to multiple stage steps
         }
         return acc;
       },

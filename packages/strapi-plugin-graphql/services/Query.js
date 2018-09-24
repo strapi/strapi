@@ -25,6 +25,23 @@ module.exports = {
     }, {});
   },
 
+  convertToQuery: function(params) {
+    const result = {};
+
+    _.forEach(params, (value, key) => {
+      if (_.isPlainObject(value)) {
+        const flatObject = this.convertToQuery(value);
+        _.forEach (flatObject, (_value, _key) => {
+          result[key + '.' + _key] = _value;
+        });
+      } else {
+        result[key] = value;
+      }
+    });
+
+    return result;
+  },
+
   /**
    * Security to avoid infinite limit.
    *
@@ -178,13 +195,15 @@ module.exports = {
 
       // Plural.
       return async (ctx, next) => {
-        ctx.params = this.amountLimiting(ctx.params);
-        ctx.query = Object.assign(
-          this.convertToParams(_.omit(ctx.params, 'where')),
-          ctx.params.where,
+        const queryOpts = {};
+        queryOpts.params = this.amountLimiting(ctx.params);
+        queryOpts.query = Object.assign(
+          {},
+          this.convertToParams(_.omit(queryOpts.params, 'where')),
+          this.convertToQuery(queryOpts.params.where)
         );
 
-        return controller(ctx, next);
+        return controller(Object.assign({}, ctx, queryOpts, { send: ctx.send }), next);
       };
     })();
 
