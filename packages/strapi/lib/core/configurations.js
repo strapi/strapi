@@ -331,7 +331,7 @@ module.exports.app = async function() {
     `${this.config.url}/${get(this.config.currentEnvironment.server, 'admin.path', 'admin')}`;
 
   // proxy settings
-  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy' || {});
+  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy', {});
 
   // check if SSL enabled and construct proxy url
   function getProxyUrl(ssl, url) {
@@ -385,9 +385,9 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
 const isAdminInDevMode = function () {
   try {
     fs.accessSync(path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'index.html'), fs.constants.R_OK | fs.constants.W_OK);
-    
-    return true;
-  } catch (e) {
+
     return false;
+  } catch (e) {
+    return true;
   }
 };

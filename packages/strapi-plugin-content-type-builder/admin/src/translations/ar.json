@@ -1,7 +1,6 @@
 {
   "plugin.description.short": "قم بتجميع هيكل البيانات الخاص بـ API الخاص بك.",
-  "plugin.description.long":
-    "قم بتجميع هيكل البيانات الخاص بـ API الخاص بك. إنشاء حقول وعلاقات جديدة في دقيقة واحدة فقط. يتم إنشاء الملفات وتحديثها تلقائيًا في مشروعك.",
+  "plugin.description.long": "قم بتجميع هيكل البيانات الخاص بـ API الخاص بك. إنشاء حقول وعلاقات جديدة في دقيقة واحدة فقط. يتم إنشاء الملفات وتحديثها تلقائيًا في مشروعك.",
   "attribute.string": "سلسلة نصية",
   "attribute.text": "نص",
   "attribute.boolean": "منطقي",
@@ -16,22 +15,17 @@
   "attribute.relation": "علاقة",
   "attribute.enumeration": "تعداد",
   "attribute.WYSIWYG": "نص (WYSIWYG)",
-
   "contentType.temporaryDisplay": "(غير محفوظ)",
   "from": "من",
   "home.contentTypeBuilder.name": "أنواع المحتوى",
   "home.contentTypeBuilder.description": "إنشاء وتحديث أنواع المحتوى الخاصة بك.",
   "home.emptyContentType.title": "لا يوجد أنواع محتويات متاحة",
-  "home.emptyContentType.description":
-    "قم بإنشاء نوع المحتوى الأول لتتمكن من استرداد البيانات من API الخاص بك.",
-
+  "home.emptyContentType.description": "قم بإنشاء نوع المحتوى الأول لتتمكن من استرداد البيانات من API الخاص بك.",
   "home.emptyAttributes.title": "لا توجد حقول بعد",
   "home.emptyAttributes.description": "أضف حقلك الأول إلى نوع المحتوى الجديد",
-
   "button.contentType.create": "إنشاء نوع المحتوى",
   "button.contentType.add": "أضف نوع المحتوى",
   "button.attributes.add": "أضف حقل جديد",
-
   "error.validation.required": "قيمة هذا الحقل مطلوبة.",
   "error.validation.regex": "هذه القيمة لا تطابق regex.",
   "error.validation.max": "هذه القيمة عالية جدًا.",
@@ -44,7 +38,6 @@
   "error.attribute.sameKeyAndName": "لا تتطابق",
   "error.validation.minSupMax": "لا يمكن أن تكون متفوقة",
   "error.attribute.forbidden": "اسم السمة هذا محجوز",
-
   "form.attribute.item.textarea.name": "الأسم",
   "form.attribute.item.number.name": "الأسم",
   "form.attribute.item.date.name": "الأسم",
@@ -53,10 +46,14 @@
   "form.attribute.item.json.name": "الأسم",
   "form.attribute.item.boolean.name": "الأسم",
   "form.attribute.item.string.name": "الأسم",
+  "form.attribute.item.enumeration.name": "أسم",
+  "form.attribute.item.enumeration.rules": "قيم ( مقسمة بإستخدام الفاصلة )",
+  "form.attribute.item.enumeration.graphql": "تجاوز الاسم لـ GraphQL",
+  "form.attribute.item.enumeration.graphql.description": "يسمح لك بتجاوز الاسم الذي تم إنشاؤه افتراضيًا لـ GraphQL",
+  "form.attribute.item.enumeration.placeholder": "مثال: صباح,قمر,احداث",
   "form.attribute.item.appearance.name": "المظهر خارجي",
   "form.attribute.item.appearance.label": "عرض كسلسلة WYSIWYG",
-  "form.attribute.item.appearance.description":
-    "خلاف ذلك ، ستكون القيمة قابلة للتحرير من خلال حقل textarea الأساسي",
+  "form.attribute.item.appearance.description": "خلاف ذلك ، ستكون القيمة قابلة للتحرير من خلال حقل textarea الأساسي",
   "form.attribute.item.settings.name": "الإعدادات",
   "form.attribute.item.requiredField": "الحقل مطلوب",
   "form.attribute.item.uniqueField": "حقل فريد",
@@ -64,25 +61,20 @@
   "form.attribute.item.minimumLength": "أدنى طول",
   "form.attribute.item.maximumLength": "أقصى طول",
   "form.attribute.item.maximum": "اقصى قيمة",
-  "form.attribute.item.requiredField.description":
-    "لن تتمكن من إنشاء إدخال إذا كان هذا الحقل فارغًا",
-  "form.attribute.item.uniqueField.description":
-    "لن تتمكن من إنشاء إدخال إذا كان هناك إدخال حالي بمحتوى متطابق",
+  "form.attribute.item.requiredField.description": "لن تتمكن من إنشاء إدخال إذا كان هذا الحقل فارغًا",
+  "form.attribute.item.uniqueField.description": "لن تتمكن من إنشاء إدخال إذا كان هناك إدخال حالي بمحتوى متطابق",
   "form.attribute.item.defineRelation.fieldName": "اسم الحقل",
   "form.attribute.item.customColumnName": "أسماء الأعمدة المخصصة",
-  "form.attribute.item.customColumnName.description":
-    "يفيد ذلك في إعادة تسمية أسماء أعمدة قاعدة البيانات بتنسيق أكثر شمولاً لاستجابات واجهة برمجة التطبيقات ( API )",
+  "form.attribute.item.customColumnName.description": "يفيد ذلك في إعادة تسمية أسماء أعمدة قاعدة البيانات بتنسيق أكثر شمولاً لاستجابات واجهة برمجة التطبيقات ( API )",
   "form.attribute.item.number.type": "تنسيق الرقم",
   "form.attribute.item.number.type.integer": "عدد صحيح (مثال: 10)",
   "form.attribute.item.number.type.float": "عدد عائم (مثال: 3.33333333)",
   "form.attribute.item.number.type.decimal": "عدد عشري (مثال: 2.22)",
   "form.attribute.settings.default": "القيمة الأفتراضية",
   "form.attribute.settings.default.checkboxLabel": "جعلة true (صحيح)",
-
   "form.button.cancel": "الغاء",
   "form.button.continue": "استمر",
   "form.button.save": "حفظ",
-
   "form.contentType.item.connections": "الأتصال",
   "form.contentType.item.name": "الأسم",
   "form.contentType.item.name.description": "يجب أن تكون أسماء نوع المحتوى مفردة: {link}",
@@ -90,9 +82,7 @@
   "form.contentType.item.description": "الوصف",
   "form.contentType.item.description.placeholder": "اكتب وصفك الصغير هنا...",
   "form.contentType.item.collectionName": "اسم المجموعة ( collection )",
-  "form.contentType.item.collectionName.inputDescription":
-    "من المفيد أن يختلف اسم نوع المحتوى واسم الجدول الخاص بك",
-
+  "form.contentType.item.collectionName.inputDescription": "من المفيد أن يختلف اسم نوع المحتوى واسم الجدول الخاص بك",
   "menu.section.contentTypeBuilder.name.plural": "أنواع المحتوى",
   "menu.section.contentTypeBuilder.name.singular": "نوع المحتوى",
   "menu.section.documentation.name": "التوثيق",
@@ -100,28 +90,22 @@
   "menu.section.documentation.guideLink": "الإرشاد.",
   "menu.section.documentation.tutorial": "تحقق من",
   "menu.section.documentation.tutorialLink": "الفيديو التعليمي.",
-
-  "modelPage.contentHeader.emptyDescription.description":
-    "لا يوجد وصف لنوع المحتوى هذا",
+  "modelPage.contentHeader.emptyDescription.description": "لا يوجد وصف لنوع المحتوى هذا",
   "modelPage.contentType.list.title.plural": "حقول",
   "modelPage.contentType.list.title.singular": "حقل",
   "modelPage.contentType.list.title.including": "من ضمنها",
   "modelPage.contentType.list.relationShipTitle.plural": "العلاقات",
   "modelPage.contentType.list.relationShipTitle.singular": "العلاقة",
   "modelPage.attribute.relationWith": "علاقة مع",
-
   "noTableWarning.description": "لا تنسَ إنشاء الجدول `{modelName}` في قاعدة البيانات الخاصة بك",
   "noTableWarning.infos": "مزيد من المعلومات",
-
   "notification.error.message": "حدث خطأ",
-  "notification.info.contentType.creating.notSaved":
-    "يرجى حفظ نوع المحتوى الحالي قبل إنشاء نوع جديد",
+  "notification.info.contentType.creating.notSaved": "يرجى حفظ نوع المحتوى الحالي قبل إنشاء نوع جديد",
+  "notification.info.disable": "هذا الحقل غير قابل للتحرير في الوقت الحالي...😮",
   "notification.info.optimized": "تم تحسين هذا المكون الإضافي باستخدام التخزين المحلي الخاص بك",
   "notification.success.message.contentType.edit": "تم تحديث نوع المحتوى الخاص بك",
   "notification.success.message.contentType.create": "تم إنشاء نوع المحتوى الخاص بك",
   "notification.success.contentTypeDeleted": "تم حذف نوع المحتوى",
-  "notification.info.enumeration": "هذا الحقل غير قابل للتحرير في الوقت الحالي ... 😮",
-
   "popUpForm.attributes.string.description": "عناوين, اسماء, فقرات, قائمة الاسماء",
   "popUpForm.attributes.text.description": "اوصاف, فقرات نصية, مقالات ",
   "popUpForm.attributes.boolean.description": "نعم او لا, 1 او 0, true او false",
@@ -132,7 +116,7 @@
   "popUpForm.attributes.relation.description": "يشير إلى نوع المحتوى",
   "popUpForm.attributes.email.description": "البريد الإلكتروني للمستخدم...",
   "popUpForm.attributes.password.description": "كلمة مرور المستخدم...",
-
+  "popUpForm.attributes.enumeration.description": "قائمة من الخيارات",
   "popUpForm.attributes.string.name": "سلسلة نصية",
   "popUpForm.attributes.text.name": "نص",
   "popUpForm.attributes.boolean.name": "قيمة منطقية",
@@ -143,35 +127,32 @@
   "popUpForm.attributes.relation.name": "علاقة",
   "popUpForm.attributes.email.name": "بريد الأكتروني",
   "popUpForm.attributes.password.name": "كلمة السر",
+  "popUpForm.attributes.enumeration.name": "تعداد",
   "popUpForm.create": "اضافة جديد",
   "popUpForm.edit": "تعديل",
   "popUpForm.field": "حقل",
   "popUpForm.create.contentType.header.title": "إضافة نوع محتوى جديد",
   "popUpForm.choose.attributes.header.title": "اضافة حقل جديد",
   "popUpForm.edit.contentType.header.title": "تحرير نوع المحتوى",
-
   "popUpForm.navContainer.relation": "تعريف العلاقة",
   "popUpForm.navContainer.base": "إعدادات القاعدة",
   "popUpForm.navContainer.advanced": "إعدادات متقدمة",
-
   "popUpRelation.title": "علاقة",
-
   "popUpWarning.button.cancel": "الغاء",
   "popUpWarning.button.confirm": "تأكيد",
   "popUpWarning.title": "الرجاء التأكيد",
-  "popUpWarning.bodyMessage.contentType.delete":
-    "هل أنت متأكد من أنك تريد حذف نوع المحتوى هذا؟",
+  "popUpWarning.bodyMessage.contentType.delete": "هل أنت متأكد من أنك تريد حذف نوع المحتوى هذا؟",
   "popUpWarning.bodyMessage.attribute.delete": "هل أنت متأكد من أنك تريد حذف هذا الحقل؟",
-
   "table.contentType.title.plural": "أنواع المحتوى متاحة",
   "table.contentType.title.singular": "نوع المحتوى متاح",
   "table.contentType.head.name": "اسم",
   "table.contentType.head.description": "وصف",
   "table.contentType.head.fields": "حقول",
-
-  "relation.oneToOne": "يملك واحد",
+  "relation.oneWay": "يمتلك واحد",
+  "relation.oneToOne": "يتشارك بواحد",
   "relation.oneToMany": "ينتمي للكثير",
   "relation.manyToOne": "يملك الكثير",
   "relation.manyToMany": "يملك وينتم للكثير",
-  "relation.attributeName.placeholder": "مثال: المؤلف, الفئة, الوسم"
+  "relation.attributeName.placeholder": "مثال: المؤلف, الفئة, الوسم",
+  "notification.info.enumeration": "هذا الحقل غير قابل للتحرير في الوقت الحالي ... 😮"
 }
