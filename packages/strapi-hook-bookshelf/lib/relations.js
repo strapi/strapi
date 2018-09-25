@@ -302,7 +302,7 @@ module.exports = {
   },
 
   addRelation: async function (params) {
-    const association = this.associations.find(x => x.via === params.foreignKey);
+    const association = this.associations.find(x => x.via === params.foreignKey && _.get(params.values, x.alias, null));
 
     if (!association) {
       // Resolve silently.
@@ -325,7 +325,7 @@ module.exports = {
   },
 
   removeRelation: async function (params) {
-    const association = this.associations.find(x => x.via === params.foreignKey);
+    const association = this.associations.find(x => x.via === params.foreignKey && _.get(params.values, x.alias, null));
 
     if (!association) {
       // Resolve silently.
