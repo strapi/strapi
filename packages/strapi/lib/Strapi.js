@@ -155,7 +155,7 @@ class Strapi extends EventEmitter {
       const key = conn.remoteAddress + ':' + conn.remotePort;
       connections[key] = conn;
 
-      conn.on('close', function() {
+      conn.on('close', function () {
         delete connections[key];
       });
     });
@@ -234,12 +234,13 @@ class Strapi extends EventEmitter {
 
   reload() {
     const state = {
-      shouldReload: true,
+      shouldReload: 0
     };
 
-    const reload = function() {
-      if (state.shouldReload === false) {
+    const reload = function () {
+      if (state.shouldReload > 0) {
         // Reset the reloading state
+        state.shouldReload -= 1;
         reload.isReloading = false;
         return;
       }
@@ -258,7 +259,9 @@ class Strapi extends EventEmitter {
       enumerable: true,
       set: value => {
         // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
-        state.shouldReload = !(state.isWatching === false && value === true);
+        if (state.isWatching === false && value === true) {
+          state.shouldReload += 1;
+        }
         state.isWatching = value;
       },
       get: () => {

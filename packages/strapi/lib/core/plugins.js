@@ -57,26 +57,26 @@ module.exports = async function() {
     this.config.environment !== 'test'
       ? path.resolve(this.config.appPath, 'admin', 'admin', 'src', 'config', 'plugins.json')
       : path.resolve(
-          this.config.appPath,
-          'packages',
-          'strapi-admin',
-          'admin',
-          'src',
-          'config',
-          'plugins.json',
-        );
+        this.config.appPath,
+        'packages',
+        'strapi-admin',
+        'admin',
+        'src',
+        'config',
+        'plugins.json',
+      );
   const buildPath =
     this.config.environment !== 'test'
       ? path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'config', 'plugins.json')
       : path.resolve(
-          this.config.appPath,
-          'packages',
-          'strapi-admin',
-          'admin',
-          'build',
-          'config',
-          'plugins.json',
-        );
+        this.config.appPath,
+        'packages',
+        'strapi-admin',
+        'admin',
+        'build',
+        'config',
+        'plugins.json',
+      );
 
   const isAdmin = await fs.pathExists(path.resolve(this.config.appPath, 'admin', 'admin'));
   if (!isAdmin) return;
@@ -100,9 +100,14 @@ module.exports = async function() {
 
   // Create `plugins.json` file.
   // Don't inject the plugins without an Admin
-  const existingPlugins = await Object.keys(this.plugins).filter(plugin =>
-    fs.pathExists(path.resolve(this.config.appPath, 'plugins', plugin, 'admin', 'src', 'containers', 'App')),
-  );
+  const existingPlugins = Object.keys(this.plugins).filter(plugin => {
+    try {
+      fs.accessSync(path.resolve(this.config.appPath, 'plugins', plugin, 'admin', 'src', 'containers', 'App'));
+      return true;
+    } catch(err) {
+      return false;
+    }
+  });
 
   const existingPluginsInfo = existingPlugins.map(id => ({
     id,
