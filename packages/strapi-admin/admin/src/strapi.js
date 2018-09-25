@@ -15,7 +15,7 @@ import { history, store } from './createStore';
 import { translationMessages, languages } from './i18n';
 import './public-path';
 
-const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email' || auth.getToken();
+const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email' || auth.getToken() !== null;
 /**
  * Register a plugin
  *
