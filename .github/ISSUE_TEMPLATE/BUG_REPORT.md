@@ -6,8 +6,8 @@ about: Create a report to help us improve 🤔.
 <!-- ⚠️ If you do not respect this template your issue will be closed. -->
 
 <!-- ⚠️ Before writing your issue make sure you are using:-->
-<!-- Node 9.x.x -->
-<!-- npm 5.x.x -->
+<!-- Node 10.x.x -->
+<!-- npm 6.x.x -->
 <!-- The latest version of Strapi. -->
 
 **Informations**

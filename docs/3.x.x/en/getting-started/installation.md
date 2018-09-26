@@ -5,8 +5,8 @@ Installation is very easy and only takes a few seconds.
 ## Requirements
 
 Please make sure your computer/server meets the following requirements:
- - [Node.js](https://nodejs.org) >= 9: Node.js is a server platform which runs JavaScript. Installation guide [here](https://nodejs.org/en/download/).
- - [MongoDB](https://www.mongodb.com/) >= 2.6: MongoDB is a powerful document store. Installation guide [here](https://www.mongodb.com/download-center?j#community).
+ - [Node.js](https://nodejs.org) >= 10.x: Node.js is a server platform which runs JavaScript. Installation guide [here](https://nodejs.org/en/download/).
+ - [MongoDB](https://www.mongodb.com/) >= 6.x: MongoDB is a powerful document store. Installation guide [here](https://www.mongodb.com/download-center?j#community).
 
 ## Setup
 
