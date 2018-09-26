@@ -10,12 +10,12 @@ import {
   updatePlugin,
 } from 'containers/App/actions';
 import { showNotification } from 'containers/NotificationProvider/actions';
-import auth from 'utils/auth';
+// import auth from 'utils/auth';
 import { history, store } from './createStore';
 import { translationMessages, languages } from './i18n';
 import './public-path';
 
-const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email' || auth.getToken() !== null;
+const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email';
 /**
  * Register a plugin
  *
@@ -26,7 +26,7 @@ const registerPlugin = (plugin) => {
   merge(translationMessages, plugin.translationMessages);
 
   plugin.leftMenuSections = plugin.leftMenuSections || [];
-  const shouldAllowRegister = isPluginAllowedToRegister(plugin) !== null;
+  const shouldAllowRegister = isPluginAllowedToRegister(plugin);
 
   switch (true) {
     // Execute bootstrap function and check if plugin can be rendered

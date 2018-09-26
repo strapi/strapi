@@ -21,6 +21,7 @@ import { bindActionCreators, compose } from 'redux';
 import { disableGlobalOverlayBlocker, enableGlobalOverlayBlocker } from 'actions/overlayBlocker';
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 import {
+  makeSelectAppPlugins,
   makeSelectBlockApp,
   makeSelectIsAppLoading,
   makeSelectShowGlobalAppBlocker,
@@ -146,6 +147,12 @@ export class AdminPage extends React.Component {
     }
   };
 
+  hasUserPluginInstalled = () => {
+    const { appPlugins } = this.props;
+
+    return appPlugins.indexOf('users-permissions') !== -1;
+  }
+
   hasUserPluginLoaded = props =>
     typeof get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== 'undefined';
 
@@ -156,16 +163,12 @@ export class AdminPage extends React.Component {
 
   shouldDisplayLogout = () => auth.getToken() && this.props.hasUserPlugin && this.isUrlProtected(this.props);
 
-  shouldCheckTokenValidity = () => {
-    return this.hasUserPlugin() && auth.getToken() !== null;
-  }
-
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
   showLoading = () => {
     const { isAppLoading, adminPage: { isLoading } } = this.props;
 
-    return isAppLoading || isLoading;
+    return isAppLoading || isLoading || (this.hasUserPluginInstalled() && !this.hasUserPluginLoaded(this.props));
   }
 
   retrievePlugins = () => {
@@ -188,6 +191,8 @@ export class AdminPage extends React.Component {
     const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
+
+    console.log('new build');
 
     if (this.showLoading()) {
       return <LoadingIndicatorPage />;
@@ -259,7 +264,7 @@ AdminPage.propTypes = {
 
 const mapStateToProps = createStructuredSelector({
   adminPage: selectAdminPage(),
-  // appPlugins: makeSelectAppPlugins(),
+  appPlugins: makeSelectAppPlugins(),
   blockApp: makeSelectBlockApp(),
   hasUserPlugin: selectHasUserPlugin(),
   isAppLoading: makeSelectIsAppLoading(),
