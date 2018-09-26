@@ -27,6 +27,7 @@
   "scripts": {
     "clean": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json",
     "clean:all": "npm run removesymlinkdependencies && rm -rf package-lock.json && rm -rf packages/*/package-lock.json && rm -rf packages/*/node_modules",
+    "destroy": "bash destroy.sh",
     "doc": "node ./scripts/documentation.js",
     "release": "npm run clean:all && npm install && npm run createsymlinkdependencies && lerna exec --concurrency 1 -- npm install && npm run removesymlinkdependencies && node ./scripts/publish.js $TAG",
     "createsymlinkdependencies": "node ./scripts/createSymlinkDependencies.js",
