@@ -20,6 +20,7 @@ import './public-path';
 import './strapi';
 
 const dispatch = store.dispatch;
+// console.log(process.env);
 
 // Don't inject plugins in development mode.
 if (window.location.port !== '4000') {

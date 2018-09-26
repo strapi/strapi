@@ -36,7 +36,7 @@ const makeSelectIsAppLoading = () => createSelector(
 
 const makeSelectAppPlugins = () => createSelector(
   selectApp(),
-  appState => appState.get('appPlugins'),
+  appState => appState.get('appPlugins').toJS(),
 );
 
 export {

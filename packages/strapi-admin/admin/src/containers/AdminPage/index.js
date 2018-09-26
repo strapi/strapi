@@ -192,8 +192,6 @@ export class AdminPage extends React.Component {
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
 
-    console.log('new build');
-
     if (this.showLoading()) {
       return <LoadingIndicatorPage />;
     }
@@ -245,16 +243,20 @@ AdminPage.contextTypes = {
 
 AdminPage.defaultProps = {
   adminPage: {},
+  appPlugins: [],
   hasUserPlugin: true,
+  isAppLoading: true,
 };
 
 AdminPage.propTypes = {
   adminPage: PropTypes.object,
+  appPlugins: PropTypes.array,
   blockApp: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
+  isAppLoading: PropTypes.bool,
   location: PropTypes.object.isRequired,
   pluginLoaded: PropTypes.func.isRequired,
   plugins: PropTypes.object.isRequired,
@@ -291,4 +293,3 @@ const withSaga = injectSaga({ key: 'adminPage', saga });
 
 export default compose(withReducer, withSaga, withConnect)(AdminPage);
 
-// export default connect(mapStateToProps, mapDispatchToProps)(AdminPage);
