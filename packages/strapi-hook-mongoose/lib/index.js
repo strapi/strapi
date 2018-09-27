@@ -48,8 +48,8 @@ module.exports = function (strapi) {
      * Initialize the hook
      */
 
-    initialize: cb => {
-      _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-hook-mongoose'}), (connection, connectionName) => {
+    initialize: cb =>
+      _.forEach(_.pickBy(strapi.config.connections, {connector: 'strapi-hook-mongoose'}), async (connection, connectionName) => {
         const instance = new Mongoose();
         const { uri, host, port, username, password, database, srv } = _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
         const uriOptions = uri ? url.parse(uri, true).query : {};
@@ -78,28 +78,21 @@ module.exports = function (strapi) {
 
         options.debug = debug === true || debug === 'true';
 
-        /* FIXME: for now, mongoose doesn't support srv auth except the way including user/pass in URI.
-         * https://github.com/Automattic/mongoose/issues/6881 */
-        instance.connect(uri ||
-          `mongodb${isSrv ? '+srv' : ''}://${username}:${password}@${host}${ !isSrv ? ':' + port : '' }/`,
-           connectOptions
-        );
-
-        for (let key in options) {
-          instance.set(key, options[key]);
+        try {
+          /* FIXME: for now, mongoose doesn't support srv auth except the way including user/pass in URI.
+          * https://github.com/Automattic/mongoose/issues/6881 */
+          await instance.connect(uri ||
+            `mongodb${isSrv ? '+srv' : ''}://${username}:${password}@${host}${ !isSrv ? ':' + port : '' }/`,
+            connectOptions
+          );
+        } catch ({message}) {
+          const errMsg = message.includes(`:${port}`)
+          ? 'Make sure your MongoDB database is running...' : message
+          return cb(errMsg);
         }
 
-        // Handle error
-        instance.connection.on('error', error => {
-          if (error.message.indexOf(`:${port}`)) {
-            return cb('Make sure your MongoDB database is running...');
-          }
+        Object.keys(options, key => instance.set(key, options[key]));
 
-          cb(error);
-        });
-
-        // Handle success
-        instance.connection.on('open', () => {
           const mountModels = (models, target, plugin = false) => {
             if (!target) return;
 
@@ -464,9 +457,7 @@ module.exports = function (strapi) {
           });
 
           cb();
-        });
-      });
-    },
+      }),
 
     getQueryParams: (value, type, key) => {
       const result = {};
