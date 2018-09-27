@@ -632,8 +632,8 @@ class Wysiwyg extends React.Component {
         newEditorState = EditorState.push(newEditorState, newContentState);
         const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 2);
 
-        this.setState({ editorState: EditorState.acceptSelection(newEditorState, updatedSelection) });
         this.sendData(newEditorState);
+        this.setState({ editorState: EditorState.acceptSelection(newEditorState, updatedSelection) });
       })
       .catch(() => {
         this.setState({ editorState: EditorState.undo(this.getEditorState()) });

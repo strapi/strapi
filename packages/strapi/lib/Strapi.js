@@ -155,7 +155,7 @@ class Strapi extends EventEmitter {
       const key = conn.remoteAddress + ':' + conn.remotePort;
       connections[key] = conn;
 
-      conn.on('close', function() {
+      conn.on('close', function () {
         delete connections[key];
       });
     });
@@ -237,7 +237,7 @@ class Strapi extends EventEmitter {
       shouldReload: 0
     };
 
-    const reload = function() {
+    const reload = function () {
       if (state.shouldReload > 0) {
         // Reset the reloading state
         state.shouldReload -= 1;
