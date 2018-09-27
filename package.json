@@ -11,7 +11,6 @@
     "eslint-plugin-babel": "^4.0.0",
     "eslint-plugin-react": "^6.8.0",
     "eslint-plugin-redux-saga": "^0.3.0",
-    "gitbook-cli": "^2.3.2",
     "istanbul": "~0.4.2",
     "jest": "^22.4.3",
     "jest-cli": "^22.4.4",
