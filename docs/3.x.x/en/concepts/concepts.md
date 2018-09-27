@@ -92,7 +92,7 @@ The controllers are defined in each `./api/**/controllers/` folders. Every JavaS
 
 ## Filters
 
-Filters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /user?_limit=30&name=John`).
+Filters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /users?_limit=30&name=John`).
 
 > Please refer to the [filters' guide](../guides/filters.md) for more informations.
 
@@ -146,7 +146,7 @@ In this example, there is a `User` model which contains two attributes `firstnam
 
 ### Where are the models defined?
 
-The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable every where in the project, they contain the ORM model object that they are refer to. By convention, models' names should be Pascal-cased, so that every word in the file (including the first one) is capitalized `User.js`, `User.settings.json`, `LegalEntity.js`, `LegalEntity.settings.json`.
+The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable every where in the project, they contain the ORM model object that they are refer to. By convention, models' names should be written in lowercase.
 
 ### Attributes
 

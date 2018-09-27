@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const exec = require('child_process').execSync;
+const exec = require('child_process').spawnSync;
 const _ = require('lodash');
 
 /**
@@ -53,8 +53,7 @@ module.exports = {
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Installing ${plugin}...`);
-
-      exec(`node "${strapiBin}" install ${plugin} ${port === '4000' ? '--dev' : ''}`);
+      exec('node', [strapiBin, 'install', plugin, (port === '4000') ? '--dev' : '']);
 
       ctx.send({ ok: true });
 
@@ -87,7 +86,7 @@ module.exports = {
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Uninstalling ${plugin}...`);
-      exec(`node "${strapiBin}" uninstall ${plugin}`);
+      exec('node', [strapiBin, 'uninstall', plugin]);
 
       ctx.send({ ok: true });
 

@@ -19,13 +19,12 @@ import templateObject from 'utils/templateObject';
 
 import {
   getDataSucceeded,
-  getLayoutSucceeded,
   setFormErrors,
   setLoader,
   submitSuccess,
   unsetLoader,
 } from './actions';
-import { GET_DATA, GET_LAYOUT, SUBMIT } from './constants';
+import { GET_DATA, SUBMIT } from './constants';
 import {
   makeSelectFileRelations,
   makeSelectIsCreating,
@@ -38,39 +37,14 @@ function* dataGet(action) {
   try {
     const modelName = yield select(makeSelectModelName());
     const params = { source: action.source };
-    const [response, layout] = yield [
+    const [response] = yield [
       call(request, `/content-manager/explorer/${modelName}/${action.id}`, { method: 'GET', params }),
-      call(request, '/content-manager/layout', { method: 'GET', params }),
     ];
     const pluginHeaderTitle = yield call(templateObject, { mainField: action.mainField }, response);
 
-    // Remove the updated_at & created_at fields so it is updated correctly when using Postgres or MySQL db
-    if (response.updated_at) {
-      delete response.created_at;
-      delete response.updated_at;
-    }
-
-    // Remove the updatedAt & createdAt fields so it is updated correctly when using MongoDB
-    if (response.updatedAt) {
-      delete response.createdAt;
-      delete response.updatedAt;
-
-    }
-
     yield put(getDataSucceeded(action.id, response, pluginHeaderTitle.mainField));
-    yield put(getLayoutSucceeded(layout));
   } catch(err) {
     strapi.notification.error('content-manager.error.record.fetch');
-  }
-}
-
-function* layoutGet(action) {
-  try {
-    const params = { source: action.source };
-    const response = yield call(request, '/content-manager/layout', { method: 'GET', params });
-    yield put(getLayoutSucceeded(response));
-  } catch(err) {
-    strapi.notification('notification.error');
   }
 }
 
@@ -82,13 +56,25 @@ export function* submit() {
   const source = yield select(makeSelectSource());
   const schema = yield select(makeSelectSchema());
   let shouldAddTranslationSuffix = false;
+  // Remove the updated_at & created_at fields so it is updated correctly when using Postgres or MySQL db
+  if (record.updated_at) {
+    delete record.created_at;
+    delete record.updated_at;
+  }
+
+  // Remove the updatedAt & createdAt fields so it is updated correctly when using MongoDB
+  if (record.updatedAt) {
+    delete record.createdAt;
+    delete record.updatedAt;
+  }
 
   try {
     // Show button loader
     yield put(setLoader());
     const recordCleaned = Object.keys(record).reduce((acc, current) => {
-      const attrType = source !== 'content-manager' ? get(schema, ['plugins', source, currentModelName, 'fields', current, 'type'], null) : get(schema, [currentModelName, 'fields', current, 'type'], null);
+      const attrType = source !== 'content-manager' ? get(schema, ['models', 'plugins', source, currentModelName, 'fields', current, 'type'], null) : get(schema, ['models', currentModelName, 'fields', current, 'type'], null);
       const cleanedData = attrType === 'json' ? record[current] : cleanData(record[current], 'value', 'id');
+
 
       if (isString(cleanedData) || isNumber(cleanedData)) {
         acc.append(current, cleanedData);
@@ -113,6 +99,11 @@ export function* submit() {
 
       return acc;
     }, new FormData());
+
+    // Helper to visualize FormData
+    // for(var pair of recordCleaned.entries()) {
+    //   console.log(pair[0]+ ', '+ pair[1]);
+    // }
 
     const id = isCreating ? '' : record.id || record._id;
     const params = { source };
@@ -170,7 +161,6 @@ export function* submit() {
 
 function* defaultSaga() {
   const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
-  yield fork(takeLatest, GET_LAYOUT, layoutGet);
   yield fork(takeLatest, SUBMIT, submit);
 
   yield take(LOCATION_CHANGE);

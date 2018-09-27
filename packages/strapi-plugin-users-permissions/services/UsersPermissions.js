@@ -116,7 +116,9 @@ module.exports = {
       }, {}));
 
     const appControllers = Object.keys(strapi.api || {}).reduce((acc, key) => {
-      acc.controllers[key] = generateActions(strapi.api[key].controllers[key]);
+      Object.keys(strapi.api[key].controllers).forEach((controller) => {
+        acc.controllers[controller] = generateActions(strapi.api[key].controllers[controller]);
+      });
 
       return acc;
     }, { controllers: {} });
@@ -203,7 +205,7 @@ module.exports = {
     const databasePermissions = await strapi.query('permission', 'users-permissions').find();
     const actions = databasePermissions
       .map(permission => `${permission.type}.${permission.controller}.${permission.action}`);
-    
+
 
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
@@ -249,13 +251,14 @@ module.exports = {
       const defaultPolicy = (obj, role) => {
         const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isConnect = obj.action === 'connect' && obj.controller === 'auth' && obj.type === 'users-permissions';
-        const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isPassword = obj.action === 'forgotpassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
+        const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
+        const isConfirmation = obj.action === 'emailconfirmation' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isNewPassword = obj.action === 'changepassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
         const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
         const isReload = obj.action === 'autoreload';
-        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect;
+        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect || isConfirmation;
 
         return Object.assign(obj, { enabled, policy: '' });
       };

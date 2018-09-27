@@ -33,7 +33,7 @@ module.exports = (scope, cb) => {
   _.defaults(scope, {
     id: _.trim(_.deburr(scope.id)),
     idPluralized: pluralize.plural(_.trim(_.deburr(scope.id))),
-    environment: process.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development'
   });
 
   // Determine default values based on the available scope.

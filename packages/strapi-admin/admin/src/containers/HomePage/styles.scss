@@ -1,21 +1,22 @@
 .blockLink {
   position: relative;
   width: calc(50% - 6px);
-  height: 99px;
+  height: auto;
   margin-top: 41px;
-  padding: 22px 25px 0 96px;
+  padding: 22px 25px 19px 96px;
   background: #F7F8F8;
   border-radius: 3px;
   line-height: 18px;
   text-decoration: none;
   > span {
-    font-family: Lato-Bold;
+    font-family: 'Lato', sans-serif;
+    font-weight: bold;
     font-size: 16px;
     color: #333740;
     letter-spacing: 0;
   }
   > p {
-    font-family: Lato-Regular;
+    font-family: 'Lato', sans-serif;
     font-size: 13px;
     color: #919BAE;
     letter-spacing: 0;

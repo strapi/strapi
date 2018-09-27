@@ -2,14 +2,6 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/layout",
-      "handler": "ContentManager.layout",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/models",
       "handler": "ContentManager.models",
       "config": {

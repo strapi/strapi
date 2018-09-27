@@ -11,43 +11,44 @@ import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
 import { cloneDeep, findIndex, get, includes, isEmpty, isObject, toNumber, toString, replace } from 'lodash';
+import HTML5Backend from 'react-dnd-html5-backend';
+import { DragDropContext } from 'react-dnd';
 import cn from 'classnames';
-
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
 import BackHeader from 'components/BackHeader';
+import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
-
 // Plugin's components
+import CustomDragLayer from 'components/CustomDragLayer';
 import Edit from 'components/Edit';
 import EditRelations from 'components/EditRelations';
-
 // App selectors
 import { makeSelectSchema } from 'containers/App/selectors';
-
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 import { bindLayout } from 'utils/bindLayout';
 import inputValidations from 'utils/inputsValidations';
-
+import { generateRedirectURI } from 'containers/ListPage/utils';
 import { checkFormValidity } from 'utils/formValidations';
-
 import {
+  addRelationItem,
   changeData,
   getData,
-  getLayout,
   initModelProps,
+  moveAttr,
+  moveAttrEnd,
   onCancel,
+  onRemoveRelationItem,
   resetProps,
   setFileRelations,
   setFormErrors,
   submit,
 } from './actions';
-
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectEditPage from './selectors';
@@ -57,35 +58,15 @@ export class EditPage extends React.Component {
   state = { showWarning: false };
 
   componentDidMount() {
-    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes());
-
-    if (!this.isCreating()) {
-      const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
-      this.props.getData(this.props.match.params.id, this.getSource(), mainField);
-    } else {
-      this.props.getLayout(this.getSource());
-    }
-
-    // Get all relations made with the upload plugin
-    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
-      const association = get(this.getSchema(), ['relations', current], {});
-
-      if (association.plugin === 'upload' && association[association.type] === 'file') {
-        const relation = {
-          name: current,
-          multiple: association.nature === 'manyToManyMorph',
-        };
-
-        acc.push(relation);
-      }
-      return acc;
-    }, []);
-
-    // Update the reducer so we can use it to create the appropriate FormData in the saga
-    this.props.setFileRelations(fileRelations);
+    this.initComponent(this.props);
   }
 
   componentDidUpdate(prevProps) {
+    if (prevProps.location.pathname !== this.props.location.pathname) {
+      this.props.resetProps();
+      this.initComponent(this.props);
+    }
+
     if (prevProps.editPage.submitSuccess !== this.props.editPage.submitSuccess) {
       if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
         const redirectUrl = this.props.location.search.split('?redirectUrl=')[1];
@@ -108,11 +89,19 @@ export class EditPage extends React.Component {
   }
 
   /**
-   * Retrive the model's custom layout
-   * @return {[type]} [description]
+   * Retrieve the model's displayed relations
+   * @return {Array}
+   */
+  getDisplayedRelations = () => {
+    return get(this.getSchema(), ['editDisplay', 'relations'], []);
+  }
+
+  /**
+   * Retrieve the model's custom layout
+   *
    */
   getLayout = () => (
-    bindLayout.call(this, get(this.props.editPage, ['layout', this.getModelName()], {}))
+    bindLayout.call(this, get(this.props.schema, ['layout', this.getModelName()], {}))
   )
 
   /**
@@ -121,6 +110,8 @@ export class EditPage extends React.Component {
    * @type {[type]}
    */
   getAttributeValidations = (name) => get(this.props.editPage.formValidations, [findIndex(this.props.editPage.formValidations, ['name', name]), 'validations'], {})
+
+  getDisplayedFields = () => get(this.getSchema(), ['editDisplay', 'fields'], []);
 
   /**
    * Retrieve the model
@@ -168,6 +159,43 @@ export class EditPage extends React.Component {
    */
   getSource = () => getQueryParameters(this.props.location.search, 'source');
 
+  /**
+   * Initialize component
+   */
+  initComponent = (props) => {
+    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes(), this.getDisplayedFields());
+
+    if (!this.isCreating()) {
+      const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
+      this.props.getData(props.match.params.id, this.getSource(), mainField);
+    }
+
+    // Get all relations made with the upload plugin
+    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
+      const association = get(this.getSchema(), ['relations', current], {});
+
+      if (association.plugin === 'upload' && association[association.type] === 'file') {
+        const relation = {
+          name: current,
+          multiple: association.nature === 'manyToManyMorph',
+        };
+
+        acc.push(relation);
+      }
+      return acc;
+    }, []);
+
+    // Update the reducer so we can use it to create the appropriate FormData in the saga
+    this.props.setFileRelations(fileRelations);
+  }
+
+  handleAddRelationItem = ({ key, value }) => {
+    this.props.addRelationItem({
+      key,
+      value,
+    });
+  }
+
   handleBlur = ({ target }) => {
     const defaultValue = get(this.getModelAttribute(target.name), 'default');
 
@@ -199,7 +227,7 @@ export class EditPage extends React.Component {
     let value = e.target.value;
     // Check if date
     if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
-      value = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss').format();
+      value = moment(e.target.value).format('YYYY-MM-DD HH:mm:ss');
     } else if (['float', 'integer', 'biginteger', 'decimal'].indexOf(get(this.getSchema(), ['fields', e.target.name, 'type'])) !== -1) {
       value = toNumber(e.target.value);
     }
@@ -212,6 +240,34 @@ export class EditPage extends React.Component {
     this.props.changeData({ target });
   }
 
+  handleConfirm = () => {
+    this.props.onCancel();
+    this.toggle();
+  }
+
+  handleGoBack = () => this.props.history.goBack();
+
+  handleRedirect = ({ model, id, source = 'content-manager'}) => {
+    /* eslint-disable */
+    switch (model) {
+      case 'permission':
+      case 'role':
+      case 'file':
+        // Exclude special models which are handled by plugins.
+        if (source !== 'content-manager') {
+          break;
+        }
+      default:
+        const pathname = `${this.props.match.path.replace(':slug', model).replace(':id', id)}`;
+
+        this.props.history.push({
+          pathname,
+          search: `?source=${source}&redirectURI=${generateRedirectURI({ model, search: `?source=${source}` })}`,
+        });
+    }
+    /* eslint-enable */
+  }
+
   handleSubmit = (e) => {
     e.preventDefault();
     const formErrors = checkFormValidity(this.generateFormFromRecord(), this.props.editPage.formValidations);
@@ -221,6 +277,14 @@ export class EditPage extends React.Component {
     }
 
     this.props.setFormErrors(formErrors);
+  }
+
+  hasDisplayedRelations = () => {
+    return this.getDisplayedRelations().length > 0;
+  }
+
+  hasDisplayedFields = () => {
+    return get(this.getModel(), ['editDisplay', 'fields'], []).length > 0;
   }
 
   isCreating = () => this.props.match.params.id === 'create';
@@ -263,21 +327,73 @@ export class EditPage extends React.Component {
   );
 
   showLoaders = () => {
-    const { editPage: { isLoading, layout } } = this.props;
+    const { editPage: { isLoading }, schema: { layout } } = this.props;
 
     return isLoading && !this.isCreating() || isLoading && get(layout, this.getModelName()) === undefined;
   }
 
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
+  renderEdit = () => {
+    const { editPage, location: { search } } = this.props;
+    const source = getQueryParameters(search, 'source');
+    const basePath = '/plugins/content-manager/ctm-configurations';
+    const pathname = source !== 'content-manager'
+      ? `${basePath}/plugins/${source}/${this.getModelName()}`
+      : `${basePath}/${this.getModelName()}`;
+
+    if (this.showLoaders()) {
+      return (
+        <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
+          <div className={styles.main_wrapper}>
+            <LoadingIndicator />
+          </div>
+        </div>
+      );
+    }
+
+    if (!this.hasDisplayedFields()) {
+      return (
+        <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
+          <EmptyAttributesBlock
+            description="content-manager.components.EmptyAttributesBlock.description"
+            label="content-manager.components.EmptyAttributesBlock.button"
+            onClick={() => this.props.history.push(pathname)}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}>
+        <div className={styles.main_wrapper}>
+          <Edit
+            attributes={this.getModelAttributes()}
+            didCheckErrors={editPage.didCheckErrors}
+            formValidations={editPage.formValidations}
+            formErrors={editPage.formErrors}
+            layout={this.getLayout()}
+            modelName={this.getModelName()}
+            onBlur={this.handleBlur}
+            onChange={this.handleChange}
+            record={editPage.record}
+            resetProps={editPage.resetProps}
+            schema={this.getSchema()}
+          />
+        </div>
+      </div>
+    );
+  }
+
   render() {
-    const { editPage, onCancel } = this.props;
+    const { editPage, moveAttr, moveAttrEnd } = this.props;
     const { showWarning } = this.state;
 
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
-          <BackHeader onClick={() => this.props.history.goBack()} />
+          <BackHeader onClick={this.handleGoBack} />
+          <CustomDragLayer />
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               actions={this.pluginHeaderActions()}
@@ -293,41 +409,25 @@ export class EditPage extends React.Component {
                 confirm: 'content-manager.popUpWarning.button.confirm',
               }}
               popUpWarningType="danger"
-              onConfirm={() => {
-                onCancel();
-                this.toggle();
-              }}
+              onConfirm={this.handleConfirm}
             />
             <div className="row">
-              <div className={this.isRelationComponentNull() ? 'col-lg-12' : 'col-lg-9'}>
-                <div className={styles.main_wrapper}>
-                  {this.showLoaders() ? (
-                    <LoadingIndicator />
-                  ) : (
-                    <Edit
-                      attributes={this.getModelAttributes()}
-                      didCheckErrors={editPage.didCheckErrors}
-                      formValidations={editPage.formValidations}
-                      formErrors={editPage.formErrors}
-                      layout={this.getLayout()}
-                      modelName={this.getModelName()}
-                      onBlur={this.handleBlur}
-                      onChange={this.handleChange}
-                      record={editPage.record}
-                      resetProps={editPage.resetProps}
-                      schema={this.getSchema()}
-                    />
-                  )}
-                </div>
-              </div>
-              {!this.isRelationComponentNull() && (
+              {this.renderEdit()}
+              {this.hasDisplayedRelations() && (
                 <div className={cn('col-lg-3')}>
                   <div className={styles.sub_wrapper}>
-                    {!this.isRelationComponentNull() && (
+                    {this.hasDisplayedRelations() && (
                       <EditRelations
-                        currentModelName={this.getModelName()}
-                        location={this.props.location}
                         changeData={this.props.changeData}
+                        currentModelName={this.getModelName()}
+                        displayedRelations={this.getDisplayedRelations()}
+                        isDraggingSibling={editPage.isDraggingSibling}
+                        location={this.props.location}
+                        moveAttr={moveAttr}
+                        moveAttrEnd={moveAttrEnd}
+                        onAddRelationalItem={this.handleAddRelationItem}
+                        onRedirect={this.handleRedirect}
+                        onRemoveRelationItem={this.props.onRemoveRelationItem}
                         record={editPage.record}
                         schema={this.getSchema()}
                       />
@@ -352,15 +452,18 @@ EditPage.defaultProps = {
 };
 
 EditPage.propTypes = {
+  addRelationItem: PropTypes.func.isRequired,
   changeData: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
   getData: PropTypes.func.isRequired,
-  getLayout: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
   initModelProps: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
+  moveAttr: PropTypes.func.isRequired,
+  moveAttrEnd: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
+  onRemoveRelationItem: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   schema: PropTypes.object,
   setFileRelations: PropTypes.func.isRequired,
@@ -371,11 +474,14 @@ EditPage.propTypes = {
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addRelationItem,
       changeData,
       getData,
-      getLayout,
       initModelProps,
+      moveAttr,
+      moveAttrEnd,
       onCancel,
+      onRemoveRelationItem,
       resetProps,
       setFileRelations,
       setFormErrors,
@@ -399,6 +505,4 @@ export default compose(
   withReducer,
   withSaga,
   withConnect,
-)(EditPage);
-
-
+)(DragDropContext(HTML5Backend)(EditPage));

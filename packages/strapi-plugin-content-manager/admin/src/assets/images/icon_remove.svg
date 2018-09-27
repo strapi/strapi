@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20px" height="20px" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49.3 (51167) - http://www.bohemiancoding.com/sketch -->
+    <title>Icon remove</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Pages" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Content-Manager---List-view" transform="translate(-279.000000, -165.000000)">
+            <g id="Container" transform="translate(234.000000, 0.000000)">
+                <g id="Add-filters" transform="translate(0.000000, 60.000000)">
+                    <g id="Icon-remove" transform="translate(45.000000, 105.000000)">
+                        <rect id="Rectangle-12" stroke="#E3E9F3" x="0.5" y="0.5" width="19" height="19" rx="9.5"></rect>
+                        <path d="M6,10 L14,10" id="Line-4" stroke="#007EFF" stroke-width="2" stroke-linecap="round"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
