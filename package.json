@@ -17,7 +17,6 @@
     "jest-cli": "^22.4.4",
     "lerna": "^2.0.0",
     "lodash": "^4.17.5",
-    "mocha": "~2.4.5",
     "pre-commit": "~1.1.2",
     "redux-saga": "^0.14.3",
     "request": "^2.87.0",
