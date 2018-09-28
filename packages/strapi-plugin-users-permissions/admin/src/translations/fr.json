@@ -133,6 +133,7 @@
   "PopUpForm.header.edit.providers": "Editer {provider} Provider",
   "PopUpForm.inputSelect.providers.label": "Sélectionnez le provider",
   "components.Input.error.password.noMatch": "Le mot de passe ne correspond pas",
+  "components.Input.error.password.length": "Le password doit contenir au moins 6 caractères",
   "notification.error.delete": "Une erreur est survenue en essayant de supprimer cet élément",
   "notification.error.fetch": "Une erreur est survenue en essayant de récupérer les données",
   "notification.error.fetchUser": "Une erreur est survenue en esssayent de récupérer les users",

@@ -75,7 +75,13 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
         acc.push({ name: key, errors: [{ id: 'components.Input.error.validation.required' }] });
       }
 
+      console.log(this.props.modifiedData.password.length);
+
       if (!isEmpty(get(this.props.modifiedData, 'password')) && !isEmpty(get(this.props.modifiedData, 'confirmPassword')) && findIndex(acc, ['name', 'confirmPassword']) === -1) {
+        if (this.props.modifiedData.password.length < 6) {
+          acc.push({ name: 'password', errors: [{ id: 'users-permissions.components.Input.error.password.length' }] });
+        }
+        
         if (get(this.props.modifiedData, 'password') !== get(this.props.modifiedData, 'confirmPassword')) {
           acc.push({ name: 'confirmPassword', errors: [{ id: 'users-permissions.components.Input.error.password.noMatch' }] });
         }
