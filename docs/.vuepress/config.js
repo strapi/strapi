@@ -72,7 +72,6 @@ module.exports = {
             '/3.x.x/guides/policies',
             '/3.x.x/guides/public-assets',
             '/3.x.x/guides/requests',
-            '/3.x.x/guides/requests',
           ],
         },
       ],
