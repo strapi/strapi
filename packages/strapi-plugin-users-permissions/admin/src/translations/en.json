@@ -142,6 +142,7 @@
   "PopUpForm.header.edit.providers": "Edit {provider} Provider",
   "PopUpForm.inputSelect.providers.label": "Choose the provider",
   "components.Input.error.password.noMatch": "Passwords do not match",
+  "components.Input.error.password.length": "Password is too short",
   "notification.error.delete": "An error occurred while trying to delete the item",
   "notification.error.fetch": "An error occurred while trying to fetch data",
   "notification.error.fetchUser": "An error occurred while trying to fetch users",
