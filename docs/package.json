@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vuepress dev",
+    "build": "vuepress build"
   },
   "author": "",
   "license": "ISC",
