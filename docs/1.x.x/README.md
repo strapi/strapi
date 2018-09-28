@@ -1,8 +1,11 @@
-# Strapi [![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi) [![Slack Status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+::: intro
+# Strapi 
 
-[Website](http://strapi.io/) - [Getting Started](#user-content-getting-started-in-a-minute) - [Documentation](http://strapi.io/documentation/introduction) - [Support](http://strapi.io/support)
+[![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi) 
+[![Slack Status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
 Strapi is an open-source Node.js rich framework for building applications and services.
+:::
 
 Strapi enables developers to focus on writing reusable application logic instead of spending time
 building infrastructure. It is designed for building practical, production-ready Node.js applications
@@ -111,11 +114,10 @@ Strapi comes with a simple but yet powerful dashboard.
 
 ## Resources
 
-- [Roadmap](ROADMAP.md)
-- [Contributing guide](CONTRIBUTING.md)
-- [MIT License](LICENSE.md)
+- [Contributing guide]((https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md))
+- [MIT License]((https://github.com/strapi/strapi/blob/master/LICENSE.md))
 
 ## Links
 
-- [Strapi website](http://strapi.io/)
+- [Strapi website](https://strapi.io/)
 - [Strapi news on Twitter](https://twitter.com/strapijs)

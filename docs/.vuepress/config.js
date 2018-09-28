@@ -3,7 +3,7 @@ const container = require('markdown-it-container')
 module.exports = {
   markdown: {
     anchor: {
-      permalink: false,
+      permalink: true,
     },
     config: md => {
       md

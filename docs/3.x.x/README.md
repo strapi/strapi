@@ -1,4 +1,5 @@
-![Logo](https://cldup.com/7umchwdUBh.png)<!-- {.text-center} -->
+::: intro
+![Logo](https://cldup.com/7umchwdUBh.png)
 
 ### API creation made simple, secure and fast.
 The most advanced open-source Content Management Framework to build powerful API with no effort.
@@ -8,6 +9,8 @@ The most advanced open-source Content Management Framework to build powerful API
 [![Build status](https://travis-ci.org/strapi/strapi.svg?branch=master)](https://travis-ci.org/strapi/strapi)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 [![Heroku Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app)<!-- {height=20} -->
+<!-- {p:.flex.justify-around} -->
+:::
 
 ## v3@alpha.13 is available!
 We've been working on a major update for Strapi during the past months, rewriting the core framework and the dashboard.
