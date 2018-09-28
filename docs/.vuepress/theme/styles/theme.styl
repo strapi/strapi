@@ -26,6 +26,20 @@ body
 a img + svg
   display none !important
 
+.version-selector
+  margin 1em 1em 0 1.5em
+  color lighten($textColor, 25%)
+  display block
+  border 1px solid darken($borderColor, 10%)
+  font-size .9rem
+  line-height 2rem
+  padding .5em 1rem .5em 1em
+  outline none
+  transition all .2s ease
+  &:focus
+    cursor auto
+    border-color $accentColor
+
 .text-center
   text-align center
 
