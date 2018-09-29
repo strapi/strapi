@@ -74,7 +74,7 @@ module.exports = strapi => {
           strapi.app.use(router.middleware());
         });
       }
-      
+
       // Let the router use our routes and allowed methods.
       strapi.app.use(strapi.router.middleware());
 
