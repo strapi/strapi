@@ -15,6 +15,7 @@ about: Create a report to help us improve 🤔.
 <!-- ⚠️ Before writing your issue make sure you are using:-->
 <!-- Node 10.x.x -->
 <!-- npm 6.x.x -->
+<!-- The latest version of Strapi. -->
 
 **Informations**
 - **Node.js version**: 
