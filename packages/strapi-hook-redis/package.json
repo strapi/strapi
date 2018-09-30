@@ -19,7 +19,7 @@
     "lodash": "^4.17.5",
     "rimraf": "^2.6.2",
     "stack-trace": "0.0.10",
-    "strapi-utils": "3.0.0-alpha.14.2"
+    "strapi-utils": "file:../strapi-utils"
   },
   "author": {
     "email": "hi@strapi.io",

@@ -30,7 +30,7 @@
     "graphql-type-json": "^0.2.1",
     "graphql-type-datetime": "^0.2.2",
     "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.0-alpha.14.2"
+    "strapi-utils": "file:../strapi-utils"
   },
   "author": {
     "name": "A Strapi developer",
