@@ -26,6 +26,7 @@
   "app.components.DownloadInfo.download": "İndirme devam ediyor...",
   "app.components.DownloadInfo.text": "Bu birkaç dakika sürebilir. Sabrınız için teşekkürler.",
   "app.components.HomePage.button.blog": "BLOG SAYFASINDA DAHA FAZLASINI GÖRÜN",
+  "app.components.EmptyAttributes.title": "Alan henüz yok",
   "app.components.HomePage.button.quickStart": "HIZLI BAŞLANGIÇ YAP",
   "app.components.HomePage.community": "Topluluğumuza ulaşın",
   "app.components.HomePage.community.content": "Farklı kanallarda takım üyeleri, katkıda bulunanlar ve geliştiricilere ulaşın.",
