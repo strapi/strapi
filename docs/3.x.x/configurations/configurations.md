@@ -95,7 +95,9 @@ Here are some use cases:
 
 CRON tasks allow you to schedule jobs (arbitrary functions) for execution at specific dates, with optional recurrence rules. It only uses a single timer at any given time (rather than reevaluating upcoming jobs every second/minute).
 
-> Note: Make sure the `enabled` cron config is set to `true` in your environment's variables.
+::: note
+Make sure the `enabled` cron config is set to `true` in your environment's variables.
+:::
 
 The cron format consists of:
 
@@ -153,7 +155,9 @@ Each JSON file located in the folder must have the name of its corresponding tra
 
 Most of the application's configurations are defined by environment. It means that you can specify settings for each environment (`development`, `production`, `test`, etc.).
 
-> Note: You can access the config of the current environment through `strapi.config.currentEnvironment`.
+::: note
+You can access the config of the current environment through `strapi.config.currentEnvironment`.
+:::
 
 ***
 
@@ -278,7 +282,9 @@ Most of the application's configurations are defined by environment. It means th
  - `router`
   - `prefix` (string): API url prefix (eg. `/v1`).
 
-> Note: The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
+::: note
+The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
+:::
 
 ***
 
@@ -383,7 +389,9 @@ In any JSON configurations files in your project, you can inject dynamic values 
 }
 ```
 
-> Note: You can't execute functions inside the curly braces. Only strings are allowed.
+::: note
+You can't execute functions inside the curly braces. Only strings are allowed.
+:::
 
 ***
 

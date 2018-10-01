@@ -36,7 +36,9 @@ The structure of the configurations has been harmonised and simplified. Files ha
 Please refer to the [new documentation](../configurations/configurations.md) to set the correct values in each file.
 
 
-> Note: Don't forget that middlewares has been removed. Please refers to the right section of this document for more details.
+::: note
+Don't forget that middlewares has been removed. Please refers to the right section of this document for more details.
+:::
 
 ## Routes
 
@@ -141,9 +143,13 @@ The services files should stay as they are. Your generator functions can be conv
 
 The models didn't change a lot. The `autoCreatedAt`, `autoUpdatedAt` and `autoPK` attributes have been removed and replaced by the `hasTimestamps` attribute.
 
-> Note: The `hasTimestamps` options will only work with Bookshelf. Also you need to create the `created_at` and `updated_at` columns manually.
+::: note
+The `hasTimestamps` options will only work with Bookshelf. Also you need to create the `created_at` and `updated_at` columns manually.
+:::
 
-> Note: The `enum` type is not available for now. Also, the validations are not working properly. It means that most of the validations have to be done manually.
+::: note
+The `enum` type is not available for now. Also, the validations are not working properly. It means that most of the validations have to be done manually.
+:::
 
 #### v1.x
 
@@ -310,7 +316,9 @@ module.exports = {
 }
 ```
 
-> Note: You will have more changes if your project is based on a SQL database. Waterline and Mongoose are almost sharing the same API.
+::: note
+You will have more changes if your project is based on a SQL database. Waterline and Mongoose are almost sharing the same API.
+:::
 
 ## Middlewares
 
@@ -351,7 +359,9 @@ It works exactly as before. You need to add `strapi-views` into your app's depen
 }
 ```
 
-> Note: You might have to install the template engine by your own (ex: `npm install ejs --save`).
+::: note
+You might have to install the template engine by your own (ex: `npm install ejs --save`).
+:::
 
 ## Error handling
 

@@ -73,7 +73,9 @@ To style a plugin component:
 
 Use this style in the component: `<div className={styles.wrapper}></div>`.
 
-Note: if you want to use several classes:
+::: note
+if you want to use several classes:
+:::
 
 ```js
 import cn from 'classnames';

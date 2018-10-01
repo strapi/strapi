@@ -29,7 +29,9 @@ cd /path/to/the/project
 npm run setup
 ```
 
-> Note: To display the build logs use the --debug option `npm run setup --debug`.
+::: note
+To display the build logs use the --debug option `npm run setup --debug`.
+:::
 
 #### #3 - Launch the server
 
@@ -39,7 +41,9 @@ Run the server with the `production` settings.
 NODE_ENV=production npm start
 ```
 
-> We highly recommend to use [pm2](https://github.com/Unitech/pm2/) to manage your process.
+::: warning
+We highly recommend to use [pm2](https://github.com/Unitech/pm2/) to manage your process.
+:::
 
 ### Advanced configurations
 

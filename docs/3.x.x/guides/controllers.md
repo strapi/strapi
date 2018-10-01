@@ -39,4 +39,6 @@ module.exports = {
 };
 ```
 
-> Note: A route handler can only access the controllers defined in the `./api/**/controllers` folders.
+::: note
+A route handler can only access the controllers defined in the `./api/**/controllers` folders.
+:::

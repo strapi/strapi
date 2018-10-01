@@ -1,6 +1,8 @@
 # Authentication
 
-> ⚠️  This feature requires the Users & Permissions plugin (installed by default).
+::: warning
+This feature requires the Users & Permissions plugin (installed by default).
+:::
 
 ## Register a new user
 

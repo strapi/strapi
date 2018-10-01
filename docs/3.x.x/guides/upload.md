@@ -1,6 +1,8 @@
 # File Upload
 
-> ⚠️  This feature requires the Upload plugin (installed by default).
+::: warning
+This feature requires the Upload plugin (installed by default).
+:::
 
 Thanks to the plugin `Upload`, you can upload any kind of files on your server or externals providers such as AWS S3.
 
@@ -8,7 +10,9 @@ Thanks to the plugin `Upload`, you can upload any kind of files on your server o
 
 The plugin exposes a single route `POST /upload` to upload one or multiple files in a single request.
 
-> ⚠️  Please send the request using multipart/form-data encoding
+::: warning
+Please send the request using multipart/form-data encoding
+:::
 
 **Parameters**
 

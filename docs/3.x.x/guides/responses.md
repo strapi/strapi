@@ -221,9 +221,11 @@ ctx.type = '.png';
 ctx.type = 'png';
 ```
 
-Note: when appropriate a `charset` is selected for you, for
+::: note
+when appropriate a `charset` is selected for you, for
 example `response.type = 'html'` will default to "utf-8". If you need to overwrite `charset`,
 use `ctx.set('Content-Type', 'text/html')` to set response header field to value directly.
+:::
 
 #### response.is(types...)
 
@@ -534,9 +536,11 @@ ctx.type = '.png';
 ctx.type = 'png';
 ```
 
-Note: when appropriate a `charset` is selected for you, for
+::: note
+when appropriate a `charset` is selected for you, for
 example `response.type = 'html'` will default to "utf-8". If you need to overwrite `charset`,
 use `ctx.set('Content-Type', 'text/html')` to set response header field to value directly.
+:::
 
 #### response.is(types...)
 
@@ -635,7 +639,9 @@ Strapi integrates [Boom](https://github.com/hapijs/boom): a set of utilities for
 
 You can also override responses based on them status. Please read the [configuration responses](../configurations/configurations.md#responses) for that.
 
-> Note: Every Boom's functions is delegated to the context. It means that `ctx.notFound` is a shortcut to `ctx.response.notFound`.
+::: note
+Every Boom's functions is delegated to the context. It means that `ctx.notFound` is a shortcut to `ctx.response.notFound`.
+:::
 
 ### API Reference
 

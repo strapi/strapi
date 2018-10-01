@@ -76,7 +76,9 @@ Run `npm start` from the `./admin` folder. That's all.
 
 You should be able to see the admin at [http://localhost:4000/admin](http://localhost:4000/admin).
 
-> Note: In development, all the plugins of your app are mounted in the same build as the administration panel.
+::: note
+In development, all the plugins of your app are mounted in the same build as the administration panel.
+:::
 
 ### Colors
 
@@ -95,7 +97,9 @@ Fonts can also be overridden:
 
 To change the top-left displayed admin panel's logo, replace the image located at `./admin/admin/src/assets/images/logo-strapi.png`.
 
-Note: make sure the size of your image is the same as the existing one (434px x 120px).
+::: note
+make sure the size of your image is the same as the existing one (434px x 120px).
+:::
 
 ***
 
@@ -109,7 +113,11 @@ npm run setup
 
 This will replace the folder's content located at `./admin/admin/build`. Visit http://localhost:1337/admin/ to make sure your updates have been taken in account.
 
-After you have built the admininistration you can now create a new project to develop your API with the changes implemented. **Note:** You should now create a project without `--dev` 
+After you have built the admininistration you can now create a new project to develop your API with the changes implemented. 
+
+::: note
+You should now create a project without `--dev` 
+:::
 
 ***
 
@@ -178,7 +186,9 @@ It's very common to deploy the front-end and the back-end on different servers. 
 
 The administration URL will be http://yourfrontend.com and every request from the panel will hit the backend at http://yourbackend.com. The plugins will be injected through the `origin` (means the API itself). In other words, the plugins URLs will be `http://yourbackend.com/dashboard/content-manager/main.js`.
 
-> Note: How it is possible? The API (the Strapi server) owns the plugin and these plugins are exposed through `http://yourbackend.com/admin/**/main.js`
+::: note
+How it is possible? The API (the Strapi server) owns the plugin and these plugins are exposed through `http://yourbackend.com/admin/**/main.js`
+:::
 
 
 The DOM should look like this:
@@ -198,7 +208,9 @@ The DOM should look like this:
 </html>
 ```
 
-> Note: The plugins are injected using the `./admin/admin/build/config/plugins.json`. To see the plugins URLs in the `index.html`, you need to launch the administration panel in the browser.
+::: note
+The plugins are injected using the `./admin/admin/build/config/plugins.json`. To see the plugins URLs in the `index.html`, you need to launch the administration panel in the browser.
+:::
 
 #### Deploy the administration panel and the plugins on another server than the API
 
@@ -275,5 +287,6 @@ The generated `index.html` will look like this:
   </body>
 </html>
 ```
-
-> Note: The plugins are injected using the `./admin/admin/build/config/plugins.json`. To see the plugins URLs in the `index.html`, you need to launch the administration panel in the browser.
+::: note
+The plugins are injected using the `./admin/admin/build/config/plugins.json`. To see the plugins URLs in the `index.html`, you need to launch the administration panel in the browser.
+:::

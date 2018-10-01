@@ -9,6 +9,7 @@ module.exports = {
       md
         .use(require('markdown-it-decorate'))
         .use(...createContainer('intro'))
+        .use(...createContainer('note'))
     }
   },
   title: 'Strapi Docs',

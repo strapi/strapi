@@ -1,6 +1,8 @@
 # GraphQL
 
-> ⚠️  This feature requires the GraphQL plugin (not installed by default).
+::: warning
+This feature requires the GraphQL plugin (not installed by default).
+:::
 
 ## Usage
 
@@ -364,7 +366,9 @@ module.exports = {
 
 Edit the `definition` attribute in one of the `schema.graphql` files of your project by using the GraphQL Type language string.
 
-> Note: The easiest way is to create a new model using the CLI `strapi generate:model category --api post`, so you don't need to customise anything.
+::: note
+The easiest way is to create a new model using the CLI `strapi generate:model category --api post`, so you don't need to customise anything.
+:::
 
 ```js
 module.exports = {
@@ -507,7 +511,9 @@ module.exports = {
 
 In this example, the policy `isAuthenticated` located in `./plugins/users-permissions/config/policies/isAuthenticated.js` will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
-> Note: There is no custom resolver in that case, so it will execute the default resolver (Post.find) provided by the Shadow CRUD feature.
+::: note
+There is no custom resolver in that case, so it will execute the default resolver (Post.find) provided by the Shadow CRUD feature.
+:::
 
 ### Link a query to a controller action
 
@@ -528,7 +534,9 @@ module.exports = {
 
 In this example, it will execute the `findByAuthor` action of the `Post` controller. It also means that the resolver will apply on the `posts` query the permissions defined on the `findByAuthor` action (through the administration panel).
 
-> Note: The `obj` parameter is available via `ctx.params` and the `options` are available via `ctx.query` in the controller's action.
+::: note
+The `obj` parameter is available via `ctx.params` and the `options` are available via `ctx.query` in the controller's action.
+:::
 
 ### Define a custom resolver
 
@@ -606,7 +614,9 @@ The type name is the global ID of the model. You can find the global ID of a mod
 
 We recommend to put the field description and deprecated reason in the model. Right now, the GraphQL plugin is the only which uses these fields. Another plugin could use this description in the future as well. However, sometimes you don't have the choice, especially when you're defining a custom type.
 
-> Note: It's not a bad practice to put the description and deprecated attribute in the `schema.graphql`, though.
+::: note
+It's not a bad practice to put the description and deprecated attribute in the `schema.graphql`, though.
+:::
 
 **Why are the "createdAt" and "updatedAt" field added to my type?**
 

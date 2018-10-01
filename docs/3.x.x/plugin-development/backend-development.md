@@ -6,7 +6,9 @@ This section explains how the 'back-end part' of your plugin works.
 
 The plugin API routes are defined in the `./plugins/**/config/routes.json` file.
 
-> Please refer to [router documentation](../guides/routing.md) for informations.
+::: note
+Please refer to [router documentation](../guides/routing.md) for informations.
+:::
 
 **Route prefix**
 

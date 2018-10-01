@@ -3,7 +3,9 @@
 See the [models' concepts](../concepts/concepts.md#models) for details.
 
 ## How to create a model?
-> Note: If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a fast feeling for available features.
+::: note
+If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a fast feeling for available features.
+:::
 
 Use the CLI, and run the following command `strapi generate:model user firstname:string lastname:string`. Read the [CLI documentation](../cli/CLI.md) for more informations.
 
@@ -11,7 +13,9 @@ This will create two files located at `./api/user/models`:
  - `User.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
  - `User.js`: imports `User.settings.json` and extends it with additional settings and lifecycle callbacks.
 
-> Note: when you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
+::: note
+when you create a new API using the CLI (`strapi generate:api <name>`), a model is automatically created.
+:::
 
 ## Model Information
 The info key on the model-json states information about the model. This information is used in the admin interface, when showing the model.
@@ -291,7 +295,9 @@ A `product` can be related to many `categories`, so a `category` can have many `
 }
 ```
 
-> Note: The `dominant` key allows you to define in which table/collection (only for NoSQL databases) should be stored the array that defines the relationship. Because there is no join table in NoSQL, this key is required for NoSQL databases (ex: MongoDB).
+::: note
+The `dominant` key allows you to define in which table/collection (only for NoSQL databases) should be stored the array that defines the relationship. Because there is no join table in NoSQL, this key is required for NoSQL databases (ex: MongoDB).
+:::
 
 **Path —** `./api/category/models/Category.settings.json`.
 ```json
@@ -571,7 +577,9 @@ CREATE TABLE `image` (
 )
 ```
 
-> Note: If you've overrided the default table name given by Strapi by using the `collectionName` attribute. Use the value set in the `collectionName` to name the table.
+::: note
+If you've overrided the default table name given by Strapi by using the `collectionName` attribute. Use the value set in the `collectionName` to name the table.
+:::
 
 The second table will allow us to associate one or many others entries to the `Image` model. The name of the table is the same as the previous one with the suffix `_morph`.
 ```
@@ -693,4 +701,6 @@ Additional settings can be set on models:
 
 In this example, the model `User` will be accessible through the `Users` global variable. The data will be stored in the `Users_v1` collection or table and the model will use the `mongo` connection defined in `./config/environments/**/database.json`
 
-> Note: The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
+::: note
+The `connection` value can be changed whenever you want, but you should be aware that there is no automatic data migration process. Also if the new connection doesn't use the same ORM you will have to rewrite your queries.
+:::

@@ -21,7 +21,9 @@ Here is the list of the collected data and why we need them.
 
 We are not collecting sensitive data such as databases configurations, environment or custom variables. The data are encrypted and anonymised.
 
-> GDPR: The collected data are non-sensitive or personal data. We are compliant with the European recommendations (see our [Privacy Policy](https://strapi.io/privacy)).
+::: warning GDPR
+The collected data are non-sensitive or personal data. We are compliant with the European recommendations (see our [Privacy Policy](https://strapi.io/privacy)).
+:::
 
 ## Disable
 

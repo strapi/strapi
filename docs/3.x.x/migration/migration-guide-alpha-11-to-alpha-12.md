@@ -69,7 +69,9 @@ You also will have to reset your roles permissions.
 
 ### Update bookshelf filters
 
-> This update is if you come from version before alpha-11.3
+::: warning
+This update is if you come from version before alpha-11.3
+:::
 
 You will have to replace your `fetchAll` services queries of your generated API:
 

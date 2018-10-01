@@ -41,7 +41,9 @@ module.exports = {
 };
 ```
 
-> Note: please make sure you installed `nodemailer` (`npm install nodemailer`) for this example.
+::: note
+please make sure you installed `nodemailer` (`npm install nodemailer`) for this example.
+:::
 
 The service is now available through the `strapi.services` global variable. We can use it in another part of our codebase. For example a controller like below:
 

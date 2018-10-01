@@ -55,7 +55,9 @@ options: [--tpl <name>|--plugin <name>]
 
   Example: `strapi generate:api product --tpl bookshelf`
 
-> Note: The first letter of the filename will be uppercased.
+::: note
+The first letter of the filename will be uppercased.
+:::
 
 ## strapi generate:controller
 Create a new controller
@@ -79,7 +81,9 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:controller &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty controller called **&#60;name&#62;** in the `./plugins/<plugin>/controllers` folder.
 
-> Note: The first letter of the filename will be uppercased.
+::: note
+The first letter of the filename will be uppercased.
+:::
 
 ## strapi generate:model
 Create a new model
@@ -112,7 +116,9 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder.
 
-> Note: The first letter of the filename will be uppercased.
+::: note
+The first letter of the filename will be uppercased.
+:::
 
 ## strapi generate:service
 Create a new service
@@ -136,7 +142,9 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:service &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty service called **&#60;name&#62;** in the `./plugins/<plugin>/services` folder.
 
-> Note: The first letter of the filename will be uppercased.
+::: note
+The first letter of the filename will be uppercased.
+:::
 
 ## strapi generate:policy
 Create a new policy
@@ -200,7 +208,9 @@ options: [--dev]
 > Checkout the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details about the local Strapi development workflow.
 
 
-> **Note: You have to restart the server to load the plugin into your project.**
+::: warning
+You have to restart the server to load the plugin into your project.
+:::
 
 Please refer to the [plugins documentation](../plugin-development/quick-start.md) to know more.
 

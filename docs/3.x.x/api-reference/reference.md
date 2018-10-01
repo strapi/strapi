@@ -35,7 +35,9 @@ Returns the Koa instance.
 
 Returns a `Promise`. When resolved, it means that the `./config/functions/bootstrap.js` has been executed. Otherwise, it throws an error.
 
-> Note: You can also access to the bootstrap function through `strapi.config.functions.boostrap`.
+::: note
+You can also access to the bootstrap function through `strapi.config.functions.boostrap`.
+:::
 
 ## strapi.config
 
@@ -45,7 +47,9 @@ Returns an object that represents the configurations of the project. Every JavaS
 
 Returns an object of the controllers wich is available in the project. Every JavaScript file located in the `./api/**/controllers` folder will be parsed into the `strapi.controllers` object. Thanks to this object, you can access to every controller's actions everywhere in the project.
 
-> Note: This object doesn't include the admin's controllers and plugin's controllers.
+::: note
+This object doesn't include the admin's controllers and plugin's controllers.
+:::
 
 ## strapi.hook
 

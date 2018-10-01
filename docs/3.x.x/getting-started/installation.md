@@ -16,7 +16,9 @@ Time to install Strapi!
 npm install strapi@alpha -g
 ```
 
-Note: if you encounter npm permissions issues, [change the permissions to npm default directory](https://docs.npmjs.com/getting-started/fixing-npm-permissions#option-1-change-the-permission-to-npms-default-directory).
+::: note
+If you encounter npm permissions issues, [change the permissions to npm default directory](https://docs.npmjs.com/getting-started/fixing-npm-permissions#option-1-change-the-permission-to-npms-default-directory).
+:::
 
 It takes about 20 seconds with a good Internet connection. You can take a coffee ☕️  if you have a slow one.
 

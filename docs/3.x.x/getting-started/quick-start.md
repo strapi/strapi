@@ -3,21 +3,18 @@
 This section explains how to handle Strapi for the first time, ([check out our tutorial video](https://www.youtube.com/watch?v=yMl5IcFHA74)).
 
 **Table of contents:**
-- [Create your first project](#create-your-first-project)
-- [Create your first API](#create-your-first-api)
-  - [Content Type Builder plugin](#content-type-builder-plugin)
-  - [Files structure](#files-structure)
-- [Manage your data](#manage-your-data)
-  - [Content Manager Plugin](#content-manager-plugin)
-  - [Create a product](#create-a-product)
-  - [Edit a product](#edit-a-product)
-  - [Delete a product](#delete-a-product)
-- [Consume your API](#consume-your-api)
-  - [List entries](#list-entries)
-  - [Get a specific entry](#get-a-specific-entry)
-  - [Create data (POST)](#create-data-post)
-  - [Update data (PUT)](#update-data-put)
-  - [Delete data (DELETE)](#delete-data-delete)
+- [Quick start](#quick-start)
+  - [Create your first project](#create-your-first-project)
+  - [Create your first user](#create-your-first-user)
+  - [Create your first API](#create-your-first-api)
+    - [Files structure](#files-structure)
+  - [Manage your data](#manage-your-data)
+  - [Consume your API](#consume-your-api)
+    - [List entries (GET)](#list-entries-get)
+    - [Get a specific entry (GET)](#get-a-specific-entry-get)
+    - [Create data (POST)](#create-data-post)
+    - [Update data (PUT)](#update-data-put)
+    - [Delete data (DELETE)](#delete-data-delete)
 
 ***
 
@@ -92,7 +89,9 @@ At this point, your application is empty. To create your first API is to use the
 **#4 —** Save. That's it!
 
 
-> Note: See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for more information on how to do it the hacker way.
+::: note
+See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for more information on how to do it the hacker way.
+:::
 
 ### Files structure
 

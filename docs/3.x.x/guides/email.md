@@ -1,6 +1,8 @@
 # Email
 
-> ⚠️  This feature requires the Email plugin (installed by default).
+::: warning
+This feature requires the Email plugin (installed by default).
+:::
 
 Thanks to the plugin `Email`, you can send email on your server or externals providers such as Sendgrid.
 
