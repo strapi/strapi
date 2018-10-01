@@ -57,7 +57,7 @@ Database:
 #### ⏳ Installation
 
 ```bash
-npm install strapi@alpha -g
+npm i strapi@alpha -g
 ````
 
 **We recommend to use the latest version of Strapi to start your new project**. 
