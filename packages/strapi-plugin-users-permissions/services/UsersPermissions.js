@@ -190,12 +190,21 @@ module.exports = {
     const routes = Object.keys(strapi.api || {}).reduce((acc, current) => {
       return acc.concat(_.get(strapi.api[current].config, 'routes', []));
     }, []);
+    const clonedPlugins = _.cloneDeep(strapi.plugins);
+    const pluginsRoutes = Object.keys(clonedPlugins || {}).reduce((acc, current) => {
+      const routes = _.get(clonedPlugins, [current, 'config', 'routes'], [])
+        .reduce((acc, curr) => {
+          const prefix = curr.config.prefix;
+          const path = prefix !== undefined ? `${prefix}${curr.path}` : `/${current}${curr.path}`;
+          _.set(curr, 'path', path);
+          
+          return acc.concat(curr);
+        }, []); 
 
-    const pluginsRoutes = Object.keys(strapi.plugins || {}).reduce((acc, current) => {
-      acc[current] = _.get(strapi.plugins[current].config, 'routes', []);
+      acc[current] = routes;
 
       return acc;
-    }, []);
+    }, {});
 
     return _.merge({ application: routes }, pluginsRoutes);
   },
