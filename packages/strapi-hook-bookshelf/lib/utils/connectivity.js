@@ -5,6 +5,7 @@ const inquirer = require('inquirer');
 const rimraf = require('rimraf');
 
 module.exports = (scope, success, error) => {
+  // eslint-disable-next-line import/no-unresolved
   const knex = require('knex')({
     client: scope.client.module,
     connection: Object.assign({}, scope.database.settings, {
