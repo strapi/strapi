@@ -556,11 +556,18 @@ module.exports = function(strapi) {
                         _.mapKeys(attributes, (field, fieldName) => {
                           try {
                             if (!field.type) {
-                              // Creating integer column for foreign key as the original implementation
+                              // Creating column for foreign key as the original implementation
                               // ROOM FOR IMPROVEMENT -- Use actual foreign keys
-                              field.model && dbTable.integer(field.model);
+                              const relation = definition.associations
+                                .find(association => association.alias === fieldName);
+
+                              if (['oneToOne', 'manyToOne', 'oneWay'].includes(relation.nature)) {
+                                dbTable[definition.primaryKeyType](fieldName);
+                              }
+
                               return;
                             }
+
 
                             switch(field.type) {
                               // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
