@@ -654,7 +654,68 @@ module.exports = function(strapi) {
                           return acc;
                         }, []);
 
-                        await Promise.all(queries.map(query => ORM.knex.raw(query)));
+                        // eslint-disable-next-line prefer-template
+                        Promise.all(queries.map(query => console.log('- ' + query)));
+
+                        const newQuery = ORM.knex.schema.alterTable(table, dbTable => {
+                          // TODO: Remove duplicate code. This is temporary to conserve original structure
+                          _.mapKeys(columnsToAdd, (field, fieldName) => {
+                            try {
+                              if (!field.type) {
+                                // Creating integer column for foreign key as the original implementation
+                                field.model && dbTable.integer(field.model);
+                                return;
+                              }
+
+                              switch(field.type) {
+                                // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
+                                case 'text':
+                                  dbTable.text(fieldName, 'longtext');
+                                  break;
+
+                                case 'decimal':
+                                  dbTable.decimal(fieldName, 10, 2);
+                                  break;
+
+                                case 'json':
+                                  // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
+                                  definition.client === 'pg'
+                                    ? dbTable.jsonb(fieldName)
+                                    : dbTable.text(fieldName, 'longtext');
+                                  break;
+
+                                case 'email':
+                                case 'password':
+                                case 'enumeration': // Manage native type is too complicated
+                                  dbTable.string(fieldName);
+                                  break;
+
+                                case 'date':
+                                case 'timestamp':
+                                case 'timestampUpdate':
+                                  dbTable.timestamp(fieldName).defaultTo(
+                                    // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
+                                    definition.client === 'mysql' && field.type === 'timestampUpdate'
+                                      ? ORM.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
+                                      : ORM.knex.fn.now()
+                                  );
+                                  break;
+
+                                default:
+                                  dbTable[field.type](fieldName);
+                              }
+
+                            } catch (e) {
+                              strapi.log.error(`Field type '${field.type}' (for table '${table}') not recognized.`);
+                              // FIXME: For temporary debugging. This should be eliminated.
+                              console.log({field}, e);
+                            }
+                          });
+                        }).toString();
+
+                        // eslint-disable-next-line prefer-template
+                        console.log('+ ' + newQuery);
+                        await ORM.knex.raw(newQuery);
                       }
 
                       let previousAttributes;
