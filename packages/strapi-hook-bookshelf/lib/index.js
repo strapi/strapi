@@ -441,21 +441,6 @@ module.exports = function(strapi) {
                       return type;
                     };
 
-                    // Apply field type of attributes definition
-                    const generateColumns = (attrs, start) => {
-                      return Object.keys(attrs).reduce((acc, attr) => {
-                        const attribute = attributes[attr];
-
-                        const type = getType(attribute, attr);
-
-                        if (type) {
-                          acc.push(`${quote}${attr}${quote} ${type}`);
-                        }
-
-                        return acc;
-                      }, start);
-                    };
-
                     const generateIndexes = async (table) => {
                       try {
                         const connection = strapi.config.connections[definition.connection];
@@ -525,18 +510,8 @@ module.exports = function(strapi) {
 
 
                     if (!tableExist) {
-                      let idAttributeBuilder = [` id  ${definition.client === 'pg' ? 'SERIAL' : 'INT          AUTO_INCREMENT NOT NULL'} PRIMARY KEY`];
-                      if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
-                        idAttributeBuilder = ['id uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY'];
-                      } else if (definition.primaryKeyType !== 'integer') {
-                        idAttributeBuilder = [`id ${getType({type: definition.primaryKeyType})} NOT NULL PRIMARY KEY`];
-                      }
-                      const columns = generateColumns(attributes, idAttributeBuilder).join(', ');
 
-                      // FIXME: For temporary debugging. This should be eliminated.
-                      const orgQuery = `CREATE TABLE ${quote}${table}${quote} (${columns})`;
-
-                      const newQuery = ORM.knex.schema.createTable(table, dbTable => {
+                      await ORM.knex.schema.createTable(table, dbTable => {
 
                         if (definition.primaryKeyType === 'integer') {
                           // Common case, numeric incrementable key
@@ -613,18 +588,7 @@ module.exports = function(strapi) {
                             console.log({field}, e);
                           }
                         });
-
-                      }).toString();
-
-                      // FIXME: For temporary debugging. This should be eliminated.
-                      // eslint-disable-next-line prefer-template
-                      console.log('- ' + orgQuery.toLowerCase() + ';');
-                      // eslint-disable-next-line prefer-template
-                      console.log('+ ' + newQuery.toLowerCase() + ';');
-                      console.log('');
-
-                      // Create table
-                      await ORM.knex.raw(newQuery);
+                      });
 
                       // Generate indexes.
                       await generateIndexes(table, attributes);
@@ -655,16 +619,7 @@ module.exports = function(strapi) {
 
                       // Generate and execute query to add missing column
                       if (Object.keys(columnsToAdd).length > 0) {
-                        const columns = generateColumns(columnsToAdd, []);
-                        const queries = columns.reduce((acc, attribute) => {
-                          acc.push(`ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`);
-                          return acc;
-                        }, []);
-
-                        // eslint-disable-next-line prefer-template
-                        Promise.all(queries.map(query => console.log('- ' + query)));
-
-                        const newQuery = ORM.knex.schema.alterTable(table, dbTable => {
+                        await ORM.knex.schema.alterTable(table, dbTable => {
                           // TODO: Remove duplicate code. This is temporary to conserve original structure
                           _.mapKeys(columnsToAdd, (field, fieldName) => {
                             try {
@@ -718,11 +673,7 @@ module.exports = function(strapi) {
                               console.log({field}, e);
                             }
                           });
-                        }).toString();
-
-                        // eslint-disable-next-line prefer-template
-                        console.log('+ ' + newQuery);
-                        await ORM.knex.raw(newQuery);
+                        });
                       }
 
                       let previousAttributes;
