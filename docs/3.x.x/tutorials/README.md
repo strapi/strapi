@@ -1,4 +1,4 @@
-## Tutorials
+# Tutorials
 
 Go further with Strapi, official and community tutorials are here to help you:
 

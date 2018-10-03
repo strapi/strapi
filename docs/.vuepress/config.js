@@ -40,23 +40,18 @@ module.exports = {
         },
         {
           collapsable: false,
-          title: 'Advanced',
-          children: [
-            '/3.x.x/advanced/customize-admin',
-            '/3.x.x/advanced/hooks',
-            '/3.x.x/advanced/logging',
-            '/3.x.x/advanced/middlewares',
-            '/3.x.x/advanced/usage-tracking',
-          ],
-        },
-        '/3.x.x/api-reference/reference',
-        '/3.x.x/cli/CLI',
-        '/3.x.x/concepts/concepts',
-        '/3.x.x/configurations/configurations',
-        {
-          collapsable: false,
           title: 'Getting started',
           children: ['/3.x.x/getting-started/installation', '/3.x.x/getting-started/quick-start'],
+        },
+        {
+          collapsable: false,
+          title: 'Globals',
+          children: [
+            '/3.x.x/api-reference/reference',
+            '/3.x.x/cli/CLI',
+            '/3.x.x/concepts/concepts',
+            '/3.x.x/configurations/configurations',
+          ],
         },
         {
           collapsable: false,
@@ -73,6 +68,25 @@ module.exports = {
             '/3.x.x/guides/policies',
             '/3.x.x/guides/public-assets',
             '/3.x.x/guides/requests',
+          ],
+        },
+        {
+          collapsable: false,
+          title: 'Advanced',
+          children: [
+            '/3.x.x/advanced/customize-admin',
+            '/3.x.x/advanced/hooks',
+            '/3.x.x/advanced/logging',
+            '/3.x.x/advanced/middlewares',
+            '/3.x.x/advanced/usage-tracking',
+          ],
+        },
+        {
+          collapsable: false,
+          title: 'Help',
+          children: [
+            ['https://github.com/strapi/strapi/wiki', 'Migration guides'],
+            '/3.x.x/tutorials/',
           ],
         },
       ],
