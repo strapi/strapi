@@ -1,21 +1,13 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
-// Core
 const path = require('path');
 
-// Public node modules.
 const _ = require('lodash');
 const bookshelf = require('bookshelf');
 const pluralize = require('pluralize');
 
-// Strapi helpers for models.
 const utilsModels = require('strapi-utils').models;
 
-// Local helpers.
 const utils = require('./utils/');
 const relations = require('./relations');
 
@@ -25,13 +17,11 @@ const GLOBALS = {};
 /**
  * Bookshelf hook
  */
-
 module.exports = function(strapi) {
   const hook = _.merge({
     /**
      * Default options
      */
-
     defaults: {
       defaultConnection: 'default',
       host: 'localhost'
@@ -40,7 +30,6 @@ module.exports = function(strapi) {
     /**
      * Initialize the hook
      */
-
     initialize: async cb => {
       const connections = _.pickBy(strapi.config.connections, { connector: 'strapi-hook-bookshelf' });
 
@@ -375,7 +364,6 @@ module.exports = function(strapi) {
                 databaseUpdate.push(new Promise(async (resolve) => {
                   // Equilize database tables
                   const handler = async (table, attributes) => {
-                    const tableExist = await ORM.knex.schema.hasTable(table);
 
                     const getType = (attribute, name) => {
                       let type;
@@ -508,92 +496,98 @@ module.exports = function(strapi) {
                       }
                     };
 
+                    const addPrimaryKey = (dbTable, type = 'integer') => {
+                      if (type === 'integer') {
+                        // Common case, numeric incrementable key
+                        dbTable.increments();
+
+                      } else {
+                        // Build primary key with a peculiar field type
+                        const pk = dbTable[type]('id')
+                          .primary()
+                          .notNullable();
+
+                        if (definition.client === 'pg' && type === 'uuid') {
+                          pk.defaultTo(ORM.knex.raw('uuid_generate_v4()'));
+                        }
+                      }
+                    };
+
+                    const addColumns = (dbTable, attributes) => {
+                      _.mapKeys(attributes, (field, fieldName) => {
+                        try {
+                          if (!field.type) {
+                            // Creating column for foreign key as the original implementation
+                            // ROOM FOR IMPROVEMENT -- Use actual foreign keys
+                            const relation = definition.associations
+                              .find(association => association.alias === fieldName);
+
+                            if (['oneToOne', 'manyToOne', 'oneWay'].includes(relation.nature)) {
+                              dbTable[definition.primaryKeyType](fieldName);
+                            }
+
+                            return;
+                          }
+
+                          switch(field.type) {
+                            // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
+                            case 'text':
+                              dbTable.text(fieldName, 'longtext');
+                              break;
+
+                            case 'decimal':
+                              dbTable.decimal(fieldName, 10, 2);
+                              break;
+
+                            case 'json':
+                              // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
+                              definition.client === 'pg'
+                                ? dbTable.jsonb(fieldName)
+                                : dbTable.text(fieldName, 'longtext');
+                              break;
+
+                            case 'email':
+                            case 'password':
+                            case 'enumeration': // Manage native type is too complicated
+                              dbTable.string(fieldName);
+                              break;
+
+                            case 'date':
+                            case 'timestamp':
+                            case 'timestampUpdate':
+                              dbTable.timestamp(fieldName).defaultTo(
+                                // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
+                                definition.client === 'mysql' && field.type === 'timestampUpdate'
+                                  ? ORM.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
+                                  : ORM.knex.fn.now()
+                              );
+                              break;
+
+                            default:
+                              dbTable[field.type](fieldName);
+                          }
+
+                        } catch (e) {
+                          strapi.log.error(`Field type '${field.type}' (for table '${table}') not recognized.`);
+                          // FIXME: For temporary debugging. This should be eliminated.
+                          console.log({field}, e);
+                        }
+                      });
+                    };
+
+                    const tableExist = await ORM.knex.schema.hasTable(table);
 
                     if (!tableExist) {
 
                       await ORM.knex.schema.createTable(table, dbTable => {
-
-                        if (definition.primaryKeyType === 'integer') {
-                          // Common case, numeric incrementable key
-                          dbTable.increments();
-
-                        } else {
-                          // Build primary key with a peculiar field type
-                          const pk = dbTable[definition.primaryKeyType]('id')
-                            .primary()
-                            .notNullable();
-
-                          if (definition.client === 'pg' && definition.primaryKeyType === 'uuid') {
-                            pk.defaultTo(ORM.knex.raw('uuid_generate_v4()'));
-                          }
-                        }
-
-                        _.mapKeys(attributes, (field, fieldName) => {
-                          try {
-                            if (!field.type) {
-                              // Creating column for foreign key as the original implementation
-                              // ROOM FOR IMPROVEMENT -- Use actual foreign keys
-                              const relation = definition.associations
-                                .find(association => association.alias === fieldName);
-
-                              if (['oneToOne', 'manyToOne', 'oneWay'].includes(relation.nature)) {
-                                dbTable[definition.primaryKeyType](fieldName);
-                              }
-
-                              return;
-                            }
-
-
-                            switch(field.type) {
-                              // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
-                              case 'text':
-                                dbTable.text(fieldName, 'longtext');
-                                break;
-
-                              case 'decimal':
-                                dbTable.decimal(fieldName, 10, 2);
-                                break;
-
-                              case 'json':
-                                // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
-                                definition.client === 'pg'
-                                  ? dbTable.jsonb(fieldName)
-                                  : dbTable.text(fieldName, 'longtext');
-                                break;
-
-                              case 'email':
-                              case 'password':
-                              case 'enumeration': // Manage native type is too complicated
-                                dbTable.string(fieldName);
-                                break;
-
-                              case 'date':
-                              case 'timestamp':
-                              case 'timestampUpdate':
-                                dbTable.timestamp(fieldName).defaultTo(
-                                  // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
-                                  definition.client === 'mysql' && field.type === 'timestampUpdate'
-                                    ? ORM.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
-                                    : ORM.knex.fn.now()
-                                );
-                                break;
-
-                              default:
-                                dbTable[field.type](fieldName);
-                            }
-
-                          } catch (e) {
-                            strapi.log.error(`Field type '${field.type}' (for table '${table}') not recognized.`);
-                            // FIXME: For temporary debugging. This should be eliminated.
-                            console.log({field}, e);
-                          }
-                        });
+                        addPrimaryKey(dbTable, definition.primaryKeyType);
+                        addColumns(dbTable, attributes);
                       });
 
                       // Generate indexes.
                       await generateIndexes(table, attributes);
-
                       await storeTable(table, attributes);
+
                     } else {
 
                       const columns = Object.keys(attributes);
@@ -620,59 +614,7 @@ module.exports = function(strapi) {
                       // Generate and execute query to add missing column
                       if (Object.keys(columnsToAdd).length > 0) {
                         await ORM.knex.schema.alterTable(table, dbTable => {
-                          // TODO: Remove duplicate code. This is temporary to conserve original structure
-                          _.mapKeys(columnsToAdd, (field, fieldName) => {
-                            try {
-                              if (!field.type) {
-                                // Creating integer column for foreign key as the original implementation
-                                field.model && dbTable.integer(field.model);
-                                return;
-                              }
-
-                              switch(field.type) {
-                                // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
-                                case 'text':
-                                  dbTable.text(fieldName, 'longtext');
-                                  break;
-
-                                case 'decimal':
-                                  dbTable.decimal(fieldName, 10, 2);
-                                  break;
-
-                                case 'json':
-                                  // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
-                                  definition.client === 'pg'
-                                    ? dbTable.jsonb(fieldName)
-                                    : dbTable.text(fieldName, 'longtext');
-                                  break;
-
-                                case 'email':
-                                case 'password':
-                                case 'enumeration': // Manage native type is too complicated
-                                  dbTable.string(fieldName);
-                                  break;
-
-                                case 'date':
-                                case 'timestamp':
-                                case 'timestampUpdate':
-                                  dbTable.timestamp(fieldName).defaultTo(
-                                    // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
-                                    definition.client === 'mysql' && field.type === 'timestampUpdate'
-                                      ? ORM.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
-                                      : ORM.knex.fn.now()
-                                  );
-                                  break;
-
-                                default:
-                                  dbTable[field.type](fieldName);
-                              }
-
-                            } catch (e) {
-                              strapi.log.error(`Field type '${field.type}' (for table '${table}') not recognized.`);
-                              // FIXME: For temporary debugging. This should be eliminated.
-                              console.log({field}, e);
-                            }
-                          });
+                          addColumns(dbTable, columnsToAdd);
                         });
                       }
 
