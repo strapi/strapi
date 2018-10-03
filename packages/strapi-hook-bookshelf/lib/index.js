@@ -461,7 +461,7 @@ module.exports = function(strapi) {
                         const connection = strapi.config.connections[definition.connection];
                         let columns = Object.keys(attributes).filter(attribute => ['string', 'text'].includes(attributes[attribute].type));
 
-                        if (!columns) {
+                        if (!columns.length) {
                           // No text columns founds, exit from creating Fulltext Index
                           return;
                         }

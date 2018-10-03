@@ -297,8 +297,6 @@ Most of the application's configurations are defined by environment. It means th
  - `parser`
   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
- - `router`
-  - `prefix` (string): API url prefix (eg. `/v1`).
 
 > Note: The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
 
