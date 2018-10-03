@@ -28,6 +28,8 @@
   border-radius: 0.3rem;
   white-space: nowrap;
   margin-right: 1.8rem;
+  line-height: 28px;
+  font-size: 13px;
   cursor: pointer;
   font-family: Lato;
   -webkit-font-smoothing: antialiased;
@@ -89,16 +91,36 @@
 }
 
 .secondary {
-  // height: 32px !important;
   min-width: 10rem;
-  color: #F64D0A;
-  border: 0.1rem solid #F64D0A;
+  color: #919BAE;
+  border: 0.1rem solid #E3E9F3;
   position: relative;
   border-radius: 3px;
   overflow: hidden;
   &:active {
-   border: 0.15rem solid #F64D0A;
- }
+    border: 0.1rem solid #B6BDCA;
+  }
+}
+
+.delete {
+  position: relative;
+  min-width: 10rem;
+  background: rgba(255,0,0, 0.15);
+  color: #F23508;
+  border: 0.1rem solid rgba(255,0,0, 0.20);
+  border-radius: 3px;
+  overflow: hidden;
+  &:active {
+    border: 0.1rem solid rgba(255,0,0, 0.30);
+  }
+  &:before {
+    content: '';
+    display: inline-block;
+    height: 12px;
+    margin-right: 8px;
+    width: 11px;
+    background-image: url('../../assets/icons/icon_trash.svg');
+  }
 }
 
 .secondaryHotline {

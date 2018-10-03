@@ -308,6 +308,13 @@ export class EditPage extends React.Component {
   pluginHeaderActions =  () => (
     [
       {
+        label: 'app.utils.delete',
+        kind: 'delete',
+        onClick: this.toggle,
+        type: 'button',
+        disabled: this.showLoaders(),
+      },
+      {
         label: 'content-manager.containers.Edit.reset',
         kind: 'secondary',
         onClick: this.toggle,
