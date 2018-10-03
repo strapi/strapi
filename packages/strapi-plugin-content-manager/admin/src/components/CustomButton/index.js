@@ -11,7 +11,7 @@ const CustomButton = styled.button`
   line-height: 28px;
   font-size: 13px;
   font-weight: 500;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   -webkit-font-smoothing-antialiased;
   cursor: pointer;
   &:hover {
