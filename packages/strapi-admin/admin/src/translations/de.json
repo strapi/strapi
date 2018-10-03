@@ -26,6 +26,7 @@
   "app.components.ComingSoonPage.featuresNotAvailable": "Dieses Feature ist derzeit noch in aktiver Entwicklung.",
   "app.components.DownloadInfo.download": "Download wird ausgeführt...",
   "app.components.DownloadInfo.text": "Dies könnte kurz dauern. Danke für deine Geduld.",
+  "app.components.EmptyAttributes.title": "Bisher gibt es noch keine Felder",
   "app.components.HomePage.button.blog": "MEHR DAZU IM BLOG",
   "app.components.HomePage.button.quickStart": "STARTE DAS QUICK-START-TUTORIAL",
   "app.components.HomePage.community": "Finde die Community im Web",
