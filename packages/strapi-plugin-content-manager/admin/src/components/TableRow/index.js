@@ -130,11 +130,6 @@ TableRow.contextTypes = {
   router: PropTypes.object.isRequired,
 };
 
-TableRow.defaultProps = {
-  enableBulkActions: true,
-  value: false,
-};
-
 TableRow.propTypes = {
   destination: PropTypes.string.isRequired,
   enableBulkActions: PropTypes.bool,
@@ -147,7 +142,9 @@ TableRow.propTypes = {
 };
 
 TableRow.defaultProps = {
+  enableBulkActions: true,
   onDelete: () => {},
+  value: false,
 };
 
 export default TableRow;
