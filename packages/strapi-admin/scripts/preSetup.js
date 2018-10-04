@@ -1,6 +1,5 @@
 const shell = require('shelljs');
 const path = require('path');
-const _ = require('lodash');
 
 shell.echo('');
 shell.echo('🕓  The setup process can take few minutes.');
