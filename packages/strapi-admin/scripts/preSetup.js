@@ -1,11 +1,12 @@
 const shell = require('shelljs');
 const path = require('path');
 
-shell.echo('');
-shell.echo('🕓  The setup process can take few minutes.');
-shell.echo('');
-shell.echo('🔸  Administration Panel');
-shell.echo('📦  Installing packages...');
+shell.echo(`
+🕓  The setup process can take few minutes.
+
+🔸  Administration Panel
+📦  Installing packages...
+`);
 
 const pwd = shell.pwd();
 
