@@ -25,6 +25,7 @@
   "app.components.ComingSoonPage.featuresNotAvailable": "Deze feature is nog in ontwikkeling",
   "app.components.DownloadInfo.download": "Aan het downloaden...",
   "app.components.DownloadInfo.text": "Dit kan even duren. Bedankt voor je geduld.",
+  "app.components.EmptyAttributes.title": "Er zijn nog geen velden",
   "app.components.HomePage.button.blog": "LEES MEER OP DE BLOG",
   "app.components.HomePage.button.quickStart": "START DE SNELLE START HANDLEIDING",
   "app.components.HomePage.community": "Vind de community op het web",
