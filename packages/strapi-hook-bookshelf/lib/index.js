@@ -514,7 +514,6 @@ module.exports = function(strapi) {
                     };
 
                     const addColumns = (dbTable, attributes) => {
-
                       if (! Object.keys(attributes).length) {
                         // No information to work
                         return;
@@ -582,45 +581,23 @@ module.exports = function(strapi) {
                     };
 
                     const tableExist = await ORM.knex.schema.hasTable(table);
+                    // NOTE: Big possibility that this is not needed
+                    let columnsToAdd = attributes;
 
                     if (!tableExist) {
-
                       await ORM.knex.schema.createTable(table, dbTable => {
                         addPrimaryKey(dbTable, definition.primaryKeyType);
-                        addColumns(dbTable, attributes);
+                        addColumns(dbTable, columnsToAdd);
                       });
-
-                      // Generate indexes.
-                      await generateIndexes(table, attributes);
-                      await storeTable(table, attributes);
 
                     } else {
-
-                      const columns = Object.keys(attributes);
-
-                      // Fetch existing column
-                      const columnsExist = await Promise.all(columns.map(attribute =>
-                        ORM.knex.schema.hasColumn(table, attribute)
-                      ));
-
-                      const columnsToAdd = {};
-
-                      // Get columns to add
-                      columnsExist.forEach((columnExist, index) => {
-                        const attribute = attributes[columns[index]];
-
-                        if (!columnExist) {
-                          columnsToAdd[columns[index]] = attribute;
-                        }
-                      });
+                      const dbColumns = await ORM.knex.table(table).columnInfo();
+                      columnsToAdd = _.omit(columnsToAdd, Object.keys(dbColumns));
 
                       // Generate and execute query to add missing column
                       await ORM.knex.schema.alterTable(table, dbTable => {
                         addColumns(dbTable, columnsToAdd);
                       });
-
-                      // Generate indexes for new attributes.
-                      await generateIndexes(table, columnsToAdd);
 
                       let previousAttributes;
                       try {
@@ -655,8 +632,11 @@ module.exports = function(strapi) {
                         })
                       ));
 
-                      await storeTable(table, attributes);
                     }
+
+                    // Generate indexes.
+                    await generateIndexes(table, columnsToAdd);
+                    await storeTable(table, columnsToAdd);
                   };
 
                   const quote = definition.client === 'pg' ? '"' : '`';
