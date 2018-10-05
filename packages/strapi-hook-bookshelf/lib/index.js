@@ -514,6 +514,12 @@ module.exports = function(strapi) {
                     };
 
                     const addColumns = (dbTable, attributes) => {
+
+                      if (! Object.keys(attributes).length) {
+                        // No information to work
+                        return;
+                      }
+
                       _.mapKeys(attributes, (field, fieldName) => {
                         try {
                           if (!field.type) {
@@ -608,15 +614,13 @@ module.exports = function(strapi) {
                         }
                       });
 
+                      // Generate and execute query to add missing column
+                      await ORM.knex.schema.alterTable(table, dbTable => {
+                        addColumns(dbTable, columnsToAdd);
+                      });
+
                       // Generate indexes for new attributes.
                       await generateIndexes(table, columnsToAdd);
-
-                      // Generate and execute query to add missing column
-                      if (Object.keys(columnsToAdd).length > 0) {
-                        await ORM.knex.schema.alterTable(table, dbTable => {
-                          addColumns(dbTable, columnsToAdd);
-                        });
-                      }
 
                       let previousAttributes;
                       try {
