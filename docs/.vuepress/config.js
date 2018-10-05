@@ -14,6 +14,7 @@ module.exports = {
   },
   title: 'Strapi Docs',
   description: 'API creation made simple, secure and fast.',
+  base: '/documentation/',
   themeConfig: {
     versions: [
       ['Version 3.x.x', '/3.x.x/'],
