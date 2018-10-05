@@ -115,13 +115,15 @@ module.exports = {
         return acc;
       }, {}));
 
-    const appControllers = Object.keys(strapi.api || {}).reduce((acc, key) => {
-      Object.keys(strapi.api[key].controllers).forEach((controller) => {
-        acc.controllers[controller] = generateActions(strapi.api[key].controllers[controller]);
-      });
+    const appControllers = Object.keys(strapi.api || {})
+      .filter(key => !!strapi.api[key].controllers)
+      .reduce((acc, key) => {
+        Object.keys(strapi.api[key].controllers).forEach((controller) => {
+          acc.controllers[controller] = generateActions(strapi.api[key].controllers[controller]);
+        });
 
-      return acc;
-    }, { controllers: {} });
+        return acc;
+      }, { controllers: {} });
 
     const pluginsPermissions = Object.keys(strapi.plugins).reduce((acc, key) => {
       const initialState = {
