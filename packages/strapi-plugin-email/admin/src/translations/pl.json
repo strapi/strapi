@@ -1,4 +1,8 @@
 {
+  "ConfigPage.description": "Skonfiguruj plugin email",
+  "ConfigPage.title": "Email - Ustawienia",
+  "EditForm.Input.number.label": "Maksymalny dozwolony rozmiar (w MB)",
+  "notification.config.success": "Ustawienia zostały zaktualizowane",
   "plugin.description.long": "Wysyłaj E-maile",
   "plugin.description.short": "Wysyłaj E-maile"
 }
