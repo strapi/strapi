@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { isEmpty, isObject, toString } from 'lodash';
+import { isEmpty, isNull, isObject, toString } from 'lodash';
 import cn from 'classnames';
 
 import CustomInputCheckbox from 'components/CustomInputCheckbox';
@@ -41,7 +41,7 @@ class TableRow extends React.Component {
       case 'integer':
       case 'biginteger':
       case 'decimal':
-        return value && !isEmpty(value.toString()) ? value.toString() : '-';
+        return !isNull(value) ? value.toString() : '-';
       case 'boolean':
         return value !== null ? toString(value) : '-';
       case 'date':
