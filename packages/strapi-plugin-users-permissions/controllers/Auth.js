@@ -149,7 +149,7 @@ module.exports = {
 
     _.defaultsDeep(grantConfig, {
       server: {
-        protocol: 'http',
+        protocol: strapi.config.currentEnvironment.server.protocol,
         host: `${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`
       }
     });
