@@ -440,7 +440,7 @@ module.exports = {
     return _.unionWith(...stages, _.isEqual);
   },
 
-  convertParams: (entity, params) => {
+  convertParams: function (entity, params) {
     const { model, models, convertor, postProcessValue } = this.prepareStage(
       entity,
       params
@@ -456,7 +456,7 @@ module.exports = {
     ])(_filter);
   },
 
-  prepareStage: (entity, params) => {
+  prepareStage: function (entity, params) {
     if (!entity) {
       throw new Error(
         'You can\'t call the convert params method without passing the model\'s name as a first argument.'
@@ -495,7 +495,7 @@ module.exports = {
     };
   },
 
-  getStrapiModels: () => {
+  getStrapiModels: function() {
     return {
       ...strapi.models,
       ...Object.keys(strapi.plugins).reduce(
@@ -508,7 +508,7 @@ module.exports = {
     };
   },
 
-  splitPrimitiveAndRelationValues: _query => {
+  splitPrimitiveAndRelationValues: function(_query) {
     const result = _.reduce(
       _query,
       (acc, value, key) => {
@@ -532,7 +532,7 @@ module.exports = {
     return result;
   },
 
-  injectRelationInKey: key => {
+  injectRelationInKey: function (key) {
     const numberOfRelations = key.match(/\./gi).length - 1;
     const relationStrings = _.times(numberOfRelations, _.constant('relations'));
     return _.chain(key)
@@ -544,7 +544,7 @@ module.exports = {
       .value();
   },
 
-  transformFilter: (filter, iteratee) => {
+  transformFilter: function (filter, iteratee) {
     if (!_.isArray(filter) && !_.isPlainObject(filter)) {
       return filter;
     }
@@ -556,28 +556,30 @@ module.exports = {
     });
   },
 
-  processValues: ({ model, models, convertor, postProcessValue }) => filter => {
-    let parentModel = model;
-    return this.transformFilter(filter, (value, key) => {
-      const field = this.getFieldFromKey(key, parentModel);
-      if (!field) {
-        return this.processMeta(value, key, {
-          field,
-          client: model.client,
-          model,
-          convertor,
-        });
-      }
-      if (field.collection || field.model) {
-        parentModel = models[field.collection || field.model];
-      }
-      return postProcessValue(
-        this.processValue(value, key, { field, client: model.client, model })
-      );
-    });
+  processValues: function ({ model, models, convertor, postProcessValue }) {
+    return filter => {
+      let parentModel = model;
+      return this.transformFilter(filter, (value, key) => {
+        const field = this.getFieldFromKey(key, parentModel);
+        if (!field) {
+          return this.processMeta(value, key, {
+            field,
+            client: model.client,
+            model,
+            convertor,
+          });
+        }
+        if (field.collection || field.model) {
+          parentModel = models[field.collection || field.model];
+        }
+        return postProcessValue(
+          this.processValue(value, key, { field, client: model.client, model })
+        );
+      });
+    };
   },
 
-  getFieldFromKey: (key, model) => {
+  getFieldFromKey: function (key, model) {
     let field;
     // Primary key is a unique case because it doesn't belong to the model's attributes
     if (key === model.primaryKey) {
@@ -599,7 +601,7 @@ module.exports = {
     return field;
   },
 
-  processValue: (value, key, { field, client }) => {
+  processValue: function (value, key, { field, client }) {
     if (field.type === 'boolean' && client === 'mysql') {
       return value === 'true' ? '1' : '0';
     }
@@ -607,7 +609,7 @@ module.exports = {
     return value;
   },
 
-  processMeta: (value, key, { convertor, model }) => {
+  processMeta: function (value, key, { convertor, model }) {
     if (_.includes(['_start', '_limit'], key)) {
       return convertor(value, key);
     } else if (key === '_sort') {
@@ -617,7 +619,7 @@ module.exports = {
     return value;
   },
 
-  processSortMeta: (value, key, { convertor, model }) => {
+  processSortMeta: function (value, key, { convertor, model }) {
     const [attr, order = 'ASC'] = value.split(':');
     if (!_.includes(ORDERS, order)) {
       throw new Error(
@@ -635,21 +637,23 @@ module.exports = {
     return convertor(order, key, attr);
   },
 
-  processPredicates: ({ model, models, convertor }) => filter => {
-    let parentModel = model;
-    return this.transformFilter(filter, (value, key) => {
-      const field = this.getFieldFromKey(key, parentModel);
-      if (!field) {
-        return value;
-      }
-      if (field.collection || field.model) {
-        parentModel = models[field.collection || field.model];
-      }
-      return this.processCriteriaMeta(value, key, { convertor });
-    });
+  processPredicates: function ({ model, models, convertor }) {
+    return filter => {
+      let parentModel = model;
+      return this.transformFilter(filter, (value, key) => {
+        const field = this.getFieldFromKey(key, parentModel);
+        if (!field) {
+          return value;
+        }
+        if (field.collection || field.model) {
+          parentModel = models[field.collection || field.model];
+        }
+        return this.processCriteriaMeta(value, key, { convertor });
+      });
+    };
   },
 
-  processCriteriaMeta: (value, key, { convertor }) => {
+  processCriteriaMeta: function (value, key, { convertor }) {
     let type = '=';
     if (key.match(/_{1}(?:ne|lte?|gte?|containss?|in)/)) {
       type = key.match(/_{1}(?:ne|lte?|gte?|containss?|in)/)[0];
@@ -658,21 +662,23 @@ module.exports = {
     return convertor(value, type, key);
   },
 
-  processGeneratedResults: () => filter => {
-    if (!_.isArray(filter) && !_.isPlainObject(filter)) {
-      return filter;
-    }
-
-    return _.transform(filter, (updatedFilter, value, key) => {
-      // Only set results for object of shape { value, key }
-      if (_.has(value, 'value') && _.has(value, 'key')) {
-        const cleanKey = _.replace(value.key, 'where.', '');
-        _.set(updatedFilter, cleanKey, this.processGeneratedResults()(value.value));
-      } else {
-        updatedFilter[key] = this.processGeneratedResults()(value);
+  processGeneratedResults: function() {
+    return filter => {
+      if (!_.isArray(filter) && !_.isPlainObject(filter)) {
+        return filter;
       }
 
-      return updatedFilter;
-    });
-  },
+      return _.transform(filter, (updatedFilter, value, key) => {
+        // Only set results for object of shape { value, key }
+        if (_.has(value, 'value') && _.has(value, 'key')) {
+          const cleanKey = _.replace(value.key, 'where.', '');
+          _.set(updatedFilter, cleanKey, this.processGeneratedResults()(value.value));
+        } else {
+          updatedFilter[key] = this.processGeneratedResults()(value);
+        }
+
+        return updatedFilter;
+      });
+    };
+  }
 };

@@ -46,12 +46,12 @@ module.exports = (mongoose = new Mongoose()) => {
         default:
       }
     },
-    valueToId: value => {
+    valueToId: function (value) {
       return this.isMongoId(value)
         ? mongoose.Types.ObjectId(value)
         : value;
     },
-    isMongoId: (value) => {
+    isMongoId: function (value) {
       // Here we don't use mongoose.Types.ObjectId.isValid method because it's a weird check,
       // it returns for instance true for any integer value ¯\_(ツ)_/¯
       const hexadecimal = /^[0-9A-F]+$/i;
