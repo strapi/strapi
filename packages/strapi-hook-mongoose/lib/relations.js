@@ -10,9 +10,142 @@ const _ = require('lodash');
 // Utils
 const { models: { getValuePrimaryKey } } = require('strapi-utils');
 
+
+const buildTempFieldPath = field => {
+  return `__${field}`;
+};
+
+const restoreRealFieldPath = (field, prefix) => {
+  return `${prefix}${field}`;
+};
+
 module.exports = {
   getModel: function (model, plugin) {
     return _.get(strapi.plugins, [plugin, 'models', model]) || _.get(strapi, ['models', model]) || undefined;
+  },
+
+  generateLookupStage: function (strapiModel, { whitelistedPopulate = null, prefixPath = '' } = {})  {
+    return strapiModel.associations
+      .filter(ast => {
+        if (whitelistedPopulate) {
+          return _.includes(whitelistedPopulate, ast.alias);
+        }
+        return ast.autoPopulate;
+      })
+      .reduce((acc, ast) => {
+        const model = ast.plugin
+          ? strapi.plugins[ast.plugin].models[ast.collection || ast.model]
+          : strapi.models[ast.collection || ast.model];
+
+        const from = model.collectionName;
+        const isDominantAssociation =
+          (ast.dominant && ast.nature === 'manyToMany') || !!ast.model;
+
+        const _localField =
+          !isDominantAssociation || ast.via === 'related' ? '_id' : ast.alias;
+
+        const localField = `${prefixPath}${_localField}`;
+
+        const foreignField = ast.filter
+          ? `${ast.via}.ref`
+          : isDominantAssociation
+            ? '_id'
+            : ast.via;
+
+        // Add the juncture like the `.populate()` function
+        const asTempPath = buildTempFieldPath(ast.alias, prefixPath);
+        const asRealPath = restoreRealFieldPath(ast.alias, prefixPath);
+        acc.push({
+          $lookup: {
+            from,
+            localField,
+            foreignField,
+            as: asTempPath,
+          },
+        });
+
+        // Unwind the relation's result if only one is expected
+        if (ast.type === 'model') {
+          acc.push({
+            $unwind: {
+              path: `$${asTempPath}`,
+              preserveNullAndEmptyArrays: true,
+            },
+          });
+        }
+
+        // Preserve relation field if it is empty
+        acc.push({
+          $addFields: {
+            [asRealPath]: {
+              $ifNull: [`$${asTempPath}`, null],
+            },
+          },
+        });
+
+        // Remove temp field
+        acc.push({
+          $project: {
+            [asTempPath]: 0,
+          },
+        });
+
+        return acc;
+      }, []);
+  },
+
+  generateMatchStage: function (strapiModel, filters, { prefixPath = '' } = {}) {
+    if (!filters) {
+      return undefined;
+    }
+
+    let acc = [];
+
+    _.forEach(filters.relations, (value, key) => {
+      if (key !== 'relations') {
+        const nextPrefixedPath = `${prefixPath}${key}.`;
+        const association = strapiModel.associations.find(a => a.alias === key);
+
+        if (!association) {
+          acc.push({
+            $match: { [`${prefixPath}${key}`]: value },
+          });
+        } else {
+          const model = association.plugin
+            ? strapi.plugins[association.plugin].models[
+                association.collection || association.model
+              ]
+            : strapi.models[association.collection || association.model];
+
+          // Generate lookup for this relation
+          acc.push(
+            ...this.generateLookupStage(strapiModel, {
+              whitelistedPopulate: [key],
+              prefixPath,
+            })
+          );
+
+          // If it's an object re-run the same function with this new value until having either a primitive value or an array.
+          if (_.isPlainObject(value)) {
+            acc.push(
+              ...this.generateMatchStage(
+                model,
+                { relations: value },
+                {
+                  prefixPath: nextPrefixedPath,
+                }
+              )
+            );
+          }
+        }
+      } else {
+        acc.push(
+          ...this.generateMatchStage(strapiModel, { relations: value }, { prefixPath })
+        );
+      }
+    });
+
+    return acc;
   },
 
   update: async function (params) {

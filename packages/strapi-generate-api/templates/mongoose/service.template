@@ -10,142 +10,7 @@
 // Public dependencies.
 const _ = require('lodash');
 
-const buildTempFieldPath = field => {
-  return `__${field}`;
-};
-
-const restoreRealFieldPath = (field, prefix) => {
-  return `${prefix}${field}`;
-};
-
-export const generateLookupStage = (
-  strapiModel,
-  { whitelistedPopulate = null, prefixPath = '' } = {}
-) => {
-  const result = strapiModel.associations
-    .filter(ast => {
-      if (whitelistedPopulate) {
-        return _.includes(whitelistedPopulate, ast.alias);
-      }
-      return ast.autoPopulate;
-    })
-    .reduce((acc, ast) => {
-      const model = ast.plugin
-        ? strapi.plugins[ast.plugin].models[ast.collection || ast.model]
-        : strapi.models[ast.collection || ast.model];
-
-      const from = model.collectionName;
-      const isDominantAssociation = ast.dominant || !!ast.model;
-
-      const _localField = !isDominantAssociation
-        ? '_id'
-        : ast.via === strapiModel.collectionName || ast.via === 'related'
-          ? '_id'
-          : ast.alias;
-
-      const localField = `${prefixPath}${_localField}`;
-
-      const foreignField = ast.filter
-        ? `${ast.via}.ref`
-        : isDominantAssociation
-          ? ast.via === strapiModel.collectionName
-            ? ast.via
-            : '_id'
-          : ast.via === strapiModel.collectionName
-            ? '_id'
-            : ast.via;
-
-      // Add the juncture like the `.populate()` function
-      const asTempPath = buildTempFieldPath(ast.alias, prefixPath);
-      const asRealPath = restoreRealFieldPath(ast.alias, prefixPath);
-      acc.push({
-        $lookup: {
-          from,
-          localField,
-          foreignField,
-          as: asTempPath,
-        },
-      });
-
-      // Unwind the relation's result if only one is expected
-      if (ast.type === 'model') {
-        acc.push({
-          $unwind: {
-            path: `$${asTempPath}`,
-            preserveNullAndEmptyArrays: true,
-          },
-        });
-      }
-
-      // Preserve relation field if it is empty
-      acc.push({
-        $addFields: {
-          [asRealPath]: {
-            $ifNull: [`$${asTempPath}`, null],
-          },
-        },
-      });
-
-      // Remove temp field
-      acc.push({
-        $project: {
-          [asTempPath]: 0,
-        },
-      });
-
-      return acc;
-    }, []);
-
-  return result;
-};
-
-export const generateMatchStage = (
-  strapiModel,
-  filters,
-  { prefixPath = '' } = {}
-) => {
-  const result = _.chain(filters)
-    .get('relations')
-    .reduce((acc, relationFilters, relationName) => {
-      const association = strapiModel.associations.find(
-        a => a.alias === relationName
-      );
-
-      // Ignore association if it's not been found
-      if (!association) {
-        return acc;
-      }
-
-      const model = association.plugin
-        ? strapi.plugins[association.plugin].models[
-            association.collection || association.model
-          ]
-        : strapi.models[association.collection || association.model];
-
-      _.forEach(relationFilters, (value, key) => {
-        if (key !== 'relations') {
-          acc.push({
-            $match: { [`${prefixPath}${relationName}.${key}`]: value },
-          });
-        } else {
-          const nextPrefixedPath = `${prefixPath}${relationName}.`;
-          acc.push(
-            ...generateLookupStage(model, {
-              whitelistedPopulate: _.keys(value),
-              prefixPath: nextPrefixedPath,
-            }),
-            ...generateMatchStage(model, relationFilters, {
-              prefixPath: nextPrefixedPath,
-            })
-          );
-        }
-      });
-      return acc;
-    }, [])
-    .value();
-
-  return result;
-};
+const { models: { mergeStages } } = require('strapi-utils');
 
 
 module.exports = {
@@ -159,17 +24,17 @@ module.exports = {
   fetchAll: (params) => {
     // Convert `params` object to filters compatible with Mongo.
     const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
-
+    const hook = strapi.hook[<%= globalID %>.orm];
     // Generate stages.
-    const populate = generateLookupStage(<%= globalID %>);
-    const match = generateMatchStage(<%= globalID %>, filters);
+    const populate = hook.load().generateLookupStage(<%= globalID %>); // Nested-Population
+    const match = hook.load().generateMatchStage(<%= globalID %>, filters); // Nested relation filter
+    const aggregateStages = mergeStages(populate, match);
 
     const result = <%= globalID %>.aggregate([
       {
         $match: filters.where, // Direct relation filter
       },
-      ...populate, // Nested-Population
-      ...match, // Nested relation filter
+      ...aggregateStages
     ])
       .skip(filters.start)
       .limit(filters.limit);

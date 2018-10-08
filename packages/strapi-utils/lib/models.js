@@ -436,6 +436,10 @@ module.exports = {
     return _.findKey(strapi.models[association.model || association.collection].attributes, {via: attribute});
   },
 
+  mergeStages: (...stages) => {
+    return _.unionWith(...stages, _.isEqual);
+  },
+
   convertParams: (entity, params) => {
     const { model, models, convertor, postProcessValue } = this.prepareStage(
       entity,
