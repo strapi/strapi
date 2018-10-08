@@ -246,6 +246,33 @@ Most of the application's configurations are defined by environment. It means th
 
 > Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
 
+#### MLab Example
+
+**Path —** `./config/environments/**/database.json`.
+```json
+{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "connector": "strapi-hook-mongoose",
+      "settings": {
+        "client": "mongo",
+        "host": "ds123456.mlab.com",
+        "port": 12345,
+        "database": "mlab_db_name",
+        "username": "mlab_user_name",
+        "password": "mlab_pass"
+      },
+      "options": {
+        "authenticationDatabase": "mlab_db_name",
+        "ssl": false
+      }
+    }
+  }
+}
+```
+
+> Please note that you must give your MLab database name as the authenticationDatabase and your password can not contain the "@" symbol.
 
 
 
@@ -270,8 +297,6 @@ Most of the application's configurations are defined by environment. It means th
  - `parser`
   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
- - `router`
-  - `prefix` (string): API url prefix (eg. `/v1`).
 
 > Note: The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
 
