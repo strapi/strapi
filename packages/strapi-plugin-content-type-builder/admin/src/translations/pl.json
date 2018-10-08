@@ -17,6 +17,7 @@
   "button.contentType.add": "Model",
   "button.contentType.create": "Model",
   "contentType.temporaryDisplay": "(Nie zapisany)",
+  "error.attribute.forbidden": "Ta nazwa jest niedozwolona",
   "error.attribute.key.taken": "Ta wartość już istnieje",
   "error.attribute.sameKeyAndName": "Nie mogą być takie same",
   "error.attribute.taken": "Taki atrybut już istnieje",
