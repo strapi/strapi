@@ -25,6 +25,20 @@ shell.exec(`cd "${appPath}" && npm install --ignore-scripts`, {
   silent
 });
 
+// Install all the dependencies of the plugins.
+shell.exec(`
+  cd ${appPath}/admin/plugins
+
+  for d in */ ; do
+      echo $d
+      cd $d
+      npm i
+      cd ../
+  done
+`, {
+  silent
+});
+
 // Install the administration dependencies.
 shell.exec(`cd "${path.resolve(appPath, 'admin')}" && npm install`, {
   silent
