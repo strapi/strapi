@@ -1,5 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import {
+  all,
   call,
   cancel,
   fork,
@@ -8,9 +9,7 @@ import {
   take,
   takeLatest,
 } from 'redux-saga/effects';
-
 import request from 'utils/request';
-
 import {
   getPermissionsSucceeded,
   getPoliciesSucceeded,
@@ -19,7 +18,6 @@ import {
   getUserSucceeded,
   submitSucceeded,
 } from './actions';
-
 import {
   GET_PERMISSIONS,
   GET_POLICIES,
@@ -27,7 +25,6 @@ import {
   GET_USER,
   SUBMIT,
 } from './constants';
-
 import {
   makeSelectActionType,
   makeSelectModifiedData,
@@ -61,13 +58,13 @@ export function* permissionsGet() {
 
 export function* policiesGet() {
   try {
-    const response = yield [
+    const [policies, routes] = yield all([
       call(request, '/users-permissions/policies', { method: 'GET' }),
       call(request, '/users-permissions/routes', { method: 'GET' }),
-    ];
-
-    yield put(getPoliciesSucceeded(response[0]));
-    yield put(getRoutesSucceeded(response[1]));
+    ]);
+    
+    yield put(getPoliciesSucceeded(policies));
+    yield put(getRoutesSucceeded(routes));
   } catch(err) {
     strapi.notification.error('users-permissions.EditPage.notification.policies.error');
   }
