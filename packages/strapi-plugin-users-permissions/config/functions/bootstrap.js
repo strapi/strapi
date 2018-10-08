@@ -157,7 +157,7 @@ module.exports = async cb => {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
+      email_confirmation_redirection: `${strapi.config.url}/admin`,
       default_role: 'authenticated'
     };
 

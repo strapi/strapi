@@ -149,13 +149,25 @@ module.exports = {
 
     _.defaultsDeep(grantConfig, {
       server: {
-        protocol: 'http',
-        host: `${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`
+        protocol: (strapi.config.proxy.enabled && strapi.config.proxy.ssl) ? 'https' : 'http',
+        host: (strapi.config.proxy.enabled) ? `${strapi.config.proxy.host}:${strapi.config.proxy.port}` : `${strapi.config.host}:${strapi.config.port}`
       }
     });
 
-    const provider = process.platform === 'win32' ? ctx.request.url.split('\\')[2] : ctx.request.url.split('/')[2];
+    let provider = process.platform === 'win32' ? ctx.request.url.split('\\')[2] : ctx.request.url.split('/')[2];
+    provider = provider.split('?')[0];
     const config = grantConfig[provider];
+
+    console.log('=== grantConfig ===');
+    console.log(grantConfig);
+    console.log('=== process.platform ===');
+    console.log(process.platform);
+    console.log('=== ctx.request.url ===');
+    console.log(ctx.request.url);
+    console.log('=== provider ===');
+    console.log(provider);
+    console.log('=== config ===');
+    console.log(config);
 
     if (!_.get(config, 'enabled')) {
       return ctx.badRequest(null, 'This provider is disabled.');
@@ -306,7 +318,7 @@ module.exports = {
         const settings = storeEmail['email_confirmation'] ? storeEmail['email_confirmation'].options : {};
 
         settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
-          URL: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/auth/email-confirmation`,
+          URL: `${strapi.config.url}/auth/email-confirmation`,
           USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider']),
           CODE: jwt
         });
