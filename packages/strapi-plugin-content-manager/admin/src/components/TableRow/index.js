@@ -74,7 +74,7 @@ class TableRow extends React.Component {
     <td key='action' className={styles.actions}>
       <IcoContainer
         icons={[
-          { icoType: 'pencil', onClick: () => this.handleClick(this.props.destination) },
+          { icoType: 'pencil', onClick: this.handleClick },
           { id: this.props.record.id, icoType: 'trash', onClick: this.props.onDelete },
         ]}
       />
@@ -119,7 +119,7 @@ class TableRow extends React.Component {
 
   render() {
     return (
-      <tr className={cn(styles.tableRow, this.props.enableBulkActions && styles.tableRowWithBulk)} onClick={() => this.handleClick(this.props.destination)}>
+      <tr className={cn(styles.tableRow, this.props.enableBulkActions && styles.tableRowWithBulk)} onClick={this.handleClick}>
         {this.renderCells()}
       </tr>
     );
@@ -128,11 +128,6 @@ class TableRow extends React.Component {
 
 TableRow.contextTypes = {
   router: PropTypes.object.isRequired,
-};
-
-TableRow.defaultProps = {
-  enableBulkActions: true,
-  value: false,
 };
 
 TableRow.propTypes = {
@@ -147,7 +142,9 @@ TableRow.propTypes = {
 };
 
 TableRow.defaultProps = {
+  enableBulkActions: true,
   onDelete: () => {},
+  value: false,
 };
 
 export default TableRow;
