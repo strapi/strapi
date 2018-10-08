@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-model",
-  "version": "3.0.0-alpha.14.2",
+  "version": "3.0.0-alpha.14.3",
   "description": "Generate a model for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
