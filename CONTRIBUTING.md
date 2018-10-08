@@ -38,14 +38,14 @@ Then, please follow the instructions below:
 
 [Go to the repository](https://github.com/strapi/strapi) and fork it to your own GitHub account.
 
-#### 2. 💿 Clone the repository
+#### 2. 💿 Clone from your repository
 
 ```bash
-git clone git@github.com:strapi/strapi.git
+git clone git@github.com:YOUR_USERNAME/strapi.git
 ```
 
 #### 3. ⏳ Installation
- 
+
 Go to the root of the repository.
 ```bash
 cd strapi

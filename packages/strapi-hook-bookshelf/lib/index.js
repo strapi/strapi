@@ -513,8 +513,6 @@ module.exports = function(strapi) {
                       if (existTable) {
                         await StrapiConfigs.forge({id: existTable.id}).save({
                           value: JSON.stringify(attributes)
-                        }, {
-                          path: true
                         });
                       } else {
                         await StrapiConfigs.forge({
