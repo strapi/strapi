@@ -82,7 +82,11 @@ export function* submitForm(action) {
           yield put(hideLoginErrorsInput(true));
           break;
         case 'reset-password':
-          formErrors = [{ name: 'password', errors: [{ id: 'users-permissions.Auth.form.error.password.matching' }] }];
+          if (errors[0].id === 'users-permissions.Auth.form.error.code.provide') {
+            strapi.notification.error(errors[0].id);
+          } else {
+            formErrors = [{ name: 'password', errors }];
+          }
           break;
         case 'register': {
           const target = includes(get(errors, ['0', 'id']), 'username') ? 'username' : 'email';
