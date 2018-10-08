@@ -1,5 +1,4 @@
 {
-  "protocol": "${process.env.protocol || 'http'}",
   "host": "localhost",
   "port": "${process.env.PORT || 1337}",
   "proxy": {

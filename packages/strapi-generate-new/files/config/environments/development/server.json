@@ -1,5 +1,4 @@
 {
-  "protocol": "http",
   "host": "localhost",
   "port": 1337,
   "proxy": {
