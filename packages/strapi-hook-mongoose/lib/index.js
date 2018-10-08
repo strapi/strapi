@@ -17,6 +17,8 @@ const { models: utilsModels }  = require('strapi-utils');
 
 // Local helpers.
 const utils = require('./utils/');
+const _utils = utils();
+
 const relations = require('./relations');
 
 /**
@@ -524,23 +526,11 @@ module.exports = function (strapi) {
 
     postProcessValue: (value) => {
       if (_.isArray(value)) {
-        return value.map(valueToId);
+        return value.map(_utils.valueToId);
       }
-      return valueToId(value);
+      return _utils.valueToId(value);
     }
   }, relations);
 
   return hook;
-};
-
-const valueToId = value => {
-  return isMongoId(value)
-    ? mongoose.Types.ObjectId(value)
-    : value;
-};
-
-const isMongoId = (value) => {
-  const hexadecimal = /^[0-9A-F]+$/i;
-
-  return hexadecimal.test(value) && value.length === 24;
 };
