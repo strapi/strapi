@@ -203,7 +203,7 @@ module.exports = {
           this.convertToQuery(queryOpts.params.where)
         );
 
-        return controller(Object.assign({}, ctx, queryOpts, { send: ctx.send }), next);
+        return controller(Object.assign({}, ctx, queryOpts, { send: ctx.send }), next, { populate: [] });
       };
     })();
 
@@ -281,8 +281,12 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.query = this.convertToParams(options);
         context.params = this.amountLimiting(options);
+        context.query = Object.assign(
+          {},
+          this.convertToParams(_.omit(options, 'where')),
+          this.convertToQuery(options.where)
+        );
 
         if (isController) {
           const values = await resolver.call(null, context);
