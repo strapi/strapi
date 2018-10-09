@@ -82,7 +82,7 @@ module.exports = {
       if (!user.password || this.isHashed(user.password)) {
         resolve(null);
       } else {
-        bcrypt.hash(user.password, 10, (err, hash) => {
+        bcrypt.hash(`${user.password}`, 10, (err, hash) => {
           resolve(hash);
         });
       }

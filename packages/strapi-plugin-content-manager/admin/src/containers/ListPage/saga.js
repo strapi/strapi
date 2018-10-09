@@ -107,6 +107,7 @@ export function* dataDeleteAll({ entriesToDelete, model, source }) {
 
     yield put(deleteSeveralDataSuccess());
     yield call(dataGet, { currentModel: model, source });
+    strapi.notification.success('content-manager.success.record.delete');
   } catch(err) {
     strapi.notification.error('content-manager.error.record.delete');
   }

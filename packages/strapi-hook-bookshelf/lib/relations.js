@@ -97,7 +97,7 @@ module.exports = {
                 module.exports.findOne
                   .call(model, { [model.primaryKey]: recordId }, [details.via])
                   .then(record => {
-                    if (record && _.isObject(record[details.via])) {
+                    if (record && _.isObject(record[details.via]) && record.id !== record[details.via][current]) {
                       return module.exports.update.call(this, {
                         id: getValuePrimaryKey(record[details.via], model.primaryKey),
                         values: {
@@ -302,7 +302,7 @@ module.exports = {
   },
 
   addRelation: async function (params) {
-    const association = this.associations.find(x => x.via === params.foreignKey);
+    const association = this.associations.find(x => x.via === params.foreignKey && _.get(params.values, x.alias, null));
 
     if (!association) {
       // Resolve silently.
@@ -325,7 +325,7 @@ module.exports = {
   },
 
   removeRelation: async function (params) {
-    const association = this.associations.find(x => x.via === params.foreignKey);
+    const association = this.associations.find(x => x.via === params.foreignKey && _.get(params.values, x.alias, null));
 
     if (!association) {
       // Resolve silently.

@@ -27,7 +27,7 @@
     "resetPasswordToken": {
       "type": "string",
       "configurable": false,
-      " ": true
+      "private": true
     },
     "confirmed": {
       "type": "boolean",

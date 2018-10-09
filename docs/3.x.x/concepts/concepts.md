@@ -94,7 +94,7 @@ The controllers are defined in each `./api/**/controllers/` folders. Every JavaS
 
 ## Filters
 
-Filters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /user?_limit=30&name=John`).
+Filters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /users?_limit=30&name=John`).
 
 > Please refer to the [filters' guide](../guides/filters.md) for more informations.
 

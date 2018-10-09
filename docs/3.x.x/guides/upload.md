@@ -17,6 +17,7 @@ Please send the request using multipart/form-data encoding
 **Parameters**
 
 - `files`: The file(s) to upload. The value(s) can be a Buffer or Stream.
+- `path`: (optional): The folder where the file(s) will be uploaded to (only supported on strapi-upload-aws-s3 now).
 - `refId`: (optional): The ID of the entry which the file(s) will be linked to.
 - `ref`: (optional): The name of the model which the file(s) will be linked to (see more below).
 - `source`: (optional): The name of the plugin where the model is located.
@@ -115,6 +116,7 @@ Let's say that you want to have a `User` model provided by the plugin `Users & P
 ```js
 {
   "files": "...", // Buffer or stream of file(s)
+  "path": "user/avatar", // Uploading folder of file(s).
   "refId": "5a993616b8e66660e8baf45c", // User's Id.
   "ref": "user", // Model name.
   "source": "users-permissions", // Plugin name.

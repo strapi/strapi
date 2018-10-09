@@ -38,7 +38,7 @@ const generateListTitle = (data, settingType) => {
 
       const disabledProviders = size(data) - enabledProvidersSize > 1 ?
         <FormattedMessage id="users-permissions.List.title.providers.disabled.plural" values={{ number: size(data) - enabledProvidersSize }} />
-        : <FormattedMessage id="users-permissions.List.title.providers.disabled.plural" values={{ number: size(data) - enabledProvidersSize }} />;
+        : <FormattedMessage id="users-permissions.List.title.providers.disabled.singular" values={{ number: size(data) - enabledProvidersSize }} />;
 
       return <div>{enabledProviders}&nbsp;{disabledProviders}</div>;
 

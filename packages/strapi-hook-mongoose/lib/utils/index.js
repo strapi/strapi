@@ -5,7 +5,8 @@
  */
 
 module.exports = mongoose => {
-  require('mongoose-float').loadType(mongoose);
+  var Decimal = require('mongoose-float').loadType(mongoose, 2);
+  var Float = require('mongoose-float').loadType(mongoose, 20);
 
   return {
     convertType: mongooseType => {
@@ -22,9 +23,9 @@ module.exports = mongoose => {
         case 'timestamp':
           return Date;
         case 'decimal':
-          return 'Float';
+          return Decimal;
         case 'float':
-          return mongoose.Schema.Types.Decimal128;
+          return Float;
         case 'json':
           return 'Mixed';
         case 'biginteger':
@@ -39,8 +40,7 @@ module.exports = mongoose => {
         case 'text':
           return 'String';
         default:
-
       }
-    }
+    },
   };
 };

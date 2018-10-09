@@ -18,6 +18,9 @@ Update the `production` settings with the IP and domain name where the project w
 }
 ```
 
+In case your database is not running on the same server, make sure that the environment of your production 
+database (`./config/environments/production/database.json`) is set properly.
+
 **⚠️  If you changed the path to access to the administration, the step #2 is required.**
 
 #### #2 - Setup (optional)
