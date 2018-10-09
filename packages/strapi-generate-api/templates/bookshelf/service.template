@@ -19,6 +19,8 @@ module.exports = {
    */
 
   fetchAll: (params) => {
+    // Get model hook
+    const hook = strapi.hook[<%= globalID %>.orm];
     // Convert `params` object to filters compatible with Bookshelf.
     const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
     // Select field to populate.
@@ -27,65 +29,18 @@ module.exports = {
       .map(ast => ast.alias);
 
     return <%= globalID %>.query(function(qb) {
-      _.forEach(filters.where, (where, key) => {
-        if (_.isArray(where.value) && where.symbol !== 'IN') {
-          for (const value in where.value) {
-            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
-          }
-        } else {
-          qb.where(key, where.symbol, where.value);
-        }
-      });
-
-      Object.keys(filters.relations).forEach(
-        (relationName) => {
-          const ast = <%= globalID.toLowerCase() %>.associations.find(a => a.alias === relationName);
-          if (ast) {
-            const model = ast.plugin ?
-              strapi.plugins[ast.plugin].models[ast.model || ast.collection] :
-              strapi.models[ast.model || ast.collection];
-
-            qb.distinct();
-
-            if (ast.tableCollectionName) {
-              qb.innerJoin(
-                ast.tableCollectionName,
-                `${ast.tableCollectionName}.${<%= globalID.toLowerCase() %>.info.name}_${<%= globalID.toLowerCase() %>.primaryKey}`,
-                `${<%= globalID.toLowerCase() %>.collectionName}.${<%= globalID.toLowerCase() %>.primaryKey}`,
-              );
-              qb.innerJoin(
-                `${relationName}`,
-                `${relationName}.${<%= globalID.toLowerCase() %>.attributes[relationName].column}`,
-                `${ast.tableCollectionName}.${<%= globalID.toLowerCase() %>.attributes[relationName].attribute}_${<%= globalID.toLowerCase() %>.attributes[relationName].column}`,
-              );
-            } else {
-              const relationTable = model.collectionName;
-              const externalKey = ast.type === 'collection' ?
-                `${model.collectionName}.${ast.via}` :
-                `${model.collectionName}.${model.primaryKey}`;
-              const internalKey = !ast.dominant
-                ? `${<%= globalID.toLowerCase() %>.collectionName}.${<%= globalID.toLowerCase() %>.primaryKey}`
-                : ast.via === <%= globalID.toLowerCase() %>.collectionName
-                  ? `${<%= globalID.toLowerCase() %>.collectionName}.${ast.alias}`
-                  : `${<%= globalID.toLowerCase() %>.collectionName}.${<%= globalID.toLowerCase() %>.primaryKey}`;
-
-              qb.innerJoin(relationTable, externalKey, internalKey);
-            }
-
-            const relation = filters.relations[relationName];
-            Object.keys(relation).forEach(
-              (filter) => {
-                qb.where(`${model.collectionName}.${filter}`, `${relation[filter].symbol}`, `${relation[filter].value}`);
-              }
-            );
-          }
-        }
-      );
+      // Generate match stage.
+      hook.load().generateMatchStage(qb)(<%= globalID %>, filters);
 
       if (_.has(filters, 'start')) qb.offset(filters.start);
       if (_.has(filters, 'limit')) qb.limit(filters.limit);
-      if (_.has(filters, 'sort')) qb.orderBy(filters.sort.key, filters.sort.order);
-
+      if (!_.isEmpty(filters.sort)) {
+        if (filters.sort.key) {
+          qb.orderBy(filters.sort.key, filters.sort.order);
+        } else {
+          qb.orderBy(filters.sort);
+        }
+      }
     }).fetchAll({
       withRelated: populate
     });

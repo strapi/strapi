@@ -1,76 +1,21 @@
 const _ = require('lodash');
 
+
 module.exports = {
   find: async function (params = {}, populate) {
+    const hook = strapi.hook[this.orm];
     const records = await this.query((qb) => {
-      _.forEach(params.where, (where, key) => {
-        if (_.isArray(where.value)) {
-          for (const value in where.value) {
-            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
-          }
-        } else {
-          qb.where(key, where.symbol, where.value);
-        }
-      });
+      // Generate match stage.
+      hook.load().generateMatchStage(qb)(this, params);
 
-      if (params.start) {
-        qb.offset(params.start);
-      }
-
-      if (params.limit) {
-        qb.limit(params.limit);
-      }
-
-      if (params.sort) {
+      if (_.has(params, 'start')) qb.offset(params.start);
+      if (_.has(params, 'limit')) qb.limit(params.limit);
+      if (!_.isEmpty(params.sort)) {
         if (params.sort.key) {
           qb.orderBy(params.sort.key, params.sort.order);
         } else {
           qb.orderBy(params.sort);
         }
-      }
-
-      if (params.relations) {
-        Object.keys(params.relations).forEach(
-          (relationName) => {
-            const ast = this.associations.find(a => a.alias === relationName);
-            if (ast) {
-              const model = ast.plugin ?
-                strapi.plugins[ast.plugin].models[ast.model ? ast.model : ast.collection] :
-                strapi.models[ast.model ? ast.model : ast.collection];
-
-              qb.distinct();
-
-              if (ast.tableCollectionName) {
-                qb.innerJoin(
-                  ast.tableCollectionName,
-                  `${ast.tableCollectionName}.${this.info.name}_${this.primaryKey}`,
-                  `${this.collectionName}.${this.primaryKey}`,
-                );
-                qb.innerJoin(
-                  `${relationName}`,
-                  `${relationName}.${this.attributes[relationName].column}`,
-                  `${ast.tableCollectionName}.${this.attributes[relationName].attribute}_${this.attributes[relationName].column}`,
-                );
-              } else {
-                const relationTable = model.collectionName;
-                const externalKey = ast.type === 'collection' ?
-                  `${model.collectionName}.${ast.via}` :
-                  `${model.collectionName}.${model.primaryKey}`;
-                const internalKey = !ast.dominant ? `${this.collectionName}.${this.primaryKey}` :
-                  ast.via === this.collectionName ? `${this.collectionName}.${ast.alias}` : `${this.collectionName}.${this.primaryKey}`;
-
-                qb.innerJoin(relationTable, externalKey, internalKey);
-              }
-
-              const relation = params.relations[relationName];
-              Object.keys(params.relations[relationName]).forEach(
-                (filter) => {
-                  qb.where(`${model.collectionName}.${filter}`, `${relation[filter].symbol}`, `${relation[filter].value}`);
-                }
-              );
-            }
-          }
-        );
       }
     })
     .fetchAll({
