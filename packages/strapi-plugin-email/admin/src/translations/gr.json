@@ -1,0 +1,11 @@
+{
+    "ConfigPage.description": "Ρυθμίστε το πρόσθετο του email",
+    "ConfigPage.title": "Email - Ρυθμίσεις",
+    "EditForm.Input.number.label": "Επιτρεπόμενο μέγιστο μέγεθος (in MB)",
+    "EditForm.Input.select.inputDescription": "Τα μηνύματα ηλεκτρονικού ταχυδρομείου μπορούν να σταλούν με τον προεπιλεγμένο πάροχο (Sendmail) ή έναν εξωτερικό πάροχο",
+    "EditForm.Input.select.label": "Πάροχοι",
+    "EditForm.Input.toggle.label": "Ενεργοποίηση αποστολής μέσω ηλεκτρονικού ταχυδρομείου",
+    "notification.config.success": "Οι ρυθμίσεις έχουν ενημερωθεί",
+    "plugin.description.long": "Αποστολή μηνυμάτων ηλεκτρονικού ταχυδρομείου.",
+    "plugin.description.short": "Αποστολή μηνυμάτων."
+  }
