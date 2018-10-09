@@ -7,16 +7,13 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const argv = require('minimist')(process.argv.slice(2));
-const { __APP_PATH__, __IS_ADMIN__, __INIT_CWD__, __NPM_START_EVENT__, __PORT__,  __PWD__ } = require('./configs/globals');
+const { __APP_PATH__, __IS_ADMIN__, __NPM_START_EVENT__, __PORT__,  __PWD__ } = require('./configs/globals');
 
+const postcssPlugins = require('./configs/postcssOptions');
+const { DEV_ALIAS } = require('./configs/alias');
 // PostCSS plugins
-const cssnext = require('postcss-cssnext');
-const postcssFocus = require('postcss-focus');
-const postcssReporter = require('postcss-reporter');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
-
-const isSetup = path.resolve(__PWD__, '..', '..') === path.resolve(__INIT_CWD__);
 
 const appPath = (() => {
   if (__APP_PATH__) {
@@ -24,15 +21,6 @@ const appPath = (() => {
   }
 
   return __IS_ADMIN__ ? path.resolve(__PWD__, '..') : path.resolve(__PWD__, '..', '..');
-})();
-
-const rootAdminpath = (() => {
-  if (isSetup) {
-    return __IS_ADMIN__
-      ? path.resolve(appPath, 'strapi-admin')
-      : path.resolve(appPath, 'packages', 'strapi-admin');
-  }
-  return path.resolve(appPath, 'admin');
 })();
 
 // Load plugins into the same build in development mode.
@@ -51,7 +39,7 @@ if (__NPM_START_EVENT__) {
   }
 
   plugins.src =
-    __IS_ADMIN__ === 'true' && !plugins.exist
+    __IS_ADMIN__  && !plugins.exist
       ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
         let hasAdminFolder;
 
@@ -124,21 +112,8 @@ module.exports = require('./webpack.base.babel')({
     }),
       // new BundleAnalyzerPlugin(),
   ], // eslint-disable-line no-use-before-define,
-      
-      // Process the CSS with PostCSS
-  postcssPlugins: [
-    postcssFocus(), // Add a :focus to every :hover
-    cssnext({
-      // Allow future CSS features to be used, also auto-prefixes the CSS...
-      browsers: ['last 2 versions', 'IE > 10'], // ...based on this browser list
-    }),
-    postcssReporter({
-      // Posts messages from plugins to the terminal
-      clearMessages: true,
-    }),
-  ],
-    
-    // Tell babel that we want presets and to hot-reload
+  postcssPlugins,
+  // Tell babel that we want presets and to hot-reload
   babelPresets: [
     [
       require.resolve('babel-preset-env'),
@@ -152,75 +127,8 @@ module.exports = require('./webpack.base.babel')({
     require.resolve('babel-preset-stage-0'),
     require.resolve('babel-preset-react-hmre'),
   ],
-  alias: {
-    moment: 'moment/moment.js',
-    'babel-polyfill': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'babel-polyfill',
-    ),
-    lodash: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-    immutable: path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'immutable',
-    ),
-    'react-intl': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'react-intl',
-    ),
-    react: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-    'react-dom': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'react-dom',
-    ),
-    'react-transition-group': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'react-transition-group',
-    ),
-    reactstrap: path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'reactstrap',
-    ),
-    'styled-components': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'styled-components',
-    ),
-    'react-dnd': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'react-dnd',
-    ),
-    'react-dnd-html5-backend': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'react-dnd-html5-backend',
-    ),
-  },
-    
+  alias: DEV_ALIAS,
+  
     // Emit a source map for easier debugging
   devtool: 'cheap-module-source-map',
 }

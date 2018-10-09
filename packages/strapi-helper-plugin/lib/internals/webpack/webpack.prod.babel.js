@@ -2,12 +2,13 @@
 const path = require('path');
 const _ = require('lodash');
 
-const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__,  __PWD__} = require('./configs/global');
+const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__,  __PWD__} = require('./configs/globals');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const cssnext = require('postcss-cssnext');
-const postcssFocus = require('postcss-focus');
-const postcssReporter = require('postcss-reporter');
+
+const postcssPlugins = require('./configs/postcssOptions');
+const { PROD_ALIAS } = require('./configs/alias');
+
 const webpack = require('webpack');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
@@ -155,15 +156,7 @@ module.exports = base({
   ),
 
   // In production, we minify our CSS with cssnano
-  postcssPlugins: [
-    postcssFocus(),
-    cssnext({
-      browsers: ['last 2 versions', 'IE > 10'],
-    }),
-    postcssReporter({
-      clearMessages: true,
-    }),
-  ],
+  postcssPlugins,
 
   // Plugins
   plugins,
@@ -182,61 +175,7 @@ module.exports = base({
     require.resolve('babel-preset-stage-0'),
   ],
 
-  alias: {
-    moment: 'moment/moment.js',
-    'babel-polyfill': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'babel-polyfill',
-    ),
-    lodash: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-    immutable: path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'immutable',
-    ),
-    'react-intl': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'react-intl',
-    ),
-    react: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-    'react-dom': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'react-dom',
-    ),
-    'react-transition-group': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'react-transition-group',
-    ),
-    reactstrap: path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'reactstrap',
-    ),
-    'styled-components': path.resolve(
-      rootAdminpath,
-      'node_modules',
-      'strapi-helper-plugin',
-      'node_modules',
-      'styled-components',
-    ),
-  },
-
+  alias: PROD_ALIAS,
   devtool: 'cheap-module-source-map',
   disableExtractTextPlugin: false,
   externals: {},
