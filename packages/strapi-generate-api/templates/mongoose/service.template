@@ -30,12 +30,7 @@ module.exports = {
     const matchStage = hook.load().generateMatchStage(<%= globalID %>, filters); // Nested relation filter
     const aggregateStages = mergeStages(populateStage, matchStage);
 
-    const result = <%= globalID %>.aggregate([
-      {
-        $match: filters.where, // Direct relation filter
-      },
-      ...aggregateStages
-    ])
+    const result = <%= globalID %>.aggregate(aggregateStages)
       .skip(filters.start)
       .limit(filters.limit);
 

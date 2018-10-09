@@ -364,7 +364,7 @@ module.exports = {
           filter: details.filter,
         };
 
-        if (infos.nature === 'manyToMany' && !association.plugin && definition.orm === 'bookshelf') {
+        if (infos.nature === 'manyToMany' && definition.orm === 'bookshelf') {
           ast.tableCollectionName = this.getCollectionName(association, details);
         }
 
@@ -453,6 +453,7 @@ module.exports = {
       this.processValues({ model, models, convertor, postProcessValue }),
       this.processPredicates({ model, models, convertor }),
       this.processGeneratedResults(),
+      this.mergeWhereAndRelationPayloads()
     ])(_filter);
   },
 
@@ -679,6 +680,18 @@ module.exports = {
 
         return updatedFilter;
       });
+    };
+  },
+
+  mergeWhereAndRelationPayloads: function() {
+    return filter => {
+      return {
+        ...filter, // Normally here we need to omit where key
+        relations: {
+          ...filter.where,
+          relations: filter.relations
+        }
+      };
     };
   }
 };

@@ -10,12 +10,7 @@ module.exports = {
     const matchStage = hook.load().generateMatchStage(this, filters); // Nested relation filter
     const aggregateStages = mergeStages(populateStage, matchStage);
 
-    const result = this.aggregate([
-      {
-        $match: filters.where || {}, // Direct relation filter
-      },
-      ...aggregateStages
-    ]);
+    const result = this.aggregate(aggregateStages);
 
     if (_.has(filters, 'start')) result.skip(filters.start);
     if (_.has(filters, 'limit')) result.limit(filters.limit);
