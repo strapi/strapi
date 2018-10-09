@@ -7,68 +7,15 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const argv = require('minimist')(process.argv.slice(2));
-const { __APP_PATH__, __IS_ADMIN__, __NPM_START_EVENT__, __PORT__,  __PWD__ } = require('./configs/globals');
-
+const { __PORT__ } = require('./configs/globals');
+const plugins = require('./configs/plugins');
 const postcssPlugins = require('./configs/postcssOptions');
 const { DEV_ALIAS } = require('./configs/alias');
+const appPath = require('./configs/appPath');
+
 // PostCSS plugins
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
-
-const appPath = (() => {
-  if (__APP_PATH__) {
-    return __APP_PATH__;
-  }
-
-  return __IS_ADMIN__ ? path.resolve(__PWD__, '..') : path.resolve(__PWD__, '..', '..');
-})();
-
-// Load plugins into the same build in development mode.
-const plugins = {
-  exist: false,
-  src: [],
-  folders: {},
-};
-
-if (__NPM_START_EVENT__) {
-  try {
-    fs.accessSync(path.resolve(appPath, 'plugins'), fs.constants.R_OK);
-  } catch (e) {
-    // Allow app without plugins.
-    plugins.exist = true;
-  }
-
-  plugins.src =
-    __IS_ADMIN__  && !plugins.exist
-      ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
-        let hasAdminFolder;
-
-        // Don't inject the plugins that don't have an admin into the app
-        try {
-          fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
-          hasAdminFolder = true;
-        } catch (err) {
-          hasAdminFolder = false;
-        }
-
-        return x[0] !== '.' && hasAdminFolder;
-      })
-      : [];
-
-  plugins.folders = plugins.src.reduce((acc, current) => {
-    acc[current] = path.resolve(
-      appPath,
-      'plugins',
-      current,
-      'node_modules',
-      'strapi-helper-plugin',
-      'lib',
-      'src',
-    );
-
-    return acc;
-  }, {});
-}
 
 const port = argv.port || __PORT__ || 3000;
 
@@ -83,7 +30,7 @@ module.exports = require('./webpack.base.babel')({
     },
     plugins.src.reduce((acc, current) => {
       acc[current] = path.resolve(plugins.folders[current], 'app.js');
-      
+    
       return acc;
     }, {}),
   ),
@@ -128,8 +75,7 @@ module.exports = require('./webpack.base.babel')({
     require.resolve('babel-preset-react-hmre'),
   ],
   alias: DEV_ALIAS,
-  
-    // Emit a source map for easier debugging
+  // Emit a source map for easier debugging
   devtool: 'cheap-module-source-map',
 }
 );
@@ -140,6 +86,6 @@ module.exports = require('./webpack.base.babel')({
  */
 function templateContent() {
   const html = fs.readFileSync(path.resolve(appPath, 'admin', 'admin', 'src', 'index.html')).toString();
-
+  
   return html;
 }

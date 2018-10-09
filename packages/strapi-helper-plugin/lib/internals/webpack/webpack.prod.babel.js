@@ -2,13 +2,13 @@
 const path = require('path');
 const _ = require('lodash');
 
-const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__,  __PWD__} = require('./configs/globals');
-
+const { __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__,  __PWD__} = require('./configs/globals');
+const appPath = require('./configs/appPath')
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const postcssPlugins = require('./configs/postcssOptions');
 const { PROD_ALIAS } = require('./configs/alias');
-
+const rootAdminpath = require('./configs/rootAdminpath');
 const webpack = require('webpack');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
@@ -18,27 +18,12 @@ const base = require('./webpack.base.babel');
 
 // const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 const isSetup = __IS_MONOREPO__;
-const appPath = (() => {
-  if (__APP_PATH__) {
-    return __APP_PATH__;
-  }
 
-  return __IS_ADMIN__ ? path.resolve(__PWD__, '..') : path.resolve(__PWD__, '..', '..');
-})();
 const adminPath = (() => {
-  if (isSetup) {
+  if (__IS_MONOREPO__) {
     return __IS_ADMIN__ ? path.resolve(appPath, 'strapi-admin') : path.resolve(__PWD__, '..');
   }
-
-  return path.resolve(appPath, 'admin');
-})();
-
-const rootAdminpath = (() => {
-  if (isSetup) {
-    return __IS_ADMIN__
-      ? path.resolve(appPath, 'strapi-admin')
-      : path.resolve(appPath, 'packages', 'strapi-admin');
-  }
+  
   return path.resolve(appPath, 'admin');
 })();
 

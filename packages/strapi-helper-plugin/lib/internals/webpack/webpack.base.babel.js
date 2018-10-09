@@ -8,7 +8,9 @@ const path = require('path');
 const webpack = require('webpack');
 const _ = require('lodash');
 
-const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__, __NPM_START_EVENT__, __PROD__, __PWD__ } = require('./configs/globals');
+const { __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__, __NPM_START_EVENT__, __PROD__, __PWD__ } = require('./configs/globals');
+const appPath = require('./configs/appPath');
+const plugins = require('./configs/plugins');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
@@ -16,21 +18,11 @@ const pluginId = pkg.name.replace(/^strapi-/i, '');
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-const appPath = (() => {
-  if (__APP_PATH__) {
-    return __APP_PATH__;
-  }
-
-  return __IS_ADMIN__ ? path.resolve(__PWD__, '..') : path.resolve(__PWD__, '..', '..');
-})();
-// const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const isSetup = __IS_MONOREPO__;
-
 const adminPath = (() => {
-  if (__IS_ADMIN__ && isSetup) {
+  if (__IS_ADMIN__ && __IS_MONOREPO__) {
     return path.resolve(appPath, 'strapi-admin');
   }
-
+  
   return path.resolve(__PWD__);
 })();
 
@@ -42,7 +34,7 @@ const URLs = {
   mode: 'host',
 };
 
-if (__IS_ADMIN__ && !isSetup) {
+if (__IS_ADMIN__ && !__IS_MONOREPO__) {
   // Load server configuration.
   const serverConfig = path.resolve(
     appPath,
@@ -79,55 +71,6 @@ if (__IS_ADMIN__ && !isSetup) {
   } catch (e) {
     throw new Error(`Impossible to access to ${serverConfig}`);
   }
-}
-
-// Load plugins into the same build in development mode.
-const plugins = {
-  exist: false,
-  src: [],
-  folders: {},
-};
-
-if (__NPM_START_EVENT__) {
-  try {
-    fs.accessSync(path.resolve(appPath, 'plugins'), fs.constants.R_OK);
-  } catch (e) {
-    // Allow app without plugins.
-    plugins.exist = true;
-  }
-
-  // Read `plugins` directory and check if the plugin comes with an UI (it has an App container).
-  // If we don't do this check webpack expects the plugin to have a containers/App/reducer.js to create
-  // the plugin's store (redux).
-  plugins.src =
-    __IS_ADMIN__ && !plugins.exist
-      ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
-        let hasAdminFolder;
-
-        try {
-          fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
-          hasAdminFolder = true;
-        } catch (err) {
-          hasAdminFolder = false;
-        }
-        return x[0] !== '.' && hasAdminFolder;
-      })
-      : [];
-
-  // Construct object of plugin' paths.
-  plugins.folders = plugins.src.reduce((acc, current) => {
-    acc[current] = path.resolve(
-      appPath,
-      'plugins',
-      current,
-      'node_modules',
-      'strapi-helper-plugin',
-      'lib',
-      'src',
-    );
-
-    return acc;
-  }, {});
 }
 
 // Tell webpack to use a loader only for those files
