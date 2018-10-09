@@ -11,6 +11,18 @@ const crypto = require('crypto');
 const _ = require('lodash');
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
+const getURLFromConfig = (config) => {
+  const server = config.currentEnvironment.server;
+  const proxy = server.proxy || {};
+  const protocol = (proxy.enabled && proxy.ssl) ? 'https' : 'http';
+  const host = proxy.enabled ? proxy.host : server.host;
+  const defaultPort = protocol === 'https' ? 443 : 80;
+  const port = proxy.enabled ? proxy.port || defaultPort : server.port;
+  const portString = port === defaultPort ? '' : `:${port}`;
+
+  return new URL(`${protocol}://${host}${portString}`);
+};
+
 module.exports = {
   callback: async (ctx) => {
     const provider = ctx.params.provider || 'local';
@@ -147,10 +159,11 @@ module.exports = {
       key: 'grant'
     }).get();
 
+    const proxyURL = getURLFromConfig(strapi.config);
     _.defaultsDeep(grantConfig, {
       server: {
-        protocol: 'http',
-        host: `${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`
+        protocol: proxyURL.protocol.split(':')[0],
+        host: proxyURL.host
       }
     });
 
@@ -305,8 +318,9 @@ module.exports = {
 
         const settings = storeEmail['email_confirmation'] ? storeEmail['email_confirmation'].options : {};
 
+        const proxyURL = getURLFromConfig(strapi.config);
         settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
-          URL: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/auth/email-confirmation`,
+          URL: (new URL('/auth/email-confirmation', proxyURL.toString())).toString(),
           USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider']),
           CODE: jwt
         });
