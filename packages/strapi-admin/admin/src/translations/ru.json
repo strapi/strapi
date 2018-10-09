@@ -25,6 +25,7 @@
   "app.components.ComingSoonPage.featuresNotAvailable": "Этот функционал все еще находится в стадии активной разработки.",
   "app.components.DownloadInfo.download": "Выполняется загрузка...",
   "app.components.DownloadInfo.text": "Это может занять около минуты. Спасибо за ваше терпение.",
+  "app.components.EmptyAttributes.title": "Пока нет полей",
   "app.components.HomePage.button.blog": "СМОТРИТЕ БОЛЬШЕ В БЛОГЕ",
   "app.components.HomePage.button.quickStart": "ОЗНАКОМТЕСЬ С РУКОВОДСТВОМ ПО БЫСТРОМУ СТАРТУ",
   "app.components.HomePage.community": "Найти сообщество в интернете",
