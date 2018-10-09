@@ -7,11 +7,12 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const argv = require('minimist')(process.argv.slice(2));
+
+const { DEV_ALIAS } = require('./configs/alias');
+const appPath = require('./configs/appPath');
 const { __PORT__ } = require('./configs/globals');
 const plugins = require('./configs/plugins');
 const postcssPlugins = require('./configs/postcssOptions');
-const { DEV_ALIAS } = require('./configs/alias');
-const appPath = require('./configs/appPath');
 
 // PostCSS plugins
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
@@ -30,11 +31,11 @@ module.exports = require('./webpack.base.babel')({
     },
     plugins.src.reduce((acc, current) => {
       acc[current] = path.resolve(plugins.folders[current], 'app.js');
-    
+      
       return acc;
     }, {}),
   ),
-      
+  
   // Don't use hashes in dev mode for better performance
   output: {
     filename: '[name].js',

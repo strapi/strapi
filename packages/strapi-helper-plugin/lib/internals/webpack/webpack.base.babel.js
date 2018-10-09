@@ -2,8 +2,6 @@
  * COMMON WEBPACK CONFIGURATION
  */
 
-/* eslint-disable no-console */
-const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const _ = require('lodash');
@@ -85,21 +83,22 @@ const foldersToInclude = [path.join(adminPath, 'admin', 'src')]
   .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')]);
 
 module.exports = options => {
+  const { alias, babelPresets, devtool, disableExtractTextPlugin, entry, externals,  output, plugins, } = options
   // The disable option is only for production
   // Config from https://github.com/facebook/create-react-app/blob/next/packages/react-scripts/config/webpack.config.prod.js
   const extractSass = new ExtractTextPlugin({
     filename: '[name].[contenthash].css',
-    disable: options.disableExtractTextPlugin || true,
+    disable: disableExtractTextPlugin || true,
   });
 
   return {
-    entry: options.entry,
+    entry: entry,
     output: Object.assign(
       {
         // Compile into js/build.js
         path: path.join(adminPath, 'admin', 'build'),
       },
-      options.output,
+      output,
     ), // Merge with env dependent settings
     module: {
       rules: [
@@ -114,7 +113,7 @@ module.exports = options => {
               loader: require.resolve('babel-loader'),
               include: foldersToInclude,
               options: {
-                presets: options.babelPresets,
+                presets: babelPresets,
                 env: {
                   production: {
                     only: ['src'],
@@ -263,7 +262,7 @@ module.exports = options => {
       }),
       new webpack.NamedModulesPlugin(),
       extractSass,
-    ].concat(options.plugins),
+    ].concat(plugins),
     resolve: {
       modules: [
         'admin/src',
@@ -271,19 +270,19 @@ module.exports = options => {
         'node_modules/strapi-helper-plugin/node_modules',
         'node_modules',
       ],
-      alias: options.alias,
+      alias: alias,
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js'],
       mainFields: ['browser', 'jsnext:main', 'main'],
     },
-    externals: options.externals,
+    externals: externals,
     resolveLoader: {
       modules: [
         path.join(__dirname, '..', '..', '..', 'node_modules'),
         path.join(process.cwd(), 'node_modules'),
       ],
     },
-    devtool: options.devtool,
+    devtool: devtool,
     target: 'web', // Make web variables accessible to webpack, e.g. window,
   };
 };

@@ -8,19 +8,18 @@
 const path = require('path');
 const webpack = require('webpack');
 const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __PWD__} = require('./configs/global')
-
-
-// const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const isSetup = __IS_MONOREPO__;
+const { DEV_ALIAS } = require('./configs/alias')
 const appPath = __APP_PATH__ || path.resolve(__PWD__, '..', ( __IS_ADMIN__ ? '' : '..' ));
 
 const rootAdminpath = (() => {
-  if (isSetup) {
+  if (__IS_MONOREPO__) {
     return __IS_ADMIN__ ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
   }
 
   return path.resolve(appPath, 'admin');
 })();
+
+
 
 module.exports = {
   context: appPath,
@@ -49,20 +48,7 @@ module.exports = {
       'node_modules/strapi-helper-plugin/node_modules',
       'node_modules',
     ],
-    alias: {
-      moment: 'moment/moment.js',
-      'babel-polyfill': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'babel-polyfill'),
-      'lodash': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-      'immutable': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
-      'react-intl': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
-      'react': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-      'react-dom': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
-      'react-transition-group': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
-      'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap'),
-      'react-dnd': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dnd'),
-      'react-dnd-hmtl5-backend': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dnd-html5-backend'),
-      'styled-components': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'styled-components'),
-    },
+    alias: DEV_ALIAS,
     symlinks: false,
     extensions: [
       '.js',
