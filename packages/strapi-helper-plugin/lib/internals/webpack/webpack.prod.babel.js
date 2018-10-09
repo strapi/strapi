@@ -2,6 +2,8 @@
 const path = require('path');
 const _ = require('lodash');
 
+const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__,  __PWD__} = require('./configs/global');
+
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const cssnext = require('postcss-cssnext');
 const postcssFocus = require('postcss-focus');
@@ -13,19 +15,18 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const base = require('./webpack.base.babel');
 
-const isAdmin = process.env.IS_ADMIN === 'true';
 // const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const isSetup = process.env.IS_MONOREPO;
+const isSetup = __IS_MONOREPO__;
 const appPath = (() => {
-  if (process.env.APP_PATH) {
-    return process.env.APP_PATH;
+  if (__APP_PATH__) {
+    return __APP_PATH__;
   }
 
-  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+  return __IS_ADMIN__ ? path.resolve(__PWD__, '..') : path.resolve(__PWD__, '..', '..');
 })();
 const adminPath = (() => {
   if (isSetup) {
-    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(process.env.PWD, '..');
+    return __IS_ADMIN__ ? path.resolve(appPath, 'strapi-admin') : path.resolve(__PWD__, '..');
   }
 
   return path.resolve(appPath, 'admin');
@@ -33,7 +34,7 @@ const adminPath = (() => {
 
 const rootAdminpath = (() => {
   if (isSetup) {
-    return isAdmin
+    return __IS_ADMIN__
       ? path.resolve(appPath, 'strapi-admin')
       : path.resolve(appPath, 'packages', 'strapi-admin');
   }
@@ -64,20 +65,20 @@ const plugins = [
 
 let publicPath;
 
-if (isAdmin && !isSetup) {
+if (__IS_ADMIN__ && !isSetup) {
   // Load server configuration.
   const serverConfig = path.resolve(
     appPath,
     'config',
     'environments',
-    _.lowerCase(process.env.NODE_ENV),
+    _.lowerCase(__NODE_ENV__),
     'server.json',
   );
 
   try {
     const server = require(serverConfig);
 
-    if (process.env.PWD.indexOf('/admin') !== -1) {
+    if (__PWD__.indexOf('/admin') !== -1) {
       if (_.get(server, 'admin.build.host')) {
         publicPath = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
       } else {
@@ -90,7 +91,7 @@ if (isAdmin && !isSetup) {
 }
 
 // Build the `index.html file`
-if (isAdmin) {
+if (__IS_ADMIN__) {
   plugins.push(
     new HtmlWebpackPlugin({
       template: 'admin/src/index.html',
@@ -128,13 +129,13 @@ if (isAdmin) {
 }
 
 const main = (() => {
-  if (isAdmin && isSetup) {
+  if (__IS_ADMIN__ && isSetup) {
     return path.join(process.cwd(), 'admin', 'src', 'app.js');
-  } else if (isAdmin) {
+  } else if (__IS_ADMIN__) {
     return path.join(appPath, 'admin', 'admin', 'src', 'app.js');
   }
 
-  return path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
+  return path.join(__PWD__, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
 })();
 
 module.exports = base({

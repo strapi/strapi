@@ -7,15 +7,16 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const isAdmin = process.env.IS_ADMIN === 'true';
+const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __PWD__} = require('./configs/global')
+
 
 // const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const isSetup = process.env.IS_MONOREPO;
-const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ? '' : '..' ));
+const isSetup = __IS_MONOREPO__;
+const appPath = __APP_PATH__ || path.resolve(__PWD__, '..', ( __IS_ADMIN__ ? '' : '..' ));
 
 const rootAdminpath = (() => {
   if (isSetup) {
-    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
+    return __IS_ADMIN__ ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
   }
 
   return path.resolve(appPath, 'admin');

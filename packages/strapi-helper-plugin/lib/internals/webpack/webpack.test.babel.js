@@ -6,6 +6,8 @@ const path = require('path');
 
 const webpack = require('webpack');
 
+const { __NODE_ENV__ } = require('./configs/global')
+
 const modules = [
   'src',
   'node_modules',
@@ -62,7 +64,7 @@ module.exports = {
     // drop any unreachable code.
     new webpack.DefinePlugin({
       'process.env': {
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+        NODE_ENV: JSON.stringify(__NODE_ENV__),
       },
     })],
 

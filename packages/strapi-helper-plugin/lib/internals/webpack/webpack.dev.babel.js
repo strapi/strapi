@@ -7,6 +7,8 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const argv = require('minimist')(process.argv.slice(2));
+const { __APP_PATH__, __IS_ADMIN__, __INIT_CWD__, __NPM_START_EVENT__, __PORT__,  __PWD__ } = require('./configs/globals');
+
 // PostCSS plugins
 const cssnext = require('postcss-cssnext');
 const postcssFocus = require('postcss-focus');
@@ -14,19 +16,19 @@ const postcssReporter = require('postcss-reporter');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
-const isAdmin = process.env.IS_ADMIN === 'true';
-const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
+const isSetup = path.resolve(__PWD__, '..', '..') === path.resolve(__INIT_CWD__);
+
 const appPath = (() => {
-  if (process.env.APP_PATH) {
-    return process.env.APP_PATH;
+  if (__APP_PATH__) {
+    return __APP_PATH__;
   }
 
-  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+  return __IS_ADMIN__ ? path.resolve(__PWD__, '..') : path.resolve(__PWD__, '..', '..');
 })();
 
 const rootAdminpath = (() => {
   if (isSetup) {
-    return isAdmin
+    return __IS_ADMIN__
       ? path.resolve(appPath, 'strapi-admin')
       : path.resolve(appPath, 'packages', 'strapi-admin');
   }
@@ -40,7 +42,7 @@ const plugins = {
   folders: {},
 };
 
-if (process.env.npm_lifecycle_event === 'start') {
+if (__NPM_START_EVENT__) {
   try {
     fs.accessSync(path.resolve(appPath, 'plugins'), fs.constants.R_OK);
   } catch (e) {
@@ -49,20 +51,20 @@ if (process.env.npm_lifecycle_event === 'start') {
   }
 
   plugins.src =
-    process.env.IS_ADMIN === 'true' && !plugins.exist
+    __IS_ADMIN__ === 'true' && !plugins.exist
       ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
-          let hasAdminFolder;
+        let hasAdminFolder;
 
-          // Don't inject the plugins that don't have an admin into the app
-          try {
-            fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
-            hasAdminFolder = true;
-          } catch (err) {
-            hasAdminFolder = false;
-          }
+        // Don't inject the plugins that don't have an admin into the app
+        try {
+          fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+          hasAdminFolder = true;
+        } catch (err) {
+          hasAdminFolder = false;
+        }
 
-          return x[0] !== '.' && hasAdminFolder;
-        })
+        return x[0] !== '.' && hasAdminFolder;
+      })
       : [];
 
   plugins.folders = plugins.src.reduce((acc, current) => {
@@ -80,7 +82,7 @@ if (process.env.npm_lifecycle_event === 'start') {
   }, {});
 }
 
-const port = argv.port || process.env.PORT || 3000;
+const port = argv.port || __PORT__ || 3000;
 
 module.exports = require('./webpack.base.babel')({
   // Add hot reloading in development
@@ -93,19 +95,19 @@ module.exports = require('./webpack.base.babel')({
     },
     plugins.src.reduce((acc, current) => {
       acc[current] = path.resolve(plugins.folders[current], 'app.js');
-
+      
       return acc;
     }, {}),
   ),
-
+      
   // Don't use hashes in dev mode for better performance
   output: {
     filename: '[name].js',
     chunkFilename: '[name].chunk.js',
     publicPath: `http://127.0.0.1:${port}/`,
   },
-
-  // Add development plugins
+    
+    // Add development plugins
   plugins: [
     new webpack.HotModuleReplacementPlugin(), // Tell webpack we want hot reloading
     new webpack.optimize.CommonsChunkPlugin({
@@ -120,10 +122,10 @@ module.exports = require('./webpack.base.babel')({
       templateContent: templateContent(), // eslint-disable-line no-use-before-define
       chunksSortMode: 'auto',
     }),
-    // new BundleAnalyzerPlugin(),
+      // new BundleAnalyzerPlugin(),
   ], // eslint-disable-line no-use-before-define,
-
-  // Process the CSS with PostCSS
+      
+      // Process the CSS with PostCSS
   postcssPlugins: [
     postcssFocus(), // Add a :focus to every :hover
     cssnext({
@@ -135,8 +137,8 @@ module.exports = require('./webpack.base.babel')({
       clearMessages: true,
     }),
   ],
-
-  // Tell babel that we want presets and to hot-reload
+    
+    // Tell babel that we want presets and to hot-reload
   babelPresets: [
     [
       require.resolve('babel-preset-env'),
@@ -218,10 +220,11 @@ module.exports = require('./webpack.base.babel')({
       'react-dnd-html5-backend',
     ),
   },
-
-  // Emit a source map for easier debugging
+    
+    // Emit a source map for easier debugging
   devtool: 'cheap-module-source-map',
-});
+}
+);
 
 /**
  * We dynamically generate the HTML content in development so that the different

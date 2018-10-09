@@ -8,28 +8,30 @@ const path = require('path');
 const webpack = require('webpack');
 const _ = require('lodash');
 
+const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__, __NPM_START_EVENT__, __PROD__, __PWD__ } = require('./configs/globals');
+
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
 const pluginId = pkg.name.replace(/^strapi-/i, '');
-const isAdmin = process.env.IS_ADMIN === 'true';
+
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const appPath = (() => {
-  if (process.env.APP_PATH) {
-    return process.env.APP_PATH;
+  if (__APP_PATH__) {
+    return __APP_PATH__;
   }
 
-  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
+  return __IS_ADMIN__ ? path.resolve(__PWD__, '..') : path.resolve(__PWD__, '..', '..');
 })();
 // const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const isSetup = process.env.IS_MONOREPO;
+const isSetup = __IS_MONOREPO__;
 
 const adminPath = (() => {
-  if (isAdmin && isSetup) {
+  if (__IS_ADMIN__ && isSetup) {
     return path.resolve(appPath, 'strapi-admin');
   }
 
-  return path.resolve(process.env.PWD);
+  return path.resolve(__PWD__);
 })();
 
 // Define remote and backend URLs.
@@ -40,13 +42,13 @@ const URLs = {
   mode: 'host',
 };
 
-if (isAdmin && !isSetup) {
+if (__IS_ADMIN__ && !isSetup) {
   // Load server configuration.
   const serverConfig = path.resolve(
     appPath,
     'config',
     'environments',
-    _.lowerCase(process.env.NODE_ENV),
+    _.lowerCase(__NODE_ENV__),
     'server.json',
   );
 
@@ -56,7 +58,7 @@ if (isAdmin && !isSetup) {
     let server = require(serverConfig);
     server = templateConfiguration(server);
 
-    if (process.env.PWD.indexOf('/admin') !== -1) {
+    if (__PWD__.indexOf('/admin') !== -1) {
       if (_.get(server, 'admin.build.host')) {
         URLs.host = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
       } else {
@@ -70,7 +72,7 @@ if (isAdmin && !isSetup) {
         URLs.mode = 'backend';
       }
 
-      if (process.env.npm_lifecycle_event === 'start') {
+      if (__NPM_START_EVENT__) {
         URLs.backend = `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`;
       }
     }
@@ -86,7 +88,7 @@ const plugins = {
   folders: {},
 };
 
-if (process.env.npm_lifecycle_event === 'start') {
+if (__NPM_START_EVENT__) {
   try {
     fs.accessSync(path.resolve(appPath, 'plugins'), fs.constants.R_OK);
   } catch (e) {
@@ -98,18 +100,18 @@ if (process.env.npm_lifecycle_event === 'start') {
   // If we don't do this check webpack expects the plugin to have a containers/App/reducer.js to create
   // the plugin's store (redux).
   plugins.src =
-    isAdmin && !plugins.exist
+    __IS_ADMIN__ && !plugins.exist
       ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
-          let hasAdminFolder;
+        let hasAdminFolder;
 
-          try {
-            fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
-            hasAdminFolder = true;
-          } catch (err) {
-            hasAdminFolder = false;
-          }
-          return x[0] !== '.' && hasAdminFolder;
-        })
+        try {
+          fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+          hasAdminFolder = true;
+        } catch (err) {
+          hasAdminFolder = false;
+        }
+        return x[0] !== '.' && hasAdminFolder;
+      })
       : [];
 
   // Construct object of plugin' paths.
@@ -210,7 +212,7 @@ module.exports = options => {
                   {
                     loader: require.resolve('css-loader'),
                     options: {
-                      minimize: process.env.NODE_ENV === 'production',
+                      minimize: __PROD__,
                       sourceMap: false,
                     },
                   },
@@ -237,7 +239,7 @@ module.exports = options => {
                       modules: true,
                       importLoaders: 1,
                       sourceMap: false,
-                      minimize: process.env.NODE_ENV === 'production',
+                      minimize: __PROD__,
                     },
                   },
                   {
@@ -310,7 +312,7 @@ module.exports = options => {
       // drop any unreachable code.
       new webpack.DefinePlugin({
         'process.env': {
-          NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+          NODE_ENV: JSON.stringify(__NODE_ENV__),
           REMOTE_URL: JSON.stringify(URLs.host),
           BACKEND_URL: JSON.stringify(URLs.backend),
           MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
