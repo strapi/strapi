@@ -9,14 +9,11 @@ import {
   take,
   takeLatest,
 } from 'redux-saga/effects';
-
 import { makeSelectSchema } from 'containers/App/selectors';
-
 // Utils.
 import cleanData from 'utils/cleanData';
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
-
 import {
   getDataSucceeded,
   setFormErrors,
@@ -24,7 +21,7 @@ import {
   submitSuccess,
   unsetLoader,
 } from './actions';
-import { GET_DATA, SUBMIT } from './constants';
+import { DELETE_DATA, GET_DATA, SUBMIT } from './constants';
 import {
   makeSelectFileRelations,
   makeSelectIsCreating,
@@ -45,6 +42,27 @@ function* dataGet(action) {
     yield put(getDataSucceeded(action.id, response, pluginHeaderTitle.mainField));
   } catch(err) {
     strapi.notification.error('content-manager.error.record.fetch');
+  }
+}
+
+function* deleteData() {
+  try {
+    const currentModelName = yield select(makeSelectModelName());
+    const record = yield select(makeSelectRecord());
+    const id = record.id || record._id;
+    const source = yield select(makeSelectSource());
+    const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
+
+    yield call(request, requestUrl, { method: 'DELETE', params: { source } });
+    strapi.notification.success('content-manager.success.record.delete');
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 300);
+    });
+    yield put(submitSuccess());
+  } catch(err) {
+    strapi.notification.error('content-manager.error.record.delete');
   }
 }
 
@@ -161,6 +179,7 @@ export function* submit() {
 
 function* defaultSaga() {
   const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
+  yield fork(takeLatest, DELETE_DATA, deleteData);
   yield fork(takeLatest, SUBMIT, submit);
 
   yield take(LOCATION_CHANGE);
