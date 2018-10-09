@@ -1,6 +1,31 @@
 const container = require('markdown-it-container')
 
+let ogprefix = 'og: http://ogp.me/ns#'
+let title = 'Strapi Documentation'
+let description = 'API creation made simple, secure and fast.'
+let color = '#2F80ED'
+let author = 'Strapi'
+let url = 'https://strapi.io/documentation/'
+
+
 module.exports = {
+  head: [
+    ['link', { rel: 'icon', href: `/rocket.png` }],
+    ['meta', { name: 'theme-color', content: color }],
+    ['meta', { prefix: ogprefix, property: 'og:title', content: title }],
+    ['meta', { prefix: ogprefix, property: 'twitter:title', content: title }],
+    ['meta', { prefix: ogprefix, property: 'og:type', content: 'article' }],
+    ['meta', { prefix: ogprefix, property: 'og:url', content: url }],
+    ['meta', { prefix: ogprefix, property: 'og:description', content: description }],
+    ['meta', { prefix: ogprefix, property: 'og:image', content: `${url}rocket.png` }],
+    ['meta', { prefix: ogprefix, property: 'og:article:author', content: author }],
+    ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
+    ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }],
+    // ['link', { rel: 'apple-touch-icon', href: `/assets/apple-touch-icon.png` }],
+    // ['link', { rel: 'mask-icon', href: '/assets/safari-pinned-tab.svg', color: color }],
+    ['meta', { name: 'msapplication-TileImage', content: '/rocket.png' }],
+    ['meta', { name: 'msapplication-TileColor', content: color }],
+  ],
   markdown: {
     anchor: {
       permalink: true,
@@ -12,8 +37,8 @@ module.exports = {
         .use(...createContainer('note'))
     }
   },
-  title: 'Strapi Docs',
-  description: 'API creation made simple, secure and fast.',
+  title,
+  description,
   base: '/documentation/',
   themeConfig: {
     versions: [
