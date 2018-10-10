@@ -1,9 +1,19 @@
 module.exports = {
   type: {
     UsersPermissionsPermission: false // Make this type NOT queriable.
-  },
+  },  
+  query: `
+    me: UsersPermissionsUser
+  `,
   resolver: {
     Query: {
+      me: {
+        resolver: async (obj, options, ctx) => {
+          await strapi.plugins['users-permissions'].controllers.user.me(ctx);
+
+          return ctx.body;
+        }
+      },
       role: {
         resolverOf: 'UsersPermissions.getRole',
         resolver: async (obj, options, ctx) => {
