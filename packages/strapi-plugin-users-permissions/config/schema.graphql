@@ -1,9 +1,19 @@
 module.exports = {
   type: {
     UsersPermissionsPermission: false // Make this type NOT queriable.
-  },
+  },  
+  query: `
+    me: UsersPermissionsUser
+  `,
   resolver: {
     Query: {
+      me: {
+        resolverOf: 'User.me',
+        resolver: {
+          plugin: 'users-permissions',
+          handler: 'User.me'
+        }
+      },
       role: {
         resolverOf: 'UsersPermissions.getRole',
         resolver: async (obj, options, ctx) => {
