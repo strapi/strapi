@@ -10,7 +10,6 @@ import {
   updatePlugin,
 } from 'containers/App/actions';
 import { showNotification } from 'containers/NotificationProvider/actions';
-// import auth from 'utils/auth';
 import { history, store } from './createStore';
 import { translationMessages, languages } from './i18n';
 import './public-path';
