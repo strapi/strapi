@@ -23,13 +23,13 @@ module.exports = {
       type: 'text'
     }
   },
+  // Synchronous
   init: config => {
     if (!config.serviceAccount || !config.bucket) {
       throw new Error(
         '"Service Account JSON" and "Bucket" fields are required!'
       );
     }
-
     // The name for the new bucket
     const bucketName = config.bucket;
     let serviceAccount = null;
@@ -50,26 +50,24 @@ module.exports = {
       }
     });
 
-    // Checks for existing bucket
-    const bucket = storage.bucket(bucketName);
-
-    bucket.exists().then(([bucketExists]) => {
-      if (!bucketExists) {
-        // Creates the new bucket
-        bucket
-          .create()
-          .then(() => {
-            bucket.setStorageClass('multi_regional');
-            strapi.log.debug(`Bucket ${bucketName} created.`);
-          })
-          .catch(error => {
-            throw error;
-          });
-      }
-    });
-
     return {
       upload: async file => {
+        const bucket = storage.bucket(bucketName);
+        const [bucketExists] = await bucket.exists();
+
+        // Create bucket if it doesn't exist
+        if (!bucketExists) {
+          await bucket
+            .create()
+            .then(() => {
+              bucket.setStorageClass('multi_regional');
+              strapi.log.debug(`Bucket ${bucketName} created.`);
+            })
+            .catch(error => {
+              throw error;
+            });
+        }
+
         const path = file.path ? `${file.path}/` : '';
         const filename = `${path}${file.hash}${file.ext}`;
         await storage
