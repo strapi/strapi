@@ -6,6 +6,7 @@
 
 import {
   FREEZE_APP,
+  GET_APP_PLUGINS_SUCCEEDED,
   LOAD_PLUGIN,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
@@ -17,6 +18,13 @@ import {
 export function freezeApp() {
   return {
     type: FREEZE_APP,
+  };
+}
+
+export function getAppPluginsSucceeded(plugins) {
+  return {
+    type: GET_APP_PLUGINS_SUCCEEDED,
+    appPlugins: plugins.map(plugin => plugin.id),
   };
 }
 
