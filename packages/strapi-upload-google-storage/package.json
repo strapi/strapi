@@ -1,0 +1,48 @@
+{
+  "name": "strapi-upload-google-storage",
+  "version": "3.0.0-alpha.14.3",
+  "description": "Google Cloud Storage provider for strapi upload",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "upload",
+    "google",
+    "cloud",
+    "storage",
+    "strapi"
+  ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib",
+  "dependencies": {
+    "@google-cloud/storage": "2.0.3",
+    "fast-crc32c": "1.0.4"
+  },
+  "strapi": {
+    "isProvider": true
+  },
+  "author": {
+    "email": "daniel@mahonstudios.com",
+    "name": "Daniel Mahon",
+    "url": "https://www.mahonstudios.com"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 9.0.0",
+    "npm": ">= 5.3.0"
+  },
+  "license": "MIT"
+}
