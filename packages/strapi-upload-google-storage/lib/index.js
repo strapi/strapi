@@ -8,7 +8,24 @@
 /* eslint-disable prefer-template */
 
 // Imports the Google Cloud client library
+const path = require('path');
 const { Storage } = require('@google-cloud/storage');
+const slugify = require('@sindresorhus/slugify');
+
+// Slugify uploaded filenames
+// https://cloud.google.com/storage/docs/naming#requirements
+const slugifyFilename = file => {
+  const filename = path.basename(file.name, file.ext);
+  const ext = file.ext.toLowerCase();
+  return `${slugify(filename)}${ext}`;
+};
+
+// Add hash to file path
+// https://cloud.google.com/storage/docs/request-rate
+const createFilePath = file => {
+  const filePath = file.path ? `${file.path}/` : `${file.hash}/`;
+  return `${filePath}${slugifyFilename(file)}`;
+};
 
 module.exports = {
   provider: 'google-cloud-storage',
@@ -34,7 +51,7 @@ module.exports = {
     const bucketName = config.bucket;
     let serviceAccount = null;
 
-    // try to parse service account
+    // Try to parse credentials from service account
     try {
       serviceAccount = JSON.parse(config.serviceAccount);
     } catch (e) {
@@ -51,9 +68,11 @@ module.exports = {
     });
 
     return {
+      // Handle upload
       upload: async file => {
         const bucket = storage.bucket(bucketName);
         const [bucketExists] = await bucket.exists();
+        const filePath = createFilePath(file);
 
         // Create bucket if it doesn't exist
         if (!bucketExists) {
@@ -68,15 +87,16 @@ module.exports = {
             });
         }
 
-        const path = file.path ? `${file.path}/` : '';
-        const filename = `${path}${file.hash}${file.ext}`;
+        // Creates a PUBLIC remote file reference
+        // and saves(pipes) the file buffer to it
         await storage
           .bucket(bucketName)
-          .file(filename)
+          .file(filePath)
           .save(file.buffer, {
             contentType: file.mime,
             public: true,
             metadata: {
+              // Download as original filename
               contentDisposition: `inline; filename="${file.name}"`
             }
           })
@@ -84,20 +104,25 @@ module.exports = {
             throw error;
           });
 
-        // Save url to file
-        file.url = `https://storage.googleapis.com/${bucketName}/${filename}`;
+        // Save PUBLIC url to file
+        // https://cloud.google.com/storage/docs/access-public-data
+        file.url = `https://storage.googleapis.com/${bucketName}/${filePath}`;
 
         strapi.log.debug(`Uploaded to ${file.url}`);
       },
+      // Handle remote deletion
       delete: async file => {
-        const path = file.path ? `${file.path}/` : '';
-        const filename = `${path}${file.hash}${file.ext}`;
         await storage
           .bucket(bucketName)
-          .file(filename)
+          .file(createFilePath(file))
           .delete()
           .catch(error => {
-            if (error.code === 404) return; // skip not found files
+            // Continue deletion if remote file is missing
+            if (error.code === 404) {
+              return strapi.log.warn(
+                'Remote file not found, you may have to delete manually!'
+              );
+            }
             throw error;
           });
 

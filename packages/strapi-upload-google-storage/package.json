@@ -15,8 +15,9 @@
   },
   "main": "./lib",
   "dependencies": {
-    "@google-cloud/storage": "2.0.3",
-    "fast-crc32c": "1.0.4"
+    "@google-cloud/storage": "^2.0.3",
+    "@sindresorhus/slugify": "^0.3.0",
+    "fast-crc32c": "^1.0.4"
   },
   "strapi": {
     "isProvider": true
