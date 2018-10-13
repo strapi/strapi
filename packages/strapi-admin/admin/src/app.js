@@ -11,6 +11,7 @@ import { findIndex } from 'lodash';
 import 'sanitize.css/sanitize.css';
 import 'whatwg-fetch';
 import {
+  getAppPluginsSucceeded,
   unsetHasUserPlugin,
 } from 'containers/App/actions';
 import { basename, store } from './createStore';
@@ -27,8 +28,10 @@ if (window.location.port !== '4000') {
       return response.json();
     })
     .then(plugins => {
+      dispatch(getAppPluginsSucceeded(plugins));
+
       if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-        store.dispatch(unsetHasUserPlugin());
+        dispatch(unsetHasUserPlugin());
       }
 
       const $body = document.getElementsByTagName('body')[0];
