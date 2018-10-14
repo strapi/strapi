@@ -4,6 +4,8 @@ const fs = require('fs');
 const _ = require('lodash');
 
 const Service = require('../services/ContentTypeBuilder');
+const { replaceJsonNewLines } = require('../utils/helpers.js');
+
 
 module.exports = {
   getModels: async ctx => {
@@ -34,8 +36,8 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
-
+    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;    
+    
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
@@ -47,11 +49,13 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
+    const _description = replaceJsonNewLines(description);
+
     strapi.reload.isWatching = false;
 
     await Service.appearance(formatedAttributes, name);
 
-    await Service.generateAPI(name, description, connection, collectionName, []);
+    await Service.generateAPI(name, _description, connection, collectionName, []);
 
     const modelFilePath = await Service.getModelPath(name, plugin);
 
@@ -88,8 +92,8 @@ module.exports = {
 
   updateModel: async ctx => {
     const { model } = ctx.params;
-    const { name, description, mainField, connection, collectionName, attributes = [], plugin } = ctx.request.body;
-
+    const { name, description, mainField, connection, collectionName, attributes = [], plugin } = ctx.request.body;    
+  
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
     if (strapi.models[_.toLower(name)] && name !== model) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
@@ -103,12 +107,14 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
+    const _description = replaceJsonNewLines(description);
+
     let modelFilePath = Service.getModelPath(model, plugin);
 
     strapi.reload.isWatching = false;
 
     if (name !== model) {
-      await Service.generateAPI(name, description, connection, collectionName, []);
+      await Service.generateAPI(name, _description, connection, collectionName, []);
     }
 
     await Service.appearance(formatedAttributes, name, plugin);
@@ -119,8 +125,8 @@ module.exports = {
       modelJSON.connection = connection;
       modelJSON.collectionName = collectionName;
       modelJSON.info = {
-        name,
-        description
+        name: name,
+        description: _description
       };
       modelJSON.attributes = formatedAttributes;
 
