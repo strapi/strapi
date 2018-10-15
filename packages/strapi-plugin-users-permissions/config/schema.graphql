@@ -9,7 +9,7 @@ module.exports = {
       email: String!
       confirmed: Boolean
       blocked: Boolean
-      role: UsersPermissionsRole
+      role: UsersPermissionsMeRole
     }
 
     type UsersPermissionsMeRole {
