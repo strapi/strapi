@@ -80,15 +80,6 @@ watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 watcher('', 'npm install ../strapi-utils --no-optional');
 shell.rm('-f', 'package-lock.json');
 
-// Without these line Travis failed.
-if (shell.test('-e', 'admin/src/config/plugins.json') === false) {
-  shell.config.silent = silent;
-  shell.cd('admin/src/config/');
-  shell.ShellString('[]').to('plugins.json');
-  shell.cd('../../../');
-}
-
-
 watcher('📦  Linking strapi-admin', 'npm link --no-optional', false);
 
 shell.cd('../strapi-generate-admin');
