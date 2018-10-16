@@ -365,70 +365,6 @@ module.exports = function(strapi) {
                   // Equilize database tables
                   const handler = async (table, attributes) => {
 
-                    const getType = (attribute, name) => {
-                      let type;
-
-                      if (!attribute.type) {
-                        // Add integer value if there is a relation
-                        const relation = definition.associations.find((association) => {
-                          return association.alias === name;
-                        });
-
-                        switch (relation.nature) {
-                          case 'oneToOne':
-                          case 'manyToOne':
-                          case 'oneWay':
-                            type = definition.primaryKeyType;
-                            break;
-                          default:
-                            return null;
-                        }
-                      } else {
-                        switch (attribute.type) {
-                          case 'uuid':
-                            type = definition.client === 'pg' ? 'uuid' : 'varchar(36)';
-                            break;
-                          case 'text':
-                            type = definition.client === 'pg' ? type = 'text' : 'longtext';
-                            break;
-                          case 'json':
-                            type = definition.client === 'pg' ? 'jsonb' : 'longtext';
-                            break;
-                          case 'string':
-                          case 'enumeration':
-                          case 'password':
-                          case 'email':
-                            type = 'varchar(255)';
-                            break;
-                          case 'integer':
-                          case 'biginteger':
-                            type = definition.client === 'pg' ? 'integer' : 'int';
-                            break;
-                          case 'float':
-                            type = definition.client === 'pg' ? 'double precision' : 'double     ';
-                            break;
-                          case 'decimal':
-                            type = 'decimal(10, 2)';
-                            break;
-                          case 'date':
-                          case 'time':
-                          case 'datetime':
-                          case 'timestamp':
-                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
-                            break;
-                          case 'timestampUpdate':
-                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
-                            break;
-                          case 'boolean':
-                            type = 'boolean';
-                            break;
-                          default:
-                        }
-                      }
-
-                      return type;
-                    };
-
                     const generateIndexes = async (table) => {
                       try {
                         const connection = strapi.config.connections[definition.connection];
@@ -513,8 +449,8 @@ module.exports = function(strapi) {
                       }
                     };
 
-                    const addColumns = (dbTable, attributes) => {
-                      if (! Object.keys(attributes).length) {
+                    const addColumns = (dbTable, attributes, alter = false) => {
+                      if (!Object.keys(attributes).length) {
                         // No information to work
                         return;
                       }
@@ -534,19 +470,20 @@ module.exports = function(strapi) {
                             return;
                           }
 
+                          let column;
                           switch(field.type) {
                             // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
                             case 'text':
-                              dbTable.text(fieldName, 'longtext');
+                              column = dbTable.text(fieldName, 'longtext');
                               break;
 
                             case 'decimal':
-                              dbTable.decimal(fieldName, 10, 2);
+                              column = dbTable.decimal(fieldName, 10, 2);
                               break;
 
                             case 'json':
                               // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
-                              definition.client === 'pg'
+                              column = definition.client === 'pg'
                                 ? dbTable.jsonb(fieldName)
                                 : dbTable.text(fieldName, 'longtext');
                               break;
@@ -554,13 +491,13 @@ module.exports = function(strapi) {
                             case 'email':
                             case 'password':
                             case 'enumeration': // Manage native type is too complicated
-                              dbTable.string(fieldName);
+                              column = dbTable.string(fieldName);
                               break;
 
                             case 'date':
                             case 'timestamp':
                             case 'timestampUpdate':
-                              dbTable.timestamp(fieldName).defaultTo(
+                              column = dbTable.timestamp(fieldName).defaultTo(
                                 // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
                                 definition.client === 'mysql' && field.type === 'timestampUpdate'
                                   ? ORM.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
@@ -569,7 +506,11 @@ module.exports = function(strapi) {
                               break;
 
                             default:
-                              dbTable[field.type](fieldName);
+                              column = dbTable[field.type](fieldName);
+                          }
+
+                          if (alter) {
+                            column.alter();
                           }
 
                         } catch (e) {
@@ -581,24 +522,17 @@ module.exports = function(strapi) {
                     };
 
                     const tableExist = await ORM.knex.schema.hasTable(table);
-                    // NOTE: Big possibility that this is not needed
-                    let columnsToAdd = attributes;
 
                     if (!tableExist) {
                       await ORM.knex.schema.createTable(table, dbTable => {
                         addPrimaryKey(dbTable, definition.primaryKeyType);
-                        addColumns(dbTable, columnsToAdd);
+                        addColumns(dbTable, attributes);
                       });
 
                     } else {
-                      const dbColumns = await ORM.knex.table(table).columnInfo();
-                      columnsToAdd = _.omit(columnsToAdd, Object.keys(dbColumns));
 
-                      // Generate and execute query to add missing column
-                      await ORM.knex.schema.alterTable(table, dbTable => {
-                        addColumns(dbTable, columnsToAdd);
-                      });
-
+                      // ROOM FOR IMPROVEMENT -- This can be avoded if compare with the actual DB scheme; also will be
+                      // more stable
                       let previousAttributes;
                       try {
                         previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
@@ -607,39 +541,24 @@ module.exports = function(strapi) {
                         previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
                       }
 
-                      // Execute query to update column type
-                      await Promise.all(columns.map(attribute =>
-                        new Promise(async (resolve) => {
-                          if (JSON.stringify(previousAttributes[attribute]) ===  JSON.stringify(attributes[attribute])) {
-                            return resolve();
-                          }
+                      const dbColumns = await ORM.knex.table(table).columnInfo();
+                      const missingColumns = _.omit(attributes, Object.keys(dbColumns));
+                      const changedColumns = _.omitBy(attributes, (value, key) => {
+                        return missingColumns[key] || _.isEqual(savedSchema[key], value);
+                      });
 
-                          const type = getType(attributes[attribute], attribute);
-
-                          if (type) {
-                            const changeType = definition.client === 'pg'
-                              ? `ALTER COLUMN ${quote}${attribute}${quote} TYPE ${type} USING ${quote}${attribute}${quote}::${type}`
-                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} `;
-
-                            const changeRequired = definition.client === 'pg'
-                              ? `ALTER COLUMN ${quote}${attribute}${quote} ${attributes[attribute].required ? 'SET' : 'DROP'} NOT NULL`
-                              : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
-                            await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
-                            await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
-                          }
-
-                          resolve();
-                        })
-                      ));
-
+                      // Generate and execute query to add missing column
+                      await ORM.knex.schema.alterTable(table, dbTable => {
+                        addColumns(dbTable, missingColumns);
+                        // TODO: Improve the API. Avoid third "magic" parameter.
+                        addColumns(dbTable, changedColumns, true);
+                      });
                     }
 
                     // Generate indexes.
-                    await generateIndexes(table, columnsToAdd);
-                    await storeTable(table, columnsToAdd);
+                    await generateIndexes(table, attributes);
+                    await storeTable(table, attributes);
                   };
-
-                  const quote = definition.client === 'pg' ? '"' : '`';
 
                   // Add created_at and updated_at field if timestamp option is true
                   if (loadedModel.hasTimestamps) {
