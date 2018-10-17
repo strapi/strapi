@@ -7,7 +7,8 @@ const webpack = require('webpack');
 const _ = require('lodash');
 
 const { __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__, __NPM_START_EVENT__, __PROD__, __PWD__ } = require('./configs/globals');
-const appPath = require('./configs/appPath');
+const paths = require('./configs/paths');
+
 const plugins = require('./configs/plugins');
 
 const pkg = require(path.resolve(process.cwd(), 'package.json'));
@@ -18,10 +19,10 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const adminPath = (() => {
   if (__IS_ADMIN__ && __IS_MONOREPO__) {
-    return path.resolve(appPath, 'strapi-admin');
+    return paths.strapiAdmin;
   }
   
-  return path.resolve(__PWD__);
+  return paths.pwd;
 })();
 
 // Define remote and backend URLs.
@@ -34,13 +35,7 @@ const URLs = {
 
 if (__IS_ADMIN__ && !__IS_MONOREPO__) {
   // Load server configuration.
-  const serverConfig = path.resolve(
-    appPath,
-    'config',
-    'environments',
-    _.lowerCase(__NODE_ENV__),
-    'server.json',
-  );
+  const serverConfig = paths.serverJson;
 
   try {
     const { templateConfiguration } = require(path.join(adminPath, 'node_modules', 'strapi-utils'));
@@ -75,7 +70,7 @@ if (__IS_ADMIN__ && !__IS_MONOREPO__) {
 const foldersToInclude = [path.join(adminPath, 'admin', 'src')]
   .concat(
     plugins.src.reduce((acc, current) => {
-      acc.push(path.resolve(appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
+      acc.push(path.resolve(paths.appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
 
       return acc;
     }, []),
@@ -84,6 +79,7 @@ const foldersToInclude = [path.join(adminPath, 'admin', 'src')]
 
 module.exports = options => {
   const { alias, babelPresets, devtool, disableExtractTextPlugin, entry, externals,  output, plugins, } = options
+  
   // The disable option is only for production
   // Config from https://github.com/facebook/create-react-app/blob/next/packages/react-scripts/config/webpack.config.prod.js
   const extractSass = new ExtractTextPlugin({
@@ -162,7 +158,7 @@ module.exports = options => {
                     loader: require.resolve('postcss-loader'),
                     options: {
                       config: {
-                        path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
+                        path: paths.postcssConfig,
                       },
                     },
                   },
@@ -188,7 +184,7 @@ module.exports = options => {
                     loader: require.resolve('postcss-loader'),
                     options: {
                       config: {
-                        path: path.resolve(__dirname, '..', 'postcss', 'postcss.config.js'),
+                        path: paths.postcssConfig,
                       },
                     },
                   },

@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const { __IS_ADMIN__, __NPM_START_EVENT__, } = require('./globals');
-const appPath = require('./appPath')
+const paths = require('./paths')
 
 
 // Create plugins object.
@@ -17,7 +17,7 @@ const plugins = {
 
 if (__NPM_START_EVENT__) {
   try {
-    fs.accessSync(path.resolve(appPath, 'plugins'), fs.constants.R_OK);
+    fs.accessSync(path.resolve(paths.appPath, 'plugins'), fs.constants.R_OK);
   } catch (e) {
     // Allow app without plugins.
     plugins.exist = true;
@@ -28,11 +28,11 @@ if (__NPM_START_EVENT__) {
   // the plugin's store (redux).
   plugins.src =
     __IS_ADMIN__ && !plugins.exist
-      ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
+      ? fs.readdirSync(path.resolve(paths.appPath, 'plugins')).filter(x => {
         let hasAdminFolder;
         
         try {
-          fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+          fs.accessSync(path.resolve(paths.appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
           hasAdminFolder = true;
         } catch (err) {
           hasAdminFolder = false;
@@ -44,7 +44,7 @@ if (__NPM_START_EVENT__) {
   // Construct object of plugin' paths.
   plugins.folders = plugins.src.reduce((acc, current) => {
     acc[current] = path.resolve(
-      appPath,
+      paths.appPath,
       'plugins',
       current,
       'node_modules',

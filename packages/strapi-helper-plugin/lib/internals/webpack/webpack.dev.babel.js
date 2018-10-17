@@ -9,7 +9,8 @@ const webpack = require('webpack');
 const argv = require('minimist')(process.argv.slice(2));
 
 const { DEV_ALIAS } = require('./configs/alias');
-const appPath = require('./configs/appPath');
+const paths = require('./configs/paths');
+
 const { __PORT__ } = require('./configs/globals');
 const plugins = require('./configs/plugins');
 const postcssPlugins = require('./configs/postcssOptions');
@@ -26,7 +27,7 @@ module.exports = require('./webpack.base.babel')({
     {
       main: [
         `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
-        path.join(appPath, 'admin', 'admin', 'src', 'app.js'),
+        path.join(paths.appPath, 'admin', 'admin', 'src', 'app.js'),
       ],
     },
     plugins.src.reduce((acc, current) => {
@@ -86,7 +87,7 @@ module.exports = require('./webpack.base.babel')({
  * DLL Javascript files are loaded in script tags and available to our application.
  */
 function templateContent() {
-  const html = fs.readFileSync(path.resolve(appPath, 'admin', 'admin', 'src', 'index.html')).toString();
+  const html = fs.readFileSync(paths.indexHtml).toString();
   
   return html;
 }

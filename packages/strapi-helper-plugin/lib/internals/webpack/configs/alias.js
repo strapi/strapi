@@ -2,12 +2,11 @@
  * Create Alias for webpack config.
  */
 const path = require('path');
-const rootAdminpath =  require('./rootAdminpath');
-
+const paths = require('./paths')
 // Create Object for alias path.
 const createAlias = libraries => libraries.reduce((acc, item) => {
   acc[item] = path.resolve(
-    rootAdminpath,
+    paths.rootAdminpath,
     'node_modules',
     'strapi-helper-plugin',
     'node_modules',

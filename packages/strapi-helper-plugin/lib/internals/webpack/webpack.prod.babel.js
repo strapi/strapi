@@ -2,13 +2,13 @@
 const path = require('path');
 const _ = require('lodash');
 
-const { __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__,  __PWD__} = require('./configs/globals');
-const appPath = require('./configs/appPath')
+const { __IS_ADMIN__, __IS_MONOREPO__,  __PWD__} = require('./configs/globals');
+const paths = require('./configs/paths');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const postcssPlugins = require('./configs/postcssOptions');
 const { PROD_ALIAS } = require('./configs/alias');
-const rootAdminpath = require('./configs/rootAdminpath');
+
 const webpack = require('webpack');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const AddAssetHtmlPlugin = require('add-asset-html-webpack-plugin');
@@ -21,15 +21,15 @@ const isSetup = __IS_MONOREPO__;
 
 const adminPath = (() => {
   if (__IS_MONOREPO__) {
-    return __IS_ADMIN__ ? path.resolve(appPath, 'strapi-admin') : path.resolve(__PWD__, '..');
+    return __IS_ADMIN__ ? paths.strapiAdmin : path.resolve(__PWD__, '..');
   }
   
-  return path.resolve(appPath, 'admin');
+  return paths.admin;
 })();
 
 const plugins = [
   new webpack.DllReferencePlugin({
-    manifest: require(path.resolve(rootAdminpath, 'admin', 'src', 'config', 'manifest.json')),
+    manifest: require(paths.manifestJson),
   }),
   // Minify and optimize the JavaScript
   new webpack.optimize.UglifyJsPlugin({
@@ -53,13 +53,7 @@ let publicPath;
 
 if (__IS_ADMIN__ && !isSetup) {
   // Load server configuration.
-  const serverConfig = path.resolve(
-    appPath,
-    'config',
-    'environments',
-    _.lowerCase(__NODE_ENV__),
-    'server.json',
-  );
+  const serverConfig = paths.serverJson;
 
   try {
     const server = require(serverConfig);
@@ -100,7 +94,7 @@ if (__IS_ADMIN__) {
   );
   plugins.push(
     new AddAssetHtmlPlugin({
-      filepath: path.resolve(__dirname, 'dist/*.dll.js'),
+      filepath: paths.filepath,
     }),
   );
   plugins.push(
@@ -118,7 +112,7 @@ const main = (() => {
   if (__IS_ADMIN__ && isSetup) {
     return path.join(process.cwd(), 'admin', 'src', 'app.js');
   } else if (__IS_ADMIN__) {
-    return path.join(appPath, 'admin', 'admin', 'src', 'app.js');
+    return path.join(paths.appPath, 'admin', 'admin', 'src', 'app.js');
   }
 
   return path.join(__PWD__, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
