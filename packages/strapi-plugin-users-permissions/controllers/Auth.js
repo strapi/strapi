@@ -147,10 +147,12 @@ module.exports = {
       key: 'grant'
     }).get();
 
+    const hostBuilder = (host, port) => port ? `${host}:${port}` : host;
+
     _.defaultsDeep(grantConfig, {
       server: {
-        protocol: 'http',
-        host: `${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`
+        protocol: strapi.config.currentEnvironment.server.protocol || 'http',
+        host: hostBuilder(strapi.config.currentEnvironment.server.host, strapi.config.currentEnvironment.server.port)
       }
     });
 
