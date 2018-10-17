@@ -159,15 +159,50 @@ module.exports = {
   },
 
   /**
+   * Build the expression $or
+   */
+  buildOr: function(attributes, q) {
+    if (q === undefined) { q = '' }
+    const $or = Object.keys(attributes).reduce((acc, curr) => {
+      switch (attributes[curr].type) {
+        case 'integer':
+        case 'float':
+        case 'decimal':
+          if (!_.isNaN(_.toNumber(q))) {
+            return acc.concat({ [curr]: q })
+          }
+          return acc;
+        case 'email':
+        case 'password':
+        case 'string':
+        case 'text':
+          return acc.concat({ [curr]: { $regex: q, $options: 'i' } })
+        case 'boolean':
+          if (q === 'true' || q === 'false') {
+            return acc.concat({ [curr]: q === 'true' })
+          }
+          return acc
+        default:
+          return acc
+      }
+    }, [])
+    return $or
+  },
+
+  /**
    * Build the mongoose aggregator by applying the filters
    */
   getModelAggregator: function(model, filters = {}) {
     const aggregation = model.aggregate();
-    if (!_.isEmpty(filters.where)) {
-      aggregation.match(filters.where);
-    }
-    if (filters.limit) {
-      aggregation.limit(filters.limit);
+    if (!_.isEmpty(filters.convertedParams.where)) {
+      if (_.has(filters.convertedParams.where, '_q')) {
+        // recursive search
+        const $or = this.buildOr(model.attributes, filters.convertedParams.where._q);
+        aggregation.match({ $or });
+      } else {
+        // specific filtering
+        aggregation.match(filters.convertedParams.where);
+      }
     }
     return aggregation;
   },
@@ -361,14 +396,15 @@ module.exports = {
               this.convertToParams(_.omit(options, 'where')),
               options.where,
             );
-            return strapi.utils.models.convertParams(name, params);
+            const convertedParams = strapi.utils.models.convertParams(name, params);
+            return { convertedParams, options }
           },
         },
         [connectionGlobalId]: {
           values: (obj, option, context) => {
             // Object here contains the key/value of the field that has been grouped-by
             // for instance obj = { where: { country: 'USA' } } so the values here needs to be filtered according to the parent value
-            return modelResolver(obj, obj, context);
+            return modelResolver(obj, obj.options, context);
           },
           groupBy: (obj, option, context) => {
             // eslint-disable-line no-unused-vars
