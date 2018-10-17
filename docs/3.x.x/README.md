@@ -11,28 +11,3 @@ The most advanced open-source Content Management Framework to build powerful API
 [![Heroku Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app)<!-- {height=20} -->
 <!-- {p:.flex.justify-around} -->
 :::
-
-## v3@alpha.14.2 is available!
-We've been working on a major update for Strapi during the past months, rewriting the core framework and the dashboard.
-
-This documentation is only related to Strapi v3@alpha.14.2 ([v1 documentation is still available](http://strapi.io/documentation/1.x.x)).
-
-**[Get Started](getting-started/installation.md)**<br />
-Learn how to install Strapi and start developing your API.
-
-**[Command Line Interface](cli/CLI.md)**<br />
-Get to know our CLI to make features the hacker way!
-
-**[Concepts](concepts/concepts.md)**<br />
-Get to know more about Strapi and how it works.
-
-**[Guides](configurations/configurations.md)**<br />
-Get familiar with Strapi. Discover concrete examples on how to develop the features you need.
-
-**[Plugin Development](plugin-development/quick-start.md)**<br />
-Understand how to develop your own plugin.
-
-**[API Reference](api-reference/reference.md)**<br />
-Learn about Strapi's API, the `strapi` object that is available in your backend.
-
-**[Migration guide](migration/migration-guide.md)**<br />
