@@ -1,6 +1,6 @@
 # Deployment
 
-#### #1 - Configurate
+#### #1 - Configure
 
 Update the `production` settings with the IP and domain name where the project will be running.
 
