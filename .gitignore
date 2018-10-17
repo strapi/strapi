@@ -109,7 +109,7 @@ coverage
 # Documentation
 ############################
 
-_book
+dist
 
 ############################
 # Builds

@@ -4,50 +4,19 @@
  *
  */
 import {
-  GET_CURR_ENV_SUCCEEDED,
-  GET_GA_STATUS,
-  GET_GA_STATUS_SUCCEEDED,
-  GET_LAYOUT,
-  GET_LAYOUT_SUCCEEDED,
-  GET_STRAPI_VERSION_SUCCEEDED,
+  GET_ADMIN_DATA,
+  GET_ADMIN_DATA_SUCCEEDED,
 } from './constants';
 
-export function getCurrEnvSucceeded(currentEnvironment) {
+export function getAdminData() {
   return {
-    type: GET_CURR_ENV_SUCCEEDED,
-    currentEnvironment,
+    type: GET_ADMIN_DATA,
   };
 }
 
-export function getGaStatus() {
+export function getAdminDataSucceeded(data) {
   return {
-    type: GET_GA_STATUS,
-  };
-}
-
-export function getGaStatusSucceeded(allowGa) {
-  return {
-    type: GET_GA_STATUS_SUCCEEDED,
-    allowGa,
-  };
-}
-
-export function getLayout() {
-  return {
-    type: GET_LAYOUT,
-  };
-}
-
-export function getLayoutSucceeded(layout) {
-  return {
-    type: GET_LAYOUT_SUCCEEDED,
-    layout,
-  };
-}
-
-export function getStrapiVersionSucceeded(strapiVersion) {
-  return {
-    type: GET_STRAPI_VERSION_SUCCEEDED,
-    strapiVersion,
+    type: GET_ADMIN_DATA_SUCCEEDED,
+    data,
   };
 }
