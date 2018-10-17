@@ -60,6 +60,9 @@ const reorderList = (manager, list) => {
   
   return List(flattenDeep(reordered));
 };
+const replaceJsonNewLines = (content, placeholder = ' ') => {
+  return content.replace(/[\r\n]+/g, placeholder);
+}
 
 module.exports = {
   createArrayOfLastEls,
@@ -67,4 +70,5 @@ module.exports = {
   getElementsOnALine,
   removeColsLine,
   reorderList,
+  replaceJsonNewLines
 };
