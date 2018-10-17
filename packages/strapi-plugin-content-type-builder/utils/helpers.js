@@ -61,10 +61,15 @@ const reorderList = (manager, list) => {
   return List(flattenDeep(reordered));
 };
 
+const escapeNewlines = (content, placeholder = '\n') => {
+  return content.replace(/[\n]+/g, placeholder);
+}
+
 module.exports = {
   createArrayOfLastEls,
   createManager,
   getElementsOnALine,
   removeColsLine,
   reorderList,
+  escapeNewlines
 };
