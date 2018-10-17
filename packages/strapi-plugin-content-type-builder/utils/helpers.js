@@ -62,7 +62,7 @@ const reorderList = (manager, list) => {
 };
 
 const escapeNewlines = (content, placeholder = '\n') => {
-  return content.replace(/[\n]+/g, placeholder);
+  return content.replace(/[\r\n]+/g, placeholder);
 }
 
 module.exports = {

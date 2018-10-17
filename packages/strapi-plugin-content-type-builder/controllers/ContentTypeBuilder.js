@@ -48,7 +48,7 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
-    const _description = escapeNewlines(description);
+    const _description = escapeNewlines(description, '\\n');
 
     strapi.reload.isWatching = false;
 
