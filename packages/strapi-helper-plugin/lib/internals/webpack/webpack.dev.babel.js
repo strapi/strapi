@@ -27,24 +27,24 @@ module.exports = require('./webpack.base.babel')({
     {
       main: [
         `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
-        path.join(paths.appPath, 'admin', 'admin', 'src', 'app.js'),
+        path.join(paths.appPath, 'admin', 'admin', 'src', 'appDev.js'),
       ],
     },
     plugins.src.reduce((acc, current) => {
       acc[current] = path.resolve(plugins.folders[current], 'app.js');
-      
+
       return acc;
     }, {}),
   ),
-  
+
   // Don't use hashes in dev mode for better performance
   output: {
     filename: '[name].js',
     chunkFilename: '[name].chunk.js',
     publicPath: `http://127.0.0.1:${port}/`,
   },
-    
-    // Add development plugins
+
+  // Add development plugins
   plugins: [
     new webpack.HotModuleReplacementPlugin(), // Tell webpack we want hot reloading
     new webpack.optimize.CommonsChunkPlugin({
@@ -59,7 +59,7 @@ module.exports = require('./webpack.base.babel')({
       templateContent: templateContent(), // eslint-disable-line no-use-before-define
       chunksSortMode: 'auto',
     }),
-      // new BundleAnalyzerPlugin(),
+    // new BundleAnalyzerPlugin(),
   ], // eslint-disable-line no-use-before-define,
   postcssPlugins,
   // Tell babel that we want presets and to hot-reload
@@ -79,8 +79,7 @@ module.exports = require('./webpack.base.babel')({
   alias: DEV_ALIAS,
   // Emit a source map for easier debugging
   devtool: 'cheap-module-source-map',
-}
-);
+});
 
 /**
  * We dynamically generate the HTML content in development so that the different
