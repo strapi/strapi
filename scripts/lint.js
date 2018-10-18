@@ -31,6 +31,7 @@ const watcher = (label, pckgName) => {
 };
 
 const except = [
+  'docs',
   'jest.config.js',
   'scripts',
   'strapi-lint',
