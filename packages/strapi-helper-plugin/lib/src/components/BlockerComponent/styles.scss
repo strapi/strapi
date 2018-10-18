@@ -5,7 +5,7 @@
 .header {
   display: flex;
   justify-content: center;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   > div {
     padding-top: 2.5rem;
     > h4 {
@@ -77,7 +77,7 @@
     margin-right: 13px;
   }
   cursor: pointer;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   -webkit-font-smoothing: antialiased;
   &:focus {
     outline: 0;

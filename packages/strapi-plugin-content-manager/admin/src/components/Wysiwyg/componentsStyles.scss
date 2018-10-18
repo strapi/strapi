@@ -6,14 +6,14 @@
   font-size: 16px;
   background-color: #fff;
   line-height: 24px !important;
-  font-family: 'OpenSans', sans-serif;
+  font-family: "OpenSans";
   cursor: text;
 
   // TODO define rules for header's margin
   h1, h2, h3, h4, h5, h6 {
     margin: 0;
     line-height: 24px !important;
-    font-family: 'OpenSans', sans-serif;
+    font-family: "OpenSans";
   }
 
   h1 {
@@ -155,7 +155,7 @@ h1+.editorParagraph{
   background-color: #FAFAFB;
   line-height: 30px;
   font-size: 12px;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   background-color: #fff;
   border-bottom: 1px solid #F3F4F4;
   line-height: 49px;

@@ -1,6 +1,6 @@
 .inputSelect { /* stylelint-disable */
   font-size: 1.3rem;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
 
   > label {
     text-transform: capitalize;
@@ -9,7 +9,7 @@
   }
   > select {
     font-size: 1.3rem;
-    font-family: 'Lato', sans-serif;
+    font-family: Lato;
     color: #333740;
     height: 3.5rem!important;
     border-radius: 0rem!important;
@@ -21,7 +21,7 @@
 .requiredClass {
   > label:after {
     color: red;
-    font-family: 'Lato', sans-serif;
+    font-family: Lato;
     font-weight: bold;
     margin-left: 5px;
     content: "*";
@@ -32,7 +32,7 @@
 .input {
   margin-bottom: 1.5rem;
   font-size: 1.3rem;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   -webkit-font-smoothing: antialiased;
   > label {
     margin-bottom: 0;
@@ -51,7 +51,7 @@
     -moz-appearance: none;
     -webkit-appearance: none;
     font-size: 1.3rem;
-    font-family: 'Lato', sans-serif !important;
+    font-family: Lato !important;
     background-position: right -1px center;
     background-repeat: no-repeat;
     background-image: url('../../assets/images/background_input.svg');
