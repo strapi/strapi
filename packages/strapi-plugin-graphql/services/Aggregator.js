@@ -197,7 +197,7 @@ module.exports = {
     if (!_.isEmpty(filters.convertedParams.where)) {
       if (_.has(filters.convertedParams.where, '_q')) {
         // recursive search
-        const $or = this.buildOr(model.attributes, filters.convertedParams.where._q);
+        const $or = this.buildOr(model.attributes, String(filters.convertedParams.where._q));
         aggregation.match({ $or });
       } else {
         // specific filtering
