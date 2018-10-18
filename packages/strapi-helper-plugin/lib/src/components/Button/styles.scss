@@ -31,7 +31,7 @@
   line-height: 26px;
   font-size: 13px;
   cursor: pointer;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   -webkit-font-smoothing: antialiased;
   &:focus {
     outline: 0;
@@ -180,7 +180,7 @@
   padding: 0;
   border-radius: 0.3rem;
   letter-spacing: .5rem;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   cursor: not-allowed;
   opacity: .65;
   &:focus {
