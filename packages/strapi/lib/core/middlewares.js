@@ -1,9 +1,8 @@
 'use strict';
 
 // Dependencies.
-const glob = require('glob');
 const path = require('path');
-const utils = require('../utils');
+const glob = require('glob');
 const { parallel } = require('async');
 const { upperFirst, lowerFirst, endsWith } = require('lodash');
 

@@ -18,6 +18,10 @@
       "configurable": false,
       "required": true
     },
+    "sha256": {
+      "type": "string",
+      "configurable": false
+    },
     "ext": {
       "type": "string",
       "configurable": false
@@ -28,7 +32,7 @@
       "required": true
     },
     "size": {
-      "type": "integer",
+      "type": "string",
       "configurable": false,
       "required": true
     },

@@ -5,8 +5,8 @@
  */
 
 // Node.js core.
-const { get } = require('lodash');
 const path = require('path');
+const { get } = require('lodash');
 
 /**
  * Language hook

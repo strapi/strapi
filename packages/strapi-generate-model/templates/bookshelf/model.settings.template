@@ -1,12 +1,16 @@
 {
   "connection": "<%= connection %>",
-  "collectionName": "<%= idPluralized %>",
+  "collectionName": "<%= collectionName || idPluralized %>",
+  "info": {
+    "name": "<%= id %>",
+    "description": "<%= description %>"
+  },
   "options": {
     "increments": true,
     "timestamps": true,
     "comment": ""
   },
   "attributes": {
-<%= attributes %>
+    <%= attributes %>
   }
 }

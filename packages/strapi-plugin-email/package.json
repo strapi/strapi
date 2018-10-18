@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.0.0-alpha.11.3",
+  "version": "3.0.0-alpha.14.3",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Email",
@@ -11,22 +11,22 @@
     "analyze:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf stats.json",
     "preanalyze": "npm run analyze:clean",
     "analyze": "node ./node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
-    "prebuild": "npm run build:clean && npm run test",
+    "prebuild": "npm run build:clean",
     "build:dev": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node ./node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
     "build": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=production node node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
     "build:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf admin/build",
     "start": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node ./node_modules/strapi-helper-plugin/lib/server",
-    "generate": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/plop --plopfile ./node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "lint": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern '/admin/build/' --config ./node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
+    "generate": "node ./node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
-    "test": "npm run lint",
-    "prepublishOnly": "npm run build"
+    "test": "echo \"Error: no test specified\"",
+    "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
-    "sendmail": "^1.2.0"
+    "strapi-email-sendmail": "3.0.0-alpha.14.3"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.11.3"
+    "react-copy-to-clipboard": "5.0.1",
+    "strapi-helper-plugin": "3.0.0-alpha.14.3"
   },
   "author": {
     "name": "Strapi team",
@@ -45,8 +45,8 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": ">= 7.0.0",
-    "npm": ">= 3.0.0"
+    "node": ">= 9.0.0",
+    "npm": ">= 5.0.0"
   },
   "license": "MIT"
 }

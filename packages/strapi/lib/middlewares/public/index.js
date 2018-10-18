@@ -9,7 +9,7 @@ const path = require('path');
 
 // Public modules
 const _ = require('lodash');
-const Koa = require('koa');
+const Koa = require('koa'); // eslint-disable-line no-unused-vars
 
 /**
  * Public assets hook

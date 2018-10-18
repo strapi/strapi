@@ -16,6 +16,7 @@ const reportback = require('reportback')();
  * Generate a JSON file
  */
 
+/* eslint-disable prefer-template */
 module.exports = function (options, handlers) {
 
   // Provide default values for handlers.

@@ -14,8 +14,10 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 function InputTextArea(props) {
+  const placeholder = isEmpty(props.placeholder) ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
+
   return (
-    <FormattedMessage id={props.placeholder} defaultMessage={props.placeholder}>
+    <FormattedMessage id={placeholder} defaultMessage={placeholder}>
       {(message) => (
         <textarea
           autoFocus={props.autoFocus}

@@ -22,7 +22,7 @@ module.exports = {
     if (primaryKey) {
       params = {
         [this.primaryKey]: primaryKey
-      }
+      };
     }
 
     return this
@@ -39,17 +39,17 @@ module.exports = {
 
       return acc;
     }, {}))
-    .catch((err) => {
-      if (err.message.indexOf('index:') !== -1) {
-        const message = err.message.split('index:');
-        const field = _.words(_.last(message).split('_')[0]);
-        const error = { message: `This ${field} is already taken`, field };
+      .catch((err) => {
+        if (err.message.indexOf('index:') !== -1) {
+          const message = err.message.split('index:');
+          const field = _.words(_.last(message).split('_')[0]);
+          const error = { message: `This ${field} is already taken`, field };
 
-        throw error;
-      }
+          throw error;
+        }
 
-      throw err;
-    });
+        throw err;
+      });
   },
 
   update: async function (search, params = {}) {
@@ -62,18 +62,18 @@ module.exports = {
     if (primaryKey) {
       search = {
         [this.primaryKey]: primaryKey
-      }
+      };
     }
 
     return this.update(search, params, {
       strict: false
     })
-    .catch((error) => {
-      const field = _.last(_.words(error.message.split('_')[0]));
-      const err = { message: `This ${field} is already taken`, field };
+      .catch((error) => {
+        const field = _.last(_.words(error.message.split('_')[0]));
+        const err = { message: `This ${field} is already taken`, field };
 
-      throw err;
-    });
+        throw err;
+      });
   },
 
   delete: async function (params) {
@@ -81,6 +81,16 @@ module.exports = {
     return this
       .remove({
         [this.primaryKey]: params[this.primaryKey] || params.id
+      });
+  },
+
+  deleteMany: async function (params) {
+    // Delete entry.
+    return this
+      .remove({
+        [this.primaryKey]: {
+          $in: params[this.primaryKey] || params.id
+        }
       });
   },
 

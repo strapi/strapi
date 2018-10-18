@@ -14,6 +14,7 @@ const pluralize = require('pluralize');
 
 // Fetch stub attribute template on initial load.
 const attributeTemplate = fs.readFileSync(path.resolve(__dirname, '..', 'templates', 'attribute.template'), 'utf8');
+/* eslint-disable prefer-template */
 
 /**
  * This `before` function is run before generating targets.
@@ -32,7 +33,7 @@ module.exports = (scope, cb) => {
   _.defaults(scope, {
     id: _.trim(_.deburr(scope.id)),
     idPluralized: pluralize.plural(_.trim(_.deburr(scope.id))),
-    environment: process.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development'
   });
 
   // Determine default values based on the available scope.
@@ -85,6 +86,12 @@ module.exports = (scope, cb) => {
       type: _.trim(_.deburr(_.camelCase(parts[1]).toLowerCase()))
     };
   });
+
+  // Set collectionName
+  scope.collectionName = _.has(scope.args, 'collectionName') ? scope.args.collectionName : undefined;
+
+  // Set description
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : undefined;
 
   // Handle invalid action arguments.
   // Send back invalidActions.

@@ -24,6 +24,8 @@ const logger = require('strapi-utils').logger;
  * readed from the RC file at $HOME.
  */
 
+/* eslint-disable prefer-template */
+/* eslint-disable no-console */
 module.exports = function () {
   const HOME = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
 

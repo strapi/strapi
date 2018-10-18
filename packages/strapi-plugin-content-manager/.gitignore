@@ -2,10 +2,11 @@
 coverage
 node_modules
 stats.json
-layout.json
+config/layout.json
 package-lock.json
+yarn.lock
 
 # Cruft
 .DS_Store
-npm-debug.log
+npm-debug.logg
 .idea

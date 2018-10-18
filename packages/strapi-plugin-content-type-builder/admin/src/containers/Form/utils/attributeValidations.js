@@ -1,10 +1,11 @@
-import { get, filter, isNumber, size, split, isEmpty, has, map, concat } from 'lodash';
+import { get, filter, isNumber, size, split, isEmpty, has, map, concat, includes } from 'lodash';
 
 export default function checkAttributeValidations(errors) {
 
   const attributeIndex = split(this.props.hash, '::')[3];
   const sameAttributes = filter(this.props.contentTypeData.attributes, (attr) => attr.name === this.props.modifiedDataAttribute.name);
-  const sameParamsKey = filter(this.props.contentTypeData.attributes, (attr) => attr.params.key === this.props.modifiedDataAttribute.params.key);
+  const sameParamsKey = filter(this.props.contentTypeData.attributes, (attr) =>
+    attr.params.key !== '-' && attr.params.key === this.props.modifiedDataAttribute.params.key && attr.params.target === this.props.modifiedDataAttribute.params.target);
   const sameParamsKeyAndName = filter(this.props.contentTypeData.attributes, (attr) => attr.name === this.props.modifiedDataAttribute.params.key);
   const formErrors = concat(errors, hasNestedValue(this.props.modifiedDataAttribute));
   const isEditingParamsKey = this.props.modifiedDataAttribute.params.key !== get(this.props.contentTypeData.attributes, [attributeIndex, 'params', 'key']);
@@ -33,6 +34,34 @@ export default function checkAttributeValidations(errors) {
 
   if (get(this.props.modifiedDataAttribute, 'name') === get(this.props.modifiedDataAttribute.params, 'key') && this.props.modifiedDataAttribute.params.target === this.props.modelName) {
     formErrors.push({ name: 'params.key', errors: [{ id: 'content-type-builder.error.attribute.sameKeyAndName' }]});
+  }
+
+  const reserved = [
+    'id',
+    'set',
+    'value',
+    'emit',
+    'on',
+    'once',
+    'listeners',
+    'removeListener',
+    'collection',
+    'db',
+    'isModified',
+    'isNew',
+    'get',
+    'modelName',
+    'save',
+    'schema',
+    'toObject',
+    'validate',
+    'remove',
+    '_pres',
+    '_posts',
+  ];
+
+  if (includes(reserved, get(this.props.modifiedDataAttribute, 'name'))) {
+    formErrors.push({ name: 'name', errors: [{ id: 'content-type-builder.error.attribute.forbidden' }]});
   }
 
   return formErrors;

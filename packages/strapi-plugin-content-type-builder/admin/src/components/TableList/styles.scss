@@ -37,7 +37,7 @@
       margin-top: 0!important;
     }
     > li:nth-child(2) {
-      height: 5.7rem;
+      min-height: 5.7rem;
       padding-top: .3rem;
     }
     > li:last-child {
@@ -97,7 +97,7 @@
 
 .nameContainer {
   display: flex;
-  justify-content: space-between;
+  // justify-content: space-between;
   > span:first-child {
     display: block;
     white-space: nowrap;

@@ -6,9 +6,10 @@
 
 import React from 'react';
 import Select from 'react-select';
+import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import 'react-select/dist/react-select.css';
-import { map, isArray, isNull, isUndefined, isFunction, get } from 'lodash';
+import { cloneDeep, map, includes, isArray, isNull, isUndefined, isFunction, get, findIndex } from 'lodash';
 
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
@@ -21,23 +22,37 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
 
     this.state = {
       isLoading: true,
+      options: [],
+      toSkip: 0,
     };
+  }
+
+  componentDidMount() {
+    this.getOptions('');
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.toSkip !== this.state.toSkip) {
+      this.getOptions('');
+    }
   }
 
   getOptions = (query) => {
     const params = {
-      limit: 20,
+      _limit: 20,
+      _start: this.state.toSkip,
       source: this.props.relation.plugin || 'content-manager',
     };
 
     // Set `query` parameter if necessary
     if (query) {
-      params.query = query;
-      params.queryAttribute = this.props.relation.displayedAttribute;
+      delete params._limit;
+      delete params._start;
+      params[`${this.props.relation.displayedAttribute}_contains`] = query;
     }
 
     // Request URL
-    const requestUrlSuffix = query && this.props.record.get(this.props.relation.alias) ? this.props.record.get(this.props.relation.alias) : '';
+    const requestUrlSuffix = query && get(this.props.record, [this.props.relation.alias]) ? get(this.props.record, [this.props.relation.alias]) : '';
     const requestUrl = `/content-manager/explorer/${this.props.relation.model || this.props.relation.collection}/${requestUrlSuffix}`;
 
     // Call our request helper (see 'utils/request')
@@ -56,10 +71,21 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
             label: templateObject({ mainField: this.props.relation.displayedAttribute }, response).mainField,
           }];
 
-        return {options};
+        const newOptions = cloneDeep(this.state.options);
+        options.map(option => {
+          // Don't add the values when searching
+          if (findIndex(newOptions, o => o.value.id === option.value.id) === -1) {
+            return newOptions.push(option);
+          }
+        });
+
+        return this.setState({
+          options: newOptions,
+          isLoading: false,
+        });
       })
       .catch(() => {
-        strapi.notification.error('content-manager.notification.relationship.fetch');
+        strapi.notification.error('content-manager.notification.error.relationship.fetch');
       });
   }
 
@@ -71,8 +97,32 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
     };
 
     this.props.setRecordAttribute({ target });
-    // NOTE: keep this line if we rollback to the old container
-    // this.props.setRecordAttribute(this.props.relation.alias, value);
+  }
+
+  handleBottomScroll = () => {
+    this.setState(prevState => {
+      return {
+        toSkip: prevState.toSkip + 20,
+      };
+    });
+  }
+
+  // Redirect to the edit page
+  handleClick = (item = {}) => {
+    this.props.onRedirect({
+      model: this.props.relation.collection || this.props.relation.model,
+      id: item.value.id || item.value._id,
+      source: this.props.relation.plugin,
+    });
+  }
+
+  handleInputChange = (value) => {
+    const clonedOptions = this.state.options;
+    const filteredValues = clonedOptions.filter(data => includes(data.label, value));
+
+    if (filteredValues.length === 0) {
+      return this.getOptions(value);
+    }
   }
 
   render() {
@@ -81,17 +131,33 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
       : '';
 
     const value = get(this.props.record, this.props.relation.alias);
-    // NOTE: keep this line if we rollback to the old container
-    // const value = this.props.record.get(this.props.relation.alias);
+    const excludeModel = ['role', 'permission', 'file'].includes(this.props.relation.model || this.props.relation.collection); // Temporary.
+    const entryLink = (isNull(value) || isUndefined(value) || excludeModel ? 
+      '' : 
+      (
+        <FormattedMessage id='content-manager.containers.Edit.clickToJump'>
+          {title => (
+            <a onClick={() => this.handleClick({value})} title={title}><FormattedMessage id='content-manager.containers.Edit.seeDetails' /></a>
+          )}
+        </FormattedMessage>
+      )
+    );
 
     /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectOne}`}>
-        <label htmlFor={this.props.relation.alias}>{this.props.relation.alias}</label>
+        <nav className={styles.headline}>
+          <label htmlFor={this.props.relation.alias}>{this.props.relation.alias}</label>
+          {entryLink}
+        </nav>
         {description}
-        <Select.Async
+        <Select
           onChange={this.handleChange}
-          loadOptions={this.getOptions}
+          options={this.state.options}
+          isLoading={this.state.isLoading}
+          onMenuScrollToBottom={this.handleBottomScroll}
+          onInputChange={this.handleInputChange}
+          onSelectResetsInput={false}
           simpleValue
           value={isNull(value) || isUndefined(value) ? null : {
             value: isFunction(value.toJS) ? value.toJS() : value,
@@ -105,6 +171,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 SelectOne.propTypes = {
+  onRedirect: PropTypes.func.isRequired,
   record: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.bool,

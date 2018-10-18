@@ -13,7 +13,7 @@ const _ = require('lodash');
 /**
  * Session hook
  */
-
+/* eslint-disable prefer-template */
 module.exports = strapi => {
   const hook = {
     /**

@@ -38,10 +38,10 @@ function* dataDelete(action) {
 function* dataGet() {
   try {
     const pageParams = yield select(makeSelectParams());
-    const _start = ( pageParams.page - 1) * pageParams.limit;
+    const _start = ( pageParams._page - 1) * pageParams._limit;
     const params = {
-      _limit: pageParams.limit,
-      _sort: pageParams.sort,
+      _limit: pageParams._limit,
+      _sort: pageParams._sort,
       _start,
     };
     const data = yield [
@@ -83,11 +83,11 @@ function* search() {
   try {
     const search = yield select(makeSelectSearch());
     const pageParams = yield select(makeSelectParams());
-    const _start = ( pageParams.page - 1) * pageParams.limit;
+    const _start = ( pageParams._page - 1) * pageParams._limit;
     const requestURL = !isEmpty(search) ? `/upload/search/${search}` : '/upload/files';
     const params = isEmpty(search) ? {
-      _limit: pageParams.limit,
-      _sort: pageParams.sort,
+      _limit: pageParams._limit,
+      _sort: pageParams._sort,
       _start,
     } : {};
     const response = yield call(request, requestURL, { method: 'GET', params });

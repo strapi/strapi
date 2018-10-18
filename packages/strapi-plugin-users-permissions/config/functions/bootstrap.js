@@ -9,8 +9,8 @@
  */
 
 const path = require('path');
-const _ = require('lodash');
 const fs = require('fs');
+const _ = require('lodash');
 const uuid = require('uuid/v4');
 
 module.exports = async cb => {
@@ -34,49 +34,77 @@ module.exports = async cb => {
     name: 'users-permissions'
   });
 
-  if (!await pluginStore.get({key: 'grant'})) {
-    const value = {
-      email: {
-        enabled: true,
-        icon: 'envelope'
-      },
-      facebook: {
-        enabled: false,
-        icon: 'facebook-official',
-        key: '',
-        secret: '',
-        callback: '/auth/facebook/callback',
-        scope: ['email']
-      },
-      google: {
-        enabled: false,
-        icon: 'google',
-        key: '',
-        secret: '',
-        callback: '/auth/google/callback',
-        scope: ['email']
-      },
-      github: {
-        enabled: false,
-        icon: 'github',
-        key: '',
-        secret: '',
-        redirect_uri: '/auth/github/callback',
-        scope: [
-          'user',
-          'user:email'
-        ]
-      },
-      twitter: {
-        enabled: false,
-        icon: 'twitter',
-        key: '',
-        secret: '',
-        callback: '/auth/twitter/callback'
+  const grantConfig = {
+    email: {
+      enabled: true,
+      icon: 'envelope'
+    },
+    discord: {
+      enabled: false,
+      icon: 'comments',
+      key: '',
+      secret: '',
+      callback: '/auth/discord/callback',
+      scope: [
+        'identify',
+        'email'
+      ]
+    },
+    facebook: {
+      enabled: false,
+      icon: 'facebook-official',
+      key: '',
+      secret: '',
+      callback: '/auth/facebook/callback',
+      scope: ['email']
+    },
+    google: {
+      enabled: false,
+      icon: 'google',
+      key: '',
+      secret: '',
+      callback: '/auth/google/callback',
+      scope: ['email']
+    },
+    github: {
+      enabled: false,
+      icon: 'github',
+      key: '',
+      secret: '',
+      redirect_uri: '/auth/github/callback',
+      scope: [
+        'user',
+        'user:email'
+      ]
+    },
+    microsoft: {
+      enabled: false,
+      icon: 'windows',
+      key: '',
+      secret: '',
+      callback: '/auth/microsoft/callback',
+      scope: ['user.read']
+    },
+    twitter: {
+      enabled: false,
+      icon: 'twitter',
+      key: '',
+      secret: '',
+      callback: '/auth/twitter/callback'
+    }
+  };
+  const prevGrantConfig = await pluginStore.get({key: 'grant'}) || {};
+  // store grant auth config to db
+  // when plugin_users-permissions_grant is not existed in db
+  // or we have added/deleted provider here.
+  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
+    // merge with the previous provider config.
+    _.keys(grantConfig).forEach((key) => {
+      if (key in prevGrantConfig) {
+        grantConfig[key] = _.merge(grantConfig[key], prevGrantConfig[key]);
       }
-    };
-
-    await pluginStore.set({key: 'grant', value});
+    });
+    await pluginStore.set({key: 'grant', value: grantConfig});
   }
 
   if (!await pluginStore.get({key: 'email'})) {
@@ -99,6 +127,25 @@ module.exports = async cb => {
 
 <p>Thanks.</p>`
         }
+      },
+      'email_confirmation': {
+        display: 'Email.template.email_confirmation',
+        icon: 'check-square-o',
+        options: {
+          from: {
+            name: 'Administration Panel',
+            email: 'no-reply@strapi.io'
+          },
+          response_email: '',
+          object: 'Account confirmation',
+          message: `<p>Thank you for registering!</p>
+
+<p>You have to confirm your email address. Please click on the link below.</p>
+
+<p><%= URL %>?confirmation=<%= CODE %></p>
+
+<p>Thanks.</p>`
+        }
       }
     };
 
@@ -109,13 +156,13 @@ module.exports = async cb => {
     const value = {
       unique_email: true,
       allow_register: true,
+      email_confirmation: false,
+      email_confirmation_redirection: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
       default_role: 'authenticated'
     };
 
     await pluginStore.set({key: 'advanced', value});
   }
 
-  strapi.plugins['users-permissions'].services.userspermissions.syncSchema(() => {
-    strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
-  });
+  strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);
 };

@@ -1,7 +1,7 @@
 /* stylelint-disable */
 .contentType, .attribute, .attributes {
   > div {
-    width: 74.5rem;
+    width: 78.5rem;
   }
 }
 
@@ -11,7 +11,6 @@
   width: 100%;
   display: flex;
   padding: 1.6rem 2.9rem 0 2.9rem;
-  // padding: 2.8rem 2.9rem 0 2.9rem;
 }
 
 .modalBody {
@@ -19,7 +18,7 @@
 }
 
 .modalFooter {
-  padding: 1.1rem 1rem 2.8rem 1rem;
+  padding: .8rem 1rem 2.8rem 1rem;
   border: none;
   > button {
     height: 3rem;
@@ -53,6 +52,7 @@
 
 .modalPosition {
   // top: 16.8rem;
+  padding-top: 2px;
   > div {
     border:none;
     border-radius: 2px;
@@ -83,7 +83,6 @@
 .popUpFormHeader {
   margin: 0 2.9rem;
   padding: 1.4rem 0 2.8rem 0;
-  // border-bottom: 1px solid black;
   border-bottom: 1px solid #F6F6F6;
   position: relative;
   > button {
@@ -115,21 +114,20 @@
 
 .primary {
   height: 3rem;
-  font-family: Lato!important;
+  min-width: 11rem;
   margin-left: 1.9rem!important;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  border: none!important;
+  border-radius: 3px;
+  color: white!important;
+  line-height: 1.6rem;
+  font-family: Lato!important;
+  font-weight: 600;
   cursor: pointer;
-  font-family: Lato;
+  -webkit-font-smoothing: antialiased;
   &:focus {
     outline: 0;
   }
-  border: none!important;
-  width: 15rem;
-  line-height: 1.6rem;
-  font-weight: 600;
-  border-radius: 3px;
-  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
-  -webkit-font-smoothing: antialiased;
-  color: white!important;
   &:hover, &:active {
     border: none!important;
     background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
@@ -193,4 +191,33 @@
 
 .saving span:nth-child(3) {
   animation-delay: .4s;
+}
+
+.primaryAddShape {
+  min-width: 12rem;
+  margin-left: 17px!important;
+  padding: 0 15px;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  border: none!important;
+  border-radius: 3px;
+  color: white;
+  font-family: Lato!important;
+  font-weight: 600;
+  &:focus {
+    outline: 0;
+  }
+  &:hover, &:active {
+    border: none!important;
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+    color: white;
+  }
+  &:before {
+    content: '\F067';
+    font-family: 'FontAwesome';
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin-right: 13px;
+  }
+  -webkit-font-smoothing: antialiased;
 }

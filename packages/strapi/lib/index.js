@@ -12,6 +12,6 @@ module.exports = function(global) {
   try {
     return global.strapi = require('./Strapi'); // Strapi instance instanciated
   } catch (error) {
-    console.log(error);
+    console.log(error); // eslint-disable-line no-console
   }
 }.call(this, global);

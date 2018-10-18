@@ -9,11 +9,13 @@
 // Public node modules.
 const _ = require('lodash');
 
+// Strapi utilities.
+const program = require('strapi-utils').commander;
+
 // Local Strapi dependencies.
 const packageJSON = require('../package.json');
 
-// Strapi utilities.
-const program = require('strapi-utils').commander;
+/* eslint-disable no-console */
 
 /**
  * Normalize version argument
@@ -57,14 +59,18 @@ program
   .option('--dbname <dbname>', 'Database name')
   .option('--dbusername <dbusername>', 'Database username')
   .option('--dbpassword <dbpassword>', 'Database password')
+  .option('--dbssl <dbssl>', 'Database SSL')
+  .option('--dbauth <dbauth>', 'Authentication Database')
   .description('create a new application')
   .action(require('./strapi-new'));
 
 // `$ strapi start`
 program
-  .command('start')
+  .command('start [appPath]')
   .description('start your Strapi application')
-  .action(require('./strapi-start'));
+  .action((appPath) => {
+    require('./strapi-start')(appPath);
+  });
 
 // `$ strapi generate:api`
 program
@@ -121,7 +127,7 @@ program
   .command('generate:plugin <id>')
   .option('-n, --name <name>', 'Plugin name')
   .description('generate a basic plugin')
-    .action(require('./strapi-generate'));
+  .action(require('./strapi-generate'));
 
 // `$ strapi install`
 program

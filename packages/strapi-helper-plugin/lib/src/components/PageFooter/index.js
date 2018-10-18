@@ -14,6 +14,7 @@ import GlobalPagination from 'components/GlobalPagination';
 
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/label-has-for */
 function PageFooter(props) {
   return (
     <div className={cn('row', styles.pageFooter)} style={props.style}>
@@ -22,21 +23,21 @@ function PageFooter(props) {
           <div className={styles.pageFooterSelectWrapper}>
             <select
               className={`form-control ${styles.select}`}
-              id="params.limit"
-              name="params.limit"
+              id="params._limit"
+              name="params._limit"
               onChange={(e) => {
                 const target = {
-                  name: 'params.limit',
+                  name: 'params._limit',
                   value: parseInt(e.target.value, 10),
                 };
                 props.onChangeParams({ target });
               }}
-              value={get(props, ['params', 'limit'], 10)}
+              value={get(props, ['params', '_limit'], 10)}
             >
               {[10, 20, 50, 100].map((value) => <option value={value} key={value}>{value}</option>)}
             </select>
           </div>
-          <label className={styles.pageFooterLabel} htmlFor="params.limit">
+          <label className={styles.pageFooterLabel} htmlFor="params._limit">
             <FormattedMessage id="components.PageFooter.select" />
           </label>
         </form>
@@ -57,7 +58,7 @@ PageFooter.defaultProps = {
   onChangeParams: () => {},
   params: {
     currentPage: 1,
-    limit: 10,
+    _limit: 10,
   },
   style: {},
 };

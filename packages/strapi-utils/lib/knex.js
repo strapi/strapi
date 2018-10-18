@@ -4,6 +4,7 @@
  * Module dependencies
  */
 
+/* eslint-disable prefer-template */
 // Node.js core.
 const fs = require('fs');
 const path = require('path');
@@ -20,10 +21,10 @@ module.exports = scope => {
   // First, make sure the application we have access to
   // the migration generator.
   try {
-    require.resolve(path.resolve(scope.rootPath, 'node_modules', 'strapi-knex'));
+    require.resolve(path.resolve(scope.rootPath, 'node_modules', 'strapi-hook-knex'));
   } catch (err) {
     console.error('Impossible to call the Knex migration tool.');
-    console.error('You can install it with `$ npm install strapi-knex --save`.');
+    console.error('You can install it with `$ npm install strapi-hook-knex --save`.');
     process.exit(1);
   }
 

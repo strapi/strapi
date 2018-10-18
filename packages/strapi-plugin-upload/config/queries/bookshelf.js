@@ -3,12 +3,20 @@ const _ = require('lodash');
 module.exports = {
   find: async function (params = {}, populate) {
     const records = await this.query(function(qb) {
-      _.forEach(params.where, (where, key) => {
-        qb.where(key, where[0].symbol, where[0].value);
+      Object.keys(params.where).forEach((key) => {
+        const where = params.where[key];
+
+        if (Array.isArray(where.value)) {
+          for (const value in where.value) {
+            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
+          }
+        } else {
+          qb.where(key, where.symbol, where.value);
+        }
       });
 
       if (params.sort) {
-        qb.orderByRaw(params.sort);
+        qb.orderBy(params.sort.key, params.sort.order);
       }
 
       if (params.start) {
@@ -37,7 +45,7 @@ module.exports = {
     if (primaryKey) {
       params = {
         [this.primaryKey]: primaryKey
-      }
+      };
     }
 
     const record = await this
@@ -85,7 +93,7 @@ module.exports = {
 
       search = {
         [this.primaryKey]: entry[this.primaryKey] || entry.id
-      }
+      };
     }
 
     return this.forge(search)
@@ -112,8 +120,8 @@ module.exports = {
     return this
       .query(function(qb) {
         qb
-        .whereRaw(`LOWER(hash) LIKE ?`, [`%${params.id}%`])
-        .orWhereRaw(`LOWER(name) LIKE ?`, [`%${params.id}%`]);
+          .whereRaw(`LOWER(hash) LIKE ?`, [`%${params.id}%`])
+          .orWhereRaw(`LOWER(name) LIKE ?`, [`%${params.id}%`]);
       })
       .fetchAll();
   },

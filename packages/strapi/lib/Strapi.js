@@ -1,19 +1,30 @@
 'use strict';
 
 // Dependencies.
-const Koa = require('koa');
-const utils = require('./utils');
 const http = require('http');
 const path = require('path');
 const cluster = require('cluster');
-const { includes, get, assign, forEach } = require('lodash');
+const { EventEmitter } = require('events');
+const Koa = require('koa');
+const { includes, get, assign, toLower } = require('lodash');
 const { logger, models } = require('strapi-utils');
-const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins, admin, store } = require('./core');
+const stackTrace = require('stack-trace');
+const utils = require('./utils');
+const {
+  nestedConfigurations,
+  appConfigurations,
+  apis,
+  middlewares,
+  hooks,
+  plugins,
+  admin,
+  store,
+} = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
-const { EventEmitter } = require('events');
-const stackTrace = require('stack-trace');
 
+/* eslint-disable prefer-template */
+/* eslint-disable no-console */
 /**
  * Construct an Strapi instance.
  *
@@ -39,7 +50,7 @@ class Strapi extends EventEmitter {
 
     // Utils.
     this.utils = {
-      models
+      models,
     };
 
     // Exclude EventEmitter, Koa and HTTP server to be freezed.
@@ -57,8 +68,9 @@ class Strapi extends EventEmitter {
       appPath: process.cwd(),
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,
-      environment: process.env.NODE_ENV || 'development',
+      environment: toLower(process.env.NODE_ENV) || 'development',
       environments: {},
+      admin: {},
       paths: {
         admin: 'admin',
         api: 'api',
@@ -71,12 +83,12 @@ class Strapi extends EventEmitter {
         services: 'services',
         static: 'public',
         validators: 'validators',
-        views: 'views'
+        views: 'views',
       },
       middleware: {},
       hook: {},
       functions: {},
-      routes: {}
+      routes: {},
     };
 
     // Bind context functions.
@@ -85,13 +97,11 @@ class Strapi extends EventEmitter {
 
   async start(config = {}, cb) {
     try {
-      this.config = assign(this.config, config)
+      this.config = assign(this.config, config);
 
       // Emit starting event.
       this.emit('server:starting');
 
-      // Enhance app.
-      await this.enhancer();
       // Load the app.
       await this.load();
       // Run bootstrap function.
@@ -101,21 +111,23 @@ class Strapi extends EventEmitter {
       // Update source admin.
       await admin.call(this);
       // Launch server.
-      this.server.listen(this.config.port, err => {
+      this.server.listen(this.config.port, async (err) => {
         if (err) {
-          this.log.debug(`Server wasn't able to start properly.`);
-          console.error(err);
+          this.log.debug(`⚠️ Server wasn't able to start properly.`);
+          this.log.error(err);
           return this.stop();
         }
 
-        this.log.info('Server started in ' + this.config.appPath);
-        this.log.info('Your server is running at ' + this.config.url);
-        this.log.debug('Time: ' + new Date());
-        this.log.debug('Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms');
-        this.log.debug('Environment: ' + this.config.environment);
-        this.log.debug('Process PID: ' + process.pid);
-        this.log.debug(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
+        this.log.info('Time: ' + new Date());
+        this.log.info('Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms');
+        this.log.info('Environment: ' + this.config.environment);
+        this.log.info('Process PID: ' + process.pid);
+        this.log.info(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
         this.log.info('To shut down your server, press <CTRL> + C at any time');
+        console.log();
+        this.log.info(`☄️  Admin panel: ${this.config.admin.url}`);
+        this.log.info(`⚡️ Server: ${this.config.url}`);
+        console.log();
 
         // Emit started event.
         this.emit('server:started');
@@ -123,10 +135,15 @@ class Strapi extends EventEmitter {
         if (cb && typeof cb === 'function') {
           cb();
         }
+
+        if (this.config.environment === 'development' && get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) {
+          await utils.openBrowser.call(this);
+        }
       });
     } catch (err) {
-      this.log.debug(`Server wasn't able to start properly.`);
-      console.error(err);
+      this.log.debug(`⛔️ Server wasn't able to start properly.`);
+      this.log.error(err);
+      console.log(err);
       this.stop();
     }
   }
@@ -138,14 +155,14 @@ class Strapi extends EventEmitter {
       const key = conn.remoteAddress + ':' + conn.remotePort;
       connections[key] = conn;
 
-      conn.on('close', function() {
-       delete connections[key];
+      conn.on('close', function () {
+        delete connections[key];
       });
     });
 
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
-        this.log.debug(`Server wasn't able to start properly.`);
+        this.log.debug(`⛔️ Server wasn't able to start properly.`);
         this.log.error(`The port ${err.port} is already used by another application.`);
         this.stop();
         return;
@@ -159,7 +176,7 @@ class Strapi extends EventEmitter {
 
       for (let key in connections) {
         connections[key].destroy();
-      };
+      }
     };
   }
 
@@ -167,7 +184,11 @@ class Strapi extends EventEmitter {
     // Destroy server and available connections.
     this.server.destroy();
 
-    if (cluster.isWorker && this.config.environment === 'development' && get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true) {
+    if (
+      cluster.isWorker &&
+      this.config.environment === 'development' &&
+      get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true
+    ) {
       process.send('stop');
     }
 
@@ -176,6 +197,8 @@ class Strapi extends EventEmitter {
   }
 
   async load() {
+    await this.enhancer();
+
     this.app.use(async (ctx, next) => {
       if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
         ctx.set('strapi', 'You are so French!');
@@ -190,7 +213,7 @@ class Strapi extends EventEmitter {
       nestedConfigurations.call(this),
       apis.call(this),
       middlewares.call(this),
-      hooks.call(this)
+      hooks.call(this),
     ]);
 
     // Populate AST with configurations.
@@ -199,28 +222,52 @@ class Strapi extends EventEmitter {
     // Usage.
     await utils.usage.call(this);
 
-    // Init core store manager
-    await store.pre.call(this);
+    // Init core store
+    await store.call(this);
 
     // Initialize hooks and middlewares.
-    await Promise.all([
-      initializeMiddlewares.call(this),
-      initializeHooks.call(this)
-    ]);
-
-    // Core store post middleware and hooks init validation.
-    await store.post.call(this);
+    await Promise.all([initializeMiddlewares.call(this), initializeHooks.call(this)]);
 
     // Harmonize plugins configuration.
     await plugins.call(this);
   }
 
   reload() {
+    const state = {
+      shouldReload: 0
+    };
+
     const reload = function () {
-      if (cluster.isWorker && this.config.environment === 'development' && get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true) {
+      if (state.shouldReload > 0) {
+        // Reset the reloading state
+        state.shouldReload -= 1;
+        reload.isReloading = false;
+        return;
+      }
+
+      if (
+        cluster.isWorker &&
+        this.config.environment === 'development' &&
+        get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true
+      ) {
         process.send('reload');
       }
     };
+
+    Object.defineProperty(reload, 'isWatching', {
+      configurable: true,
+      enumerable: true,
+      set: value => {
+        // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
+        if (state.isWatching === false && value === true) {
+          state.shouldReload += 1;
+        }
+        state.isWatching = value;
+      },
+      get: () => {
+        return state.isWatching;
+      },
+    });
 
     reload.isReloading = false;
     reload.isWatching = true;
@@ -229,45 +276,49 @@ class Strapi extends EventEmitter {
   }
 
   async bootstrap() {
-    const execBootstrap = (fn) => !fn ? Promise.resolve() : new Promise((resolve, reject) => {
-      const timeoutMs = this.config.bootstrapTimeout || 3500;
-      const timer = setTimeout(() => {
-        this.log.warn(`Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`);
-        this.log.warn('Perhaps you forgot to call it?');
-      }, timeoutMs);
+    const execBootstrap = fn =>
+      !fn
+        ? Promise.resolve()
+        : new Promise((resolve, reject) => {
+          const timeoutMs = this.config.bootstrapTimeout || 3500;
+          const timer = setTimeout(() => {
+            this.log.warn(
+              `Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`,
+            );
+            this.log.warn('Perhaps you forgot to call it?');
+          }, timeoutMs);
 
-      let ranBootstrapFn = false;
+          let ranBootstrapFn = false;
 
-      try {
-        fn(err => {
-          if (ranBootstrapFn) {
-            this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
+          try {
+            fn(err => {
+              if (ranBootstrapFn) {
+                this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
 
-            return reject();
+                return reject();
+              }
+
+              ranBootstrapFn = true;
+              clearTimeout(timer);
+
+              return resolve(err);
+            });
+          } catch (e) {
+            if (ranBootstrapFn) {
+              this.log.error('The bootstrap function threw an error after its callback was called.');
+
+              return reject(e);
+            }
+
+            ranBootstrapFn = true;
+            clearTimeout(timer);
+
+            return resolve(e);
           }
-
-          ranBootstrapFn = true;
-          clearTimeout(timer);
-
-          return resolve(err);
         });
-      } catch (e) {
-        if (ranBootstrapFn) {
-          this.log.error('The bootstrap function threw an error after its callback was called.');
-
-          return reject(e);
-        }
-
-        ranBootstrapFn = true;
-        clearTimeout(timer);
-
-        return resolve(e);
-      }
-    });
 
     return Promise.all(
-      Object.values(this.plugins)
-      .map(x => execBootstrap(get(x, 'config.functions.bootstrap')))
+      Object.values(this.plugins).map(x => execBootstrap(get(x, 'config.functions.bootstrap'))),
     ).then(() => execBootstrap(this.config.functions.bootstrap));
   }
 
@@ -277,19 +328,24 @@ class Strapi extends EventEmitter {
     // Remove object from tree.
     delete this.propertiesToNotFreeze;
 
-    return Object.keys(this).filter(x => !includes(propertiesToNotFreeze, x)).forEach(key => {
-      Object.freeze(this[key]);
-    });
+    return Object.keys(this)
+      .filter(x => !includes(propertiesToNotFreeze, x))
+      .forEach(key => {
+        Object.freeze(this[key]);
+      });
   }
 
   query(entity, plugin) {
     if (!entity) {
-      return this.log.error(`You can't call the query method without passing the model's name as a first argument.`);
+      return this.log.error(
+        `You can't call the query method without passing the model's name as a first argument.`,
+      );
     }
 
     const model = entity.toLowerCase();
 
-    const Model = get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+    const Model =
+      get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
 
     if (!Model) {
       return this.log.error(`The model ${model} can't be found.`);
@@ -304,7 +360,7 @@ class Strapi extends EventEmitter {
     // Get stack trace.
     const stack = stackTrace.get()[1];
     const file = stack.getFileName();
-    const method = stack.getFunctionName();
+    // const method = stack.getFunctionName();
 
     // Extract plugin path.
     let pluginPath = undefined;
@@ -333,12 +389,16 @@ class Strapi extends EventEmitter {
     }
 
     // Bind queries with the current model to allow the use of `this`.
-    const bindQueries = Object.keys(queries).reduce((acc, current) => {
-      return acc[current] = queries[current].bind(Model), acc;
-    }, {
-      orm: connector,
-      primaryKey: Model.primaryKey
-    });
+    const bindQueries = Object.keys(queries).reduce(
+      (acc, current) => {
+        return (acc[current] = queries[current].bind(Model)), acc;
+      },
+      {
+        orm: connector,
+        primaryKey: Model.primaryKey,
+        associations: Model.associations
+      },
+    );
 
     return bindQueries;
   }

@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
-const exec = require('child_process').execSync;
+const exec = require('child_process').spawnSync;
 
 module.exports = {
   menu: {
@@ -11,7 +11,7 @@ module.exports = {
       {
         name: 'menu.section.global-settings',
         items: [
-            {
+          {
             slug: 'application',
             name: 'menu.item.application',
             icon: 'globe'
@@ -105,7 +105,7 @@ module.exports = {
           ]
         }
       ]
-    }
+    };
   },
 
   request: env => ({
@@ -452,6 +452,41 @@ module.exports = {
             value: _.get(strapi.config, `environments.${env}.server.cron.enabled`, null)
           }
         ]
+      },
+      {
+        name: 'form.server.item.proxy',
+        items: [
+          {
+            name: 'form.server.item.proxy.enable',
+            target: 'server.proxy.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.server.proxy.enabled`, null),
+            items: [
+              {
+                name: 'form.server.item.proxy.host',
+                target: 'server.proxy.host',
+                type: 'string',
+                value: _.get(strapi.config, `environments.${env}.server.proxy.host`, null),
+                validations: {}
+              },
+              {
+                name: 'form.server.item.proxy.port',
+                target: 'server.proxy.port',
+                type: 'number',
+                value: _.get(strapi.config, `environments.${env}.server.proxy.port`, null),
+                validations: {}
+              },
+              {
+                name: 'form.server.item.proxy.ssl',
+                target: 'server.proxy.ssl',
+                type: 'boolean',
+                value: _.get(strapi.config, `environments.${env}.server.proxy.ssl`, null),
+                validations: {}
+              }
+            ],
+            validations: {}
+          }
+        ]
       }
     ]
   }),
@@ -521,11 +556,6 @@ module.exports = {
                 port: 3306
               },
               {
-                name: 'form.database.item.provider.sqlite3',
-                value: 'sqlite3',
-                port: 1433
-              },
-              {
                 name: 'form.database.item.provider.redis',
                 value: 'redis',
                 port: 6379
@@ -575,7 +605,21 @@ module.exports = {
             type: 'password',
             value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.password`, null),
             validations: {}
-          }
+          },
+          {
+            name: 'form.database.item.authenticationDatabase',
+            target: `database.connections.${name}.options.authenticationDatabase`,
+            type: 'string',
+            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.options.authenticationDatabase`, null),
+            validations: {}
+          },
+          {
+            name: 'form.database.item.ssl',
+            target: `database.connections.${name}.options.ssl`,
+            type: 'boolean',
+            value: [true, 'true'].includes(_.get(strapi.config, `environments.${env}.database.connections.${name}.options.ssl`, false)),
+            validations: {}
+          },
         ]
       },
       {
@@ -583,7 +627,7 @@ module.exports = {
         items: [
           {
             name: 'form.database.item.default',
-            target: `database.defaultConnection`,
+            target: 'database.defaultConnection',
             type: 'string',
             value: _.get(strapi.config, `environments.${env}.database.defaultConnection`, null),
             validations: {
@@ -636,14 +680,14 @@ module.exports = {
   },
 
   getClientConnector: client => {
-    const bookshelfClients = ['postgres', 'mysql', 'sqlite3'];
+    const bookshelfClients = ['postgres', 'mysql'];
     const mongooseClients = ['mongo'];
     const redisClients = ['redis'];
 
     let connector;
-    if (_.indexOf(bookshelfClients, client) !== -1) connector = 'strapi-bookshelf';
-    if (_.indexOf(mongooseClients, client) !== -1) connector = 'strapi-mongoose';
-    if (_.indexOf(redisClients, client) !== -1) connector = 'strapi-redis';
+    if (_.indexOf(bookshelfClients, client) !== -1) connector = 'strapi-hook-bookshelf';
+    if (_.indexOf(mongooseClients, client) !== -1) connector = 'strapi-hook-mongoose';
+    if (_.indexOf(redisClients, client) !== -1) connector = 'strapi-hook-redis';
 
     return connector;
   },
@@ -661,9 +705,6 @@ module.exports = {
         break;
       case 'mongo':
         return '#43b121';
-        break;
-      case 'sqlite3':
-        return '#006fff';
         break;
       default:
         return '#000000';
@@ -885,8 +926,7 @@ module.exports = {
   installDependency: (params, name) => {
     const clientsDependencies = {
       postgres: 'pg',
-      mysql: 'mysql',
-      sqlite3: 'sqlite3'
+      mysql: 'mysql'
     };
 
     const client = _.get(clientsDependencies, _.get(params, `database.connections.${name}.settings.client`));
@@ -896,17 +936,17 @@ module.exports = {
 
     if (connector && !installedConnector) {
       strapi.log.info(`Installing ${connector} dependency ...`);
-      exec(`npm install ${connector}@alpha`);
+      exec('npm', ['install', `${connector}@alpha`]);
     }
 
     if (client && !installedClient) {
       strapi.log.info(`Installing ${client} dependency ...`);
-      exec(`npm install ${client}`);
+      exec('npm', ['install', client]);
     }
   },
 
   cleanDependency: (env, config) => {
-    const availableConnectors = ['strapi-mongoose', 'strapi-bookshelf', 'strapi-redis'];
+    const availableConnectors = ['strapi-hook-mongoose', 'strapi-hook-bookshelf', 'strapi-hook-redis'];
     let usedConnectors = [];
     const errors = [];
 

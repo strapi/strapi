@@ -1,11 +1,11 @@
 'use strict';
 
 // Dependencies.
-const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
-const cheerio = require('cheerio');
 const URL = require('url');
+const cheerio = require('cheerio');
+const _ = require('lodash');
 
 module.exports = function() {
   return new Promise((resolve, reject) => {
@@ -39,7 +39,7 @@ module.exports = function() {
           fs.readFile(sourcePath, (err, html) => {
             const $ = cheerio.load(html.toString());
 
-            $('script').each(function(i, elem) {
+            $('script').each(function() {
               if ($(this).attr('src')) {
                 const parse = path.parse($(this).attr('src'));
                 const url = URL.parse(_.get(strapi.config.currentEnvironment.server, 'admin.build.host', _.get(strapi.config.currentEnvironment.server, 'admin.path', '/admin')));

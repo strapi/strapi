@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
-import { isEmpty } from 'lodash';
+import { includes, isEmpty } from 'lodash';
 
 // Design
 import IcoContainer from 'components/IcoContainer';
@@ -16,6 +16,8 @@ import ListRow from 'components/ListRow';
 import PopUpWarning from 'components/PopUpWarning';
 
 import styles from './styles.scss';
+
+const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
 
 class Row extends React.Component {
   state = { showModal: false };
@@ -32,14 +34,17 @@ class Row extends React.Component {
   }
 
   render() {
-    const uploadPath = `/plugins/upload/configurations/${this.context.currentEnvironment}`;
-    const icons = this.props.name === 'upload' ? [
+    // const uploadPath = `/plugins/upload/configurations/${this.context.currentEnvironment}`;
+    // Make sure to match the ctm config URI instead of content-type view URI
+    const settingsPath = this.props.name === 'content-manager' ? '/plugins/content-manager/ctm-configurations' : `/plugins/${this.props.name}/configurations/${this.context.currentEnvironment}`; 
+    // const icons = this.props.name === 'upload' || this.props.name === 'email' ? [
+    const icons = includes(PLUGINS_WITH_CONFIG, this.props.name) ? [
       {
         icoType: 'cog',
         onClick: (e) => {
           e.preventDefault();
           e.stopPropagation();
-          this.context.router.history.push(uploadPath);
+          this.context.router.history.push(settingsPath);
         },
       },
       {

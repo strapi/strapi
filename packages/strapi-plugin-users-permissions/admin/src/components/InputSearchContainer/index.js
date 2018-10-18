@@ -23,7 +23,6 @@ class InputSearchContainer extends React.Component { // eslint-disable-line reac
     isFocused: false,
     users: this.props.values,
     value: '',
-    autoFocus: false,
   };
 
   componentWillReceiveProps(nextProps) {
@@ -120,9 +119,6 @@ class InputSearchContainer extends React.Component { // eslint-disable-line reac
 }
 
 InputSearchContainer.defaultProps = {
-  labelValues: {
-    number: 0,
-  },
   users: [],
   values: [],
 };

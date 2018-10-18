@@ -22,7 +22,7 @@ const Purest = require('purest');
  */
 
 exports.connect = (provider, query) => {
-  const access_token = query.access_token || query.code || query.oauth_token;
+  const access_token = query.access_token || query.code || query.oauth_token;
 
   return new Promise((resolve, reject) => {
     if (!access_token) {
@@ -46,7 +46,9 @@ exports.connect = (provider, query) => {
 
       try {
         const users = await strapi.query('user', 'users-permissions').find({
-          email: profile.email
+          where: {
+            email: profile.email
+          }
         });
 
         const advanced = await strapi.store({
@@ -70,13 +72,13 @@ exports.connect = (provider, query) => {
           return resolve([null, [{ messages: [{ id: 'Auth.form.error.email.taken' }] }], 'Email is already taken.']);
         }
 
-        // Retrieve role `public`.
-        const publicRole = await strapi.query('role', 'users-permissions').findOne({ type: 'public' }, []);
+        // Retrieve default role.
+        const defaultRole = await strapi.query('role', 'users-permissions').findOne({ type: advanced.default_role }, []);
 
         // Create the new user.
         const params = _.assign(profile, {
           provider: provider,
-          role: publicRole._id || publicRole.id
+          role: defaultRole._id || defaultRole.id
         });
 
         const createdUser = await strapi.query('user', 'users-permissions').create(params);
@@ -97,7 +99,7 @@ exports.connect = (provider, query) => {
  */
 
 const getProfile = async (provider, query, callback) => {
-  const access_token = query.access_token || query.code || query.oauth_token;
+  const access_token = query.access_token || query.code || query.oauth_token;
 
   const grant = await strapi.store({
     environment: '',
@@ -107,7 +109,41 @@ const getProfile = async (provider, query, callback) => {
   }).get();
 
   switch (provider) {
-    case 'facebook':
+    case 'discord': {
+      const discord = new Purest({
+        provider: 'discord',
+        config: {
+          'discord': {
+            'https://discordapp.com/api/': {
+              '__domain': {
+                'auth': {
+                  'auth': {'bearer': '[0]'}
+                }
+              },
+              '{endpoint}': {
+                '__path': {
+                  'alias': '__default'
+                }
+              }
+            }
+          }
+        }
+      });
+      discord.query().get('users/@me').auth(access_token).request((err, res, body) => {
+        if (err) {
+          callback(err);
+        } else {
+          // Combine username and discriminator because discord username is not unique
+          var username = `${body.username}#${body.discriminator}`;
+          callback(null, {
+            username: username,
+            email: body.email
+          });
+        }
+      });
+      break;
+    }
+    case 'facebook': {
       const facebook = new Purest({
         provider: 'facebook'
       });
@@ -123,7 +159,8 @@ const getProfile = async (provider, query, callback) => {
         }
       });
       break;
-    case 'google':
+    }
+    case 'google': {
       const google = new Purest({
         provider: 'google'
       });
@@ -139,7 +176,8 @@ const getProfile = async (provider, query, callback) => {
         }
       });
       break;
-    case 'github':
+    }
+    case 'github': {
       const github = new Purest({
         provider: 'github',
         defaults: {
@@ -169,7 +207,42 @@ const getProfile = async (provider, query, callback) => {
         });
       });
       break;
-    case 'twitter':
+    }
+    case 'microsoft': {
+      const microsoft = new Purest({
+        provider: 'microsoft',
+        config:{
+          'microsoft': {
+            'https://graph.microsoft.com': {
+              '__domain': {
+                'auth': {
+                  'auth': {'bearer': '[0]'}
+                }
+              },
+              '[version]/{endpoint}': {
+                '__path': {
+                  'alias': '__default',
+                  'version': 'v1.0'
+                }
+              }
+            }
+          }
+        }
+      });
+
+      microsoft.query().get('me').auth(access_token).request((err, res, body) => {
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, {
+            username: body.userPrincipalName,
+            email: body.userPrincipalName
+          });
+        }
+      });
+      break;
+    }
+    case 'twitter': {
       const twitter = new Purest({
         provider: 'twitter',
         key: grant.twitter.key,
@@ -187,10 +260,11 @@ const getProfile = async (provider, query, callback) => {
         }
       });
       break;
+    }
     default:
       callback({
         message: 'Unknown provider.'
       });
       break;
   }
-}
+};

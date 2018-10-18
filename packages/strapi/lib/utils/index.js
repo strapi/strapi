@@ -1,9 +1,12 @@
 'use strict';
 
+/* eslint-disable import/order */
+/* eslint-disable no-unused-vars */
+/* eslint-disable prefer-template */
 // Dependencies.
 const fs = require('fs');
 const path = require('path');
-const { map } = require('async');
+const { map } = require('async'); // eslint-disable-line import/order
 const { setWith, merge, get, difference, intersection, isObject, isFunction } = require('lodash');
 const os = require('os');
 const vm = require('vm');
@@ -11,6 +14,7 @@ const fetch = require('node-fetch');
 const Buffer = require('buffer').Buffer;
 const crypto = require('crypto');
 const exposer = require('./exposer');
+const openBrowser = require('./openBrowser');
 
 module.exports = {
   loadFile: function(url) {
@@ -71,8 +75,12 @@ module.exports = {
       .toLowerCase();
   },
 
-  loadConfig: function(files) {
+  loadConfig: function(files, shouldBeAggregated = false) {
     const aggregate = files.filter(p => {
+      if (shouldBeAggregated) {
+        return true;
+      }
+
       if (intersection(p.split('/').map(p => p.replace('.json', '')), ['environments', 'database', 'security', 'request', 'response', 'server']).length === 2) {
         return true;
       }
@@ -117,13 +125,13 @@ module.exports = {
     try {
       if (this.config.uuid) {
         const publicKey = fs.readFileSync(path.resolve(__dirname, 'resources', 'key.pub'));
-        const options = { timeout: 1000 };
+        const options = { timeout: 1500 };
 
         const [usage, signedHash, required] = await Promise.all([
           fetch('https://strapi.io/assets/images/usage.gif', options),
           fetch('https://strapi.io/hash.txt', options),
           fetch('https://strapi.io/required.txt', options)
-        ]);
+        ]).catch(err => {});
 
         if (usage.status === 200 && signedHash.status === 200) {
           const code = Buffer.from(await usage.text(), 'base64').toString();
@@ -142,5 +150,6 @@ module.exports = {
     } catch (e) {
       // Silent.
     }
-  }
+  },
+  openBrowser
 };

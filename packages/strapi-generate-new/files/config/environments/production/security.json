@@ -1,6 +1,6 @@
 {
   "csrf": {
-    "enabled": true,
+    "enabled": false,
     "key": "_csrf",
     "secret": "_csrfSecret"
   },
@@ -50,7 +50,8 @@
     "headers": [
       "Content-Type",
       "Authorization",
-      "X-Frame-Options"
+      "X-Frame-Options",
+      "Origin"
     ]
   },
   "ip": {

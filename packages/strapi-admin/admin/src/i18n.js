@@ -37,7 +37,7 @@ const addLanguageLocaleData = language => {
     addLocaleData(localeData);
     return true;
   } catch (error) {
-    console.error(`It looks like the language "${language}" is not supported by "react-intl" module.`); // eslint-disable-line no-console
+    console.warn(`⚠️ It looks like the language "${language}" is not supported by "react-intl" module.`); // eslint-disable-line no-console
     return false;
   }
 };

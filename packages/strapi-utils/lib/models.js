@@ -4,12 +4,18 @@
  * Module dependencies
  */
 
-// Public node modules.
-const _ = require('lodash');
-
 // Node.js core
 const path = require('path');
 
+// Public node modules.
+const _ = require('lodash');
+
+// Following this discussion https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric this function is the best implem to determine if a value is a valid number candidate
+const isNumeric = (value) => {
+  return !_.isObject(value) && !isNaN(parseFloat(value)) && isFinite(value);
+};
+
+/* eslint-disable prefer-template */
 /*
  * Set of utils for models
  */
@@ -44,6 +50,14 @@ module.exports = {
     }
 
     return undefined;
+  },
+
+  /**
+   * Retrieve the value based on the primary key
+   */
+
+  getValuePrimaryKey: (value, defaultKey) => {
+    return value[defaultKey] || value.id || value._id;
   },
 
   /**
@@ -103,7 +117,7 @@ module.exports = {
         // We have to find if they are a model linked to this key
         _.forIn(allModels, model => {
           _.forIn(model.attributes, attribute => {
-            if (attribute.hasOwnProperty('via') && attribute.via === key) {
+            if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.model === currentModelName) {
               if (attribute.hasOwnProperty('collection')) {
                 types.other = 'collection';
 
@@ -140,30 +154,16 @@ module.exports = {
         types.current = 'modelD';
 
         // We have to find if they are a model linked to this key
-        _.forIn(_.omit(models, currentModelName || ''), model => {
-          Object.keys(model.attributes)
-            .filter(key => key === association.via)
-            .forEach(attr => {
-              const attribute = model.attributes[attr];
+        const model = models[association.model];
+        const attribute = model.attributes[association.via];
 
-              if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection') && attribute.collection !== '*') {
-                types.other = 'collection';
-
-                // Break loop
-                return false;
-              } else if (attribute.hasOwnProperty('model') && attribute.model !== '*') {
-                types.other = 'model';
-
-                // Break loop
-                return false;
-              } else if (attribute.hasOwnProperty('collection') || attribute.hasOwnProperty('model')) {
-                types.other = 'morphTo';
-
-                // Break loop
-                return false;
-              }
-            });
-        });
+        if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.hasOwnProperty('collection') && attribute.collection !== '*') {
+          types.other = 'collection';
+        } else if (attribute.hasOwnProperty('model') && attribute.model !== '*') {
+          types.other = 'model';
+        } else if (attribute.hasOwnProperty('collection') || attribute.hasOwnProperty('model')) {
+          types.other = 'morphTo';
+        }
       } else if (association.hasOwnProperty('model')) {
         types.current = 'model';
 
@@ -423,6 +423,11 @@ module.exports = {
       throw new Error('You can\'t call the convert params method without passing the model\'s name as a first argument.');
     }
 
+    // Remove the source params (that can be sent from the ctm plugin) since it is not a filter
+    if (params.source) {
+      delete params.source;
+    }
+
     const model = entity.toLowerCase();
 
     const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
@@ -434,6 +439,7 @@ module.exports = {
       return this.log.error(`The model ${model} can't be found.`);
     }
 
+    const client = models[model].client;
     const connector = models[model].orm;
 
     if (!connector) {
@@ -450,25 +456,53 @@ module.exports = {
 
     _.forEach(params, (value, key)  => {
       let result;
+      let formattedValue;
+      let modelAttributes = models[model]['attributes'];
+      let fieldType;
+      // Get the field type to later check if it's a string before number conversion
+      if (modelAttributes[key]) {
+        fieldType = modelAttributes[key]['type'];
+      } else {
+        // Remove the filter keyword at the end
+        let splitKey = key.split('_').slice(0,-1);
+        splitKey = splitKey.join('_');
+
+        if (modelAttributes[splitKey]) {
+          fieldType = modelAttributes[splitKey]['type'];
+        }
+      }
+      // Check if the value is a valid candidate to be converted to a number value
+      if (fieldType !== 'string') {
+        formattedValue = isNumeric(value)
+          ? _.toNumber(value)
+          : value;
+      } else {
+        formattedValue = value;
+      }
 
       if (_.includes(['_start', '_limit'], key)) {
-        result = convertor(value, key);
+        result = convertor(formattedValue, key);
       } else if (key === '_sort') {
-        const [attr, order] = value.split(':');
+        const [attr, order = 'ASC'] = formattedValue.split(':');
         result = convertor(order, key, attr);
       } else {
         const suffix = key.split('_');
 
+        // Mysql stores boolean as 1 or 0
+        if (client === 'mysql' && _.get(models, [model, 'attributes', suffix, 'type']) === 'boolean') {
+          formattedValue = value === 'true' ? '1' : '0';
+        }
+
         let type;
 
-        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte'], _.last(suffix))) {
+        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'containss', 'in'], _.last(suffix))) {
           type = `_${_.last(suffix)}`;
           key = _.dropRight(suffix).join('_');
         } else {
           type = '=';
         }
 
-        result = convertor(value, type, key);
+        result = convertor(formattedValue, type, key);
       }
 
       _.set(convertParams, result.key, result.value);

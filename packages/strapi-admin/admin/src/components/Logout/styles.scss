@@ -1,18 +1,15 @@
 .logout {
-  position: fixed;
-  top: 0;
-  right: 0;
+  position: relative;
   min-width: 19rem;
   -webkit-font-smoothing: antialiased;
-  z-index: 999;
   > div {
     height: 6rem;
     width: 100%;
-    line-height: 6rem;
+    line-height: 5.8rem;
     z-index: 999;
     > button {
       width: 100%;
-      padding-right: 30px;
+      padding-right: 20px;
       background: transparent;
       border: none;
       border-radius: 0;
@@ -39,12 +36,25 @@
     }
   }
 
+  &:after {
+    position: absolute;
+    right: -1px;
+    top: calc(50% - 10px);
+    content: '';
+    display: inline-block;
+    vertical-align: middle;
+    height: 20px;
+    border-left: 1px solid #F3F4F4;
+    transition: opacity .2s ease-out;
+  }
+
+  &:hover:after {
+    opacity: 0;
+  }
 
 }
 .dropDownContent {
-  // top: -1px;
   left: auto !important;
-  right: -5px !important;
   min-width: 100%!important;
   margin: 0 !important;
   padding: 0;

@@ -7,7 +7,7 @@
 // Public node modules.
 const fs = require('fs');
 const path = require('path');
-
+/* eslint-disable no-unused-vars */
 module.exports = {
   provider: 'local',
   name: 'Local server',

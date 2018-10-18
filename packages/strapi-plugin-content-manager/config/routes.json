@@ -2,14 +2,6 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/layout",
-      "handler": "ContentManager.layout",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/models",
       "handler": "ContentManager.models",
       "config": {
@@ -33,6 +25,14 @@
       }
     },
     {
+      "method": "PUT",
+      "path": "/models",
+      "handler": "ContentManager.updateSettings",
+      "config": {
+        "policies": ["routing"]
+      }
+    },
+    {
       "method": "GET",
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.findOne",
@@ -51,6 +51,14 @@
       "method": "PUT",
       "path": "/explorer/:model/:id",
       "handler": "ContentManager.update",
+      "config": {
+        "policies": ["routing"]
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/explorer/deleteAll/:model",
+      "handler": "ContentManager.deleteAll",
       "config": {
         "policies": ["routing"]
       }

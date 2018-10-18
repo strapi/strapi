@@ -19,6 +19,8 @@
  * @api private
  */
 
+/* eslint-disable prefer-template */
+/* eslint-disable no-useless-escape */
 exports.pathRegexp = (path, keys, sensitive, strict) => {
   if (toString.call(path) === '[object RegExp]') {
     return path;

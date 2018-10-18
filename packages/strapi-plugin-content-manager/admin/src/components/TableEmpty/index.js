@@ -6,23 +6,41 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import { upperFirst } from 'lodash';
 
 import styles from './styles.scss';
 
-class TableEmpty extends React.Component {
-  render() {
-    return (
-      <tr className={styles.tableEmpty}>
-        <td colSpan={this.props.colspan + 1}>There is no {this.props.contentType || 'entry'}...</td>
-      </tr>
-    );
+function TableEmpty({ colspan, contentType, filters, search }) {
+  let id, values;
+  const model = upperFirst(contentType);
+
+  if (search !== '') {
+    id = 'withSearch';
+    values = { contentType: model, search };
+  } else {
+    id = filters.length > 0 ? 'withFilters' : 'withoutFilter';
+    values = { contentType: model || 'entry' };
   }
+
+  return (
+    <tr className={styles.tableEmpty}>
+      <td colSpan={colspan + 1}>
+        <FormattedMessage id={`content-manager.components.TableEmpty.${id}`} values={values} />
+      </td>
+    </tr>
+  );
 }
 
+TableEmpty.defaultProps = {
+  search: '',
+};
 
 TableEmpty.propTypes = {
   colspan: PropTypes.number.isRequired,
   contentType: PropTypes.string.isRequired,
+  filters: PropTypes.array.isRequired,
+  search: PropTypes.string,
 };
 
 export default TableEmpty;

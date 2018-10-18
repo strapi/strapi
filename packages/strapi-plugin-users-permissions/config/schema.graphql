@@ -1,0 +1,55 @@
+module.exports = {
+  type: {
+    UsersPermissionsPermission: false // Make this type NOT queriable.
+  },
+  resolver: {
+    Query: {
+      role: {
+        resolverOf: 'UsersPermissions.getRole',
+        resolver: async (obj, options, ctx) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.getRole(ctx);
+
+          return ctx.body.role;
+        }
+      },
+      roles: {
+        description: `Retrieve all the existing roles. You can't apply filters on this query.`,
+        resolverOf: 'UsersPermissions.getRoles', // Apply the `getRoles` permissions on the resolver.
+        resolver: async (obj, options, ctx) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.getRoles(ctx);
+
+          return ctx.body.roles;
+        }
+      }
+    },
+    Mutation: {
+      createRole: {
+        description: 'Create a new role',
+        resolverOf: 'UsersPermissions.createRole',
+        resolver: async (obj, options, ctx) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.createRole(ctx);
+
+          return { ok: true };
+        }
+      },
+      updateRole: {
+        description: 'Update an existing role',
+        resolverOf: 'UsersPermissions.updateRole',
+        resolver: async (obj, options, ctx) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(ctx);
+
+          return { ok: true };
+        }
+      },
+      deleteRole: {
+        description: 'Delete an existing role',
+        resolverOf: 'UsersPermissions.deleteRole',
+        resolver: async (obj, options, ctx) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(ctx);
+
+          return { ok: true };
+        }
+      }
+    }
+  }
+};

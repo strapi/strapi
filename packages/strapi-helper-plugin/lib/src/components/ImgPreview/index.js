@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get, has, isArray, isEmpty, size } from 'lodash';
+import { get, has, isArray, isEmpty, startsWith, size } from 'lodash';
 import cn from 'classnames';
 
 import BkgImg  from 'assets/icons/icon_upload.svg';
@@ -17,6 +17,7 @@ import ImgPreviewHint from 'components/ImgPreviewHint';
 
 import styles from './styles.scss';
 
+/* eslint-disable react/no-unused-state */
 class ImgPreview extends React.Component {
   state = {
     imgURL: '',
@@ -30,9 +31,10 @@ class ImgPreview extends React.Component {
   componentDidMount() {
     // We don't need the generateImgURL function here since the compo will
     // always have an init value here
+    const file = this.props.multiple ? get(this.props.files, ['0', 'name'], '') : get(this.props.files, 'name');
     this.setState({
       imgURL: get(this.props.files, ['0', 'url'], '') || get(this.props.files, 'url', ''),
-      isImg: this.isPictureType(get(this.props.files, ['0', 'name'], '')),
+      isImg: this.isPictureType(file),
     });
   }
 
@@ -54,13 +56,17 @@ class ImgPreview extends React.Component {
         this.setState({ isInitValue: true });
       }
     }
-  }
 
-  getFileType = (fileName) => fileName.split('.').slice(-1)[0];
+    if (isEmpty(nextProps.files)) {
+      this.setState({ isImg: false, imgURL: null });
+    }
+  }
 
   componentDidCatch(error, info) {
     console.log('An error occured in ImgPreview', info);
   }
+
+  getFileType = (fileName) => fileName.split('.').slice(-1)[0];
 
   /**
    * [generateImgURL description]
@@ -141,10 +147,12 @@ class ImgPreview extends React.Component {
 
   renderContent = () => {
     const fileType = this.getFileType(this.state.imgURL);
-
+    
     if (this.state.isImg) {
+      const imgURL = startsWith(this.state.imgURL, '/') ? `${strapi.backendURL}${this.state.imgURL}` : this.state.imgURL;
+
       return (
-        <img src={this.state.imgURL} alt="" />
+        <img src={imgURL} alt="" />
       );
     }
 
@@ -158,6 +166,7 @@ class ImgPreview extends React.Component {
   render() {
     const { files, onBrowseClick } = this.props;
     const { imgURL } = this.state;
+
     const containerStyle = isEmpty(imgURL) ?
       {
         backgroundImage: `url(${BkgImg})`,

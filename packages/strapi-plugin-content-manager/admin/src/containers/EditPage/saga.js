@@ -1,5 +1,5 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { findIndex, get, isArray, isEmpty,   isNumber, isString, map } from 'lodash';
+import { findIndex, get, isArray, isEmpty, includes, isNumber, isString, map } from 'lodash';
 import {
   call,
   cancel,
@@ -9,21 +9,19 @@ import {
   take,
   takeLatest,
 } from 'redux-saga/effects';
-
+import { makeSelectSchema } from 'containers/App/selectors';
 // Utils.
 import cleanData from 'utils/cleanData';
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
-
 import {
   getDataSucceeded,
-  getLayoutSucceeded,
   setFormErrors,
   setLoader,
   submitSuccess,
   unsetLoader,
 } from './actions';
-import { GET_DATA, GET_LAYOUT, SUBMIT } from './constants';
+import { DELETE_DATA, GET_DATA, SUBMIT } from './constants';
 import {
   makeSelectFileRelations,
   makeSelectIsCreating,
@@ -36,25 +34,35 @@ function* dataGet(action) {
   try {
     const modelName = yield select(makeSelectModelName());
     const params = { source: action.source };
-    const [response, layout] = yield [
+    const [response] = yield [
       call(request, `/content-manager/explorer/${modelName}/${action.id}`, { method: 'GET', params }),
-      call(request, '/content-manager/layout', { method: 'GET', params }),
     ];
     const pluginHeaderTitle = yield call(templateObject, { mainField: action.mainField }, response);
+
     yield put(getDataSucceeded(action.id, response, pluginHeaderTitle.mainField));
-    yield put(getLayoutSucceeded(layout));
   } catch(err) {
     strapi.notification.error('content-manager.error.record.fetch');
   }
 }
 
-function* layoutGet(action) {
+function* deleteData() {
   try {
-    const params = { source: action.source };
-    const response = yield call(request, '/content-manager/layout', { method: 'GET', params });
-    yield put(getLayoutSucceeded(response));
+    const currentModelName = yield select(makeSelectModelName());
+    const record = yield select(makeSelectRecord());
+    const id = record.id || record._id;
+    const source = yield select(makeSelectSource());
+    const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
+
+    yield call(request, requestUrl, { method: 'DELETE', params: { source } });
+    strapi.notification.success('content-manager.success.record.delete');
+    yield new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 300);
+    });
+    yield put(submitSuccess());
   } catch(err) {
-    strapi.notification('notification.error');
+    strapi.notification.error('content-manager.error.record.delete');
   }
 }
 
@@ -64,12 +72,27 @@ export function* submit() {
   const isCreating = yield select(makeSelectIsCreating());
   const record = yield select(makeSelectRecord());
   const source = yield select(makeSelectSource());
+  const schema = yield select(makeSelectSchema());
+  let shouldAddTranslationSuffix = false;
+  // Remove the updated_at & created_at fields so it is updated correctly when using Postgres or MySQL db
+  if (record.updated_at) {
+    delete record.created_at;
+    delete record.updated_at;
+  }
+
+  // Remove the updatedAt & createdAt fields so it is updated correctly when using MongoDB
+  if (record.updatedAt) {
+    delete record.createdAt;
+    delete record.updatedAt;
+  }
 
   try {
     // Show button loader
     yield put(setLoader());
     const recordCleaned = Object.keys(record).reduce((acc, current) => {
-      const cleanedData = cleanData(record[current], 'value', 'id');
+      const attrType = source !== 'content-manager' ? get(schema, ['models', 'plugins', source, currentModelName, 'fields', current, 'type'], null) : get(schema, ['models', currentModelName, 'fields', current, 'type'], null);
+      const cleanedData = attrType === 'json' ? record[current] : cleanData(record[current], 'value', 'id');
+
 
       if (isString(cleanedData) || isNumber(cleanedData)) {
         acc.append(current, cleanedData);
@@ -89,11 +112,16 @@ export function* submit() {
           acc.append(current, JSON.stringify(data));
         }
       } else {
-        acc.append(current, JSON.stringify(cleanedData));
+        acc.append(current,  JSON.stringify(cleanedData));
       }
 
       return acc;
     }, new FormData());
+
+    // Helper to visualize FormData
+    // for(var pair of recordCleaned.entries()) {
+    //   console.log(pair[0]+ ', '+ pair[1]);
+    // }
 
     const id = isCreating ? '' : record.id || record._id;
     const params = { source };
@@ -122,6 +150,12 @@ export function* submit() {
     if (isArray(err.response.payload.message)) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {
+          if (includes(current.id, 'Auth')) {
+            acc.id = `users-permissions.${current.id}`;
+            shouldAddTranslationSuffix = true;
+
+            return acc;
+          }
           acc.errorMessage = current.id;
 
           return acc;
@@ -131,11 +165,13 @@ export function* submit() {
         return acc;
       }, []);
 
-      const name = get(err.response.payload.message, ['0', 'messages', '0', 'field']);
+      const name = get(err.response.payload.message, ['0', 'messages', '0', 'field', '0']);
 
       yield put(setFormErrors([{ name, errors }]));
     }
-    strapi.notification.error(isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update');
+
+    const notifErrorPrefix = source === 'users-permissions' && shouldAddTranslationSuffix ? 'users-permissions.' : '';
+    strapi.notification.error(`${notifErrorPrefix}${get(err.response, ['payload', 'message', '0', 'messages', '0', 'id'], isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update')}`);
   } finally {
     yield put(unsetLoader());
   }
@@ -143,7 +179,7 @@ export function* submit() {
 
 function* defaultSaga() {
   const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
-  yield fork(takeLatest, GET_LAYOUT, layoutGet);
+  yield fork(takeLatest, DELETE_DATA, deleteData);
   yield fork(takeLatest, SUBMIT, submit);
 
   yield take(LOCATION_CHANGE);

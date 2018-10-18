@@ -20,11 +20,14 @@ const localStorageKey = 'strapi-admin-language';
 // Detect user language.
 const userLanguage = window.localStorage.getItem(localStorageKey) ||  window.navigator.language ||  window.navigator.userLanguage;
 
-// Split user language in a correct format.
-const userLanguageShort = get(split(userLanguage, '-'), '0');
+let foundLanguage = includes(languages, userLanguage) && userLanguage;
+if (!foundLanguage) {
+  // Split user language in a correct format.
+  const userLanguageShort = get(split(userLanguage, '-'), '0');
 
-// Check that the language is included in the admin configuration.
-const foundLanguage = includes(languages, userLanguageShort) && userLanguageShort;
+  // Check that the language is included in the admin configuration.
+  foundLanguage = includes(languages, userLanguageShort) && userLanguageShort;
+}
 
 const initialState = fromJS({
   locale: foundLanguage || first(languages) || 'en',

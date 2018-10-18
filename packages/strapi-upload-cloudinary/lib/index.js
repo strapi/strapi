@@ -5,7 +5,8 @@
  */
 
 // Public node modules.
-const _ = require('lodash');
+/* eslint-disable import/no-unresolved */
+/* eslint-disable prefer-template */
 const cloudinary = require('cloudinary').v2;
 const intoStream = require('into-stream');
 
@@ -45,7 +46,7 @@ module.exports = {
             resolve();
           });
           intoStream(file.buffer).pipe(upload_stream);
-        })
+        });
       },
       async delete (file) {
         try {
@@ -55,7 +56,7 @@ module.exports = {
           if (response.result !== 'ok') {
             throw {
               error: new Error(response.result)
-            }
+            };
           }
         } catch (error) {
           throw error.error;

@@ -19,7 +19,7 @@
 .li {
   margin-top: 0!important;
   position: relative;
-  height: 5.4rem;
+  min-height: 5.4rem;
   line-height: 5.4rem;
   cursor: pointer;
   &:hover {

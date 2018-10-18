@@ -14,6 +14,7 @@ import Button from 'components/Button';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 class ContentHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
   handleEdit = () => {
     router.push(this.props.editPath);

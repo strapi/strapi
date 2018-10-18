@@ -14,12 +14,12 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, upperFirst } from 'lodash';
 import cn from 'classnames';
 
-import Block from 'components/HomePageBlock/Loadable';
+import Block from 'components/HomePageBlock';
 import Button from 'components/Button';
-import Sub from 'components/Sub/Loadable';
+import Sub from 'components/Sub';
 import Input from 'components/InputText';
-import SupportUsCta from 'components/SupportUsCta/Loadable';
-import SupportUsTitle from 'components/SupportUsTitle/Loadable';
+import SupportUsCta from 'components/SupportUsCta';
+import SupportUsTitle from 'components/SupportUsTitle';
 
 import { selectPlugins } from 'containers/App/selectors';
 
@@ -52,16 +52,6 @@ const FIRST_BLOCK = [
       id: 'app.components.HomePage.create',
     },
     content: () => <CreateContent />,
-  },
-];
-
-const WELCOME_AGAIN_BLOCK = [
-  {
-    title: {
-      id: 'app.components.HomePage.welcome.again',
-    },
-    name: upperFirst(`${get(auth.getUserInfo(), 'username')}!`),
-    content: () => <WelcomeContent hasContent />,
   },
 ];
 
@@ -147,7 +137,7 @@ export class HomePage extends React.PureComponent {
     const data = this.showFirstBlock()
       ? {
         className: styles.homePageTutorialButton,
-        href: 'https://strapi.io/documentation/getting-started/quick-start.html',
+        href: 'https://strapi.io/documentation/getting-started/quick-start.html#create-your-first-api',
         id: 'app.components.HomePage.button.quickStart',
         primary: true,
       }
@@ -169,6 +159,15 @@ export class HomePage extends React.PureComponent {
 
   render() {
     const { homePage: { articles, body } } = this.props;
+    const WELCOME_AGAIN_BLOCK = [
+      {
+        title: {
+          id: 'app.components.HomePage.welcome.again',
+        },
+        name: upperFirst(`${get(auth.getUserInfo(), 'username')}!`),
+        content: () => <WelcomeContent hasContent />,
+      },
+    ];
 
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>

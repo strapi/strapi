@@ -199,7 +199,7 @@ InputSelectWithErrors.propTypes = {
       }),
       PropTypes.string,
     ]),
-  ).isRequired,
+  ),
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,

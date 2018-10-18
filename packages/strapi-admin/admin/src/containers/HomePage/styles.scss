@@ -1,9 +1,9 @@
 .blockLink {
   position: relative;
   width: calc(50% - 6px);
-  height: 99px;
+  height: auto;
   margin-top: 41px;
-  padding: 22px 25px 0 96px;
+  padding: 22px 25px 19px 96px;
   background: #F7F8F8;
   border-radius: 3px;
   line-height: 18px;
@@ -134,11 +134,12 @@
 
   button {
     float: left;
-    width: 100px;
+    min-width: 100px;
     height: 3.4rem;
     margin-top: .9rem;
     padding-left: 20px;
     padding-right: 20px;
+    text-align: center;
     background: #333740;
     color: #FFFFFF;
     border-top-right-radius: 3px;
@@ -265,4 +266,24 @@
   display: block;
   max-width: 55rem !important;
   margin-bottom: 31px;
+}
+
+.spinner {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin: auto;
+  > div {
+    border: 2px solid #f3f3f3; /* Light grey */
+    border-top: 2px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    animation: spin 2s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

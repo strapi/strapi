@@ -7,7 +7,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
+import cn from 'classnames';
 
+import LoadingIndicator from 'components/LoadingIndicator';
 import Input from 'components/InputsIndex';
 
 import styles from './styles.scss';
@@ -25,6 +27,14 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
   )
 
   render() {
+    if (this.props.showLoaders) {
+      return (
+        <div className={cn(styles.editForm, this.props.showLoaders && styles.loadIndicatorContainer)}>
+          <LoadingIndicator />
+        </div>
+      );
+    }
+
     return (
       <div className={styles.editForm}>
         <div className="row">
@@ -32,7 +42,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             inputDescription={{ id: 'users-permissions.EditForm.inputSelect.description.role' }}
             inputClassName={styles.inputStyle}
             label={{ id: 'users-permissions.EditForm.inputSelect.label.role' }}
-            name="settings.default_role"
+            name="advanced.settings.default_role"
             onChange={this.props.onChange}
             selectOptions={this.generateSelectOptions()}
             type="select"
@@ -44,7 +54,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
           <Input
             label={{ id: 'users-permissions.EditForm.inputToggle.label.email' }}
             inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.email' }}
-            name="settings.unique_email"
+            name="advanced.settings.unique_email"
             onChange={this.props.onChange}
             type="toggle"
             value={get(this.props.values.settings, 'unique_email')}
@@ -81,10 +91,31 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
           <Input
             label={{ id: 'users-permissions.EditForm.inputToggle.label.sign-up' }}
             inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.sign-up' }}
-            name="settings.allow_register"
+            name="advanced.settings.allow_register"
             onChange={this.props.onChange}
             type="toggle"
             value={get(this.props.values.settings, 'allow_register')}
+          />
+        </div>
+        <div className={styles.separator} />
+        <div className="row">
+          <Input
+            label={{ id: 'users-permissions.EditForm.inputToggle.label.email-confirmation' }}
+            inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.email-confirmation' }}
+            name="advanced.settings.email_confirmation"
+            onChange={this.props.onChange}
+            type="toggle"
+            value={get(this.props.values.settings, 'email_confirmation')}
+          />
+        </div>
+        <div className="row">
+          <Input
+            label={{ id: 'users-permissions.EditForm.inputToggle.label.email-confirmation-redirection' }}
+            inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.email-confirmation-redirection' }}
+            name="advanced.settings.email_confirmation_redirection"
+            onChange={this.props.onChange}
+            type="text"
+            value={get(this.props.values.settings, 'email_confirmation_redirection')}
           />
         </div>
       </div>
@@ -94,6 +125,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
 
 EditForm.propTypes = {
   onChange: PropTypes.func.isRequired,
+  showLoaders: PropTypes.bool.isRequired,
   values: PropTypes.object.isRequired,
 };
 

@@ -16,6 +16,14 @@
   }
 }
 
+.withBulk {
+  > tr {
+    th:first-child {
+      width: 50px;
+    }
+  }
+}
+
 .iconAsc{
   position: absolute;
   top: 3px; right: -12px;

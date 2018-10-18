@@ -1,33 +1,27 @@
 {
-  "ConfigPage.title": "Przesyłanie - Ustawienia",
-  "ConfigPage.description": "KOnfiguracja wtyczki przesyłania plików",
-
+  "ConfigPage.description": "Konfiguracja wtyczki służącej do przesyłania plików.",
+  "ConfigPage.title": "Pliki - Ustawienia",
   "EditForm.Input.number.label": "Maksymalny dozwolony rozmiar (w MB)",
-  "EditForm.Input.select.label": "Dostawcy",
   "EditForm.Input.select.inputDescription": "Pliki mogą zostać przesłane na serwer lub zewnętrzne źródła.",
+  "EditForm.Input.select.label": "Dostawcy",
   "EditForm.Input.toggle.label": "Włącz przesyłanie plików",
-
   "EmptyLi.message": "Żaden plik nie został jeszcze przesłany",
-
   "EntriesNumber.number": "{number} plik znaleziony",
   "EntriesNumber.number.plural": "{number} plików znalezionych",
-
-  "HomePage.title": "Przesyłanie",
-  "HomePage.description": "Discover all the uploaded files Odkryj wszystkie ",
   "HomePage.InputSearch.placeholder": "Szukaj...",
-
+  "HomePage.description": "Przeglądaj wszystkie przesłane pliki.",
+  "HomePage.title": "Pliki",
   "Li.linkCopied": "Link został skopiowany do schowka",
-
-  "ListHeader.type": "Typ",
   "ListHeader.hash": "Hash",
   "ListHeader.name": "Nazwa",
-  "ListHeader.updated": "Aktualizacja",
-  "ListHeader.size": "Rozmiar",
   "ListHeader.related": "Związany z",
-
-  "PluginInputFile.text": "Przeciągnij & upuść pliki w to miejsce lub {link} pliki do przesłania",
+  "ListHeader.size": "Rozmiar",
+  "ListHeader.type": "Typ",
+  "ListHeader.updated": "Aktualizacja",
   "PluginInputFile.link": "przeglądaj",
-
+  "PluginInputFile.loading": "Twoje pliki są właśnie przesyłane...",
+  "PluginInputFile.text": "Przeciągnij & upuść pliki w to miejsce lub {link} pliki do przesłania.",
+  "notification.config.success": "Ustawienia zostały zaaktualizowane",
   "notification.delete.success": "Plik został usunięty",
   "notification.dropFile.success": "Plik został przesłany",
   "notification.dropFiles.success": "{number} plików zostało przesłanych"

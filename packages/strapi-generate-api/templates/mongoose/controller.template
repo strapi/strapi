@@ -15,10 +15,11 @@ module.exports = {
    */
 
   find: async (ctx) => {
-    const data = await strapi.services.<%= id %>.fetchAll(ctx.query);
-
-    // Send 200 `ok`
-    ctx.send(data);
+    if (ctx.query._q) {
+      return strapi.services.<%= id %>.search(ctx.query);
+    } else {
+      return strapi.services.<%= id %>.fetchAll(ctx.query);
+    }
   },
 
   /**
@@ -32,10 +33,17 @@ module.exports = {
       return ctx.notFound();
     }
 
-    const data = await strapi.services.<%= id %>.fetch(ctx.params);
+    return strapi.services.<%= id %>.fetch(ctx.params);
+  },
 
-    // Send 200 `ok`
-    ctx.send(data);
+  /**
+   * Count <%= id %> records.
+   *
+   * @return {Number}
+   */
+
+  count: async (ctx) => {
+    return strapi.services.<%= id %>.count(ctx.query);
   },
 
   /**
@@ -45,10 +53,7 @@ module.exports = {
    */
 
   create: async (ctx) => {
-    const data = await strapi.services.<%= id %>.add(ctx.request.body);
-
-    // Send 201 `created`
-    ctx.created(data);
+    return strapi.services.<%= id %>.add(ctx.request.body);
   },
 
   /**
@@ -58,10 +63,7 @@ module.exports = {
    */
 
   update: async (ctx, next) => {
-    const data = await strapi.services.<%= id %>.edit(ctx.params, ctx.request.body) ;
-
-    // Send 200 `ok`
-    ctx.send(data);
+    return strapi.services.<%= id %>.edit(ctx.params, ctx.request.body) ;
   },
 
   /**
@@ -71,9 +73,6 @@ module.exports = {
    */
 
   destroy: async (ctx, next) => {
-    const data = await strapi.services.<%= id %>.remove(ctx.params);
-
-    // Send 200 `ok`
-    ctx.send(data);
+    return strapi.services.<%= id %>.remove(ctx.params);
   }
 };

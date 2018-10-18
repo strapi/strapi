@@ -137,6 +137,7 @@ module.exports = {
       fs.unlinkSync(filePath);
 
       ctx.send({ ok: true });
+      strapi.reload();
     } catch (e) {
       ctx.badRequest(null, Service.formatErrors([{
         target: 'name',
@@ -214,8 +215,10 @@ module.exports = {
 
     if (params.database.connections) {
       const settings = _.assign(_.clone(strapi.config.environments[env].database.connections[name].settings), params.database.connections[name].settings);
+      const options = _.assign(_.clone(strapi.config.environments[env].database.connections[name].options), params.database.connections[name].options);
       params = _.assign(_.clone(strapi.config.environments[env].database.connections[name]), params.database.connections[name]);
       params.settings = settings;
+      params.options = options;
     }
 
     delete params.name;
@@ -331,8 +334,8 @@ module.exports = {
 
   autoReload: async ctx => {
     ctx.send({
-      autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false),
-      environment: strapi.config.environment,
+      autoReload: _.get(strapi.config.currentEnvironment, 'server.autoReload', { enabled: false }),
+      environment: strapi.config.environment
     });
   }
 };

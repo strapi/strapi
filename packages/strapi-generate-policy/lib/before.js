@@ -15,6 +15,7 @@ const _ = require('lodash');
  * @param {Function} cb
  */
 
+/* eslint-disable prefer-template */
 module.exports = (scope, cb) => {
   if (!scope.rootPath || !scope.id) {
     return cb.invalid('Usage: `$ strapi generate:policy policyName --api apiName --plugin pluginName`');

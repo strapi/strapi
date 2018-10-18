@@ -20,6 +20,7 @@ import logoTShirt from 'assets/images/logo-t-shirt.svg';
 import styles from './styles.scss';
 import Screenshot from './screenshot.png';
 
+/* eslint-disable react/no-unused-state */
 class PluginCard extends React.Component {
   state = { isOpen: false, boostrapCol: 'col-lg-4' };
 

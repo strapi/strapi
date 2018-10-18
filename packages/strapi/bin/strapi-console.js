@@ -14,7 +14,7 @@ module.exports = function () {
       try {
         return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
       } catch (e) {
-        return require('strapi');
+        return require('strapi'); // eslint-disable-line import/no-unresolved
       }
     }();
 
@@ -35,7 +35,7 @@ module.exports = function () {
 
       // Open the Node.js REPL.
       if ((cluster.isMaster && _.isEmpty(cluster.workers)) || cluster.worker.id === 1) {
-        const repl = REPL.start(strapi.config.info.name + ' > ' || 'strapi > ');
+        const repl = REPL.start(strapi.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template
 
         repl.on('exit', function (err) {
 

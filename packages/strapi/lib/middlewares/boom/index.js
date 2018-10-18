@@ -19,13 +19,19 @@ module.exports = strapi => {
       this.delegator = delegate(strapi.app.context, 'response');
       this.createResponses();
 
+      strapi.errors = Boom;
       strapi.app.use(async (ctx, next) => {
         try {
           // App logic.
           await next();
         } catch (error) {
+          // emit error if configured
+          if (_.get(strapi, 'config.currentEnvironment.server.emitErrors', false)) {
+            strapi.app.emit('error', error, ctx);
+          }
+
           // Log error.
-          strapi.log.error(error);
+          console.error(error);
 
           // Wrap error into a Boom's response.
           ctx.status = error.status || 500;
@@ -39,7 +45,7 @@ module.exports = strapi => {
         }
 
         // Empty body is considered as `notFound` response.
-        if (!ctx.body) {
+        if (!ctx.body && ctx.body !== 0) {
           ctx.notFound();
         }
 
