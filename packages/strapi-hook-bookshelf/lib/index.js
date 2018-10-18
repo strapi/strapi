@@ -479,7 +479,7 @@ module.exports = function(strapi) {
                                   ? column
                                   : `"${column}"`;
 
-                                return ORM.knex.raw(`CREATE INDEX search_${_.toLower(indexName)} ON "${table}" USING gin(${attribute} gin_trgm_ops)`);
+                                return ORM.knex.raw(`CREATE INDEX IF NOT EXISTS search_${_.toLower(indexName)} ON "${table}" USING gin(${attribute} gin_trgm_ops)`);
                               });
 
                             await Promise.all(indexes);
