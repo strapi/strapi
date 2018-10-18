@@ -222,7 +222,8 @@ class PopUpRelations extends React.Component {
   );
 
   renderModalBodyRelations = () => {
-    const header = get(this.props.values, ['params', 'pluginValue'])
+    const pluginValue = get(this.props.values, ['params', 'pluginValue'], '');
+    const header = !isEmpty(pluginValue.trim())
       ? get(this.props.dropDownItems, [
         findIndex(this.props.dropDownItems, {
           name: get(this.props.values, ['params', 'target']),

@@ -137,5 +137,6 @@
   "components.popUpWarning.title": "Merci de confirmer",
   "notification.error": "Une erreur est survenue",
   "notification.error.layout": "Impossible de récupérer le layout de l'admin",
-  "request.error.model.unknown": "Le model n'existe pas"
+  "request.error.model.unknown": "Le model n'existe pas",
+  "app.utils.delete": "Supprimer"
 }
