@@ -375,7 +375,7 @@ class Strapi extends EventEmitter {
         pluginPath = pathTerms[index + 1];
       }
     }
-
+      
     if (!pluginPath) {
       return this.log.error('Impossible to find the plugin where `strapi.query` has been called.');
     }

@@ -1,5 +1,5 @@
-const cssnext = require('postcss-cssnext');
 const postcssFocus = require('postcss-focus');
+const cssnext = require('postcss-cssnext');
 const postcssReporter = require('postcss-reporter');
 
 const postcssPlugins = [

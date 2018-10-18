@@ -2,7 +2,8 @@
  * Create Alias for webpack config.
  */
 const path = require('path');
-const paths = require('./paths')
+const paths = require('./paths');
+
 // Create Object for alias path.
 const createAlias = libraries => libraries.reduce((acc, item) => {
   acc[item] = path.resolve(
@@ -11,36 +12,18 @@ const createAlias = libraries => libraries.reduce((acc, item) => {
     'strapi-helper-plugin',
     'node_modules',
     item,
-  )
-  return acc
-}, {})
+  );
+  return acc;
+}, { moment: 'moment/moment.js' });
 
 /**
  * Libraries common for PROD and DEV.
- * Insert Here a new library, if you create an alias for PROD and DEV.
+ * Insert Here a new library, if you want create an alias for PROD and DEV.
  */
-const commonLibrary = ['babel-polyfill', 'lodash', 'immutable', 'react-intl', 'react', 'react-dom', 'react-transition-group', 'reactstrap', 'styled-components']
+const commonLibrary = ['babel-polyfill', 'lodash', 'immutable', 'react-intl', 'react', 'react-dnd', 'react-dnd-html5-backend', 'react-dom', 'react-transition-group', 'reactstrap', 'styled-components'];
 
-/**
- * Libraries for DEV.
- * Insert Here a new library, if you create an alias DEV.
- */
-const devLibrary = ['react-dnd', 'react-dnd-html5-backend']
+// Alias common for PROD and DEV.
+const COMMON_ALIAS = createAlias(commonLibrary);
 
-// COMMON Alias for PROD and DEV.
-const COMMON_ALIAS = createAlias(commonLibrary)
 
-// Alias for PROD (contains COMMON_ALIAS).
-const PROD_ALIAS = {
-  ...COMMON_ALIAS,
-  moment: 'moment/moment.js',
-};
-
-// Alias for DEV (contains COMMON_ALIAS).
-const DEV_ALIAS = {
-  ...COMMON_ALIAS,
-  moment: 'moment/moment.js',
-  ...createAlias(devLibrary)
-};
-
-module.exports = { PROD_ALIAS, DEV_ALIAS };
+module.exports = { COMMON_ALIAS };

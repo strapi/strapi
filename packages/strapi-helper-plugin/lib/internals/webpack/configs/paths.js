@@ -7,18 +7,13 @@ const { __APP_PATH__, __IS_ADMIN__, __INIT_CWD__, __IS_MONOREPO__, __NODE_ENV__ 
 const appDirectory = fs.realpathSync(process.cwd());
 
 // define appPath.
-const appPath = (() => {
-  if (__APP_PATH__) {
-    return __APP_PATH__;
-  }
-  
-  return __IS_ADMIN__ ? path.resolve(__PWD__, '..') : path.resolve(__PWD__, '..', '..');
-})();
+const appPath = __APP_PATH__ || path.resolve(__PWD__, '..', ( __IS_ADMIN__ ? '' : '..' ));
+
 
 const isSetup = __PROD__ ?  __IS_MONOREPO__ :  path.resolve(__PWD__, '..', '..') === path.resolve(__INIT_CWD__);
 
 const rootAdminpath = (() => {
-  if (isSetup) {
+  if (isSetup || __IS_MONOREPO__) {
     return __IS_ADMIN__
       ? path.resolve(appPath, 'strapi-admin')
       : path.resolve(appPath, 'packages', 'strapi-admin');
@@ -26,11 +21,10 @@ const rootAdminpath = (() => {
   return path.resolve(appPath, 'admin');
 })();
 
-
 // Resolve path from app directory to relative path.
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
-const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
+// const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
 
 module.exports = {
   admin: path.resolve(appPath, 'admin'),

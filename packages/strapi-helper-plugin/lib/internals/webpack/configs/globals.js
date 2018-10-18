@@ -5,7 +5,7 @@
 const { APP_PATH, IS_ADMIN, IS_MONOREPO, INIT_CWD,  NODE_ENV, npm_lifecycle_event, PORT, PWD} = process.env;
 
 const __APP_PATH__ = APP_PATH;
-const __INIT_CWD__ = INIT_CWD
+const __INIT_CWD__ = INIT_CWD;
 const __NPM_START_EVENT__ = npm_lifecycle_event === 'start';
 const __PORT__ = PORT;
 const __PWD__ = PWD;
@@ -29,5 +29,5 @@ module.exports = {
   __NPM_START_EVENT__,
   __PORT__,
   __PROD__,
-  __PWD__
+  __PWD__,
 };

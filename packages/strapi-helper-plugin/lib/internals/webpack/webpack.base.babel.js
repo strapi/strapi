@@ -8,6 +8,7 @@ const _ = require('lodash');
 
 const { __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__, __NPM_START_EVENT__, __PROD__, __PWD__ } = require('./configs/globals');
 const paths = require('./configs/paths');
+const { COMMON_ALIAS } = require('./configs/alias');
 
 const plugins = require('./configs/plugins');
 
@@ -78,7 +79,7 @@ const foldersToInclude = [path.join(adminPath, 'admin', 'src')]
   .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')]);
 
 module.exports = options => {
-  const { alias, babelPresets, devtool, disableExtractTextPlugin, entry, externals,  output, plugins, } = options
+  const { alias, babelPresets, devtool, disableExtractTextPlugin, entry, externals,  output, plugins, } = options;
   
   // The disable option is only for production
   // Config from https://github.com/facebook/create-react-app/blob/next/packages/react-scripts/config/webpack.config.prod.js
@@ -87,6 +88,22 @@ module.exports = options => {
     disable: disableExtractTextPlugin || true,
   });
 
+  const commonBabelPresets = [
+    [
+      require.resolve('babel-preset-env'),
+      {
+        es2015: {
+          modules: false,
+        },
+      },
+    ],
+    require.resolve('babel-preset-react'),
+    require.resolve('babel-preset-stage-0'),
+    // Add some babel presets in function of mode.
+  ];
+
+  const commonDevtool = 'cheap-module-source-map';
+  
   return {
     entry: entry,
     output: Object.assign(
@@ -109,7 +126,7 @@ module.exports = options => {
               loader: require.resolve('babel-loader'),
               include: foldersToInclude,
               options: {
-                presets: babelPresets,
+                presets: commonBabelPresets.concat(babelPresets),
                 env: {
                   production: {
                     only: ['src'],
@@ -244,7 +261,6 @@ module.exports = options => {
         // make fetch available
         fetch: 'exports-loader?self.fetch!whatwg-fetch',
       }),
-
       // Always expose NODE_ENV to webpack, in order to use `process.env.NODE_ENV`
       // inside your code for any environment checks; UglifyJS will automatically
       // drop any unreachable code.
@@ -256,6 +272,7 @@ module.exports = options => {
           MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
         },
       }),
+      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
       new webpack.NamedModulesPlugin(),
       extractSass,
     ].concat(plugins),
@@ -266,11 +283,12 @@ module.exports = options => {
         'node_modules/strapi-helper-plugin/node_modules',
         'node_modules',
       ],
-      alias: alias,
+      alias: _.isEmpty(alias) ? COMMON_ALIAS : alias,
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js'],
       mainFields: ['browser', 'jsnext:main', 'main'],
     },
+    devtool: _.isEmpty(devtool) ? commonDevtool : devtool,
     externals: externals,
     resolveLoader: {
       modules: [
@@ -278,7 +296,6 @@ module.exports = options => {
         path.join(process.cwd(), 'node_modules'),
       ],
     },
-    devtool: devtool,
     target: 'web', // Make web variables accessible to webpack, e.g. window,
   };
 };

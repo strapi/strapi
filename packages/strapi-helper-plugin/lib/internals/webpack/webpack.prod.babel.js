@@ -2,12 +2,11 @@
 const path = require('path');
 const _ = require('lodash');
 
-const { __IS_ADMIN__, __IS_MONOREPO__,  __PWD__} = require('./configs/globals');
+const { __IS_ADMIN__, __IS_MONOREPO__, __PWD__ } = require('./configs/globals');
 const paths = require('./configs/paths');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const postcssPlugins = require('./configs/postcssOptions');
-const { PROD_ALIAS } = require('./configs/alias');
 
 const webpack = require('webpack');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
@@ -23,7 +22,7 @@ const adminPath = (() => {
   if (__IS_MONOREPO__) {
     return __IS_ADMIN__ ? paths.strapiAdmin : path.resolve(__PWD__, '..');
   }
-  
+
   return paths.admin;
 })();
 
@@ -45,7 +44,6 @@ const plugins = [
   new webpack.LoaderOptionsPlugin({
     minimize: true,
   }),
-  new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
   // new BundleAnalyzerPlugin(),
 ];
 
@@ -139,23 +137,7 @@ module.exports = base({
 
   // Plugins
   plugins,
-
-  // Babel presets configuration
-  babelPresets: [
-    [
-      require.resolve('babel-preset-env'),
-      {
-        es2015: {
-          modules: false,
-        },
-      },
-    ],
-    require.resolve('babel-preset-react'),
-    require.resolve('babel-preset-stage-0'),
-  ],
-
-  alias: PROD_ALIAS,
-  devtool: 'cheap-module-source-map',
+  babelPresets: [],
   disableExtractTextPlugin: false,
   externals: {},
 });

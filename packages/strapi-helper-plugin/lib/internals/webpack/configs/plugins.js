@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const { __IS_ADMIN__, __NPM_START_EVENT__, } = require('./globals');
-const paths = require('./paths')
+const paths = require('./paths');
 
 
 // Create plugins object.
@@ -30,7 +30,6 @@ if (__NPM_START_EVENT__) {
     __IS_ADMIN__ && !plugins.exist
       ? fs.readdirSync(path.resolve(paths.appPath, 'plugins')).filter(x => {
         let hasAdminFolder;
-        
         try {
           fs.accessSync(path.resolve(paths.appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
           hasAdminFolder = true;
