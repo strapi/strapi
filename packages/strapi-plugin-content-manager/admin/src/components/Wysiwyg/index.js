@@ -722,7 +722,7 @@ class Wysiwyg extends React.Component {
                 stripPastedStyles
                 tabIndex={this.props.tabIndex}
               />
-              <input className={styles.editorInput} value="" tabIndex="-1" />
+              <input className={styles.editorInput} tabIndex="-1" />
             </div>
           )}
           {!isFullscreen && (
