@@ -196,8 +196,6 @@ module.exports = {
         }
 
         if (!_.isFunction(acc[type][resolver])) {
-          console.log(type, resolver);
-
           acc[type][resolver] = acc[type][resolver].resolver;
         }
 
