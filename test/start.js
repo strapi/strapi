@@ -1,6 +1,8 @@
 const spawn = require('child_process').spawn;
-const fs = require('fs-extra');
+const fs = require('fs');
 const path = require('path');
+const shell = require('shelljs');
+const { deleteApp } = require('./helpers/deleteFolder');
 
 const strapiBin = path.resolve('./packages/strapi/bin/strapi.js');
 const appName = 'testApp';
@@ -17,14 +19,14 @@ const {runCLI: jest} = require('jest-cli/build/cli');
 
 const main = async () => {
   const clean = () => {
-    return new Promise((resolve) => {
-      fs.exists(appName, exists => {
-        if (exists) {
-          fs.removeSync(appName);
-        }
-
-        resolve();
-      });
+    return new Promise(async (resolve) => {
+      try {
+        fs.accessSync(appName);
+        await deleteApp(path.resolve(appName));
+      } catch(err) {
+        // Silent
+      }
+      resolve();
     });
   };
 
@@ -51,12 +53,11 @@ const main = async () => {
   const start = () => {
     return new Promise((resolve, reject) => {
       try {
-        appStart = spawn('node', `${strapiBin} start ${appName}`.split(' '), {detached: true});
-
-        appStart.stdout.on('data', data => {
-          console.log(data.toString());
-
+        shell.cd('./testApp');
+        const appStart = shell.exec(`strapi start`, { async: true, silent: true });
+        appStart.stdout.on('data', (data) => {
           if (data.includes('To shut down your server')) {
+            shell.cd('..');
             return resolve();
           }
         });
@@ -98,7 +99,7 @@ const main = async () => {
       await clean();
       await generate(database);
       await start();
-      await test();
+      // await test();
       process.kill(-appStart.pid);
     } catch (e) {
       console.error(e.message);
@@ -107,8 +108,8 @@ const main = async () => {
   };
 
   await testProcess(databases.mongo);
-  await testProcess(databases.postgres);
-  await testProcess(databases.mysql);
+  // await testProcess(databases.postgres);
+  // await testProcess(databases.mysql);
   process.exit(testExitCode);
 };
 
