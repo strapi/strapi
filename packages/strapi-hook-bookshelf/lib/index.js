@@ -456,67 +456,60 @@ module.exports = function(strapi) {
                       }
 
                       _.mapKeys(attributes, (field, fieldName) => {
-                        try {
-                          if (!field.type) {
-                            // Creating column for foreign key as the original implementation
-                            // ROOM FOR IMPROVEMENT -- Use actual foreign keys
-                            const relation = definition.associations
-                              .find(association => association.alias === fieldName);
+                        if (!field.type) {
+                          // Creating column for foreign key as the original implementation
+                          // ROOM FOR IMPROVEMENT -- Use actual foreign keys
+                          const relation = definition.associations
+                            .find(association => association.alias === fieldName);
 
-                            if (['oneToOne', 'manyToOne', 'oneWay'].includes(relation.nature)) {
-                              dbTable[definition.primaryKeyType](fieldName);
-                            }
-
-                            return;
+                          if (['oneToOne', 'manyToOne', 'oneWay'].includes(relation.nature)) {
+                            dbTable[definition.primaryKeyType](fieldName);
                           }
 
-                          let column;
-                          switch(field.type) {
-                            // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
-                            case 'text':
-                              column = dbTable.text(fieldName, 'longtext');
-                              break;
+                          return;
+                        }
 
-                            case 'decimal':
-                              column = dbTable.decimal(fieldName, 10, 2);
-                              break;
+                        let column;
+                        switch(field.type) {
+                          // ROOM FOR IMPROVEMENT -- We could add REAL defined constrains to database
+                          case 'text':
+                            column = dbTable.text(fieldName, 'longtext');
+                            break;
 
-                            case 'json':
+                          case 'decimal':
+                            column = dbTable.decimal(fieldName, 10, 2);
+                            break;
+
+                          case 'json':
+                            // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
+                            column = definition.client === 'pg'
+                              ? dbTable.jsonb(fieldName)
+                              : dbTable.text(fieldName, 'longtext');
+                            break;
+
+                          case 'email':
+                          case 'password':
+                          case 'enumeration': // Manage native type is too complicated
+                            column = dbTable.string(fieldName);
+                            break;
+
+                          case 'date':
+                          case 'timestamp':
+                          case 'timestampUpdate':
+                            column = dbTable.timestamp(fieldName).defaultTo(
                               // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
-                              column = definition.client === 'pg'
-                                ? dbTable.jsonb(fieldName)
-                                : dbTable.text(fieldName, 'longtext');
-                              break;
+                              definition.client === 'mysql' && field.type === 'timestampUpdate'
+                                ? ORM.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
+                                : ORM.knex.fn.now()
+                            );
+                            break;
 
-                            case 'email':
-                            case 'password':
-                            case 'enumeration': // Manage native type is too complicated
-                              column = dbTable.string(fieldName);
-                              break;
+                          default:
+                            column = dbTable[field.type](fieldName);
+                        }
 
-                            case 'date':
-                            case 'timestamp':
-                            case 'timestampUpdate':
-                              column = dbTable.timestamp(fieldName).defaultTo(
-                                // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
-                                definition.client === 'mysql' && field.type === 'timestampUpdate'
-                                  ? ORM.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
-                                  : ORM.knex.fn.now()
-                              );
-                              break;
-
-                            default:
-                              column = dbTable[field.type](fieldName);
-                          }
-
-                          if (alter) {
-                            column.alter();
-                          }
-
-                        } catch (e) {
-                          strapi.log.error(`Field type '${field.type}' (for table '${table}') not recognized.`);
-                          // FIXME: For temporary debugging. This should be eliminated.
-                          console.log({field}, e);
+                        if (alter) {
+                          column.alter();
                         }
                       });
                     };
@@ -533,12 +526,12 @@ module.exports = function(strapi) {
 
                       // ROOM FOR IMPROVEMENT -- This can be avoded if compare with the actual DB scheme; also will be
                       // more stable
-                      let previousAttributes;
+                      let savedSchema;
                       try {
-                        previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
+                        savedSchema = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
                       } catch (err) {
                         await storeTable(table, attributes);
-                        previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
+                        savedSchema = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
                       }
 
                       const dbColumns = await ORM.knex.table(table).columnInfo();
