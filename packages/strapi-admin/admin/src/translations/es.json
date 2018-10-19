@@ -92,6 +92,7 @@
   "app.components.listPluginsPage.deletePlugin.error": "Se ha producido un error al desinstalar el plugin",
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
+  "app.utils.delete": "Eliminar",
   "app.utils.placeholder.defaultMessage": " ",
   "components.AutoReloadBlocker.description": "Abra el siguiente archivo y habilite la función.",
   "components.AutoReloadBlocker.header": "Es necesario recargar para este plugin.",
@@ -136,6 +137,5 @@
   "components.popUpWarning.title": "Por favor, confirme",
   "notification.error": "Se ha producido un error",
   "notification.error.layout": "No se pudo recuperar el esquema",
-  "request.error.model.unknown": "Este modelo no existe",
-  "app.utils.delete": "Eliminar"
+  "request.error.model.unknown": "Este modelo no existe"
 }

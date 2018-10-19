@@ -93,6 +93,7 @@
   "app.components.listPluginsPage.deletePlugin.error": "Une erreur est survenue pendant la désintallation",
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
+  "app.utils.delete": "Supprimer",
   "app.utils.placeholder.defaultMessage": " ",
   "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
@@ -137,6 +138,5 @@
   "components.popUpWarning.title": "Merci de confirmer",
   "notification.error": "Une erreur est survenue",
   "notification.error.layout": "Impossible de récupérer le layout de l'admin",
-  "request.error.model.unknown": "Le model n'existe pas",
-  "app.utils.delete": "Supprimer"
+  "request.error.model.unknown": "Le model n'existe pas"
 }
