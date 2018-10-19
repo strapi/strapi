@@ -1,4 +1,4 @@
-# strapi-upload-cloudinary
+# strapi-provider-email-sendmail
 
 ## Resources
 

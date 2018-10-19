@@ -1,24 +1,24 @@
 {
-  "name": "strapi-upload-local",
+  "name": "strapi-provider-email-amazon-ses",
   "version": "3.0.0-alpha.14.3",
-  "description": "Local provider for strapi upload",
+  "description": "Amazon SES provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
-    "upload",
-    "strapi"
+    "email",
+    "strapi",
+    "amazon",
+    "ses"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
-  "dependencies": {},
-  "strapi": {
-    "isProvider": true
+  "dependencies": {
+    "node-ses": "^2.1.0"
   },
   "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
+    "email": "nikolay@tsenkov.net",
+    "name": "Nikolay tsenkov"
   },
   "maintainers": [
     {

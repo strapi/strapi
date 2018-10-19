@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "react-copy-to-clipboard": "^5.0.1",
-    "strapi-upload-local": "3.0.0-alpha.14.3",
+    "strapi-provider-upload-local": "3.0.0-alpha.14.3",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },

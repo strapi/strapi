@@ -26,11 +26,11 @@ By default Strapi provides a local email system. You might want to send email wi
 To install a new provider run:
 
 ```
-$ npm install strapi-email-sendgrid@alpha --save
+$ npm install strapi-provider-email-sendgrid@alpha --save
 ```
 
-We have two providers available `strapi-email-sendgrid` and `strapi-upload-mailgun`, use the alpha tag to install one of them. Then, visit `/admin/plugins/email/configurations/development` on your web browser and configure the provider.
+We have two providers available `strapi-provider-email-sendgrid` and `strapi-provider-upload-mailgun`, use the alpha tag to install one of them. Then, visit `/admin/plugins/email/configurations/development` on your web browser and configure the provider.
 
-If you want to create your own, make sure the name starts with `strapi-email-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `send` functions.
+If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `send` functions.
 
-Check all community providers available on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-email-)
+Check all community providers available on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-email-)
