@@ -40,6 +40,7 @@ module.exports = {
   title,
   description,
   base: '/documentation/',
+  ga: 'UA-54313258-1',
   themeConfig: {
     versions: [
       ['Version 3.x.x', '/3.x.x/'],
