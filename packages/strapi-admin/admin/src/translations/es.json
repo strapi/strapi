@@ -136,5 +136,6 @@
   "components.popUpWarning.title": "Por favor, confirme",
   "notification.error": "Se ha producido un error",
   "notification.error.layout": "No se pudo recuperar el esquema",
-  "request.error.model.unknown": "Este modelo no existe"
+  "request.error.model.unknown": "Este modelo no existe",
+  "app.utils.delete": "Eliminar"
 }
