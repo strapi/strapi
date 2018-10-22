@@ -1,7 +1,7 @@
 .inputNumber { /* stylelint-disable */
   // margin-bottom: .3rem;
   font-size: 1.3rem;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   > label {
     font-weight: 500;
     text-transform: capitalize;
@@ -21,14 +21,14 @@
     height: 3.4rem;
     line-height: 3.4rem;
     font-size: 1.3rem;
-    font-family: 'Lato', sans-serif !important;
+    font-family: Lato!important;
     background-size: 0!important;
   }
 }
 
 .inputText { /* stylelint-disable */
 
-  font-family: 'Lato', sans-serif !important;
+  font-family: Lato!important;
   font-size: 1.3rem;
   > label {
     font-size: 1.3rem;
@@ -49,7 +49,7 @@
     border-radius: 0.25rem;
     border: 1px solid #E3E9F3;
     line-height: 3.4rem;
-    font-family: 'Lato', sans-serif !important;
+    font-family: Lato!important;
     font-size: 1.3rem;
     background-size: 0!important;
   }
@@ -69,7 +69,7 @@
 .requiredClass {
   > label:after {
     color: red;
-    font-family: 'Lato', sans-serif;
+    font-family: Lato;
     font-weight: bold;
     margin-left: 5px;
     content: "*";

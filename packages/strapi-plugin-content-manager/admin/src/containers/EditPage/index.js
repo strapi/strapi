@@ -38,6 +38,7 @@ import { checkFormValidity } from 'utils/formValidations';
 import {
   addRelationItem,
   changeData,
+  deleteData,
   getData,
   initModelProps,
   moveAttr,
@@ -55,7 +56,7 @@ import makeSelectEditPage from './selectors';
 import styles from './styles.scss';
 
 export class EditPage extends React.Component {
-  state = { showWarning: false };
+  state = { showWarning: false, showWarningDelete: false };
 
   componentDidMount() {
     this.initComponent(this.props);
@@ -241,8 +242,15 @@ export class EditPage extends React.Component {
   }
 
   handleConfirm = () => {
-    this.props.onCancel();
-    this.toggle();
+    const { showWarningDelete } = this.state;
+
+    if (showWarningDelete) {
+      this.props.deleteData();
+      this.toggleDelete();
+    } else {
+      this.props.onCancel();
+      this.toggle();
+    }
   }
 
   handleGoBack = () => this.props.history.goBack();
@@ -320,11 +328,27 @@ export class EditPage extends React.Component {
         onClick: this.handleSubmit,
         type: 'submit',
         loader: this.props.editPage.showLoader,
-        style: this.props.editPage.showLoader ? { marginRight: '18px' } : {},
+        style: this.props.editPage.showLoader ? { marginRight: '18px', flexGrow: 2 } : { flexGrow: 2 },
         disabled: this.showLoaders(),
       },
     ]
   );
+
+  pluginHeaderSubActions = () => {
+    const subActions = this.isCreating()
+      ? []
+      : [
+        {
+          label: 'app.utils.delete',
+          kind: 'delete',
+          onClick: this.toggleDelete,
+          type: 'button',
+          disabled: this.showLoaders(),
+        },
+      ];
+    
+    return subActions;
+  }
 
   showLoaders = () => {
     const { editPage: { isLoading }, schema: { layout } } = this.props;
@@ -333,6 +357,8 @@ export class EditPage extends React.Component {
   }
 
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+
+  toggleDelete = () => this.setState(prevState => ({ showWarningDelete: !prevState.showWarningDelete }));
 
   renderEdit = () => {
     const { editPage, location: { search } } = this.props;
@@ -387,7 +413,7 @@ export class EditPage extends React.Component {
 
   render() {
     const { editPage, moveAttr, moveAttrEnd } = this.props;
-    const { showWarning } = this.state;
+    const { showWarning, showWarningDelete } = this.state;
 
     return (
       <div>
@@ -397,6 +423,7 @@ export class EditPage extends React.Component {
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               actions={this.pluginHeaderActions()}
+              subActions={this.pluginHeaderSubActions()}
               title={{ id: this.getPluginHeaderTitle() }}
             />
             <PopUpWarning
@@ -405,6 +432,18 @@ export class EditPage extends React.Component {
               content={{
                 title: 'content-manager.popUpWarning.title',
                 message: 'content-manager.popUpWarning.warning.cancelAllSettings',
+                cancel: 'content-manager.popUpWarning.button.cancel',
+                confirm: 'content-manager.popUpWarning.button.confirm',
+              }}
+              popUpWarningType="danger"
+              onConfirm={this.handleConfirm}
+            />
+            <PopUpWarning
+              isOpen={showWarningDelete}
+              toggleModal={this.toggleDelete}
+              content={{
+                title: 'content-manager.popUpWarning.title',
+                message: 'content-manager.popUpWarning.bodyMessage.contentType.delete',
                 cancel: 'content-manager.popUpWarning.button.cancel',
                 confirm: 'content-manager.popUpWarning.button.confirm',
               }}
@@ -454,6 +493,7 @@ EditPage.defaultProps = {
 EditPage.propTypes = {
   addRelationItem: PropTypes.func.isRequired,
   changeData: PropTypes.func.isRequired,
+  deleteData: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
   getData: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
@@ -476,6 +516,7 @@ function mapDispatchToProps(dispatch) {
     {
       addRelationItem,
       changeData,
+      deleteData,
       getData,
       initModelProps,
       moveAttr,

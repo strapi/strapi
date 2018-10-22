@@ -23,7 +23,7 @@
 
 .titleContainer {
   color: #333740;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-size: 1.8rem;
   font-weight: bold;
   line-height: 2.2rem;
@@ -146,7 +146,7 @@ button {
 }
 
 .italicText {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   color: #49515A;
   font-style: italic;
   height: 100%;
@@ -156,17 +156,17 @@ button {
 }
 
 .normal {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   color: #1C5DE7;
   cursor: pointer;
 }
 
 .primary {
   height: 3rem;
-  font-family: 'Lato', sans-serif !important;
+  font-family: Lato!important;
   margin-left: 1.9rem!important;
   cursor: pointer;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   &:focus {
     outline: 0;
   }
@@ -187,7 +187,7 @@ button {
 }
 
 .secondary {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
   background-color: transparent;
@@ -273,7 +273,7 @@ button {
   padding-top: 1.6rem;
   padding-bottom: 1rem;
   > h4 {
-    font-family: 'Lato', sans-serif;
+    font-family: Lato;
     font-weight: bold!important;
     font-size: 1.8rem!important;
 

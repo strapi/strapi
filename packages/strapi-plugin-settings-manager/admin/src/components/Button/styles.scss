@@ -5,7 +5,7 @@
   text-transform: capitalize;
   margin-right: 1.8rem;
   cursor: pointer;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   &:focus {
     outline: 0;
   }
@@ -91,7 +91,7 @@
   line-height: 3.2rem;
   border-radius: 0.3rem;
   letter-spacing: 1rem;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   cursor: not-allowed;
   position: relative;
   opacity: .65;

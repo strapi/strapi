@@ -66,7 +66,7 @@ module.exports = (scope, cb) => {
   const connectionValidation = () => {
     const databaseChoices = [
       {
-        name: 'MongoDB (recommended)',
+        name: 'MongoDB',
         value: {
           database: 'mongo',
           connector: 'strapi-hook-mongoose'
