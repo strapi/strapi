@@ -514,7 +514,7 @@ module.exports = {
   /**
    * Build the expression $or
    */
-  buildOr: function(attributes, q) {
+  buildOr: (attributes, q) => {
     if (q === undefined) { q = '' }
     const $or = Object.keys(attributes).reduce((acc, curr) => {
       switch (attributes[curr].type) {
