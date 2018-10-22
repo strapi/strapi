@@ -78,8 +78,13 @@ export function* submitChanges(action) {
           unset(body.attributes[index].params, key);
         }
 
-        if (key === 'pluginValue' && value) {
-          set(body.attributes[index].params, 'plugin', true);
+        if (key === 'pluginValue') {
+          if (value && value !== ' ')  {
+            set(body.attributes[index].params, 'plugin', true);
+          } else {
+            unset(body.attributes[index].params, 'plugin');
+            unset(body.attributes[index].params, 'pluginValue');
+          }
         }
 
         if (!value && key !== 'multiple' && key !== 'default') {

@@ -88,7 +88,7 @@
   padding: 0;
   border-radius: 0;
   border: none;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   box-shadow: 0 2px 4px rgba(203, 211, 224, .5);
 
   > div {
@@ -101,7 +101,7 @@
         cursor: pointer;
         border-bottom: 1px solid #F6F6F6;
         font-size: 1.3rem;
-        font-family: 'Lato', sans-serif;
+        font-family: Lato;
         font-weight: 400;
         text-transform: capitalize;
         color: #323740;

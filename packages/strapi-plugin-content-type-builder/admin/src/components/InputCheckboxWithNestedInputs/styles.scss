@@ -1,6 +1,6 @@
 .inputCheckboxWithNestedInputs { /* stylelint-disable */
   font-size: 1.3rem;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   margin-bottom: 1.5rem;
   -webkit-font-smoothing: antialiased;
   > div {
@@ -34,7 +34,7 @@
   > small {
     -webkit-font-smoothing: antialiased;
     color: #9EA7B8;
-    font-family: 'Lato', sans-serif;
+    font-family: Lato;
     font-size: 1.2rem;
   }
 }
