@@ -25,6 +25,7 @@
   "app.components.ComingSoonPage.featuresNotAvailable": "Esta característica está aún en desarrollo.",
   "app.components.DownloadInfo.download": "Descarga en curso...",
   "app.components.DownloadInfo.text": "Esto puede tardar un minuto. Gracias por su paciencia.",
+  "app.components.EmptyAttributes.title": "Aún no hay campos",
   "app.components.HomePage.button.blog": "VER MÁS EN EL BLOG",
   "app.components.HomePage.button.quickStart": "INICIAR EL TUTORIAL DE INICIO RÁPIDO",
   "app.components.HomePage.community": "Encuentra la comunidad en la web",
@@ -135,5 +136,6 @@
   "components.popUpWarning.title": "Por favor, confirme",
   "notification.error": "Se ha producido un error",
   "notification.error.layout": "No se pudo recuperar el esquema",
-  "request.error.model.unknown": "Este modelo no existe"
+  "request.error.model.unknown": "Este modelo no existe",
+  "app.utils.delete": "Eliminar"
 }

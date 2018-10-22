@@ -15,6 +15,9 @@ const shell = require('shelljs');
 // Logger.
 const { cli, logger, packageManager } = require('strapi-utils');
 
+// Local Strapi dependencies.
+const packageJSON = require('../package.json');
+
 /**
  * `$ strapi install`
  *
@@ -66,7 +69,7 @@ module.exports = function (plugin, cliArguments) {
       fs.writeFileSync(`${pluginPath}/package.json`, JSON.stringify({}), 'utf8');
     }
 
-    const cmd = isStrapiInstalledWithNPM ? `npm install ${pluginID}@alpha --ignore-scripts --no-save --prefix ${pluginPath}` : `yarn --cwd ${pluginPath} add ${pluginID}@alpha --ignore-scripts --no-save`;
+    const cmd = isStrapiInstalledWithNPM ? `npm install ${pluginID}@${packageJSON.version} --ignore-scripts --no-save --prefix ${pluginPath}` : `yarn --cwd ${pluginPath} add ${pluginID}@${packageJSON.version} --ignore-scripts --no-save`;
     exec(cmd, (err) => {
       if (err) {
         logger.error(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginID}`);

@@ -45,7 +45,7 @@ module.exports = strapi => {
         }
 
         // Empty body is considered as `notFound` response.
-        if (!ctx.body) {
+        if (!ctx.body && ctx.body !== 0) {
           ctx.notFound();
         }
 
