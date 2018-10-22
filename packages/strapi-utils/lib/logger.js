@@ -1,16 +1,16 @@
-"use strict";
+'use strict';
 
 /**
  * Logger.
  */
 
 
-const fs = require("fs");
-const path = require("path");
-const _ = require("lodash");
-const pino = require("pino");
+const fs = require('fs');
+const path = require('path');
+const _ = require('lodash');
+const pino = require('pino');
 
-const logLevels = ["fatal", "error", "warn", "info", "debug", "trace"];
+const logLevels = ['fatal', 'error', 'warn', 'info', 'debug', 'trace'];
 
 function getLogLevel() {
   if (
@@ -19,10 +19,10 @@ function getLogLevel() {
   ) {
     return process.env.STRAPI_LOG_LEVEL;
   }
-  return "debug";
+  return 'debug';
 }
 
-const logTypes = ["stdout", "file"];
+const logTypes = ['stdout', 'file'];
 function getLogType() {
   if (
     _.isString(process.env.STRAPI_LOG_TYPE) &&
@@ -30,10 +30,10 @@ function getLogType() {
   ) {
     return process.env.STRAPI_LOG_TYPE;
   }
-  return "stdout";
+  return 'stdout';
 }
 
-function parseLogPath(defaultLogFilename = "strapi.log") {
+function parseLogPath(defaultLogFilename = 'strapi.log') {
   if (_.isString(process.env.STRAPI_LOG_PATH)) {
     return path.parse(process.env.STRAPI_LOG_PATH);
   }
@@ -53,8 +53,8 @@ const logFile = path.join(getLogDir(), getLogBase());
 function getBool(envVar, defaultValue) {
   if (_.isBoolean(envVar)) return envVar;
   if (_.isString(envVar)) {
-    if (envVar === "true") return true;
-    if (envVar === "false") return false;
+    if (envVar === 'true') return true;
+    if (envVar === 'false') return false;
   }
   return defaultValue;
 }
@@ -77,17 +77,17 @@ const pretty = pino.pretty({
 
 let logger;
 switch (getLogType()) {
-  case "stdout":
+  case 'stdout':
     pretty.pipe(process.stdout);
     logger = getBool(process.env.STRAPI_LOG_PRETTY_PRINT, true)
       ? pino(loggerConfig, pretty)
       : pino(loggerConfig);
     break;
-  case "file":
-    pretty.pipe(fs.createWriteStream(logFile, { flags: "a" }));
+  case 'file':
+    pretty.pipe(fs.createWriteStream(logFile, { flags: 'a' }));
     logger = getBool(process.env.STRAPI_LOG_PRETTY_PRINT, true)
       ? pino(loggerConfig, pretty)
-      : pino(loggerConfig, fs.createWriteStream(logFile, { flags: "a" }));
+      : pino(loggerConfig, fs.createWriteStream(logFile, { flags: 'a' }));
     break;
   default:
     pretty.pipe(process.stdout);
