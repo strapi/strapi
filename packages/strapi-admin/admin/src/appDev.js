@@ -7,6 +7,7 @@
 
 import { findIndex } from 'lodash';
 import {
+  getAppPluginsSucceeded,
   unsetHasUserPlugin,
 } from 'containers/App/actions';
 import 'babel-polyfill';
@@ -25,6 +26,8 @@ const plugins = (() => {
   }
 })();
 
+dispatch(getAppPluginsSucceeded(plugins));
+
 // Hot reloadable translation json files
 if (module.hot) {
   // modules.hot.accept does not accept dynamic dependencies,
@@ -35,7 +38,7 @@ if (module.hot) {
 }
 
 if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-  store.dispatch(unsetHasUserPlugin());
+  dispatch(unsetHasUserPlugin());
 }
 
 export {
