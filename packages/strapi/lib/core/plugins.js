@@ -6,17 +6,16 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 
 module.exports = async function() {
-  const folder = ((url = _.get(strapi.config.currentEnvironment.server, 'admin.path', 'admin')) =>
-    url[0] === '/' ? url.substring(1) : url)().replace(/\/$/, '');
+  // The regex removes possible slashes from the beginning and end of the value
+  const folder = _.get(strapi.config.currentEnvironment.server, 'admin.path', 'admin').replace(/^\/|\/$/g, '');
 
   const configuratePlugin = (acc, current, source, name) => {
     switch (source) {
       case 'host': {
-        const host =
-          _.get(this.config.environments[current].server, 'admin.build.host').replace(/\/$/, '') || '/';
+        const host = _.get(this.config.environments[current].server, 'admin.build.host').replace(/\/$/, '') || '/';
 
         if (!host) {
-          throw new Error(`You can't use \`remote\` as a source without set the \`host\` configuration.`);
+          throw new Error("You can't use `remote` as a source without set the `host` configuration.");
         }
 
         const folder = _.get(this.config.environments[current].server, 'admin.build.plugins.folder', null);
@@ -29,14 +28,16 @@ module.exports = async function() {
 
         return `/${host}/${name}/main.js`.replace('//', '/');
       }
+
       case 'custom':
         if (!_.isEmpty(_.get(this.plugins[name].config, `sources.${current}`, {}))) {
           return (acc[current] = this.plugins[name].config.sources[current]);
         }
 
         throw new Error(
-          `You have to define the source URL for each environment in \`./plugins/**/config/sources.json\``,
+          "You have to define the source URL for each environment in `./plugins/**/config/sources.json`"
         );
+
       case 'backend': {
         const backend = _.get(
           this.config.environments[current],
@@ -48,6 +49,7 @@ module.exports = async function() {
 
         return `${backend}/${folder.replace(/\/$/, '')}/${name}/main.js`;
       }
+
       default:
         return `/${name}/main.js`;
     }
@@ -79,7 +81,9 @@ module.exports = async function() {
       );
 
   const isAdmin = await fs.pathExists(path.resolve(this.config.appPath, 'admin', 'admin'));
-  if (!isAdmin) return;
+  if (!isAdmin) {
+    return;
+  }
 
   // arrange system directories
   await Promise.all([
