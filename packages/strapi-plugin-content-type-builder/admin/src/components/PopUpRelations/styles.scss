@@ -42,7 +42,7 @@
    text-transform: capitalize;
    margin-right: 1.8rem;
    cursor: pointer;
-   font-family: 'Lato', sans-serif;
+   font-family: Lato;
    &:focus {
      outline: 0;
    }
@@ -123,15 +123,15 @@
 }
 
 .popUpRelations {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
 }
 
 .primary {
   height: 3rem;
-  font-family: 'Lato', sans-serif !important;
+  font-family: Lato!important;
   margin-left: 1.9rem!important;
   cursor: pointer;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   &:focus {
     outline: 0;
   }
@@ -185,7 +185,7 @@
 
 .secondary {
   min-width: 100px;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
   cursor: pointer;
@@ -215,7 +215,7 @@
   border: none!important;
   border-radius: 3px;
   color: white;
-  font-family: 'Lato', sans-serif !important;
+  font-family: Lato!important;
   font-weight: 600;
   &:focus {
     outline: 0;
