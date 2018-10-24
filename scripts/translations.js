@@ -11,12 +11,14 @@ const main = async () => {
       return pkg.indexOf('strapi') !== -1;
     });
   } catch (error) {
-    console.error(`Can't get strapi packages`);
+    return console.error(`Can't get strapi packages`);
   }
 
   const packageCheckingPromises = packages.map((pkg) => {
     return new Promise(async (resolve) => {
       const translationsPath = path.resolve(process.cwd(), 'packages', pkg, 'admin', 'src', 'translations');
+
+      let files;
 
       try {
         files = fs.readdirSync(translationsPath, 'utf8');
@@ -24,7 +26,7 @@ const main = async () => {
         return resolve();
       }
 
-      files.forEach((file) => {
+      fileUpdatePromises = files.map((file) => {
         let obj;
 
         try {
@@ -39,8 +41,10 @@ const main = async () => {
           clean[key] = obj[key];
         });
 
-        fs.writeFileSync(path.resolve(translationsPath, file), JSON.stringify(clean, null, 2), 'utf8');
+        return fs.writeFile(path.resolve(translationsPath, file), JSON.stringify(clean, null, 2), 'utf8');
       });
+
+      await Promise.all(fileUpdatePromises)
 
       resolve();
     });
