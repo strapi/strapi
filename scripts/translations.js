@@ -26,7 +26,7 @@ const main = async () => {
         return resolve();
       }
 
-      fileUpdatePromises = files.map((file) => {
+      const updateFilesPromises = files.map((file) => {
         let obj;
 
         try {
@@ -41,10 +41,14 @@ const main = async () => {
           clean[key] = obj[key];
         });
 
-        return fs.writeFile(path.resolve(translationsPath, file), JSON.stringify(clean, null, 2), 'utf8');
+        return new Promise((resolve) => {
+          fs.writeFile(path.resolve(translationsPath, file), JSON.stringify(clean, null, 2), 'utf8', () => {
+            resolve()
+          });
+        });
       });
 
-      await Promise.all(fileUpdatePromises)
+      await Promise.all(updateFilesPromises);
 
       resolve();
     });
