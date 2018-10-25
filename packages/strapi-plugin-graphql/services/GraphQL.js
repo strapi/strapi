@@ -649,7 +649,6 @@ module.exports = {
 
               switch (association.nature) {
                 case 'manyToMany': {
-                  if (association.dominant) {
                     const arrayOfIds = (obj[association.alias] || []).map(related => {
                       return related[ref.primaryKey] || related;
                     });
@@ -661,7 +660,6 @@ module.exports = {
                       [ref.primaryKey]: arrayOfIds,
                       ...where.where
                     }).where;
-                  }
                   break;
                   // falls through
                 }
