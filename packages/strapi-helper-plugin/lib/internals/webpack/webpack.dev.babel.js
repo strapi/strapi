@@ -88,7 +88,7 @@ module.exports = require('./webpack.base.babel')({
     {
       main: [
         `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
-        path.join(appPath, 'admin', 'admin', 'src', 'app.js'),
+        path.join(appPath, 'admin', 'admin', 'src', 'appDev.js'),
       ],
     },
     plugins.src.reduce((acc, current) => {
