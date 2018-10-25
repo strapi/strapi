@@ -63,7 +63,7 @@ export default {
       for (let i = 0; i < pages.length; i++) {
         if (res.length >= max) break
         const p = pages[i]
-        // filter out results that do not match current ersion context
+        // filter out results that do not match current version context
         if (!~p.path.slice(1).indexOf(searchContext)) continue
         // filter out results that do not match current locale
         if (this.getPageLocalePath(p) !== localePath) continue
