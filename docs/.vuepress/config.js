@@ -40,6 +40,7 @@ module.exports = {
   title,
   description,
   base: '/documentation/',
+  ga: 'UA-54313258-1',
   themeConfig: {
     versions: [
       ['Version 3.x.x', '/3.x.x/'],
@@ -49,25 +50,39 @@ module.exports = {
     docsDir: 'docs',
     editLinks: true,
     editLinkText: 'Improve this page',
-    // base: '/',
-    // host: 'localhost',
     serviceWorker: true,
     sidebar: {
       '/3.x.x/': [
         {
           collapsable: false,
-          title: 'UsefulLinks',
+          title: 'Getting started',
           children: [
-            ['/3.x.x/', 'Introduction'],
-            ['https://strapi.io', 'Strapi Website'],
-            ['https://github.com/strapi/strapi', 'GitHub Repository'],
-            ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contribution Guide'],
+            '/3.x.x/getting-started/installation',
+            '/3.x.x/getting-started/quick-start',
+            '/3.x.x/concepts/concepts',
           ],
         },
         {
           collapsable: false,
-          title: 'Getting started',
-          children: ['/3.x.x/getting-started/installation', '/3.x.x/getting-started/quick-start'],
+          title: 'Guides',
+          children: [
+            '/3.x.x/guides/authentication.md',
+            '/3.x.x/configurations/configurations.md',
+            '/3.x.x/guides/controllers.md',
+            '/3.x.x/guides/deployment.md',
+            '/3.x.x/guides/email.md',
+            '/3.x.x/guides/upload.md',
+            '/3.x.x/guides/filters.md',
+            '/3.x.x/guides/graphql.md',
+            '/3.x.x/guides/i18n.md',
+            '/3.x.x/guides/models.md',
+            '/3.x.x/guides/policies.md',
+            '/3.x.x/guides/public-assets.md',
+            '/3.x.x/guides/requests.md',
+            '/3.x.x/guides/responses.md',
+            '/3.x.x/guides/routing.md',
+            '/3.x.x/guides/services.md',
+          ],
         },
         {
           collapsable: false,
@@ -75,25 +90,7 @@ module.exports = {
           children: [
             '/3.x.x/api-reference/reference',
             '/3.x.x/cli/CLI',
-            '/3.x.x/concepts/concepts',
             '/3.x.x/configurations/configurations',
-          ],
-        },
-        {
-          collapsable: false,
-          title: 'Guides',
-          children: [
-            '/3.x.x/guides/authentication',
-            '/3.x.x/guides/controllers',
-            '/3.x.x/guides/deployment',
-            '/3.x.x/guides/email',
-            '/3.x.x/guides/filters',
-            '/3.x.x/guides/graphql',
-            '/3.x.x/guides/i18n',
-            '/3.x.x/guides/models',
-            '/3.x.x/guides/policies',
-            '/3.x.x/guides/public-assets',
-            '/3.x.x/guides/requests',
           ],
         },
         {
@@ -109,8 +106,9 @@ module.exports = {
         },
         {
           collapsable: false,
-          title: 'Help',
+          title: 'Resources',
           children: [
+            ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
             ['https://github.com/strapi/strapi/wiki', 'Migration guides'],
             '/3.x.x/tutorials/',
           ],

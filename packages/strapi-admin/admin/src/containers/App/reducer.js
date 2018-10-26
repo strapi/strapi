@@ -4,10 +4,11 @@ import {
   ENABLE_GLOBAL_OVERLAY_BLOCKER,
 } from 'constants/overlayBlocker';
 
-import { fromJS } from 'immutable';
+import { fromJS, List } from 'immutable';
 
 import {
   FREEZE_APP,
+  GET_APP_PLUGINS_SUCCEEDED,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
   UNFREEZE_APP,
@@ -16,8 +17,10 @@ import {
 } from './constants';
 
 const initialState = fromJS({
+  appPlugins: List([]),
   blockApp: false,
   hasUserPlugin: true,
+  isAppLoading: true,
   plugins: {},
   showGlobalAppBlocker: true,
 });
@@ -30,6 +33,10 @@ function appReducer(state = initialState, action) {
       return state.set('showGlobalAppBlocker', true);
     case FREEZE_APP:
       return state.set('blockApp', true);
+    case GET_APP_PLUGINS_SUCCEEDED:
+      return state
+        .update('appPlugins', () => List(action.appPlugins))
+        .update('isAppLoading', () => false);
     case PLUGIN_LOADED:
       return state.setIn(['plugins', action.plugin.id], fromJS(action.plugin));
     case UPDATE_PLUGIN:
