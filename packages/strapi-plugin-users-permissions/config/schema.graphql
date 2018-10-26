@@ -2,8 +2,35 @@ module.exports = {
   type: {
     UsersPermissionsPermission: false // Make this type NOT queriable.
   },
+  definition: `
+    type UsersPermissionsMe {
+      _id: ID!
+      username: String!
+      email: String!
+      confirmed: Boolean
+      blocked: Boolean
+      role: UsersPermissionsMeRole
+    }
+
+    type UsersPermissionsMeRole {
+      _id: ID!
+      name: String!
+      description: String
+      type: String
+    }
+  `,
+  query: `
+    me: UsersPermissionsMe
+  `,
   resolver: {
     Query: {
+      me: {
+        resolverOf: 'User.me',
+        resolver: {
+          plugin: 'users-permissions',
+          handler: 'User.me'
+        }
+      },
       role: {
         resolverOf: 'UsersPermissions.getRole',
         resolver: async (obj, options, ctx) => {
