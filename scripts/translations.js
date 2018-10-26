@@ -1,7 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 
+const shell = require('shelljs');
+
 const main = async () => {
+  const {stdout} = shell.exec('git diff --name-only --cached', {silent: true});
+  const changes = stdout.trim().split('\n');
+
   let packages;
 
   try {
@@ -27,6 +32,10 @@ const main = async () => {
       }
 
       const updateFilesPromises = files.map((file) => {
+        if (!changes.includes(path.join('packages', pkg, 'admin', 'src', 'translations', file))) {
+          return true;
+        }
+
         let obj;
 
         try {
