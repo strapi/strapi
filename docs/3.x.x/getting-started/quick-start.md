@@ -55,7 +55,7 @@ Now that your app is running let's see how to [create your first user](#create-y
 
 In order to use the admin panel and to consume your API you first need to register your first user. This process only happens once if you don't have any user table created and is made to create the `admin user` that has all the permissions granted for your API.
 
-If your using MongoDB for your database you don't have to create your table manually (it's already handled by Strapi) otherwise you'll have to create your user table first.
+If you're using MongoDB for your database you don't have to create your table manually (it's already handled by Strapi) otherwise you'll have to create your user table first.
 
 To create your first user, start your server (`strapi start`) and go to : http://localhost:1337/admin.
 
