@@ -59,14 +59,14 @@ module.exports = {
       
       // Add resolver to primaryKey defined in the models
       Object.assign(acc.resolver[globalId], {
-        _id: (obj, options, context) => {
+        [model.primaryKey]: (obj, options, context) => {
           // eslint-disable-line no-unused-vars
-          if (typeof obj._id === 'object') { 
-            if (Object.prototype.hasOwnProperty.call(obj._id, 'id') && (typeof obj._id.id === 'object')) {
-              return obj._id.id.toString('hex');
+          if (typeof obj[model.primaryKey] === 'object') { 
+            if (Object.prototype.hasOwnProperty.call(obj[model.primaryKey], 'id') && (typeof obj[model.primaryKey].id === 'object')) {
+              return obj[model.primaryKey].id.toString('hex');
             }
           }
-          return obj._id || obj.id;
+          return obj[model.primaryKey];
         },
       });
 
