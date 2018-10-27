@@ -56,6 +56,19 @@ module.exports = {
       if (!acc.resolver[globalId]) {
         acc.resolver[globalId] = {};
       }
+      
+      // Add resolver to primaryKey defined in the models
+      Object.assign(acc.resolver[globalId], {
+        _id: (obj, options, context) => {
+          // eslint-disable-line no-unused-vars
+          if (typeof obj._id === 'object') { 
+            if (Object.prototype.hasOwnProperty.call(obj._id, 'id') && (typeof obj._id.id === 'object')) {
+              return obj._id.id.toString('hex');
+            }
+          }
+          return obj._id || obj.id;
+        },
+      });
 
       // Add timestamps attributes.
       if (_.get(model, 'options.timestamps') === true) {
