@@ -124,7 +124,7 @@ module.exports = {
       modelJSON.connection = connection;
       modelJSON.collectionName = collectionName;
       modelJSON.info = {
-        name: name,
+        name,
         description: _description
       };
       modelJSON.attributes = formatedAttributes;
