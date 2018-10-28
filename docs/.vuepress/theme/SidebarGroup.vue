@@ -9,7 +9,7 @@
     <DropdownTransition>
       <ul class="sidebar-group-items" ref="items" v-if="open || !collapsable">
         <li v-for="child in item.children">
-          <SidebarLink :item="child"/>
+          <SidebarLink :item="child" :open="open" :collapsable="collapsable"/>
         </li>
       </ul>
     </DropdownTransition>
