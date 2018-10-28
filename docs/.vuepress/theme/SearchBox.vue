@@ -10,7 +10,9 @@
       @blur="focused = false"
       @keyup.enter="go(focusIndex)"
       @keyup.up="onUp"
-      @keyup.down="onDown">
+      @keyup.down="onDown"
+      placeholder="Search"
+    >
     <ul class="suggestions"
       v-if="showSuggestions"
       :class="{ 'align-right': alignRight }"
