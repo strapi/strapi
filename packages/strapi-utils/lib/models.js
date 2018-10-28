@@ -509,37 +509,6 @@ module.exports = {
     });
 
     return convertParams;
-  },
-
-  /**
-   * Build the expression $or
-   */
-  buildOr: (attributes, q) => {
-    if (q === undefined) { q = '' }
-    const $or = Object.keys(attributes).reduce((acc, curr) => {
-      switch (attributes[curr].type) {
-        case 'integer':
-        case 'float':
-        case 'decimal':
-          if (!_.isNaN(_.toNumber(q))) {
-            return acc.concat({ [curr]: q })
-          }
-          return acc;
-        case 'email':
-        case 'password':
-        case 'string':
-        case 'text':
-          return acc.concat({ [curr]: { $regex: q, $options: 'i' } })
-        case 'boolean':
-          if (q === 'true' || q === 'false') {
-            return acc.concat({ [curr]: q === 'true' })
-          }
-          return acc
-        default:
-          return acc
-      }
-    }, [])
-    return $or
   }
 
 };

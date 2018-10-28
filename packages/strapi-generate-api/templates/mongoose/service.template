@@ -163,31 +163,31 @@ module.exports = {
       .map(ast => ast.alias)
       .join(' ');
 
-    const $or = strapi.utils.models.buildOr(<%= globalID %>.attributes, params._q);
-    //const $or = Object.keys(<%= globalID %>.attributes).reduce((acc, curr) => {
-    //  switch (<%= globalID %>.attributes[curr].type) {
-    //    case 'integer':
-    //    case 'float':
-    //    case 'decimal':
-    //      if (!_.isNaN(_.toNumber(params._q))) {
-    //        return acc.concat({ [curr]: params._q });
-    //      }
-    //
-    //      return acc;
-    //    case 'string':
-    //    case 'text':
-    //    case 'password':
-    //      return acc.concat({ [curr]: { $regex: params._q, $options: 'i' } });
-    //    case 'boolean':
-    //      if (params._q === 'true' || params._q === 'false') {
-    //        return acc.concat({ [curr]: params._q === 'true' });
-    //      }
-    //
-    //      return acc;
-    //    default:
-    //      return acc;
-    //  }
-    //}, []);
+    const $or = Object.keys(<%= globalID %>.attributes).reduce((acc, curr) => {
+      switch (<%= globalID %>.attributes[curr].type) {
+        case 'integer':
+        case 'float':
+        case 'decimal':
+          if (!_.isNaN(_.toNumber(params._q))) {
+            return acc.concat({ [curr]: params._q });
+          }
+
+          return acc;
+        case 'email':
+        case 'password':
+        case 'string':
+        case 'text':
+          return acc.concat({ [curr]: { $regex: params._q, $options: 'i' } });
+        case 'boolean':
+          if (params._q === 'true' || params._q === 'false') {
+            return acc.concat({ [curr]: params._q === 'true' });
+          }
+
+          return acc;
+        default:
+          return acc;
+      }
+    }, []);
 
     return <%= globalID %>
       .find({ $or })

@@ -75,6 +75,37 @@ module.exports = {
   },
 
   /**
+   * Build the expression $or
+   */
+  buildOr: (attributes, q) => {
+    if (q === undefined) { q = '' }
+    const $or = Object.keys(attributes).reduce((acc, curr) => {
+      switch (attributes[curr].type) {
+        case 'integer':
+        case 'float':
+        case 'decimal':
+          if (!_.isNaN(_.toNumber(q))) {
+            return acc.concat({ [curr]: q })
+          }
+          return acc;
+        case 'email':
+        case 'password':
+        case 'string':
+        case 'text':
+          return acc.concat({ [curr]: { $regex: q, $options: 'i' } })
+        case 'boolean':
+          if (q === 'true' || q === 'false') {
+            return acc.concat({ [curr]: q === 'true' })
+          }
+          return acc
+        default:
+          return acc
+      }
+    }, [])
+    return $or
+  },
+
+  /**
    * Returns a list of fields that have type included in fieldTypes.
    */
   getFieldsByTypes: (fields, typeCheck, returnType) => {
@@ -166,7 +197,7 @@ module.exports = {
     if (!_.isEmpty(filters.convertedParams.where)) {
       if (_.has(filters.convertedParams.where, '_q')) {
         // recursive search
-        const $or = strapi.utils.models.buildOr(model.attributes, String(filters.convertedParams.where._q));
+        const $or = this.buildOr(model.attributes, String(filters.convertedParams.where._q));
         aggregation.match({ $or });
       } else {
         // specific filtering
