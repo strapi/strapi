@@ -4,33 +4,35 @@
 This feature requires the Users & Permissions plugin (installed by default).
 :::
 
-## Register a new user
+## Registration
 
 This route lets you create new users.
 
 #### Usage
 
 ```js
-$.ajax({
-  type: 'POST',
-  url: 'http://localhost:1337/auth/local/register',
-  data: {
+import axios from 'axios';
+
+// Request API.
+axios
+  .post('http://localhost:1337/auth/local/register', {
     username: 'Strapi user',
     email: 'user@strapi.io',
     password: 'strapiPassword'
-  },
-  done: function(auth) {
+  })
+  .then(response => {
+    // Handle success.
     console.log('Well done!');
-    console.log('User profile', auth.user);
-    console.log('User token', auth.jwt);
-  },
-  fail: function(error) {
+    console.log('User profile', response.data.user);
+    console.log('User token', response.data.jwt);
+  })
+  .catch(error => {
+    // Handle error.
     console.log('An error occurred:', error);
-  }
-});
+  });
 ```
 
-## Login.
+## Login
 
 This route lets you login your users by getting an authentication token.
 
@@ -39,22 +41,24 @@ This route lets you login your users by getting an authentication token.
 - The `identifier` param can either be an email or a username.
 
 ```js
-$.ajax({
-  type: 'POST',
-  url: 'http://localhost:1337/auth/local',
-  data: {
-    identifier: 'user@strapi.io',
-    password: 'strapiPassword'
-  },
-  done: function(auth) {
+import axios from 'axios';
+
+// Request API.
+axios
+  .post('http://localhost:1337/auth/local', {
+      identifier: 'user@strapi.io',
+      password: 'strapiPassword'
+  })
+  .then(response => {
+    // Handle success.
     console.log('Well done!');
-    console.log('User profile', auth.user);
-    console.log('User token', auth.jwt);
-  },
-  fail: function(error) {
+    console.log('User profile', response.data.user);
+    console.log('User token', response.data.jwt);
+  })
+  .catch(error => {
+    // Handle error.
     console.log('An error occurred:', error);
-  }
-});
+  });
 ```
 
 ## Providers
@@ -81,14 +85,14 @@ After his approval, he will be redirected to `/auth/:provider/callback`. The `jw
 
 Response payload:
 
-```js
+```json
 {
   "user": {},
   "jwt": ""
 }
 ```
 
-## Use your token to be identified as a user.
+## Token usage
 
 By default, each API request is identified as `guest` role (see permissions of `guest`'s role in your admin dashboard). To make a request as a user, you have to set the `Authorization` token in your request headers. You receive a 401 error if you are not authorized to make this request or if your authorization header is not correct.
 
@@ -97,22 +101,28 @@ By default, each API request is identified as `guest` role (see permissions of `
 - The `token` variable is the `data.jwt` received when login in or registering.
 
 ```js
-$.ajax({
-  type: 'GET',
-  url: 'http://localhost:1337/articles',
-  headers: {
-    Authorization: `Bearer ${token}`
-  },
-  done: function(data) {
-    console.log('Your data', data);
-  },
-  fail: function(error) {
+import axios from 'axios';
+
+const token = 'YOUR_TOKEN_HERE';
+
+// Request API.
+axios
+  .get('http://localhost:1337/posts', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then(response => {
+    // Handle success.
+    console.log('Data: ', response.data);
+  })
+  .catch(error => {
+    // Handle error.
     console.log('An error occurred:', error);
-  }
-});
+  });
 ```
 
-## Send forgot password request.
+## Forgotten password
 
 This action sends an email to a user with the link of you reset password page. This link contains an URL param `code` which is required to reset user password.
 
@@ -123,23 +133,25 @@ This action sends an email to a user with the link of you reset password page. T
 it is used to redirect the user to the new-password form. 
 
 ```js
-$.ajax({
-  type: 'POST',
-  url: 'http://localhost:1337/auth/forgot-password',
-  data: {
+import axios from 'axios';
+
+// Request API.
+axios
+  .post('http://localhost:1337/auth/forgot-password', {
     email: 'user@strapi.io',
     url: 'http:/localhost:1337/admin/plugins/users-permissions/auth/reset-password'
-  },
-  done: function() {
+  })
+  .then(response => {
+    // Handle success.
     console.log('Your user received an email');
-  },
-  fail: function(error) {
+  })
+  .catch(error => {
+    // Handle error.
     console.log('An error occurred:', error);
-  }
-});
+  });
 ```
 
-## Reset user password.
+## Password reset
 
 This action will reset the user password.
 
@@ -148,24 +160,28 @@ This action will reset the user password.
 - `code` is the url params received from the email link (see forgot password)
 
 ```js
-$.ajax({
-  type: 'POST',
-  url: 'http://localhost:1337/auth/reset-password',
-  data: {
+import axios from 'axios';
+
+// Request API.
+axios
+  .post('http://localhost:1337/auth/reset-password', {
     code: 'privateCode',
     password: 'myNewPassword',
     passwordConfirmation: 'myNewPassword'
-  },
-  done: function() {
-    console.log('Your user password is reset');
-  },
-  fail: function(error) {
+  })
+  .then(response => {
+    // Handle success.
+    console.log('Your user\'s password has been changed.');
+  })
+  .catch(error => {
+    // Handle error.
     console.log('An error occurred:', error);
-  }
+  });
 });
 ```
 
-## User Object In Strapi Context
+## User object in Strapi context
+
 The `user` object is available to successfully authenticated requests.
 
 #### Usage
@@ -190,7 +206,7 @@ The `user` object is available to successfully authenticated requests.
 
 ```
 
-## Add a new provider
+## Adding a new provider
 
 To add a new provider on Strapi, you will need to perform changes onto the following files:
 
@@ -257,9 +273,9 @@ You may also want to take a look onto the numerous already made configurations [
           callback(err);
         } else {
           // Combine username and discriminator because discord username is not unique
-          var username = `${body.username}#${body.discriminator}`;
+          const username = `${body.username}#${body.discriminator}`;
           callback(null, {
-            username: username,
+            username,
             email: body.email
           });
         }
@@ -322,7 +338,7 @@ As for backend, we have a `switch...case` where we need to put our new provider 
 Add the corresponding translation into: `packages/strapi-plugin-users-permissions/admin/src/translations/en.json`
 
 ```js
-  "PopUpForm.Providers.discord.providerConfig.redirectURL": "The redirect URL to add in your Discord application configurations",
+  'PopUpForm.Providers.discord.providerConfig.redirectURL': 'The redirect URL to add in your Discord application configurations',
 ````
 
 These two change will set up the popup message who appear on the UI when we will configure our new provider.

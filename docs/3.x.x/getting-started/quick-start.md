@@ -3,22 +3,21 @@
 This section explains how to handle Strapi for the first time, ([check out our tutorial video](https://www.youtube.com/watch?v=yMl5IcFHA74)).
 
 **Table of contents:**
-- [Quick start](#quick-start)
-  - [Create your first project](#create-your-first-project)
-  - [Create your first user](#create-your-first-user)
-  - [Create your first API](#create-your-first-api)
-    - [Files structure](#files-structure)
-  - [Manage your data](#manage-your-data)
-  - [Consume your API](#consume-your-api)
-    - [List entries (GET)](#list-entries-get)
-    - [Get a specific entry (GET)](#get-a-specific-entry-get)
-    - [Create data (POST)](#create-data-post)
-    - [Update data (PUT)](#update-data-put)
-    - [Delete data (DELETE)](#delete-data-delete)
+- [1. Create your first project](#_1-create-a-project)
+- [2. Create your first user](#_2-register-the-first-user)
+- [3. Create your first Content Type](#_3-create-a-content-type)
+  - [Files structure](#files-structure)
+- [4. Manage your data](#_4-add-content)
+- [5. Consume your API](#_5-consume-the-api)
+  - [List entries (GET)](#list-entries-get)
+  - [Get a specific entry (GET)](#get-a-specific-entry-get)
+  - [Create data (POST)](#create-data-post)
+  - [Update data (PUT)](#update-data-put)
+  - [Delete data (DELETE)](#delete-data-delete)
 
 ***
 
-## Create your first project
+## 1. Create a project
 
 Creating your first project with Strapi is easy:
 
@@ -34,6 +33,10 @@ strapi new my-project
 
 ![Generate a Strapi project](../assets/terminal_new.png)
 
+::: note
+The CLI will ask you to choose your database: select MongoDB, Postgres or MySQL. Then, fill the database information in. The default values should work if you correctly installed the database system on your machine.
+:::
+
 This action creates a new folder named `my-project` with the entire [files structure](../concepts/concepts.md#files-structure) of a Strapi application.
 
 **#3 — Go to your project and launch the server:**
@@ -47,44 +50,42 @@ strapi start
 
 ![Start Strapi](../assets/terminal_start.png)
 
-Now that your app is running let's see how to [create your first user](#create-your-first-user).
+Now that your app is running let's see how to [create your first user](#_2-register-the-first-user).
 
 ***
 
-## Create your first user
+## 2. Register the first user
 
-In order to use the admin panel and to consume your API you first need to register your first user. This process only happens once if you don't have any user table created and is made to create the `admin user` that has all the permissions granted for your API.
+In order to use the admin panel and to consume your API you first need to register your first user. This process only happens once and is made to create the `admin user` who has all the permissions granted.
 
-If you're using MongoDB for your database you don't have to create your table manually (it's already handled by Strapi) otherwise you'll have to create your user table first.
-
-To create your first user, start your server (`strapi start`) and go to : http://localhost:1337/admin.
+To create your first user, start your server (`strapi start`) and go to [http://localhost:1337/admin](http://localhost:1337/admin).
 
 ![Register View](../assets/getting-started_register.png)
 
 
-Now that your first user is registered let's see how to [create your first api](#create-your-first-api).
+Now that your first user is registered let's see how to [create your first Content Type](#_3-create-a-content-type).
+
 ***
-## Create your first API
 
-To create your first API, start your server (`strapi start`) and go to : http://localhost:1337/admin.
+## 3. Create a Content Type
 
-At this point, your application is empty. To create your first API is to use the **Content Type Builder** plugin: a powerful UI to help you create an API in a few clicks. Let's take the example of an e-commerce API, which manages products.
+At this point, your project is empty. To create your first Content Type, you are going to use the **Content Type Builder** plugin: a powerful UI to help defining your Content Type's structure within a few clicks. Let's take the example of blog, which manages posts.
 
 **#1 —** Go to the **Content Type Builder** plugin.
 
 ![Content Type Builder - Home](../assets/getting-started_no_content_type.png)
 
-**#2 —** Create a Content Type named `Product` and submit the form.
+**#2 —** Create a Content Type named `Post` and submit the form.
 
 ![Content Type Builder - Create a new Content Type](../assets/getting-started_create_content_type.png)
 
 **#3 —** Add three fields in this Content Type.
 
-  - A `string` field named `name`.
-  - A `text` field named `description`.
-  - A `number` field named `price` (with `float` as number format).
+  - A `string` field named `title`.
+  - A `text` field named `content` (tick the `Display as WYSIWYG` in the `Advanced Settings` tab).
+  - A `media` field named `cover`.
 
-![Content Type Builder - List fields in Product](../assets/getting-started_list_fields.png)
+![Content Type Builder - List fields in Post](../assets/getting-started_list_fields.png)
 
 **#4 —** Save. That's it!
 
@@ -95,22 +96,22 @@ See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for more informati
 
 ### Files structure
 
-A new directory has been created in the `./api` folder of your application which contains all the needed stuff for your `Product` Content Type: routes, controllers, services and models. Take a look at the [API structure documentation](../concepts/concepts.md#files-structure) for more informations.
+A new directory has been created in the `./api` folder of your application which contains all the needed stuff for your `Post` Content Type: routes, controllers, services and models. Take a look at the [API structure documentation](../concepts/concepts.md#files-structure) for more informations.
 
 
-**Well done, you created your first API using Strapi!**
+**Well done, you created your first Content Type using Strapi!**
 
 ***
 
-## Manage your data
+## 4. Add content
 
-After creating [your first Content Type](#create-your-first-api), it would be great to be able to create, edit or delete entries.
+After creating [your first Content Type](#_3-create-a-content-type), you probably want to create, edit or delete entries. No worries, everything is ready for you:
 
-**#1 —** Go to the [**Product list**](http://localhost:1337/admin/plugins/content-manager/product/) by clicking on the link in the left menu (generated by the **Content Manager** plugin).
+**#1 —** Go to the [**Post list**](http://localhost:1337/admin/plugins/content-manager/post/) by clicking on the link in the left menu (generated by the **Content Manager** plugin).
 
 ![Content Type Builder - Home](../assets/getting-started_no_entry.png)
 
-**#2 —** Click on the button `Add New Product` and fill the form.
+**#2 —** Click on the button `Add New Post` and fill the form.
 
 ![Content Type Builder - Home](../assets/getting-started_add_entry.png)
 
@@ -120,125 +121,161 @@ After creating [your first Content Type](#create-your-first-api), it would be gr
 
 ***
 
-## Consume your API
+## 5. Consume the API
 
-Your API is now ready and [contains data](#manage-your-data). At this point, you'll probably want to use this data in mobile or desktop applications.
-In order to do so, you'll need to allow access to other users (identified as 'Guest').
+Your API is now ready and [contains data](#_4-add-content). At this point, you'll probably want to use this data in mobile or desktop applications.
+In order to do so, you'll need to allow access to other users (identified as 'Public').
 
-**1 -** Go to the [**Auth & Permissions View**](http://localhost:1337/admin/plugins/users-permissions/roles) by clicking on **Auth & Permissions** link in the left menu and click on the **Guest Role** item.
+**1 -** Go to the [**Auth & Permissions View**](http://localhost:1337/admin/plugins/users-permissions/roles) by clicking on **Auth & Permissions** link in the left menu.
 
 ![Auth & Permissions - Home](../assets/getting-started_manage_role_home.png)
 
-**2 -** Manage your APIs permissions in the **Permissions** section of the [**Edit Guest Role view**](http://localhost:1337/admin/plugins/users-permissions/roles/edit/1) by enabling or disabling specific actions.
+**2 -** Click on the `Public` role, enable the actions related to your new Content Type and save:
 
-![Auth & Permissions - Edit Guest](../assets/getting-started_allow_access.png)
+![Auth & Permissions - Edit Public](../assets/getting-started_allow_access.png)
 
+::: note
+You should now be able to get the list of posts from the API: [http://localhost:1337/posts](http://localhost:1337/posts). 
+:::
 
 ### List entries (GET)
 
-To retrieve the list of products, use the `GET /products` route.
+To retrieve the list of posts, use the `GET /posts` route.
 
-Generated APIs provide a handy way to filter and order queries. In that way, ordering products by price is as easy as `GET http://localhost:1337/products?_sort=price:asc`. For more informations, read the [filters documentation](../guides/filters.md)
+Generated APIs provide a handy way to filter and order queries. In that way, ordering posts by price is as easy as `GET http://localhost:1337/posts?_sort=price:asc`. For more informations, read the [filters documentation](../guides/filters.md).
 
-Here is an example using jQuery.
+Here is an example using Axios:
 
 ```js
-$.ajax({
-  type: 'GET',
-  url: 'http://localhost:1337/products?_sort=price:asc', // Order by price.
-  done: function(products) {
-    console.log('Well done, here is the list of products: ', products);
-  },
-  fail: function(error) {
+import axios from 'axios';
+
+// Request API.
+axios
+  .get('http://localhost:1337/posts', {
+    params: {
+      _sort: 'createdAt:desc' // Generates http://localhost:1337/posts?_sort=createdAt:desc
+    }
+  })
+  .then(response => {
+    // Handle success.
+    console.log('Well done, here is the list of posts: ', response.data);
+  })
+  .catch(error => {
+    // Handle error.
     console.log('An error occurred:', error);
-  }
-});
+  });
 ```
 
 ### Get a specific entry (GET)
 
-If you want to get a specific entry, add the `id` of the wanted product at the end of the url.
+If you want to get a specific entry, add the `id` of the wanted post at the end of the url.
+
+Examble with Axios:
 
 ```js
-$.ajax({
-  type: 'GET',
-  url: 'http://localhost:1337/products/123', // Where `123` is the `id` of the product.
-  done: function(product) {
-    console.log('Well done, here is the product having the `id` 123: ', product);
-  },
-  fail: function(error) {
+import axios from 'axios';
+
+const postId = 'YOUR_POST_ID_HERE'; // Replace with one of your posts id.
+
+// Request API.
+axios
+  .get(`http://localhost:1337/posts/${postId}`)
+  .then(response => {
+    // Handle success.
+    console.log('Well done, here is the post: ', response.data);
+  })
+  .catch(error => {
+    // Handle error.
     console.log('An error occurred:', error);
-  }
-});
+  });
 ```
 
 ### Create data (POST)
 
 Use the `POST` route to create a new entry.
 
-jQuery example:
+Examble with Axios:
 
 ```js
-$.ajax({
-  type: 'POST',
-  url: 'http://localhost:1337/products',
-  data: {
-    name: 'Cheese cake',
-    description: 'Chocolate cheese cake with ice cream',
-    price: 5
-  },
-  done: function(product) {
-    console.log('Congrats, your product has been successfully created: ', product); // Remember the product `id` for the next steps.
-  },
-  fail: function(error) {
+import axios from 'axios';
+
+// Request API.
+axios
+  .post(`http://localhost:1337/posts/`, {
+    title: 'My new post'
+  })
+  .then(response => {
+    // Handle success.
+    console.log(
+      'Well done, your post has been successfully created: ',
+      response.data
+    );
+  })
+  .catch(error => {
+    // Handle error.
     console.log('An error occurred:', error);
-  }
-});
+  });
 ```
 
 ### Update data (PUT)
 
 Use the `PUT` route to update an existing entry.
 
-jQuery example:
+Examble with Axios:
 
 ```js
-$.ajax({
-  type: 'PUT',
-  url: 'http://localhost:1337/products/123', // Where `123` is the `id` of the product.
-  data: {
-    description: 'This is the new description'
-  },
-  done: function(product) {
-    console.log('Congrats, your product has been successfully updated: ', product.description);
-  },
-  fail: function(error) {
+import axios from 'axios';
+
+const postId = 'YOUR_POST_ID_HERE'; // Replace with one of your posts id.
+
+// Request API.
+axios
+  .put(`http://localhost:1337/posts/${postId}`, {
+    title: 'Updated title'
+  })
+  .then(response => {
+    // Handle success.
+    console.log(
+      'Well done, your post has been successfully updated: ',
+      response.data
+    );
+  })
+  .catch(error => {
+    // Handle error.
     console.log('An error occurred:', error);
-  }
-});
+  });
 ```
 
 ### Delete data (DELETE)
 
 Use the `DELETE` route to delete an existing entry.
 
-jQuery example:
+Examble with Axios:
 
 ```js
-$.ajax({
-  type: 'DELETE',
-  url: 'http://localhost:1337/products/123', // Where `123` is the `id` of the product.
-  done: function(product) {
-    console.log('Congrats, your product has been successfully deleted: ', product);
-  },
-  fail: function(error) {
-    console.log('An error occurred:', error);
-  }
-});
-```
+import axios from 'axios';
 
+const postId = 'YOUR_POST_ID_HERE'; // Replace with one of your posts id.
+
+// Request API.
+axios
+  .delete(`http://localhost:1337/posts/${postId}`)
+  .then(response => {
+    // Handle success.
+    console.log(
+      'Well done, your post has been successfully updated: ',
+      response.data
+    );
+  })
+  .catch(error => {
+    // Handle error.
+    console.log('An error occurred:', error);
+  });
+```
 ***
 
-Congratulations! You successfully finished the Getting Started guide! Read the [concepts](../concepts/concepts.md) to understand more advanced concepts.
+#### 👏 Congratulations!
+
+You successfully finished the Getting Started guide! Read the [concepts section](../concepts/concepts.md) to understand more deeply how to use and customize Strapi.
 
 Also, feel free to join the community thanks to the different channels listed in the [community page](http://strapi.io/community): team members, contributors and developers will be happy to help you.
