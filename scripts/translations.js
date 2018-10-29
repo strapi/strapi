@@ -12,7 +12,7 @@ const main = async () => {
   try {
     packages = fs.readdirSync(path.resolve(process.cwd(), 'packages'), 'utf8');
 
-    packages.filter(pkg => pkg.startsWith('strapi'));
+    packages = packages.filter(pkg => pkg.startsWith('strapi'));
   } catch (error) {
     return console.error(`Can't get strapi packages`);
   }
