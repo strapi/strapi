@@ -12,9 +12,7 @@ const main = async () => {
   try {
     packages = fs.readdirSync(path.resolve(process.cwd(), 'packages'), 'utf8');
 
-    packages = packages.filter((pkg) => {
-      return pkg.indexOf('strapi') !== -1;
-    });
+    packages.filter(pkg => pkg.startsWith('strapi'));
   } catch (error) {
     return console.error(`Can't get strapi packages`);
   }
