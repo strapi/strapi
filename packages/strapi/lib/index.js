@@ -3,8 +3,6 @@
 // Starting date
 global.startedAt = Date.now();
 
-const foo = "bar";
-
 /**
  * Instantiate and expose a Strapi singleton
  * (maintains legacy support).
@@ -12,7 +10,8 @@ const foo = "bar";
 module.exports = function(global) {
   try {
     return global.strapi = require('./Strapi'); // Strapi instance instanciated
+
   } catch (error) {
-    console.log(error); // eslint-disable-line no-console
+    console.error(error);
   }
 }.call(this, global);
