@@ -16,7 +16,7 @@ const files = glob
   .filter(f => changedFiles.has(f))
   .filter(
     package =>
-      !package.includes('README.md') &&
+      !package.includes('CLI.md') &&
       !package.includes('strapi-middleware-views') &&
       !package.includes('strapi-lint') &&
       !package.includes('strapi-plugin-settings-manager'),
