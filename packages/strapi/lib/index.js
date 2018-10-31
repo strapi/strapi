@@ -10,7 +10,6 @@ global.startedAt = Date.now();
 module.exports = function(global) {
   try {
     return global.strapi = require('./Strapi'); // Strapi instance instanciated
-
   } catch (error) {
     console.error(error);
   }
