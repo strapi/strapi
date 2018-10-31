@@ -8,9 +8,12 @@ import { hideLoginErrorsInput, submitError, submitSucceeded } from './actions';
 import { SUBMIT } from './constants';
 
 export function* submitForm(action) {
+
   try {
-    const formType = yield select(makeSelectFormType());
     const body = yield select(makeSelectModifiedData());
+    const formType = yield select(makeSelectFormType());
+    const isRegister = formType === 'register';
+
     let requestURL;
 
     switch (formType) {
@@ -33,12 +36,12 @@ export function* submitForm(action) {
 
     const response = yield call(request, requestURL, { method: 'POST', body: omit(body, 'news') });
 
-    if (response.jwt) {
+    if(response.user.role.name === 'Administrator' || isRegister){
       yield call(auth.setToken, response.jwt, body.rememberMe);
       yield call(auth.setUserInfo, response.user, body.rememberMe);
     }
 
-    if (formType === 'register') {
+    if (isRegister) {
       action.context.updatePlugin('users-permissions', 'hasAdminUser', true);
 
       if (body.news) {
