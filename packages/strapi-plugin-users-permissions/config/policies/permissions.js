@@ -35,7 +35,7 @@ module.exports = async (ctx, next) => {
     if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && ctx.state.user.confirmed !== true) {
       return ctx.unauthorized('Your account email is not confirmed.');
     }
-    
+
     if (ctx.state.user.blocked === true) {
       return ctx.unauthorized(`Your account has been blocked by the administrator.`);
     }

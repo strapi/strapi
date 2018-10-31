@@ -35,15 +35,15 @@ const main = async () => {
       const appCreation = spawn('node', `${strapiBin} new ${appName} --dev ${database}`.split(' '), { detached: true });
 
       appCreation.stdout.on('data', data => {
-        console.log(data.toString());
+        console.log(data.toString().trim());
 
         if (data.includes('is ready at')) {
-          process.kill(-appCreation.pid);
+          process.kill(appCreation.pid);
           return resolve();
         }
 
         if (data.includes('Database connection has failed')) {
-          process.kill(-appCreation.pid);
+          process.kill(appCreation.pid);
           return reject(new Error('Database connection has failed'));
         }
       });
@@ -54,17 +54,19 @@ const main = async () => {
     return new Promise((resolve, reject) => {
       try {
         shell.cd('./testApp');
-        const appStart = shell.exec(`strapi start`, { async: true, silent: true });
+        appStart = shell.exec(`strapi start`, { async: true, silent: true });
         appStart.stdout.on('data', (data) => {
           if (data.includes('To shut down your server')) {
             shell.cd('..');
             return resolve();
+          } else {
+            console.log(data.trim());
           }
         });
 
       } catch (e) {
         if (typeof appStart !== 'undefined') {
-          process.kill(-appStart.pid);
+          process.kill(appStart.pid);
         }
         return reject(e);
       }
@@ -79,7 +81,9 @@ const main = async () => {
         testURL: 'http://localhost/'
       }, [process.cwd()]);
 
-      const packages = fs.readdirSync(path.resolve(process.cwd(), 'packages'))
+      const packagesPath = path.resolve(process.cwd(), 'packages');
+
+      const packages = fs.readdirSync(packagesPath)
         .filter(file => file.indexOf('strapi') !== -1);
 
       // Run tests in every packages.
@@ -87,7 +91,7 @@ const main = async () => {
         await jest({
           passWithNoTests: true,
           testURL: 'http://localhost/'
-        }, [`${process.cwd()}/packages/${packages[i]}`]);
+        }, [path.resolve(packagesPath, packages[i])]);
       }
 
       resolve();
@@ -99,8 +103,8 @@ const main = async () => {
       await clean();
       await generate(database);
       await start();
-      // await test();
-      process.kill(-appStart.pid);
+      await test();
+      process.kill(appStart.pid);
     } catch (e) {
       console.error(e.message);
       testExitCode = 1;
