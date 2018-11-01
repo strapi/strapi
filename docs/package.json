@@ -12,7 +12,8 @@
   "dependencies": {
     "directory-tree": "^2.1.0",
     "markdown-it-decorate": "^1.2.2",
-    "vuepress": "^0.14.2"
+    "vuepress": "^0.14.2",
+    "cache-loader": "1.2.2"
   },
   "devDependencies": {
     "markdown-it-container": "^2.0.0"
