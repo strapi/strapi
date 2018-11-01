@@ -94,8 +94,8 @@ module.exports = (scope, cb) => {
       });
     } else {
       const alphaDependencies = othersDependencies.map(dep => {
-        if (_.includes(dep, 'strapi') && !_.includes(dep, '@alpha')) { // We need this for yarn
-          return `${dep}@alpha`;
+        if (_.includes(dep, 'strapi')) { // We need this for yarn
+          return `${dep}@${scope.strapiPackageJSON.version}`;
         }
 
         return dep;

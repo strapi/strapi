@@ -225,14 +225,14 @@ module.exports = (scope, cb) => {
               shell.exec(`mkdir ${scope.tmpPath}`);
             }
 
-            let cmd = `${packageCmd} ${scope.client.connector}@alpha`;
+            let cmd = `${packageCmd} ${scope.client.connector}@${scope.strapiPackageJSON.version}`;
 
             if (scope.client.module) {
               cmd += ` ${scope.client.module}`;
             }
 
             if (scope.client.connector === 'strapi-hook-bookshelf') {
-              cmd += ` strapi-hook-knex@alpha`;
+              cmd += ` strapi-hook-knex@${scope.strapiPackageJSON.version}`;
 
               scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
             }
