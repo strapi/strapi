@@ -54,7 +54,7 @@ module.exports = scope => {
       'eslint-plugin-react': '^6.8.0'
     },
     'dependencies': Object.assign({}, {
-      'lodash': '4.x.x',
+      'lodash': '^4.17.5',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
       [scope.client.connector]: getDependencyVersion(cliPkg, 'strapi'),
     }, additionalsDependencies, {
