@@ -11,6 +11,9 @@
         {{ $siteTitle }}
       </span>
     </router-link>
+    <select @input="changeVersion($event.target.value)" class="version-selector">
+      <option v-for="version in versions" :value="version.path" :selected="!!~$page.path.indexOf(version.path)">{{version.name}}</option>
+    </select>
     <div class="links">
       <AlgoliaSearchBox v-if="isAlgoliaSearch" :options="algolia"/>
       <SearchBox v-else-if="$site.themeConfig.search !== false"/>
@@ -28,11 +31,23 @@ import NavLinks from './NavLinks.vue'
 export default {
   components: { SidebarButton, NavLinks, SearchBox, AlgoliaSearchBox },
   computed: {
+    versions() {
+      const { themeConfig } = this.$site
+      return themeConfig.versions.map(version => ({
+        name: version[0],
+        path: version[1],
+      }))
+    },
     algolia () {
       return this.$themeLocaleConfig.algolia || this.$site.themeConfig.algolia || {}
     },
     isAlgoliaSearch () {
       return this.algolia && this.algolia.apiKey && this.algolia.indexName
+    }
+  },
+  methods: {
+    changeVersion(to) {
+      this.$router.push(to)
     }
   }
 }
