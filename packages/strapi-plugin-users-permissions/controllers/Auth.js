@@ -199,6 +199,7 @@ module.exports = {
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.object, {
       USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider'])
     });
+    
     try {
       // Send an email to the user.
       await strapi.plugins['email'].services.email.send({

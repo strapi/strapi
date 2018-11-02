@@ -41,20 +41,26 @@ import styles from './styles.scss';
 
 export class AuthPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
-    const { location: { search }, match: {params: { authType, id } }, setForm } = this.props; 
-    const params = search ? replace(search, '?code=', '') : id;
     auth.clearAppStorage();
-    setForm(authType, params);
+    this.setForm();
   }
 
   componentDidUpdate(prevProps) {
-    const { hideLoginErrorsInput, location: { search }, match: { params :{ authType, id }}, setForm, submitSuccess } = this.props;
+    const { 
+      hideLoginErrorsInput,
+      match: { 
+        params : {
+          authType,
+        },
+      }, 
+      submitSuccess,
+    } = this.props;
+
     if (authType !== prevProps.match.params.authType) {
-      const params = search ? replace(search, '?code=', '') : id;
-      setForm(authType, params);
+      this.setForm();
       hideLoginErrorsInput(false);
     }
-    if (submitSuccess !== prevProps.submitSuccess && submitSuccess) {
+    if (submitSuccess && submitSuccess !== prevProps.submitSuccess) {
       switch (authType) {
         case 'login':
         case 'reset-password': 
@@ -78,6 +84,29 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     return get(formErrors, ['0', 'errors', '0', 'id']);
   }
 
+  setForm = () => {
+    const {
+      location: {
+        search,
+      },
+      match: {
+        params: {
+          authType,
+          id,
+        },
+      },
+      setForm, 
+    } = this.props; 
+    const params = search ? replace(search, '?code=', '') : id;
+    
+    setForm(authType, params);
+  }
+
+  isAuthType = type => {
+    const { match: { params: { authType } } } = this.props;
+    return authType === type;
+  }
+  
   handleSubmit = (e) => {
     const { modifiedData, setErrors, submit } = this.props;
     e.preventDefault();
@@ -104,11 +133,6 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     if (isEmpty(formErrors)) {
       submit(this.context);
     }
-  }
-
-  isAuthType = type => {
-    const { match: { params: { authType } } } = this.props;
-    return authType === type;
   }
 
   redirect = path => this.props.history.push(path)
@@ -162,26 +186,46 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
   }
 
   renderInputs = () => {
-    const { didCheckErrors, formErrors, match: { params: { authType } }, modifiedData, noErrorsDescription, onChangeInput, submitSuccess } = this.props;
+    const { 
+      didCheckErrors,
+      formErrors,
+      match: {
+        params: {
+          authType,
+        },
+      },
+      modifiedData,
+      noErrorsDescription,
+      onChangeInput,
+      submitSuccess,
+    } = this.props;
+    
     const inputs = get(form, ['form', authType]);
-
-    return map(inputs, (input, key) => (
-      <Input
-        autoFocus={key === 0}
-        customBootstrapClass={get(input, 'customBootstrapClass')}
-        didCheckErrors={didCheckErrors}
-        errors={get(formErrors, [findIndex(formErrors, ['name', input.name]), 'errors'])}
-        key={get(input, 'name')}
-        label={this.isAuthType('forgot-password') && submitSuccess? { id: 'users-permissions.Auth.form.forgot-password.email.label.success' } : get(input, 'label')}
-        name={get(input, 'name')}
-        onChange={onChangeInput}
-        placeholder={get(input, 'placeholder')}
-        type={get(input, 'type')}
-        validations={{ required: true }}
-        value={get(modifiedData, get(input, 'name'), get(input, 'value'))}
-        noErrorsDescription={noErrorsDescription}
-      />
-    ));
+    const isForgotEmailSent = this.isAuthType('forgot-password') && submitSuccess;
+    return map(inputs, (input, key) => {
+      const label = 
+        isForgotEmailSent
+          ? { id: 'users-permissions.Auth.form.forgot-password.email.label.success' } 
+          : get(input, 'label');
+          
+      return (
+        <Input
+          autoFocus={key === 0}
+          customBootstrapClass={get(input, 'customBootstrapClass')}
+          didCheckErrors={didCheckErrors}
+          errors={get(formErrors, [findIndex(formErrors, ['name', input.name]), 'errors'])}
+          key={get(input, 'name')}
+          label={label}
+          name={get(input, 'name')}
+          onChange={onChangeInput}
+          placeholder={get(input, 'placeholder')}
+          type={get(input, 'type')}
+          validations={{ required: true }}
+          value={get(modifiedData, get(input, 'name'), get(input, 'value'))}
+          noErrorsDescription={noErrorsDescription}
+        />
+      );
+    });
   }
 
   render() {
