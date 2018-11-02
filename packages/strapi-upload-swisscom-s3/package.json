@@ -1,0 +1,47 @@
+{
+  "name": "strapi-upload-swisscom-s3",
+  "version": "3.0.0-alpha.14.4.0",
+  "description": "Swisscom Dynamic Storage (S3) provider for strapi upload",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "upload",
+    "s3",
+    "strapi",
+    "swisscom",
+    "dynamic storage"
+  ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib",
+  "dependencies": {
+    "aws-sdk": "^2.199.0"
+  },
+  "strapi": {
+    "isProvider": true
+  },
+  "author": {
+    "email": "matteias.collet@swisscom.com",
+    "name": "Matt Collet",
+    "url": "https://developer.swisscom.com"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 9.0.0",
+    "npm": ">= 5.3.0"
+  },
+  "license": "MIT"
+}
