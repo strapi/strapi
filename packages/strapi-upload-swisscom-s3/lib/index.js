@@ -30,7 +30,6 @@ module.exports = {
       type: 'text'
     }
   },
-
   init: config => {
     AWS.config.update({
       accessKeyId: config.key,
@@ -49,42 +48,34 @@ module.exports = {
       upload: file => {
         return new Promise((resolve, reject) => {
           const path = file.path ? `${file.path}/` : '';
-          S3.upload(
-            {
-              Key: `${path}${file.hash}${file.ext}`,
-              Body: new Buffer(file.buffer, 'binary'),
-              ACL: 'public-read',
-              ContentType: file.mime
-            },
-            (err, data) => {
-              if (err) return reject(err);
-
-              file.url =
-                'https://' +
-                config.namespaceHost +
-                '/' +
-                config.bucket +
-                '/' +
-                data.key;
-
-              resolve();
+          S3.upload({
+            Key: `${path}${file.hash}${file.ext}`,
+            Body: new Buffer(file.buffer, 'binary'),
+            ACL: 'public-read',
+            ContentType: file.mime
+          }, (err, data) => {
+            if (err) {
+              return reject(err);
             }
+
+            file.url = `https://${config.namespaceHost}/${config.bucket}/${data.key}`;
+            resolve();
+          }
           );
         });
       },
-
       delete: file => {
         return new Promise((resolve, reject) => {
-          S3.deleteObject(
-            {
-              Bucket: config.bucket,
-              Key: `${file.hash}${file.ext}`
-            },
-            (err, data) => {
-              if (err) return reject(err);
-              resolve();
+          S3.deleteObject({
+            Bucket: config.bucket,
+            Key: `${file.hash}${file.ext}`
+          }, (err, data) => {
+            if (err) {
+              return reject(err);
             }
-          );
+
+            resolve();
+          });
         });
       }
     };
