@@ -49,6 +49,27 @@ The following types are currently available:
   - `json`
   - `email`
 
+## Primary key attribute
+
+When using a MongoDB connection, your model gets an _id: ID_ primary key by default: you dont have to add it on the attributes.
+
+However if you need to customize it, for example to change the _id type, you can add it and make the needed changes.
+
+For a given `Article` model, to have a `String` on the _id:
+
+**Path —** `./api/article/models/Article.settings.json`.
+```json
+{
+  ...,
+  "attributes": {
+    "_id": {
+      "type": "string",
+      "configurable": false
+    },
+  }
+}
+```
+
 #### Validations
 
 You can apply basic validations to the attributes. The following supported validations are *only supported by MongoDB* connection.

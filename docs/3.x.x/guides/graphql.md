@@ -248,7 +248,7 @@ The generated GraphQL type and queries will be:
 ```
 // Post's Type definition
 type Post {
-  _id: String
+  _id: ID
   created_at: String
   updated_at: String
   title: String
@@ -259,7 +259,7 @@ type Post {
 // Queries to retrieve one or multiple posts.
 type Query {
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
-  post(id: String!): Post
+  post(id: ID!): Post
 }
 
 // Mutations to create, update or delete a post.

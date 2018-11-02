@@ -42,10 +42,15 @@ module.exports = {
         ? strapi.plugins[plugin].models[name]
         : strapi.models[name];
 
+      // Primary key can be customized so get its type
+      const keyType = model.attributes[model.primaryKey] ? Types.convertType({
+        definition: model.attributes[model.primaryKey]
+      }) : 'ID';
+
       // Setup initial state with default attribute that should be displayed
       // but these attributes are not properly defined in the models.
       const initialState = {
-        [model.primaryKey]: 'ID!',
+        [model.primaryKey]: `${keyType}!`,
       };
 
       const globalId = model.globalId;
@@ -162,7 +167,7 @@ module.exports = {
         if (_.isFunction(queries[type])) {
           if (type === 'singular') {
             Object.assign(acc.query, {
-              [`${pluralize.singular(name)}(id: ID!)`]: model.globalId,
+              [`${pluralize.singular(name)}(id: ${keyType}!)`]: model.globalId,
             });
           } else {
             Object.assign(acc.query, {
