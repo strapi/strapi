@@ -21,6 +21,7 @@ install:
   - npm run setup --debug
 
 script:
+  - npm run lint
   - npm run doc
 
 cache:
