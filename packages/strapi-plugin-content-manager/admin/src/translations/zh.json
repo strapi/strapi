@@ -93,7 +93,7 @@
   "form.Input.pageEntries.inputDescription": "附註：您可以在每個資料類型的設定頁面中覆寫這些設定。",
   "form.Input.placeholder": "佔位符",
   "form.Input.placeholder.placeholder": "在文字框中顯示提示訊息",
-  "form.Input.search": "開啟搜尋功能",
+  "form.Input.search": "啟用搜尋功能",
   "form.Input.search.field": "允許此欄位被搜尋",
   "form.Input.sort.field": "允許以此欄位排序",
   "notification.error.displayedFields": "您至少需要顯示一個欄位",
