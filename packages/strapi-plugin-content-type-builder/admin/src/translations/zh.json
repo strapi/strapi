@@ -34,7 +34,7 @@
   "form.attribute.item.appearance.name": "外觀",
   "form.attribute.item.boolean.name": "名稱",
   "form.attribute.item.customColumnName": "自訂欄位名稱",
-  "form.attribute.item.customColumnName.description": "將資料庫欄位名稱以更廣泛的格式重新命名，對 API 回應很有用。",
+  "form.attribute.item.customColumnName.description": "將資料庫欄位名稱以更易懂的格式重新命名，對 API 回應很有用。",
   "form.attribute.item.date.name": "名稱",
   "form.attribute.item.defineRelation.fieldName": "欄位名稱",
   "form.attribute.item.enumeration.graphql": "GraphQL 名稱覆寫",
