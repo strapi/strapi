@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-unused-vars */
+
 /**
  * GraphQL.js service
  *
@@ -154,7 +156,7 @@ module.exports = {
       Object.keys(queries).forEach(type => {
         // The query cannot be built.
         if (_.isError(queries[type])) {
-          console.error(queries[type]);
+          console.error(queries[type]);  // eslint-disable-line no-console
           strapi.stop();
         }
 

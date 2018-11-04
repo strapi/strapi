@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-unused-vars */
+
 /**
  * Aggregator.js service
  *
@@ -146,6 +148,7 @@ module.exports = {
    * Build the mongoose aggregator by applying the filters
    */
   getModelAggregator: function(model, filters = {}) {
+
     const aggregation = model.aggregate();
     if (!_.isEmpty(filters.convertedParams.where)) {
       if (_.has(filters.convertedParams.where, '_q')) {

@@ -477,7 +477,7 @@ module.exports = function (strapi) {
           case 'password':
           case 'string':
           case 'text':
-            return acc.concat({ [curr]: { $regex: q, $options: 'i' } })
+            return acc.concat({ [curr]: { $regex: q, $options: 'i' } });
           case 'boolean':
             if (q === 'true' || q === 'false') {
               return acc.concat({ [curr]: q === 'true' });

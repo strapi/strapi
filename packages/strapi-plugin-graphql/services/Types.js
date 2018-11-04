@@ -1,5 +1,7 @@
 'use strict';
 
+/* eslint-disable no-unused-vars */
+
 /**
  * Types.js service
  *
@@ -217,23 +219,17 @@ module.exports = {
       case 'create':
         return `
           input ${type}${inputName} { data: ${inputName} }
-          type ${type}${payloadName} { ${pluralize.singular(name)}: ${
-          model.globalId
-        } }
+          type ${type}${payloadName} { ${pluralize.singular(name)}: ${model.globalId} }
         `;
       case 'update':
         return `
           input ${type}${inputName}  { where: InputID, data: ${inputName} }
-          type ${type}${payloadName} { ${pluralize.singular(name)}: ${
-          model.globalId
-        } }
+          type ${type}${payloadName} { ${pluralize.singular(name)}: ${model.globalId} }
         `;
       case 'delete':
         return `
           input ${type}${inputName}  { where: InputID }
-          type ${type}${payloadName} { ${pluralize.singular(name)}: ${
-          model.globalId
-        } }
+          type ${type}${payloadName} { ${pluralize.singular(name)}: ${model.globalId} }
         `;
       default:
       // Nothing

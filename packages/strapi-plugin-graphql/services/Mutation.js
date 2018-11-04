@@ -65,9 +65,9 @@ module.exports = {
 
         const controller = plugin
           ? _.get(
-              strapi.plugins,
-              `${plugin}.controllers.${_.toLower(name)}.${action}`,
-            )
+            strapi.plugins,
+            `${plugin}.controllers.${_.toLower(name)}.${action}`,
+          )
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
@@ -149,9 +149,9 @@ module.exports = {
 
       const controller = plugin
         ? _.get(
-            strapi.plugins,
-            `${plugin}.controllers.${_.toLower(name)}.${action}`,
-          )
+          strapi.plugins,
+          `${plugin}.controllers.${_.toLower(name)}.${action}`,
+        )
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
