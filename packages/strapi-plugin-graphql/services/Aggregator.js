@@ -75,53 +75,6 @@ module.exports = {
   },
 
   /**
-   * Build the expression $or
-   */
-  buildOr: (attributes, q) => {
-    if (q === undefined) { q = '' }
-    const $or = Object.keys(attributes).reduce((acc, curr) => {
-      switch (attributes[curr].type) {
-        case 'integer':
-        case 'float':
-        case 'decimal':
-          if (!_.isNaN(_.toNumber(q))) {
-            return acc.concat({ [curr]: q })
-          }
-          return acc;
-        case 'email':
-        case 'password':
-        case 'string':
-        case 'text':
-          return acc.concat({ [curr]: { $regex: q, $options: 'i' } })
-        case 'boolean':
-          if (q === 'true' || q === 'false') {
-            return acc.concat({ [curr]: q === 'true' })
-          }
-          return acc
-        default:
-          return acc
-      }
-    }, [])
-    return $or
-  },
-
-  /**
-   * Returns a list of fields that have type included in fieldTypes.
-   */
-  getFieldsByTypes: (fields, typeCheck, returnType) => {
-    return _.reduce(
-      fields,
-      (acc, fieldType, fieldName) => {
-        if (typeCheck(fieldType)) {
-          acc[fieldName] = returnType(fieldType, fieldName);
-        }
-        return acc;
-      },
-      {},
-    );
-  },
-
-  /**
    * Use the field resolver otherwise fall through the field value
    *
    * @returns {function}
@@ -197,7 +150,7 @@ module.exports = {
     if (!_.isEmpty(filters.convertedParams.where)) {
       if (_.has(filters.convertedParams.where, '_q')) {
         // recursive search
-        const $or = this.buildOr(model.attributes, String(filters.convertedParams.where._q));
+        const $or = strapi.hook.mongoose.buildOr(model.attributes, String(filters.convertedParams.where._q));
         aggregation.match({ $or });
       } else {
         // specific filtering
@@ -397,7 +350,7 @@ module.exports = {
               options.where,
             );
             const convertedParams = strapi.utils.models.convertParams(name, params);
-            return { convertedParams, options }
+            return { convertedParams, options };
           },
         },
         [connectionGlobalId]: {
