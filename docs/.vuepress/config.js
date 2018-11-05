@@ -86,6 +86,7 @@ module.exports = {
             '/3.x.x/guides/responses',
             '/3.x.x/guides/routing',
             '/3.x.x/guides/services',
+            '/3.x.x/guides/webhooks',
           ],
         },
         {
