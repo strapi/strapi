@@ -31,6 +31,10 @@ class TableRow extends React.Component {
    * @returns {*}
    */
   getDisplayedValue(type, value, name) {
+    if (!value) {
+      return '-';
+    }
+
     switch (type.toLowerCase()) {
       case 'string':
       case 'text':
