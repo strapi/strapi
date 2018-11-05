@@ -135,22 +135,22 @@ module.exports = {
     const shadowCRUD =
       strapi.plugins.graphql.config.shadowCRUD !== false
         ? (() => {
-            // Exclude core models.
+          // Exclude core models.
           const models = Object.keys(strapi.models).filter(
-              model => model !== 'core_store',
-            );
+            model => model !== 'core_store',
+          );
 
             // Reproduce the same pattern for each plugin.
           return Object.keys(strapi.plugins).reduce((acc, plugin) => {
             const {
-                definition,
-                query,
-                mutation,
-                resolver,
-              } = Resolvers.shadowCRUD(
-                Object.keys(strapi.plugins[plugin].models),
-                plugin,
-              );
+              definition,
+              query,
+              mutation,
+              resolver,
+            } = Resolvers.shadowCRUD(
+              Object.keys(strapi.plugins[plugin].models),
+              plugin,
+            );
 
               // We cannot put this in the merge because it's a string.
             acc.definition += definition || '';

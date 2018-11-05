@@ -13,6 +13,7 @@ const Query = require('./Query.js');
 const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
+/* eslint-disable no-unused-vars */
 
 module.exports = {
   /**

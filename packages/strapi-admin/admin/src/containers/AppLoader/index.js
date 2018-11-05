@@ -15,8 +15,11 @@ class AppLoader extends React.Component {
 
     return appPlugins.length !== Object.keys(mountedPlugins).length;
   }
+
   render() {
-    return this.props.children({ shouldLoad: this.shouldLoad() });
+    const { children } = this.props;
+    
+    return children({ shouldLoad: this.shouldLoad() });
   }
 }
 
