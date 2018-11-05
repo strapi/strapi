@@ -35,7 +35,7 @@ module.exports = async function() {
         }
 
         throw new Error(
-          "You have to define the source URL for each environment in `./plugins/**/config/sources.json`"
+          'You have to define the source URL for each environment in `./plugins/**/config/sources.json`'
         );
 
       case 'backend': {
