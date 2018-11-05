@@ -1,11 +1,11 @@
-import { get, includes, isArray, set, omit } from 'lodash';
-import { call, fork, takeLatest, put, select } from 'redux-saga/effects';
+import { get, includes, isArray, omit, set } from 'lodash';
+import { call, fork, put, select, takeLatest } from 'redux-saga/effects';
 import auth from 'utils/auth';
 import request from 'utils/request';
 
-import { makeSelectFormType, makeSelectModifiedData } from './selectors';
 import { hideLoginErrorsInput, submitError, submitSucceeded } from './actions';
 import { SUBMIT } from './constants';
+import { makeSelectFormType, makeSelectModifiedData } from './selectors';
 
 export function* submitForm(action) {
 
@@ -36,7 +36,7 @@ export function* submitForm(action) {
 
     const response = yield call(request, requestURL, { method: 'POST', body: omit(body, 'news') });
 
-    if(response.user.role.name === 'Administrator' || isRegister){
+    if(get(response, 'user.role.name', '') === 'Administrator' || isRegister){
       yield call(auth.setToken, response.jwt, body.rememberMe);
       yield call(auth.setUserInfo, response.user, body.rememberMe);
     }
