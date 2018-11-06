@@ -1,13 +1,7 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
-// Node.js core.
 const path = require('path');
 
-// Public node modules.
 const _ = require('lodash');
 const fs = require('fs-extra');
 
@@ -18,7 +12,6 @@ const fs = require('fs-extra');
  * @param {Object} scope
  * @param {Function} cb
  */
-
 module.exports = function (scope, cb) {
   if (scope.developerMode) {
     fs.mkdirsSync(path.resolve(scope.rootPath));
