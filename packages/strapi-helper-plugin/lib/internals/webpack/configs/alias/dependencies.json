@@ -1,0 +1,15 @@
+{ 
+  "base": [
+    "babel-polyfill",
+    "lodash",
+    "immutable",
+    "react-intl",
+    "react",
+    "react-dnd",
+    "react-dnd-html5-backend",
+    "react-dom",
+    "react-transition-group",
+    "reactstrap",
+    "styled-components"
+  ]
+}
