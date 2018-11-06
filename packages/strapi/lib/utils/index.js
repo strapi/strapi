@@ -14,6 +14,7 @@ const fetch = require('node-fetch');
 const Buffer = require('buffer').Buffer;
 const crypto = require('crypto');
 const exposer = require('./exposer');
+const openBrowser = require('./openBrowser');
 
 module.exports = {
   loadFile: function(url) {
@@ -149,5 +150,6 @@ module.exports = {
     } catch (e) {
       // Silent.
     }
-  }
+  },
+  openBrowser
 };

@@ -461,6 +461,11 @@ module.exports = function(strapi) {
                         const connection = strapi.config.connections[definition.connection];
                         let columns = Object.keys(attributes).filter(attribute => ['string', 'text'].includes(attributes[attribute].type));
 
+                        if (!columns.length) {
+                          // No text columns founds, exit from creating Fulltext Index
+                          return;
+                        }
+
                         switch (connection.settings.client) {
                           case 'pg': {
                             // Enable extension to allow GIN indexes.
@@ -474,7 +479,7 @@ module.exports = function(strapi) {
                                   ? column
                                   : `"${column}"`;
 
-                                return ORM.knex.raw(`CREATE INDEX search_${_.toLower(indexName)} ON "${table}" USING gin(${attribute} gin_trgm_ops)`);
+                                return ORM.knex.raw(`CREATE INDEX IF NOT EXISTS search_${_.toLower(indexName)} ON "${table}" USING gin(${attribute} gin_trgm_ops)`);
                               });
 
                             await Promise.all(indexes);
@@ -508,8 +513,6 @@ module.exports = function(strapi) {
                       if (existTable) {
                         await StrapiConfigs.forge({id: existTable.id}).save({
                           value: JSON.stringify(attributes)
-                        }, {
-                          path: true
                         });
                       } else {
                         await StrapiConfigs.forge({

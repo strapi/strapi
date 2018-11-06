@@ -30,7 +30,7 @@ If you send a pull request, please do it against the `master` branch. We are dev
 ***
 
 ## Setup Development Environment
-To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the recommended versions of Node.js (v8) and npm (v5).
+To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/installation.html#requirements)
 
 Then, please follow the instructions below:
 
@@ -38,14 +38,14 @@ Then, please follow the instructions below:
 
 [Go to the repository](https://github.com/strapi/strapi) and fork it to your own GitHub account.
 
-#### 2. 💿 Clone the repository
+#### 2. 💿 Clone from your repository
 
 ```bash
-git clone git@github.com:strapi/strapi.git
+git clone git@github.com:YOUR_USERNAME/strapi.git
 ```
 
 #### 3. ⏳ Installation
- 
+
 Go to the root of the repository.
 ```bash
 cd strapi

@@ -118,6 +118,11 @@ module.exports = {
 
       const files = values.files;
 
+      // set empty attributes if old values was cleared
+      _.difference(Object.keys(files), Object.keys(values.fields)).forEach(attr => {
+        values.fields[attr] = [];
+      });
+
       // Parse stringify JSON data.
       values = Object.keys(values.fields).reduce((acc, current) => {
         acc[current] = parser(values.fields[current]);

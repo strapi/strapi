@@ -52,16 +52,16 @@ module.exports = {
       // Check if the user exists.
       const user = await strapi.query('user', 'users-permissions').findOne(query, ['role']);
 
+      if (!user) {
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
+      }
+      
       if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && user.confirmed !== true) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }] : 'Your account email is not confirmed.');
       }
 
       if (user.blocked === true) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }] : 'Your account has been blocked by the administrator.');
-      }
-
-      if (!user) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       }
 
       if (user.role.type !== 'root' && ctx.request.admin) {
@@ -267,11 +267,11 @@ module.exports = {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');
     }
 
-    // Check if the provided identifier is an email or not.
-    const isEmail = emailRegExp.test(params.identifier);
+    // Check if the provided email is valid or not.
+    const isEmail = emailRegExp.test(params.email);
 
     if (isEmail) {
-      params.identifier = params.identifier.toLowerCase();
+      params.email = params.email.toLowerCase();
     }
 
     params.role = role._id || role.id;
@@ -285,7 +285,7 @@ module.exports = {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
     }
 
-    if (user && user.provider !== params.provider && strapi.plugins['users-permissions'].config.advanced.unique_email) {
+    if (user && user.provider !== params.provider && settings.unique_email) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }] : 'Email is already taken.');
     }
 
