@@ -8,6 +8,8 @@
   "app.components.DownloadInfo.download": "Download in progress...",
   "app.components.DownloadInfo.text": "This could take a minute. Thanks for your patience.",
 
+  "app.components.EmptyAttributes.title": "There are no fields yet",
+
   "app.components.HomePage.welcome": "Welcome on board!",
   "app.components.HomePage.welcome.again": "Welcome ",
   "app.components.HomePage.cta": "CONFIRM",

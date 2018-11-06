@@ -9,14 +9,17 @@ import {
   DOWNLOAD_PLUGIN,
   DOWNLOAD_PLUGIN_ERROR,
   DOWNLOAD_PLUGIN_SUCCEEDED,
-  GET_PLUGINS_SUCCEEDED,
+  GET_AVAILABLE_PLUGINS_SUCCEEDED,
+  GET_INSTALLED_PLUGINS_SUCCEEDED,
   ON_CHANGE,
 } from './constants';
 
 const initialState = fromJS({
   availablePlugins: List([]),
+  installedPlugins: List([]),
   blockApp: false,
   didFetchPlugins: false,
+  didFetchInstalledPlugins: false,
   pluginToDownload: '',
   search: '',
 });
@@ -35,10 +38,14 @@ function installPluginPageReducer(state = initialState, action) {
       return state
         .set('blockApp', false)
         .set('pluginToDownload', '');
-    case GET_PLUGINS_SUCCEEDED:
+    case GET_AVAILABLE_PLUGINS_SUCCEEDED:
       return state
         .set('didFetchPlugins', true)
         .set('availablePlugins', List(action.availablePlugins));
+    case GET_INSTALLED_PLUGINS_SUCCEEDED:
+      return state
+        .set('didFetchInstalledPlugins', true)
+        .set('installedPlugins', List(action.installedPlugins));
     case ON_CHANGE:
       return state.updateIn(action.keys, () => action.value);
     default:

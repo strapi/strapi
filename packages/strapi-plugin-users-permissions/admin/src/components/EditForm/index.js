@@ -34,7 +34,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
         </div>
       );
     }
-    
+
     return (
       <div className={styles.editForm}>
         <div className="row">
@@ -95,6 +95,27 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
             onChange={this.props.onChange}
             type="toggle"
             value={get(this.props.values.settings, 'allow_register')}
+          />
+        </div>
+        <div className={styles.separator} />
+        <div className="row">
+          <Input
+            label={{ id: 'users-permissions.EditForm.inputToggle.label.email-confirmation' }}
+            inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.email-confirmation' }}
+            name="advanced.settings.email_confirmation"
+            onChange={this.props.onChange}
+            type="toggle"
+            value={get(this.props.values.settings, 'email_confirmation')}
+          />
+        </div>
+        <div className="row">
+          <Input
+            label={{ id: 'users-permissions.EditForm.inputToggle.label.email-confirmation-redirection' }}
+            inputDescription={{ id: 'users-permissions.EditForm.inputToggle.description.email-confirmation-redirection' }}
+            name="advanced.settings.email_confirmation_redirection"
+            onChange={this.props.onChange}
+            type="text"
+            value={get(this.props.values.settings, 'email_confirmation_redirection')}
           />
         </div>
       </div>
