@@ -1,6 +1,6 @@
 /* Lato (hairline, regular) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 100;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -8,7 +8,7 @@
 }
 /* Lato (hairline, italic) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 100;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -16,7 +16,7 @@
 }
 /* Lato (thin, regular) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 200;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -24,7 +24,7 @@
 }
 /* Lato (thin, italic) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 200;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -32,7 +32,7 @@
 }
 /* Lato (light, regular) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 300;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -40,7 +40,7 @@
 }
 /* Lato (light, italic) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 300;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -48,7 +48,7 @@
 }
 /* Lato (normal, regular) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 400;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -56,7 +56,7 @@
 }
 /* Lato (normal, italic) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 400;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -64,7 +64,7 @@
 }
 /* Lato (medium, regular) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: "Lato Medium";
   font-weight: 400;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -72,7 +72,7 @@
 }
 /* Lato (medium, italic) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: "Lato Medium";
   font-weight: 400;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -80,7 +80,7 @@
 }
 /* Lato (semibold, regular) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 500;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -88,7 +88,7 @@
 }
 /* Lato (semibold, italic) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 500;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -96,7 +96,7 @@
 }
 /* Lato (bold, regular) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 600;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -104,7 +104,7 @@
 }
 /* Lato (bold, italic) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 600;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -112,7 +112,7 @@
 }
 /* Lato (heavy, regular) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 800;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -120,7 +120,7 @@
 }
 /* Lato (heavy, italic) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 800;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -128,7 +128,7 @@
 }
 /* Lato (black, regular) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 900;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -136,7 +136,7 @@
 }
 /* Lato (black, italic) */
 @font-face {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   font-weight: 900;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -157,7 +157,7 @@
 
 /* OpenSans (light, regular) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 300;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -165,7 +165,7 @@
 }
 /* OpenSans (light, italic) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 300;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -173,7 +173,7 @@
 }
 /* OpenSans (normal, regular) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 400;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -181,7 +181,7 @@
 }
 /* OpenSans (normal, italic) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 400;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -189,7 +189,7 @@
 }
 /* OpenSans (semibold, regular) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 500;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -197,7 +197,7 @@
 }
 /* OpenSans (semibold, italic) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 500;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -205,7 +205,7 @@
 }
 /* OpenSans (bold, regular) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 600;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -213,7 +213,7 @@
 }
 /* OpenSans (bold, italic) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 600;
   font-style: italic;
   text-rendering: optimizeLegibility;
@@ -221,7 +221,7 @@
 }
 /* OpenSans (heavy, regular) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 800;
   font-style: normal;
   text-rendering: optimizeLegibility;
@@ -229,7 +229,7 @@
 }
 /* OpenSans (heavy, italic) */
 @font-face {
-  font-family: 'OpenSans', sans-serif;
+  font-family: 'OpenSans';
   font-weight: 800;
   font-style: italic;
   text-rendering: optimizeLegibility;

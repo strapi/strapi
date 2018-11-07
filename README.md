@@ -137,6 +137,10 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki to keep your projects up-to-date.
 
+## Roadmap
+
+Check out our [roadmap](https://portal.productboard.com/strapi) to get informed by the latest feature released and the upcoming ones. You can also give us insights and vote for a specific feature.
+
 ## License
 
 [MIT License](LICENSE.md) Copyright (c) 2015-2018 [Strapi Solutions](https://strapi.io/).

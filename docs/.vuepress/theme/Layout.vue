@@ -5,14 +5,7 @@
     @touchend="onTouchEnd">
     <Navbar v-if="shouldShowNavbar" @toggle-sidebar="toggleSidebar"/>
     <div class="sidebar-mask" @click="toggleSidebar(false)"></div>
-    <Sidebar :items="sidebarItems" @toggle-sidebar="toggleSidebar">
-      <div slot="top">
-        <select @input="changeVersion($event.target.value)" class="version-selector">
-          <option v-for="version in versions" :value="version.path" :selected="!!~$page.path.indexOf(version.path)">{{version.name}}</option>
-        </select>
-      </div>
-      <slot name="sidebar-bottom" slot="bottom"/>
-    </Sidebar>
+    <Sidebar :items="sidebarItems" @toggle-sidebar="toggleSidebar" />
     <div class="custom-layout" v-if="$page.frontmatter.layout">
       <component :is="$page.frontmatter.layout"/>
     </div>

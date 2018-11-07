@@ -27,7 +27,7 @@
     text-transform: capitalize;
     margin-right: 1.8rem;
     cursor: pointer;
-    font-family: 'Lato', sans-serif;
+    font-family: Lato;
     &:focus {
       outline: 0;
     }
@@ -77,7 +77,7 @@
 }
 
 .popUpForm {
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
 }
 
 .popUpFormHeader {
@@ -121,7 +121,7 @@
   border-radius: 3px;
   color: white!important;
   line-height: 1.6rem;
-  font-family: 'Lato', sans-serif !important;
+  font-family: Lato!important;
   font-weight: 600;
   cursor: pointer;
   -webkit-font-smoothing: antialiased;
@@ -137,7 +137,7 @@
 
 .secondary {
   min-width: 100px;
-  font-family: 'Lato', sans-serif;
+  font-family: Lato;
   color: #F64D0A;
   border: 0.1rem solid #F64D0A;
   cursor: pointer;
@@ -201,7 +201,7 @@
   border: none!important;
   border-radius: 3px;
   color: white;
-  font-family: 'Lato', sans-serif !important;
+  font-family: Lato!important;
   font-weight: 600;
   &:focus {
     outline: 0;
