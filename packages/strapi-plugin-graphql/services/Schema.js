@@ -303,7 +303,7 @@ module.exports = {
       if (err && err.code === 'ENOENT') {
         fs.mkdirSync(generatedFolder);
       } else {
-        console.error(err);  // eslint-disable-line no-console
+        strapi.log.error(err);
       }
     }
 
