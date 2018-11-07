@@ -6,77 +6,17 @@ const path = require('path');
 const webpack = require('webpack');
 const _ = require('lodash');
 
-const { __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__, __NPM_START_EVENT__, __PROD__, __PWD__ } = require('./configs/globals');
-const paths = require('./configs/paths');
 const { COMMON_ALIAS } = require('./configs/alias');
+const foldersToInclude = require('./configs/foldersToInclude');
 
-const plugins = require('./configs/plugins');
+const { __NODE_ENV__, __PROD__ } = require('./configs/globals');
+const paths = require('./configs/paths');
+const URLs = require('./configs/server');
 
-const pkg = require(path.resolve(process.cwd(), 'package.json'));
+const pkg = require(paths.packageJson);
 const pluginId = pkg.name.replace(/^strapi-/i, '');
 
-
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
-const adminPath = (() => {
-  if (__IS_ADMIN__ && __IS_MONOREPO__) {
-    return paths.strapiAdmin;
-  }
-  
-  return paths.pwd;
-})();
-
-// Define remote and backend URLs.
-const URLs = {
-  host: '/admin',
-  backend: '/',
-  publicPath: null,
-  mode: 'host',
-};
-
-if (__IS_ADMIN__ && !__IS_MONOREPO__) {
-  // Load server configuration.
-  const serverConfig = paths.serverJson;
-
-  try {
-    const { templateConfiguration } = require(path.join(adminPath, 'node_modules', 'strapi-utils'));
-
-    let server = require(serverConfig);
-    server = templateConfiguration(server);
-
-    if (__PWD__.indexOf('/admin') !== -1) {
-      if (_.get(server, 'admin.build.host')) {
-        URLs.host = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
-      } else {
-        URLs.host = _.get(server, 'admin.path', '/admin');
-      }
-
-      URLs.publicPath = URLs.host;
-      URLs.backend = _.get(server, 'admin.build.backend', '/');
-
-      if (_.get(server, 'admin.build.plugins.source') === 'backend') {
-        URLs.mode = 'backend';
-      }
-
-      if (__NPM_START_EVENT__) {
-        URLs.backend = `http://${_.get(server, 'host', 'localhost')}:${_.get(server, 'port', 1337)}`;
-      }
-    }
-  } catch (e) {
-    throw new Error(`Impossible to access to ${serverConfig}`);
-  }
-}
-
-// Tell webpack to use a loader only for those files
-const foldersToInclude = [path.join(adminPath, 'admin', 'src')]
-  .concat(
-    plugins.src.reduce((acc, current) => {
-      acc.push(path.resolve(paths.appPath, 'plugins', current, 'admin', 'src'), plugins.folders[current]);
-
-      return acc;
-    }, []),
-  )
-  .concat([path.join(adminPath, 'node_modules', 'strapi-helper-plugin', 'lib', 'src')]);
 
 module.exports = options => {
   const { alias, babelPresets, devtool, disableExtractTextPlugin, entry, externals,  output, plugins, } = options;
@@ -99,20 +39,19 @@ module.exports = options => {
     ],
     require.resolve('babel-preset-react'),
     require.resolve('babel-preset-stage-0'),
-    // Add some babel presets in function of mode.
   ];
 
   const commonDevtool = 'cheap-module-source-map';
-  
+
   return {
     entry: entry,
     output: Object.assign(
       {
         // Compile into js/build.js
-        path: path.join(adminPath, 'admin', 'build'),
+        path: path.join(paths.adminPath, 'admin', 'build'),
       },
       output,
-    ), // Merge with env dependent settings
+    ), // Merge with env dependent settings.
     module: {
       rules: [
         // TODO: add eslint formatter
@@ -242,7 +181,7 @@ module.exports = options => {
             },
             {
               test: /\.html$/,
-              include: [path.join(adminPath, 'admin', 'src')],
+              include: [path.join(paths.adminPath, 'admin', 'src')],
               use: require.resolve('html-loader'),
             },
             {

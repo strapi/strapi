@@ -8,9 +8,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const argv = require('minimist')(process.argv.slice(2));
 
-const paths = require('./configs/paths');
-
 const { __PORT__ } = require('./configs/globals');
+const paths = require('./configs/paths');
 const plugins = require('./configs/plugins');
 const postcssPlugins = require('./configs/postcssOptions');
 

@@ -36,7 +36,7 @@ module.exports = strapi => {
           composeEndpoint(value, null, router)(cb);
         });
 
-        // router.prefix(strapi.config.admin.path || `/${strapi.config.paths.admin}`);
+        // router.prefix(strapi.config.admin.path || `/${strapi.config.paths.appPathAdmin}`);
         router.prefix('/admin');
 
         // TODO:

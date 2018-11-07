@@ -2,35 +2,46 @@ const fs = require('fs');
 const _ = require('lodash');
 const path = require('path');
 
-const { __APP_PATH__, __IS_ADMIN__, __INIT_CWD__, __IS_MONOREPO__, __NODE_ENV__ ,__PROD__,  __PWD__} = require('./globals');
+const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__ ,  __PWD__} = require('./globals');
+
+/**
+ * Whole path uses in webpack.
+ * const is in this order due of reference, cannot order them in alphabetical order.
+ */
 
 const appDirectory = fs.realpathSync(process.cwd());
 
-// define appPath.
+/**
+ * appPath : Path of main directory of application.
+ * For example : 
+ *   - build from monorepository : appPath = 'path/strapi'
+ *   - build in app dev : appPath = `path/${nameProject}`
+ */
 const appPath = __APP_PATH__ || path.resolve(__PWD__, '..', ( __IS_ADMIN__ ? '' : '..' ));
 
+// Path bis 'admin' from our application.
+const appPathAdmin = path.resolve(appPath, 'admin');
 
-const isSetup = __PROD__ ?  __IS_MONOREPO__ :  path.resolve(__PWD__, '..', '..') === path.resolve(__INIT_CWD__);
+// Path bis 'strapi-admin' in our application.
+const strapiAdmin = __IS_ADMIN__ ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
 
-const rootAdminpath = (() => {
-  if (isSetup || __IS_MONOREPO__) {
-    return __IS_ADMIN__
-      ? path.resolve(appPath, 'strapi-admin')
-      : path.resolve(appPath, 'packages', 'strapi-admin');
-  }
-  return path.resolve(appPath, 'admin');
-})();
+/**
+ * rootAdminpath : Path of admin in main directory of application.
+ * For example : 
+ *   - build from monorepository : appPath = 'path/strapi/packages/strapi-admin'
+ *   - build in app dev : appPath = `path/${nameProject}/admin`
+ */
+const rootAdminpath =  __IS_MONOREPO__ ? strapiAdmin : appPathAdmin;
 
-// Resolve path from app directory to relative path.
+const adminPath = __IS_ADMIN__ && __IS_MONOREPO__ ? strapiAdmin : path.resolve(__PWD__);
+
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
-// const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
-
 module.exports = {
-  admin: path.resolve(appPath, 'admin'),
+  adminPath: adminPath,
+  appPathAdmin: appPathAdmin,
   appIndexJs: resolveApp('src/index.js'),
   appPath: appPath,
-  //adminSrc: path.resolve(adminPath, 'admin', 'src'),
   filepath: path.resolve(__dirname, 'dist/*.dll.js'),
   indexHtml: path.resolve(appPath, 'admin', 'admin', 'src', 'index.html'),
   manifestJson: path.resolve(rootAdminpath, 'admin', 'src', 'config', 'manifest.json'),
@@ -45,5 +56,4 @@ module.exports = {
     _.lowerCase(__NODE_ENV__),
     'server.json',
   ),
-  strapiAdmin : path.resolve(appPath, 'strapi-admin')
 };
