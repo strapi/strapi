@@ -13,7 +13,6 @@ const Query = require('./Query.js');
 const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
-/* eslint-disable no-unused-vars */
 
 module.exports = {
   /**
@@ -66,11 +65,11 @@ module.exports = {
         });
 
         Object.assign(acc.resolver[globalId], {
-          createdAt: (obj, options, context) => {
+          createdAt: (obj) => {
             // eslint-disable-line no-unused-vars
             return obj.createdAt || obj.created_at;
           },
-          updatedAt: (obj, options, context) => {
+          updatedAt: (obj) => {
             // eslint-disable-line no-unused-vars
             return obj.updatedAt || obj.updated_at;
           },
@@ -155,7 +154,7 @@ module.exports = {
       Object.keys(queries).forEach(type => {
         // The query cannot be built.
         if (_.isError(queries[type])) {
-          console.error(queries[type]);
+          strapi.log.error(queries[type]);
           strapi.stop();
         }
 
@@ -304,7 +303,7 @@ module.exports = {
           case 'manyMorphToMany':
           case 'manyToManyMorph':
             return _.merge(acc.resolver[globalId], {
-              [association.alias]: async (obj, options, context) => {
+              [association.alias]: async (obj) => {
                 // eslint-disable-line no-unused-vars
                 const [withRelated, withoutRelated] = await Promise.all([
                   resolvers.fetch(
@@ -363,7 +362,7 @@ module.exports = {
         }
 
         _.merge(acc.resolver[globalId], {
-          [association.alias]: async (obj, options, context) => {
+          [association.alias]: async (obj, options) => {
             // eslint-disable-line no-unused-vars
             // Construct parameters object to retrieve the correct related entries.
             const params = {
@@ -416,7 +415,8 @@ module.exports = {
                     }).where;
                     break;
                   // falls through
-                }
+                  }
+                  break;
                 default:
                   // Where.
                   queryOpts.query = strapi.utils.models.convertParams(name, {
