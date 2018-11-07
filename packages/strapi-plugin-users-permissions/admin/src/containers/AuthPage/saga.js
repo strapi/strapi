@@ -37,6 +37,7 @@ export function* submitForm(action) {
     const response = yield call(request, requestURL, { method: 'POST', body: omit(body, 'news') });
 
     if(get(response, 'user.role.name', '') === 'Administrator' || isRegister){
+      
       yield call(auth.setToken, response.jwt, body.rememberMe);
       yield call(auth.setUserInfo, response.user, body.rememberMe);
     }

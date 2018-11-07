@@ -60,10 +60,14 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
       this.setForm();
       hideLoginErrorsInput(false);
     }
-    if (submitSuccess && submitSuccess !== prevProps.submitSuccess) {
+
+    if (submitSuccess) {
       switch (authType) {
         case 'login':
         case 'reset-password': 
+          // Check if we have token to handle redirection to login or admin.
+          // Done to prevent redirection to admin after reset password if user should
+          // not have access.
           auth.getToken()
             ? this.redirect('/')
             : this.redirect('/plugins/users-permissions/auth/login');
@@ -135,7 +139,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     }
   }
 
-  redirect = path => this.props.history.push(path)
+  redirect = path => this.props.history.push(path);
 
   renderButton = () => {
     const { match: { params: { authType } }, submitSuccess } = this.props;
