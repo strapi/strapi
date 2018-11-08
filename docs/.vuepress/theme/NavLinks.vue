@@ -9,11 +9,19 @@
       <NavLink v-else :item="item"/>
     </div>
     <!-- repo link -->
-    <a v-if="repoLink"
-      :href="repoLink"
+    <a
+      :href="websiteLink"
       class="repo-link"
       target="_blank"
       rel="noopener noreferrer">
+      Website
+      <OutboundLink/>
+    </a>
+    <a v-if="repoLink"
+       :href="repoLink"
+       class="repo-link"
+       target="_blank"
+       rel="noopener noreferrer">
       {{ repoLabel }}
       <OutboundLink/>
     </a>
@@ -92,6 +100,22 @@ export default {
       }
 
       return 'Source'
+    },
+    websiteLink () {
+      const { website } = this.$site.themeConfig
+      if (website) {
+        return /^https?:/.test(website)
+          ? website
+          : `https://${website}`
+      }
+    },
+    slackLink () {
+      const { slack } = this.$site.themeConfig
+      if (slack) {
+        return /^https?:/.test(slack)
+          ? slack
+          : `https://${slack}`
+      }
     }
   }
 }
