@@ -21,6 +21,7 @@ import Button from 'components/Button';
 import Input from 'components/InputsIndex';
 
 // Utils
+import auth from 'utils/auth';
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 
@@ -40,47 +41,90 @@ import styles from './styles.scss';
 
 export class AuthPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
-    const params = this.props.location.search ? replace(this.props.location.search, '?code=', '') : this.props.match.params.id;
-    this.props.setForm(this.props.match.params.authType, params);
+    auth.clearAppStorage();
+    this.setForm();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.props.match.params.authType !== nextProps.match.params.authType) {
-      const params = nextProps.location.search ? replace(nextProps.location.search, '?code=', '') : nextProps.match.params.id;
-      this.props.setForm(nextProps.match.params.authType, params);
-      this.props.hideLoginErrorsInput(false);
+  componentDidUpdate(prevProps) {
+    const { 
+      hideLoginErrorsInput,
+      match: { 
+        params : {
+          authType,
+        },
+      }, 
+      submitSuccess,
+    } = this.props;
+
+    if (authType !== prevProps.match.params.authType) {
+      this.setForm();
+      hideLoginErrorsInput(false);
     }
 
-    if (nextProps.submitSuccess) {
-      switch (this.props.match.params.authType) {
+    if (submitSuccess) {
+      switch (authType) {
         case 'login':
-        case 'reset-password':
-          this.props.history.push('/');
+        case 'reset-password': 
+          // Check if we have token to handle redirection to login or admin.
+          // Done to prevent redirection to admin after reset password if user should
+          // not have access.
+          auth.getToken()
+            ? this.redirect('/')
+            : this.redirect('/plugins/users-permissions/auth/login');
           break;
         case 'register':
-          this.props.history.push('/');
+          this.redirect('/');
           // NOTE: prepare for comfirm email;
-          // this.props.history.push(`/plugins/users-permissions/auth/register-success/${this.props.modifiedData.email}`);
+          // this.redirect(`/plugins/users-permissions/auth/register-success/${this.props.modifiedData.email}`);
           break;
         default:
-
       }
     }
   }
 
+  // Get form Errors shortcut.
+  getFormErrors = () => {
+    const { formErrors } = this.props;
+    return get(formErrors, ['0', 'errors', '0', 'id']);
+  }
+
+  setForm = () => {
+    const {
+      location: {
+        search,
+      },
+      match: {
+        params: {
+          authType,
+          id,
+        },
+      },
+      setForm, 
+    } = this.props; 
+    const params = search ? replace(search, '?code=', '') : id;
+    
+    setForm(authType, params);
+  }
+
+  isAuthType = type => {
+    const { match: { params: { authType } } } = this.props;
+    return authType === type;
+  }
+  
   handleSubmit = (e) => {
+    const { modifiedData, setErrors, submit } = this.props;
     e.preventDefault();
-    const formErrors = Object.keys(this.props.modifiedData).reduce((acc, key) => {
-      if (isEmpty(get(this.props.modifiedData, key)) && !isBoolean(get(this.props.modifiedData, key))) {
+    const formErrors = Object.keys(modifiedData).reduce((acc, key) => {
+      if (isEmpty(get(modifiedData, key)) && !isBoolean(get(modifiedData, key))) {
         acc.push({ name: key, errors: [{ id: 'components.Input.error.validation.required' }] });
       }
 
-      if (!isEmpty(get(this.props.modifiedData, 'password')) && !isEmpty(get(this.props.modifiedData, 'confirmPassword')) && findIndex(acc, ['name', 'confirmPassword']) === -1) {
-        if (this.props.modifiedData.password.length < 6) {
+      if (!isEmpty(get(modifiedData, 'password')) && !isEmpty(get(modifiedData, 'confirmPassword')) && findIndex(acc, ['name', 'confirmPassword']) === -1) {
+        if (modifiedData.password.length < 6) {
           acc.push({ name: 'password', errors: [{ id: 'users-permissions.components.Input.error.password.length' }] });
         }
         
-        if (get(this.props.modifiedData, 'password') !== get(this.props.modifiedData, 'confirmPassword')) {
+        if (get(modifiedData, 'password') !== get(modifiedData, 'confirmPassword')) {
           acc.push({ name: 'confirmPassword', errors: [{ id: 'users-permissions.components.Input.error.password.noMatch' }] });
         }
       }
@@ -88,25 +132,27 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
       return acc;
     }, []);
 
-    this.props.setErrors(formErrors);
+    setErrors(formErrors);
 
     if (isEmpty(formErrors)) {
-      this.props.submit(this.context);
+      submit(this.context);
     }
   }
+
+  redirect = path => this.props.history.push(path);
 
   renderButton = () => {
     const { match: { params: { authType } }, submitSuccess } = this.props;
 
-    if (this.props.match.params.authType === 'login') {
+    if (this.isAuthType('login')) {
       return (
         <div className={cn('col-md-6', styles.loginButton)}>
           <Button primary label="users-permissions.Auth.form.button.login" type="submit" />
         </div>
       );
     }
-    const isEmailForgotSent = authType === 'forgot-password' && submitSuccess;
-    const label = isEmailForgotSent ? 'users-permissions.Auth.form.button.forgot-password.success' : `users-permissions.Auth.form.button.${this.props.match.params.authType}`;
+    const isEmailForgotSent = this.isAuthType('forgot-password') && submitSuccess;
+    const label = isEmailForgotSent ? 'users-permissions.Auth.form.button.forgot-password.success' : `users-permissions.Auth.form.button.${authType}`;
   
     return (
       <div className={cn('col-md-12', styles.buttonContainer)}>
@@ -121,9 +167,10 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
     );
   }
 
+  renderLogo = () => this.isAuthType('register') && <div className={styles.logoContainer}><img src={LogoStrapi} alt="logo" /></div>;
+  
   renderLink = () => {
-
-    if (this.props.match.params.authType === 'login') {
+    if (this.isAuthType('login')) {
       return (
         <Link to="/plugins/users-permissions/auth/forgot-password">
           <FormattedMessage id="users-permissions.Auth.link.forgot-password" />
@@ -131,7 +178,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
       );
     }
 
-    if (this.props.match.params.authType === 'forgot-password' || this.props.match.params.authType === 'register-success') {
+    if (this.isAuthType('forgot-password') || this.isAuthType('register-success')) {
       return (
         <Link to="/plugins/users-permissions/auth/login">
           <FormattedMessage id="users-permissions.Auth.link.ready" />
@@ -143,33 +190,53 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
   }
 
   renderInputs = () => {
-    const { match: { params: { authType } } } = this.props;
+    const { 
+      didCheckErrors,
+      formErrors,
+      match: {
+        params: {
+          authType,
+        },
+      },
+      modifiedData,
+      noErrorsDescription,
+      onChangeInput,
+      submitSuccess,
+    } = this.props;
+    
     const inputs = get(form, ['form', authType]);
-
-    return map(inputs, (input, key) => (
-      <Input
-        autoFocus={key === 0}
-        customBootstrapClass={get(input, 'customBootstrapClass')}
-        didCheckErrors={this.props.didCheckErrors}
-        errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', input.name]), 'errors'])}
-        key={get(input, 'name')}
-        label={authType === 'forgot-password' && this.props.submitSuccess? { id: 'users-permissions.Auth.form.forgot-password.email.label.success' } : get(input, 'label')}
-        name={get(input, 'name')}
-        onChange={this.props.onChangeInput}
-        placeholder={get(input, 'placeholder')}
-        type={get(input, 'type')}
-        validations={{ required: true }}
-        value={get(this.props.modifiedData, get(input, 'name'), get(input, 'value'))}
-        noErrorsDescription={this.props.noErrorsDescription}
-      />
-    ));
+    const isForgotEmailSent = this.isAuthType('forgot-password') && submitSuccess;
+    return map(inputs, (input, key) => {
+      const label = 
+        isForgotEmailSent
+          ? { id: 'users-permissions.Auth.form.forgot-password.email.label.success' } 
+          : get(input, 'label');
+          
+      return (
+        <Input
+          autoFocus={key === 0}
+          customBootstrapClass={get(input, 'customBootstrapClass')}
+          didCheckErrors={didCheckErrors}
+          errors={get(formErrors, [findIndex(formErrors, ['name', input.name]), 'errors'])}
+          key={get(input, 'name')}
+          label={label}
+          name={get(input, 'name')}
+          onChange={onChangeInput}
+          placeholder={get(input, 'placeholder')}
+          type={get(input, 'type')}
+          validations={{ required: true }}
+          value={get(modifiedData, get(input, 'name'), get(input, 'value'))}
+          noErrorsDescription={noErrorsDescription}
+        />
+      );
+    });
   }
 
   render() {
-    const { match: { params: { authType } }, modifiedData, submitSuccess } = this.props;
-    let divStyle = authType === 'register' ? { marginTop: '3.2rem' } : { marginTop: '.9rem' };
+    const { modifiedData, noErrorsDescription, submitSuccess } = this.props;
+    let divStyle = this.isAuthType('register') ? { marginTop: '3.2rem' } : { marginTop: '.9rem' };
 
-    if (authType === 'forgot-password' && submitSuccess) {
+    if (this.isAuthType('forgot-password') && submitSuccess) {
       divStyle = { marginTop: '.9rem', minHeight: '18.2rem' };
     }
 
@@ -177,33 +244,33 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
       <div className={styles.authPage}>
         <div className={styles.wrapper}>
           <div className={styles.headerContainer}>
-            {this.props.match.params.authType === 'register' ? (
+            {this.isAuthType('register') ? (
               <FormattedMessage id="users-permissions.Auth.form.header.register" />
             ) : (
               <img src={LogoStrapi} alt="logo" />
             )}
           </div>
           <div className={styles.headerDescription}>
-            {authType === 'register' && <FormattedMessage id="users-permissions.Auth.header.register.description" />}
+            {this.isAuthType('register') && <FormattedMessage id="users-permissions.Auth.header.register.description" />}
           </div>
 
           <div
             className={cn(
               styles.formContainer,
-              authType === 'forgot-password' && submitSuccess ? styles.borderedSuccess : styles.bordered,
+              this.isAuthType('forgot-password') && submitSuccess ? styles.borderedSuccess : styles.bordered,
             )}
             style={divStyle}
           >
             <form onSubmit={this.handleSubmit}>
               <div className="container-fluid">
-                {this.props.noErrorsDescription && !isEmpty(get(this.props.formErrors, ['0', 'errors', '0', 'id']))? (
+                {noErrorsDescription && !isEmpty(this.getFormErrors())? (
                   <div className={styles.errorsContainer}>
-                    <FormattedMessage id={get(this.props.formErrors, ['0', 'errors', '0', 'id'])} />
+                    <FormattedMessage id={this.getFormErrors()} />
                   </div>
                 ): ''}
                 <div className="row" style={{ textAlign: 'start' }}>
                   {!submitSuccess && this.renderInputs()}
-                  { authType === 'forgot-password' && submitSuccess && (
+                  { this.isAuthType('forgot-password') && submitSuccess && (
                     <div className={styles.forgotSuccess}>
                       <FormattedMessage id="users-permissions.Auth.form.forgot-password.email.label.success" />
                       <br />
@@ -219,7 +286,7 @@ export class AuthPage extends React.Component { // eslint-disable-line react/pre
             {this.renderLink()}
           </div>
         </div>
-        {authType === 'register' && <div className={styles.logoContainer}><img src={LogoStrapi} alt="logo" /></div>}
+        {this.renderLogo()}
       </div>
     );
   }
