@@ -47,7 +47,7 @@ module.exports = {
 
     // Copy Markdown files with some information.
     'README.md': {
-      template: 'CLI.md'
+      template: 'README.md'
     },
 
     // Empty API directory.
