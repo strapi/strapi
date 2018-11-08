@@ -297,7 +297,7 @@ module.exports = async cb => {
       const prevEditDisplayFields = _.get(prevSchema.models, fieldsPath);
       // Update the fields
       const updatedEditDisplayFields = prevEditDisplayFields.filter(field => field !== currentAttr.join());
-     // Set the new layout
+      // Set the new layout
       _.set(prevSchema.models, fieldsPath, updatedEditDisplayFields);
 
       if (updatedListDisplay.length === 0) {
