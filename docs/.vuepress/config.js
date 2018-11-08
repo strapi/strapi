@@ -1,12 +1,11 @@
 const container = require('markdown-it-container')
 
-let ogprefix = 'og: http://ogp.me/ns#'
-let title = 'Strapi Documentation'
-let description = 'API creation made simple, secure and fast.'
-let color = '#2F80ED'
-let author = 'Strapi'
-let url = 'https://strapi.io/documentation/'
-
+const ogprefix = 'og: http://ogp.me/ns#'
+const title = 'Strapi Documentation'
+const description = 'API creation made simple, secure and fast.'
+const color = '#2F80ED'
+const author = 'Strapi'
+const url = 'https://strapi.io/documentation/'
 
 module.exports = {
   head: [
@@ -47,15 +46,20 @@ module.exports = {
       ['Version 1.x.x', '/1.x.x/'],
     ],
     repo: 'strapi/strapi',
+    website: 'https://strapi.io',
     docsDir: 'docs',
     editLinks: true,
     editLinkText: 'Improve this page',
     serviceWorker: true,
+    hiddenLinks: [
+      '/3.x.x/cli/CLI.html',
+      '/3.x.x/api-reference/reference.html',
+    ],
     sidebar: {
       '/3.x.x/': [
         {
           collapsable: false,
-          title: 'Getting started',
+          title: '🚀 Getting started',
           children: [
             '/3.x.x/getting-started/installation',
             '/3.x.x/getting-started/quick-start',
@@ -63,39 +67,31 @@ module.exports = {
           ],
         },
         {
-          collapsable: false,
-          title: 'Guides',
+          collapsable: true,
+          title: '💡 Guides',
           children: [
-            '/3.x.x/guides/authentication.md',
-            '/3.x.x/configurations/configurations.md',
-            '/3.x.x/guides/controllers.md',
-            '/3.x.x/guides/deployment.md',
-            '/3.x.x/guides/email.md',
-            '/3.x.x/guides/upload.md',
-            '/3.x.x/guides/filters.md',
-            '/3.x.x/guides/graphql.md',
-            '/3.x.x/guides/i18n.md',
-            '/3.x.x/guides/models.md',
-            '/3.x.x/guides/policies.md',
-            '/3.x.x/guides/public-assets.md',
-            '/3.x.x/guides/requests.md',
-            '/3.x.x/guides/responses.md',
-            '/3.x.x/guides/routing.md',
-            '/3.x.x/guides/services.md',
-          ],
-        },
-        {
-          collapsable: false,
-          title: 'Globals',
-          children: [
-            '/3.x.x/api-reference/reference',
-            '/3.x.x/cli/CLI',
+            '/3.x.x/guides/authentication',
             '/3.x.x/configurations/configurations',
+            '/3.x.x/guides/controllers',
+            '/3.x.x/guides/deployment',
+            '/3.x.x/guides/email',
+            '/3.x.x/guides/upload',
+            '/3.x.x/guides/filters',
+            '/3.x.x/guides/graphql',
+            '/3.x.x/guides/i18n',
+            '/3.x.x/guides/models',
+            '/3.x.x/guides/policies',
+            '/3.x.x/guides/public-assets',
+            '/3.x.x/guides/requests',
+            '/3.x.x/guides/responses',
+            '/3.x.x/guides/routing',
+            '/3.x.x/guides/services',
+            '/3.x.x/guides/webhooks',
           ],
         },
         {
-          collapsable: false,
-          title: 'Advanced',
+          collapsable: true,
+          title: '⚙️️ Advanced',
           children: [
             '/3.x.x/advanced/customize-admin',
             '/3.x.x/advanced/hooks',
@@ -105,8 +101,35 @@ module.exports = {
           ],
         },
         {
+          collapsable: true,
+          title: '🔌 Plugin Development',
+          children: [
+            '/3.x.x/plugin-development/quick-start',
+            '/3.x.x/plugin-development/plugin-architecture',
+            '/3.x.x/plugin-development/backend-development',
+            '/3.x.x/plugin-development/frontend-development',
+            '/3.x.x/plugin-development/frontend-use-cases',
+            '/3.x.x/plugin-development/utils',
+            // '/3.x.x/plugin-development/ui-components', TODO: Add this file
+          ],
+        },
+        {
+          collapsable: true,
+          title: '💻 Command Line Interface',
+          children: [
+            '/3.x.x/cli/CLI',
+          ],
+        },
+        {
+          collapsable: true,
+          title: '🏗 API Reference',
+          children: [
+            '/3.x.x/api-reference/reference',
+          ],
+        },
+        {
           collapsable: false,
-          title: 'Resources',
+          title: '📚 Resources',
           children: [
             ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
             ['https://github.com/strapi/strapi/wiki', 'Migration guides'],

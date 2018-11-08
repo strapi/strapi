@@ -14,6 +14,11 @@ const selectPlugins = () => createSelector(
   (appState) => appState.get('plugins')
 );
 
+const makeSelectApp = () => createSelector(
+  selectApp(),
+  appState => appState.toJS(),
+);
+
 const selectHasUserPlugin = () => createSelector(
   selectApp(),
   (appState) => appState.get('hasUserPlugin'),
@@ -38,7 +43,7 @@ const makeSelectAppPlugins = () => createSelector(
   selectApp(),
   appState => appState.get('appPlugins').toJS(),
 );
-
+export default makeSelectApp;
 export {
   selectApp,
   selectHasUserPlugin,

@@ -18,7 +18,7 @@
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "すべてクリア",
   "components.FiltersPickWrapper.PluginHeader.description": "エントリをフィルタリングするための条件を設定する",
   "components.FiltersPickWrapper.PluginHeader.title.filter": "フィルタ",
-  "components.filterspickwrapper.hide": "隠す",
+  "components.FiltersPickWrapper.hide": "隠す",
   "components.LimitSelect.itemsPerPage": "ページあたりのアイテム数",
   "components.Search.placeholder": "エントリを検索する...",
   "components.TableDelete.delete": "すべて削除",
