@@ -1,6 +1,7 @@
 // Dependencies.
 import { LOCATION_CHANGE } from 'react-router-redux';
 import {
+  all,
   call,
   cancel,
   fork,
@@ -9,10 +10,8 @@ import {
   take,
   takeLatest,
 } from 'redux-saga/effects';
-
 // Utils.
 import request from 'utils/request';
-
 // Actions
 import {
   deleteDataSuccess,
@@ -63,10 +62,10 @@ export function* dataGet(action) {
       params._q = _q;
     }
     
-    const response = yield [
+    const response = yield all([
       call(request, countURL, { method: 'GET', params }),
       call(request, recordsURL, { method: 'GET', params }),
-    ];
+    ]);
 
     yield put(getDataSucceeded(response));
   } catch(err) {
