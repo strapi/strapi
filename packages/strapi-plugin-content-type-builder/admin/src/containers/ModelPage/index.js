@@ -13,25 +13,19 @@ import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { router } from 'app';
-
 // Global selectors
 import { makeSelectMenu } from 'containers/App/selectors';
 import { makeSelectContentTypeUpdated } from 'containers/Form/selectors';
-
 import AttributeRow from 'components/AttributeRow';
 import ContentHeader from 'components/ContentHeader';
 import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import Form from 'containers/Form';
 import List from 'components/List';
 import PluginLeftMenu from 'components/PluginLeftMenu';
-
 import forms from 'containers/Form/forms.json';
-
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-
 import { storeData } from '../../utils/storeData';
-
 import {
   cancelChanges,
   deleteAttribute,
@@ -40,7 +34,6 @@ import {
   resetShowButtonsProps,
   submit,
 } from './actions';
-
 import saga from './sagas';
 import reducer from './reducer';
 import selectModelPage from './selectors';
@@ -69,7 +62,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     this.contentHeaderButtons = [
       { label: 'content-type-builder.form.button.cancel', handleClick: this.props.cancelChanges, kind: 'secondary', type: 'button' },
-      { label: 'content-type-builder.form.button.save', handleClick: this.handleSubmit, kind: 'primary', type: 'submit' },
+      { label: 'content-type-builder.form.button.save', handleClick: this.handleSubmit, kind: 'primary', type: 'submit', id: 'saveData' },
     ];
   }
 

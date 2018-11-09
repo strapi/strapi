@@ -32,7 +32,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
     return (
       <div className={styles.buttonContainer}>
         {map(this.props.buttonsContent, (button, key) => (
-          <Button key={key} type={button.type} label={button.label} kind={button.kind} onClick={button.handleClick} />
+          <Button key={key} type={button.type} label={button.label} kind={button.kind} id={button.id} onClick={button.handleClick} />
         ))}
       </div>
     );
