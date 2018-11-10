@@ -6,8 +6,8 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import SupportUsTitle from 'components/SupportUsTitle/Loadable';
-import SupportUsCta from 'components/SupportUsCta/Loadable';
+import SupportUsTitle from 'components/SupportUsTitle';
+import SupportUsCta from 'components/SupportUsCta';
 
 import styles from './styles.scss';
 

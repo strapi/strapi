@@ -99,17 +99,17 @@ shell.cd('../strapi-generate-new');
 watcher('', 'npm install ../strapi-utils');
 watcher('📦  Linking strapi-generate-new', 'npm link');
 
-shell.cd('../strapi-mongoose');
+shell.cd('../strapi-hook-mongoose');
 watcher('', 'npm install ../strapi-utils');
-watcher('📦  Linking strapi-mongoose...', 'npm link');
+watcher('📦  Linking strapi-hook-mongoose...', 'npm link');
 
-shell.cd('../strapi-knex');
-watcher('📦  Linking strapi-knex...', 'npm link');
+shell.cd('../strapi-hook-knex');
+watcher('📦  Linking strapi-hook-knex...', 'npm link');
 
-shell.cd('../strapi-bookshelf');
+shell.cd('../strapi-hook-bookshelf');
 watcher('', 'npm install ../strapi-utils');
-watcher('', 'npm install ../strapi-knex');
-watcher('📦  Linking strapi-bookshelf...', 'npm link');
+watcher('', 'npm install ../strapi-hook-knex');
+watcher('📦  Linking strapi-hook-bookshelf...', 'npm link');
 
 shell.cd('../strapi');
 watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
@@ -118,13 +118,18 @@ watcher('📦  Linking strapi...', 'npm link');
 shell.cd('../strapi-plugin-graphql');
 watcher('📦  Linking strapi-plugin-graphql...', 'npm link --no-optional', false);
 
-// Upload plugins
+// Plugin services
 shell.cd('../strapi-upload-local');
 watcher('📦  Linking strapi-upload-local...', 'npm link --no-optional', false);
+
+shell.cd('../strapi-email-sendmail');
+watcher('📦  Linking strapi-email-sendmail...', 'npm link --no-optional', false);
 
 // Plugins with admin
 shell.cd('../strapi-plugin-email');
 shell.rm('-f', 'package-lock.json');
+watcher('', 'npm install ../strapi-helper-plugin --no-optional');
+watcher('', 'npm install ../strapi-email-sendmail --no-optional');
 watcher('📦  Linking strapi-plugin-email...', 'npm link --no-optional', false);
 
 shell.cd('../strapi-plugin-users-permissions');
@@ -158,7 +163,7 @@ shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-content-type-builder...', 'npm link --no-optional', false);
 
 
-const pluginsToBuild = ['admin', 'content-manager', 'content-type-builder', 'upload', 'users-permissions', 'settings-manager'];
+const pluginsToBuild = ['admin', 'content-manager', 'content-type-builder', 'upload', 'email', 'users-permissions', 'settings-manager'];
 
 const buildPlugins = async () => {
   const build = (pckgName) => {

@@ -7,6 +7,7 @@
 // Public node modules.
 const _ = require('lodash');
 const uuid = require('uuid/v4');
+const { packageManager } = require('strapi-utils');
 
 /**
  * Expose main package JSON of the application
@@ -15,6 +16,8 @@ const uuid = require('uuid/v4');
 
 module.exports = scope => {
   const cliPkg = scope.strapiPackageJSON || {};
+  // Store the package manager info into the package.json
+  const pkgManager = packageManager.isStrapiInstalledWithNPM() ? 'npm' : 'yarn';
 
   // Let us install additional dependencies on a specific version.
   // Ex: it allows us to install the right version of knex.
@@ -45,13 +48,13 @@ module.exports = scope => {
     },
     'devDependencies': {
       'babel-eslint': '^7.1.1',
-      'eslint': '^3.12.2',
+      'eslint': '^4.19.1',
       'eslint-config-airbnb': '^13.0.0',
-      'eslint-plugin-import': '^2.2.0',
-      'eslint-plugin-react': '^6.8.0'
+      'eslint-plugin-import': '^2.11.0',
+      'eslint-plugin-react': '^7.7.0'
     },
     'dependencies': Object.assign({}, {
-      'lodash': '4.x.x',
+      'lodash': '^4.17.5',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
       [scope.client.connector]: getDependencyVersion(cliPkg, 'strapi'),
     }, additionalsDependencies, {
@@ -68,6 +71,7 @@ module.exports = scope => {
       'url': scope.website || ''
     }],
     'strapi': {
+      'packageManager': pkgManager,
       'uuid': uuid()
     },
     'engines': {

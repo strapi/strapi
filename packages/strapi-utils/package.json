@@ -1,6 +1,6 @@
 {
   "name": "strapi-utils",
-  "version": "3.0.0-alpha.12.2",
+  "version": "3.0.0-alpha.14.4.0",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -21,8 +21,9 @@
     "commander": "^2.11.0",
     "joi-json": "^2.0.1",
     "knex": "^0.13.0",
-    "lodash": "^4.17.4",
-    "pino": "^4.7.1"
+    "lodash": "^4.17.5",
+    "pino": "^4.7.1",
+    "shelljs": "^0.7.7"
   },
   "author": {
     "email": "hi@strapi.io",

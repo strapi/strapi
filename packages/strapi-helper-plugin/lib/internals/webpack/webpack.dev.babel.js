@@ -16,13 +16,7 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const appPath = (() => {
-  if (process.env.APP_PATH) {
-    return process.env.APP_PATH;
-  }
-
-  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
-})();
+const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ?  '' : '..' ));
 
 const rootAdminpath = (() => {
   if (isSetup) {
@@ -46,42 +40,54 @@ if (process.env.npm_lifecycle_event === 'start') {
     plugins.exist = true;
   }
 
-  plugins.src = process.env.IS_ADMIN === 'true' && !plugins.exist ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
-    let hasAdminFolder;
+  plugins.src =
+    process.env.IS_ADMIN === 'true' && !plugins.exist
+      ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
+          let hasAdminFolder;
 
-    // Don't inject the plugins that don't have an admin into the app
-    try {
-      fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
-      hasAdminFolder = true;
-    } catch(err) {
-      hasAdminFolder = false;
-    }
+          // Don't inject the plugins that don't have an admin into the app
+          try {
+            fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+            hasAdminFolder = true;
+          } catch (err) {
+            hasAdminFolder = false;
+          }
 
-    return x[0] !== '.' && hasAdminFolder;
-  }) : [];
+          return x[0] !== '.' && hasAdminFolder;
+        })
+      : [];
 
   plugins.folders = plugins.src.reduce((acc, current) => {
-    acc[current] = path.resolve(appPath, 'plugins', current, 'node_modules', 'strapi-helper-plugin', 'lib', 'src');
+    acc[current] = path.resolve(
+      appPath,
+      'plugins',
+      current,
+      'node_modules',
+      'strapi-helper-plugin',
+      'lib',
+      'src',
+    );
 
     return acc;
   }, {});
 }
 
-
 const port = argv.port || process.env.PORT || 3000;
 
 module.exports = require('./webpack.base.babel')({
   // Add hot reloading in development
-  entry: Object.assign({
-    main: [
-      `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
-      path.join(appPath, 'admin', 'admin', 'src', 'app.js'),
-    ],
-  }, plugins.src.reduce((acc, current) => {
-    acc[current] = path.resolve(plugins.folders[current], 'app.js');
+  entry: Object.assign(
+    {
+      main: [
+        `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
+        path.join(appPath, 'admin', 'admin', 'src', 'appDev.js'),
+      ],
+    },
+    plugins.src.reduce((acc, current) => {
+      acc[current] = path.resolve(plugins.folders[current], 'app.js');
 
-    return acc;
-  }, {})
+      return acc;
+    }, {}),
   ),
 
   // Don't use hashes in dev mode for better performance
@@ -112,10 +118,12 @@ module.exports = require('./webpack.base.babel')({
   // Process the CSS with PostCSS
   postcssPlugins: [
     postcssFocus(), // Add a :focus to every :hover
-    cssnext({ // Allow future CSS features to be used, also auto-prefixes the CSS...
+    cssnext({
+      // Allow future CSS features to be used, also auto-prefixes the CSS...
       browsers: ['last 2 versions', 'IE > 10'], // ...based on this browser list
     }),
-    postcssReporter({ // Posts messages from plugins to the terminal
+    postcssReporter({
+      // Posts messages from plugins to the terminal
       clearMessages: true,
     }),
   ],
@@ -136,30 +144,83 @@ module.exports = require('./webpack.base.babel')({
   ],
   alias: {
     moment: 'moment/moment.js',
-    'babel-polyfill': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'babel-polyfill'),
-    'lodash': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
-    'immutable': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'immutable'),
-    'react-intl': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-intl'),
-    'react': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
-    'react-dom': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-dom'),
-    'react-transition-group': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react-transition-group'),
-    'reactstrap': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'reactstrap'),
-    'styled-components': path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'styled-components')
+    'babel-polyfill': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'babel-polyfill',
+    ),
+    lodash: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+    immutable: path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'immutable',
+    ),
+    'react-intl': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react-intl',
+    ),
+    react: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+    'react-dom': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react-dom',
+    ),
+    'react-transition-group': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react-transition-group',
+    ),
+    reactstrap: path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'reactstrap',
+    ),
+    'styled-components': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'styled-components',
+    ),
+    'react-dnd': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react-dnd',
+    ),
+    'react-dnd-html5-backend': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react-dnd-html5-backend',
+    ),
   },
 
   // Emit a source map for easier debugging
   devtool: 'cheap-module-source-map',
 });
 
-
 /**
  * We dynamically generate the HTML content in development so that the different
  * DLL Javascript files are loaded in script tags and available to our application.
  */
 function templateContent() {
-  const html = fs.readFileSync(
-    path.resolve(appPath, 'admin', 'admin', 'src', 'index.html')
-  ).toString();
+  const html = fs.readFileSync(path.resolve(appPath, 'admin', 'admin', 'src', 'index.html')).toString();
 
   return html;
 }

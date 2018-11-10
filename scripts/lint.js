@@ -2,19 +2,24 @@ const path = require('path');
 const shell = require('shelljs');
 const chalk = require('chalk');
 const eslintErrorsFormatter = require('./eslintErrorsFormatter');
+const listChangedFiles = require('../packages/strapi-lint/lib/internals/shared/listChangedFiles.js');
+const changedFiles = listChangedFiles();
+const { take, template } = require('lodash');
 
-const frontCmd =
-  'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern \'/admin/build/\' --config ../../node_modules/strapi-lint/lib/internals/eslint/front/.eslintrc.json admin';
-const helperCmd =
-  'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern \'/admin/build/\' --config ../../node_modules/strapi-lint/lib/internals/eslint/front/.eslintrc.json lib/src';
-const backCmd =
-  'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern \'/admin\' --config ../../node_modules/strapi-lint/lib/internals/eslint/back/.eslintrc.json controllers config services bin lib';
+const cmdEslint = template(
+  'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern "${ignore}"'
+  + ' --config ../../node_modules/strapi-lint/lib/internals/eslint/${conf}/.eslintrc.json ${params}'
+);
 
+const cmdFront = cmdEslint({ ignore: '/admin/build/', conf: 'front', params: 'admin' });
+const cmdHelper = cmdEslint({ ignore: '/admin/build/', conf: 'front', params: 'lib/src' });
+const cmdBack = cmdEslint({ ignore: '/admin', conf: 'back', params: 'controllers config services bin lib' });
 
-const watcher = (label, pckgName, type = 'front') => {
+const watcher = (label, pckgName) => {
   shell.echo(label);
-  shell.cd(`packages/${pckgName}`);
-  const cmd = pckgName === 'strapi-helper-plugin' ? helperCmd : `${frontCmd} && ${backCmd}`;
+  shell.cd(pckgName);
+  const cmd = pckgName.includes('strapi-helper-plugin') ? cmdHelper : `${cmdFront} && ${cmdBack}`;
+
   const data = shell.exec(cmd, { silent: true });
   shell.echo(chalk(eslintErrorsFormatter(data.stdout)));
   shell.cd('../..');
@@ -25,9 +30,26 @@ const watcher = (label, pckgName, type = 'front') => {
   shell.echo('');
 };
 
-const packagesPath = path.resolve(process.env.PWD, 'packages');
-shell.ls('* -d', packagesPath)
-  .filter(package => package !== 'README.md' && package !== 'strapi-middleware-views' && package !== 'strapi-lint' && package !== 'strapi-plugin-settings-manager')
-  .forEach(package => {
-    watcher(`Testing ${package}`, package);
+const except = [
+  'docs',
+  'jest.config.js',
+  'scripts',
+  'strapi-lint',
+  'strapi-middleware-views',
+  'strapi-plugin-settings-manager',
+  'test',
+];
+
+const changedDirs = [...changedFiles]
+  .filter(file => path.extname(file) === '.js' && !except.some(path => file.includes(path)))
+  .map(file => {
+    const directoryArray = file.split('/');
+    const toTake = directoryArray.length === 2 ? 1 : 2;
+
+    return take(directoryArray, toTake).join('/');
+  });
+
+[...new Set(changedDirs)]
+  .forEach(directory => {
+    watcher(`Testing ${directory}`, directory);
   });

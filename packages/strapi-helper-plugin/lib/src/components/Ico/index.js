@@ -16,15 +16,23 @@ function Ico(props) {
 }
 
 const handleClick = (e, onClick) => {
-  e.preventDefault();
-  e.stopPropagation();
-  onClick(e);
+  if (onClick) {
+    e.preventDefault();
+    e.stopPropagation();
+    onClick(e);
+  }
 };
 
 Ico.propTypes = {
   icoType: PropTypes.string,
-  id: PropTypes.string,
-  onClick: PropTypes.func,
+  id: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+  onClick: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.func,
+  ]),
 };
 
 Ico.defaultProps = {

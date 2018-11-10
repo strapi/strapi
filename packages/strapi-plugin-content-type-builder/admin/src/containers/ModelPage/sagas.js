@@ -5,7 +5,6 @@ import {
   forEach,
   get,
   includes,
-  isEmpty,
   map,
   replace,
   set,
@@ -22,9 +21,8 @@ import { temporaryContentTypePosted } from 'containers/App/actions';
 
 import { storeData } from '../../utils/storeData';
 
-import { CHECK_IF_TABLE_EXISTS, MODEL_FETCH, SUBMIT } from './constants';
+import { MODEL_FETCH, SUBMIT } from './constants';
 import {
-  checkIfTableExistsSucceeded,
   modelFetchSucceeded,
   postContentTypeSucceeded,
   resetShowButtonsProps,
@@ -33,21 +31,6 @@ import {
   submitActionSucceeded,
 } from './actions';
 import { makeSelectModel } from './selectors';
-
-export function* getTableExistance() {
-  try {
-    // TODO check table existance for plugin model
-    const model = yield select(makeSelectModel());
-    const modelName = !isEmpty(model.collectionName) ? model.collectionName : model.name;
-    const requestUrl = `/content-type-builder/checkTableExists/${model.connection}/${modelName}`;
-    const tableExists = yield call(request, requestUrl, { method: 'GET' });
-
-    yield put(checkIfTableExistsSucceeded(tableExists));
-
-  } catch(error) {
-    strapi.notification.error('notification.error');
-  }
-}
 
 export function* fetchModel(action) {
   try {
@@ -74,7 +57,6 @@ export function* submitChanges(action) {
   try {
     // Show button loader
     yield put(setButtonLoader());
-
     const modelName = get(storeData.getContentType(), 'name');
     const data = yield select(makeSelectModel());
     const body = cloneDeep(data);
@@ -96,11 +78,16 @@ export function* submitChanges(action) {
           unset(body.attributes[index].params, key);
         }
 
-        if (key === 'pluginValue' && value) {
-          set(body.attributes[index].params, 'plugin', true);
+        if (key === 'pluginValue') {
+          if (value && value !== ' ')  {
+            set(body.attributes[index].params, 'plugin', true);
+          } else {
+            unset(body.attributes[index].params, 'plugin');
+            unset(body.attributes[index].params, 'pluginValue');
+          }
         }
 
-        if (!value && key !== 'multiple') {
+        if (!value && key !== 'multiple' && key !== 'default') {
           const paramsKey = includes(key, 'Value') ? replace(key,'Value', '') : key;
           unset(body.attributes[index].params, paramsKey);
         }
@@ -116,7 +103,6 @@ export function* submitChanges(action) {
     const baseUrl = '/content-type-builder/models/';
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
     const opts = { method, body };
-
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
@@ -153,13 +139,11 @@ export function* submitChanges(action) {
 }
 
 function* defaultSaga() {
-  const loadExistanceTableWatcher = yield fork(takeLatest, CHECK_IF_TABLE_EXISTS, getTableExistance);
   const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
   const loadSubmitChanges = yield fork(takeLatest, SUBMIT, submitChanges);
 
   yield take(LOCATION_CHANGE);
 
-  yield cancel(loadExistanceTableWatcher);
   yield cancel(loadModelWatcher);
   yield cancel(loadSubmitChanges);
 }

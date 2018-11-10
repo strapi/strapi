@@ -8,7 +8,10 @@ import { fromJS, List, Map } from 'immutable';
 import { GET_ARTICLES_SUCCEEDED, ON_CHANGE, SUBMIT_SUCCEEDED } from './constants';
 
 const initialState = fromJS({
-  articles: List([]),
+  articles: List([
+    {content: '', title: '', link: ''},
+    {content: '', title: '', link: ''},
+  ]),
   body: Map({
     email: '',
   }),

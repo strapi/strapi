@@ -25,6 +25,11 @@ module.exports = strapi => {
           // App logic.
           await next();
         } catch (error) {
+          // emit error if configured
+          if (_.get(strapi, 'config.currentEnvironment.server.emitErrors', false)) {
+            strapi.app.emit('error', error, ctx);
+          }
+
           // Log error.
           console.error(error);
 
@@ -40,7 +45,7 @@ module.exports = strapi => {
         }
 
         // Empty body is considered as `notFound` response.
-        if (!ctx.body) {
+        if (!ctx.body && ctx.body !== 0) {
           ctx.notFound();
         }
 

@@ -7,35 +7,56 @@
  */
 
 const _ = require('lodash');
-const sendmail = require('sendmail')({
-  silent: true
-});
+
+const createDefaultEnvConfig = async (env) => {
+  const pluginStore = strapi.store({
+    environment: env,
+    type: 'plugin',
+    name: 'email'
+  });
+
+  const provider = _.find(strapi.plugins.email.config.providers, {provider: 'sendmail'});
+  const value = _.assign({}, provider, {});
+
+  await pluginStore.set({key: 'provider', value});
+  return await strapi.store({
+    environment: env,
+    type: 'plugin',
+    name: 'email'
+  }).get({key: 'provider'});
+};
+
+const getProviderConfig = async (env) => {
+  let config = await strapi.store({
+    environment: env,
+    type: 'plugin',
+    name: 'email'
+  }).get({key: 'provider'});
+
+  if(!config) {
+    config = await createDefaultEnvConfig(env);
+  }
+
+  return config;
+};
 
 module.exports = {
-  send: (options, cb) => { // eslint-disable-line no-unused-vars
-    return new Promise((resolve, reject) => {
-      // Default values.
-      options = _.isObject(options) ? options : {};
-      options.from = options.from || '"Administration Panel" <no-reply@strapi.io>';
-      options.replyTo = options.replyTo || '"Administration Panel" <no-reply@strapi.io>';
-      options.text = options.text || options.html;
-      options.html = options.html || options.text;
+  getProviderConfig,
+  send: async (options, config, cb) => {
+    // Get email provider settings to configure the provider to use.
+    if(!config) {
+      config = await getProviderConfig(strapi.config.environment);
+    }
 
-      // Send the email.
-      sendmail({
-        from: options.from,
-        to: options.to,
-        replyTo: options.replyTo,
-        subject: options.subject,
-        text: options.text,
-        html: options.html
-      }, function (err) {
-        if (err) {
-          reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
-        } else {
-          resolve();
-        }
-      });
-    });
+    const provider = _.find(strapi.plugins.email.config.providers, { provider: config.provider });
+
+    if (!provider) {
+      throw new Error(`The provider package isn't installed. Please run \`npm install strapi-email-${config.provider}\``);
+    }
+
+    const actions = provider.init(config);
+
+    // Execute email function of the provider for all files.
+    return actions.send(options, cb);
   }
 };

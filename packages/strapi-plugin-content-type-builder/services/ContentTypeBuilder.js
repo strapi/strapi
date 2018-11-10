@@ -4,30 +4,119 @@ const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 const generator = require('strapi-generate');
+const { fromJS, List, Map } = require('immutable');
+const Manager = require('../utils/Manager.js');
+const {
+  createManager,
+  removeColsLine,
+  reorderList,
+} = require('../utils/helpers.js');
 
 module.exports = {
-  appearance: (attributes, model, source) => {
-    const layoutPath = path.join(strapi.config.appPath, 'plugins', source, 'config', 'layout.json');
-    let layout;
+  appearance: async (attributes, model, plugin) => {
+    const pluginStore = strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'content-manager'
+    });
 
-    try {
-      // NOTE: do we really need to parse the JSON?
-      // layout = JSON.parse(layoutPath, 'utf8');
-      layout = require(layoutPath);
-    } catch (err) {
-      layout = {};
+    const schema = await pluginStore.get({ key: 'schema' });
+    const layout = _.get(schema.layout, model, {});
+
+    // If updating a content-type
+    if (!_.isEmpty(layout)) {
+      const state = fromJS({
+        schema: fromJS(schema),
+      });
+      const schemaPath = plugin ? ['models', 'plugins', plugin, model] : ['models', model];
+      const keys = plugin ? `plugins.${plugin}.${model}.editDisplay` : `${model}.editDisplay`;
+      const prevList = state.getIn(['schema', ...schemaPath, 'editDisplay', 'fields'], List());
+      const prevFields =  Object.keys(state.getIn(['schema', ...schemaPath, 'editDisplay', 'availableFields'], Map()).toJS());
+      const currentFields = Object.keys(attributes);
+      const fieldsToRemove = _.difference(prevFields, currentFields);
+      let newList = prevList;
+
+      fieldsToRemove.forEach((field) => {
+        const index = newList.indexOf(field);
+        const manager = new Manager(state, prevList, keys, index, fromJS(layout.attributes || {}));
+        const attrToRemoveInfos = manager.attrToRemoveInfos; // Retrieve the removed item infos
+        const arrayOfLastLineElements = manager.arrayOfEndLineElements;
+        const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
+
+        if (isRemovingAFullWidthNode) {
+          const currentNodeLine = _.findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]); // Used only to know if removing a full size element on the first line
+          if (currentNodeLine === 0) {
+            newList = newList
+              .delete(index);
+          } else {
+            const previousNodeLine = currentNodeLine - 1;
+            const firstElementOnLine = previousNodeLine === 0 ? 0 : arrayOfLastLineElements[previousNodeLine - 1].index + 1;
+            const lastElementOnLine = arrayOfLastLineElements[previousNodeLine].index + 1;
+            const previousLineRangeIndexes = firstElementOnLine === lastElementOnLine ? [firstElementOnLine] : _.range(firstElementOnLine, lastElementOnLine);
+            const elementsOnLine = manager.getElementsOnALine(previousLineRangeIndexes);
+            const previousLineColNumber = manager.getLineSize(elementsOnLine);
+
+            if (previousLineColNumber >= 10) {
+              newList = newList
+                .delete(index);
+            } else {
+              const colNumberToAdd = 12 - previousLineColNumber;
+              const colsToAdd = manager.getColsToAdd(colNumberToAdd);
+              newList = newList
+                .delete(index)
+                .insert(index, colsToAdd[0]);
+
+              if (colsToAdd.length > 1) {
+                newList = newList
+                  .insert(index, colsToAdd[1]);
+              }
+            }
+          }
+        } else {
+          const nodeBounds = { left: manager.getBound(false), right: manager.getBound(true) }; // Retrieve the removed element's bounds
+          const leftBoundIndex = _.get(nodeBounds, ['left', 'index'], 0) + 1;
+          const rightBoundIndex = _.get(nodeBounds, ['right', 'index'], prevList.size -1);
+          const elementsOnLine = manager.getElementsOnALine(_.range(leftBoundIndex - 1, rightBoundIndex + 1));
+          const currentLineColSize = manager.getLineSize(elementsOnLine);
+          const isRemovingLine = currentLineColSize - attrToRemoveInfos.bootstrapCol === 0;
+
+          if (isRemovingLine) {
+            newList = newList
+              .delete(attrToRemoveInfos.index);
+          } else {
+            const random = Math.random().toString(36).substring(7);
+            newList = newList
+              .delete(attrToRemoveInfos.index)
+              .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__${random}`);
+          }
+        }
+
+        const newManager = createManager(state, newList, keys, 0, fromJS(layout.attributes));
+        newList = removeColsLine(newManager, newList);
+        const lastManager = createManager(state, newList, keys, 0, fromJS(layout.attributes));
+        newList = reorderList(lastManager, lastManager.getLayout());
+      });
+
+      // Delete them from the available fields
+      fieldsToRemove.forEach(field => {
+        _.unset(schema, [...schemaPath, 'editDisplay', 'availableFields', field]);
+      });
+
+      _.set(schema, [...schemaPath, 'editDisplay', 'fields'], newList.toJS());
     }
 
     Object.keys(attributes).map(attribute => {
       const appearances = _.get(attributes, [attribute, 'appearance'], {});
       Object.keys(appearances).map(appearance => {
-        _.set(layout, [model, 'attributes', attribute, 'appearance'], appearances[appearance] ? appearance : '' );
+        _.set(layout, ['attributes', attribute, 'appearance'], appearances[appearance] ? appearance : '' );
       });
 
       _.unset(attributes, [attribute, 'appearance']);
     });
 
-    fs.writeFileSync(layoutPath, JSON.stringify(layout, null, 2), 'utf8');
+    schema.layout[model] = layout;
+
+    await pluginStore.set({ key: 'schema', value: schema });
   },
 
   getModels: () => {
@@ -67,10 +156,18 @@ module.exports = {
     return models.concat(pluginModels);
   },
 
-  getModel: (name, source) => {
+  getModel: async (name, source) => {
     name = _.toLower(name);
 
     const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
+
+    const pluginStore = strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'content-manager'
+    });
+
+    const schema = await pluginStore.get({ key: 'schema' });
 
     const attributes = [];
     _.forEach(model.attributes, (params, attr) => {
@@ -80,7 +177,8 @@ module.exports = {
         if (params.plugin === 'upload' && relation.model || relation.collection === 'file') {
           params = {
             type: 'media',
-            multiple: params.collection ? true : false
+            multiple: params.collection ? true : false,
+            required: params.required
           };
         } else {
           params = _.omit(params, ['collection', 'model', 'via']);
@@ -91,7 +189,7 @@ module.exports = {
         }
       }
 
-      const appearance = _.get(strapi.plugins, [source || 'content-manager', 'config', 'layout', name, 'attributes', attr, 'appearance']);
+      const appearance = _.get(schema, ['layout', name, 'attributes', attr, 'appearance']);
       if (appearance) {
         _.set(params, ['appearance', appearance], true);
       }
@@ -105,6 +203,7 @@ module.exports = {
     return {
       name: _.get(model, 'info.name', 'model.name.missing'),
       description: _.get(model, 'info.description', 'model.description.missing'),
+      mainField: _.get(model, 'info.mainField', ''),
       connection: model.connection,
       collectionName: model.collectionName,
       attributes: attributes
@@ -116,7 +215,7 @@ module.exports = {
   },
 
   generateAPI: (name, description, connection, collectionName, attributes) => {
-    const template = _.get(strapi.config.currentEnvironment, `database.connections.${connection}.connector`, 'strapi-mongoose').split('-')[1];
+    const template = _.get(strapi.config.currentEnvironment, `database.connections.${connection}.connector`, 'strapi-hook-mongoose').split('-')[2];
 
     return new Promise((resolve, reject) => {
       const scope = {
@@ -189,7 +288,8 @@ module.exports = {
           attrs[attribute.name] = {
             [attribute.params.multiple ? 'collection' : 'model']: 'file',
             via,
-            plugin: 'upload'
+            plugin: 'upload',
+            required: attribute.params.required === true ? true : false
           };
         }
       } else if (_.has(attribute, 'params.target')) {
@@ -240,7 +340,7 @@ module.exports = {
     return [attributesNotConfigurable, errors];
   },
 
-  clearRelations: (model, source) => {
+  clearRelations: (model, source, force) => {
     const errors = [];
     const structure = {
       models: strapi.models,
@@ -258,10 +358,10 @@ module.exports = {
       Object.keys(models).forEach(name => {
         const relationsToDelete = _.get(plugin ? strapi.plugins[plugin].models[name] : strapi.models[name], 'associations', []).filter(association => {
           if (source) {
-            return association[association.type] === model && association.plugin === source;
+            return association[association.type] === model && association.plugin === source && (association.nature !== 'oneWay' || force);
           }
 
-          return association[association.type] === model;
+          return association[association.type] === model && (association.nature !== 'oneWay' || force);
         });
 
         if (!_.isEmpty(relationsToDelete)) {

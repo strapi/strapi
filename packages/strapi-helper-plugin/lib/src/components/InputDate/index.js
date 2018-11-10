@@ -18,9 +18,10 @@ import styles from './styles.scss';
 /* eslint-disable react/jsx-boolean-value */
 function InputDate(props) {
   const value = isObject(props.value) && props.value._isAMomentObject === true ? props.value : moment(props.value);
+  const formattedPlaceholder = props.placeholder === '' ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
 
   return (
-    <FormattedMessage id={props.placeholder} defaultMessage={props.placeholder}>
+    <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
       {(placeholder) => (
         <DateTime
           dateFormat='YYYY-MM-DD'
@@ -47,6 +48,7 @@ function InputDate(props) {
             value: moment,
           }})}
           onFocus={props.onFocus}
+          ref={props.inputRef}
           tabIndex={props.tabIndex}
           timeFormat='HH:mm:ss'
           utc={true}
@@ -59,11 +61,12 @@ function InputDate(props) {
 }
 
 InputDate.defaultProps = {
-  autoFocus: true,
+  autoFocus: false,
   className: '',
   deactivateErrorHighlight: false,
   disabled: false,
   error: false,
+  inputRef: () => {},
   onBlur: () => {},
   onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
@@ -77,6 +80,7 @@ InputDate.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  inputRef: PropTypes.func,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,

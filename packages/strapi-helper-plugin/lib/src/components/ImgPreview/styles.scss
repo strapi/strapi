@@ -20,7 +20,7 @@
   background-repeat: no-repeat !important;
   white-space: nowrap;
 
-  z-index: 1;
+  z-index: 1 !important;
   > img {
     position: absolute;
     top: 0;
@@ -49,7 +49,7 @@
   display: block;
   position: absolute;
   top: 37px;
-  z-index: 9999;
+  z-index: 999;
   padding: 12px 40px 0 40px;
   line-height: 18px;
   color: #fff !important;

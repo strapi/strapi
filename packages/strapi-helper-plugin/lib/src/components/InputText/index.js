@@ -28,6 +28,7 @@ function InputText(props) {
           onChange={props.onChange}
           onFocus={props.onFocus}
           placeholder={message}
+          ref={props.inputRef}
           style={props.style}
           tabIndex={props.tabIndex}
           type="text"
@@ -44,6 +45,7 @@ InputText.defaultProps = {
   deactivateErrorHighlight: false,
   disabled: false,
   error: false,
+  inputRef: () => {},
   onBlur: () => {},
   onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
@@ -57,6 +59,7 @@ InputText.propTypes = {
   deactivateErrorHighlight: PropTypes.bool,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
+  inputRef: PropTypes.func,
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,

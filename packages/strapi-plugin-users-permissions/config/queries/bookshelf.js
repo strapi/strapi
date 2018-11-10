@@ -20,8 +20,15 @@ module.exports = {
       if (params.limit) {
         qb.limit(params.limit);
       }
+
+      if (params.sort) {
+        if (params.sort.key) {
+          qb.orderBy(params.sort.key, params.sort.order);
+        } else {
+          qb.orderBy(params.sort);
+        }
+      }
     })
-      .orderBy(params.sort)
       .fetchAll({
         withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
       });
@@ -32,7 +39,18 @@ module.exports = {
 
   count: async function (params = {}) {
     return await this
-      .where(params)
+      .forge() // Instanciate the model
+      .query(qb => {
+        _.forEach(params.where, (where, key) => {
+          if (_.isArray(where.value)) {
+            for (const value in where.value) {
+              qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
+            }
+          } else {
+            qb.where(key, where.symbol, where.value);
+          }
+        });
+      })
       .count();
   },
 

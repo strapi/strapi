@@ -1,22 +1,22 @@
-<!--
-⚠️ If you do not respect these two points, your issue will be closed.
-- Don't forget the checkbox at the end of your issue.
-- Respect this template.
--->
+<!-- ⚠️ If you do not respect this template your issue will be closed. -->
 
-*BUG TEMPLATE* <!-- Delete this header from your issue. -->
+<!-- =============================================================================== -->
+<!-- ⚠️ If you are not using the current Strapi release, you will be asked to update. -->
+<!-- Please see the wiki for guides on upgrading to the latest release. -->
+<!-- =============================================================================== -->
 
-<!-- ⚠️ Before writing your issue make sure you are using :-->
-<!-- Node 9.x.x -->
-<!-- npm 5.x.x -->
-<!-- The latest version of Strapi. -->
+<!-- ⚠️ Make sure to browse the opened and closed issues before submitting your issue. -->
+
+<!-- ⚠️ Before writing your issue make sure you are using:-->
+<!-- Node 10.x.x -->
+<!-- npm 6.x.x -->
 
 **Informations**
-- **Node.js version**:
-- **npm version**:
-- **Strapi version**:
-- **Database**:
-- **Operating system**:
+- **Node.js version**: 
+- **npm version**: 
+- **Strapi version**: <!-- Please make sure you are on the latest version -->
+- **Database**: 
+- **Operating system**: 
 
 
 **What is the current behavior?**
@@ -32,24 +32,3 @@
 
 
 **Suggested solutions**
-
-
-
----
-
-*FEATURE REQUEST TEMPLATE*  <!-- Delete this header from your issue. -->
-
-**What is the expected behavior?**
-
-
-
----
-
-<!-- ⚠️ Make sure to browse the opened and closed issues. -->
-
-- [ ] I'm sure that this feature hasn't already been referenced
-
-<!--
- ⬆️ Don't delete this checkbox from your issue and approve it.
-Add an `x` ->  [x] or click on the checkbox when your issue is created.
- -->

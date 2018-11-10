@@ -26,7 +26,10 @@
   height: 3rem;
   position: relative;
   border-radius: 0.3rem;
+  white-space: nowrap;
   margin-right: 1.8rem;
+  line-height: 26px;
+  font-size: 13px;
   cursor: pointer;
   font-family: Lato;
   -webkit-font-smoothing: antialiased;
@@ -58,7 +61,8 @@
 
 .primary {
   font-weight: 500;
-  min-width: 15rem;
+  min-width: 14rem;
+  border: 1px solid;
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   -webkit-font-smoothing: antialiased;
   color: white;
@@ -69,7 +73,7 @@
 
 .primaryAddShape {
   font-weight: 500;
-  min-width: 15rem;
+  min-width: 14rem;
   background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
   -webkit-font-smoothing: antialiased;
   color: white;
@@ -88,16 +92,38 @@
 }
 
 .secondary {
-  // height: 32px !important;
   min-width: 10rem;
-  color: #F64D0A;
-  border: 0.1rem solid #F64D0A;
+  color: #919BAE;
+  border: 0.1rem solid #E3E9F3;
   position: relative;
   border-radius: 3px;
   overflow: hidden;
   &:active {
-   border: 0.15rem solid #F64D0A;
- }
+    border: 0.1rem solid #B6BDCA;
+  }
+}
+
+.delete {
+  position: relative;
+  padding: 0 15px;
+  background: rgba(255,0,0, 0.15);
+  color: #F23508;
+  border: 0.1rem solid rgba(255,0,0, 0.20);
+  border-radius: 3px;
+  overflow: hidden;
+  &:active {
+    border: 0.1rem solid rgba(255,0,0, 0.30);
+  }
+  &:before {
+    content: '';
+    display: inline-block;
+    width: 11px;
+    height: 12px;
+    margin-right: 8px;
+    margin-top: -3px;
+    background-image: url('../../assets/icons/icon_trash.svg');
+    vertical-align: middle;
+  }
 }
 
 .secondaryHotline {

@@ -16,24 +16,18 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
 import { get, includes, isFunction, map, omit } from 'lodash';
-import { compose } from 'redux';
-
+import { bindActionCreators, compose } from 'redux';
 // Actions required for disabling and enabling the OverlayBlocker
-import {
-  disableGlobalOverlayBlocker,
-  enableGlobalOverlayBlocker,
-} from 'actions/overlayBlocker';
-
+import { disableGlobalOverlayBlocker, enableGlobalOverlayBlocker } from 'actions/overlayBlocker';
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 import {
+  makeSelectAppPlugins,
   makeSelectBlockApp,
+  makeSelectIsAppLoading,
   makeSelectShowGlobalAppBlocker,
   selectHasUserPlugin,
   selectPlugins,
 } from 'containers/App/selectors';
-
-import { hideNotification } from 'containers/NotificationProvider/actions';
-
 // Design
 import ComingSoonPage from 'containers/ComingSoonPage';
 import Content from 'containers/Content';
@@ -44,59 +38,59 @@ import HomePage from 'containers/HomePage/Loadable';
 import InstallPluginPage from 'containers/InstallPluginPage/Loadable';
 import LeftMenu from 'containers/LeftMenu';
 import ListPluginsPage from 'containers/ListPluginsPage/Loadable';
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import Logout from 'components/Logout';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import OverlayBlocker from 'components/OverlayBlocker';
-import PluginPage from 'containers/PluginPage/Loadable';
-
+import PluginPage from 'containers/PluginPage';
 // Utils
 import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
-
-import { getGaStatus, getLayout } from './actions';
+import { getAdminData } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import selectAdminPage from './selectors';
-
 import styles from './styles.scss';
 
 const PLUGINS_TO_BLOCK_PRODUCTION = ['content-type-builder', 'settings-manager'];
 
-export class AdminPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class AdminPage extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { hasAlreadyRegistereOtherPlugins: false };
 
-  getChildContext = () => (
-    {
-      disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
-      enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
-      plugins: this.props.plugins,
-      updatePlugin: this.props.updatePlugin,
-    }
-  );
+  getChildContext = () => ({
+    disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
+    enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
+    plugins: this.props.plugins,
+    updatePlugin: this.props.updatePlugin,
+  });
 
   componentDidMount() {
+    this.props.getAdminData();
     this.checkLogin(this.props);
-    this.props.getGaStatus();
-    this.props.getLayout();
     ReactGA.initialize('UA-54313258-9');
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.location.pathname !== this.props.location.pathname) {
-      this.checkLogin(nextProps);
+  componentDidUpdate(prevProps) {
+    const { adminPage: { allowGa }, location: { pathname }, plugins } = this.props;
 
-      if (nextProps.adminPage.allowGa) {
-        ReactGA.pageview(nextProps.location.pathname);
+    if (prevProps.location.pathname !== pathname) {
+      this.checkLogin(this.props);
+
+      if (allowGa) {
+        ReactGA.pageview(pathname);
       }
     }
 
-    if (get(nextProps.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== get(this.props.plugins.toJS(), ['users-permissions', 'hasAdminUser'])) {
-      this.checkLogin(nextProps, true);
+    const hasAdminPath = ['users-permissions', 'hasAdminUser'];
+
+    if (get(prevProps.plugins.toJS(), hasAdminPath) !== get(plugins.toJS(), hasAdminPath)) {
+      this.checkLogin(this.props, true);
     }
 
-    if (!this.hasUserPluginLoaded(this.props) && this.hasUserPluginLoaded(nextProps)) {
-      this.checkLogin(nextProps);
+    if (!this.hasUserPluginLoaded(prevProps) && this.hasUserPluginLoaded(this.props)) {
+      this.checkLogin(this.props);
     }
   }
 
@@ -106,23 +100,34 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
         return;
       }
 
-      const endPoint = this.hasAdminUser(props) ? 'login': 'register';
+      const endPoint = this.hasAdminUser(props) ? 'login' : 'register';
       this.props.history.push(`/plugins/users-permissions/auth/${endPoint}`);
     }
 
-    if (!this.isUrlProtected(props) && includes(props.location.pathname, 'auth/register') && this.hasAdminUser(props) && !skipAction) {
+    if (
+      !this.isUrlProtected(props) &&
+      includes(props.location.pathname, 'auth/register') &&
+      this.hasAdminUser(props) &&
+      !skipAction
+    ) {
       this.props.history.push('/plugins/users-permissions/auth/login');
     }
 
-    if (props.hasUserPlugin && !this.isUrlProtected(props) && !includes(props.location.pathname, 'auth/register') && !this.hasAdminUser(props)) {
+    if (
+      props.hasUserPlugin &&
+      !this.isUrlProtected(props) &&
+      !includes(props.location.pathname, 'auth/register') &&
+      !this.hasAdminUser(props)
+    ) {
       this.props.history.push('/plugins/users-permissions/auth/register');
     }
 
-    if (!props.hasUserPlugin || auth.getToken() && !this.state.hasAlreadyRegistereOtherPlugins) {
+    if (!props.hasUserPlugin || (auth.getToken() && !this.state.hasAlreadyRegistereOtherPlugins)) {
       map(omit(this.props.plugins.toJS(), ['users-permissions', 'email']), plugin => {
         switch (true) {
           case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements):
-            plugin.pluginRequirements(plugin)
+            plugin
+              .pluginRequirements(plugin)
               .then(plugin => {
                 return plugin.bootstrap(plugin);
               })
@@ -140,36 +145,56 @@ export class AdminPage extends React.Component { // eslint-disable-line react/pr
 
       this.setState({ hasAlreadyRegistereOtherPlugins: true });
     }
+  };
+
+  hasUserPluginInstalled = () => {
+    const { appPlugins } = this.props;
+
+    return appPlugins.indexOf('users-permissions') !== -1;
   }
 
-  hasUserPluginLoaded = (props) => typeof get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== 'undefined';
+  hasUserPluginLoaded = props =>
+    typeof get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']) !== 'undefined';
 
-  hasAdminUser = (props) => get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
+  hasAdminUser = props => get(props.plugins.toJS(), ['users-permissions', 'hasAdminUser']);
 
-  isUrlProtected = (props) => !includes(props.location.pathname, get(props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
+  isUrlProtected = props =>
+    !includes(props.location.pathname, get(props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']));
 
   shouldDisplayLogout = () => auth.getToken() && this.props.hasUserPlugin && this.isUrlProtected(this.props);
 
   showLeftMenu = () => !includes(this.props.location.pathname, 'users-permissions/auth/');
 
+  showLoading = () => {
+    const { isAppLoading, adminPage: { isLoading } } = this.props;
+
+    return isAppLoading || isLoading || (this.hasUserPluginInstalled() && !this.hasUserPluginLoaded(this.props));
+  }
+
   retrievePlugins = () => {
-    const { adminPage: { currentEnvironment }, plugins } = this.props;
+    const {
+      adminPage: { currentEnvironment },
+      plugins,
+    } = this.props;
 
     if (currentEnvironment === 'production') {
       let pluginsToDisplay = plugins;
-      PLUGINS_TO_BLOCK_PRODUCTION.map(plugin =>
-        pluginsToDisplay = pluginsToDisplay.delete(plugin));
+      PLUGINS_TO_BLOCK_PRODUCTION.map(plugin => (pluginsToDisplay = pluginsToDisplay.delete(plugin)));
 
       return pluginsToDisplay;
     }
 
     return plugins;
-  }
+  };
 
   render() {
     const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
+
+    if (this.showLoading()) {
+      return <LoadingIndicatorPage />;
+    }
 
     return (
       <div className={styles.adminPage}>
@@ -218,18 +243,20 @@ AdminPage.contextTypes = {
 
 AdminPage.defaultProps = {
   adminPage: {},
+  appPlugins: [],
   hasUserPlugin: true,
+  isAppLoading: true,
 };
 
 AdminPage.propTypes = {
   adminPage: PropTypes.object,
+  appPlugins: PropTypes.array,
   blockApp: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
-  getGaStatus: PropTypes.func.isRequired,
-  getLayout: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
   history: PropTypes.object.isRequired,
+  isAppLoading: PropTypes.bool,
   location: PropTypes.object.isRequired,
   pluginLoaded: PropTypes.func.isRequired,
   plugins: PropTypes.object.isRequired,
@@ -239,33 +266,30 @@ AdminPage.propTypes = {
 
 const mapStateToProps = createStructuredSelector({
   adminPage: selectAdminPage(),
+  appPlugins: makeSelectAppPlugins(),
   blockApp: makeSelectBlockApp(),
   hasUserPlugin: selectHasUserPlugin(),
+  isAppLoading: makeSelectIsAppLoading(),
   plugins: selectPlugins(),
   showGlobalAppBlocker: makeSelectShowGlobalAppBlocker(),
 });
 
 function mapDispatchToProps(dispatch) {
-  return {
-    disableGlobalOverlayBlocker: () => { dispatch(disableGlobalOverlayBlocker()); },
-    enableGlobalOverlayBlocker: () => { dispatch(enableGlobalOverlayBlocker()); },
-    getGaStatus: () => { dispatch(getGaStatus()); },
-    getLayout: () => { dispatch(getLayout()); },
-    onHideNotification: (id) => { dispatch(hideNotification(id)); },
-    pluginLoaded: (plugin) => { dispatch(pluginLoaded(plugin)); },
-    updatePlugin: (pluginId, updatedKey, updatedValue) => { dispatch(updatePlugin(pluginId, updatedKey, updatedValue)); },
+  return bindActionCreators(
+    {
+      disableGlobalOverlayBlocker,
+      enableGlobalOverlayBlocker,
+      getAdminData,
+      pluginLoaded,
+      updatePlugin,
+    },
     dispatch,
-  };
+  );
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withReducer = injectReducer({ key: 'adminPage', reducer });
 const withSaga = injectSaga({ key: 'adminPage', saga });
 
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect,
-)(AdminPage);
+export default compose(withReducer, withSaga, withConnect)(AdminPage);
 
-// export default connect(mapStateToProps, mapDispatchToProps)(AdminPage);

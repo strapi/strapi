@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.0.0-alpha.12.2",
+  "version": "3.0.0-alpha.14.4.0",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Email",
@@ -16,15 +16,17 @@
     "build": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=production node node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
     "build:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf admin/build",
     "start": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node ./node_modules/strapi-helper-plugin/lib/server",
-    "generate": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/plop --plopfile ./node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
+    "generate": "node ./node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo \"Error: no test specified\""
+    "test": "echo \"Error: no test specified\"",
+    "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
-    "sendmail": "^1.2.0"
+    "strapi-email-sendmail": "3.0.0-alpha.14.4.0"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.12.2"
+    "react-copy-to-clipboard": "5.0.1",
+    "strapi-helper-plugin": "3.0.0-alpha.14.4.0"
   },
   "author": {
     "name": "Strapi team",
