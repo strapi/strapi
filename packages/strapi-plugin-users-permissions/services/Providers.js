@@ -170,7 +170,7 @@ const getProfile = async (provider, query, callback) => {
           callback(err);
         } else {
           callback(null, {
-            username: body.displayName || body.emails[0].value,
+            username: body.emails[0].value.split("@")[0],
             email: body.emails[0].value
           });
         }
