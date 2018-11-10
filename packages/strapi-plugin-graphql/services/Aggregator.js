@@ -78,6 +78,22 @@ module.exports = {
   },
 
   /**
+   * Returns a list of fields that have type included in fieldTypes.
+   */
+  getFieldsByTypes: (fields, typeCheck, returnType) => {
+    return _.reduce(
+      fields,
+      (acc, fieldType, fieldName) => {
+        if (typeCheck(fieldType)) {
+          acc[fieldName] = returnType(fieldType, fieldName);
+        }
+        return acc;
+      },
+      {},
+    );
+  },  
+
+  /**
    * Use the field resolver otherwise fall through the field value
    *
    * @returns {function}
