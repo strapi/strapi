@@ -398,25 +398,23 @@ module.exports = {
               queryOpts.skip = convertedParams.start;
 
               switch (association.nature) {
-                case 'manyToMany':
-                  if (association.dominant) {
-                    const arrayOfIds = (obj[association.alias] || []).map(
-                      related => {
-                        return related[ref.primaryKey] || related;
-                      },
-                    );
+                case 'manyToMany': {
+                  const arrayOfIds = (obj[association.alias] || []).map(
+                    related => {
+                      return related[ref.primaryKey] || related;
+                    },
+                  );
 
-                    // Where.
-                    queryOpts.query = strapi.utils.models.convertParams(name, {
-                      // Construct the "where" query to only retrieve entries which are
-                      // related to this entry.
-                      [ref.primaryKey]: arrayOfIds,
-                      ...where.where,
-                    }).where;
-                    break;
-                  // falls through
-                  }
+                  // Where.
+                  queryOpts.query = strapi.utils.models.convertParams(name, {
+                    // Construct the "where" query to only retrieve entries which are
+                    // related to this entry.
+                    [ref.primaryKey]: arrayOfIds,
+                    ...where.where,
+                  }).where;
                   break;
+                  // falls through
+                }
                 default:
                   // Where.
                   queryOpts.query = strapi.utils.models.convertParams(name, {
@@ -426,6 +424,14 @@ module.exports = {
                     ...where.where,
                   }).where;
               }
+            }
+
+            if (queryOpts.hasOwnProperty('query') &&
+              queryOpts.query.hasOwnProperty('id') &&
+              queryOpts.query.id.hasOwnProperty('value') &&
+              Array.isArray(queryOpts.query.id.value)
+            ){
+              queryOpts.query.id.symbol = 'IN';
             }
 
             const value = await (association.model
