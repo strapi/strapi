@@ -12,6 +12,7 @@ const graphql = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const GraphQLDateTime = require('graphql-type-datetime');
 const pluralize = require('pluralize');
+/* eslint-disable no-unused-vars */
 
 module.exports = {
   /**
@@ -212,7 +213,7 @@ module.exports = {
 
     const inputName = `${_.capitalize(name)}Input`;
     const payloadName = `${_.capitalize(name)}Payload`;
-
+    /* eslint-disable indent */
     switch (type) {
       case 'create':
         return `
@@ -238,5 +239,6 @@ module.exports = {
       default:
       // Nothing
     }
+    /* eslint-enable indent */
   },
 };
