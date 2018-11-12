@@ -25,6 +25,7 @@
   "app.components.ComingSoonPage.featuresNotAvailable": "Questa funzionalità è ancora sotto sviluppo attivo.",
   "app.components.DownloadInfo.download": "Download in corso...",
   "app.components.DownloadInfo.text": "Potrebbe volerci un minuto. Grazie della pazienza.",
+  "app.components.EmptyAttributes.title": "Campi non ancora presenti.",
   "app.components.HomePage.button.blog": "LEGGI DI PIÙ SUL BLOG",
   "app.components.HomePage.button.quickStart": "INIZIA IL TUTORIAL QUICK START",
   "app.components.HomePage.community": "Trova la community sul web",

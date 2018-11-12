@@ -18,7 +18,7 @@ const { packageManager } = require('strapi-utils'); // eslint-disable-line impor
 
 module.exports =  (scope, cb) => {
   // Copy the admin files.
-  fs.copySync(path.resolve(__dirname, '..', 'files'), path.resolve(scope.rootPath, 'admin'));
+  fs.copySync(path.resolve(__dirname, '..', 'templates', 'gitignore'), path.join(scope.rootPath, 'admin', '.gitignore'));
 
   if (scope.developerMode) {
     return cb();

@@ -136,5 +136,6 @@
   "components.popUpWarning.title": "Lütfen onaylayın",
   "notification.error": "Bir hata oluştu",
   "notification.error.layout": "Düzen alınamadı",
-  "request.error.model.unknown": "Bu model bulunmamaktadır."
+  "request.error.model.unknown": "Bu model bulunmamaktadır.",
+  "app.utils.delete": "Sil"
 }

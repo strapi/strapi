@@ -104,10 +104,8 @@ module.exports = async cb => {
     });
     
     // Don't display fields that are hidden by default like the resetPasswordToken for the model user
-    fieldsToRemove.forEach(field => {
-      _.unset(fields, field);
-      _.unset(schemaModel.attributes, field);
-    });
+    _.unset(fields, fieldsToRemove);
+    schemaModel.attributes = _.omit(schemaModel.attributes, fieldsToRemove);
 
     schemaModel.fields = fields;
     schemaModel.editDisplay.availableFields = fields;
@@ -292,6 +290,15 @@ module.exports = async cb => {
 
       // Update the displayed fields
       const updatedListDisplay = prevListDisplay.filter(obj => obj.name !== currentAttr.join());
+
+      // Retrieve the model's displayed fields for the `EditPage`
+      const fieldsPath = getEditDisplayFieldsPath(attrPath);
+      // Retrieve the previous settings
+      const prevEditDisplayFields = _.get(prevSchema.models, fieldsPath);
+      // Update the fields
+      const updatedEditDisplayFields = prevEditDisplayFields.filter(field => field !== currentAttr.join());
+      // Set the new layout
+      _.set(prevSchema.models, fieldsPath, updatedEditDisplayFields);
 
       if (updatedListDisplay.length === 0) {
         // Update it with the one from the generated schema
