@@ -11,6 +11,6 @@
     "enabled": false
   },
   "admin": {
-    "autoOpen": true
+    "autoOpen": false
   }
 }
