@@ -9,6 +9,7 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const Schema = require('./Schema.js');
+/* eslint-disable no-unused-vars */
 
 module.exports = {
   /**
@@ -385,22 +386,6 @@ module.exports = {
         ...groupByFormat.resolver,
       },
     };
-  },
-
-  /**
-   * Returns a list of fields that have type included in fieldTypes.
-   */
-  getFieldsByTypes: (fields, typeCheck, returnType) => {
-    return _.reduce(
-      fields,
-      (acc, fieldType, fieldName) => {
-        if (typeCheck(fieldType)) {
-          acc[fieldName] = returnType(fieldType, fieldName);
-        }
-        return acc;
-      },
-      {},
-    );
   },
 
   /**
