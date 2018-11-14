@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import cn from 'classnames';
-import { get, sortBy } from 'lodash';
+import { get, isObject, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
 import { onChange, onSubmit, onReset } from 'containers/App/actions';
 import { makeSelectModifiedSchema, makeSelectSubmitSuccess } from 'containers/App/selectors';
@@ -37,22 +37,22 @@ class SettingsPage extends React.PureComponent {
     this.props.onReset();
   }
   
-  getModels = (data = this.props.schema.models, destination = '/') => {
+  getModels = (data = this.props.schema.models, destination = '/', init = []) => {
     const models = Object.keys(data).reduce((acc, curr) => {
       if (curr !== 'plugins') {
   
-        if (!data[curr].fields && _.isObject(data[curr])) {
-          return this.getModels(data[curr], `${destination}${curr}/`);
+        if (!data[curr].fields && isObject(data[curr])) {
+          return this.getModels(data[curr], `${destination}${curr}/`, acc);
         }
         
         return acc.concat([{ name: curr, destination: `${destination}${curr}` }]);
       } 
     
-      return this.getModels(data[curr], `${destination}${curr}/`);
-    }, []);
+      return this.getModels(data[curr], `${destination}${curr}/`, acc);
+    }, init);
 
     return sortBy(
-      models.filter(obj => obj.name !== 'permission' && obj.name !== 'role'),
+      models.filter(obj => obj.name !== 'permission' && obj.name !== 'role' && !(obj.name === 'file' && obj.destination === '/plugins/upload/file')),
       ['name'],
     );
   }

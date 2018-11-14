@@ -36,12 +36,12 @@ class TableRow extends React.Component {
       case 'text':
       case 'email':
       case 'enumeration':
-        return (value && !isEmpty(value.toString())) || name === 'id' ? value.toString() : '-';
+        return (value && !isEmpty(toString(value))) || name === 'id' ? toString(value) : '-';
       case 'float':
       case 'integer':
       case 'biginteger':
       case 'decimal':
-        return !isNull(value) ? value.toString() : '-';
+        return !isNull(value) ? toString(value) : '-';
       case 'boolean':
         return value !== null ? toString(value) : '-';
       case 'date':

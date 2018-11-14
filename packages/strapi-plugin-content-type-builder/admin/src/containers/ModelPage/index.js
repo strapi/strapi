@@ -260,6 +260,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const content = size(this.props.modelPage.model.attributes) === 0 ?
       <EmptyAttributesBlock title="content-type-builder.home.emptyAttributes.title" description="content-type-builder.home.emptyAttributes.description" label="content-type-builder.button.attributes.add" onClick={this.handleClickAddAttribute} id="openAddAttr" /> :
       <List
+        id="attributesList"
         listContent={this.props.modelPage.model}
         renderCustomListTitle={this.renderListTitle}
         listContentMappingKey={'attributes'}
