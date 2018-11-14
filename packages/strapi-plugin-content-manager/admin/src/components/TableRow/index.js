@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { isEmpty, isNull, isObject, toString } from 'lodash';
+import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import cn from 'classnames';
 
 import CustomInputCheckbox from 'components/CustomInputCheckbox';
@@ -31,7 +31,7 @@ class TableRow extends React.Component {
    * @returns {*}
    */
   getDisplayedValue(type, value, name) {
-    switch (type.toLowerCase()) {
+    switch (toLower(type)) {
       case 'string':
       case 'text':
       case 'email':
