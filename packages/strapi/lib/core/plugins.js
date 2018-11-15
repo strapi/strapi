@@ -12,9 +12,12 @@ module.exports = async function() {
   const configuratePlugin = (acc, current, source, name) => {
     switch (source) {
       case 'host': {
-        const host = _.get(this.config.environments[current].server, 'admin.build.host').replace(/\/$/, '') || '/';
+        let host;
 
-        if (!host) {
+        try {
+          host = _.get(this.config.environments[current].server, 'admin.build.host').replace(/\/$/, '') || '/';
+
+        } catch (e) {
           throw new Error("You can't use `remote` as a source without set the `host` configuration.");
         }
 
