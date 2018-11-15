@@ -47,7 +47,7 @@
     "app.components.HomePage.welcomeBlock.content.raise": " یا ارتقاء دهید ",
     "app.components.ImgPreview.hint": "برای آپلود، فایل خود را بکشید و در این نقطه رها کنید یا {browse}",
     "app.components.ImgPreview.hint.browse": "مرور کردن",
-    "app.components.InputFile.newFile": "افزودن فایل جدید,
+    "app.components.InputFile.newFile": "افزودن فایل جدید",
     "app.components.InputFileDetails.open": "باز کردن در تب جدید",
     "app.components.InputFileDetails.originalName": "نام اصلی:",
     "app.components.InputFileDetails.remove": "حذف این فایل",
