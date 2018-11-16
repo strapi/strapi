@@ -12,6 +12,6 @@ const postcssPlugins = [
     // Posts messages from plugins to the terminal
     clearMessages: true,
   }),
-]
+];
 
-module.exports = { postcssPlugins }
+module.exports = { postcssPlugins };

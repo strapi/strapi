@@ -12,7 +12,7 @@ const cmdEslint = template(
 );
 
 const cmdFront = cmdEslint({ ignore: '/admin/build/', conf: 'front', params: 'admin' });
-const cmdHelper = cmdEslint({ ignore: '/admin/build/', conf: 'front', params: 'lib/src' });
+const cmdHelper = cmdEslint({ ignore: '/admin/build/', conf: 'front', params: 'lib/src lib/internals/webpack' });
 const cmdBack = cmdEslint({ ignore: '/admin', conf: 'back', params: 'controllers config services bin lib' });
 
 const watcher = (label, pckgName) => {

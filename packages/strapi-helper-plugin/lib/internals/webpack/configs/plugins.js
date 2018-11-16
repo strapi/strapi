@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { __IS_ADMIN__, __NPM_START_EVENT__, } = require('./globals');
+const { __IS_ADMIN__, __NPM_START_EVENT__ } = require('./globals');
 const paths = require('./paths');
 
 

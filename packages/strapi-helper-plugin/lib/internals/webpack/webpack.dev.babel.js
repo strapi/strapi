@@ -6,17 +6,13 @@ const fs = require('fs');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 const argv = require('minimist')(process.argv.slice(2));
-
 const { __PORT__ } = require('./configs/globals');
 const paths = require('./configs/paths');
 const plugins = require('./configs/plugins');
 const postcssPlugins = require('./configs/postcssOptions');
-
-// PostCSS plugins
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
-
 const port = argv.port || __PORT__ || 3000;
 
 module.exports = require('./webpack.base.babel')({
