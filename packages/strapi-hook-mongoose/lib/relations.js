@@ -257,22 +257,11 @@ module.exports = {
                 }
 
                 virtualFields.push(
-                  model.findOne({
-                    [model.primaryKey]: getValuePrimaryKey(value, model.primaryKey)
+                  module.exports.addRelation.call(model, {
+                    id: getValuePrimaryKey(value, this.primaryKey),
+                    values: _.pick(value, [this.primaryKey, details.via]),
+                    foreignKey: current
                   })
-                    .populate([details.via])
-                    .lean()
-                    .then(entry => {
-                      if (_.isArray(entry[details.via])) {
-                        value[details.via] = entry[details.via].map(entry => _.get(entry, '_id', entry)).concat(value[details.via]);
-                      }
-
-                      return module.exports.addRelation.call(model, {
-                        id: getValuePrimaryKey(value, this.primaryKey),
-                        values: _.pick(value, [this.primaryKey, details.via]),
-                        foreignKey: current
-                      });
-                    })
                 );
               });
 

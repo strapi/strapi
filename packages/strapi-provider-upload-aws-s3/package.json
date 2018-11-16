@@ -1,19 +1,20 @@
 {
-  "name": "strapi-email-sendgrid",
-  "version": "3.0.0-alpha.14.4.0",
-  "description": "Sendgrid provider for strapi email",
+  "name": "strapi-provider-upload-aws-s3",
+  "version": "3.0.0-alpha.14.5",
+  "description": "AWS S3 provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
-    "email",
-    "strapi",
-    "sendgrid"
+    "upload",
+    "aws",
+    "s3",
+    "strapi"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
   "dependencies": {
-    "@sendgrid/mail": "6.2.1"
+    "aws-sdk": "^2.199.0"
   },
   "strapi": {
     "isProvider": true

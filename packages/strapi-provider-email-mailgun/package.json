@@ -1,20 +1,19 @@
 {
-  "name": "strapi-upload-aws-s3",
-  "version": "3.0.0-alpha.14.4.0",
-  "description": "AWS S3 provider for strapi upload",
+  "name": "strapi-provider-email-mailgun",
+  "version": "3.0.0-alpha.14.5",
+  "description": "Mailgun provider for strapi email plugin",
   "homepage": "http://strapi.io",
   "keywords": [
-    "upload",
-    "aws",
-    "s3",
-    "strapi"
+    "email",
+    "strapi",
+    "mailgun"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
   "dependencies": {
-    "aws-sdk": "^2.199.0"
+    "mailgun-js": "0.18.0"
   },
   "strapi": {
     "isProvider": true

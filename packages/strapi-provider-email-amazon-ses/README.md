@@ -1,4 +1,4 @@
-# strapi-upload-local
+# strapi-provider-email-amazon-ses
 
 ## Resources
 
