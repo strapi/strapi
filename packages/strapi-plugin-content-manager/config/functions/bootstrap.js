@@ -194,7 +194,7 @@ module.exports = async cb => {
       schemaModel.editDisplay.relations = relationsArray;
     }
 
-    schemaModel.editDisplay.fields = Object.keys(schemaModel.editDisplay.availableFields);
+    schemaModel.editDisplay.fields = Object.keys(schemaModel.editDisplay.availableFields).filter(field => !fieldsToRemove.includes(field));
 
     if (plugin) {
       return _.set(schema.models.plugins, `${plugin}.${name}`, schemaModel);
