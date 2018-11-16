@@ -88,7 +88,7 @@ module.exports = function (strapi) {
           return cb(errMsg);
         }
 
-        Object.keys(options, key => instance.set(key, options[key]));
+        Object.keys(options).map(key => instance.set(key, options[key]));
 
         const mountModels = (models, target, plugin = false) => {
           if (!target) return;
