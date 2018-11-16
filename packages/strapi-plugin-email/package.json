@@ -22,11 +22,11 @@
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
-    "strapi-provider-email-sendmail": "file:../strapi-provider-email-sendmail"
+    "strapi-provider-email-sendmail": "3.0.0-alpha.14.5"
   },
   "devDependencies": {
     "react-copy-to-clipboard": "5.0.1",
-    "strapi-helper-plugin": "file:../strapi-helper-plugin"
+    "strapi-helper-plugin": "3.0.0-alpha.14.5"
   },
   "author": {
     "name": "Strapi team",

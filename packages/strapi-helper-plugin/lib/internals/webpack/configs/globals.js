@@ -1,8 +1,16 @@
 /**
  * Constants needed for webpack config.
  */
-
-const { APP_PATH, IS_ADMIN, IS_MONOREPO, INIT_CWD,  NODE_ENV, npm_lifecycle_event, PORT, PWD} = process.env;
+const {
+  APP_PATH,
+  IS_ADMIN,
+  IS_MONOREPO,
+  INIT_CWD,
+  NODE_ENV,
+  npm_lifecycle_event,
+  PORT,
+  PWD,
+} = process.env;
 
 const __APP_PATH__ = APP_PATH;
 const __INIT_CWD__ = INIT_CWD;

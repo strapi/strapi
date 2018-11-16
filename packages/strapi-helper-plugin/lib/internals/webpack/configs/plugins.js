@@ -23,23 +23,32 @@ if (__NPM_START_EVENT__) {
     plugins.exist = true;
   }
   
-  // Read `plugins` directory and check if the plugin comes with an UI (it has an App container).
-  // If we don't do this check webpack expects the plugin to have a containers/App/reducer.js to create
-  // the plugin's store (redux).
-  plugins.src =
-    __IS_ADMIN__ && !plugins.exist
-      ? fs.readdirSync(path.resolve(paths.appPath, 'plugins')).filter(x => {
+  if (__IS_ADMIN__ && !plugins.exist) {
+    const pluginsDirectory = path.resolve(paths.appPath, 'plugins');
+
+    plugins.src = fs
+      .readdirSync(pluginsDirectory)
+      .filter(x => {
+        // Read `plugins` directory and check if the plugin comes with an UI (it has an App container).
+        // If we don't do this check webpack expects the plugin to have a containers/App/reducer.js to create
+        // the plugin's store (redux).
         let hasAdminFolder;
+        
         try {
-          fs.accessSync(path.resolve(paths.appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+          const pluginMainContainer = path.join(pluginsDirectory, x, 'admin', 'src', 'containers', 'App');
+          fs.accessSync(pluginMainContainer);
+
           hasAdminFolder = true;
-        } catch (err) {
+        } catch(err) {
           hasAdminFolder = false;
         }
+        
         return x[0] !== '.' && hasAdminFolder;
-      })
-      : [];
-  
+      });
+  } else {
+    plugins.src = [];
+  }
+
   // Construct object of plugin' paths.
   plugins.folders = plugins.src.reduce((acc, current) => {
     acc[current] = path.resolve(
