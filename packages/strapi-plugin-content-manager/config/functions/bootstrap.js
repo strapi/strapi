@@ -104,7 +104,9 @@ module.exports = async cb => {
     });
     
     // Don't display fields that are hidden by default like the resetPasswordToken for the model user
-    _.unset(fields, fieldsToRemove);
+    fieldsToRemove.forEach(field => {
+      _.unset(fields, field);
+    });
     schemaModel.attributes = _.omit(schemaModel.attributes, fieldsToRemove);
 
     schemaModel.fields = fields;
@@ -194,7 +196,7 @@ module.exports = async cb => {
       schemaModel.editDisplay.relations = relationsArray;
     }
 
-    schemaModel.editDisplay.fields = Object.keys(schemaModel.editDisplay.availableFields).filter(field => !fieldsToRemove.includes(field));
+    schemaModel.editDisplay.fields = Object.keys(schemaModel.editDisplay.availableFields);
 
     if (plugin) {
       return _.set(schema.models.plugins, `${plugin}.${name}`, schemaModel);
