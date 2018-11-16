@@ -1,6 +1,6 @@
 {
   "name": "strapi-lint",
-  "version": "3.0.0-alpha.14.3",
+  "version": "3.0.0-alpha.14.5",
   "description": "Strapi eslint and prettier configurations",
   "directories": {
     "lib": "lib"

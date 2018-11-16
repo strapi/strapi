@@ -110,6 +110,8 @@ class Strapi extends EventEmitter {
       await this.freeze();
       // Update source admin.
       await admin.call(this);
+      // Init first start
+      utils.init.call(this);
       // Launch server.
       this.server.listen(this.config.port, async (err) => {
         if (err) {
@@ -136,7 +138,7 @@ class Strapi extends EventEmitter {
           cb();
         }
 
-        if (this.config.environment === 'development' && get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) {
+        if (this.config.environment === 'development' && get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false || this.config.init) {
           await utils.openBrowser.call(this);
         }
       });
