@@ -51,6 +51,12 @@ module.exports = async cb => {
 
     return acc;
   }, {});
+  const appModels = Object.keys(pluginsModel).reduce((acc, curr) => {
+    const models = Object.keys(_.get(pluginsModel, [curr, 'models'], {}));
+
+    return acc.concat(models);
+  }, Object.keys(strapi.models).filter(m => m !== 'core_store'));
+
   // Init schema
   const schema = {
     generalSettings: {
@@ -225,7 +231,7 @@ module.exports = async cb => {
   try {
     // Retrieve the previous schema from the db
     const prevSchema = await pluginStore.get({ key: 'schema' });
-
+  
     // If no schema stored
     if (!prevSchema) {
       _.set(schema, 'layout', tempLayout);
@@ -233,6 +239,14 @@ module.exports = async cb => {
       pluginStore.set({ key: 'schema', value: schema });
 
       return cb();
+    } else {
+      const layoutModels = Object.keys(_.get(prevSchema, 'layout'));
+
+      layoutModels.forEach(model => {
+        if (!appModels.includes(model)) {
+          _.unset(prevSchema, ['layout', model]);
+        }
+      });
     }
 
     // Here we do the difference between the previous schema from the database and the new one

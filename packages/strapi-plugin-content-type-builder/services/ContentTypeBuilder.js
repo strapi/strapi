@@ -21,7 +21,7 @@ module.exports = {
     });
 
     const schema = await pluginStore.get({ key: 'schema' });
-    const layout = _.get(schema.layout, model, {});
+    const layout = _.get(schema.layout, model, { attributes: {} });
 
     // If updating a content-type
     if (!_.isEmpty(layout)) {
