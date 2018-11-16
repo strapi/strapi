@@ -17,7 +17,7 @@ Please send the request using multipart/form-data encoding
 **Parameters**
 
 - `files`: The file(s) to upload. The value(s) can be a Buffer or Stream.
-- `path`: (optional): The folder where the file(s) will be uploaded to (only supported on strapi-upload-aws-s3 now).
+- `path`: (optional): The folder where the file(s) will be uploaded to (only supported on strapi-provider-upload-aws-s3 now).
 - `refId`: (optional): The ID of the entry which the file(s) will be linked to.
 - `ref`: (optional): The name of the model which the file(s) will be linked to (see more below).
 - `source`: (optional): The name of the plugin where the model is located.
@@ -136,11 +136,11 @@ By default Strapi provides a local file upload system. You might want to upload 
 To install a new provider run:
 
 ```
-$ npm install strapi-upload-aws-s3@alpha --save
+$ npm install strapi-provider-upload-aws-s3@alpha --save
 ```
 
-We have two providers available `strapi-upload-aws-s3` and `strapi-upload-cloudinary`, use the alpha tag to install one of them. Then, visit `/admin/plugins/upload/configurations/development` on your web browser and configure the provider.
+We have two providers available `strapi-provider-upload-aws-s3` and `strapi-provider-upload-cloudinary`, use the alpha tag to install one of them. Then, visit `/admin/plugins/upload/configurations/development` on your web browser and configure the provider.
 
-If you want to create your own, make sure the name starts with `strapi-upload-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `upload` and `delete` functions.
+If you want to create your own, make sure the name starts with `strapi-provider-upload-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `upload` and `delete` functions.
 
-Check all community providers available on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-upload-)
+Check all community providers available on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-upload-)
