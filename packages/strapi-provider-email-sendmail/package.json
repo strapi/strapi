@@ -1,11 +1,10 @@
 {
-  "name": "strapi-upload-cloudinary",
+  "name": "strapi-provider-email-sendmail",
   "version": "3.0.0-alpha.14.5",
-  "description": "Cloudinary provider for strapi upload",
+  "description": "Sendmail provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
-    "upload",
-    "cloudinary",
+    "email",
     "strapi"
   ],
   "directories": {
@@ -13,16 +12,15 @@
   },
   "main": "./lib",
   "dependencies": {
-    "cloudinary": "^1.11.0",
-    "into-stream": "^3.1.0"
+    "sendmail": "^1.2.0"
   },
   "strapi": {
     "isProvider": true
   },
   "author": {
-    "email": "perret.luca@gmail.com",
-    "name": "Luca Perret",
-    "url": "https://github.com/lucaperret"
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
   },
   "maintainers": [
     {
