@@ -30,22 +30,25 @@ function PopUpWarning({ content, isOpen, onConfirm, onlyConfirmButton, popUpWarn
   const buttons = [
     {
       className: styles.secondary,
-      id: content.cancel || 'components.popUpWarning.button.cancel',
+      id: 'ctaCancel',
       handleClick: toggleModal,
+      message: content.cancel || 'components.popUpWarning.button.cancel',
       style: {},
     },
     {
       className: styles.primary,
-      id: content.confirm || 'components.popUpWarning.button.confirm',
+      id: 'ctaConfirm',
       handleClick: onConfirm,
+      message: content.confirm || 'components.popUpWarning.button.confirm',
       style: {},
     },
   ];
   const singleButton = [
     {
       className: styles.primary,
-      id: content.confirm || 'components.popUpWarning.button.confirm',
+      id: 'ctaConfirm',
       handleClick: onConfirm,
+      message: content.confirm || 'components.popUpWarning.button.confirm',
       style: { width: '100%' },
     },
   ];
@@ -68,8 +71,8 @@ function PopUpWarning({ content, isOpen, onConfirm, onlyConfirmButton, popUpWarn
           </div>
           <div className={styles.popUpWarningButtonContainer}>
             {map(footerButtons, (button) => (
-              <FormattedMessage id={button.id} key={button.id}>
-                {(message) => <Button onClick={button.handleClick} className={button.className} style={button.style}>{message}</Button>}
+              <FormattedMessage id={button.message} key={button.id}>
+                {(message) => <Button onClick={button.handleClick} className={button.className} id={button.id} style={button.style}>{message}</Button>}
               </FormattedMessage>
             ))}
           </div>
