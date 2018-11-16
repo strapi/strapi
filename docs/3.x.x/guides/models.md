@@ -25,8 +25,8 @@ The info key on the model-json states information about the model. This informat
 
 ## Model options
 The options key on the model-json states.
-   - `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id').
-   - `idAttributeType`: Data type of `idAttribute`, accepted list of value bellow:
+   - `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id'). _Only valid for strapi-hook-bookshelf_
+   - `idAttributeType`: Data type of `idAttribute`, accepted list of value bellow. _Only valid for strapi-hook-bookshelf_
 
 ## Define the attributes
 

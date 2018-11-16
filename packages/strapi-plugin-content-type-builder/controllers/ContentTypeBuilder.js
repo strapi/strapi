@@ -4,6 +4,7 @@ const fs = require('fs');
 const _ = require('lodash');
 
 const Service = require('../services/ContentTypeBuilder');
+const { escapeNewlines } = require('../utils/helpers.js');
 
 module.exports = {
   getModels: async ctx => {
@@ -47,11 +48,13 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
+    const _description = escapeNewlines(description, '\\n');
+
     strapi.reload.isWatching = false;
 
     await Service.appearance(formatedAttributes, name);
 
-    await Service.generateAPI(name, description, connection, collectionName, []);
+    await Service.generateAPI(name, _description, connection, collectionName, []);
 
     const modelFilePath = await Service.getModelPath(name, plugin);
 
@@ -103,12 +106,14 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
+    const _description = escapeNewlines(description);
+
     let modelFilePath = Service.getModelPath(model, plugin);
 
     strapi.reload.isWatching = false;
 
     if (name !== model) {
-      await Service.generateAPI(name, description, connection, collectionName, []);
+      await Service.generateAPI(name, _description, connection, collectionName, []);
     }
 
     await Service.appearance(formatedAttributes, name, plugin);
@@ -120,7 +125,7 @@ module.exports = {
       modelJSON.collectionName = collectionName;
       modelJSON.info = {
         name,
-        description
+        description: _description
       };
       modelJSON.attributes = formatedAttributes;
 
