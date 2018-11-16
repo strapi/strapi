@@ -3,11 +3,8 @@
  */
 
 const path = require('path');
-
 const webpack = require('webpack');
-
-const { __NODE_ENV__ } = require('./configs/global')
-
+const { __NODE_ENV__ } = require('./configs/globals');
 const modules = [
   'src',
   'node_modules',

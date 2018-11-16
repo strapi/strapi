@@ -5,21 +5,17 @@
 const path = require('path');
 const webpack = require('webpack');
 const _ = require('lodash');
-
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const { COMMON_ALIAS } = require('./configs/alias');
 const foldersToInclude = require('./configs/foldersToInclude');
-
 const { __NODE_ENV__, __PROD__ } = require('./configs/globals');
 const paths = require('./configs/paths');
 const URLs = require('./configs/server');
-
 const pkg = require(paths.packageJson);
 const pluginId = pkg.name.replace(/^strapi-/i, '');
 
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-
 module.exports = options => {
-  const { alias, babelPresets, devtool, disableExtractTextPlugin, entry, externals,  output, plugins, } = options;
+  const { alias, babelPresets, devtool, disableExtractTextPlugin, entry, externals,  output, plugins } = options;
   
   // The disable option is only for production
   // Config from https://github.com/facebook/create-react-app/blob/next/packages/react-scripts/config/webpack.config.prod.js

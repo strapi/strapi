@@ -1,6 +1,12 @@
-const _ = require('lodash');
 const path = require('path');
-const { __IS_ADMIN__, __IS_MONOREPO__, __NPM_START_EVENT__, __PROD__, __PWD__ } = require('./globals');
+const _ = require('lodash');
+const {
+  __IS_ADMIN__,
+  __IS_MONOREPO__,
+  __NPM_START_EVENT__,
+  __PROD__,
+  __PWD__,
+} = require('./globals');
 const paths = require('./paths');
 
 const URLs = {

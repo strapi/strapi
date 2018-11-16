@@ -1,14 +1,18 @@
 const fs = require('fs');
-const _ = require('lodash');
 const path = require('path');
-
-const { __APP_PATH__, __IS_ADMIN__, __IS_MONOREPO__, __NODE_ENV__ ,  __PWD__} = require('./globals');
+const _ = require('lodash');
+const {
+  __APP_PATH__,
+  __IS_ADMIN__,
+  __IS_MONOREPO__,
+  __NODE_ENV__ , 
+  __PWD__,
+} = require('./globals');
 
 /**
  * Whole path uses in webpack.
  * const is in this order due of reference, cannot order them in alphabetical order.
  */
-
 const appDirectory = fs.realpathSync(process.cwd());
 
 /**
