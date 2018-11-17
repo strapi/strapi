@@ -91,6 +91,8 @@ module.exports = {
       ctx.request.body.role = defaultRole._id || defaultRole.id;
     }
 
+    ctx.request.body.provider = 'local';
+
     try {
       const data = await strapi.plugins['users-permissions'].services.user.add(ctx.request.body);
       // Send 201 `created`

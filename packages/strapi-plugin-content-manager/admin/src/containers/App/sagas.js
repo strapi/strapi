@@ -1,8 +1,6 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { fork, put, call, takeLatest, take, cancel, select } from 'redux-saga/effects';
 import request from 'utils/request';
-
-
 import { getModelEntriesSucceeded, loadedModels, submitSucceeded } from './actions';
 import { GET_MODEL_ENTRIES, LOAD_MODELS, ON_SUBMIT } from './constants';
 import { makeSelectModifiedSchema } from './selectors';

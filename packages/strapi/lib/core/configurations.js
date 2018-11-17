@@ -13,7 +13,8 @@ module.exports.nested = function() {
     // Load root configurations.
     new Promise((resolve, reject) => {
       glob('./config/**/*.*(js|json)', {
-        cwd: this.config.appPath
+        cwd: this.config.appPath,
+        dot: true
       }, (err, files) => {
         if (err) {
           return reject(err);

@@ -1,0 +1,45 @@
+{
+  "name": "strapi-provider-email-sendgrid",
+  "version": "3.0.0-alpha.14.5",
+  "description": "Sendgrid provider for strapi email",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "email",
+    "strapi",
+    "sendgrid"
+  ],
+  "directories": {
+    "lib": "./lib"
+  },
+  "main": "./lib",
+  "dependencies": {
+    "@sendgrid/mail": "6.2.1"
+  },
+  "strapi": {
+    "isProvider": true
+  },
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "http://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">= 9.0.0",
+    "npm": ">= 5.3.0"
+  },
+  "license": "MIT"
+}
