@@ -391,7 +391,7 @@ const isAdminInDevMode = function () {
 const getURLFromSegments = function ({ hostname, port, ssl = false }) {
   const protocol = ssl ? 'https' : 'http';
   const defaultPort = ssl ? 443 : 80;
-  const portString = (port === undefined || port === defaultPort) ? '' : `:${port}`;
+  const portString = (port === undefined || parseInt(port) === defaultPort) ? '' : `:${port}`;
 
   return `${protocol}://${hostname}${portString}`;
 };
