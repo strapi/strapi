@@ -5,8 +5,8 @@
  */
 
 module.exports = mongoose => {
-  var Decimal = require('mongoose-float').loadType(mongoose, 2);
-  var Float = require('mongoose-float').loadType(mongoose, 20);
+  mongoose.Schema.Types.Decimal = require('mongoose-float').loadType(mongoose, 2);
+  mongoose.Schema.Types.Float = require('mongoose-float').loadType(mongoose, 20);
 
   return {
     convertType: mongooseType => {
@@ -23,9 +23,9 @@ module.exports = mongoose => {
         case 'timestamp':
           return Date;
         case 'decimal':
-          return Decimal;
+          return 'Decimal';
         case 'float':
-          return Float;
+          return 'Float';
         case 'json':
           return 'Mixed';
         case 'biginteger':
