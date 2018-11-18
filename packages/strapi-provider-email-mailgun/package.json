@@ -1,17 +1,20 @@
 {
-  "name": "strapi-upload-local",
+  "name": "strapi-provider-email-mailgun",
   "version": "3.0.0-alpha.14.5",
-  "description": "Local provider for strapi upload",
+  "description": "Mailgun provider for strapi email plugin",
   "homepage": "http://strapi.io",
   "keywords": [
-    "upload",
-    "strapi"
+    "email",
+    "strapi",
+    "mailgun"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
-  "dependencies": {},
+  "dependencies": {
+    "mailgun-js": "0.18.0"
+  },
   "strapi": {
     "isProvider": true
   },
