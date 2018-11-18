@@ -672,15 +672,10 @@ module.exports = {
 
 In this example, the policy `isAuthenticated` located in `./plugins/users-permissions/config/policies/isAuthenticated.js` will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
-<<<<<<< HEAD:docs/3.x.x/guides/graphql.md
+
 ::: note
 There is no custom resolver in that case, so it will execute the default resolver (Post.find) provided by the Shadow CRUD feature.
 :::
-=======
-The same process is applied to the `createPost` mutation.
-
-> Note: There is no custom resolver in that case, so it will execute the default resolver (Post.find) provided by the Shadow CRUD feature.
->>>>>>> 5705158a4368b144541493e08570ce0e93734ed8:docs/3.x.x/en/guides/graphql.md
 
 ### Link a query or mutation to a controller action
 
