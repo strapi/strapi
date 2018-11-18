@@ -37,6 +37,16 @@ module.exports = {
 
   generateMatchStage: function (qb) {
     return (strapiModel, filters) => {
+      if (!filters) {
+        return undefined;
+      }
+
+      // 1st level deep filter
+      if (filters.where) {
+        this.generateMatchStage(qb)(strapiModel, { relations: filters.where });
+      }
+
+      // 2nd+ level deep filter
       _.forEach(filters.relations, (value, key) => {
         if (key !== 'relations') {
           const association = strapiModel.associations.find(a => a.alias === key);

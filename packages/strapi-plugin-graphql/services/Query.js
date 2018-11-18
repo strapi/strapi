@@ -32,7 +32,7 @@ module.exports = {
       if (_.isPlainObject(value)) {
         const flatObject = this.convertToQuery(value);
         _.forEach (flatObject, (_value, _key) => {
-          result[key + '.' + _key] = _value;
+          result[`${key}.${_key}`] = _value;
         });
       } else {
         result[key] = value;

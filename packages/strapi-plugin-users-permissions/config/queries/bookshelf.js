@@ -18,10 +18,9 @@ module.exports = {
         }
       }
     })
-    .fetchAll({
-      withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
-    });
-
+      .fetchAll({
+        withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
+      });
 
     return records ? records.toJSON() : records;
   },

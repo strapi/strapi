@@ -101,6 +101,18 @@ module.exports = {
 
     let acc = [];
 
+    // 1st level deep filter
+    if (filters.where) {
+      acc.push(
+        ...generateMatchStage(
+          strapiModel,
+          { relations: filters.where },
+          { prefixPath }
+        )
+      );
+    }
+
+    // 2nd+ level deep filter
     _.forEach(filters.relations, (value, key) => {
       if (key !== 'relations') {
         const nextPrefixedPath = `${prefixPath}${key}.`;

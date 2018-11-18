@@ -11,11 +11,6 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-// Following this discussion https://stackoverflow.com/questions/18082/validate-decimal-numbers-in-javascript-isnumeric this function is the best implem to determine if a value is a valid number candidate
-const isNumeric = (value) => {
-  return !_.isObject(value) && !isNaN(parseFloat(value)) && isFinite(value);
-};
-
 // Constants
 const ORDERS = ['ASC', 'DESC'];
 
