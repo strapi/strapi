@@ -368,7 +368,7 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
         });
 
         return apiModelsUsed.length !== 0;
-      }) || 0; // Filter model with the right connector
+      }); // Filter model with the right connector
 
     flattenHooksConfig[name] = {
       enabled: force || modelsUsed.length > 0 // Will return false if there is no model, else true.

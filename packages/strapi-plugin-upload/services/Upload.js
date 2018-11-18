@@ -65,7 +65,7 @@ module.exports = {
 
     if (!provider) {
       throw new Error(
-        `The provider package isn't installed. Please run \`npm install strapi-upload-${
+        `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${
           config.provider
         }\``,
       );

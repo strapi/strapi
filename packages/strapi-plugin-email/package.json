@@ -22,7 +22,7 @@
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
-    "strapi-email-sendmail": "3.0.0-alpha.14.5"
+    "strapi-provider-email-sendmail": "3.0.0-alpha.14.5"
   },
   "devDependencies": {
     "react-copy-to-clipboard": "5.0.1",
