@@ -105,9 +105,9 @@ module.exports = {
       _.set(schema, [...schemaPath, 'editDisplay', 'fields'], newList.toJS());
     }
 
-    Object.keys(attributes).map(attribute => {
+    Object.keys(attributes).forEach(attribute => {
       const appearances = _.get(attributes, [attribute, 'appearance'], {});
-      Object.keys(appearances).map(appearance => {
+      Object.keys(appearances).forEach(appearance => {
         _.set(layout, ['attributes', attribute, 'appearance'], appearances[appearance] ? appearance : '' );
       });
 
