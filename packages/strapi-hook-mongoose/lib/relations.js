@@ -113,8 +113,8 @@ module.exports = {
         } else {
           const model = association.plugin
             ? strapi.plugins[association.plugin].models[
-                association.collection || association.model
-              ]
+              association.collection || association.model
+            ]
             : strapi.models[association.collection || association.model];
 
           // Generate lookup for this relation
