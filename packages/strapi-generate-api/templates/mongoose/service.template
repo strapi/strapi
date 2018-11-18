@@ -36,7 +36,7 @@ module.exports = {
 
     if (_.has(filters, 'start')) result.skip(filters.start);
     if (_.has(filters, 'limit')) result.limit(filters.limit);
-    if (_.has(filters, 'sort')) result.sort(filters.sort);
+    if (!_.isEmpty(filters, 'sort')) result.sort(filters.sort);
 
     return result;
   },
