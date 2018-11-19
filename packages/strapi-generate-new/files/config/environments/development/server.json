@@ -9,5 +9,8 @@
   },
   "cron": {
     "enabled": false
+  },
+  "admin": {
+    "autoOpen": false
   }
 }

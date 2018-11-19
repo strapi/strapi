@@ -1,14 +1,12 @@
 'use strict';
 
-// Node.js core.
-const execSync = require('child_process').execSync;
-const path = require('path');
-
 // Public node modules
 const inquirer = require('inquirer');
+const rimraf = require('rimraf');
 
 module.exports = (scope, success, error) => {
-  const knex  = require(path.resolve(`${scope.tmpPath}/node_modules/knex`))({
+  // eslint-disable-next-line import/no-unresolved
+  const knex = require('knex')({
     client: scope.client.module,
     connection: Object.assign({}, scope.database.settings, {
       user: scope.database.settings.username
@@ -20,9 +18,12 @@ module.exports = (scope, success, error) => {
       knex.destroy();
 
       const next = () => {
-        execSync(`rm -r "${scope.tmpPath}"`);
-
-        success();
+        rimraf(scope.tmpPath, (err) => {
+          if (err) {
+            console.log(`Error removing connection test folder: ${scope.tmpPath}`);
+          }
+          success();
+        });
       };
 
       if (tables.rows && tables.rows.length !== 0) {
@@ -33,7 +34,7 @@ module.exports = (scope, success, error) => {
           name: 'confirm',
           message: `Are you sure you want to continue with the ${scope.database.settings.database} database:`,
         }])
-          .then(({confirm}) => {
+          .then(({ confirm }) => {
             if (confirm) {
               next();
             } else {

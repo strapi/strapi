@@ -16,19 +16,11 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const appPath = (() => {
-  if (process.env.APP_PATH) {
-    return process.env.APP_PATH;
-  }
-
-  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
-})();
+const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ?  '' : '..' ));
 
 const rootAdminpath = (() => {
   if (isSetup) {
-    return isAdmin
-      ? path.resolve(appPath, 'strapi-admin')
-      : path.resolve(appPath, 'packages', 'strapi-admin');
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
   }
   return path.resolve(appPath, 'admin');
 })();
@@ -88,7 +80,7 @@ module.exports = require('./webpack.base.babel')({
     {
       main: [
         `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
-        path.join(appPath, 'admin', 'admin', 'src', 'app.js'),
+        path.join(appPath, 'admin', 'admin', 'src', 'appDev.js'),
       ],
     },
     plugins.src.reduce((acc, current) => {

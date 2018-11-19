@@ -66,7 +66,7 @@ module.exports = (scope, cb) => {
   const connectionValidation = () => {
     const databaseChoices = [
       {
-        name: 'MongoDB (recommended)',
+        name: 'MongoDB',
         value: {
           database: 'mongo',
           connector: 'strapi-hook-mongoose'
@@ -225,14 +225,14 @@ module.exports = (scope, cb) => {
               shell.exec(`mkdir ${scope.tmpPath}`);
             }
 
-            let cmd = `${packageCmd} ${scope.client.connector}@alpha`;
+            let cmd = `${packageCmd} ${scope.client.connector}@${scope.strapiPackageJSON.version}`;
 
             if (scope.client.module) {
               cmd += ` ${scope.client.module}`;
             }
 
             if (scope.client.connector === 'strapi-hook-bookshelf') {
-              cmd += ` strapi-hook-knex@alpha`;
+              cmd += ` strapi-hook-knex@${scope.strapiPackageJSON.version}`;
 
               scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
             }
@@ -260,7 +260,7 @@ module.exports = (scope, cb) => {
             } catch(err) {
               shell.rm('-r', scope.tmpPath);
               console.log(err);
-              cb.success();
+              cb.error();
             }
           });
       });

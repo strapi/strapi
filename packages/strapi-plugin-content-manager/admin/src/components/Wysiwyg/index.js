@@ -173,9 +173,7 @@ class Wysiwyg extends React.Component {
     if (selectedText !== '') {
       return this.setState(
         {
-          // Move the cursor to the end (this line forces the cursor to be at the end of the content)
-          // It may go at the end of the last block
-          editorState: EditorState.moveFocusToEnd(newEditorState),
+          editorState: newEditorState,
         },
         () => {
           this.focus();
@@ -309,7 +307,14 @@ class Wysiwyg extends React.Component {
     const newContentState = this.createNewContentStateFromBlock(newBlock);
     const newEditorState = this.createNewEditorState(newContentState, text);
 
-    return this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+    return this.setState(
+      {
+        editorState: newEditorState,
+      },
+      () => {
+        this.focus();
+      },
+    );
   };
 
   /**
@@ -627,8 +632,8 @@ class Wysiwyg extends React.Component {
         newEditorState = EditorState.push(newEditorState, newContentState);
         const updatedSelection = updateSelection(this.getSelection(), nextBlocks, 2);
 
-        this.setState({ editorState: EditorState.acceptSelection(newEditorState, updatedSelection) });
         this.sendData(newEditorState);
+        this.setState({ editorState: EditorState.acceptSelection(newEditorState, updatedSelection) });
       })
       .catch(() => {
         this.setState({ editorState: EditorState.undo(this.getEditorState()) });
@@ -717,7 +722,7 @@ class Wysiwyg extends React.Component {
                 stripPastedStyles
                 tabIndex={this.props.tabIndex}
               />
-              <input className={styles.editorInput} value="" tabIndex="-1" />
+              <input className={styles.editorInput} tabIndex="-1" />
             </div>
           )}
           {!isFullscreen && (

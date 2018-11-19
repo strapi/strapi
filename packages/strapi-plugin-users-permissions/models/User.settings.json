@@ -18,6 +18,10 @@
       "configurable": false,
       "required": true
     },
+    "provider": {
+      "type": "string",
+      "configurable": false
+    },
     "password": {
       "type": "password",
       "minLength": 6,
@@ -27,7 +31,7 @@
     "resetPasswordToken": {
       "type": "string",
       "configurable": false,
-      " ": true
+      "private": true
     },
     "confirmed": {
       "type": "boolean",
