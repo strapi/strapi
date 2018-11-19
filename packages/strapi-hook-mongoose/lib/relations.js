@@ -104,7 +104,7 @@ module.exports = {
     // 1st level deep filter
     if (filters.where) {
       acc.push(
-        ...generateMatchStage(
+        ...this.generateMatchStage(
           strapiModel,
           { relations: filters.where },
           { prefixPath }
