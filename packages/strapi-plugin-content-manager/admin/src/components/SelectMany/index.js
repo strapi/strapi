@@ -49,15 +49,6 @@ class SelectMany extends React.PureComponent {
     }
   }
 
-  handleInputChange = (value) => {
-    const clonedOptions = this.state.options;
-    const filteredValues = clonedOptions.filter(data => includes(data.label, value));
-
-    if (filteredValues.length === 0) {
-      return this.getOptions(value);
-    }
-  }
-
   getOptions = query => {
     const params = {
       _limit: 20,
@@ -111,6 +102,15 @@ class SelectMany extends React.PureComponent {
         strapi.notification.error('content-manager.notification.error.relationship.fetch');
       });
   };
+
+  handleInputChange = (value) => {
+    const clonedOptions = this.state.options;
+    const filteredValues = clonedOptions.filter(data => includes(data.label, value));
+
+    if (filteredValues.length === 0) {
+      return this.getOptions(value);
+    }
+  }
 
   handleChange = value => {
     // Remove new added value from available option;
