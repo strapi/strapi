@@ -74,7 +74,7 @@ To use the providers authentication, set your credentials in
 
 Redirect your user to: `GET /connect/:provider`.
 
-After his approval, he will be redirected to `/auth/:provider/callback`. The jwt and user will be available in the querystring.
+After their approval, they will be redirected to `/auth/:provider/callback`. The jwt and user will be available in the querystring.
 
 Response payload:
 

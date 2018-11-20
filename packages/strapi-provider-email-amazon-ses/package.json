@@ -1,27 +1,24 @@
 {
-  "name": "strapi-email-sendgrid",
+  "name": "strapi-provider-email-amazon-ses",
   "version": "3.0.0-alpha.14.5",
-  "description": "Sendgrid provider for strapi email",
+  "description": "Amazon SES provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
     "email",
     "strapi",
-    "sendgrid"
+    "amazon",
+    "ses"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
   "dependencies": {
-    "@sendgrid/mail": "6.2.1"
-  },
-  "strapi": {
-    "isProvider": true
+    "node-ses": "^2.1.0"
   },
   "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
+    "email": "nikolay@tsenkov.net",
+    "name": "Nikolay tsenkov"
   },
   "maintainers": [
     {
