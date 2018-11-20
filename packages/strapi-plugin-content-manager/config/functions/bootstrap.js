@@ -108,7 +108,7 @@ module.exports = async cb => {
         disabled: false,
       };
     });
-    
+
     // Don't display fields that are hidden by default like the resetPasswordToken for the model user
     _.unset(fields, fieldsToRemove);
     schemaModel.attributes = _.omit(schemaModel.attributes, fieldsToRemove);
@@ -353,16 +353,16 @@ module.exports = async cb => {
     });
 
     // Update other keys
-    sameApis.map(apiPath => {
+    sameApis.forEach(apiPath => {
       // This doesn't keep the prevSettings for the relations,  the user will have to reset it.
       // We might have to improve this if we want the order of the relations to be kept
-      const keysToUpdate = ['relations', 'loadedModel', 'associations', 'attributes', ['editDisplay', 'relations']].map(key => apiPath.concat(key));
+      ['relations', 'loadedModel', 'associations', 'attributes', ['editDisplay', 'relations']]
+        .map(key => apiPath.concat(key))
+        .forEach(keyPath => {
+          const newValue = _.get(schema.models, keyPath);
 
-      keysToUpdate.map(keyPath => {
-        const newValue = _.get(schema.models, keyPath);
-
-        _.set(prevSchema.models, keyPath, newValue);
-      });
+          _.set(prevSchema.models, keyPath, newValue);
+        });
     });
 
     // Special handler for the upload relations
@@ -377,6 +377,7 @@ module.exports = async cb => {
     });
 
     await pluginStore.set({ key: 'schema', value: prevSchema });
+
   } catch(err) {
     console.log('error', err);
   }
