@@ -546,7 +546,7 @@ export class ListPage extends React.Component {
                       decreaseMarginBottom={filters.length > 0}
                     >
                       <div className="row">
-                        <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} />
+                        <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} id="addFilterCTA" />
                         {filters.map(this.renderFilter)}
                       </div>
                     </Div>
