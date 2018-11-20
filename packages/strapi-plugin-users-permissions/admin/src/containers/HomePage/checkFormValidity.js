@@ -8,7 +8,7 @@ export default function checkFormValidity(settingType, data, providerToEdit = ''
       const isProviderEnabled = get(data, 'enabled');
       const keys = providerToEdit === 'email' ? [] : ['key', 'secret'];
 
-      keys.map(key => {
+      keys.forEach(key => {
         if (isProviderEnabled && isEmpty(get(data, key))) {
           formErrors.push({ name: key, errors: [{ id: 'components.Input.error.validation.required' }] });
         }
@@ -16,9 +16,9 @@ export default function checkFormValidity(settingType, data, providerToEdit = ''
       break;
     }
     case 'email-templates': {
-      Object.keys(data.options).map((value) => {
+      Object.keys(data.options).forEach((value) => {
         if (isObject(data.options[value])) {
-          Object.keys(data.options[value]).map(subValue => {
+          Object.keys(data.options[value]).forEach(subValue => {
             if (isEmpty(get(data, ['options', value, subValue]))) {
               formErrors.push({ name: `options.${value}.${subValue}`, errors: [{ id: 'components.Input.error.validation.required' }] });
             }
