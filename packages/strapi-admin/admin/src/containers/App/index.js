@@ -18,6 +18,7 @@ import AdminPage from 'containers/AdminPage';
 import NotFoundPage from 'containers/NotFoundPage';
 import NotificationProvider from 'containers/NotificationProvider';
 import AppLoader from 'containers/AppLoader';
+import FullStory from 'components/FullStory';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import '../../styles/main.scss';
 import styles from './styles.scss';
@@ -26,6 +27,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
   render() {
     return (
       <div>
+        <FullStory org="GK708" />
         <NotificationProvider />
         <AppLoader>
           {({ shouldLoad }) => {

@@ -43,7 +43,6 @@ import Logout from 'components/Logout';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import OverlayBlocker from 'components/OverlayBlocker';
 import PluginPage from 'containers/PluginPage';
-import FullStory from 'components/FullStory';
 // Utils
 import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
@@ -226,7 +225,6 @@ export class AdminPage extends React.Component {
           </Content>
         </div>
         <OverlayBlocker isOpen={this.props.blockApp && this.props.showGlobalAppBlocker} />
-        <FullStory org="GK708" />
       </div>
     );
   }
