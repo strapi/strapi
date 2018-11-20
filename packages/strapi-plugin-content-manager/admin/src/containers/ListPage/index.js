@@ -431,6 +431,7 @@ export class ListPage extends React.Component {
   renderPluginHeader = () => {
     const pluginHeaderActions = [
       {
+        id: 'addEntry',
         label: 'content-manager.containers.List.addAnEntry',
         labelValues: {
           entity: capitalize(this.props.match.params.slug) || 'Content Manager',

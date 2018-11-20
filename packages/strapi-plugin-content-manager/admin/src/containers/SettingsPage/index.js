@@ -60,6 +60,7 @@ class SettingsPage extends React.PureComponent {
   getPluginHeaderActions = () => (
     [
       {
+        id: 'cancelChanges',
         label: 'content-manager.popUpWarning.button.cancel',
         kind: 'secondary',
         onClick: this.handleReset,
