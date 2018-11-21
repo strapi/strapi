@@ -17,6 +17,12 @@ const exposer = require('./exposer');
 const openBrowser = require('./openBrowser');
 
 module.exports = {
+  init: function() {
+    if (this.config.init) {
+      fs.unlinkSync(path.resolve(this.config.appPath, 'config', '.init.json'));
+    }
+  },
+
   loadFile: function(url) {
     // Clear cache.
     delete require.cache[require.resolve(path.resolve(this.config.appPath, url))];

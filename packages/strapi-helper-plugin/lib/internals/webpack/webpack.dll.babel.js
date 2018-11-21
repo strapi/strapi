@@ -9,8 +9,7 @@ const path = require('path');
 const webpack = require('webpack');
 const isAdmin = process.env.IS_ADMIN === 'true';
 
-// const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const isSetup = process.env.IS_MONOREPO;
+const isSetup = process.env.IS_MONOREPO || false;
 const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ? '' : '..' ));
 
 const rootAdminpath = (() => {

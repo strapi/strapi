@@ -51,7 +51,7 @@ module.exports = {
     const provider = _.find(strapi.plugins.email.config.providers, { provider: config.provider });
 
     if (!provider) {
-      throw new Error(`The provider package isn't installed. Please run \`npm install strapi-email-${config.provider}\``);
+      throw new Error(`The provider package isn't installed. Please run \`npm install strapi-provider-email-${config.provider}\``);
     }
 
     const actions = provider.init(config);

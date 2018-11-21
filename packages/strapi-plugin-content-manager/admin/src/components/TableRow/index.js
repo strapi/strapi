@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { isEmpty, isNull, isObject, toString } from 'lodash';
+import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import cn from 'classnames';
 
 import CustomInputCheckbox from 'components/CustomInputCheckbox';
@@ -31,17 +31,17 @@ class TableRow extends React.Component {
    * @returns {*}
    */
   getDisplayedValue(type, value, name) {
-    switch (type.toLowerCase()) {
+    switch (toLower(type)) {
       case 'string':
       case 'text':
       case 'email':
       case 'enumeration':
-        return (value && !isEmpty(value.toString())) || name === 'id' ? value.toString() : '-';
+        return (value && !isEmpty(toString(value))) || name === 'id' ? toString(value) : '-';
       case 'float':
       case 'integer':
       case 'biginteger':
       case 'decimal':
-        return !isNull(value) ? value.toString() : '-';
+        return !isNull(value) ? toString(value) : '-';
       case 'boolean':
         return value !== null ? toString(value) : '-';
       case 'date':

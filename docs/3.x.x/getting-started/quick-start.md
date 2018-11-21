@@ -126,7 +126,7 @@ After creating [your first Content Type](#_3-create-a-content-type), you probabl
 Your API is now ready and [contains data](#_4-add-content). At this point, you'll probably want to use this data in mobile or desktop applications.
 In order to do so, you'll need to allow access to other users (identified as 'Public').
 
-**1 -** Go to the [**Auth & Permissions View**](http://localhost:1337/admin/plugins/users-permissions/roles) by clicking on **Auth & Permissions** link in the left menu.
+**1 -** Go to the [**Roles & Permissions View**](http://localhost:1337/admin/plugins/users-permissions/roles) by clicking on **Roles & Permissions** link in the left menu.
 
 ![Auth & Permissions - Home](../assets/getting-started_manage_role_home.png)
 

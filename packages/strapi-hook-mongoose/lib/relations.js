@@ -97,13 +97,13 @@ module.exports = {
               acc[current] = params.values[current];
             } else if (response[current] && _.isArray(response[current]) && current !== 'id') {
               // Records to add in the relation.
-              const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
-                a[this.primaryKey].toString() === b[this.primaryKey].toString()
+              const toAdd = _.differenceWith(params.values[current], response[current], (a, b) => 
+                (a[this.primaryKey] || a).toString() === (b[this.primaryKey] || b).toString()
               );
 
               // Records to remove in the relation.
               const toRemove = _.differenceWith(response[current], params.values[current], (a, b) =>
-                a[this.primaryKey].toString() === b[this.primaryKey].toString()
+                (a[this.primaryKey] || a).toString() === (b[this.primaryKey] || b).toString()
               )
                 .filter(x => toAdd.find(y => x.id === y.id) === undefined);
 
@@ -124,22 +124,11 @@ module.exports = {
                 }
 
                 virtualFields.push(
-                  model.findOne({
-                    [model.primaryKey]: getValuePrimaryKey(value, model.primaryKey)
+                  module.exports.addRelation.call(model, {
+                    id: getValuePrimaryKey(value, this.primaryKey),
+                    values: _.pick(value, [this.primaryKey, details.via]),
+                    foreignKey: current
                   })
-                    .populate([details.via])
-                    .lean()
-                    .then(entry => {
-                      if (_.isArray(entry[details.via])) {
-                        value[details.via] = entry[details.via].map(entry => _.get(entry, '_id', entry)).concat(value[details.via]);
-                      }
-
-                      return module.exports.addRelation.call(model, {
-                        id: getValuePrimaryKey(value, this.primaryKey),
-                        values: _.pick(value, [this.primaryKey, details.via]),
-                        foreignKey: current
-                      });
-                    })
                 );
               });
 
