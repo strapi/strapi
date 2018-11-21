@@ -199,7 +199,7 @@ export class EditPage extends React.Component {
 
   handleBlur = ({ target }) => {
     const defaultValue = get(this.getModelAttribute(target.name), 'default');
-
+    
     if (isEmpty(target.value) && defaultValue && target.value !== false) {
       return this.props.changeData({
         target: {

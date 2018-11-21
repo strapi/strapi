@@ -135,6 +135,7 @@ class InputSearchWithErrors extends React.Component { // eslint-disable-line rea
         <InputErrors
           className={errorsClassName}
           errors={!noErrorsDescription && this.state.errors || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
