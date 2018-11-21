@@ -42,13 +42,13 @@ class SettingsPage extends React.PureComponent {
       if (curr !== 'plugins') {
   
         if (!data[curr].fields && _.isObject(data[curr])) {
-          return this.getModels(data[curr], `${destination}${curr}/`);
+          return acc.concat(this.getModels(data[curr], `${destination}${curr}/`));
         }
         
         return acc.concat([{ name: curr, destination: `${destination}${curr}` }]);
       } 
     
-      return this.getModels(data[curr], `${destination}${curr}/`);
+      return acc.concat(this.getModels(data[curr], `${destination}${curr}/`));
     }, []);
 
     return sortBy(
