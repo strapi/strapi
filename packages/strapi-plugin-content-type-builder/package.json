@@ -24,11 +24,11 @@
   "dependencies": {
     "immutable": "^3.8.2",
     "pluralize": "^7.0.0",
-    "strapi-generate": "3.0.0-alpha.14.5",
-    "strapi-generate-api": "3.0.0-alpha.14.5"
+    "strapi-generate": "file:../strapi-generate",
+    "strapi-generate-api": "file:../strapi-generate-api"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.14.5"
+    "strapi-helper-plugin": "file:../strapi-helper-plugin"
   },
   "author": {
     "name": "Strapi team",

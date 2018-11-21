@@ -424,7 +424,7 @@ module.exports = {
 
                   if (this.loaders[association.collection || association.model]) {
                     // return this.loaders[association.collection].load({ ids: arrayOfIds, query: queryOpts.query });
-                    return arrayOfIds.map(id => this.loaders[association.collection || association.model].load({ ids: arrayOfIds, options: queryOpts }));
+                    return this.loaders[association.collection || association.model].load({ ids: arrayOfIds, options: queryOpts });
                   }
                   break;
                   // falls through
@@ -467,18 +467,18 @@ module.exports = {
     return new DataLoader(keys => {
       return new Promise(async (resolve, reject) => {
         try {
-          const { ids, options } = this.extractQueries(keys);
-          console.log(ids);
-          const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, {
-            ...query,
-            query: {
-              _id: _.uniq(ids.map(x => x.toString()))
-            },
-            populate: []
-          });
+          const { queriesIds, queriesOptions, map } = this.extractQueries(_.cloneDeep(keys));
 
-          const entries = request && request.toJSON ? request.toJSON() : request;
-          const data = ids.map(id => entries.find(x => (x.id || x._id) == id));
+          const executeQueries = await Promise.all(queriesIds.map((ids, index) => this.makeQuery(model, ids, queriesOptions[index])));
+
+          const data = keys.map((query, index) => {
+            const indexResults = map.findIndex(queryMap => queryMap.indexOf(index) !== -1);
+            const results = executeQueries[indexResults];
+
+            return query.ids.map(id => 
+              results.find(entry => (entry._id || entry.id || '').toString() === id.toString())
+            );
+          });
 
           resolve(data);
         } catch (e) {
@@ -489,43 +489,53 @@ module.exports = {
       cacheKeyFn: (key) => {
         return _.isObjectLike(key) ? JSON.stringify(_.cloneDeep(key)) : key;
       }
-    })
+    });
+  },
+
+  makeQuery: async function(model, ids, queryOptions) {
+    const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, {
+      ...queryOptions,
+      query: {
+        _id: _.uniq(ids.map(x => x.toString()))
+      },
+      populate: []
+    });
+    
+    const entries = request && request.toJSON ? request.toJSON() : request;
+
+    return entries;
   },
 
   extractQueries: function(keys) {
-    const queries = [];
+    const queriesIds = [];
     const queriesOptions = [];
-
-    console.log(keys);
+    const map = [[]]; // { <originalPosition> : [queries] }
     
     keys.forEach((current, index) => {
-      if (index < 1) {
-        queries.push(current.ids);
-        queriesOptions.push(current.query);
-      }
+      const { query, ...options } = current.options;
 
       // Find similar query.
-      const indexQueriesOptions = queriesOptions.findIndex(queryOption => _.isEqual(queryOption, current.query));
+      const indexQueriesOptions = queriesOptions.findIndex(queryOption => _.isEqual(queryOption, options));
 
-      if (indexQueriesOptions) {
+      if (indexQueriesOptions !== -1) {
         // Push to this query the new IDs to fetch.
-        queries[indexQueriesOptions].push(...current.ids);
+        queriesIds[indexQueriesOptions].push(...current.ids);
+        map[indexQueriesOptions].push(index);
       } else {
         // Create new query in the query.
         // Note: The query and the query options have the same index in both arrays.
-        queries.push(current.ids);
-        queriesOptions.push(current.query);
+        queriesIds.push(current.ids);
+        queriesOptions.push(options);
+        
+        map[queriesIds.length - 1] = [];
+        map[queriesIds.length - 1].push(index);
       }
     });
 
-    console.log(queries);
-    console.log(queriesOptions);
-
-    // const ids = _.uniq(_.flatten(keys.map(query => query.ids.map(x => x.toString()))));
-
-
     return {
-      ids
-    }
+      queriesIds,
+      queriesOptions,
+      map
+    };
   }
 };

@@ -26,7 +26,7 @@
     "draft-js": "^0.10.5",
     "react-select": "^1.2.1",
     "showdown": "^1.8.6",
-    "strapi-helper-plugin": "3.0.0-alpha.14.5"
+    "strapi-helper-plugin": "file:../strapi-helper-plugin"
   },
   "dependencies": {
     "pluralize": "^7.0.0"
