@@ -151,7 +151,7 @@ module.exports = {
     );
 
     return data;
-    },
+  },
 
   /**
    * Promise to search a/an <%= id %>.
