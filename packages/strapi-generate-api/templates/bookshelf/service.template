@@ -150,7 +150,7 @@ module.exports = {
     await <%= globalID %>.updateRelations(params);
 
     return <%= globalID %>.forge(params).destroy();
-    },
+  },
 
   /**
    * Promise to search a/an <%= id %>.
