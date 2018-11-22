@@ -1,7 +1,9 @@
 {
   "private": true,
   "version": "3.0.0-alpha.14.5",
-  "dependencies": {},
+  "dependencies": {
+    "cypress": "^3.1.2"
+  },
   "devDependencies": {
     "assert": "~1.3.0",
     "axios": "^0.18.0",

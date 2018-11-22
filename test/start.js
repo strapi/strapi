@@ -2,6 +2,7 @@ const spawn = require('child_process').spawn;
 const fs = require('fs');
 const path = require('path');
 const shell = require('shelljs');
+const cypress = require('cypress')
 const { deleteApp } = require('./helpers/deleteFolder');
 
 const strapiBin = path.resolve('./packages/strapi/bin/strapi.js');
@@ -65,6 +66,7 @@ const main = async () => {
         });
 
       } catch (e) {
+        console.log(e)
         if (typeof appStart !== 'undefined') {
           process.kill(appStart.pid);
         }
@@ -72,6 +74,7 @@ const main = async () => {
       }
     });
   };
+
 
   const test = () => {
     return new Promise(async (resolve) => {
@@ -98,12 +101,18 @@ const main = async () => {
     });
   };
 
+  const cypressTest = () => {
+    return cypress
+      .run({ spec: './packages/**/cypress/integration/*' });
+  }
+
   const testProcess = async (database) => {
     try {
       await clean();
       await generate(database);
       await start();
-      await test();
+      await cypressTest();
+      // await test();
       process.kill(appStart.pid);
     } catch (e) {
       console.error(e.message);
@@ -114,7 +123,7 @@ const main = async () => {
   await testProcess(databases.mongo);
   // await testProcess(databases.postgres);
   // await testProcess(databases.mysql);
-  process.exit(testExitCode);
+  // process.exit(testExitCode);
 };
 
 main();
