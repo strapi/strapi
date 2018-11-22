@@ -45,14 +45,29 @@ module.exports = {
       // Retrieving referring model.
       const ref = this.retrieveModel(model, query.options.source);
 
-
       if (query.single) {
         // Return object instead of array for one-to-many relationship.
         return data.find(entry => (entry._id || entry.id || '').toString() === query.params[ref.primaryKey].toString());
       }
 
       // Extracting ids from original request to map with query results.
-      const ids = query.options.query[ref.primaryKey];
+      const ids = (() => {
+        if ( _.get(query.options, `query.${ref.primaryKey}`)) {
+          return  _.get(query.options, `query.${ref.primaryKey}`);
+        }
+
+        // Single object to retrieve (one-to-many).
+        const alias = _.first(Object.keys(query.options.query));
+
+        return {
+          alias,
+          value: _.get(query.options, `query.${alias}`)
+        };
+      })();
+
+      if (!_.isArray(ids)) {
+        return data.filter(entry => entry[ids.alias].toString() === ids.value.toString());
+      }
 
       return ids
         .map(id => data.find(entry => entry[ref.primaryKey].toString() === id.toString()))
@@ -62,15 +77,16 @@ module.exports = {
 
   makeQuery: async function(model, query = {}) {
     // Retrieve refering model.
-    const ref = this.retrieveModel(model, _.get(query.options, 'source'));
-    // Run query and remove duplicated ID.
-    const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, {
+    const params = {
       ...query.options,
-      query: {
-        [ref.primaryKey]: _.uniq(query.ids.map(x => x.toString()))
-      },
-      populate: []
-    });
+      populate: [],
+      query: {}
+    };
+
+    params.query[query.alias] = _.uniq(query.ids.map(x => x.toString())) ;
+
+    // Run query and remove duplicated ID.
+    const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, params);
     
     return request && request.toJSON ? request.toJSON() : request;
   },
@@ -88,7 +104,7 @@ module.exports = {
     
     keys.forEach((current, index) => {
       // Extract query options.
-      const { single = false, params = {} } = current;
+      const { single = false, params = {}, association } = current;
       const { query = {}, ...options } = current.options;
   
       // Retrieving referring model.
@@ -97,15 +113,24 @@ module.exports = {
       // Find similar query.
       const indexQueries = queries.findIndex(query => _.isEqual(query.options, options));
 
+      const ids = (() => {
+        if (single) {
+          return [params[ref.primaryKey]];
+        }
+
+        return _.isArray(query[ref.primaryKey]) ? query[ref.primaryKey] : [query[association.via]];
+      })();
+
       if (indexQueries !== -1) {
         // Push to the same query the new IDs to fetch.
-        queries[indexQueries].ids.push(...(single ? [params[ref.primaryKey]] : query[ref.primaryKey]));
+        queries[indexQueries].ids.push(...ids);
         map[indexQueries].push(index);
       } else {
         // Create new query in the query.
         queries.push({
-          ids: single ? [params[ref.primaryKey]] : query[ref.primaryKey],
-          options: options
+          ids,
+          options,
+          alias: _.first(Object.keys(query))
         });
         
         map[queries.length - 1 > 0 ? queries.length - 1 : 0] = [];

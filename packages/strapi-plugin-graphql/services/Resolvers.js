@@ -400,6 +400,7 @@ module.exports = {
 
               // Skip.
               queryOpts.skip = convertedParams.start;
+              
 
               switch (association.nature) {
                 case 'manyToMany': {
@@ -434,19 +435,13 @@ module.exports = {
               queryOpts.query.hasOwnProperty('id') &&
               queryOpts.query.id.hasOwnProperty('value') &&
               Array.isArray(queryOpts.query.id.value)
-            ){
+            ) {
               queryOpts.query.id.symbol = 'IN';
             }
-            
+
             return association.model ?
-              {} || Loaders.loaders[association.collection || association.model].load({ params, options: queryOpts, single: true }):
-              [] || Loaders.loaders[association.collection || association.model].load({ options: queryOpts });
-
-            // const value = await (association.model
-            //   ? resolvers.fetch(params, association.plugin, [])
-            //   : resolvers.fetchAll(params, { ...queryOpts, populate: [] }));
-
-            // return value && value.toJSON ? value.toJSON() : value;
+              Loaders.loaders[association.collection || association.model].load({ params, options: queryOpts, single: true }):
+              Loaders.loaders[association.collection || association.model].load({ options: queryOpts, association });
           },
         });
       });
