@@ -46,7 +46,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
         <div>
           <div className={`${styles.title} ${styles.flex}`}>
             <span>{startCase(this.props.name)}</span>
-            <i className={`fa fa-${this.props.icoType}`} onClick={this.handleEdit} role="button" />
+            <i className={`fa fa-${this.props.icoType}`} id="editCTName" onClick={this.handleEdit} role="button" />
           </div>
           <div className={styles.subTitle}>{description}</div>
         </div>
