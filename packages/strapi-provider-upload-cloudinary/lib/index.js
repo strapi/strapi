@@ -50,7 +50,7 @@ module.exports = {
       },
       async delete (file) {
         try {
-          const response = await cloudinary.uploader.destroy(file.public_id + '3', {
+          const response = await cloudinary.uploader.destroy(file.public_id, {
             invalidate: true
           });
           if (response.result !== 'ok') {
