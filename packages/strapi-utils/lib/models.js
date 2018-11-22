@@ -480,7 +480,7 @@ module.exports = {
         formattedValue = value;
       }
 
-      if (_.includes(['_start', '_limit'], key)) {
+      if (_.includes(['_start', '_limit', '_populate'], key)) {
         result = convertor(formattedValue, key);
       } else if (key === '_sort') {
         const [attr, order = 'ASC'] = formattedValue.split(':');

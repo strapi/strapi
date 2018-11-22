@@ -383,7 +383,7 @@ module.exports = {
               : strapi.models[params.model];
 
             if (association.type === 'model') {
-              params.id = _.get(obj, [association.alias, ref.primaryKey], obj[association.alias]);
+              params[ref.primaryKey] = _.get(obj, [association.alias, ref.primaryKey], obj[association.alias]);
             } else {
               // Apply optional arguments to make more precise nested request.
               const convertedParams = strapi.utils.models.convertParams(
@@ -439,8 +439,8 @@ module.exports = {
             }
             
             return association.model ?
-              Loaders.loaders[association.collection || association.model].load({ params, options: queryOpts, single: true }):
-              Loaders.loaders[association.collection || association.model].load({ options: queryOpts });
+              {} || Loaders.loaders[association.collection || association.model].load({ params, options: queryOpts, single: true }):
+              [] || Loaders.loaders[association.collection || association.model].load({ options: queryOpts });
 
             // const value = await (association.model
             //   ? resolvers.fetch(params, association.plugin, [])

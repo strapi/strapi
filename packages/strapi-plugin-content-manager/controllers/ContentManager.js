@@ -28,7 +28,7 @@ module.exports = {
 
       return;
     }
-
+    
     // Default list with filters or not.
     ctx.body = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll(ctx.params, ctx.request.query);
   },

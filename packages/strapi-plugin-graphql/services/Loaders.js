@@ -44,11 +44,18 @@ module.exports = {
 
       // Retrieving referring model.
       const ref = this.retrieveModel(model, query.options.source);
+
+
+      if (query.single) {
+        // Return object instead of array for one-to-many relationship.
+        return data.find(entry => (entry._id || entry.id || '').toString() === query.params[ref.primaryKey].toString());
+      }
+
       // Extracting ids from original request to map with query results.
       const ids = query.options.query[ref.primaryKey];
 
       return ids
-        .map(id => data.find(entry => (entry._id || entry.id || '').toString() === id.toString()))
+        .map(id => data.find(entry => entry[ref.primaryKey].toString() === id.toString()))
         .filter(entry => entry !== undefined);
     });
   },
@@ -81,7 +88,9 @@ module.exports = {
     
     keys.forEach((current, index) => {
       // Extract query options.
-      const { query, ...options } = current.options;
+      const { single = false, params = {} } = current;
+      const { query = {}, ...options } = current.options;
+  
       // Retrieving referring model.
       const ref = this.retrieveModel(model, options.source);
 
@@ -90,12 +99,12 @@ module.exports = {
 
       if (indexQueries !== -1) {
         // Push to the same query the new IDs to fetch.
-        queries[indexQueries].ids.push(...query[ref.primaryKey]);
+        queries[indexQueries].ids.push(...(single ? [params[ref.primaryKey]] : query[ref.primaryKey]));
         map[indexQueries].push(index);
       } else {
         // Create new query in the query.
         queries.push({
-          ids: query[ref.primaryKey],
+          ids: single ? [params[ref.primaryKey]] : query[ref.primaryKey],
           options: options
         });
         

@@ -500,6 +500,10 @@ module.exports = function (strapi) {
           result.key = `limit`;
           result.value = parseFloat(value);
           break;
+        case '_populate':
+          result.key = `populate`;
+          result.value = value;
+          break;
         case '_contains':
           result.key = `where.${key}`;
           result.value = {

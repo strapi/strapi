@@ -258,6 +258,9 @@ module.exports = {
       if (_.isFunction(resolver)) {
         context.query = this.convertToParams(options);
         context.params = this.amountLimiting(options);
+        
+        // Avoid population.
+        context.query._populate = [];
 
         if (isController) {
           const values = await resolver.call(null, context);
