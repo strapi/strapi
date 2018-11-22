@@ -7,9 +7,9 @@
  */
 
 const _ = require('lodash');
-const DataLoader = require('dataloader');
 const pluralize = require('pluralize');
 const Aggregator = require('./Aggregator');
+const Loaders = require('./Loaders');
 const Query = require('./Query.js');
 const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
@@ -362,13 +362,8 @@ module.exports = {
           default:
         }
 
-        // TODO:
-        // - For each association, I've to create a loader.
-        // - Each loader only return one kind of data (user, product or category).
-        // - Each loader should only execute one request.
-        // - Maybe, I should create specific loader to handle `where` condition like this https://github.com/facebook/dataloader/blob/master/examples/Knex.md
-
-        this.loaders[association.collection || association.model] = this.createLoader(association.collection || association.model, association.plugin);
+        // Create dynamic dataloader for query batching and caching.
+        Loaders.createLoader(association.collection || association.model, association.plugin);
 
         _.merge(acc.resolver[globalId], {
           [association.alias]: async (obj, options) => {
@@ -421,11 +416,6 @@ module.exports = {
                     [ref.primaryKey]: arrayOfIds,
                     ...where.where,
                   }).where;
-
-                  if (this.loaders[association.collection || association.model]) {
-                    // return this.loaders[association.collection].load({ ids: arrayOfIds, query: queryOpts.query });
-                    return this.loaders[association.collection || association.model].load({ ids: arrayOfIds, options: queryOpts });
-                  }
                   break;
                   // falls through
                 }
@@ -447,95 +437,21 @@ module.exports = {
             ){
               queryOpts.query.id.symbol = 'IN';
             }
+            
+            return association.model ?
+              resolvers.fetch(params, association.plugin, []):
+              Loaders.loaders[association.collection || association.model].load({ options: queryOpts });
 
-            const value = await (association.model
-              ? resolvers.fetch(params, association.plugin, [])
-              : resolvers.fetchAll(params, { ...queryOpts, populate: [] }));
+            // const value = await (association.model
+            //   ? resolvers.fetch(params, association.plugin, [])
+            //   : resolvers.fetchAll(params, { ...queryOpts, populate: [] }));
 
-            return value && value.toJSON ? value.toJSON() : value;
+            // return value && value.toJSON ? value.toJSON() : value;
           },
         });
       });
 
       return acc;
     }, initialState);
-  },
-
-  loaders: {},
-
-  createLoader: function(model) {
-    return new DataLoader(keys => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          const { queriesIds, queriesOptions, map } = this.extractQueries(_.cloneDeep(keys));
-
-          const executeQueries = await Promise.all(queriesIds.map((ids, index) => this.makeQuery(model, ids, queriesOptions[index])));
-
-          const data = keys.map((query, index) => {
-            const indexResults = map.findIndex(queryMap => queryMap.indexOf(index) !== -1);
-            const results = executeQueries[indexResults];
-
-            return query.ids.map(id => 
-              results.find(entry => (entry._id || entry.id || '').toString() === id.toString())
-            );
-          });
-
-          resolve(data);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    }, {
-      cacheKeyFn: (key) => {
-        return _.isObjectLike(key) ? JSON.stringify(_.cloneDeep(key)) : key;
-      }
-    });
-  },
-
-  makeQuery: async function(model, ids, queryOptions) {
-    const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, {
-      ...queryOptions,
-      query: {
-        _id: _.uniq(ids.map(x => x.toString()))
-      },
-      populate: []
-    });
-    
-    const entries = request && request.toJSON ? request.toJSON() : request;
-
-    return entries;
-  },
-
-  extractQueries: function(keys) {
-    const queriesIds = [];
-    const queriesOptions = [];
-    const map = [[]]; // { <originalPosition> : [queries] }
-    
-    keys.forEach((current, index) => {
-      const { query, ...options } = current.options;
-
-      // Find similar query.
-      const indexQueriesOptions = queriesOptions.findIndex(queryOption => _.isEqual(queryOption, options));
-
-      if (indexQueriesOptions !== -1) {
-        // Push to this query the new IDs to fetch.
-        queriesIds[indexQueriesOptions].push(...current.ids);
-        map[indexQueriesOptions].push(index);
-      } else {
-        // Create new query in the query.
-        // Note: The query and the query options have the same index in both arrays.
-        queriesIds.push(current.ids);
-        queriesOptions.push(options);
-        
-        map[queriesIds.length - 1] = [];
-        map[queriesIds.length - 1].push(index);
-      }
-    });
-
-    return {
-      queriesIds,
-      queriesOptions,
-      map
-    };
   }
 };
