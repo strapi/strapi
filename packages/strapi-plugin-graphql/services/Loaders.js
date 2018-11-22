@@ -21,7 +21,9 @@ module.exports = {
           // Run queries in parallel.
           const results = await Promise.all(queries.map((query) => this.makeQuery(model, query)));
           // Use to match initial queries order.
-          resolve(this.mapData(model, keys, map, results));
+          const data = this.mapData(model, keys, map, results);
+
+          resolve(data);
         } catch (e) {
           reject(e);
         }
@@ -45,9 +47,9 @@ module.exports = {
       // Extracting ids from original request to map with query results.
       const ids = query.options.query[ref.primaryKey];
 
-      return ids.map(id => 
-        data.find(entry => (entry._id || entry.id || '').toString() === id.toString())
-      );
+      return ids
+        .map(id => data.find(entry => (entry._id || entry.id || '').toString() === id.toString()))
+        .filter(entry => entry !== undefined);
     });
   },
 

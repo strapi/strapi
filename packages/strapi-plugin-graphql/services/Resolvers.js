@@ -439,7 +439,7 @@ module.exports = {
             }
             
             return association.model ?
-              resolvers.fetch(params, association.plugin, []):
+              Loaders.loaders[association.collection || association.model].load({ params, options: queryOpts, single: true }):
               Loaders.loaders[association.collection || association.model].load({ options: queryOpts });
 
             // const value = await (association.model
