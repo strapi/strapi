@@ -35,6 +35,77 @@ module.exports = {
     return _.get(strapi.plugins, [plugin, 'models', model]) || _.get(strapi, ['models', model]) || undefined;
   },
 
+  generateMatchStage: function (qb) {
+    return (strapiModel, filters) => {
+      if (!filters) {
+        return undefined;
+      }
+
+      // 1st level deep filter
+      if (filters.where) {
+        this.generateMatchStage(qb)(strapiModel, { relations: filters.where });
+      }
+
+      // 2nd+ level deep filter
+      _.forEach(filters.relations, (value, key) => {
+        if (key !== 'relations') {
+          const association = strapiModel.associations.find(a => a.alias === key);
+          if (!association) {
+            const fieldKey = `${strapiModel.collectionName}.${key}`;
+            if (_.isArray(value.value)  && value.symbol !== 'IN') {
+              for (const value in value.value) {
+                qb[value ? 'where' : 'orWhere'](fieldKey, value.symbol, value.value[value]);
+              }
+            } else {
+              qb.where(fieldKey, value.symbol, value.value);
+            }
+          } else {
+            const model = association.plugin ?
+              strapi.plugins[association.plugin].models[association.model || association.collection] :
+              strapi.models[association.model || association.collection];
+            const relationTable = model.collectionName;
+
+            qb.distinct();
+
+            if (association.nature === 'manyToMany') {
+              // Join on both ends
+              qb.innerJoin(
+                association.tableCollectionName,
+                `${association.tableCollectionName}.${strapiModel.info.name}_${strapiModel.primaryKey}`,
+                `${strapiModel.collectionName}.${strapiModel.primaryKey}`,
+              );
+
+              qb.innerJoin(
+                relationTable,
+                `${association.tableCollectionName}.${strapiModel.attributes[key].attribute}_${strapiModel.attributes[key].column}`,
+                `${relationTable}.${model.primaryKey}`,
+              );
+            } else {
+              const externalKey = association.type === 'collection'
+                ? `${relationTable}.${association.via}`
+                : `${relationTable}.${model.primaryKey}`;
+
+              const internalKey = association.type === 'collection'
+                ? `${strapiModel.collectionName}.${strapiModel.primaryKey}`
+                : `${strapiModel.collectionName}.${association.alias}`;
+
+              qb.innerJoin(relationTable, externalKey, internalKey);
+            }
+
+            if (_.isPlainObject(value)) {
+              this.generateMatchStage(qb)(
+                model,
+                { relations: value.value }
+              );
+            }
+          }
+        } else {
+          this.generateMatchStage(qb)(strapiModel, { relations: value });
+        }
+      });
+    };
+  },
+
   findOne: async function (params, populate) {
     const record = await this
       .forge({
