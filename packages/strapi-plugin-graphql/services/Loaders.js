@@ -76,7 +76,7 @@ module.exports = {
   },
 
   makeQuery: async function(model, query = {}) {
-    // Retrieve refering model.
+    // Construct parameters object sent to the Content Manager service.
     const params = {
       ...query.options,
       populate: [],
@@ -130,7 +130,7 @@ module.exports = {
         queries.push({
           ids,
           options,
-          alias: _.first(Object.keys(query))
+          alias: _.first(Object.keys(query)) || ref.primaryKey
         });
         
         map[queries.length - 1 > 0 ? queries.length - 1 : 0] = [];
