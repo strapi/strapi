@@ -47,10 +47,7 @@ exports.connect = (provider, query) => {
       try {
         const users = await strapi.query('user', 'users-permissions').find({
           where: {
-            email: {
-              symbol: '=',
-              value: profile.email
-            }
+            email: profile.email
           }
         });
 
