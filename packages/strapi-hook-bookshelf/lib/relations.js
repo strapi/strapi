@@ -53,10 +53,22 @@ module.exports = {
           if (!association) {
             const fieldKey = `${strapiModel.collectionName}.${key}`;
             if (_.isArray(value.value)  && value.symbol !== 'IN') {
-              for (const value in value.value) {
+              for (let value in value.value) {
+                if (typeof value === 'string') {
+                  value = {
+                    value,
+                    symbol: '='
+                  };
+                }
                 qb[value ? 'where' : 'orWhere'](fieldKey, value.symbol, value.value[value]);
               }
             } else {
+              if (typeof value === 'string') {
+                value = {
+                  value,
+                  symbol: '='
+                };
+              }
               qb.where(fieldKey, value.symbol, value.value);
             }
           } else {
