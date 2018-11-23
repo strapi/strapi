@@ -1,17 +1,20 @@
 {
-  "name": "strapi-upload-local",
-  "version": "3.0.0-alpha.14.4.0",
-  "description": "Local provider for strapi upload",
+  "name": "strapi-provider-email-sendgrid",
+  "version": "3.0.0-alpha.14.5",
+  "description": "Sendgrid provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
-    "upload",
-    "strapi"
+    "email",
+    "strapi",
+    "sendgrid"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
-  "dependencies": {},
+  "dependencies": {
+    "@sendgrid/mail": "6.2.1"
+  },
   "strapi": {
     "isProvider": true
   },

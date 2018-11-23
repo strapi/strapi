@@ -16,13 +16,13 @@ function* getData() {
       yield call(request, `${strapi.backendURL}/users/me`, { method: 'GET' });
     }
 
-    const [{ allowGa }, { strapiVersion }, { currentEnvironment }, { layout }] = yield all([
+    const [{ uuid }, { strapiVersion }, { currentEnvironment }, { layout }] = yield all([
       call(request, '/admin/gaConfig', { method: 'GET' }),
       call(request, '/admin/strapiVersion', { method: 'GET' }),
       call(request, '/admin/currentEnvironment', { method: 'GET' }),
       call(request, '/admin/layout', { method: 'GET' }),
     ]);
-    yield put(getAdminDataSucceeded({ allowGa, strapiVersion, currentEnvironment, layout }));
+    yield put(getAdminDataSucceeded({ uuid, strapiVersion, currentEnvironment, layout }));
 
   } catch(err) {
     console.log(err); // eslint-disable-line no-console
