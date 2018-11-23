@@ -47,7 +47,7 @@ module.exports = {
 
       if (query.single) {
         // Return object instead of array for one-to-many relationship.
-        return data.find(entry => (entry._id || entry.id || '').toString() === query.params[ref.primaryKey].toString());
+        return data.find(entry => entry[ref.primaryKey].toString() === (query.params[ref.primaryKey] || '').toString());
       }
 
       // Extracting ids from original request to map with query results.
@@ -64,7 +64,7 @@ module.exports = {
           value: _.get(query.options, `query.${alias}`)
         };
       })();
-
+      
       if (!_.isArray(ids)) {
         return data.filter(entry => entry[ids.alias].toString() === ids.value.toString());
       }
@@ -83,7 +83,7 @@ module.exports = {
       query: {}
     };
 
-    params.query[query.alias] = _.uniq(query.ids.map(x => x.toString())) ;
+    params.query[query.alias] = _.uniq(query.ids.filter(x => !_.isEmpty(x)).map(x => x.toString())) ;
 
     // Run query and remove duplicated ID.
     const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, params);
