@@ -130,6 +130,26 @@ module.exports = {
 };
 ```
 
+### Bookshelf, Mongoose
+
+**Path —** `./config/functions/bookshelf.js`.
+**Path —** `./config/functions/mongoose.js`.
+
+When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
+
+As an example, for using the `mongoose-simple-random` plugin for MongoDB, you can register it like this:
+
+**Path —** `./config/functions/mongoose.js`.
+```js
+'use strict';
+
+const random = require('mongoose-simple-random');
+
+module.exports = (mongoose, connection) => {
+  mongoose.plugin(random);
+};
+```
+
 ***
 
 ## Locales
