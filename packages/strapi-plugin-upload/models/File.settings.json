@@ -46,6 +46,10 @@
       "configurable": false,
       "required": true
     },
+    "public_id": {
+      "type": "string",
+      "configurable": false
+    },
     "related": {
       "collection": "*",
       "filter": "field",
