@@ -29,6 +29,7 @@ module.exports = {
     modelName = '',
     attributeName = '',
     rootType = 'query',
+    action = ''
   }) {
     // Type
     if (definition.type) {
@@ -62,7 +63,7 @@ module.exports = {
           break;
       }
 
-      if (definition.required) {
+      if (definition.required && action !== 'update') {
         type += '!';
       }
 
@@ -202,6 +203,21 @@ module.exports = {
           })
           .join('\n')}
       }
+
+      input edit${inputName} {
+        ${Object.keys(model.attributes)
+          .filter(attribute => model.attributes[attribute].private !== true)
+          .map(attribute => {
+            return `${attribute}: ${this.convertType({
+              definition: model.attributes[attribute],
+              modelName: globalId,
+              attributeName: attribute,
+              rootType: 'mutation',
+              action: 'update'
+            })}`;
+          })
+          .join('\n')}
+      }
     `;
     /* eslint-enable */
   },
@@ -224,7 +240,7 @@ module.exports = {
         `;
       case 'update':
         return `
-          input ${type}${inputName}  { where: InputID, data: ${inputName} }
+          input ${type}${inputName}  { where: InputID, data: edit${inputName} }
           type ${type}${payloadName} { ${pluralize.singular(name)}: ${
           model.globalId
         } }
