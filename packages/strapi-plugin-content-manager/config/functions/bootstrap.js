@@ -53,7 +53,7 @@ module.exports = async cb => {
   }, {});
   // Reference all current models
   const appModels = Object.keys(pluginsModel).reduce((acc, curr) => {
-    const models = Object.keys(_.get(pluginModels, [curr, 'models'], {}));
+    const models = Object.keys(_.get(pluginsModel, [curr, 'models'], {}));
 
     return acc.concat(models);
   }, Object.keys(strapi.models).filter(m => m !== 'core_store'));
