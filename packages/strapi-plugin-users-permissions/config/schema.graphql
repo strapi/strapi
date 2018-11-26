@@ -1,3 +1,5 @@
+const _ = require('lodash');
+
 module.exports = {
   type: {
     UsersPermissionsPermission: false // Make this type NOT queriable.
@@ -63,7 +65,7 @@ module.exports = {
         description: 'Update an existing role',
         resolverOf: 'UsersPermissions.updateRole',
         resolver: async (obj, options, ctx) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(ctx);
+          await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(ctx.params, ctx.body);
 
           return { ok: true };
         }
@@ -75,6 +77,48 @@ module.exports = {
           await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(ctx);
 
           return { ok: true };
+        }
+      },
+      createUser: {
+        description: 'Create a new user',
+        resolverOf: 'User.create',
+        resolver: async (obj, options, { context }) => {
+          context.params =  _.toPlainObject(options.input.where);
+          context.request.body = _.toPlainObject(options.input.data);
+
+          await strapi.plugins['users-permissions'].controllers.user.create(context);
+
+          return {
+            user: context.body
+          };
+        }
+      },
+      updateUser: {
+        description: 'Update an existing user',
+        resolverOf: 'User.update',
+        resolver: async (obj, options, { context }) => {
+          context.params =  _.toPlainObject(options.input.where);
+          context.request.body = _.toPlainObject(options.input.data);
+
+          await strapi.plugins['users-permissions'].controllers.user.update(context);
+
+          return { 
+            user: context.body
+          };
+        }
+      },
+      deleteUser: {
+        description: 'Delete an existing user',
+        resolverOf: 'User.destroy',
+        resolver: async (obj, options, { context }) => {
+          context.params =  _.toPlainObject(options.input.where);
+          context.request.body = _.toPlainObject(options.input.data);
+
+          await strapi.plugins['users-permissions'].controllers.user.delete(context);
+
+          return {
+            user: context.body
+          };
         }
       }
     }
