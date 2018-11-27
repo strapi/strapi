@@ -111,13 +111,21 @@ module.exports = {
         description: 'Delete an existing user',
         resolverOf: 'User.destroy',
         resolver: async (obj, options, { context }) => {
+          // Set parameters to context.
           context.params =  _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
-          await strapi.plugins['users-permissions'].controllers.user.delete(context);
+          // Retrieve user to be able to return it because 
+          // Bookshelf doesn't return the row once deleted.
+          await strapi.plugins['users-permissions'].controllers.user.findOne(context);
+          // Assign result to user.
+          const user = context.body;
+
+          // Run destroy query.
+          await strapi.plugins['users-permissions'].controllers.user.destroy(context);
 
           return {
-            user: context.body
+            user
           };
         }
       }
