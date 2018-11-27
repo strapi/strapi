@@ -584,7 +584,7 @@ module.exports = {
       };
     } else if (model.attributes[key]) {
       field = model.attributes[key];
-    } else {
+    } else if (typeof key === 'string') {
       // Remove the filter keyword at the end
       let splitKey = key.split('_').slice(0, -1);
       splitKey = splitKey.join('_');
