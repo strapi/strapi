@@ -12,9 +12,9 @@ module.exports = {
 
     const result = this.aggregate(aggregateStages);
 
-    if (_.has(filters, 'start')) result.skip(filters.start);
-    if (_.has(filters, 'limit')) result.limit(filters.limit);
-    if (_.has(filters, 'sort')) result.sort(filters.sort);
+    if (_.has(filters, 'start') && filters.start) result.skip(filters.start);
+    if (_.has(filters, 'limit') && filters.limit) result.limit(filters.limit);
+    if (_.has(filters, 'sort') && filters.sort) result.sort(filters.sort);
 
     return result;
   },
