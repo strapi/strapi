@@ -89,7 +89,7 @@ module.exports = {
           await strapi.plugins['users-permissions'].controllers.user.create(context);
 
           return {
-            user: context.body
+            user: context.body.toJSON ? context.body.toJSON() : context.body
           };
         }
       },
@@ -103,7 +103,7 @@ module.exports = {
           await strapi.plugins['users-permissions'].controllers.user.update(context);
 
           return { 
-            user: context.body
+            user: context.body.toJSON ? context.body.toJSON() : context.body
           };
         }
       },
@@ -119,7 +119,7 @@ module.exports = {
           // Bookshelf doesn't return the row once deleted.
           await strapi.plugins['users-permissions'].controllers.user.findOne(context);
           // Assign result to user.
-          const user = context.body;
+          const user = context.body.toJSON ? context.body.toJSON() : context.body;
 
           // Run destroy query.
           await strapi.plugins['users-permissions'].controllers.user.destroy(context);

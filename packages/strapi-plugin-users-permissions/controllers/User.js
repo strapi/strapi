@@ -95,6 +95,7 @@ module.exports = {
 
     try {
       const data = await strapi.plugins['users-permissions'].services.user.add(ctx.request.body);
+
       // Send 201 `created`
       ctx.created(data);
     } catch(error) {

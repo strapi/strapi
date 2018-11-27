@@ -192,7 +192,6 @@ module.exports = {
     return `
       input ${inputName} {
         ${Object.keys(model.attributes)
-          .filter(attribute => model.attributes[attribute].private !== true)
           .map(attribute => {
             return `${attribute}: ${this.convertType({
               definition: model.attributes[attribute],
@@ -206,7 +205,6 @@ module.exports = {
 
       input edit${inputName} {
         ${Object.keys(model.attributes)
-          .filter(attribute => model.attributes[attribute].private !== true)
           .map(attribute => {
             return `${attribute}: ${this.convertType({
               definition: model.attributes[attribute],
