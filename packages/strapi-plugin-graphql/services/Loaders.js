@@ -76,18 +76,24 @@ module.exports = {
   },
 
   makeQuery: async function(model, query = {}) {
+    if (_.isEmpty(query.ids)) {
+      return [];
+    }
+
+    const ref = this.retrieveModel(model, query.options.source);
+
     // Construct parameters object sent to the Content Manager service.
     const params = {
       ...query.options,
-      populate: [],
+      populate: ref.associations.filter(a => !a.dominant).map(a => a.alias),
       query: {}
     };
 
-    params.query[query.alias] = _.uniq(query.ids.filter(x => !_.isEmpty(x)).map(x => x.toString())) ;
+    params.query[query.alias] = _.uniq(query.ids.filter(x => !_.isEmpty(x)).map(x => x.toString()));
 
     // Run query and remove duplicated ID.
     const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, params);
-    
+
     return request && request.toJSON ? request.toJSON() : request;
   },
 

@@ -1,4 +1,5 @@
 'use strict';
+/* global <%= globalID %> */
 
 /**
  * <%= filename %> service
@@ -9,6 +10,8 @@
 // Public dependencies.
 const _ = require('lodash');
 
+const { models: { mergeStages } } = require('strapi-utils');
+
 module.exports = {
 
   /**
@@ -17,22 +20,24 @@ module.exports = {
    * @return {Promise}
    */
 
-  fetchAll: (params) => {
+  fetchAll: (params, next, { populate } = {}) => {
     // Convert `params` object to filters compatible with Mongo.
     const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
-    // Select field to populate.
-    const populate = <%= globalID %>.associations
-      .filter(ast => ast.autoPopulate !== false)
-      .map(ast => ast.alias)
-      .join(' ');
+    const hook = strapi.hook[<%= globalID %>.orm];
+    // Generate stages.
+    const populateStage = hook.load().generateLookupStage(<%= globalID %>, { whitelistedPopulate: populate }); // Nested-Population
+    const matchStage = hook.load().generateMatchStage(<%= globalID %>, filters); // Nested relation filter
+    const aggregateStages = mergeStages(filters.populate || populateStage, matchStage);
 
-    return <%= globalID %>
-      .find()
-      .where(filters.where)
-      .sort(filters.sort)
+    const result = <%= globalID %>.aggregate(aggregateStages)
       .skip(filters.start)
-      .limit(filters.limit)
-      .populate(filters.populate || populate);
+      .limit(filters.limit);
+
+    if (_.has(filters, 'start')) result.skip(filters.start);
+    if (_.has(filters, 'limit')) result.limit(filters.limit);
+    if (!_.isEmpty(filters.sort)) result.sort(filters.sort);
+
+    return result;
   },
 
   /**

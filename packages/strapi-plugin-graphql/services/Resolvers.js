@@ -367,6 +367,11 @@ module.exports = {
 
         _.merge(acc.resolver[globalId], {
           [association.alias]: async (obj, options) => {
+            console.log(association.alias, `(${globalId})`);
+            console.log(obj);
+            console.log('####');
+
+
             // eslint-disable-line no-unused-vars
             // Construct parameters object to retrieve the correct related entries.
             const params = {
@@ -382,6 +387,16 @@ module.exports = {
               ? strapi.plugins[association.plugin].models[params.model]
               : strapi.models[params.model];
 
+              if (association.type === 'model' && !_.isEmpty(obj[association.alias])) {
+                // Nested relation has already been fetched
+                // we don't need to resend a request.
+
+                // Note: we can't apply the same principle on another relation type
+                // because it won't apply limit, sort, start, etc filters.
+                return obj[association.alias];
+              }
+              
+
             if (association.type === 'model') {
               params[ref.primaryKey] = _.get(obj, [association.alias, ref.primaryKey], obj[association.alias]);
             } else {
@@ -390,35 +405,34 @@ module.exports = {
                 name,
                 Query.convertToParams(Query.amountLimiting(options)),
               );
+
               const where = strapi.utils.models.convertParams(
                 name,
                 options.where || {},
               );
 
               // Limit, order, etc.
-              Object.assign(queryOpts, convertedParams);
+              Object.assign(queryOpts, convertedParams, { where: where.where });
 
               // Skip.
               queryOpts.skip = convertedParams.start;
-              
 
               switch (association.nature) {
-                case 'manyToMany': {
+                case "manyToMany": {
                   const arrayOfIds = (obj[association.alias] || []).map(
                     related => {
                       return related[ref.primaryKey] || related;
-                    },
+                    }
                   );
-
-                  // Where.
-                  queryOpts.query = strapi.utils.models.convertParams(name, {
-                    // Construct the "where" query to only retrieve entries which are
-                    // related to this entry.
-                    [ref.primaryKey]: arrayOfIds,
-                    ...where.where,
-                  }).where;
+                  
+                  Object.assign(queryOpts, {
+                    ...queryOpts,
+                    query: {
+                      [ref.primaryKey]: arrayOfIds
+                    }
+                  });
+                  
                   break;
-                  // falls through
                 }
                 default:
                   // Where.
