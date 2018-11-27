@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * SettingsPage
  */
 
@@ -36,23 +36,23 @@ class SettingsPage extends React.PureComponent {
   componentWillUnmount() {
     this.props.onReset();
   }
-  
+
   getModels = (data = this.props.schema.models, destination = '/') => {
     const models = Object.keys(data).reduce((acc, curr) => {
       if (curr !== 'plugins') {
-  
+
         if (!data[curr].fields && _.isObject(data[curr])) {
           return acc.concat(this.getModels(data[curr], `${destination}${curr}/`));
         }
-        
+
         return acc.concat([{ name: curr, destination: `${destination}${curr}` }]);
-      } 
-    
+      }
+
       return acc.concat(this.getModels(data[curr], `${destination}${curr}/`));
     }, []);
 
     return sortBy(
-      models.filter(obj => obj.name !== 'permission' && obj.name !== 'role'),
+      models.filter(obj => !!this.props.schema.layout[obj.name]),
       ['name'],
     );
   }
