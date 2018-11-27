@@ -23,8 +23,8 @@ import {
   size,
   split,
   take,
-  toNumber,
   toLower,
+  toNumber,
   replace,
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
