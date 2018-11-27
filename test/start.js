@@ -103,7 +103,7 @@ const main = async () => {
 
   const cypressTest = () => {
     return cypress
-      .run({ spec: './packages/**/cypress/integration/*' });
+      .run({ spec: './packages/**/cypress/integration/*', browser: 'chrome' });
   }
 
   const testProcess = async (database) => {

@@ -29,14 +29,17 @@ const serverRestartDelay = Cypress.config('serverRestartDelay');
 
 Cypress.Commands.add('createUser', () => {
   const user = {
-    username: 'soup',
-    email: 'hi@strapi.io',
-    password: 'coucou123',
+    username: 'admin',
+    email: 'admin@strapi.io',
+    password: 'pcw123',
   };
 
-  return cy.request({ url: `${backendUrl}/users-permissions/init`, method: 'GET' })
+  return cy
+    .request({ url: `${backendUrl}/users-permissions/init`, method: 'GET' })
     .then(response => {
-      const { body: { hasAdmin } } = response;
+      const {
+        body: { hasAdmin },
+      } = response;
 
       if (!hasAdmin) {
         // Create one
@@ -47,44 +50,44 @@ Cypress.Commands.add('createUser', () => {
 
 Cypress.Commands.add('checkModalOpening', () => {
   return cy.get('.modal').invoke('show');
-})
+});
 
 Cypress.Commands.add('deleteUser', (id, jwt) => {
   cy.request({
     url: `${backendUrl}/users/${id}`,
     method: 'DELETE',
     headers: {
-      Authorization: `Bearer ${jwt}`
-    }
+      Authorization: `Bearer ${jwt}`,
+    },
   });
 });
 
 Cypress.Commands.add('createProductAndTagApis', (jwt = null) => {
-  return cy
-    .fixture('api/tag.json')
-    .then(body => {
-      return cy.request({
+  return cy.fixture('api/tag.json').then(body => {
+    return cy
+      .request({
         url: `${backendUrl}/content-type-builder/models`,
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${jwt}`
+          Authorization: `Bearer ${jwt}`,
         },
         body,
       })
       .wait(serverRestartDelay)
       .fixture('api/product.json')
       .then(body => {
-        return cy.request({
-          url: `${backendUrl}/content-type-builder/models`,
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${jwt}`
-          },
-          body,
-        })
-        .wait(serverRestartDelay);
+        return cy
+          .request({
+            url: `${backendUrl}/content-type-builder/models`,
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+            body,
+          })
+          .wait(serverRestartDelay);
       });
-    });
+  });
 });
 
 Cypress.Commands.add('createCTMApis', (jwt = null) => {
@@ -114,8 +117,7 @@ Cypress.Commands.add('deleteAllModelData', (model, jwt, source = null) => {
     headers: {
       Authorization: `Bearer ${jwt}`,
     },
-  })
-  .then(data => {
+  }).then(data => {
     const entriesToDelete = data.body.reduce((acc, curr) => {
       return acc.concat(curr.id);
     }, []);
@@ -134,49 +136,49 @@ Cypress.Commands.add('deleteAllModelData', (model, jwt, source = null) => {
 });
 
 Cypress.Commands.add('deleteApi', (model, jwt) => {
-  return cy.request({
-    url: `${backendUrl}/content-type-builder/models/${model}`,
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${jwt}`
-    },
-  })
-  .wait(serverRestartDelay);
+  return cy
+    .request({
+      url: `${backendUrl}/content-type-builder/models/${model}`,
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    })
+    .wait(serverRestartDelay);
 });
 
 Cypress.Commands.add('login', () => {
-  cy.createUser()
-  return cy.request({
-    url: `${backendUrl}/auth/local`,
-    method: 'POST',
-    body: {
-      identifier: 'soup',
-      password: 'coucou123',
-    },
-  })
-  .then(response => {
-    window.localStorage.setItem('jwtToken', stringify(response.body.jwt));
-    window.localStorage.setItem('userInfo', stringify(response.body.user));
+  cy.createUser();
+  return cy
+    .request({
+      url: `${backendUrl}/auth/local`,
+      method: 'POST',
+      body: {
+        identifier: 'admin',
+        password: 'pcw123',
+      },
+    })
+    .then(response => {
+      window.localStorage.setItem('jwtToken', stringify(response.body.jwt));
+      window.localStorage.setItem('userInfo', stringify(response.body.user));
 
-    return response.body;
-  })
+      return response.body;
+    });
 });
 
 Cypress.Commands.add('seedData', (model, jwt, source = null) => {
-  return cy
-    .fixture(`seeds/${model}.json`)
-    .then(seed => {
-      seed.forEach(body => {
-        cy.request({
-          method: 'POST',
-          url: `${backendUrl}/content-manager/explorer/${model}?source='content-manager`,
-          headers: {
-            Authorization: `Bearer ${jwt}`,
-          },
-          body,
-        });
+  return cy.fixture(`seeds/${model}.json`).then(seed => {
+    seed.forEach(body => {
+      cy.request({
+        method: 'POST',
+        url: `${backendUrl}/content-manager/explorer/${model}?source='content-manager`,
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+        body,
       });
     });
+  });
 });
 
 Cypress.Commands.add('submitForm', () => {

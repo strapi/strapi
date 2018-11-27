@@ -1,7 +1,7 @@
 const frontLoadingDelay = Cypress.config('frontLoadingDelay');
 const userData = {
-  identifier: 'soup',
-  password: 'coucou123',
+  identifier: 'admin',
+  password: 'pcw123',
 };
 
 describe('Test login', () => {
@@ -19,19 +19,13 @@ describe('Test login', () => {
       cy.deleteUser(userId, jwt);
     }
   });
-  
 
   it('Should login the user', () => {
-    cy.visit('/admin/users-permissions/auth/login')
-      .wait(frontLoadingDelay);
+    cy.visit('/admin/users-permissions/auth/login').wait(frontLoadingDelay);
 
-    Object
-      .keys(userData)
-      .map(key => {
-        return cy
-          .get(`#${key}`)
-          .type(userData[key]);
-      });
+    Object.keys(userData).map(key => {
+      return cy.get(`#${key}`).type(userData[key]);
+    });
 
     cy.submitForm()
       .window()
@@ -42,8 +36,7 @@ describe('Test login', () => {
         userId = userInfo._id || userInfo.id;
         expect(win.localStorage.getItem('jwtToken')).to.be.ok;
       });
-    
-    cy.url()
-      .should('equal', `${Cypress.config('baseUrl')}/admin/`);
+
+    cy.url().should('equal', `${Cypress.config('baseUrl')}/admin/`);
   });
 });
