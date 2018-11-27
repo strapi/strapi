@@ -28,8 +28,7 @@ module.exports = {
 
   getGaConfig: async ctx => {
     try {
-      const allowGa = _.get(strapi.config, 'info.customs.allowGa', true);
-      ctx.send({ allowGa });
+      ctx.send({ uuid: _.get(strapi.config, 'uuid', false) });
     } catch(err) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }

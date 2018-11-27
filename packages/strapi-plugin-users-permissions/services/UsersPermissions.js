@@ -199,9 +199,9 @@ module.exports = {
           const prefix = curr.config.prefix;
           const path = prefix !== undefined ? `${prefix}${curr.path}` : `/${current}${curr.path}`;
           _.set(curr, 'path', path);
-          
+
           return acc.concat(curr);
-        }, []); 
+        }, []);
 
       acc[current] = routes;
 
@@ -221,7 +221,7 @@ module.exports = {
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
       Object.keys(_.get(strapi.api[api], 'controllers', {}))
-        .map(controller => {
+        .forEach(controller => {
           const actions = Object.keys(strapi.api[api].controllers[controller])
             .filter(action => _.isFunction(strapi.api[api].controllers[controller][action]))
             .map(action => `application.${controller}.${action.toLowerCase()}`);
@@ -235,7 +235,7 @@ module.exports = {
     // Aggregate plugins' actions.
     const pluginsActions = Object.keys(strapi.plugins).reduce((acc, plugin) => {
       Object.keys(strapi.plugins[plugin].controllers)
-        .map(controller => {
+        .forEach(controller => {
           const actions = Object.keys(strapi.plugins[plugin].controllers[controller])
             .filter(action => _.isFunction(strapi.plugins[plugin].controllers[controller][action]))
             .map(action => `${plugin}.${controller}.${action.toLowerCase()}`);

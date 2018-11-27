@@ -43,6 +43,7 @@ import Logout from 'components/Logout';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import OverlayBlocker from 'components/OverlayBlocker';
 import PluginPage from 'containers/PluginPage';
+import FullStory from 'components/FullStory';
 // Utils
 import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
@@ -73,12 +74,12 @@ export class AdminPage extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { adminPage: { allowGa }, location: { pathname }, plugins } = this.props;
+    const { adminPage: { uuid }, location: { pathname }, plugins } = this.props;
 
     if (prevProps.location.pathname !== pathname) {
       this.checkLogin(this.props);
 
-      if (allowGa) {
+      if (uuid) {
         ReactGA.pageview(pathname);
       }
     }
@@ -198,6 +199,7 @@ export class AdminPage extends React.Component {
 
     return (
       <div className={styles.adminPage}>
+        {this.props.adminPage.uuid ? <FullStory org="GK708" /> : ''}
         {this.showLeftMenu() && (
           <LeftMenu
             plugins={this.retrievePlugins()}
