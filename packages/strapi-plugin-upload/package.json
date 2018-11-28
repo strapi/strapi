@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-alpha.14.5",
+  "version": "3.0.0-alpha.15",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Files Upload",
@@ -23,12 +23,12 @@
   },
   "dependencies": {
     "react-copy-to-clipboard": "^5.0.1",
-    "strapi-provider-upload-local": "3.0.0-alpha.14.5",
+    "strapi-provider-upload-local": "3.0.0-alpha.15",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.14.5"
+    "strapi-helper-plugin": "3.0.0-alpha.15"
   },
   "author": {
     "name": "A Strapi developer",
