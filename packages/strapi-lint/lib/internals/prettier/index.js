@@ -39,7 +39,7 @@ if (!backendFiles.length) {
 const runPrettier = (files, isFront = true) => {
   const prettierConfigFolder = isFront ? 'front' : 'back';
   const prettierConfigPath = require.resolve(`./${prettierConfigFolder}/.prettierrc`);
-
+  console.log({ files, prettierConfigFolder })
   files.forEach(file => {
     const options = prettier.resolveConfig.sync(file, {
       config: prettierConfigPath
