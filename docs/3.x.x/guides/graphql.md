@@ -18,7 +18,11 @@ Then, start your app and open your browser at [http://localhost:1337/graphql](ht
 
 ## Configurations
 
-By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL is set to `/graphql`. You can edit these configurations in the following files.
+By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL is set to `/graphql`. The Playground is enabled by default for both the development and staging environments, however it is disabled in production, by changinging the config option `playgroundAlways` to true, you can enable it.
+
+Security limits on maximum number of items in your response by default is limited to 100, however you can change this on the following config option `amountLimit`. This should only be changed after careful consideration of the drawbacks of a large query which can cause what would basically be a DDoS (Distributed Denial of Service). And may cause abnormal load on your Strapi server, as well as your database server.
+
+You can edit these configurations in the following files.
 
 **Path —** `./plugins/graphql/config/settings.json`.
 
@@ -26,7 +30,9 @@ By default, the [Shadow CRUD](#shadow-crud) feature is enabled and the GraphQL i
 {
   "endpoint": "/graphql",
   "shadowCRUD": true,
-  "depthLimit": 7
+  "playgroundAlways": false,
+  "depthLimit": 7,
+  "amountLimit": 100
 }
 ```
 
