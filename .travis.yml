@@ -6,8 +6,8 @@ git:
 language: node_js
 
 node_js:
-  - "9"
   - "10"
+  - "11"
 
 before_install:
   - export CHROME_BIN=chromium-browser
