@@ -56,6 +56,7 @@ module.exports = scope => {
     'dependencies': Object.assign({}, {
       'lodash': '^4.17.5',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
+      'strapi-utils': getDependencyVersion(cliPkg, 'strapi'),
       [scope.client.connector]: getDependencyVersion(cliPkg, 'strapi'),
     }, additionalsDependencies, {
       [scope.client.module]: scope.client.version
@@ -75,8 +76,8 @@ module.exports = scope => {
       'uuid': uuid()
     },
     'engines': {
-      'node': '>= 9.0.0',
-      'npm': '>= 5.0.0'
+      "node": ">= 10.0.0",
+      "npm": ">= 6.0.0"
     },
     'license': scope.license || 'MIT'
   });
