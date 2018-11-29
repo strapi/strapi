@@ -25,6 +25,23 @@ module.exports = {
     }, {});
   },
 
+  convertToQuery: function(params) {
+    const result = {};
+
+    _.forEach(params, (value, key) => {
+      if (_.isPlainObject(value)) {
+        const flatObject = this.convertToQuery(value);
+        _.forEach (flatObject, (_value, _key) => {
+          result[`${key}.${_key}`] = _value;
+        });
+      } else {
+        result[key] = value;
+      }
+    });
+
+    return result;
+  },
+
   /**
    * Security to avoid infinite limit.
    *
@@ -95,10 +112,7 @@ module.exports = {
         const [name, action] = handler.split('.');
 
         const controller = plugin
-          ? _.get(
-              strapi.plugins,
-              `${plugin}.controllers.${_.toLower(name)}.${action}`,
-            )
+          ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
@@ -178,13 +192,15 @@ module.exports = {
 
       // Plural.
       return async (ctx, next) => {
-        ctx.params = this.amountLimiting(ctx.params);
-        ctx.query = Object.assign(
-          this.convertToParams(_.omit(ctx.params, 'where')),
-          ctx.params.where,
+        const queryOpts = {};
+        queryOpts.params = this.amountLimiting(ctx.params);
+        queryOpts.query = Object.assign(
+          {},
+          this.convertToParams(_.omit(queryOpts.params, 'where')),
+          this.convertToQuery(queryOpts.params.where)
         );
 
-        return controller(ctx, next);
+        return controller(Object.assign({}, ctx, queryOpts, { send: ctx.send }), next, { populate: [] });
       };
     })();
 
@@ -199,10 +215,7 @@ module.exports = {
       const [name, action] = resolverOf.split('.');
 
       const controller = plugin
-        ? _.get(
-            strapi.plugins,
-            `${plugin}.controllers.${_.toLower(name)}.${action}`,
-          )
+        ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
@@ -262,8 +275,12 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.query = this.convertToParams(options);
         context.params = this.amountLimiting(options);
+        context.query = Object.assign(
+          {},
+          this.convertToParams(_.omit(options, 'where')),
+          this.convertToQuery(options.where)
+        );
 
         if (isController) {
           const values = await resolver.call(null, context);

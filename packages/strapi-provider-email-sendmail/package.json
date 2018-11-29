@@ -1,19 +1,18 @@
 {
-  "name": "strapi-email-mailgun",
-  "version": "3.0.0-alpha.14.4.0",
-  "description": "Mailgun provider for strapi email plugin",
+  "name": "strapi-provider-email-sendmail",
+  "version": "3.0.0-alpha.15",
+  "description": "Sendmail provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
     "email",
-    "strapi",
-    "mailgun"
+    "strapi"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
   "dependencies": {
-    "mailgun-js": "0.18.0"
+    "sendmail": "^1.2.0"
   },
   "strapi": {
     "isProvider": true
@@ -38,8 +37,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "license": "MIT"
 }

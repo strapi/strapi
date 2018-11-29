@@ -1,11 +1,9 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { forEach, set, map, replace } from 'lodash';
-import { call, take, put, fork, cancel, select, takeLatest } from 'redux-saga/effects';
+import { all, call, take, put, fork, cancel, select, takeLatest } from 'redux-saga/effects';
 import request from 'utils/request';
-
 // selectors
 import { makeSelectModifiedData } from './selectors';
-
 import {
   CONFIG_FETCH,
   EDIT_SETTINGS,
@@ -18,7 +16,6 @@ import {
   SPECIFIC_DATABASE_FETCH,
   DATABASE_EDIT,
 } from './constants';
-
 import {
   configFetchSucceded,
   databasesFetchSucceeded,
@@ -121,10 +118,10 @@ export function* fetchDatabases(action) {
     const requestUrlListDatabases = `/settings-manager/configurations/databases/${action.environment}`;
     const requestUrlAppDatabases = '/settings-manager/configurations/database/model';
 
-    const [listDatabasesData, appDatabaseData] = yield [
+    const [listDatabasesData, appDatabaseData] = yield all([
       call(request, requestUrlListDatabases, opts),
       call(request, requestUrlAppDatabases, opts),
-    ];
+    ]);
     yield put(databasesFetchSucceeded(listDatabasesData, appDatabaseData));
   } catch(error) {
     strapi.notification.error('settings-manager.strapi.notification.error');
@@ -139,10 +136,10 @@ export function* fetchLanguages() {
     const requestUrlAppLanguages = '/settings-manager/configurations/languages';
     const requestUrlListLanguages = '/settings-manager/configurations/i18n';
 
-    const [appLanguagesData, listLanguagesData] = yield [
+    const [appLanguagesData, listLanguagesData] = yield all([
       call(request, requestUrlAppLanguages, opts),
       call(request, requestUrlListLanguages, opts),
-    ];
+    ]);
     yield put(languagesFetchSucceeded(appLanguagesData, listLanguagesData));
   } catch(error) {
     strapi.notification.error('settings-manager.strapi.notification.error');

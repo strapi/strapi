@@ -1,28 +1,24 @@
 {
-  "name": "strapi-upload-cloudinary",
-  "version": "3.0.0-alpha.14.4.0",
-  "description": "Cloudinary provider for strapi upload",
+  "name": "strapi-provider-email-amazon-ses",
+  "version": "3.0.0-alpha.15",
+  "description": "Amazon SES provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
-    "upload",
-    "cloudinary",
-    "strapi"
+    "email",
+    "strapi",
+    "amazon",
+    "ses"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
   "dependencies": {
-    "cloudinary": "^1.11.0",
-    "into-stream": "^3.1.0"
-  },
-  "strapi": {
-    "isProvider": true
+    "node-ses": "^2.1.0"
   },
   "author": {
-    "email": "perret.luca@gmail.com",
-    "name": "Luca Perret",
-    "url": "https://github.com/lucaperret"
+    "email": "nikolay@tsenkov.net",
+    "name": "Nikolay tsenkov"
   },
   "maintainers": [
     {
@@ -39,8 +35,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "license": "MIT"
 }

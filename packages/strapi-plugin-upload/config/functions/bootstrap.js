@@ -26,7 +26,8 @@ module.exports = async cb => {
     fs.readdir(path.join(basePath, 'node_modules'), async (err, node_modules) => {
       // get all upload provider
       const uploads = _.filter(node_modules, (node_module) => {
-        return _.startsWith(node_module, ('strapi-upload'));
+        // DEPRECATED strapi-upload-* will be remove in next version
+        return _.startsWith(node_module, 'strapi-provider-upload') || _.startsWith(node_module, 'strapi-upload');
       });
 
       // mount all providers to get configs
@@ -53,7 +54,7 @@ module.exports = async cb => {
         }
       } catch (err) {
         strapi.log.error(`Can't load ${config.provider} upload provider.`);
-        strapi.log.warn(`Please install strapi-upload-${config.provider} --save in ${path.join(strapi.config.appPath, 'plugins', 'upload')} folder.`);
+        strapi.log.warn(`Please install strapi-provider-upload-${config.provider} --save in ${path.join(strapi.config.appPath, 'plugins', 'upload')} folder.`);
         strapi.stop();
       }
 

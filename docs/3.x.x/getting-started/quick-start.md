@@ -1,6 +1,6 @@
 # Quick start
 
-This section explains how to handle Strapi for the first time, ([check out our tutorial video](https://www.youtube.com/watch?v=yMl5IcFHA74)).
+This section explains how to handle Strapi for the first time, ([check out our video tutorial](https://www.youtube.com/watch?v=yMl5IcFHA74)).
 
 **Table of contents:**
 - [1. Create your first project](#_1-create-a-project)
@@ -126,7 +126,7 @@ After creating [your first Content Type](#_3-create-a-content-type), you probabl
 Your API is now ready and [contains data](#_4-add-content). At this point, you'll probably want to use this data in mobile or desktop applications.
 In order to do so, you'll need to allow access to other users (identified as 'Public').
 
-**1 -** Go to the [**Auth & Permissions View**](http://localhost:1337/admin/plugins/users-permissions/roles) by clicking on **Auth & Permissions** link in the left menu.
+**1 -** Go to the [**Roles & Permissions View**](http://localhost:1337/admin/plugins/users-permissions/roles) by clicking on **Roles & Permissions** link in the left menu.
 
 ![Auth & Permissions - Home](../assets/getting-started_manage_role_home.png)
 
@@ -170,7 +170,7 @@ axios
 
 If you want to get a specific entry, add the `id` of the wanted post at the end of the url.
 
-Examble with Axios:
+Example with Axios:
 
 ```js
 import axios from 'axios';
@@ -194,7 +194,7 @@ axios
 
 Use the `POST` route to create a new entry.
 
-Examble with Axios:
+Example with Axios:
 
 ```js
 import axios from 'axios';
@@ -221,7 +221,7 @@ axios
 
 Use the `PUT` route to update an existing entry.
 
-Examble with Axios:
+Example with Axios:
 
 ```js
 import axios from 'axios';
@@ -250,7 +250,7 @@ axios
 
 Use the `DELETE` route to delete an existing entry.
 
-Examble with Axios:
+Example with Axios:
 
 ```js
 import axios from 'axios';

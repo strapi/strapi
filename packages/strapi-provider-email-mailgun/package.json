@@ -1,17 +1,20 @@
 {
-  "name": "strapi-upload-local",
-  "version": "3.0.0-alpha.14.4.0",
-  "description": "Local provider for strapi upload",
+  "name": "strapi-provider-email-mailgun",
+  "version": "3.0.0-alpha.15",
+  "description": "Mailgun provider for strapi email plugin",
   "homepage": "http://strapi.io",
   "keywords": [
-    "upload",
-    "strapi"
+    "email",
+    "strapi",
+    "mailgun"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
-  "dependencies": {},
+  "dependencies": {
+    "mailgun-js": "0.18.0"
+  },
   "strapi": {
     "isProvider": true
   },
@@ -35,8 +38,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "license": "MIT"
 }

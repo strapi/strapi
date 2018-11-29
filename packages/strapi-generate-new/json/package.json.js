@@ -48,14 +48,15 @@ module.exports = scope => {
     },
     'devDependencies': {
       'babel-eslint': '^7.1.1',
-      'eslint': '^3.12.2',
+      'eslint': '^4.19.1',
       'eslint-config-airbnb': '^13.0.0',
-      'eslint-plugin-import': '^2.2.0',
-      'eslint-plugin-react': '^6.8.0'
+      'eslint-plugin-import': '^2.11.0',
+      'eslint-plugin-react': '^7.7.0'
     },
     'dependencies': Object.assign({}, {
       'lodash': '^4.17.5',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
+      'strapi-utils': getDependencyVersion(cliPkg, 'strapi'),
       [scope.client.connector]: getDependencyVersion(cliPkg, 'strapi'),
     }, additionalsDependencies, {
       [scope.client.module]: scope.client.version
@@ -75,8 +76,8 @@ module.exports = scope => {
       'uuid': uuid()
     },
     'engines': {
-      'node': '>= 9.0.0',
-      'npm': '>= 5.0.0'
+      "node": ">= 10.0.0",
+      "npm": ">= 6.0.0"
     },
     'license': scope.license || 'MIT'
   });
