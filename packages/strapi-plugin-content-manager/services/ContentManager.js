@@ -8,7 +8,7 @@ const _ = require('lodash');
 
 module.exports = {
   fetchAll: async (params, query) => {
-    const { limit, skip, sort, query : request, queryAttribute, source, page, populate = [] } = query; // eslint-disable-line no-unused-vars
+    const { limit, skip, sort, query : request, queryAttribute, source, populate = [] } = query;
     const filters = strapi.utils.models.convertParams(params.model, query);
     const where = !_.isEmpty(request) ? request : filters.where;
 
@@ -117,6 +117,11 @@ module.exports = {
       };
 
       const files = values.files;
+
+      // set empty attributes if old values was cleared
+      _.difference(Object.keys(files), Object.keys(values.fields)).forEach(attr => {
+        values.fields[attr] = [];
+      });
 
       // Parse stringify JSON data.
       values = Object.keys(values.fields).reduce((acc, current) => {

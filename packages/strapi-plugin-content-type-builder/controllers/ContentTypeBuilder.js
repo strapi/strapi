@@ -4,6 +4,7 @@ const fs = require('fs');
 const _ = require('lodash');
 
 const Service = require('../services/ContentTypeBuilder');
+const { escapeNewlines } = require('../utils/helpers.js');
 
 module.exports = {
   getModels: async ctx => {
@@ -24,7 +25,9 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknown' }] }]);
     }
 
-    ctx.send({ model: Service.getModel(model, source) });
+    const modelLayout = await Service.getModel(model, source);
+
+    ctx.send({ model: modelLayout });
   },
 
   getConnections: async ctx => {
@@ -45,13 +48,15 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
+    const _description = escapeNewlines(description, '\\n');
+
     strapi.reload.isWatching = false;
 
-    await Service.appearance(formatedAttributes, name, 'content-manager');
+    await Service.appearance(formatedAttributes, name);
 
-    await Service.generateAPI(name, description, connection, collectionName, []);
+    await Service.generateAPI(name, _description, connection, collectionName, []);
 
-    const modelFilePath = Service.getModelPath(name, plugin);
+    const modelFilePath = await Service.getModelPath(name, plugin);
 
     try {
       const modelJSON = _.cloneDeep(require(modelFilePath));
@@ -101,15 +106,17 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
+    const _description = escapeNewlines(description);
+
     let modelFilePath = Service.getModelPath(model, plugin);
 
     strapi.reload.isWatching = false;
 
     if (name !== model) {
-      await Service.generateAPI(name, description, connection, collectionName, []);
+      await Service.generateAPI(name, _description, connection, collectionName, []);
     }
 
-    await Service.appearance(formatedAttributes, name, plugin ? plugin : 'content-manager');
+    await Service.appearance(formatedAttributes, name, plugin);
 
     try {
       const modelJSON = _.cloneDeep(require(modelFilePath));
@@ -118,7 +125,7 @@ module.exports = {
       modelJSON.collectionName = collectionName;
       modelJSON.info = {
         name,
-        description
+        description: _description
       };
       modelJSON.attributes = formatedAttributes;
 
@@ -181,6 +188,18 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: removeModelErrors }]);
     }
 
+    const pluginStore = strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'content-manager'
+    });
+
+    const schema = await pluginStore.get({ key: 'schema' });
+
+    delete schema.layout[model];
+
+    await pluginStore.set({ key: 'schema', value: schema });
+
     ctx.send({ ok: true });
 
     strapi.reload();
@@ -188,7 +207,7 @@ module.exports = {
 
   autoReload: async ctx => {
     ctx.send({
-      autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false),
+      autoReload: _.get(strapi.config.currentEnvironment, 'server.autoReload', { enabled: false })
     });
   },
 

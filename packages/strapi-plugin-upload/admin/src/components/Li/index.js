@@ -34,13 +34,13 @@ class Li extends React.Component {
     let divider;
     
     switch (true) {
-      case value > 10000:
+      case value > 1000000:
         unit = 'GB';
-        divider = 1000;
+        divider = 1000000;
         break;
       case value < 1:
         unit = 'B';
-        divider = 1;
+        divider = .001;
         break;
       case value > 1000:
         unit = 'MB';
@@ -56,7 +56,7 @@ class Li extends React.Component {
 
   handleClick = (e) => {
     e.preventDefault();
-    const aTag = document.getElementById('aTag');
+    const aTag = document.getElementById(this.props.item.hash);
     aTag.click();
   }
 
@@ -103,7 +103,7 @@ class Li extends React.Component {
     return (
       <CopyToClipboard text={item.url} onCopy={() => this.setState({copied: true})}>
         <li className={styles.liWrapper}>
-          <a href={item.url} target="_blank" style={{ display: 'none' }} id="aTag">nothing</a>
+          <a href={item.url} target="_blank" style={{ display: 'none' }} id={item.hash}>nothing</a>
           <div className={styles.liContainer}>
             <div>
               <div />

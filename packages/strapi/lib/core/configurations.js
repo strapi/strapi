@@ -1,9 +1,11 @@
 'use strict';
 
 // Dependencies.
+const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
-const { merge, setWith, get, upperFirst, isString, isEmpty, isObject, pullAll, defaults, isPlainObject, assign, clone, cloneDeep, camelCase } = require('lodash');
+const { merge, setWith, get, upperFirst, isEmpty, isObject, pullAll, defaults, assign, clone, cloneDeep, camelCase } = require('lodash');
+const { templateConfiguration } = require('strapi-utils');
 const utils = require('../utils');
 
 module.exports.nested = function() {
@@ -11,7 +13,8 @@ module.exports.nested = function() {
     // Load root configurations.
     new Promise((resolve, reject) => {
       glob('./config/**/*.*(js|json)', {
-        cwd: this.config.appPath
+        cwd: this.config.appPath,
+        dot: true
       }, (err, files) => {
         if (err) {
           return reject(err);
@@ -84,14 +87,14 @@ module.exports.app = async function() {
   this.config.currentEnvironment = this.config.environments[this.config.environment] || {};
 
   // Set current connections.
-  this.config.connections = get(this.config.currentEnvironment, `database.connections`, {});
+  this.config.connections = get(this.config.currentEnvironment, 'database.connections', {});
 
   if (get(this.config, 'language.enabled')) {
     this.config.language.locales = Object.keys(get(strapi.config, 'locales', {}));
   }
 
   // Template literal string.
-  this.config = templateConfigurations(this.config);
+  this.config = templateConfiguration(this.config);
 
   // Initialize main router to use it in middlewares.
   this.router = this.koaMiddlewares.routerJoi();
@@ -304,7 +307,7 @@ module.exports.app = async function() {
 
   this.config.hook.settings = Object.keys(this.hook).reduce((acc, current) => {
     // Try to find the settings in the current environment, then in the main configurations.
-    const currentSettings = merge(get(cloneDeep(this.hook[current]), ['defaults', current], {}), flattenHooksConfig[current] || this.config.currentEnvironment[current] || this.config[current]);
+    const currentSettings = merge(get(cloneDeep(this.hook[current]), ['defaults', current], {}), flattenHooksConfig[current] || get(this.config.currentEnvironment, ['hook', current]) || get(this.config, ['hook', current]));
     acc[current] = !isObject(currentSettings) ? {} : currentSettings;
 
     if (!acc[current].hasOwnProperty('enabled')) {
@@ -317,9 +320,24 @@ module.exports.app = async function() {
     return acc;
   }, {});
 
+  // default settings
   this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
   this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
-  this.config.url = `http://${this.config.host}:${this.config.port}`;
+
+  // Admin.
+  const url = getURLFromSegments({ hostname: this.config.host, port: this.config.port });
+  const adminPath = get(this.config.currentEnvironment.server, 'admin.path', 'admin');
+  this.config.admin.devMode = isAdminInDevMode.call(this);
+  this.config.admin.url = this.config.admin.devMode ?
+    (new URL(adminPath, `http://${this.config.host}:4000`)).toString():
+    (new URL(adminPath, url)).toString();
+
+  // proxy settings
+  const proxy = get(this.config.currentEnvironment, 'server.proxy', {});
+  this.config.proxy = proxy;
+
+  // check if proxy is enabled and construct url
+  this.config.url = proxy.enabled ? getURLFromSegments({ hostname: proxy.host, port: proxy.port, ssl: proxy.ssl }) : url;
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig, force = false) {
@@ -345,7 +363,7 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
         });
 
         return apiModelsUsed.length !== 0;
-      }) || 0; // Filter model with the right connector
+      }); // Filter model with the right connector
 
     flattenHooksConfig[name] = {
       enabled: force || modelsUsed.length > 0 // Will return false if there is no model, else true.
@@ -360,23 +378,20 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
   }
 };
 
-/**
- * Allow dynamic config values through
- * the native ES6 template string function.
- */
-const regex = /\$\{[^()]*\}/g;
-const templateConfigurations = function (obj) {
-  // Allow values which looks like such as
-  // an ES6 literal string without parenthesis inside (aka function call).
-  return Object.keys(obj).reduce((acc, key) => {
-    if (isPlainObject(obj[key]) && !isString(obj[key])) {
-      acc[key] = templateConfigurations(obj[key]);
-    } else if (isString(obj[key]) && obj[key].match(regex) !== null) {
-      acc[key] = eval('`' + obj[key] + '`'); // eslint-disable-line prefer-template
-    } else {
-      acc[key] = obj[key];
-    }
+const isAdminInDevMode = function () {
+  try {
+    fs.accessSync(path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'index.html'), fs.constants.R_OK | fs.constants.W_OK);
 
-    return acc;
-  }, {});
+    return false;
+  } catch (e) {
+    return true;
+  }
+};
+
+const getURLFromSegments = function ({ hostname, port, ssl = false }) {
+  const protocol = ssl ? 'https' : 'http';
+  const defaultPort = ssl ? 443 : 80;
+  const portString = (port === undefined || parseInt(port) === defaultPort) ? '' : `:${port}`;
+
+  return `${protocol}://${hostname}${portString}`;
 };

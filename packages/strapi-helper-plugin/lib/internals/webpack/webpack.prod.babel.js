@@ -15,14 +15,8 @@ const base = require('./webpack.base.babel');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 // const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const isSetup = process.env.IS_MONOREPO;
-const appPath = (() => {
-  if (process.env.APP_PATH) {
-    return process.env.APP_PATH;
-  }
-
-  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
-})();
+const isSetup = process.env.IS_MONOREPO || false;
+const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ?  '' : '..' ));
 const adminPath = (() => {
   if (isSetup) {
     return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(process.env.PWD, '..');
@@ -33,9 +27,7 @@ const adminPath = (() => {
 
 const rootAdminpath = (() => {
   if (isSetup) {
-    return isAdmin
-      ? path.resolve(appPath, 'strapi-admin')
-      : path.resolve(appPath, 'packages', 'strapi-admin');
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
   }
   return path.resolve(appPath, 'admin');
 })();
@@ -238,11 +230,5 @@ module.exports = base({
 
   devtool: 'cheap-module-source-map',
   disableExtractTextPlugin: false,
-  externals: {
-    'styled-components': {
-      commonjs: 'styled-components',
-      commonjs2: 'styled-components',
-      amd: 'styled-components',
-    },
-  },
+  externals: {},
 });

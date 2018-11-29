@@ -1,21 +1,13 @@
 {
   "parser": "babel-eslint",
-  "extends": [
-    "airbnb",
-    "prettier",
-    "eslint:recommended"
-  ],
+  "extends": ["airbnb", "prettier", "eslint:recommended"],
   "env": {
     "browser": true,
     "node": true,
     "mocha": true,
     "es6": true
   },
-  "plugins": [
-    "redux-saga",
-    "react",
-    "jsx-a11y"
-  ],
+  "plugins": ["redux-saga", "react", "jsx-a11y"],
   "parserOptions": {
     "ecmaVersion": 7,
     "sourceType": "module",
@@ -25,10 +17,7 @@
     }
   },
   "rules": {
-    "comma-dangle": [
-      2,
-      "always-multiline"
-    ],
+    "comma-dangle": [2, "always-multiline"],
     "import/newline-after-import": 0,
     "import/no-dynamic-require": 0,
     "import/no-extraneous-dependencies": 0,
@@ -38,14 +27,7 @@
     "import/order": [
       "error",
       {
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          "parent",
-          "sibling",
-          "index"
-        ]
+        "groups": ["builtin", "external", "internal", "parent", "sibling", "index"]
       }
     ],
     "import/imports-first": 2,
@@ -53,7 +35,8 @@
       2,
       2,
       {
-        "SwitchCase": 1
+        "SwitchCase": 1,
+        "ignoredNodes": ["ConditionalExpression"]
       }
     ],
     "jsx-a11y/aria-props": 2,
@@ -76,10 +59,7 @@
     "class-methods-use-this": 0,
     "react/forbid-prop-types": 0,
     "react/react-in-jsx-scope": 0,
-    "react/jsx-first-prop-new-line": [
-      2,
-      "multiline"
-    ],
+    "react/jsx-first-prop-new-line": [2, "multiline"],
     "react/jsx-filename-extension": 0,
     "react/jsx-no-target-blank": 0,
     "react/no-did-mount-set-state": 0,

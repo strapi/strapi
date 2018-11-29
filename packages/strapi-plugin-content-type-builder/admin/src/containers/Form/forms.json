@@ -4,18 +4,6 @@
       "items": [
         {
           "label": {
-            "id": "content-type-builder.form.contentType.item.connections"
-          },
-          "name": "connection",
-          "type": "select",
-          "value": "default",
-          "items": [{}],
-          "validations": {
-            "required": true
-          }
-        },
-        {
-          "label": {
             "id": "content-type-builder.form.contentType.item.name"
           },
           "name": "name",
@@ -43,6 +31,18 @@
                 }
               }
             }
+          }
+        },
+        {
+          "label": {
+            "id": "content-type-builder.form.contentType.item.connections"
+          },
+          "name": "connection",
+          "type": "select",
+          "value": "default",
+          "items": [{}],
+          "validations": {
+            "required": true
           }
         },
         {
@@ -926,7 +926,10 @@
             },
             "name": "name",
             "type": "string",
-            "value": ""
+            "value": "",
+            "validations": {
+              "required": true
+            }
           },
           {
             "label": {

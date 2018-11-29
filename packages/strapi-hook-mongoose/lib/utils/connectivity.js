@@ -1,13 +1,12 @@
 'use strict';
 
-// Node.js core.
-const execSync = require('child_process').execSync;
-const path = require('path');
+// Public node modules
+const rimraf = require('rimraf');
 
 module.exports = (scope, success, error) => {
-  const Mongoose = require(path.resolve(`${scope.tmpPath}/node_modules/mongoose`));
+  const Mongoose = require('mongoose');
 
-  const { username, password } = scope.database.settings;
+  const { username, password, srv } = scope.database.settings;
   const { authenticationDatabase, ssl } = scope.database.options;
 
   const connectOptions = {};
@@ -26,8 +25,9 @@ module.exports = (scope, success, error) => {
 
   connectOptions.ssl = ssl ? true : false;
   connectOptions.useNewUrlParser = true;
+  connectOptions.dbName = scope.database.settings.database;
 
-  Mongoose.connect(`mongodb://${scope.database.settings.host}:${scope.database.settings.port}/${scope.database.settings.database}`, connectOptions, function (err) {
+  Mongoose.connect(`mongodb${srv ? '+srv' : ''}://${scope.database.settings.host}${!srv ? `:${scope.database.settings.port}` : ''}/`, connectOptions, function (err) {
     if (err) {
       console.log('⚠️ Database connection has failed! Make sure your database is running.');
       return error();
@@ -35,8 +35,11 @@ module.exports = (scope, success, error) => {
 
     Mongoose.connection.close();
 
-    execSync(`rm -r "${scope.tmpPath}"`);
-
-    success();
+    rimraf(scope.tmpPath, (err) => {
+      if (err) {
+        console.log(`Error removing connection test folder: ${scope.tmpPath}`);
+      }
+      success();
+    });
   });
 };

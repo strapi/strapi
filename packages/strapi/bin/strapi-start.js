@@ -13,7 +13,7 @@ const cluster = require('cluster');
 // Public dependencies
 const fs = require('fs');
 const _ = require('lodash');
-const {cyan} = require('chalk');
+const { cyan } = require('chalk');
 
 // Logger.
 const { cli, logger } = require('strapi-utils');
@@ -66,7 +66,8 @@ module.exports = function(appPath = '') {
       };
 
       const setFilesToWatch = (src) => {
-        var files = fs.readdirSync(src);
+        let files = _.includes(src, '/admin') || _.includes(src, 'components') ? [] : fs.readdirSync(src);
+
         _.forEach(files, file => {
           if (
             _.startsWith(file, '.') ||
@@ -85,8 +86,6 @@ module.exports = function(appPath = '') {
       };
 
       setFilesToWatch(appPath);
-
-
 
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {

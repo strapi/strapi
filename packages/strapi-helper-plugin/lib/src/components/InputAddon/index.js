@@ -43,6 +43,7 @@ class InputAddon extends React.Component {
       tabIndex,
       value,
     } = this.props;
+    const formattedPlaceholder = placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
     return (
       <div className={cn(styles.inputAddon, 'input-group', !isEmpty(className) && className)} style={style}>
@@ -60,7 +61,7 @@ class InputAddon extends React.Component {
             </span>
           )}
         </FormattedMessage>
-        <FormattedMessage id={placeholder} defaultMessage={placeholder}>
+        <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
           {(message) => (
             <input
               autoFocus={autoFocus}

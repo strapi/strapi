@@ -57,7 +57,6 @@ export function* submitChanges(action) {
   try {
     // Show button loader
     yield put(setButtonLoader());
-
     const modelName = get(storeData.getContentType(), 'name');
     const data = yield select(makeSelectModel());
     const body = cloneDeep(data);
@@ -79,11 +78,16 @@ export function* submitChanges(action) {
           unset(body.attributes[index].params, key);
         }
 
-        if (key === 'pluginValue' && value) {
-          set(body.attributes[index].params, 'plugin', true);
+        if (key === 'pluginValue') {
+          if (value && value !== ' ')  {
+            set(body.attributes[index].params, 'plugin', true);
+          } else {
+            unset(body.attributes[index].params, 'plugin');
+            unset(body.attributes[index].params, 'pluginValue');
+          }
         }
 
-        if (!value && key !== 'multiple') {
+        if (!value && key !== 'multiple' && key !== 'default') {
           const paramsKey = includes(key, 'Value') ? replace(key,'Value', '') : key;
           unset(body.attributes[index].params, paramsKey);
         }
@@ -99,7 +103,6 @@ export function* submitChanges(action) {
     const baseUrl = '/content-type-builder/models/';
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
     const opts = { method, body };
-
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {

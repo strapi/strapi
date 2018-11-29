@@ -18,6 +18,10 @@
       "configurable": false,
       "required": true
     },
+    "sha256": {
+      "type": "string",
+      "configurable": false
+    },
     "ext": {
       "type": "string",
       "configurable": false
@@ -41,6 +45,10 @@
       "type": "string",
       "configurable": false,
       "required": true
+    },
+    "public_id": {
+      "type": "string",
+      "configurable": false
     },
     "related": {
       "collection": "*",

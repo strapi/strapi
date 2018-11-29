@@ -88,7 +88,7 @@ module.exports = {
   },
 
   getPlugins: (plugin, lang = 'en') => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       request({
         uri: `https://marketplace.strapi.io/plugins?lang=${lang}`,
         json: true,
@@ -97,7 +97,7 @@ module.exports = {
         }
       }, (err, response, body) => {
         if (err) {
-          return reject(err);
+          return resolve([]);
         }
 
         resolve(body);
@@ -115,11 +115,15 @@ module.exports = {
         return acc;
       }, {}));
 
-    const appControllers = Object.keys(strapi.api || {}).reduce((acc, key) => {
-      acc.controllers[key] = generateActions(strapi.api[key].controllers[key]);
+    const appControllers = Object.keys(strapi.api || {})
+      .filter(key => !!strapi.api[key].controllers)
+      .reduce((acc, key) => {
+        Object.keys(strapi.api[key].controllers).forEach((controller) => {
+          acc.controllers[controller] = generateActions(strapi.api[key].controllers[controller]);
+        });
 
-      return acc;
-    }, { controllers: {} });
+        return acc;
+      }, { controllers: {} });
 
     const pluginsPermissions = Object.keys(strapi.plugins).reduce((acc, key) => {
       const initialState = {
@@ -188,12 +192,21 @@ module.exports = {
     const routes = Object.keys(strapi.api || {}).reduce((acc, current) => {
       return acc.concat(_.get(strapi.api[current].config, 'routes', []));
     }, []);
+    const clonedPlugins = _.cloneDeep(strapi.plugins);
+    const pluginsRoutes = Object.keys(clonedPlugins || {}).reduce((acc, current) => {
+      const routes = _.get(clonedPlugins, [current, 'config', 'routes'], [])
+        .reduce((acc, curr) => {
+          const prefix = curr.config.prefix;
+          const path = prefix !== undefined ? `${prefix}${curr.path}` : `/${current}${curr.path}`;
+          _.set(curr, 'path', path);
 
-    const pluginsRoutes = Object.keys(strapi.plugins || {}).reduce((acc, current) => {
-      acc[current] = _.get(strapi.plugins[current].config, 'routes', []);
+          return acc.concat(curr);
+        }, []);
+
+      acc[current] = routes;
 
       return acc;
-    }, []);
+    }, {});
 
     return _.merge({ application: routes }, pluginsRoutes);
   },
@@ -203,12 +216,12 @@ module.exports = {
     const databasePermissions = await strapi.query('permission', 'users-permissions').find();
     const actions = databasePermissions
       .map(permission => `${permission.type}.${permission.controller}.${permission.action}`);
-    
+
 
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
       Object.keys(_.get(strapi.api[api], 'controllers', {}))
-        .map(controller => {
+        .forEach(controller => {
           const actions = Object.keys(strapi.api[api].controllers[controller])
             .filter(action => _.isFunction(strapi.api[api].controllers[controller][action]))
             .map(action => `application.${controller}.${action.toLowerCase()}`);
@@ -222,7 +235,7 @@ module.exports = {
     // Aggregate plugins' actions.
     const pluginsActions = Object.keys(strapi.plugins).reduce((acc, plugin) => {
       Object.keys(strapi.plugins[plugin].controllers)
-        .map(controller => {
+        .forEach(controller => {
           const actions = Object.keys(strapi.plugins[plugin].controllers[controller])
             .filter(action => _.isFunction(strapi.plugins[plugin].controllers[controller][action]))
             .map(action => `${plugin}.${controller}.${action.toLowerCase()}`);
@@ -249,13 +262,14 @@ module.exports = {
       const defaultPolicy = (obj, role) => {
         const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isConnect = obj.action === 'connect' && obj.controller === 'auth' && obj.type === 'users-permissions';
-        const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isPassword = obj.action === 'forgotpassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
+        const isRegister = obj.action === 'register' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
+        const isConfirmation = obj.action === 'emailconfirmation' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isNewPassword = obj.action === 'changepassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
         const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
         const isReload = obj.action === 'autoreload';
-        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect;
+        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect || isConfirmation;
 
         return Object.assign(obj, { enabled, policy: '' });
       };

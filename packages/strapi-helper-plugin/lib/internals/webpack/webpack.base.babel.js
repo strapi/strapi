@@ -14,15 +14,8 @@ const isAdmin = process.env.IS_ADMIN === 'true';
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-const appPath = (() => {
-  if (process.env.APP_PATH) {
-    return process.env.APP_PATH;
-  }
-
-  return isAdmin ? path.resolve(process.env.PWD, '..') : path.resolve(process.env.PWD, '..', '..');
-})();
-// const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const isSetup = process.env.IS_MONOREPO;
+const isSetup = process.env.IS_MONOREPO || false;
+const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ?  '' : '..' ));
 
 const adminPath = (() => {
   if (isAdmin && isSetup) {
@@ -51,7 +44,10 @@ if (isAdmin && !isSetup) {
   );
 
   try {
-    const server = require(serverConfig);
+    const { templateConfiguration } = require(path.join(adminPath, 'node_modules', 'strapi-utils'));
+
+    let server = require(serverConfig);
+    server = templateConfiguration(server);
 
     if (process.env.PWD.indexOf('/admin') !== -1) {
       if (_.get(server, 'admin.build.host')) {
@@ -61,7 +57,7 @@ if (isAdmin && !isSetup) {
       }
 
       URLs.publicPath = URLs.host;
-      URLs.backend = _.get(server, 'admin.build.backend', `/`);
+      URLs.backend = _.get(server, 'admin.build.backend', '/');
 
       if (_.get(server, 'admin.build.plugins.source') === 'backend') {
         URLs.mode = 'backend';

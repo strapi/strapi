@@ -94,8 +94,8 @@ module.exports = (scope, cb) => {
       });
     } else {
       const alphaDependencies = othersDependencies.map(dep => {
-        if (_.includes(dep, 'strapi') && !_.includes(dep, '@alpha')) { // We need this for yarn
-          return `${dep}@alpha`;
+        if (_.includes(dep, 'strapi')) { // We need this for yarn
+          return `${dep}@${scope.strapiPackageJSON.version}`;
         }
 
         return dep;
@@ -187,10 +187,10 @@ module.exports = (scope, cb) => {
         console.log();
         console.log(`👌 Your new application ${green(scope.name)} is ready at ${cyan(scope.rootPath)}.`);
         console.log();
-        console.log('⚡️ change directory:');
+        console.log('⚡️ Change directory:');
         console.log(`$ ${green(`cd ${scope.name}`)}`);
         console.log();
-        console.log('⚡️ start application:');
+        console.log('⚡️ Start application:');
         console.log(`$ ${green('strapi start')}`);
 
         cb();

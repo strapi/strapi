@@ -222,7 +222,8 @@ class PopUpRelations extends React.Component {
   );
 
   renderModalBodyRelations = () => {
-    const header = get(this.props.values, ['params', 'pluginValue'])
+    const pluginValue = get(this.props.values, ['params', 'pluginValue'], '');
+    const header = !isEmpty(pluginValue.trim())
       ? get(this.props.dropDownItems, [
         findIndex(this.props.dropDownItems, {
           name: get(this.props.values, ['params', 'target']),
@@ -313,8 +314,8 @@ class PopUpRelations extends React.Component {
             <Button onClick={handleToggle} className={styles.secondary}>
               <FormattedMessage id="content-type-builder.form.button.cancel" />
             </Button>
-            <Button type="submit" onClick={(e) => this.props.onSubmit(e, true)} className={styles.primaryAddShape}><FormattedMessage id="content-type-builder.button.attributes.add" /></Button>
-            <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
+            <Button type="submit" onClick={this.props.onSubmit} className={styles.primaryAddShape}><FormattedMessage id="content-type-builder.button.attributes.add" /></Button>
+            <Button type="button" onClick={(e) => this.props.onSubmit(e, false)} className={styles.primary}>
               <FormattedMessage id="content-type-builder.form.button.continue" />
             </Button>{' '}
           </ModalFooter>
