@@ -8,7 +8,7 @@ const _ = require('lodash');
 
 module.exports = {
   fetchAll: async (params, query) => {
-    const { limit, skip, sort, query : request, queryAttribute, source, page, populate = [] } = query; // eslint-disable-line no-unused-vars
+    const { limit, skip, sort, query : request, queryAttribute, source, populate = [] } = query;
     const filters = strapi.utils.models.convertParams(params.model, query);
     const where = !_.isEmpty(request) ? request : filters.where;
 

@@ -1,28 +1,24 @@
 {
-  "name": "strapi-upload-cloudinary",
-  "version": "3.0.0-alpha.14.5",
-  "description": "Cloudinary provider for strapi upload",
+  "name": "strapi-provider-upload-local",
+  "version": "3.0.0-alpha.15",
+  "description": "Local provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
     "upload",
-    "cloudinary",
     "strapi"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
-  "dependencies": {
-    "cloudinary": "^1.11.0",
-    "into-stream": "^3.1.0"
-  },
+  "dependencies": {},
   "strapi": {
     "isProvider": true
   },
   "author": {
-    "email": "perret.luca@gmail.com",
-    "name": "Luca Perret",
-    "url": "https://github.com/lucaperret"
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
   },
   "maintainers": [
     {
@@ -39,8 +35,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "license": "MIT"
 }

@@ -26,7 +26,8 @@ module.exports = async cb => {
     fs.readdir(path.join(basePath, 'node_modules'), async (err, node_modules) => {
       // get all email providers
       const emails = _.filter(node_modules, (node_module) => {
-        return _.startsWith(node_module, ('strapi-email'));
+        // DEPRECATED strapi-email-* will be remove in next version
+        return _.startsWith(node_module, 'strapi-provider-email') || _.startsWith(node_module, 'strapi-email');
       });
 
       // mount all providers to get configs
@@ -51,7 +52,7 @@ module.exports = async cb => {
         }
       } catch (err) {
         strapi.log.error(`Can't load ${config.provider} email provider.`);
-        strapi.log.warn(`Please install strapi-email-${config.provider} --save in ${path.join(strapi.config.appPath, 'plugins', 'email')} folder.`);
+        strapi.log.warn(`Please install strapi-provider-email-${config.provider} --save in ${path.join(strapi.config.appPath, 'plugins', 'email')} folder.`);
         strapi.stop();
       }
 
