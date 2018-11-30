@@ -1,7 +1,5 @@
 'use strict';
 
-/*eslint-disable no-console*/
-
 // Public node modules
 const rimraf = require('rimraf');
 

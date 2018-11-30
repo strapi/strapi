@@ -1,7 +1,5 @@
 'use strict';
 
-/* eslint-disable no-unused-vars */
-
 /**
  * Types.js service
  *
