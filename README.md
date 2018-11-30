@@ -44,9 +44,20 @@
 
 #### 🖐 Requirements
 
+Operating system:
+ * Ubuntu/Debian
+ * CentOS/RHEL
+ * MacOS
+ * Windows - [WSL Only](https://github.com/strapi/strapi/wiki/Frequently-Asked-Questions#windows)
+ * Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
+
+**Please note that Strapi may work on other Operating Systems, but are not tested at this time.**
+
 Node:
  * NodeJS >= 10.x
  * NPM >= 6.x
+
+**Please note that right now Node 11 is not Officially supported, and the current Node LTS (v10) should be used.**
 
 Database:
  * MongoDB >= 3.x 

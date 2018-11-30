@@ -34,7 +34,6 @@ const watcher = (label, cmd, withSuccess = true) => {
     shell.echo('✅  Success');
     shell.echo('');
   }
-
 };
 
 const asyncWatcher = (label, cmd, withSuccess = true, resolve) => {
@@ -88,7 +87,6 @@ if (shell.test('-e', 'admin/src/config/plugins.json') === false) {
   shell.cd('../../../');
 }
 
-
 watcher('📦  Linking strapi-admin', 'npm link --no-optional', false);
 
 shell.cd('../strapi-generate-admin');
@@ -112,46 +110,73 @@ watcher('', 'npm install ../strapi-hook-knex');
 watcher('📦  Linking strapi-hook-bookshelf...', 'npm link');
 
 shell.cd('../strapi');
-watcher('', 'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils');
+watcher(
+  '',
+  'npm install ../strapi-generate ../strapi-generate-admin ../strapi-generate-api ../strapi-generate-new ../strapi-generate-plugin ../strapi-generate-policy ../strapi-generate-service ../strapi-utils'
+);
 watcher('📦  Linking strapi...', 'npm link');
 
 shell.cd('../strapi-plugin-graphql');
-watcher('📦  Linking strapi-plugin-graphql...', 'npm link --no-optional', false);
+watcher(
+  '📦  Linking strapi-plugin-graphql...',
+  'npm link --no-optional',
+  false
+);
 
 // Plugin services
-shell.cd('../strapi-upload-local');
-watcher('📦  Linking strapi-upload-local...', 'npm link --no-optional', false);
+shell.cd('../strapi-provider-upload-local');
+watcher(
+  '📦  Linking strapi-provider-upload-local...',
+  'npm link --no-optional',
+  false
+);
 
-shell.cd('../strapi-email-sendmail');
-watcher('📦  Linking strapi-email-sendmail...', 'npm link --no-optional', false);
+shell.cd('../strapi-provider-email-sendmail');
+watcher(
+  '📦  Linking strapi-provider-email-sendmail...',
+  'npm link --no-optional',
+  false
+);
 
 // Plugins with admin
 shell.cd('../strapi-plugin-email');
 shell.rm('-f', 'package-lock.json');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
-watcher('', 'npm install ../strapi-email-sendmail --no-optional');
+watcher('', 'npm install ../strapi-provider-email-sendmail --no-optional');
 watcher('📦  Linking strapi-plugin-email...', 'npm link --no-optional', false);
 
 shell.cd('../strapi-plugin-users-permissions');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
+watcher('', 'npm install ../strapi-utils --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('📦  Linking strapi-plugin-users-permissions...', 'npm link --no-optional', false);
+watcher(
+  '📦  Linking strapi-plugin-users-permissions...',
+  'npm link --no-optional',
+  false
+);
 
 shell.cd('../strapi-plugin-content-manager');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('📦  Linking strapi-plugin-content-manager...', 'npm link --no-optional', false);
+watcher(
+  '📦  Linking strapi-plugin-content-manager...',
+  'npm link --no-optional',
+  false
+);
 
 shell.cd('../strapi-plugin-settings-manager');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('📦  Linking strapi-plugin-settings-manager...', 'npm link --no-optional', false);
-
+watcher(
+  '📦  Linking strapi-plugin-settings-manager...',
+  'npm link --no-optional',
+  false
+);
 
 // Plugins with admin and other plugin's dependencies
 shell.cd('../strapi-plugin-upload');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
-watcher('', 'npm install ../strapi-upload-local --no-optional');
+watcher('', 'npm install ../strapi-provider-upload-local --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher('📦  Linking strapi-plugin-upload...', 'npm link --no-optional', false);
 
@@ -160,16 +185,32 @@ watcher('', 'npm install ../strapi-helper-plugin --no-optional');
 watcher('', 'npm install ../strapi-generate --no-optional');
 watcher('', 'npm install ../strapi-generate-api --no-optional');
 shell.rm('-f', 'package-lock.json');
-watcher('📦  Linking strapi-plugin-content-type-builder...', 'npm link --no-optional', false);
+watcher(
+  '📦  Linking strapi-plugin-content-type-builder...',
+  'npm link --no-optional',
+  false
+);
 
-
-const pluginsToBuild = ['admin', 'content-manager', 'content-type-builder', 'upload', 'email', 'users-permissions', 'settings-manager'];
+const pluginsToBuild = [
+  'admin',
+  'content-manager',
+  'content-type-builder',
+  'upload',
+  'email',
+  'users-permissions',
+  'settings-manager'
+];
 
 const buildPlugins = async () => {
-  const build = (pckgName) => {
+  const build = pckgName => {
     return new Promise(resolve => {
-      const name = pckgName === 'admin' ? pckgName: `plugin-${pckgName}`;
-      asyncWatcher(`🏗  Building ${name}...`, `cd ../strapi-${name} && IS_MONOREPO=true npm run build`, false, resolve);
+      const name = pckgName === 'admin' ? pckgName : `plugin-${pckgName}`;
+      asyncWatcher(
+        `🏗  Building ${name}...`,
+        `cd ../strapi-${name} && IS_MONOREPO=true npm run build`,
+        false,
+        resolve
+      );
     });
   };
 
@@ -178,23 +219,34 @@ const buildPlugins = async () => {
 
 const setup = async () => {
   if (process.env.npm_config_build) {
-    if (process.platform === 'darwin') { // Allow async build for darwin platform
+    if (process.platform === 'darwin') {
+      // Allow async build for darwin platform
       await buildPlugins();
     } else {
       pluginsToBuild.map(name => {
         const pluginName = name === 'admin' ? name : `plugin-${name}`;
         shell.cd(`../strapi-${pluginName}`);
 
-        return watcher(`🏗  Building ${pluginName}...`, 'IS_MONOREPO=true npm run build');
+        return watcher(
+          `🏗  Building ${pluginName}...`,
+          'IS_MONOREPO=true npm run build'
+        );
       });
     }
   }
 
   // Log installation duration.
   const installationEndDate = new Date();
-  const duration = (installationEndDate.getTime() - installationStartDate.getTime()) / 1000;
+  const duration =
+    (installationEndDate.getTime() - installationStartDate.getTime()) / 1000;
   shell.echo('✅  Strapi has been succesfully installed.');
-  shell.echo(`⏳  The installation took ${Math.floor(duration / 60) > 0 ? `${Math.floor(duration / 60)} minutes and ` : ''}${Math.floor(duration % 60)} seconds.`);
+  shell.echo(
+    `⏳  The installation took ${
+      Math.floor(duration / 60) > 0
+        ? `${Math.floor(duration / 60)} minutes and `
+        : ''
+    }${Math.floor(duration % 60)} seconds.`
+  );
 };
 
 setup();

@@ -1,27 +1,28 @@
 {
-  "name": "strapi-email-sendgrid",
-  "version": "3.0.0-alpha.14.4.0",
-  "description": "Sendgrid provider for strapi email",
+  "name": "strapi-provider-upload-cloudinary",
+  "version": "3.0.0-alpha.15",
+  "description": "Cloudinary provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
-    "email",
-    "strapi",
-    "sendgrid"
+    "upload",
+    "cloudinary",
+    "strapi"
   ],
   "directories": {
     "lib": "./lib"
   },
   "main": "./lib",
   "dependencies": {
-    "@sendgrid/mail": "6.2.1"
+    "cloudinary": "^1.11.0",
+    "into-stream": "^3.1.0"
   },
   "strapi": {
     "isProvider": true
   },
   "author": {
-    "email": "hi@strapi.io",
-    "name": "Strapi team",
-    "url": "http://strapi.io"
+    "email": "perret.luca@gmail.com",
+    "name": "Luca Perret",
+    "url": "https://github.com/lucaperret"
   },
   "maintainers": [
     {
@@ -38,8 +39,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "license": "MIT"
 }

@@ -1,4 +1,11 @@
-# strapi-email-sendmail
+# strapi-provider-upload-cloudinary
+
+## ⏳ Installation
+
+```bash
+cd plugins/upload
+npm i --save strapi-provider-upload-cloudinary
+````
 
 ## Resources
 

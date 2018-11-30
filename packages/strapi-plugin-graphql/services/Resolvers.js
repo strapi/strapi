@@ -375,14 +375,14 @@ module.exports = {
               source: association.plugin,
             };
 
-            if (association.type === 'model') {
-              params.id = obj[association.alias];
-            } else {
-              // Get refering model.
-              const ref = association.plugin
-                ? strapi.plugins[association.plugin].models[params.model]
-                : strapi.models[params.model];
+            // Get refering model.
+            const ref = association.plugin
+              ? strapi.plugins[association.plugin].models[params.model]
+              : strapi.models[params.model];
 
+            if (association.type === 'model') {
+              params.id = _.get(obj, [association.alias, ref.primaryKey], obj[association.alias]);
+            } else {
               // Apply optional arguments to make more precise nested request.
               const convertedParams = strapi.utils.models.convertParams(
                 name,
@@ -400,11 +400,11 @@ module.exports = {
               queryOpts.skip = convertedParams.start;
 
               switch (association.nature) {
-                case 'manyToMany': {
+                case "manyToMany": {
                   const arrayOfIds = (obj[association.alias] || []).map(
                     related => {
                       return related[ref.primaryKey] || related;
-                    },
+                    }
                   );
 
                   // Where.
@@ -415,7 +415,6 @@ module.exports = {
                     ...where.where,
                   }).where;
                   break;
-                  // falls through
                 }
                 default:
                   // Where.
