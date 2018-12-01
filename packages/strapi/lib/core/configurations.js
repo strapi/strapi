@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
+const URL = require('url');
 const { merge, setWith, get, upperFirst, isEmpty, isObject, pullAll, defaults, assign, clone, cloneDeep, camelCase } = require('lodash');
 const { templateConfiguration } = require('strapi-utils');
 const utils = require('../utils');
@@ -329,8 +330,8 @@ module.exports.app = async function() {
   const adminPath = get(this.config.currentEnvironment.server, 'admin.path', 'admin');
   this.config.admin.devMode = isAdminInDevMode.call(this);
   this.config.admin.url = this.config.admin.devMode ?
-    (new URL(adminPath, `http://${this.config.host}:4000`)).toString():
-    (new URL(adminPath, url)).toString();
+    (URL.parse(adminPath, `http://${this.config.host}:4000`)).toString():
+    (URL.parse(adminPath, url)).toString();
 
   // proxy settings
   const proxy = get(this.config.currentEnvironment, 'server.proxy', {});
