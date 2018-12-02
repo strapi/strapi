@@ -2,27 +2,21 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params, populate, raw = false) {
+    const model = this;
     return this.query(function(qb) {
-      _.forEach(params.where, (where, key) => {
-        if (_.isArray(where.value) && where.symbol !== 'IN') {
-          for (const value in where.value) {
-            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
-          }
+      // Generate Population stage
+      strapi.hook.bookshelf.load().generatePopulationStage(qb)(model, params);
+      // Generate match stage.
+      strapi.hook.bookshelf.load().generateMatchStage(qb)(model, params);
+
+      if (_.has(params, 'start')) qb.offset(params.start);
+      if (_.has(params, 'limit')) qb.limit(params.limit);
+      if (!_.isEmpty(params.sort)) {
+        if (params.sort.key) {
+          qb.orderBy(params.sort.key, params.sort.order);
         } else {
-          qb.where(key, where.symbol, where.value);
+          qb.orderBy(params.sort);
         }
-      });
-
-      if (params.sort) {
-        qb.orderBy(params.sort.key, params.sort.order);
-      }
-
-      if (params.skip) {
-        qb.offset(_.toNumber(params.skip));
-      }
-
-      if (params.limit) {
-        qb.limit(_.toNumber(params.limit));
       }
     }).fetchAll({
       withRelated: populate || this.associations.map(x => x.alias)
@@ -30,18 +24,14 @@ module.exports = {
   },
 
   count: async function (params = {}) {
+    const model = this;
     return await this
       .forge()
       .query(qb => {
-        _.forEach(params.where, (where, key) => {
-          if (_.isArray(where.value)) {
-            for (const value in where.value) {
-              qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
-            }
-          } else {
-            qb.where(key, where.symbol, where.value);
-          }
-        });
+        // Generate Population stage
+        strapi.hook.bookshelf.load().generatePopulationStage(qb)(model, params);
+        // Generate match stage.
+        strapi.hook.bookshelf.load().generateMatchStage(qb)(model, params);
       })
       .count();
   },

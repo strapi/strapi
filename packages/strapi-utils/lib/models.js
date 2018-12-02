@@ -431,10 +431,6 @@ module.exports = {
     return _.findKey(strapi.models[association.model || association.collection].attributes, {via: attribute});
   },
 
-  mergeStages: (...stages) => {
-    return _.unionWith(...stages, _.isEqual);
-  },
-
   convertParams: function (entity, params) {
     const { model, models, convertor, postProcessValue } = this.prepareStage(
       entity,
@@ -540,14 +536,17 @@ module.exports = {
       .value();
   },
 
-  transformFilter: function (filter, iteratee) {
+  transformFilter: function (filter, iteratee, currentKeyDepth = 0) {
+    const previousDepth = currentKeyDepth;
     if (!_.isArray(filter) && !_.isPlainObject(filter)) {
       return filter;
     }
 
     return _.transform(filter, (updatedFilter, value, key) => {
-      const updatedValue = iteratee(value, key);
-      updatedFilter[key] = this.transformFilter(updatedValue, iteratee);
+      const updatedValue = iteratee(value, key, { currentKeyDepth });
+      currentKeyDepth++;
+      updatedFilter[key] = this.transformFilter(updatedValue, iteratee, currentKeyDepth);
+      currentKeyDepth = previousDepth;
       return updatedFilter;
     });
   },
@@ -555,7 +554,13 @@ module.exports = {
   processValues: function ({ model, models, convertor, postProcessValue }) {
     return filter => {
       let parentModel = model;
-      return this.transformFilter(filter, (value, key) => {
+      let previousPath = -1;
+      return this.transformFilter(filter, (value, key, { currentKeyDepth } = {}) => {
+        // Go back to the previous model if the filter iterator is going up
+        if (currentKeyDepth < previousPath) {
+          parentModel = model;
+        }
+
         const field = this.getFieldFromKey(key, parentModel);
         if (!field) {
           return this.processMeta(value, key, {
@@ -565,9 +570,12 @@ module.exports = {
             convertor,
           });
         }
+
         if (field.collection || field.model) {
           parentModel = models[field.collection || field.model];
         }
+
+        previousPath = currentKeyDepth;
         return postProcessValue(
           this.processValue(value, key, { field, client: model.client, model })
         );
@@ -589,7 +597,11 @@ module.exports = {
       let splitKey = key.split('_').slice(0, -1);
       splitKey = splitKey.join('_');
 
-      if (model.attributes[splitKey]) {
+      if (splitKey === model.primaryKey) {
+        field = {
+          type: 'ID', // Just in case
+        };
+      } else if (model.attributes[splitKey]) {
         field = model.attributes[splitKey];
       }
     }
@@ -616,7 +628,8 @@ module.exports = {
   },
 
   processSortMeta: function (value, key, { convertor, model }) {
-    const [attr, order = 'ASC'] = value.split(':');
+    const [attr, _order = 'ASC'] = value.split(':');
+    const order = _order.toUpperCase();
     if (!_.includes(ORDERS, order)) {
       throw new Error(
         `Unkown order value: "${order}", available values are: ${ORDERS.join(
@@ -636,14 +649,26 @@ module.exports = {
   processPredicates: function ({ model, models, convertor }) {
     return filter => {
       let parentModel = model;
-      return this.transformFilter(filter, (value, key) => {
+      let previousPath = -1;
+      return this.transformFilter(filter, (value, key, { currentKeyDepth } = {}) => {
+        // Go back to the previous model if the filter iterator is going up
+        if (currentKeyDepth < previousPath) {
+          parentModel = model;
+        }
+
         const field = this.getFieldFromKey(key, parentModel);
+
+        // Ignore processing
         if (!field) {
           return value;
         }
+
+        // Setting the new model definition
         if (field.collection || field.model) {
           parentModel = models[field.collection || field.model];
         }
+
+        previousPath = currentKeyDepth;
         return this.processCriteriaMeta(value, key, { convertor });
       });
     };

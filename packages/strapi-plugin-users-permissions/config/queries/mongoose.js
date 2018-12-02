@@ -1,14 +1,12 @@
 const _ = require('lodash');
 
-const { models: { mergeStages } } = require('strapi-utils');
-
 module.exports = {
   find: async function (filters = {}, populate) {
     const hook = strapi.hook[this.orm];
     // Generate stages.
     const populateStage = hook.load().generateLookupStage(this, { whitelistedPopulate: populate }); // Nested-Population
     const matchStage = hook.load().generateMatchStage(this, filters); // Nested relation filter
-    const aggregateStages = mergeStages(populateStage, matchStage);
+    const aggregateStages = _.unionWith(populateStage, matchStage, _.isEqual);
 
     const result = this.aggregate(aggregateStages);
 

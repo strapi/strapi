@@ -29,7 +29,8 @@ module.exports = {
       .map(ast => ast.alias);
 
     return <%= globalID %>.query(function(qb) {
-      // Generate match stage.
+      // Generate stages.
+      hook.load().generatePopulationStage(qb)(<%= globalID %>, filters);
       hook.load().generateMatchStage(qb)(<%= globalID %>, filters);
 
       if (_.has(filters, 'start')) qb.offset(filters.start);
@@ -76,7 +77,8 @@ module.exports = {
     const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
 
     return <%= globalID %>.query(function(qb) {
-      // Generate match stage.
+      // Generate stages.
+      hook.load().generatePopulationStage(qb)(<%= globalID %>, filters);
       hook.load().generateMatchStage(qb)(<%= globalID %>, filters);
     }).count();
   },

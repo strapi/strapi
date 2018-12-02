@@ -2,14 +2,19 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params, populate, raw = false) {
-    const query = this
-      .find(params.where)
-      .limit(Number(params.limit))
-      .sort(params.sort)
-      .skip(Number(params.skip))
-      .populate(populate || this.associations.map(x => x.alias).join(' '));
+    const hook = strapi.hook.mongoose;
+    const model = this;
+    // Generate stages.
+    const populateStage = hook.load().generateLookupStage(model, { whitelistedPopulate: populate }); // Nested-Population
+    const matchStage = hook.load().generateMatchStage(model, params); // Nested relation
+    const aggregateStages = _.unionWith(populateStage, matchStage, _.isEqual);
 
-    return raw ? query.lean() : query;
+    const result = model.aggregate(aggregateStages);
+    if (_.has(params, 'start')) result.skip(params.start);
+    if (_.has(params, 'limit')) result.limit(params.limit);
+    if (!_.isEmpty(params.sort)) result.sort(params.sort);
+
+    return raw ? result.lean() : result;
   },
 
   count: async function (params) {

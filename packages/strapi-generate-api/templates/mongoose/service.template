@@ -10,8 +10,6 @@
 // Public dependencies.
 const _ = require('lodash');
 
-const { models: { mergeStages } } = require('strapi-utils');
-
 module.exports = {
 
   /**
@@ -27,7 +25,7 @@ module.exports = {
     // Generate stages.
     const populateStage = hook.load().generateLookupStage(<%= globalID %>, { whitelistedPopulate: populate }); // Nested-Population
     const matchStage = hook.load().generateMatchStage(<%= globalID %>, filters); // Nested relation filter
-    const aggregateStages = mergeStages(populateStage, matchStage);
+    const aggregateStages = _.unionWith(populateStage, matchStage, _.isEqual);
 
     const result = <%= globalID %>.aggregate(aggregateStages)
       .skip(filters.start)
@@ -72,7 +70,7 @@ module.exports = {
     // Generate stages.
     const populateStage = hook.load().generateLookupStage(<%= globalID %>, { whitelistedPopulate: populate }); // Nested-Population
     const matchStage = hook.load().generateMatchStage(<%= globalID %>, filters); // Nested relation filter
-    const aggregateStages = mergeStages(populateStage, matchStage);
+    const aggregateStages = _.unionWith(populateStage, matchStage, _.isEqual);
 
     return <%= globalID %>
       .count()
