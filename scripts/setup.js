@@ -147,7 +147,6 @@ watcher('📦  Linking strapi-plugin-email...', 'npm link --no-optional', false)
 
 shell.cd('../strapi-plugin-users-permissions');
 watcher('', 'npm install ../strapi-helper-plugin --no-optional');
-watcher('', 'npm install ../strapi-utils --no-optional');
 shell.rm('-f', 'package-lock.json');
 watcher(
   '📦  Linking strapi-plugin-users-permissions...',
