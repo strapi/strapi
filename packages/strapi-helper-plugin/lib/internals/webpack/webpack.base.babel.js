@@ -8,20 +8,18 @@ const _ = require('lodash');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const { COMMON_ALIAS } = require('./configs/alias');
 const foldersToInclude = require('./configs/foldersToInclude');
-const { __NODE_ENV__, __PROD__ } = require('./configs/globals');
+const { __NODE_ENV__, __PROD__, __IS_ADMIN__, __IS_MONOREPO__ } = require('./configs/globals');
 const paths = require('./configs/paths');
 const URLs = require('./configs/server');
 const pkg = require(paths.packageJson);
 const pluginId = pkg.name.replace(/^strapi-/i, '');
 
 module.exports = options => {
-  const { alias, babelPresets, devtool, disableExtractTextPlugin, entry, externals,  output, plugins } = options;
-  
   // The disable option is only for production
   // Config from https://github.com/facebook/create-react-app/blob/next/packages/react-scripts/config/webpack.config.prod.js
   const extractSass = new ExtractTextPlugin({
     filename: '[name].[contenthash].css',
-    disable: disableExtractTextPlugin || true,
+    disable: options.disableExtractTextPlugin || true,
   });
 
   const commonBabelPresets = [
@@ -40,13 +38,13 @@ module.exports = options => {
   const commonDevtool = 'cheap-module-source-map';
 
   return {
-    entry: entry,
+    entry: options.entry,
     output: Object.assign(
       {
         // Compile into js/build.js
-        path: path.join(paths.adminPath, 'admin', 'build'),
+        path: paths.buildPath,
       },
-      output,
+      options.output,
     ), // Merge with env dependent settings.
     module: {
       rules: [
@@ -61,7 +59,7 @@ module.exports = options => {
               loader: require.resolve('babel-loader'),
               include: foldersToInclude,
               options: {
-                presets: commonBabelPresets.concat(babelPresets),
+                presets: commonBabelPresets.concat(options.babelPresets),
                 env: {
                   production: {
                     only: ['src'],
@@ -72,7 +70,10 @@ module.exports = options => {
                       require.resolve('babel-plugin-transform-es2015-destructuring'),
                       require.resolve('babel-plugin-transform-es2015-parameters'),
                       require.resolve('babel-plugin-transform-object-rest-spread'),
-                      [require.resolve('babel-plugin-styled-components'), { ssr: true, preprocess: true }],
+                      [
+                        require.resolve('babel-plugin-styled-components'),
+                        { ssr: true, preprocess: true },
+                      ],
                     ],
                   },
                   test: {
@@ -210,7 +211,7 @@ module.exports = options => {
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
       new webpack.NamedModulesPlugin(),
       extractSass,
-    ].concat(plugins),
+    ].concat(options.plugins),
     resolve: {
       modules: [
         'admin/src',
@@ -218,13 +219,13 @@ module.exports = options => {
         'node_modules/strapi-helper-plugin/node_modules',
         'node_modules',
       ],
-      alias: _.isEmpty(alias) ? COMMON_ALIAS : alias,
+      alias: _.isEmpty(options.alias) ? COMMON_ALIAS : options.alias,
       symlinks: false,
       extensions: ['.js', '.jsx', '.react.js'],
       mainFields: ['browser', 'jsnext:main', 'main'],
     },
-    devtool: _.isEmpty(devtool) ? commonDevtool : devtool,
-    externals: externals,
+    devtool: _.isEmpty(options.devtool) ? commonDevtool : options.devtool,
+    externals: options.externals,
     resolveLoader: {
       modules: [
         path.join(__dirname, '..', '..', '..', 'node_modules'),

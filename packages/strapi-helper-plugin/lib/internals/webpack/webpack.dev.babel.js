@@ -21,7 +21,7 @@ module.exports = require('./webpack.base.babel')({
     {
       main: [
         `webpack-hot-middleware/client?path=http://localhost:${port}/__webpack_hmr`,
-        path.join(paths.appPath, 'admin', 'admin', 'src', 'appDev.js'),
+        paths.appDev,
       ],
     },
     plugins.src.reduce((acc, current) => {
@@ -56,9 +56,7 @@ module.exports = require('./webpack.base.babel')({
   ], // eslint-disable-line no-use-before-define,
   postcssPlugins,
   // Tell babel that we want hot-reload
-  babelPresets: [
-    require.resolve('babel-preset-react-hmre'),
-  ],
+  babelPresets: [require.resolve('babel-preset-react-hmre')],
 });
 
 /**
@@ -67,6 +65,6 @@ module.exports = require('./webpack.base.babel')({
  */
 function templateContent() {
   const html = fs.readFileSync(paths.indexHtml).toString();
-  
+
   return html;
 }
