@@ -33,9 +33,8 @@ module.exports = {
         return ast.autoPopulate;
       })
       .reduce((acc, ast) => {
-        const model = ast.plugin
-          ? strapi.plugins[ast.plugin].models[ast.collection || ast.model]
-          : strapi.models[ast.collection || ast.model];
+        const { models } = ast.plugin ? strapi.plugins[ast.plugin] : strapi;
+        const model = models[ast.collection || ast.model];
 
         const from = model.collectionName;
         const isDominantAssociation =
@@ -123,11 +122,8 @@ module.exports = {
             $match: { [`${prefixPath}${key}`]: value },
           });
         } else {
-          const model = association.plugin
-            ? strapi.plugins[association.plugin].models[
-              association.collection || association.model
-            ]
-            : strapi.models[association.collection || association.model];
+          const { models } = association.plugin ? strapi.plugins[association.plugin] : strapi;
+          const model = models[association.collection || association.model];
 
           // Generate lookup for this relation
           acc.push(
@@ -148,6 +144,11 @@ module.exports = {
                 }
               )
             );
+          } else {
+            // If the value is a primitive it means that it corresponds to the association primary key
+            acc.push({
+              $match: { [`${prefixPath}${key}.${model.primaryKey}`]: value },
+            });
           }
         }
       } else {
