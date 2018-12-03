@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-alpha.14.5",
+  "version": "3.0.0-alpha.15",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -31,8 +31,8 @@
   },
   "devDependencies": {
     "sanitize.css": "^4.1.0",
-    "strapi-helper-plugin": "3.0.0-alpha.14.5",
-    "strapi-utils": "3.0.0-alpha.14.5"
+    "strapi-helper-plugin": "3.0.0-alpha.15",
+    "strapi-utils": "3.0.0-alpha.15"
   },
   "author": {
     "name": "Strapi",
@@ -47,8 +47,8 @@
     }
   ],
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.0.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "license": "MIT"
 }

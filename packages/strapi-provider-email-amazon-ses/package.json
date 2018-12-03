@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-email-amazon-ses",
-  "version": "3.0.0-alpha.14.5",
+  "version": "3.0.0-alpha.15",
   "description": "Amazon SES provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -35,8 +35,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "license": "MIT"
 }
