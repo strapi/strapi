@@ -102,8 +102,10 @@ const main = async () => {
   };
 
   const cypressTest = () => {
+    const config = Object.assign({ spec: './packages/**/test/front/integration/*' }, process.env.npm_config_browser === 'true' ? { browser: 'chrome' } : {});
+    
     return cypress
-      .run({ spec: './packages/**/cypress/integration/*', browser: 'chrome' });
+      .run(config);
   }
 
   const testProcess = async (database) => {
