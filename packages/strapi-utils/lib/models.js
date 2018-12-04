@@ -504,7 +504,7 @@ module.exports = {
     const result = _.reduce(
       _query,
       (acc, value, key) => {
-        if (_.startsWith(key, '_')) {
+        if (_.includes(['_start', '_limit', '_sort'], key)) {
           acc[key] = value;
         } else if (!_.includes(key, '.')) {
           acc.where[key] = value;
