@@ -102,6 +102,8 @@ module.exports = {
             }
 
             generatePopulation(model, { relations: value });
+          } else if (_.isPlainObject(value)) {
+            generatePopulation(strapiModel, { relations: value });
           }
         } else {
           generatePopulation(strapiModel, { relations: value });
