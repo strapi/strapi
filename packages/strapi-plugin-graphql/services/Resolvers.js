@@ -390,14 +390,15 @@ module.exports = {
 
               switch (association.nature) {
                 case 'manyToMany': {
-                  const arrayOfIds = (obj[association.alias] || []).map(
-                    related => {
-                      return related[ref.primaryKey] || related;
-                    }
-                  );
-
-                  _.set(queryOpts, ['query', ref.primaryKey], arrayOfIds);
-                  break;
+                  if (association.dominant) {
+                    const arrayOfIds = (obj[association.alias] || []).map(
+                      related => {
+                        return related[ref.primaryKey] || related;
+                      }
+                    );
+                    _.set(queryOpts, ['query', `${ref.primaryKey}_in`], arrayOfIds);
+                    break;
+                  }
                 }
                 default:
                   // Where.
@@ -405,10 +406,6 @@ module.exports = {
                   // related to this entry.
                   _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
               }
-            }
-
-            if (Array.isArray(_.get(queryOpts, 'query.id.value'))){
-              _.set(queryOpts, 'query.id.symbol', 'IN');
             }
 
             const value = await (association.model
