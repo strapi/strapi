@@ -444,7 +444,7 @@ module.exports = {
       this.processValues({ model, models, convertor, postProcessValue }),
       this.processPredicates({ model, models, convertor }),
       this.processGeneratedResults(),
-      this.mergeWhereAndRelationPayloads()
+      // this.mergeWhereAndRelationPayloads()
     ])(_filter);
   },
 
