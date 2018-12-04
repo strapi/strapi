@@ -526,7 +526,7 @@ module.exports = function (strapi) {
 
     postProcessValue: (value) => {
       if (_.isArray(value)) {
-        return value.map(_utils.valueToId);
+        return value.map((_value) => _utils.valueToId(_value));
       }
       return _utils.valueToId(value);
     }
