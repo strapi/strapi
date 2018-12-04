@@ -8,29 +8,26 @@
 const path = require('path');
 const webpack = require('webpack');
 const { COMMON_ALIAS } = require('./configs/alias');
-const isAdmin = process.env.IS_ADMIN === 'true';
+const dependencies = require('./configs/alias/dependencies.json');
+const paths = require('./configs/paths');
 
-const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ? '' : '..' ));
-
-
-const isSetup = process.env.IS_MONOREPO;
-
-const rootAdminpath = (() => {
-  if (isSetup) {
-    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
-  }
-
-  return path.resolve(appPath, 'admin');
-})();
 module.exports = {
-  context: appPath,
+  context: paths.appPath,
   entry: {
-    vendor: ['react-dnd', 'react-dnd-html5-backend', 'react', 'react-dom', 'react-intl', 'reactstrap', 'react-transition-group', 'immutable', 'lodash', 'babel-polyfill'], // Shared dependencies accross the admin and plugins.
+    vendor: dependencies.base, // Shared dependencies accross the admin and plugins.
   },
   devtool: 'cheap-module-source-map',
   output: {
     filename: '[name].dll.js',
-    path: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'lib', 'internals', 'webpack', 'dist'),
+    path: path.resolve(
+      paths.rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'lib',
+      'internals',
+      'webpack',
+      'dist',
+    ),
 
     // The name of the global variable which the library's
     // require() function will be assigned to
@@ -39,11 +36,11 @@ module.exports = {
   plugins: [
     new webpack.DllPlugin({
       name: '[name]_lib',
-      path: path.resolve(rootAdminpath, 'admin', 'src', 'config', 'manifest.json'),
+      path: path.resolve(paths.rootAdminpath, 'admin', 'src', 'config', 'manifest.json'),
     }),
   ],
   resolve: {
-    alias : COMMON_ALIAS,
+    alias: COMMON_ALIAS,
     modules: [
       'admin/src',
       'node_modules/strapi-helper-plugin/lib/src',
@@ -51,15 +48,7 @@ module.exports = {
       'node_modules',
     ],
     symlinks: false,
-    extensions: [
-      '.js',
-      '.jsx',
-      '.react.js',
-    ],
-    mainFields: [
-      'browser',
-      'jsnext:main',
-      'main',
-    ],
+    extensions: ['.js', '.jsx', '.react.js'],
+    mainFields: ['browser', 'jsnext:main', 'main'],
   },
 };
