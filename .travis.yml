@@ -22,9 +22,8 @@ install:
   - npm run setup --debug
 
 script:
-  - npm run lint
   - npm run doc
-  - snyk monitor --org=strapi
+  # - npm run lint
 
 cache:
   directories:
