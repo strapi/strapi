@@ -23,9 +23,9 @@
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "devDependencies": {
-    "flag-icon-css": "^2.8.0",
-    "react-select": "^1.0.0-rc.5",
-    "strapi-helper-plugin": "3.0.0-alpha.16"
+    "flag-icon-css": "^3.2.1",
+    "react-select": "^2.1.2",
+    "strapi-helper-plugin": "3.0.0-debugalpha.4.1"
   },
   "author": {
     "name": "Strapi team",
