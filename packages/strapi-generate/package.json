@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "async": "^2.5.0",
-    "fs-extra": "^4.0.0",
+    "fs-extra": "^7.0.1",
     "lodash": "^4.17.5",
     "reportback": "^2.0.1",
     "strapi-utils": "3.0.0-alpha.16"
