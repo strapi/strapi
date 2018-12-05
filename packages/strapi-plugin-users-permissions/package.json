@@ -26,14 +26,14 @@
     "grant-koa": "^4.2.0",
     "jsonwebtoken": "^8.1.0",
     "koa": "^2.1.0",
-    "koa2-ratelimit": "^0.6.1",
-    "purest": "^2.0.1",
+    "koa2-ratelimit": "^0.7.0",
+    "purest": "^3.1.0",
     "request": "^2.83.0",
     "strapi-utils": "3.0.0-alpha.16",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.16"
+    "strapi-helper-plugin": "3.0.0-debugalpha.4.1"
   },
   "author": {
     "name": "Strapi team",
