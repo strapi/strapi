@@ -28,7 +28,7 @@
     "strapi-generate-api": "3.0.0-alpha.16"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.16"
+    "strapi-helper-plugin": "3.0.0-debugalpha.4.1"
   },
   "author": {
     "name": "Strapi team",
