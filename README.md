@@ -5,6 +5,8 @@
 
 ---
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/strapi/strapi.svg)](https://greenkeeper.io/)
+
 <p align="center">
   <a href="https://strapi.io">
     <img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" alt="Strapi logo" />
