@@ -26,12 +26,12 @@
   },
   "dependencies": {
     "react-ga": "^2.4.1",
-    "remove-markdown": "^0.2.2",
-    "shelljs": "^0.7.8"
+    "remove-markdown": "^0.3.0",
+    "shelljs": "^0.8.3"
   },
   "devDependencies": {
-    "sanitize.css": "^4.1.0",
-    "strapi-helper-plugin": "3.0.0-alpha.16",
+    "sanitize.css": "^8.0.0",
+    "strapi-helper-plugin": "3.0.0-debugalpha.4.1",
     "strapi-utils": "3.0.0-alpha.16"
   },
   "author": {
