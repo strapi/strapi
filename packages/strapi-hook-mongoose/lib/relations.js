@@ -98,12 +98,12 @@ module.exports = {
             } else if (response[current] && _.isArray(response[current]) && current !== 'id') {
               // Records to add in the relation.
               const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
-                a[this.primaryKey].toString() === b[this.primaryKey].toString()
+                (a[this.primaryKey] || a).toString() === (b[this.primaryKey] || b).toString()
               );
 
               // Records to remove in the relation.
               const toRemove = _.differenceWith(response[current], params.values[current], (a, b) =>
-                a[this.primaryKey].toString() === b[this.primaryKey].toString()
+                (a[this.primaryKey] || a).toString() === (b[this.primaryKey] || b).toString()
               )
                 .filter(x => toAdd.find(y => x.id === y.id) === undefined);
 

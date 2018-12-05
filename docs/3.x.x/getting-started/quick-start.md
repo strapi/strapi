@@ -1,6 +1,6 @@
 # Quick start
 
-This section explains how to handle Strapi for the first time, ([check out our tutorial video](https://www.youtube.com/watch?v=yMl5IcFHA74)).
+This section explains how to handle Strapi for the first time, ([check out our video tutorial](https://www.youtube.com/watch?v=yMl5IcFHA74)).
 
 **Table of contents:**
 - [1. Create your first project](#_1-create-a-project)
@@ -170,7 +170,7 @@ axios
 
 If you want to get a specific entry, add the `id` of the wanted post at the end of the url.
 
-Examble with Axios:
+Example with Axios:
 
 ```js
 import axios from 'axios';
@@ -194,7 +194,7 @@ axios
 
 Use the `POST` route to create a new entry.
 
-Examble with Axios:
+Example with Axios:
 
 ```js
 import axios from 'axios';
@@ -221,7 +221,7 @@ axios
 
 Use the `PUT` route to update an existing entry.
 
-Examble with Axios:
+Example with Axios:
 
 ```js
 import axios from 'axios';
@@ -250,7 +250,7 @@ axios
 
 Use the `DELETE` route to delete an existing entry.
 
-Examble with Axios:
+Example with Axios:
 
 ```js
 import axios from 'axios';

@@ -296,7 +296,7 @@ A `product` can be related to many `categories`, so a `category` can have many `
 ```
 
 ::: note
-The `dominant` key allows you to define in which table/collection (only for NoSQL databases) should be stored the array that defines the relationship. Because there is no join table in NoSQL, this key is required for NoSQL databases (ex: MongoDB).
+(NoSQL databases only) The `dominant` key defines which table/collection should store the array that defines the relationship. Because there are no join tables in NoSQL, this key is required for NoSQL databases (ex: MongoDB).
 :::
 
 **Path —** `./api/category/models/Category.settings.json`.

@@ -18,8 +18,8 @@ about: Create a report to help us improve 🤔.
 <!-- The latest version of Strapi. -->
 
 **Informations**
-- **Node.js version**: 
-- **npm version**: 
+- **Node.js version**: <!-- Please ensure you are using the Node LTS version (v10) -->
+- **NPM version**: 
 - **Strapi version**: <!-- Please make sure you are on the latest version -->
 - **Database**: 
 - **Operating system**: 

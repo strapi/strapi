@@ -44,9 +44,20 @@
 
 #### 🖐 Requirements
 
+Operating system:
+ * Ubuntu/Debian
+ * CentOS/RHEL
+ * MacOS
+ * Windows - [WSL Only](https://github.com/strapi/strapi/wiki/Frequently-Asked-Questions#windows)
+ * Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
+
+**Please note that Strapi may work on other Operating Systems, but are not tested at this time.**
+
 Node:
  * NodeJS >= 10.x
  * NPM >= 6.x
+
+**Please note that right now Node 11 is not Officially supported, and the current Node LTS (v10) should be used.**
 
 Database:
  * MongoDB >= 3.x 
@@ -140,6 +151,12 @@ Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki
 ## Roadmap
 
 Check out our [roadmap](https://portal.productboard.com/strapi) to get informed by the latest feature released and the upcoming ones. You can also give us insights and vote for a specific feature.
+
+## Sponsors
+
+[Become a sponsor](https://opencollective.com/strapi#sponsor) and get your logo on our README on GitHub with a link to your site.
+
+<a href="https://opencollective.com/strapi#contributors"><img src="https://opencollective.com/strapi/tiers/sponsor.svg"/></a>
 
 ## License
 

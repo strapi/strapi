@@ -37,6 +37,10 @@ Find products having a price equal or greater than `3`.
 
 `GET /products?price_gte=3`
 
+ > Note: You can't use filter to have specific results inside relation, like "Find users and only their posts older than yesterday" as example. If you need it, you can modify or create your own service or use [GraphQL](./graphql.md#query-api).
+
+ > Warning: this filter isn't available for `upload` plugin
+
 ### Sort
 
 Sort according to a specific field.

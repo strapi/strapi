@@ -1,5 +1,6 @@
 const _ = require('lodash');
 
+
 module.exports = {
   find: async function (params = {}, populate) {
     const records = await this.query(function(qb) {
@@ -12,15 +13,12 @@ module.exports = {
           qb.where(key, where.symbol, where.value);
         }
       });
-
       if (params.start) {
         qb.offset(params.start);
       }
-
       if (params.limit) {
         qb.limit(params.limit);
       }
-
       if (params.sort) {
         if (params.sort.key) {
           qb.orderBy(params.sort.key, params.sort.order);
@@ -32,7 +30,6 @@ module.exports = {
       .fetchAll({
         withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
       });
-
 
     return records ? records.toJSON() : records;
   },
