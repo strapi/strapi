@@ -15,7 +15,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "consolidate": "^0.14.5",
+    "consolidate": "^0.15.1",
     "koa-views": "^6.1.1",
     "lodash": "^4.17.5"
   },
