@@ -14,7 +14,7 @@
   "main": "./lib",
   "dependencies": {
     "cloudinary": "^1.11.0",
-    "into-stream": "^3.1.0"
+    "into-stream": "^4.0.0"
   },
   "strapi": {
     "isProvider": true
