@@ -1,0 +1,45 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "docs/package.json",
+        "package.json",
+        "packages/strapi-admin/package.json",
+        "packages/strapi-generate-admin/package.json",
+        "packages/strapi-generate-api/package.json",
+        "packages/strapi-generate-controller/package.json",
+        "packages/strapi-generate-model/package.json",
+        "packages/strapi-generate-new/package.json",
+        "packages/strapi-generate-plugin/package.json",
+        "packages/strapi-generate-policy/package.json",
+        "packages/strapi-generate-service/package.json",
+        "packages/strapi-generate/package.json",
+        "packages/strapi-helper-plugin/package.json",
+        "packages/strapi-hook-bookshelf/package.json",
+        "packages/strapi-hook-ejs/package.json",
+        "packages/strapi-hook-knex/package.json",
+        "packages/strapi-hook-mongoose/package.json",
+        "packages/strapi-hook-redis/package.json",
+        "packages/strapi-lint/package.json",
+        "packages/strapi-middleware-views/package.json",
+        "packages/strapi-plugin-content-manager/package.json",
+        "packages/strapi-plugin-content-type-builder/package.json",
+        "packages/strapi-plugin-email/package.json",
+        "packages/strapi-plugin-graphql/package.json",
+        "packages/strapi-plugin-settings-manager/package.json",
+        "packages/strapi-plugin-upload/package.json",
+        "packages/strapi-plugin-users-permissions/package.json",
+        "packages/strapi-provider-email-amazon-ses/package.json",
+        "packages/strapi-provider-email-mailgun/package.json",
+        "packages/strapi-provider-email-sendgrid/package.json",
+        "packages/strapi-provider-email-sendmail/package.json",
+        "packages/strapi-provider-upload-aws-s3/package.json",
+        "packages/strapi-provider-upload-cloudinary/package.json",
+        "packages/strapi-provider-upload-local/package.json",
+        "packages/strapi-provider-upload-rackspace/package.json",
+        "packages/strapi-utils/package.json",
+        "packages/strapi/package.json"
+      ]
+    }
+  }
+}
