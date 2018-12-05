@@ -6,4 +6,12 @@ ignore:
     - '*':
         reason: testing
         expires: 2019-01-04T14:37:34.495Z
+  qs:
+    - '*':
+        reason: Temporarily ignore
+        expires: 2019-01-31T00:00:00.000Z
+  apollo-server-koa@2.2.6:
+    - '*':
+        reason: Temporarily ignore
+        expires: 2019-01-04T16:34:24.069Z
 patch: {}

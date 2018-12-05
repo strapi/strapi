@@ -34,7 +34,8 @@
     "setup": "npm run clean:all && npm install ./packages/strapi-lint --save-dev && npm install && node ./scripts/setup.js && npm run clean",
     "lint": "node ./scripts/lint.js",
     "test": "snyk test && node ./test/start.js",
-    "prettier": "node ./packages/strapi-lint/lib/internals/prettier/index.js"
+    "prettier": "node ./packages/strapi-lint/lib/internals/prettier/index.js",
+    "snyk": "node ./scripts/snyk.js"
   },
   "author": {
     "email": "hi@strapi.io",

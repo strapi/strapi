@@ -6,4 +6,12 @@ ignore:
     - '*':
         reason: testing
         expires: 2019-01-04T14:37:58.353Z
+  qs:
+    - '*':
+        reason: Temporarily ignore
+        expires: 2019-01-31T00:00:00.000Z
+  purest:
+    - '*':
+        reason: Temporarily ignore
+        expires: 2019-01-31T00:00:00.000Z
 patch: {}

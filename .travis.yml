@@ -23,6 +23,7 @@ install:
 
 script:
   - npm run doc
+  - npm run snyk
   # - npm run lint
 
 cache:
