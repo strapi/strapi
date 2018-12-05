@@ -6,8 +6,8 @@ git:
 language: node_js
 
 node_js:
-  - "10"
-  - "11"
+  - '10'
+  - '11'
 
 before_install:
   - export CHROME_BIN=chromium-browser
@@ -24,7 +24,8 @@ install:
 script:
   - npm run lint
   - npm run doc
+  - snyk monitor --org=strapi
 
 cache:
   directories:
-    - "node_modules"
+    - 'node_modules'
