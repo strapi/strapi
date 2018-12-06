@@ -183,7 +183,6 @@
             "schema": {
               "type": "integer"
             },
-            "example": 20,
             "deprecated": false
           },
           {
@@ -204,7 +203,6 @@
             "schema": {
               "type": "integer"
             },
-            "example": 0,
             "deprecated": false
           },
           {
@@ -567,7 +565,13 @@
                 "email": {
                   "type": "string"
                 },
+                "provider": {
+                  "type": "string"
+                },
                 "password": {
+                  "type": "string"
+                },
+                "resetPasswordToken": {
                   "type": "string"
                 },
                 "confirmed": {
@@ -652,7 +656,13 @@
                 "email": {
                   "type": "string"
                 },
+                "provider": {
+                  "type": "string"
+                },
                 "password": {
+                  "type": "string"
+                },
+                "resetPasswordToken": {
                   "type": "string"
                 },
                 "confirmed": {
