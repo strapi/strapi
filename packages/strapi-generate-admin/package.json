@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-admin",
-  "version": "3.0.0-alpha.14.1.1",
+  "version": "3.0.0-alpha.16",
   "description": "Generate the default admin panel for a Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -15,8 +15,8 @@
   "dependencies": {
     "fs-extra": "^4.0.1",
     "lodash": "^4.17.5",
-    "strapi-admin": "3.0.0-alpha.14.1.1",
-    "strapi-utils": "3.0.0-alpha.14.1.1"
+    "strapi-admin": "3.0.0-alpha.16",
+    "strapi-utils": "3.0.0-alpha.16"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -38,8 +38,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "license": "MIT"
 }

@@ -1,91 +1,25 @@
 /**
  * app.js
  *
- * This is the entry file for the application, only setup and boilerplate
+ * This is the entry file for the application when running the build
  * code.
  */
 
 /* eslint-disable */
-import './public-path';
 import 'babel-polyfill';
-/* eslint-disable no-console */
-// Import all the third party stuff
-import { Provider } from 'react-redux';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { ConnectedRouter } from 'react-router-redux';
-import createHistory from 'history/createBrowserHistory';
-import { merge, isFunction } from 'lodash';
+import { findIndex } from 'lodash';
 import 'sanitize.css/sanitize.css';
 import 'whatwg-fetch';
-
-import LanguageProvider from 'containers/LanguageProvider';
-
-import App from 'containers/App';
-import { showNotification } from 'containers/NotificationProvider/actions';
 import {
-  freezeApp,
-  pluginLoaded,
-  unfreezeApp,
+  getAppPluginsSucceeded,
   unsetHasUserPlugin,
-  updatePlugin,
 } from 'containers/App/actions';
+import { basename, store } from './createStore';
+import './intlPolyfill';
+import './public-path';
+import './strapi';
 
-import auth from 'utils/auth';
-import configureStore from './store';
-import { translationMessages, languages } from './i18n';
-import { findIndex } from 'lodash';
-
-const plugins = (() => {
-  try {
-    return require('./config/plugins.json');
-  } catch (e) {
-    return [];
-  }
-})();
-/* eslint-enable */
-
-// Create redux store with history
-const basename = strapi.remoteURL.replace(window.location.origin, '');
-const history = createHistory({
-  basename,
-});
-const store = configureStore({}, history);
-
-const render = (translatedMessages) => {
-  ReactDOM.render(
-    <Provider store={store}>
-      <LanguageProvider messages={translatedMessages}>
-        <ConnectedRouter history={history}>
-          <App />
-        </ConnectedRouter>
-      </LanguageProvider>
-    </Provider>,
-    document.getElementById('app')
-  );
-};
-
-// Hot reloadable translation json files
-if (module.hot) {
-  // modules.hot.accept does not accept dynamic dependencies,
-  // have to be constants at compile-time
-  module.hot.accept('./i18n', () => {
-    render(translationMessages);
-  });
-}
-
-// Chunked polyfill for browsers without Intl support
-window.onload = function onLoad() {
-  if (!window.Intl) {
-    Promise.all([
-      System.import('intl'),
-      System.import('intl/locale-data/jsonp/en.js'),
-      System.import('intl/locale-data/jsonp/fr.js'),
-    ]).then(() => render(translationMessages));
-  } else {
-    render(translationMessages);
-  }
-};
+const dispatch = store.dispatch;
 
 // Don't inject plugins in development mode.
 if (window.location.port !== '4000') {
@@ -94,8 +28,10 @@ if (window.location.port !== '4000') {
       return response.json();
     })
     .then(plugins => {
+      dispatch(getAppPluginsSucceeded(plugins));
+
       if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-        store.dispatch(unsetHasUserPlugin());
+        dispatch(unsetHasUserPlugin());
       }
 
       const $body = document.getElementsByTagName('body')[0];
@@ -131,102 +67,8 @@ if (window.location.port !== '4000') {
     .catch(err => {
       console.log(err); // eslint-disable-line no-console
     });
-} else if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-  store.dispatch(unsetHasUserPlugin());
 }
 
-// const isPluginAllowedToRegister = (plugin) => true;
-const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email' || auth.getToken();
-
-/**
- * Register a plugin
- *
- * @param params
- */
-const registerPlugin = (plugin) => {
-  // Merge admin translation messages
-  merge(translationMessages, plugin.translationMessages);
-
-  plugin.leftMenuSections = plugin.leftMenuSections || [];
-  const shouldAllowRegister = isPluginAllowedToRegister(plugin) !== null;
-
-  switch (true) {
-    // Execute bootstrap function and check if plugin can be rendered
-    case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements) && shouldAllowRegister:
-      plugin.pluginRequirements(plugin)
-        .then(plugin => {
-          return plugin.bootstrap(plugin);
-        })
-        .then(plugin => {
-          store.dispatch(pluginLoaded(plugin));
-        });
-      break;
-    // Check if plugin can be rendered
-    case isFunction(plugin.pluginRequirements):
-      plugin.pluginRequirements(plugin).then(plugin => {
-        store.dispatch(pluginLoaded(plugin));
-      });
-      break;
-    // Execute bootstrap function
-    case isFunction(plugin.bootstrap) && shouldAllowRegister:
-      plugin.bootstrap(plugin).then(plugin => {
-        store.dispatch(pluginLoaded(plugin));
-      });
-      break;
-    default:
-      store.dispatch(pluginLoaded(plugin));
-  }
-};
-
-const displayNotification = (message, status) => {
-  store.dispatch(showNotification(message, status));
-};
-
-const lockApp = () => {
-  store.dispatch(freezeApp());
-};
-
-const unlockApp = () => {
-  store.dispatch(unfreezeApp());
-};
-
-/**
- * Public Strapi object exposed to the `window` object
- */
-
-window.strapi = Object.assign(window.strapi || {}, {
-  mode: process.env.MODE || 'host',
-  registerPlugin,
-  notification: {
-    success: (message) => {
-      displayNotification(message, 'success');
-    },
-    warning: (message) => {
-      displayNotification(message, 'warning');
-    },
-    error: (message) => {
-      displayNotification(message, 'error');
-    },
-    info: (message) => {
-      displayNotification(message, 'info');
-    },
-  },
-  refresh: (pluginId) => ({
-    translationMessages: (translationMessagesUpdated) => {
-      render(merge({}, translationMessages, translationMessagesUpdated));
-    },
-    leftMenuSections: (leftMenuSectionsUpdated) => {
-      store.dispatch(updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated));
-    },
-  }),
-  router: history,
-  languages,
-  currentLanguage: window.localStorage.getItem('strapi-admin-language') ||  window.navigator.language ||  window.navigator.userLanguage || 'en',
-  lockApp,
-  unlockApp,
-});
-
-const dispatch = store.dispatch;
 export {
   dispatch,
 };

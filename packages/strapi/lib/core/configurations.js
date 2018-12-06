@@ -13,7 +13,8 @@ module.exports.nested = function() {
     // Load root configurations.
     new Promise((resolve, reject) => {
       glob('./config/**/*.*(js|json)', {
-        cwd: this.config.appPath
+        cwd: this.config.appPath,
+        dot: true
       }, (err, files) => {
         if (err) {
           return reject(err);
@@ -322,26 +323,21 @@ module.exports.app = async function() {
   // default settings
   this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
   this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
-  this.config.url = `http://${this.config.host}:${this.config.port}`;
 
   // Admin.
+  const url = getURLFromSegments({ hostname: this.config.host, port: this.config.port });
+  const adminPath = get(this.config.currentEnvironment.server, 'admin.path', 'admin');
   this.config.admin.devMode = isAdminInDevMode.call(this);
   this.config.admin.url = this.config.admin.devMode ?
-    `http://${this.config.host}:4000/${get(this.config.currentEnvironment.server, 'admin.path', 'admin')}`:
-    `${this.config.url}/${get(this.config.currentEnvironment.server, 'admin.path', 'admin')}`;
+    (new URL(adminPath, `http://${this.config.host}:4000`)).toString():
+    (new URL(adminPath, url)).toString();
 
   // proxy settings
-  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy', {});
-
-  // check if SSL enabled and construct proxy url
-  function getProxyUrl(ssl, url) {
-    return `http${ssl ? 's' : ''}://${url}`;
-  }
+  const proxy = get(this.config.currentEnvironment, 'server.proxy', {});
+  this.config.proxy = proxy;
 
   // check if proxy is enabled and construct url
-  if (get(this.config, 'proxy.enabled')) {
-    this.config.url = getProxyUrl(this.config.proxy.ssl, `${this.config.proxy.host}:${this.config.proxy.port}`);
-  }
+  this.config.url = proxy.enabled ? getURLFromSegments({ hostname: proxy.host, port: proxy.port, ssl: proxy.ssl }) : url;
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig, force = false) {
@@ -367,7 +363,7 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
         });
 
         return apiModelsUsed.length !== 0;
-      }) || 0; // Filter model with the right connector
+      }); // Filter model with the right connector
 
     flattenHooksConfig[name] = {
       enabled: force || modelsUsed.length > 0 // Will return false if there is no model, else true.
@@ -382,31 +378,6 @@ const enableHookNestedDependencies = function (name, flattenHooksConfig, force =
   }
 };
 
-/**
- * Allow dynamic config values through
- * the native ES6 template string function.
- */
-const regex = /\$\{[^()]*\}/g;
-const excludeConfigPaths = ['info.scripts'];
-const templateConfigurations = function (obj, configPath = '') {
-  // Allow values which looks like such as
-  // an ES6 literal string without parenthesis inside (aka function call).
-  // Exclude config with conflicting syntax (e.g. npm scripts).
-  return Object.keys(obj).reduce((acc, key) => {
-    if (isPlainObject(obj[key]) && !isString(obj[key])) {
-      acc[key] = templateConfigurations(obj[key], `${configPath}.${key}`);
-    } else if (isString(obj[key])
-      && !excludeConfigPaths.includes(configPath.substr(1))
-      && obj[key].match(regex) !== null) {
-      acc[key] = eval('`' + obj[key] + '`'); // eslint-disable-line prefer-template
-    } else {
-      acc[key] = obj[key];
-    }
-
-    return acc;
-  }, {});
-};
-    
 const isAdminInDevMode = function () {
   try {
     fs.accessSync(path.resolve(this.config.appPath, 'admin', 'admin', 'build', 'index.html'), fs.constants.R_OK | fs.constants.W_OK);
@@ -415,4 +386,12 @@ const isAdminInDevMode = function () {
   } catch (e) {
     return true;
   }
+};
+
+const getURLFromSegments = function ({ hostname, port, ssl = false }) {
+  const protocol = ssl ? 'https' : 'http';
+  const defaultPort = ssl ? 443 : 80;
+  const portString = (port === undefined || parseInt(port) === defaultPort) ? '' : `:${port}`;
+
+  return `${protocol}://${hostname}${portString}`;
 };

@@ -16,7 +16,7 @@ This project and everyone participating in it is governed by the [Strapi Code of
 Strapi is open-source under the [MIT license](https://github.com/strapi/strapi/blob/master/LICENSE.md). All the work done is available on GitHub.
 The core team and the contributors send pull requests which go through the same validation process.
 
-Every user can send a feature request using the [issues](https://github.com/strapi/strapi/issues/new?template=FEATURE_REQUEST.md) on GitHub. Feel free to upvote 👍 [existing feature request](https://github.com/strapi/strapi/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+feature+request+%F0%9F%99%8F%22)
+Every user can send a feature request using the [issues](https://github.com/strapi/strapi/issues/new?template=FEATURE_REQUEST.md) on GitHub. Feel free to upvote 👍 [existing feature request](https://portal.productboard.com/strapi)
 
 ## Repository Organization
 We made the choice to use a monorepo design such as [React](https://github.com/facebook/react/tree/master/packages), [Babel](https://github.com/babel/babel/tree/master/packages), [Meteor](https://github.com/meteor/meteor/tree/devel/packages) or [Ember](https://github.com/emberjs/ember.js/tree/master/packages) do. It allows the community to easily maintain the whole ecosystem up-to-date and consistent.
@@ -30,7 +30,7 @@ If you send a pull request, please do it against the `master` branch. We are dev
 ***
 
 ## Setup Development Environment
-To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the recommended versions of Node.js (v8) and npm (v5).
+To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/installation.html#requirements)
 
 Then, please follow the instructions below:
 
@@ -38,14 +38,14 @@ Then, please follow the instructions below:
 
 [Go to the repository](https://github.com/strapi/strapi) and fork it to your own GitHub account.
 
-#### 2. 💿 Clone the repository
+#### 2. 💿 Clone from your repository
 
 ```bash
-git clone git@github.com:strapi/strapi.git
+git clone git@github.com:YOUR_USERNAME/strapi.git
 ```
 
 #### 3. ⏳ Installation
- 
+
 Go to the root of the repository.
 ```bash
 cd strapi

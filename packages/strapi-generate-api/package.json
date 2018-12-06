@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-api",
-  "version": "3.0.0-alpha.14.1.1",
+  "version": "3.0.0-alpha.16",
   "description": "Generate an API for a Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -39,8 +39,8 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "license": "MIT"
 }

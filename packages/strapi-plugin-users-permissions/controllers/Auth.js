@@ -52,12 +52,12 @@ module.exports = {
       // Check if the user exists.
       const user = await strapi.query('user', 'users-permissions').findOne(query, ['role']);
 
-      if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && user.confirmed !== true) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }] : 'Your account email is not confirmed.');
-      }
-
       if (!user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
+      }
+      
+      if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && user.confirmed !== true) {
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }] : 'Your account email is not confirmed.');
       }
 
       if (user.blocked === true) {
@@ -147,12 +147,8 @@ module.exports = {
       key: 'grant'
     }).get();
 
-    _.defaultsDeep(grantConfig, {
-      server: {
-        protocol: 'http',
-        host: `${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}`
-      }
-    });
+    const [ protocol, host ] = strapi.config.url.split('://');
+    _.defaultsDeep(grantConfig, { server: { protocol, host } });
 
     const provider = process.platform === 'win32' ? ctx.request.url.split('\\')[2] : ctx.request.url.split('/')[2];
     const config = grantConfig[provider];
@@ -199,7 +195,7 @@ module.exports = {
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.object, {
       USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider'])
     });
-
+    
     try {
       // Send an email to the user.
       await strapi.plugins['email'].services.email.send({
@@ -306,7 +302,7 @@ module.exports = {
         const settings = storeEmail['email_confirmation'] ? storeEmail['email_confirmation'].options : {};
 
         settings.message = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.message, {
-          URL: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/auth/email-confirmation`,
+          URL: (new URL('/auth/email-confirmation', strapi.config.url)).toString(),
           USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider']),
           CODE: jwt
         });

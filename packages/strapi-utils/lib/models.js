@@ -19,7 +19,6 @@ const isNumeric = (value) => {
 /*
  * Set of utils for models
  */
-
 module.exports = {
 
   /**
@@ -37,7 +36,6 @@ module.exports = {
   getPK: function (collectionIdentity, collection, models) {
     if (_.isString(collectionIdentity)) {
       const ORM = this.getORM(collectionIdentity);
-
       try {
         const GraphQLFunctions = require(path.resolve(strapi.config.appPath, 'node_modules', 'strapi-' + ORM, 'lib', 'utils'));
 
@@ -466,7 +464,6 @@ module.exports = {
         // Remove the filter keyword at the end
         let splitKey = key.split('_').slice(0,-1);
         splitKey = splitKey.join('_');
-
         if (modelAttributes[splitKey]) {
           fieldType = modelAttributes[splitKey]['type'];
         }
@@ -487,7 +484,6 @@ module.exports = {
         result = convertor(order, key, attr);
       } else {
         const suffix = key.split('_');
-
         // Mysql stores boolean as 1 or 0
         if (client === 'mysql' && _.get(models, [model, 'attributes', suffix, 'type']) === 'boolean') {
           formattedValue = value === 'true' ? '1' : '0';

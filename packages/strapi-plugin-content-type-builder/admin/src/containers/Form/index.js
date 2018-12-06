@@ -23,6 +23,7 @@ import {
   size,
   split,
   take,
+  toLower,
   toNumber,
   replace,
 } from 'lodash';
@@ -378,7 +379,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
   handleBlur = ({ target }) => {
     if (target.name === 'name') {
-      this.props.changeInput(target.name, camelCase(target.value), includes(this.props.hash, 'edit'));
+      this.props.changeInput(target.name, toLower(camelCase(target.value)), includes(this.props.hash, 'edit'));
       if (!isEmpty(target.value)) {
         // The input name for content type doesn't have the default handleBlur validation so we need to manually remove the error
         this.props.removeContentTypeRequiredError();
@@ -489,7 +490,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 
     return {
       ...model,
-      name: camelCase(model.name),
+      name: toLower(camelCase(model.name)),
     };
   }
 
