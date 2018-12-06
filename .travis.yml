@@ -22,6 +22,9 @@ before_install:
 install:
   - npm run setup --debug
 
+before_script:
+  - git fetch origin master:master
+
 script:
   - npm run lint
   - npm run doc
