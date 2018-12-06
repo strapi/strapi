@@ -19,7 +19,7 @@ const exec = (command, args) => {
   try {
     return execFileSync(command, args, options);
   } catch (err) {
-    return [];
+    return '';
   }
 };
 
