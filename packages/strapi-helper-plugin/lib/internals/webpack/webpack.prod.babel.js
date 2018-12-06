@@ -16,7 +16,7 @@ const base = require('./webpack.base.babel');
 const isAdmin = process.env.IS_ADMIN === 'true';
 // const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 const isSetup = process.env.IS_MONOREPO || false;
-const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ?  '' : '..' ));
+const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', isAdmin ? '' : '..');
 const adminPath = (() => {
   if (isSetup) {
     return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(process.env.PWD, '..');
@@ -27,7 +27,9 @@ const adminPath = (() => {
 
 const rootAdminpath = (() => {
   if (isSetup) {
-    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
+    return isAdmin
+      ? path.resolve(appPath, 'strapi-admin')
+      : path.resolve(appPath, 'packages', 'strapi-admin');
   }
   return path.resolve(appPath, 'admin');
 })();
@@ -182,7 +184,13 @@ module.exports = base({
       'node_modules',
       'babel-polyfill',
     ),
-    lodash: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+    lodash: path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'lodash',
+    ),
     immutable: path.resolve(
       rootAdminpath,
       'node_modules',
@@ -197,7 +205,13 @@ module.exports = base({
       'node_modules',
       'react-intl',
     ),
-    react: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+    react: path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react',
+    ),
     'react-dom': path.resolve(
       rootAdminpath,
       'node_modules',
@@ -211,6 +225,13 @@ module.exports = base({
       'strapi-helper-plugin',
       'node_modules',
       'react-transition-group',
+    ),
+    'react-copy-to-clipboard': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react-copy-to-clipboard',
     ),
     reactstrap: path.resolve(
       rootAdminpath,

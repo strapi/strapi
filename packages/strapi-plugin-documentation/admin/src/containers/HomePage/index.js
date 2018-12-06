@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEmpty } from 'lodash';
 import cn from 'classnames';
@@ -19,6 +20,7 @@ import Row from 'components/Row';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import Input from 'components/InputsIndex';
 // Utils
+import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
 import openWithNewTab from 'utils/openWithNewTab';
@@ -42,12 +44,12 @@ export class HomePage extends React.Component {
   componentDidMount() {
     this.props.getDocInfos();
   }
-  
+
   getRestrictedAccessValue = () => {
     const { form } = this.props;
 
     return get(form, [0, 0, 'value'], false);
-  }
+  };
 
   getPluginHeaderActions = () => {
     return [
@@ -64,23 +66,27 @@ export class HomePage extends React.Component {
         type: 'submit',
       },
     ];
-  }
+  };
+
+  handleCopy = () => {
+    strapi.notification.info('documentation.containers.HomePage.copied');
+  };
 
   openCurrentDocumentation = () => {
     const { currentDocVersion } = this.props;
 
     return openWithNewTab(`/documentation/v${currentDocVersion}`);
-  }
+  };
 
-  shouldHideInput = (inputName)  => {
+  shouldHideInput = inputName => {
     return !this.getRestrictedAccessValue() && inputName === 'password';
-  }
+  };
 
   toggleModal = () => this.props.onClickDeleteDoc('');
 
   renderForm = (array, i) => {
     const { didCheckErrors, formErrors } = this.props;
-  
+
     return (
       <div className="row" key={i}>
         {array.map((input, j) => {
@@ -96,13 +102,12 @@ export class HomePage extends React.Component {
               errors={get(formErrors, [input.name], [])}
               name={`form.${i}.${j}.value`}
               onChange={this.props.onChange}
-              
             />
           );
         })}
       </div>
     );
-  }
+  };
 
   renderRow = data => {
     const { currentDocVersion, onClickDeleteDoc, onUpdateDoc } = this.props;
@@ -116,10 +121,17 @@ export class HomePage extends React.Component {
         onUpdateDoc={onUpdateDoc}
       />
     );
-  }
+  };
 
   render() {
-    const { docVersions, form, isLoading, onConfirmDeleteDoc, onSubmit, versionToDelete } = this.props;
+    const {
+      docVersions,
+      form,
+      isLoading,
+      onConfirmDeleteDoc,
+      onSubmit,
+      versionToDelete,
+    } = this.props;
 
     if (isLoading) {
       return <LoadingIndicatorPage />;
@@ -142,10 +154,28 @@ export class HomePage extends React.Component {
         <form onSubmit={onSubmit}>
           <PluginHeader
             actions={this.getPluginHeaderActions()}
-            title={{ id: 'documentation.containers.HomePage.PluginHeader.title'}}
-            description={{ id: 'documentation.containers.HomePage.PluginHeader.description'}}
+            title={{ id: 'documentation.containers.HomePage.PluginHeader.title' }}
+            description={{ id: 'documentation.containers.HomePage.PluginHeader.description' }}
           />
           <div className={cn('row', styles.container)}>
+            <Block>
+              <CopyToClipboard text={auth.getToken()} onCopy={this.handleCopy}>
+                <div className="row" style={{ zIndex: '99' }}>
+                  <Input
+                    style={{ zIndex: '9', cursor: 'pointer' }}
+                    inputStyle={{ cursor: 'pointer' }}
+                    name="jwtToken"
+                    value={auth.getToken()}
+                    type="string"
+                    onChange={() => {}}
+                    label={{ id: 'documentation.containers.HomePage.form.jwtToken' }}
+                    inputDescription={{
+                      id: 'documentation.containers.HomePage.form.jwtToken.description',
+                    }}
+                  />
+                </div>
+              </CopyToClipboard>
+            </Block>
             <Block>
               {form.map(this.renderForm)}
               {/* <div className="row">
@@ -157,14 +187,11 @@ export class HomePage extends React.Component {
                 {/* </div> 
               </div> */}
             </Block>
-            <Block
-              title='documentation.containers.HomePage.Block.title'
-            >
+            <Block title="documentation.containers.HomePage.Block.title">
               <div className={styles.wrapper}>
                 <Row isHeader />
                 {docVersions.map(this.renderRow)}
               </div>
-
             </Block>
           </div>
         </form>
@@ -208,7 +235,10 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectHomePage();
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
 const withReducer = injectReducer({ key: 'homePage', reducer });
 const withSaga = injectSaga({ key: 'homePage', saga });

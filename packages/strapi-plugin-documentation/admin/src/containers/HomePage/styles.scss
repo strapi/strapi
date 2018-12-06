@@ -1,4 +1,3 @@
-
 .containerFluid {
   padding: 18px 30px;
   > div:first-child {
@@ -15,7 +14,7 @@
   }
   > div:first-child {
     > div {
-      margin-bottom: 28px !important;
+      margin-bottom: 22px !important;
     }
   }
 }
@@ -31,7 +30,7 @@
 
     > div:nth-child(2) {
       font-weight: 600;
-      color: #9EA7B8;
+      color: #9ea7b8;
     }
   }
   > div:last-child {
@@ -44,7 +43,7 @@
 .buttonOutline {
   height: 30px;
   padding: 0 15px;
-  border: 1px solid #DFE0E1;
+  border: 1px solid #dfe0e1;
   font-weight: 500;
   font-size: 13px;
   &:before {
