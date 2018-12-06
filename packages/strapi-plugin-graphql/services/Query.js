@@ -258,9 +258,11 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        // options.populate = model.associations.filter(a => !a.dominant).map(a => a.alias);
         context.query = this.convertToParams(options);
         context.params = this.amountLimiting(options);
+
+        // Avoid population.
+        context.query._populate = model.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias);
 
         if (isController) {
           const values = await resolver.call(null, ctx);
