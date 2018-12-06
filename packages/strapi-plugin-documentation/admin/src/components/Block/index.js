@@ -1,12 +1,11 @@
 /**
- * 
+ *
  * Block
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-
 import styles from './styles.scss';
 
 const renderMsg = msg => <p>{msg}</p>;
@@ -16,15 +15,12 @@ const Block = ({ children, description, style, title }) => (
     <div className={styles.documentationBlock} style={style}>
       <div className={styles.documentationBlockTitle}>
         <FormattedMessage id={title} />
-        <FormattedMessage id={description}>
-          {renderMsg}
-        </FormattedMessage>
+        <FormattedMessage id={description}>{renderMsg}</FormattedMessage>
       </div>
       {children}
     </div>
   </div>
 );
-
 
 Block.defaultProps = {
   children: null,

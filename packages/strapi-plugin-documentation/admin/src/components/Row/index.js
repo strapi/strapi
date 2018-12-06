@@ -15,9 +15,19 @@ function Row({ currentDocVersion, data, isHeader, onClickDelete, onUpdateDoc }) 
     <div className={styles.docRow}>
       <div>{version}</div>
       <div>
-        {isHeader ? <FormattedMessage id="documentation.components.Row.generatedDate" /> : <span>{generatedDate}</span>}
+        {isHeader ? (
+          <FormattedMessage id="documentation.components.Row.generatedDate" />
+        ) : (
+          <span>{generatedDate}</span>
+        )}
       </div>
-      <ButtonContainer currentDocVersion={currentDocVersion} isHeader={isHeader} version={version} onClickDelete={onClickDelete} onClick={onUpdateDoc} />
+      <ButtonContainer
+        currentDocVersion={currentDocVersion}
+        isHeader={isHeader}
+        version={version}
+        onClickDelete={onClickDelete}
+        onClick={onUpdateDoc}
+      />
     </div>
   );
 }

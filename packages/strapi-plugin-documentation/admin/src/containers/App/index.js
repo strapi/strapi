@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route } from 'react-router-dom';
@@ -30,26 +29,18 @@ class App extends React.Component {
   }
 }
 
-App.contextTypes = {
-  plugins: PropTypes.object,
-  router: PropTypes.object.isRequired,
-  updatePlugin: PropTypes.func,
-};
-
 App.propTypes = {};
 
 export function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {},
-    dispatch,
-  );
+  return bindActionCreators({}, dispatch);
 }
 
 const mapStateToProps = createStructuredSelector({});
 
 // Wrap the component to inject dispatch and state into it
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
-export default compose(
-  withConnect,
-)(App);
+export default compose(withConnect)(App);

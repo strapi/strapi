@@ -10,7 +10,7 @@ function* getData() {
   try {
     const response = yield call(request, '/documentation/getInfos', { method: 'GET' });
     yield put(getDocInfosSucceeded(response));
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('An error occurred');
   }
 }
@@ -26,7 +26,7 @@ function* deleteDoc() {
       yield call(getData);
       strapi.notification.info('Doc deleted');
     }
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error(err.response.payload.message);
   }
 }
@@ -47,16 +47,18 @@ function* submit() {
       }, init);
     };
     const body = createBody(cloneDeep(form));
-
+    console.log({ form, body });
     if (body.restrictedAccess && body.password === '') {
-      return yield put(setFormErrors({ 'password': [{ id: 'components.Input.error.validation.required' }] }));
+      return yield put(
+        setFormErrors({ password: [{ id: 'components.Input.error.validation.required' }] }),
+      );
     }
 
     yield call(request, `${prefix}/updateSettings`, { method: 'PUT', body });
     yield put(setFormErrors([]));
-    
+
     strapi.notification.success('documentation.notification.update.success');
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error(err.response.payload.message);
   }
 }
@@ -71,7 +73,7 @@ function* updateDoc(action) {
       yield call(getData);
       strapi.notification.info('Doc generated');
     }
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error(err.response.payload.message);
   }
 }

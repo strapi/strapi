@@ -19,6 +19,7 @@ import Block from 'components/Block';
 import Row from 'components/Row';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import Input from 'components/InputsIndex';
+import { pluginId } from 'app';
 // Utils
 import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
@@ -40,6 +41,8 @@ import styles from './styles.scss';
 import reducer from './reducer';
 import saga from './saga';
 
+const makeTranslation = txt => `${pluginId}.containers.HomePage.${txt}`;
+
 export class HomePage extends React.Component {
   componentDidMount() {
     this.props.getDocInfos();
@@ -54,13 +57,13 @@ export class HomePage extends React.Component {
   getPluginHeaderActions = () => {
     return [
       {
-        label: 'documentation.containers.HomePage.Button.open',
+        label: makeTranslation('Button.open'),
         className: styles.buttonOutline,
         onClick: this.openCurrentDocumentation,
         type: 'button',
       },
       {
-        label: 'documentation.containers.HomePage.Button.update',
+        label: makeTranslation('Button.update'),
         kind: 'primary',
         onClick: () => {},
         type: 'submit',
@@ -69,7 +72,7 @@ export class HomePage extends React.Component {
   };
 
   handleCopy = () => {
-    strapi.notification.info('documentation.containers.HomePage.copied');
+    strapi.notification.info(makeTranslation('copied'));
   };
 
   openCurrentDocumentation = () => {
@@ -144,9 +147,9 @@ export class HomePage extends React.Component {
           toggleModal={this.toggleModal}
           content={{
             title: 'components.popUpWarning.title',
-            message: 'documentation.containers.HomePage.PopUpWarning.message',
+            message: makeTranslation('PopUpWarning.message'),
             cancel: 'app.components.Button.cancel',
-            confirm: 'documentation.containers.HomePage.PopUpWarning.confirm',
+            confirm: makeTranslation('PopUpWarning.confirm'),
           }}
           popUpWarningType="danger"
           onConfirm={onConfirmDeleteDoc}
@@ -154,8 +157,8 @@ export class HomePage extends React.Component {
         <form onSubmit={onSubmit}>
           <PluginHeader
             actions={this.getPluginHeaderActions()}
-            title={{ id: 'documentation.containers.HomePage.PluginHeader.title' }}
-            description={{ id: 'documentation.containers.HomePage.PluginHeader.description' }}
+            title={{ id: makeTranslation('PluginHeader.title') }}
+            description={{ id: makeTranslation('PluginHeader.description') }}
           />
           <div className={cn('row', styles.container)}>
             <Block>
@@ -168,26 +171,16 @@ export class HomePage extends React.Component {
                     value={auth.getToken()}
                     type="string"
                     onChange={() => {}}
-                    label={{ id: 'documentation.containers.HomePage.form.jwtToken' }}
+                    label={{ id: makeTranslation('form.jwtToken') }}
                     inputDescription={{
-                      id: 'documentation.containers.HomePage.form.jwtToken.description',
+                      id: makeTranslation('form.jwtToken.description'),
                     }}
                   />
                 </div>
               </CopyToClipboard>
             </Block>
-            <Block>
-              {form.map(this.renderForm)}
-              {/* <div className="row">
-                {form.map(this.renderForm)}
-                {/* <div className="col-md-12">
-                  <div className="row">
-
-                  </div> 
-                {/* </div> 
-              </div> */}
-            </Block>
-            <Block title="documentation.containers.HomePage.Block.title">
+            <Block>{form.map(this.renderForm)}</Block>
+            <Block title={makeTranslation('Block.title')}>
               <div className={styles.wrapper}>
                 <Row isHeader />
                 {docVersions.map(this.renderRow)}
@@ -199,10 +192,6 @@ export class HomePage extends React.Component {
     );
   }
 }
-
-HomePage.contextTypes = {
-  router: PropTypes.object,
-};
 
 HomePage.defaultProps = {
   form: [],
@@ -239,7 +228,6 @@ const withConnect = connect(
   mapStateToProps,
   mapDispatchToProps,
 );
-
 const withReducer = injectReducer({ key: 'homePage', reducer });
 const withSaga = injectSaga({ key: 'homePage', saga });
 
