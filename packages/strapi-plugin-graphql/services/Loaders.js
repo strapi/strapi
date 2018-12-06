@@ -66,7 +66,9 @@ module.exports = {
       })();
       
       if (!_.isArray(ids)) {
-        return data.filter(entry => entry[ids.alias].toString() === ids.value.toString()).slice(query.options.start, query.options.limit);
+        return data
+          .filter(entry => entry[ids.alias].toString() === ids.value.toString())
+          .slice((query.options.start || query.options.skip), (query.options.start || query.options.skip) + query.options.limit);
       }
 
       // Critical: don't touch this part until you truly understand what you're doing.
@@ -87,20 +89,24 @@ module.exports = {
     const ref = this.retrieveModel(model, query.options.source);
 
     // Construct parameters object sent to the Content Manager service.
-    // We are faking the `start` and `skip` argument because it doesn't make sense because we are merging different requests in one.
+    // We are faking the `start`, `skip` and `limit` argument because it doesn't make sense because we are merging different requests in one.
     // Note: we're trying to avoid useless populate for performances. Please be careful if you're updating this part.
     const params = {
       ...query.options,
       populate: ref.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias),
       query: {},
       start: 0,
-      skip: 0
+      skip: 0,
+      limit: 500,
     };
 
     params.query[query.alias] = _.uniq(query.ids.filter(x => !_.isEmpty(x)).map(x => x.toString()));
-    // However, we're applying a limit based on the number of entries we've to fetch.
-    // We'll apply the real `skip`, `start` and `limit` parameters during the mapping above.
-    params.limit = params.query[query.alias].length;
+
+    if (['id', '_id'].includes(query.alias)) {
+      // However, we're applying a limit based on the number of entries we've to fetch.
+      // We'll apply the real `skip`, `start` and `limit` parameters during the mapping above.
+      params.limit = params.query[query.alias].length;
+    }
 
     // Run query and remove duplicated ID.
     const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, params);
