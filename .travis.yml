@@ -14,6 +14,7 @@ before_install:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - git fetch -a
+  - git fecth origin master
   # - sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
   # - npm cache clean --force
   # - rm -rf node_modules/
@@ -22,9 +23,9 @@ install:
   - npm run setup --debug
 
 script:
+  - npm run lint
   - npm run doc
   - npm run snyk
-  # - npm run lint
 
 cache:
   directories:
