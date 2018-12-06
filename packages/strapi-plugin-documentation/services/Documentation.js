@@ -884,7 +884,24 @@ module.exports = {
             current !== 'id' &&
             current !== '_id'
           ) {
-            acc[current] = mainComponent.properties[current];
+            // The post request shouldn't include nested relations of type 2
+            // For instance if a product has many tags
+            // we expect to find an array of tags objects containing other relations in the get response
+            // and since we use to getComponent to generate this one we need to
+            // remove this object since we only send an array of tag ids.
+            if (_.find(modelAssociations, ['alias', current])) {
+              const isArrayProperty =
+                _.get(mainComponent, ['properties', current, 'type']) !== undefined;
+
+              if (isArrayProperty) {
+                acc[current] = { type: 'array', items: { type: 'string' } };
+              } else {
+                acc[current] = { type: 'string' };
+              }
+            } else {
+              // If the field is not an association we take the one from the component
+              acc[current] = mainComponent.properties[current];
+            }
           }
 
           return acc;
@@ -1495,25 +1512,27 @@ module.exports = {
             let documentation = JSON.parse(
               fs.readFileSync(path.resolve([...documentationPath, el].join('/')), 'utf8'),
             );
+            /* eslint-disable indent */
             const overrideDocumentationPath = isPlugin
               ? path.resolve(
-                strapi.config.appPath,
-                'plugins',
-                current,
-                'documentation',
-                version,
-                'overrides',
-                el,
-              )
+                  strapi.config.appPath,
+                  'plugins',
+                  current,
+                  'documentation',
+                  version,
+                  'overrides',
+                  el,
+                )
               : path.resolve(
-                strapi.config.appPath,
-                'api',
-                current,
-                'documentation',
-                version,
-                'overrides',
-                el,
-              );
+                  strapi.config.appPath,
+                  'api',
+                  current,
+                  'documentation',
+                  version,
+                  'overrides',
+                  el,
+                );
+            /* eslint-enable indent */
             let overrideDocumentation;
 
             try {
