@@ -63,7 +63,7 @@ module.exports = {
         })
         .join('\n');
     } else if (type === 'query' || type === 'mutation') {
-      const test = lines
+      return lines
         .map((line, index) => {
           if (['{', '}'].includes(line)) {
             return '';
@@ -90,8 +90,6 @@ module.exports = {
           return line;
         })
         .join('\n');
-
-      return test;
     }
 
     return lines

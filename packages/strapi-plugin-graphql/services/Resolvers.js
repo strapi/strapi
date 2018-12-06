@@ -367,11 +367,6 @@ module.exports = {
 
         _.merge(acc.resolver[globalId], {
           [association.alias]: async (obj, options) => {
-            console.log(association.alias, `(${globalId})`);
-            console.log(obj);
-            console.log('####');
-
-
             // eslint-disable-line no-unused-vars
             // Construct parameters object to retrieve the correct related entries.
             const params = {
@@ -386,16 +381,6 @@ module.exports = {
             const ref = association.plugin
               ? strapi.plugins[association.plugin].models[params.model]
               : strapi.models[params.model];
-
-              if (association.type === 'model' && !_.isEmpty(obj[association.alias])) {
-                // Nested relation has already been fetched
-                // we don't need to resend a request.
-
-                // Note: we can't apply the same principle on another relation type
-                // because it won't apply limit, sort, start, etc filters.
-                return obj[association.alias];
-              }
-              
 
             if (association.type === 'model') {
               params[ref.primaryKey] = _.get(obj, [association.alias, ref.primaryKey], obj[association.alias]);
@@ -431,17 +416,16 @@ module.exports = {
                       [ref.primaryKey]: arrayOfIds
                     }
                   });
-                  
+
                   break;
                 }
                 default:
-                  // Where.
-                  queryOpts.query = strapi.utils.models.convertParams(name, {
-                    // Construct the "where" query to only retrieve entries which are
-                    // related to this entry.
-                    [association.via]: obj[ref.primaryKey],
-                    ...where.where,
-                  }).where;
+                  Object.assign(queryOpts, {
+                    ...queryOpts,
+                    query: {
+                      [association.via]: obj[ref.primaryKey]
+                    }
+                  });
               }
             }
 

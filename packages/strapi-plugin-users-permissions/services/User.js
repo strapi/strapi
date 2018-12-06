@@ -74,7 +74,6 @@ module.exports = {
    */
 
   fetchAll: (params) => {
-    console.log("PARAMS USER", strapi.utils.models.convertParams('user', params));
     return strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', params));
   },
 

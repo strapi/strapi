@@ -25,34 +25,17 @@ module.exports = {
     }, {});
   },
 
-  convertToQuery: function(params) {
-    const result = {};
-
-    _.forEach(params, (value, key) => {
-      if (_.isPlainObject(value)) {
-        const flatObject = this.convertToQuery(value);
-        _.forEach (flatObject, (_value, _key) => {
-          result[`${key}.${_key}`] = _value;
-        });
-      } else {
-        result[key] = value;
-      }
-    });
-
-    return result;
-  },
-
   /**
    * Security to avoid infinite limit.
    *
    * @return String
    */
 
-  amountLimiting: params => {
+  amountLimiting: (params = {}) => {
     if (params.limit && params.limit < 0) {
       params.limit = 0;
-    } else if (params.limit && params.limit > 100) {
-      params.limit = 100;
+    } else if (params.limit && params.limit > _.get(strapi.plugins, 'graphql.config.amountLimit', 100)) {
+      params.limit = _.get(strapi.plugins, 'graphql.config.amountLimit', 100);
     }
 
     return params;
@@ -192,16 +175,13 @@ module.exports = {
 
       // Plural.
       return async (ctx, next) => {
-        const queryOpts = {};
-        queryOpts.params = this.amountLimiting(ctx.params);
-        queryOpts.query = Object.assign(
-          {},
-          this.convertToParams(_.omit(queryOpts.params, 'where')),
-          this.convertToQuery(queryOpts.params.where)
+        ctx.params = this.amountLimiting(ctx.params);
+        ctx.query = Object.assign(
+          this.convertToParams(_.omit(ctx.params, 'where')),
+          ctx.params.where,
         );
-        
-        // Only populate on non-dominant side.
-        return controller(Object.assign({}, ctx, queryOpts, { send: ctx.send }), next, { populate: model.associations.filter(a => !a.dominant).map(a => a.alias) });
+
+        return controller(ctx, next);
       };
     })();
 
@@ -278,15 +258,10 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        options.populate = model.associations.filter(a => !a.dominant).map(a => a.alias);
+        // options.populate = model.associations.filter(a => !a.dominant).map(a => a.alias);
+        context.query = this.convertToParams(options);
+        context.params = this.amountLimiting(options);
 
-        ctx.params = this.amountLimiting(options);
-        ctx.query = Object.assign(
-          {},
-          this.convertToParams(_.omit(options, 'where')),
-          this.convertToQuery(options.where),
-        );
-    
         if (isController) {
           const values = await resolver.call(null, ctx);
 

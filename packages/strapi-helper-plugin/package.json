@@ -1,10 +1,10 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.14.5",
+  "version": "3.0.0-alpha.16",
   "description": "Helper for Strapi plugins development",
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">= 10.0.0",
+    "npm": ">= 6.0.0"
   },
   "author": {
     "email": "hi@strapi.io",
