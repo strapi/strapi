@@ -6,8 +6,8 @@ git:
 language: node_js
 
 node_js:
-  - "10"
-  - "11"
+  - '10'
+  - '11'
 
 before_install:
   - export CHROME_BIN=chromium-browser
@@ -19,7 +19,7 @@ before_install:
   # - rm -rf node_modules/
 
 install:
-  - npm run setup --debug
+  - npm run setup:build --debug
 
 script:
   - npm run lint
@@ -27,4 +27,4 @@ script:
 
 cache:
   directories:
-    - "node_modules"
+    - 'node_modules'
