@@ -16,7 +16,11 @@ const exec = (command, args) => {
     encoding: 'utf-8',
   };
 
-  return execFileSync(command, args, options);
+  try {
+    return execFileSync(command, args, options);
+  } catch (err) {
+    return '';
+  }
 };
 
 const execGitCmd = args =>
