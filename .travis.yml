@@ -14,7 +14,7 @@ before_install:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - git fetch -a
-  - git fecth origin master
+  - git fetch origin master
   # - sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
   # - npm cache clean --force
   # - rm -rf node_modules/
