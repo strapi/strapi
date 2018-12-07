@@ -51,6 +51,12 @@ module.exports = async cb => {
 
     return acc;
   }, {});
+  // Reference all current models
+  const appModels = Object.keys(pluginsModel).reduce((acc, curr) => {
+    const models = Object.keys(_.get(pluginsModel, [curr, 'models'], {}));
+
+    return acc.concat(models);
+  }, Object.keys(strapi.models).filter(m => m !== 'core_store'));
   // Init schema
   const schema = {
     generalSettings: {
@@ -104,7 +110,9 @@ module.exports = async cb => {
     });
 
     // Don't display fields that are hidden by default like the resetPasswordToken for the model user
-    _.unset(fields, fieldsToRemove);
+    fieldsToRemove.forEach(field => {
+      _.unset(fields, field);
+    });
     schemaModel.attributes = _.omit(schemaModel.attributes, fieldsToRemove);
 
     schemaModel.fields = fields;
@@ -233,6 +241,16 @@ module.exports = async cb => {
       pluginStore.set({ key: 'schema', value: schema });
 
       return cb();
+    } else {
+      const modelsLayout = Object.keys(_.get(prevSchema, 'layout', {}));
+
+      // Remove previous model from the schema.layout
+      // Usually needed when renaming a model
+      modelsLayout.forEach(model => {
+        if (!appModels.includes(model)) {
+          _.unset(prevSchema, ['layout', model]);
+        }
+      });
     }
 
     // Here we do the difference between the previous schema from the database and the new one

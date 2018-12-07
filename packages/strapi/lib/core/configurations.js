@@ -323,26 +323,21 @@ module.exports.app = async function() {
   // default settings
   this.config.port = get(this.config.currentEnvironment, 'server.port') || this.config.port;
   this.config.host = get(this.config.currentEnvironment, 'server.host') || this.config.host;
-  this.config.url = `http://${this.config.host}:${this.config.port}`;
 
   // Admin.
+  const url = getURLFromSegments({ hostname: this.config.host, port: this.config.port });
+  const adminPath = get(this.config.currentEnvironment.server, 'admin.path', 'admin');
   this.config.admin.devMode = isAdminInDevMode.call(this);
   this.config.admin.url = this.config.admin.devMode ?
-    `http://${this.config.host}:4000/${get(this.config.currentEnvironment.server, 'admin.path', 'admin')}`:
-    `${this.config.url}/${get(this.config.currentEnvironment.server, 'admin.path', 'admin')}`;
+    (new URL(adminPath, `http://${this.config.host}:4000`)).toString():
+    (new URL(adminPath, url)).toString();
 
   // proxy settings
-  this.config.proxy = get(this.config.currentEnvironment, 'server.proxy', {});
-
-  // check if SSL enabled and construct proxy url
-  function getProxyUrl(ssl, url) {
-    return `http${ssl ? 's' : ''}://${url}`;
-  }
+  const proxy = get(this.config.currentEnvironment, 'server.proxy', {});
+  this.config.proxy = proxy;
 
   // check if proxy is enabled and construct url
-  if (get(this.config, 'proxy.enabled')) {
-    this.config.url = getProxyUrl(this.config.proxy.ssl, `${this.config.proxy.host}:${this.config.proxy.port}`);
-  }
+  this.config.url = proxy.enabled ? getURLFromSegments({ hostname: proxy.host, port: proxy.port, ssl: proxy.ssl }) : url;
 };
 
 const enableHookNestedDependencies = function (name, flattenHooksConfig, force = false) {
@@ -391,4 +386,12 @@ const isAdminInDevMode = function () {
   } catch (e) {
     return true;
   }
+};
+
+const getURLFromSegments = function ({ hostname, port, ssl = false }) {
+  const protocol = ssl ? 'https' : 'http';
+  const defaultPort = ssl ? 443 : 80;
+  const portString = (port === undefined || parseInt(port) === defaultPort) ? '' : `:${port}`;
+
+  return `${protocol}://${hostname}${portString}`;
 };

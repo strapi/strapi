@@ -97,7 +97,7 @@ module.exports = {
               acc[current] = params.values[current];
             } else if (response[current] && _.isArray(response[current]) && current !== 'id') {
               // Records to add in the relation.
-              const toAdd = _.differenceWith(params.values[current], response[current], (a, b) => 
+              const toAdd = _.differenceWith(params.values[current], response[current], (a, b) =>
                 (a[this.primaryKey] || a).toString() === (b[this.primaryKey] || b).toString()
               );
 

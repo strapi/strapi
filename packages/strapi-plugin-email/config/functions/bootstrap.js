@@ -26,7 +26,8 @@ module.exports = async cb => {
     fs.readdir(path.join(basePath, 'node_modules'), async (err, node_modules) => {
       // get all email providers
       const emails = _.filter(node_modules, (node_module) => {
-        return _.startsWith(node_module, ('strapi-provider-email'));
+        // DEPRECATED strapi-email-* will be remove in next version
+        return _.startsWith(node_module, 'strapi-provider-email') || _.startsWith(node_module, 'strapi-email');
       });
 
       // mount all providers to get configs

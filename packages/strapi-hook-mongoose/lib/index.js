@@ -17,6 +17,7 @@ const { models: utilsModels }  = require('strapi-utils');
 
 // Local helpers.
 const utils = require('./utils/');
+
 const relations = require('./relations');
 
 /**
@@ -488,16 +489,16 @@ module.exports = function (strapi) {
           result.value = value;
           break;
         case '_sort':
-          result.key = `sort`;
+          result.key = 'sort';
           result.value = (_.toLower(value) === 'desc') ? '-' : '';
           result.value += key;
           break;
         case '_start':
-          result.key = `start`;
+          result.key = 'start';
           result.value = parseFloat(value);
           break;
         case '_limit':
-          result.key = `limit`;
+          result.key = 'limit';
           result.value = parseFloat(value);
           break;
         case '_contains':
