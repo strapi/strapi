@@ -5,7 +5,7 @@
   "strapi": {
     "name": "Documentation",
     "icon": "book",
-    "description": "Description of documentation plugin."
+    "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI."
   },
   "scripts": {
     "analyze:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf stats.json",
