@@ -16,7 +16,7 @@ This project and everyone participating in it is governed by the [Strapi Code of
 Strapi is open-source under the [MIT license](https://github.com/strapi/strapi/blob/master/LICENSE.md). All the work done is available on GitHub.
 The core team and the contributors send pull requests which go through the same validation process.
 
-Every user can send a feature request using the [issues](https://github.com/strapi/strapi/issues/new?template=FEATURE_REQUEST.md) on GitHub. Feel free to upvote 👍 [existing feature request](https://github.com/strapi/strapi/issues?q=is%3Aopen+is%3Aissue+label%3A%22type%3A+feature+request+%F0%9F%99%8F%22)
+Every user can send a feature request using the [issues](https://github.com/strapi/strapi/issues/new?template=FEATURE_REQUEST.md) on GitHub. Feel free to upvote 👍 [existing feature request](https://portal.productboard.com/strapi)
 
 ## Repository Organization
 We made the choice to use a monorepo design such as [React](https://github.com/facebook/react/tree/master/packages), [Babel](https://github.com/babel/babel/tree/master/packages), [Meteor](https://github.com/meteor/meteor/tree/devel/packages) or [Ember](https://github.com/emberjs/ember.js/tree/master/packages) do. It allows the community to easily maintain the whole ecosystem up-to-date and consistent.

@@ -26,7 +26,8 @@ module.exports = async cb => {
     fs.readdir(path.join(basePath, 'node_modules'), async (err, node_modules) => {
       // get all upload provider
       const uploads = _.filter(node_modules, (node_module) => {
-        return _.startsWith(node_module, ('strapi-provider-upload'));
+        // DEPRECATED strapi-upload-* will be remove in next version
+        return _.startsWith(node_module, 'strapi-provider-upload') || _.startsWith(node_module, 'strapi-upload');
       });
 
       // mount all providers to get configs
