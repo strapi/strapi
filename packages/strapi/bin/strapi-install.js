@@ -12,8 +12,12 @@ const path = require('path');
 const fs = require('fs-extra');
 const shell = require('shelljs');
 
+// Public
+const {cyan} = require('chalk');
+const ora = require('ora');
+
 // Logger.
-const { cli, logger, packageManager } = require('strapi-utils');
+const { cli, packageManager } = require('strapi-utils');
 
 // Local Strapi dependencies.
 const packageJSON = require('../package.json');
@@ -30,34 +34,31 @@ module.exports = function (plugin, cliArguments) {
   const pluginID = `${pluginPrefix}${plugin}`;
   const pluginPath = `./plugins/${plugin}`;
 
+  let loader = ora(`Install ${cyan(plugin)} plugin`).start();
+
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
-    return logger.error('This command can only be used inside a Strapi project.');
+    return loader.fail('This command can only be used inside a Strapi project.');
   }
 
   // Check that the plugin is not installed yet.
   if (fs.existsSync(pluginPath)) {
-    logger.error(`It looks like this plugin is already installed. Please check in \`${pluginPath}\`.`);
+    loader.fail(`It looks like this plugin is already installed. Please check in \`${cyan(pluginPath)}\`.`);
     process.exit(1);
   }
-
-  // Progress message.
-  logger.debug('Installation in progress...');
 
   if (cliArguments.dev) {
     try {
       fs.symlinkSync(path.resolve(__dirname, '..', '..', pluginID), path.resolve(process.cwd(), pluginPath), 'dir');
 
-      logger.info('The plugin has been successfully installed.');
+      loader.succeed(`The ${cyan(plugin)} plugin has been successfully installed.`);
       process.exit(0);
     } catch (e) {
-      logger.error('An error occurred during plugin installation.');
+      console.log(e);
+      loader.fail('An error occurred during plugin installation.');
       process.exit(1);
     }
   } else {
-    // Debug message.
-    logger.debug('Installing the plugin from npm registry.');
-
     // Install the plugin from the npm registry.
     const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
 
@@ -72,7 +73,7 @@ module.exports = function (plugin, cliArguments) {
     const cmd = isStrapiInstalledWithNPM ? `npm install ${pluginID}@${packageJSON.version} --ignore-scripts --no-save --prefix ${pluginPath}` : `yarn --cwd ${pluginPath} add ${pluginID}@${packageJSON.version} --ignore-scripts --no-save`;
     exec(cmd, (err) => {
       if (err) {
-        logger.error(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginID}`);
+        loader.fail(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginID}`);
         process.exit(1);
       }
 
@@ -81,12 +82,7 @@ module.exports = function (plugin, cliArguments) {
         shell.rm('-r', `${pluginPath}/package.json`);
       }
 
-      // Debug message.
-      logger.debug('Plugin successfully installed from npm registry.');
-
       try {
-        // Debug message.
-        logger.debug(`Moving the \`node_modules/${pluginID}\` folder to the \`./plugins\` folder.`);
         // Move the plugin from the `node_modules` folder to the `./plugins` folder.
         fs.copySync(`${pluginPath}/node_modules/${pluginID}`, pluginPath, {
           overwrite: true,
@@ -107,10 +103,10 @@ module.exports = function (plugin, cliArguments) {
         }
 
         // Success.
-        logger.info('The plugin has been successfully installed.');
+        loader.succeed(`The ${cyan(plugin)} plugin has been successfully installed.`);
         process.exit(0);
       } catch (err) {
-        logger.error('An error occurred during plugin installation.');
+        loader.fail('An error occurred during plugin installation.');
         process.exit(1);
       }
     });
