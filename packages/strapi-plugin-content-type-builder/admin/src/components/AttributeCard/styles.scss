@@ -13,6 +13,7 @@
   line-height: 4rem;
   box-shadow: 1px 1px 1px rgba(104, 118,145, 0.05);
   cursor: pointer;
+  
   &:hover, &:active, &:focus {
     background: #F7F7F7;
     outline: 0;
@@ -24,7 +25,11 @@
 
 .attributeCard {
   font-size: 1.3rem;
-  &:after{
+  display: flex;
+  align-items: center;
+  max-width: calc(100% - 18px);
+
+  &:after {
     content: '\f05d';
     position: absolute;
     top: 7px;
@@ -35,10 +40,11 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  &:hover{
+  &:hover {
     background: none;
   }
-  > img{
+
+  > img {
     display: inline-block;
     height: 20px;
     width: 35px;
@@ -47,11 +53,17 @@
   }
 
   > span {
+    white-space: nowrap;
     color: #9EA7B8;
     font-size: 1.2rem;
     font-style: italic;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
+
+    &:last-child {
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
   }
 }
 
