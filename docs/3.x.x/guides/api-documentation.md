@@ -200,6 +200,20 @@ Overriding the `full_documentation.json` is a bad idea since it will be regenera
 
 You can easily modify the description, summary, parameters of a path however, for a response like the `200` you will need to write the full object. Take a look at the `./plugins/users-permissions/documentation/1.0.0/overrides/users-permissions-User.json` for a complete example.
 
+**_NOTE 3_**
+
+To modify your generated swagger files security on a specific model, for example to allow the public to use it, you will need to override the security for each path's action. For example with the route `/comments/count` typically all routes are protected by strapi, however if you allow the public role to use this without authentication you will need to override it in your model. See the below example:
+
+```json
+    "/comments/count": {
+      "get": {
+        "security": []
+      }
+    },
+```
+
+As you can see in that example, you are defining "no security" whereas normally you would need a bearer token to access. You will need to do this manually as the documentation plugin rewrites files and cannot pull permissions from the database as this would require a server restart each time the docs are updated.
+
 ## FAQ
 
 ### How does it generate the other plugins' documentation?
