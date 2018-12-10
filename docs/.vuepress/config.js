@@ -70,6 +70,7 @@ module.exports = {
           collapsable: true,
           title: '💡 Guides',
           children: [
+            '/3.x.x/guides/api-documentation',
             '/3.x.x/guides/authentication',
             '/3.x.x/configurations/configurations',
             '/3.x.x/guides/controllers',
