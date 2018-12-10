@@ -38,9 +38,6 @@ module.exports = {
     '.editorconfig': {
       copy: 'editorconfig'
     },
-    '.npmignore': {
-      copy: 'npmignore'
-    },
     '.gitignore': {
       copy: 'gitignore'
     },
