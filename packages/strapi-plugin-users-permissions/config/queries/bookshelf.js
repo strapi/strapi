@@ -3,14 +3,23 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params = {}, populate) {
-    const hook = strapi.hook[this.orm];
-    const records = await this.query((qb) => {
-      // Generate match stage.
-      hook.load().generateMatchStage(qb)(this, params);
-
-      if (_.has(params, 'start')) qb.offset(params.start);
-      if (_.has(params, 'limit')) qb.limit(params.limit);
-      if (!_.isEmpty(params.sort)) {
+    const records = await this.query(function(qb) {
+      _.forEach(params.where, (where, key) => {
+        if (_.isArray(where.value)) {
+          for (const value in where.value) {
+            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
+          }
+        } else {
+          qb.where(key, where.symbol, where.value);
+        }
+      });
+      if (params.start) {
+        qb.offset(params.start);
+      }
+      if (params.limit) {
+        qb.limit(params.limit);
+      }
+      if (params.sort) {
         if (params.sort.key) {
           qb.orderBy(params.sort.key, params.sort.order);
         } else {
