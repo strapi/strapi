@@ -24,7 +24,7 @@
   "devDependencies": {
     "codemirror": "^5.39.0",
     "draft-js": "^0.10.5",
-    "react-select": "^2.1.2",
+    "react-select": "^1.0.0-rc.5",
     "showdown": "^1.8.6",
     "strapi-helper-plugin": "3.0.0-alpha.16"
   },
@@ -35,11 +35,6 @@
     "name": "Strapi team",
     "email": "hi@strapi.io",
     "url": "http://strapi.io"
-  },
-  "greenkeeper": {
-    "ignore": [
-      "react-select"
-    ]
   },
   "maintainers": [
     {

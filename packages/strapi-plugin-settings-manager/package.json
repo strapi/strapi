@@ -24,18 +24,13 @@
   },
   "devDependencies": {
     "flag-icon-css": "^3.2.1",
-    "react-select": "^2.1.2",
+    "react-select": "^1.0.0-rc.5",
     "strapi-helper-plugin": "3.0.0-alpha.16"
   },
   "author": {
     "name": "Strapi team",
     "email": "hi@strapi.io",
     "url": "http://strapi.io"
-  },
-  "greenkeeper": {
-    "ignore": [
-      "react-select"
-    ]
   },
   "maintainers": [
     {
