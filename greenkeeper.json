@@ -39,7 +39,8 @@
         "packages/strapi-provider-upload-rackspace/package.json",
         "packages/strapi-utils/package.json",
         "packages/strapi/package.json"
-      ]
+      ],
+      "ignore": ["react-select"]
     }
   },
   "ignore": [
