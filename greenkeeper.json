@@ -78,7 +78,6 @@
     "strapi-provider-upload-rackspace",
     "strapi-utils",
     "strapi",
-    "react-select",
-    "shelljs"
+    "react-select"
   ]
 }
