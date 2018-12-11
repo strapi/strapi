@@ -36,6 +36,11 @@
     "email": "hi@strapi.io",
     "url": "http://strapi.io"
   },
+  "greenkeeper": {
+    "ignore": [
+      "react-select"
+    ]
+  },
   "maintainers": [
     {
       "name": "Strapi team",
