@@ -77,6 +77,7 @@
     "strapi-provider-upload-local",
     "strapi-provider-upload-rackspace",
     "strapi-utils",
-    "strapi"
+    "strapi",
+    "react-select"
   ]
 }
