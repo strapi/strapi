@@ -41,5 +41,42 @@
         "packages/strapi/package.json"
       ]
     }
-  }
+  },
+  "ignore": [
+    "strapi-admin",
+    "strapi-generate-admin",
+    "strapi-generate-api",
+    "strapi-generate-controller",
+    "strapi-generate-model",
+    "strapi-generate-new",
+    "strapi-generate-plugin",
+    "strapi-generate-policy",
+    "strapi-generate-service",
+    "strapi-generate",
+    "strapi-helper-plugin",
+    "strapi-hook-bookshelf",
+    "strapi-hook-ejs",
+    "strapi-hook-knex",
+    "strapi-hook-mongoose",
+    "strapi-hook-redis",
+    "strapi-lint",
+    "strapi-middleware-views",
+    "strapi-plugin-content-manager",
+    "strapi-plugin-content-type-builder",
+    "strapi-plugin-email",
+    "strapi-plugin-graphql",
+    "strapi-plugin-settings-manager",
+    "strapi-plugin-upload",
+    "strapi-plugin-users-permissions",
+    "strapi-provider-email-amazon-ses",
+    "strapi-provider-email-mailgun",
+    "strapi-provider-email-sendgrid",
+    "strapi-provider-email-sendmail",
+    "strapi-provider-upload-aws-s3",
+    "strapi-provider-upload-cloudinary",
+    "strapi-provider-upload-local",
+    "strapi-provider-upload-rackspace",
+    "strapi-utils",
+    "strapi"
+  ]
 }
