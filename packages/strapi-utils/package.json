@@ -1,6 +1,6 @@
 {
   "name": "strapi-utils",
-  "version": "3.0.0-alpha.15",
+  "version": "3.0.0-alpha.16",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -23,7 +23,6 @@
     "knex": "^0.13.0",
     "lodash": "^4.17.5",
     "pino": "^4.7.1",
-    "pluralize": "^7.0.0",
     "shelljs": "^0.7.7"
   },
   "author": {
