@@ -152,7 +152,7 @@ describe('Test CTB', () => {
 
       cy.get('#attributesList li')
         .first()
-        .should('have.text', 'updatedNameString');
+        .contains('updatedName'); // Yield el in .nav containing 'About'
 
       cy.get('button#saveData')
         .click()
