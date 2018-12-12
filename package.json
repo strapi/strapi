@@ -20,6 +20,7 @@
     "redux-saga": "^0.14.3",
     "request": "^2.87.0",
     "shelljs": "^0.7.7",
+    "snyk": "^1.99.0",
     "strapi-lint": "file:packages/strapi-lint"
   },
   "scripts": {
@@ -32,8 +33,9 @@
     "setup:build": "npm run setup --build",
     "setup": "npm run clean:all && npm install ./packages/strapi-lint --save-dev && npm install && node ./scripts/setup.js && npm run clean",
     "lint": "node ./scripts/lint.js",
-    "test": "node ./test/start.js",
-    "prettier": "node ./packages/strapi-lint/lib/internals/prettier/index.js"
+    "test": "snyk test && node ./test/start.js",
+    "prettier": "node ./packages/strapi-lint/lib/internals/prettier/index.js",
+    "snyk": "node ./scripts/snyk.js"
   },
   "author": {
     "email": "hi@strapi.io",

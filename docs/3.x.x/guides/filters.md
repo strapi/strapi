@@ -49,8 +49,8 @@ Sort according to a specific field.
 
 Sort users by email.
 
- - ASC: `GET /users?_sort=email:asc`
- - DESC: `GET /users?_sort=email:desc`
+ - ASC: `GET /users?_sort=email:ASC`
+ - DESC: `GET /users?_sort=email:DESC`
 
 ### Limit
 
