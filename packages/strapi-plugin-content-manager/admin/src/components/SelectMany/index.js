@@ -205,6 +205,7 @@ class SelectMany extends React.PureComponent {
           keys={this.props.relation.alias}
           moveAttr={this.props.moveAttr}
           moveAttrEnd={this.props.moveAttrEnd}
+          name={this.props.relation.alias}
           onRemove={this.handleRemove}
           distance={1}
           onClick={this.handleClick}
