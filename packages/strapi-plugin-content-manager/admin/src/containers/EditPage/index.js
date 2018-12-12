@@ -10,7 +10,17 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
-import { cloneDeep, findIndex, get, includes, isEmpty, isObject, toNumber, toString, replace } from 'lodash';
+import {
+  cloneDeep,
+  findIndex,
+  get,
+  includes,
+  isEmpty,
+  isObject,
+  toNumber,
+  toString,
+  replace,
+} from 'lodash';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 import cn from 'classnames';
@@ -69,7 +79,10 @@ export class EditPage extends React.Component {
     }
 
     if (prevProps.editPage.submitSuccess !== this.props.editPage.submitSuccess) {
-      if (!isEmpty(this.props.location.search) && includes(this.props.location.search, '?redirectUrl')) {
+      if (
+        !isEmpty(this.props.location.search) &&
+        includes(this.props.location.search, '?redirectUrl')
+      ) {
         const redirectUrl = this.props.location.search.split('?redirectUrl=')[1];
 
         this.props.history.push({
@@ -95,22 +108,26 @@ export class EditPage extends React.Component {
    */
   getDisplayedRelations = () => {
     return get(this.getSchema(), ['editDisplay', 'relations'], []);
-  }
+  };
 
   /**
    * Retrieve the model's custom layout
    *
    */
-  getLayout = () => (
-    bindLayout.call(this, get(this.props.schema, ['layout', this.getModelName()], {}))
-  )
+  getLayout = () =>
+    bindLayout.call(this, get(this.props.schema, ['layout', this.getModelName()], {}));
 
   /**
    *
    *
    * @type {[type]}
    */
-  getAttributeValidations = (name) => get(this.props.editPage.formValidations, [findIndex(this.props.editPage.formValidations, ['name', name]), 'validations'], {})
+  getAttributeValidations = name =>
+    get(
+      this.props.editPage.formValidations,
+      [findIndex(this.props.editPage.formValidations, ['name', name]), 'validations'],
+      {},
+    );
 
   getDisplayedFields = () => get(this.getSchema(), ['editDisplay', 'fields'], []);
 
@@ -118,13 +135,15 @@ export class EditPage extends React.Component {
    * Retrieve the model
    * @type {Object}
    */
-  getModel = () => get(this.props.schema, ['models', this.getModelName()]) || get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()]);
+  getModel = () =>
+    get(this.props.schema, ['models', this.getModelName()]) ||
+    get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()]);
 
   /**
    * Retrieve specific attribute
    * @type {String} name
    */
-  getModelAttribute = (name) => get(this.getModelAttributes(), name);
+  getModelAttribute = name => get(this.getModelAttributes(), name);
 
   /**
    * Retrieve the model's attributes
@@ -142,9 +161,10 @@ export class EditPage extends React.Component {
    * Retrieve model's schema
    * @return {Object}
    */
-  getSchema = () => this.getSource() !== 'content-manager' ?
-    get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()])
-    : get(this.props.schema, ['models', this.getModelName()]);
+  getSchema = () =>
+    this.getSource() !== 'content-manager'
+      ? get(this.props.schema, ['models', 'plugins', this.getSource(), this.getModelName()])
+      : get(this.props.schema, ['models', this.getModelName()]);
 
   getPluginHeaderTitle = () => {
     if (this.isCreating()) {
@@ -152,7 +172,7 @@ export class EditPage extends React.Component {
     }
 
     return this.props.match.params.id;
-  }
+  };
 
   /**
    * Retrieve the model's source
@@ -163,8 +183,14 @@ export class EditPage extends React.Component {
   /**
    * Initialize component
    */
-  initComponent = (props) => {
-    this.props.initModelProps(this.getModelName(), this.isCreating(), this.getSource(), this.getModelAttributes(), this.getDisplayedFields());
+  initComponent = props => {
+    this.props.initModelProps(
+      this.getModelName(),
+      this.isCreating(),
+      this.getSource(),
+      this.getModelAttributes(),
+      this.getDisplayedFields(),
+    );
 
     if (!this.isCreating()) {
       const mainField = get(this.getModel(), 'info.mainField') || this.getModel().primaryKey;
@@ -172,34 +198,37 @@ export class EditPage extends React.Component {
     }
 
     // Get all relations made with the upload plugin
-    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce((acc, current) => {
-      const association = get(this.getSchema(), ['relations', current], {});
+    const fileRelations = Object.keys(get(this.getSchema(), 'relations', {})).reduce(
+      (acc, current) => {
+        const association = get(this.getSchema(), ['relations', current], {});
 
-      if (association.plugin === 'upload' && association[association.type] === 'file') {
-        const relation = {
-          name: current,
-          multiple: association.nature === 'manyToManyMorph',
-        };
+        if (association.plugin === 'upload' && association[association.type] === 'file') {
+          const relation = {
+            name: current,
+            multiple: association.nature === 'manyToManyMorph',
+          };
 
-        acc.push(relation);
-      }
-      return acc;
-    }, []);
+          acc.push(relation);
+        }
+        return acc;
+      },
+      [],
+    );
 
     // Update the reducer so we can use it to create the appropriate FormData in the saga
     this.props.setFileRelations(fileRelations);
-  }
+  };
 
   handleAddRelationItem = ({ key, value }) => {
     this.props.addRelationItem({
       key,
       value,
     });
-  }
+  };
 
   handleBlur = ({ target }) => {
     const defaultValue = get(this.getModelAttribute(target.name), 'default');
-    
+
     if (isEmpty(target.value) && defaultValue && target.value !== false) {
       return this.props.changeData({
         target: {
@@ -210,7 +239,11 @@ export class EditPage extends React.Component {
     }
 
     const errorIndex = findIndex(this.props.editPage.formErrors, ['name', target.name]);
-    const errors = inputValidations(target.value, this.getAttributeValidations(target.name), target.type);
+    const errors = inputValidations(
+      target.value,
+      this.getAttributeValidations(target.name),
+      target.type,
+    );
     const formErrors = cloneDeep(this.props.editPage.formErrors);
 
     if (errorIndex === -1 && !isEmpty(errors)) {
@@ -222,14 +255,18 @@ export class EditPage extends React.Component {
     }
 
     return this.props.setFormErrors(formErrors);
-  }
+  };
 
-  handleChange = (e) => {
+  handleChange = e => {
     let value = e.target.value;
     // Check if date
     if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
       value = moment(e.target.value).format('YYYY-MM-DD HH:mm:ss');
-    } else if (['float', 'integer', 'biginteger', 'decimal'].indexOf(get(this.getSchema(), ['fields', e.target.name, 'type'])) !== -1) {
+    } else if (
+      ['float', 'integer', 'biginteger', 'decimal'].indexOf(
+        get(this.getSchema(), ['fields', e.target.name, 'type']),
+      ) !== -1
+    ) {
       value = toNumber(e.target.value);
     }
 
@@ -239,7 +276,7 @@ export class EditPage extends React.Component {
     };
 
     this.props.changeData({ target });
-  }
+  };
 
   handleConfirm = () => {
     const { showWarningDelete } = this.state;
@@ -251,11 +288,11 @@ export class EditPage extends React.Component {
       this.props.onCancel();
       this.toggle();
     }
-  }
+  };
 
   handleGoBack = () => this.props.history.goBack();
 
-  handleRedirect = ({ model, id, source = 'content-manager'}) => {
+  handleRedirect = ({ model, id, source = 'content-manager' }) => {
     /* eslint-disable */
     switch (model) {
       case 'permission':
@@ -270,103 +307,124 @@ export class EditPage extends React.Component {
 
         this.props.history.push({
           pathname,
-          search: `?source=${source}&redirectURI=${generateRedirectURI({ model, search: `?source=${source}` })}`,
+          search: `?source=${source}&redirectURI=${generateRedirectURI({
+            model,
+            search: `?source=${source}`,
+          })}`,
         });
     }
     /* eslint-enable */
-  }
+  };
 
-  handleSubmit = (e) => {
+  handleSubmit = e => {
     e.preventDefault();
-    const formErrors = checkFormValidity(this.generateFormFromRecord(), this.props.editPage.formValidations);
+    const formErrors = checkFormValidity(
+      this.generateFormFromRecord(),
+      this.props.editPage.formValidations,
+    );
 
     if (isEmpty(formErrors)) {
       this.props.submit();
     }
 
     this.props.setFormErrors(formErrors);
-  }
+  };
 
   hasDisplayedRelations = () => {
     return this.getDisplayedRelations().length > 0;
-  }
+  };
 
   hasDisplayedFields = () => {
     return get(this.getModel(), ['editDisplay', 'fields'], []).length > 0;
-  }
+  };
 
   isCreating = () => this.props.match.params.id === 'create';
 
-  isRelationComponentNull = () => (
-    Object.keys(get(this.getSchema(), 'relations', {})).filter(relation => (
-      get(this.getSchema(), ['relations', relation, 'plugin']) !== 'upload' &&
-      (!get(this.getSchema(), ['relations', relation, 'nature'], '').toLowerCase().includes('morph') || !get(this.getSchema(), ['relations', relation, relation]))
-    )).length === 0
-  )
+  isRelationComponentNull = () =>
+    Object.keys(get(this.getSchema(), 'relations', {})).filter(
+      relation =>
+        get(this.getSchema(), ['relations', relation, 'plugin']) !== 'upload' &&
+        (!get(this.getSchema(), ['relations', relation, 'nature'], '')
+          .toLowerCase()
+          .includes('morph') ||
+          !get(this.getSchema(), ['relations', relation, relation])),
+    ).length === 0;
 
   // NOTE: technical debt that needs to be redone
-  generateFormFromRecord = () => (
+  generateFormFromRecord = () =>
     Object.keys(this.getModelAttributes()).reduce((acc, current) => {
       acc[current] = get(this.props.editPage.record, current, '');
 
       return acc;
-    }, {})
-  )
+    }, {});
 
-  pluginHeaderActions =  () => (
-    [
-      {
-        label: 'content-manager.containers.Edit.reset',
-        kind: 'secondary',
-        onClick: this.toggle,
-        type: 'button',
-        disabled: this.showLoaders(),
-      },
-      {
-        kind: 'primary',
-        label: 'content-manager.containers.Edit.submit',
-        onClick: this.handleSubmit,
-        type: 'submit',
-        loader: this.props.editPage.showLoader,
-        style: this.props.editPage.showLoader ? { marginRight: '18px', flexGrow: 2 } : { flexGrow: 2 },
-        disabled: this.showLoaders(),
-      },
-    ]
-  );
+  pluginHeaderActions = () => [
+    {
+      label: 'content-manager.containers.Edit.reset',
+      kind: 'secondary',
+      onClick: this.toggle,
+      type: 'button',
+      disabled: this.showLoaders(),
+    },
+    {
+      kind: 'primary',
+      label: 'content-manager.containers.Edit.submit',
+      onClick: this.handleSubmit,
+      type: 'submit',
+      loader: this.props.editPage.showLoader,
+      style: this.props.editPage.showLoader
+        ? { marginRight: '18px', flexGrow: 2 }
+        : { flexGrow: 2 },
+      disabled: this.showLoaders(),
+    },
+  ];
 
   pluginHeaderSubActions = () => {
+    /* eslint-disable indent */
     const subActions = this.isCreating()
       ? []
       : [
-        {
-          label: 'app.utils.delete',
-          kind: 'delete',
-          onClick: this.toggleDelete,
-          type: 'button',
-          disabled: this.showLoaders(),
-        },
-      ];
-    
+          {
+            label: 'app.utils.delete',
+            kind: 'delete',
+            onClick: this.toggleDelete,
+            type: 'button',
+            disabled: this.showLoaders(),
+          },
+        ];
+
     return subActions;
-  }
+    /* eslint-enable indent */
+  };
 
   showLoaders = () => {
-    const { editPage: { isLoading }, schema: { layout } } = this.props;
+    const {
+      editPage: { isLoading },
+      schema: { layout },
+    } = this.props;
 
-    return isLoading && !this.isCreating() || isLoading && get(layout, this.getModelName()) === undefined;
-  }
+    return (
+      (isLoading && !this.isCreating()) ||
+      (isLoading && get(layout, this.getModelName()) === undefined)
+    );
+  };
 
   toggle = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
-  toggleDelete = () => this.setState(prevState => ({ showWarningDelete: !prevState.showWarningDelete }));
+  toggleDelete = () =>
+    this.setState(prevState => ({ showWarningDelete: !prevState.showWarningDelete }));
 
   renderEdit = () => {
-    const { editPage, location: { search } } = this.props;
+    const {
+      editPage,
+      location: { search },
+    } = this.props;
     const source = getQueryParameters(search, 'source');
     const basePath = '/plugins/content-manager/ctm-configurations';
-    const pathname = source !== 'content-manager'
-      ? `${basePath}/plugins/${source}/${this.getModelName()}`
-      : `${basePath}/${this.getModelName()}`;
+    const pathname =
+      source !== 'content-manager'
+        ? `${basePath}/plugins/${source}/${this.getModelName()}`
+        : `${basePath}/${this.getModelName()}`;
 
     if (this.showLoaders()) {
       return (
@@ -409,7 +467,7 @@ export class EditPage extends React.Component {
         </div>
       </div>
     );
-  }
+  };
 
   render() {
     const { editPage, moveAttr, moveAttrEnd } = this.props;
@@ -425,6 +483,7 @@ export class EditPage extends React.Component {
               actions={this.pluginHeaderActions()}
               subActions={this.pluginHeaderSubActions()}
               title={{ id: this.getPluginHeaderTitle() }}
+              titleId="addNewEntry"
             />
             <PopUpWarning
               isOpen={showWarning}
@@ -537,7 +596,10 @@ const mapStateToProps = createStructuredSelector({
   schema: makeSelectSchema(),
 });
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
 const withReducer = injectReducer({ key: 'editPage', reducer });
 const withSaga = injectSaga({ key: 'editPage', saga });

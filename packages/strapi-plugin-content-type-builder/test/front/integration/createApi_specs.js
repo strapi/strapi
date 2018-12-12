@@ -17,27 +17,24 @@ describe('Test CTB', () => {
     beforeEach(() => {
       cy.server();
       cy.route(`${backendUrl}/content-type-builder/autoReload`).as('initContentTypeBuilder');
-      cy.login()
-        .then(data => {
-          jwt = data.jwt;
-          userId = data.user._id || data.user.id;
-        });
+      cy.login().then(data => {
+        jwt = data.jwt;
+        userId = data.user._id || data.user.id;
+      });
       cy.visit('/admin');
       cy.wait(frontLoadingDelay);
       cy.wait('@initContentTypeBuilder');
     });
-  
+
     it('Should visit the content type builder', () => {
-      cy.get('a[href="/admin/plugins/content-type-builder"')
-        .click();
-      cy.url()
-        .should('equal', pluginUrl);
+      cy.get('a[href="/admin/plugins/content-type-builder"').click();
+      cy.url().should('equal', pluginUrl);
     });
-  
+
     it('Should prevent the user from creating a camelCase api', () => {
       cy.server();
       cy.route('GET', `${backendUrl}/content-type-builder/models`).as('models');
-  
+
       cy.get('a[href="/admin/plugins/content-type-builder"')
         .click()
         .wait('@models')
@@ -57,49 +54,45 @@ describe('Test CTB', () => {
         .get('#name')
         .should('have.value', 'notcamelcase');
     });
-  
+
     it('Should create a TAG API', function() {
       cy.server();
       cy.route('GET', `${backendUrl}/content-type-builder/models`).as('models');
       cy.route('POST', `${backendUrl}/content-type-builder/models`).as('createModel');
       cy.route('DELETE', `${backendUrl}/content-type-builder/models/tag`).as('deleteTag');
-  
+
       cy.get('a[href="/admin/plugins/content-type-builder"')
         .click()
         .wait('@models');
-  
+
       // Open modal
       cy.get('#openAddCT')
         .click()
         .wait(animDelay);
-  
+
       // Check the modal is opened this will tell is if we have a build issue
       cy.checkModalOpening();
-      cy.get('.modal')
-        .invoke('show');
-  
+      cy.get('.modal').invoke('show');
+
       // Fill the form
-      Object.keys(TAG_API)
-        .map(key => {
-          cy.log(key);
-          cy.get(`#${key}`)
-            .type(TAG_API[key]);
-        });
-  
+      Object.keys(TAG_API).map(key => {
+        cy.log(key);
+        cy.get(`#${key}`).type(TAG_API[key]);
+      });
+
       // Submit the form and navigate to product page
       cy.submitForm()
         .url()
         .should('equal', `${pluginUrl}/models/tag`);
-      
+
       // Open the attributes's modal
       cy.get('#openAddAttr')
         .click()
         .wait(animDelay);
-      
+
       // Check that we don't have a build error from reacstrap
-      cy.checkModalOpening()
-        .should('be.visible');
-  
+      cy.checkModalOpening().should('be.visible');
+
       // Ensure the modal is opened to get #attrCardstring
       cy.wait(1000)
         .get('button#attrCardstring')
@@ -108,17 +101,17 @@ describe('Test CTB', () => {
         .type('name')
         .get('#continue')
         .click();
-  
+
       cy.get('button#saveData')
-        .should('contain', 'Save')
+        .should('have.id', 'saveData')
         .click()
         .wait('@createModel')
         .wait(frontLoadingDelay);
-    
+
       cy.get('#attributesList li')
         .first()
         .should('contain', 'name');
-      
+
       // Delete tag API
       cy.get('a[href="/admin/plugins/content-type-builder"]')
         .click()
@@ -135,17 +128,19 @@ describe('Test CTB', () => {
         .get('#ctbModelsList li')
         .should('have.length', 4);
     });
-  
+
     it('Should update PRODUCT API field and visit the create product page', () => {
       cy.server();
       cy.createProductAndTagApis(jwt);
       cy.route(`${backendUrl}/content-type-builder/models/product?`).as('getProductModel');
       cy.route('PUT', `${backendUrl}/content-type-builder/models/product`).as('updateProductModel');
-  
-      cy.visit('/admin/plugins/content-type-builder/models/product#editproduct::attributestring::baseSettings::0');
+
+      cy.visit(
+        '/admin/plugins/content-type-builder/models/product#editproduct::attributestring::baseSettings::0',
+      );
       cy.wait('@getProductModel');
       cy.wait(frontLoadingDelay);
-  
+
       // Open the modal via url
       cy.checkModalOpening()
         .should('be.visible')
@@ -154,22 +149,22 @@ describe('Test CTB', () => {
         .type('updatedName')
         .get('#continue')
         .click();
-      
+
       cy.get('#attributesList li')
         .first()
         .should('have.text', 'updatedNameString');
-      
+
       cy.get('button#saveData')
         .click()
         .wait('@updateProductModel')
         .wait(frontLoadingDelay);
-      
+
       // Check that we can still go to the create page
       cy.get('a[href="/admin/plugins/content-manager/product?source=content-manager"')
         .click()
         .get('button[label="content-manager.containers.List.addAnEntry"')
         .click();
-      
+
       cy.window()
         .its('__store__')
         .its('content-manager')
@@ -178,8 +173,15 @@ describe('Test CTB', () => {
             .getState()
             .getIn(['global', 'schema', 'models', 'product', 'editDisplay', 'fields'])
             .toJS();
-  
-          expect(displayedFields).to.include.members(['description', 'price', 'updatedName', 'bool', 'bool1', 'email']);
+
+          expect(displayedFields).to.include.members([
+            'description',
+            'price',
+            'updatedName',
+            'bool',
+            'bool1',
+            'email',
+          ]);
         });
     });
 
@@ -188,11 +190,13 @@ describe('Test CTB', () => {
       // cy.createProductAndTagApis(jwt);
       cy.route(`${backendUrl}/content-type-builder/models/product?`).as('getProductModel');
       cy.route('PUT', `${backendUrl}/content-type-builder/models/product`).as('updateProductModel');
-  
-      cy.visit('/admin/plugins/content-type-builder/models/product#editproduct::contentType::baseSettings');
+
+      cy.visit(
+        '/admin/plugins/content-type-builder/models/product#editproduct::contentType::baseSettings',
+      );
       cy.wait('@getProductModel');
       cy.wait(frontLoadingDelay);
-  
+
       // Open the modal via url
       cy.checkModalOpening()
         .should('be.visible')
@@ -202,7 +206,7 @@ describe('Test CTB', () => {
         .submitForm()
         .wait('@updateProductModel')
         .wait(frontLoadingDelay);
-      
+
       // Check that we can still go to the create page
       cy.get('a[href="/admin/plugins/content-manager/produit?source=content-manager"')
         .click()
@@ -210,8 +214,8 @@ describe('Test CTB', () => {
         .get('button[label="content-manager.containers.List.addAnEntry"')
         .click()
         .get('h1')
-        .should('have', 'New Entry');
-      
+        .should('have.id', 'addNewEntry');
+
       // cy.window()
       //   .its('__store__')
       //   .its('content-manager')
@@ -220,7 +224,7 @@ describe('Test CTB', () => {
       //       .getState()
       //       .getIn(['global', 'schema', 'models', 'product', 'editDisplay', 'fields'])
       //       .toJS();
-  
+
       //     expect(displayedFields).to.include.members(['description', 'price', 'updatedName', 'bool', 'bool1', 'email']);
       //   });
     });
