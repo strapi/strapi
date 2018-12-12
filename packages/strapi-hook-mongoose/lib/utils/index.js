@@ -4,9 +4,18 @@
  * Module dependencies
  */
 
-module.exports = mongoose => {
-  var Decimal = require('mongoose-float').loadType(mongoose, 2);
-  var Float = require('mongoose-float').loadType(mongoose, 20);
+module.exports = (mongoose = new Mongoose()) => {
+  mongoose.Schema.Types.Decimal = require('mongoose-float').loadType(mongoose, 2);
+  mongoose.Schema.Types.Float = require('mongoose-float').loadType(mongoose, 20);
+
+  /**
+   * Convert MongoDB ID to the stringify version as GraphQL throws an error if not.
+   *
+   * Refer to: https://github.com/graphql/graphql-js/commit/3521e1429eec7eabeee4da65c93306b51308727b#diff-87c5e74dd1f7d923143e0eee611f598eR183
+   */
+  mongoose.Types.ObjectId.prototype.valueOf = function () {
+    return this.toString();
+  };
 
   return {
     convertType: mongooseType => {
@@ -23,9 +32,9 @@ module.exports = mongoose => {
         case 'timestamp':
           return Date;
         case 'decimal':
-          return Decimal;
+          return 'Decimal';
         case 'float':
-          return Float;
+          return 'Float';
         case 'json':
           return 'Mixed';
         case 'biginteger':
@@ -41,6 +50,6 @@ module.exports = mongoose => {
           return 'String';
         default:
       }
-    },
+    }
   };
 };

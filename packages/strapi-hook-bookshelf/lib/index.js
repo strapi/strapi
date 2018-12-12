@@ -60,7 +60,7 @@ module.exports = function(strapi) {
             'config',
             'functions',
             'bookshelf.js'
-          ))(ORM, strapi.connections[connectionName]);
+          ))(ORM, connection);
         } catch (err) {
           // This is not an error if the file is not found.
         }
@@ -502,7 +502,7 @@ module.exports = function(strapi) {
                             console.log(e);
                           }
 
-                          strapi.log.warn(`The SQL database indexes haven't been generated successfully. Please enable the debug mode for more details.`);
+                          strapi.log.warn('The SQL database indexes haven\'t been generated successfully. Please enable the debug mode for more details.');
                         }
                       }
                     };

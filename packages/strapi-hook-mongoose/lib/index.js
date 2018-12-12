@@ -6,6 +6,7 @@
 
 // Public node modules.
 const url = require('url');
+const path = require('path');
 const _ = require('lodash');
 const mongoose = require('mongoose');
 const Mongoose = mongoose.Mongoose;
@@ -17,6 +18,7 @@ const { models: utilsModels }  = require('strapi-utils');
 
 // Local helpers.
 const utils = require('./utils/');
+
 const relations = require('./relations');
 
 /**
@@ -86,6 +88,18 @@ module.exports = function (strapi) {
           const errMsg = message.includes(`:${port}`) ? 'Make sure your MongoDB database is running...' : message;
 
           return cb(errMsg);
+        }
+
+        try {
+          // Require `config/functions/mongoose.js` file to customize connection.
+          require(path.resolve(
+            strapi.config.appPath,
+            'config',
+            'functions',
+            'mongoose.js'
+          ))(instance, connection);
+        } catch (err) {
+          // This is not an error if the file is not found.
         }
 
         Object.keys(options, key => instance.set(key, options[key]));
@@ -488,16 +502,16 @@ module.exports = function (strapi) {
           result.value = value;
           break;
         case '_sort':
-          result.key = `sort`;
+          result.key = 'sort';
           result.value = (_.toLower(value) === 'desc') ? '-' : '';
           result.value += key;
           break;
         case '_start':
-          result.key = `start`;
+          result.key = 'start';
           result.value = parseFloat(value);
           break;
         case '_limit':
-          result.key = `limit`;
+          result.key = 'limit';
           result.value = parseFloat(value);
           break;
         case '_contains':
