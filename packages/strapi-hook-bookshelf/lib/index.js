@@ -60,7 +60,7 @@ module.exports = function(strapi) {
             'config',
             'functions',
             'bookshelf.js'
-          ))(ORM, strapi.connections[connectionName]);
+          ))(ORM, connection);
         } catch (err) {
           // This is not an error if the file is not found.
         }
