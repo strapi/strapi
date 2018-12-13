@@ -74,6 +74,54 @@ To add a new file attribute in your models, it's like adding a new association. 
 
 ## Examples
 
+**JS example**
+
+The `Article` attributes:
+
+```json
+"attributes": {
+  "title": {
+    "default": "",
+    "type": "string"
+  },
+  "cover": {
+    "model": "file",
+    "via": "related",
+    "plugin": "upload",
+    "required": false
+  }
+}
+```
+
+Code example:
+
+```html
+<form>
+  <!-- Can be multiple files -->
+  <input type="file" name="files">
+  <input type="text" name="ref" value="article">
+  <input type="text" name="refId" value="5c126648c7415f0c0ef1bccd">
+  <input type="text" name="field" value="cover">
+  <input type="submit" value="Submit">
+</form>
+
+<script type="text/javascript">
+  const formElement = document.querySelector('form');
+
+  formElement.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const request = new XMLHttpRequest();
+
+    request.open('POST', '/upload');
+
+    request.send(new FormData(formElement));
+  });
+</script>
+```
+
+> ⚠️  You have to send a FormData in any case (React, Angular, jQuery etc...)
+
 **Single file**
 
 ```
