@@ -91,7 +91,7 @@ module.exports = {
 
   /**
    * Recursively create missing directories
-   * @param {String} apiName
+   * @param {String} targetDir
    *
    */
   createDocumentationDirectory: function(targetDir) {
@@ -374,13 +374,15 @@ module.exports = {
       let key;
       let tags;
 
-      if (controllerName.toLowerCase() === apiName) {
+      if (controllerName.toLowerCase() === apiName && !_.isObject(routeTagConfig)) {
         key = apiName;
       } else if (routeTagConfig !== undefined) {
         if (_.isObject(routeTagConfig)) {
           const { name, plugin } = routeTagConfig;
-          key = `${plugin}-${name}`;
-          tags = this.formatTag(plugin, name);
+          const referencePlugin = !_.isEmpty(plugin);
+
+          key = referencePlugin ? `${plugin}-${name}` : name.toLowerCase();
+          tags = referencePlugin ? this.formatTag(plugin, name) : _.upperFirst(name);
         } else {
           key = routeTagConfig.toLowerCase();
         }
@@ -641,9 +643,7 @@ module.exports = {
 
   generatePluginResponseSchema: function(tag) {
     const { actionType, name, plugin } = _.isObject(tag) ? tag : { tag };
-    const getter = plugin
-      ? ['plugins', plugin, 'models', name.toLocaleLowerCase()]
-      : ['models', name];
+    const getter = plugin ? ['plugins', plugin, 'models', name.toLowerCase()] : ['models', name];
     const isModelRelated =
       _.get(strapi, getter) !== undefined &&
       ['find', 'findOne', 'create', 'search', 'update', 'destroy', 'count'].includes(actionType);
@@ -765,7 +765,7 @@ module.exports = {
   generateResponses: function(verb, routeObject, tag) {
     const endPoint = routeObject.path.split('/')[1];
     const description = this.generateResponseDescription(verb, tag, endPoint);
-    const schema = this.generateResponseSchema(verb, routeObject.handler, tag, endPoint);
+    const schema = this.generateResponseSchema(verb, routeObject, tag, endPoint);
 
     return {
       200: {
@@ -952,14 +952,15 @@ module.exports = {
    * Its schema is either a component when we know what the routes returns otherwise, it returns a dummy schema
    * that the user will modify later
    * @param {String} verb
-   * @param {String} handlerMethod
+   * @param {Object} route
    * @param {String} tag
    * @param {String} endPoint
    * @returns {Object}
    */
-  generateResponseSchema: function(verb, handler, tag) {
-    const [controller, handlerMethod] = handler.split('.');
-    const upperFirstTag = _.upperFirst(tag);
+  generateResponseSchema: function(verb, routeObject, tag) {
+    const { handler } = routeObject;
+    let [controller, handlerMethod] = handler.split('.');
+    let upperFirstTag = _.upperFirst(tag);
 
     if (verb === 'delete') {
       return {
@@ -967,7 +968,49 @@ module.exports = {
         format: 'int64',
       };
     }
-    const isModelRelated = strapi.models[tag] !== undefined && tag === _.lowerCase(controller);
+
+    // A tag key might be added to a route to tell if a custom endPoint in an api/<model>/config/routes.json
+    // Retrieves data from another model it is a faster way to generate the response
+    const routeReferenceTag = _.get(routeObject, ['config', 'tag']);
+    let isModelRelated = false;
+    const shouldCheckIfACustomEndPointReferencesAnotherModel =
+      _.isObject(routeReferenceTag) && !_.isEmpty(_.get(routeReferenceTag, 'name'));
+
+    if (shouldCheckIfACustomEndPointReferencesAnotherModel) {
+      const { actionType, name, plugin } = routeReferenceTag;
+      // A model could be in either a plugin or the api folder
+      // The path is different depending on the case
+      const getter = !_.isEmpty(plugin)
+        ? ['plugins', plugin, 'models', name.toLowerCase()]
+        : ['models', name.toLowerCase()];
+
+      // An actionType key might be added to the tag object to guide the algorithm is generating an automatic response
+      const isKnownAction = [
+        'find',
+        'findOne',
+        'create',
+        'search',
+        'update',
+        'destroy',
+        'count',
+      ].includes(actionType);
+
+      // Check if a route points to a model
+      isModelRelated = _.get(strapi, getter) !== undefined && isKnownAction;
+
+      if (isModelRelated && isKnownAction) {
+        // We need to change the handlerMethod name if it is know to generate the good schema
+        handlerMethod = actionType;
+
+        // This is to retrieve the correct component if a custom endpoints references a plugin model
+        if (!_.isEmpty(plugin)) {
+          upperFirstTag = this.formatTag(plugin, name, true);
+        }
+      }
+    } else {
+      // Normal way there's no tag object
+      isModelRelated = strapi.models[tag] !== undefined && tag === _.lowerCase(controller);
+    }
 
     // We create a component when we are sure that we can 'guess' what's needed to be sent
     // https://swagger.io/specification/#referenceObject
