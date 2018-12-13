@@ -35,7 +35,7 @@ module.exports = strapi => {
                 const whitelist =strapi.config.middleware.settings.cors.origin.split(',');
                 const requestOrigin = ctx.accept.headers.origin;
                 if (!whitelist.includes(requestOrigin)) {
-                        return ctx.throw(`  ${requestOrigin} is not a valid origin`);
+                  return ctx.throw(`${requestOrigin} is not a valid origin`);
                 }
                 return requestOrigin;
               },
