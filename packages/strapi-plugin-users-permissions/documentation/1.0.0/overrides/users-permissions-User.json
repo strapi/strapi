@@ -50,7 +50,7 @@
     "/auth/email-confirmation": {
       "get": {
         "tags": ["Authentication"],
-        "security": [],
+        "security": []
       }
     },
     "/users-permissions/search/{id}": {
@@ -75,7 +75,7 @@
         "summary": "Authenticate your user with a custom provider",
         "tags": ["Authentication"],
         "security": [],
-        "parameters":[
+        "parameters": [
           {
             "name": "provider",
             "in": "path",
@@ -109,17 +109,14 @@
         "requestBody": {
           "description": "The identifier param can either be an email or a username",
           "content": {
-            "application/json":{
-              "schema":{
-                "required":[
-                  "identifier",
-                  "password"
-                ],
+            "application/json": {
+              "schema": {
+                "required": ["identifier", "password"],
                 "properties": {
                   "identifier": {
                     "type": "string"
                   },
-                  "password":{
+                  "password": {
                     "type": "string"
                   }
                 }
@@ -205,7 +202,7 @@
               "example": {
                 "email": "hi@strapi.io",
                 "url": "http://mon-site.com/rest-password"
-              }  
+              }
             }
           }
         },
