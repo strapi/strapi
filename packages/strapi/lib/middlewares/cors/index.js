@@ -38,7 +38,7 @@ module.exports = strapi => {
                         return ctx.throw(`  ${requestOrigin} is not a valid origin`);
                 }
                 return requestOrigin;
-             },
+              },
               exposeHeaders: strapi.config.middleware.settings.cors.expose,
               maxAge: strapi.config.middleware.settings.cors.maxAge,
               credentials: strapi.config.middleware.settings.cors.credentials,
