@@ -353,7 +353,9 @@ Refer to the [upload plugin](./upload.md) polymorphic implementation for more in
 
 Let's stay with our `Image` model which might belongs to **a single `Article` or `Product` entry**.
 
-> In other words, it means that a `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
+::: note
+In other words, it means that a `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
+:::
 
 **Path —** `./api/image/models/Image.settings.json`.
 ```json
@@ -369,7 +371,9 @@ Let's stay with our `Image` model which might belongs to **a single `Article` or
 
 Also, our `Image` model which might belongs to **many `Article` or `Product` entries**.
 
-> In other words, it means that a `Article` entry can relate to the same image than a `Product` entry.
+::: note
+In other words, it means that a `Article` entry can relate to the same image than a `Product` entry.
+:::
 
 **Path —** `./api/image/models/Image.settings.json`.
 ```json

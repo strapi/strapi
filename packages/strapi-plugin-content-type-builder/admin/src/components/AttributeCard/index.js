@@ -81,6 +81,7 @@ class AttributeCard extends React.Component {
         <button
           autoFocus={autoFocus}
           className={styles.attributeCardContainer}
+          id={`attrCard${attribute.type}`}
           onClick={() => handleClick(attribute.type)}
           type="button"
           tabIndex={tabIndex + 1}
