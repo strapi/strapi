@@ -34,10 +34,10 @@ module.exports = {
 
 The global logger is configured by environment variables.
 
-`STRAPI_LOG_LEVEL`: Can be 'fatal', 'error', 'warn', 'info', 'debug' or 'trace'.
-`STRAPI_LOG_TIMESTAMP`: Can be true/false
-`STRAPI_LOG_PRETTY_PRINT`: Can be true/false
-`STRAPI_LOG_FORCE_COLOR`: Can be true/false
+- `STRAPI_LOG_LEVEL`: Can be fatal, error, warn, info, debug or trace.
+- `STRAPI_LOG_TIMESTAMP`: Can be true/false
+- `STRAPI_LOG_PRETTY_PRINT`: Can be true/false
+- `STRAPI_LOG_FORCE_COLOR`: Can be true/false
 
 ## Request logging middleware
 
