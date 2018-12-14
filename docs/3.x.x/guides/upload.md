@@ -181,7 +181,7 @@ curl -X POST -F 'files=@/path/to/pictures/avatar.jpg&refId=5a993616b8e66660e8baf
 
 By default Strapi provides a local file upload system. You might want to upload your files on AWS S3 or another provider.
 
-Check all community providers available on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-upload-)
+You can check all the available providers developed by the community on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-upload-)
 
 To install a new provider run:
 

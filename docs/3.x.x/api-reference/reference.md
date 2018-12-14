@@ -31,7 +31,7 @@ This object contains the controllers, models, services and configurations contai
 ## strapi.api
 
 This object contains APIs contained in the `./api` folder.
-And by using `strapi.api[:name]` this object contains the controllers, models, services and configurations contained in the `./api/:name` folder.
+And by using `strapi.api[:name]` you can access the controllers, services, the model definition and also the configurations of the `./api/:name` folder
 
 ## strapi.app
 

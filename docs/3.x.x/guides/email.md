@@ -23,7 +23,7 @@ await strapi.plugins['email'].services.email.send({
 
 By default Strapi provides a local email system. You might want to send email with a third party.
 
-Check all community providers available on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-email-)
+You can check all the available providers developed by the community on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-email-)
 
 To install a new provider run:
 
