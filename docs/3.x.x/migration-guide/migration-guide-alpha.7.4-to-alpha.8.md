@@ -1,4 +1,4 @@
-# Migrating from 3.0.0-alpha.7.3 to 3.0.0-alpha.8
+# Migration guide from alpha.7.4 to alpha.8
 
 **Here are the major changes:**
 
@@ -6,13 +6,21 @@
 - Setup database connection on project creation
 - Helper for table creation for SQL database
 
-> Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
+<br>
+
+::: note
+Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
+:::
+
+<br>
 
 ## Getting started
 
 Install Strapi `alpha.8` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.8 -g`.
 
 When it's done, generate a new empty project `strapi new myNewProject` (don't pay attention to the database configuration).
+
+<br>
 
 ## Configurations
 
@@ -44,9 +52,13 @@ You will have to update just 1 file: `package.json`
 }
 ```
 
+<br>
+
 ## Update the Admin
 
 Delete your old admin folder and replace by the new one.
+
+<br>
 
 ## Update the Plugins
 

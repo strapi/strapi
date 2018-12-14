@@ -132,7 +132,7 @@ module.exports = {
           title: '📚 Resources',
           children: [
             ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
-            ['https://github.com/strapi/strapi/wiki', 'Migration guides'],
+            '/3.x.x/migration-guide/',
             '/3.x.x/tutorials/',
           ],
         },
