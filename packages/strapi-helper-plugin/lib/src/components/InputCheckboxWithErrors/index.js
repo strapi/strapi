@@ -117,6 +117,7 @@ class InputCheckboxWithErrors extends React.Component {
         <InputErrors
           className={errorsClassName}
           errors={this.state.errors}
+          name={name}
           style={errorsStyle}
         />
         {spacer}

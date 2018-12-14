@@ -148,7 +148,7 @@ class FiltersPickWrapper extends React.PureComponent {
               }}
               title={this.renderTitle()}
             />
-            <Wrapper>
+            <Wrapper id="filterPickWrapper">
               { showInput && appliedFilters.map((filter, key) => (
                 <FilterOptions
                   key={key}

@@ -74,7 +74,8 @@ module.exports = function(appPath = '') {
             file === 'node_modules' ||
             file === 'plugins.json' ||
             file === 'index.html'   ||
-            file === 'public'
+            file === 'public'       ||
+            file === 'cypress'
           ) {
             return;
           }

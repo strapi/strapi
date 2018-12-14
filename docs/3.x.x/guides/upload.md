@@ -11,7 +11,7 @@ Thanks to the plugin `Upload`, you can upload any kind of files on your server o
 The plugin exposes a single route `POST /upload` to upload one or multiple files in a single request.
 
 ::: warning
-Please send the request using multipart/form-data encoding
+Please send FormData in your request body
 :::
 
 **Parameters**
@@ -74,6 +74,54 @@ To add a new file attribute in your models, it's like adding a new association. 
 
 ## Examples
 
+**JS example**
+
+The `Article` attributes:
+
+```json
+"attributes": {
+  "title": {
+    "default": "",
+    "type": "string"
+  },
+  "cover": {
+    "model": "file",
+    "via": "related",
+    "plugin": "upload",
+    "required": false
+  }
+}
+```
+
+Code example:
+
+```html
+<form>
+  <!-- Can be multiple files -->
+  <input type="file" name="files">
+  <input type="text" name="ref" value="article">
+  <input type="text" name="refId" value="5c126648c7415f0c0ef1bccd">
+  <input type="text" name="field" value="cover">
+  <input type="submit" value="Submit">
+</form>
+
+<script type="text/javascript">
+  const formElement = document.querySelector('form');
+
+  formElement.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const request = new XMLHttpRequest();
+
+    request.open('POST', '/upload');
+
+    request.send(new FormData(formElement));
+  });
+</script>
+```
+
+> ⚠️  You have to send a FormData in any case (React, Angular, jQuery etc...)
+
 **Single file**
 
 ```
@@ -133,14 +181,20 @@ curl -X POST -F 'files=@/path/to/pictures/avatar.jpg&refId=5a993616b8e66660e8baf
 
 By default Strapi provides a local file upload system. You might want to upload your files on AWS S3 or another provider.
 
+You can check all the available providers developed by the community on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-upload-)
+
 To install a new provider run:
 
 ```
 $ npm install strapi-provider-upload-aws-s3@alpha --save
 ```
 
-We have two providers available `strapi-provider-upload-aws-s3` and `strapi-provider-upload-cloudinary`, use the alpha tag to install one of them. Then, visit `/admin/plugins/upload/configurations/development` on your web browser and configure the provider.
+::: note
+If the provider is not in the mono repo, you probably not need `@alpha` depending if the creator published it with this tag or not.
+:::
+
+Then, visit `/admin/plugins/upload/configurations/development` on your web browser and configure the provider.
+
+## Create providers
 
 If you want to create your own, make sure the name starts with `strapi-provider-upload-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `upload` and `delete` functions.
-
-Check all community providers available on npmjs.org - [Providers list](https://www.npmjs.com/search?q=strapi-provider-upload-)

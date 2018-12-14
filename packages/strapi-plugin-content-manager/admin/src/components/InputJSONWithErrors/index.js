@@ -51,6 +51,7 @@ class InputJSONWithErrors extends React.Component { // eslint-disable-line react
       this.setErrors(errors);
     }
   }
+
   setErrors = errors => this.setState({ errors });
 
   setInit = () => this.setState({ hasInitialValue: true });
@@ -143,6 +144,7 @@ class InputJSONWithErrors extends React.Component { // eslint-disable-line react
         <InputErrors
           className={errorsClassName}
           errors={!noErrorsDescription && this.state.errors || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}

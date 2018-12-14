@@ -239,7 +239,7 @@ class PreviewWysiwyg extends React.PureComponent {
           onChange={() => {}}
           placeholder={placeholder}
         />
-        <input className={styles.editorInput} value="" tabIndex="-1" />
+        <input className={styles.editorInput} value="" onChange={() => {}} tabIndex="-1" />
       </div>
     );
   }

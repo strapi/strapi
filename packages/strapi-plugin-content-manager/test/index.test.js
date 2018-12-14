@@ -33,6 +33,7 @@ describe('App setup auth', () => {
 describe('Generate test APIs', () => {
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
@@ -79,6 +80,17 @@ describe('Generate test APIs', () => {
       });
     }
   );
+  test(
+    'Create new product API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models`,
+        method: 'POST',
+        body: form.product,
+        json: true
+      });
+    }
+  );
 });
 
 describe('Test manyToMany relation (article - tag) with Content Manager', () => {
@@ -91,6 +103,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
@@ -387,6 +400,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
@@ -663,6 +677,7 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
 
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
@@ -757,25 +772,12 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       expect(body.reference.id).toBe(entry.reference);
     }
   );
-  test(
-    'Get article1 without relations',
-    async () => {
-      let body = await rq({
-        url: `/content-manager/explorer/article/${data.articles[0].id}?source=content-manager`,
-        method: 'GET'
-      });
-
-      body = JSON.parse(body);
-
-      expect(body.id);
-      expect(body.reference).toBe(null);
-    }
-  );
 });
 
 describe('Test oneWay relation (reference - tag) with Content Manager', () => {
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
@@ -891,6 +893,7 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
 describe('Delete test APIs', () => {
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
@@ -928,6 +931,16 @@ describe('Delete test APIs', () => {
     async () => {
       await rq({
         url: `/content-type-builder/models/reference`,
+        method: 'DELETE',
+        json: true
+      });
+    }
+  );
+  test(
+    'Delete product API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models/product`,
         method: 'DELETE',
         json: true
       });

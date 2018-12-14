@@ -139,6 +139,7 @@ class InputAddonWithErrors extends React.Component { // eslint-disable-line reac
         <InputErrors
           className={errorsClassName}
           errors={!noErrorsDescription && this.state.errors || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
