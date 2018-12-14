@@ -24,6 +24,7 @@ install:
 
 before_script:
   - git fetch origin master:master
+  - snyk auth ${SNYK_TOKEN}
 
 script:
   - npm run lint

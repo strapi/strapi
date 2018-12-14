@@ -268,7 +268,9 @@ You can access the config of the current environment through `strapi.config.curr
 }
 ```
 
-> Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
+::: note
+Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
+:::
 
 #### MLab Example
 
@@ -296,8 +298,9 @@ You can access the config of the current environment through `strapi.config.curr
 }
 ```
 
-> Please note that you must give your MLab database name as the authenticationDatabase and your password can not contain the "@" symbol.
-
+::: note
+Please note that you must give your MLab database name as the authenticationDatabase and your password can not contain the "@" symbol.
+:::
 
 
 ***

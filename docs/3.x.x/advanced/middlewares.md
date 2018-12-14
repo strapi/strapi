@@ -4,11 +4,16 @@ The middlewares are functions which are composed and executed in a stack-like ma
 
 Enable the middleware in environments settings
 
-**Path —** [`config/environments/**`]
+**Path —** `config/environments/middleware.json`.
 ```json
-  "urlReader": {
-      "enabled": true
-  }
+{
+  "ejs": {
+    "enabled": true,
+    "viewExt": "ejs",
+    "debug": false,
+    "cache": false
+  },
+}
 ```
 
 **Path —** [`strapi/lib/middlewares/responseTime/index.js`](https://github.com/strapi/strapi/blob/master/packages/strapi/lib/middlewares/responseTime/index.js).

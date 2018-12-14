@@ -10,7 +10,9 @@ To be honest with all of you, the migration process won't be easy. The new versi
 - Removed middlewares from core (koa-graphql, koa-proxy, koa-ssl, koa-views).
 - Better error handling with Boom.
 
-> Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
+::: note
+Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
+:::
 
 ## Getting started
 
@@ -33,7 +35,7 @@ The structure of the configurations has been harmonised and simplified. Files ha
 - `./config/environments/**/response.json` added
 - `./config/environments/**/custom.json` added
 
-Please refer to the [new documentation](../configurations/configurations.md) to set the correct values in each file.
+Please refer to the [new documentation](https://github.com/strapi/strapi/blob/master/docs/3.x.x/en/configurations/configurations.md) to set the correct values in each file.
 
 
 ::: note
