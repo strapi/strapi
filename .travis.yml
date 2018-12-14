@@ -15,7 +15,6 @@ before_install:
   - sh -e /etc/init.d/xvfb start
   - git fetch -a
   - git fetch origin master
-  - echo ${SNYK_TOKEN:0:4}
   # - sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
   # - npm cache clean --force
   # - rm -rf node_modules/
@@ -27,6 +26,7 @@ before_script:
   - git fetch origin master:master
 
 script:
+  - echo ${SNYK_TOKEN:0:4}
   - npm run lint
   - npm run doc
   - npm run snyk
