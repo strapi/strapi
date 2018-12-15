@@ -481,7 +481,7 @@ module.exports = function(strapi) {
                             break;
 
                           case 'json':
-                            // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
+                            // ROOM FOR IMPROVEMENT -- MariaDB doesn't support json type yet
                             column = definition.client === 'pg'
                               ? dbTable.jsonb(fieldName)
                               : dbTable.text(fieldName, 'longtext');
@@ -489,15 +489,28 @@ module.exports = function(strapi) {
 
                           case 'email':
                           case 'password':
-                          case 'enumeration': // Manage native type is too complicated
+                          case 'enumeration': // MySQL enum data type is too complex and slow
                             column = dbTable.string(fieldName);
                             break;
 
                           case 'date':
+                            // should be .date but until frontend supports just date, leaving as datetime
+                            column = dbTable.datetime(fieldName);
+                            break;
+
+                          case 'datetime':
+                            // Currently isn't used, needs to replace date
+                            column = dbTable.datetime(fieldName);
+                            break;
+
                           case 'timestamp':
+                            // ROOM FOR IMPROVEMENT -- Should use knex.timestamps
+                            column = dbTable.timestamp(fieldName).defaultTo(ORM.knex.fn.now());
+                            break;
+
                           case 'timestampUpdate':
                             column = dbTable.timestamp(fieldName).defaultTo(
-                              // ROOM FOR IMPROVEMENT -- Remove distinction; procur same behavior on all engines
+                              // ROOM FOR IMPROVEMENT -- Should use knex.timestamps
                               definition.client === 'mysql' && field.type === 'timestampUpdate'
                                 ? ORM.knex.raw('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
                                 : ORM.knex.fn.now()
