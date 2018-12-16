@@ -56,6 +56,7 @@ If you're using SQL databases, you should use the native SQL constraints to appl
 
   - `required` (boolean) — if true adds a required validator for this property.
   - `unique` (boolean) — whether to define a unique index on this property.
+  - `index` (boolean) — adds an index on this property, this will use the default mongodb index for the type and will run in the background.
   - `max` (integer) — checks if the value is greater than or equal to the given minimum.
   - `min` (integer) — checks if the value is less than or equal to the given maximum.
 
@@ -100,7 +101,8 @@ To improve the Developer eXperience when developing or using the administration 
     "age": {
       "type": "integer",
       "min": 18,
-      "max": 99
+      "max": 99,
+      "index": true
     },
     "birthday": {
       "type": "date"
