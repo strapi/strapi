@@ -31,8 +31,8 @@ module.exports = strapi => {
             })(ctx, next);
           } else if (strapi.config.currentEnvironment.security.cors.enabled) {
             return strapi.koaMiddlewares.kcors({
-              origin:function(ctx) {
-                const whitelist =strapi.config.middleware.settings.cors.origin.split(',');
+              origin: function(ctx) {
+                const whitelist = strapi.config.middleware.settings.cors.origin.split(',');
                 const requestOrigin = ctx.accept.headers.origin;
                 if (!whitelist.includes(requestOrigin)) {
                   return ctx.throw(`${requestOrigin} is not a valid origin`);
