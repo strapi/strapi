@@ -24,12 +24,10 @@ install:
 
 before_script:
   - git fetch origin master:master
-  - snyk auth ${SNYK_TOKEN}
 
 script:
   - npm run lint
   - npm run doc
-  - npm run snyk
 
 cache:
   directories:
