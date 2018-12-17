@@ -22,7 +22,6 @@
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
-    "react-copy-to-clipboard": "^5.0.1",
     "strapi-provider-upload-local": "3.0.0-alpha.16",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
