@@ -8,11 +8,13 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 function InputText(props) {
-  const placeholder = isEmpty(props.placeholder) ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
+  const placeholder = isEmpty(props.placeholder)
+    ? 'app.utils.placeholder.defaultMessage'
+    : props.placeholder;
 
   return (
     <FormattedMessage id={placeholder} defaultMessage={placeholder}>
-      {(message) => (
+      {message => (
         <input
           autoFocus={props.autoFocus}
           className={cn(

@@ -131,7 +131,6 @@ module.exports = function (strapi) {
 
                 /*
                   Override populate path for polymorphic association.
-
                   It allows us to make Upload.find().populate('related')
                   instead of Upload.find().populate('related.item')
                 */
