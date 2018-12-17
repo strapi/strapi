@@ -10,7 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import Button from 'components/Button';
 import styles from './styles.scss';
 
-function EmptyAttributesBlock({ description, label, onClick, title }) {
+function EmptyAttributesBlock({ description, label, onClick, title, id }) {
   return (
     <div className={styles.emptyAttributesBlock}>
       <div>
@@ -25,6 +25,7 @@ function EmptyAttributesBlock({ description, label, onClick, title }) {
             onClick={onClick}
             primaryAddShape
             label={label}
+            id={id}
           />
         </div>
       </div>
@@ -34,6 +35,7 @@ function EmptyAttributesBlock({ description, label, onClick, title }) {
 
 EmptyAttributesBlock.defaultProps = {
   description: 'app.utils.defaultMessage',
+  id: '',
   label: 'app.utils.defaultMessage',
   onClick: () => {},
   title: 'app.components.EmptyAttributes.title',
@@ -41,6 +43,7 @@ EmptyAttributesBlock.defaultProps = {
 
 EmptyAttributesBlock.propTypes = {
   description: PropTypes.string,
+  id: PropTypes.string,
   label: PropTypes.string,
   onClick: PropTypes.func,
   title: PropTypes.string,

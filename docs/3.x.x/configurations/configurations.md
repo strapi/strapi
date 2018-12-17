@@ -130,6 +130,26 @@ module.exports = {
 };
 ```
 
+### Bookshelf, Mongoose
+
+**Path —** `./config/functions/bookshelf.js`.
+**Path —** `./config/functions/mongoose.js`.
+
+When present, they are loaded to let you customize your database connection instance, for example for adding some plugin, customizing parameters, etc.
+
+As an example, for using the `mongoose-simple-random` plugin for MongoDB, you can register it like this:
+
+**Path —** `./config/functions/mongoose.js`.
+```js
+'use strict';
+
+const random = require('mongoose-simple-random');
+
+module.exports = (mongoose, connection) => {
+  mongoose.plugin(random);
+};
+```
+
 ***
 
 ## Locales
@@ -248,7 +268,9 @@ You can access the config of the current environment through `strapi.config.curr
 }
 ```
 
-> Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
+::: note
+Please refer to the [dynamic configurations section](#dynamic-configurations) to use global environment variable to configure the databases.
+:::
 
 #### MLab Example
 
@@ -276,8 +298,9 @@ You can access the config of the current environment through `strapi.config.curr
 }
 ```
 
-> Please note that you must give your MLab database name as the authenticationDatabase and your password can not contain the "@" symbol.
-
+::: note
+Please note that you must give your MLab database name as the authenticationDatabase and your password can not contain the "@" symbol.
+:::
 
 
 ***

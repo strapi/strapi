@@ -25,7 +25,7 @@ function TableDelete({ colspan, number, onToggleDeleteAll }) {
         <FormattedMessage
           id="content-manager.components.TableDelete.delete"
         >
-          {message => <span className={styles.deleteAll} onClick={onToggleDeleteAll}>{message}</span>}
+          {message => <span className={styles.deleteAll} id="deleteAllData" onClick={onToggleDeleteAll}>{message}</span>}
         </FormattedMessage>
       </td>
     </tr>

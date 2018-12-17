@@ -431,6 +431,7 @@ export class ListPage extends React.Component {
   renderPluginHeader = () => {
     const pluginHeaderActions = [
       {
+        id: 'addEntry',
         label: 'content-manager.containers.List.addAnEntry',
         labelValues: {
           entity: capitalize(this.props.match.params.slug) || 'Content Manager',
@@ -545,7 +546,7 @@ export class ListPage extends React.Component {
                       decreaseMarginBottom={filters.length > 0}
                     >
                       <div className="row">
-                        <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} />
+                        <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} id="addFilterCTA" />
                         {filters.map(this.renderFilter)}
                       </div>
                     </Div>

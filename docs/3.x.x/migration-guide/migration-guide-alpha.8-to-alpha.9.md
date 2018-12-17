@@ -1,18 +1,25 @@
-# Migrating from 3.0.0-alpha.8 to 3.0.0-alpha.9
+# Migration guide from alpha.8 to alpha.9
 
 **Here are the major changes:**
 
 - Put roles' permissions in database
 - Providers connection (Facebook, GitHub, ...)
 
-> Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
+<br>
 
+::: note
+Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about the migration process.
+:::
+
+<br>
 
 ## Getting started
 
 Install Strapi `alpha.9` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.9 -g`.
 
 When it's done, generate a new empty project `strapi new myNewProject` (don't pay attention to the database configuration).
+
+<br>
 
 ## Configurations
 
@@ -41,11 +48,13 @@ You will have to update just 2 files: `package.json` and `request.json`
 }
 ```
 
+<br>
 
 ## Update the Admin
 
 Delete your old admin folder and replace it by the new one.
 
+<br>
 
 ## Update the Plugins
 
@@ -55,11 +64,13 @@ Copy the fields and relations you had in your `/plugins/users-permissions/models
 
 Then, delete your old `plugins` folder and replace it by the new one.
 
+<br>
 
 ## ⚠️  Roles update
 
 Roles are now stored in your database. You will have to re-create and configure them via the admin dashboard.
 
+<br>
 
 ## ⚠️  User collection/table name has changed
 

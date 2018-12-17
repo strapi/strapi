@@ -131,6 +131,7 @@ class InputTextAreaWithErrors extends React.Component { // eslint-disable-line r
         <InputErrors
           className={errorsClassName}
           errors={!noErrorsDescription && this.state.errors || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}

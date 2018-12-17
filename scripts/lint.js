@@ -38,6 +38,7 @@ const except = [
   'strapi-middleware-views',
   'strapi-plugin-settings-manager',
   'test',
+  'cypress',
 ];
 
 const changedDirs = [...changedFiles]

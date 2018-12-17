@@ -72,6 +72,12 @@ function Comp(props) {
   );
 }
 
+if (window.Cypress) {
+  window.__store__ = Object.assign(window.__store__ || {}, {
+    [pluginId]: store,
+  });
+}
+
 // Hot reloadable translation json files
 if (module.hot) {
   // modules.hot.accept does not accept dynamic dependencies,
