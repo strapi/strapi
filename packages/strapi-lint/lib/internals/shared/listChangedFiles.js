@@ -31,15 +31,11 @@ const execGitCmd = args =>
 
 const listChangedFiles = () => {
   const mergeBase = execGitCmd(['merge-base', 'HEAD', 'master']);
-
-  try {
-    return new Set([
-      ...execGitCmd(['diff', '--name-only', '--diff-filter=ACMRTUB', mergeBase]),
-      ...execGitCmd(['ls-files', '--others', '--exclude-standard']),
-    ]);
-  } catch (err) {
-    return [];
-  }
+  
+  return new Set([
+    ...execGitCmd(['diff', '--name-only', '--diff-filter=ACMRTUB', mergeBase]),
+    ...execGitCmd(['ls-files', '--others', '--exclude-standard']),
+  ]);
 };
 
 module.exports = listChangedFiles;

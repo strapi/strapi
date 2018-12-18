@@ -20,7 +20,7 @@ before_install:
   # - rm -rf node_modules/
 
 install:
-  - npm run setup --debug
+  - npm run setup:build --debug
 
 before_script:
   - git fetch origin master:master

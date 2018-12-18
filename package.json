@@ -21,8 +21,8 @@
     "redux-saga": "^0.14.3",
     "request": "^2.87.0",
     "shelljs": "^0.7.7",
-    "strapi-lint": "file:packages/strapi-lint",
-    "snyk": "^1.99.0"
+    "snyk": "^1.99.0",
+    "strapi-lint": "file:packages/strapi-lint"
   },
   "scripts": {
     "clean": "npm run removesymlinkdependencies && npx rimraf package-lock.json && npx rimraf packages/*/package-lock.json",
