@@ -1,16 +1,12 @@
-# strapi-redis
+# strapi-middleware-views
 
-[![npm version](https://img.shields.io/npm/v/strapi-redis.svg)](https://www.npmjs.org/package/strapi-redis)
-[![npm downloads](https://img.shields.io/npm/dm/strapi-redis.svg)](https://www.npmjs.org/package/strapi-redis)
-[![npm dependencies](https://david-dm.org/strapi/strapi-redis.svg)](https://david-dm.org/strapi/strapi-redis)
-[![Build status](https://travis-ci.org/strapi/strapi-redis.svg?branch=master)](https://travis-ci.org/strapi/strapi-redis)
+[![npm version](https://img.shields.io/npm/v/strapi-middleware-views.svg)](https://www.npmjs.org/package/strapi-middleware-views)
+[![npm downloads](https://img.shields.io/npm/dm/strapi-middleware-views.svg)](https://www.npmjs.org/package/strapi-middleware-views)
+[![npm dependencies](https://david-dm.org/strapi/strapi-middleware-views.svg)](https://david-dm.org/strapi/strapi-middleware-views)
+[![Build status](https://travis-ci.org/strapi/strapi-middleware-views.svg?branch=master)](https://travis-ci.org/strapi/strapi-middleware-views)
 [![Slack status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
 
-This built-in hook allows you to use [Redis](https://redis.io/) as a databases connection. Redis is an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker.
-
-## Motivation
-
-We developed this hook to use Redis as cache database for our Strapi apps.
+Views middleware to enable server-side rendering for the Strapi framework. It will let you use [koa-views](https://www.npmjs.com/package/koa-views) and [consolidate](https://github.com/tj/consolidate.js/).
 
 ## Resources
 
