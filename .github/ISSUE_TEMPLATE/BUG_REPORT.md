@@ -23,6 +23,7 @@ about: Create a report to help us improve 🤔.
 - **Strapi version**: <!-- Please make sure you are on the latest version -->
 - **Database**: 
 - **Operating system**: 
+- **(Optional) Link to your Project**: <!-- To speedup support, if you have your project on github/gitlab you can provide a link -->
 
 
 **What is the current behavior?**
