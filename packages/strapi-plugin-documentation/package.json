@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.0-alpha.16",
+  "version": "3.0.0-alpha.17",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -29,7 +29,7 @@
     "swagger-ui-dist": "^3.18.3-republish2"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.16"
+    "strapi-helper-plugin": "3.0.0-alpha.17"
   },
   "author": {
     "name": "soupette",
