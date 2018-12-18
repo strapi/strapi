@@ -34,7 +34,7 @@ module.exports = strapi => {
               origin: function(ctx) {
                 const whitelist = strapi.config.middleware.settings.cors.origin.split(/\s*,\s*/);
                 const requestOrigin = ctx.accept.headers.origin;
-		if(whitelist.includes('*')){
+		if (whitelist.includes('*')) {
 		  return '*';
 		}
                 if (!whitelist.includes(requestOrigin)) {
