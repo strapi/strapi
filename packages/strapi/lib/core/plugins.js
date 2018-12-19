@@ -88,6 +88,10 @@ module.exports = async function() {
     return;
   }
 
+  if (strapi.config.environment !== 'development') {
+    return;
+  }
+
   // arrange system directories
   await Promise.all([
     fs.remove(sourcePath),
