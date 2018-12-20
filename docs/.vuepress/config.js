@@ -70,6 +70,7 @@ module.exports = {
           collapsable: true,
           title: '💡 Guides',
           children: [
+            '/3.x.x/guides/api-documentation',
             '/3.x.x/guides/authentication',
             '/3.x.x/configurations/configurations',
             '/3.x.x/guides/controllers',
@@ -132,7 +133,7 @@ module.exports = {
           title: '📚 Resources',
           children: [
             ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
-            ['https://github.com/strapi/strapi/wiki', 'Migration guides'],
+            '/3.x.x/migration-guide/',
             '/3.x.x/tutorials/',
           ],
         },

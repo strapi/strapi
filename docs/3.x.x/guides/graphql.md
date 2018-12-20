@@ -14,7 +14,9 @@ strapi install graphql
 
 Then, start your app and open your browser at [http://localhost:1337/graphql](http://localhost:1337/graphql). You should see the interface (GraphQL Playground) that will help you to write GraphQL query to explore your data.
 
-> Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
+::: note
+Install the [ModHeader](https://chrome.google.com/webstore/detail/modheader/idgpnmonknjnojddfkpgkljpfnnfcklj/related) extension to set the `Authorization` header in your request
+:::
 
 ## Configurations
 
@@ -280,7 +282,9 @@ The queries and mutations will use the generated controller's actions as resolve
 
 ## Aggregation & Grouping
 
-> This feature is only available on Mongoose ORM.
+::: warning
+This feature is only available on Mongoose ORM.
+:::
 
 Strapi now supports Aggregation & Grouping.
 Let's consider again the model mentioned above:
@@ -571,7 +575,9 @@ module.exports = {
 };
 ```
 
-> The resolver parameter also accepts an object as a value to target a controller located in a plugin.
+::: note
+The resolver parameter also accepts an object as a value to target a controller located in a plugin.
+:::
 
 ```js
 module.exports = {
@@ -625,7 +631,9 @@ One of the most powerful features of GraphQL is the auto-documentation of the sc
 
 It might happens that you want to add a description to a query or deprecate it. To do that, you need to use the `schema.graphql` file.
 
-> Remember: The `schema.graphql` file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./plugins/*/config/schema.graphql`.
+::: warning
+The `schema.graphql` file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./plugins/*/config/schema.graphql`.
+:::
 
 **Path —** `./api/post/config/schema.graphql`.
 
@@ -714,7 +722,9 @@ The `obj` parameter is available via `ctx.params` and the `options` are availabl
 
 The same process is also applied for the `createPost` mutation. It will execute the `customCreate` action of the `Post` controller.
 
-> Note: The `where` parameter is available via `ctx.params` and the `data` are available via `ctx.request.body` in the controller's action.
+::: note
+The `where` parameter is available via `ctx.params` and the `data` are available via `ctx.request.body` in the controller's action.
+:::
 
 ### Define a custom resolver
 

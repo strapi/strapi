@@ -13,7 +13,7 @@ import styles from './styles.scss';
 
 function SettingsRow({ destination, name, onClick }) {
   return (
-    <div className={styles.settingsRow} onClick={() => onClick(destination)}>
+    <div className={styles.settingsRow} id={name} onClick={() => onClick(destination)}>
       <div>
         <div className={styles.frame}>
           <div className={styles.icon}>

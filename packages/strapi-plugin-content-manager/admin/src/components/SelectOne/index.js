@@ -154,6 +154,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
         <Select
           onChange={this.handleChange}
           options={this.state.options}
+          id={this.props.relation.alias}
           isLoading={this.state.isLoading}
           onMenuScrollToBottom={this.handleBottomScroll}
           onInputChange={this.handleInputChange}
