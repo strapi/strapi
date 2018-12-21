@@ -75,7 +75,7 @@ export function* submit() {
   const source = yield select(makeSelectSource());
   const schema = yield select(makeSelectSchema());
   let shouldAddTranslationSuffix = false;
-  
+
   // Remove the updated_at & created_at fields so it is updated correctly when using Postgres or MySQL db
   if (record.updated_at) {
     delete record.created_at;
@@ -93,7 +93,7 @@ export function* submit() {
     yield put(setLoader());
     const recordCleaned = Object.keys(record).reduce((acc, current) => {
       const attrType = source !== 'content-manager' ? get(schema, ['models', 'plugins', source, currentModelName, 'fields', current, 'type'], null) : get(schema, ['models', currentModelName, 'fields', current, 'type'], null);
-      const cleanedData = attrType === 'json' ? record[current] : cleanData(record[current], 'value', 'id');
+      const cleanedData = (attrType === 'json' || attrType==='geojson') ? record[current] : cleanData(record[current], 'value', 'id');
 
 
       if (isString(cleanedData) || isNumber(cleanedData)) {

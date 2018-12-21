@@ -23,6 +23,7 @@ import IcoRelation from '../../assets/images/icon_relation.png';
 import IcoString from '../../assets/images/icon_string.png';
 import IcoText from '../../assets/images/icon_text.png';
 import IcoEnum from '../../assets/images/icon_enum.png';
+import IcoGeoJSON from '../../assets/images/icon_geojson.png';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -47,6 +48,7 @@ class AttributeRow extends React.Component {
       email: IcoEmail,
       password: IcoPassword,
       enumeration: IcoEnum,
+      geojson: IcoGeoJSON,
     };
     this.state = {
       showWarning: false,

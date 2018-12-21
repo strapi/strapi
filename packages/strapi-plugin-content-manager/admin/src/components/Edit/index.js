@@ -19,6 +19,7 @@ import {
 // or strapi/packages/strapi-helper-plugin/lib/src
 import Input from 'components/InputsIndex';
 import InputJSONWithErrors from 'components/InputJSONWithErrors';
+import InputGJSONWithErrors from 'components/InputGJSONWithErrors';
 import WysiwygWithErrors from 'components/WysiwygWithErrors';
 import styles from './styles.scss';
 
@@ -49,6 +50,8 @@ const getInputType = (type = '') => {
       return 'file';
     case 'json':
       return 'json';
+    case 'geojson':
+      return 'geojson';
     default:
       return 'text';
   }
@@ -115,7 +118,7 @@ class Edit extends React.PureComponent {
   renderAttr = (attr, key) => {
     if (attr.includes('__col-md')) {
       const className = attr.split('__')[1];
-      
+
       return <div key={key} className={className} />;
     }
 
@@ -132,11 +135,11 @@ class Edit extends React.PureComponent {
       className = 'col-md-4';
     }
 
-    return (  
+    return (
       <Input
         autoFocus={key === 0}
         customBootstrapClass={className}
-        customInputs={{ json: InputJSONWithErrors, wysiwyg: WysiwygWithErrors }}
+        customInputs={{ json: InputJSONWithErrors, wysiwyg: WysiwygWithErrors, geojson: InputGJSONWithErrors}}
         didCheckErrors={this.props.didCheckErrors}
         disabled={!get(details, 'editable', true)}
         errors={this.getInputErrors(attr)}

@@ -29,7 +29,14 @@
     "strapi-helper-plugin": "3.0.0-alpha.16"
   },
   "dependencies": {
-    "pluralize": "^7.0.0"
+    "@mapbox/geojson-extent": "^0.3.2",
+    "@turf/invariant": "^6.1.2",
+    "events": "^3.0.0",
+    "lodash.debounce": "^4.0.8",
+    "mapbox-gl": "^0.52.0",
+    "pluralize": "^7.0.0",
+    "suggestions": "^1.3.3",
+    "xtend": "^4.0.1"
   },
   "author": {
     "name": "Strapi team",

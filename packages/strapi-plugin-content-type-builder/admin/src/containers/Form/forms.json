@@ -100,6 +100,13 @@
         "type": "json",
         "description": "content-type-builder.popUpForm.attributes.json.description"
       },
+
+      {
+        "type": "geojson",
+        "description": "content-type-builder.popUpForm.attributes.geojson.description"
+      },
+
+
       {
         "type": "email",
         "description": "content-type-builder.popUpForm.attributes.email.description"
@@ -751,6 +758,54 @@
           {
             "label": {
               "id": "content-type-builder.form.attribute.item.json.name"
+            },
+            "name": "name",
+            "type": "string",
+            "value": "",
+            "validations": {
+              "required": true
+            }
+          }
+        ]
+      },
+      "advancedSettings": {
+        "items": [
+          {
+            "title": {
+              "id": "content-type-builder.form.attribute.item.settings.name"
+            },
+            "label": {
+              "id": "content-type-builder.form.attribute.item.requiredField"
+            },
+            "name": "params.required",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": {
+              "id": "content-type-builder.form.attribute.item.requiredField.description"
+            }
+          },
+          {
+            "label": {
+              "id": "content-type-builder.form.attribute.item.uniqueField"
+            },
+            "name": "params.unique",
+            "type": "checkbox",
+            "value": false,
+            "validations": {},
+            "inputDescription": {
+              "id": "content-type-builder.form.attribute.item.uniqueField.description"
+            }
+          }
+        ]
+      }
+    },
+    "geojson": {
+      "baseSettings": {
+        "items": [
+          {
+            "label": {
+              "id": "content-type-builder.form.attribute.item.geojson.name"
             },
             "name": "name",
             "type": "string",

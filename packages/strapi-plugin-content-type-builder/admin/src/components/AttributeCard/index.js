@@ -18,6 +18,7 @@ import IcoNumber from '../../assets/images/icon_number.png';
 import IcoRelation from '../../assets/images/icon_relation.png';
 import IcoString from '../../assets/images/icon_string.png';
 import IcoText from '../../assets/images/icon_text.png';
+import IcoGeoJSON from '../../assets/images/icon_geojson.png';
 import IcoEnum from '../../assets/images/icon_enum.png';
 
 import styles from './styles.scss';
@@ -36,6 +37,7 @@ const asset = {
   'string': IcoString,
   'text': IcoText,
   'enumeration': IcoEnum,
+  'geojson': IcoGeoJSON,
 };
 
 

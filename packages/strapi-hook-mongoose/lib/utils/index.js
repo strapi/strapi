@@ -37,6 +37,8 @@ module.exports = (mongoose = new Mongoose()) => {
           return 'Float';
         case 'json':
           return 'Mixed';
+        case 'geojson':
+          return 'Mixed';
         case 'biginteger':
         case 'integer':
           return 'Number';
