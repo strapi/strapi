@@ -39,6 +39,10 @@ The CLI will ask you to choose your database: select MongoDB, Postgres or MySQL.
 
 This action creates a new folder named `my-project` with the entire [files structure](../concepts/concepts.md#files-structure) of a Strapi application.
 
+::: note
+Unfortunately, There is an issue on windows, you will probably be stuck and unable to enter your `Database name` to continue; using a VM is one of the solutions; see [the issue](https://github.com/strapi/strapi/issues/1281).
+:::
+
 **#3 — Go to your project and launch the server:**
 
 In your terminal run the following commands:
