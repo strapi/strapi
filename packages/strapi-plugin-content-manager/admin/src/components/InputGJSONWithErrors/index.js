@@ -10,11 +10,11 @@ import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputSpacer from 'components/InputSpacer';
-import InputGJSON from 'components/InputGJSON';
+import Label from 'components/Label'; //eslint-disable-line
+import InputDescription from 'components/InputDescription'; //eslint-disable-line
+import InputErrors from 'components/InputErrors'; //eslint-disable-line
+import InputSpacer from 'components/InputSpacer'; //eslint-disable-line
+import InputGJSON from 'components/InputGJSON'; //eslint-disable-line 
 
 // Utils
 import validateInput from 'utils/inputsValidations';
@@ -70,9 +70,6 @@ class InputGJSONWithErrors extends React.Component { // eslint-disable-line reac
   }
 
   handleChange = (e) => {
-    console.log('json string', e)
-
-
     this.setState({ errors: [] });
     this.props.onChange(e);
   }

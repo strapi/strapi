@@ -7,7 +7,7 @@
 import React from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from 'react-intl'; //eslint-disable-line
 
 import Logo from 'assets/images/icon_filter_blue.svg';
 import styles from './styles.scss';

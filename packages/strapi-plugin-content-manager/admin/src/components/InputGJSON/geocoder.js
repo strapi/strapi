@@ -1,7 +1,7 @@
+import {EventEmitter} from 'events';
 import Typeahead from 'suggestions';
 import {debounce} from 'lodash';
 import extend from 'xtend';
-import {EventEmitter} from 'events';
 
 /**
 * A geocoder component using Mapbox Geocoding API
@@ -20,6 +20,7 @@ import {EventEmitter} from 'events';
 * map.addControl(geocoder);
 * @return {MapboxGenericGeocoder} `this`
 */
+
 function MapboxGenericGeocoder(options, geocodeRequest) {
   this._eventEmitter = new EventEmitter();
   this.options = extend({}, this.options, options);
@@ -33,7 +34,7 @@ MapboxGenericGeocoder.prototype = {
     zoom: 16,
     flyTo: true,
     minLength: 2,
-    limit: 5
+    limit: 5,
   },
 
   onAdd(map) {
@@ -76,7 +77,7 @@ MapboxGenericGeocoder.prototype = {
     this._typeahead = new Typeahead(this._inputEl, [], {
       filter: false,
       minLength: this.options.minLength,
-      limit: this.options.limit
+      limit: this.options.limit,
     });
     this._typeahead.getItemValue = item => item.name;
 
@@ -113,7 +114,7 @@ MapboxGenericGeocoder.prototype = {
         } else {
           this._map.flyTo({
             center: [selected.lon, selected.lat],
-            zoom: this.options.zoom
+            zoom: this.options.zoom,
           });
         }
       }
@@ -180,7 +181,7 @@ MapboxGenericGeocoder.prototype = {
   off(type, fn) {
     this._eventEmitter.removeListener(type, fn);
     return this;
-  }
+  },
 };
 
 export default MapboxGenericGeocoder;

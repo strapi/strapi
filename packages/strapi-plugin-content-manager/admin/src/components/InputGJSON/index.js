@@ -45,18 +45,118 @@ class InputGJSON extends React.Component {
     super(props);
     this.editor = React.createRef();
     this.fileInput = React.createRef();
-    this.onUploadFile = this.onUploadFile.bind(this);
+    this.handleUploadFile = this.handleUploadFile.bind(this);
     this.loadGeometries = this.loadGeometries.bind(this);
 
     this.state = { error: false, markedText: null };
   }
 
-  onUploadFile(e) {
+
+  componentDidMount() {
+    // Init Map component
+    this.loadMap();
+    // Init codemirror component
+    this.codeMirror = cm.fromTextArea(this.editor.current, {
+      autoCloseBrackets: true,
+      lineNumbers: true,
+      matchBrackets: true,
+      mode: 'application/json',
+      smartIndent: true,
+      styleSelectedText: true,
+      tabSize: 2,
+      readOnly:true,
+      theme: DEFAULT_THEME,
+    });
+    // this.codeMirror.on('change', this.handleChange);
+    this.codeMirror.on('blur', this.handleBlur);
+
+    this.setSize();
+    this.setInitValue();
+
+
+  }
+
+  componentDidUpdate(prevProps) {
+    if (isEmpty(prevProps.value) && !isEmpty(this.props.value) && !this.state.hasInitValue) {
+      this.setInitValue();
+    } else {
+      this.updateValue();
+    }
+  }
+
+
+
+  setInitValue = () => {
+    const { value } = this.props;
+
+    if (isObject(value) && value !== null) {
+      try {
+        parse(stringify(value));
+        this.setState({ hasInitValue: true });
+        return value;
+      } catch(err) {
+        return this.setState({ error: true });
+      }
+    }
+  }
+
+  setSize = () => this.codeMirror.setSize('100%', 'auto');
+
+  setTheme = (theme) => this.codeMirror.setOption('theme', theme);
+
+  getContentAtLine = (line) => this.codeMirror.getLine(line);
+
+  getEditorOption = (opt) => this.codeMirror.getOption(opt);
+
+  getValue = () => this.codeMirror.getValue();
+
+
+
+  updateValue  = () => {
+    const { value } = this.props;
+
+    if (isObject(value) && value !== null) {
+      try {
+        this.loadGeometries(value);
+        this.codeMirror.setValue(stringify(value, null, 2));
+        return value;
+      } catch(err) {
+        // Silent
+      }
+    }
+  }
+
+
+
+  geocodeNominatimRequest(query, mapBounds, options) {
+    var params = { format: 'json', q: query, limit: options.limit };
+    var urlParams = new URLSearchParams(Object.entries(params));
+
+      return fetch('http://nominatim.openstreetmap.org/search?' + urlParams).then(function(response) { //eslint-disable-line
+      if(response.ok) {
+        return response.json();
+      } else {
+        return [];
+      }
+    }).then(function(json) {
+      return json.map(function(result) {
+        return {
+          name: result.display_name,
+          lat: result.lat,
+          lon: result.lon,
+          bbox: [result.boundingbox[2], result.boundingbox[0], result.boundingbox[3], result.boundingbox[1]],
+        };
+      });
+    });
+  }
+
+
+  handleUploadFile(e) {
     e.preventDefault();
     const {handleChange, loadGeometries, draw} = this;
     const file = this.fileInput.current.files[0];
     if (file) {
-      var reader = new FileReader(); //eslint-disable-line
+        var reader = new FileReader(); //eslint-disable-line
       reader.readAsText(file, 'UTF-8');
       reader.onload = function (evt) {
         draw.deleteAll();
@@ -68,16 +168,18 @@ class InputGJSON extends React.Component {
     }
   }
 
+
+
   loadMap() {
     mapboxgl.accessToken =
-      'pk.eyJ1IjoiYXJrb2Jsb2ciLCJhIjoiY2pmZ2RsNGpqNDE1OTJxazdrNzVxNnl2ZSJ9.Qj1ryjt2_OWUmlTKlcEmtA';
+    'pk.eyJ1IjoiYXJrb2Jsb2ciLCJhIjoiY2pmZ2RsNGpqNDE1OTJxazdrNzVxNnl2ZSJ9.Qj1ryjt2_OWUmlTKlcEmtA';
     const map = new mapboxgl.Map({
       container: this.mapContainer, // container id
       style: 'mapbox://styles/arkoblog/cjh0bqsmw00172rrsbt7caf2e', // stylesheet location
       center: [84.2596, 28.0744],
     });
 
-    // Add zoom, drawing and rotation controls to the map.
+      // Add zoom, drawing and rotation controls to the map.
     const draw = new MapboxDraw({ //eslint-disable-line
       controls: {
         point: true,
@@ -140,101 +242,6 @@ class InputGJSON extends React.Component {
 
   }
 
-
-  geocodeNominatimRequest(query, mapBounds, options) {
-    var params = { format: 'json', q: query, limit: options.limit };
-    var urlParams = new URLSearchParams(Object.entries(params));
-
-    return fetch('http://nominatim.openstreetmap.org/search?' + urlParams).then(function(response) { //eslint-disable-line
-      if(response.ok) {
-        return response.json();
-      } else {
-        return [];
-      }
-    }).then(function(json) {
-      return json.map(function(result) {
-        return {
-          name: result.display_name,
-          lat: result.lat,
-          lon: result.lon,
-          bbox: [result.boundingbox[2], result.boundingbox[0], result.boundingbox[3], result.boundingbox[1]]
-        };
-      });
-    });
-  }
-
-
-  componentDidMount() {
-
-    // Init Map component
-    this.loadMap();
-    // Init codemirror component
-    this.codeMirror = cm.fromTextArea(this.editor.current, {
-      autoCloseBrackets: true,
-      lineNumbers: true,
-      matchBrackets: true,
-      mode: 'application/json',
-      smartIndent: true,
-      styleSelectedText: true,
-      tabSize: 2,
-      readOnly:true,
-      theme: DEFAULT_THEME,
-    });
-    // this.codeMirror.on('change', this.handleChange);
-    this.codeMirror.on('blur', this.handleBlur);
-
-    this.setSize();
-    this.setInitValue();
-
-
-  }
-
-  componentDidUpdate(prevProps) {
-    if (isEmpty(prevProps.value) && !isEmpty(this.props.value) && !this.state.hasInitValue) {
-      this.setInitValue();
-    } else {
-      this.updateValue();
-    }
-  }
-
-  updateValue  = () => {
-    const { value } = this.props;
-
-    if (isObject(value) && value !== null) {
-      try {
-        this.loadGeometries(value);
-        this.codeMirror.setValue(stringify(value, null, 2));
-        return value;
-      } catch(err) {
-        // Silent
-      }
-    }
-  }
-
-
-  setInitValue = () => {
-    const { value } = this.props;
-
-    if (isObject(value) && value !== null) {
-      try {
-        parse(stringify(value));
-        this.setState({ hasInitValue: true });
-        return value;
-      } catch(err) {
-        return this.setState({ error: true });
-      }
-    }
-  }
-
-  setSize = () => this.codeMirror.setSize('100%', 'auto');
-
-  setTheme = (theme) => this.codeMirror.setOption('theme', theme);
-
-  getContentAtLine = (line) => this.codeMirror.getLine(line);
-
-  getEditorOption = (opt) => this.codeMirror.getOption(opt);
-
-  getValue = () => this.codeMirror.getValue();
 
   markSelection = ({ message }) => {
     let line = parseInt(
@@ -335,7 +342,7 @@ class InputGJSON extends React.Component {
           </div>
           <div style={{backgroundColor:'#e5e5e5', padding:'10px'}}>
           Use the map to add shapes, or upload your own file: {' '}
-            <input type="file" accept=".geojson" onChange={this.onUploadFile} ref={this.fileInput} />
+            <input type="file" accept=".geojson" onChange={this.handleUploadFile} ref={this.fileInput} />
           </div>
         </div>
       </div>

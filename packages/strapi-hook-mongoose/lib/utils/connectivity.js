@@ -29,7 +29,7 @@ module.exports = (scope, success, error) => {
 
   Mongoose.connect(`mongodb${srv ? '+srv' : ''}://${scope.database.settings.host}${!srv ? `:${scope.database.settings.port}` : ''}/`, connectOptions, function (err) {
     if (err) {
-      console.log('⚠️ Database connection has failed! Make sure your database is running.');
+      console.log('⚠️ Database connection has failed! Make sure your database is running.'); //eslint-disable-line
       return error();
     }
 
@@ -37,7 +37,7 @@ module.exports = (scope, success, error) => {
 
     rimraf(scope.tmpPath, (err) => {
       if (err) {
-        console.log(`Error removing connection test folder: ${scope.tmpPath}`);
+        console.log(`Error removing connection test folder: ${scope.tmpPath}`); //eslint-disable-line
       }
       success();
     });
