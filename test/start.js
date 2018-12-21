@@ -58,11 +58,10 @@ const main = async () => {
         shell.cd('./testApp');
         appStart = shell.exec(`strapi start`, { async: true, silent: true });
         appStart.stdout.on('data', (data) => {
+          console.log(data.trim());
           if (data.includes('To shut down your server')) {
             shell.cd('..');
             return resolve();
-          } else {
-            console.log(data.trim());
           }
         });
 
@@ -103,10 +102,8 @@ const main = async () => {
   };
 
   const cypressTest = () => {
-    const config = Object.assign({ spec: './packages/**/test/front/integration/*' }, process.env.npm_config_browser === 'true' ? { browser: 'chrome' } : {});
-
-    return cypress
-      .run(config);
+    const config = process.env.npm_config_browser === 'true' ? { browser: 'chrome' } : {};
+    return cypress.run(config);
   }
 
   const testProcess = async (database) => {
