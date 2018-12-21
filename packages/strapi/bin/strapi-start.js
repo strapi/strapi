@@ -34,13 +34,13 @@ module.exports = function(appPath = '') {
   appPath = path.join(process.cwd(), appPath);
 
   try {
-    const strapi = function () {
+    const strapi = (function() {
       try {
         return require(path.resolve(appPath, 'node_modules', 'strapi'));
       } catch (e) {
         return require('strapi'); // eslint-disable-line import/no-unresolved
       }
-    }();
+    })();
 
     // Set NODE_ENV
     if (_.isEmpty(process.env.NODE_ENV)) {
@@ -53,7 +53,7 @@ module.exports = function(appPath = '') {
       'config',
       'environments',
       'development',
-      'server.json'
+      'server.json',
     ));
 
     if (process.env.NODE_ENV === 'development' && _.get(server, 'autoReload.enabled') === true) {
@@ -65,8 +65,13 @@ module.exports = function(appPath = '') {
         }
       };
 
-      const setFilesToWatch = (src) => {
-        let files = _.includes(src, '/admin') || _.includes(src, 'components') ? [] : fs.readdirSync(src);
+      const setFilesToWatch = src => {
+        let files =
+          _.includes(src, '/admin') ||
+          _.includes(src, 'components') ||
+          _.includes(src, '/documentation')
+            ? []
+            : fs.readdirSync(src);
 
         _.forEach(files, file => {
           if (
@@ -115,7 +120,7 @@ module.exports = function(appPath = '') {
       }
 
       if (cluster.isWorker) {
-        process.on('message', (message) => {
+        process.on('message', message => {
           switch (message) {
             case 'isKilled':
               strapi.server.destroy(() => {
@@ -123,13 +128,16 @@ module.exports = function(appPath = '') {
               });
               break;
             default:
-             // Do nothing.
+            // Do nothing.
           }
         });
 
-        return strapi.start({
-          appPath
-        }, afterwards);
+        return strapi.start(
+          {
+            appPath,
+          },
+          afterwards,
+        );
       } else {
         return;
       }
@@ -138,9 +146,12 @@ module.exports = function(appPath = '') {
     // Otherwise, if no workable local `strapi` module exists,
     // run the application using the currently running version
     // of `strapi`. This is probably always the global install.
-    strapi.start({
-      appPath
-    }, afterwards);
+    strapi.start(
+      {
+        appPath,
+      },
+      afterwards,
+    );
   } catch (e) {
     logger.error(e);
     process.exit(0);
