@@ -16,11 +16,13 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
 const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ?  '' : '..' ));
+const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', isAdmin ? '' : '..');
 
 const rootAdminpath = (() => {
   if (isSetup) {
-    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(appPath, 'packages', 'strapi-admin');
+    return isAdmin
+      ? path.resolve(appPath, 'strapi-admin')
+      : path.resolve(appPath, 'packages', 'strapi-admin');
   }
   return path.resolve(appPath, 'admin');
 })();
@@ -43,18 +45,18 @@ if (process.env.npm_lifecycle_event === 'start') {
   plugins.src =
     process.env.IS_ADMIN === 'true' && !plugins.exist
       ? fs.readdirSync(path.resolve(appPath, 'plugins')).filter(x => {
-          let hasAdminFolder;
+        let hasAdminFolder;
 
-          // Don't inject the plugins that don't have an admin into the app
-          try {
-            fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
-            hasAdminFolder = true;
-          } catch (err) {
-            hasAdminFolder = false;
-          }
+        // Don't inject the plugins that don't have an admin into the app
+        try {
+          fs.accessSync(path.resolve(appPath, 'plugins', x, 'admin', 'src', 'containers', 'App'));
+          hasAdminFolder = true;
+        } catch (err) {
+          hasAdminFolder = false;
+        }
 
-          return x[0] !== '.' && hasAdminFolder;
-        })
+        return x[0] !== '.' && hasAdminFolder;
+      })
       : [];
 
   plugins.folders = plugins.src.reduce((acc, current) => {
@@ -151,7 +153,13 @@ module.exports = require('./webpack.base.babel')({
       'node_modules',
       'babel-polyfill',
     ),
-    lodash: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'lodash'),
+    lodash: path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'lodash',
+    ),
     immutable: path.resolve(
       rootAdminpath,
       'node_modules',
@@ -166,7 +174,13 @@ module.exports = require('./webpack.base.babel')({
       'node_modules',
       'react-intl',
     ),
-    react: path.resolve(rootAdminpath, 'node_modules', 'strapi-helper-plugin', 'node_modules', 'react'),
+    react: path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react',
+    ),
     'react-dom': path.resolve(
       rootAdminpath,
       'node_modules',
@@ -202,6 +216,13 @@ module.exports = require('./webpack.base.babel')({
       'node_modules',
       'react-dnd',
     ),
+    'react-copy-to-clipboard': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'react-copy-to-clipboard',
+    ),
     'react-dnd-html5-backend': path.resolve(
       rootAdminpath,
       'node_modules',
@@ -220,7 +241,9 @@ module.exports = require('./webpack.base.babel')({
  * DLL Javascript files are loaded in script tags and available to our application.
  */
 function templateContent() {
-  const html = fs.readFileSync(path.resolve(appPath, 'admin', 'admin', 'src', 'index.html')).toString();
+  const html = fs
+    .readFileSync(path.resolve(appPath, 'admin', 'admin', 'src', 'index.html'))
+    .toString();
 
   return html;
 }

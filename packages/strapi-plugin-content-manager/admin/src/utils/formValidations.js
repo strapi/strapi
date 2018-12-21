@@ -1,16 +1,18 @@
 import {
+  findIndex,
   forEach,
-  isObject,
+  includes,
   isArray,
+  isBoolean,
+  isEmpty,
+  isNaN,
+  isNull,
+  isNumber,
+  isObject,
+  isUndefined,
   map,
   mapKeys,
-  includes,
   reject,
-  isEmpty,
-  findIndex,
-  isUndefined,
-  isBoolean,
-  isNumber,
 } from 'lodash';
 
 /* eslint-disable consistent-return */
@@ -101,7 +103,7 @@ function validate(value, validations) {
       case 'type':
         if (validationValue === 'json') {
           try {
-            if (isObject(value) || isBoolean(value) || isNumber(value) || isArray(value)) {
+            if (isObject(value) || isBoolean(value) || isNumber(value) || isArray(value) || isNaN(value) || isNull(value)) {
               value = JSON.parse(JSON.stringify(value));
             } else {
               errors.push({ id: 'content-manager.error.validation.json' });

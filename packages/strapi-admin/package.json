@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-alpha.16",
+  "version": "3.0.0-alpha.17",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -30,9 +30,9 @@
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
-    "sanitize.css": "^8.0.0",
-    "strapi-helper-plugin": "3.0.0-alpha.16",
-    "strapi-utils": "3.0.0-alpha.16"
+    "sanitize.css": "^4.1.0",
+    "strapi-helper-plugin": "3.0.0-alpha.17",
+    "strapi-utils": "3.0.0-alpha.17"
   },
   "author": {
     "name": "Strapi",

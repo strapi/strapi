@@ -12,4 +12,8 @@ const history = createHistory({
 });
 const store = configureStore({}, history);
 
+if (window.Cypress) {
+  window.__store__ = Object.assign(window.__store__ || {}, { strapiAdmin: store });
+}
+
 export { basename, history, store };

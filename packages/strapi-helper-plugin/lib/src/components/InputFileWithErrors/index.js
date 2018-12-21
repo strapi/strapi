@@ -117,6 +117,7 @@ class InputFileWithErrors extends React.PureComponent {
         <InputErrors
           className={errorsClassName}
           errors={!noErrorsDescription && this.state.errors || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}
