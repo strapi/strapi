@@ -21,7 +21,6 @@ import './strapi';
 
 const dispatch = store.dispatch;
 
-console.log(strapi.remoteURL);
 // Don't inject plugins in development mode.
 if (window.location.port !== '4000') {
   fetch(`${strapi.remoteURL}/config/plugins.json`)
