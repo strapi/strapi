@@ -175,8 +175,8 @@ class InputGJSON extends React.Component {
     'pk.eyJ1IjoiYXJrb2Jsb2ciLCJhIjoiY2pmZ2RsNGpqNDE1OTJxazdrNzVxNnl2ZSJ9.Qj1ryjt2_OWUmlTKlcEmtA';
     const map = new mapboxgl.Map({
       container: this.mapContainer, // container id
-      style: 'mapbox://styles/arkoblog/cjh0bqsmw00172rrsbt7caf2e', // stylesheet location
-      center: [84.2596, 28.0744],
+      style: 'https://maps.tilehosting.com/styles/basic/style.json?key=FqtjYUJi4HGcp4dogscf', // stylesheet location
+      // center: [84.2596, 28.0744],
     });
 
       // Add zoom, drawing and rotation controls to the map.
