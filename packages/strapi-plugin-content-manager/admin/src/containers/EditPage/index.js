@@ -463,6 +463,7 @@ export class EditPage extends React.Component {
             record={editPage.record}
             resetProps={editPage.resetProps}
             schema={this.getSchema()}
+            isCreating={this.isCreating()}
           />
         </div>
       </div>

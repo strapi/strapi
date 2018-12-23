@@ -55,6 +55,40 @@ const getInputType = (type = '') => {
 };
 
 class Edit extends React.PureComponent {
+  state = { shouldUpdateEnumFields: true };
+
+  componentDidUpdate() {
+    if (this.state.shouldUpdateEnumFields && this.props.isCreating) {
+      this.orderAttributes()
+        .forEach(attr => {
+          const details = get(this.props.schema, ['editDisplay', 'availableFields', attr]);
+
+          const layout = this.getInputLayout(attr);
+          const appearance = get(layout, 'appearance');
+          const type = !isEmpty(appearance)
+            ? appearance.toLowerCase()
+            : get(layout, 'type', getInputType(details.type));
+
+          if (type === 'select') {
+            const attribute = get(this.props.schema, ['attributes', attr]);
+
+            const target = {
+              type: 'select',
+              name: attr,
+              value: attribute.default,
+              selectOptions: attribute.required
+                ? attribute.enum
+                : ['', ...attribute.enum],
+            };
+
+            this.props.onChange({ target });
+          }
+        });
+
+      this.setState({ shouldUpdateEnumFields: false });
+    }
+  }
+
   getInputErrors = (attr) => {
     const index = findIndex(this.props.formErrors, ['name', attr]);
     return index !== -1 ? this.props.formErrors[index].errors : [];
@@ -115,7 +149,7 @@ class Edit extends React.PureComponent {
   renderAttr = (attr, key) => {
     if (attr.includes('__col-md')) {
       const className = attr.split('__')[1];
-      
+
       return <div key={key} className={className} />;
     }
 
@@ -132,7 +166,7 @@ class Edit extends React.PureComponent {
       className = 'col-md-4';
     }
 
-    return (  
+    return (
       <Input
         autoFocus={key === 0}
         customBootstrapClass={className}
