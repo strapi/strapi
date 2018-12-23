@@ -88,8 +88,11 @@ module.exports = async function() {
     return;
   }
 
-  if (strapi.config.environment !== 'development') {
+  const existBuildPath = await fs.pathExists(buildPath);
+  if (strapi.config.environment !== 'development' && existBuildPath) {
     return;
+  } else if (strapi.config.environment !== 'development' && !existBuildPath) {
+    console.log('The plugins.json file is missing and the front-end cannot work without it. Please, create it first at development environment.');
   }
 
   // arrange system directories
@@ -97,7 +100,6 @@ module.exports = async function() {
     fs.remove(sourcePath),
 
     (async () => {
-      const existBuildPath = await fs.pathExists(buildPath);
       if (existBuildPath) {
         await fs.remove(buildPath);
       } else {
