@@ -21,6 +21,7 @@ import './strapi';
 
 const dispatch = store.dispatch;
 
+console.log(strapi.remoteURL);
 // Don't inject plugins in development mode.
 if (window.location.port !== '4000') {
   fetch(`${strapi.remoteURL}/config/plugins.json`)
@@ -60,9 +61,10 @@ if (window.location.port !== '4000') {
         script.src = plugin.source[process.env.NODE_ENV].indexOf('://') === -1 ?
           `${basename}${plugin.source[process.env.NODE_ENV]}`.replace('//', '/'): // relative
           plugin.source[process.env.NODE_ENV]; // absolute
-
         $body.appendChild(script);
+
       });
+
     })
     .catch(err => {
       console.log(err); // eslint-disable-line no-console

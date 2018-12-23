@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import mapboxgl from 'mapbox-gl';
 import cm from 'codemirror';
 import ge from '@mapbox/geojson-extent';
+import MapboxDraw from "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw";
 
 
 
@@ -32,7 +33,6 @@ import { isEmpty, isObject, trimStart } from 'lodash';
 import jsonlint from './jsonlint';
 import styles from './styles.scss';
 import MapboxGenericGeocoder from './geocoder';
-import './geocoder.scss';
 
 // const WAIT = 600;
 const stringify = JSON.stringify;
