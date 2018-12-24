@@ -71,14 +71,17 @@ class Edit extends React.PureComponent {
 
           if (type === 'select') {
             const attribute = get(this.props.schema, ['attributes', attr]);
+            const value = attribute.default ? attribute.default : 'undefined';
+            const selectOptions = attribute.required
+              ? attribute.enum
+              : ['undefined', ...attribute.enum];
 
             const target = {
               type: 'select',
               name: attr,
-              value: attribute.default,
-              selectOptions: attribute.required
-                ? attribute.enum
-                : ['', ...attribute.enum],
+              value,
+              // selectOptions doesn't work
+              selectOptions,
             };
 
             this.props.onChange({ target });
