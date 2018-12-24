@@ -27,20 +27,24 @@ module.exports = (scope, success, error) => {
       };
 
       if (tables.rows && tables.rows.length !== 0) {
-        console.log('🤔 It seems that your database is not empty. Be aware that Strapi is going to automatically creates tables & columns, and might update columns which can corrupt data or cause data loss.');
+        if (scope.database.options.force) {
+          next();
+        } else {
+          console.log('🤔 It seems that your database is not empty. Be aware that Strapi is going to automatically creates tables & columns, and might update columns which can corrupt data or cause data loss.');
 
-        inquirer.prompt([{
-          type: 'confirm',
-          name: 'confirm',
-          message: `Are you sure you want to continue with the ${scope.database.settings.database} database:`,
-        }])
-          .then(({ confirm }) => {
-            if (confirm) {
-              next();
-            } else {
-              error();
-            }
-          });
+          inquirer.prompt([{
+            type: 'confirm',
+            name: 'confirm',
+            message: `Are you sure you want to continue with the ${scope.database.settings.database} database:`,
+          }])
+            .then(({ confirm }) => {
+              if (confirm) {
+                next();
+              } else {
+                error();
+              }
+            });
+        }
       } else {
         next();
       }
