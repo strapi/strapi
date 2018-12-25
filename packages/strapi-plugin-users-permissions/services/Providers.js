@@ -47,7 +47,10 @@ exports.connect = (provider, query) => {
       try {
         const users = await strapi.query('user', 'users-permissions').find({
           where: {
-            email: profile.email
+            email: {
+              symbol: '=',
+              value: profile.email
+            }
           }
         });
 
@@ -85,6 +88,7 @@ exports.connect = (provider, query) => {
 
         return resolve([createdUser, null]);
       } catch (err) {
+        strapi.log.error(err)
         reject([null, err]);
       }
     });
