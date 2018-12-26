@@ -54,7 +54,7 @@ module.exports = function (name, cliArguments) {
       return process.exit(1);
     }
 
-    const dbforce = cliArguments.dbforce !== undefined;
+    scope.dbforce = cliArguments.dbforce !== undefined;
 
     scope.database = {
       settings: {
@@ -67,8 +67,7 @@ module.exports = function (name, cliArguments) {
       },
       options: {
         authenticationDatabase: cliArguments.dbauth,
-        ssl: cliArguments.dbssl,
-        force: dbforce
+        ssl: cliArguments.dbssl
       }
     };
   }
