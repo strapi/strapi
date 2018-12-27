@@ -1,3 +1,3 @@
 files:
-  - source: /packages/strapi-admin/admin/src/translations/en.json
-    translation: /packages/strapi-admin/admin/src/translations/%two_letters_code%.json
+  - source: /packages/**/admin/src/translations/en.json
+    translation: /packages/**/admin/src/translations/%two_letters_code%.json
