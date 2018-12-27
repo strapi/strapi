@@ -1,11 +1,11 @@
 {
-  "ConfigPage.description": "Eメールプラグインを設定する",
-  "ConfigPage.title": "Eメール - 設定",
-  "EditForm.Input.number.label": "許可される最大サイズ（MB単位）",
-  "EditForm.Input.select.inputDescription": "電子メールは、デフォルトのプロバイダ（Sendmail）または外部プロバイダ",
-  "EditForm.Input.select.label": "プロバイダー",
-  "EditForm.Input.toggle.label": "メール送信を有効にする",
-  "notification.config.success": "設定が更新されました",
-  "plugin.description.long": "メールを送る",
-  "plugin.description.short": "メールを送る"
+  "ConfigPage.description": "Configure the email plugin",
+  "ConfigPage.title": "Email - Settings",
+  "EditForm.Input.number.label": "Maximum size allowed (in MB)",
+  "EditForm.Input.select.inputDescription": "Emails can be sent with the default provider (Sendmail) or an external provider",
+  "EditForm.Input.select.label": "Providers",
+  "EditForm.Input.toggle.label": "Enable email send",
+  "notification.config.success": "The settings has been updated",
+  "plugin.description.long": "Send emails.",
+  "plugin.description.short": "Send emails."
 }
