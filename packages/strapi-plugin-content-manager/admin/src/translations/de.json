@@ -7,7 +7,7 @@
   "components.EmptyAttributesBlock.description": "Du kannst deine Einstellungen ändern",
   "components.FilterOptions.FILTER_TYPES.=": "ist",
   "components.FilterOptions.FILTER_TYPES._contains": "enthält",
-  "components.FilterOptions.FILTER_TYPES._containss": "enthält (Groß-/Kleinschreibung beachten)",
+  "components.FilterOptions.FILTER_TYPES._containss": "enthält (Groß-\/Kleinschreibung beachten)",
   "components.FilterOptions.FILTER_TYPES._gt": "ist größer als",
   "components.FilterOptions.FILTER_TYPES._gte": "ist größer oder gleich als",
   "components.FilterOptions.FILTER_TYPES._lt": "ist kleiner als",
