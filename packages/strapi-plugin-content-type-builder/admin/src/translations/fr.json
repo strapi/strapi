@@ -112,7 +112,6 @@
   "popUpForm.attributes.date.name": "Date",
   "popUpForm.attributes.email.description": "Email utilisateurs",
   "popUpForm.attributes.email.name": "E-mail",
-  "popUpForm.attributes.enumeration": "Énumération",
   "popUpForm.attributes.enumeration.description": "Liste de choix",
   "popUpForm.attributes.enumeration.name": "Énumération",
   "popUpForm.attributes.json.description": "Données au format JSON",
