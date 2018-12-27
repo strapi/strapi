@@ -136,6 +136,6 @@
   "components.popUpWarning.title": "ارجو التأكيد",
   "notification.error": "حدث خطأ",
   "notification.error.layout": "تعذّر استرداد التنسيق",
-  "request.error.model.unknow": "هذا النموذج غير موجود",
-  "request.error.model.unknown": "هذا النموذج غير موجود"
+  "request.error.model.unknown": "هذا النموذج غير موجود",
+  "app.utils.delete": "Delete"
 }
