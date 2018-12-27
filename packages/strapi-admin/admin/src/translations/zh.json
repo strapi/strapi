@@ -113,7 +113,7 @@
   "components.ListRow.empty": "沒有資料可以顯示",
   "components.OverlayBlocker.description": "您正在使用的功能需要重新啟動，請等待重新啟動完成。",
   "components.OverlayBlocker.title": "等待重新啟動中...",
-  "components.PageFooter.select": "項目/頁",
+  "components.PageFooter.select": "項目\/頁",
   "components.ProductionBlocker.description": "為了安全起見，我們需要在其他環境關閉這個擴充功能",
   "components.ProductionBlocker.header": "這個擴充功能只能在開發環境中使用",
   "components.Wysiwyg.ToggleMode.markdown": "切換到編輯模式",
