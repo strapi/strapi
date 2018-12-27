@@ -1,6 +1,5 @@
 {
   "Analytics": "Analytics",
-  "Auth & Permissions": "Authentifizierung & Berechtigungen",
   "Content Manager": "Inhalts-Manager",
   "Content Type Builder": "Inhaltstyp-Manager",
   "Email": "E-Mail",
@@ -92,7 +91,7 @@
   "app.components.listPlugins.title.singular": "{number} Plugin ist installiert",
   "app.components.listPluginsPage.deletePlugin.error": "Bei der Entfernung des Plugins ist ein Fehler aufgetreten",
   "app.utils.SelectOption.defaultMessage": " ",
-  "app.utils.defaultMessage": "",
+  "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
   "components.AutoReloadBlocker.description": "Öffne die folgende Datei und aktiviere das Feature.",
   "components.AutoReloadBlocker.header": "Dieses Plugin benötigt das Neuladen-Feature.",
@@ -137,5 +136,6 @@
   "components.popUpWarning.title": "Bitte bestätigen",
   "notification.error": "Ein Fehler ist aufgetreten",
   "notification.error.layout": "Das Layout konnte nicht abgerufen werden.",
-  "request.error.model.unknown": "Dieses Schema existiert nicht"
+  "request.error.model.unknown": "Dieses Schema existiert nicht",
+  "app.utils.delete": "Delete"
 }
