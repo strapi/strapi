@@ -106,7 +106,7 @@
   "notification.success.message.contentType.edit": "Der Inhaltstyp wurde aktualisiert",
   "plugin.description.long": "Modelliere die Datenstruktur deiner API. Lege neue Felder und Beziehungen innerhalb von einer Minute an. Erforderliche Dateien werden automatisch in deinem Projekt angelegt und aktualisiert.",
   "plugin.description.short": "Modelliere die Datenstruktur deiner API.",
-  "popUpForm.attributes.boolean.description": "Ja/Nein, 1 oder 0, Wahr/Falsch",
+  "popUpForm.attributes.boolean.description": "Ja\/Nein, 1 oder 0, Wahr\/Falsch",
   "popUpForm.attributes.boolean.name": "Boolean",
   "popUpForm.attributes.date.description": "Event-Daten, Öffnungszeiten",
   "popUpForm.attributes.date.name": "Datum",
