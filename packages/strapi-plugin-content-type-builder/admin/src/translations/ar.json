@@ -100,7 +100,6 @@
   "notification.error.message": "حدث خطأ",
   "notification.info.contentType.creating.notSaved": "يرجى حفظ نوع المحتوى الحالي قبل إنشاء نوع جديد",
   "notification.info.disable": "هذا الحقل غير قابل للتحرير في الوقت الحالي...😮",
-  "notification.info.enumeration": "هذا الحقل غير قابل للتحرير في الوقت الحالي ... 😮",
   "notification.info.optimized": "تم تحسين هذا المكون الإضافي باستخدام التخزين المحلي الخاص بك",
   "notification.success.contentTypeDeleted": "تم حذف نوع المحتوى",
   "notification.success.message.contentType.create": "تم إنشاء نوع المحتوى الخاص بك",
