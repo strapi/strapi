@@ -1,11 +1,11 @@
 {
-  "ConfigPage.description": "Configure a extensão do email",
-  "ConfigPage.title": "Email - Definições",
-  "EditForm.Input.number.label": "Tamanho máximo permitido (em MB)",
-  "EditForm.Input.select.inputDescription": "Os emails podem ser enviados com o provedor predefinido (Sendmail) ou por um provedor externo",
-  "EditForm.Input.select.label": "Provedores",
-  "EditForm.Input.toggle.label": "Activar envio de email",
-  "notification.config.success": "As configurações foram actualizadas",
-  "plugin.description.long": "Enviar emails.",
-  "plugin.description.short": "Enviar emails."
+  "ConfigPage.description": "Configure the email plugin",
+  "ConfigPage.title": "Email - Settings",
+  "EditForm.Input.number.label": "Maximum size allowed (in MB)",
+  "EditForm.Input.select.inputDescription": "Emails can be sent with the default provider (Sendmail) or an external provider",
+  "EditForm.Input.select.label": "Providers",
+  "EditForm.Input.toggle.label": "Enable email send",
+  "notification.config.success": "The settings has been updated",
+  "plugin.description.long": "Send emails.",
+  "plugin.description.short": "Send emails."
 }
