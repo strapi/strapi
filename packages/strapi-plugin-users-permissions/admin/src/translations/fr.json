@@ -79,7 +79,6 @@
   "Email.template.email_confirmation": "Confirmation de l'adresse email",
   "Email.template.reset_password": "Modification de mot de passe",
   "Email.template.success_register": "Inscription réussie",
-  "Email.template.validation_email": "E-mail de validation d'adresse",
   "HeaderNav.link.advancedSettings": "Paramètres avancés",
   "HeaderNav.link.emailTemplates": "Templates d'e-mail",
   "HeaderNav.link.providers": "Fournisseurs",
