@@ -136,5 +136,6 @@
   "components.popUpWarning.title": "Potwierdzenie",
   "notification.error": "Wystąpił błąd",
   "notification.error.layout": "Nie można pobrać układu",
-  "request.error.model.unknown": "Ten model nie istnieje"
+  "request.error.model.unknown": "Ten model nie istnieje",
+  "app.utils.delete": "Delete"
 }
