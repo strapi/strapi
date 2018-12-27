@@ -136,6 +136,6 @@
   "components.popUpWarning.title": "Per favore conferma",
   "notification.error": "Si è verificato un errore",
   "notification.error.layout": "Non è stato possibile recuperare il layout",
-  "request.error.model.unknow": "Questo modello non esiste",
-  "request.error.model.unknown": "Questo modello non esiste"
+  "request.error.model.unknown": "Questo modello non esiste",
+  "app.utils.delete": "Delete"
 }
