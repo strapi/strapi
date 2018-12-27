@@ -7,7 +7,6 @@
   "containers.HomePage.Block.title": "Versions",
   "containers.HomePage.PopUpWarning.message": "Êtes-vous sûre de vouloir supprimer cette version?",
   "containers.HomePage.PopUpWarning.confirm": "Supprimer",
-
   "containers.HomePage.form.jwtToken": "Récuperez votre jwt token",
   "containers.HomePage.form.jwtToken.description": "Copiez ce token et utilisez le dans swagger pour effectuer des requêtes",
   "containers.HomePage.form.restrictedAccess": "Accès restreint",
@@ -16,11 +15,9 @@
   "containers.HomePage.form.password.inputDescription": "Définir le mot de passe pour accèder à la documentation.",
   "containers.HomePage.form.showGeneratedFiles": "Montrer les fichiers générés",
   "containers.HomePage.form.showGeneratedFiles.inputDescription": "Cette option est pratique lorsque que vous voulez modifier votre documentation. \nLe plugin va générer les fichiers par modèle.",
-
   "components.Row.generatedDate": "Dernière création",
   "components.Row.open": "Ouvrir",
   "components.Row.regenerate": "Recréer",
-
   "error.regenerateDoc": "Une erreur est survenue en recréant la documentation",
   "error.noVersion": "Une version de documentation est nécessaire",
   "error.regenerateDoc.versionMissing": "La version que vous essayer de créer n'existe pas.",
