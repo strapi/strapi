@@ -89,7 +89,7 @@ module.exports = function(strapi) {
             // Register the final model for Bookshelf.
             const loadedModel = _.assign({
               tableName: definition.collectionName,
-              hasTimestamps: _.get(definition, 'options.timestamps') === true,
+              hasTimestamps: _.get(definition, 'options.timestamps'),
               idAttribute: _.get(definition, 'options.idAttribute', 'id'),
               associations: [],
               defaults: Object.keys(definition.attributes).reduce((acc, current) => {
@@ -619,10 +619,10 @@ module.exports = function(strapi) {
 
                   // Add created_at and updated_at field if timestamp option is true
                   if (loadedModel.hasTimestamps) {
-                    definition.attributes['created_at'] = {
+                    definition.attributes[loadedModel.hasTimestamps[0]] = {
                       type: 'timestamp'
                     };
-                    definition.attributes['updated_at'] = {
+                    definition.attributes[loadedModel.hasTimestamps[1]] = {
                       type: 'timestampUpdate'
                     };
                   }
@@ -701,8 +701,8 @@ module.exports = function(strapi) {
 
                   // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
                   if (loadedModel.hasTimestamps) {
-                    delete definition.attributes['created_at'];
-                    delete definition.attributes['updated_at'];
+                    delete definition.attributes[loadedModel.hasTimestamps[0]];
+                    delete definition.attributes[loadedModel.hasTimestamps[1]];
                   }
 
                   resolve();

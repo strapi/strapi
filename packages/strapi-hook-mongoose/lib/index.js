@@ -207,7 +207,10 @@ module.exports = function (strapi) {
                   });
                 });
 
-                collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+                let timestamps = {};
+                _.set(timestamps.createdAt, _.get(definition, 'options.timestamps[0]'));
+                _.set(timestamps.updatedAt, _.get(definition, 'options.timestamps[1]'));
+                collection.schema.set('timestamps', timestamps);
                 collection.schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
                 collection.schema.options.toObject = collection.schema.options.toJSON = {

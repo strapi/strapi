@@ -17,6 +17,7 @@ const pickData = (model) => _.pick(model, [
   'globalId',
   'globalName',
   'orm',
+  'options.timestamps',
   'loadedModel',
   'primaryKey',
   'associations'
@@ -330,8 +331,9 @@ module.exports = async cb => {
     // Here we just need to add the data from the current schema Object
     apisToAdd.map(apiPath => {
       const api = _.get(schema.models, apiPath);
-      const { search, filters, bulkActions, pageEntries } = _.get(prevSchema, 'generalSettings');
+      const { search, filters, bulkActions, pageEntries, options } = _.get(prevSchema, 'generalSettings');
 
+      _.set(api, 'options', options);
       _.set(api, 'filters', filters);
       _.set(api, 'search', search);
       _.set(api, 'bulkActions', bulkActions);
