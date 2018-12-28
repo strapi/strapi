@@ -89,7 +89,7 @@ module.exports = function(strapi) {
             // Register the final model for Bookshelf.
             const loadedModel = _.assign({
               tableName: definition.collectionName,
-              hasTimestamps: _.get(definition, 'options.timestamps'),
+              hasTimestamps: _.get(definition, 'options.timestamps', false),
               idAttribute: _.get(definition, 'options.idAttribute', 'id'),
               associations: [],
               defaults: Object.keys(definition.attributes).reduce((acc, current) => {
@@ -100,7 +100,14 @@ module.exports = function(strapi) {
                 return acc;
               }, {})
             }, definition.options);
-
+            // Use default timestamp column names if value is `true`
+            if (_.get(loadedModel, 'hasTimestamps') === true) {
+              _.set(loadedModel, 'hasTimestamps', ['created_at', 'updated_at']);
+            }
+            // Use false for values other than `Boolean` or `Array`
+            if (!_.isArray(_.get(loadedModel, 'hasTimestamps')) || !_.isBoolean(_.get(loadedModel, 'hasTimestamps'))) {
+              _.set(loadedModel, 'hasTimestamps', false);
+            }
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
               loadedModel.toJSON = function(options = {}) {
                 const { shallow = false, omitPivot = false } = options;
@@ -619,10 +626,10 @@ module.exports = function(strapi) {
 
                   // Add created_at and updated_at field if timestamp option is true
                   if (loadedModel.hasTimestamps) {
-                    definition.attributes[loadedModel.hasTimestamps[0]] = {
+                    definition.attributes[_.isString(loadedModel.hasTimestamps[0]) ? loadedModel.hasTimestamps[0] : 'created_at'] = {
                       type: 'timestamp'
                     };
-                    definition.attributes[loadedModel.hasTimestamps[1]] = {
+                    definition.attributes[_.isString(loadedModel.hasTimestamps[1]) ? loadedModel.hasTimestamps[1] : 'updated_at'] = {
                       type: 'timestampUpdate'
                     };
                   }
@@ -701,8 +708,8 @@ module.exports = function(strapi) {
 
                   // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
                   if (loadedModel.hasTimestamps) {
-                    delete definition.attributes[loadedModel.hasTimestamps[0]];
-                    delete definition.attributes[loadedModel.hasTimestamps[1]];
+                    delete definition.attributes[_.isString(loadedModel.hasTimestamps[0]) ? loadedModel.hasTimestamps[0] : 'created_at'];
+                    delete definition.attributes[_.isString(loadedModel.hasTimestamps[1]) ? loadedModel.hasTimestamps[1] : 'updated_at'];
                   }
 
                   resolve();

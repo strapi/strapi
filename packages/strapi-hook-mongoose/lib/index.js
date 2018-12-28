@@ -207,10 +207,16 @@ module.exports = function (strapi) {
                   });
                 });
 
-                let timestamps = {};
-                _.set(timestamps.createdAt, _.get(definition, 'options.timestamps[0]'));
-                _.set(timestamps.updatedAt, _.get(definition, 'options.timestamps[1]'));
-                collection.schema.set('timestamps', timestamps);
+                // Use provided timestamps if the elemnets in the array are string else use default.
+                if (_.isArray(_.get(definition, 'options.timestamps'))) {
+                  const timestamps = {
+                    createdAt: _.isString(_.get(definition, 'options.timestamps[0]')) ? _.get(definition, 'options.timestamps[0]') : 'createdAt',
+                    updatedAt: _.isString(_.get(definition, 'options.timestamps[1]')) ? _.get(definition, 'options.timestamps[1]') : 'updatedAt'
+                  };
+                  collection.schema.set('timestamps', timestamps);
+                } else {
+                  collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+                }
                 collection.schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
                 collection.schema.options.toObject = collection.schema.options.toJSON = {
