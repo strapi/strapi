@@ -105,7 +105,7 @@ module.exports = function(strapi) {
               _.set(loadedModel, 'hasTimestamps', ['created_at', 'updated_at']);
             }
             // Use false for values other than `Boolean` or `Array`
-            if (!_.isArray(_.get(loadedModel, 'hasTimestamps')) || !_.isBoolean(_.get(loadedModel, 'hasTimestamps'))) {
+            if (!_.isArray(_.get(loadedModel, 'hasTimestamps')) && !_.isBoolean(_.get(loadedModel, 'hasTimestamps'))) {
               _.set(loadedModel, 'hasTimestamps', false);
             }
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
