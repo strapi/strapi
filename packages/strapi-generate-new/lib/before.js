@@ -226,6 +226,7 @@ module.exports = (scope, cb) => {
             }
 
             let cmd = `${packageCmd} ${scope.client.connector}@${scope.strapiPackageJSON.version}`;
+            let linkNodeModulesCommand = `cd ${scope.tmpPath} && npm link ${scope.client.connector}`;
 
             if (scope.client.module) {
               cmd += ` ${scope.client.module}`;
@@ -233,6 +234,7 @@ module.exports = (scope, cb) => {
 
             if (scope.client.connector === 'strapi-hook-bookshelf') {
               cmd += ` strapi-hook-knex@${scope.strapiPackageJSON.version}`;
+              linkNodeModulesCommand += ` && npm link strapi-hook-knex`;
 
               scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
             }
@@ -248,7 +250,13 @@ module.exports = (scope, cb) => {
                 }
               }
 
-              resolve();
+              if (scope.developerMode) {
+                exec(linkNodeModulesCommand, () => {
+                  resolve();
+                });
+              } else {
+                resolve();
+              }
             });
           })
         ];
