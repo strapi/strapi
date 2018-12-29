@@ -22,13 +22,26 @@ module.exports = strapi => {
       strapi.config.hook.load.after.push('graphql');
 
       // Load core utils.
-      const utils = require(path.resolve(
-        strapi.config.appPath,
-        'node_modules',
-        'strapi',
-        'lib',
-        'utils',
-      ));
+      let utils = null;
+      // try requiring from local node_module
+      try {
+        utils = require(path.resolve(
+          strapi.config.appPath,
+          'node_modules',
+          'strapi',
+          'lib',
+          'utils',
+        ));
+      } catch {
+        // if error, require from global node_module
+        utils = require(path.resolve(
+          process.env._.replace('bin/strapi', 'lib/'),
+          'node_modules',
+          'strapi',
+          'lib',
+          'utils',
+        ));
+      }
 
       // Set '*.graphql' files configurations in the global variable.
       await Promise.all([
