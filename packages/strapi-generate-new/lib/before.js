@@ -66,18 +66,18 @@ module.exports = (scope, cb) => {
   const connectionValidation = () => {
     const databaseChoices = [
       {
+        name: 'SQLite',
+        value: {
+          database: 'sqlite',
+          connector: 'strapi-hook-bookshelf',
+          module: 'sqlite3'
+        }
+      },
+      {
         name: 'MongoDB',
         value: {
           database: 'mongo',
           connector: 'strapi-hook-mongoose'
-        }
-      },
-      {
-        name: 'Postgres',
-        value: {
-          database: 'postgres',
-          connector: 'strapi-hook-bookshelf',
-          module: 'pg'
         }
       },
       {
@@ -86,6 +86,14 @@ module.exports = (scope, cb) => {
           database: 'mysql',
           connector: 'strapi-hook-bookshelf',
           module: 'mysql'
+        }
+      },
+      {
+        name: 'Postgres',
+        value: {
+          database: 'postgres',
+          connector: 'strapi-hook-bookshelf',
+          module: 'pg'
         }
       }
     ];
@@ -125,34 +133,37 @@ module.exports = (scope, cb) => {
 
         const asyncFn = [
           new Promise(resolve => {
+            const isMongo = scope.client.database === 'mongo';
+            const isSQLite = scope.database.settings.client === 'sqlite';
+
             inquirer
               .prompt([
                 {
-                  when: !hasDatabaseConfig,
+                  when: !hasDatabaseConfig && !isSQLite,
                   type: 'input',
                   name: 'database',
                   message: 'Database name:',
                   default: _.get(scope.database, 'database', scope.name)
                 },
                 {
-                  when: !hasDatabaseConfig,
+                  when: !hasDatabaseConfig && !isSQLite,
                   type: 'input',
                   name: 'host',
                   message: 'Host:',
                   default: _.get(scope.database, 'host', '127.0.0.1')
                 },
                 {
-                  when: !hasDatabaseConfig && scope.client.database === 'mongo',
+                  when: !hasDatabaseConfig && isMongo,
                   type: 'boolean',
                   name: 'srv',
                   message: '+srv connection:',
                   default: _.get(scope.database, 'srv', false)
                 },
                 {
-                  when: !hasDatabaseConfig,
+                  when: !hasDatabaseConfig && !isSQLite,
                   type: 'input',
                   name: 'port',
-                  message: `Port${scope.client.database === 'mongo' ? ' (It will be ignored if you enable +srv)' : ''}:`,
+                  message: `Port${isMongo ? ' (It will be ignored if you enable +srv)' : ''}:`,
                   default: (answers) => { // eslint-disable-line no-unused-vars
                     if (_.get(scope.database, 'port')) {
                       return scope.database.port;
@@ -168,14 +179,14 @@ module.exports = (scope, cb) => {
                   }
                 },
                 {
-                  when: !hasDatabaseConfig,
+                  when: !hasDatabaseConfig && !isSQLite,
                   type: 'input',
                   name: 'username',
                   message: 'Username:',
                   default: _.get(scope.database, 'username', undefined)
                 },
                 {
-                  when: !hasDatabaseConfig,
+                  when: !hasDatabaseConfig && !isSQLite,
                   type: 'password',
                   name: 'password',
                   message: 'Password:',
@@ -183,18 +194,25 @@ module.exports = (scope, cb) => {
                   default: _.get(scope.database, 'password', undefined)
                 },
                 {
-                  when: !hasDatabaseConfig && scope.client.database === 'mongo',
+                  when: !hasDatabaseConfig && isMongo,
                   type: 'input',
                   name: 'authenticationDatabase',
                   message: 'Authentication database (Maybe "admin" or blank):',
                   default: _.get(scope.database, 'authenticationDatabase', undefined)
                 },
                 {
-                  when: !hasDatabaseConfig && scope.client.database === 'mongo',
+                  when: !hasDatabaseConfig && isMongo,
                   type: 'boolean',
                   name: 'ssl',
                   message: 'Enable SSL connection:',
                   default: _.get(scope.database, 'ssl', false)
+                },
+                {
+                  when: !hasDatabaseConfig && isSQLite,
+                  type: 'input',
+                  name: 'filename',
+                  message: 'Filename:',
+                  default: () => '.tmp/data.db'
                 }
               ])
               .then(answers => {
@@ -210,6 +228,17 @@ module.exports = (scope, cb) => {
                 scope.database.settings.password = answers.password;
                 scope.database.options.authenticationDatabase = answers.authenticationDatabase;
                 scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+                scope.database.settings.filename = answers.filename;
+
+                // SQLite requirements.
+                if (isSQLite) {
+                  // Clean `scope.database` object for SQLite configuration.
+                  delete scope.database.settings.srv;
+                  delete scope.database.options;
+
+                  // Necessary for SQLite configuration (https://knexjs.org/#Builder-insert).
+                  scope.database.options.useNullAsDefault = true;
+                }
 
                 console.log();
                 console.log('⏳ Testing database connection...');

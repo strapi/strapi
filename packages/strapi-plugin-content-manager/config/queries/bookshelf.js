@@ -86,6 +86,9 @@ module.exports = {
 
       // Search in columns with text using index.
       switch (this.client) {
+        case 'mysql':
+          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
+          break;
         case 'pg': {
           const searchQuery = searchText.map(attribute =>
             _.toLower(attribute) === attribute
@@ -96,9 +99,10 @@ module.exports = {
           qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
           break;
         }
-        default:
-          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
-          break;
+        case 'sqlite3':
+          const searchQuery = searchText.map(attribute => {
+            qb.orWhere(`${attribute}`, 'LIKE', `%${query}%`)
+          });
       }
 
       if (params.sort) {
@@ -168,7 +172,7 @@ module.exports = {
           qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
           break;
         }
-        default:
+        case 'mysql':
           qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
           break;
       }

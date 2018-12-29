@@ -5,6 +5,7 @@
  */
 
 // Node.js core.
+const fs = require('fs');
 const path = require('path');
 
 // Public node modules.
@@ -100,37 +101,48 @@ module.exports = strapi => {
             socket: _.get(connection.settings, 'socketPath'),
             ssl: _.get(connection.settings, 'ssl') || false,
             timezone: _.get(connection.settings, 'timezone') || 'utc',
+            filename: _.get(connection.settings, 'filename') || '.tmp/data.db'
           },
           debug: _.get(connection.options, 'debug') || false,
           acquireConnectionTimeout: _.get(connection.options, 'acquireConnectionTimeout'),
-          migrations: _.get(connection.options, 'migrations')
+          migrations: _.get(connection.options, 'migrations'),
+          useNullAsDefault: _.get(connection.options, 'useNullAsDefault'),
         }, strapi.config.hook.settings.knex);
 
-        if (options.client === 'pg') {
-          client.types.setTypeParser(1700, 'text', parseFloat);
-
-          if (_.isString(_.get(options.connection, 'schema'))) {
-            options.pool = {
-              min: _.get(connection.options, 'pool.min') || 0,
-              max: _.get(connection.options, 'pool.max') || 10,
-              afterCreate: (conn, cb) => {
-                conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, (err) => {
-                  cb(err, conn);
-                });
+        switch(options.client) {
+          case 'mysql':
+            options.connection.typeCast = (field, next) => {
+              if (field.type === 'TINY' && field.length === 1) {
+                return (field.string() === '1');
               }
+              return next();
             };
-          } else {
-            delete options.connection.schema;
-          }
-        }
+            break;
+          case 'pg':
+            client.types.setTypeParser(1700, 'text', parseFloat);
 
-        if (options.client === 'mysql') {
-          options.connection.typeCast = (field, next) => {
-            if (field.type === 'TINY' && field.length === 1) {
-              return (field.string() === '1');
+            if (_.isString(_.get(options.connection, 'schema'))) {
+              options.pool = {
+                min: _.get(connection.options, 'pool.min') || 0,
+                max: _.get(connection.options, 'pool.max') || 10,
+                afterCreate: (conn, cb) => {
+                  conn.query(`SET SESSION SCHEMA '${options.connection.schema}';`, (err) => {
+                    cb(err, conn);
+                  });
+                }
+              };
+            } else {
+              delete options.connection.schema;
             }
-            return next();
-          };
+            break;
+          case 'sqlite3':
+            // Create the directory if it does not exist.
+            const directory = path.dirname(path.resolve(strapi.config.appPath, options.connection.filename));
+            if (!fs.existsSync(directory)){
+              fs.mkdirSync(directory);
+            }
+
+            break;
         }
 
         // Finally, use the client via `knex`.
