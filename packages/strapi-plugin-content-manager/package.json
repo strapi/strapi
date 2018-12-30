@@ -31,7 +31,8 @@
   "dependencies": {
     "@mapbox/geojson-extent": "^0.3.2",
     "@mapbox/mapbox-gl-draw": "^1.1.1",
-    "@turf/invariant": "^6.1.2",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.11.1",
     "events": "^3.0.0",
     "lodash.debounce": "^4.0.8",
     "mapbox-gl": "^0.52.0",
