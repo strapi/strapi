@@ -10,9 +10,6 @@ import PropTypes from 'prop-types';
 import mapboxgl from 'mapbox-gl';
 import ge from '@mapbox/geojson-extent';
 import MapboxDraw from '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw';
-
-
-
 import { isEmpty } from 'lodash';
 import styles from './styles.scss';
 import MapboxGenericGeocoder from './geocoder';
@@ -26,7 +23,7 @@ class InputGJSON extends React.Component {
     this.handleUploadFile = this.handleUploadFile.bind(this);
     this.loadGeometries = this.loadGeometries.bind(this);
 
-    this.state = { error: false, markedText: null };
+    this.state = { error: false };
   }
 
 
@@ -183,14 +180,12 @@ class InputGJSON extends React.Component {
 }
 
 InputGJSON.defaultProps = {
-  onBlur: () => {},
   onChange: () => {},
   value: null,
 };
 
 InputGJSON.propTypes = {
   name: PropTypes.string.isRequired,
-  onBlur: PropTypes.func,
   onChange: PropTypes.func,
   value: PropTypes.object,
 };

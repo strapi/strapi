@@ -383,7 +383,7 @@ module.exports = async cb => {
     await pluginStore.set({ key: 'schema', value: prevSchema });
 
   } catch(err) {
-    console.log('error', err);
+    console.log('error', err); //eslint-disable-line
   }
 
   cb();

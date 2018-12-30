@@ -270,7 +270,6 @@ export class EditPage extends React.Component {
       value = toNumber(e.target.value);
     }
 
-    console.log('chageHandler', e);
     const target = {
       name: `record.${e.target.name}`,
       value,
