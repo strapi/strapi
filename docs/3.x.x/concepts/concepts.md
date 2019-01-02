@@ -106,7 +106,7 @@ Please refer to the [filters' guide](../guides/filters.md) for more informations
 
 ## Models
 
-Models are a representation of the database's structure and lifecyle. They are split into two separate files. A JavaScript file that contains the lifecycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
+Models are a representation of the database's structure and lifecycle. They are split into two separate files. A JavaScript file that contains the lifecycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
 
 **Path —** `./api/user/models/User.js`.
 ```js

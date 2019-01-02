@@ -7,11 +7,8 @@ Enable the middleware in environments settings
 **Path —** `config/environments/middleware.json`.
 ```json
 {
-  "ejs": {
-    "enabled": true,
-    "viewExt": "ejs",
-    "debug": false,
-    "cache": false
+  "responseTime": {
+    "enabled": true
   },
 }
 ```
