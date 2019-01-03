@@ -23,7 +23,7 @@ options: [--dev|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbna
   Generates a new project called **&#60;name&#62;** and skip the interactive database configuration and initilize with these options.
   - **&#60;dbclient&#62;** can be `mongo`, `postgres`, `mysql`.
   - **&#60;dbssl&#62;** and **&#60;dbauth&#62;** are available only for `mongo` and are optional.
-  - **--dbforce** is only available for `postgres`, `mysql`, and is optional. 
+  - **--dbforce** Allows you to overwrite content if the provided database is not empty. Only available for `postgres`, `mysql`, and is optional. 
 
 See the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details.
 
