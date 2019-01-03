@@ -151,8 +151,8 @@ module.exports = {
 **Example**
 ```js
 // Create a pet
-var xhr = new XMLHttpRequest();
-xhr.open("POST", "/pets", true);
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/pets', true);
 xhr.setRequestHeader('Content-Type', 'application/json');
 xhr.send(JSON.stringify({
   owner: '5c151d9d5b1d55194d3209be' // The id of the user you want to link
@@ -225,8 +225,8 @@ module.exports = {
 **Example**
 ```js
 // Create an address
-var xhr = new XMLHttpRequest();
-xhr.open("POST", "/addresses", true);
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/addresses', true);
 xhr.setRequestHeader('Content-Type', 'application/json');
 xhr.send(JSON.stringify({
   user: '5c151d9d5b1d55194d3209be' // The id of the user you want to link
@@ -299,16 +299,16 @@ module.exports = {
 **Examples**
 ```js
 // Create an article
-var xhr = new XMLHttpRequest();
-xhr.open("POST", "/articles", true);
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/articles', true);
 xhr.setRequestHeader('Content-Type', 'application/json');
 xhr.send(JSON.stringify({
   author: '5c151d9d5b1d55194d3209be' // The id of the user you want to link
 }));
 
 // Update an article
-var xhr = new XMLHttpRequest();
-xhr.open("PUT", "/users/5c151d9d5b1d55194d3209be", true);
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/users/5c151d9d5b1d55194d3209be', true);
 xhr.setRequestHeader('Content-Type', 'application/json');
 xhr.send(JSON.stringify({
   articles: ['5c151d51eb28fd19457189f6', '5c151d51eb28fd19457189f8'] // Set of ALL articles linked to the user (existing articles + new article or - removed article)
@@ -387,8 +387,8 @@ module.exports = {
 **Example**
 ```js
 // Update a product
-var xhr = new XMLHttpRequest();
-xhr.open("PUT", "/products/5c151d9d5b1d55194d3209be", true);
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/products/5c151d9d5b1d55194d3209be', true);
 xhr.setRequestHeader('Content-Type', 'application/json');
 xhr.send(JSON.stringify({
   categories: ['5c151d51eb28fd19457189f6', '5c151d51eb28fd19457189f8'] // Set of ALL categories linked to the product (existing categories + new category or - removed category)
