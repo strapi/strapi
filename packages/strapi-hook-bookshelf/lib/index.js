@@ -134,7 +134,7 @@ module.exports = function(strapi) {
               try {
                 // External function to map key that has been updated with `columnName`
                 const mapper = (params = {}) => {
-                  if (definition.client === 'mysql') {
+                  if (definition.client === 'mysql' || definition.client === 'sqlite3') {
                     Object.keys(params).map((key) => {
                       const attr = definition.attributes[key] || {};
 
@@ -295,7 +295,7 @@ module.exports = function(strapi) {
                   });
 
                   // Convert to JSON format stringify json for mysql database
-                  if (definition.client === 'mysql') {
+                  if (definition.client === 'mysql' || definition.client === 'sqlite3') {
                     const events = [{
                       name: 'saved',
                       target: 'afterSave'
