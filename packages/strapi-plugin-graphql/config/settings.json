@@ -1,5 +1,6 @@
 {
   "endpoint": "/graphql",
+  "tracing": false,
   "shadowCRUD": true,
   "playgroundAlways": false,
   "depthLimit": 7,

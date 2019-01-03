@@ -53,6 +53,7 @@ program
 program
   .command('new')
   .option('-d, --dev', 'Development mode')
+  .option('--debug', 'Display database connection error')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')

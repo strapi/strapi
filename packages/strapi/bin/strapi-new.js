@@ -42,7 +42,8 @@ module.exports = function (name, cliArguments) {
     generatorType: 'new',
     name,
     strapiPackageJSON: packageJSON,
-    developerMode
+    developerMode,
+    debug: cliArguments.debug !== undefined
   };
 
   const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
