@@ -1,12 +1,24 @@
 'use strict';
 
+// Core
+const path = require('path');
+
 // Public node modules
 const inquirer = require('inquirer');
 const rimraf = require('rimraf');
 
 module.exports = (scope, success, error) => {
-  // eslint-disable-next-line import/no-unresolved
-  const knex = require('knex')({
+  let knex;
+
+  try {
+    // eslint-disable-next-line import/no-unresolved
+    knex = require('knex');
+  } catch (err) {
+    // eslint-disable-next-line import/no-unresolved
+    knex = require(path.resolve(scope.tmpPath, 'node_modules', 'knex'));
+  }
+
+  knex = knex({
     client: scope.client.module,
     connection: Object.assign({}, scope.database.settings, {
       user: scope.database.settings.username
@@ -48,10 +60,16 @@ module.exports = (scope, success, error) => {
   })
     .catch((err) => {
       if (err.sql) {
-        console.log('⚠️ Server connection has failed! Make sure your database server is running.');
+        console.log('⚠️  Server connection has failed! Make sure your database server is running.');
       } else {
-        console.log(`⚠️ Database connection has failed! Make sure your "${scope.database.settings.database}" database exist.`);
+        console.log(`⚠️  Database connection has failed! Make sure your "${scope.database.settings.database}" database exist.`);
       }
+
+      if (scope.debug) {
+        console.log('🐛 Full error log:');
+        console.log(err);
+      }
+
       error();
     });
 };

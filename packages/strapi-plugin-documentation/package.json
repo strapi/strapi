@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.0-alpha.16",
+  "version": "3.0.0-alpha.17",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -20,7 +20,7 @@
     "lint": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern '/admin/build/' --config ./node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "npm run lint",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
@@ -29,7 +29,7 @@
     "swagger-ui-dist": "^3.18.3-republish2"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.16"
+    "strapi-helper-plugin": "3.0.0-alpha.17"
   },
   "author": {
     "name": "soupette",
