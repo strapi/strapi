@@ -100,8 +100,8 @@ module.exports = {
           break;
         }
         case 'sqlite3':
-          const searchQuery = searchText.map(attribute => {
-            qb.orWhere(`${attribute}`, 'LIKE', `%${query}%`)
+          searchText.map(attribute => {
+            qb.orWhere(`${attribute}`, 'LIKE', `%${query}%`);
           });
       }
 

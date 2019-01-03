@@ -470,6 +470,7 @@ module.exports = function(strapi) {
                       try {
                         const connection = strapi.config.connections[definition.connection];
                         let columns = Object.keys(attributes).filter(attribute => ['string', 'text'].includes(attributes[attribute].type));
+                        let indexes;
 
                         if (!columns.length) {
                           // No text columns founds, exit from creating Fulltext Index
@@ -490,7 +491,7 @@ module.exports = function(strapi) {
                             await ORM.knex.raw('CREATE EXTENSION IF NOT EXISTS pg_trgm');
 
                             // Create GIN indexes for every column.
-                            const indexes = columns
+                            indexes = columns
                               .map(column => {
                                 const indexName = `${_.snakeCase(table)}_${column}`;
                                 const attribute = _.toLower(column) === column

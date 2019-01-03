@@ -109,6 +109,11 @@ module.exports = strapi => {
           useNullAsDefault: _.get(connection.options, 'useNullAsDefault'),
         }, strapi.config.hook.settings.knex);
 
+        // Resolve path to the directory containing the database file.
+        const fileDirectory = options.connection.filename
+          ? path.dirname(path.resolve(strapi.config.appPath, options.connection.filename))
+          : '';
+
         switch(options.client) {
           case 'mysql':
             options.connection.typeCast = (field, next) => {
@@ -137,9 +142,8 @@ module.exports = strapi => {
             break;
           case 'sqlite3':
             // Create the directory if it does not exist.
-            const directory = path.dirname(path.resolve(strapi.config.appPath, options.connection.filename));
-            if (!fs.existsSync(directory)){
-              fs.mkdirSync(directory);
+            if (!fs.existsSync(fileDirectory)){
+              fs.mkdirSync(fileDirectory);
             }
 
             break;
