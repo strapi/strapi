@@ -62,6 +62,7 @@ program
   .option('--dbpassword <dbpassword>', 'Database password')
   .option('--dbssl <dbssl>', 'Database SSL')
   .option('--dbauth <dbauth>', 'Authentication Database')
+  .option('--dbforce', 'Overwrite database content if any')
   .description('create a new application')
   .action(require('./strapi-new'));
 

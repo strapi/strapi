@@ -55,6 +55,8 @@ module.exports = function (name, cliArguments) {
       return process.exit(1);
     }
 
+    scope.dbforce = cliArguments.dbforce !== undefined;
+
     scope.database = {
       settings: {
         client: cliArguments.dbclient,
