@@ -234,10 +234,11 @@ module.exports = (scope, cb) => {
                 if (isSQLite) {
                   // Clean `scope.database` object for SQLite configuration.
                   delete scope.database.settings.srv;
-                  delete scope.database.options;
 
                   // Necessary for SQLite configuration (https://knexjs.org/#Builder-insert).
-                  scope.database.options.useNullAsDefault = true;
+                  scope.database.options = {
+                    useNullAsDefault: true
+                  };
                 }
 
                 console.log();
