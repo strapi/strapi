@@ -1,4 +1,4 @@
-# Migration guide from alpha.16 to alpha.18
+# Migration guide from alpha.17 to alpha.18
 
 **Here are the major changes:**
 
@@ -8,7 +8,7 @@
 
 **Useful links:**
 - Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.18](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.18)
-- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.16...v3.0.0-alpha.18](https://github.com/strapi/strapi/compare/v3.0.0-alpha.16...v3.0.0-alpha.18)
+- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.17...v3.0.0-alpha.18](https://github.com/strapi/strapi/compare/v3.0.0-alpha.17...v3.0.0-alpha.18)
 
 <br>
 
