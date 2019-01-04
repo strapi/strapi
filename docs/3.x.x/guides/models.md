@@ -27,6 +27,7 @@ The info key on the model-json states information about the model. This informat
 The options key on the model-json states.
    - `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id'). _Only valid for strapi-hook-bookshelf_
    - `idAttributeType`: Data type of `idAttribute`, accepted list of value bellow. _Only valid for strapi-hook-bookshelf_
+   - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where frist element is create data and second elemtent is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
 ## Define the attributes
 
