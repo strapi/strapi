@@ -85,6 +85,7 @@ module.exports = async cb => {
       pageEntries: 10,
       defaultSort: model.primaryKey,
       sort: 'ASC',
+      options: model.options,
       editDisplay: {
         availableFields: {},
         fields: [],
