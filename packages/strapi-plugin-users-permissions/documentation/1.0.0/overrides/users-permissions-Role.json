@@ -1,0 +1,24 @@
+{
+  "paths": {
+    "/users-permissions/init": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "hasAdmin": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

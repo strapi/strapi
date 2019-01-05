@@ -148,6 +148,17 @@ module.exports = {
 }
 ```
 
+**Example**
+```js
+// Create a pet
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/pets', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  owner: '5c151d9d5b1d55194d3209be' // The id of the user you want to link
+}));
+```
+
 ### One-to-one
 
 Refer to the [one-to-one concept](../concepts/concepts.md#one-to-one) for informations.
@@ -211,6 +222,17 @@ module.exports = {
 }
 ```
 
+**Example**
+```js
+// Create an address
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/addresses', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  user: '5c151d9d5b1d55194d3209be' // The id of the user you want to link
+}));
+```
+
 ### One-to-many
 
 Refer to the [one-to-many concept](../concepts/concepts.md#one-to-many) for more informations.
@@ -272,6 +294,25 @@ module.exports = {
     ctx.body = users;
   }
 }
+```
+
+**Examples**
+```js
+// Create an article
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/articles', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  author: '5c151d9d5b1d55194d3209be' // The id of the user you want to link
+}));
+
+// Update an article
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/users/5c151d9d5b1d55194d3209be', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  articles: ['5c151d51eb28fd19457189f6', '5c151d51eb28fd19457189f8'] // Set of ALL articles linked to the user (existing articles + new article or - removed article)
+}));
 ```
 
 ### Many-to-many
@@ -343,6 +384,17 @@ module.exports = {
 }
 ```
 
+**Example**
+```js
+// Update a product
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/products/5c151d9d5b1d55194d3209be', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  categories: ['5c151d51eb28fd19457189f6', '5c151d51eb28fd19457189f8'] // Set of ALL categories linked to the product (existing categories + new category or - removed category)
+}));
+```
+
 ### Polymorphic
 
 The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc).
@@ -353,7 +405,9 @@ Refer to the [upload plugin](./upload.md) polymorphic implementation for more in
 
 Let's stay with our `Image` model which might belongs to **a single `Article` or `Product` entry**.
 
-> In other words, it means that a `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
+::: note
+In other words, it means that a `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
+:::
 
 **Path —** `./api/image/models/Image.settings.json`.
 ```json
@@ -369,7 +423,9 @@ Let's stay with our `Image` model which might belongs to **a single `Article` or
 
 Also, our `Image` model which might belongs to **many `Article` or `Product` entries**.
 
-> In other words, it means that a `Article` entry can relate to the same image than a `Product` entry.
+::: note
+In other words, it means that a `Article` entry can relate to the same image than a `Product` entry.
+:::
 
 **Path —** `./api/image/models/Image.settings.json`.
 ```json

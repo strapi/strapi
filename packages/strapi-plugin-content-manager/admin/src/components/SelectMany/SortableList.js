@@ -12,10 +12,10 @@ import SortableItem from './SortableItem';
 // CSS.
 import styles from './styles.scss';
 
-const SortableList = ({ items, isDraggingSibling, keys, moveAttr, moveAttrEnd, onClick, onRemove }) => {
+const SortableList = ({ items, isDraggingSibling, keys, moveAttr, moveAttrEnd, name, onClick, onRemove }) => {
   return (
     <div className={cn(styles.sortableList)}>
-      <ul>
+      <ul id={`sortableListOf${name}`}>
         {items.map((item, index) => (
           <SortableItem
             isDraggingSibling={isDraggingSibling}
@@ -41,6 +41,7 @@ SortableList.propTypes = {
   keys: PropTypes.string.isRequired,
   moveAttr: PropTypes.func.isRequired,
   moveAttrEnd: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
 };

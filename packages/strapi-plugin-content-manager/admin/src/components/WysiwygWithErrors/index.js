@@ -137,6 +137,7 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
         <InputErrors
           className={errorsClassName}
           errors={!noErrorsDescription && this.state.errors || []}
+          name={name}
           style={errorsStyle}
         />
         {spacer}

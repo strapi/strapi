@@ -6,6 +6,7 @@
 
 // Public node modules.
 const url = require('url');
+const path = require('path');
 const _ = require('lodash');
 const mongoose = require('mongoose');
 const Mongoose = mongoose.Mongoose;
@@ -89,7 +90,19 @@ module.exports = function (strapi) {
           return cb(errMsg);
         }
 
-        Object.keys(options).map(key => instance.set(key, options[key]));
+        try {
+          // Require `config/functions/mongoose.js` file to customize connection.
+          require(path.resolve(
+            strapi.config.appPath,
+            'config',
+            'functions',
+            'mongoose.js'
+          ))(instance, connection);
+        } catch (err) {
+          // This is not an error if the file is not found.
+        }
+
+        Object.keys(options, key => instance.set(key, options[key]));
 
         const mountModels = (models, target, plugin = false) => {
           if (!target) return;
@@ -118,7 +131,6 @@ module.exports = function (strapi) {
 
                 /*
                   Override populate path for polymorphic association.
-
                   It allows us to make Upload.find().populate('related')
                   instead of Upload.find().populate('related.item')
                 */

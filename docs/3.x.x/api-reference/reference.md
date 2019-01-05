@@ -2,6 +2,7 @@
 
   - strapi
     - [.admin](#strapiadmin)
+    - [.api](#strapiapi)
     - [.app](#strapiapp)
     - [.bootstrap()](#strapibootstrap)
     - [.config](#strapiconfig)
@@ -26,6 +27,11 @@
 ## strapi.admin
 
 This object contains the controllers, models, services and configurations contained in the `./admin` folder.
+
+## strapi.api
+
+This object contains APIs contained in the `./api` folder.
+And by using `strapi.api[:name]` you can access the controllers, services, the model definition and also the configurations of the `./api/:name` folder
 
 ## strapi.app
 

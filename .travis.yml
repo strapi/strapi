@@ -6,20 +6,24 @@ git:
 language: node_js
 
 node_js:
-  - "10"
-  - "11"
+  - '10'
+  - '11'
 
 before_install:
   - export CHROME_BIN=chromium-browser
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - git fetch -a
+  - git fetch origin master
   # - sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
   # - npm cache clean --force
   # - rm -rf node_modules/
 
 install:
-  - npm run setup --debug
+  - npm run setup:build --debug
+
+before_script:
+  - git fetch origin master:master
 
 script:
   - npm run lint
@@ -27,4 +31,4 @@ script:
 
 cache:
   directories:
-    - "node_modules"
+    - 'node_modules'

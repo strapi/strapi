@@ -60,7 +60,7 @@ Node:
 **Please note that right now Node 11 is not Officially supported, and the current Node LTS (v10) should be used.**
 
 Database:
- * MongoDB >= 3.x 
+ * MongoDB >= 3.x
  * MySQL >= 5.6
  * MariaDB >= 10.1
  * PostgreSQL >= 10
@@ -71,7 +71,7 @@ Database:
 npm install strapi@alpha -g
 ````
 
-**We recommend to use the latest version of Strapi to start your new project**. 
+**We recommend to use the latest version of Strapi to start your new project**.
 Some breaking changes might happen, new releases are shipped every two weeks to fix/enhance the product.
 
 #### 🏗 Create a new project
@@ -140,7 +140,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 #### Professional support
 
-[Strapi Solutions](https://strapi.io), the company behind Strapi, provides a full range of solutions to get better results, faster. We're always looking for the next challenge: coaching, consulting, training, customization, etc. 
+[Strapi Solutions](https://strapi.io), the company behind Strapi, provides a full range of solutions to get better results, faster. We're always looking for the next challenge: coaching, consulting, training, customization, etc.
 
 [Drop us an email](mailto:support@strapi.io) to see how we can help you.
 
@@ -160,4 +160,4 @@ Check out our [roadmap](https://portal.productboard.com/strapi) to get informed 
 
 ## License
 
-[MIT License](LICENSE.md) Copyright (c) 2015-2018 [Strapi Solutions](https://strapi.io/).
+[MIT License](LICENSE.md) Copyright (c) 2015-2019 [Strapi Solutions](https://strapi.io/).
