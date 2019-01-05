@@ -362,9 +362,6 @@ module.exports = {
           default:
         }
 
-        // Create dynamic dataloader for query batching and caching.
-        Loaders.createLoader(association.collection || association.model, association.plugin);
-
         _.merge(acc.resolver[globalId], {
           [association.alias]: async (obj, options) => {
             // eslint-disable-line no-unused-vars

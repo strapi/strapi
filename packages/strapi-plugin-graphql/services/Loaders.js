@@ -12,8 +12,26 @@ const DataLoader = require('dataloader');
 module.exports = {
   loaders: {},
 
-  createLoader: function(model) {
-    this.loaders[model] = new DataLoader(keys => {
+  initializeLoader: function() {
+    // Create loaders for each relational field (exclude core models).
+    Object.keys(strapi.models)
+      .filter(model => model !== 'core_store')
+      .forEach(model => {
+        (strapi.models[model].associations || []).forEach(association => this.createLoader(association.collection || association.model, association.plugin));
+      });
+
+    // Reproduce the same pattern for each plugin.
+    Object.keys(strapi.plugins).forEach(plugin => {
+      Object.keys(strapi.plugins[plugin].models).forEach(model => {
+        (strapi.plugins[plugin].models[model].associations || []).forEach(association => this.createLoader(association.collection || association.model, association.plugin));
+      });
+    });
+  },
+
+  createLoader: function(model, plugin) {
+    const name = plugin ? `${plugin}__${model}`: model;
+
+    this.loaders[name] = new DataLoader(keys => {
       return new Promise(async (resolve, reject) => {
         try {
           // Extract queries from keys and merge similar queries.
