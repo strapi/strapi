@@ -60,7 +60,7 @@ Delete your old admin folder and replace it by the new one.
 
 Copy this file `/plugins/users-permissions/config/jwt.json` **from your old project** and paste it in the corresponding one in your new project.
 
-Copy the fields and relations you had in your `/plugins/users-permissions/models/User.settings.json` file in the new one.
+Copy the fields and relations you had in your `/plugins/users-permissions/models/User.settings.json` and `/plugins/users-permissions/config/jwt.json` file in the new one.
 
 Then, delete your old `plugins` folder and replace it by the new one.
 
