@@ -52,7 +52,7 @@ Delete your old admin folder and replace it with the new one.
 If you did a custom update on one of the plugins, you will have to manually migrate your update.
 :::
 
-Copy the fields and relations you had in your `/plugins/users-permissions/models/User.settings.json` file in the new one.
+Copy the fields and relations you had in your `/plugins/users-permissions/models/User.settings.json` and `/plugins/users-permissions/config/jwt.json` file in the new one.
 
 Then, delete your old `plugins` folder and replace it with the new one.
 
