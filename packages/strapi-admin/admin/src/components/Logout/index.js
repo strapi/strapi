@@ -41,16 +41,10 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
           </DropdownToggle>
           <DropdownMenu className={styles.dropDownContent}>
             <DropdownItem onClick={this.handleGoTo} className={styles.item}>
-              <FormattedMessage
-                id="app.components.Logout.profile"
-                defaultMessage="Profile"
-              />
+              <FormattedMessage id="app.components.Logout.profile" />
             </DropdownItem>
             <DropdownItem onClick={this.handleLogout}>
-              <FormattedMessage
-                id="app.components.Logout.logout"
-                defaultMessage="Logout"
-              />
+              <FormattedMessage id="app.components.Logout.logout" />
               <i className="fa fa-sign-out" />
             </DropdownItem>
           </DropdownMenu>
