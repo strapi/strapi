@@ -75,7 +75,7 @@ class TableRow extends React.Component {
       <IcoContainer
         icons={[
           { icoType: 'pencil', onClick: this.handleClick },
-          { id: this.props.record.id, icoType: 'trash', onClick: this.props.onDelete },
+          { id: this.props.record[this.props.primaryKey], icoType: 'trash', onClick: this.props.onDelete },
         ]}
       />
     </td>
@@ -106,7 +106,7 @@ class TableRow extends React.Component {
       return (
         <td onClick={(e) => e.stopPropagation()} key="i">
           <CustomInputCheckbox
-            name={this.props.record.id}
+            name={this.props.record[this.props.primaryKey]}
             onChange={this.props.onChange}
             value={this.props.value}
           />
@@ -136,6 +136,7 @@ TableRow.propTypes = {
   headers: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
   onDelete: PropTypes.func,
+  primaryKey: PropTypes.string,
   record: PropTypes.object.isRequired,
   redirectUrl: PropTypes.string.isRequired,
   value: PropTypes.bool,
@@ -144,6 +145,7 @@ TableRow.propTypes = {
 TableRow.defaultProps = {
   enableBulkActions: true,
   onDelete: () => {},
+  primaryKey: 'id',
   value: false,
 };
 

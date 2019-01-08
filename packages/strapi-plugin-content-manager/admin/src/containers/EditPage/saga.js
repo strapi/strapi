@@ -50,8 +50,11 @@ function* deleteData() {
   try {
     const currentModelName = yield select(makeSelectModelName());
     const record = yield select(makeSelectRecord());
-    const id = record.id || record._id;
     const source = yield select(makeSelectSource());
+    const schema = yield select(makeSelectSchema());
+
+    const primaryKey = get(schema, ['models', currentModelName, 'primaryKey'], null);
+    const id = record[primaryKey];
     const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
 
     yield call(request, requestUrl, { method: 'DELETE', params: { source } });
@@ -120,7 +123,8 @@ export function* submit() {
     //   console.log(pair[0]+ ', '+ pair[1]);
     // }
 
-    const id = isCreating ? '' : record.id || record._id;
+    const primaryKey = get(schema, ['models', currentModelName, 'primaryKey'], null);
+    const id = isCreating ? '' : record[primaryKey];
     const params = { source };
     // Change the request helper default headers so we can pass a FormData
     const headers = {

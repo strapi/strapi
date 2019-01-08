@@ -49,8 +49,9 @@ module.exports = {
   },
 
   fetch: async (params, source, populate, raw = true) => {
+    const primaryKey = strapi.query(params.model, source).primaryKey;
     return await strapi.query(params.model, source).findOne({
-      id: params.id
+      [primaryKey]: params.id
     }, populate, raw);
   },
 
@@ -103,6 +104,8 @@ module.exports = {
   },
 
   edit: async (params, values, source) => {
+    const primaryKey = strapi.query(params.model, source).primaryKey;
+
     // Multipart/form-data.
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
       // Silent recursive parser.
@@ -132,7 +135,7 @@ module.exports = {
 
       // Update JSON fields.
       await strapi.query(params.model, source).update({
-        id: params.id,
+        [primaryKey]: params.id,
         values
       });
 
@@ -143,13 +146,13 @@ module.exports = {
       }
 
       return strapi.query(params.model, source).findOne({
-        id: params.id
+        [primaryKey]: params.id
       });
     }
 
     // Raw JSON.
     return strapi.query(params.model, source).update({
-      id: params.id,
+      [primaryKey]: params.id,
       values
     });
   },
@@ -158,7 +161,7 @@ module.exports = {
     const query = strapi.query(params.model, source);
     const primaryKey = query.primaryKey;
     const response = await query.findOne({
-      id: params.id
+      [primaryKey]: params.id
     });
 
     params[primaryKey] = response[primaryKey];

@@ -83,7 +83,7 @@ module.exports = function(strapi) {
             definition.orm = 'bookshelf';
             definition.client = _.get(connection.settings, 'client');
             _.defaults(definition, {
-              primaryKey: 'id',
+              primaryKey: _.get(definition, 'options.idAttribute', 'id'),
               primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer')
             });
             // Register the final model for Bookshelf.
