@@ -56,6 +56,7 @@ program
   .option('--debug', 'Display database connection error')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
+  .option('--dbsrv <dbsrv>', 'Database srv')
   .option('--dbport <dbport>', 'Database port')
   .option('--dbname <dbname>', 'Database name')
   .option('--dbusername <dbusername>', 'Database username')
