@@ -14,6 +14,13 @@ Main update on the:
 - [ ] Framework
 - [ ] Plugin
 
+<!-- Please note that all databases should be tested and confirmed to be working prior to the PR being merged. -->
+Manual testing done on the follow databases:
+- [ ] Not applicable
+- [ ] MongoDB
+- [ ] MySQL
+- [ ] Postgres
+
 <!-- Write a short description of what your PR does and link the concerned issues of your update. -->
 
 <!-- ⚠️ Please link issue(s) you close / fix by using GitHub keywords https://help.github.com/articles/closing-issues-using-keywords/ !-->
