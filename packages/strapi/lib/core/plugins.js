@@ -89,9 +89,9 @@ module.exports = async function() {
   }
 
   const existBuildPath = await fs.pathExists(buildPath);
-  if (strapi.config.environment !== 'development' && existBuildPath) {
+  if (strapi.config.currentEnvironment.server.production && existBuildPath) {
     return;
-  } else if (strapi.config.environment !== 'development' && !existBuildPath) {
+  } else if (strapi.config.currentEnvironment.server.production && !existBuildPath) {
     console.log('The plugins.json file is missing and the front-end cannot work without it. Please, create it first at development environment.');
   }
 

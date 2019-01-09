@@ -266,7 +266,7 @@ module.exports = {
       resolvers,
     });
 
-    if (strapi.config.environment === 'development') {
+    if (!strapi.config.currentEnvironment.server.production) {
       // Write schema.
       this.writeGenerateSchema(graphql.printSchema(schema));
     }

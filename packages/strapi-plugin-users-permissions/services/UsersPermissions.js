@@ -438,7 +438,7 @@ module.exports = {
     try {
       // Disable auto-reload.
       strapi.reload.isWatching = false;
-      if (strapi.config.environment === 'development') {
+      if (!strapi.config.currentEnvironment.server.production) {
         // Rewrite actions.json file.
         fs.writeFileSync(actionsPath, JSON.stringify({ actions: data }), 'utf8');
       }
