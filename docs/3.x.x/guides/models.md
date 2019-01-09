@@ -27,6 +27,7 @@ The info key on the model-json states information about the model. This informat
 The options key on the model-json states.
    - `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id'). _Only valid for strapi-hook-bookshelf_
    - `idAttributeType`: Data type of `idAttribute`, accepted list of value bellow. _Only valid for strapi-hook-bookshelf_
+   - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where frist element is create data and second elemtent is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
 ## Define the attributes
 
@@ -148,6 +149,17 @@ module.exports = {
 }
 ```
 
+**Example**
+```js
+// Create a pet
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/pets', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  owner: '5c151d9d5b1d55194d3209be' // The id of the user you want to link
+}));
+```
+
 ### One-to-one
 
 Refer to the [one-to-one concept](../concepts/concepts.md#one-to-one) for informations.
@@ -211,6 +223,17 @@ module.exports = {
 }
 ```
 
+**Example**
+```js
+// Create an address
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/addresses', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  user: '5c151d9d5b1d55194d3209be' // The id of the user you want to link
+}));
+```
+
 ### One-to-many
 
 Refer to the [one-to-many concept](../concepts/concepts.md#one-to-many) for more informations.
@@ -272,6 +295,25 @@ module.exports = {
     ctx.body = users;
   }
 }
+```
+
+**Examples**
+```js
+// Create an article
+const xhr = new XMLHttpRequest();
+xhr.open('POST', '/articles', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  author: '5c151d9d5b1d55194d3209be' // The id of the user you want to link
+}));
+
+// Update an article
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/users/5c151d9d5b1d55194d3209be', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  articles: ['5c151d51eb28fd19457189f6', '5c151d51eb28fd19457189f8'] // Set of ALL articles linked to the user (existing articles + new article or - removed article)
+}));
 ```
 
 ### Many-to-many
@@ -341,6 +383,17 @@ module.exports = {
     ctx.body = categories;
   }
 }
+```
+
+**Example**
+```js
+// Update a product
+const xhr = new XMLHttpRequest();
+xhr.open('PUT', '/products/5c151d9d5b1d55194d3209be', true);
+xhr.setRequestHeader('Content-Type', 'application/json');
+xhr.send(JSON.stringify({
+  categories: ['5c151d51eb28fd19457189f6', '5c151d51eb28fd19457189f8'] // Set of ALL categories linked to the product (existing categories + new category or - removed category)
+}));
 ```
 
 ### Polymorphic
