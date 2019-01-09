@@ -64,31 +64,6 @@ module.exports = scope => {
       }]
     };
 
-    if (scope.args.tpl && scope.args.tpl !== 'mongoose') {
-      routes.routes.push({
-        method: 'POST',
-        path: '/' + scope.idPluralized + '/:' + tokenID + '/relationships/:relation',
-        handler: scope.globalID + '.createRelation',
-        config: {
-          policies: []
-        }
-      }, {
-        method: 'PUT',
-        path: '/' + scope.idPluralized + '/:' + tokenID + '/relationships/:relation',
-        handler: scope.globalID + '.updateRelation',
-        config: {
-          policies: []
-        }
-      }, {
-        method: 'DELETE',
-        path: '/' + scope.idPluralized + '/:' + tokenID + '/relationships/:relation',
-        handler: scope.globalID + '.destroyRelation',
-        config: {
-          policies: []
-        }
-      });
-    }
-
     return routes;
   }
 
