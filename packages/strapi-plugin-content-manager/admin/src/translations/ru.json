@@ -88,7 +88,7 @@
   "form.Input.disabled": "Editable field",
   "form.Input.filters": "Применить фильтры",
   "form.Input.label": "Метка",
-  "form.Input.label.inputDescription": "Это знчение переопределит метку, в заголовке таблицы",
+  "form.Input.label.inputDescription": "Это значение переопределит метку, в заголовке таблицы",
   "form.Input.pageEntries": "Записей на страницу",
   "form.Input.pageEntries.inputDescription": "Заметка: вы можете переопределить это значение на странице настроек Типа Данных",
   "form.Input.placeholder": "Плейсхолдер",
