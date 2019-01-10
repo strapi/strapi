@@ -5,7 +5,12 @@
       "path": "/",
       "handler": "Email.send",
       "config": {
-        "policies": []
+        "policies": [],
+        "description": "Send an email",
+        "tag": {
+          "plugin": "email",
+          "name": "Email"
+        }
       }
     },
     {

@@ -22,3 +22,6 @@
 - [Migration guide from alpha.14.4 to alpha.14.5](migration-guide-alpha.14.4-to-alpha.14.5.md)
 - [Migration guide from alpha.14.5 to alpha.15](migration-guide-alpha.14.5-to-alpha.15.md)
 - [Migration guide from alpha.15 to alpha.16](migration-guide-alpha.15-to-alpha.16.md)
+- [Migration guide from alpha.15 to alpha.16](migration-guide-alpha.15-to-alpha.16.md)
+- [Migration guide from alpha.16 to alpha.17](migration-guide-alpha.16-to-alpha.17.md)
+- [Migration guide from alpha.17 to alpha.18](migration-guide-alpha.17-to-alpha.18.md)

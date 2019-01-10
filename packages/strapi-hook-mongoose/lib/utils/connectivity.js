@@ -29,7 +29,13 @@ module.exports = (scope, success, error) => {
 
   Mongoose.connect(`mongodb${srv ? '+srv' : ''}://${scope.database.settings.host}${!srv ? `:${scope.database.settings.port}` : ''}/`, connectOptions, function (err) {
     if (err) {
-      console.log('⚠️ Database connection has failed! Make sure your database is running.');
+      console.log('⚠️  Database connection has failed! Make sure your database is running.');
+
+      if (scope.debug) {
+        console.log('🐛 Full error log:');
+        console.log(err);
+      }
+
       return error();
     }
 

@@ -16,7 +16,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: function (cb) {
       strapi.app.use(
         async (ctx, next) => {
           if (ctx.request.admin) {
@@ -31,7 +31,17 @@ module.exports = strapi => {
             })(ctx, next);
           } else if (strapi.config.currentEnvironment.security.cors.enabled) {
             return strapi.koaMiddlewares.kcors({
-              origin: strapi.config.middleware.settings.cors.origin,
+              origin: function (ctx) {
+                const whitelist = strapi.config.middleware.settings.cors.origin.split(/\s*,\s*/);
+                const requestOrigin = ctx.accept.headers.origin;
+                if (whitelist.includes('*')) {
+                  return '*';
+                }
+                if (!whitelist.includes(requestOrigin)) {
+                  return ctx.throw(`${requestOrigin} is not a valid origin`);
+                }
+                return requestOrigin;
+              },
               exposeHeaders: strapi.config.middleware.settings.cors.expose,
               maxAge: strapi.config.middleware.settings.cors.maxAge,
               credentials: strapi.config.middleware.settings.cors.credentials,
