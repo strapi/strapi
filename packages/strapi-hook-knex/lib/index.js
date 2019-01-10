@@ -18,8 +18,7 @@ const CLIENTS = [
   'sqlite3',
   'mariasql',
   'oracle', 'strong-oracle',
-  'mssql',
-  'websql'
+  'mssql'
 ];
 
 /**
@@ -64,9 +63,6 @@ module.exports = strapi => {
             break;
           case 'ms':
             connection.settings.client = 'mssql';
-            break;
-          case 'web':
-            connection.settings.client = 'websql';
             break;
         }
 
