@@ -31,7 +31,7 @@ function LeftMenuFooter({ version }) { // eslint-disable-line react/prefer-state
       </ul>
       <div className={styles.poweredBy}>
         <FormattedMessage {...messages.poweredBy} />
-        <a href={`https://github.com/strapi/strapi/releases/tag/v${version}`} target="_blank">v{version}</a>
+        <a href="https://strapi.io" target="_blank">Strapi</a> <a href={`https://github.com/strapi/strapi/releases/tag/v${version}`} target="_blank">v{version}</a>
       </div>
     </div>
   );
