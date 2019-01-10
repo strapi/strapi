@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.16",
+  "version": "3.0.0-alpha.18",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 10.0.0",
@@ -78,6 +78,7 @@
     "prettier": "^1.5.3",
     "prop-types": "^15.5.10",
     "react": "^16.5.2",
+    "react-copy-to-clipboard": "^5.0.1",
     "react-datetime": "^2.15.0",
     "react-dnd": "^5.0.0",
     "react-dnd-html5-backend": "^5.0.1",

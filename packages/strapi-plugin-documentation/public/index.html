@@ -1,0 +1,471 @@
+<!-- HTML for static distribution bundle build --><!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <title>Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="/plugins/documentation/swagger-ui.css">
+    <link rel="icon" type="image/png" href="/plugins/documentation/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="/plugins/documentation/favicon-16x16.png" sizes="16x16">
+    <style>
+      html
+      {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+      }
+
+      *,
+      *:before,
+      *:after
+      {
+        box-sizing: inherit;
+      }
+
+      body
+      {
+        margin:0;
+        background: #fafafa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="swagger-ui"></div>
+
+    <script src="/plugins/documentation/swagger-ui-bundle.js"> </script>
+    <script src="/plugins/documentation/swagger-ui-standalone-preset.js"> </script>
+  
+
+
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          <script class="custom-swagger-ui">
+            window.onload = function() {
+
+              // Build a system
+              const ui = SwaggerUIBundle({
+                url: "https://petstore.swagger.io/v2/swagger.json",
+                spec: {"openapi":"3.0.0","info":{"version":"1.0.0","title":"DOCUMENTATION","description":"","termsOfService":"YOUR_TERMS_OF_SERVICE_URL","contact":{"name":"TEAM","email":"contact-email@something.io","url":"mywebsite.io"},"license":{"name":"Apache 2.0","url":"https://www.apache.org/licenses/LICENSE-2.0.html"},"x-generation-date":"12/07/2018 12:13:25 AM"},"x-strapi-config":{"path":"/documentation","showGeneratedFiles":true},"servers":[{"url":"http://localhost:1337","description":"Development server"},{"url":"YOUR_STAGING_SERVER","description":"Staging server server"},{"url":"YOUR_PRODUCTION_SERVER","description":"Production server"}],"externalDocs":{"description":"Find out more","url":"https://strapi.io/documentation/3.x.x/"},"security":[{"bearerAuth":[]}],"paths":{"/email/":{"post":{"deprecated":false,"description":"Send an email using the provider defined through the dashboard","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"properties":{"foo":{"type":"string"}}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Email"],"requestBody":{"description":"","required":true,"content":{"application/json":{"schema":{"type":"object","properties":{"from":{"type":"string","format":"email"},"to":{"type":"string","format":"email","example":"user@example.com"},"reply_to":{"type":"string","format":"email"},"subject":{"type":"string","example":"Lorem ipsum title"},"text":{"type":"string","example":"Lorem ipsum"},"html":{"type":"string","format":"html","example":"<h1>Lorem ipsum</h1>"}}}}}}}},"/upload/":{"post":{"deprecated":false,"description":"Upload one or multiple files","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"type":"array","items":{"type":"object","properties":{"name":{"type":"string"},"hash":{"type":"string","format":"uuid"},"sha256":{"type":"string"},"ext":{"type":"string"},"mime":{"type":"string"},"size":{"type":"integer"},"url":{"type":"string","format":"uri"},"provider":{"type":"string"},"related":{"type":"array","items":{"type":"object"}}}}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Upload - File"],"requestBody":{"description":"","required":true,"content":{"multipart/form-data":{"schema":{"required":["files"],"properties":{"files":{"type":"array","items":{"type":"string","format":"binary"}},"path":{"type":"string","example":"/public/upload"},"refId":{"type":"string","example":"5a993616b8e66660e8baf45c"},"ref":{"type":"string","example":"user"},"source":{"type":"string","example":"users-permissions"},"field":{"type":"string","example":"avatar"}}}}}}}},"/upload/files/count":{"get":{"deprecated":false,"description":"Retrieve the total number of uploaded files","responses":{"200":{"description":"","content":{"application/json":{"schema":{"properties":{"count":{"type":"integer"}}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Upload - File"],"parameters":[]}},"/upload/files":{"get":{"deprecated":false,"description":"Retrieve all file documents","responses":{"200":{"description":"","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/UploadFile"}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Upload - File"],"parameters":[]}},"/upload/files/{_id}":{"get":{"deprecated":false,"description":"Retrieve a single file depending on its id","responses":{"200":{"description":"","content":{"application/json":{"schema":{"$ref":"#/components/schemas/UploadFile"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Upload - File"],"parameters":[{"name":"_id","in":"path","description":"","deprecated":false,"required":true,"schema":{"type":"string"}}]},"delete":{"deprecated":false,"description":"Delete an uploaded file","responses":{"200":{"description":"Document deleted"},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Upload - File"],"parameters":[{"name":"_id","in":"path","description":"","deprecated":false,"required":true,"schema":{"type":"string"}}]}},"/upload/search/{id}":{"get":{"deprecated":false,"description":"Search for an uploaded file","responses":{"200":{"description":"","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/UploadFile"}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Upload - File"],"parameters":[{"name":"id","in":"path","description":"","deprecated":false,"required":true,"schema":{"type":"string"}}]}},"/users-permissions/init":{"get":{"deprecated":false,"description":"Check if the first admin user has already been registered","responses":{"200":{"description":"Response","content":{"application/json":{"schema":{"properties":{"hasAdmin":{"type":"boolean"}}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - Role"],"parameters":[]}},"/users-permissions/roles/{id}":{"get":{"deprecated":false,"description":"Retrieve a role depending on its id","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsRole"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - Role"],"parameters":[{"name":"id","in":"path","description":"","deprecated":false,"required":true,"schema":{"type":"string"}}]}},"/users-permissions/roles":{"get":{"deprecated":false,"description":"Retrieve all role documents","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Users-PermissionsRole"}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - Role"],"parameters":[{"name":"_limit","in":"query","required":false,"description":"Maximum number of results possible","schema":{"type":"integer"},"deprecated":false},{"name":"_sort","in":"query","required":false,"description":"Sort according to a specific field.","schema":{"type":"string"},"deprecated":false},{"name":"_start","in":"query","required":false,"description":"Skip a specific number of entries (especially useful for pagination)","schema":{"type":"integer"},"deprecated":false},{"name":"=","in":"query","required":false,"description":"Get entries that matches exactly your input","schema":{"type":"string"},"deprecated":false},{"name":"_ne","in":"query","required":false,"description":"Get records that are not equals to something","schema":{"type":"string"},"deprecated":false},{"name":"_lt","in":"query","required":false,"description":"Get record that are lower than a value","schema":{"type":"string"},"deprecated":false},{"name":"_lte","in":"query","required":false,"description":"Get records that are lower than or equal to a value","schema":{"type":"string"},"deprecated":false},{"name":"_gt","in":"query","required":false,"description":"Get records that are greater than a value","schema":{"type":"string"},"deprecated":false},{"name":"_gte","in":"query","required":false,"description":"Get records that are greater than  or equal a value","schema":{"type":"string"},"deprecated":false},{"name":"_contains","in":"query","required":false,"description":"Get records that contains a value","schema":{"type":"string"},"deprecated":false},{"name":"_containss","in":"query","required":false,"description":"Get records that contains (case sensitive) a value","schema":{"type":"string"},"deprecated":false}]},"post":{"deprecated":false,"description":"Create a new role","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsRole"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - Role"],"requestBody":{"description":"","required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/NewUsers-PermissionsRole"}}}}}},"/users-permissions/roles/{role}":{"put":{"deprecated":false,"description":"Update a role","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsRole"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - Role"],"parameters":[{"name":"role","in":"path","description":"","deprecated":false,"required":true,"schema":{"type":"string"}}],"requestBody":{"description":"","required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/NewUsers-PermissionsRole"}}}}},"delete":{"deprecated":false,"description":"Delete a role","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"properties":{"foo":{"type":"string"}}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - Role"],"parameters":[{"name":"role","in":"path","description":"","deprecated":false,"required":true,"schema":{"type":"string"}}]}},"/users-permissions/search/{id}":{"get":{"deprecated":false,"description":"Search for users","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Users-PermissionsUser"}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"Retrieve a list of users by searching for their username or email","tags":["Users-Permissions - User"],"parameters":[{"name":"id","in":"path","description":"A string matching a user's email or username","deprecated":false,"required":true,"schema":{"type":"string"}}]}},"/connect/*":{"get":{"deprecated":false,"description":"Connect a provider","responses":{"200":{"description":"Your user is redirected"},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"Authenticate your user with a custom provider","tags":["Authentication"],"parameters":[{"name":"provider","in":"path","required":true,"deprecated":false,"description":"The name of the provider you want to use","schema":{"type":"string"}}],"externalDocs":{"description":"Find out more about the authentication flow in the strapi documentation","url":"https://strapi.io/documentation/guides/authentication.html#providers"}}},"/auth/local":{"post":{"deprecated":false,"description":"Login a user using the identifiers email and password","responses":{"200":{"description":"Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsRegisterResponse"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Authentication"],"requestBody":{"description":"The identifier param can either be an email or a username","required":true,"content":{"application/json":{"schema":{"required":["identifier","password"],"properties":{"identifier":{"type":"string"},"password":{"type":"string"}}},"example":{"identifier":"hi@strapi.io","password":"superSecure123"}}}},"externalDocs":{"description":"Find out more in the strapi's documentation","url":"https://strapi.io/documentation/guides/authentication.html#login"}}},"/auth/local/register":{"post":{"deprecated":false,"description":"Register a new user with the default role","responses":{"200":{"description":"Successfully register a user","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsRegisterResponse"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Authentication"],"requestBody":{"description":"","required":true,"content":{"application/json":{"schema":{"required":["username","email","password"],"properties":{"username":{"type":"string","minLength":3},"email":{"type":"string","minLength":6},"password":{"type":"string","minLength":6}}}}}},"externalDocs":{"description":"Find out more in the strapi's documentation","url":"https://strapi.io/documentation/guides/authentication.html#usage"}}},"/auth/{provider}/callback":{"get":{"deprecated":false,"description":"Successfull redirection after approving a provider","responses":{"200":{"description":"Successfull redirection after approving a provider","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsRegisterResponse"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Authentication"],"parameters":[{"name":"provider","in":"path","description":"The provider used to authenticate your user","deprecated":false,"required":true,"schema":{"type":"string"}}],"externalDocs":{"description":"Find out more in the strapi's documentation","url":"https://strapi.io/documentation/guides/authentication.html#providers"}}},"/auth/forgot-password":{"post":{"deprecated":false,"description":"Send the reset password email link","responses":{"200":{"description":"Email sent"},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"Send an email to reset your password","tags":["Authentication"],"requestBody":{"description":"","required":true,"content":{"application/json":{"schema":{"properties":{"email":{"type":"string"},"url":{"type":"string"}}},"example":{"email":"hi@strapi.io","url":"http://mon-site.com/rest-password"}}}},"externalDocs":{"description":"Find out more in the strapi's documentation","url":"https://strapi.io/documentation/guides/authentication.html#send-forgot-password-request"}}},"/auth/reset-password":{"post":{"deprecated":false,"description":"Change a user's password","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsRegisterResponse"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Authentication"],"requestBody":{"description":"","required":true,"content":{"application/json":{"schema":{"required":["code","password","passwordConfirmation"],"properties":{"code":{"type":"string"},"password":{"type":"string"},"passwordConfirmation":{"type":"string"}}}}}}}},"/auth/email-confirmation":{"get":{"deprecated":false,"description":"Validate a user account","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"properties":{"foo":{"type":"string"}}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Authentication"],"parameters":[]}},"/users":{"get":{"deprecated":false,"description":"Retrieve all user documents","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Users-PermissionsUser"}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - User"],"parameters":[{"name":"_limit","in":"query","required":false,"description":"Maximum number of results possible","schema":{"type":"integer"},"deprecated":false},{"name":"_sort","in":"query","required":false,"description":"Sort according to a specific field.","schema":{"type":"string"},"deprecated":false},{"name":"_start","in":"query","required":false,"description":"Skip a specific number of entries (especially useful for pagination)","schema":{"type":"integer"},"deprecated":false},{"name":"=","in":"query","required":false,"description":"Get entries that matches exactly your input","schema":{"type":"string"},"deprecated":false},{"name":"_ne","in":"query","required":false,"description":"Get records that are not equals to something","schema":{"type":"string"},"deprecated":false},{"name":"_lt","in":"query","required":false,"description":"Get record that are lower than a value","schema":{"type":"string"},"deprecated":false},{"name":"_lte","in":"query","required":false,"description":"Get records that are lower than or equal to a value","schema":{"type":"string"},"deprecated":false},{"name":"_gt","in":"query","required":false,"description":"Get records that are greater than a value","schema":{"type":"string"},"deprecated":false},{"name":"_gte","in":"query","required":false,"description":"Get records that are greater than  or equal a value","schema":{"type":"string"},"deprecated":false},{"name":"_contains","in":"query","required":false,"description":"Get records that contains a value","schema":{"type":"string"},"deprecated":false},{"name":"_containss","in":"query","required":false,"description":"Get records that contains (case sensitive) a value","schema":{"type":"string"},"deprecated":false}]}},"/users/me":{"get":{"deprecated":false,"description":"Retrieve the logged in user informations","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsUser"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - User"],"parameters":[]}},"/users/{_id}":{"get":{"deprecated":false,"description":"Retrieve a single user depending on his id","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsUser"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - User"],"parameters":[{"name":"_id","in":"path","description":"","deprecated":false,"required":true,"schema":{"type":"string"}}]},"put":{"deprecated":false,"description":"Update an existing user","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Users-PermissionsUser"}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - User"],"parameters":[{"name":"_id","in":"path","description":"","deprecated":false,"required":true,"schema":{"type":"string"}}],"requestBody":{"description":"","required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/NewUsers-PermissionsUser"}}}}},"delete":{"deprecated":false,"description":"Delete an existing user","responses":{"200":{"description":"response","content":{"application/json":{"schema":{"properties":{"foo":{"type":"string"}}}}}},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}},"default":{"description":"unexpected error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/Error"}}}}},"summary":"","tags":["Users-Permissions - User"],"parameters":[{"name":"_id","in":"path","description":"","deprecated":false,"required":true,"schema":{"type":"string"}}]}}},"tags":[{"name":"Email"},{"name":"Upload - File"},{"name":"Users-Permissions - Role"},{"name":"Authentication","description":"All the routes related to the authentication","externalDocs":{"description":"Find out more in strapi's documentation","url":"https://strapi.io/documentation/guides/authentication.html"}},{"name":"Users-Permissions - User"}],"components":{"schemas":{"UploadFile":{"properties":{"name":{"type":"string"},"sha256":{"type":"string"},"hash":{"type":"string"},"ext":{"type":"string"},"size":{"type":"string"},"mime":{"type":"string"},"url":{"type":"string"},"provider":{"type":"string"},"updatedAt":{"type":"string"},"createdAt":{"type":"string"},"related":{"type":"array","items":{"type":"string"}}}},"Users-PermissionsRole":{"required":["id","name"],"properties":{"id":{"type":"string"},"name":{"type":"string","minLength":3},"description":{"type":"string"},"type":{"type":"string"},"permissions":{"type":"array","items":{"required":["id","type","controller","action","enabled"],"properties":{"id":{"type":"string"},"type":{"type":"string"},"controller":{"type":"string"},"action":{"type":"string"},"enabled":{"type":"boolean"},"policy":{"type":"string"},"role":{"type":"string"}}}},"users":{"type":"array","items":{"required":["id","username","email"],"properties":{"id":{"type":"string"},"username":{"type":"string"},"email":{"type":"string"},"provider":{"type":"string"},"password":{"type":"string"},"resetPasswordToken":{"type":"string"},"confirmed":{"type":"boolean"},"blocked":{"type":"boolean"},"role":{"type":"string"}}}}}},"NewUsers-PermissionsRole":{"required":["name"],"properties":{"name":{"type":"string","minLength":3},"description":{"type":"string"},"type":{"type":"string"},"permissions":{"type":"array","items":{"type":"string"}},"users":{"type":"array","items":{"type":"string"}}}},"Users-PermissionsUser":{"required":["id","username","email"],"properties":{"id":{"type":"string"},"username":{"type":"string","minLength":3},"email":{"type":"string","minLength":6},"provider":{"type":"string"},"confirmed":{"type":"boolean","default":false},"blocked":{"type":"boolean","default":false},"role":{"required":["id","name"],"properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"type":{"type":"string"},"permissions":{"type":"array","items":{"type":"string"}},"users":{"type":"array","items":{"type":"string"}}}}}},"NewUsers-PermissionsUser":{"required":["username","email"],"properties":{"username":{"type":"string","minLength":3},"email":{"type":"string","minLength":6},"provider":{"type":"string"},"password":{"type":"string","minLength":6},"resetPasswordToken":{"type":"string"},"confirmed":{"type":"boolean","default":false},"blocked":{"type":"boolean","default":false},"role":{"type":"string"}}},"Users-PermissionsRegisterResponse":{"properties":{"jwt":{"type":"string"},"user":{"$ref":"#/components/schemas/Users-PermissionsUser"}}},"Error":{"required":["code","message"],"properties":{"code":{"type":"integer","format":"int32"},"message":{"type":"string"}}}},"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}}}},
+                dom_id: '#swagger-ui',
+                docExpansion: "none",
+                deepLinking: true,
+                presets: [
+                  SwaggerUIBundle.presets.apis,
+                  SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                  SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout"
+              })
+
+              window.ui = ui
+            }
+          </script>
+        </body></html>

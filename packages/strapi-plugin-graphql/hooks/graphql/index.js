@@ -162,6 +162,7 @@ module.exports = strapi => {
           context: ctx,
         }),
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
+        tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
         playground: false,
       };
 

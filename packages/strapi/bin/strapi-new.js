@@ -42,7 +42,8 @@ module.exports = function (name, cliArguments) {
     generatorType: 'new',
     name,
     strapiPackageJSON: packageJSON,
-    developerMode
+    developerMode,
+    debug: cliArguments.debug !== undefined
   };
 
   const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
@@ -53,6 +54,8 @@ module.exports = function (name, cliArguments) {
       console.log(`⛔️ Some database arguments are missing. Required arguments list: ${dbArguments}`);
       return process.exit(1);
     }
+
+    scope.dbforce = cliArguments.dbforce !== undefined;
 
     scope.database = {
       settings: {
