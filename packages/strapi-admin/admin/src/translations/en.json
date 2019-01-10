@@ -65,6 +65,8 @@
   "app.components.InstallPluginPopup.navLink.faq": "faq",
   "app.components.InstallPluginPopup.navLink.screenshots": "Screenshots",
   "app.components.InstallPluginPopup.noDescription": "No description available",
+  "app.components.LeftMenuFooter.documentation": "Documentation",
+  "app.components.LeftMenuFooter.help": "Help",
   "app.components.LeftMenuFooter.poweredBy": "Powered by ",
   "app.components.LeftMenuLinkContainer.configuration": "Configurations",
   "app.components.LeftMenuLinkContainer.general": "General",
