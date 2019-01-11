@@ -77,15 +77,10 @@ export function* submit() {
   let shouldAddTranslationSuffix = false;
   
   // Remove the updated_at & created_at fields so it is updated correctly when using Postgres or MySQL db
-  if (record.updated_at) {
-    delete record.created_at;
-    delete record.updated_at;
-  }
-
-  // Remove the updatedAt & createdAt fields so it is updated correctly when using MongoDB
-  if (record.updatedAt) {
-    delete record.createdAt;
-    delete record.updatedAt;
+  const timestamps = get(schema, ['models', currentModelName, 'options', 'timestamps'], null);
+  if (timestamps) {
+    delete record[timestamps[0]];
+    delete record[timestamps[1]];
   }
 
   try {
