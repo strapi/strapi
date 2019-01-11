@@ -83,7 +83,6 @@ exports.connect = (provider, query) => {
 
         return resolve([createdUser, null]);
       } catch (err) {
-        strapi.log.error(err);
         reject([null, err]);
       }
     });
