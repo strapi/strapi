@@ -11,7 +11,7 @@
  "containers.HomePage.form.jwtToken": "Получите ваш JWT токен",
   "containers.HomePage.form.jwtToken.description": "Скопируйте этот токен и используйте его в swagger, чтобы делать запросы",
   "containers.HomePage.form.restrictedAccess": "Закрытый доступ",
-  "containers.HomePage.form.restrictedAccess.inputDescription": "Сделайте вашу документацию приватной. По умолчанию доступ открыть",
+  "containers.HomePage.form.restrictedAccess.inputDescription": "Сделайте вашу документацию приватной. По умолчанию доступ открыт",
   "containers.HomePage.form.password": "Пароль",
   "containers.HomePage.form.password.inputDescription": "Установите пароль для доступа к документации",
   "containers.HomePage.form.showGeneratedFiles": "Показать сгенерированные файлы",
@@ -19,7 +19,7 @@
 
   "components.Row.generatedDate": "Последнее обновление",
   "components.Row.open": "Открыть",
-  "components.Row.regenerate": "Обновить",
+  "components.Row.regenerate": "Сгенерировать",
 
   "error.regenerateDoc": "При генерации документации возникла ошибка",
   "error.noVersion": "Необходимо указать версию",
