@@ -434,9 +434,11 @@ module.exports = {
               queryOpts.query.id.symbol = 'IN';
             }
 
+            const loaderName = association.plugin ? `${association.plugin}__${params.model}`: params.model;
+
             return association.model ?
-              Loaders.loaders[association.collection || association.model].load({ params, options: queryOpts, single: true }):
-              Loaders.loaders[association.collection || association.model].load({ options: queryOpts, association });
+              Loaders.loaders[loaderName].load({ params, options: queryOpts, single: true }):
+              Loaders.loaders[loaderName].load({ options: queryOpts, association });
           },
         });
       });
