@@ -113,6 +113,14 @@
     },
     {
       "method": "GET",
+      "path": "/permissions",
+      "handler": "UsersPermissions.getPermissions",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/providers",
       "handler": "UsersPermissions.getProviders",
       "config": {

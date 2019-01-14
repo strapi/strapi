@@ -21,6 +21,22 @@ Update the `production` settings with the IP and domain name where the project w
 In case your database is not running on the same server, make sure that the environment of your production 
 database (`./config/environments/production/database.json`) is set properly.
 
+If you are passing a number of configuration item values via environment variables which is always encouraged for production environment to keep application stateless, checkout the section for [Dynamic Configuration](../configurations/configurations.md#dynamic-configurations). Here is a hint on how to do it for production, for the configuration mentioned above:
+ 
+ **Path —** `./config/environments/production/server.json`.
+```js
+{
+  "host": "${process.env.APP_HOST || '127.0.0.1'}"
+  "port": "${process.env.NODE_PORT || 1337}",
+  "autoReload": {
+    "enabled": false
+  },
+  "admin": {
+    "path": "/dashboard" // We highly recommend to change the default `/admin` path for security reasons.
+  }
+}
+```
+
 **⚠️  If you changed the path to access to the administration, the step #2 is required.**
 
 #### #2 - Setup (optional)
