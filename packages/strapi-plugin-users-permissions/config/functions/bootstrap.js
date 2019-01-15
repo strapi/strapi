@@ -91,6 +91,14 @@ module.exports = async cb => {
       key: '',
       secret: '',
       callback: '/auth/twitter/callback'
+    },
+    ibm: {
+      enabled: false,
+      icon: 'flask',
+      key: '',
+      secret: '',
+      callback: '/auth/ibm/callback',
+      scope: ['openid']
     }
   };
   const prevGrantConfig = await pluginStore.get({key: 'grant'}) || {};

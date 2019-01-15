@@ -259,6 +259,39 @@ const getProfile = async (provider, query, callback) => {
       });
       break;
     }
+    case 'ibm': {
+      const ibm = new Purest({
+        provider: 'ibm',
+        config: {
+          'ibm': {
+            'https://idaas.iam.ibm.com/idaas/oidc/endpoint/default/': {
+              '__domain': {
+                'auth': {
+                  'auth': {'bearer': '[0]'}
+                }
+              },
+              '{endpoint}': {
+                '__path': {
+                  'alias': '__default'
+                }
+              }
+            }
+          }
+        }
+      });
+
+      ibm.query().get('userinfo').auth(access_token).request((err, res, body) => {
+        if (err) {
+          callback(err);
+        } else {
+          callback(null, {
+            username: body.sub.split('@')[0],
+            email: body.sub
+          });
+        }
+      });
+      break;
+    }
     default:
       callback({
         message: 'Unknown provider.'

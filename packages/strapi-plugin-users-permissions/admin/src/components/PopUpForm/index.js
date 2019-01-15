@@ -55,6 +55,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         return `${strapi.backendURL}/connect/microsoft/callback`;
       case 'twitter':
         return `${strapi.backendURL}/connect/twitter/callback`;
+      case 'ibm':
+        return `${strapi.backendURL}/connect/ibm/callback`;
       default: {
         const value = get(this.props.values, 'callback', '');
 
