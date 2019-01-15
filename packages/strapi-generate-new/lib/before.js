@@ -209,7 +209,11 @@ module.exports = (scope, cb) => {
                 scope.database.settings.username = answers.username;
                 scope.database.settings.password = answers.password;
                 scope.database.options.authenticationDatabase = answers.authenticationDatabase;
-                scope.database.settings.ssl = scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+                if (scope.client.database === 'mongo') {
+                  scope.database.settings.ssl = _.toString(answers.ssl) === 'true';
+                } else {
+                  scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+                }
 
                 console.log();
                 console.log('⏳ Testing database connection...');
