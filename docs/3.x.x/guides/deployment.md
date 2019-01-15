@@ -3,7 +3,7 @@
 ### Docker
 
 ::: tip
-You can also deploy using [https://hub.docker.com/r/strapi/strapi](Docker)
+You can also deploy using [Docker](https://hub.docker.com/r/strapi/strapi])
 :::
 
 The method below describes regular deployment using the built-in mechanisms.
