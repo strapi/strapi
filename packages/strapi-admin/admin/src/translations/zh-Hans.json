@@ -72,6 +72,8 @@
   "app.components.ListPluginsPage.description": "项目中已安装的插件列表",
   "app.components.ListPluginsPage.helmet.title": "插件列表",
   "app.components.ListPluginsPage.title": "插件",
+  "app.components.Logout.profile": "轮廓",
+  "app.components.Logout.logout": "登出",
   "app.components.NotFoundPage.back": "返回主页",
   "app.components.NotFoundPage.description": "没有找到",
   "app.components.Official": "官方",
