@@ -210,9 +210,9 @@ module.exports = (scope, cb) => {
                 scope.database.settings.password = answers.password;
                 scope.database.options.authenticationDatabase = answers.authenticationDatabase;
                 if (scope.client.database === 'mongo') {
-                  scope.database.settings.ssl = _.toString(answers.ssl) === 'true';
-                } else {
                   scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+                } else {
+                  scope.database.settings.ssl = _.toString(answers.ssl) === 'true';
                 }
 
                 console.log();
