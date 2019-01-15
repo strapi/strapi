@@ -68,25 +68,17 @@ module.exports = {
         return data.find(entry => entry[ref.primaryKey].toString() === (query.params[ref.primaryKey] || '').toString());
       }
 
+      // Generate constant for skip parameters.
+      // Note: we shouldn't support both way of doing this kind of things in the future.
+      const skip = query.options.start || query.options.skip;
+
       // Extracting ids from original request to map with query results.
-      const ids = (() => {
-        if ( _.get(query.options, `query.${ref.primaryKey}`)) {
-          return  _.get(query.options, `query.${ref.primaryKey}`);
-        }
-
-        // Single object to retrieve (one-to-many).
-        const alias = _.first(Object.keys(query.options.query));
-
-        return {
-          alias,
-          value: _.get(query.options, `query.${alias}`)
-        };
-      })();
+      const ids = this.extractIds(query, ref);
       
       if (!_.isArray(ids)) {
         return data
           .filter(entry => entry[ids.alias].toString() === ids.value.toString())
-          .slice((query.options.start || query.options.skip), (query.options.start || query.options.skip) + query.options.limit);
+          .slice(skip, skip + query.options.limit);
       }
 
       // Critical: don't touch this part until you truly understand what you're doing.
@@ -95,8 +87,22 @@ module.exports = {
       return data
         .filter(entry => entry !== undefined)
         .filter(entry => ids.map(id => id.toString()).includes(entry[ref.primaryKey].toString()))
-        .slice((query.options.start || query.options.skip), (query.options.start || query.options.skip) + query.options.limit);
+        .slice(skip, skip + query.options.limit);
     });
+  },
+
+  extractIds: (query, ref) => {
+    if ( _.get(query.options, `query.${ref.primaryKey}`)) {
+      return  _.get(query.options, `query.${ref.primaryKey}`);
+    }
+
+    // Single object to retrieve (one-to-many).
+    const alias = _.first(Object.keys(query.options.query));
+
+    return {
+      alias,
+      value: _.get(query.options, `query.${alias}`)
+    };
   },
 
   makeQuery: async function(model, query = {}) {
@@ -109,13 +115,17 @@ module.exports = {
     // Construct parameters object sent to the Content Manager service.
     // We are faking the `start`, `skip` and `limit` argument because it doesn't make sense because we are merging different requests in one.
     // Note: we're trying to avoid useless populate for performances. Please be careful if you're updating this part.
+    const populate = ref.associations
+      .filter(association => !association.dominassociationnt && _.isEmpty(association.model))
+      .map(association => association.alias);
+
     const params = {
       ...query.options,
-      populate: ref.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias),
+      populate,
       query: {},
       start: 0,
       skip: 0,
-      limit: 500,
+      limit: 100,
     };
 
     params.query[query.alias] = _.uniq(query.ids.filter(x => !_.isEmpty(x)).map(x => x.toString()));
@@ -145,6 +155,7 @@ module.exports = {
     
     keys.forEach((current, index) => {
       // Extract query options.
+      // Note: the `single` means that we've only one entry to fetch.
       const { single = false, params = {}, association } = current;
       const { query = {}, ...options } = current.options;
   
@@ -154,13 +165,17 @@ module.exports = {
       // Find similar query.
       const indexQueries = queries.findIndex(query => _.isEqual(query.options, options));
 
-      const ids = (() => {
-        if (single) {
-          return [params[ref.primaryKey]];
-        }
-
-        return _.isArray(query[ref.primaryKey]) ? query[ref.primaryKey] : [query[association.via]];
-      })();
+      // Generate array of IDs to fetch.
+      const ids = []; 
+      
+      // Only one entry to fetch.
+      if (single) {
+        ids.push(params[ref.primaryKey]);
+      } else if (_.isArray(query[ref.primaryKey])) {
+        ids.push(...query[ref.primaryKey]);
+      } else {
+        ids.push(query[association.via]);
+      }
 
       if (indexQueries !== -1) {
         // Push to the same query the new IDs to fetch.

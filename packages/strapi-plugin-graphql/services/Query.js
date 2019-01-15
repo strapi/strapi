@@ -167,7 +167,7 @@ module.exports = {
         return async (ctx, next) => {
           ctx.params = {
             ...params,
-            [model.primaryKey]: ctx.params.id,
+            [model.primaryKey]: ctx.query[model.primaryKey],
           };
 
           // Return the controller.
@@ -176,15 +176,7 @@ module.exports = {
       }
 
       // Plural.
-      return async (ctx, next) => {
-        ctx.params = this.amountLimiting(ctx.params);
-        ctx.query = Object.assign(
-          this.convertToParams(_.omit(ctx.params, 'where')),
-          ctx.params.where,
-        );
-
-        return controller(ctx, next);
-      };
+      return controller;
     })();
 
     // The controller hasn't been found.
@@ -233,7 +225,7 @@ module.exports = {
     );
 
     return async (obj, options = {}, { context }) => {
-      options = _.toPlainObject(options);
+      const _options = _.toPlainObject(options);
       
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
@@ -263,8 +255,8 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.query = this.convertToParams(options);
-        context.params = this.amountLimiting(options);
+        context.query = this.convertToParams(_options);
+        context.params = this.amountLimiting(_options);
 
         // Avoid population.
         context.query._populate = model.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias);
@@ -279,7 +271,7 @@ module.exports = {
           return values && values.toJSON ? values.toJSON() : values;
         }
 
-        return resolver.call(null, obj, options, context);
+        return resolver.call(null, obj, _options, context);
       }
 
       // Resolver can be a promise.
