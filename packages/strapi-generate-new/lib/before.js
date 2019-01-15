@@ -190,7 +190,7 @@ module.exports = (scope, cb) => {
                   default: _.get(scope.database, 'authenticationDatabase', undefined)
                 },
                 {
-                  when: !hasDatabaseConfig && scope.client.database === 'mongo',
+                  when: !hasDatabaseConfig,
                   type: 'boolean',
                   name: 'ssl',
                   message: 'Enable SSL connection:',
@@ -209,7 +209,11 @@ module.exports = (scope, cb) => {
                 scope.database.settings.username = answers.username;
                 scope.database.settings.password = answers.password;
                 scope.database.options.authenticationDatabase = answers.authenticationDatabase;
-                scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+                if (scope.client.database === 'mongo') {
+                  scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+                } else {
+                  scope.database.settings.ssl = _.toString(answers.ssl) === 'true';
+                }
 
                 console.log();
                 console.log('⏳ Testing database connection...');
