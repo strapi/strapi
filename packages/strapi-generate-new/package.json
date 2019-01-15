@@ -15,7 +15,7 @@
   "dependencies": {
     "enpeem": "^2.2.0",
     "fs-extra": "^4.0.0",
-    "inquirer": "^4.0.2",
+    "inquirer": "^6.2.1",
     "listr": "^0.14.1",
     "lodash": "^4.17.5",
     "ora": "^2.1.0",

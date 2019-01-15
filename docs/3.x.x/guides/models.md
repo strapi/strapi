@@ -27,6 +27,7 @@ The info key on the model-json states information about the model. This informat
 The options key on the model-json states.
    - `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id'). _Only valid for strapi-hook-bookshelf_
    - `idAttributeType`: Data type of `idAttribute`, accepted list of value bellow. _Only valid for strapi-hook-bookshelf_
+   - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where frist element is create data and second elemtent is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
 ## Define the attributes
 
@@ -56,6 +57,7 @@ If you're using SQL databases, you should use the native SQL constraints to appl
 
   - `required` (boolean) — if true adds a required validator for this property.
   - `unique` (boolean) — whether to define a unique index on this property.
+  - `index` (boolean) — adds an index on this property, this will create a [single field index](https://docs.mongodb.com/manual/indexes/#single-field) that will run in the background (*only supported by MongoDB*).
   - `max` (integer) — checks if the value is greater than or equal to the given minimum.
   - `min` (integer) — checks if the value is less than or equal to the given maximum.
 
@@ -100,7 +102,8 @@ To improve the Developer eXperience when developing or using the administration 
     "age": {
       "type": "integer",
       "min": 18,
-      "max": 99
+      "max": 99,
+      "index": true
     },
     "birthday": {
       "type": "date"
