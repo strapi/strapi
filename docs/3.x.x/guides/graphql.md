@@ -194,7 +194,7 @@ You can also apply different parameters to the query to make more complex querie
   - `<field>_lt`: Lower than.
   - `<field>_lte`: Lower than or equal to.
   - `<field>_gt`: Greater than.
-  - `<field>_gte`: Lower than or equal to.
+  - `<field>_gte`: Greater than or equal to.
   - `<field>_contains`: Contains.
   - `<field>_containss`: Contains sensitive.
 
