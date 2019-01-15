@@ -1,5 +1,13 @@
 # Deployment
 
+### Docker
+
+::: tip
+You can also deploy using [https://hub.docker.com/r/strapi/strapi](Docker)
+:::
+
+The method below describes regular deployment using the built-in mechanisms.
+
 #### #1 - Configure
 
 Update the `production` settings with the IP and domain name where the project will be running.
