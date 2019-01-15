@@ -75,6 +75,8 @@
   "app.components.ListPluginsPage.description": "Список установленных плагинов.",
   "app.components.ListPluginsPage.helmet.title": "Список плагинов",
   "app.components.ListPluginsPage.title": "Плагины",
+  "app.components.Logout.profile": "Профиль",
+  "app.components.Logout.logout": "Выйти",
   "app.components.NotFoundPage.back": "Вернуться на главную",
   "app.components.NotFoundPage.description": "Не найдено",
   "app.components.Official": "Официальный",

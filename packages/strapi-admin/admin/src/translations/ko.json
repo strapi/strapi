@@ -74,6 +74,8 @@
   "app.components.ListPluginsPage.description": "이 프로젝트에 설치된 플러그인 목록입니다.",
   "app.components.ListPluginsPage.helmet.title": "플러그인 목록",
   "app.components.ListPluginsPage.title": "플러그인",
+  "app.components.Logout.profile": "옆모습",
+  "app.components.Logout.logout": "로그 아웃",
   "app.components.NotFoundPage.back": "홈으로 돌아가기",
   "app.components.NotFoundPage.description": "찾을 수 없는 페이지입니다.",
   "app.components.Official": "공식",

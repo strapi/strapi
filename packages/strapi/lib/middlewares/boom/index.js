@@ -37,7 +37,7 @@ module.exports = strapi => {
           ctx.status = error.status || 500;
           ctx.body = _.get(ctx.body, 'isBoom')
             ? ctx.body || error && error.message
-            : Boom.wrap(error, ctx.status, ctx.body || error.message);
+            : Boom.wrap(error, ctx.status);
         }
 
         if (ctx.response.headers.location) {

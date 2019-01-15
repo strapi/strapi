@@ -266,8 +266,10 @@ module.exports = {
       resolvers,
     });
 
-    // Write schema.
-    this.writeGenerateSchema(graphql.printSchema(schema));
+    if (!strapi.config.currentEnvironment.server.production) {
+      // Write schema.
+      this.writeGenerateSchema(graphql.printSchema(schema));
+    }
 
     // Remove custom scaler (like Upload);
     typeDefs = Types.removeCustomScalar(typeDefs, resolvers);

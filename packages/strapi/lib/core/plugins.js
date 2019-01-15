@@ -88,12 +88,18 @@ module.exports = async function() {
     return;
   }
 
+  const existBuildPath = await fs.pathExists(buildPath);
+  if (strapi.config.currentEnvironment.server.production && existBuildPath) {
+    return;
+  } else if (strapi.config.currentEnvironment.server.production && !existBuildPath) {
+    console.log('The plugins.json file is missing and the front-end cannot work without it. Please, create it first at development environment.');
+  }
+
   // arrange system directories
   await Promise.all([
     fs.remove(sourcePath),
 
     (async () => {
-      const existBuildPath = await fs.pathExists(buildPath);
       if (existBuildPath) {
         await fs.remove(buildPath);
       } else {
