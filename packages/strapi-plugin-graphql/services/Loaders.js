@@ -13,6 +13,8 @@ module.exports = {
   loaders: {},
 
   initializeLoader: function() {
+    this.resetLoaders();
+
     // Create loaders for each relational field (exclude core models).
     Object.keys(strapi.models)
       .filter(model => model !== 'core_store')
@@ -28,8 +30,16 @@ module.exports = {
     });
   },
 
+  resetLoaders: () => {
+    this.loaders = {};
+  },
+
   createLoader: function(model, plugin) {
     const name = plugin ? `${plugin}__${model}`: model;
+
+    if (this.loaders[name]) {
+      return this.loaders[name];
+    }
 
     this.loaders[name] = new DataLoader(keys => {
       return new Promise(async (resolve, reject) => {
@@ -116,7 +126,7 @@ module.exports = {
     // We are faking the `start`, `skip` and `limit` argument because it doesn't make sense because we are merging different requests in one.
     // Note: we're trying to avoid useless populate for performances. Please be careful if you're updating this part.
     const populate = ref.associations
-      .filter(association => !association.dominassociationnt && _.isEmpty(association.model))
+      .filter(association => !association.dominant && _.isEmpty(association.model))
       .map(association => association.alias);
 
     const params = {
