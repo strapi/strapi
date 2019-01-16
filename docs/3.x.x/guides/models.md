@@ -176,7 +176,7 @@ A `user` can have one `address`. And this address is only related to this `user`
   "attributes": {
     "address": {
       "model": "address",
-      "via": "user"
+      "via": "tenant"
     }
   }
 }
