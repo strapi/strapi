@@ -225,7 +225,7 @@ module.exports = {
     );
 
     return async (obj, options = {}, { context }) => {
-      const _options = _.toPlainObject(options);
+      const _options = _.cloneDeep(options);
       
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
@@ -255,11 +255,25 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.query = this.convertToParams(_options);
-        context.params = this.amountLimiting(_options);
-
-        // Avoid population.
-        context.query._populate = model.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias);
+        // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
+        // cause a lost of the Object prototype.
+        Object.defineProperties(ctx, {
+          query: {
+            value: {
+              ...this.convertToParams(_.omit(_options, 'where')),
+              ..._options.where,
+              // Avoid population.
+              _populate: model.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias),
+            },
+            writable: true,
+            configurable: true
+          },
+          params: {
+            value: this.convertToParams(this.amountLimiting(_options)),
+            writable: true,
+            configurable: true
+          }
+        });
 
         if (isController) {
           const values = await resolver.call(null, ctx);
@@ -271,7 +285,7 @@ module.exports = {
           return values && values.toJSON ? values.toJSON() : values;
         }
 
-        return resolver.call(null, obj, _options, context);
+        return resolver.call(null, obj, _options, ctx);
       }
 
       // Resolver can be a promise.
