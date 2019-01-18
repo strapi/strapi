@@ -132,7 +132,7 @@ module.exports = {
           email: ctx.request.body.email
         });
 
-        if (user !== null && (user.id || user._id).toString() !== ctx.params._id) {
+        if (user !== null && (user.id || user._id).toString() !== (ctx.params.id || ctx.params._id)) {
           return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
         }
       }
