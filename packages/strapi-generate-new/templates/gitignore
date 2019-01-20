@@ -80,6 +80,7 @@ $RECYCLE.BIN/
 ssl
 .idea
 nbproject
+public/uploads
 
 
 ############################
