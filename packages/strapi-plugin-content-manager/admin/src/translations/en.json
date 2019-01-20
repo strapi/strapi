@@ -96,6 +96,7 @@
   "form.Input.search": "Enable search",
   "form.Input.search.field": "Enable search on this field",
   "form.Input.sort.field": "Enable sort on this field",
+  "form.Input.wysiwyg": "Display as WYSIWYG",
   "notification.error.displayedFields": "You need at least one displayed field",
   "notification.error.relationship.fetch": "An error occurred during relationship fetch.",
   "notification.info.SettingPage.disableSort": "You need to have one attribute with the sorting allowed",

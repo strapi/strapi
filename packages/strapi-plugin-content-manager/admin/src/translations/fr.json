@@ -96,6 +96,7 @@
   "form.Input.search": "Autoriser la recherche",
   "form.Input.search.field": "Autoriser la recherche sur ce champs",
   "form.Input.sort.field": "Autoriser le tri sur ce champs",
+  "form.Input.wysiwyg": "Afficher comme WYSIWYG",
   "notification.error.displayedFields": "Vous devez avoir au moins un champ d'affiché",
   "notification.error.relationship.fetch": "Une erreur est survenue en récupérant les relations.",
   "notification.info.SettingPage.disableSort": "Vous devez avoir au moins un attribut de tri par défaut",
