@@ -40,6 +40,7 @@ module.exports = {
           type = 'Boolean';
           break;
         case 'integer':
+        case 'biginteger':
           type = 'Int';
           break;
         case 'decimal':

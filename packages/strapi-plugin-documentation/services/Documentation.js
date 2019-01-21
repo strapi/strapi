@@ -1313,6 +1313,7 @@ module.exports = {
       case 'double':
         return 'number';
       case 'integer':
+      case 'biginteger':
       case 'long':
         return 'integer';
       default:

@@ -88,7 +88,7 @@ class Manager {
       case 'checkbox':
       case 'boolean':
       case 'date':
-      case 'bigint':
+      case 'biginteger':
       case 'decimal':
       case 'float':
       case 'integer':

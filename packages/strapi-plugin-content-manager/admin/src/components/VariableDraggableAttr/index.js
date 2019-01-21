@@ -31,7 +31,7 @@ const getBootstrapClass = attrType => {
     case 'boolean':
     case 'toggle':
     case 'date':
-    case 'bigint':
+    case 'biginteger':
     case 'decimal':
     case 'float':
     case 'integer':

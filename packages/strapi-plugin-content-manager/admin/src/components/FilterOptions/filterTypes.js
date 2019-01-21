@@ -39,6 +39,7 @@ const getFilters = (type) => {
         },
       ];
     case 'integer':
+    case 'biginteger':
     case 'float':
     case 'decimal':
     case 'date':
