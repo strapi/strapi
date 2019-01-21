@@ -249,7 +249,9 @@ function appReducer(state = initialState, action) {
         });
     // Special case to change the textarea type to WYSIWYG
     case ON_CHANGE_INPUT_TYPE:
-      return state.updateIn(['modifiedSchema', ...action.keys], () => action.value);
+      return state
+        .updateIn(['modifiedSchema', ...action.keys], () => action.value)
+        .update('shouldResetGrid', v => !v);
     case ON_CHANGE_SETTINGS:
       return state
         .updateIn(['modifiedSchema', 'models'].concat(action.keys), () => action.value);

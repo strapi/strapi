@@ -181,11 +181,7 @@ class SettingPage extends React.PureComponent {
 
   getDropDownFieldItems = () => {
     const currentDisplayedFields = this.getEditPageDisplayedFields();
-    const availableFields = get(
-      this.props.schema,
-      ['models', ...this.getPath().split('.'), 'editDisplay', 'availableFields'],
-      {},
-    );
+    const availableFields = this.getEditPageFields();
 
     return Object.keys(availableFields).filter(field => {
       return currentDisplayedFields.indexOf(field) === -1;
@@ -210,6 +206,8 @@ class SettingPage extends React.PureComponent {
   getEditPageDisplayedFields = () => get(this.getEditPageDisplaySettings(), ['fields'], []);
 
   getEditPageDisplayedRelations = () => get(this.getEditPageDisplaySettings(), ['relations'], []);
+
+  getEditPageFields = () => get(this.props.schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'availableFields'], {});
 
   getLayout = () => {
     const {
@@ -454,6 +452,17 @@ class SettingPage extends React.PureComponent {
     const isRemovingSelectedItem = isRelation ? itemName === data.alias : itemName === data.name;
     const displayedRelations = this.getEditPageDisplayedRelations();
     const displayedFields = this.getEditPageDisplayedFields();
+    const allRelations = this.getRelations();
+    const allFields =  Object.keys(get(this.props.schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'availableFields'], {}));
+
+    if (isRemovingSelectedItem && displayedRelations.length === 1 && allFields.length === 0) {
+      return strapi.notification.info('content-manager.notification.error.displayedFields');
+    }
+
+    if (isRemovingSelectedItem && displayedFields.length === 1 && allRelations.length === 0) {
+      return strapi.notification.info('content-manager.notification.error.displayedFields');
+    }
+
 
     if (isRelation) {
       this.props.onRemoveEditViewRelationAttr(index, keys);
@@ -463,8 +472,8 @@ class SettingPage extends React.PureComponent {
 
     if (isRemovingSelectedItem) {
       const selectNextItemCond = isRelation
-        ? displayedRelations.length > 2
-        : displayedFields.length > 2;
+        ? displayedRelations.length > 1
+        : displayedFields.length > 1;
       const selectOtherItemCond = isRelation
         ? displayedFields.length > 0
         : displayedRelations.length > 0;
@@ -900,6 +909,8 @@ class SettingPage extends React.PureComponent {
             <div className={styles.editWrapper}>
               <div className="row">
                 {this.renderForm()}
+                {/* DISPLAY A TOGGLE THAT CHANGES THE TEXTAREA TO WYSIWYG */}
+                {/* @aurelsicoko remove this line if you want to remove this feature */}
                 {this.isEditingTextField() && this.renderInputWysiwyg()}
               </div>
             </div>
@@ -1034,8 +1045,6 @@ class SettingPage extends React.PureComponent {
           <HeaderNav links={this.generateHeaderNavLinks()} />
           <div className={cn('row', styles.container)}>
             {content()}
-            {/* {this.renderListSettings()} */}
-            {/* {this.renderEditSettings()} */}
           </div>
         </div>
       </form>
