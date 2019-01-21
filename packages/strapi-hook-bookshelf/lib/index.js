@@ -423,7 +423,7 @@ module.exports = function(strapi) {
                             type = definition.client === 'pg' ? 'integer' : 'int';
                             break;
                           case 'biginteger':
-                            type = definition.client === 'pg' ? 'bigint' : 'bigint(63)';
+                            type = definition.client === 'pg' ? 'bigint' : 'bigint(53)';
                             break;
                           case 'float':
                             type = definition.client === 'pg' ? 'double precision' : 'double';
