@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const uuid = require('uuid/v4');
+
 const { packageManager } = require('strapi-utils');
 
 /**
@@ -72,7 +72,7 @@ module.exports = scope => {
     }],
     'strapi': {
       'packageManager': pkgManager,
-      'uuid': uuid()
+      'uuid': scope.uuid
     },
     'engines': {
       "node": ">= 10.0.0",
