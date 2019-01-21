@@ -420,8 +420,10 @@ module.exports = function(strapi) {
                             type = 'varchar(255)';
                             break;
                           case 'integer':
+                            type = definition.client === 'pg' ? 'integer' : 'int';
+                            break;
                           case 'biginteger':
-                            type = definition.client === 'pg' ? 'bigint' : 'bigint';
+                            type = definition.client === 'pg' ? 'bigint' : 'bigint(63)';
                             break;
                           case 'float':
                             type = definition.client === 'pg' ? 'double precision' : 'double';
