@@ -92,6 +92,7 @@ class Manager {
       case 'decimal':
       case 'float':
       case 'integer':
+      case 'biginteger':
       case 'number':
         return 4;
       case 'json':
