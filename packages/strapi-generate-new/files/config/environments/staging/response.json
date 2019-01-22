@@ -6,6 +6,7 @@
     "enabled": false
   },
   "poweredBy": {
-    "enabled": false
+    "enabled": true,
+    "value": "Strapi <strapi.io>"
   }
 }
