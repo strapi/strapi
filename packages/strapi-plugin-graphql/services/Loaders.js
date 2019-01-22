@@ -30,12 +30,17 @@ module.exports = {
     });
   },
 
-  resetLoaders: () => {
+  resetLoaders: function () {
     this.loaders = {};
   },
 
   createLoader: function(model, plugin) {
     const name = plugin ? `${plugin}__${model}`: model;
+
+    // Exclude polymorphic from loaders.
+    if (name === undefined) {
+      return;
+    }
 
     if (this.loaders[name]) {
       return this.loaders[name];
