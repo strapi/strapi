@@ -132,7 +132,7 @@ module.exports = {
     const params = {
       ...query.options,
       populate,
-      query: {},
+      query: query.options.where || {},
       start: 0,
       skip: 0,
       limit: 100,
