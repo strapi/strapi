@@ -58,13 +58,15 @@ module.exports = function() {
               $('body').attr('back', `/`);
             }
 
-            fs.writeFile(sourcePath, $.html(), (err) => {
-              if (err) {
-                return reject(err);
-              }
+            if (!strapi.config.currentEnvironment.server.production) {
+              fs.writeFile(sourcePath, $.html(), (err) => {
+                if (err) {
+                  return reject(err);
+                }
 
-              resolve();
-            });
+                resolve();
+              });
+            }
           });
         });
       });
