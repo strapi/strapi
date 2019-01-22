@@ -339,6 +339,9 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or not GZIP response compression.
  - `responseTime`
   - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
+ - `poweredBy`
+  - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: depends on the environment.
+  - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
 
 ***
 

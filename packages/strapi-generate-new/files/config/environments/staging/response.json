@@ -4,5 +4,8 @@
   },
   "responseTime": {
     "enabled": false
+  },
+  "poweredBy": {
+    "enabled": false
   }
 }

@@ -207,6 +207,15 @@ module.exports = {
             validations: {
               required: true
             }
+          },
+          {
+            name: 'form.response.item.poweredBy.enabled',
+            target: 'response.poweredBy.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.response.poweredBy.enabled`, null),
+            validations: {
+              required: true
+            }
           }
         ]
       }
