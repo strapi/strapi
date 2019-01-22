@@ -75,6 +75,8 @@
   "app.components.ListPluginsPage.description": "Projedeki yüklenen eklentiler.",
   "app.components.ListPluginsPage.helmet.title": "Eklenti Listesi",
   "app.components.ListPluginsPage.title": "Etklentiler",
+  "app.components.Logout.profile": "Profil",
+  "app.components.Logout.logout": "Çıkış Yap",
   "app.components.NotFoundPage.back": "Anasayfaya geri dön",
   "app.components.NotFoundPage.description": "Bulunamadı",
   "app.components.Official": "Resmi",

@@ -1,3 +1,4 @@
+/* global <%= globalID %> */
 'use strict';
 
 /**

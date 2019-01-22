@@ -75,6 +75,8 @@
   "app.components.ListPluginsPage.description": "Lijst van alle plugins voor dit project",
   "app.components.ListPluginsPage.helmet.title": "Alle extensies",
   "app.components.ListPluginsPage.title": "Extensies",
+  "app.components.Logout.profile": "Profil",
+  "app.components.Logout.logout": "Log ud",
   "app.components.NotFoundPage.back": "Terug naar home pagina",
   "app.components.NotFoundPage.description": "Niets gevonden",
   "app.components.Official": "Officieel",

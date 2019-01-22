@@ -17,6 +17,7 @@ const {cyan} = require('chalk');
 const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const shell = require('shelljs');
+const uuid = require('uuid/v4');
 
 // Logger.
 const { packageManager } = require('strapi-utils');
@@ -46,6 +47,7 @@ module.exports = (scope, cb) => {
   // Make changes to the rootPath where the Strapi project will be created.
   scope.rootPath = path.resolve(process.cwd(), scope.name || '');
   scope.tmpPath = path.resolve(os.tmpdir(), `strapi${ crypto.randomBytes(6).toString('hex') }`);
+  scope.uuid = uuid();
 
   // Ensure we aren't going to inadvertently delete any files.
   try {
@@ -190,7 +192,7 @@ module.exports = (scope, cb) => {
                   default: _.get(scope.database, 'authenticationDatabase', undefined)
                 },
                 {
-                  when: !hasDatabaseConfig && scope.client.database === 'mongo',
+                  when: !hasDatabaseConfig,
                   type: 'boolean',
                   name: 'ssl',
                   message: 'Enable SSL connection:',
@@ -209,7 +211,11 @@ module.exports = (scope, cb) => {
                 scope.database.settings.username = answers.username;
                 scope.database.settings.password = answers.password;
                 scope.database.options.authenticationDatabase = answers.authenticationDatabase;
-                scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+                if (scope.client.database === 'mongo') {
+                  scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+                } else {
+                  scope.database.settings.ssl = _.toString(answers.ssl) === 'true';
+                }
 
                 console.log();
                 console.log('⏳ Testing database connection...');
