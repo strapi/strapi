@@ -1,5 +1,4 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
-import moment from 'moment';
 import { findIndex, get, isArray, isEmpty, includes, isNumber, isString, map } from 'lodash';
 import {
   all,
@@ -96,7 +95,7 @@ export function* submit() {
           cleanedData = record[current];
           break;
         case 'date':
-          cleanedData = moment(record[current]).format();
+          cleanedData = record[current]._isAMomentObject === true ? record[current].format() : record[current];
           break;
         default:
           cleanedData = cleanData(record[current], 'value', 'id');
