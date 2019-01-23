@@ -198,7 +198,12 @@ module.exports = {
             validations: {
               required: true
             }
-          },
+          }
+        ]
+      },
+      {
+        name: '',
+        items: [
           {
             name: 'form.response.item.responseTime.enabled',
             target: 'response.responseTime.enabled',
@@ -207,7 +212,12 @@ module.exports = {
             validations: {
               required: true
             }
-          },
+          }
+        ]
+      },
+      {
+        name: '',
+        items: [
           {
             name: 'form.response.item.poweredBy.enabled',
             target: 'response.poweredBy.enabled',
