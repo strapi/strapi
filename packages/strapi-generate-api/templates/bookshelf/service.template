@@ -1,3 +1,4 @@
+/* global <%= globalID %> */
 'use strict';
 
 /**
@@ -46,7 +47,7 @@ module.exports = {
       qb.offset(filters.start);
       qb.limit(filters.limit);
     }).fetchAll({
-      withRelated: populate
+      withRelated: filters.populate || populate
     });
   },
 

@@ -161,6 +161,10 @@ module.exports = {
       id: params.id
     });
 
+    if (!response) {
+      throw `This resource doesn't exist.`;
+    }
+
     params[primaryKey] = response[primaryKey];
     params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
       const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
