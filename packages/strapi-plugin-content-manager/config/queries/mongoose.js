@@ -143,8 +143,8 @@ module.exports = {
   delete: async function (params) {
     // Delete entry.
     return this
-      .remove({
-        [this.primaryKey]: params.id
+      .findOneAndDelete({
+        [this.primaryKey]: params.id,
       });
   },
 
