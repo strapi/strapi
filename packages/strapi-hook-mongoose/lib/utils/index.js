@@ -17,7 +17,7 @@ module.exports = (mongoose = new Mongoose()) => {
     return this.toString();
   };
 
-  return {
+  const fn = {
     convertType: mongooseType => {
       switch (mongooseType.toLowerCase()) {
         case 'array':
@@ -52,4 +52,6 @@ module.exports = (mongoose = new Mongoose()) => {
       }
     }
   };
+
+  return fn;
 };

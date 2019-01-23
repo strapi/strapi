@@ -194,18 +194,35 @@ export class HomePage extends React.Component {
 }
 
 HomePage.defaultProps = {
+  currentDocVersion: '',
+  didCheckErrors: false,
+  docVersions: [],
   form: [],
+  formErrors: [],
+  isLoading: true,
+  onChange: () => {},
   onClickDeleteDoc: () => {},
   onConfirmDeleteDoc: () => {},
   onSubmit: () => {},
+  onUpdateDoc: () => {},
+  versionToDelete: '',
+
 };
 
 HomePage.propTypes = {
+  currentDocVersion: PropTypes.string,
+  didCheckErrors: PropTypes.bool,
+  docVersions: PropTypes.array,
   form: PropTypes.array,
+  formErrors: PropTypes.array,
   getDocInfos: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool,
+  onChange: PropTypes.func,
   onClickDeleteDoc: PropTypes.func,
   onConfirmDeleteDoc: PropTypes.func,
   onSubmit: PropTypes.func,
+  onUpdateDoc: PropTypes.func,
+  versionToDelete: PropTypes.string,
 };
 
 function mapDispatchToProps(dispatch) {

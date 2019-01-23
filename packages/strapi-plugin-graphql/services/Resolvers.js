@@ -9,6 +9,7 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const Aggregator = require('./Aggregator');
+const Loaders = require('./Loaders');
 const Query = require('./Query.js');
 const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
@@ -379,20 +380,21 @@ module.exports = {
               : strapi.models[params.model];
 
             if (association.type === 'model') {
-              params.id = _.get(obj, [association.alias, ref.primaryKey], obj[association.alias]);
+              params[ref.primaryKey] = _.get(obj, [association.alias, ref.primaryKey], obj[association.alias]);
             } else {
               // Apply optional arguments to make more precise nested request.
               const convertedParams = strapi.utils.models.convertParams(
                 name,
                 Query.convertToParams(Query.amountLimiting(options)),
               );
+
               const where = strapi.utils.models.convertParams(
                 name,
                 options.where || {},
               );
 
               // Limit, order, etc.
-              Object.assign(queryOpts, convertedParams);
+              Object.assign(queryOpts, convertedParams, { where: where.where });
 
               // Skip.
               queryOpts.skip = convertedParams.start;
@@ -404,24 +406,23 @@ module.exports = {
                       return related[ref.primaryKey] || related;
                     }
                   );
+                  
+                  Object.assign(queryOpts, {
+                    ...queryOpts,
+                    query: {
+                      [ref.primaryKey]: arrayOfIds
+                    }
+                  });
 
-                  // Where.
-                  queryOpts.query = strapi.utils.models.convertParams(name, {
-                    // Construct the "where" query to only retrieve entries which are
-                    // related to this entry.
-                    [ref.primaryKey]: arrayOfIds,
-                    ...where.where,
-                  }).where;
                   break;
                 }
                 default:
-                  // Where.
-                  queryOpts.query = strapi.utils.models.convertParams(name, {
-                    // Construct the "where" query to only retrieve entries which are
-                    // related to this entry.
-                    [association.via]: obj[ref.primaryKey],
-                    ...where.where,
-                  }).where;
+                  Object.assign(queryOpts, {
+                    ...queryOpts,
+                    query: {
+                      [association.via]: obj[ref.primaryKey]
+                    }
+                  });
               }
             }
 
@@ -429,20 +430,20 @@ module.exports = {
               queryOpts.query.hasOwnProperty('id') &&
               queryOpts.query.id.hasOwnProperty('value') &&
               Array.isArray(queryOpts.query.id.value)
-            ){
+            ) {
               queryOpts.query.id.symbol = 'IN';
             }
 
-            const value = await (association.model
-              ? resolvers.fetch(params, association.plugin, [])
-              : resolvers.fetchAll(params, { ...queryOpts, populate: [] }));
+            const loaderName = association.plugin ? `${association.plugin}__${params.model}`: params.model;
 
-            return value && value.toJSON ? value.toJSON() : value;
+            return association.model ?
+              Loaders.loaders[loaderName].load({ params, options: queryOpts, single: true }):
+              Loaders.loaders[loaderName].load({ options: queryOpts, association });
           },
         });
       });
 
       return acc;
     }, initialState);
-  },
+  }
 };

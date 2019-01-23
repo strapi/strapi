@@ -75,6 +75,8 @@
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
   "app.components.ListPluginsPage.description": "Liste aller im Projekt installierten Plugins.",
   "app.components.ListPluginsPage.helmet.title": "Plugins anzeigen",
+  "app.components.Logout.profile": "Profil",
+  "app.components.Logout.logout": "Ausloggen",
   "app.components.ListPluginsPage.title": "Plugins",
   "app.components.NotFoundPage.back": "Zurück zur Homepage",
   "app.components.NotFoundPage.description": "Nicht gefunden",

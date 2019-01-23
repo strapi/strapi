@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-upload-cloudinary",
-  "version": "3.0.0-alpha.18",
+  "version": "3.0.0-alpha.20",
   "description": "Cloudinary provider for strapi upload",
   "homepage": "http://strapi.io",
   "keywords": [
