@@ -49,6 +49,7 @@
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "Antwortzeit",
   "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "Wert",
   "form.response.name": "Antwort",
   "form.security.description": "Verwalte deine Sicherheitseinstellungen.",
   "form.security.item.cors": "Cors",
