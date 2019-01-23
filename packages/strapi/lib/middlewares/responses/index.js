@@ -22,8 +22,8 @@ module.exports = () => {
         }
 
         // Set X-Powered-By header.
-        if (_.get(strapi.config.currentEnvironment.response, 'poweredBy.enabled', null)) {
-          ctx.set('X-Powered-By', _.get(strapi.config.currentEnvironment.response, 'poweredBy.value'));
+        if (_.get(strapi.config.currentEnvironment.response, 'poweredBy.enabled')) {
+          ctx.set('X-Powered-By', _.get(strapi.config.currentEnvironment.response, 'poweredBy.value', 'Strapi <strapi.io>'));
         }
       });
       cb();
