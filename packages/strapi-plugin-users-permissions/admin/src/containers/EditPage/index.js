@@ -110,7 +110,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
   showLoaderForm = () => {
     const { editPage: { modifiedData }, match: { params: { actionType } } } = this.props;
 
-    return actionType !== 'create' && get(modifiedData, ['name'], '') === '';
+    return actionType !== 'create' && isEmpty(modifiedData);
   }
 
   showLoaderPermissions = () => {
