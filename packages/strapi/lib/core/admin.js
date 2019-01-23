@@ -66,6 +66,8 @@ module.exports = function() {
 
                 resolve();
               });
+            } else {
+              resolve();
             }
           });
         });
