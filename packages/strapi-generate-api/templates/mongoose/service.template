@@ -32,7 +32,7 @@ module.exports = {
       .sort(filters.sort)
       .skip(filters.start)
       .limit(filters.limit)
-      .populate(populate);
+      .populate(filters.populate || populate);
   },
 
   /**
