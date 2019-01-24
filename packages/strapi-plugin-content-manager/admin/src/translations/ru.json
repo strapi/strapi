@@ -51,7 +51,7 @@
   "containers.SettingPage.attributes": "Поля атрибутов",
   "containers.SettingPage.attributes.description": "Определить порядок атрибутов",
   "containers.SettingPage.listSettings.description": "Настройки списка записей для этого Типа Контента",
-  "containers.SettingPage.listSettings.title": "Список — Настройки",
+  "containers.SettingPage.listSettings.title": "Список (hастройки)",
   "containers.SettingPage.pluginHeaderDescription": "Отдельные настройки для этого Типа Контента",
   "containers.SettingsPage.Block.contentType.description": "Настроить отдельные параметры",
   "containers.SettingsPage.Block.contentType.title": "Типы Контента",

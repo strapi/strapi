@@ -820,7 +820,6 @@ class SettingPage extends React.PureComponent {
     return (
       <Block
         title="content-manager.containers.SettingPage.editSettings.description" // Previously description
-        // titrle="content-manager.containers.SettingPage.editSettings.title"
         style={{ paddingBottom: '30px', paddingTop: '25px' }}
       >
         <div className="row">
