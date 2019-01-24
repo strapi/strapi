@@ -66,7 +66,10 @@ module.exports = {
     'public/uploads': {
       folder: {}
     },
-
+    // Copy gitkeep into uploads directory.
+    'public/uploads/.gitkeep': {
+      copy: 'gitkeep'
+    },
     // Empty node_modules directory.
     'node_modules': {
       folder: {}

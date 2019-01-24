@@ -216,6 +216,7 @@ module.exports = function (strapi) {
                   collection.schema.set('timestamps', timestamps);
                 } else {
                   collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+                  _.set(definition, 'options.timestamps', _.get(definition, 'options.timestamps') === true ? ['createdAt', 'updatedAt'] : false);
                 }
                 collection.schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
@@ -521,6 +522,10 @@ module.exports = function (strapi) {
         case '_limit':
           result.key = 'limit';
           result.value = parseFloat(value);
+          break;
+        case '_populate':
+          result.key = `populate`;
+          result.value = value;
           break;
         case '_contains':
           result.key = `where.${key}`;

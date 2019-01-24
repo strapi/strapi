@@ -86,6 +86,16 @@ module.exports = function(strapi) {
               primaryKey: 'id',
               primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer')
             });
+
+            // Use default timestamp column names if value is `true`
+            if (_.get(definition, 'options.timestamps', false) === true) {
+              _.set(definition, 'options.timestamps', ['created_at', 'updated_at']);
+            }
+            // Use false for values other than `Boolean` or `Array`
+            if (!_.isArray(_.get(definition, 'options.timestamps')) && !_.isBoolean(_.get(definition, 'options.timestamps'))) {
+              _.set(definition, 'options.timestamps', false);
+            }
+
             // Register the final model for Bookshelf.
             const loadedModel = _.assign({
               tableName: definition.collectionName,
@@ -100,14 +110,7 @@ module.exports = function(strapi) {
                 return acc;
               }, {})
             }, definition.options);
-            // Use default timestamp column names if value is `true`
-            if (_.get(loadedModel, 'hasTimestamps') === true) {
-              _.set(loadedModel, 'hasTimestamps', ['created_at', 'updated_at']);
-            }
-            // Use false for values other than `Boolean` or `Array`
-            if (!_.isArray(_.get(loadedModel, 'hasTimestamps')) && !_.isBoolean(_.get(loadedModel, 'hasTimestamps'))) {
-              _.set(loadedModel, 'hasTimestamps', false);
-            }
+
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
               loadedModel.toJSON = function(options = {}) {
                 const { shallow = false, omitPivot = false } = options;
@@ -1070,6 +1073,10 @@ module.exports = function(strapi) {
         case '_limit':
           result.key = 'limit';
           result.value = parseFloat(value);
+          break;
+        case '_populate':
+          result.key = 'populate';
+          result.value = value;
           break;
         case '_contains':
         case '_containss':
