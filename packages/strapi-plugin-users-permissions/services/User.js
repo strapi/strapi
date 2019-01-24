@@ -141,5 +141,56 @@ module.exports = {
 
   validatePassword: (password, hash) => {
     return bcrypt.compareSync(password, hash);
+  },
+
+  /**
+   * Promise to search a/an user.
+   *
+   * @return {Promise}
+   */
+
+  search: async (params) => {
+    // Convert `params` object to filters compatible with Mongo.
+    const filters = strapi.utils.models.convertParams('user', params);
+    // Select field to populate.
+    const populate = strapi.query('user', 'users-permissions').associations
+      .filter(ast => ast.autoPopulate !== false)
+      .map(ast => ast.alias)
+      .join(' ');
+
+    console.log(strapi.query('user', 'users-permissions'));
+    console.log(strapi.query('user', 'users-permissions').attributes);
+
+    const $or = Object.keys(strapi.query('user', 'users-permissions').attributes).reduce((acc, curr) => {
+      switch (strapi.query('user', 'users-permissions').attributes[curr].type) {
+        case 'integer':
+        case 'float':
+        case 'decimal':
+          if (!_.isNaN(_.toNumber(params._q))) {
+            return acc.concat({ [curr]: params._q });
+          }
+
+          return acc;
+        case 'string':
+        case 'text':
+        case 'password':
+          return acc.concat({ [curr]: { $regex: params._q, $options: 'i' } });
+        case 'boolean':
+          if (params._q === 'true' || params._q === 'false') {
+            return acc.concat({ [curr]: params._q === 'true' });
+          }
+
+          return acc;
+        default:
+          return acc;
+      }
+    }, []);
+
+    return strapi.query('user', 'users-permissions')
+      .find({ $or })
+      .sort(filters.sort)
+      .skip(filters.start)
+      .limit(filters.limit)
+      .populate(populate);
   }
 };

@@ -17,7 +17,13 @@ module.exports = {
    */
 
   find: async (ctx) => {
-    let data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query);
+    let data;
+    if (ctx.query._q) {
+      data = await strapi.plugins['users-permissions'].services.user.search(ctx.query);
+    } else {
+      data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query);
+    }
+
     data.reduce((acc, user) => {
       acc.push(_.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']));
       return acc;
@@ -163,7 +169,7 @@ module.exports = {
 
   destroy: async (ctx) => {
     const data = await strapi.plugins['users-permissions'].services.user.remove(ctx.params);
-    
+
     // Send 200 `ok`
     ctx.send(data);
   },
