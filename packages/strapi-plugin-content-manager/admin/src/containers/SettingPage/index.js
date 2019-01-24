@@ -41,22 +41,30 @@ import {
   makeSelectShouldResetGrid,
   makeSelectSubmitSuccess,
 } from 'containers/App/selectors';
+
 import BackHeader from 'components/BackHeader';
-import Input from 'components/InputsIndex';
-import HeaderNav from 'components/HeaderNav';
-import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning';
 import Block from 'components/Block';
 import CustomDragLayer from 'components/CustomDragLayer';
 import DraggableAttr from 'components/DraggableAttr';
+import FormTitle from 'components/FormTitle';
+import HeaderNav from 'components/HeaderNav';
+import Input from 'components/InputsIndex';
+import InputSelect from 'components/InputSelect';
+import PluginHeader from 'components/PluginHeader';
+import PopUpWarning from 'components/PopUpWarning';
 import VariableDraggableAttr from 'components/VariableDraggableAttr';
+
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
+
 import { onClickEditField, onClickEditListItem, onClickEditRelation } from './actions';
-import forms from './forms.json';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectSettingPage from './selectors';
+
+import SectionTitle from './SectionTitle';
+
+import forms from './forms.json';
 import styles from './styles.scss';
 
 
@@ -787,9 +795,10 @@ class SettingPage extends React.PureComponent {
     );
   };
 
-  renderInputMainSettings = (input, i) => {
+  renderInputMainSettings = input => {
     const inputName = `${this.getPath()}.${input.name}`;
-    const content = (
+
+    return (
       <Input
         {...input}
         key={input.name}
@@ -799,19 +808,6 @@ class SettingPage extends React.PureComponent {
         value={this.getValue(inputName, input.type)}
       />
     );
-
-    if (i === 3) {
-      return (
-        <React.Fragment key={input.name}>
-          <div className="col-md-12">
-            <div className={styles.separator} />
-          </div>
-          {content}
-        </React.Fragment>
-      );
-    }
-
-    return content;
   };
 
   renderEditSettings = () => {
@@ -819,12 +815,31 @@ class SettingPage extends React.PureComponent {
 
     return (
       <Block
-        title="content-manager.containers.SettingPage.editSettings.description" // Previously description
-        style={{ paddingBottom: '30px', paddingTop: '25px' }}
+        style={{ marginBottom: '13px', paddingBottom: '30px', paddingTop: '25px' }}
       >
+        <SectionTitle isSettings />
+        <div className="row">
+          <div className={cn('col-md-12', styles.editFormTitle)}>
+            <FormTitle
+              title="content-manager.containers.SettingPage.editSettings.entry.title"
+              description="content-manager.containers.SettingPage.editSettings.entry.title.description"
+            />
+          </div>
+          <div className="col-md-4">
+            <InputSelect style={{ marginBottom: '6px' }} name="k" selectOptions={['1']} value='1' />
+          </div>
+          <div className="col-md-12">
+            <div className={styles.separatorHigher} />
+          </div>
+        </div>
+
+        <SectionTitle />
         <div className="row">
           <div className={cn('col-md-8', styles.draggedDescription, styles.edit_settings)}>
-            <FormattedMessage id="content-manager.containers.SettingPage.attributes" />
+            <FormTitle
+              title="content-manager.global.displayedFields"
+              description="content-manager.containers.SettingPage.editSettings.description"
+            />
             <div className={cn(styles.sort_wrapper, 'col-md-12', styles.padded)}>
               <CustomDragLayer />
               <div className={cn('row', styles.noPadding)}>
@@ -862,7 +877,10 @@ class SettingPage extends React.PureComponent {
           {/* RELATIONS SORT */}
           {this.hasRelations() && (
             <div className={cn('col-md-4', styles.draggedDescription, styles.edit_settings)}>
-              <FormattedMessage id="content-manager.containers.SettingPage.relations" />
+              <FormTitle
+                title="content-manager.containers.SettingPage.relations"
+                description="content-manager.containers.SettingPage.editSettings.description"
+              />
               <div className={cn(styles.sort_wrapper, 'col-md-12')}>
                 <div className="row">
                   {/* DRAGGABLE BLOCK */}
@@ -905,7 +923,7 @@ class SettingPage extends React.PureComponent {
         {/* EDIT MAIN ATTR FORM */}
         <div className="row">
           <div className="col-md-8">
-            <div className={styles.editWrapper}>
+            <div className={styles.editWrapper} style={{ paddingTop: '26px' }}>
               <div className="row">
                 {this.renderForm()}
                 {/* DISPLAY A TOGGLE THAT CHANGES THE TEXTAREA TO WYSIWYG */}
@@ -925,62 +943,57 @@ class SettingPage extends React.PureComponent {
 
     return (
       <Block
-        title="content-manager.containers.SettingPage.listSettings.description" // Previous description
-        // titele="content-manager.containers.SettingPage.listSettings.title"
         style={{ marginBottom: '13px', paddingBottom: '30px', paddingTop: '25px' }}
       >
-        <div className={styles.ctmForm}>
-          <div className="row">
-            {/* GENERAL LIST SETTINGS FORM */}
-            <div className="col-md-12">
-              <div className="row">{forms.inputs.map(this.renderInputMainSettings)}</div>
-            </div>
+        <SectionTitle isSettings />
+        <div className="row">
+          {/* GENERAL LIST SETTINGS FORM */}
+          <div className="col-md-12">
+            <div className="row">{forms.inputs.map(this.renderInputMainSettings)}</div>
+          </div>
 
-            <div className="col-md-12">
-              <div className={styles.separatorHigher} />
+          <div className="col-md-12">
+            <div className={styles.separatorHigher} />
+          </div>
+        </div>
+        <SectionTitle />
+        <div className="row">
+          <div className={cn('col-md-12', styles.draggedDescription)}>
+            <FormTitle
+              title="content-manager.global.displayedFields"
+              description="content-manager.containers.SettingPage.attributes.description"
+            />
+          </div>
+
+          <div className="col-md-5">
+            {this.getListDisplay().map(this.renderDraggableAttrListSettings)}
+            <div
+              className={cn(
+                styles.dropdownWrapper,
+                isOpen && styles.dropdownWrapperOpen,
+                this.shouldDisplayCursorNotAllowed('list') && styles.dropDownNotAllowed,
+              )}
+            >
+              <ButtonDropdown isOpen={isOpen} toggle={this.toggleDropdown}>
+                <DropdownToggle>
+                  <FormattedMessage id="content-manager.containers.SettingPage.addField">
+                    {this.renderDropDownP}
+                  </FormattedMessage>
+                </DropdownToggle>
+                <DropdownMenu>
+                  {this.getDropDownItems().map(this.renderDropDownItemListSettings)}
+                </DropdownMenu>
+              </ButtonDropdown>
             </div>
           </div>
 
-          <div className={styles.listDisplayWrapper}>
-            <div className="row">
-              <div className={cn('col-md-12', styles.draggedDescription)}>
-                <FormattedMessage id="content-manager.containers.SettingPage.attributes" />
-                <p>
-                  <FormattedMessage id="content-manager.containers.SettingPage.attributes.description" />
-                </p>
-              </div>
-
-              <div className="col-md-5">
-                {this.getListDisplay().map(this.renderDraggableAttrListSettings)}
-                <div
-                  className={cn(
-                    styles.dropdownWrapper,
-                    isOpen && styles.dropdownWrapperOpen,
-                    this.shouldDisplayCursorNotAllowed('list') && styles.dropDownNotAllowed,
-                  )}
-                >
-                  <ButtonDropdown isOpen={isOpen} toggle={this.toggleDropdown}>
-                    <DropdownToggle>
-                      <FormattedMessage id="content-manager.containers.SettingPage.addField">
-                        {this.renderDropDownP}
-                      </FormattedMessage>
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      {this.getDropDownItems().map(this.renderDropDownItemListSettings)}
-                    </DropdownMenu>
-                  </ButtonDropdown>
-                </div>
-              </div>
-
-              {/* LIST ATTR FORM */}
-              <div className="col-md-7">
-                <div className={styles.editWrapper}>
-                  <div className="row">{forms.editList.map(this.renderFormListAttrSettings)}</div>
-                </div>
-              </div>
-              {/* LIST ATTR FORM */}
+          {/* LIST ATTR FORM */}
+          <div className="col-md-7">
+            <div className={styles.editWrapper}>
+              <div className="row">{forms.editList.map(this.renderFormListAttrSettings)}</div>
             </div>
           </div>
+          {/* LIST ATTR FORM */}
         </div>
       </Block>
     );
