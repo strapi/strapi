@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.0.0-alpha.17",
+  "version": "3.0.0-alpha.21",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -24,11 +24,11 @@
   "dependencies": {
     "immutable": "^3.8.2",
     "pluralize": "^7.0.0",
-    "strapi-generate": "3.0.0-alpha.17",
-    "strapi-generate-api": "3.0.0-alpha.17"
+    "strapi-generate": "3.0.0-alpha.21",
+    "strapi-generate-api": "3.0.0-alpha.21"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.17"
+    "strapi-helper-plugin": "3.0.0-alpha.21"
   },
   "author": {
     "name": "Strapi team",

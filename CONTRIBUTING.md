@@ -32,6 +32,8 @@ If you send a pull request, please do it against the `master` branch. We are dev
 ## Setup Development Environment
 To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/installation.html#requirements)
 
+**Note: Fish shell users** - due to the way fish shell deals with symlinks, the following steps will not work.
+
 Then, please follow the instructions below:
 
 #### 1. ▪️ Fork the repository
@@ -72,7 +74,7 @@ npm run setup:build
 
 You can open a new terminal window and go into any folder you want for the next steps.
 ```bash
-cd /.../workspace/
+cd ../workspace/
 ```
 
 The command to generate a project is the same, except you have to add the `--dev` argument at the end of line.

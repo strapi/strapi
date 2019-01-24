@@ -60,7 +60,9 @@ module.exports = function (strapi) {
 
         // Connect to mongo database
         const connectOptions = {};
-        const options = {};
+        const options = {
+          useFindAndModify: false
+        };
 
         if (!_.isEmpty(username)) {
           connectOptions.user = username;
@@ -77,6 +79,7 @@ module.exports = function (strapi) {
         connectOptions.ssl = ssl === true || ssl === 'true';
         connectOptions.useNewUrlParser = true;
         connectOptions.dbName = database;
+        connectOptions.useCreateIndex = true;
 
         options.debug = debug === true || debug === 'true';
 
@@ -207,7 +210,17 @@ module.exports = function (strapi) {
                   });
                 });
 
-                collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+                // Use provided timestamps if the elemnets in the array are string else use default.
+                if (_.isArray(_.get(definition, 'options.timestamps'))) {
+                  const timestamps = {
+                    createdAt: _.isString(_.get(definition, 'options.timestamps[0]')) ? _.get(definition, 'options.timestamps[0]') : 'createdAt',
+                    updatedAt: _.isString(_.get(definition, 'options.timestamps[1]')) ? _.get(definition, 'options.timestamps[1]') : 'updatedAt'
+                  };
+                  collection.schema.set('timestamps', timestamps);
+                } else {
+                  collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+                  _.set(definition, 'options.timestamps', _.get(definition, 'options.timestamps') === true ? ['createdAt', 'updatedAt'] : false);
+                }
                 collection.schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
                 collection.schema.options.toObject = collection.schema.options.toJSON = {
@@ -512,6 +525,10 @@ module.exports = function (strapi) {
         case '_limit':
           result.key = 'limit';
           result.value = parseFloat(value);
+          break;
+        case '_populate':
+          result.key = `populate`;
+          result.value = value;
           break;
         case '_contains':
           result.key = `where.${key}`;

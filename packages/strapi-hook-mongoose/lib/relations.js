@@ -239,7 +239,7 @@ module.exports = {
 
     virtualFields.push(
       this
-        .update({
+        .updateOne({
           [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey)
         }, values, {
           strict: false

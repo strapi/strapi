@@ -14,9 +14,19 @@ module.exports = (scope, success, error) => {
   if (scope.client.database === 'sqlite' && !fs.existsSync(directory)){
     fs.mkdirSync(directory);
   }
+  
+  let knex;
+
+  try {
+    // eslint-disable-next-line import/no-unresolved
+    knex = require('knex');
+  } catch (err) {
+    // eslint-disable-next-line import/no-unresolved
+    knex = require(path.resolve(scope.tmpPath, 'node_modules', 'knex'));
+  }
 
   // eslint-disable-next-line import/no-unresolved
-  const knex = require('knex')({
+  knex = knex({
     client: scope.client.module,
     connection: Object.assign({}, scope.database.settings, {
       user: scope.database.settings.username
@@ -44,20 +54,24 @@ module.exports = (scope, success, error) => {
       };
 
       if (tables.rows && tables.rows.length !== 0) {
-        console.log('🤔 It seems that your database is not empty. Be aware that Strapi is going to automatically creates tables & columns, and might update columns which can corrupt data or cause data loss.');
+        if (scope.dbforce) {
+          next();
+        } else {
+          console.log('🤔 It seems that your database is not empty. Be aware that Strapi is going to automatically creates tables & columns, and might update columns which can corrupt data or cause data loss.');
 
-        inquirer.prompt([{
-          type: 'confirm',
-          name: 'confirm',
-          message: `Are you sure you want to continue with the ${scope.database.settings.database} database:`,
-        }])
-          .then(({ confirm }) => {
-            if (confirm) {
-              next();
-            } else {
-              error();
-            }
-          });
+          inquirer.prompt([{
+            type: 'confirm',
+            name: 'confirm',
+            message: `Are you sure you want to continue with the ${scope.database.settings.database} database:`,
+          }])
+            .then(({ confirm }) => {
+              if (confirm) {
+                next();
+              } else {
+                error();
+              }
+            });
+        }
       } else {
         next();
       }
@@ -65,10 +79,16 @@ module.exports = (scope, success, error) => {
   })
     .catch((err) => {
       if (err.sql) {
-        console.log('⚠️ Server connection has failed! Make sure your database server is running.');
+        console.log('⚠️  Server connection has failed! Make sure your database server is running.');
       } else {
-        console.log(`⚠️ Database connection has failed! Make sure your "${scope.database.settings.database}" database exist.`);
+        console.log(`⚠️  Database connection has failed! Make sure your "${scope.database.settings.database}" database exist.`);
       }
+
+      if (scope.debug) {
+        console.log('🐛 Full error log:');
+        console.log(err);
+      }
+
       error();
     });
 };

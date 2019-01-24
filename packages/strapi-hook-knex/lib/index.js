@@ -19,8 +19,7 @@ const CLIENTS = [
   'sqlite3',
   'mariasql',
   'oracle', 'strong-oracle',
-  'mssql',
-  'websql'
+  'mssql'
 ];
 
 /**
@@ -66,9 +65,6 @@ module.exports = strapi => {
           case 'ms':
             connection.settings.client = 'mssql';
             break;
-          case 'web':
-            connection.settings.client = 'websql';
-            break;
         }
 
         // Make sure the client is supported.
@@ -96,18 +92,28 @@ module.exports = strapi => {
             password: _.get(connection.settings, 'password'),
             database: _.get(connection.settings, 'database'),
             charset: _.get(connection.settings, 'charset'),
-            schema: _.get(connection.settings, 'schema') || 'public',
+            schema: _.get(connection.settings, 'schema', 'public'),
             port: _.get(connection.settings, 'port'),
             socket: _.get(connection.settings, 'socketPath'),
-            ssl: _.get(connection.settings, 'ssl') || false,
-            timezone: _.get(connection.settings, 'timezone') || 'utc',
-            filename: _.get(connection.settings, 'filename') || '.tmp/data.db'
+            ssl: _.get(connection.settings, 'ssl', false),
+            timezone: _.get(connection.settings, 'timezone', 'utc'),
+            filename: _.get(connection.settings, 'filename', '.tmp/data.db')
           },
-          debug: _.get(connection.options, 'debug') || false,
+          debug: _.get(connection.options, 'debug', false),
           acquireConnectionTimeout: _.get(connection.options, 'acquireConnectionTimeout'),
           migrations: _.get(connection.options, 'migrations'),
           useNullAsDefault: _.get(connection.options, 'useNullAsDefault'),
         }, strapi.config.hook.settings.knex);
+        
+        options.pool = {
+          min: _.get(connection.options, 'pool.min', 0),
+          max: _.get(connection.options, 'pool.max', 10),
+          acquireTimeoutMillis: _.get(connection.options, 'pool.acquireTimeoutMillis', 2000),
+          createTimeoutMillis: _.get(connection.options, 'pool.createTimeoutMillis', 2000),
+          idleTimeoutMillis: _.get(connection.options, 'pool.idleTimeoutMillis', 30000),
+          reapIntervalMillis: _.get(connection.options, 'pool.reapIntervalMillis', 1000),
+          createRetryIntervalMillis: _.get(connection.options, 'pool.createRetryIntervalMillis', 200),
+        };
 
         // Resolve path to the directory containing the database file.
         const fileDirectory = options.connection.filename
