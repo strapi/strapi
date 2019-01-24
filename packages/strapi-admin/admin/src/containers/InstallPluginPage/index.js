@@ -13,18 +13,9 @@ import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 import { map } from 'lodash';
 
-import {
-  disableGlobalOverlayBlocker,
-  enableGlobalOverlayBlocker,
-} from 'actions/overlayBlocker';
-
 // Design
-// import Input from 'components/Input';
-import DownloadInfo from 'components/DownloadInfo';
-import OverlayBlocker from 'components/OverlayBlocker';
 import PluginCard from 'components/PluginCard';
 import PluginHeader from 'components/PluginHeader';
-import SupportUsBanner from 'components/SupportUsBanner';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 
 import injectSaga from 'utils/injectSaga';
@@ -46,14 +37,12 @@ import styles from './styles.scss';
 export class InstallPluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   getChildContext = () => (
     {
+
       downloadPlugin: this.props.downloadPlugin,
     }
   );
 
   componentDidMount() {
-    // Disable the AdminPage OverlayBlocker in order to give it a custom design (children)
-    this.props.disableGlobalOverlayBlocker();
-
     // Don't fetch the available plugins if it has already been done
     if (!this.props.didFetchPlugins) {
       this.props.getAvailablePlugins();
@@ -63,11 +52,6 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
     this.props.getInstalledPlugins();
   }
 
-  componentWillUnmount() {
-    // Enable the AdminPage OverlayBlocker so it is displayed when the server is restarting
-    this.props.enableGlobalOverlayBlocker();
-  }
-
   render() {
     if (!this.props.didFetchPlugins || !this.props.didFetchInstalledPlugins) {
       return <LoadingIndicatorPage />;
@@ -75,9 +59,6 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
     
     return (
       <div>
-        <OverlayBlocker isOpen={this.props.blockApp}>
-          <DownloadInfo />
-        </OverlayBlocker>
         <FormattedMessage id="app.components.InstallPluginPage.helmet">
           {message => (
             <Helmet>
@@ -92,26 +73,10 @@ export class InstallPluginPage extends React.Component { // eslint-disable-line 
             description={{ id: 'app.components.InstallPluginPage.description' }}
             actions={[]}
           />
-          <div className="row">
-            <div className="col-md-12 col-lg-12">
-              <SupportUsBanner />
-            </div>
-          </div>
-          {/*}<div className={cn('row', styles.inputContainer)}>
-            <Input
-              customBootstrapClass="col-md-12"
-              label="app.components.InstallPluginPage.InputSearch.label"
-              name="search"
-              onChange={this.props.onChange}
-              placeholder="app.components.InstallPluginPage.InputSearch.placeholder"
-              type="search"
-              validations={{}}
-              value={this.props.search}
-            />
-          </div>*/}
           <div className={cn('row', styles.wrapper)}>
             {map(this.props.availablePlugins, (plugin) => (
               <PluginCard
+                currentEnvironment={this.props.adminPage.currentEnvironment}
                 history={this.props.history}
                 key={plugin.id}
                 plugin={plugin}
@@ -139,13 +104,13 @@ InstallPluginPage.childContextTypes = {
 };
 
 InstallPluginPage.propTypes = {
+  adminPage: PropTypes.shape({
+    currentEnvironment: PropTypes.string.isRequired,
+  }).object.isRequired,
   availablePlugins: PropTypes.array.isRequired,
-  blockApp: PropTypes.bool.isRequired,
   didFetchInstalledPlugins: PropTypes.bool.isRequired,
   didFetchPlugins: PropTypes.bool.isRequired,
-  disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   downloadPlugin: PropTypes.func.isRequired,
-  enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getAvailablePlugins: PropTypes.func.isRequired,
   getInstalledPlugins: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
@@ -159,9 +124,7 @@ const mapStateToProps = makeSelectInstallPluginPage();
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      disableGlobalOverlayBlocker,
       downloadPlugin,
-      enableGlobalOverlayBlocker,
       getAvailablePlugins,
       getInstalledPlugins,
       onChange,

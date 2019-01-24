@@ -23,6 +23,7 @@ import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 import {
   makeSelectAppPlugins,
   makeSelectBlockApp,
+  makeSelectOverlayBlockerProps,
   makeSelectIsAppLoading,
   makeSelectShowGlobalAppBlocker,
   selectHasUserPlugin,
@@ -219,14 +220,17 @@ export class AdminPage extends React.Component {
               <Route path="/plugins/:pluginId" component={PluginPage} />
               <Route path="/plugins" component={ComingSoonPage} />
               <Route path="/list-plugins" component={ListPluginsPage} exact />
-              <Route path="/install-plugin" component={InstallPluginPage} exact />
+              <Route path="/marketplace" render={(props) => <InstallPluginPage {...props} {...this.props} />} exact />
               <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
               <Route path="404" component={NotFoundPage} />
             </Switch>
           </Content>
         </div>
-        <OverlayBlocker isOpen={this.props.blockApp && this.props.showGlobalAppBlocker} />
+        <OverlayBlocker
+          isOpen={this.props.blockApp && this.props.showGlobalAppBlocker}
+          {...this.props.overlayBlockerData}
+        />
       </div>
     );
   }
@@ -248,6 +252,7 @@ AdminPage.defaultProps = {
   appPlugins: [],
   hasUserPlugin: true,
   isAppLoading: true,
+  overlayBlockerData: {},
 };
 
 AdminPage.propTypes = {
@@ -261,6 +266,7 @@ AdminPage.propTypes = {
   history: PropTypes.object.isRequired,
   isAppLoading: PropTypes.bool,
   location: PropTypes.object.isRequired,
+  overlayBlockerData: PropTypes.object,
   pluginLoaded: PropTypes.func.isRequired,
   plugins: PropTypes.object.isRequired,
   showGlobalAppBlocker: PropTypes.bool.isRequired,
@@ -271,6 +277,7 @@ const mapStateToProps = createStructuredSelector({
   adminPage: selectAdminPage(),
   appPlugins: makeSelectAppPlugins(),
   blockApp: makeSelectBlockApp(),
+  overlayBlockerData: makeSelectOverlayBlockerProps(),
   hasUserPlugin: selectHasUserPlugin(),
   isAppLoading: makeSelectIsAppLoading(),
   plugins: selectPlugins(),

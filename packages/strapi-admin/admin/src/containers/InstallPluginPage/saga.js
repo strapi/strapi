@@ -32,16 +32,14 @@ export function* pluginDownload() {
         port: window.location.port,
       },
     };
-    const response = yield call(request, '/admin/plugins/install', opts, true);
+
+    const response = yield call(request, '/admin/plugins/install', opts, {
+      enabled: true,
+      title: 'app.components.InstallPluginPage.Download.title',
+      description: 'app.components.InstallPluginPage.Download.description',
+    });
 
     if (response.ok) {
-
-      yield new Promise(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, 8000);
-      });
-
       yield put(downloadPluginSucceeded());
       window.location.reload();
     }
