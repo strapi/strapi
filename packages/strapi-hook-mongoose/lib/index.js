@@ -60,7 +60,9 @@ module.exports = function (strapi) {
 
         // Connect to mongo database
         const connectOptions = {};
-        const options = {};
+        const options = {
+          useFindAndModify: false
+        };
 
         if (!_.isEmpty(username)) {
           connectOptions.user = username;
@@ -77,6 +79,7 @@ module.exports = function (strapi) {
         connectOptions.ssl = ssl === true || ssl === 'true';
         connectOptions.useNewUrlParser = true;
         connectOptions.dbName = database;
+        connectOptions.useCreateIndex = true;
 
         options.debug = debug === true || debug === 'true';
 
