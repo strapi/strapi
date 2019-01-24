@@ -10,14 +10,14 @@ module.exports = {
   fetchAll: async (params, query) => {
     const { limit, skip, sort, query : request, queryAttribute, source, populate = [] } = query;
     const filters = strapi.utils.models.convertParams(params.model, query);
-    const where = !_.isEmpty(request) ? request : filters.where;
+    const where = !_.isEmpty(request) ? strapi.utils.models.convertParams(params.model, request) : filters;
 
     // Find entries using `queries` system
     return await strapi.query(params.model, source).find({
       limit: limit || filters.limit,
       skip: skip || filters.start || 0,
       sort: sort || filters.sort,
-      where,
+      where: where.where,
       queryAttribute,
     }, populate);
   },
