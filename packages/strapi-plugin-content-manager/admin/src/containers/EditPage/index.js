@@ -170,8 +170,12 @@ export class EditPage extends React.Component {
     if (this.isCreating()) {
       return toString(this.props.editPage.pluginHeaderTitle);
     }
+    const primaryKey = this.getModel().primaryKey;
+    const { match: { params: { id } } } = this.props;
+    const title = get(this.getSchema(), 'editDisplay.displayedField', primaryKey);
+    const valueToDisplay = get(this.props.editPage, ['initialRecord', title], id);
 
-    return this.props.match.params.id;
+    return isEmpty(valueToDisplay) ? id : valueToDisplay;
   };
 
   /**

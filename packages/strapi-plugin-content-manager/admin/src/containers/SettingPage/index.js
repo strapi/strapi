@@ -217,6 +217,19 @@ class SettingPage extends React.PureComponent {
 
   getEditPageFields = () => get(this.props.schema, ['models', ...this.getPath().split('.'), 'editDisplay', 'availableFields'], {});
 
+  getEditPagePossibleEntryTitleFields = () => {
+    const availableFields = this.getEditPageFields();
+    
+    const stringAndNumberFields = Object.keys(availableFields)
+      .filter(field => {
+        const currentField = availableFields[field];
+
+        return currentField.type === 'string' || currentField.type === 'number';
+      });
+    
+    return [this.getPrimaryKey(), ...stringAndNumberFields];
+  }
+
   getLayout = () => {
     const {
       match: {
@@ -812,6 +825,8 @@ class SettingPage extends React.PureComponent {
 
   renderEditSettings = () => {
     const { isOpenField, isOpenRelation } = this.state;
+    const displayedFieldPath = [...this.getPath().split('.'), 'editDisplay', 'displayedField'];
+    const value = get(this.props.schema, ['models', ...displayedFieldPath], null);
 
     return (
       <Block
@@ -826,7 +841,13 @@ class SettingPage extends React.PureComponent {
             />
           </div>
           <div className="col-md-4">
-            <InputSelect style={{ marginBottom: '6px' }} name="k" selectOptions={['1']} value='1' />
+            <InputSelect
+              name={displayedFieldPath.join('.')}
+              onChange={this.props.onChangeSettings}
+              style={{ marginBottom: '6px' }}
+              selectOptions={this.getEditPagePossibleEntryTitleFields()}
+              value={value}
+            />
           </div>
           <div className="col-md-12">
             <div className={styles.separatorHigher} />
