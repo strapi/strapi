@@ -19,6 +19,7 @@ import {
   isObject,
   toNumber,
   toString,
+  truncate,
   replace,
 } from 'lodash';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -175,7 +176,7 @@ export class EditPage extends React.Component {
     const title = get(this.getSchema(), 'editDisplay.displayedField', primaryKey);
     const valueToDisplay = get(this.props.editPage, ['initialRecord', title], id);
 
-    return isEmpty(valueToDisplay) ? id : valueToDisplay;
+    return isEmpty(valueToDisplay) ? id : truncate(valueToDisplay, { length: '24', separator: '.' });
   };
 
   /**
