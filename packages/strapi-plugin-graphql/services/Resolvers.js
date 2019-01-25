@@ -59,7 +59,7 @@ module.exports = {
       }
 
       // Add timestamps attributes.
-      if (_.get(model, 'options.timestamps') === true) {
+      if (_.isArray(_.get(model, 'options.timestamps')) || _.get(model, 'options.timestamps') == true) {
         Object.assign(initialState, {
           createdAt: 'DateTime!',
           updatedAt: 'DateTime!',
