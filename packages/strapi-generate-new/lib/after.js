@@ -5,8 +5,8 @@
  */
 
 // Node.js core.
-const path = require('path');
 const { exec, execSync } = require('child_process');
+const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
@@ -15,6 +15,7 @@ const fs = require('fs-extra');
 const npm = require('enpeem');
 const ora = require('ora');
 const shell = require('shelljs');
+const request = require('request');
 
 // Logger.
 const { packageManager } = require('strapi-utils');
@@ -31,6 +32,8 @@ const { packageManager } = require('strapi-utils');
 module.exports = (scope, cb) => {
   console.log(`The app has been connected to the database ${green('successfully')}!`);
   console.log();
+
+  trackSuccess('didConnectDatabase', scope);
 
   console.log('🏗  Application generation:');
 
@@ -193,7 +196,19 @@ module.exports = (scope, cb) => {
         console.log('⚡️ Start application:');
         console.log(`$ ${green('strapi start')}`);
 
+        trackSuccess('didCreateProject', scope);
+        
         cb();
       });
   }
 };
+
+function trackSuccess(event, scope) {
+  request
+    .post('https://analytics.strapi.io/track')
+    .form({
+      event,
+      uuid: scope.uuid
+    })
+    .on('error', () => {});
+}
