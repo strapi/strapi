@@ -16,10 +16,9 @@ module.exports = scope => {
     };
 
     // Apply only settings set during the configuration
-    const settings = Object.keys(scope.database.settings).reduce((acc, key) => {
-      acc[key] = settingsBase[key];
-      return acc;
-    }, {});
+    Object.keys(scope.database.settings).forEach((key) => {
+      scope.database.settings[key] = settingsBase[key];
+    });
 
     // All available options (bookshelf and mongoose)
     const optionsBase = {
@@ -28,18 +27,17 @@ module.exports = scope => {
     };
 
     // Apply only options set during the configuration
-    const options = Object.keys(scope.database.options).reduce((acc, key) => {
-      acc[key] = optionsBase[key];
-      return acc;
-    }, {});
+    Object.keys(scope.database.options).forEach((key) => {
+      scope.database.options[key] = optionsBase[key];
+    });
 
     return {
       defaultConnection: 'default',
       connections: {
         default: {
           connector: scope.client.connector,
-          settings,
-          options
+          settings: scope.database.settings,
+          options: scope.database.options
         }
       }
     };
