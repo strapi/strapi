@@ -6,7 +6,7 @@ module.exports = scope => {
     // All available settings (bookshelf and mongoose)
     const settingsBase = {
       client: scope.client.database,
-      host: '${process.env.DATABASE_HOST || 127.0.0.1 }',
+      host: '${process.env.DATABASE_HOST || \'127.0.0.1\' }',
       port: '${process.env.DATABASE_PORT || 27017 }',
       srv: '${process.env.DATABASE_SRV || false }',
       database: '${process.env.DATABASE_NAME || strapi }',
