@@ -48,6 +48,11 @@
       "via": "users",
       "plugin": "users-permissions",
       "configurable": false
+    },
+    "tokens": {
+      "collection": "refreshtoken",
+      "via": "user",
+      "plugin": "users-permissions"
     }
   },
   "collectionName": "users-permissions_user"

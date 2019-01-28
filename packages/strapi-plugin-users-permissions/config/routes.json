@@ -286,6 +286,34 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/auth/token",
+      "handler": "Auth.token",
+      "config": {
+        "policies": ["plugins.users-permissions.ratelimit"],
+        "prefix": "",
+        "description": "Generate a new jwt using refresh token",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/token/revoke",
+      "handler": "Auth.revoke",
+      "config": {
+        "policies": ["plugins.users-permissions.ratelimit"],
+        "prefix": "",
+        "description": "Revoke a refresh token",
+        "tag": {
+          "plugin": "users-permissions",
+          "name": "User"
+        }
+      }
+    },
+    {
       "method": "GET",
       "path": "/users",
       "handler": "User.find",

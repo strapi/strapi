@@ -56,7 +56,7 @@ module.exports = {
       if (!user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       }
-      
+
       if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && user.confirmed !== true) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }] : 'Your account email is not confirmed.');
       }
@@ -79,8 +79,11 @@ module.exports = {
       if (!validPassword) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       } else {
+        // Issue a refresh token and save to db.
+        const token = await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']), ctx.request.header['user-agent']);
         ctx.send({
           jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
+          refreshToken: token,
           user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
         });
       }
@@ -101,8 +104,11 @@ module.exports = {
         return ctx.badRequest(null, (error === 'array') ? (ctx.request.admin ? error[0] : error[1]) : error);
       }
 
+      // Issue a refresh token and save to db.
+      const token = await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user, ['_id', 'id']), ctx.request.header['user-agent']);
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user, ['_id', 'id'])),
+        refreshToken: token,
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     }
@@ -129,8 +135,11 @@ module.exports = {
       // Update the user.
       await strapi.query('user', 'users-permissions').update(data);
 
+      // Issue a refresh token and save to db.
+      const token = await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']), ctx.request.header['user-agent']);
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
+        refreshToken: token,
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
@@ -196,7 +205,7 @@ module.exports = {
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.object, {
       USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider'])
     });
-    
+
     try {
       // Send an email to the user.
       await strapi.plugins['email'].services.email.send({
@@ -357,5 +366,71 @@ module.exports = {
     }).get();
 
     ctx.redirect(settings.email_confirmation_redirection || '/');
+  },
+
+  token: async (ctx) => {
+    const query = {};
+
+    const params = ctx.request.body;
+
+    // Check if the provided identifier is an email or not.
+    const isEmail = emailRegExp.test(params.identifier);
+
+    // Set the identifier to the appropriate query field.
+    if (isEmail) {
+      query.email = params.identifier.toLowerCase();
+    } else {
+      query.username = params.identifier;
+    }
+
+    // Check if the user exists.
+    const user = await strapi.query('user', 'users-permissions').findOne(query);
+
+    // User not found.
+    if (!user) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.user.not-exist' }] }] : 'This email does not exist.');
+    }
+
+    let tokenMatch = false;
+    _.map(user.tokens, function (t) {
+      if (t.token == params.refreshToken) {
+        tokenMatch = true;
+      }
+    });
+    // Invalid refresh token
+    if (!tokenMatch) {
+      return ctx.badRequest(null, 'Invalid refresh token');
+    }
+
+    ctx.send({
+      jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user, ['_id', 'id'])),
+      user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
+    });
+  },
+
+  revoke: async (ctx) => {
+    const user = ctx.state.user;
+    const params = ctx.request.body;
+
+    if (!user) {
+      return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
+    }
+
+    let tokenMatch = false;
+    _.map(user.tokens, function (t) {
+      if (t.token == params.refreshToken) {
+        tokenMatch = true;
+        params.id = (t._id || t.id);
+      }
+    });
+    // Invalid refresh token
+    if (!tokenMatch) {
+      return ctx.badRequest(null, 'Invalid refresh token');
+    }
+
+    const data = await strapi.plugins['users-permissions'].services.refreshtoken.revoke(params);
+
+    // Send 200 `ok`
+    ctx.send(data);
   }
 };

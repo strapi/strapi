@@ -1,0 +1,25 @@
+{
+    "connection": "default",
+    "collectionName": "users-permissions_refresh_token",
+    "info": {
+        "name": "refreshToken",
+        "description": ""
+    },
+    "attributes": {
+        "user": {
+            "model": "user",
+            "via": "tokens",
+            "plugin": "users-permissions"
+        },
+        "token": {
+            "type": "string",
+            "required": true,
+            "configurable": false
+        },
+        "agent": {
+            "type": "string",
+            "required": true,
+            "configurable": false
+        }
+    }
+}
