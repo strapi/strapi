@@ -5,7 +5,6 @@
  */
 
 // Node.js core.
-const { exec, execSync } = require('child_process');
 const path = require('path');
 
 // Public node modules.
@@ -55,7 +54,7 @@ module.exports = (scope, cb) => {
   const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1);
   // Add this check to know if we are in development mode so the creation is faster.
   const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
-  const globalRootPath = execSync(packageManager.commands('root -g'));
+  const globalRootPath = shell.exec(packageManager.commands('root -g'), {silent: true});
 
   // Verify if the dependencies are available into the global
   _.forEach(strapiDependencies, (key) => {
@@ -148,10 +147,10 @@ module.exports = (scope, cb) => {
       installPlugin = installPlugin.then(() => {
         return new Promise(resolve => {
           loader = ora(`Install plugin ${cyan(defaultPlugin.name)}.`).start();
-          exec(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`, (err) => {
-            if (err) {
+          shell.exec(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`, {silent: true}, (code, stdout, stderr) => {
+            if (code) {
               loader.warn(`An error occurred during ${defaultPlugin.name} plugin installation.`);
-              console.log(err);
+              console.log(stderr);
               return resolve();
             }
 
@@ -197,7 +196,7 @@ module.exports = (scope, cb) => {
         console.log(`$ ${green('strapi start')}`);
 
         trackSuccess('didCreateProject', scope);
-        
+
         cb();
       });
   }

@@ -8,7 +8,6 @@
 const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const exec = require('child_process').exec;
 
 
 // Public node modules.
@@ -232,7 +231,7 @@ module.exports = (scope, cb) => {
             let packageCmd = packageManager.commands('install --prefix', scope.tmpPath);
             // Manually create the temp directory for yarn
             if (!isStrapiInstalledWithNPM) {
-              shell.exec(`mkdir ${scope.tmpPath}`);
+              shell.mkdir(scope.tmpPath);
             }
 
             let cmd = `${packageCmd} ${scope.client.connector}@${scope.strapiPackageJSON.version}`;
@@ -249,7 +248,7 @@ module.exports = (scope, cb) => {
               scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
             }
 
-            exec(cmd, () => {
+            shell.exec(cmd, {silent: true}, () => {
               if (scope.client.module) {
                 const lock = require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.module}/package.json`));
                 scope.client.version = lock.version;
@@ -261,7 +260,7 @@ module.exports = (scope, cb) => {
               }
 
               if (scope.developerMode) {
-                exec(linkNodeModulesCommand, () => {
+                shell.exec(linkNodeModulesCommand, {silent: true}, () => {
                   resolve();
                 });
               } else {
