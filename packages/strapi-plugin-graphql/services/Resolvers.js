@@ -60,8 +60,10 @@ module.exports = {
 
       // Add timestamps attributes.
       if (_.isArray(_.get(model, 'options.timestamps'))) {
-        initialState[_.get(model, 'options.timestamps[0]')] = 'DateTime!';
-        initialState[_.get(model, 'options.timestamps[1]')] = 'DateTime!';
+        Object.assign(initialState, {
+          [_.get(model, 'options.timestamps[0]')]: 'DateTime!',
+          [_.get(model, 'options.timestamps[1]')]: 'DateTime!'
+        });
 
         Object.assign(acc.resolver[globalId], {
           createdAt: (obj) => {
