@@ -28,6 +28,9 @@ module.exports = strapi => {
 
       if (strapi.plugins) {
         _.forEach(strapi.plugins, (plugin, name) => {
+          if ( ! plugin.config ) {
+            plugin.config = {}
+          }
           _.forEach(plugin.config.routes, value => {
             if (_.get(value.config, 'policies')) {
               value.config.policies.unshift('plugins.users-permissions.permissions');
