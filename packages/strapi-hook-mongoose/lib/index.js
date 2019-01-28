@@ -166,7 +166,7 @@ module.exports = function (strapi) {
                             }
 
                             // Images are not displayed in populated data.
-                            // We automaticaly populate morph relations.
+                            // We automatically populate morph relations.
                             if (association.nature === 'oneToManyMorph' || association.nature === 'manyToManyMorph') {
                               this._mongooseOptions.populate[association.alias] = {
                                 path: association.alias,
