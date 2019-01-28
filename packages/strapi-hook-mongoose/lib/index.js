@@ -160,6 +160,28 @@ module.exports = function (strapi) {
                             } else {
                               this._mongooseOptions.populate[association.alias].path = `${association.alias}.ref`;
                             }
+                          } else {
+                            if (!this._mongooseOptions.populate) {
+                              this._mongooseOptions.populate = {};
+                            }
+
+                            // Images are not displayed in populated data.
+                            // We automatically populate morph relations.
+                            if (association.nature === 'oneToManyMorph' || association.nature === 'manyToManyMorph') {
+                              this._mongooseOptions.populate[association.alias] = {
+                                path: association.alias,
+                                match: {
+                                  [`${association.via}.${association.filter}`]: association.alias,
+                                  [`${association.via}.kind`]: definition.globalId
+                                },
+                                options: {
+                                  sort: '-createdAt'
+                                },
+                                select: undefined,
+                                model: undefined,
+                                _docs: {}
+                              };
+                            }
                           }
                           next();
                         });
