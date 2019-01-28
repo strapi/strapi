@@ -59,22 +59,18 @@ module.exports = {
       }
 
       // Add timestamps attributes.
-      const isArrayTimestamps = _.isArray(_.get(model, 'options.timestamps'));
-
-      if (isArrayTimestamps || _.get(model, 'options.timestamps') == true) {
-        Object.assign(initialState, {
-          createdAt: 'DateTime!',
-          updatedAt: 'DateTime!',
-        });
+      if (_.isArray(_.get(model, 'options.timestamps'))) {
+        initialState[_.get(model, 'options.timestamps[0]')] = "DateTime!";
+        initialState[_.get(model, 'options.timestamps[1]')] = "DateTime!";
 
         Object.assign(acc.resolver[globalId], {
           createdAt: (obj) => {
             // eslint-disable-line no-unused-vars
-            return isArrayTimestamps ? obj[_.get(model, 'options.timestamps[0]')] : obj.createdAt || obj.created_at;
+            return obj[_.get(model, 'options.timestamps[0]')];
           },
           updatedAt: (obj) => {
             // eslint-disable-line no-unused-vars
-            return isArrayTimestamps ? obj[_.get(model, 'options.timestamps[1]')] : obj.updatedAt || obj.updated_at;
+            return obj[_.get(model, 'options.timestamps[1]')];
           },
         });
       }
