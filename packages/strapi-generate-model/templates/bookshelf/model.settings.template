@@ -8,7 +8,11 @@
   "options": {
     "increments": true,
     "timestamps": true,
-    "comment": ""
+    "comment": "",
+    "plugins": [
+      "visibility",
+      "pagination"
+    ]
   },
   "attributes": {
     <%= attributes %>
