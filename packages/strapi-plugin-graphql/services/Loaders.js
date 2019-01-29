@@ -143,7 +143,7 @@ module.exports = {
       limit: 100,
     };
 
-    params.query[query.alias] = _.uniq(query.ids.filter(x => !_.isEmpty(x)).map(x => x.toString()));
+    params.query[query.alias] = _.uniq(query.ids.filter(x => !_.isEmpty(x) || _.isInteger(x)).map(x => x.toString()));
 
     if (['id', '_id'].includes(query.alias)) {
       // However, we're applying a limit based on the number of entries we've to fetch.

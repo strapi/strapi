@@ -205,12 +205,16 @@ module.exports = (scope, cb) => {
                 }
 
                 scope.database.settings.host = answers.host;
-                scope.database.settings.srv = _.toString(answers.srv) === 'true';
                 scope.database.settings.port = answers.port;
                 scope.database.settings.database = answers.database;
                 scope.database.settings.username = answers.username;
                 scope.database.settings.password = answers.password;
-                scope.database.options.authenticationDatabase = answers.authenticationDatabase;
+                if (answers.srv) {
+                  scope.database.settings.srv =  _.toString(answers.srv) === 'true';
+                }
+                if (answers.authenticationDatabase) {
+                  scope.database.options.authenticationDatabase = answers.authenticationDatabase;
+                }
                 if (scope.client.database === 'mongo') {
                   scope.database.options.ssl = _.toString(answers.ssl) === 'true';
                 } else {
