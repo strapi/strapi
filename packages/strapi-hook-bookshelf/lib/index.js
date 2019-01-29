@@ -66,9 +66,8 @@ module.exports = function(strapi) {
         }
 
         // Load plugins
-        if (_.get(connection, 'options.plugins', true) !== false) {
-          ORM.plugin('visibility');
-          ORM.plugin('pagination');
+        if (_.get(connection, 'options.plugins', null) !== null) {
+          _.forEach(connection.options.plugins, plugin => ORM.plugin(plugin));
         }
 
         const mountModels = (models, target, plugin = false) => {
@@ -108,7 +107,8 @@ module.exports = function(strapi) {
                 }
 
                 return acc;
-              }, {})
+              }, {}),
+              virtuals: _.get(definition, 'virtuals', {}) // Register any model virtuals (https://github.com/bookshelf/bookshelf/wiki/Plugin:-Virtuals)
             }, definition.options);
 
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
