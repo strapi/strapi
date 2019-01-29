@@ -69,6 +69,10 @@ module.exports = function(strapi) {
         if (_.get(connection, 'options.plugins', null) !== null) {
           _.forEach(connection.options.plugins, plugin => ORM.plugin(plugin));
         }
+        // backwards compartibility. Will be remove in future release
+        ORM.plugin('visibility');
+        ORM.plugin('pagination');
+
 
         const mountModels = (models, target, plugin = false) => {
           // Parse every authenticated model.
