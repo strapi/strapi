@@ -63,7 +63,7 @@ module.exports = {
           children: [
             '/3.x.x/getting-started/installation',
             '/3.x.x/getting-started/quick-start',
-            '/3.x.x/concepts/concepts',
+            '/3.x.x/getting-started/concepts',
           ],
         },
         {
@@ -72,7 +72,7 @@ module.exports = {
           children: [
             '/3.x.x/guides/api-documentation',
             '/3.x.x/guides/authentication',
-            '/3.x.x/configurations/configurations',
+            '/3.x.x/guides/configurations',
             '/3.x.x/guides/controllers',
             '/3.x.x/guides/deployment',
             '/3.x.x/guides/email',
@@ -118,14 +118,14 @@ module.exports = {
           collapsable: true,
           title: '💻 Command Line Interface',
           children: [
-            '/3.x.x/cli/CLI',
+            '/3.x.x/CLI.md',
           ],
         },
         {
           collapsable: true,
           title: '🏗 API Reference',
           children: [
-            '/3.x.x/api-reference/reference',
+            '/3.x.x/API-REFERENCE.md',
           ],
         },
         {
@@ -134,7 +134,14 @@ module.exports = {
           children: [
             ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
             '/3.x.x/migration-guide/',
-            '/3.x.x/tutorials/',
+            ['/3.x.x/FAQ.md', 'FAQ', {
+              collapsable: true,
+              title: 'FAQ',
+              children: [
+                '/3.x.x/FAQ.md',
+              ],
+            }],
+            '/3.x.x/TUTORIALS.md',
           ],
         },
       ],
