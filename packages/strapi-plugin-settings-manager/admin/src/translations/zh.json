@@ -48,6 +48,8 @@
   "form.response.description": "調整回應設定",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "回應時間",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "值",
   "form.response.name": "回應",
   "form.security.description": "調整安全性設定",
   "form.security.item.cors": "跨域資源共享 (Cors)",
