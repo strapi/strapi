@@ -126,6 +126,7 @@
   "PopUpForm.Providers.secret.label": "클라이언트 시크릿(Client Secret)",
   "PopUpForm.Providers.secret.placeholder": "텍스트",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "Twitter",
+  "PopUpForm.Providers.ibm.providerConfig.redirectURL": "IBM",
   "PopUpForm.button.cancel": "취소",
   "PopUpForm.button.save": "저장",
   "PopUpForm.header.add.providers": "새 프로바이더(provider) 추가",

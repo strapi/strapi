@@ -136,6 +136,7 @@
   "PopUpForm.Providers.secret.label": "Klucz sekretny klienta",
   "PopUpForm.Providers.secret.placeholder": "TEKST",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji Twitter",
+  "PopUpForm.Providers.ibm.providerConfig.redirectURL": "Adres przekierowania do dodania w aplikacji IBM",
   "PopUpForm.button.cancel": "Anuluj",
   "PopUpForm.button.save": "Zapisz",
   "PopUpForm.header.add.providers": "Dostawca",

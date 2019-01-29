@@ -136,6 +136,7 @@
   "PopUpForm.Providers.secret.label": "Web istemcisi Secret",
   "PopUpForm.Providers.secret.placeholder": "METİN",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "Twitter uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
+  "PopUpForm.Providers.ibm.providerConfig.redirectURL": "IBM uygulama yapılandırmalarınıza eklenecek yönlendirme URL'si",
   "PopUpForm.button.cancel": "İptal",
   "PopUpForm.button.save": "Kaydet",
   "PopUpForm.header.add.providers": "Yeni Sağlayıcı Ekle",

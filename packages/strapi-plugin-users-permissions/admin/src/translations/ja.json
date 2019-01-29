@@ -135,6 +135,7 @@
   "PopUpForm.Providers.secret.label": "クライアントの秘密",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "Twitterアプリケーション設定で追加するリダイレクトURL",
+  "PopUpForm.Providers.ibm.providerConfig.redirectURL": "IBMアプリケーション設定で追加するリダイレクトURL",
   "PopUpForm.button.cancel": "キャンセル",
   "PopUpForm.button.save": "保存",
   "PopUpForm.header.add.providers": "プロバイダーを追加",

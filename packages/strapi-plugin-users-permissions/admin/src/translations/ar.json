@@ -126,6 +126,7 @@
   "PopUpForm.Providers.secret.label": "سر العميل (Client Secret)",
   "PopUpForm.Providers.secret.placeholder": "نص",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق Twitter",
+  "PopUpForm.Providers.ibm.providerConfig.redirectURL": "عنوان URL لإعادة التوجيه لإضافتة تكوين تطبيق IBM",
   "PopUpForm.button.cancel": "الغاء",
   "PopUpForm.button.save": "حفظ",
   "PopUpForm.header.add.providers": "إضافة موفر جديد",

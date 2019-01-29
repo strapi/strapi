@@ -126,6 +126,7 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "Twitter应用中配置的重定向URL",
+  "PopUpForm.Providers.ibm.providerConfig.redirectURL": "IBM应用中配置的重定向URL",
   "PopUpForm.button.cancel": "取消",
   "PopUpForm.button.save": "保存",
   "PopUpForm.header.add.providers": "增加新的供应商(Provider)",

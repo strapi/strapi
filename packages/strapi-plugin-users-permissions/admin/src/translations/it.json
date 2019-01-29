@@ -124,6 +124,7 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione Twitter",
+  "PopUpForm.Providers.ibm.providerConfig.redirectURL": "L'URL di redirect per aggiungere la tua configurazione dell'applicazione IBM",
   "PopUpForm.button.cancel": "Cancella",
   "PopUpForm.button.save": "Salva",
   "PopUpForm.header.add.providers": "Aggiungi nuovo Provider",

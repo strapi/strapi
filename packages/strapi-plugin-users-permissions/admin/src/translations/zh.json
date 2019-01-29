@@ -135,6 +135,7 @@
   "PopUpForm.Providers.secret.label": "客戶端密鑰",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "在 Twitter 的設定中填入的重新導向網址",
+  "PopUpForm.Providers.ibm.providerConfig.redirectURL": "在 IBM 的設定中填入的重新導向網址",
   "PopUpForm.button.cancel": "取消",
   "PopUpForm.button.save": "儲存",
   "PopUpForm.header.add.providers": "新增驗證方式",

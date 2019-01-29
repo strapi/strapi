@@ -136,6 +136,7 @@
   "PopUpForm.Providers.secret.label": "Client Secret",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
   "PopUpForm.Providers.twitter.providerConfig.redirectURL": "De doorstuur URL om in je Twitter applicatie configuratie te zetten",
+  "PopUpForm.Providers.ibm.providerConfig.redirectURL": "De doorstuur URL om in je IBM applicatie configuratie te zetten",
   "PopUpForm.button.cancel": "Annuleren",
   "PopUpForm.button.save": "Opslaan",
   "PopUpForm.header.add.providers": "Nieuwe leverancier toevoegen",
