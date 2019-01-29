@@ -48,6 +48,8 @@
   "form.response.description": "Yanıt ayarlarınızı yapılandırın.",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "Tepki Süresi",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "Değer",
   "form.response.name": "Cevap",
   "form.security.description": "Güvenlik ayarlarınızı yapılandırın.",
   "form.security.item.cors": "Cors",

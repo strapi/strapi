@@ -48,6 +48,8 @@
   "form.response.description": "Configure as suas definições de resposta.",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "Tempo de resposta",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "Valor",
   "form.response.name": "Resposta",
   "form.security.description": "Configure as suas definições de segurança.",
   "form.security.item.cors": "Cors",

@@ -48,6 +48,8 @@
   "form.response.description": "قم بتكوين إعدادات الاستجابة الخاصة بك.",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "وقت الاستجابة",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "القيمة",
   "form.response.name": "الإستجابة",
   "form.security.description": "تكوين إعدادات الأمان الخاصة بك.",
   "form.security.item.cors": "Cors",
