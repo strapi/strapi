@@ -48,6 +48,8 @@
   "form.response.description": "Configurar las opciones de respuesta.",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "Tiempo de respuesta",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "Valor",
   "form.response.name": "Respuesta",
   "form.security.description": "Configurar las opciones de seguridad.",
   "form.security.item.cors": "Cors",
