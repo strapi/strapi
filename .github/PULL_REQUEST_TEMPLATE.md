@@ -15,7 +15,7 @@
 - [ ] Plugin
 
 <!-- Please note that all databases should be tested and confirmed to be working prior to the PR being merged. -->
-**Manual testing done on the follow databases:**
+**Manual testing done on the following databases:**
 - [ ] Not applicable
 - [ ] MongoDB
 - [ ] MySQL

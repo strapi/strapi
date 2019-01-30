@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
@@ -16,7 +15,6 @@ import {
   get,
   includes,
   isEmpty,
-  isObject,
   toNumber,
   toString,
   truncate,
@@ -265,9 +263,7 @@ export class EditPage extends React.Component {
   handleChange = e => {
     let value = e.target.value;
     // Check if date
-    if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
-      value = moment(e.target.value).format('YYYY-MM-DD HH:mm:ss');
-    } else if (
+    if (
       ['float', 'integer', 'biginteger', 'decimal'].indexOf(
         get(this.getSchema(), ['fields', e.target.name, 'type']),
       ) !== -1

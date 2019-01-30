@@ -60,7 +60,9 @@ module.exports = function (strapi) {
 
         // Connect to mongo database
         const connectOptions = {};
-        const options = {};
+        const options = {
+          useFindAndModify: false
+        };
 
         if (!_.isEmpty(username)) {
           connectOptions.user = username;
@@ -77,6 +79,7 @@ module.exports = function (strapi) {
         connectOptions.ssl = ssl === true || ssl === 'true';
         connectOptions.useNewUrlParser = true;
         connectOptions.dbName = database;
+        connectOptions.useCreateIndex = true;
 
         options.debug = debug === true || debug === 'true';
 
@@ -156,6 +159,28 @@ module.exports = function (strapi) {
                               };
                             } else {
                               this._mongooseOptions.populate[association.alias].path = `${association.alias}.ref`;
+                            }
+                          } else {
+                            if (!this._mongooseOptions.populate) {
+                              this._mongooseOptions.populate = {};
+                            }
+
+                            // Images are not displayed in populated data.
+                            // We automatically populate morph relations.
+                            if (association.nature === 'oneToManyMorph' || association.nature === 'manyToManyMorph') {
+                              this._mongooseOptions.populate[association.alias] = {
+                                path: association.alias,
+                                match: {
+                                  [`${association.via}.${association.filter}`]: association.alias,
+                                  [`${association.via}.kind`]: definition.globalId
+                                },
+                                options: {
+                                  sort: '-createdAt'
+                                },
+                                select: undefined,
+                                model: undefined,
+                                _docs: {}
+                              };
                             }
                           }
                           next();
