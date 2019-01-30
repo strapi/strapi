@@ -22,6 +22,14 @@ import { makeSelectPluginToDownload } from './selectors';
 
 export function* pluginDownload() {
   try {
+    // Force the Overlayblocker to be displayed
+    const overlayblockerParams = {
+      enabled: true,
+      title: 'app.components.InstallPluginPage.Download.title',
+      description: 'app.components.InstallPluginPage.Download.description',
+    };
+    strapi.lockApp(overlayblockerParams);
+
     const pluginToDownload = yield select(makeSelectPluginToDownload());
     const opts = {
       method: 'POST',
@@ -31,17 +39,15 @@ export function* pluginDownload() {
       },
     };
 
-    const response = yield call(request, '/admin/plugins/install', opts, {
-      enabled: true,
-      title: 'app.components.InstallPluginPage.Download.title',
-      description: 'app.components.InstallPluginPage.Download.description',
-    });
+    const response = yield call(request, '/admin/plugins/install', opts, overlayblockerParams);
 
     if (response.ok) {
       yield put(downloadPluginSucceeded());
       window.location.reload();
     }
   } catch(err) {
+    // Hide the global OverlayBlocker
+    strapi.unlockApp();
     strapi.notification.error('notification.error');
   }
 }

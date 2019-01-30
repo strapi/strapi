@@ -20,23 +20,13 @@ const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
 /* eslint-disable react/no-unused-state */
 class PluginCard extends React.Component {
   state = { 
-    isOpen: false, 
     boostrapCol: 'col-lg-4',
   };
 
   componentDidMount() {
-    // this.shouldOpenModal(this.props);
-
     // Listen window resize.
     window.addEventListener('resize', this.setBoostrapCol);
-
     this.setBoostrapCol();
-  }
-
-  componentWillReceiveProps() {
-    // if (nextProps.history.location.hash !== this.props.history.location.hash) {
-    //   this.shouldOpenModal(nextProps);
-    // }
   }
 
   componentWillUnmount() {
@@ -57,16 +47,16 @@ class PluginCard extends React.Component {
     this.setState({ boostrapCol });
   }
 
-  // handleClick = () => {
-  //   if (this.props.plugin.id !== 'support-us') {
-  //     this.props.history.push({
-  //       pathname: this.props.history.location.pathname,
-  //       hash: `${this.props.plugin.id}::description`,
-  //     });
-  //   } else {
-  //     this.aTag.click();
-  //   }
-  // }
+  handleClick = () => {
+    if (this.props.plugin.id !== 'support-us') {
+      this.props.history.push({
+        pathname: this.props.history.location.pathname,
+        hash: `${this.props.plugin.id}::description`,
+      });
+    } else {
+      this.aTag.click();
+    }
+  }
 
   handleClickSettings = (e) => {
     const settingsPath = this.props.plugin.id === 'content-manager' ? '/plugins/content-manager/ctm-configurations' : `/plugins/${this.props.plugin.id}/configurations/${this.props.currentEnvironment}`; 
@@ -85,10 +75,6 @@ class PluginCard extends React.Component {
     } else {
       this.props.history.push('/list-plugins');
     }
-  }
-
-  shouldOpenModal = (props) => {
-    this.setState({ isOpen: !isEmpty(props.history.location.hash) });
   }
 
   render() {
@@ -120,7 +106,7 @@ class PluginCard extends React.Component {
           </div>
           <div className={styles.cardDescription}>
             {descriptions.long}
-            &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" />
+            {/* &nbsp;<FormattedMessage id="app.components.PluginCard.more-details" /> */}
           </div>
           <div className={styles.cardFooter} onClick={e => e.stopPropagation()}>
             <div className={styles.cardFooterButton}>
