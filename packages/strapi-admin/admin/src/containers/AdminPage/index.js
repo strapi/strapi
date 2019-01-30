@@ -268,7 +268,10 @@ AdminPage.propTypes = {
   history: PropTypes.object.isRequired,
   isAppLoading: PropTypes.bool,
   location: PropTypes.object.isRequired,
-  overlayBlockerData: PropTypes.object,
+  overlayBlockerData: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.object,
+  ]),
   pluginLoaded: PropTypes.func.isRequired,
   plugins: PropTypes.object.isRequired,
   showGlobalAppBlocker: PropTypes.bool.isRequired,
