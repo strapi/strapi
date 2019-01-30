@@ -106,7 +106,7 @@ InstallPluginPage.childContextTypes = {
 InstallPluginPage.propTypes = {
   adminPage: PropTypes.shape({
     currentEnvironment: PropTypes.string.isRequired,
-  }).object.isRequired,
+  }).isRequired,
   availablePlugins: PropTypes.array.isRequired,
   didFetchInstalledPlugins: PropTypes.bool.isRequired,
   didFetchPlugins: PropTypes.bool.isRequired,

@@ -36,7 +36,7 @@ import LocaleToggle from 'containers/LocaleToggle';
 import CTAWrapper from 'components/CtaWrapper';
 import Header from 'components/Header/index';
 import HomePage from 'containers/HomePage/Loadable';
-import InstallPluginPage from 'containers/InstallPluginPage/Loadable';
+import Marketplace from 'containers/Marketplace/Loadable';
 import LeftMenu from 'containers/LeftMenu';
 import ListPluginsPage from 'containers/ListPluginsPage/Loadable';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
@@ -189,6 +189,8 @@ export class AdminPage extends React.Component {
     return plugins;
   };
 
+  renderMarketPlace = props => <Marketplace {...props} {...this.props} />;
+
   render() {
     const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
@@ -220,7 +222,7 @@ export class AdminPage extends React.Component {
               <Route path="/plugins/:pluginId" component={PluginPage} />
               <Route path="/plugins" component={ComingSoonPage} />
               <Route path="/list-plugins" component={ListPluginsPage} exact />
-              <Route path="/marketplace" render={(props) => <InstallPluginPage {...props} {...this.props} />} exact />
+              <Route path="/marketplace" render={this.renderMarketPlace} exact />
               <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
               <Route path="404" component={NotFoundPage} />
@@ -302,4 +304,3 @@ const withReducer = injectReducer({ key: 'adminPage', reducer });
 const withSaga = injectSaga({ key: 'adminPage', saga });
 
 export default compose(withReducer, withSaga, withConnect)(AdminPage);
-

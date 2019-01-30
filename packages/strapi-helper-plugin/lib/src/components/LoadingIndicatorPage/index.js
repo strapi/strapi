@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import styles from './styles.scss';
 
 const LoadingIndicatorPage = (props) => {
-
   if (props.error) {
     return <div>An error occurred</div>;
   }
