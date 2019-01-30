@@ -23,7 +23,7 @@ const dispatch = store.dispatch;
 
 // Don't inject plugins in development mode.
 if (window.location.port !== '4000') {
-  fetch(`${strapi.remoteURL}/config/plugins.json`)
+  fetch(`${strapi.remoteURL}/config/plugins.json`, { cache: 'no-cache' })
     .then(response => {
       return response.json();
     })
