@@ -21,6 +21,7 @@ const uuid = require('uuid/v4');
 
 // Logger.
 const { packageManager } = require('strapi-utils');
+const trackSuccess = require('./success');
 
 /**
  * This `before` function is run before generating targets.
@@ -48,6 +49,8 @@ module.exports = (scope, cb) => {
   scope.rootPath = path.resolve(process.cwd(), scope.name || '');
   scope.tmpPath = path.resolve(os.tmpdir(), `strapi${ crypto.randomBytes(6).toString('hex') }`);
   scope.uuid = uuid();
+
+  trackSuccess('willCreateProject', scope);
 
   // Ensure we aren't going to inadvertently delete any files.
   try {
