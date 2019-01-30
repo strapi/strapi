@@ -171,6 +171,7 @@ InputDateWithErrors.defaultProps = {
   style: {},
   tabIndex: '0',
   validations: {},
+  value: null,
 };
 
 InputDateWithErrors.propTypes = {
@@ -217,7 +218,10 @@ InputDateWithErrors.propTypes = {
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object,
+  ]),
 };
 
 export default InputDateWithErrors;
