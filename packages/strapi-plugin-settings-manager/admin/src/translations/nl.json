@@ -48,6 +48,8 @@
   "form.response.description": "Configureer je response instellingen.",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "Response Tijd",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "Waarde",
   "form.response.name": "Response",
   "form.security.description": "Configureer je beveiliging instellingen.",
   "form.security.item.cors": "Cors",
