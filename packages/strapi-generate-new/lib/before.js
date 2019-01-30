@@ -21,6 +21,7 @@ const uuid = require('uuid/v4');
 
 // Logger.
 const { packageManager } = require('strapi-utils');
+const trackSuccess = require('./success');
 
 /**
  * This `before` function is run before generating targets.
@@ -48,6 +49,8 @@ module.exports = (scope, cb) => {
   scope.rootPath = path.resolve(process.cwd(), scope.name || '');
   scope.tmpPath = path.resolve(os.tmpdir(), `strapi${ crypto.randomBytes(6).toString('hex') }`);
   scope.uuid = uuid();
+
+  trackSuccess('willCreateProject', scope);
 
   // Ensure we aren't going to inadvertently delete any files.
   try {
@@ -205,12 +208,16 @@ module.exports = (scope, cb) => {
                 }
 
                 scope.database.settings.host = answers.host;
-                scope.database.settings.srv = _.toString(answers.srv) === 'true';
                 scope.database.settings.port = answers.port;
                 scope.database.settings.database = answers.database;
                 scope.database.settings.username = answers.username;
                 scope.database.settings.password = answers.password;
-                scope.database.options.authenticationDatabase = answers.authenticationDatabase;
+                if (answers.srv) {
+                  scope.database.settings.srv =  _.toString(answers.srv) === 'true';
+                }
+                if (answers.authenticationDatabase) {
+                  scope.database.options.authenticationDatabase = answers.authenticationDatabase;
+                }
                 if (scope.client.database === 'mongo') {
                   scope.database.options.ssl = _.toString(answers.ssl) === 'true';
                 } else {
