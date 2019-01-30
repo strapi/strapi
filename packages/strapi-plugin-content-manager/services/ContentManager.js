@@ -10,7 +10,7 @@ module.exports = {
   fetchAll: async (params, query) => {
     const { limit, skip, sort, query : request, queryAttribute, source, populate = [] } = query;
     const filters = strapi.utils.models.convertParams(params.model, query);
-    const where = !_.isEmpty(request) ? request : filters.where;
+    const { where = {} } = !_.isEmpty(request) ? strapi.utils.models.convertParams(params.model, request) : filters;
 
     // Find entries using `queries` system
     return await strapi.query(params.model, source).find({
@@ -160,6 +160,10 @@ module.exports = {
     const response = await query.findOne({
       id: params.id
     });
+
+    if (!response) {
+      throw `This resource doesn't exist.`;
+    }
 
     params[primaryKey] = response[primaryKey];
     params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {

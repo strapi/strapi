@@ -13,7 +13,7 @@ module.exports = {
 
   count: async function (params = {}) {
     return Number(await this
-      .count(params));
+      .countDocuments(params));
   },
 
   findOne: async function (params, populate) {
@@ -65,7 +65,7 @@ module.exports = {
       };
     }
 
-    return this.update(search, params, {
+    return this.updateOne(search, params, {
       strict: false
     })
       .catch((error) => {
@@ -79,7 +79,7 @@ module.exports = {
   delete: async function (params) {
     // Delete entry.
     return this
-      .remove({
+      .deleteOne({
         [this.primaryKey]: params[this.primaryKey] || params.id
       });
   },
@@ -87,7 +87,7 @@ module.exports = {
   deleteMany: async function (params) {
     // Delete entry.
     return this
-      .remove({
+      .deleteMany({
         [this.primaryKey]: {
           $in: params[this.primaryKey] || params.id
         }

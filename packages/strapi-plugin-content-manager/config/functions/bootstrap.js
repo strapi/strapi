@@ -17,7 +17,7 @@ const pickData = (model) => _.pick(model, [
   'globalId',
   'globalName',
   'orm',
-  'options.timestamps',
+  'options',
   'loadedModel',
   'primaryKey',
   'associations'
@@ -381,6 +381,12 @@ module.exports = async cb => {
       const currentFields = _.get(prevSchema.models, fieldsPath, []);
       currentFields.push(attr.name);
       _.set(prevSchema.models, fieldsPath, currentFields);
+    });
+
+    schemaApis.map((model) => {
+      const isPlugin = model.includes('plugins.');
+      _.set(prevSchema.models[model], 'info', _.get(!isPlugin ? strapi.models[model] : strapi[model], 'info'));
+      _.set(prevSchema.models[model], 'options', _.get(!isPlugin ? strapi.models[model] : strapi[model], 'options'));
     });
 
     await pluginStore.set({ key: 'schema', value: prevSchema });
