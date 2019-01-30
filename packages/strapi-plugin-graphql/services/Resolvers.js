@@ -64,17 +64,6 @@ module.exports = {
           [_.get(model, 'options.timestamps[0]')]: 'DateTime!',
           [_.get(model, 'options.timestamps[1]')]: 'DateTime!'
         });
-
-        Object.assign(acc.resolver[globalId], {
-          createdAt: (obj) => {
-            // eslint-disable-line no-unused-vars
-            return obj[_.get(model, 'options.timestamps[0]')];
-          },
-          updatedAt: (obj) => {
-            // eslint-disable-line no-unused-vars
-            return obj[_.get(model, 'options.timestamps[1]')];
-          },
-        });
       }
 
       // Retrieve user customisation.
