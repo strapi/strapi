@@ -61,6 +61,7 @@ module.exports = function (name, cliArguments) {
       settings: {
         client: cliArguments.dbclient,
         host: cliArguments.dbhost,
+        srv: cliArguments.dbsrv,
         port: cliArguments.dbport,
         database: cliArguments.dbname,
         username: cliArguments.dbusername,

@@ -422,8 +422,10 @@ module.exports = function(strapi) {
                           case 'email':
                             type = 'varchar(255)';
                             break;
-                          case 'integer':
                           case 'biginteger':
+                            type = definition.client === 'pg' ? 'bigint' : 'bigint(53)';
+                            break;
+                          case 'integer':
                             type = definition.client === 'pg' ? 'integer' : 'int';
                             break;
                           case 'float':

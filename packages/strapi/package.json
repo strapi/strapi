@@ -71,6 +71,9 @@
     "strapi-generate-service": "3.0.0-alpha.21",
     "strapi-utils": "3.0.0-alpha.21"
   },
+  "scripts": {
+    "postinstall": "node lib/utils/success.js"
+  },
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
