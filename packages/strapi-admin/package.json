@@ -25,6 +25,7 @@
     "presetup": "node ./scripts/preSetup.js"
   },
   "dependencies": {
+    "intl": "^1.2.5",
     "react-ga": "^2.4.1",
     "remove-markdown": "^0.2.2",
     "shelljs": "^0.7.8"
