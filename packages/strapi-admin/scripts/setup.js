@@ -12,7 +12,7 @@ const appPath = isDevelopmentMode ? path.resolve(process.env.PWD, '..') : path.r
 shell.echo('🏗  Building the admin...');
 
 shell.cd(path.resolve(appPath, 'admin'));
-const build = shell.exec(`APP_PATH="${appPath}" npm run build`, {silent});
+const build = shell.exec(`set APP_PATH="${appPath}" && npm run build`, {silent});
 
 if (build.stderr && build.code !== 0) {
   console.error(build.stderr);
@@ -55,7 +55,7 @@ if (process.env.npm_config_plugins === 'true') {
 
       shell.echo('🏗  Building...');
       shell.cd(path.resolve(plugins, plugin));
-      const build = shell.exec(`APP_PATH="${appPath}" npm run build`, {silent});
+      const build = shell.exec(`set APP_PATH="${appPath}" && npm run build`, {silent});
 
       if (build.stderr && build.code !== 0) {
         console.error(build.stderr);

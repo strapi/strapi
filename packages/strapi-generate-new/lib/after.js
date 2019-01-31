@@ -150,7 +150,7 @@ module.exports = (scope, cb) => {
           shell.exec(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`, {silent: true}, (code, stdout, stderr) => {
             if (code) {
               loader.warn(`An error occurred during ${defaultPlugin.name} plugin installation.`);
-              console.log(stderr);
+              console.log(code, stdout, stderr);
               return resolve();
             }
 
@@ -170,14 +170,14 @@ module.exports = (scope, cb) => {
           if (dependency.global) {
             try {
               fs.accessSync(dependency.path, fs.constants.R_OK | fs.constants.F_OK);
-              fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+              fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'junction');
             } catch (e) {
               // Silent.
             }
           } else {
             try {
               fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), fs.constants.R_OK | fs.constants.F_OK);
-              fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+              fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'junction');
             } catch (e) {
               // Silent.
             }

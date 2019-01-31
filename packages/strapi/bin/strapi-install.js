@@ -48,7 +48,7 @@ module.exports = function (plugin, cliArguments) {
 
   if (cliArguments.dev) {
     try {
-      fs.symlinkSync(path.resolve(__dirname, '..', '..', pluginID), path.resolve(process.cwd(), pluginPath), 'dir');
+      fs.symlinkSync(path.resolve(__dirname, '..', '..', pluginID), path.resolve(process.cwd(), pluginPath), 'junction');
 
       loader.succeed(`The ${cyan(plugin)} plugin has been successfully installed.`);
       process.exit(0);

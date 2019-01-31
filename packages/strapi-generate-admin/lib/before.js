@@ -14,8 +14,9 @@ const fs = require('fs-extra');
  */
 module.exports = function (scope, cb) {
   if (scope.developerMode) {
+    console.log(scope)
     fs.mkdirsSync(path.resolve(scope.rootPath));
-    fs.symlinkSync(path.resolve(__dirname, '..', '..', 'strapi-admin'), path.resolve(scope.rootPath, 'admin'), 'dir');
+    fs.symlinkSync(path.resolve(__dirname, '..', '..', 'strapi-admin'), path.resolve(scope.rootPath, 'admin'), 'junction');
   } else {
     // Copy the admin files.
     fs.copySync(path.resolve(__dirname, '..', '..', 'strapi-admin'), path.resolve(scope.rootPath, 'admin'), {
