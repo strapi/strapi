@@ -156,7 +156,11 @@ module.exports = strapi => {
               fs.mkdirSync(fileDirectory);
             }
 
-            options.log = undefined;
+            // Disable warn log
+            // .returning() is not supported by sqlite3 and will not have any effect.
+            options.log = {
+              warn: () => {}
+            };
 
             break;
         }
