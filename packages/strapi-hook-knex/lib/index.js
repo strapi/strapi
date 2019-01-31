@@ -156,6 +156,8 @@ module.exports = strapi => {
               fs.mkdirSync(fileDirectory);
             }
 
+            options.log = undefined;
+
             break;
         }
 
