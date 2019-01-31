@@ -45,7 +45,7 @@
   "app.components.HomePage.welcomeBlock.content": "Nous sommes heureux de vous compter parmi nos membres. Nous sommes à l'écoute de vos retours alors, n'hésitez pas à nous envoyer des DM sur ",
   "app.components.HomePage.welcomeBlock.content.again": "Nous espérons que votre projet avance bien... Découvrez les derniers articles à propos de Strapi. Nous faisons de notre mieux pour améliorer le produit selon vos retours.",
   "app.components.HomePage.welcomeBlock.content.issues": "issues",
-  "app.components.HomePage.welcomeBlock.content.raise": " ou soumetez des ",
+  "app.components.HomePage.welcomeBlock.content.raise": " ou soumettez des ",
   "app.components.ImgPreview.hint": "Glissez-déposez dans cette zone ou {browse} un fichier à télécharger",
   "app.components.ImgPreview.hint.browse": "recherchez",
   "app.components.InputFile.newFile": "Ajouter un nouveau fichier",

@@ -88,6 +88,7 @@ module.exports = async cb => {
       options: model.options,
       editDisplay: {
         availableFields: {},
+        displayedField: model.primaryKey,
         fields: [],
         relations: [],
       },
