@@ -150,7 +150,9 @@ module.exports = strapi => {
             break;
           case 'sqlite3':
             // Create the directory if it does not exist.
-            if (!fs.existsSync(fileDirectory)){
+            try {
+              fs.statSync(fileDirectory);
+            } catch (err) {
               fs.mkdirSync(fileDirectory);
             }
 
