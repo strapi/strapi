@@ -50,7 +50,7 @@ module.exports = function (name, cliArguments) {
   const matchingDbArguments = _.intersection(_.keys(cliArguments), dbArguments);
 
   if (matchingDbArguments.length) {
-    if (matchingDbArguments.length !== dbArguments.length) {
+    if (matchingDbArguments.length !== dbArguments.length && cliArguments.dbclient !== 'sqlite') {
       console.log(`⛔️ Some database arguments are missing. Required arguments list: ${dbArguments}`);
       return process.exit(1);
     }
@@ -65,7 +65,8 @@ module.exports = function (name, cliArguments) {
         port: cliArguments.dbport,
         database: cliArguments.dbname,
         username: cliArguments.dbusername,
-        password: cliArguments.dbpassword
+        password: cliArguments.dbpassword,
+        filename: cliArguments.dbfile
       },
       options: {
         authenticationDatabase: cliArguments.dbauth,
