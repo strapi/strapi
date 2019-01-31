@@ -88,8 +88,18 @@ export function* submit() {
     yield put(setLoader());
     const recordCleaned = Object.keys(record).reduce((acc, current) => {
       const attrType = source !== 'content-manager' ? get(schema, ['models', 'plugins', source, currentModelName, 'fields', current, 'type'], null) : get(schema, ['models', currentModelName, 'fields', current, 'type'], null);
-      const cleanedData = attrType === 'json' ? record[current] : cleanData(record[current], 'value', 'id');
+      let cleanedData;
 
+      switch (attrType) {
+        case 'json':
+          cleanedData = record[current];
+          break;
+        case 'date':
+          cleanedData = record[current]._isAMomentObject === true ? record[current].format('YYYY-MM-DD HH:mm:ss') : record[current];
+          break;
+        default:
+          cleanedData = cleanData(record[current], 'value', 'id');
+      }
 
       if (isString(cleanedData) || isNumber(cleanedData)) {
         acc.append(current, cleanedData);

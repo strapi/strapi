@@ -420,7 +420,6 @@ module.exports = {
         arrayOfPromises.push(this.updateUserRole(user, authenticated._id || authenticated.id));
       });
 
-
     return Promise.all(arrayOfPromises);
   },
 
