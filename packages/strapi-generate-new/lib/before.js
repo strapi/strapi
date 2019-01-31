@@ -206,7 +206,7 @@ module.exports = (scope, cb) => {
                   default: _.get(scope.database, 'authenticationDatabase', undefined)
                 },
                 {
-                  when: !hasDatabaseConfig,
+                  when: !hasDatabaseConfig && !isSQLite,
                   type: 'boolean',
                   name: 'ssl',
                   message: 'Enable SSL connection:',
@@ -230,9 +230,6 @@ module.exports = (scope, cb) => {
                 scope.database.settings.database = answers.database;
                 scope.database.settings.username = answers.username;
                 scope.database.settings.password = answers.password;
-                if (scope.database.options.ssl) {
-                  scope.database.options.ssl = _.toString(answers.ssl) === 'true';
-                }
                 if (answers.filename) {
                   scope.database.settings.filename = answers.filename;
                 }
@@ -251,9 +248,9 @@ module.exports = (scope, cb) => {
                   };
                 }
 
-                if (scope.client.database === 'mongo') {
+                if (answers.ssl && scope.client.database === 'mongo') {
                   scope.database.options.ssl = _.toString(answers.ssl) === 'true';
-                } else {
+                } else if (answers.ssl) {
                   scope.database.settings.ssl = _.toString(answers.ssl) === 'true';
                 }
 

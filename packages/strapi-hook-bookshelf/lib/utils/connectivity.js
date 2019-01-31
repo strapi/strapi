@@ -1,7 +1,6 @@
 'use strict';
 
 // Node.js core.
-const fs = require('fs');
 const path = require('path');
 
 // Public node modules
@@ -9,12 +8,10 @@ const inquirer = require('inquirer');
 const rimraf = require('rimraf');
 
 module.exports = (scope, success, error) => {
-  // Create the directory if it does not exist.
-  const directory = path.dirname(path.resolve(scope.database.settings.filename));
-  if (scope.client.database === 'sqlite' && !fs.existsSync(directory)){
-    fs.mkdirSync(directory);
+  if (scope.client.database === 'sqlite') {
+    return success();
   }
-  
+
   let knex;
 
   try {

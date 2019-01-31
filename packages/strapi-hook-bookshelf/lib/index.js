@@ -623,11 +623,11 @@ module.exports = function(strapi) {
                           const type = getType(attributes[attribute], attribute);
 
                           if (type) {
-                            const changeType = definition.client === 'pg'
+                            const changeType = definition.client === 'pg' || definition.client === 'sqlite3'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} TYPE ${type} USING ${quote}${attribute}${quote}::${type}`
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} `;
 
-                            const changeRequired = definition.client === 'pg'
+                            const changeRequired = definition.client === 'pg' || definition.client === 'sqlite3'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} ${attributes[attribute].required ? 'SET' : 'DROP'} NOT NULL`
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
