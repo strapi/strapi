@@ -51,7 +51,7 @@ class App extends React.Component {
     return (
       <div className="content-manager">
         <Switch>
-          <Route path="/plugins/content-manager/ctm-configurations/:slug/:source?/:endPoint?" component={SettingPage} />
+          <Route path="/plugins/content-manager/ctm-configurations/:viewType/:slug/:source?/:endPoint?" component={SettingPage} />
           <Route path="/plugins/content-manager/ctm-configurations" component={SettingsPage} />
           <Route path="/plugins/content-manager/:slug/:id" component={EditPage} />
           <Route path="/plugins/content-manager/:slug" component={ListPage} />

@@ -41,7 +41,7 @@
   "containers.SettingPage.attributes": "속성",
   "containers.SettingPage.attributes.description": "속성의 순서를 지정합니다",
   "containers.SettingPage.listSettings.description": "이 콘텐츠 유형의 옵션을 구성합니다.",
-  "containers.SettingPage.listSettings.title": "목록 — 설정",
+  "containers.SettingPage.listSettings.title": "목록 (설정)",
   "containers.SettingPage.pluginHeaderDescription": "이 콘텐츠 유형에 특정한 설정을 구성합니다.",
   "containers.SettingsPage.Block.contentType.description": "특정 설정을 구성합니다.",
   "containers.SettingsPage.Block.contentType.title": "콘텐츠 유형",

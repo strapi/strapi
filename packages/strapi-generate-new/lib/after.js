@@ -15,10 +15,10 @@ const fs = require('fs-extra');
 const npm = require('enpeem');
 const ora = require('ora');
 const shell = require('shelljs');
-const request = require('request');
 
 // Logger.
 const { packageManager } = require('strapi-utils');
+const trackSuccess = require('./success');
 
 /**
  * Runs after this generator has finished
@@ -202,13 +202,3 @@ module.exports = (scope, cb) => {
       });
   }
 };
-
-function trackSuccess(event, scope) {
-  request
-    .post('https://analytics.strapi.io/track')
-    .form({
-      event,
-      uuid: scope.uuid
-    })
-    .on('error', () => {});
-}
