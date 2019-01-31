@@ -1,5 +1,5 @@
 /* eslint-disable */
-var shell = require('shelljs');
+const shell = require('shelljs');
 shell.exec('npm -v', {silent: true}, function (code, stdout, stderr) {
   if (code) throw stderr;
   if (parseFloat(stdout) < 3) {
