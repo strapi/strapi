@@ -27,8 +27,6 @@ const rootAdminpath = (() => {
   return path.resolve(appPath, 'admin');
 })();
 
-console.log(rootAdminpath)
-
 // Load plugins into the same build in development mode.
 const plugins = {
   exist: false,
