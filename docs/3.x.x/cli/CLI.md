@@ -23,7 +23,7 @@ options: [--dev|--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --d
   Will display the full error message if one is fired during the database connection.
 
 - **strapi new &#60;name&#62; --quickstart**<br/>
-Use the quickstart system to create your all.
+Use the quickstart system to create your app.
 
 - **strapi new &#60;name&#62; --dbclient=&#60;dbclient&#62; --dbhost=&#60;dbhost&#62; --dbport=&#60;dbport&#62; --dbname=&#60;dbname&#62; --dbusername=&#60;dbusername&#62; --dbpassword=&#60;dbpassword&#62; --dbssl=&#60;dbssl&#62; --dbauth=&#60;dbauth&#62; --dbforce**<br/>
 
