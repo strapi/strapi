@@ -11,6 +11,7 @@ const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
+const shell = require('shelljs');
 
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
@@ -43,7 +44,8 @@ module.exports = function (name, cliArguments) {
     name,
     strapiPackageJSON: packageJSON,
     developerMode,
-    debug: cliArguments.debug !== undefined
+    debug: cliArguments.debug !== undefined,
+    quick: cliArguments.quickstart !== undefined
   };
 
   const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
@@ -83,6 +85,15 @@ module.exports = function (name, cliArguments) {
     error: function returnError(err) {
       console.log(err);
       process.exit(1);
+    },
+
+    success:  () => {
+      if (scope.quick) {
+        shell.cd(scope.rootPath);
+        shell.exec('strapi start', {
+          stdio: 'inherit'
+        });
+      }
     }
   });
 };
