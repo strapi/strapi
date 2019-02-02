@@ -1,49 +1,23 @@
 const _ = require('lodash');
+const { Builder, Query } = require('strapi-utils');
 
 module.exports = {
-  find: async function (params, populate, raw = false) {
-    return this.query(function(qb) {
-      _.forEach(params.where, (where, key) => {
-        if (_.isArray(where.value) && where.symbol !== 'IN' && where.symbol !== 'NOT IN') {
-          for (const value in where.value) {
-            qb[parseInt(value) ? 'orWhere' : 'where'](key, where.symbol, where.value[value]);
-          }
-        } else {
-          qb.where(key, where.symbol, where.value);
-        }
-      });
+  find: async function (params, populate) {
+    const model = this;
+    const filter = new Builder(model, params).convert();
 
-      if (params.sort) {
-        qb.orderBy(params.sort.key, params.sort.order);
-      }
-
-      if (params.skip) {
-        qb.offset(_.toNumber(params.skip));
-      }
-
-      if (params.limit) {
-        qb.limit(_.toNumber(params.limit));
-      }
-    }).fetchAll({
-      withRelated: populate || this.associations.map(x => x.alias)
-    }).then(data => raw ? data.toJSON() : data);
+    return new Query(model)
+      .find(filter, populate)
+      .execute();
   },
 
   count: async function (params = {}) {
-    return await this
-      .forge()
-      .query(qb => {
-        _.forEach(params.where, (where, key) => {
-          if (_.isArray(where.value)) {
-            for (const value in where.value) {
-              qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
-            }
-          } else {
-            qb.where(key, where.symbol, where.value);
-          }
-        });
-      })
-      .count();
+    const model = this;
+    const filter = new Builder(model, params).convert();
+
+    return new Query(model)
+      .count(filter)
+      .execute();
   },
 
   search: async function (params, populate, raw = false) {

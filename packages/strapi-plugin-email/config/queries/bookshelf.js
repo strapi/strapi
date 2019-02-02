@@ -1,34 +1,23 @@
 const _ = require('lodash');
+const { Builder, Query } = require('strapi-utils');
 
 module.exports = {
-  find: async function (params = {}, populate) {
-    const records = await this.query(function(qb) {
-      _.forEach(params.where, (where, key) => {
-        qb.where(key, where[0].symbol, where[0].value);
-      });
+  find: async function (params, populate) {
+    const model = this;
+    const filter = new Builder(model, params).convert();
 
-      if (params.sort) {
-        qb.orderBy(params.sort.key, params.sort.order);
-      }
-
-      if (params.start) {
-        qb.offset(params.start);
-      }
-
-      if (params.limit) {
-        qb.limit(params.limit);
-      }
-    }).fetchAll({
-      withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
-    });
-
-    return records ? records.toJSON() : records;
+    return new Query(model)
+      .find(filter, populate)
+      .execute();
   },
 
   count: async function (params = {}) {
-    return await this
-      .where(params)
-      .count();
+    const model = this;
+    const filter = new Builder(model, params).convert();
+
+    return new Query(model)
+      .count(filter)
+      .execute();
   },
 
   findOne: async function (params, populate) {

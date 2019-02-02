@@ -1,42 +1,23 @@
 const _ = require('lodash');
+const { Builder, Query } = require('strapi-utils');
 
 module.exports = {
-  find: async function (params = {}, populate) {
-    const records = await this.query(function(qb) {
-      Object.keys(params.where).forEach((key) => {
-        const where = params.where[key];
+  find: async function (params, populate) {
+    const model = this;
+    const filter = new Builder(model, params).convert();
 
-        if (Array.isArray(where.value) && where.symbol !== 'IN' && where.symbol !== 'NOT IN') {
-          for (const value in where.value) {
-            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
-          }
-        } else {
-          qb.where(key, where.symbol, where.value);
-        }
-      });
-
-      if (params.sort) {
-        qb.orderBy(params.sort.key, params.sort.order);
-      }
-
-      if (params.start) {
-        qb.offset(params.start);
-      }
-
-      if (params.limit) {
-        qb.limit(params.limit);
-      }
-    }).fetchAll({
-      withRelated: populate || _.keys(_.groupBy(_.reject(this.associations, { autoPopulate: false }), 'alias'))
-    });
-
-    return records ? records.toJSON() : records;
+    return new Query(model)
+      .find(filter, populate)
+      .execute();
   },
 
   count: async function (params = {}) {
-    return await this
-      .where(params)
-      .count();
+    const model = this;
+    const filter = new Builder(model, params).convert();
+
+    return new Query(model)
+      .count(filter)
+      .execute();
   },
 
   findOne: async function (params, populate) {
