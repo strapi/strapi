@@ -27,6 +27,23 @@ module.exports = {
     }, {});
   },
 
+  convertToQuery: function(params) {
+    const result = {};
+
+    _.forEach(params, (value, key) => {
+      if (_.isPlainObject(value)) {
+        const flatObject = this.convertToQuery(value);
+        _.forEach (flatObject, (_value, _key) => {
+          result[`${key}.${_key}`] = _value;
+        });
+      } else {
+        result[key] = value;
+      }
+    });
+
+    return result;
+  },
+
   /**
    * Security to avoid infinite limit.
    *
@@ -261,9 +278,7 @@ module.exports = {
           query: {
             value: {
               ...this.convertToParams(_.omit(_options, 'where'), model.primaryKey),
-              ..._options.where,
-              // Avoid population.
-              _populate: model.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias),
+              ...this.convertToQuery(_options.where),
             },
             writable: true,
             configurable: true
