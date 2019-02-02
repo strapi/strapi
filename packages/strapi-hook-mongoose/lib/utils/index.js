@@ -1,10 +1,13 @@
 'use strict';
 
+const _ = require('lodash');
+const Mongoose = require('mongoose');
+
 /**
  * Module dependencies
  */
 
-module.exports = (mongoose = new Mongoose()) => {
+module.exports = (mongoose = Mongoose) => {
   mongoose.Schema.Types.Decimal = require('mongoose-float').loadType(mongoose, 2);
   mongoose.Schema.Types.Float = require('mongoose-float').loadType(mongoose, 20);
 
@@ -17,7 +20,7 @@ module.exports = (mongoose = new Mongoose()) => {
     return this.toString();
   };
 
-  const fn = {
+  const utils = {
     convertType: mongooseType => {
       switch (mongooseType.toLowerCase()) {
         case 'array':
@@ -50,8 +53,27 @@ module.exports = (mongoose = new Mongoose()) => {
           return 'String';
         default:
       }
+    },
+    valueToId: (value) => {
+      return utils.isMongoId(value)
+        ? mongoose.Types.ObjectId(value)
+        : value;
+    },
+    isMongoId: (value) => {
+      if(value instanceof mongoose.Types.ObjectId) {
+        return true;
+      }
+
+      if (!_.isString(value)) {
+        return false;
+      }
+
+      // Here we don't use mongoose.Types.ObjectId.isValid method because it's a weird check,
+      // it returns for instance true for any integer value ¯\_(ツ)_/¯
+      const hexadecimal = /^[0-9A-F]+$/i;
+      return hexadecimal.test(value) && value.length === 24;
     }
   };
 
-  return fn;
+  return utils;
 };
