@@ -18,6 +18,8 @@ const utilsModels = require('strapi-utils').models;
 // Local helpers.
 const utils = require('./utils/');
 const relations = require('./relations');
+const { Query } = require('./query');
+const { Converter } = require('./converter');
 
 const PIVOT_PREFIX = '_pivot_';
 const GLOBALS = {};
@@ -732,24 +734,11 @@ module.exports = function(strapi) {
                       }
                     };
 
-                    const table = _.get(manyRelations, 'collectionName') ||
-                      _.map(
-                        _.sortBy(
-                          [
-                            collection.attributes[
-                              manyRelations.via
-                            ],
-                            manyRelations
-                          ],
-                          'collection'
-                        ),
-                        table => {
-                          return _.snakeCase(
-                            // eslint-disable-next-line prefer-template
-                            pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via)
-                          );
-                        }
-                      ).join('__');
+                    const table = _.get(manyRelations, 'collectionName')
+                      || utilsModels.getCollectionName(
+                        collection.attributes[manyRelations.via],
+                        manyRelations
+                      );
 
                     await handler(table, attributes);
                   }
@@ -868,24 +857,11 @@ module.exports = function(strapi) {
                     strapi.plugins[details.plugin].models[details.collection]:
                     strapi.models[details.collection];
 
-                  const collectionName = _.get(details, 'collectionName') ||
-                    _.map(
-                      _.sortBy(
-                        [
-                          collection.attributes[
-                            details.via
-                          ],
-                          details
-                        ],
-                        'collection'
-                      ),
-                      table => {
-                        return _.snakeCase(
-                          // eslint-disable-next-line prefer-template
-                          pluralize.plural(table.collection) + ' ' + pluralize.plural(table.via)
-                        );
-                      }
-                    ).join('__');
+                  const collectionName = _.get(details, 'collectionName')
+                    || utilsModels.getCollectionName(
+                      collection.attributes[details.via],
+                      details,
+                    );
 
                   const relationship = _.clone(
                     collection.attributes[details.via]
@@ -1150,7 +1126,10 @@ module.exports = function(strapi) {
       }
 
       return result;
-    }
+    },
+
+    Query,
+    Converter,
   }, relations);
 
   return hook;
