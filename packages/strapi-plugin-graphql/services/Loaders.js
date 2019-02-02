@@ -85,15 +85,22 @@ module.exports = {
 
       // Generate constant for skip parameters.
       // Note: we shouldn't support both way of doing this kind of things in the future.
-      const skip = query.options.start || query.options.skip;
+      const skip = query.options.start || query.options.skip || 0;
+      const limit = query.options.limit || 100;
 
       // Extracting ids from original request to map with query results.
       const ids = this.extractIds(query, ref);
       
       if (!_.isArray(ids)) {
+        const ast = ref.associations.find(ast => ast.alias === ids.alias);
+        const astModel = this.retrieveModel(ast.model, ast.plugin);
+
         return data
-          .filter(entry => entry[ids.alias].toString() === ids.value.toString())
-          .slice(skip, skip + query.options.limit);
+          .filter(entry => {
+            const entryValue = entry[ids.alias][astModel.primaryKey];
+            return entryValue.toString() === ids.value.toString();
+          })
+          .slice(skip, skip + limit);
       }
 
       // Critical: don't touch this part until you truly understand what you're doing.
@@ -102,7 +109,7 @@ module.exports = {
       return data
         .filter(entry => entry !== undefined)
         .filter(entry => ids.map(id => id.toString()).includes(entry[ref.primaryKey].toString()))
-        .slice(skip, skip + query.options.limit);
+        .slice(skip, skip + limit);
     });
   },
 
@@ -125,31 +132,19 @@ module.exports = {
       return [];
     }
 
-    const ref = this.retrieveModel(model, query.options.source);
-
     // Construct parameters object sent to the Content Manager service.
-    // We are faking the `start`, `skip` and `limit` argument because it doesn't make sense because we are merging different requests in one.
     // Note: we're trying to avoid useless populate for performances. Please be careful if you're updating this part.
-    const populate = ref.associations
-      .filter(association => !association.dominant && _.isEmpty(association.model))
-      .map(association => association.alias);
-
     const params = {
       ...query.options,
-      populate,
-      query: query.options.where || {},
-      start: 0,
-      skip: 0,
-      limit: 100,
+      populate: [], // Avoid useless population for performance reason
+      query: {},
     };
 
-    params.query[query.alias] = _.uniq(query.ids.filter(x => !_.isEmpty(x) || _.isInteger(x)).map(x => x.toString()));
-
-    if (['id', '_id'].includes(query.alias)) {
-      // However, we're applying a limit based on the number of entries we've to fetch.
-      // We'll apply the real `skip`, `start` and `limit` parameters during the mapping above.
-      params.limit = params.query[query.alias].length;
-    }
+    params.query[`${query.alias}_in`] = _.chain(query.ids)
+      .filter(id => !_.isEmpty(id) || _.isInteger(id)) // Only keep valid ids
+      .map(id => id.toString()) // convert ids to string
+      .uniq() // Remove redundant ids
+      .value();
 
     // Run query and remove duplicated ID.
     const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, params);
