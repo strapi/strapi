@@ -1109,6 +1109,13 @@ module.exports = function(strapi) {
             symbol: 'IN',
             value,
           };
+          break;          
+        case '_nin':
+          result.key = `where.${key}`;
+          result.value = {
+            symbol: 'NOT IN',
+            value,
+          };
           break;
         default:
           return undefined;
