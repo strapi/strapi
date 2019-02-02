@@ -8,6 +8,7 @@
 
 // Public dependencies.
 const _ = require('lodash');
+const { Builder, Query } = require('strapi-utils');
 
 module.exports = {
 
@@ -17,22 +18,13 @@ module.exports = {
    * @return {Promise}
    */
 
-  fetchAll: (params) => {
-    // Convert `params` object to filters compatible with Mongo.
-    const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
-    // Select field to populate.
-    const populate = <%= globalID %>.associations
-      .filter(ast => ast.autoPopulate !== false)
-      .map(ast => ast.alias)
-      .join(' ');
+  fetchAll: (params, populate) => {
+    const filter = new Builder(<%= globalID %>, params).convert();
 
-    return <%= globalID %>
-      .find()
-      .where(filters.where)
-      .sort(filters.sort)
-      .skip(filters.start)
-      .limit(filters.limit)
-      .populate(filters.populate || populate);
+    return new Query(<%= globalID %>)
+      .find(filter)
+      .populate(populate)
+      .execute();
   },
 
   /**
@@ -60,12 +52,11 @@ module.exports = {
    */
 
   count: (params) => {
-    // Convert `params` object to filters compatible with Mongo.
-    const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
-
-    return <%= globalID %>
-      .countDocuments()
-      .where(filters.where);
+      // Convert `params` object to filter compatible with Mongo.
+    const filter = new Builder(<%= globalID %>, params).convert();
+    return new Query(<%= globalID %>)
+      .count(filter)
+      .execute();
   },
 
   /**

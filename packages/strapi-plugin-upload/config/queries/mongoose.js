@@ -1,19 +1,24 @@
 const _ = require('lodash');
+const { Builder, Query } = require('strapi-utils');
 
 module.exports = {
-  find: async function (params = {}, populate) {
-    return this
-      .find(params.where)
-      .limit(Number(params.limit))
-      .sort(params.sort)
-      .skip(Number(params.start))
-      .populate(populate || this.associations.map(x => x.alias).join(' '))
-      .lean();
+  find: async function (params, populate) {
+    const model = this;
+    const filter = new Builder(model, params).convert();
+
+    return new Query(model)
+      .find(filter)
+      .populate(populate)
+      .execute();
   },
 
-  count: async function (params = {}) {
-    return Number(await this
-      .countDocuments(params));
+  count: async function (params) {
+    const model = this;
+    // Convert `params` object to filter compatible with Mongo.
+    const filter = new Builder(model, params).convert();
+    return new Query(model)
+      .count(filter)
+      .execute();
   },
 
   findOne: async function (params, populate) {
