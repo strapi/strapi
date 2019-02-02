@@ -43,6 +43,9 @@ Find products having a price equal or greater than `3`.
 Find multiple product with id 3, 6, 8
 `GET /products?id_in=3&id_in=6&id_in=8`
 
+Find posts written by a user belongs to the strapi company.
+`GET /posts?author.company.name=strapi`
+
 ::: note
 You can't use filter to have specific results inside relation, like "Find users and only their posts older than yesterday" as example. If you need it, you can modify or create your own service or use [GraphQL](./graphql.md#query-api).
 :::
@@ -85,10 +88,11 @@ Get the second page of results.
 ## Programmatic usage
 
 Requests system can be implemented in custom code sections.
+In the newest version of strapi, we introduced the Builder API which is an easy/new way to manipulate filters.
 
 ### Extracting requests filters
 
-To extract the filters from a JavaScript object or a request, you need to call the [`strapi.utils.models.convertParams` helper](../api-reference/reference.md#strapiutils).
+To extract the filters from a JavaScript object or a request, you need to call the [`Builder` API](../api-reference/reference.md#strapiutils).
 
 ::: note
 The returned objects are formatted according to the ORM used by the model.
@@ -96,39 +100,75 @@ The returned objects are formatted according to the ORM used by the model.
 
 #### Example
 
-**Path —** `./api/user/controllers/User.js`.
+**Path —** `./api/product/services/Product.js`.
+
+```JS
+const { Builder } = require('strapi-utils');
+
+module.exports = {
+  // Find products having a price equal or greater than `3`.
+  fetchExpensiveProducts: (params, populate) => {
+    const filter = new Builder(Product)
+      .gte('price', 3)
+      .convert(); // the Convert method will convert your filter according to the Model's ORM (Mongoose/Bookshelf).
+
+    return new Query(Product)
+      .find(filter)
+      .populate(populate)
+      .execute();
+  },
+
+  // Find products that belongs to strapi company ordered by creation date.
+  fetchLastestStrapiProducts: (params, populate) => {
+    const filter = new Builder(Product)
+      .eq('company.name', 'strapi')
+      .contains('company.country', 'fr')
+      .sort('createdAt:DESC') // createdAt:desc will also work here
+      .convert();
+
+    return new Query(Product)
+      .find(filter)
+      .populate(populate)
+      .execute();
+  }
+}
+
+```
+
+**Path —** `./api/product/controllers/Product.js`.
 
 ```js
+const { Builder } = require('strapi-utils');
+
 // Define a list of params.
 const params = {
   '_limit': 20,
-  '_sort': 'email'
+  '_sort': 'email:desc'
 };
 
 // Convert params.
-const formattedParams = strapi.utils.models.convertParams('user', params); // { limit: 20, sort: 'email' }
+const formattedParams = new Builder(Product, params).build(); // { limit: 20, sort: { order: 'desc', key: 'email' } }
+const convertedParams = new Builder(Product, params).convert(); // { limit: 20, sort: '-email' }
 ```
 
 ### Query usage
 
 #### Example
 
-**Path —** `./api/user/controllers/User.js`.
+**Path —** `./api/product/controllers/Product.js`.
 
 ```js
-module.exports = {
+const { Builder, Query } = require('strapi-utils');
 
+module.exports = {
   find: async (ctx) => {
     // Convert params.
-    const formattedParams = strapi.utils.models.convertParams('user', ctx.request.query);
+    const filter = new Builder(Product, ctx.request.query).convert();
 
     // Get the list of users according to the request query.
-    const filteredUsers = await User
-      .find()
-      .where(formattedParams.where)
-      .sort(formattedParams.sort)
-      .skip(formattedParams.start)
-      .limit(formattedParams.limit);
+    const filteredUsers = await new Query(Product)
+      .find(filter)
+      .execute();
 
     // Finally, send the results to the client.
     ctx.body = filteredUsers;

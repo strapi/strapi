@@ -16,5 +16,7 @@ module.exports = {
   packageManager: require('./packageManager'),
   policy: require('./policy'),
   regex: require('./regex'),
-  templateConfiguration: require('./templateConfiguration')
+  templateConfiguration: require('./templateConfiguration'),
+  Query: require('./query').Query,
+  Builder: require('./builder').Builder
 };
