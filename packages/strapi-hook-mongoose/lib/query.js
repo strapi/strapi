@@ -1,4 +1,4 @@
-const { has, isEmpty, get } = require('lodash');
+const _ = require('lodash');
 const { buildQueryJoins, buildQueryFilter } = require('./query-utils');
 
 class Query {
@@ -15,9 +15,9 @@ class Query {
 
   find(filter) {
     this.query = this.buildQuery(filter);
-    if (!isEmpty(filter.sort)) this.query.sort(filter.sort);
-    if (has(filter, 'start')) this.query.skip(filter.start);
-    if (has(filter, 'limit')) this.query.limit(filter.limit);
+    if (!_.isEmpty(filter.sort)) this.query.sort(filter.sort);
+    if (_.has(filter, 'start')) this.query.skip(filter.start);
+    if (_.has(filter, 'limit')) this.query.limit(filter.limit);
 
     return this;
   }
@@ -26,13 +26,16 @@ class Query {
     this.query = this.buildQuery(filter);
     this.query = this.query
       .count("count")
-      .then(result => get(result, `0.count`, 0));
+      .then(result => _.get(result, `0.count`, 0));
     return this;
   }
 
   populate(populate) {
     const queryJoins = buildQueryJoins(this.model, { whitelistedPopulate: populate });
-    this.query = this.query.append(queryJoins);
+    const existingPipelines = this.query.pipeline();
+    // Remove redundant joins
+    const differenceJoins = _.differenceWith(queryJoins, existingPipelines, _.isEqual);
+    this.query = this.query.append(differenceJoins);
     return this;
   }
 
