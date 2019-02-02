@@ -12,43 +12,26 @@ const _ = require('lodash');
 
 // Strapi utilities.
 const utils = require('strapi-hook-bookshelf/lib/utils/');
+const { Builder, Query } = require('strapi-utils');
 
 module.exports = {
 
   /**
-   * Promise to fetch all <%= idPluralized %>.
+   * Promise to fetch all <%= humanizeIdPluralized %>.
    *
    * @return {Promise}
    */
 
-  fetchAll: (params) => {
-    // Convert `params` object to filters compatible with Bookshelf.
-    const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+  fetchAll: (params, populate) => {
+    const filter = new Builder(<%= globalID %>, params).convert();
     // Select field to populate.
-    const populate = <%= globalID %>.associations
+    const withRelated = populate || <%= globalID %>.associations
       .filter(ast => ast.autoPopulate !== false)
       .map(ast => ast.alias);
 
-    return <%= globalID %>.query(function(qb) {
-      _.forEach(filters.where, (where, key) => {
-        if (_.isArray(where.value) && where.symbol !== 'IN' && where.symbol !== 'NOT IN') {
-          for (const value in where.value) {
-            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value])
-          }
-        } else {
-          qb.where(key, where.symbol, where.value);
-        }
-      });
-
-      if (filters.sort) {
-        qb.orderBy(filters.sort.key, filters.sort.order);
-      }
-
-      qb.offset(filters.start);
-      qb.limit(filters.limit);
-    }).fetchAll({
-      withRelated: filters.populate || populate
-    });
+    return new Query(<%= globalID %>)
+      .find(filter, withRelated)
+      .execute();
   },
 
   /**
@@ -76,19 +59,11 @@ module.exports = {
 
   count: (params) => {
     // Convert `params` object to filters compatible with Bookshelf.
-    const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+    const filter = new Builder(<%= globalID %>, params).convert();
 
-    return <%= globalID %>.query(function(qb) {
-      _.forEach(filters.where, (where, key) => {
-        if (_.isArray(where.value)) {
-          for (const value in where.value) {
-            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
-          }
-        } else {
-          qb.where(key, where.symbol, where.value);
-        }
-      });
-    }).count();
+    return new Query(<%= globalID %>)
+      .count(filter)
+      .execute();
   },
 
   /**

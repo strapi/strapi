@@ -23,6 +23,7 @@
     "knex": "^0.16.3",
     "lodash": "^4.17.5",
     "pino": "^4.7.1",
+    "pluralize": "^7.0.0",
     "shelljs": "^0.7.7"
   },
   "author": {
