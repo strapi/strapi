@@ -97,7 +97,26 @@ module.exports = {
 
         return data
           .filter(entry => {
-            const entryValue = entry[ids.alias][astModel.primaryKey];
+            /**
+             * In some cases (Mongoose for instance) the entry will be populated so we need to access its value using the primary key
+             * Example
+             * // Mongoose
+             * entry = {
+             *   product: {
+             *     _id: "some_id", // the value is entry["product"]["_id"]
+             *     price: 10
+             *   },
+             *   company: "strapi"
+             * }
+             * // Bookshelf
+             * entry = {
+             *  product: 1, // the value is entry["product"]
+             *  company: "strapi"
+             * }
+             */
+            const entryValue = _.isUndefined(entry[ids.alias][astModel.primaryKey])
+              ? entry[ids.alias]
+              : entry[ids.alias][astModel.primaryKey];
             return entryValue.toString() === ids.value.toString();
           })
           .slice(skip, skip + limit);

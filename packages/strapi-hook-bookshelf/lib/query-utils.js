@@ -14,8 +14,22 @@ class QueryBuilder {
         let fieldKey = `${model.collectionName}.${attributeKey}`;
         if (association) {
           if (association.nature === 'manyToMany') {
-            const { attribute, column } = model.attributes[key];
+            const { attribute, column } = model.attributes[association.via];
             fieldKey = `${association.tableCollectionName}.${attribute}_${column}`;
+          }
+
+          /**
+           * If for instance we want to filter on the model relation, such as
+           * {
+           *   product: {
+           *     method: 'whereIn',
+           *     value: ["1", "2", "3"]
+           *   }
+           * }
+           * the fieldKey should be "products.id" and not "products.product"
+           */
+          if (attributeKey === key) {
+            fieldKey = `${model.collectionName}.${model.primaryKey}`;
           }
         }
 
@@ -108,7 +122,7 @@ class QueryBuilder {
 
         qb.innerJoin(
           relationTable,
-          `${association.tableCollectionName}.${strapiModel.attributes[key].attribute}_${strapiModel.attributes[key].column}`,
+          `${association.tableCollectionName}.${strapiModel.attributes[association.alias].attribute}_${strapiModel.attributes[association.alias].column}`,
           `${relationTable}.${astModel.primaryKey}`,
         );
       } else {
