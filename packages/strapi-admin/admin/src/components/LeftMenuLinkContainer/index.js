@@ -41,7 +41,7 @@ function LeftMenuLinkContainer({ layout, plugins }) {
   }, {});
   
   const linkSections = Object.keys(pluginsSections).map((current, j) => {
-    const contentTypesToShow = get(layout, 'layout.contentTypesToShow');
+    const contentTypesToShow = get(layout, 'contentTypesToShow');
     const contentTypes = contentTypesToShow
       ? pluginsSections[current].links.filter(
         obj => findIndex(contentTypesToShow, ['destination', obj.destination]) !== -1,
@@ -110,7 +110,7 @@ function LeftMenuLinkContainer({ layout, plugins }) {
           <LeftMenuLink
             icon="shopping-basket"
             label={messages.installNewPlugin.id}
-            destination="/install-plugin"
+            destination="/marketplace"
           />
           {hasSettingsManager && (
             <LeftMenuLink

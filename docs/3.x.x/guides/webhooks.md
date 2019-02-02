@@ -19,7 +19,7 @@ All of these functions are available in a file located at `api/yourContentType/m
 
 If your goal is to rebuild a static website, the only useful callbacks are `afterCreate`, `afterUpdate` and `afterDestroy`. So, uncomment them, add logs and try to create, update and delete entries from the admin panel.
 
-*Path: `api/yourContentType/models/YourContentType.js`*
+**Path —** `api/yourContentType/models/YourContentType.js`.
 
 ```js
 'use strict';
@@ -51,7 +51,7 @@ We are almost there: the only thing we still need to do is to actually make the 
 
 So first of all, let's store this URL in a proper way. To do so, edit `config/environments/development/custom.json`:
 
-*Path: `config/environments/development/custom.json`*
+**Path —** `config/environments/development/custom.json`.
 
 ```json
 {
@@ -63,20 +63,20 @@ Do the same thing for other environments.
 
 #### HTTP call
 
-Now it is time to make the HTTP call. In this example we will use `request` as it is already in the list of Strapi's dependencies. Let's install it:
+Now it is time to make the HTTP call. In this example we will use `axios`. Let's install it:
 
 ```
-npm i request --save
+npm i axios --save
 ```
 
 Edit `api/yourContentType/models/YourContentType.js`:
 
-*Path: `api/yourContentType/models/YourContentType.js`*
+**Path —** `api/yourContentType/models/YourContentType.js`.
 
 ```js
 'use strict';
 
-const request = require('request');
+const axios = require('axios');
 
 /**
  * Lifecycle callbacks for the `Post` model.
@@ -118,4 +118,6 @@ So, to trigger an url on delete, please add `request.post(strapi.config.currentE
  - `remove` action of `api/yourContentType/services/YourContentType.js` (triggered by your public API).
  - `delete` action of `plugins/content-manager/services/ContentManager.js` (triggered by the Content Manager).
 
-*Note: do not forget to require `request` at the top of these files.*
+::: note
+Do not forget to require `axios` at the top of these files.
+:::

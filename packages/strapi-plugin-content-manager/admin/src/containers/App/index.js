@@ -42,8 +42,8 @@ class App extends React.Component {
 
     const currentModelName = this.props.location.pathname.split('/')[3];
     const source = getQueryParameters(this.props.location.search, 'source');
-    const attrPath = source === 'content-manager' ? ['models', currentModelName, 'fields'] : ['models', 'plugins', source, currentModelName, 'fields'];
-
+    const attrPath = source === 'content-manager' ? ['models', currentModelName, 'editDisplay', 'availableFields'] : ['models', 'plugins', source, currentModelName, 'editDisplay', 'availableFields'];
+    
     if (currentModelName && source && isEmpty(get(this.props.schema, attrPath))) {
       return <EmptyAttributesView currentModelName={currentModelName} history={this.props.history} modelEntries={this.props.modelEntries} />;
     }
@@ -51,7 +51,7 @@ class App extends React.Component {
     return (
       <div className="content-manager">
         <Switch>
-          <Route path="/plugins/content-manager/ctm-configurations/:slug/:source?/:endPoint?" component={SettingPage} />
+          <Route path="/plugins/content-manager/ctm-configurations/:viewType/:slug/:source?/:endPoint?" component={SettingPage} />
           <Route path="/plugins/content-manager/ctm-configurations" component={SettingsPage} />
           <Route path="/plugins/content-manager/:slug/:id" component={EditPage} />
           <Route path="/plugins/content-manager/:slug" component={ListPage} />

@@ -13,9 +13,6 @@ module.exports = {
       email: {
         className: 'col-md-6'
       },
-      provider: {
-        className: 'd-none'
-      },
       resetPasswordToken: {
         className: 'd-none'
       },

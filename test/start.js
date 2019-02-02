@@ -1,6 +1,9 @@
 const spawn = require('child_process').spawn;
-const fs = require('fs-extra');
+const fs = require('fs');
 const path = require('path');
+const shell = require('shelljs');
+const cypress = require('cypress')
+const { deleteApp } = require('./helpers/deleteFolder');
 
 const strapiBin = path.resolve('./packages/strapi/bin/strapi.js');
 const appName = 'testApp';
@@ -10,21 +13,22 @@ let appStart;
 const databases = {
   mongo: `--dbclient=mongo --dbhost=127.0.0.1 --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername= --dbpassword=`,
   postgres: '--dbclient=postgres --dbhost=127.0.0.1 --dbport=5432 --dbname=strapi-test --dbusername= --dbpassword=',
-  mysql: '--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi-test --dbusername=root --dbpassword=root'
+  mysql: '--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi-test --dbusername=root --dbpassword=root',
+  sqlite: '--dbclient=sqlite --dbfile=./tmp/data.db'
 };
 
 const {runCLI: jest} = require('jest-cli/build/cli');
 
 const main = async () => {
   const clean = () => {
-    return new Promise((resolve) => {
-      fs.exists(appName, exists => {
-        if (exists) {
-          fs.removeSync(appName);
-        }
-
-        resolve();
-      });
+    return new Promise(async (resolve) => {
+      try {
+        fs.accessSync(appName);
+        await deleteApp(path.resolve(appName));
+      } catch(err) {
+        // Silent
+      }
+      resolve();
     });
   };
 
@@ -33,15 +37,15 @@ const main = async () => {
       const appCreation = spawn('node', `${strapiBin} new ${appName} --dev ${database}`.split(' '), { detached: true });
 
       appCreation.stdout.on('data', data => {
-        console.log(data.toString());
+        console.log(data.toString().trim());
 
         if (data.includes('is ready at')) {
-          process.kill(-appCreation.pid);
+          process.kill(appCreation.pid);
           return resolve();
         }
 
         if (data.includes('Database connection has failed')) {
-          process.kill(-appCreation.pid);
+          process.kill(appCreation.pid);
           return reject(new Error('Database connection has failed'));
         }
       });
@@ -51,24 +55,27 @@ const main = async () => {
   const start = () => {
     return new Promise((resolve, reject) => {
       try {
-        appStart = spawn('node', `${strapiBin} start ${appName}`.split(' '), {detached: true});
-
-        appStart.stdout.on('data', data => {
-          console.log(data.toString());
-
+        shell.cd('./testApp');
+        appStart = shell.exec(`strapi start`, { async: true, silent: true });
+        appStart.stdout.on('data', (data) => {
           if (data.includes('To shut down your server')) {
+            shell.cd('..');
             return resolve();
+          } else {
+            console.log(data.trim());
           }
         });
 
       } catch (e) {
+        console.log(e)
         if (typeof appStart !== 'undefined') {
-          process.kill(-appStart.pid);
+          process.kill(appStart.pid);
         }
         return reject(e);
       }
     });
   };
+
 
   const test = () => {
     return new Promise(async (resolve) => {
@@ -78,7 +85,9 @@ const main = async () => {
         testURL: 'http://localhost/'
       }, [process.cwd()]);
 
-      const packages = fs.readdirSync(path.resolve(process.cwd(), 'packages'))
+      const packagesPath = path.resolve(process.cwd(), 'packages');
+
+      const packages = fs.readdirSync(packagesPath)
         .filter(file => file.indexOf('strapi') !== -1);
 
       // Run tests in every packages.
@@ -86,30 +95,39 @@ const main = async () => {
         await jest({
           passWithNoTests: true,
           testURL: 'http://localhost/'
-        }, [`${process.cwd()}/packages/${packages[i]}`]);
+        }, [path.resolve(packagesPath, packages[i])]);
       }
 
       resolve();
     });
   };
 
+  const cypressTest = () => {
+    const config = Object.assign({ spec: './packages/**/test/front/integration/*' }, process.env.npm_config_browser === 'true' ? { browser: 'chrome' } : {});
+
+    return cypress
+      .run(config);
+  }
+
   const testProcess = async (database) => {
     try {
       await clean();
       await generate(database);
       await start();
-      await test();
-      process.kill(-appStart.pid);
+      // await cypressTest();
+      // await test();
+      process.kill(appStart.pid);
     } catch (e) {
       console.error(e.message);
       testExitCode = 1;
     }
   };
 
-  await testProcess(databases.mongo);
-  await testProcess(databases.postgres);
-  await testProcess(databases.mysql);
-  process.exit(testExitCode);
+  // await testProcess(databases.mongo);
+  // await testProcess(databases.postgres);
+  // await testProcess(databases.mysql);
+  // await testProcess(databases.sqlite);
+  // process.exit(testExitCode);
 };
 
 main();

@@ -103,6 +103,8 @@ package-lock.json
 
 testApp
 coverage
+cypress/screenshots
+cypress/videos
 
 
 ############################

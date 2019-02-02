@@ -60,6 +60,7 @@ class SettingsPage extends React.PureComponent {
   getPluginHeaderActions = () => (
     [
       {
+        id: 'cancelChanges',
         label: 'content-manager.popUpWarning.button.cancel',
         kind: 'secondary',
         onClick: this.handleReset,
@@ -83,7 +84,8 @@ class SettingsPage extends React.PureComponent {
 
   handleClick = (destination) => {
     const { location: { pathname } } = this.props;
-    this.props.history.push(`${pathname}${destination}`);
+
+    this.props.history.push(`${pathname}/list-settings${destination}`);
   }
 
   handleConfirmReset = () => {

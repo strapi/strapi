@@ -6,6 +6,7 @@
 
 // Public node modules.
 const url = require('url');
+const path = require('path');
 const _ = require('lodash');
 const mongoose = require('mongoose');
 const Mongoose = mongoose.Mongoose;
@@ -17,7 +18,6 @@ const { models: utilsModels }  = require('strapi-utils');
 
 // Local helpers.
 const utils = require('./utils/');
-const _utils = utils();
 
 const relations = require('./relations');
 
@@ -60,7 +60,9 @@ module.exports = function (strapi) {
 
         // Connect to mongo database
         const connectOptions = {};
-        const options = {};
+        const options = {
+          useFindAndModify: false
+        };
 
         if (!_.isEmpty(username)) {
           connectOptions.user = username;
@@ -77,6 +79,7 @@ module.exports = function (strapi) {
         connectOptions.ssl = ssl === true || ssl === 'true';
         connectOptions.useNewUrlParser = true;
         connectOptions.dbName = database;
+        connectOptions.useCreateIndex = true;
 
         options.debug = debug === true || debug === 'true';
 
@@ -88,6 +91,18 @@ module.exports = function (strapi) {
           const errMsg = message.includes(`:${port}`) ? 'Make sure your MongoDB database is running...' : message;
 
           return cb(errMsg);
+        }
+
+        try {
+          // Require `config/functions/mongoose.js` file to customize connection.
+          require(path.resolve(
+            strapi.config.appPath,
+            'config',
+            'functions',
+            'mongoose.js'
+          ))(instance, connection);
+        } catch (err) {
+          // This is not an error if the file is not found.
         }
 
         Object.keys(options, key => instance.set(key, options[key]));
@@ -119,7 +134,6 @@ module.exports = function (strapi) {
 
                 /*
                   Override populate path for polymorphic association.
-
                   It allows us to make Upload.find().populate('related')
                   instead of Upload.find().populate('related.item')
                 */
@@ -145,6 +159,28 @@ module.exports = function (strapi) {
                               };
                             } else {
                               this._mongooseOptions.populate[association.alias].path = `${association.alias}.ref`;
+                            }
+                          } else {
+                            if (!this._mongooseOptions.populate) {
+                              this._mongooseOptions.populate = {};
+                            }
+
+                            // Images are not displayed in populated data.
+                            // We automatically populate morph relations.
+                            if (association.nature === 'oneToManyMorph' || association.nature === 'manyToManyMorph') {
+                              this._mongooseOptions.populate[association.alias] = {
+                                path: association.alias,
+                                match: {
+                                  [`${association.via}.${association.filter}`]: association.alias,
+                                  [`${association.via}.kind`]: definition.globalId
+                                },
+                                options: {
+                                  sort: '-createdAt'
+                                },
+                                select: undefined,
+                                model: undefined,
+                                _docs: {}
+                              };
                             }
                           }
                           next();
@@ -196,7 +232,17 @@ module.exports = function (strapi) {
                   });
                 });
 
-                collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+                // Use provided timestamps if the elemnets in the array are string else use default.
+                if (_.isArray(_.get(definition, 'options.timestamps'))) {
+                  const timestamps = {
+                    createdAt: _.isString(_.get(definition, 'options.timestamps[0]')) ? _.get(definition, 'options.timestamps[0]') : 'createdAt',
+                    updatedAt: _.isString(_.get(definition, 'options.timestamps[1]')) ? _.get(definition, 'options.timestamps[1]') : 'updatedAt'
+                  };
+                  collection.schema.set('timestamps', timestamps);
+                } else {
+                  collection.schema.set('timestamps', _.get(definition, 'options.timestamps') === true);
+                  _.set(definition, 'options.timestamps', _.get(definition, 'options.timestamps') === true ? ['createdAt', 'updatedAt'] : false);
+                }
                 collection.schema.set('minimize', _.get(definition, 'options.minimize', false) === true);
 
                 collection.schema.options.toObject = collection.schema.options.toJSON = {
@@ -502,6 +548,10 @@ module.exports = function (strapi) {
           result.key = 'limit';
           result.value = parseFloat(value);
           break;
+        case '_populate':
+          result.key = `populate`;
+          result.value = value;
+          break;
         case '_contains':
           result.key = `where.${key}`;
           result.value = {
@@ -522,13 +572,6 @@ module.exports = function (strapi) {
       }
 
       return result;
-    },
-
-    postProcessValue: (value) => {
-      if (_.isArray(value)) {
-        return value.map(_utils.valueToId);
-      }
-      return _utils.valueToId(value);
     }
   }, relations);
 

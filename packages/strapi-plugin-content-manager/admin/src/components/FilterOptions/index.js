@@ -71,6 +71,7 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
         </div>
         {showAddButton && (
           <Add
+            id="newFilter"
             onClick={onClickAdd}
             style={{ marginLeft: isBool? '14px': '6px' }}
             type="button"

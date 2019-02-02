@@ -75,6 +75,8 @@
   "app.components.ListPluginsPage.description": "このプロジェクトでインストールされたプラグイン一覧",
   "app.components.ListPluginsPage.helmet.title": "プラグイン一覧",
   "app.components.ListPluginsPage.title": "プラグイン",
+  "app.components.Logout.profile": "プロフィール",
+  "app.components.Logout.logout": "ログアウト",
   "app.components.NotFoundPage.back": "ホームページに戻る",
   "app.components.NotFoundPage.description": "見つかりません",
   "app.components.Official": "オフィシャル",

@@ -1,0 +1,29 @@
+{
+  "containers.HomePage.Button.open": "Открыть документацию",
+  "containers.HomePage.Button.update": "Обновить",
+  "containers.HomePage.copied": "Токен скопирован в буфер обмена",
+  "containers.HomePage.PluginHeader.title": "Документация - Настройки",
+  "containers.HomePage.PluginHeader.description": "Настройте плагин документации",
+  "containers.HomePage.Block.title": "Версии",
+  "containers.HomePage.PopUpWarning.message": "Вы уверены что хотите удалить эту версию?",
+  "containers.HomePage.PopUpWarning.confirm": "Я понимаю",
+
+ "containers.HomePage.form.jwtToken": "Получите ваш JWT токен",
+  "containers.HomePage.form.jwtToken.description": "Скопируйте этот токен и используйте его в swagger, чтобы делать запросы",
+  "containers.HomePage.form.restrictedAccess": "Закрытый доступ",
+  "containers.HomePage.form.restrictedAccess.inputDescription": "Сделайте вашу документацию приватной. По умолчанию доступ открыт",
+  "containers.HomePage.form.password": "Пароль",
+  "containers.HomePage.form.password.inputDescription": "Установите пароль для доступа к документации",
+  "containers.HomePage.form.showGeneratedFiles": "Показать сгенерированные файлы",
+  "containers.HomePage.form.showGeneratedFiles.inputDescription": "Полезно, если вы хотите изменить сгенерированную документацию. \nПлагин разделяет файлы на модели и плагины. \nПри включенной опции вам будет проще кастомизировать документацию",
+
+  "components.Row.generatedDate": "Последнее обновление",
+  "components.Row.open": "Открыть",
+  "components.Row.regenerate": "Сгенерировать",
+
+  "error.regenerateDoc": "При генерации документации возникла ошибка",
+  "error.noVersion": "Необходимо указать версию",
+  "error.regenerateDoc.versionMissing": "Версии, которую вы пытаетесь сгенерировать, не существует",
+  "error.deleteDoc.versionMissing": "Версии, которую вы пытаетесь удалить, не существует.",
+  "notification.update.success": "Настройки успешно обновлены"
+}

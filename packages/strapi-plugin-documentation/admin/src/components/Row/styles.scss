@@ -1,0 +1,73 @@
+.docRow {
+  height: 54px;
+  display: flex;
+  line-height: 53px;
+  margin:  0 28px 0 36px;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(14,22,34,0.04);
+  font-size: 13px;
+  color: #333740;
+  > div:first-child {
+    flex: 0 0 70px;
+    font-weight: 500;
+  }
+  > div:nth-child(2) {
+    flex: 0 0 160px;
+    text-align: left;
+    font-weight: 500 !important;
+  }
+  > div:last-child {
+    flex: 0 0 400px;
+    align-self: center;
+    text-align: right;
+  }
+  -webkit-font-smoothing: antialiased;
+}
+
+.rowButton {
+  height: 26px;
+  margin: 0;
+  padding: 0 15px;
+  line-height: initial;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.buttonOutline {
+  margin-right: 10px;
+  border: 1px solid #DFE0E1;
+  &:before {
+    margin-right: 10px;
+    content: '\F08E';
+    font-family: 'FontAwesome';
+    font-size: 10px;
+  }
+}
+
+.buttonRegenerate {
+  background: #E6F0FB;
+  border: 1px solid #AED4FB;
+  color: #007EFF;
+  &:before {
+    margin-right: 10px;
+    content: '\f021';
+    font-family: 'FontAwesome';
+    font-size: 10px;
+  }
+}
+
+.buttonTrash {
+  margin-left: 25px;
+  font-weight: 400;
+  &:before {
+    margin-right: 10px;
+    content: '\f1f8';
+    font-family: 'FontAwesome';
+    font-size: 12 px;
+  }
+}
+
+.marged {
+  margin-left: 45px;
+  font-weight: 400;
+}

@@ -5,8 +5,8 @@
  */
 
 // Node.js core.
-const path = require('path');
 const { exec, execSync } = require('child_process');
+const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
@@ -18,6 +18,7 @@ const shell = require('shelljs');
 
 // Logger.
 const { packageManager } = require('strapi-utils');
+const trackSuccess = require('./success');
 
 /**
  * Runs after this generator has finished
@@ -31,6 +32,8 @@ const { packageManager } = require('strapi-utils');
 module.exports = (scope, cb) => {
   console.log(`The app has been connected to the database ${green('successfully')}!`);
   console.log();
+
+  trackSuccess('didConnectDatabase', scope);
 
   console.log('🏗  Application generation:');
 
@@ -193,6 +196,8 @@ module.exports = (scope, cb) => {
         console.log('⚡️ Start application:');
         console.log(`$ ${green('strapi start')}`);
 
+        trackSuccess('didCreateProject', scope);
+        
         cb();
       });
   }

@@ -10,6 +10,8 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 const policyUtils = require('strapi-utils').policy;
 
+const Loaders = require('./Loaders');
+
 module.exports = {
   /**
    * Convert parameters to valid filters parameters.
@@ -25,34 +27,17 @@ module.exports = {
     }, {});
   },
 
-  convertToQuery: function(params) {
-    const result = {};
-
-    _.forEach(params, (value, key) => {
-      if (_.isPlainObject(value)) {
-        const flatObject = this.convertToQuery(value);
-        _.forEach (flatObject, (_value, _key) => {
-          result[`${key}.${_key}`] = _value;
-        });
-      } else {
-        result[key] = value;
-      }
-    });
-
-    return result;
-  },
-
   /**
    * Security to avoid infinite limit.
    *
    * @return String
    */
 
-  amountLimiting: params => {
+  amountLimiting: (params = {}) => {
     if (params.limit && params.limit < 0) {
       params.limit = 0;
-    } else if (params.limit && params.limit > 100) {
-      params.limit = 100;
+    } else if (params.limit && params.limit > strapi.plugins.graphql.config.amountLimit) {
+      params.limit = strapi.plugins.graphql.config.amountLimit;
     }
 
     return params;
@@ -182,7 +167,7 @@ module.exports = {
         return async (ctx, next) => {
           ctx.params = {
             ...params,
-            [model.primaryKey]: ctx.params.id,
+            [model.primaryKey]: ctx.query[model.primaryKey],
           };
 
           // Return the controller.
@@ -191,17 +176,7 @@ module.exports = {
       }
 
       // Plural.
-      return async (ctx, next) => {
-        const queryOpts = {};
-        queryOpts.params = this.amountLimiting(ctx.params);
-        queryOpts.query = Object.assign(
-          {},
-          this.convertToParams(_.omit(queryOpts.params, 'where')),
-          this.convertToQuery(queryOpts.params.where)
-        );
-
-        return controller(Object.assign({}, ctx, queryOpts, { send: ctx.send }), next, { populate: [] });
-      };
+      return controller;
     })();
 
     // The controller hasn't been found.
@@ -249,7 +224,9 @@ module.exports = {
       ),
     );
 
-    return async (obj, options, { context }) => {
+    return async (obj, options = {}, { context }) => {
+      const _options = _.cloneDeep(options);
+      
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
@@ -273,17 +250,33 @@ module.exports = {
         return policy;
       }
 
+      // Initiliase loaders for this request.
+      Loaders.initializeLoader();
+
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.params = this.amountLimiting(options);
-        context.query = Object.assign(
-          {},
-          this.convertToParams(_.omit(options, 'where')),
-          this.convertToQuery(options.where)
-        );
+        // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
+        // cause a lost of the Object prototype.
+        Object.defineProperties(ctx, {
+          query: {
+            value: {
+              ...this.convertToParams(_.omit(_options, 'where')),
+              ..._options.where,
+              // Avoid population.
+              _populate: model.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias),
+            },
+            writable: true,
+            configurable: true
+          },
+          params: {
+            value: this.convertToParams(this.amountLimiting(_options)),
+            writable: true,
+            configurable: true
+          }
+        });
 
         if (isController) {
-          const values = await resolver.call(null, context);
+          const values = await resolver.call(null, ctx);
 
           if (ctx.body) {
             return ctx.body;
@@ -292,7 +285,7 @@ module.exports = {
           return values && values.toJSON ? values.toJSON() : values;
         }
 
-        return resolver.call(null, obj, options, context);
+        return resolver.call(null, obj, _options, ctx);
       }
 
       // Resolver can be a promise.

@@ -25,6 +25,7 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
               </div>
               <div className={styles.buttonContainer}>
                 <Button
+                  id="openAddCT"
                   secondaryHotlineAdd
                   label={this.props.buttonLabel}
                   onClick={this.props.onButtonClick}
@@ -34,7 +35,7 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
           </div>
           <div className="row">
             <div className={styles.ulContainer}>
-              <ul>
+              <ul id="ctbModelsList">
                 <li>
                   <div className={`${styles.liHeaderContainer} row`}>
                     <div className="col-md-1"></div>

@@ -30,7 +30,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
           </div>
         </div>
         <div className={styles.ulContainer}>
-          <ul>
+          <ul id={this.props.id}>
             {map(this.props.listContent[this.props.listContentMappingKey], (row, key) => {
               if (this.props.renderCustomLi) return this.props.renderCustomLi(row, key);
 
@@ -48,6 +48,7 @@ class List extends React.Component { // eslint-disable-line react/prefer-statele
 }
 
 List.propTypes = {
+  id: PropTypes.string,
   listContent: PropTypes.object,
   listContentMappingKey: PropTypes.string.isRequired,
   onButtonClick: PropTypes.func,
@@ -62,6 +63,7 @@ List.propTypes = {
 };
 
 List.defaultProps = {
+  id: '',
   listContent: {},
   onButtonClick: () => {},
   renderCustomLi: false,

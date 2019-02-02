@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const uuid = require('uuid/v4');
+
 const { packageManager } = require('strapi-utils');
 
 /**
@@ -56,7 +56,6 @@ module.exports = scope => {
     'dependencies': Object.assign({}, {
       'lodash': '^4.17.5',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
-      'strapi-utils': getDependencyVersion(cliPkg, 'strapi'),
       [scope.client.connector]: getDependencyVersion(cliPkg, 'strapi'),
     }, additionalsDependencies, {
       [scope.client.module]: scope.client.version
@@ -73,7 +72,7 @@ module.exports = scope => {
     }],
     'strapi': {
       'packageManager': pkgManager,
-      'uuid': uuid()
+      'uuid': scope.uuid
     },
     'engines': {
       "node": ">= 10.0.0",

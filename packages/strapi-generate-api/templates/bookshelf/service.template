@@ -1,5 +1,5 @@
-'use strict';
 /* global <%= globalID %> */
+'use strict';
 
 /**
  * <%= filename %> service
@@ -10,6 +10,9 @@
 // Public dependencies.
 const _ = require('lodash');
 
+// Strapi utilities.
+const utils = require('strapi-hook-bookshelf/lib/utils/');
+
 module.exports = {
 
   /**
@@ -19,8 +22,6 @@ module.exports = {
    */
 
   fetchAll: (params) => {
-    // Get model hook
-    const hook = strapi.hook[<%= globalID %>.orm];
     // Convert `params` object to filters compatible with Bookshelf.
     const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
     // Select field to populate.
@@ -29,20 +30,24 @@ module.exports = {
       .map(ast => ast.alias);
 
     return <%= globalID %>.query(function(qb) {
-      // Generate match stage.
-      hook.load().generateMatchStage(qb)(<%= globalID %>, filters);
-
-      if (_.has(filters, 'start')) qb.offset(filters.start);
-      if (_.has(filters, 'limit')) qb.limit(filters.limit);
-      if (!_.isEmpty(filters.sort)) {
-        if (filters.sort.key) {
-          qb.orderBy(filters.sort.key, filters.sort.order);
+      _.forEach(filters.where, (where, key) => {
+        if (_.isArray(where.value) && where.symbol !== 'IN') {
+          for (const value in where.value) {
+            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value])
+          }
         } else {
-          qb.orderBy(filters.sort);
+          qb.where(key, where.symbol, where.value);
         }
+      });
+
+      if (filters.sort) {
+        qb.orderBy(filters.sort.key, filters.sort.order);
       }
+
+      qb.offset(filters.start);
+      qb.limit(filters.limit);
     }).fetchAll({
-      withRelated: populate
+      withRelated: filters.populate || populate
     });
   },
 
@@ -205,6 +210,9 @@ module.exports = {
 
       // Search in columns with text using index.
       switch (<%= globalID %>.client) {
+        case 'mysql':
+          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
+          break;
         case 'pg': {
           const searchQuery = searchText.map(attribute =>
             _.toLower(attribute) === attribute
@@ -215,9 +223,6 @@ module.exports = {
           qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
           break;
         }
-        default:
-          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
-          break;
       }
 
       if (filters.sort) {

@@ -18,6 +18,7 @@ describe('App setup auth', () => {
     'Login admin user',
     async () => {
       await restart(rq);
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const body = await login();
 
@@ -33,6 +34,7 @@ describe('App setup auth', () => {
 describe('Generate test APIs', () => {
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
@@ -79,6 +81,17 @@ describe('Generate test APIs', () => {
       });
     }
   );
+  test(
+    'Create new product API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models`,
+        method: 'POST',
+        body: form.product,
+        json: true
+      });
+    }
+  );
 });
 
 describe('Test manyToMany relation (article - tag) with Content Manager', () => {
@@ -91,13 +104,14 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
     'Create tag1',
     async () => {
       let body = await rq({
-        url: `/tag`,
+        url: `/tags`,
         method: 'POST',
         body: {
           name: 'tag1'
@@ -116,7 +130,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
     'Create tag2',
     async () => {
       let body = await rq({
-        url: `/tag`,
+        url: `/tags`,
         method: 'POST',
         body: {
           name: 'tag2'
@@ -135,7 +149,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
     'Create tag3',
     async () => {
       let body = await rq({
-        url: `/tag`,
+        url: `/tags`,
         method: 'POST',
         body: {
           name: 'tag3'
@@ -159,7 +173,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       };
 
       let body = await rq({
-        url: `/article`,
+        url: `/articles`,
         method: 'POST',
         body: entry,
         json: true
@@ -184,7 +198,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       };
 
       let body = await rq({
-        url: `/article`,
+        url: `/articles`,
         method: 'POST',
         body: entry,
         json: true
@@ -210,7 +224,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/article/${entry.id}`,
+        url: `/articles/${entry.id}`,
         method: 'PUT',
         body: entry,
         json: true
@@ -236,7 +250,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/article/${entry.id}`,
+        url: `/articles/${entry.id}`,
         method: 'PUT',
         body: entry,
         json: true
@@ -260,7 +274,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/article/${entry.id}`,
+        url: `/articles/${entry.id}`,
         method: 'PUT',
         body: entry,
         json: true
@@ -285,7 +299,7 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/article/${entry.id}`,
+        url: `/articles/${entry.id}`,
         method: 'PUT',
         body: entry,
         json: true
@@ -312,13 +326,14 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
     'Create cat1',
     async () => {
       let body = await rq({
-        url: `/category`,
+        url: `/categories`,
         method: 'POST',
         body: {
           name: 'cat1'
@@ -337,7 +352,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Create cat2',
     async () => {
       let body = await rq({
-        url: `/category`,
+        url: `/categories`,
         method: 'POST',
         body: {
           name: 'cat2'
@@ -362,7 +377,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       };
 
       let body = await rq({
-        url: `/article`,
+        url: `/articles`,
         method: 'POST',
         body: entry,
         json: true
@@ -387,7 +402,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/article/${entry.id}`,
+        url: `/articles/${entry.id}`,
         method: 'PUT',
         body: entry,
         json: true
@@ -411,7 +426,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       };
 
       let body = await rq({
-        url: `/article`,
+        url: `/articles`,
         method: 'POST',
         body: entry,
         json: true
@@ -435,7 +450,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/article/${entry.id}`,
+        url: `/articles/${entry.id}`,
         method: 'PUT',
         body: entry,
         json: true
@@ -459,7 +474,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       cleanDate(entry);
 
       let body = await rq({
-        url: `/category/${entry.id}`,
+        url: `/categories/${entry.id}`,
         method: 'PUT',
         body: entry,
         json: true
@@ -482,7 +497,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       };
 
       let body = await rq({
-        url: `/category`,
+        url: `/categories`,
         method: 'POST',
         body: entry,
         json: true
@@ -500,7 +515,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get article1 with cat3',
     async () => {
       let body = await rq({
-        url: `/article/${data.articles[0].id}`,
+        url: `/articles/${data.articles[0].id}`,
         method: 'GET',
         json: true
       });
@@ -513,7 +528,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get article2 with cat2',
     async () => {
       let body = await rq({
-        url: `/article/${data.articles[1].id}`,
+        url: `/articles/${data.articles[1].id}`,
         method: 'GET',
         json: true
       });
@@ -526,7 +541,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get cat1 without relations',
     async () => {
       let body = await rq({
-        url: `/category/${data.categories[0].id}`,
+        url: `/categories/${data.categories[0].id}`,
         method: 'GET',
         json: true
       });
@@ -539,7 +554,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get cat2 with article2',
     async () => {
       let body = await rq({
-        url: `/category/${data.categories[1].id}`,
+        url: `/categories/${data.categories[1].id}`,
         method: 'GET',
         json: true
       });
@@ -553,7 +568,7 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
     'Get cat3 with article1',
     async () => {
       let body = await rq({
-        url: `/category/${data.categories[2].id}`,
+        url: `/categories/${data.categories[2].id}`,
         method: 'GET',
         json: true
       });
@@ -575,13 +590,14 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
 
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
     'Create ref1',
     async () => {
       let body = await rq({
-        url: `/reference`,
+        url: `/references`,
         method: 'POST',
         body: {
           name: 'ref1'
@@ -604,7 +620,7 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       };
 
       let body = await rq({
-        url: `/article`,
+        url: `/articles`,
         method: 'POST',
         body: entry,
         json: true
@@ -627,7 +643,7 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       cleanDate(entry);
 
       let body = await rq({
-        url: `/article/${entry.id}`,
+        url: `/articles/${entry.id}`,
         method: 'PUT',
         body: entry,
         json: true
@@ -651,7 +667,7 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       };
 
       let body = await rq({
-        url: `/article`,
+        url: `/articles`,
         method: 'POST',
         body: entry,
         json: true
@@ -665,31 +681,19 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       expect(body.reference.id).toBe(entry.reference);
     }
   );
-  test(
-    'Get article1 without relations',
-    async () => {
-      let body = await rq({
-        url: `/article/${data.articles[0].id}`,
-        method: 'GET',
-        json: true
-      });
-
-      expect(body.id);
-      expect(body.reference).toBe(null);
-    }
-  );
 });
 
 describe('Test oneWay relation (reference - tag) with Content Manager', () => {
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
     'Attach Tag to a Reference',
     async () => {
       const tagToCreate = await rq({
-        url: `/tag`,
+        url: `/tags`,
         method: 'POST',
         json: true,
         body: {
@@ -698,7 +702,7 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
       });
 
       const referenceToCreate = await rq({
-        url: `/reference`,
+        url: `/references`,
         method: 'POST',
         json: true,
         body: {
@@ -715,7 +719,7 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
     'Detach Tag to a Reference',
     async () => {
       const tagToCreate = await rq({
-        url: `/tag`,
+        url: `/tags`,
         method: 'POST',
         json: true,
         body: {
@@ -724,7 +728,7 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
       });
 
       const referenceToCreate = await rq({
-        url: `/reference`,
+        url: `/references`,
         method: 'POST',
         json: true,
         body: {
@@ -736,7 +740,7 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
       expect(referenceToCreate.tag.id).toBe(tagToCreate.id);
 
       const referenceToUpdate = await rq({
-        url: `/reference/${referenceToCreate.id}`,
+        url: `/references/${referenceToCreate.id}`,
         method: 'PUT',
         json: true,
         body: {
@@ -752,7 +756,7 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
     'Delete Tag so the relation in the Reference side should be removed',
     async () => {
       const tagToCreate = await rq({
-        url: `/tag`,
+        url: `/tags`,
         method: 'POST',
         json: true,
         body: {
@@ -761,7 +765,7 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
       });
 
       const referenceToCreate = await rq({
-        url: `/reference`,
+        url: `/references`,
         method: 'POST',
         json: true,
         body: {
@@ -771,13 +775,13 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
       });
 
       const tagToDelete = await rq({
-        url: `/tag/${tagToCreate.id}`,
+        url: `/tags/${tagToCreate.id}`,
         method: 'DELETE',
         json: true
       });
 
       const referenceToGet = await rq({
-        url: `/reference/${referenceToCreate.id}`,
+        url: `/references/${referenceToCreate.id}`,
         method: 'GET',
         json: true
       });
@@ -798,6 +802,7 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
 describe('Delete test APIs', () => {
   beforeEach(async () => {
     await restart(rq);
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }, 60000);
 
   test(
@@ -835,6 +840,16 @@ describe('Delete test APIs', () => {
     async () => {
       await rq({
         url: `/content-type-builder/models/reference`,
+        method: 'DELETE',
+        json: true
+      });
+    }
+  );
+  test(
+    'Delete product API',
+    async () => {
+      await rq({
+        url: `/content-type-builder/models/product`,
         method: 'DELETE',
         json: true
       });

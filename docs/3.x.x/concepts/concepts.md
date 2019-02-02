@@ -88,7 +88,9 @@ In this example, any time a web browser is pointed to the `/hello` URL on your a
 
 The controllers are defined in each `./api/**/controllers/` folders. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (include the first one) is capitalized `User.js`, `LegalEntity.js`.
 
-> Please refer to the [controllers' guide](../guides/controllers.md) for more informations.
+::: note
+Please refer to the [controllers' guide](../guides/controllers.md) for more informations.
+:::
 
 ***
 
@@ -96,13 +98,15 @@ The controllers are defined in each `./api/**/controllers/` folders. Every JavaS
 
 Filters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /users?_limit=30&name=John`).
 
-> Please refer to the [filters' guide](../guides/filters.md) for more informations.
+::: note
+Please refer to the [filters' guide](../guides/filters.md) for more informations.
+:::
 
 ***
 
 ## Models
 
-Models are a representation of the database's structure and lifecyle. They are split into two separate files. A JavaScript file that contains the lifecycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
+Models are a representation of the database's structure and lifecycle. They are split into two separate files. A JavaScript file that contains the lifecycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
 
 **Path —** `./api/user/models/User.js`.
 ```js
@@ -154,7 +158,9 @@ The models are defined in each `./api/**/models/` folder. Every JavaScript or JS
 
 A model must contain a list of attributes, and each of these attributes must have a type.
 
-> Please refer to the [models' guide for more informations about the attributes](../guides/models.md#define-the-attributes).
+::: note
+Please refer to the [models' guide for more informations about the attributes](../guides/models.md#define-the-attributes).
+:::
 
 ### Relations
 
@@ -162,31 +168,41 @@ A model must contain a list of attributes, and each of these attributes must hav
 
 Many-to-many associations allow to link an entry to many entry.
 
-> Please refer to the [many-to-many guide](../guides/models.md#many-to-many)
+::: note
+Please refer to the [many-to-many guide](../guides/models.md#many-to-many)
+:::
 
 #### One-to-many
 
 One-way relationships are useful to link an entry to another.
 
-> Please refer to the [one-to-many guide](../guides/models.md#one-to-many)
+::: note
+Please refer to the [one-to-many guide](../guides/models.md#one-to-many)
+:::
 
 #### One-to-one
 
 One-way relationships are useful to link an entry to another.
 
-> Please refer to the [one-to-one guide](../guides/models.md#one-to-one).
+::: note
+Please refer to the [one-to-one guide](../guides/models.md#one-to-one).
+:::
 
 #### One-way
 
 One-way relationships are useful to link an entry to another. However, only one of the models can be queried with its populated items.
 
-> Please refer to the [one-way guide](../guides/models.md#one-way).
+::: note
+Please refer to the [one-way guide](../guides/models.md#one-way).
+:::
 
 ### Lifecycle callbacks
 
 Lifecycle callbacks are functions triggered at specific moments of the queries.
 
-> Please refer to the [lifecycle callbacks guide](../guides/models.md#lifecycle-callbacks).
+::: note
+Please refer to the [lifecycle callbacks guide](../guides/models.md#lifecycle-callbacks).
+:::
 
 ***
 
@@ -194,7 +210,9 @@ Lifecycle callbacks are functions triggered at specific moments of the queries.
 
 Internationalization and localization (i18n) allows to adapt the project to different languages and serve the right content to the users. This feature is deeply integrated into the Strapi's core. It will detect the user language preference (locale) and translate the requested content using the translation files.
 
-> Please refer to the [internationalization's guide](../guides/i18n.md).
+::: note
+Please refer to the [internationalization's guide](../guides/i18n.md).
+:::
 
 ***
 
@@ -202,7 +220,9 @@ Internationalization and localization (i18n) allows to adapt the project to diff
 
 A plugin is like a fully independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also contain an UI integrated into the admin panel to use it easily. It allows to develop or plugin features in a project in a short time span.
 
-> Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.
+::: note
+Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.
+:::
 
 ***
 
@@ -210,7 +230,9 @@ A plugin is like a fully independent sub-application. It has its own business lo
 
 The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top of solid conventions and reusable CSS classes. It is also using [PostCSS](https://github.com/postcss/postcss) and [PostCSS SCSS](https://github.com/postcss/postcss-scss) to keep the code maintainable.
 
-> Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styling) for detailed informations.
+::: note
+Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styling) for detailed informations.
+:::
 
 ***
 
@@ -227,31 +249,41 @@ Policies can be:
 
 The API and plugins policies (scoped) are defined in each `./api/**/config/policies/` folders and plugins. They are respectively exposed through `strapi.api.**.config.policies` and `strapi.plugins.**.config.policies`. The global policies are defined at `./config/policies/` and accessible via `strapi.config.policies`.
 
-> Please refer to the [policy guide](../guides/policies.md)
+::: note
+Please refer to the [policy guide](../guides/policies.md)
+:::
 
 ### Global policies
 
 Global policies are reusable through the entire app.
 
-> Please refer to the [global policy guide](../guides/policies.md#global-policies)
+::: note
+Please refer to the [global policy guide](../guides/policies.md#global-policies)
+:::
 
 ### Scoped policies
 
 A policy defined in an API or plugin is usable only from this API or plugin. You don't need any prefix to use it.
 
-> Please refer to the [scoped policy guide](../guides/policies.md#scoped-policies).
+::: note
+Please refer to the [scoped policy guide](../guides/policies.md#scoped-policies).
+:::
 
 ### Plugin policies
 
 Plugin policies are usable from any app API.
 
-> Please refer to the [plugin policy guide](../guides/policies.md#plugins).
+::: note
+Please refer to the [plugin policy guide](../guides/policies.md#plugins).
+:::
 
 ## Public Assets
 
 Public assets are static files such as images, video, css, etc that you want to make accessible to the outside world. Every new project includes by default, a folder named `./public`.
 
-> Please refer to the [public configuration](../configurations/configurations.md#Application) for more informations.
+::: note
+Please refer to the [public configuration](../configurations/configurations.md#Application) for more informations.
+:::
 
 ***
 
@@ -259,7 +291,9 @@ Public assets are static files such as images, video, css, etc that you want to 
 
 The context object (`ctx`) contains all the request's related informations.
 
-> Please refer to the [requests guide](../guides/requests.md) for more informations.
+::: note
+Please refer to the [requests guide](../guides/requests.md) for more informations.
+:::
 
 ***
 
@@ -267,7 +301,9 @@ The context object (`ctx`) contains all the request's related informations.
 
 The context object (`ctx`) contains a list of values and functions useful to manage server responses.
 
-> Please refer to the [responses guide](../guides/responses.md) for more informations.
+::: note
+Please refer to the [responses guide](../guides/responses.md) for more informations.
+:::
 
 ***
 
@@ -275,7 +311,9 @@ The context object (`ctx`) contains a list of values and functions useful to man
 
 `./api/**/config/routes.json` files define all available routes for the clients.
 
-> Please refer to the [routing guide](../guides/routing.md) for more informations.
+::: note
+Please refer to the [routing guide](../guides/routing.md) for more informations.
+:::
 
 ***
 
@@ -283,6 +321,8 @@ The context object (`ctx`) contains a list of values and functions useful to man
 
 Services are a set of reusable functions. They are particularly useful to respect the DRY (don’t repeat yourself) programming concept and to simplify [controllers](#controllers) logic.
 
-> Please refer to the [services guide](../guides/services.md) for more informations.
+::: note
+Please refer to the [services guide](../guides/services.md) for more informations.
+:::
 
 ***
