@@ -20,6 +20,8 @@ const { models: utilsModels }  = require('strapi-utils');
 const utils = require('./utils/');
 
 const relations = require('./relations');
+const { Query } = require('./query');
+const { Converter } = require('./converter');
 
 /**
  * Mongoose hook
@@ -576,7 +578,10 @@ module.exports = function (strapi) {
       }
 
       return result;
-    }
+    },
+
+    Query,
+    Converter,
   }, relations);
 
   return hook;
