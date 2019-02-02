@@ -89,60 +89,34 @@ module.exports = {
       const limit = query.options.limit || 100;
 
       // Extracting ids from original request to map with query results.
-      const ids = this.extractIds(query, ref);
-      
-      if (!_.isArray(ids)) {
-        const ast = ref.associations.find(ast => ast.alias === ids.alias);
-        const astModel = this.retrieveModel(ast.model, ast.plugin);
+      const ids = this.extractIds(query);
+      const ast = ref.associations.find(ast => ast.alias === ids.alias);
+      const astModel = this.retrieveModel(ast.model || ast.collection, ast.plugin);
 
-        return data
-          .filter(entry => {
-            /**
-             * In some cases (Mongoose for instance) the entry will be populated so we need to access its value using the primary key
-             * Example
-             * // Mongoose
-             * entry = {
-             *   product: {
-             *     _id: "some_id", // the value is entry["product"]["_id"]
-             *     price: 10
-             *   },
-             *   company: "strapi"
-             * }
-             * // Bookshelf
-             * entry = {
-             *  product: 1, // the value is entry["product"]
-             *  company: "strapi"
-             * }
-             */
-            const entryValue = _.isUndefined(entry[ids.alias][astModel.primaryKey])
-              ? entry[ids.alias]
-              : entry[ids.alias][astModel.primaryKey];
-            return entryValue.toString() === ids.value.toString();
-          })
-          .slice(skip, skip + limit);
-      }
-
-      // Critical: don't touch this part until you truly understand what you're doing.
-      // The data array takes care of the sorting of the entries. It explains why we are looping from this array and not the `ids` array.
-      // Then, we're applying the `limit`, `start` and `skip` argument.
       return data
         .filter(entry => entry !== undefined)
-        .filter(entry => ids.map(id => id.toString()).includes(entry[ref.primaryKey].toString()))
+        .filter(entry => {
+          const aliasEntry = entry[ids.alias];
+          if (_.isArray(aliasEntry)) {
+            return _.find(
+              aliasEntry,
+              value => value[astModel.primaryKey].toString() ===  ids.value
+            );
+          }
+
+          const entryValue = aliasEntry[astModel.primaryKey].toString();
+          return entryValue === ids.value;
+        })
         .slice(skip, skip + limit);
     });
   },
 
-  extractIds: (query, ref) => {
-    if ( _.get(query.options, `query.${ref.primaryKey}`)) {
-      return  _.get(query.options, `query.${ref.primaryKey}`);
-    }
-
-    // Single object to retrieve (one-to-many).
+  extractIds: (query) => {
     const alias = _.first(Object.keys(query.options.query));
-
+    const value =  query.options.query[alias].toString();
     return {
       alias,
-      value: _.get(query.options, `query.${alias}`)
+      value,
     };
   },
 
@@ -151,11 +125,13 @@ module.exports = {
       return [];
     }
 
-    // Construct parameters object sent to the Content Manager service.
-    // Note: we're trying to avoid useless populate for performances. Please be careful if you're updating this part.
+    // Retrieving referring model.
+    const ref = this.retrieveModel(model, query.options.source);
+    const ast = ref.associations.find(ast => ast.alias === query.alias);
+
     const params = {
       ...query.options,
-      populate: [], // Avoid useless population for performance reason
+      populate: ast ? [query.alias] : [], // Avoid useless population for performance reason
       query: {},
     };
 
@@ -200,8 +176,6 @@ module.exports = {
       // Only one entry to fetch.
       if (single) {
         ids.push(params[ref.primaryKey]);
-      } else if (_.isArray(query[ref.primaryKey])) {
-        ids.push(...query[ref.primaryKey]);
       } else {
         ids.push(query[association.via]);
       }
