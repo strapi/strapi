@@ -1107,14 +1107,14 @@ module.exports = function(strapi) {
           result.key = `where.${key}`;
           result.value = {
             symbol: 'IN',
-            value,
+            value: _.isArray(value) ? value : [value],
           };
-          break;          
+          break;
         case '_nin':
           result.key = `where.${key}`;
           result.value = {
             symbol: 'NOT IN',
-            value,
+            value: _.isArray(value) ? value : [value],
           };
           break;
         default:
