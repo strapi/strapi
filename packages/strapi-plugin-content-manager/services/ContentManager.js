@@ -196,8 +196,8 @@ module.exports = {
       return acc;
     }, []);
 
-    const filters = strapi.utils.models.convertParams(model, { [`${primaryKey}_in`]: toRemove });
-    const entries = await strapi.query(model, source).find({ where: filters.where }, null, true);
+    const filter = { [`${primaryKey}_in`]: toRemove };
+    const entries = await strapi.query(model, source).find(filter);
     const associations = strapi.query(model, source).associations;
 
     for (let i = 0; i < entries.length; ++i) {
