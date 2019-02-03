@@ -44,7 +44,7 @@ const getFilters = (type) => {
         {
           id: 'content-manager.components.FilterOptions.FILTER_TYPES._nin',
           value: '_nin',
-        }
+        },
       ];
     case 'integer':
     case 'float':
