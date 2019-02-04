@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "apollo-server-koa": "^2.0.7",
+    "core-js": "^3.0.0-beta.10",
     "dataloader": "^1.4.0",
     "glob": "^7.1.3",
     "graphql": "^14.0.2",
