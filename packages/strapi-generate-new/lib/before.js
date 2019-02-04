@@ -104,7 +104,7 @@ module.exports = (scope, cb) => {
     const answers = await inquirer
       .prompt([
         {
-          when: !scope.quick,
+          when: !scope.quick && !hasDatabaseConfig,
           type: 'list',
           name: 'type',
           message: 'Choose your installation type',
