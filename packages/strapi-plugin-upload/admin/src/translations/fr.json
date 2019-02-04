@@ -10,7 +10,7 @@
   "EntriesNumber.number.plural": "{number} fichiers trouvés",
   "HomePage.InputSearch.placeholder": "Rechercher un fichier...",
   "HomePage.description": "Découvrez tous les fichiers téléchargés",
-  "HomePage.title": "Upload",
+  "HomePage.title": "Chargement",
   "Li.linkCopied": "Lien copié dans le presse-papier",
   "ListHeader.hash": "Hash",
   "ListHeader.name": "Nom",
