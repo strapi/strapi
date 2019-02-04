@@ -3,6 +3,7 @@
 This section explains how to handle Strapi for the first time, ([check out our video tutorial](https://www.youtube.com/watch?v=yMl5IcFHA74)).
 
 **Table of contents:**
+
 - [1. Create your first project](#_1-create-a-project)
 - [2. Create your first user](#_2-register-the-first-user)
 - [3. Create your first Content Type](#_3-create-a-content-type)
@@ -15,7 +16,7 @@ This section explains how to handle Strapi for the first time, ([check out our v
   - [Update data (PUT)](#update-data-put)
   - [Delete data (DELETE)](#delete-data-delete)
 
-***
+---
 
 ## 1. Create a project
 
@@ -56,7 +57,7 @@ strapi start
 
 Now that your app is running let's see how to [create your first user](#_2-register-the-first-user).
 
-***
+---
 
 ## 2. Register the first user
 
@@ -66,10 +67,9 @@ To create your first user, start your server (`strapi start`) and go to [http://
 
 ![Register View](../assets/getting-started_register.png)
 
-
 Now that your first user is registered let's see how to [create your first Content Type](#_3-create-a-content-type).
 
-***
+---
 
 ## 3. Create a Content Type
 
@@ -85,14 +85,13 @@ At this point, your project is empty. To create your first Content Type, you are
 
 **#3 —** Add three fields in this Content Type.
 
-  - A `string` field named `title`.
-  - A `text` field named `content` (tick the `Display as WYSIWYG` in the `Advanced Settings` tab).
-  - A `media` field named `cover`.
+- A `string` field named `title`.
+- A `text` field named `content` (tick the `Display as WYSIWYG` in the `Advanced Settings` tab).
+- A `media` field named `cover`.
 
 ![Content Type Builder - List fields in Post](../assets/getting-started_list_fields.png)
 
 **#4 —** Save. That's it!
-
 
 ::: note
 See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for more information on how to do it the hacker way.
@@ -102,10 +101,9 @@ See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for more informati
 
 A new directory has been created in the `./api` folder of your application which contains all the needed stuff for your `Post` Content Type: routes, controllers, services and models. Take a look at the [API structure documentation](../concepts/concepts.md#files-structure) for more informations.
 
-
 **Well done, you created your first Content Type using Strapi!**
 
-***
+---
 
 ## 4. Add content
 
@@ -123,7 +121,7 @@ After creating [your first Content Type](#_3-create-a-content-type), you probabl
 
 ![Content Type Builder - Home](../assets/getting-started_with_entry.png)
 
-***
+---
 
 ## 5. Consume the API
 
@@ -139,12 +137,12 @@ In order to do so, you'll need to allow access to other users (identified as 'Pu
 ![Auth & Permissions - Edit Public](../assets/getting-started_allow_access.png)
 
 ::: note
-You should now be able to get the list of posts from the API: [http://localhost:1337/posts](http://localhost:1337/posts). 
+You should now be able to get the list of posts from the API: [http://localhost:1337/posts](http://localhost:1337/posts).
 :::
 
 ### List entries (GET)
 
-To retrieve the list of posts, use the `GET /posts` route.
+To retrieve the list of posts, use the `GET /posts` route.
 
 Generated APIs provide a handy way to filter and order queries. In that way, ordering posts by price is as easy as `GET http://localhost:1337/posts?_sort=price:asc`. For more informations, read the [filters documentation](../guides/filters.md).
 
@@ -157,8 +155,8 @@ import axios from 'axios';
 axios
   .get('http://localhost:1337/posts', {
     params: {
-      _sort: 'createdAt:desc' // Generates http://localhost:1337/posts?_sort=createdAt:desc
-    }
+      _sort: 'createdAt:desc', // Generates http://localhost:1337/posts?_sort=createdAt:desc
+    },
   })
   .then(response => {
     // Handle success.
@@ -206,13 +204,13 @@ import axios from 'axios';
 // Request API.
 axios
   .post(`http://localhost:1337/posts/`, {
-    title: 'My new post'
+    title: 'My new post',
   })
   .then(response => {
     // Handle success.
     console.log(
       'Well done, your post has been successfully created: ',
-      response.data
+      response.data,
     );
   })
   .catch(error => {
@@ -235,13 +233,13 @@ const postId = 'YOUR_POST_ID_HERE'; // Replace with one of your posts id.
 // Request API.
 axios
   .put(`http://localhost:1337/posts/${postId}`, {
-    title: 'Updated title'
+    title: 'Updated title',
   })
   .then(response => {
     // Handle success.
     console.log(
       'Well done, your post has been successfully updated: ',
-      response.data
+      response.data,
     );
   })
   .catch(error => {
@@ -268,7 +266,7 @@ axios
     // Handle success.
     console.log(
       'Well done, your post has been successfully updated: ',
-      response.data
+      response.data,
     );
   })
   .catch(error => {
@@ -276,7 +274,8 @@ axios
     console.log('An error occurred:', error);
   });
 ```
-***
+
+---
 
 #### 👏 Congratulations!
 
