@@ -59,6 +59,7 @@
     "ora": "^3.0.0",
     "rimraf": "^2.6.2",
     "semver": "^5.4.1",
+    "shelljs": "^0.8.3",
     "stack-trace": "0.0.10",
     "strapi-generate": "3.0.0-alpha.21",
     "strapi-generate-admin": "3.0.0-alpha.21",
@@ -70,6 +71,9 @@
     "strapi-generate-policy": "3.0.0-alpha.21",
     "strapi-generate-service": "3.0.0-alpha.21",
     "strapi-utils": "3.0.0-alpha.21"
+  },
+  "scripts": {
+    "postinstall": "node lib/utils/success.js"
   },
   "author": {
     "email": "hi@strapi.io",

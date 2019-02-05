@@ -15,9 +15,10 @@ import {
   UPDATE_PLUGIN,
 } from './constants';
 
-export function freezeApp() {
+export function freezeApp(data) {
   return {
     type: FREEZE_APP,
+    data,
   };
 }
 

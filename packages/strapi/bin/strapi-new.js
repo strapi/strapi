@@ -11,6 +11,7 @@ const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
+const shell = require('shelljs');
 
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
@@ -43,14 +44,15 @@ module.exports = function (name, cliArguments) {
     name,
     strapiPackageJSON: packageJSON,
     developerMode,
-    debug: cliArguments.debug !== undefined
+    debug: cliArguments.debug !== undefined,
+    quick: cliArguments.quickstart !== undefined
   };
 
   const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
   const matchingDbArguments = _.intersection(_.keys(cliArguments), dbArguments);
 
   if (matchingDbArguments.length) {
-    if (matchingDbArguments.length !== dbArguments.length) {
+    if (matchingDbArguments.length !== dbArguments.length && cliArguments.dbclient !== 'sqlite') {
       console.log(`⛔️ Some database arguments are missing. Required arguments list: ${dbArguments}`);
       return process.exit(1);
     }
@@ -65,7 +67,8 @@ module.exports = function (name, cliArguments) {
         port: cliArguments.dbport,
         database: cliArguments.dbname,
         username: cliArguments.dbusername,
-        password: cliArguments.dbpassword
+        password: cliArguments.dbpassword,
+        filename: cliArguments.dbfile
       },
       options: {
         authenticationDatabase: cliArguments.dbauth,
@@ -82,6 +85,15 @@ module.exports = function (name, cliArguments) {
     error: function returnError(err) {
       console.log(err);
       process.exit(1);
+    },
+
+    success:  () => {
+      if (scope.quick) {
+        shell.cd(scope.rootPath);
+        shell.exec('strapi start', {
+          stdio: 'inherit'
+        });
+      }
     }
   });
 };

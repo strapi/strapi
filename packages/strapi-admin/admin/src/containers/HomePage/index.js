@@ -137,7 +137,7 @@ export class HomePage extends React.PureComponent {
     const data = this.showFirstBlock()
       ? {
         className: styles.homePageTutorialButton,
-        href: 'https://strapi.io/documentation/getting-started/quick-start.html#create-your-first-api',
+        href: 'https://strapi.io/documentation/3.x.x/getting-started/quick-start.html#_3-create-a-content-type',
         id: 'app.components.HomePage.button.quickStart',
         primary: true,
       }
