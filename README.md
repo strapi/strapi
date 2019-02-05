@@ -40,7 +40,7 @@
 
 ## Getting Started
 
-<a href="https://strapi.io/getting-started" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://strapi.io/documentation/3.x.x/getting-started/installation.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 #### 🖐 Requirements
 
