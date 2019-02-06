@@ -337,7 +337,7 @@ module.exports = (scope, cb) => {
         try {
           require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
         } catch(err) {
-          trackSuccess('didNotConnectDatabase', scope);
+          trackSuccess('didNotConnectDatabase', scope, err);
           console.log(err);
           shell.rm('-r', scope.tmpPath);
           cb.error();
