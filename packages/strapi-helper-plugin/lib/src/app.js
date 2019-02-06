@@ -103,6 +103,7 @@ strapi.registerPlugin({
   icon: pluginPkg.strapi.icon,
   id: pluginId,
   injectedComponents,
+  isReady: false,
   layout,
   leftMenuLinks: [],
   mainComponent: Comp,

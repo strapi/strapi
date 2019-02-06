@@ -14,7 +14,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-import AdminPage from 'containers/AdminPage';
+import Admin from 'containers/Admin';
 import NotFoundPage from 'containers/NotFoundPage';
 import NotificationProvider from 'containers/NotificationProvider';
 import AppLoader from 'containers/AppLoader';
@@ -36,7 +36,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
             return (
               <div className={styles.container}>
                 <Switch>
-                  <Route path="/" component={AdminPage} />
+                  <Route path="/" component={Admin} />
                   <Route path="" component={NotFoundPage} />
                 </Switch>
               </div>
