@@ -28,6 +28,7 @@ import PluginDispatcher from 'containers/PluginDispatcher';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import OverlayBlocker from 'components/OverlayBlocker';
 
+import { updatePlugin } from 'containers/App/actions';
 
 import makeSelectApp from 'containers/App/selectors';
 
@@ -91,6 +92,19 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     this.props.setAppError();
   }
 
+  helpers = {
+    hideLeftMenu: this.props.hideLeftMenu,
+    showLeftMenu: this.props.showLeftMenu,
+    updatePlugin: this.props.updatePlugin,
+  };
+
+  hasApluginNotReady = props => {
+    const { global: { plugins } } = props;
+    const notReadyPlugins = Object.keys(plugins).filter(plugin => plugins[plugin].isReady === false);
+
+    return notReadyPlugins.length !== 0;
+  } 
+
   isAcceptingTracking = () => {
     const { admin: { uuid } } = this.props;
 
@@ -136,13 +150,17 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
       return true;
     }
 
-    return false;
+    return this.hasApluginNotReady(this.props);
   }
 
   renderMarketPlace = props => <Marketplace {...props} {...this.props} />;
 
 
-  renderPluginDispatcher = props => <PluginDispatcher {...this.props} {...props} />;
+  renderPluginDispatcher = props => {
+    // NOTE: Send the needed props instead of everything...
+
+    return <PluginDispatcher {...this.props} {...props} {...this.helpers} />;
+  }
 
   render() {
     const {
@@ -212,10 +230,13 @@ Admin.propTypes = {
   admin: PropTypes.object.isRequired,
   getInitData: PropTypes.func.isRequired,
   global: PropTypes.object.isRequired,
+  hideLeftMenu: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   resetLocaleDefaultClassName: PropTypes.func.isRequired,
   setAppError: PropTypes.func.isRequired,
   setLocaleCustomClassName: PropTypes.func.isRequired,
+  showLeftMenu: PropTypes.func.isRequired,
+  updatePlugin: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -232,6 +253,7 @@ function mapDispatchToProps(dispatch) {
       setAppError,
       setLocaleCustomClassName,
       showLeftMenu,
+      updatePlugin,
     },
     dispatch,
   );

@@ -30,6 +30,7 @@ const tryRequireRoot = (source) => {
   }
 };
 
+// TODO: Remove the bootstrap
 const bootstrap = tryRequireRoot('bootstrap');
 const pluginRequirements = tryRequireRoot('requirements');
 
