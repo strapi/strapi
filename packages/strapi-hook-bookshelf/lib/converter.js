@@ -17,8 +17,6 @@ class Converter {
       case 'lte': return '<=';
       case 'gt': return '>';
       case 'gte': return '>=';
-      case 'contains':
-      case 'containss': return 'like';
       case 'in': return 'IN';
       case 'nin': return 'NOT IN';
       default: operation;
@@ -65,11 +63,17 @@ class Converter {
             method: 'whereNotIn',
             value: _.castArray(value),
           };
-        } else if (operation === 'contains' || operation === 'containss') {
+        } else if (operation === 'contains') {
           query[key] = {
             method,
-            symbol,
+            symbol: 'like',
             value: `%${value}%`,
+          };
+        } else if (operation === 'containss') {
+          query[key] = {
+            rawMethod: (qb, fieldKey) => {
+              qb.whereRaw(`LOWER(${fieldKey}) LIKE '%' || LOWER(?) || '%'`, [value]);
+            }
           };
         } else if (operation === 'exists') {
           query[key] = {

@@ -13,11 +13,6 @@ class QueryBuilder {
         const { association, model, attributeKey } = this.getAssociationFromFieldKey(strapiModel, key);
         let fieldKey = `${model.collectionName}.${attributeKey}`;
         if (association) {
-          if (association.nature === 'manyToMany') {
-            const { attribute, column } = model.attributes[association.via];
-            fieldKey = `${association.tableCollectionName}.${attribute}_${column}`;
-          }
-
           /**
            * If for instance we want to filter on the model relation, such as
            * {
@@ -35,6 +30,8 @@ class QueryBuilder {
 
         if (value.symbol) {
           qb[value.method](fieldKey, value.symbol, value.value);
+        } else if (!_.isUndefined(value.rawMethod)) {
+          value.rawMethod(qb, fieldKey);
         } else if (!_.isUndefined(value.value)) {
           qb[value.method](fieldKey, value.value);
         } else {
