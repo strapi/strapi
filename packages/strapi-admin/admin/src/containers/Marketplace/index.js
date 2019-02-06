@@ -56,7 +56,7 @@ class Marketplace extends React.Component {
   );
 
   renderPluginCard = plugin => {
-    const { adminPage: { currentEnvironment }, availablePlugins, downloadPlugin, history, installedPlugins } = this.props;
+    const { admin: { currentEnvironment }, availablePlugins, downloadPlugin, history, installedPlugins } = this.props;
     const currentPlugin = availablePlugins[plugin];
     
     return (
@@ -113,7 +113,7 @@ Marketplace.childContextTypes = {
 Marketplace.defaultProps = {};
 
 Marketplace.propTypes = {
-  adminPage: PropTypes.object.isRequired,
+  admin: PropTypes.object.isRequired,
   availablePlugins: PropTypes.array.isRequired,
   downloadPlugin: PropTypes.func.isRequired,
   getAvailableAndInstalledPlugins: PropTypes.func.isRequired,
