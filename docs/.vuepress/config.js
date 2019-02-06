@@ -44,6 +44,9 @@ module.exports = {
     config: md => {
       md.use(require('markdown-it-decorate'))
         .use(...createContainer('intro'))
+        .use(...createContainer('windows'))
+        .use(...createContainer('ubuntu'))
+        .use(...createContainer('mac'))
         .use(...createContainer('note'));
     },
   },

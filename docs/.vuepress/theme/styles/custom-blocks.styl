@@ -2,7 +2,7 @@
   .custom-block-title
     font-weight 600
     margin-bottom -0.4rem
-  &.tip, &.warning, &.danger, &.note
+  &.tip, &.warning, &.danger, &.note, &.windows, &.ubuntu, &.mac
     padding .1rem 1.5rem
     border-left-width .5rem
     border-left-style solid
@@ -12,7 +12,21 @@
     border-color #42b983
   &.note
     background-color #f3f5f7
-    border-color $accentColor
+  &.windows
+    background-color #daf0fb
+    border-color #1ba1e2
+    color darken(#1ba1e2, 70%)
+  &.ubuntu
+    background-color #fce7e0
+    border-color #dd4814
+    color darken(#dd4814, 70%)
+  &.mac
+    background-color #e2e6f2
+    border-color #8294c9
+    color darken(#8294c9, 70%)
+   &.mac strong, &.ubuntu strong, &.windows strong
+    margin-bottom  1rem
+    display block
   &.warning
     background-color rgba(255,229,100,.3)
     border-color darken(#ffe564, 35%)
@@ -29,3 +43,4 @@
       color darken(red, 40%)
     a
       color $textColor
+

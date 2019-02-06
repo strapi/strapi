@@ -4,12 +4,13 @@ This section explains how to handle Strapi for the first time, ([check out our v
 
 **Table of contents:**
 
-- [1. Create your first project](#_1-create-a-project)
-- [2. Create your first user](#_2-register-the-first-user)
-- [3. Create your first Content Type](#_3-create-a-content-type)
+- [1. Create a project](#_1-create-a-project)
+- [2. Create an admin user](#_2-create-an-admin-user)
+- [3. Create a Content Type](#_3-create-a-content-type)
   - [Files structure](#files-structure)
-- [4. Manage your data](#_4-add-content)
-- [5. Consume your API](#_5-consume-the-api)
+- [4. Manage and add data to Content Type](#_4-manage-and-add-data-to-content-type)
+- [5. Set roles and permissions](#_5-set-roles-and-permissions)
+- [6. Consume the Content Type API](#_6-consume-the-content-type-api)
   - [List entries (GET)](#list-entries-get)
   - [Get a specific entry (GET)](#get-a-specific-entry-get)
   - [Create data (POST)](#create-data-post)
@@ -59,7 +60,7 @@ Now that your app is running let's see how to [create your first user](#_2-regis
 
 ---
 
-## 2. Register the first user
+## 2. Create an admin user
 
 In order to use the admin panel and to consume your API you first need to register your first user. This process only happens once and is made to create the `admin user` who has all the permissions granted.
 
@@ -105,7 +106,7 @@ A new directory has been created in the `./api` folder of your application which
 
 ---
 
-## 4. Add content
+## 4. Manage and add data to Content Type
 
 After creating [your first Content Type](#_3-create-a-content-type), you probably want to create, edit or delete entries. No worries, everything is ready for you:
 
@@ -123,7 +124,9 @@ After creating [your first Content Type](#_3-create-a-content-type), you probabl
 
 ---
 
-## 5. Consume the API
+## 5. Set roles and permissions
+
+## 6. Consume the Content Type API
 
 Your API is now ready and [contains data](#_4-add-content). At this point, you'll probably want to use this data in mobile or desktop applications.
 In order to do so, you'll need to allow access to other users (identified as 'Public').
