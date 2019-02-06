@@ -1,14 +1,14 @@
-# Quick start
+# Quick start detailed
 
 We have created an Quick Start installation which will set-up, configure and get Strapi up and running effortlessly.
 
-(You should have already completed the steps to install Strapi and the requirements from [Installation Requirements](install-requirements.html).)
+(You should have already completed the steps to install Strapi and the requirements from [Installation Requirements](/3.x.x/getting-started/install-requirements.html).)
 
 ::: warning NOTE
 Quick start will install Strapi using a SQLite database. [SQLite](https://www.sqlite.org/index.html) is likely used more than all other database engines combined.
 :::
 
-This quick start is written for developers needing an intermediate or more advanced introduction to Strapi. A more detailed version of this Quick Start page can be found at the [Quick Start - Detailed](/3.x.x/installation-options/quick-start-detailed.html) page.
+This quick start (detailed version) is written for developers who prefer more detailed explanations when learning a new CMS. A more intermediate to advanced version is written and can be found at [Quick Start](/3.x.x/getting-started/quick-start.html).
 
 This section explains how to handle Strapi for the first time, ([check out our video tutorial](https://www.youtube.com/watch?v=yMl5IcFHA74)).
 

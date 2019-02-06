@@ -37,4 +37,6 @@ $ npm install strapi -g
 
 ## Cmd Line and Code
 
+We will use Command Line for non specific operating system instructions.
+
 ## Symbols Used

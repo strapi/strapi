@@ -82,6 +82,7 @@ module.exports = {
             '/3.x.x/installation-options/install-docker.md',
             '/3.x.x/installation-options/install-node.md',
             '/3.x.x/installation-options/install-strapi.md',
+            '/3.x.x/installation-options/quick-start-detailed.md',
             '/3.x.x/installation-options/use-databases.md',
           ],
         },
