@@ -80,7 +80,8 @@ module.exports = function(appPath = '') {
             file === 'plugins.json' ||
             file === 'index.html'   ||
             file === 'public'       ||
-            file === 'cypress'
+            file === 'cypress'      ||
+            _.endsWith(file, '.db')
           ) {
             return;
           }

@@ -18,6 +18,7 @@ import {
   MOVE_ATTR_EDIT_VIEW,
   MOVE_VARIABLE_ATTR_EDIT_VIEW,
   ON_CHANGE,
+  ON_CHANGE_INPUT_TYPE,
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
   ON_CLICK_ADD_ATTR_FIELD,
@@ -246,6 +247,11 @@ function appReducer(state = initialState, action) {
                 }, acc);
             }, models);
         });
+    // Special case to change the textarea type to WYSIWYG
+    case ON_CHANGE_INPUT_TYPE:
+      return state
+        .updateIn(['modifiedSchema', ...action.keys], () => action.value)
+        .update('shouldResetGrid', v => !v);
     case ON_CHANGE_SETTINGS:
       return state
         .updateIn(['modifiedSchema', 'models'].concat(action.keys), () => action.value);
