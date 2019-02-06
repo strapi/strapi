@@ -192,4 +192,6 @@ Are you having trouble during the basic installation steps? Please check to see 
 
 ---
 
+::: tip NEXT STEPS
 👏 Congrats, you are all set! Now that Strapi is installed you can proceed to the [Quick start](/3.x.x/getting-started/quick-start.html) and [create a project](quick-start.md#_1-create-a-project).
+:::
