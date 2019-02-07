@@ -113,7 +113,11 @@ After your admin user is registered, you will see the Strapi admin panel:
 
 ---
 
-Every user is found by clicking in the left menu: Content Type --> Users. From here you can add and edit users.
+Every user is found by clicking in the left menu: **CONTENT TYPES** --> **Users**.
+
+![Strapi Users Content Type Menu Item](../assets/AfterRegistrationScreenAdminPanelChooseUsersMenu.jpg 'Strapi Users Content Type Menu Item')
+
+From here you can add and edit users.
 
 ![Strapi Users Page](../assets/AdminUserInUsers.jpg 'Strapi Users Page')
 
@@ -124,6 +128,46 @@ Now let's see how to [create a Content Type](#_3-create-a-content-type).
 ---
 
 ## 3. Create a Content Type
+
+At this point, your project is empty. You need to create a Content Type. We will use the **Content Type Builder** plugin.
+
+Go to the **Content Type Builder** plugin, located in the left menu: **PLUGINS** --> **Content Type Builder**:
+
+![Choose Content Type Item Location](../assets/AfterRegistrationScreenAdminPanelChooseContentType.jpg 'Choose Content Type Item Location')
+
+We will create two content types. We will create a content type for **Restaurant** and **Category**.
+
+![Create Content Type Screen](../assets/CreateContentTypeScreen.jpg 'Create Content Type Screen')
+
+::: warning NOTE
+
+Content Type _name_ is always **singular**. For example, **restaurant** not restaurants.
+
+:::
+
+### The "Restaurant" Content Type
+
+The "Restaurant" Content Type will have a String Field named "Name" for the restaurant name, and a Text field (with a WYSIWYG editor) named "Description" for the restaurant description.
+
+### The "Category" Content Type
+
+The "Category" Content Type will have a String field named "Category for categories assigned to restaurants, and a Relation field with a Many to Many relationship.
+
+add Description of the new Content Type : Recommend Restaurants
+
+Add New Fields - click Add New Field
+
+Let's give it a name, click String, Name - Strapi Restaurant, click Advanced Settings Tab, check Required field, unique field
+
+Click Continue
+
+Click on text - type in Description
+click on tab Advanced Settings - Check "Display as a WYSIWYG"
+Click Continue
+
+Click Save for Restaurant
+
+Let Strapi Save and wait for restart.
 
 At this point, your project is empty. To create your first Content Type, you are going to use the **Content Type Builder** plugin: a powerful UI to help defining your Content Type's structure within a few clicks. Let's take the example of blog, which manages posts.
 

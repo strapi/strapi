@@ -58,3 +58,33 @@ Now let's see how to [create a Content Type](#_3-create-a-content-type).
 ---
 
 ## 3. Create a Content Type
+
+At this point, your project is empty. You need to create a Content Type. We will use the **Content Type Builder** plugin.
+
+We will create two content types for our headless CMS. We will create a content type for restaurants and restaurant category.
+
+We will create two content types. A "Restaurant" Content Type and a "Category" Content Type. The "Restaurant" Content Type will have a String Field named "Name" for the restaurant name, and a Text field (with a WYSIWYG editor) named "Description" for the restaurant description. The "Category" Content Type will have a String field named "Category for categories assigned to restaurants, and a Relation field with a Many to Many relationship.
+
+::: warning NOTE
+
+Content Type name is always singular. For example, restaurant not restaurants.
+
+:::
+
+Should be singular : restaurant
+
+add Description of the new Content Type : Recommend Restaurants
+
+Add New Fields - click Add New Field
+
+Let's give it a name, click String, Name - Strapi Restaurant, click Advanced Settings Tab, check Required field, unique field
+
+Click Continue
+
+Click on text - type in Description
+click on tab Advanced Settings - Check "Display as a WYSIWYG"
+Click Continue
+
+Click Save for Restaurant
+
+Let Strapi Save and wait for restart.
