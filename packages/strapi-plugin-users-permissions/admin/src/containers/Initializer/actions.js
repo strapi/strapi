@@ -5,11 +5,19 @@
  */
 
 import {
-  DEFAULT_ACTION,
+  INITIALIZE,
+  INITIALIZE_SUCCEEDED,
 } from './constants';
 
-export function defaultAction() {
+export function initialize() {
   return {
-    type: DEFAULT_ACTION,
+    type: INITIALIZE,
+  };
+}
+
+export function initializeSucceeded(data) {
+  return {
+    type: INITIALIZE_SUCCEEDED,
+    data,
   };
 }

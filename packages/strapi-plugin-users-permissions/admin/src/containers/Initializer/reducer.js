@@ -6,15 +6,20 @@
 
 import { fromJS } from 'immutable';
 import {
-  DEFAULT_ACTION,
+  INITIALIZE_SUCCEEDED,
 } from './constants';
 
-const initialState = fromJS({});
+const initialState = fromJS({
+  hasAdminUser: false,
+  shouldUpdate: false,
+});
 
 function initializerReducer(state = initialState, action) {
   switch (action.type) {
-    case DEFAULT_ACTION:
-      return state;
+    case INITIALIZE_SUCCEEDED:
+      return state
+        .updateIn(['hasAdmin'], () => action.data)
+        .update('shouldUpdate', v => !v);
     default:
       return state;
   }

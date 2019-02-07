@@ -104,6 +104,16 @@ const initializer = (() => {
   try {
     return require('../../../../admin/src/initializer.js'); // eslint-disable-line import/no-unresolved
   } catch(err) {
+    console.log({ err });
+    return null;
+  }
+})();
+
+// Require the plugin's lifecycle
+const lifecycles = (() => {
+  try {
+    return require('../../../../admin/src/lifecycles.js'); // eslint-disable-line import/no-unresolved
+  } catch(err) {
     return null;
   }
 })();
@@ -123,6 +133,7 @@ strapi.registerPlugin({
   leftMenuLinks: [],
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
+  lifecycles,
   // pluginRequirements,
   preventComponentRendering: false,
   translationMessages,

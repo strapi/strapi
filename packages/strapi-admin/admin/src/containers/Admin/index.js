@@ -63,6 +63,7 @@ import styles from './styles.scss';
 const PLUGINS_TO_BLOCK_PRODUCTION = ['content-type-builder', 'settings-manager'];
 
 export class Admin extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  // state = { }
   getChildContext = () => ({
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
@@ -112,7 +113,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
   hasApluginNotReady = props => {
     const { global: { plugins } } = props;
 
-    return Object.keys(plugins).every(plugin => plugins[plugin].isReady === false);
+    return !Object.keys(plugins).every(plugin => (plugins[plugin].isReady === true));
   } 
 
   isAcceptingTracking = () => {
@@ -205,7 +206,6 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
         showGlobalAppBlocker,
       },
     } = this.props;
-    console.log(this.props.global.plugins);
 
     if (appError) {
       return <div>An error has occured please check your logs</div>;
@@ -219,7 +219,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
         </React.Fragment>
       );
     }
-
+    console.log(this.props.global.plugins);
     const contentWrapperStyle = showLeftMenu ? { main: {}, sub: styles.content } : { main: { width: '100%' }, sub: styles.wrapper };
 
     return (

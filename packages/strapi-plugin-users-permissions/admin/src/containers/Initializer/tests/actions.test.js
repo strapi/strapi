@@ -1,18 +1,18 @@
 
 import {
-  defaultAction,
+  intialize,
 } from '../actions';
 import {
-  DEFAULT_ACTION,
+  INITIALIZE,
 } from '../constants';
 
 describe('Initializer actions', () => {
-  describe('Default Action', () => {
-    it('has a type of DEFAULT_ACTION', () => {
+  describe('Initialize Action', () => {
+    it('has a type of INITIALIZE', () => {
       const expected = {
-        type: DEFAULT_ACTION,
+        type: INITIALIZE,
       };
-      expect(defaultAction()).toEqual(expected);
+      expect(intialize()).toEqual(expected);
     });
   });
 });

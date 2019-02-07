@@ -4,4 +4,5 @@
  *
  */
 
-export const DEFAULT_ACTION = 'UsersPermissions/Initializer/DEFAULT_ACTION';
+export const INITIALIZE = 'UsersPermissions/Initializer/INITIALIZE';
+export const INITIALIZE_SUCCEEDED = 'UsersPermissions/Initializer/INITIALIZE_SUCCEEDED';
