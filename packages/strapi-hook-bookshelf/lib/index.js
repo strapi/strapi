@@ -464,14 +464,18 @@ module.exports = function(strapi) {
                     };
 
                     // Apply field type of attributes definition
-                    const generateColumns = (attrs, start) => {
+                    const generateColumns = (attrs, start, addRequiredUnique) => {
                       return Object.keys(attrs).reduce((acc, attr) => {
                         const attribute = attributes[attr];
 
                         const type = getType(attribute, attr);
 
                         if (type) {
-                          acc.push(`${quote}${attr}${quote} ${type}`);
+                          if (addRequiredUnique) {
+                            acc.push(`${quote}${attr}${quote} ${type} ${attribute.unique ? 'UNIQUE' : ''} ${attribute.required ? 'NOT NULL' : ''}`);
+                          } else {
+                            acc.push(`${quote}${attr}${quote} ${type}`);
+                          }
                         }
 
                         return acc;
@@ -558,7 +562,7 @@ module.exports = function(strapi) {
                       } else if (definition.primaryKeyType !== 'integer') {
                         idAttributeBuilder = [`id ${getType({type: definition.primaryKeyType})} NOT NULL PRIMARY KEY`];
                       }
-                      const columns = generateColumns(attributes, idAttributeBuilder).join(',\n\r');
+                      const columns = generateColumns(attributes, idAttributeBuilder, true).join(',\n\r');
 
                       // Create table
                       await ORM.knex.raw(`
@@ -632,6 +636,30 @@ module.exports = function(strapi) {
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
+                            if ((previousAttributes[attribute] && !previousAttributes[attribute].unique && attributes[attribute].unique) ||
+                                (!previousAttributes[attribute] && attributes[attribute].unique)) {
+                              // Add UNIQUE
+                              const changeUnique = definition.client === 'pg'
+                              ? ` `
+                              : `ADD UNIQUE INDEX ${quote}${attribute}_UNIQUE${quote} (${quote}${attribute}${quote} ASC) VISIBLE`
+                              try {
+                                await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeUnique}`);
+                              } catch(err) {
+                                // code: 'ER_DUP_KEYNAME'
+                              }
+                              
+                            }
+                            if (previousAttributes[attribute] && previousAttributes[attribute].unique && !attributes[attribute].unique) {
+                              // Drop UNIQUE
+                              const changeUnique = definition.client === 'pg'
+                              ? ` `
+                              : `DROP INDEX ${quote}${attribute}_UNIQUE${quote}`
+                              try {
+                                await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeUnique}`);
+                              } catch(err) {
+                                // code: 'ER_CANT_DROP_FIELD_OR_KEY'
+                              }
+                            }
                           }
 
                           resolve();
