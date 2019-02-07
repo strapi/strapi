@@ -100,9 +100,8 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
 
   hasApluginNotReady = props => {
     const { global: { plugins } } = props;
-    const notReadyPlugins = Object.keys(plugins).filter(plugin => plugins[plugin].isReady === false);
-
-    return notReadyPlugins.length !== 0;
+    
+    return Object.keys(plugins).every(plugin => plugins[plugin].isReady === false);
   } 
 
   isAcceptingTracking = () => {
