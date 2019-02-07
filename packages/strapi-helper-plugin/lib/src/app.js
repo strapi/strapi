@@ -24,17 +24,17 @@ const LoadableApp = Loadable({
   loading: LoadingIndicatorPage,
 });
 
-const tryRequireRoot = (source) => {
-  try {
-    return require('../../../../admin/src/' + source + '.js').default; // eslint-disable-line prefer-template
-  } catch(err) {
-    return null;
-  }
-};
+// const tryRequireRoot = (source) => {
+//   try {
+//     return require('../../../../admin/src/' + source + '.js').default; // eslint-disable-line prefer-template
+//   } catch(err) {
+//     return null;
+//   }
+// };
 
 // TODO: Remove the bootstrap
-const bootstrap = tryRequireRoot('bootstrap');
-const pluginRequirements = tryRequireRoot('requirements');
+// const bootstrap = tryRequireRoot('bootstrap');
+// const pluginRequirements = tryRequireRoot('requirements');
 
 const layout = (() => {
   try {
@@ -44,13 +44,13 @@ const layout = (() => {
   }
 })();
 
-const injectedComponents = (() => {
-  try {
-    return require('injectedComponents').default; // eslint-disable-line import/no-unresolved
-  } catch(err) {
-    return [];
-  }
-});
+// const injectedComponents = (() => {
+//   try {
+//     return require('injectedComponents').default; // eslint-disable-line import/no-unresolved
+//   } catch(err) {
+//     return [];
+//   }
+// });
 
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
@@ -76,11 +76,11 @@ function Comp(props) {
   );
 }
 
-if (window.Cypress) {
-  window.__store__ = Object.assign(window.__store__ || {}, {
-    [pluginId]: store,
-  });
-}
+// if (window.Cypress) {
+//   window.__store__ = Object.assign(window.__store__ || {}, {
+//     [pluginId]: store,
+//   });
+// }
 
 // Hot reloadable translation json files
 if (module.hot) {
@@ -98,21 +98,32 @@ if (module.hot) {
   });
 }
 
+
+// Require the Initializer component
+const initializer = (() => {
+  try {
+    return require('../../../../admin/src/initializer.js'); // eslint-disable-line import/no-unresolved
+  } catch(err) {
+    return null;
+  }
+})();
+
 // Register the plugin.
 strapi.registerPlugin({
   blockerComponent: null,
   blockerComponentProps: {},
-  bootstrap,
+  // bootstrap,
   description: pluginDescription,
   icon: pluginPkg.strapi.icon,
   id: pluginId,
-  injectedComponents,
+  // injectedComponents,
+  initializer,
   isReady: false,
   layout,
   leftMenuLinks: [],
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
-  pluginRequirements,
+  // pluginRequirements,
   preventComponentRendering: false,
   translationMessages,
 });

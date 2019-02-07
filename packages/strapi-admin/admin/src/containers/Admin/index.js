@@ -159,11 +159,29 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     if (isLoading) {
       return true;
     }
-    console.log('lll');
+
     return this.hasApluginNotReady(this.props);
   }
 
   renderMarketPlace = props => <Marketplace {...props} {...this.props} />;
+
+  renderInitializers = () => {
+    const {
+      global: { plugins },
+    } = this.props;
+
+    return Object.keys(plugins).reduce((acc, current) => {
+      const Compo = plugins[current].initializer;
+      const key = plugins[current].id;
+
+      if (Compo) {
+        // We don't check if the initializer is correct because there's a fallback in cdc
+        acc.push(<Compo key={key} {...this.props} {...this.helpers} />);
+      }
+
+      return acc;
+    }, []);
+  };
 
 
   renderPluginDispatcher = props => {
@@ -187,13 +205,19 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
         showGlobalAppBlocker,
       },
     } = this.props;
+    console.log(this.props.global.plugins);
 
     if (appError) {
       return <div>An error has occured please check your logs</div>;
     }
 
     if (this.showLoader()) {
-      return <LoadingIndicatorPage />;
+      return (
+        <React.Fragment>
+          {this.renderInitializers()}
+          <LoadingIndicatorPage />
+        </React.Fragment>
+      );
     }
 
     const contentWrapperStyle = showLeftMenu ? { main: {}, sub: styles.content } : { main: { width: '100%' }, sub: styles.wrapper };
