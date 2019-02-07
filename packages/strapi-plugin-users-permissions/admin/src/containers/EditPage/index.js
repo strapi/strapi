@@ -12,7 +12,7 @@ import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isEmpty, isEqual, size } from 'lodash';
 import cn from 'classnames';
-
+import { pluginId } from 'app';
 // Design
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
@@ -22,9 +22,6 @@ import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import PluginHeader from 'components/PluginHeader';
 import Plugins from 'components/Plugins';
 import Policies from 'components/Policies';
-
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
 
 // Actions
 import {
@@ -330,12 +327,12 @@ const withConnect = connect(mapStateToProps, mapDispatchToProps);
 /* Remove this line if the container doesn't have a route and
 *  check the documentation to see how to create the container's store
 */
-const withReducer = injectReducer({ key: 'editPage', reducer });
+const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId });
 
 /* Remove the line below the container doesn't have a route and
 *  check the documentation to see how to create the container's store
 */
-const withSaga = injectSaga({ key: 'editPage', saga });
+const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 
 export default compose(
   withReducer,

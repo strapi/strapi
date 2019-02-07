@@ -14,20 +14,20 @@ class ErrorBoundary extends React.Component { // eslint-disable-line react/prefe
     this.state = { error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(error) {
-    console.log({ error }); // eslint-disable-line no-console
-    return { error: true };
+  static getDerivedStateFromError(errorInfo) {
+    console.log('kkk', { errorInfo }); // eslint-disable-line no-console
+    return { error: true, errorInfo };
   }
 
   render() {
     if (this.state.error) {
       return (
-        <div>
+        <div style={{ padding: '40px' }}>
           <h2><FormattedMessage id="components.ErrorBoundary.title" /></h2>
           <details style={{ whiteSpace: 'pre-wrap' }}>
-            {this.state.error && this.state.error.toString()}
+            {this.state.error && this.state.errorInfo.message}
             <br />
-            {this.state.errorInfo.componentStack}
+            {this.state.errorInfo.stack}
           </details>
         </div>
       );

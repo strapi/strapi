@@ -24,6 +24,9 @@ import ListPluginsPage from 'containers/ListPluginsPage/Loadable';
 import NotFoundPage from 'containers/NotFoundPage/Loadable';
 import PluginDispatcher from 'containers/PluginDispatcher';
 
+// Actions from strapi-helper-plugin
+// Actions required for disabling and enabling the OverlayBlocker
+import { disableGlobalOverlayBlocker, enableGlobalOverlayBlocker } from 'actions/overlayBlocker';
 // Components from strapi-helper-plugin
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import OverlayBlocker from 'components/OverlayBlocker';
@@ -56,9 +59,17 @@ import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';
 
+// TODO: Remove this and create the delete plugin API
 const PLUGINS_TO_BLOCK_PRODUCTION = ['content-type-builder', 'settings-manager'];
 
 export class Admin extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getChildContext = () => ({
+    disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
+    enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
+    plugins: this.props.global.plugins,
+    updatePlugin: this.props.updatePlugin,
+  });
+
   componentDidMount() {
     // Initialize Google Analytics
     // Refer to ../../../doc/disable-tracking.md for more informations
@@ -100,7 +111,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
 
   hasApluginNotReady = props => {
     const { global: { plugins } } = props;
-    
+
     return Object.keys(plugins).every(plugin => plugins[plugin].isReady === false);
   } 
 
@@ -148,7 +159,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     if (isLoading) {
       return true;
     }
-
+    console.log('lll');
     return this.hasApluginNotReady(this.props);
   }
 
@@ -224,9 +235,23 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
   }
 }
 
+Admin.childContextTypes = {
+  disableGlobalOverlayBlocker: PropTypes.func,
+  enableGlobalOverlayBlocker: PropTypes.func,
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
+};
+
+Admin.contextTypes = {
+  router: PropTypes.object.isRequired,
+};
+
+
 Admin.propTypes = {
   // TODO: change this to shape
   admin: PropTypes.object.isRequired,
+  disableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getInitData: PropTypes.func.isRequired,
   global: PropTypes.object.isRequired,
   hideLeftMenu: PropTypes.func.isRequired,
@@ -246,6 +271,8 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      disableGlobalOverlayBlocker,
+      enableGlobalOverlayBlocker,
       getInitData,
       hideLeftMenu,
       resetLocaleDefaultClassName,

@@ -2,7 +2,8 @@
  * Common configuration for the app in both dev an prod mode
  */
 
-import { merge, isFunction } from 'lodash';
+// import { merge, isFunction } from 'lodash';
+import { merge } from 'lodash';
 import {
   freezeApp,
   pluginLoaded,
@@ -10,11 +11,15 @@ import {
   updatePlugin,
 } from 'containers/App/actions';
 import { showNotification } from 'containers/NotificationProvider/actions';
+
+import injectReducer from 'utils/injectReducer';
+import injectSaga from 'utils/injectSaga';
+
 import { history, store } from './createStore';
 import { translationMessages, languages } from './i18n';
 import './public-path';
 
-const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email';
+// const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' || plugin.id === 'email';
 /**
  * Register a plugin
  *
@@ -25,34 +30,37 @@ const registerPlugin = (plugin) => {
   merge(translationMessages, plugin.translationMessages);
 
   plugin.leftMenuSections = plugin.leftMenuSections || [];
-  const shouldAllowRegister = isPluginAllowedToRegister(plugin);
+  store.dispatch(pluginLoaded(plugin));
 
-  switch (true) {
-    // Execute bootstrap function and check if plugin can be rendered
-    case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements) && shouldAllowRegister:
-      plugin.pluginRequirements(plugin)
-        .then(plugin => {
-          return plugin.bootstrap(plugin);
-        })
-        .then(plugin => {
-          store.dispatch(pluginLoaded(plugin));
-        });
-      break;
-    // Check if plugin can be rendered
-    case isFunction(plugin.pluginRequirements):
-      plugin.pluginRequirements(plugin).then(plugin => {
-        store.dispatch(pluginLoaded(plugin));
-      });
-      break;
-    // Execute bootstrap function
-    case isFunction(plugin.bootstrap) && shouldAllowRegister:
-      plugin.bootstrap(plugin).then(plugin => {
-        store.dispatch(pluginLoaded(plugin));
-      });
-      break;
-    default:
-      store.dispatch(pluginLoaded(plugin));
-  }
+  // TODO: Clean this mess
+  // const shouldAllowRegister = isPluginAllowedToRegister(plugin);
+
+  // switch (true) {
+  //   // Execute bootstrap function and check if plugin can be rendered
+  //   case isFunction(plugin.bootstrap) && isFunction(plugin.pluginRequirements) && shouldAllowRegister:
+  //     plugin.pluginRequirements(plugin)
+  //       .then(plugin => {
+  //         return plugin.bootstrap(plugin);
+  //       })
+  //       .then(plugin => {
+  //         store.dispatch(pluginLoaded(plugin));
+  //       });
+  //     break;
+  //   // Check if plugin can be rendered
+  //   case isFunction(plugin.pluginRequirements):
+  //     plugin.pluginRequirements(plugin).then(plugin => {
+  //       store.dispatch(pluginLoaded(plugin));
+  //     });
+  //     break;
+  //   // Execute bootstrap function
+  //   case isFunction(plugin.bootstrap) && shouldAllowRegister:
+  //     plugin.bootstrap(plugin).then(plugin => {
+  //       store.dispatch(pluginLoaded(plugin));
+  //     });
+  //     break;
+  //   default:
+  //     store.dispatch(pluginLoaded(plugin));
+  // }
 };
 const displayNotification = (message, status) => {
   store.dispatch(showNotification(message, status));
@@ -94,4 +102,7 @@ window.strapi = Object.assign(window.strapi || {}, {
   currentLanguage: window.localStorage.getItem('strapi-admin-language') ||  window.navigator.language ||  window.navigator.userLanguage || 'en',
   lockApp,
   unlockApp,
+  injectReducer,
+  injectSaga,
+  store,
 });

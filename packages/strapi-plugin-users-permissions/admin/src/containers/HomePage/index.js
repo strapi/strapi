@@ -12,16 +12,13 @@ import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 
+import { pluginId } from 'app';
 // Design
 import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';
 import List from 'components/List';
 import PluginHeader from 'components/PluginHeader';
 import PopUpForm from 'components/PopUpForm';
-
-// Utils
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 
 // Selectors
 import selectHomePage from './selectors';
@@ -279,9 +276,8 @@ function mapDispatchToProps(dispatch) {
 const mapStateToProps = selectHomePage();
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,

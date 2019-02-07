@@ -1,9 +1,10 @@
 import { createSelector } from 'reselect';
+import { pluginId } from 'app';
 
 /**
  * Direct selector to the editPage state domain
  */
-const selectEditPageDomain = () => (state) => state.get('editPage');
+const selectEditPageDomain = () => (state) => state.get(`${pluginId}-editPage`);
 
 /**
  * Default selector used by EditPage
