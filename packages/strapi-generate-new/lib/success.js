@@ -6,6 +6,7 @@
 
 // Node.js core.
 const request = require('request');
+const { machineIdSync } = require('node-machine-id');
 
 module.exports = function trackSuccess(event, scope, error) {
   request
@@ -13,6 +14,7 @@ module.exports = function trackSuccess(event, scope, error) {
     .form({
       event,
       uuid: scope.uuid,
+      deviceId: machineIdSync(),
       properties: {
         error
       }
