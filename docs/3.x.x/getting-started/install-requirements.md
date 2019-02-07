@@ -137,7 +137,7 @@ Time to install Strapi!
 
 We will now install Strapi. Strapi installs with one command. The command is the same for Windows, Mac or Ubuntu.
 ::: danger WARNING
-Strapi must be installed globally, using the "-g" flag, to avoid problems.
+Strapi must be installed globally, using the "-g" flag.
 :::
 
 ```bash
@@ -188,7 +188,7 @@ Commands:
   *
 ```
 
-Are you having trouble during the basic installation steps? Please check to see if someone already had the [same issue](https://github.com/strapi/strapi/issues). If not, please [submit an issue](https://github.com/strapi/strapi/issues/new).
+Are you having trouble during the [basic installation requirements](/3.x.x/getting-started/install-requirements.html#basic-installation-requirements) steps? Please check to see if someone has already had the [same issue](https://github.com/strapi/strapi/issues). If not, please [submit an issue](https://github.com/strapi/strapi/issues/new).
 
 ---
 

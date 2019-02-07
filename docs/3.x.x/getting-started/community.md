@@ -8,6 +8,4 @@ We have a vibrant and active community. You can get help, contribute and stay in
 
 ## Twitter
 
-## Intercom Channel
-
 ## Join Newsletter

@@ -2,83 +2,124 @@
 
 We have created an Quick Start installation which will set-up, configure and get Strapi up and running effortlessly.
 
-(You should have already completed the steps to install Strapi and the requirements from [Installation Requirements](/3.x.x/getting-started/install-requirements.html).)
+This quick start (detailed version) is written for developers who prefer more detailed explanations when learning a new CMS. A more intermediate to advanced version is written and can be found at [Quick Start](/3.x.x/getting-started/quick-start.html) in the [Getting Started](/3.x.x/getting-started/quick-start.html) section.
 
-::: warning NOTE
-Quick start will install Strapi using a SQLite database. [SQLite](https://www.sqlite.org/index.html) is likely used more than all other database engines combined.
-:::
+(You should have already completed the steps to install Strapi and the requirements from [Installation Requirements](/3.x.x/getting-started/install-requirements.html). These steps continue after ensuring nodejs, NPM and strapi are all properly installed.)
 
-This quick start (detailed version) is written for developers who prefer more detailed explanations when learning a new CMS. A more intermediate to advanced version is written and can be found at [Quick Start](/3.x.x/getting-started/quick-start.html).
-
-This section explains how to handle Strapi for the first time, ([check out our video tutorial](https://www.youtube.com/watch?v=yMl5IcFHA74)).
+This page explains how to create a new project in Strapi. Each step from creating a new project to creating content types ready to be consumed is covered. ([Check out our video tutorial](https://www.youtube.com/watch?v=yMl5IcFHA74)).
 
 **Table of contents:**
 
-- [1. Create a project](#_1-create-a-project)
-- [2. Create an admin user](#_2-create-an-admin-user)
-- [3. Create a Content Type](#_3-create-a-content-type)
-  - [Files structure](#files-structure)
-- [4. Manage and add data to Content Type](#_4-manage-and-add-data-to-content-type)
-- [5. Set roles and permissions](#_5-set-roles-and-permissions)
-- [6. Consume the Content Type API](#_6-consume-the-content-type-api)
-  - [List entries (GET)](#list-entries-get)
-  - [Get a specific entry (GET)](#get-a-specific-entry-get)
-  - [Create data (POST)](#create-data-post)
-  - [Update data (PUT)](#update-data-put)
-  - [Delete data (DELETE)](#delete-data-delete)
+1. [Create a project](#_1-create-a-project)
+2. [Create an admin user](#_2-create-an-admin-user)
+3. [Create a Content Type](#_3-create-a-content-type)
+
+   - [Files structure](#files-structure)
+
+4. [Manage and add data to Content Type](#_4-manage-and-add-data-to-content-type)
+5. [Set roles and permissions](#_5-set-roles-and-permissions)
+6. [Consume the Content Type API](#_6-consume-the-content-type-api)
+
+   - [List entries (GET)](#list-entries-get)
+   - [Get a specific entry (GET)](#get-a-specific-entry-get)
+   - [Create data (POST)](#create-data-post)
+   - [Update data (PUT)](#update-data-put)
+   - [Delete data (DELETE)](#delete-data-delete)
 
 ---
 
 ## 1. Create a project
 
-Creating your first project with Strapi is easy:
-
-**#1 — Open your terminal**
-
-Open your terminal in the directory you want to create your application in.
-
-**#2 — Run the following command line in your terminal:**
+Navigate to your parent "projects" directory in your command line.
 
 ```bash
-strapi new my-project
+str@pi:~/Desktop/Strapi/Projects$
 ```
 
-![Generate a Strapi project](../assets/terminal_new.png)
-
-::: note
-The CLI will ask you to choose your database: select MongoDB, Postgres or MySQL. Then, fill the database information in. The default values should work if you correctly installed the database system on your machine.
-:::
-
-This action creates a new folder named `my-project` with the entire [files structure](../concepts/concepts.md#files-structure) of a Strapi application.
-
-::: note
-Unfortunately, there is an issue on Windows, you will probably be stuck and unable to enter your `Database name` to continue. Using a VM is one of the solutions. See [the issue](https://github.com/strapi/strapi/issues/1281).
-:::
-
-**#3 — Go to your project and launch the server:**
-
-In your terminal run the following commands:
+Type the following in your command line and press enter to create a Strapi Quick Start project.
 
 ```bash
-cd my-project
-strapi start
+str@pi:~/Desktop/Strapi/Projects$ strapi new my-project --quickstart
 ```
 
-![Start Strapi](../assets/terminal_start.png)
+You will see something like this:
 
-Now that your app is running let's see how to [create your first user](#_2-register-the-first-user).
+```bash
+str@pi:~/Desktop/Strapi/Projects$ strapi new my-project --quickstart
+🚀 Start creating your Strapi application. It might take a minute, please take a coffee ☕️
+
+
+⏳ Testing database connection...
+The app has been connected to the database successfully!
+
+🏗  Application generation:
+✔ Copy dashboard
+✔ Install plugin settings-manager.
+✔ Install plugin content-type-builder.
+✔ Install plugin content-manager.
+✔ Install plugin users-permissions.
+✔ Install plugin email.
+✔ Install plugin upload.
+✔ Link strapi dependency to the project.
+
+👌 Your new application my-project is ready at /home/str/Desktop/Strapi/Projects/my-project.
+
+⚡️ Change directory:
+$ cd my-project
+
+⚡️ Start application:
+$ strapi start
+```
+
+The command will automatically create a Strapi app folder within your parent "projects" directory.
+
+```bash
+str@pi:~/Desktop/Strapi/Projects$ ls
+my-project
+```
+
+This will open your default browser to the Welcome page for creating an admin user.
+
+![Strapi Welcome Page for creating admin user](../assets/strapi-welcome-screen.jpg 'Strapi Welcome Page for creating admin user')
+
+::: warning NOTE
+You can replace the "my-project" project name with any name you want.
+
+---
+
+Quick start will install Strapi using a SQLite database. ([SQLite](https://www.sqlite.org/index.html) is likely used more than all other database engines combined.)
+
+:::
 
 ---
 
 ## 2. Create an admin user
 
-In order to use the admin panel and to consume your API you first need to register your first user. This process only happens once and is made to create the `admin user` who has all the permissions granted.
+The first user you create is the root user for your project. This user has all privileges and access rights. You will need to complete the following fields:
 
-To create your first user, start your server (`strapi start`) and go to [http://localhost:1337/admin](http://localhost:1337/admin).
+1. Username, create a username for login access to your project, eg. paulbocuse
+2. Password, create a unique password for your project
+3. Email Address, this will be used for recovery
+4. Check receive news, this is optional but recommended
+5. Click the "Ready to Start" button
 
-![Register View](../assets/getting-started_register.png)
+![Example completed Welcome Screen with Admin User information](../assets/welcome-screen-entered-information.jpg 'Example completed Welcome Screen with Admin User information')
 
-Now that your first user is registered let's see how to [create your first Content Type](#_3-create-a-content-type).
+---
+
+After your admin user is registered, you will see the Strapi admin panel:
+
+![Strapi Admin Panel](../assets/AfterRegistrationScreenAdminPanel.jpg 'Strapi Admin Panel')
+
+---
+
+Every user is found by clicking in the left menu: Content Type --> Users. From here you can add and edit users.
+
+![Strapi Users Page](../assets/AdminUserInUsers.jpg 'Strapi Users Page')
+
+---
+
+Now let's see how to [create a Content Type](#_3-create-a-content-type).
 
 ---
 
