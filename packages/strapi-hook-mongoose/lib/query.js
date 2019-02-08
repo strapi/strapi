@@ -4,17 +4,21 @@ const { buildQueryJoins, buildQueryFilter } = require('./query-utils');
 class Query {
   constructor(model) {
     this.model = model;
+    this.query = this.model.aggregate();
   }
 
   buildQuery(filter) {
-    const filterStage = buildQueryFilter(this.model, filter.where);
-    const query = this.model.aggregate(filterStage);
+    return buildQueryFilter(this.model, filter.where);
+  }
 
-    return query;
+  thru(cb) {
+    this.query = cb(this.query);
+
+    return this;
   }
 
   find(filter) {
-    this.query = this.buildQuery(filter);
+    this.query = this.query.append(this.buildQuery(filter));
     if (!_.isEmpty(filter.sort)) this.query.sort(filter.sort);
     if (_.has(filter, 'start')) this.query.skip(filter.start);
     if (_.has(filter, 'limit')) this.query.limit(filter.limit);
@@ -23,7 +27,7 @@ class Query {
   }
 
   count(filter) {
-    this.query = this.buildQuery(filter);
+    this.query = this.query.append(this.buildQuery(filter));
     this.query = this.query
       .count("count")
       .then(result => _.get(result, `0.count`, 0));
