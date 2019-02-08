@@ -8,7 +8,10 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const { Builder, Query } = require('strapi-utils');
+
 const Schema = require('./Schema.js');
+const GraphQLQuery = require('./Query.js');
 /* eslint-disable no-unused-vars */
 
 module.exports = {
@@ -59,20 +62,6 @@ module.exports = {
    */
   isNumberType: type => {
     return type === 'Int' || type === 'Float';
-  },
-
-  /**
-   * Convert parameters to valid filters parameters.
-   *
-   * @return Object
-   */
-
-  convertToParams: params => {
-    return Object.keys(params).reduce((acc, current) => {
-      return Object.assign(acc, {
-        [`_${current}`]: params[current],
-      });
-    }, {});
   },
 
   /**
@@ -163,14 +152,9 @@ module.exports = {
    * Build the mongoose aggregator by applying the filters
    */
   getModelAggregator: function(model, filters = {}) {
-    const aggregation = model.aggregate();
-    if (!_.isEmpty(filters.where)) {
-      aggregation.match(filters.where);
-    }
-    if (filters.limit) {
-      aggregation.limit(filters.limit);
-    }
-    return aggregation;
+    return new Query(model)
+      .find(filters)
+      .execute();
   },
 
   /**
@@ -218,21 +202,18 @@ module.exports = {
   /**
    * Correctly format the data returned by the group by
    */
-  preProcessGroupByData: function({ result, fieldKey, filters, modelName }) {
+  preProcessGroupByData: function({ result, fieldKey, filters, model }) {
     const _result = _.toArray(result);
     return _.map(_result, value => {
-      const params = Object.assign(
-        {},
-        this.convertToParams(_.omit(filters, 'where')),
-        filters.where,
-        {
-          [fieldKey]: value._id,
-        },
-      );
+      const params = {
+        ...GraphQLQuery.convertToParams(_.omit(filters, 'where')),
+        ...GraphQLQuery.convertToQuery(filters.where),
+        [fieldKey]: value._id,
+      };
 
       return {
         key: value._id,
-        connection: strapi.utils.models.convertParams(modelName, params),
+        connection: new Builder(model, params).convert(),
       };
     });
   },
@@ -268,7 +249,7 @@ module.exports = {
           result,
           fieldKey,
           filters: obj,
-          modelName: name,
+          model,
         });
       },
       () => true,
@@ -356,30 +337,29 @@ module.exports = {
       resolver: {
         Query: {
           [`${pluralize.plural(name)}Connection`]: (obj, options, context) => {
-            // eslint-disable-line no-unused-vars
-            const params = Object.assign(
-              {},
-              this.convertToParams(_.omit(options, 'where')),
-              options.where,
-            );
-            return strapi.utils.models.convertParams(name, params);
+            return options;
           },
         },
         [connectionGlobalId]: {
-          values: (obj, option, context) => {
+          values: (obj, options, context) => {
             // Object here contains the key/value of the field that has been grouped-by
             // for instance obj = { where: { country: 'USA' } } so the values here needs to be filtered according to the parent value
             return modelResolver(obj, obj, context);
           },
-          groupBy: (obj, option, context) => {
+          groupBy: (obj, options, context) => {
             // eslint-disable-line no-unused-vars
             // There is noting to resolve here, it's the aggregation resolver that will take care of it
             return obj;
           },
-          aggregate: (obj, option, context) => {
+          aggregate: (obj, options, context) => {
+            // eslint-disable-line no-unused-vars
+            const params = {
+              ...GraphQLQuery.convertToParams(_.omit(obj, 'where')),
+              ...GraphQLQuery.convertToQuery(obj.where),
+            };
             // eslint-disable-line no-unused-vars
             // There is noting to resolve here, it's the aggregation resolver that will take care of it
-            return obj;
+            return new Builder(model, params).convert();
           },
         },
         ...aggregatorFormat.resolver,
@@ -461,6 +441,7 @@ module.exports = {
     const aggregatorGlobalId = `${globalId}Aggregator`;
     const initialFields = {
       count: 'Int',
+      totalCount: 'Int',
     };
 
     // Only add the aggregator's operations if there are some numeric fields
@@ -480,12 +461,20 @@ module.exports = {
         count: async (obj, options, context) => {
           // eslint-disable-line no-unused-vars
           // Object here corresponds to the filter that needs to be applied to the aggregation
-          const result = await this.getModelAggregator(model, obj).group({
-            _id: null,
-            count: { $sum: 1 },
-          });
-
-          return _.get(result, '0.count');
+          return new Query(model)
+            .thru((query) => {
+              if (_.has(obj, 'limit')) query.limit(obj.limit);
+              return query;
+            })
+            .count(obj)
+            .execute();
+        },
+        totalCount: async (obj, options, context) => {
+          // eslint-disable-line no-unused-vars
+          // Object here corresponds to the filter that needs to be applied to the aggregation
+          return new Query(model)
+            .count(obj)
+            .execute();
         },
       },
     };
