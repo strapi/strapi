@@ -84,6 +84,7 @@ module.exports = {
             '/3.x.x/installation-options/install-strapi.md',
             '/3.x.x/installation-options/quick-start-detailed.md',
             '/3.x.x/installation-options/use-databases.md',
+            '/3.x.x/installation-options/API-Routes.md',
           ],
         },
         {
