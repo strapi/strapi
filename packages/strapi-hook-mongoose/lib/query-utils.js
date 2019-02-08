@@ -127,7 +127,7 @@ class QueryBuilder {
    */
   buildQueryFilter(strapiModel, where) {
     if (_.isEmpty(where)) {
-      return;
+      return [];
     }
 
     const joins = this.buildJoinsFromWhere(strapiModel, where);
