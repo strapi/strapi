@@ -75,6 +75,8 @@
   "app.components.ListPluginsPage.description": "Lista zainstalowanych wtyczek w projekcie.",
   "app.components.ListPluginsPage.helmet.title": "Lista wtyczek",
   "app.components.ListPluginsPage.title": "Wtyczki",
+  "app.components.Logout.profile": "Profil",
+  "app.components.Logout.logout": "Wyloguj",
   "app.components.NotFoundPage.back": "Powrót do strony głównej",
   "app.components.NotFoundPage.description": "Nie znaleziono",
   "app.components.Official": "Oficjalna",

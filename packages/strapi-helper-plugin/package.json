@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.18",
+  "version": "3.0.0-alpha.23.1",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 10.0.0",
@@ -26,6 +26,9 @@
   "pre-commit": [
     "lint:admin"
   ],
+  "devDependencies": {
+    "plop": "^2.2.0"
+  },
   "dependencies": {
     "add-asset-html-webpack-plugin": "^2.1.2",
     "babel-cli": "6.26.0",
@@ -68,7 +71,6 @@
     "moment": "^2.16.0",
     "node-sass": "^4.5.3",
     "null-loader": "^0.1.1",
-    "plop": "^1.8.0",
     "postcss-cssnext": "^2.11.0",
     "postcss-focus": "^2.0.0",
     "postcss-loader": "^2.0.6",

@@ -110,7 +110,7 @@ module.exports = function () {
           });
 
           strapi.models['core_store'].orm === 'mongoose'
-            ? await strapi.models['core_store'].update({ _id: data._id }, data, { strict: false })
+            ? await strapi.models['core_store'].updateOne({ _id: data._id }, data, { strict: false })
             : await strapi.models['core_store'].forge({ id: data.id }).save(data, { patch: true });
         } else {
           Object.assign(where, {

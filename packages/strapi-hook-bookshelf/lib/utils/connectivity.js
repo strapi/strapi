@@ -1,6 +1,6 @@
 'use strict';
 
-// Core
+// Node.js core.
 const path = require('path');
 
 // Public node modules
@@ -8,6 +8,10 @@ const inquirer = require('inquirer');
 const rimraf = require('rimraf');
 
 module.exports = (scope, success, error) => {
+  if (scope.client.database === 'sqlite') {
+    return success();
+  }
+
   let knex;
 
   try {
@@ -18,15 +22,23 @@ module.exports = (scope, success, error) => {
     knex = require(path.resolve(scope.tmpPath, 'node_modules', 'knex'));
   }
 
+  // eslint-disable-next-line import/no-unresolved
   knex = knex({
     client: scope.client.module,
     connection: Object.assign({}, scope.database.settings, {
       user: scope.database.settings.username
-    })
+    }),
+    useNullAsDefault: true
   });
 
   knex.raw('select 1+1 as result').then(() => {
-    knex.raw(scope.client.database === 'postgres' ? "SELECT tablename FROM pg_tables WHERE schemaname='public'" : 'SELECT * FROM information_schema.tables').then((tables) => {
+    const selectQueries = {
+      postgres: 'SELECT tablename FROM pg_tables WHERE schemaname=\'public\'',
+      mysql: 'SELECT * FROM information_schema.tables',
+      sqlite: 'select * from sqlite_master'
+    };
+
+    knex.raw(selectQueries[scope.client.database]).then((tables) => {
       knex.destroy();
 
       const next = () => {

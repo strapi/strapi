@@ -40,7 +40,7 @@
 
 ## Getting Started
 
-<a href="https://strapi.io/getting-started" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://strapi.io/documentation/3.x.x/getting-started/installation.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 #### 🖐 Requirements
 
@@ -57,7 +57,7 @@ Node:
  * NodeJS >= 10.x
  * NPM >= 6.x
 
-**Please note that right now Node 11 is not Officially supported, and the current Node LTS (v10) should be used.**
+**Please note that right now Node 11 is not supported, and the current Node LTS (v10) should be used.**
 
 Database:
  * MongoDB >= 3.x
@@ -71,8 +71,8 @@ Database:
 npm install strapi@alpha -g
 ````
 
-**We recommend to use the latest version of Strapi to start your new project**.
-Some breaking changes might happen, new releases are shipped every two weeks to fix/enhance the product.
+**We recommend always using the latest version of Strapi to start your new project**.
+As this project is currently in Alpha, some breaking changes may occur. New releases are shipped every two weeks to fix/enhance the project.
 
 #### 🏗 Create a new project
 
@@ -80,7 +80,7 @@ Some breaking changes might happen, new releases are shipped every two weeks to 
 strapi new my-project
 ```
 
-It will generate a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
+This command will generate a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
 
 #### 🚀 Start your project
 
@@ -109,8 +109,7 @@ Be aware that one of the content type builder won't work due to the writing file
 
 ## Features
 
-- **Modern Admin Panel:**
-  Elegant, entirely customizable and fully extensible admin panel.
+- **Modern Admin Panel:** Elegant, entirely customizable and fully extensible admin panel.
 - **Secure by default:** Reusable policies, CSRF, CORS, P3P, Xframe, XSS, and more.
 - **Plugins Oriented:** Install auth system, content management, custom plugins, and more, in seconds.
 - **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performances.
@@ -133,7 +132,7 @@ For more information on the upcoming version, please take a look to our [ROADMAP
 For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of this channel to ask question:
 
 - [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
-- [Slack](http://slack.strapi.io) (highly recommended for realtime support)
+- [Slack](http://slack.strapi.io) (highly recommended for faster support)
 - [GitHub](https://github.com/strapi/strapi)
 - [Twitter](https://twitter.com/strapijs)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161).

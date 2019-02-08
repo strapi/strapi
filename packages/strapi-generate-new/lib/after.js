@@ -5,8 +5,8 @@
  */
 
 // Node.js core.
-const path = require('path');
 const { exec, execSync } = require('child_process');
+const path = require('path');
 
 // Public node modules.
 const _ = require('lodash');
@@ -18,6 +18,7 @@ const shell = require('shelljs');
 
 // Logger.
 const { packageManager } = require('strapi-utils');
+const trackSuccess = require('./success');
 
 /**
  * Runs after this generator has finished
@@ -31,6 +32,8 @@ const { packageManager } = require('strapi-utils');
 module.exports = (scope, cb) => {
   console.log(`The app has been connected to the database ${green('successfully')}!`);
   console.log();
+
+  trackSuccess('didConnectDatabase', scope);
 
   console.log('🏗  Application generation:');
 
@@ -80,6 +83,7 @@ module.exports = (scope, cb) => {
         'cache-min': 999999999
       }, err => {
         if (err) {
+          trackSuccess('didNotInstallProjectDependencies', scope);
           console.log();
           console.log('⚠️ You should run `npm install` into your application before starting it.');
           console.log();
@@ -103,8 +107,10 @@ module.exports = (scope, cb) => {
       const data = shell.exec(`yarn --cwd ${scope.rootPath} add ${alphaDependencies} --production`, { silent: true });
 
       if (data.stderr && data.code !== 0) {
+        trackSuccess('didNotInstallProjectDependencies', scope);
         cb();
       }
+
       pluginsInstallation();
     }
   } else {
@@ -147,6 +153,7 @@ module.exports = (scope, cb) => {
           loader = ora(`Install plugin ${cyan(defaultPlugin.name)}.`).start();
           exec(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`, (err) => {
             if (err) {
+              trackSuccess('didNotInstallProjectPlugins', scope);
               loader.warn(`An error occurred during ${defaultPlugin.name} plugin installation.`);
               console.log(err);
               return resolve();
@@ -193,6 +200,8 @@ module.exports = (scope, cb) => {
         console.log('⚡️ Start application:');
         console.log(`$ ${green('strapi start')}`);
 
+        trackSuccess('didCreateProject', scope);
+        
         cb();
       });
   }

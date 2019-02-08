@@ -1,4 +1,12 @@
 {
+  "documentation": {
+    "id": "app.components.LeftMenuFooter.documentation",
+    "defaultMessage": "Documentation"
+  },
+  "help": {
+    "id": "app.components.LeftMenuFooter.help",
+    "defaultMessage": "Help"
+  },
   "poweredBy": {
     "id": "app.components.LeftMenuFooter.poweredBy",
     "defaultMessage": "Proudly powered by "

@@ -420,7 +420,6 @@ module.exports = {
         arrayOfPromises.push(this.updateUserRole(user, authenticated._id || authenticated.id));
       });
 
-
     return Promise.all(arrayOfPromises);
   },
 
@@ -438,8 +437,10 @@ module.exports = {
     try {
       // Disable auto-reload.
       strapi.reload.isWatching = false;
-      // Rewrite actions.json file.
-      fs.writeFileSync(actionsPath, JSON.stringify({ actions: data }), 'utf8');
+      if (!strapi.config.currentEnvironment.server.production) {
+        // Rewrite actions.json file.
+        fs.writeFileSync(actionsPath, JSON.stringify({ actions: data }), 'utf8');
+      }
       // Set value to AST to avoid restart.
       _.set(strapi.plugins['users-permissions'], 'config.actions', data);
       // Disable auto-reload.
