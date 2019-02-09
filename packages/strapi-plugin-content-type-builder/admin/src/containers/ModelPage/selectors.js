@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 /**
  * Direct selector to the modelPage state domain
  */
-const selectModelPageDomain = () => state => state.get('modelPage');
+const selectModelPageDomain = () => state => state.get('content-type-builder-modelPage');
 
 /**
  * Other specific selectors

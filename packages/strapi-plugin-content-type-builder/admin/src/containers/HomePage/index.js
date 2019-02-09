@@ -11,7 +11,7 @@ import { createStructuredSelector } from 'reselect';
 import { size } from 'lodash';
 import Helmet from 'react-helmet';
 import PropTypes from 'prop-types';
-import { router } from 'app';
+import { pluginId, router } from 'app';
 
 import { makeSelectLoading, makeSelectMenu, makeSelectModels } from 'containers/App/selectors';
 import { deleteContentType } from 'containers/App/actions';
@@ -23,8 +23,6 @@ import ContentHeader from 'components/ContentHeader';
 import EmptyContentTypeView from 'components/EmptyContentTypeView';
 import TableList from 'components/TableList';
 
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
 import { storeData } from '../../utils/storeData';
 
 import selectHomePage from './selectors';
@@ -140,8 +138,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,

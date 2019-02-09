@@ -44,6 +44,7 @@ import {
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
+import injectHooks from 'utils/injectHooks';
 
 import NavTopRightWrapper from './NavTopRightWrapper';
 
@@ -60,7 +61,8 @@ import saga from './saga';
 import styles from './styles.scss';
 
 export class Admin extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  // state = { }
+  state = { shouldSecureAfterAllPluginsAreMounted: true };
+
   getChildContext = () => ({
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
@@ -74,16 +76,32 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     ReactGA.initialize('UA-54313258-9');
     // Retrieve the main settings of the application
     this.props.getInitData();
+    const { admin: { isLoading } } = this.props;
+
+    if (!isLoading) {
+      this.willSecure();
+    }
   }
 
   componentDidUpdate(prevProps) {
     const {
+      admin: { isLoading },
       location: { pathname },
     } = this.props;
 
     if (prevProps.location.pathname !== pathname) {
       if (this.isAcceptingTracking()) {
         ReactGA.pageview(pathname);
+      }
+    }
+
+    if (prevProps.location.pathname !== pathname) {
+      this.willSecure();
+    }
+
+    if (!isLoading && this.state.shouldSecureAfterAllPluginsAreMounted) {
+      if (!this.hasApluginNotReady(this.props)) {
+        this.willSecure();
       }
     }
   }
@@ -138,6 +156,18 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     }
 
     return this.hasApluginNotReady(this.props);
+  }
+
+  willSecure = () => {
+    const { shouldSecureAfterAllPluginsAreMounted } = this.state;
+    const updater = () => {
+      this.setState({
+        shouldSecureAfterAllPluginsAreMounted: false,
+      });
+    };
+    const cb = shouldSecureAfterAllPluginsAreMounted ? updater : () => {};
+
+    this.props.getHook('willSecure', this, cb);
   }
 
   renderMarketPlace = props => <Marketplace {...props} {...this.props} />;
@@ -259,6 +289,7 @@ Admin.propTypes = {
   admin: PropTypes.object.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  getHook: PropTypes.func.isRequired,
   getInitData: PropTypes.func.isRequired,
   global: PropTypes.object.isRequired,
   hideLeftMenu: PropTypes.func.isRequired,
@@ -293,16 +324,9 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-/* Remove this line if the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withLocaleToggleReducer = injectReducer({ key: 'localeToggle', reducer: localeToggleReducer });
-
-/* Remove the line below the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
+const withHooks = injectHooks({ key: 'admin' });
 const withSaga = injectSaga({ key: 'admin', saga });
 
 export default compose(
@@ -310,4 +334,5 @@ export default compose(
   withLocaleToggleReducer,
   withSaga,
   withConnect,
+  withHooks,
 )(Admin);

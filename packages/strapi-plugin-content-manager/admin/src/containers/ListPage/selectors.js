@@ -9,7 +9,7 @@ import { createSelector } from 'reselect';
 /**
 * Direct selector to the listPage state domain
 */
-const selectListPageDomain = () => state => state.get('listPage');
+const selectListPageDomain = () => state => state.get('content-manager-listPage');
 
 
 /**

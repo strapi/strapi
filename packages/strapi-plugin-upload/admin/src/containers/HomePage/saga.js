@@ -1,7 +1,7 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { Map } from 'immutable';
 import { isEmpty } from 'lodash';
-import { all, call, fork, put, select, take, takeLatest } from 'redux-saga/effects';
+import { all, cancel, call, fork, put, select, take, takeLatest } from 'redux-saga/effects';
 import request from 'utils/request';
 
 import {

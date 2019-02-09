@@ -1,4 +1,4 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+// import { LOCATION_CHANGE } from 'react-router-redux';
 import {
   capitalize,
   cloneDeep,
@@ -13,7 +13,8 @@ import {
   unset,
 } from 'lodash';
 import pluralize from 'pluralize';
-import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
+// import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
+import { takeLatest, call, put, fork, select } from 'redux-saga/effects';
 
 import request from 'utils/request';
 
@@ -139,13 +140,13 @@ export function* submitChanges(action) {
 }
 
 function* defaultSaga() {
-  const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
-  const loadSubmitChanges = yield fork(takeLatest, SUBMIT, submitChanges);
+  yield fork(takeLatest, MODEL_FETCH, fetchModel);
+  yield fork(takeLatest, SUBMIT, submitChanges);
 
-  yield take(LOCATION_CHANGE);
+  // yield take(LOCATION_CHANGE);
 
-  yield cancel(loadModelWatcher);
-  yield cancel(loadSubmitChanges);
+  // yield cancel(loadModelWatcher);
+  // yield cancel(loadSubmitChanges);
 }
 
 export default defaultSaga;

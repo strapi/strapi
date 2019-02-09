@@ -26,6 +26,10 @@ module.exports = function lifecycles() {
     willSecure: require('./lifecycles/willSecure.js'),
   });
 
+  this.setHooks('users-permissions.homePage', {
+    willtoto: require('./lifecycles/willSecure.js'),
+  });
+
   // Set hooks for the App container of the Content Manager.
   // Note: we have to specify the first argument to select a specific container which is located in a plugin, or not.
   // this.setHooks('content-manager.App', {

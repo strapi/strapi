@@ -1,13 +1,16 @@
 const { includes } = require('lodash');
 const auth = require('utils/auth').default;
 
-module.exports = function willSecure(props, store, cb = () => {}) {
+module.exports = function willSecure(instances, cb = () => {}) {
   const {
-    showLeftMenu,
-    hideLeftMenu,
-    location: { pathname },
-    history,
-  } = props;
+    props: {
+      showLeftMenu,
+      hideLeftMenu,
+      location: { pathname },
+      history,
+      store,
+    },
+  } = instances;
 
   const initializerReducer = store
     .getState()

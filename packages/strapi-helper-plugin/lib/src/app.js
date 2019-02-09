@@ -11,7 +11,7 @@ import './public-path.js'; // eslint-disable-line import/extensions
 
 import React from 'react';
 import Loadable from 'react-loadable';
-import { Provider } from 'react-redux';
+// import { Provider } from 'react-redux';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 
 // TODO: Clean code
@@ -62,9 +62,9 @@ const store = strapi.store;
 // Define the plugin root component
 function Comp(props) {
   return (
-    <Provider store={store}>
-      <LoadableApp {...props} />
-    </Provider>
+    // <Provider store={store}>
+    <LoadableApp {...props} />
+    // </Provider>
   );
 }
 
