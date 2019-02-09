@@ -59,9 +59,6 @@ import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';
 
-// TODO: Remove this and create the delete plugin API
-const PLUGINS_TO_BLOCK_PRODUCTION = ['content-type-builder', 'settings-manager'];
-
 export class Admin extends React.Component { // eslint-disable-line react/prefer-stateless-function
   // state = { }
   getChildContext = () => ({
@@ -123,27 +120,6 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
   }
 
   /**
-   * 
-   * Retrieve the installed plugins
-   * Note: this should be removed
-   */
-  retrievePlugins = () => {
-    const {
-      admin: { currentEnvironment },
-      global: { plugins },
-    } = this.props;
-
-    if (currentEnvironment === 'production') {
-      let pluginsToDisplay = plugins;
-      PLUGINS_TO_BLOCK_PRODUCTION.map(plugin => (pluginsToDisplay = pluginsToDisplay.delete(plugin)));
-
-      return pluginsToDisplay;
-    }
-
-    return plugins;
-  };
-
-  /**
    * Display the app loader until the app is ready
    * @returns {Boolean}
    */
@@ -195,6 +171,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     const {
       admin: {
         appError,
+        isLoading,
         // Should be removed
         layout,
         showLeftMenu,
@@ -203,6 +180,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
       global: {
         blockApp,
         overlayBlockerData,
+        plugins,
         showGlobalAppBlocker,
       },
     } = this.props;
@@ -211,6 +189,11 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
       return <div>An error has occured please check your logs</div>;
     }
 
+    if (isLoading) {
+      return <LoadingIndicatorPage />;
+    }
+
+    // We need the admin data in order to make the initializers work
     if (this.showLoader()) {
       return (
         <React.Fragment>
@@ -219,7 +202,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
         </React.Fragment>
       );
     }
-    console.log(this.props.global.plugins);
+
     const contentWrapperStyle = showLeftMenu ? { main: {}, sub: styles.content } : { main: { width: '100%' }, sub: styles.wrapper };
 
     return (
@@ -229,7 +212,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
           <LeftMenu
             layout={layout}
             version={strapiVersion}
-            plugins={this.retrievePlugins()}
+            plugins={plugins}
           />
         )}
         <NavTopRightWrapper>

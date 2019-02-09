@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 /**
  * Direct selector to the authPage state domain
  */
-const selectAuthPageDomain = () => (state) => state.get('authPage');
+const selectAuthPageDomain = () => (state) => state.get('users-permissions-authPage');
 
 /**
  * Default selector used by AuthPage

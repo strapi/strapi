@@ -13,6 +13,7 @@ import cn from 'classnames';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 
 import { pluginId } from 'app';
+
 // Design
 import EditForm from 'components/EditForm';
 import HeaderNav from 'components/HeaderNav';

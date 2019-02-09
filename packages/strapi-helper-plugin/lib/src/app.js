@@ -44,14 +44,6 @@ const layout = (() => {
   }
 })();
 
-// const injectedComponents = (() => {
-//   try {
-//     return require('injectedComponents').default; // eslint-disable-line import/no-unresolved
-//   } catch(err) {
-//     return [];
-//   }
-// });
-
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
 const pluginId = pluginPkg.name.replace(
@@ -104,7 +96,6 @@ const initializer = (() => {
   try {
     return require('../../../../admin/src/initializer.js'); // eslint-disable-line import/no-unresolved
   } catch(err) {
-    console.log({ err });
     return null;
   }
 })();

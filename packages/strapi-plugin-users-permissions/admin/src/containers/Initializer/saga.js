@@ -10,7 +10,7 @@ export function* initialize() {
     const requestURL = '/users-permissions/init';
 
     const { hasAdmin } = yield call(request, requestURL, { method: 'GET' });
-    
+
     yield put(initializeSucceeded(hasAdmin));
   } catch(err) {
     strapi.notification.error('notification.error');

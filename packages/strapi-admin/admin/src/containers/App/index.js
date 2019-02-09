@@ -23,6 +23,8 @@ import '../../styles/main.scss';
 import styles from './styles.scss';
 
 export class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  renderAdmin = props => <Admin {...this.props} {...props} />;
+
   render() {
     return (
       <div>
@@ -36,7 +38,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
             return (
               <div className={styles.container}>
                 <Switch>
-                  <Route path="/" component={Admin} />
+                  <Route path="/" render={this.renderAdmin} />
                   <Route path="" component={NotFoundPage} />
                 </Switch>
               </div>

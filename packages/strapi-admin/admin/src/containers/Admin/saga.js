@@ -9,11 +9,11 @@ export function* getData() {
     const [
       { uuid },
       { strapiVersion },
-      { currentEnvironment },
+      { autoReload, currentEnvironment },
       { layout },
     ] = yield all(endPoints.map(endPoint => call(request, `/admin/${endPoint}`, { method: 'GET' })));
 
-    yield put(getInitDataSucceeded({ uuid, strapiVersion, currentEnvironment, layout }));
+    yield put(getInitDataSucceeded({ autoReload, uuid, strapiVersion, currentEnvironment, layout }));
   } catch(err) {
     console.log(err); // eslint-disable-line no-console
     strapi.notification.error('notification.error');

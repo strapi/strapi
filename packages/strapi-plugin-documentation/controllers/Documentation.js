@@ -14,6 +14,8 @@ const fs = require('fs');
 const cheerio = require('cheerio');
 const _ = require('lodash');
 
+/* eslint-disable no-console */
+
 module.exports = {
   getInfos: async (ctx) => {
     try {

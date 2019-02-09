@@ -18,7 +18,7 @@ function initializerReducer(state = initialState, action) {
   switch (action.type) {
     case INITIALIZE_SUCCEEDED:
       return state
-        .updateIn(['hasAdmin'], () => action.data)
+        .updateIn(['hasAdminUser'], () => action.data)
         .update('shouldUpdate', v => !v);
     default:
       return state;

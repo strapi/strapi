@@ -14,6 +14,7 @@ import {
 } from './constants';
 
 const initialState = fromJS({
+  autoReload: false,
   appError: false,
   currentEnvironment: 'development',
   isLoading: true,
@@ -29,6 +30,7 @@ function adminReducer(state = initialState, action) {
       return state;
     case GET_INIT_DATA_SUCCEEDED:
       return state
+        .update('autoReload', () => action.data.autoReload.enabled)
         .update('currentEnvironment', () => action.data.currentEnvironment)
         .update('isLoading', () => false)
         .update('layout', () => Map(action.data.layout))

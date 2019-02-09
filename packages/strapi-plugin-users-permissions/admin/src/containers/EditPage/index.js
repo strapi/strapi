@@ -13,6 +13,7 @@ import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isEmpty, isEqual, size } from 'lodash';
 import cn from 'classnames';
 import { pluginId } from 'app';
+
 // Design
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
