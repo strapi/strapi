@@ -86,6 +86,7 @@ module.exports = {
 
         strapi.reload();
       } catch (e) {
+        strapi.emit('didNotCreateContentType', e);
         return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
       }
     } catch (e) {

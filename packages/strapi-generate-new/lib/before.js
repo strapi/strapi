@@ -104,7 +104,7 @@ module.exports = (scope, cb) => {
     const answers = await inquirer
       .prompt([
         {
-          when: !scope.quick,
+          when: !scope.quick && !hasDatabaseConfig,
           type: 'list',
           name: 'type',
           message: 'Choose your installation type',
@@ -136,7 +136,10 @@ module.exports = (scope, cb) => {
     const isQuick = scope.quick;
 
     if (isQuick) {
+      trackSuccess('didChooseQuickstart', scope);
       answers.client = databaseChoices[0].value;
+    } else {
+      trackSuccess('didChooseCustomDatabase', scope);
     }
 
     if (hasDatabaseConfig) {
@@ -334,6 +337,7 @@ module.exports = (scope, cb) => {
         try {
           require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
         } catch(err) {
+          trackSuccess('didNotConnectDatabase', scope, err);
           console.log(err);
           shell.rm('-r', scope.tmpPath);
           cb.error();
