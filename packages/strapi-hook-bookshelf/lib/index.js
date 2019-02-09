@@ -86,6 +86,16 @@ module.exports = function(strapi) {
               primaryKey: 'id',
               primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer')
             });
+
+            // Use default timestamp column names if value is `true`
+            if (_.get(definition, 'options.timestamps', false) === true) {
+              _.set(definition, 'options.timestamps', ['created_at', 'updated_at']);
+            }
+            // Use false for values other than `Boolean` or `Array`
+            if (!_.isArray(_.get(definition, 'options.timestamps')) && !_.isBoolean(_.get(definition, 'options.timestamps'))) {
+              _.set(definition, 'options.timestamps', false);
+            }
+
             // Register the final model for Bookshelf.
             const loadedModel = _.assign({
               tableName: definition.collectionName,
@@ -100,14 +110,7 @@ module.exports = function(strapi) {
                 return acc;
               }, {})
             }, definition.options);
-            // Use default timestamp column names if value is `true`
-            if (_.get(loadedModel, 'hasTimestamps') === true) {
-              _.set(loadedModel, 'hasTimestamps', ['created_at', 'updated_at']);
-            }
-            // Use false for values other than `Boolean` or `Array`
-            if (!_.isArray(_.get(loadedModel, 'hasTimestamps')) && !_.isBoolean(_.get(loadedModel, 'hasTimestamps'))) {
-              _.set(loadedModel, 'hasTimestamps', false);
-            }
+
             if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
               loadedModel.toJSON = function(options = {}) {
                 const { shallow = false, omitPivot = false } = options;
@@ -141,7 +144,7 @@ module.exports = function(strapi) {
               try {
                 // External function to map key that has been updated with `columnName`
                 const mapper = (params = {}) => {
-                  if (definition.client === 'mysql') {
+                  if (definition.client === 'mysql' || definition.client === 'sqlite3') {
                     Object.keys(params).map((key) => {
                       const attr = definition.attributes[key] || {};
 
@@ -302,7 +305,7 @@ module.exports = function(strapi) {
                   });
 
                   // Convert to JSON format stringify json for mysql database
-                  if (definition.client === 'mysql') {
+                  if (definition.client === 'mysql' || definition.client === 'sqlite3') {
                     const events = [{
                       name: 'saved',
                       target: 'afterSave'
@@ -408,7 +411,7 @@ module.exports = function(strapi) {
                             type = definition.client === 'pg' ? 'uuid' : 'varchar(36)';
                             break;
                           case 'text':
-                            type = definition.client === 'pg' ? type = 'text' : 'longtext';
+                            type = definition.client === 'pg' ? 'text' : 'longtext';
                             break;
                           case 'json':
                             type = definition.client === 'pg' ? 'jsonb' : 'longtext';
@@ -419,8 +422,10 @@ module.exports = function(strapi) {
                           case 'email':
                             type = 'varchar(255)';
                             break;
-                          case 'integer':
                           case 'biginteger':
+                            type = definition.client === 'pg' ? 'bigint' : 'bigint(53)';
+                            break;
+                          case 'integer':
                             type = definition.client === 'pg' ? 'integer' : 'int';
                             break;
                           case 'float':
@@ -436,7 +441,17 @@ module.exports = function(strapi) {
                             type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
                             break;
                           case 'timestampUpdate':
-                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
+                            switch(definition.client) {
+                              case 'pg':
+                                type = 'timestamp with time zone';
+                                break;
+                              case 'sqlite3':
+                                type = 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                                break;
+                              default:
+                                type = 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
+                                break;
+                            }
                             break;
                           case 'boolean':
                             type = 'boolean';
@@ -474,6 +489,14 @@ module.exports = function(strapi) {
                         }
 
                         switch (connection.settings.client) {
+                          case 'mysql':
+                            columns = columns
+                              .map(attribute => `\`${attribute}\``)
+                              .join(',');
+
+                            // Create fulltext indexes for every column.
+                            await ORM.knex.raw(`CREATE FULLTEXT INDEX SEARCH_${_.toUpper(_.snakeCase(table))} ON \`${table}\` (${columns})`);
+                            break;
                           case 'pg': {
                             // Enable extension to allow GIN indexes.
                             await ORM.knex.raw('CREATE EXTENSION IF NOT EXISTS pg_trgm');
@@ -492,15 +515,6 @@ module.exports = function(strapi) {
                             await Promise.all(indexes);
                             break;
                           }
-
-                          default:
-                            columns = columns
-                              .map(attribute => `\`${attribute}\``)
-                              .join(',');
-
-                            // Create fulltext indexes for every column.
-                            await ORM.knex.raw(`CREATE FULLTEXT INDEX SEARCH_${_.toUpper(_.snakeCase(table))} ON \`${table}\` (${columns})`);
-                            break;
                         }
                       } catch (e) {
                         // Handle duplicate errors.
@@ -532,7 +546,13 @@ module.exports = function(strapi) {
 
 
                     if (!tableExist) {
-                      let idAttributeBuilder = [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`];
+                      const defaultAttributeDifinitions = {
+                        mysql: [`id INT AUTO_INCREMENT NOT NULL PRIMARY KEY`],
+                        pg: [`id SERIAL NOT NULL PRIMARY KEY`],
+                        sqlite3: ['id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL']
+                      };
+
+                      let idAttributeBuilder = defaultAttributeDifinitions[definition.client];
                       if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
                         idAttributeBuilder = ['id uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY'];
                       } else if (definition.primaryKeyType !== 'integer') {
@@ -603,11 +623,11 @@ module.exports = function(strapi) {
                           const type = getType(attributes[attribute], attribute);
 
                           if (type) {
-                            const changeType = definition.client === 'pg'
+                            const changeType = definition.client === 'pg' || definition.client === 'sqlite3'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} TYPE ${type} USING ${quote}${attribute}${quote}::${type}`
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} `;
 
-                            const changeRequired = definition.client === 'pg'
+                            const changeRequired = definition.client === 'pg' || definition.client === 'sqlite3'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} ${attributes[attribute].required ? 'SET' : 'DROP'} NOT NULL`
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
@@ -1070,6 +1090,10 @@ module.exports = function(strapi) {
         case '_limit':
           result.key = 'limit';
           result.value = parseFloat(value);
+          break;
+        case '_populate':
+          result.key = 'populate';
+          result.value = value;
           break;
         case '_contains':
         case '_containss':

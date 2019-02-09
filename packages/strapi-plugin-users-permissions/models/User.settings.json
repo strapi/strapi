@@ -49,5 +49,6 @@
       "plugin": "users-permissions",
       "configurable": false
     }
-  }
+  },
+  "collectionName": "users-permissions_user"
 }

@@ -74,7 +74,7 @@ npm run setup:build
 
 You can open a new terminal window and go into any folder you want for the next steps.
 ```bash
-cd /.../workspace/
+cd ../workspace/
 ```
 
 The command to generate a project is the same, except you have to add the `--dev` argument at the end of line.
