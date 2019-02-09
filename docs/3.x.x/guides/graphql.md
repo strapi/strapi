@@ -275,9 +275,9 @@ type Query {
 
 // Mutations to create, update or delete a post.
 type Mutation {
-  createProduct(input: createProductInput): createProductPayload!
-  updateProduct(input: updateProductInput): updateProductPayload!
-  deleteProduct(input: deleteProductInput): deleteProductPayload!
+  createPost(input: createPostInput): createPostPayload!
+  updatePost(input: updatePostInput): updatePostPayload!
+  deletePost(input: deletePostInput): deletePostPayload!
 }
 ```
 

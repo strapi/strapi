@@ -15,7 +15,7 @@ module.exports = {
   count: async function (params) {
     return Number(await this
       .where(params.where)
-      .count());
+      .countDocuments());
   },
 
   search: async function (params, populate) { // eslint-disable-line  no-unused-vars
@@ -81,7 +81,7 @@ module.exports = {
 
     return this
       .find({ $or })
-      .count();
+      .countDocuments();
   },
 
   findOne: async function (params, populate, raw = true) {
@@ -150,7 +150,7 @@ module.exports = {
 
   deleteMany: async function (params) {
     return this
-      .remove({
+      .deleteMany({
         [this.primaryKey]: {
           $in: params[this.primaryKey] || params.id
         }

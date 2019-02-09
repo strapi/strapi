@@ -486,7 +486,7 @@ module.exports = {
         const suffix = key.split('_');
         // Mysql stores boolean as 1 or 0
         if (client === 'mysql' && _.get(models, [model, 'attributes', suffix, 'type']) === 'boolean') {
-          formattedValue = value === 'true' ? '1' : '0';
+          formattedValue = value.toString() === 'true' ? '1' : '0';
         }
 
         let type;
