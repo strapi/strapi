@@ -86,7 +86,26 @@ class InputGJSON extends React.Component {
     'pk.eyJ1IjoiYXJrb2Jsb2ciLCJhIjoiY2pmZ2RsNGpqNDE1OTJxazdrNzVxNnl2ZSJ9.Qj1ryjt2_OWUmlTKlcEmtA';
     const map = new mapboxgl.Map({
       container: this.mapContainer, // container id
-      style: 'https://maps.tilehosting.com/styles/basic/style.json?key=FqtjYUJi4HGcp4dogscf', // stylesheet location
+      // style: 'https://maps.tilehosting.com/styles/basic/style.json?key=FqtjYUJi4HGcp4dogscf', // stylesheet location
+      style: {
+        'version': 8,
+        'sources': {
+          'raster-tiles': {
+            'type': 'raster',
+            'tiles': [
+              'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              'http://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            ],
+            'tileSize': 256,
+          },
+        },
+        'layers': [{
+          'id': 'simple-tiles',
+          'type': 'raster',
+          'source': 'raster-tiles',
+          'minzoom': 0,
+          'maxzoom': 22,
+        }]},
     });
 
     // Add zoom, drawing and rotation controls to the map.
@@ -109,9 +128,9 @@ class InputGJSON extends React.Component {
 
     map.scrollZoom.disable();
     map.on('load', () => {
-      map.on('draw.create', (e) => {e.preventDefault(); this.handleChange(draw.getAll());});
-      map.on('draw.update', (e) => {e.preventDefault(); this.handleChange(draw.getAll());});
-      map.on('draw.delete', (e) => {e.preventDefault(); this.handleChange(draw.getAll());});
+      map.on('draw.create', () => {this.handleChange(draw.getAll());});
+      map.on('draw.update', () => { this.handleChange(draw.getAll());});
+      map.on('draw.delete', () => { this.handleChange(draw.getAll());});
 
     });
     this.map = map;
