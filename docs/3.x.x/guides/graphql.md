@@ -197,6 +197,8 @@ You can also apply different parameters to the query to make more complex querie
   - `<field>_gte`: Greater than or equal to.
   - `<field>_contains`: Contains.
   - `<field>_containss`: Contains sensitive.
+  - `<field>_in`: Matches any value in the array of values.
+  - `<field>_nin`: Doesn't match any value in the array of values.
 
 Return the second decade of users which have an email that contains `@strapi.io` ordered by username.
 
@@ -207,6 +209,10 @@ query {
   }) {
     username
     email
+  },
+  books(limit: 10, where: { _id_nin: ["5c4dad1a8f3845222ca88a56", "5c4dad1a8f3845222ca88a57"] }) {
+    _id,
+    title
   }
 }
 ```
