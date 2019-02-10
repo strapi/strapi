@@ -33,8 +33,8 @@ module.exports = (scope, success, error) => {
 
   knex.raw('select 1+1 as result').then(() => {
     const selectQueries = {
-      mysql: 'SELECT tablename FROM pg_tables WHERE schemaname=\'public\'',
-      postgres: 'SELECT * FROM information_schema.tables',
+      postgres: 'SELECT tablename FROM pg_tables WHERE schemaname=\'public\'',
+      mysql: 'SELECT * FROM information_schema.tables',
       sqlite: 'select * from sqlite_master'
     };
 
