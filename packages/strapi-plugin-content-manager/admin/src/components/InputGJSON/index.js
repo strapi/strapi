@@ -82,8 +82,8 @@ class InputGJSON extends React.Component {
 
 
   loadMap() {
-    mapboxgl.accessToken =
-    'pk.eyJ1IjoiYXJrb2Jsb2ciLCJhIjoiY2pmZ2RsNGpqNDE1OTJxazdrNzVxNnl2ZSJ9.Qj1ryjt2_OWUmlTKlcEmtA';
+    // mapboxgl.accessToken =
+    // 'pk.eyJ1IjoiYXJrb2Jsb2ciLCJhIjoiY2pmZ2RsNGpqNDE1OTJxazdrNzVxNnl2ZSJ9.Qj1ryjt2_OWUmlTKlcEmtA';
     const map = new mapboxgl.Map({
       container: this.mapContainer, // container id
       // style: 'https://maps.tilehosting.com/styles/basic/style.json?key=FqtjYUJi4HGcp4dogscf', // stylesheet location
@@ -125,7 +125,7 @@ class InputGJSON extends React.Component {
     map.addControl(draw, 'top-left');
     map.addControl(geocoder);
     map.addControl(new mapboxgl.NavigationControl(), 'top-left');
-
+    // map.addControl(new mapboxgl.AttributionControl());
     map.scrollZoom.disable();
     map.on('load', () => {
       map.on('draw.create', () => {this.handleChange(draw.getAll());});
@@ -186,6 +186,18 @@ class InputGJSON extends React.Component {
               }}
             ref={el => this.mapContainer = el} //eslint-disable-line
             >
+              <div
+                style={{
+                  position:'absolute',
+                  bottom: 0,
+                  right: 0,
+                  zIndex: 20,
+                  backgroundColor: 'rgba(255,255,255,0.5)',
+                  padding:'0.5rem',
+                }}
+              >
+                <a href="https://www.mapbox.com/about/maps/">Mapbox</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors
+              </div>
             </div>
           </div>
           <div style={{backgroundColor:'#e5e5e5', padding:'10px'}}>
