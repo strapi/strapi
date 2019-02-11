@@ -13,6 +13,8 @@
   "components.FilterOptions.FILTER_TYPES._lt": "is lower than",
   "components.FilterOptions.FILTER_TYPES._lte": "is lower than or equal to",
   "components.FilterOptions.FILTER_TYPES._ne": "is not",
+  "components.FilterOptions.FILTER_TYPES._in": "matches any value in the array of values",
+  "components.FilterOptions.FILTER_TYPES._nin": "doesn't match any value in the array of values",
   "components.FilterOptions.button.apply": "Apply",
   "components.FiltersPickWrapper.PluginHeader.actions.apply": "Apply",
   "components.FiltersPickWrapper.PluginHeader.actions.clearAll": "Clear all",
