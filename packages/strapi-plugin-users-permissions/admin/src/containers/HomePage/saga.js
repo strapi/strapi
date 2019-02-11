@@ -89,6 +89,7 @@ export function* defaultSaga() {
   yield fork(takeLatest, DELETE_DATA, dataDelete);
   yield fork(takeLatest, SUBMIT, submitData);
 
+  // TODO: Fix router (Other PR)
   // yield take(LOCATION_CHANGE);
   // yield cancel(loadDataWatcher);
 }
