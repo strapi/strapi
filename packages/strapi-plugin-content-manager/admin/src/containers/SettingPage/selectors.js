@@ -4,11 +4,12 @@
  */
 
 import { createSelector } from 'reselect';
+import pluginId from 'pluginId';
 
 /**
 * Direct selector to the settingPage state domain
 */
-const selectSettingPageDomain = () => state => state.get('content-manager-settingPage');
+const selectSettingPageDomain = () => state => state.get(`${pluginId}-settingPage`);
 
 
 /**

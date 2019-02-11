@@ -23,6 +23,7 @@ import {
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 import cn from 'classnames';
+import pluginId from 'pluginId';
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
@@ -600,8 +601,8 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
-const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId: 'content-manager' });
-const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId: 'content-manager' });
+const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 
 export default compose(
   withReducer,

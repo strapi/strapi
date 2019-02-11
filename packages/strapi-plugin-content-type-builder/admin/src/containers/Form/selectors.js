@@ -1,9 +1,10 @@
 import { createSelector } from 'reselect';
+import pluginId from 'pluginId';
 
 /**
  * Direct selector to the form state domain
  */
-const selectFormDomain = () => state => state.get('content-type-builder-form');
+const selectFormDomain = () => state => state.get(`${pluginId}-form`);
 
 /**
  * Other specific selectors

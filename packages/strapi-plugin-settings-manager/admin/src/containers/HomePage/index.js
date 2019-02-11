@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import pluginId from 'pluginId';
 
 import {
   endsWith,
@@ -562,8 +563,8 @@ HomePage.propTypes = {
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId: 'settings-manager' });
-const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId: 'settings-manager' });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,

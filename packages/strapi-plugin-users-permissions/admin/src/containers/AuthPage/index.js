@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isBoolean, isEmpty, map, replace } from 'lodash';
 import cn from 'classnames';
+import pluginId from 'pluginId';
 
 // Logo
 import LogoStrapi from 'assets/images/logo_strapi.png';
@@ -326,8 +327,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = strapi.injectReducer({ key: 'authPage', reducer, pluginId: 'users-permissions' });
-const withSaga = strapi.injectSaga({ key: 'authPage', saga, pluginId: 'users-permissions' });
+const withReducer = strapi.injectReducer({ key: 'authPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'authPage', saga, pluginId });
 
 export default compose(
   withReducer,

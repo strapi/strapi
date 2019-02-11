@@ -1,9 +1,10 @@
 import { createSelector } from 'reselect';
+import pluginId from 'pluginId';
 
 /**
  * Direct selector to the modelPage state domain
  */
-const selectModelPageDomain = () => state => state.get('content-type-builder-modelPage');
+const selectModelPageDomain = () => state => state.get(`${pluginId}-modelPage`);
 
 /**
  * Other specific selectors

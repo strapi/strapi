@@ -14,6 +14,7 @@ import { DragDropContext } from 'react-dnd';
 import { FormattedMessage } from 'react-intl';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import PropTypes from 'prop-types';
+import pluginId from 'pluginId';
 import {
   beginMove,
   endMove,
@@ -1158,8 +1159,8 @@ const withConnect = connect(
   mapStateToProps,
   mapDispatchToProps,
 );
-const withReducer = strapi.injectReducer({ key: 'settingPage', reducer, pluginId: 'content-manager' });
-const withSaga = strapi.injectSaga({ key: 'settingPage', saga, pluginId: 'content-manager' });
+const withReducer = strapi.injectReducer({ key: 'settingPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'settingPage', saga, pluginId });
 
 export default compose(
   withReducer,

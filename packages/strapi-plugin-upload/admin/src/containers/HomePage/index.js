@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { isEmpty } from 'lodash';
+import pluginId from 'pluginId';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -219,8 +220,8 @@ const mapStateToProps = selectHomePage();
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId: 'upload' });
-const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId: 'upload' });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,

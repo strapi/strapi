@@ -13,6 +13,7 @@ import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { router } from 'app';
+import pluginId from 'pluginId';
 // Global selectors
 import { makeSelectMenu } from 'containers/App/selectors';
 import { makeSelectContentTypeUpdated } from 'containers/Form/selectors';
@@ -353,8 +354,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withSaga = strapi.injectSaga({ key: 'modelPage', saga, pluginId: 'content-type-builder' });
-const withReducer = strapi.injectReducer({ key: 'modelPage', reducer, pluginId: 'content-type-builder' });
+const withSaga = strapi.injectSaga({ key: 'modelPage', saga, pluginId });
+const withReducer = strapi.injectReducer({ key: 'modelPage', reducer, pluginId });
 
 export default compose(
   withReducer,

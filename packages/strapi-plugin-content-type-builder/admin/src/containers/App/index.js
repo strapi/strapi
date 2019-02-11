@@ -12,7 +12,7 @@ import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { pluginId } from 'app';
+import pluginId from 'pluginId';
 
 import HomePage from 'containers/HomePage';
 import ModelPage from 'containers/ModelPage';
@@ -93,10 +93,10 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId: 'content-type-builder' });
-const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId: 'content-type-builder' });
-const withFormReducer = strapi.injectReducer({ key: 'form', reducer: formReducer, pluginId: 'content-type-builder' });
-const withFormSaga = strapi.injectSaga({ key: 'form', saga: formSaga, pluginId: 'content-type-builder' });
+const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId });
+const withFormReducer = strapi.injectReducer({ key: 'form', reducer: formReducer, pluginId });
+const withFormSaga = strapi.injectSaga({ key: 'form', saga: formSaga, pluginId });
 
 export default compose(
   withReducer,

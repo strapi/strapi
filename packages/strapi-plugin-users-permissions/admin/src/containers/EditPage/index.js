@@ -12,6 +12,7 @@ import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isEmpty, isEqual, size } from 'lodash';
 import cn from 'classnames';
+import pluginId from 'pluginId';
 
 // Design
 import BackHeader from 'components/BackHeader';
@@ -323,8 +324,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId: 'users-permissions'});
-const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId: 'users-permissions' });
+const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 
 export default compose(
   withReducer,

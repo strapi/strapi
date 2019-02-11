@@ -5,11 +5,12 @@
  */
 
 import { createSelector } from 'reselect';
+import pluginId from 'pluginId';
 
 /**
 * Direct selector to the listPage state domain
 */
-const selectEditPageDomain = () => state => state.get('content-manager-editPage');
+const selectEditPageDomain = () => state => state.get(`${pluginId}-editPage`);
 
 
 /**

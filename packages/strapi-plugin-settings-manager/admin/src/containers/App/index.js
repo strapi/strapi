@@ -14,7 +14,7 @@ import 'flag-icon-css/css/flag-icon.css';
 import 'react-select/dist/react-select.css';
 import { Switch, Route } from 'react-router-dom';
 import { isEmpty } from 'lodash';
-import { pluginId } from 'app';
+import pluginId from 'pluginId';
 
 import HomePage from 'containers/HomePage';
 
@@ -94,8 +94,8 @@ const mapStateToProps = createStructuredSelector({
 // Wrap the component to inject dispatch and state into it
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId: 'settings-manager' });
-const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId: 'settings-manager' });
+const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId });
 
 export default compose(
   withReducer,

@@ -8,7 +8,7 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 // Utils
-import { pluginId } from 'app';
+import pluginId from 'pluginId';
 // Containers
 import HomePage from 'containers/HomePage';
 import NotFoundPage from 'containers/NotFoundPage';

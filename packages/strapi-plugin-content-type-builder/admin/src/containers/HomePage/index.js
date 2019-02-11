@@ -12,6 +12,7 @@ import { size } from 'lodash';
 import Helmet from 'react-helmet';
 import PropTypes from 'prop-types';
 import { router } from 'app';
+import pluginId from 'pluginId';
 
 import { makeSelectLoading, makeSelectMenu, makeSelectModels } from 'containers/App/selectors';
 import { deleteContentType } from 'containers/App/actions';
@@ -139,8 +140,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId: 'content-type-builder' });
-const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId: 'content-type-builder' });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,

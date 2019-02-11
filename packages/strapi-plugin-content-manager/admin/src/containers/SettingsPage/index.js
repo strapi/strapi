@@ -10,6 +10,7 @@ import { createStructuredSelector } from 'reselect';
 import cn from 'classnames';
 import { get, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
+import pluginId from 'pluginId';
 import { onChange, onSubmit, onReset } from 'containers/App/actions';
 import { makeSelectModifiedSchema, makeSelectSubmitSuccess } from 'containers/App/selectors';
 import Input from 'components/InputsIndex';
@@ -209,8 +210,8 @@ const mapStateToProps = createStructuredSelector({
   submitSuccess: makeSelectSubmitSuccess(),
 });
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = strapi.injectReducer({ key: 'settingsPage', reducer, pluginId: 'content-manager' });
-const withSaga = strapi.injectSaga({ key: 'settingsPage', saga, pluginId: 'content-manager' });
+const withReducer = strapi.injectReducer({ key: 'settingsPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'settingsPage', saga, pluginId });
 
 export default compose(
   withReducer,

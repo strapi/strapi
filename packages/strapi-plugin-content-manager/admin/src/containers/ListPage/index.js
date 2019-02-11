@@ -13,6 +13,7 @@ import { capitalize, findIndex, get, isUndefined, toInteger, upperFirst } from '
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
+import pluginId from 'pluginId';
 // App selectors
 import { makeSelectSchema } from 'containers/App/selectors';
 // You can find these components in either
@@ -679,7 +680,7 @@ const mapStateToProps = createStructuredSelector({
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = strapi.injectReducer({ key: 'listPage', reducer, pluginId: 'content-manager' });
-const withSaga = strapi.injectSaga({ key: 'listPage', saga, pluginId: 'content-manager' });
+const withReducer = strapi.injectReducer({ key: 'listPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'listPage', saga, pluginId });
 
 export default compose(withReducer, withSaga, withConnect)(ListPage);
