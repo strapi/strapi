@@ -22,8 +22,6 @@ import Input from 'components/InputsIndex';
 import { pluginId } from 'app';
 // Utils
 import auth from 'utils/auth';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import openWithNewTab from 'utils/openWithNewTab';
 // Actions
 import {
@@ -245,8 +243,8 @@ const withConnect = connect(
   mapStateToProps,
   mapDispatchToProps,
 );
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId: 'documentation' });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId: 'documentation' });
 
 export default compose(
   withReducer,
