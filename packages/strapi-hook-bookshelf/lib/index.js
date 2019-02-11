@@ -1107,7 +1107,14 @@ module.exports = function(strapi) {
           result.key = `where.${key}`;
           result.value = {
             symbol: 'IN',
-            value,
+            value: _.castArray(value),
+          };
+          break;
+        case '_nin':
+          result.key = `where.${key}`;
+          result.value = {
+            symbol: 'NOT IN',
+            value: _.castArray(value),
           };
           break;
         default:
