@@ -4,4 +4,6 @@
  *
  */
 
-export const DEFAULT_ACTION = 'HomePage/DEFAULT_ACTION';
+import pluginId from 'pluginId';
+
+export const DEFAULT_ACTION = `${pluginId}/HomePage/DEFAULT_ACTION`;
