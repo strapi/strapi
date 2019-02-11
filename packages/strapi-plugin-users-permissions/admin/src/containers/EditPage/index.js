@@ -23,9 +23,6 @@ import PluginHeader from 'components/PluginHeader';
 import Plugins from 'components/Plugins';
 import Policies from 'components/Policies';
 
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
-
 // Actions
 import {
   addUser,
@@ -326,16 +323,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-/* Remove this line if the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
-const withReducer = injectReducer({ key: 'editPage', reducer });
-
-/* Remove the line below the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
-const withSaga = injectSaga({ key: 'editPage', saga });
+const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId: 'users-permissions'});
+const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId: 'users-permissions' });
 
 export default compose(
   withReducer,

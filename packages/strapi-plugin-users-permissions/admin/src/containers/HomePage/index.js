@@ -19,10 +19,6 @@ import List from 'components/List';
 import PluginHeader from 'components/PluginHeader';
 import PopUpForm from 'components/PopUpForm';
 
-// Utils
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
-
 // Selectors
 import selectHomePage from './selectors';
 
@@ -280,8 +276,8 @@ const mapStateToProps = selectHomePage();
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId: 'users-permissions' });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId: 'users-permissions' });
 
 export default compose(
   withReducer,

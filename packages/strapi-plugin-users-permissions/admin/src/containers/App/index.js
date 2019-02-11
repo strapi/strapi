@@ -7,10 +7,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
+// import { connect } from 'react-redux';
 import { Switch, Route } from 'react-router-dom';
-import { bindActionCreators, compose } from 'redux';
+// import { bindActionCreators, compose } from 'redux';
 
 // Utils
 import { pluginId } from 'app';
@@ -59,18 +58,17 @@ App.propTypes = {
   location: PropTypes.object.isRequired,
 };
 
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {},
-    dispatch,
-  );
-}
-
-const mapStateToProps = createStructuredSelector({});
+// export function mapDispatchToProps(dispatch) {
+//   return bindActionCreators(
+//     {},
+//     dispatch,
+//   );
+// }
 
 // Wrap the component to inject dispatch and state into it
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+// const withConnect = connect(null, mapDispatchToProps);
+export default App;
 
-export default compose(
-  withConnect,
-)(App);
+// export default compose(
+//   withConnect,
+// )(App);

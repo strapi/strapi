@@ -11,9 +11,9 @@ import './public-path.js'; // eslint-disable-line import/extensions
 
 import React from 'react';
 import Loadable from 'react-loadable';
-import { Provider } from 'react-redux';
+// import { Provider } from 'react-redux';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import configureStore from './store';
+// import configureStore from './store';
 import { translationMessages } from './i18n';
 
 
@@ -61,22 +61,23 @@ const apiUrl = `${strapi.backendURL}/${pluginId}`;
 const router = strapi.router;
 
 // Create redux store with Strapi admin history
-const store = configureStore({}, strapi.router, pluginName);
+// const store = configureStore({}, strapi.router, pluginName);
+const store = strapi.store;
 
 // Define the plugin root component
 function Comp(props) {
   return (
-    <Provider store={store}>
-      <LoadableApp {...props} />
-    </Provider>
+    // <Provider store={store}>
+    <LoadableApp {...props} />
+    // </Provider>
   );
 }
 
-if (window.Cypress) {
-  window.__store__ = Object.assign(window.__store__ || {}, {
-    [pluginId]: store,
-  });
-}
+// if (window.Cypress) {
+//   window.__store__ = Object.assign(window.__store__ || {}, {
+//     [pluginId]: store,
+//   });
+// }
 
 // Hot reloadable translation json files
 if (module.hot) {

@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 /**
  * Direct selector to the editPage state domain
  */
-const selectEditPageDomain = () => (state) => state.get('editPage');
+const selectEditPageDomain = () => (state) => state.get('users-permissions-editPage');
 
 /**
  * Default selector used by EditPage
