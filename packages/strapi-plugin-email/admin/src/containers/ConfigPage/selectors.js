@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 /**
  * Direct selector to the configPage state domain
  */
-const selectConfigPageDomain = () => state => state.get('configPage');
+const selectConfigPageDomain = () => state => state.get('email-configPage');
 
 /**
  * Default selector used by ConfigPage
