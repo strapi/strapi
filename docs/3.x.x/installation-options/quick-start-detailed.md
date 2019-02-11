@@ -4,7 +4,7 @@ We have created an Quick Start installation which will set-up, configure and get
 
 This quick start (detailed version) is written for developers who prefer more detailed explanations when learning a new CMS. A more intermediate to advanced version is written and can be found at [Quick Start](/3.x.x/getting-started/quick-start.html) in the [Getting Started](/3.x.x/getting-started/quick-start.html) section.
 
-(You should have already completed the steps to install Strapi and the requirements from [Installation Requirements](/3.x.x/getting-started/install-requirements.html). These steps continue after ensuring nodejs, NPM and strapi are all properly installed.)
+(You should have already completed the steps to install Strapi and the requirements from [Installation Requirements](/3.x.x/getting-started/install-requirements.html). These steps continue after [ensuring nodejs, NPM and strapi are all properly installed](/3.x.x/getting-started/install-requirements.html#check-installation)).)
 
 This page explains how to create a new project in Strapi. Each step from creating a new project to creating content types ready to be consumed is covered. ([Check out our video tutorial](https://www.youtube.com/watch?v=yMl5IcFHA74)).
 
@@ -43,8 +43,20 @@ str@pi:~/Desktop/Strapi/Projects$ strapi new my-project --quickstart
 ```
 
 ::: warning NOTE
+You can replace the "my-project" project name with any name you want.
+
+:::
+
+::: warning NOTE
 
 When you create a new Quick Start project in Strapi, you will download all the node modules, the Strapi files necessary and the Strapi plugin files. THIS STEP CAN TAKE SEVERAL MINUTES DEPENDING ON YOUR INTERNET CONNECTION SPEED. Please wait for the process to complete before cancelling or trying to continue.
+
+:::
+
+::: warning NOTE
+You can replace the "my-project" project name with any name you want.
+
+Quick start will install Strapi using a SQLite database. ([SQLite](https://www.sqlite.org/index.html) is likely used more than all other database engines combined.)
 
 :::
 
@@ -88,15 +100,6 @@ This will open your default browser to the Welcome page for creating an admin us
 
 ![Strapi Welcome Page for creating admin user](../assets/quick-start-detailed/strapi-welcome-screen.jpg 'Strapi Welcome Page for creating admin user')
 
-::: warning NOTE
-You can replace the "my-project" project name with any name you want.
-
----
-
-Quick start will install Strapi using a SQLite database. ([SQLite](https://www.sqlite.org/index.html) is likely used more than all other database engines combined.)
-
-:::
-
 ---
 
 ## 2. Create an admin user
@@ -129,124 +132,124 @@ From here you can add and edit users.
 
 ---
 
-Now let's see how to [create a Content Type](#_3-create-a-content-type). Click on the **Strapi** logo (top left corner) to return the main administration panel.
+Now let's see how to [create a Content Type](#_3-create-a-content-type). Next, click on the **Strapi** logo (top left corner) to return the main administration panel.
 
 ---
 
 ## 3. Create a Content Type
 
-At this point, your project is empty. You need to create a Content Type. We will use the **Content Type Builder** plugin.
+At this point, your project is empty. You need to create a **Content Type**. We will use the **Content Type Builder** plugin.
 
 Go to the **Content Type Builder** plugin, located in the left menu: **PLUGINS** --> **Content Type Builder**:
 
 ![Choose Content Type Item Location](../assets/quick-start-detailed/AfterRegistrationScreenAdminPanelChooseContentType.jpg 'Choose Content Type Item Location')
 
-We will create two content types. We will create a content type for **Restaurant** and **Category**.
+We will create two content types. We will create a content type called **"Restaurant"** and one called **"Category"**.
 
 ![Create Content Type Screen](../assets/quick-start-detailed/CreateContentTypeScreen.jpg 'Create Content Type Screen')
 
 ::: warning NOTE
 
-Content Type _name_ is always **singular**. For example, **restaurant** not restaurants. For example, **catgeory** not categories.
+Content Type _name_ is always **singular**. For example, **restaurant** not restaurants. For example, **category** not categories.
 
 :::
 
-### The "Restaurant" Content Type
+### The Restaurant Content Type
 
-The "Restaurant" Content Type will have a **String Field** named **"Name"** for the restaurant name, and a **Text field** (with a WYSIWYG editor) named "Description" for the restaurant description.
+The Restaurant Content Type will have a **String** field named **Name** for the restaurant name, and a **Text** field (with a WYSIWYG editor) named "Description" for the restaurant description.
 
-Let's now add a content type. Click the **"Add Content Type"** button.
+Let's now add a content type. Click the **"+ Add Content Type"** button.
 
 ![Add Content Type Button](../assets/quick-start-detailed/AddContentTypeButton.jpg 'Add Content Type Button')
 
-Now enter a name for your New Content Type (we will call this one **"restaurant"**), and write a **"Description"**. We will write **"Recommended Restaurants"** in the description.
+Now enter a "Name" for your New Content Type (we will call this one **"restaurant"**), and below write a "description". We will write **"Recommended Restaurants"** for the description.
 
 ::: warning NOTE
 
-This description and name should be clear so you can tell it apart from other content types you may add later.
+This **"name"** should be clear so you can tell it apart from other content types you may add later. This will be what you see listed in the backend panel.
 :::
 
 Then click the **Save** button.
 
 ![Restaurant Name and Descriptions](../assets/quick-start-detailed/RestaurantNameAndDescription.jpg 'Restaurant Name and Descriptions')
 
-Now you are ready to add the content type fields. We will add a **String Field** for the Name and a **Text Field** for a short Restaurant description. Click on the **"Add New Field"** button.
+Now you are ready to add the content type fields. We will add a **String** field for the Name and a **Text** field for a short Restaurant description. Click on the **"+ Add New Field"** button.
 
 ![Add Restaurant Fields](../assets/quick-start-detailed/restaurantAddFields.jpg 'Add Restaurant Fields')
 
-Next we will click on the **"String Field"**.
+Next we will click on the **String** field.
 
 ![String Field](../assets/quick-start-detailed/restaurantStringAndText.jpg 'String Fields')
 
-In the **"Base Settings"** tab, in the **"Name"** field, type **"Name"**. This will be the name of the restaurant.
+You should be under the **BASE SETTINGS** tab, in the **Name** field, type **"Name"**. This will be the name of the restaurant.
 
 ![Input Restaurant Name Field](../assets/quick-start-detailed/saveRestaurantNameField.jpg 'Input Restaurant Name Field')
 
-Now, click on the **"Advanced Settings"** tab, check **"Required field"** and **"Unique"**. This field is required for each restaurant and is not optional. Also, we want each restaurant to have a unique name, so we check the Unique field box. And then click the **"Continue"** button.
+Now, click on the **ADVANCED SETTINGS** tab, check **Required field** and **Unique field**. This field is required for each restaurant and is not optional. Also, we want each restaurant to have a unique name, so we check the **Unique field** box. And then click the **Continue** button.
 
 ![Advanced Settings String Field](../assets/quick-start-detailed/restaurantAdvancedSettingsStringField.jpg 'Advanced Settings String Field')
 
-We are now ready to add the second field, **"Text"** for the restaurant description. Click the **"Add New Field"** button.
+We are now ready to add the second field, **Text** for the restaurant description. Click the **"+ Add New Field"** button.
 
 ![Add new restaurant field](../assets/quick-start-detailed/restaurantAddNewField.jpg 'Add new restaurant field')
 
-From here, click the **"Text Field"**.
+From here, click the **Text** field.
 
 ![Text Fields](../assets/quick-start-detailed/AddTextFieldRestaurant.jpg 'Text Fields')
 
-In the **"Base Settings"** tab, in the **"Name"** field, type **"Description"**. This will be the description of the restaurant.
+You should be under the **BASE SETTINGS** tab, in the **Name** field, type **"Description"**. This will be the description of the restaurant.
 
 ![Input Restaurant Description Field](../assets/quick-start-detailed/restaurantTextFieldBaseSettings.jpg 'Input Restaurant Description Field')
 
-Now, click on the **"Advanced Settings"** tab, check **"Display as a WYSIWYG"**. This field will provide a rich text editor. And then click the **"Continue"** button.
+Now, click on the **ADVANCED SETTINGS** tab, check **"Display as a WYSIWYG"**. This field will provide a rich text editor. And then click the **Continue** button.
 
 ![Advanced Settings Text Field](../assets/quick-start-detailed/restaurantTextFieldAdvancedSettings.jpg 'Advanced Settings Text Field')
 
-Lastly, we will save this Content Type. Click the **"Save"** button.
+Lastly, we will save this Content Type. Click the **Save** button.
 
 ![Save Restaurant Content Type](../assets/quick-start-detailed/saveRestaurantContentType.jpg 'Save Restaurant Content Type')
 
-Wait for Strapi to restart, and then we will be able to create the next **"Category"** content type.
+Wait for Strapi to restart, and then we will be able to create the next **Category** content type.
 
 ![Wait for Strapi Restart](../assets/quick-start-detailed/waitForRestart.jpg 'Wait for Strapi Restart')
 
-### The "Category" Content Type
+### The Category Content Type
 
-The "Category" Content Type will have a **String field** named **"Category"** for categories assigned to restaurants, and a **Relation field** with a **Many to Many** relationship.
+The Category Content Type will have a **String** field named **"Category"** for categories assigned to restaurants, and a **Relation field** with a **Many to Many** relationship.
 
 Let's now add this second content type. Click the **+ Add Content Type** menu item.
 
 ![Add Content Type Menu Item](../assets/quick-start-detailed/AddContentTypeMenuItem.jpg 'Add Content Type Menu Item')
 
-Now enter a name for this New Content Type (we will call this one **"category"**), and write a Description. We will write **"Restaurant Categories"** in the description. Then click the **Save** button.
+Now enter a name for this New Content Type (we will call this one **"category"**), and write a Description. We will write **"Restaurant Categories"** for the description. Then click the **Save** button.
 
 ![Category Content Type Name and Description](../assets/quick-start-detailed/categoryNameAndDescription.jpg 'Category Content Type Name and Description')
 
-Now you are ready to add the content type fields. We will add a **String Field** for the Name and a **Relation Field** for creating a **Many to Many** relation between the Category Content Type and Restaurant Content Type. Click on the **"Add New Field"** button.
+Now you are ready to add the content type fields. We will add a **String** field for the Name and a **Relation Field** for creating a **Many to Many** relation between the Category Content Type and Restaurant Content Type. Click on the **"+ Add New Field"** button.
 
 ![Category Add New Field Button](../assets/quick-start-detailed/categoryAddNewField.jpg 'Category Add New Field Button')
 
-Next we will click on the **"String Field"**.
+Next we will click on the **String** field.
 
 ![Category add String Field](../assets/quick-start-detailed/categoryAddStringField.jpg 'Category add String Field')
 
-In the **"Base Settings"** tab, in the **"Name"** field, type **"Name"**. This will be the name of the category.
+You should be under the **BASE SETTINGS** tab, in the **Name** field, type **"Name"**. This will be the name of the category.
 
 ![Category String Field Name](../assets/quick-start-detailed/categoryStringNameField.jpg 'Category String Field Name')
 
-Now, click on the **"Advanced Settings"** tab, check **"Required field"** and **"Unique"**. This field is required for each category and is not optional. Also, we want each category to have a unique name, so we check the Unique field box. And then click the **"Continue"** button.
+Now, click on the **ADVANCED SETTINGS** tab, check **Required field** and **Unique field**. This field is required for each category and is not optional. Also, we want each category to have a unique name, so we check the **Unique field** box. And then click the **Continue** button.
 
 ![Category String Field Advanced Settings](../assets/quick-start-detailed/categoryStringAdvancedSettings.jpg 'Category String Field Advanced Settings')
 
-We are now ready to add the second field, **"Relation"** for the **Many to Many relation** setting between Categories and Restaurants. Click the **"Add New Field"** button.
+We are now ready to add the second field, the **Relation** field for the **Many to Many relation** setting between Categories and Restaurants. Click the **"+ Add New Field"** button.
 
 ![Category Add New Field for Relation Field](../assets/quick-start-detailed/categoryAddClickNewFieldRelation.jpg 'Category Add New Field for Relation Field')
 
-From here, click the **"Relation"** field.
+From here, click the **Relation** field.
 
 ![Category Click Relation Field](../assets/quick-start-detailed/clickRelationFieldCategory.jpg 'Category Click Relation Field')
 
-This will bring you to the following screen. We will change two elements in this field.
+This will bring you to the **Add New Relation** screen. We will change two elements on this page for the **Relation** field.
 
 ![Add new Relation Field screen](../assets/quick-start-detailed/addNewRelationScreen.jpg 'Add new Relation Field screen')
 
@@ -254,11 +257,11 @@ The first element to change is **Permission (Users-Permissions)** to **Restauran
 
 ![Change Permission to Restaurant](../assets/quick-start-detailed/categoryChangePermissionToRestaurant.jpg 'Change Permission to Restaurant')
 
-The second element to change is to click the **Many to Many** icon (in the middle). It should now read, **"Categories has and belongs to many Restaurants"**. Then click the **"Continue"** button.
+The second element to change is to click the **Many to Many** icon (in the middle). It should now read, **"Categories has and belongs to many Restaurants"**. Then click the **Continue** button.
 
 ![Category Has Many To Many Relation](../assets/quick-start-detailed/categoryHasManyToMany.jpg 'Category Has Many To Many Relation')
 
-Lastly, we will save this Content Type. Click the **"Save"** button.
+Lastly, we will save this Content Type. Click the **Save** button.
 
 ![Now Save Category](../assets/quick-start-detailed/nowSaveCategory.jpg 'Now Save Category')
 
@@ -266,11 +269,13 @@ Wait for Strapi to restart.
 
 ![Now Wait for Strapi to Restart](../assets/quick-start-detailed/saveCategoryWaiting.jpg 'Now Wait for Strapi to Restart')
 
-Verify in the left menu that you see **"Categories"**, **"Restaurants"** and **"Users"** under **"CONTENT TYPES"**.
+Verify in the left menu under **CONTENT TYPES**, that you see **Categories**, **Restaurants** and **Users**.
 
 ![Verify Content Types](../assets/quick-start-detailed/verifyContentTypes.jpg 'Verify Content Types')
 
 We are now ready to [manage and add data to the Content Types](quick-start-detailed.html#_4-manage-and-add-data-to-content-type) we just created.
+
+Next, click on the **Strapi** logo (top left corner) to return the main administration panel.
 
 ::: warning NOTE
 See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for more information on how to add Content Types the hacker way.
@@ -278,7 +283,7 @@ See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for more informati
 
 ### Files structure
 
-A new directory has been created in the `./api` folder of your application which contains all the needed files related to your `Restaurant` and `Category` Content Types: routes, controllers, services and models. Take a look at the [API structure documentation](../concepts/concepts.md#files-structure) for more information.
+A new directory has been created in the `./api` folder of your application which contains all the needed files related to your `restaurant` and `category` Content Types: routes, controllers, services and models. Take a look at the [API structure documentation](../concepts/concepts.md#files-structure) for more information.
 
 ---
 
@@ -286,13 +291,15 @@ A new directory has been created in the `./api` folder of your application which
 
 After creating [the Content Types](#_3-create-a-content-type), we now need to manage and add data/content to the new Content Types.
 
-We will create a complete entry of a restaurant called, **"Strapi Restaurant"** with a description saying, **"Strapi restaurant is a cosy restaurant delivering one of the very fastest and nicest dining experiences in the world, combining nods to tradition with fierce modernity, warmth with daring."**. We will then assign two Categories, **"Italian"** and **"Contemporary"** to this restaurant.
+We will create an entry of a restaurant called, **"Strapi Restaurant"** with a description saying, **"Strapi restaurant is a cosy restaurant delivering one of the very fastest and nicest dining experiences in the world, combining nods to tradition with fierce modernity, warmth with daring."**.
 
-Click on **"Restaurants"** under the **CONTENT TYPES** menu in order to **"Add New Restaurant"**.
+We will then assign two Categories, **"Italian"** and **"Contemporary"** to this restaurant.
+
+Click on **Restaurants** under the **CONTENT TYPES** menu in order to **Add New Restaurant**.
 
 ![Add Restaurant to Content Type](../assets/quick-start-detailed/AddStrapiRestaurant.jpg 'Add Restaurant to Content Type')
 
-Next click on the **"Add New Restaurant"** button (in the top right corner). GO ahead and add **"Strapi Restaurant"** to the **Name** field, and add the content (above) to the **Description** field. Then press the **"Save"** button (in the top right corner).
+Next click on the **+ Add New Restaurant** button (in the top right corner). Go ahead and type **"Strapi Restaurant"** in the **Name** field, and type the content (above) into the **Description** field. Then press the **Save** button (in the top right corner).
 
 ![Add Restaurant Name and Description](../assets/quick-start-detailed/addTheRestaurantData.jpg 'Add Restaurant Name and Description')
 
@@ -300,35 +307,45 @@ When it is properly saved, you will see your restaurant listed in the entries. F
 
 ![Restaurant is now listed](../assets/quick-start-detailed/ListedRestaurant.jpg 'Restaurant is now listed')
 
-We have **NOT** added a **"Category"** to the **Restaurant** we created. We first have to add the actual Category items to the **Categories** content types. Click on **"Categories"** under the **CONTENT TYPES** menu on the left.
+We have **NOT** added a **Category** to the **Restaurant** we created. We first have to add the actual Category items to the **Categories** content type.
+
+We will next assign two Categories, **"Italian"** and **"Contemporary"** to this restaurant.
+
+Click on **Categories** under the **CONTENT TYPES** menu on the left.
 
 ![Category Add Content Type Screen](../assets/quick-start-detailed/categoryContentTypeScreen.jpg 'Category Add Content Type Screen')
 
-Now we will add each of the catgeories. First, let's add **"Italian"**. You will see **"Restaurants"** to the right. Select **"Strapi Restaurant"** to add this category to the restaurant. And then press the **"Save"** button.
+Now we will add each of the catgeories. Click the **+ Add New Category** button to add the first category **Italian**. Type **"Italian"** into the **Name** field. Next, you will see **Restaurants (0)** to the right. Select **Strapi Restaurant** to add this category to the restaurant.
+
+After selecting, **Restaurants (0)** to the right, will change to **Restaurants (1)** (see below). And then press the **Save** button.
 
 ![Add Italian category to Restaurant](../assets/quick-start-detailed/addItalianCategoryToRestaurant.jpg 'Add Italian category to Restaurant')
 
-You now see the Category listed. Click the **"Add New Category"** to add the second category **"Contemporary"**.
+You now see the Category listed. Click the **+ Add New Category** button to add the second category **"Contemporary"**.
 
 ![Listed Italian Category](../assets/quick-start-detailed/listedItalianCategory.jpg 'Listed Italian Category')
 
-Now let's add **"Contemporary"**. You will see **"Restaurants"** to the right. Select **"Strapi Restaurant"** to add this category to the restaurant. And then press the **"Save"** button.
+Now let's add **Contemporary**. Type **"Contemporary"** into the **Name** field. You will see **Restaurants (0)** to the right. You will see **Restaurants** to the right. Select **Strapi Restaurant** to add this category to the restaurant.
+
+After selecting, **Restaurants (0)** to the right, will change to **Restaurants (1)** (see below). And then press the **Save** button.
 
 ![Add Contemporary category to Restaurant](../assets/quick-start-detailed/addContemporaryCategoryToRestaurant.jpg 'Add Contemporary category to Restaurant')
 
-You return to the **"Category"** Content Type page. You see both categories listed. Both have been assigned to the **"Restaurant"** we created earlier.
+You return to the **Category** Content Type page. You see both categories listed. Both have been assigned to the **Restaurant** we created earlier.
 
 ![Both categories listed](../assets/quick-start-detailed/categoriesListed.jpg 'Both categories listed')
 
 ::: warning NOTE
 
-If you want to add Categories directly from the **"Restaurants"** Content Type, you simply click on the Restaurant and add, edit or change **EXISTING** categories. Otherwise, you can create and add new **"Categories"** from the **"Category Content Type"** as we did above.
+If you want to add Categories directly from the **Restaurants** Content Type, you simply click on the Restaurant and add, edit or change **EXISTING** categories. Otherwise, you can create and add new **Categories** from the **Category Content Type** as we did above.
 
 ![Select Category from Restaurant](../assets/quick-start-detailed/selectCategoryFromRestaurant.jpg 'Select Category from Restaurant')
 
 :::
 
-The next steps involve [setting roles and permissions](quick-start-detailed.html#_5-set-roles-and-permissions) for these content types. Let's do that. Click on the Strapi Logo to return to the main administration panel.
+The next steps involve [setting roles and permissions](quick-start-detailed.html#_5-set-roles-and-permissions) for these content types. Let's do that.
+
+Click on the Strapi Logo to return to the main administration panel.
 
 ![Main Admin Panel](../assets/quick-start-detailed/mainAdminPanel.jpg 'Main Admin Panel')
 
@@ -336,13 +353,15 @@ The next steps involve [setting roles and permissions](quick-start-detailed.html
 
 ## 5. Set roles and permissions
 
-By default, Strapi publishes all Content Types with restricted permissions. Which means you have to explicitly give permissions to each Content Type you create. We are going to give **"Public"** (any web browser with the correct link) access to the **"Restaurant"** Content Type.
+By default, Strapi publishes all Content Types with restricted permissions. Which means you have to explicitly give permissions to each Content Type you create. We are going to give **Public** (any web browser with the correct link) access to the **Restaurant** Content Type.
 
-Locate and click on the **"Roles & Permission"** menu item under **"PLUGINS"** on the left menu. (The **"Roles & Permission"** plugin can accomplish many tasks related to permissions. For now we will focus on the **"Public"** role.) Next, click on the **pencil** edit icon to the right of the **"Public"** Role.
+Locate and click on the **Roles & Permission** menu item under **PLUGINS** on the left menu. (The **Roles & Permission** plugin can accomplish many tasks related to permissions. For now we will focus on the **Public** role.)
+
+Next, click on the **pencil** edit icon to the right of the **Public** Role.
 
 ![Roles and Permissions Panel](../assets/quick-start-detailed/RolesAndPermissionsPanel.jpg 'Roles and Permissions Panel')
 
-From here, scroll down under **"Permissions"** and find **"Restaurant"**. Click the checkbox next to **find**. To the right, you will see the URL route. It should say, `/restaurants"`. Scroll back to the top, and click the **"Save"** button.
+From here, scroll down under **Permissions** and find **Restaurant**. Click the checkbox next to **find**. To the right, you will see the URL route. It should say, `/restaurants"`. Scroll back to the top, and click the **Save** button.
 
 ![Check Find for Restaurant](../assets/quick-start-detailed/rolesFindAndRoute.jpg 'Check Find for Restaurant')
 
@@ -351,6 +370,8 @@ You are returned to the **Roles and Permission** Panel.
 ![Roles and Permissions Panel](../assets/quick-start-detailed/RolesAndPermissionsPanel.jpg 'Roles and Permissions Panel')
 
 We are now ready to [Consume the Content Type API](quick-start-detailed.html#_6-consume-the-content-type-api).
+
+Click on the Strapi Logo to return to the main administration panel.
 
 ---
 
