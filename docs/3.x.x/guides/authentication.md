@@ -1,19 +1,48 @@
 # Authentication
 
-::: warning
-This feature requires the Users & Permissions plugin (installed by default).
-:::
+This Authentication API requires the Users & Permissions plugin which comes with Strapi, installed by default.
+
+## Token usage
+
+A jwt token may be used for making permission-restricted API requests. To make an API request as a user, place the jwt token into an `Authorization` header of the GET request. A request without a token, will assume the `guest` role permissions by default. Modify the permissions of each user's role in admin dashboard. Authentication failures return a 401 (unauthorized) error.
+
+#### Usage
+
+- The `token` variable is the `data.jwt` received when login in or registering.
+
+```js
+import axios from 'axios';
+
+const token = 'YOUR_TOKEN_HERE';
+
+// Request API.
+axios
+  .get('http://localhost:1337/posts', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+  .then(response => {
+    // Handle success.
+    console.log('Data: ', response.data);
+  })
+  .catch(error => {
+    // Handle error.
+    console.log('An error occurred:', error);
+  });
+```
 
 ## Registration
 
-This route lets you create new users.
+Creates a new user in the database with a default role as 'guest'.  
 
 #### Usage
 
 ```js
 import axios from 'axios';
 
-// Request API.
+// Request API. 
+// Add your own code here to customize or restrict how the public can register new users.
 axios
   .post('http://localhost:1337/auth/local/register', {
     username: 'Strapi user',
@@ -34,7 +63,7 @@ axios
 
 ## Login
 
-This route lets you login your users by getting an authentication token.
+Submit the user's identifier and password credentials for authentication. When the authentication is successful, the response data returned will have the users information along with a jwt authentication token.
 
 #### Local
 
@@ -76,12 +105,12 @@ Strapi comes with the following providers:
 
 ---
 
-To use the providers authentication, set your credentials in the admin interface (Plugin Users & Permissions > Providers).
+Set your providers credentials in the admin interface (Plugin Users & Permissions > Providers).
 Then update and enable the provider you want use.
 
-Redirect your user to: `GET /connect/:provider`. eg: `GET /connect/facebook`
+To authenticate the user, use the GET method to request the url, `/connect/:provider`. eg: `GET /connect/facebook`
 
-After his approval, he will be redirected to `/auth/:provider/callback`. The `jwt` and `user` data will be available in the body response.
+After authentication, create and customize your own redirect callback at `/auth/:provider/callback`. The `jwt` and `user` data will be available in a .json response.
 
 Response payload:
 
@@ -90,36 +119,6 @@ Response payload:
   "user": {},
   "jwt": ""
 }
-```
-
-## Token usage
-
-By default, each API request is identified as `guest` role (see permissions of `guest`'s role in your admin dashboard). To make a request as a user, you have to set the `Authorization` token in your request headers. You receive a 401 error if you are not authorized to make this request or if your authorization header is not correct.
-
-#### Usage
-
-- The `token` variable is the `data.jwt` received when login in or registering.
-
-```js
-import axios from 'axios';
-
-const token = 'YOUR_TOKEN_HERE';
-
-// Request API.
-axios
-  .get('http://localhost:1337/posts', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-  .then(response => {
-    // Handle success.
-    console.log('Data: ', response.data);
-  })
-  .catch(error => {
-    // Handle error.
-    console.log('An error occurred:', error);
-  });
 ```
 
 ## Forgotten password
@@ -220,18 +219,15 @@ packages/strapi-plugin-users-permissions/admin/src/translations/en.json
 We will go step by step.
 
 ### Configure your Provider Request
-First, we need to configure our new provider onto `Provider.js` file.
+Configure the new provider in the `Provider.js` file at the `getProfile` function.
 
-Jump onto the `getProfile` function, you will see the list of currently available providers in the form of a `switch...case`.
-
-As you can see, `getProfile` take three params:
+The `getProfile` takes three params:
 
 1. provider :: The name of the used provider as a string.
 2. query :: The query is the result of the provider callback.
 3. callback :: The callback function who will continue the internal Strapi login logic.
 
-Let's take the `discord` one as an example since it's not the easier, it should cover most of the case you 
-may encounter trying to implement your own provider.
+Here is an example that uses the `discord` provider.
 
 #### Configure your oauth generic information
 
@@ -259,14 +255,16 @@ may encounter trying to implement your own provider.
     }
 ```
 
-So here, you can see that we use a module called `Purest`. This module gives us with a generic way to interact 
-with the REST API.
+This code creates a `Purest` object that gives us a generic way to interact with the provider's REST API.
 
-To understand each value usage, and the templating syntax, I invite you to read the [Official Purest Documentation](https://github.com/simov/purest/tree/2.x)
+For more specs on using the `Purest` module, please refer to the [Official Purest Documentation](https://github.com/simov/purest/tree/2.x)
 
 You may also want to take a look onto the numerous already made configurations [here](https://github.com/simov/purest-providers/blob/master/config/providers.json).
 
-#### Retrieve your user informations:
+#### Retrieve your user's information:
+
+For our discord provider it will look like:
+
 ```js
       discord.query().get('users/@me').auth(access_token).request((err, res, body) => {
         if (err) {
@@ -300,9 +298,9 @@ to retrieve your user from the database and log you in.
 Now, we need to configure our 'model' for our new provider. That way, our settings can be stored in the database, and 
 managed from the admin panel.
 
-Into: `packages/strapi-plugin-users-permissions/config/functions/bootstrap.js`
+Open the file `packages/strapi-plugin-users-permissions/config/functions/bootstrap.js`
 
-Simply add the fields your provider need into the `grantConfig` object.
+Add the fields your provider needs into the `grantConfig` object.
 For our discord provider it will look like:
 
 ```js
@@ -319,31 +317,29 @@ For our discord provider it will look like:
     },
 ```
 
-You have already done the hard part, now, we simply need to make our new provider available from the front 
-side of our application. So let's do it!
-
 <!-- #### Tests -->
 <!-- TODO Add documentation about how to configure unit test for the new provider -->
 
 ### Configure frontend for your new provider
 
-First, let's edit: `packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js`
-As for backend, we have a `switch...case` where we need to put our new provider info.
+To make the new provider available on the front end of the application, 
+edit `packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js`
+Add the new provider info. For our discord provider it will look like:
 
 ```js
       case 'discord':
         return `${strapi.backendURL}/connect/discord/callback`;
 ```
 
-Add the corresponding translation into: `packages/strapi-plugin-users-permissions/admin/src/translations/en.json`
+### Add language translation
+
+Add the language translation in `packages/strapi-plugin-users-permissions/admin/src/translations/en.json`
 
 ```js
   'PopUpForm.Providers.discord.providerConfig.redirectURL': 'The redirect URL to add in your Discord application configurations',
 ````
 
-These two change will set up the popup message who appear on the UI when we will configure our new provider.
-
-That's it, now you should be able to use your new provider.
+These two change will set up the popup message that appears in the UI. That's it, now you should be able to use your new provider.
 
 ## Email templates
 
