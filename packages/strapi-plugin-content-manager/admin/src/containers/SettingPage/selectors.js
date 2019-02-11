@@ -8,7 +8,7 @@ import { createSelector } from 'reselect';
 /**
 * Direct selector to the settingPage state domain
 */
-const selectSettingPageDomain = () => state => state.get('settingPage');
+const selectSettingPageDomain = () => state => state.get('content-manager-settingPage');
 
 
 /**

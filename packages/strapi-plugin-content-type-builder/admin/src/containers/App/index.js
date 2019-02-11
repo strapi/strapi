@@ -97,6 +97,7 @@ const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId: 'co
 const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId: 'content-type-builder' });
 const withFormReducer = strapi.injectReducer({ key: 'form', reducer: formReducer, pluginId: 'content-type-builder' });
 const withFormSaga = strapi.injectSaga({ key: 'form', saga: formSaga, pluginId: 'content-type-builder' });
+
 export default compose(
   withReducer,
   withFormReducer,

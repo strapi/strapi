@@ -37,8 +37,6 @@ import Edit from 'components/Edit';
 import EditRelations from 'components/EditRelations';
 // App selectors
 import { makeSelectSchema } from 'containers/App/selectors';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 import { bindLayout } from 'utils/bindLayout';
 import inputValidations from 'utils/inputsValidations';
@@ -602,8 +600,8 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
-const withReducer = injectReducer({ key: 'editPage', reducer });
-const withSaga = injectSaga({ key: 'editPage', saga });
+const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId: 'content-manager' });
+const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId: 'content-manager' });
 
 export default compose(
   withReducer,

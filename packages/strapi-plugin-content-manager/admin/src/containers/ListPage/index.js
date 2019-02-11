@@ -30,8 +30,6 @@ import Search from 'components/Search';
 import Table from 'components/Table';
 // Utils located in `strapi/packages/strapi-helper-plugin/lib/src/utils`;
 import getQueryParameters from 'utils/getQueryParameters';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import storeData from 'utils/storeData';
 import Div from './Div';
 import {
@@ -681,7 +679,7 @@ const mapStateToProps = createStructuredSelector({
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = injectReducer({ key: 'listPage', reducer });
-const withSaga = injectSaga({ key: 'listPage', saga });
+const withReducer = strapi.injectReducer({ key: 'listPage', reducer, pluginId: 'content-manager' });
+const withSaga = strapi.injectSaga({ key: 'listPage', saga, pluginId: 'content-manager' });
 
 export default compose(withReducer, withSaga, withConnect)(ListPage);

@@ -54,9 +54,6 @@ import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 import VariableDraggableAttr from 'components/VariableDraggableAttr';
 
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
-
 import { onClickEditField, onClickEditListItem, onClickEditRelation } from './actions';
 import reducer from './reducer';
 import saga from './saga';
@@ -1161,8 +1158,8 @@ const withConnect = connect(
   mapStateToProps,
   mapDispatchToProps,
 );
-const withReducer = injectReducer({ key: 'settingPage', reducer });
-const withSaga = injectSaga({ key: 'settingPage', saga });
+const withReducer = strapi.injectReducer({ key: 'settingPage', reducer, pluginId: 'content-manager' });
+const withSaga = strapi.injectSaga({ key: 'settingPage', saga, pluginId: 'content-manager' });
 
 export default compose(
   withReducer,

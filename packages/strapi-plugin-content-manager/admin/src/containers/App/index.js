@@ -13,7 +13,6 @@ import PropTypes from 'prop-types';
 import { isEmpty, get } from 'lodash';
 import { Switch, Route } from 'react-router-dom';
 
-import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 
 import EditPage from 'containers/EditPage';
@@ -28,6 +27,7 @@ import {
 } from './actions';
 import { makeSelectLoading, makeSelectModelEntries, makeSelectSchema } from './selectors';
 
+import reducer from './reducer';
 import saga from './sagas';
 
 class App extends React.Component {
@@ -93,9 +93,11 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withSaga = injectSaga({ key: 'global', saga });
+const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId: 'content-manager' });
+const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId: 'content-manager' });
 
 export default compose(
+  withReducer,
   withSaga,
   withConnect,
 )(App);

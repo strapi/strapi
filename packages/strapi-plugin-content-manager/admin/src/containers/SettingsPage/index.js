@@ -17,8 +17,6 @@ import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 import Block from 'components/Block';
 import SettingsRow from 'components/SettingsRow';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';
@@ -211,8 +209,8 @@ const mapStateToProps = createStructuredSelector({
   submitSuccess: makeSelectSubmitSuccess(),
 });
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = injectReducer({ key: 'settingsPage', reducer });
-const withSaga = injectSaga({ key: 'settingsPage', saga });
+const withReducer = strapi.injectReducer({ key: 'settingsPage', reducer, pluginId: 'content-manager' });
+const withSaga = strapi.injectSaga({ key: 'settingsPage', saga, pluginId: 'content-manager' });
 
 export default compose(
   withReducer,
