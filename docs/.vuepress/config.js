@@ -71,21 +71,13 @@ module.exports = {
           children: [
             '/3.x.x/getting-started/install-requirements',
             '/3.x.x/getting-started/quick-start',
-            '/3.x.x/getting-started/how-to-read-our-docs',
             '/3.x.x/getting-started/community',
           ],
         },
         {
           collapsable: true,
           title: 'Installation Options',
-          children: [
-            '/3.x.x/installation-options/install-docker.md',
-            '/3.x.x/installation-options/install-node.md',
-            '/3.x.x/installation-options/install-strapi.md',
-            '/3.x.x/installation-options/quick-start-detailed.md',
-            '/3.x.x/installation-options/use-databases.md',
-            '/3.x.x/installation-options/API-Routes.md',
-          ],
+          children: ['/3.x.x/installation-options/quick-start-detailed.md'],
         },
         {
           collapsable: true,
