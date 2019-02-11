@@ -7,15 +7,15 @@
  */
 
 // Node.js core.
+const os = require('os');
 const path = require('path');
-
 
 // Public node modules.
 const _ = require('lodash');
 const fetch = require('node-fetch');
 const { machineIdSync } = require('node-machine-id');
 const shell = require('shelljs');
-const os = require('os');
+
 
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
