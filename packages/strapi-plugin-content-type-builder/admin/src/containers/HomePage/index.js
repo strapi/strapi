@@ -23,8 +23,7 @@ import ContentHeader from 'components/ContentHeader';
 import EmptyContentTypeView from 'components/EmptyContentTypeView';
 import TableList from 'components/TableList';
 
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
+// Utils
 import { storeData } from '../../utils/storeData';
 
 import selectHomePage from './selectors';
@@ -140,8 +139,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId: 'content-type-builder' });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId: 'content-type-builder' });
 
 export default compose(
   withReducer,

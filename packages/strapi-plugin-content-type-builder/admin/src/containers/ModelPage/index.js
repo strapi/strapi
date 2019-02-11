@@ -23,8 +23,6 @@ import Form from 'containers/Form';
 import List from 'components/List';
 import PluginLeftMenu from 'components/PluginLeftMenu';
 import forms from 'containers/Form/forms.json';
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
 import { storeData } from '../../utils/storeData';
 import {
   cancelChanges,
@@ -355,8 +353,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withSaga = injectSaga({ key: 'modelPage', saga });
-const withReducer = injectReducer({ key: 'modelPage', reducer });
+const withSaga = strapi.injectSaga({ key: 'modelPage', saga, pluginId: 'content-type-builder' });
+const withReducer = strapi.injectReducer({ key: 'modelPage', reducer, pluginId: 'content-type-builder' });
 
 export default compose(
   withReducer,

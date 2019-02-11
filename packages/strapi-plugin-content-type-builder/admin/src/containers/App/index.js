@@ -24,12 +24,13 @@ import formReducer from 'containers/Form/reducer';
 import { makeSelectShouldRefetchContentType } from 'containers/Form/selectors';
 
 // Utils
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
+// import injectSaga from 'utils/injectSaga';
+// import injectReducer from 'utils/injectReducer';
 import { storeData } from '../../utils/storeData';
 
 import styles from './styles.scss';
 import { modelsFetch } from './actions';
+import reducer from './reducer';
 import saga from './sagas';
 
 /* eslint-disable consistent-return */
@@ -92,10 +93,12 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withSaga = injectSaga({ key: 'global', saga });
-const withFormReducer = injectReducer({ key: 'form', reducer: formReducer });
-const withFormSaga = injectSaga({ key: 'form', saga: formSaga });
+const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId: 'content-type-builder' });
+const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId: 'content-type-builder' });
+const withFormReducer = strapi.injectReducer({ key: 'form', reducer: formReducer, pluginId: 'content-type-builder' });
+const withFormSaga = strapi.injectSaga({ key: 'form', saga: formSaga, pluginId: 'content-type-builder' });
 export default compose(
+  withReducer,
   withFormReducer,
   withFormSaga,
   withSaga,

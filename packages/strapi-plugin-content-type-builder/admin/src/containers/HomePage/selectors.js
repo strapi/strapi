@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 /**
  * Direct selector to the homePage state domain
  */
-const selectHomePageDomain = () => state => state.get('homePage');
+const selectHomePageDomain = () => state => state.get('content-type-builder-homePage');
 
 /**
  * Other specific selectors

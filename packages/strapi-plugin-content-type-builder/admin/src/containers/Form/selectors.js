@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 /**
  * Direct selector to the form state domain
  */
-const selectFormDomain = () => state => state.get('form');
+const selectFormDomain = () => state => state.get('content-type-builder-form');
 
 /**
  * Other specific selectors
