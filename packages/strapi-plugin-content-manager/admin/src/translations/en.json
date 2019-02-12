@@ -35,6 +35,8 @@
   "containers.Edit.returnList": "Return to list",
   "containers.Edit.seeDetails": "Details",
   "containers.Edit.submit": "Save",
+  "containers.Edit.Link.Layout": "Configure the layout",
+  "containers.Edit.Link.Fields": "Edit the fields",
   "containers.Home.introduction": "To edit your entries go to the specific link in the left menu. This plugin doesn't have a proper way to edit settings and it's still under active development.",
   "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",
   "containers.Home.pluginHeaderTitle": "Content Manager",

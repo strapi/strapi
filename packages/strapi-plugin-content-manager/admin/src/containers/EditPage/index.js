@@ -7,7 +7,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { Link } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
 import {
@@ -19,7 +18,7 @@ import {
   toNumber,
   toString,
   truncate,
-  replace
+  replace,
 } from 'lodash';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
@@ -32,7 +31,7 @@ import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
-import ListRow from 'components/ListRow';
+import NavLink from 'components/NavLink';
 // Plugin's components
 import CustomDragLayer from 'components/CustomDragLayer';
 import Edit from 'components/Edit';
@@ -59,12 +58,14 @@ import {
   resetProps,
   setFileRelations,
   setFormErrors,
-  submit
+  submit,
 } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectEditPage from './selectors';
 import styles from './styles.scss';
+
+const pluginId = 'content-manager';
 
 export class EditPage extends React.Component {
   state = { showWarning: false, showWarningDelete: false };
@@ -87,17 +88,17 @@ export class EditPage extends React.Component {
         includes(this.props.location.search, '?redirectUrl')
       ) {
         const redirectUrl = this.props.location.search.split(
-          '?redirectUrl='
+          '?redirectUrl=',
         )[1];
 
         this.props.history.push({
           pathname: redirectUrl.split('?')[0],
-          search: redirectUrl.split('?')[1]
+          search: redirectUrl.split('?')[1],
         });
       } else {
         this.props.history.push({
           pathname: replace(this.props.location.pathname, '/create', ''),
-          search: `?source=${this.getSource()}`
+          search: `?source=${this.getSource()}`,
         });
       }
     }
@@ -122,7 +123,7 @@ export class EditPage extends React.Component {
   getLayout = () =>
     bindLayout.call(
       this,
-      get(this.props.schema, ['layout', this.getModelName()], {})
+      get(this.props.schema, ['layout', this.getModelName()], {}),
     );
 
   /**
@@ -135,9 +136,9 @@ export class EditPage extends React.Component {
       this.props.editPage.formValidations,
       [
         findIndex(this.props.editPage.formValidations, ['name', name]),
-        'validations'
+        'validations',
       ],
-      {}
+      {},
     );
 
   getDisplayedFields = () =>
@@ -153,7 +154,7 @@ export class EditPage extends React.Component {
       'models',
       'plugins',
       this.getSource(),
-      this.getModelName()
+      this.getModelName(),
     ]);
 
   /**
@@ -179,12 +180,12 @@ export class EditPage extends React.Component {
    * @return {Object}
    */
   getSchema = () =>
-    this.getSource() !== 'content-manager'
+    this.getSource() !== pluginId
       ? get(this.props.schema, [
         'models',
         'plugins',
         this.getSource(),
-        this.getModelName()
+        this.getModelName(),
       ])
       : get(this.props.schema, ['models', this.getModelName()]);
 
@@ -195,18 +196,18 @@ export class EditPage extends React.Component {
     const primaryKey = this.getModel().primaryKey;
     const {
       match: {
-        params: { id }
-      }
+        params: { id },
+      },
     } = this.props;
     const title = get(
       this.getSchema(),
       'editDisplay.displayedField',
-      primaryKey
+      primaryKey,
     );
     const valueToDisplay = get(
       this.props.editPage,
       ['initialRecord', title],
-      id
+      id,
     );
 
     return isEmpty(valueToDisplay)
@@ -221,6 +222,25 @@ export class EditPage extends React.Component {
   getSource = () => getQueryParameters(this.props.location.search, 'source');
 
   /**
+   * Get url base to create edit layout link
+   * @type {String} url base
+   */
+  getContentManagerBaseUrl = () => {
+    let url = `/plugins/${pluginId}/ctm-configurations/edit-settings/`;
+    if (this.getSource() === 'users-permissions') {
+      url = `${url}plugins/${this.getSource()}/`;
+    }
+
+    return url;
+  };
+
+  /**
+   * Access url base from injected component to create edit model link
+   * @type {String} url base
+   */
+  getContentTypeBuilderBaseUrl = () => '/plugins/content-type-builder/models/';
+
+  /**
    * Initialize component
    */
   initComponent = props => {
@@ -229,7 +249,7 @@ export class EditPage extends React.Component {
       this.isCreating(),
       this.getSource(),
       this.getModelAttributes(),
-      this.getDisplayedFields()
+      this.getDisplayedFields(),
     );
 
     if (!this.isCreating()) {
@@ -240,7 +260,7 @@ export class EditPage extends React.Component {
 
     // Get all relations made with the upload plugin
     const fileRelations = Object.keys(
-      get(this.getSchema(), 'relations', {})
+      get(this.getSchema(), 'relations', {}),
     ).reduce((acc, current) => {
       const association = get(this.getSchema(), ['relations', current], {});
 
@@ -250,7 +270,7 @@ export class EditPage extends React.Component {
       ) {
         const relation = {
           name: current,
-          multiple: association.nature === 'manyToManyMorph'
+          multiple: association.nature === 'manyToManyMorph',
         };
 
         acc.push(relation);
@@ -265,7 +285,7 @@ export class EditPage extends React.Component {
   handleAddRelationItem = ({ key, value }) => {
     this.props.addRelationItem({
       key,
-      value
+      value,
     });
   };
 
@@ -276,19 +296,19 @@ export class EditPage extends React.Component {
       return this.props.changeData({
         target: {
           name: `record.${target.name}`,
-          value: defaultValue
-        }
+          value: defaultValue,
+        },
       });
     }
 
     const errorIndex = findIndex(this.props.editPage.formErrors, [
       'name',
-      target.name
+      target.name,
     ]);
     const errors = inputValidations(
       target.value,
       this.getAttributeValidations(target.name),
-      target.type
+      target.type,
     );
     const formErrors = cloneDeep(this.props.editPage.formErrors);
 
@@ -308,7 +328,7 @@ export class EditPage extends React.Component {
     // Check if date
     if (
       ['float', 'integer', 'biginteger', 'decimal'].indexOf(
-        get(this.getSchema(), ['fields', e.target.name, 'type'])
+        get(this.getSchema(), ['fields', e.target.name, 'type']),
       ) !== -1
     ) {
       value = toNumber(e.target.value);
@@ -316,7 +336,7 @@ export class EditPage extends React.Component {
 
     const target = {
       name: `record.${e.target.name}`,
-      value
+      value,
     };
 
     this.props.changeData({ target });
@@ -336,14 +356,14 @@ export class EditPage extends React.Component {
 
   handleGoBack = () => this.props.history.goBack();
 
-  handleRedirect = ({ model, id, source = 'content-manager' }) => {
+  handleRedirect = ({ model, id, source = pluginId }) => {
     /* eslint-disable */
     switch (model) {
       case 'permission':
       case 'role':
       case 'file':
         // Exclude special models which are handled by plugins.
-        if (source !== 'content-manager') {
+        if (source !== pluginId) {
           break;
         }
       default:
@@ -355,8 +375,8 @@ export class EditPage extends React.Component {
           pathname,
           search: `?source=${source}&redirectURI=${generateRedirectURI({
             model,
-            search: `?source=${source}`
-          })}`
+            search: `?source=${source}`,
+          })}`,
         });
     }
     /* eslint-enable */
@@ -366,7 +386,7 @@ export class EditPage extends React.Component {
     e.preventDefault();
     const formErrors = checkFormValidity(
       this.generateFormFromRecord(),
-      this.props.editPage.formValidations
+      this.props.editPage.formValidations,
     );
 
     if (isEmpty(formErrors)) {
@@ -376,23 +396,19 @@ export class EditPage extends React.Component {
     this.props.setFormErrors(formErrors);
   };
 
-  hasDisplayedRelations = () => {
-    return this.getDisplayedRelations().length > 0;
-  };
-
-  hasDisplayedDevSection = () => {
-    return process.env.NODE_ENV === 'development';
-  };
-
-  hasDisplayedRightSection = () => {
-    return this.hasDisplayedRelations || this.hasDisplayedDevSection;
-  };
-
   hasDisplayedFields = () => {
     return get(this.getModel(), ['editDisplay', 'fields'], []).length > 0;
   };
 
   isCreating = () => this.props.match.params.id === 'create';
+
+  /**
+   * Check environment
+   * @type {boolean} current env is dev
+   */
+  isDevEnvironment = () => {
+    return process.env.NODE_ENV === 'development';
+  };
 
   isRelationComponentNull = () =>
     Object.keys(get(this.getSchema(), 'relations', {})).filter(
@@ -401,7 +417,7 @@ export class EditPage extends React.Component {
         (!get(this.getSchema(), ['relations', relation, 'nature'], '')
           .toLowerCase()
           .includes('morph') ||
-          !get(this.getSchema(), ['relations', relation, relation]))
+          !get(this.getSchema(), ['relations', relation, relation])),
     ).length === 0;
 
   // NOTE: technical debt that needs to be redone
@@ -412,25 +428,43 @@ export class EditPage extends React.Component {
       return acc;
     }, {});
 
+  /**
+   * Render the edit layout link
+   * @type {NavLink}
+   */
+  layoutLink = () => {
+    // Retrieve URL
+    const url = `${this.getContentManagerBaseUrl()}${this.getModelName()}`;
+    // Link props to display
+    const message = {
+      message: {
+        id: `${pluginId}.containers.Edit.Link.Layout`,
+      },
+      icon: 'layout',
+    };
+
+    return <NavLink {...message} url={url} />;
+  };
+
   pluginHeaderActions = () => [
     {
-      label: 'content-manager.containers.Edit.reset',
+      label: `${pluginId}.containers.Edit.reset`,
       kind: 'secondary',
       onClick: this.toggle,
       type: 'button',
-      disabled: this.showLoaders()
+      disabled: this.showLoaders(),
     },
     {
       kind: 'primary',
-      label: 'content-manager.containers.Edit.submit',
+      label: `${pluginId}.containers.Edit.submit`,
       onClick: this.handleSubmit,
       type: 'submit',
       loader: this.props.editPage.showLoader,
       style: this.props.editPage.showLoader
         ? { marginRight: '18px', flexGrow: 2 }
         : { flexGrow: 2 },
-      disabled: this.showLoaders()
-    }
+      disabled: this.showLoaders(),
+    },
   ];
 
   pluginHeaderSubActions = () => {
@@ -443,18 +477,67 @@ export class EditPage extends React.Component {
             kind: 'delete',
             onClick: this.toggleDelete,
             type: 'button',
-            disabled: this.showLoaders()
-          }
+            disabled: this.showLoaders(),
+          },
         ];
 
     return subActions;
     /* eslint-enable indent */
   };
 
+  /**
+   * Retrieve external links from injected components
+   * @type {Array} List of external links to display
+   */
+  retrieveLinksContainerComponent = () => {
+    // Should be retrieved from the global props (@soupette)
+    const { plugins } = this.context;
+    const appPlugins = plugins.toJS();
+    const componentToInject = Object.keys(appPlugins).reduce((acc, current) => {
+      // Retrieve injected compos from plugin
+      // if compo can be injected in left.links area push the compo in the array
+      const currentPlugin = appPlugins[current];
+      const injectedComponents = get(currentPlugin, 'injectedComponents', []);
+
+      const compos = injectedComponents
+        .filter(compo => {
+          return (
+            compo.plugin === `${pluginId}.editPage` &&
+            compo.area === 'right.links'
+          );
+        })
+        .map(compo => {
+          const Component = compo.component;
+
+          return (
+            <li key={compo.key}>
+              <Component {...this} {...compo.props} />
+            </li>
+          );
+        });
+
+      return [...acc, ...compos];
+    }, []);
+
+    return componentToInject;
+  };
+
+  shouldDisplayedRelations = () => {
+    return this.getDisplayedRelations().length > 0;
+  };
+
+  /**
+   * Right section to display if needed
+   * @type {boolean}
+   */
+  shouldDisplayedRightSection = () => {
+    return this.shouldDisplayedRelations() || this.isDevEnvironment();
+  };
+
   showLoaders = () => {
     const {
       editPage: { isLoading },
-      schema: { layout }
+      schema: { layout },
     } = this.props;
 
     return (
@@ -468,72 +551,38 @@ export class EditPage extends React.Component {
 
   toggleDelete = () =>
     this.setState(prevState => ({
-      showWarningDelete: !prevState.showWarningDelete
+      showWarningDelete: !prevState.showWarningDelete,
     }));
 
-  layoutLink = () => {
-    const url = this.getContentManagerBaseUrl() + this.getModelName();
+  /**
+   * Render internal and external links
+   * @type {Array} List of all links to display
+   */
+  renderNavLinks = () => {
+    // Add ctm link as list item to external links array to return the entire list
+    let ctmLink = <li key={`${pluginId}.link`}>{this.layoutLink()}</li>;
 
-    return <Link to={url}>Configure the layout</Link>;
-  };
-
-  getContentManagerBaseUrl = () => {
-    if (this.getModelName() !== 'user') {
-      return '/plugins/content-manager/ctm-configurations/edit-settings/';
-    } else {
-      return '/plugins/content-manager/ctm-configurations/edit-settings/plugins/users-permissions/';
-    }
-  };
-
-  getContentTypeBuilderBaseUrl = () => {
-    return '/plugins/content-type-builder/models/';
-  };
-
-  retrieveLinksContainerComponent = () => {
-    // Should be retrieved from the global props (@soupette)
-    const { plugins } = this.context;
-    const appPlugins = plugins.toJS();
-    const componentToInject = Object.keys(appPlugins).reduce((acc, current) => {
-      // Retrieve injected compo from plugin
-      // if compo can be injected in left.links area push the compo in the array
-      const currentPlugin = appPlugins[current];
-      const injectedComponents = get(currentPlugin, 'injectedComponents', []);
-
-      const compos = injectedComponents
-        .filter(compo => {
-          return (
-            compo.plugin === 'content-manager.editPage' &&
-            compo.area === 'left.links'
-          );
-        })
-        .map(compo => {
-          const Component = compo.component;
-
-          return <Component {...this} key={compo.key} />;
-        });
-
-      return [...acc, ...compos];
-    }, []);
-
-    return componentToInject;
+    return [ctmLink, ...this.retrieveLinksContainerComponent()];
   };
 
   renderEdit = () => {
     const {
       editPage,
-      location: { search }
+      location: { search },
     } = this.props;
     const source = getQueryParameters(search, 'source');
-    const basePath = '/plugins/content-manager/ctm-configurations';
+    const basePath = `/plugins/${pluginId}/ctm-configurations`;
     const pathname =
-      source !== 'content-manager'
+      source !== pluginId
         ? `${basePath}/plugins/${source}/${this.getModelName()}`
         : `${basePath}/${this.getModelName()}`;
 
     if (this.showLoaders()) {
       return (
         <div
-          className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}
+          className={
+            !this.shouldDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'
+          }
         >
           <div className={styles.main_wrapper}>
             <LoadingIndicator />
@@ -545,11 +594,13 @@ export class EditPage extends React.Component {
     if (!this.hasDisplayedFields()) {
       return (
         <div
-          className={!this.hasDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'}
+          className={
+            !this.shouldDisplayedRelations() ? 'col-lg-12' : 'col-lg-9'
+          }
         >
           <EmptyAttributesBlock
-            description="content-manager.components.EmptyAttributesBlock.description"
-            label="content-manager.components.EmptyAttributesBlock.button"
+            description={`${pluginId}.components.EmptyAttributesBlock.description`}
+            label={`${pluginId}.components.EmptyAttributesBlock.button`}
             onClick={() => this.props.history.push(pathname)}
           />
         </div>
@@ -558,7 +609,9 @@ export class EditPage extends React.Component {
 
     return (
       <div
-        className={!this.hasDisplayedRightSection() ? 'col-lg-12' : 'col-lg-9'}
+        className={
+          !this.shouldDisplayedRightSection() ? 'col-lg-12' : 'col-lg-9'
+        }
       >
         <div className={styles.main_wrapper}>
           <Edit
@@ -599,11 +652,10 @@ export class EditPage extends React.Component {
               isOpen={showWarning}
               toggleModal={this.toggle}
               content={{
-                title: 'content-manager.popUpWarning.title',
-                message:
-                  'content-manager.popUpWarning.warning.cancelAllSettings',
-                cancel: 'content-manager.popUpWarning.button.cancel',
-                confirm: 'content-manager.popUpWarning.button.confirm'
+                title: `${pluginId}.popUpWarning.title`,
+                message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
+                cancel: `${pluginId}.popUpWarning.button.cancel`,
+                confirm: `${pluginId}.popUpWarning.button.confirm`,
               }}
               popUpWarningType="danger"
               onConfirm={this.handleConfirm}
@@ -612,20 +664,19 @@ export class EditPage extends React.Component {
               isOpen={showWarningDelete}
               toggleModal={this.toggleDelete}
               content={{
-                title: 'content-manager.popUpWarning.title',
-                message:
-                  'content-manager.popUpWarning.bodyMessage.contentType.delete',
-                cancel: 'content-manager.popUpWarning.button.cancel',
-                confirm: 'content-manager.popUpWarning.button.confirm'
+                title: `${pluginId}.popUpWarning.title`,
+                message: `${pluginId}.popUpWarning.bodyMessage.contentType.delete`,
+                cancel: `${pluginId}.popUpWarning.button.cancel`,
+                confirm: `${pluginId}.popUpWarning.button.confirm`,
               }}
               popUpWarningType="danger"
               onConfirm={this.handleConfirm}
             />
             <div className="row">
               {this.renderEdit()}
-              {this.hasDisplayedRightSection() && (
+              {this.shouldDisplayedRightSection() && (
                 <div className={cn('col-lg-3')}>
-                  {this.hasDisplayedRelations() && (
+                  {this.shouldDisplayedRelations() && (
                     <div className={styles.sub_wrapper}>
                       <EditRelations
                         changeData={this.props.changeData}
@@ -644,12 +695,9 @@ export class EditPage extends React.Component {
                     </div>
                   )}
 
-                  {this.hasDisplayedDevSection() && (
+                  {this.isDevEnvironment() && (
                     <div className={styles.links_wrapper}>
-                      <ul>
-                        <li>{this.layoutLink()}</li>
-                        <li>{this.retrieveLinksContainerComponent()}</li>
-                      </ul>
+                      <ul>{this.renderNavLinks()}</ul>
                     </div>
                   )}
                 </div>
@@ -663,11 +711,11 @@ export class EditPage extends React.Component {
 }
 
 EditPage.contextTypes = {
-  plugins: PropTypes.object
+  plugins: PropTypes.object,
 };
 
 EditPage.defaultProps = {
-  schema: {}
+  schema: {},
 };
 
 EditPage.propTypes = {
@@ -688,7 +736,7 @@ EditPage.propTypes = {
   schema: PropTypes.object,
   setFileRelations: PropTypes.func.isRequired,
   setFormErrors: PropTypes.func.isRequired,
-  submit: PropTypes.func.isRequired
+  submit: PropTypes.func.isRequired,
 };
 
 function mapDispatchToProps(dispatch) {
@@ -706,20 +754,20 @@ function mapDispatchToProps(dispatch) {
       resetProps,
       setFileRelations,
       setFormErrors,
-      submit
+      submit,
     },
-    dispatch
+    dispatch,
   );
 }
 
 const mapStateToProps = createStructuredSelector({
   editPage: makeSelectEditPage(),
-  schema: makeSelectSchema()
+  schema: makeSelectSchema(),
 });
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 );
 
 const withReducer = injectReducer({ key: 'editPage', reducer });
@@ -728,5 +776,5 @@ const withSaga = injectSaga({ key: 'editPage', saga });
 export default compose(
   withReducer,
   withSaga,
-  withConnect
+  withConnect,
 )(DragDropContext(HTML5Backend)(EditPage));

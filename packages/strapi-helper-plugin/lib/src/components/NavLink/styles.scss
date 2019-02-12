@@ -1,0 +1,28 @@
+a.navLink {
+  text-decoration: none;
+  width: 100%;
+  display: block;
+  span, i {
+    color: #333740;
+  }
+  span {
+    font-size: 13px;
+  }
+  i {
+    margin-right: 10px;
+    width: 13px;
+    height: 11px;
+  }
+  .fa.layout {
+    background-image: url('../../assets/icons/icon_layout.svg');
+    display: inline-block;
+  }
+  &:hover {
+    span, i {
+      color: #007EFF;
+    }
+    .fa.layout {
+      background-image: url('../../assets/icons/icon_layout_hover.svg');
+    }
+  }
+}

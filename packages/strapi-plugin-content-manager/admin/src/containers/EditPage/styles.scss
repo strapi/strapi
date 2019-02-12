@@ -19,7 +19,7 @@
 
 .sub_wrapper {
   padding: 0 20px 1px;
-  margin-bottom: 40px;
+  margin-bottom: 28px;
 }
 
 .links_wrapper {
@@ -32,14 +32,6 @@
     border-top: 1px solid #f6f6f6;
     &:first-of-type {
       border-color: transparent;
-    }
-    a {
-      text-decoration: none;
-      width: 100%;
-      display: block;
-      p {
-        font-size: 13px;
-      }
     }
   }
 }

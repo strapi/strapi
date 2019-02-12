@@ -18,7 +18,7 @@ import { translationMessages } from './i18n';
 
 const LoadableApp = Loadable({
   loader: () => import('containers/App'),
-  loading: LoadingIndicatorPage
+  loading: LoadingIndicatorPage,
 });
 
 const tryRequireRoot = source => {
@@ -70,7 +70,7 @@ function Comp(props) {
 
 if (window.Cypress) {
   window.__store__ = Object.assign(window.__store__ || {}, {
-    [pluginId]: store
+    [pluginId]: store,
   });
 }
 
@@ -105,7 +105,7 @@ strapi.registerPlugin({
   name: pluginPkg.strapi.name,
   pluginRequirements,
   preventComponentRendering: false,
-  translationMessages
+  translationMessages,
 });
 
 // Export store

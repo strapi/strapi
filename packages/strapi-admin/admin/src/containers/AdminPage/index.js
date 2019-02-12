@@ -20,7 +20,7 @@ import { bindActionCreators, compose } from 'redux';
 // Actions required for disabling and enabling the OverlayBlocker
 import {
   disableGlobalOverlayBlocker,
-  enableGlobalOverlayBlocker
+  enableGlobalOverlayBlocker,
 } from 'actions/overlayBlocker';
 import { pluginLoaded, updatePlugin } from 'containers/App/actions';
 import {
@@ -30,7 +30,7 @@ import {
   makeSelectIsAppLoading,
   makeSelectShowGlobalAppBlocker,
   selectHasUserPlugin,
-  selectPlugins
+  selectPlugins,
 } from 'containers/App/selectors';
 // Design
 import ComingSoonPage from 'containers/ComingSoonPage';
@@ -60,7 +60,7 @@ import styles from './styles.scss';
 
 const PLUGINS_TO_BLOCK_PRODUCTION = [
   'content-type-builder',
-  'settings-manager'
+  'settings-manager',
 ];
 
 export class AdminPage extends React.Component {
@@ -71,7 +71,7 @@ export class AdminPage extends React.Component {
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
     plugins: this.props.plugins,
-    updatePlugin: this.props.updatePlugin
+    updatePlugin: this.props.updatePlugin,
   });
 
   componentDidMount() {
@@ -84,7 +84,7 @@ export class AdminPage extends React.Component {
     const {
       adminPage: { uuid },
       location: { pathname },
-      plugins
+      plugins,
     } = this.props;
 
     if (prevProps.location.pathname !== pathname) {
@@ -206,7 +206,7 @@ export class AdminPage extends React.Component {
   showLoading = () => {
     const {
       isAppLoading,
-      adminPage: { isLoading }
+      adminPage: { isLoading },
     } = this.props;
 
     return (
@@ -219,7 +219,7 @@ export class AdminPage extends React.Component {
   retrievePlugins = () => {
     const {
       adminPage: { currentEnvironment },
-      plugins
+      plugins,
     } = this.props;
 
     if (currentEnvironment === 'production') {
@@ -290,11 +290,11 @@ AdminPage.childContextTypes = {
   disableGlobalOverlayBlocker: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
   plugins: PropTypes.object,
-  updatePlugin: PropTypes.func
+  updatePlugin: PropTypes.func,
 };
 
 AdminPage.contextTypes = {
-  router: PropTypes.object.isRequired
+  router: PropTypes.object.isRequired,
 };
 
 AdminPage.defaultProps = {
@@ -302,7 +302,7 @@ AdminPage.defaultProps = {
   appPlugins: [],
   hasUserPlugin: true,
   isAppLoading: true,
-  overlayBlockerData: {}
+  overlayBlockerData: {},
 };
 
 AdminPage.propTypes = {
@@ -320,7 +320,7 @@ AdminPage.propTypes = {
   pluginLoaded: PropTypes.func.isRequired,
   plugins: PropTypes.object.isRequired,
   showGlobalAppBlocker: PropTypes.bool.isRequired,
-  updatePlugin: PropTypes.func.isRequired
+  updatePlugin: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -331,7 +331,7 @@ const mapStateToProps = createStructuredSelector({
   hasUserPlugin: selectHasUserPlugin(),
   isAppLoading: makeSelectIsAppLoading(),
   plugins: selectPlugins(),
-  showGlobalAppBlocker: makeSelectShowGlobalAppBlocker()
+  showGlobalAppBlocker: makeSelectShowGlobalAppBlocker(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -341,7 +341,7 @@ function mapDispatchToProps(dispatch) {
       enableGlobalOverlayBlocker,
       getAdminData,
       pluginLoaded,
-      updatePlugin
+      updatePlugin,
     },
     dispatch
   );
