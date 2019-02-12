@@ -7,6 +7,7 @@
  */
 
 // Node.js core.
+const child_process = require('child_process');
 const os = require('os');
 const path = require('path');
 
@@ -113,11 +114,32 @@ module.exports = function (name, cliArguments) {
         try {
           // Enter inside the project folder.
           shell.cd(scope.rootPath);
-          // Launch the server.
-          shell.exec('strapi start', {
-            stdio: 'inherit'
+          // Empty log.
+          console.log();
+
+          if (process.platform === "win32") {
+            var rl = require("readline").createInterface({
+              input: process.stdin,
+              output: process.stdout
+            });
+          
+            rl.on("SIGINT", function () {
+              process.emit("SIGINT");
+            });
+          }
+          
+          process.on("SIGINT", function () {
+            //graceful shutdown
+            process.exit();
           });
+
+          const child  = child_process.exec('strapi start');
+          child.stdout.pipe(process.stdout);
+          child.stderr.pipe(process.stderr);
+
+          // shell.exec('strapi start');
         } catch (e) {
+          console.log(e);
           error(e);
         }
       }

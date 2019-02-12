@@ -315,7 +315,14 @@ module.exports = (scope, cb) => {
             scope.client.version = lock.version;
 
             if (scope.developerMode === true && scope.client.connector === 'strapi-hook-bookshelf') {
-              const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
+              let knexVersion;
+
+              try {
+                knexVersion = require(path.join(`${scope.tmpPath}`,'/node_modules/', 'knex', 'package.json'));
+              } catch (e) {
+                knexVersion = require(path.join(`${scope.tmpPath}`,'/node_modules/','strapi-hook-knex', 'node_modules', 'knex', 'package.json'));
+              }
+
               scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
             }
           }
