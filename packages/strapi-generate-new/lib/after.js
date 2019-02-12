@@ -14,10 +14,10 @@ const fs = require('fs-extra');
 const npm = require('enpeem');
 const ora = require('ora');
 const shell = require('shelljs');
-const request = require('request');
 
 // Logger.
 const { packageManager } = require('strapi-utils');
+const trackSuccess = require('./success');
 
 /**
  * Runs after this generator has finished
@@ -82,6 +82,7 @@ module.exports = (scope, cb) => {
         'cache-min': 999999999
       }, err => {
         if (err) {
+          trackSuccess('didNotInstallProjectDependencies', scope);
           console.log();
           console.log('⚠️ You should run `npm install` into your application before starting it.');
           console.log();
@@ -105,8 +106,10 @@ module.exports = (scope, cb) => {
       const data = shell.exec(`yarn --cwd ${scope.rootPath} add ${alphaDependencies} --production`, { silent: true });
 
       if (data.stderr && data.code !== 0) {
+        trackSuccess('didNotInstallProjectDependencies', scope);
         cb();
       }
+
       pluginsInstallation();
     }
   } else {
@@ -149,6 +152,7 @@ module.exports = (scope, cb) => {
           loader = ora(`Install plugin ${cyan(defaultPlugin.name)}.`).start();
           shell.exec(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`, {silent: true}, (code, stdout, stderr) => {
             if (code) {
+              trackSuccess('didNotInstallProjectPlugins', scope);
               loader.warn(`An error occurred during ${defaultPlugin.name} plugin installation.`);
               console.log(code, stdout, stderr);
               return resolve();
@@ -201,13 +205,3 @@ module.exports = (scope, cb) => {
       });
   }
 };
-
-function trackSuccess(event, scope) {
-  request
-    .post('https://analytics.strapi.io/track')
-    .form({
-      event,
-      uuid: scope.uuid
-    })
-    .on('error', () => {});
-}

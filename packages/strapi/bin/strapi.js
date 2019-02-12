@@ -54,6 +54,7 @@ program
   .command('new')
   .option('-d, --dev', 'Development mode')
   .option('--debug', 'Display database connection error')
+  .option('--quickstart', 'Quickstart app creation')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbsrv <dbsrv>', 'Database srv')
@@ -63,6 +64,7 @@ program
   .option('--dbpassword <dbpassword>', 'Database password')
   .option('--dbssl <dbssl>', 'Database SSL')
   .option('--dbauth <dbauth>', 'Authentication Database')
+  .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
   .description('create a new application')
   .action(require('./strapi-new'));

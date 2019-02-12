@@ -48,6 +48,8 @@
   "form.response.description": "レスポンス設定を構成します。",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "Response Time",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "Value",
   "form.response.name": "レスポンス",
   "form.security.description": "セキュリティ設定を構成します。",
   "form.security.item.cors": "Cors",

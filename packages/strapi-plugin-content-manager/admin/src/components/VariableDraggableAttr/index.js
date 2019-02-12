@@ -158,12 +158,23 @@ class VariableDraggableAttr extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
+    const { layout, name } = this.props;
+    const prevLayout = get(prevProps.layout, [name, 'appearance'], '');
+    const newLayout = get(layout, [name, 'appearance'], '');
+
     if (prevProps.isDragging !== this.props.isDragging) {
       this.handleDragEffect();
     }
 
     if (prevProps.isDragging !== this.props.isDragging && this.props.isDragging) {
       this.handleClickEdit();
+    }
+
+    if (prevLayout !== newLayout) {
+      const newType = newLayout === 'WYSIWYG' ? 'WYSIWYG' : 'text';
+      const classNames = getBootstrapClass(newType);
+
+      this.updateClassNames(classNames);
     }
   }
 
@@ -185,6 +196,8 @@ class VariableDraggableAttr extends React.Component {
     const { index, keys, onRemove } = this.props;
     onRemove(index, keys);
   }
+
+  updateClassNames = newClassName => this.setState({ classNames: newClassName });
 
   renderContent = () => {
     let { classNames, isOver, style, dragStart } = this.state;

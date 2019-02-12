@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
@@ -16,9 +15,9 @@ import {
   get,
   includes,
   isEmpty,
-  isObject,
   toNumber,
   toString,
+  truncate,
   replace,
 } from 'lodash';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -171,7 +170,10 @@ export class EditPage extends React.Component {
       return toString(this.props.editPage.pluginHeaderTitle);
     }
 
-    return this.props.match.params.id;
+    const title = get(this.getSchema(), 'editDisplay.displayedField');
+    const valueToDisplay = get(this.props.editPage, ['initialRecord', title], null);
+
+    return isEmpty(valueToDisplay) ? null : truncate(valueToDisplay, { length: '24', separator: '.' });
   };
 
   /**
@@ -260,9 +262,7 @@ export class EditPage extends React.Component {
   handleChange = e => {
     let value = e.target.value;
     // Check if date
-    if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
-      value = moment(e.target.value).format('YYYY-MM-DD HH:mm:ss');
-    } else if (
+    if (
       ['float', 'integer', 'biginteger', 'decimal'].indexOf(
         get(this.getSchema(), ['fields', e.target.name, 'type']),
       ) !== -1

@@ -48,6 +48,8 @@
   "form.response.description": "Задайте настройки ответа.",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "Время ответа",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "Value",
   "form.response.name": "Ответ",
   "form.security.description": "Задайте настройки безопасности.",
   "form.security.item.cors": "Cors",

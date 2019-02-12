@@ -491,7 +491,7 @@ module.exports = {
 
         let type;
 
-        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'containss', 'in'], _.last(suffix))) {
+        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'containss', 'in', 'nin'], _.last(suffix))) {
           type = `_${_.last(suffix)}`;
           key = _.dropRight(suffix).join('_');
         } else {

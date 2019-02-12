@@ -145,7 +145,7 @@ export default function request(url, options = {}, shouldWatchServerRestart = fa
     .then((response) => {
       if (shouldWatchServerRestart) {
         // Display the global OverlayBlocker
-        strapi.lockApp();
+        strapi.lockApp(shouldWatchServerRestart);
         return serverRestartWatcher(response);
       }
 
