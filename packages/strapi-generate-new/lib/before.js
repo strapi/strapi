@@ -321,7 +321,7 @@ module.exports = (scope, cb) => {
           }
 
           if (scope.developerMode) {
-            exec(linkNodeModulesCommand, () => {
+            shell.exec(linkNodeModulesCommand, () => {
               resolve();
             });
           } else {
