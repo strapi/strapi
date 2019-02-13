@@ -27,8 +27,10 @@ export default ({ key, pluginId }) => WrappedComponent => {
       this.prepareHooks();
     }
 
-    getHook = (hookName, instances, cb = () => {}) => {
-      return this.state.hooks[hookName](instances, cb);
+    getHook = (hookName) => {
+      const that = this.compo.current;
+
+      return this.state.hooks[hookName].bind(that)();
     }
 
     setHooks = (...args) => {
@@ -76,10 +78,12 @@ export default ({ key, pluginId }) => WrappedComponent => {
       });
     }
 
+    compo = React.createRef();
+
     render() {
       const props = {...this.props, ...this.state, getHook: this.getHook };
 
-      return <WrappedComponent {...props} />;
+      return <WrappedComponent ref={this.compo} {...props} />;
     }
   }
 

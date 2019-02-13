@@ -1,7 +1,7 @@
 const { includes } = require('lodash');
 const auth = require('utils/auth').default;
 
-module.exports = function willSecure(instances, cb = () => {}) {
+module.exports = function willSecure() {
   const {
     props: {
       showLeftMenu,
@@ -10,13 +10,17 @@ module.exports = function willSecure(instances, cb = () => {}) {
       history,
       store,
     },
-  } = instances;
+  } = this;
+
+  const cb = () => this.setState({
+    shouldSecureAfterAllPluginsAreMounted: false,
+  });
 
   const initializerReducer = store
     .getState()
     .getIn(['users-permissions-initializer']);
 
-  const nonProtectedURLs = '/plugins/users-permissions/auth';
+  const nonProtectedURLs = ['/plugins/users-permissions/auth'];
   const redirectEndPoint = initializerReducer.get('hasAdminUser')
     ? '/plugins/users-permissions/auth/login'
     : '/plugins/users-permissions/auth/register';

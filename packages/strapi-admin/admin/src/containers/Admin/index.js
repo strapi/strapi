@@ -79,7 +79,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     const { admin: { isLoading } } = this.props;
 
     if (!isLoading) {
-      this.willSecure();
+      this.props.getHook('willSecure');
     }
   }
 
@@ -96,12 +96,12 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     }
 
     if (prevProps.location.pathname !== pathname) {
-      this.willSecure();
+      this.props.getHook('willSecure');
     }
 
     if (!isLoading && this.state.shouldSecureAfterAllPluginsAreMounted) {
       if (!this.hasApluginNotReady(this.props)) {
-        this.willSecure();
+        this.props.getHook('willSecure');
       }
     }
   }
@@ -156,18 +156,6 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     }
 
     return this.hasApluginNotReady(this.props);
-  }
-
-  willSecure = () => {
-    const { shouldSecureAfterAllPluginsAreMounted } = this.state;
-    const updater = () => {
-      this.setState({
-        shouldSecureAfterAllPluginsAreMounted: false,
-      });
-    };
-    const cb = shouldSecureAfterAllPluginsAreMounted ? updater : () => {};
-
-    this.props.getHook('willSecure', this, cb);
   }
 
   renderMarketPlace = props => <Marketplace {...props} {...this.props} />;
