@@ -26,13 +26,15 @@ module.exports =  (scope, cb) => {
 
   // Install back-end admin `node_modules`.
   const cmd = packageManager.isStrapiInstalledWithNPM() ? 'npm install --production --ignore-scripts' : 'yarn install --production --ignore-scripts';
-  shell.exec(cmd, {
-    cwd: path.resolve(scope.rootPath, 'admin')
-  }, {silent: true}, (code, stdout, stderr) => {
-    if (code) {
-      return cb(stderr);
-    }
+
+  try {
+    shell.exec(cmd, {
+      cwd: path.resolve(scope.rootPath, 'admin'),
+      silent: true 
+    });
 
     cb();
-  });
+  } catch (e) {
+    cb(e);
+  }
 };

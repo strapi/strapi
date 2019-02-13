@@ -29,11 +29,6 @@ const trackSuccess = require('./success');
 /* eslint-disable no-console */
 /* eslint-disable prefer-template */
 module.exports = (scope, cb) => {
-  console.log(`The app has been connected to the database ${green('successfully')}!`);
-  console.log();
-
-  trackSuccess('didConnectDatabase', scope);
-
   console.log('🏗  Application generation:');
 
   let loader = ora('Copy dashboard').start();

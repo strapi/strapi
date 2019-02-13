@@ -12,7 +12,7 @@ const crypto = require('crypto');
 
 // Public node modules.
 const _ = require('lodash');
-const {cyan} = require('chalk');
+const {cyan, green} = require('chalk');
 const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const shell = require('shelljs');
@@ -309,7 +309,7 @@ module.exports = (scope, cb) => {
           scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
         }
 
-        shell.exec(cmd, {silent: true}, () => {
+        shell.exec(cmd, { silent: true }, () => {
           if (scope.client.module) {
             const lock = require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.module}/package.json`));
             scope.client.version = lock.version;
@@ -338,10 +338,27 @@ module.exports = (scope, cb) => {
       })
     ];
 
+    const connectedToTheDatabase = () => {
+      console.log();
+      console.log(`The app has been connected to the database ${green('successfully')}!`);
+      console.log();
+    
+      trackSuccess('didConnectDatabase', scope);
+
+      cb.success();
+    };
+
     Promise.all(asyncFn)
       .then(() => {
+        // Bypass real connection test.
+        if (isQuick) {
+          return connectedToTheDatabase();
+        }
+
         try {
-          require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
+          const connectivityFile = path.join(scope.tmpPath, 'node_modules', scope.client.connector, 'lib', 'utils', 'connectivity.js');
+
+          require(connectivityFile)(scope, connectedToTheDatabase, connectionValidation);
         } catch(err) {
           trackSuccess('didNotConnectDatabase', scope, err);
           console.log(err);
