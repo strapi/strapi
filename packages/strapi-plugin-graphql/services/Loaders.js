@@ -85,8 +85,8 @@ module.exports = {
 
       // Generate constant for skip parameters.
       // Note: we shouldn't support both way of doing this kind of things in the future.
-      const skip = query.options.start || query.options.skip || 0;
-      const limit = query.options.limit || 100;
+      const skip = query.options._start || query.options._skip || 0;
+      const limit = _.get(query, 'options._limit', 100); // Take into account the limit if its equal 0
 
       // Extracting ids from original request to map with query results.
       const ids = this.extractIds(query);
@@ -133,6 +133,9 @@ module.exports = {
       ...query.options,
       populate: ast ? [query.alias] : [], // Avoid useless population for performance reason
       query: {},
+      _start: 0, // Don't apply start or skip
+      _skip: 0, // Don't apply start or skip
+      _limit: -1, // Don't apply a limit
     };
 
     params.query[`${query.alias}_in`] = _.chain(query.ids)

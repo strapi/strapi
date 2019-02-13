@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
 const getFilterKey = (key) => {
-  const matched = key.match(/^_?(sort|limit|start)$/);
+  const matched = key.match(/^_?(sort|limit|start|skip)$/);
   if (matched) {
     return matched[1];
   }
@@ -47,9 +47,46 @@ class Builder {
         if (matched) {
           [field, operation] = matched;
         }
-        this[operation].apply(this, [field, value]);
+
+        if (this.isValidFieldId(field)) {
+          this[operation].apply(this, [field, value]);
+        } else {
+          strapi.log.warn(
+            `Your filter: ${JSON.stringify(filter, null, 2)} contains a field "${field}" that doesn't appear neither on your model definition nor in the basic filter operators,
+            This field will be ignored for now.`
+          );
+        }
       }
     }
+  }
+
+  isValidFieldId(fieldId) {
+    let model = this.model;
+    const fieldParts = fieldId.split('.');
+    const fieldPartsSize = fieldParts.length;
+    return _.every(fieldParts, (fieldPart, index) => {
+      const fieldIdx = index + 1;
+      const isAttribute =
+        !!model.attributes[fieldPart] || model.primaryKey === fieldPart;
+      const association = model.associations.find(
+        ast => ast.alias === fieldPart
+      );
+      const isAssociation = !!association;
+      if (fieldIdx < fieldPartsSize) {
+        if (isAssociation) {
+          const { models } = association.plugin
+            ? strapi.plugins[association.plugin]
+            : strapi;
+          model = models[association.collection || association.model];
+          return true;
+        }
+      } else if (fieldIdx === fieldPartsSize) {
+        if (isAttribute || isAssociation) {
+          return true;
+        }
+      }
+      return false;
+    });
   }
 
   sort(sort) {
@@ -62,11 +99,27 @@ class Builder {
   }
 
   limit(limit) {
-    this.filter.limit = _.toNumber(limit);
+    const _limit = _.toNumber(limit);
+    // If the limit is explicitly set to -1, then don't apply a limit
+    if (_limit === -1) {
+      delete this.filter.limit;
+    } else {
+      this.filter.limit = _limit;
+    }
+
+    return this;
   }
 
   start(start) {
     this.filter.start = _.toNumber(start);
+    return this;
+  }
+
+  /**
+   * This is just an alias for start, it'll be deprecated in the future.
+   */
+  skip(start) {
+    return this.start(start);
   }
 
   add(w) {
