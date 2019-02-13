@@ -116,9 +116,9 @@ module.exports = function (name, cliArguments) {
           shell.cd(scope.rootPath);
           // Empty log.
           console.log();
-
+          // Create interface for windows user to let them quit the program.
           if (process.platform === "win32") {
-            var rl = require("readline").createInterface({
+            const rl = require("readline").createInterface({
               input: process.stdin,
               output: process.stdout
             });
@@ -127,13 +127,13 @@ module.exports = function (name, cliArguments) {
               process.emit("SIGINT");
             });
           }
-          
+          // Listen Ctrl+C / SIGINT event to close the process.
           process.on("SIGINT", function () {
-            //graceful shutdown
             process.exit();
           });
-
-          const child  = child_process.exec('strapi start');
+          // Launch the server.
+          const child  = child_process.exec('strapi start', { stdio: 'inherit' });
+          // Display child process logs in the parent process.
           child.stdout.pipe(process.stdout);
           child.stderr.pipe(process.stderr);
 
