@@ -12,10 +12,6 @@ const bootstrap = (plugin) => new Promise((resolve, reject) => {
           label: 'Users',
           destination: 'user',
           plugin: 'content-manager',
-        }, {
-          label: 'Admins',
-          destination: 'admin',
-          plugin: 'content-manager',
         }],
         name: 'Content Types',
       });

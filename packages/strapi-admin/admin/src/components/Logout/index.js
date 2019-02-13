@@ -24,6 +24,13 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
     });
   }
 
+  handleGoToAdmin = () => {
+    this.context.router.history.push({
+      pathname: `/plugins/content-manager/admin`,
+      search: '?source=users-permissions',
+    });
+  }
+
   handleLogout = () => {
     auth.clearAppStorage();
     this.context.router.history.push('/plugins/users-permissions/auth/login');
@@ -42,6 +49,9 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
           <DropdownMenu className={styles.dropDownContent}>
             <DropdownItem onClick={this.handleGoTo} className={styles.item}>
               <FormattedMessage id="app.components.Logout.profile" />
+            </DropdownItem>
+            <DropdownItem onClick={this.handleGoToAdmin} className={styles.item}>
+              <FormattedMessage id="app.components.Logout.admin" />
             </DropdownItem>
             <DropdownItem onClick={this.handleLogout}>
               <FormattedMessage id="app.components.Logout.logout" />

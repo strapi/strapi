@@ -87,7 +87,7 @@
     }
   }
 
-  > button:first-child {
+  > button {
     height: 44px;
     line-height: 48px;
     &:hover, &:active {
@@ -95,7 +95,7 @@
     }
   }
 
-  > button:not(:first-child) {
+  > button:last-child {
     color: #F75B1D;
     > i {
       margin-left: 10px
