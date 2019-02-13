@@ -346,8 +346,15 @@ class Strapi extends EventEmitter {
 
     const model = entity.toLowerCase();
 
-    const Model =
-      get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+    let Model;
+
+    if (plugin === 'admin') {
+      Model =
+        get(strapi.admin, ['models', model], undefined);
+    } else {
+      Model =
+        get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+    }
 
     if (!Model) {
       return this.log.error(`The model ${model} can't be found.`);
@@ -376,6 +383,8 @@ class Strapi extends EventEmitter {
       if (index !== -1) {
         pluginPath = pathTerms[index + 1];
       }
+    } if (plugin === 'admin') {
+      pluginPath = 'admin';
     }
 
     if (!pluginPath) {
@@ -384,7 +393,7 @@ class Strapi extends EventEmitter {
 
     // Get plugin name.
     const pluginName = pluginPath.replace('strapi-plugin-', '').toLowerCase();
-    const queries = get(this.plugins, `${pluginName}.config.queries.${connector}`);
+    const queries = pluginPath === 'admin' ? get(this.admin, `config.queries.${connector}`) : get(this.plugins, `${pluginName}.config.queries.${connector}`);
 
     if (!queries) {
       return this.log.error(`There is no query available for the model ${model}.`);

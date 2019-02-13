@@ -12,7 +12,7 @@ module.exports = async (ctx, next) => {
       }
 
       ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ _id, id });
-      ctx.state.admin = await strapi.query('admin', 'users-permissions').findOne({ _id, id });
+      ctx.state.admin = await strapi.query('admin', 'admin').findOne({ _id, id });
     } catch (err) {
       return handleErrors(ctx, err, 'unauthorized');
     }

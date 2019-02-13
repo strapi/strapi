@@ -47,6 +47,16 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "POST",
+      "path": "/auth/local",
+      "handler": "Auth.adminCallback"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/local/register",
+      "handler": "Auth.adminRegister"
     }
   ]
 }

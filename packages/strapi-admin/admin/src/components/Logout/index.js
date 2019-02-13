@@ -27,7 +27,7 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
   handleGoToAdmin = () => {
     this.context.router.history.push({
       pathname: `/plugins/content-manager/admin`,
-      search: '?source=users-permissions',
+      search: '?source=admin',
     });
   }
 

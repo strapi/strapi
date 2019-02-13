@@ -202,35 +202,6 @@
     },
     {
       "method": "POST",
-      "path": "/admin/auth/local",
-      "handler": "Auth.adminCallback",
-      "config": {
-        "policies": ["plugins.users-permissions.ratelimit"],
-        "prefix": "",
-        "description": "Login a admin using the identifiers email and password",
-        "tag": {
-          "plugin": "users-permissions",
-          "name": "Admin"
-        }
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/admin/auth/local/register",
-      "handler": "Auth.adminRegister",
-      "config": {
-        "policies": ["plugins.users-permissions.ratelimit"],
-        "prefix": "",
-        "description": "Register a new admin with the default role",
-        "tag": {
-          "plugin": "users-permissions",
-          "name": "Admin",
-          "actionType": "create"
-        }
-      }
-    },
-    {
-      "method": "POST",
       "path": "/auth/local",
       "handler": "Auth.callback",
       "config": {
