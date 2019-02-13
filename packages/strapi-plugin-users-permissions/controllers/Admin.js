@@ -23,7 +23,7 @@ module.exports = {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
     }
 
-    const data = await strapi.query('user', 'users-permissions').create(values);
+    const data = await strapi.query('admin', 'users-permissions').create(values);
 
     // Send 201 `created`
     ctx.created(data);
@@ -42,7 +42,7 @@ module.exports = {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
     }
 
-    const data = await strapi.query('user', 'users-permissions').update(_.assign(ctx.params, values));
+    const data = await strapi.query('admin', 'users-permissions').update(_.assign(ctx.params, values));
 
     // Send 200 `ok`
     ctx.send(data);
