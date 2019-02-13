@@ -260,6 +260,8 @@ module.exports = {
       };
 
       const defaultPolicy = (obj, role) => {
+        const isAdminCallback = obj.action === 'admincallback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
+        const isAdminRegister = obj.action === 'adminregister' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isCallback = obj.action === 'callback' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
         const isConnect = obj.action === 'connect' && obj.controller === 'auth' && obj.type === 'users-permissions';
         const isPassword = obj.action === 'forgotpassword' && obj.controller === 'auth' && obj.type === 'users-permissions' && role.type === 'public';
@@ -269,7 +271,7 @@ module.exports = {
         const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
         const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
         const isReload = obj.action === 'autoreload';
-        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect || isConfirmation;
+        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect || isConfirmation || isAdminCallback || isAdminRegister;
 
         return Object.assign(obj, { enabled, policy: '' });
       };

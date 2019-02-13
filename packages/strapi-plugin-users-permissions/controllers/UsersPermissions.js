@@ -131,9 +131,9 @@ module.exports = {
   },
 
   init: async (ctx) => {
-    const role = await strapi.query('role', 'users-permissions').findOne({ type: 'root' }, ['users']);
+    const admins = await strapi.query('admin', 'users-permissions').find();
 
-    ctx.send({ hasAdmin: !_.isEmpty(role.users) });
+    ctx.send({ hasAdmin: admins.length > 0 });
   },
 
   searchUsers: async (ctx) => {
@@ -160,7 +160,7 @@ module.exports = {
 
     try {
       await strapi.plugins['users-permissions'].services.userspermissions.updateRole(roleID, ctx.request.body);
-      
+
       strapi.emit('didOpenAccessToFetchContentTypeEntries', ctx.request.body);
 
       ctx.send({ ok: true });

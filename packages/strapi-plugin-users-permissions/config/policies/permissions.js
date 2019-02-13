@@ -12,8 +12,18 @@ module.exports = async (ctx, next) => {
       }
 
       ctx.state.user = await strapi.query('user', 'users-permissions').findOne({ _id, id });
+      ctx.state.admin = await strapi.query('admin', 'users-permissions').findOne({ _id, id });
     } catch (err) {
       return handleErrors(ctx, err, 'unauthorized');
+    }
+
+    if (ctx.state.admin) {
+      if (ctx.state.admin.blocked === true) {
+        return handleErrors(ctx, 'Your account has been blocked by the administrator.', 'unauthorized');
+      }
+
+      ctx.state.user = ctx.state.admin;
+      return await next();
     }
 
     if (!ctx.state.user) {
