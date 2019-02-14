@@ -68,6 +68,7 @@ export class AdminPage extends React.Component {
   state = { hasAlreadyRegistereOtherPlugins: false };
 
   getChildContext = () => ({
+    currentEnvironment: this.props.adminPage.currentEnvironment,
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
     plugins: this.props.plugins,
@@ -169,7 +170,7 @@ export class AdminPage extends React.Component {
               break;
             default:
           }
-        }
+        },
       );
 
       this.setState({ hasAlreadyRegistereOtherPlugins: true });
@@ -192,7 +193,7 @@ export class AdminPage extends React.Component {
   isUrlProtected = props =>
     !includes(
       props.location.pathname,
-      get(props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl'])
+      get(props.plugins.toJS(), ['users-permissions', 'nonProtectedUrl']),
     );
 
   shouldDisplayLogout = () =>
@@ -225,7 +226,7 @@ export class AdminPage extends React.Component {
     if (currentEnvironment === 'production') {
       let pluginsToDisplay = plugins;
       PLUGINS_TO_BLOCK_PRODUCTION.map(
-        plugin => (pluginsToDisplay = pluginsToDisplay.delete(plugin))
+        plugin => (pluginsToDisplay = pluginsToDisplay.delete(plugin)),
       );
 
       return pluginsToDisplay;
@@ -266,11 +267,7 @@ export class AdminPage extends React.Component {
               <Route path="/plugins/:pluginId" component={PluginPage} />
               <Route path="/plugins" component={ComingSoonPage} />
               <Route path="/list-plugins" component={ListPluginsPage} exact />
-              <Route
-                path="/marketplace"
-                render={this.renderMarketPlace}
-                exact
-              />
+              <Route path="/marketplace" render={this.renderMarketPlace} exact />
               <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
               <Route path="404" component={NotFoundPage} />
@@ -287,6 +284,7 @@ export class AdminPage extends React.Component {
 }
 
 AdminPage.childContextTypes = {
+  currentEnvironment: PropTypes.string.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
   plugins: PropTypes.object,
@@ -343,13 +341,13 @@ function mapDispatchToProps(dispatch) {
       pluginLoaded,
       updatePlugin,
     },
-    dispatch
+    dispatch,
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 );
 const withReducer = injectReducer({ key: 'adminPage', reducer });
 const withSaga = injectSaga({ key: 'adminPage', saga });
@@ -357,5 +355,5 @@ const withSaga = injectSaga({ key: 'adminPage', saga });
 export default compose(
   withReducer,
   withSaga,
-  withConnect
+  withConnect,
 )(AdminPage);

@@ -1,7 +1,7 @@
 a.navLink {
-  text-decoration: none;
-  width: 100%;
   display: block;
+  width: 100%;
+  text-decoration: none;
   span, i {
     color: #333740;
   }
@@ -9,19 +9,19 @@ a.navLink {
     font-size: 13px;
   }
   i {
-    margin-right: 10px;
     width: 13px;
     height: 11px;
+    margin-right: 10px;
   }
-  .fa.layout {
-    background-image: url('../../assets/icons/icon_layout.svg');
+  .layout {
     display: inline-block;
+    background-image: url('../../assets/icons/icon_layout.svg');
   }
   &:hover {
     span, i {
       color: #007EFF;
     }
-    .fa.layout {
+    .layout {
       background-image: url('../../assets/icons/icon_layout_hover.svg');
     }
   }

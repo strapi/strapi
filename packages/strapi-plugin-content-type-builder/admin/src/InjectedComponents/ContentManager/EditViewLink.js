@@ -11,12 +11,8 @@ import NavLink from 'components/NavLink';
 // Create link from content-type-builder to content-manager
 function EditViewLink(props) {
   // Retrieve URL from props
-  let url = `${props.getContentTypeBuilderBaseUrl()}${props.getModelName()}`;
-
-  // Add users-permissions to URL for permission, role and user content types
-  if (props.getSource() === 'users-permissions') {
-    url = `${url}&source=${props.getSource()}`;
-  }
+  const base = `${props.getContentTypeBuilderBaseUrl()}${props.getModelName()}`;
+  const url = props.getSource() === 'users-permissions' ? `${base}&source=${props.getSource()}` : base;
 
   return <NavLink {...props} url={url} />;
 }

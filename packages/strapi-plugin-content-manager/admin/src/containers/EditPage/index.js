@@ -227,6 +227,7 @@ export class EditPage extends React.Component {
    */
   getContentManagerBaseUrl = () => {
     let url = `/plugins/${pluginId}/ctm-configurations/edit-settings/`;
+
     if (this.getSource() === 'users-permissions') {
       url = `${url}plugins/${this.getSource()}/`;
     }
@@ -407,7 +408,9 @@ export class EditPage extends React.Component {
    * @type {boolean} current env is dev
    */
   isDevEnvironment = () => {
-    return process.env.NODE_ENV === 'development';
+    const { currentEnvironment } = this.context;
+
+    return currentEnvironment === 'development';
   };
 
   isRelationComponentNull = () =>
@@ -443,7 +446,11 @@ export class EditPage extends React.Component {
       icon: 'layout',
     };
 
-    return <NavLink {...message} url={url} />;
+    return (
+      <li key={`${pluginId}.link`}>
+        <NavLink {...message} url={url} />
+      </li>
+    );
   };
 
   pluginHeaderActions = () => [
@@ -559,10 +566,7 @@ export class EditPage extends React.Component {
    * @type {Array} List of all links to display
    */
   renderNavLinks = () => {
-    // Add ctm link as list item to external links array to return the entire list
-    let ctmLink = <li key={`${pluginId}.link`}>{this.layoutLink()}</li>;
-
-    return [ctmLink, ...this.retrieveLinksContainerComponent()];
+    return [this.layoutLink(), ...this.retrieveLinksContainerComponent()];
   };
 
   renderEdit = () => {
@@ -711,6 +715,7 @@ export class EditPage extends React.Component {
 }
 
 EditPage.contextTypes = {
+  currentEnvironment: PropTypes.string,
   plugins: PropTypes.object,
 };
 

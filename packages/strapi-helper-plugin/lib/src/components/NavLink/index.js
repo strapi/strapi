@@ -14,20 +14,21 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 function NavLink(props) {
-  let content = props.children;
+  let content;
 
   if (typeof props.message === 'string') {
     content = props.message;
-  }
-
-  if (isObject(props.message) && props.message.id) {
+  } else if (isObject(props.message) && props.message.id) {
     content = <FormattedMessage id={props.message.id} />;
+  } else {
+    // Default value.
+    content = props.children;
   }
 
   let icon = <i className={`fa ${props.icon}`} />;
 
   if (props.icon === 'layout') {
-    icon = <i className={cn(styles.fa, styles.layout)} />;
+    icon = <i className={cn(styles.layout)} />;
   }
 
   return (
