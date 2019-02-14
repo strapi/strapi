@@ -15,9 +15,14 @@ function* getVideos() {
 
     yield put(
       getVideosSucceeded(
-        videos.map(video => {
+        videos.map((video, index) => {
+
           video.isOpen = false;
+          /*if (index === 0) {
+            video.isOpen = true;
+          }*/
           video.duration = null;
+          video.startTime = localStorage.getItem("videos");
 
           return video;
         }),

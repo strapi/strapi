@@ -5,7 +5,7 @@
  */
 
 import { fromJS } from 'immutable';
-import { GET_VIDEOS_SUCCEEDED, ON_CLICK } from './constants';
+import { GET_VIDEOS_SUCCEEDED, ON_CLICK, SET_VIDEOS_DURATION } from './constants';
 
 const initialState = fromJS({
   videos: fromJS([]),
@@ -25,6 +25,8 @@ function onboardingReducer(state = initialState, action) {
           return acc.updateIn([index, 'isOpen'], () => false);
         }, list);
       });
+    case SET_VIDEOS_DURATION:
+      return state.updateIn(['videos', action.index, 'duration'], () => action.duration);
     default:
       return state;
   }

@@ -73,21 +73,27 @@ li.listItem {
     }
   }
 }
-
-.playerWrapper {
+.modal .modal-dialog {
   background: red;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1051;
+}
+
+.hiddenPlayerWrapper {
   display: none;
-  max-width: 74.5rem;
-  margin: 16rem auto 3rem calc(50% - 24rem);
-  &.visible {
-    display: block;
+}
+
+.videoModal {
+  margin-right: auto !important;
+  margin-left: auto !important;
+  .videoModalHeader {
+    border-bottom: 0;
+    > h5 {
+      font-family: Lato;
+      font-weight: bold!important;
+      font-size: 1.8rem!important;
+    }
+    > button {
+      margin-top: 0;
+      margin-right: 0;
+    }
   }
 }

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { getVideos, onClick } from './actions';
+import { getVideos, onClick, setVideoDuration } from './actions';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -17,29 +17,21 @@ import makeSelectOnboarding from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 
-import OnboardingVideo from 'components/OnboardingList';
+import OnboardingVideo from 'components/OnboardingVideo';
 
 import styles from './styles.scss';
-import auth from 'utils/auth';
 
 export class Onboarding extends React.Component {
-  state = { showVideos: false };
+  state = { showVideos: false, videosTime: [] };
 
   componentWillMount() {
     this.setState({ showVideos: true });
-    this.props.getVideos();
 
-    localStorage.setItem('videos', JSON.stringify(['video0', 'video1']));
-    console.log(localStorage.getItem('videos'));
-
-    if (auth.get('videos')) {
-      console.log('localStorageExist');
-      console.log(auth.get('videos'));
-    } else {
-      console.log('localStorageNoooo');
-      auth.set('videos', JSON.stringify(['video0', 'video1']), true);
-      //localStorage.setItem('videos', stringify(['video0', 'video1']));
+    if (!localStorage.getItem('videos')) {
+      localStorage.setItem('videos', JSON.stringify([0,0,0,0]));
     }
+
+    this.props.getVideos();
   }
 
   toggleVideos = e => {
@@ -48,7 +40,7 @@ export class Onboarding extends React.Component {
 
   // eslint-disable-line react/prefer-stateless-function
   render() {
-    const { videos, onClick } = this.props;
+    const { videos, onClick, setVideoDuration } = this.props;
     return (
       <div className={styles.videosWrapper}>
         <div
@@ -70,6 +62,7 @@ export class Onboarding extends React.Component {
                   id={i}
                   video={video}
                   onClick={onClick}
+                  setVideoDuration={setVideoDuration}
                 />
               );
             })}
@@ -98,7 +91,7 @@ Onboarding.propTypes = {
 const mapStateToProps = makeSelectOnboarding();
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ getVideos, onClick }, dispatch);
+  return bindActionCreators({ getVideos, onClick, setVideoDuration }, dispatch);
 }
 
 const withConnect = connect(

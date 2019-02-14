@@ -10,25 +10,22 @@ import cn from 'classnames';
 
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
-import PopUpVideo from 'components/PopUpVideo';
 import { Player } from 'video-react';
 import '../../../../node_modules/video-react/dist/video-react.css';
 
 import styles from './styles.scss';
-import auth from 'utils/auth';
 
-class OnboardingList extends React.Component {
+class OnboardingVideo extends React.Component {
+  hiddenPlayer = React.createRef();
   player = React.createRef();
 
   componentDidMount() {
-    //console.log(this.player.current);
-    this.player.current.subscribeToStateChange(
+    this.hiddenPlayer.current.subscribeToStateChange(
       this.handleChangeState.bind(this),
     );
   }
 
   handleChangeState = (state, prevState) => {
-    //console.log({ state, prevState });
 
     const { duration } = state;
     const { id } = this.props;
@@ -45,11 +42,18 @@ class OnboardingList extends React.Component {
     this.player.current.play();
   };
 
-  render() {
-    const content = this.props.video.isOpen ? 'yo' : 'ya';
-    const { video } = this.props;
+  /*onModalClose = () => {
+    console.log('CLOSE');
 
-    //getVideoDuration = e => {};
+    const { player } = this.player.current.getState();
+    const currTime = player.currentTime;
+
+    console.log(currTime);
+    
+  };*/
+
+  render() {
+    const { video } = this.props;
 
     return (
       <li
@@ -64,62 +68,61 @@ class OnboardingList extends React.Component {
         </div>
         <div className={styles.txtWrapper}>
           <p className={styles.title}>{video.title}</p>
-          <p className={styles.time}>{this.props.video.duration}</p>
+          <p className={styles.time}>{isNaN(video.duration) ? ' ' :  `${Math.floor(video.duration / 60)}:${Math.floor(video.duration)%60}`}</p>
         </div>
-
-        {/* <PopUpVideo video={video.video} /> */}
 
         <Modal
           isOpen={video.isOpen}
           toggle={this.props.onClick}
-          className={styles.modalPosition}
+          className={styles.videoModal}
           onOpened={this.afterOpenModal}
-          onClosed={this.afterOpenModal}
+          // onClosed={this.onModalClose}
         >
           <ModalHeader
             toggle={this.props.onClick}
-            className={styles.popUpWarningHeader}
+            className={styles.videoModalHeader}
           >
             <FormattedMessage id={video.title} />
           </ModalHeader>
           <ModalBody className={styles.modalBodyHelper}>
             <div>
-              {/* <Player
+              <Player
+                ref={this.player}
                 playsInline
                 poster="/assets/poster.png"
                 src={video.video}
-              /> */}
+                preload="auto"
+              />
             </div>
           </ModalBody>
         </Modal>
-
-        <div
-          className={cn(
-            styles.playerWrapper,
-            video.isOpen ? styles.visible : '',
-          )}
-        >
-          <Player
-            ref={this.player}
-            playsInline
-            poster="/assets/poster.png"
-            src={video.video}
-            preload="auto"
-            subscribeToStateChange={this.subscribeToStateChange}
-          />
-        </div>
+        {!video.duration ? (
+          <div className={cn(styles.hiddenPlayerWrapper)}>
+            <Player
+              ref={this.hiddenPlayer}
+              playsInline
+              poster="/assets/poster.png"
+              src={video.video}
+              preload="auto"
+              subscribeToStateChange={this.subscribeToStateChange}
+            />
+          </div>
+        ) : (
+          <div></div>
+        )}
       </li>
     );
   }
 }
 
-OnboardingList.defaultProps = {
+OnboardingVideo.defaultProps = {
   video: {},
   setVideoDuration: () => {},
 };
 
-OnboardingList.propTypes = {
+OnboardingVideo.propTypes = {
   videos: PropTypes.object,
+  setVideoDuration: PropTypes.func,
 };
 
-export default OnboardingList;
+export default OnboardingVideo;
