@@ -58,11 +58,15 @@ const auth = {
   },
 
   set(value, key, isLocalStorage) {
+    console.log(value);
+    console.log(key);
+    console.log(isLocalStorage);
     if (isEmpty(value)) {
       return null;
     }
 
     if (isLocalStorage && localStorage) {
+      console.log('Hey');
       return localStorage.setItem(key, stringify(value));
     }
 
@@ -72,7 +76,6 @@ const auth = {
 
     return null;
   },
-
 
   setToken(value = '', isLocalStorage = false, tokenKey = TOKEN_KEY) {
     return auth.set(value, tokenKey, isLocalStorage);
