@@ -26,4 +26,8 @@ window.strapi = {
   backendURL: devBackendURL || backendURL,
 };
 
-__webpack_public_path__ = window.location.port === '4000' ? `${window.location.origin}/` : `${(strapi.remoteURL).replace(window.location.origin, '')}/`;
+try {
+  __webpack_public_path__ = window.location.port === '4000' ? `${window.location.origin}/` : `${(strapi.remoteURL).replace(window.location.origin, '')}/`;
+} catch(err) {
+  // Do nothing
+}

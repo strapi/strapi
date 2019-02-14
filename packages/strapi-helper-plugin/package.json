@@ -27,7 +27,11 @@
     "lint:admin"
   ],
   "devDependencies": {
-    "plop": "^2.2.0"
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.8.0",
+    "enzyme-to-json": "^3.3.5",
+    "plop": "^2.2.0",
+    "react-test-renderer": "^16.7.0"
   },
   "dependencies": {
     "add-asset-html-webpack-plugin": "^2.1.2",

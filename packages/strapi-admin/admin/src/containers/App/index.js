@@ -49,7 +49,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 }
 
 App.contextTypes = {
-  router: PropTypes.object.isRequired,
+  router: PropTypes.object,
 };
 
 App.propTypes = {};
