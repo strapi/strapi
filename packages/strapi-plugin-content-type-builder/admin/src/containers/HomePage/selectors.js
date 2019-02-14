@@ -4,7 +4,7 @@ import pluginId from 'pluginId';
 /**
  * Direct selector to the homePage state domain
  */
-const selectHomePageDomain = () => state => state.get(`${pluginId}-homePage`);
+const selectHomePageDomain = () => state => state.get(`${pluginId}_homePage`);
 
 /**
  * Other specific selectors

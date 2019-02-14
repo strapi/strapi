@@ -171,7 +171,7 @@ describe('Test CTB', () => {
         .then(pluginStore => {
           const displayedFields = pluginStore
             .getState()
-            .getIn(['content-manager-global', 'schema', 'models', 'product', 'editDisplay', 'fields'])
+            .getIn(['content-manager_global', 'schema', 'models', 'product', 'editDisplay', 'fields'])
             .toJS();
 
           expect(displayedFields).to.include.members([

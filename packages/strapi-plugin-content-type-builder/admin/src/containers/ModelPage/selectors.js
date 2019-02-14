@@ -4,7 +4,7 @@ import pluginId from 'pluginId';
 /**
  * Direct selector to the modelPage state domain
  */
-const selectModelPageDomain = () => state => state.get(`${pluginId}-modelPage`);
+const selectModelPageDomain = () => state => state.get(`${pluginId}_modelPage`);
 
 /**
  * Other specific selectors

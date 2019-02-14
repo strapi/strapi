@@ -9,7 +9,7 @@ import pluginId from 'pluginId';
 /**
 * Direct selector to the settingPage state domain
 */
-const selectSettingPageDomain = () => state => state.get(`${pluginId}-settingPage`);
+const selectSettingPageDomain = () => state => state.get(`${pluginId}_settingPage`);
 
 
 /**

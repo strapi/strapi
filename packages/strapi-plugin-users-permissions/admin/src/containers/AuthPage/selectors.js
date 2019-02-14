@@ -4,7 +4,7 @@ import pluginId from 'pluginId';
 /**
  * Direct selector to the authPage state domain
  */
-const selectAuthPageDomain = () => (state) => state.get(`${pluginId}-authPage`);
+const selectAuthPageDomain = () => (state) => state.get(`${pluginId}_authPage`);
 
 /**
  * Default selector used by AuthPage

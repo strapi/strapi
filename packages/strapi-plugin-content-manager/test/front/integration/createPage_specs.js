@@ -200,7 +200,7 @@ describe('Testing Content Manager createPages', function() {
         .then(pluginStore => {
           const records = pluginStore
             .getState()
-            .getIn(['content-manager-listPage', 'records', 'tag'])
+            .getIn(['content-manager_listPage', 'records', 'tag'])
             .toJS();
 
           expect(records).to.have.length(0);
@@ -411,7 +411,7 @@ describe('Testing Content Manager createPages', function() {
         .then(pluginStore => {
           const category = pluginStore
             .getState()
-            .getIn(['content-manager-editPage', 'record', 'category'])
+            .getIn(['content-manager_editPage', 'record', 'category'])
           
             expect(category).to.equal(null);
         });
@@ -420,7 +420,7 @@ describe('Testing Content Manager createPages', function() {
         .then(pluginStore => {
           const category = pluginStore
             .getState()
-            .getIn(['content-manager-editPage', 'record', 'category', 'name'])
+            .getIn(['content-manager_editPage', 'record', 'category', 'name'])
           
             expect(category).to.equal('french food');
         })
@@ -428,7 +428,7 @@ describe('Testing Content Manager createPages', function() {
         .then(pluginStore => {
           const category = pluginStore
             .getState()
-            .getIn(['content-manager-editPage', 'record', 'category', 'name'])
+            .getIn(['content-manager_editPage', 'record', 'category', 'name'])
           
             expect(category).to.equal('french food');
         });

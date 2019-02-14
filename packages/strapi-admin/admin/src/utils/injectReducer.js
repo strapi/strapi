@@ -21,11 +21,7 @@ export default ({ key, reducer, pluginId }) => (WrappedComponent) => {
 
     componentWillMount() {
       const { injectReducer } = this.injectors;
-      let reducerName = key;
-
-      if (pluginId) {
-        reducerName = `${pluginId}-${key}`;
-      }
+      const reducerName = pluginId ? `${pluginId}_${key}` : key;
 
       injectReducer(reducerName, reducer);
     }

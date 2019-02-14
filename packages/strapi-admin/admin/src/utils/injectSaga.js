@@ -25,22 +25,14 @@ export default ({ key, saga, mode, pluginId }) => (WrappedComponent) => {
 
     componentWillMount() {
       const { injectSaga } = this.injectors;
-      let sagaName = key;
-
-      if (pluginId) {
-        sagaName = `${pluginId}-${key}`;
-      }
+      const sagaName = pluginId ? `${pluginId}_${key}` : key;
 
       injectSaga(sagaName, { saga, mode }, this.props);
     }
 
     componentWillUnmount() {
       const { ejectSaga } = this.injectors;
-      let sagaName = key;
-
-      if (pluginId) {
-        sagaName = `${pluginId}-${key}`;
-      }
+      const sagaName = pluginId ? `${pluginId}_${key}` : key;
 
       ejectSaga(sagaName);
     }
