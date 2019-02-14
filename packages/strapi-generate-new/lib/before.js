@@ -283,7 +283,7 @@ module.exports = (scope, cb) => {
         }
 
         console.log();
-        console.log('⏳ Testing database connection...');
+        console.log(isQuick ? '✅ Connected to the database' : '⏳ Testing database connection...');
 
         resolve();
       }),
@@ -309,6 +309,12 @@ module.exports = (scope, cb) => {
           scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
         }
 
+        if (isQuick) {
+          scope.client.version = 'latest';
+
+          return resolve();
+        }
+
         shell.exec(cmd, { silent: true }, () => {
           if (scope.client.module) {
             const lock = require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.module}/package.json`));
@@ -328,7 +334,7 @@ module.exports = (scope, cb) => {
           }
 
           if (scope.developerMode) {
-            shell.exec(linkNodeModulesCommand, () => {
+            shell.exec(linkNodeModulesCommand, { silent: true }, () => {
               resolve();
             });
           } else {
@@ -338,10 +344,13 @@ module.exports = (scope, cb) => {
       })
     ];
 
-    const connectedToTheDatabase = () => {
+    const connectedToTheDatabase = (withMessage = true) => {
       console.log();
-      console.log(`The app has been connected to the database ${green('successfully')}!`);
-      console.log();
+
+      if (withMessage) {  
+        console.log(`The app has been connected to the database ${green('successfully')}!`);
+        console.log();
+      }
     
       trackSuccess('didConnectDatabase', scope);
 
@@ -352,7 +361,7 @@ module.exports = (scope, cb) => {
       .then(() => {
         // Bypass real connection test.
         if (isQuick) {
-          return connectedToTheDatabase();
+          return connectedToTheDatabase(false);
         }
 
         try {

@@ -149,7 +149,7 @@ module.exports = (scope, cb) => {
             if (code) {
               trackSuccess('didNotInstallProjectPlugins', scope);
               loader.warn(`An error occurred during ${defaultPlugin.name} plugin installation.`);
-              console.log(code, stdout, stderr);
+              console.log(stderr);
               return resolve();
             }
 
