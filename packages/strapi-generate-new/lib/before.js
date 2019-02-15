@@ -267,7 +267,7 @@ module.exports = (scope, cb) => {
         if (answers.authenticationDatabase) {
           scope.database.options.authenticationDatabase = answers.authenticationDatabase;
         }
-        
+
         // SQLite requirements.
         if (isSQLite) {
           // Necessary for SQLite configuration (https://knexjs.org/#Builder-insert).
@@ -283,7 +283,11 @@ module.exports = (scope, cb) => {
         }
 
         console.log();
-        console.log(isQuick ? '✅ Connected to the database' : '⏳ Testing database connection...');
+        console.log(
+          isQuick
+          ? '✅ Connected to the database'
+          : '⏳ Testing database connection...\r\nIt might take a minute, please have a coffee ☕️'
+        );
 
         resolve();
       }),
@@ -347,11 +351,11 @@ module.exports = (scope, cb) => {
     const connectedToTheDatabase = (withMessage = true) => {
       console.log();
 
-      if (withMessage) {  
+      if (withMessage) {
         console.log(`The app has been connected to the database ${green('successfully')}!`);
         console.log();
       }
-    
+
       trackSuccess('didConnectDatabase', scope);
 
       cb.success();

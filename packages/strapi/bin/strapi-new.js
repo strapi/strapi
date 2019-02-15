@@ -31,7 +31,7 @@ const packageJSON = require('../package.json');
  */
 
 module.exports = function (name, cliArguments) {
-  console.log('🚀 Start creating your Strapi application. It might take a minute, please take a coffee ☕️');
+  console.log('🚀 Start creating your Strapi application.');
 
   const developerMode = cliArguments.dev !== undefined;
 
@@ -85,9 +85,9 @@ module.exports = function (name, cliArguments) {
   const error = (error) => {
     fetch('https://analytics.strapi.io/track', {
       method: 'POST',
-      body: JSON.stringify({ 
-        event: 'didNotStartAutomatically', 
-        deviceId: machineIdSync(), 
+      body: JSON.stringify({
+        event: 'didNotStartAutomatically',
+        deviceId: machineIdSync(),
         properties: {
           error,
           os: os.type()
@@ -122,7 +122,7 @@ module.exports = function (name, cliArguments) {
               input: process.stdin,
               output: process.stdout
             });
-          
+
             rl.on("SIGINT", function () {
               process.emit("SIGINT");
             });
