@@ -17,6 +17,7 @@ import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 {{/if}}
 import { bindActionCreators, compose } from 'redux';
+// import pluginId from 'pluginId';
 
 {{#if wantSaga}}
 import injectSaga from 'utils/injectSaga';
@@ -72,7 +73,7 @@ const withConnect = connect(mapStateToProps, mapDispatchToProps);
 /* Remove this line if the container doesn't have a route and
 *  check the documentation to see how to create the container's store
 */
-const withReducer = injectReducer({ key: '{{ camelCase name }}', reducer });
+const withReducer = injectReducer({ key: '{{ camelCase name }}', reducer, pluginId });
 {{else}}
 const withConnect = connect(null, mapDispatchToProps);
 {{/if}}
@@ -81,7 +82,7 @@ const withConnect = connect(null, mapDispatchToProps);
 /* Remove the line below the container doesn't have a route and
 *  check the documentation to see how to create the container's store
 */
-const withSaga = injectSaga({ key: '{{ camelCase name }}', saga });
+const withSaga = injectSaga({ key: '{{ camelCase name }}', saga, pluginId });
 {{/if}}
 
 export default compose(
