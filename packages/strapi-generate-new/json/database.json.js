@@ -6,13 +6,13 @@ module.exports = scope => {
     // All available settings (bookshelf and mongoose)
     const settingsBase = {
       client: scope.client.database,
-      host: '${process.env.DATABASE_HOST || \'127.0.0.1\' }',
-      port: '${process.env.DATABASE_PORT || 27017 }',
-      srv: '${process.env.DATABASE_SRV || false }',
-      database: '${process.env.DATABASE_NAME || strapi }',
-      username: '${process.env.DATABASE_USERNAME || \'\' }',
-      password: '${process.env.DATABASE_PASSWORD || \'\' }',
-      ssl: '${process.env.DATABASE_SSL || false }'
+      host: '${process.env.DATABASE_HOST || \'127.0.0.1\'}',
+      port: '${process.env.DATABASE_PORT || 27017}',
+      srv: '${process.env.DATABASE_SRV || false}',
+      database: '${process.env.DATABASE_NAME || \'strapi\'}',
+      username: '${process.env.DATABASE_USERNAME || \'\'}',
+      password: '${process.env.DATABASE_PASSWORD || \'\'}',
+      ssl: '${process.env.DATABASE_SSL || false}'
     };
 
     // Apply only settings set during the configuration
@@ -22,8 +22,8 @@ module.exports = scope => {
 
     // All available options (bookshelf and mongoose)
     const optionsBase = {
-      ssl: '${process.env.DATABASE_SSL || false }',
-      authenticationDatabase: '${process.env.DATABASE_AUTHENTICATION_DATABASE || \'\' }'
+      ssl: '${process.env.DATABASE_SSL || false}',
+      authenticationDatabase: '${process.env.DATABASE_AUTHENTICATION_DATABASE || \'\'}'
     };
 
     // Apply only options set during the configuration

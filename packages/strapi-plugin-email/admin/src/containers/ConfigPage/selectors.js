@@ -1,9 +1,10 @@
 import { createSelector } from 'reselect';
+import pluginId from 'pluginId';
 
 /**
  * Direct selector to the configPage state domain
  */
-const selectConfigPageDomain = () => state => state.get('configPage');
+const selectConfigPageDomain = () => state => state.get(`${pluginId}_configPage`);
 
 /**
  * Default selector used by ConfigPage

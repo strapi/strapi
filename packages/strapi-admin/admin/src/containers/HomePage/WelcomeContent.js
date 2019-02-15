@@ -28,7 +28,7 @@ function WelcomeContent({ hasContent }) {
                 {message => (
                   <a
                     className={styles.welcomeContentA}
-                    href="https://github.com/strapi/strapi/issues/new"
+                    href="https://github.com/strapi/strapi/issues/new/choose"
                     target="_blank"
                   >
                     {message}

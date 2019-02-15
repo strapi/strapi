@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import moment from 'moment';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
@@ -16,14 +15,15 @@ import {
   get,
   includes,
   isEmpty,
-  isObject,
   toNumber,
   toString,
+  truncate,
   replace,
 } from 'lodash';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 import cn from 'classnames';
+import pluginId from 'pluginId';
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
@@ -38,8 +38,6 @@ import Edit from 'components/Edit';
 import EditRelations from 'components/EditRelations';
 // App selectors
 import { makeSelectSchema } from 'containers/App/selectors';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 import { bindLayout } from 'utils/bindLayout';
 import inputValidations from 'utils/inputsValidations';
@@ -171,7 +169,10 @@ export class EditPage extends React.Component {
       return toString(this.props.editPage.pluginHeaderTitle);
     }
 
-    return this.props.match.params.id;
+    const title = get(this.getSchema(), 'editDisplay.displayedField');
+    const valueToDisplay = get(this.props.editPage, ['initialRecord', title], null);
+
+    return isEmpty(valueToDisplay) ? null : truncate(valueToDisplay, { length: '24', separator: '.' });
   };
 
   /**
@@ -260,9 +261,7 @@ export class EditPage extends React.Component {
   handleChange = e => {
     let value = e.target.value;
     // Check if date
-    if (isObject(e.target.value) && e.target.value._isAMomentObject === true) {
-      value = moment(e.target.value).format('YYYY-MM-DD HH:mm:ss');
-    } else if (
+    if (
       ['float', 'integer', 'biginteger', 'decimal'].indexOf(
         get(this.getSchema(), ['fields', e.target.name, 'type']),
       ) !== -1
@@ -601,8 +600,8 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
-const withReducer = injectReducer({ key: 'editPage', reducer });
-const withSaga = injectSaga({ key: 'editPage', saga });
+const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 
 export default compose(
   withReducer,

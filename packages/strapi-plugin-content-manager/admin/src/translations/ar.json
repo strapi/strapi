@@ -50,7 +50,7 @@
   "containers.SettingPage.editSettings.description": "اسحب الحقول وأفلتها لإنشاء التخطيط",
   "containers.SettingPage.editSettings.title": "التعديل - الإعدادات",
   "containers.SettingPage.listSettings.description": "تكوين الخيارات لنوع المحتوى هذا",
-  "containers.SettingPage.listSettings.title": "القائمة — الإعدادات",
+  "containers.SettingPage.listSettings.title": "قائمة( إعدادات)",
   "containers.SettingPage.pluginHeaderDescription": "قم بتكوين الإعدادات المحددة لنوع المحتوى هذا",
   "containers.SettingPage.relations": "المجالات العلائقية",
   "containers.SettingsPage.Block.contentType.description": "تكوين الإعدادات المحددة",

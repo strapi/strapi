@@ -47,7 +47,7 @@ function* submit() {
       }, init);
     };
     const body = createBody(cloneDeep(form));
-    console.log({ form, body });
+
     if (body.restrictedAccess && body.password === '') {
       return yield put(
         setFormErrors({ password: [{ id: 'components.Input.error.validation.required' }] }),

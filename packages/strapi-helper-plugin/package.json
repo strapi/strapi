@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.21",
+  "version": "3.0.0-alpha.23.1",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 10.0.0",
@@ -57,7 +57,7 @@
     "lodash-webpack-plugin": "^0.11.4",
     "node-sass": "^4.5.3",
     "null-loader": "^0.1.1",
-    "plop": "^1.8.0",
+    "plop": "^2.2.0",
     "postcss-cssnext": "^2.11.0",
     "postcss-focus": "^2.0.0",
     "postcss-loader": "^2.0.6",

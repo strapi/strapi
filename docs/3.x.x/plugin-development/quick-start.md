@@ -26,7 +26,7 @@ If the installation failed, please remove the global packages related to Strapi.
 In a new terminal window:
 
 1. Generate a new plugin: `cd /path/to/myDevelopmentProject && strapi generate:plugin my-plugin`
-2. Install admin dependencies and build: `cd /admin && npm setup`
+2. Install admin dependencies and build: `cd /admin && npm run setup`
 3. `npm start`
 
 When finished with plugin modifications:

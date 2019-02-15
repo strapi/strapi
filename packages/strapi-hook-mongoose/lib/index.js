@@ -565,7 +565,11 @@ module.exports = function (strapi) {
           break;
         case '_in':
           result.key = `where.${key}.$in`;
-          result.value = value;
+          result.value = _.castArray(value);
+          break;
+        case '_nin':
+          result.key = `where.${key}.$nin`;
+          result.value = _.castArray(value);
           break;
         default:
           result = undefined;
