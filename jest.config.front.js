@@ -1,6 +1,3 @@
-const path = require('path');
-process.env.REMOTE_URL = '/admin';
-
 module.exports = {
   collectCoverageFrom: [
     'packages/strapi-admin/admin/src/**/**/*.{js,jsx}',
@@ -10,25 +7,25 @@ module.exports = {
   ],
   coverageThreshold: {
     global: {
-      // NOTE: This should be uncommented at some point
-
-      // statements: 90,
-      // branches: 90,
-      // functions: 90,
-      // lines: 90,
+      // NOTE: This should be increased at some point
+      statements: 0,
+      branches: 0,
+      functions: 0,
+      lines: 0,
     },
   },
   moduleDirectories: [
     'node_modules',
     '<rootDir>/packages/strapi-admin/admin/src',
+    '<rootDir>/packages/strapi-plugin-content-manager/admin/src',
     '<rootDir>/packages/strapi-helper-plugin/node_modules',
+    '<rootDir>/packages/strapi-helper-plugin',
     '<rootDir>/packages/strapi-helper-plugin/lib/src',
   ],
   moduleNameMapper: {
     '.*\\.(css|less|styl|scss|sass)$': '<rootDir>/packages/strapi-helper-plugin/lib/internals/mocks/cssModule.js',
     '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/packages/strapi-helper-plugin/lib/internals/mocks/image.js',
-    'containers(.*)$': '<rootDir>/packages/strapi-admin/admin/src/containers/$1',
   },
   rootDir: process.cwd(),
   setupTestFrameworkScriptFile: '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/test-bundler.js',
@@ -38,8 +35,10 @@ module.exports = {
   ],
   testRegex: 'tests/.*\\.test\\.js$',
   transform: {
-    "^.+\\.js$": "babel-jest",
+    '^.+\\.js$': 'babel-jest',
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/fileTransformer.js',
+
   },
-  testURL: "http://localhost:4000/admin"
+  testURL: 'http://localhost:4000/admin',
 };
 
