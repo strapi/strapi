@@ -1,8 +1,8 @@
 {
   "connection": "default",
-  "collectionName": "users-permissions_admin",
+  "collectionName": "users-permissions_administrator",
   "info": {
-    "name": "Admin",
+    "name": "Administrator",
     "description": ""
   },
   "attributes": {

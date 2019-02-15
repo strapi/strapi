@@ -38,7 +38,7 @@ module.exports = {
     }
 
     // Check if the admin exists.
-    const admin = await strapi.query('admin', 'admin').findOne(query);
+    const admin = await strapi.query('administrator', 'admin').findOne(query);
 
     if (!admin) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
@@ -87,7 +87,7 @@ module.exports = {
     }
 
     // First, check if the admin is the first one to register as admin.
-    const admins = await strapi.query('admin', 'admin').find();
+    const admins = await strapi.query('administrator', 'admin').find();
     const hasAdmin = admins.length > 0;
 
     if (hasAdmin) {
@@ -103,7 +103,7 @@ module.exports = {
 
     params.password = await strapi.plugins['users-permissions'].services.user.hashPassword(params);
 
-    const admin = await strapi.query('admin', 'admin').findOne({
+    const admin = await strapi.query('administrator', 'admin').findOne({
       email: params.email
     });
 
@@ -112,7 +112,7 @@ module.exports = {
     }
 
     try {
-      const admin = await strapi.query('admin', 'admin').create(params);
+      const admin = await strapi.query('administrator', 'admin').create(params);
 
       admin.isAdmin = true;
 
