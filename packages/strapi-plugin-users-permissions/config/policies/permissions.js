@@ -32,10 +32,6 @@ module.exports = async (ctx, next) => {
 
     role = ctx.state.user.role;
 
-    if (role.type === 'root') {
-      return await next();
-    }
-
     const store = await strapi.store({
       environment: '',
       type: 'plugin',

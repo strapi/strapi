@@ -57,10 +57,6 @@ module.exports = {
       throw new Error('Cannot found this role');
     }
 
-    if (role.type === 'root') {
-      return new Error(`You cannot delete the root admin role.`);
-    }
-
     // Move users to guest role.
     const arrayOfPromises = role.users.reduce((acc, user) => {
       acc.push(strapi.query('user', 'users-permissions').update({
@@ -271,7 +267,7 @@ module.exports = {
         const isInit = obj.action === 'init' && obj.controller === 'userspermissions';
         const isMe = obj.action === 'me' && obj.controller === 'user' && obj.type === 'users-permissions';
         const isReload = obj.action === 'autoreload';
-        const enabled = isCallback || isRegister || role.type === 'root' || isInit || isPassword || isNewPassword || isMe || isReload || isConnect || isConfirmation || isAdminCallback || isAdminRegister;
+        const enabled = isCallback || isRegister || isInit || isPassword || isNewPassword || isMe || isReload || isConnect || isConfirmation || isAdminCallback || isAdminRegister;
 
         return Object.assign(obj, { enabled, policy: '' });
       };
@@ -348,11 +344,6 @@ module.exports = {
     // Create two first default roles.
     await Promise.all([
       strapi.query('role', 'users-permissions').create({
-        name: 'Administrator',
-        description: 'These users have all access in the project.',
-        type: 'root'
-      }),
-      strapi.query('role', 'users-permissions').create({
         name: 'Authenticated',
         description: 'Default role given to authenticated user.',
         type: 'authenticated'
@@ -368,9 +359,8 @@ module.exports = {
   },
 
   updateRole: async function (roleID, body) {
-    const [role, root, authenticated] = await Promise.all([
+    const [role, authenticated] = await Promise.all([
       this.getRole(roleID, []),
-      strapi.query('role', 'users-permissions').findOne({ type: 'root' }, []),
       strapi.query('role', 'users-permissions').findOne({ type: 'authenticated' }, [])
     ]);
 
@@ -410,14 +400,12 @@ module.exports = {
 
     // Add user to this role.
     _.differenceBy(body.users, role.users, role._id ? '_id' : 'id')
-      .filter(user => user.role !== `${root._id || root.id}`.toString())
       .forEach(user => {
         arrayOfPromises.push(this.updateUserRole(user, roleID));
       });
 
     // Remove user to this role and link him to authenticated.
     _.differenceBy(role.users, body.users, role._id ? '_id' : 'id')
-      .filter(user => user.role !== `${root._id || root.id}`.toString())
       .forEach(user => {
         arrayOfPromises.push(this.updateUserRole(user, authenticated._id || authenticated.id));
       });
