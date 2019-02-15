@@ -4,7 +4,7 @@
  *
  */
 
-import { GET_VIDEOS, GET_VIDEOS_SUCCEEDED, ON_CLICK, SET_VIDEOS_DURATION } from './constants';
+import { GET_VIDEOS, GET_VIDEOS_SUCCEEDED, ON_CLICK, SET_VIDEOS_DURATION, UPDATE_VIDEO_START_TIME } from './constants';
 
 export function getVideos() {
   return {
@@ -26,10 +26,18 @@ export function onClick(e) {
   };
 }
 
-export function setVideoDuration(id, duration) {
+export function setVideoDuration(index, duration) {
   return {
     type: SET_VIDEOS_DURATION,
-    index: parseInt(id, 10),
+    index: parseInt(index, 10),
     duration: parseFloat(duration, 10),
+  };
+}
+
+export function updateVideoStartTime(index, startTime) {
+  return {
+    type: UPDATE_VIDEO_START_TIME,
+    index: parseInt(index, 10),
+    startTime: parseFloat(startTime, 10),
   };
 }

@@ -53,7 +53,7 @@ import FullStory from 'components/FullStory';
 import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
-import { getAdminData } from './actions';
+import { emitEvent, getAdminData } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import selectAdminPage from './selectors';
@@ -70,6 +70,7 @@ export class AdminPage extends React.Component {
 
   getChildContext = () => ({
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
+    emitEvent: this.props.emitEvent,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
     plugins: this.props.plugins,
     updatePlugin: this.props.updatePlugin,
@@ -290,6 +291,7 @@ export class AdminPage extends React.Component {
 }
 
 AdminPage.childContextTypes = {
+  emitEvent: PropTypes.func,
   disableGlobalOverlayBlocker: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
   plugins: PropTypes.object,
@@ -341,6 +343,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       disableGlobalOverlayBlocker,
+      emitEvent,
       enableGlobalOverlayBlocker,
       getAdminData,
       pluginLoaded,

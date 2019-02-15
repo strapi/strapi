@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
-import { FormattedMessage } from 'react-intl';
 import { Player } from 'video-react';
 import '../../../../node_modules/video-react/dist/video-react.css';
 
@@ -21,12 +20,11 @@ class OnboardingVideo extends React.Component {
 
   componentDidMount() {
     this.hiddenPlayer.current.subscribeToStateChange(
-      this.handleChangeState.bind(this),
+      this.handleChangeState,
     );
   }
 
   handleChangeState = (state, prevState) => {
-
     const { duration } = state;
     const { id } = this.props;
 
@@ -35,22 +33,21 @@ class OnboardingVideo extends React.Component {
     }
   };
 
-  afterOpenModal = () => {
-    // references are now sync'd and can be accessed.
-    console.log('YOYO');
+  handleCurrentTimeChange = (curr) => {
 
+    this.props.getVideoCurrentTime(this.props.id, curr);            
+  }
+
+  afterOpenModal = () => {
     this.player.current.play();
   };
 
-  /*onModalClose = () => {
-    console.log('CLOSE');
+  onModalClose = () => {
 
     const { player } = this.player.current.getState();
     const currTime = player.currentTime;
-
-    console.log(currTime);
-    
-  };*/
+    this.handleCurrentTimeChange(currTime);
+  };
 
   render() {
     const { video } = this.props;
@@ -76,39 +73,36 @@ class OnboardingVideo extends React.Component {
           toggle={this.props.onClick}
           className={styles.videoModal}
           onOpened={this.afterOpenModal}
-          // onClosed={this.onModalClose}
+          onClosed={this.onModalClose}
         >
           <ModalHeader
             toggle={this.props.onClick}
             className={styles.videoModalHeader}
           >
-            <FormattedMessage id={video.title} />
+            {video.title}
           </ModalHeader>
           <ModalBody className={styles.modalBodyHelper}>
             <div>
               <Player
                 ref={this.player}
-                playsInline
                 poster="/assets/poster.png"
                 src={video.video}
+                startTime={video.startTime}
                 preload="auto"
               />
             </div>
           </ModalBody>
         </Modal>
-        {!video.duration ? (
+        {!video.duration && (
           <div className={cn(styles.hiddenPlayerWrapper)}>
             <Player
               ref={this.hiddenPlayer}
-              playsInline
               poster="/assets/poster.png"
               src={video.video}
               preload="auto"
               subscribeToStateChange={this.subscribeToStateChange}
             />
           </div>
-        ) : (
-          <div></div>
         )}
       </li>
     );
@@ -116,13 +110,17 @@ class OnboardingVideo extends React.Component {
 }
 
 OnboardingVideo.defaultProps = {
+  currTime: 0,
   video: {},
   setVideoDuration: () => {},
+  getVideoCurrentTime: () => {},
 };
 
 OnboardingVideo.propTypes = {
+  currTime: PropTypes.number,
   videos: PropTypes.object,
   setVideoDuration: PropTypes.func,
+  getVideoCurrentTime: PropTypes.func,
 };
 
 export default OnboardingVideo;

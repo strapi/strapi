@@ -109,12 +109,16 @@ function serverRestartWatcher(response) {
  *
  * @return {object}           The response data
  */
-export default function request(
-  url,
-  options = {},
-  shouldWatchServerRestart = false,
-  stringify = true,
-) {
+export default function request(...args) {
+  let [url, options = {}, shouldWatchServerRestart, stringify = true, ...rest] = args;
+  let noAuth;
+
+  try {
+    [{ noAuth }] = rest;
+  } catch(err) {
+    noAuth = false;
+  }
+
   // Set headers
   if (!options.headers) {
     options.headers = Object.assign(
@@ -130,7 +134,7 @@ export default function request(
 
   const token = auth.getToken();
 
-  if (token) {
+  if (token && !noAuth) {
     options.headers = Object.assign(
       {
         Authorization: `Bearer ${token}`,
