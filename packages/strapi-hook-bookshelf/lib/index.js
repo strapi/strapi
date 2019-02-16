@@ -651,12 +651,12 @@ module.exports = function(strapi) {
                           await ORM.knex.raw(`INSERT INTO ${quote}tmp_${table}${quote}(${Object.keys(attributes).join(' ,')}) SELECT ${Object.keys(attributes).join(' ,')} FROM ${quote}${table}${quote}`);
                         } catch (err) {
                           console.log('Warning!');
-                          console.log('We can\'t migrate your data caused by the following error');
+                          console.log('We can\'t migrate your data due to the following error.');
                           console.log();
                           console.log(err);
                           console.log();
-                          console.log(`We created a new table "tmp_${table}" with your last update.`);
-                          console.log(`We suggest you manually migrate your data from "${table}" to "tmp_${table}" and then to DROP and RENAME tables.`);
+                          console.log(`We created a new table "tmp_${table}" with your latest changes.`);
+                          console.log(`We suggest you manually migrate your data from "${table}" to "tmp_${table}" and then to DROP and RENAME the tables.`);
 
                           return false;
                         }
