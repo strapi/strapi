@@ -12,6 +12,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEmpty } from 'lodash';
 import cn from 'classnames';
+import pluginId from 'pluginId';
 // Components
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
@@ -19,11 +20,8 @@ import Block from 'components/Block';
 import Row from 'components/Row';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import Input from 'components/InputsIndex';
-import { pluginId } from 'app';
 // Utils
 import auth from 'utils/auth';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import openWithNewTab from 'utils/openWithNewTab';
 // Actions
 import {
@@ -245,8 +243,8 @@ const withConnect = connect(
   mapStateToProps,
   mapDispatchToProps,
 );
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,
