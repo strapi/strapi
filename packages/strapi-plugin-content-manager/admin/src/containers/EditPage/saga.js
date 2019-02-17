@@ -1,13 +1,13 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+// import { LOCATION_CHANGE } from 'react-router-redux';
 import { findIndex, get, isArray, isEmpty, includes, isNumber, isString, map } from 'lodash';
 import {
   all,
   call,
-  cancel,
+  // cancel,
   fork,
   put,
   select,
-  take,
+  // take,
   takeLatest,
 } from 'redux-saga/effects';
 import { makeSelectSchema } from 'containers/App/selectors';
@@ -185,13 +185,15 @@ export function* submit() {
 }
 
 function* defaultSaga() {
-  const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
+  yield fork(takeLatest, GET_DATA, dataGet);
+  // TODO fix router (Other PR)
+  // const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
   yield fork(takeLatest, DELETE_DATA, deleteData);
   yield fork(takeLatest, SUBMIT, submit);
 
-  yield take(LOCATION_CHANGE);
+  // yield take(LOCATION_CHANGE);
 
-  yield cancel(loadDataWatcher);
+  // yield cancel(loadDataWatcher);
 }
 
 export default defaultSaga;
