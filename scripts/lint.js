@@ -32,6 +32,7 @@ const watcher = (label, pckgName) => {
 
 const except = [
   'docs',
+  'fileTransformer.js',
   'jest.config.js',
   'jest.config.front.js',
   'scripts',
