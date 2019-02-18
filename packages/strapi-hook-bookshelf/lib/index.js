@@ -644,7 +644,7 @@ module.exports = function(strapi) {
                         })
                       ));
 
-                      if (sqlite3Change) {
+                      if (sqlite3Change && definition.client === 'sqlite3') {
                         await createTable(`tmp_${table}`);
 
                         try {
