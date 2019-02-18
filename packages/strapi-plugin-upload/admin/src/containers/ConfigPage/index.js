@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { findIndex, get, isEmpty } from 'lodash';
+import pluginId from 'pluginId';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -19,12 +20,6 @@ import PluginHeader from 'components/PluginHeader';
 
 // Plugin's components
 import EditForm from 'components/EditForm';
-
-// You can find these utils in either
-// ./node_modules/strapi-helper-plugin/lib/src
-// or strapi/packages/strapi-helper-plugin/lib/src
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 
 import {
   getSettings,
@@ -180,8 +175,8 @@ const mapStateToProps = selectConfigPage();
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = injectReducer({ key: 'configPage', reducer });
-const withSaga = injectSaga({ key: 'configPage', saga });
+const withReducer = strapi.injectReducer({ key: 'configPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'configPage', saga, pluginId });
 
 export default compose(
   withReducer,

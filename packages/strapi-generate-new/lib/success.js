@@ -5,6 +5,7 @@
  */
 
 // Node.js core.
+const os = require('os');
 const request = require('request');
 const { machineIdSync } = require('node-machine-id');
 
@@ -16,7 +17,8 @@ module.exports = function trackSuccess(event, scope, error) {
       uuid: scope.uuid,
       deviceId: machineIdSync(),
       properties: {
-        error
+        error,
+        os: os.type()
       }
     })
     .on('error', () => {});

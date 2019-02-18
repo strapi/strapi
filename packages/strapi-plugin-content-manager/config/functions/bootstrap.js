@@ -5,7 +5,8 @@ const {
   getApisKeys,
   getApisUploadRelations,
   getEditDisplayAvailableFieldsPath,
-  getEditDisplayFieldsPath,
+  getEditDisplayDisplayedField,
+  getEditDisplayFieldsPath
 } = require('./utils/getters');
 const splitted = str => str.split('.');
 const pickData = model =>
@@ -394,6 +395,9 @@ module.exports = async cb => {
       const defaultSortPath = apiPath.concat('defaultSort');
       const currentAttr = attrPath.slice(-1);
       const defaultSort = _.get(prevSchema.models, defaultSortPath);
+      const displayedFieldPath = getEditDisplayDisplayedField(attrPath);
+      const displayedField = _.get(prevSchema.models, displayedFieldPath, null);
+      const primaryKey = _.get(prevSchema.models, [...apiPath, 'primaryKey'], null);
 
       // If the user has deleted the default sort attribute in the content type builder
       // Replace it by new generated one from the current schema
@@ -405,6 +409,12 @@ module.exports = async cb => {
         );
       }
 
+      // If the user has deleted the edit view displayed field (name in the header)
+      // Replace it by the model's primary key.
+      if (_.includes(currentAttr, displayedField)) {
+        _.set(prevSchema.models, displayedFieldPath, primaryKey);
+      }
+      
       // Update the displayed fields
       const updatedListDisplay = prevListDisplay.filter(
         obj => obj.name !== currentAttr.join()
