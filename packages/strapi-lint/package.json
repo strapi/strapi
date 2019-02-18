@@ -39,6 +39,7 @@
   },
   "dependencies": {
     "babel-eslint": "^8.2.3",
-    "prettier": "^1.12.1"
+    "prettier": "^1.12.1",
+    "shelljs": "^0.7.8"
   }
 }
