@@ -7,6 +7,7 @@
  */
 
 // Node.js core.
+const child_process = require('child_process');
 const os = require('os');
 const path = require('path');
 
@@ -30,7 +31,7 @@ const packageJSON = require('../package.json');
  */
 
 module.exports = function (name, cliArguments) {
-  console.log('🚀 Start creating your Strapi application. It might take a minute, please take a coffee ☕️');
+  console.log('🚀 Start creating your Strapi application.');
 
   const developerMode = cliArguments.dev !== undefined;
 
@@ -84,9 +85,9 @@ module.exports = function (name, cliArguments) {
   const error = (error) => {
     fetch('https://analytics.strapi.io/track', {
       method: 'POST',
-      body: JSON.stringify({ 
-        event: 'didNotStartAutomatically', 
-        deviceId: machineIdSync(), 
+      body: JSON.stringify({
+        event: 'didNotStartAutomatically',
+        deviceId: machineIdSync(),
         properties: {
           error,
           os: os.type()
@@ -113,11 +114,32 @@ module.exports = function (name, cliArguments) {
         try {
           // Enter inside the project folder.
           shell.cd(scope.rootPath);
-          // Launch the server.
-          shell.exec('strapi start', {
-            stdio: 'inherit'
+          // Empty log.
+          console.log();
+          // Create interface for windows user to let them quit the program.
+          if (process.platform === "win32") {
+            const rl = require("readline").createInterface({
+              input: process.stdin,
+              output: process.stdout
+            });
+
+            rl.on("SIGINT", function () {
+              process.emit("SIGINT");
+            });
+          }
+          // Listen Ctrl+C / SIGINT event to close the process.
+          process.on("SIGINT", function () {
+            process.exit();
           });
+          // Launch the server.
+          const child  = child_process.exec('strapi start', { stdio: 'inherit' });
+          // Display child process logs in the parent process.
+          child.stdout.pipe(process.stdout);
+          child.stderr.pipe(process.stderr);
+
+          // shell.exec('strapi start');
         } catch (e) {
+          console.log(e);
           error(e);
         }
       }
