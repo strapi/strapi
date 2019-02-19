@@ -1,4 +1,4 @@
-# Migration guide from alpha.22 to alpha.23
+# Migration guide from alpha.23 to alpha.24
 
 **Here are the major changes:**
 
@@ -6,8 +6,8 @@
 - Documentation
 
 **Useful links:**
-- Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.23](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.23)
-- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.22...v3.0.0-alpha.23](https://github.com/strapi/strapi/compare/v3.0.0-alpha.22...v3.0.0-alpha.23)
+- Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.24](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.24.1)
+- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.23...v3.0.0-alpha.24](https://github.com/strapi/strapi/compare/v3.0.0-alpha.23...v3.0.0-alpha.24)
 
 <br>
 
@@ -19,7 +19,7 @@ Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about 
 
 ## Getting started
 
-Install Strapi `alpha.23` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.23 -g`.
+Install Strapi `alpha.24.1` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.24.1 -g`.
 
 When it's done, generate a new empty project `strapi new myNewProject` (don't pay attention to the database configuration).
 
@@ -27,9 +27,9 @@ When it's done, generate a new empty project `strapi new myNewProject` (don't pa
 
 ## Update node modules
 
-Update the Strapi's dependencies version (move Strapi's dependencies to `3.0.0-alpha.23` version) of your project.
+Update the Strapi's dependencies version (move Strapi's dependencies to `3.0.0-alpha.24.1` version) of your project.
 
-Run `npm install strapi@3.0.0-alpha.23 --save` to update your strapi version.
+Run `npm install strapi@3.0.0-alpha.24.1 --save` to update your strapi version.
 
 <br>
 
@@ -53,6 +53,10 @@ Copy the fields and relations you had in your `/plugins/users-permissions/models
 
 Then, delete your old `plugins` folder and replace it with the new one.
 
+## Update custom plugin store
+
+If you write your own plugins please follow these instructions https://github.com/strapi/strapi/pull/2808
+
 <br>
 
-That's all, you have now upgraded to Strapi `alpha.23`.
+That's all, you have now upgraded to Strapi `alpha.24.1`.
