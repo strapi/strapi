@@ -81,6 +81,15 @@ if (module.hot) {
   });
 }
 
+// Require the Initializer component
+const initializer = (() => {
+  try {
+    return require('../../../../admin/src/initializer.js'); // eslint-disable-line import/no-unresolved
+  } catch(err) {
+    return null;
+  }
+})();
+
 // Register the plugin.
 strapi.registerPlugin({
   blockerComponent: null,
@@ -90,6 +99,8 @@ strapi.registerPlugin({
   icon: pluginPkg.strapi.icon,
   id: pluginId,
   injectedComponents,
+  initializer,
+  isReady: false,
   layout,
   leftMenuLinks: [],
   mainComponent: Comp,
