@@ -28,7 +28,8 @@ module.exports = {
     const { files = {} } = ctx.request.body.files;
 
     if (_.isEmpty(files)) {
-      return ctx.send(true);
+      strapi.log.error('Files are empty');
+      return ctx.badRequest(null, 'Files are empty');
     }
 
     // Transform stream files to buffer
