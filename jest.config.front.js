@@ -1,7 +1,7 @@
 module.exports = {
   collectCoverageFrom: [
     'packages/strapi-admin/admin/src/**/**/*.{js,jsx}',
-    'packages/strapi-plugin-**/**/admin/src/**/**/*.{js,jsx}',
+    '!packages/strapi-plugin-**/**/admin/src/**/**/*.{js,jsx}',
     '!packages/strapi-admin/admin/src/**/**/tests/*.test.{js,jsx}',
     '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
   ],
@@ -13,6 +13,9 @@ module.exports = {
       functions: 0,
       lines: 0,
     },
+  },
+  globals: {
+    __webpack_public_path__: 'http://localhost:4000',
   },
   moduleDirectories: [
     'node_modules',

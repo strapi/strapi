@@ -1,4 +1,5 @@
 import 'whatwg-fetch';
+import { startsWith } from 'lodash';
 import auth from 'utils/auth';
 
 /**
@@ -127,7 +128,7 @@ export default function request(url, options = {}, shouldWatchServerRestart = fa
   }
 
   // Add parameters to url
-  url = _.startsWith(url, '/') ? `${strapi.backendURL}${url}` : url;
+  url = startsWith(url, '/') ? `${strapi.backendURL}${url}` : url;
 
   if (options && options.params) {
     const params = formatQueryParams(options.params);
