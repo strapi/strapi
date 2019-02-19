@@ -64,8 +64,6 @@ import saga from './saga';
 import makeSelectEditPage from './selectors';
 import styles from './styles.scss';
 
-const pluginId = 'content-manager';
-
 export class EditPage extends React.Component {
   state = { showWarning: false, showWarningDelete: false };
 
