@@ -189,7 +189,7 @@ const buildPlugins = async () => {
       const name = pckgName === 'admin' ? pckgName : `plugin-${pckgName}`;
       asyncWatcher(
         `🏗  Building ${name}...`,
-        `cd ../strapi-${name} && IS_MONOREPO=true npm run build`,
+        `cd ../strapi-${name} && cross-env IS_MONOREPO=true npm run build`,
         false,
         resolve,
       );
@@ -209,7 +209,7 @@ const setup = async () => {
         const pluginName = name === 'admin' ? name : `plugin-${name}`;
         shell.cd(`../strapi-${pluginName}`);
 
-        return watcher(`🏗  Building ${pluginName}...`, 'IS_MONOREPO=true npm run build');
+        return watcher(`🏗  Building ${pluginName}...`, 'cross-env IS_MONOREPO=true npm run build');
       });
     }
   }
