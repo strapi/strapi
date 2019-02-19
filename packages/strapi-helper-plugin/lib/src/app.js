@@ -19,10 +19,10 @@ const LoadableApp = Loadable({
   loading: LoadingIndicatorPage,
 });
 
-const tryRequireRoot = (source) => {
+const tryRequireRoot = source => {
   try {
     return require('../../../../admin/src/' + source + '.js').default; // eslint-disable-line prefer-template
-  } catch(err) {
+  } catch (err) {
     return null;
   }
 };
@@ -33,7 +33,7 @@ const pluginRequirements = tryRequireRoot('requirements');
 const layout = (() => {
   try {
     return require('../../../../config/layout.js'); // eslint-disable-line import/no-unresolved
-  } catch(err) {
+  } catch (err) {
     return null;
   }
 })();
@@ -41,17 +41,14 @@ const layout = (() => {
 const injectedComponents = (() => {
   try {
     return require('injectedComponents').default; // eslint-disable-line import/no-unresolved
-  } catch(err) {
+  } catch (err) {
     return [];
   }
-});
+})();
 
 // Plugin identifier based on the package.json `name` value
 const pluginPkg = require('../../../../package.json');
-const pluginId = pluginPkg.name.replace(
-  /^strapi-plugin-/i,
-  ''
-);
+const pluginId = pluginPkg.name.replace(/^strapi-plugin-/i, '');
 const pluginName = pluginPkg.strapi.name;
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const apiUrl = `${strapi.backendURL}/${pluginId}`;

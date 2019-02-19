@@ -4,7 +4,7 @@ import pluginId from 'pluginId';
 /**
  * Direct selector to the form state domain
  */
-const selectFormDomain = () => state => state.get(`${pluginId}-form`);
+const selectFormDomain = () => state => state.get(`${pluginId}_form`);
 
 /**
  * Other specific selectors

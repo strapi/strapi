@@ -10,7 +10,7 @@ import pluginId from 'pluginId';
 /**
 * Direct selector to the listPage state domain
 */
-const selectEditPageDomain = () => state => state.get(`${pluginId}-editPage`);
+const selectEditPageDomain = () => state => state.get(`${pluginId}_editPage`);
 
 
 /**

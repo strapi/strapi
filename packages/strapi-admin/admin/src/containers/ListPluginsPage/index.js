@@ -19,18 +19,26 @@ import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
-import { makeSelectCurrentEnv, makeSelectPluginDeleteAction, makeSelectPlugins, makeSelectIsLoading } from './selectors';
-import { getPlugins, onDeletePluginClick, onDeletePluginConfirm } from './actions';
+import {
+  makeSelectCurrentEnv,
+  makeSelectPluginDeleteAction,
+  makeSelectPlugins,
+  makeSelectIsLoading,
+} from './selectors';
+import {
+  getPlugins,
+  onDeletePluginClick,
+  onDeletePluginConfirm,
+} from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';
 
-export class ListPluginsPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  getChildContext = () => (
-    {
-      currentEnvironment: this.props.currentEnvironment,
-    }
-  );
+export class ListPluginsPage extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
+  getChildContext = () => ({
+    currentEnvironment: this.props.currentEnvironment,
+  });
 
   componentDidMount() {
     this.props.getPlugins();
@@ -40,14 +48,16 @@ export class ListPluginsPage extends React.Component { // eslint-disable-line re
     if (this.props.isLoading) {
       return <LoadingIndicatorPage />;
     }
-
     return (
       <div>
         <FormattedMessage id="app.components.ListPluginsPage.helmet.title">
-          {(message) => (
+          {message => (
             <Helmet>
               <title>{message}</title>
-              <meta name="description" content="Description of ListPluginsPage" />
+              <meta
+                name="description"
+                content="Description of ListPluginsPage"
+              />
             </Helmet>
           )}
         </FormattedMessage>
@@ -105,20 +115,23 @@ function mapDispatchToProps(dispatch) {
       onDeletePluginClick,
       onDeletePluginConfirm,
     },
-    dispatch
+    dispatch,
   );
 }
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
 /* Remove this line if the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
+ *  check the documentation to see how to create the container's store
+ */
 const withReducer = injectReducer({ key: 'listPluginsPage', reducer });
 
 /* Remove the line below the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
+ *  check the documentation to see how to create the container's store
+ */
 const withSaga = injectSaga({ key: 'listPluginsPage', saga });
 
 export default compose(

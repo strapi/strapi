@@ -4,7 +4,7 @@ import pluginId from 'pluginId';
 /**
  * Direct selector to the configPage state domain
  */
-const selectConfigPageDomain = () => state => state.get(`${pluginId}-configPage`);
+const selectConfigPageDomain = () => state => state.get(`${pluginId}_configPage`);
 
 /**
  * Default selector used by ConfigPage

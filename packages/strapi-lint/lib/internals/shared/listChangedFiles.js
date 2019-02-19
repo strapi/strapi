@@ -5,10 +5,13 @@
 
 'use strict';
 
-const execFileSync = require('child_process').execFileSync;
+const shell = require('shelljs');
 
 const exec = (command, args) => {
-  console.log('> ' + [command].concat(args).join(' '));
+  const cmd = [command].concat(args).join(' ');
+
+  console.log(`> ${cmd}`);
+
   const options = {
     cwd: process.cwd(),
     env: process.env,
@@ -17,7 +20,7 @@ const exec = (command, args) => {
   };
 
   try {
-    return execFileSync(command, args, options);
+    return shell.exec(cmd, {silent: true});
   } catch (err) {
     return '';
   }
@@ -31,7 +34,7 @@ const execGitCmd = args =>
 
 const listChangedFiles = () => {
   const mergeBase = execGitCmd(['merge-base', 'HEAD', 'master']);
-  
+
   return new Set([
     ...execGitCmd(['diff', '--name-only', '--diff-filter=ACMRTUB', mergeBase]),
     ...execGitCmd(['ls-files', '--others', '--exclude-standard']),
