@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { capitalize, findIndex, get, isUndefined, toInteger, upperFirst } from 'lodash';
+import { capitalize, findIndex, get, isEmpty, isUndefined, toInteger, upperFirst } from 'lodash';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
@@ -365,7 +365,13 @@ export class ListPage extends React.Component {
 
   showSearch = () => get(this.getCurrentModel(), ['search']);
 
-  showFilters = () => get(this.getCurrentModel(), ['filters']);
+  showFilters = () => {
+    if (isEmpty(get(this.getCurrentModel(), ['editDisplay', 'availableFields']))) {
+      return false;
+    }
+
+    return get(this.getCurrentModel(), ['filters']);
+  }
 
   showBulkActions = () => get(this.getCurrentModel(), ['bulkActions']);
 
