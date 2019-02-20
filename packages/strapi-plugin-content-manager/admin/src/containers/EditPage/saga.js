@@ -67,7 +67,7 @@ function* deleteData() {
   }
 }
 
-export function* submit() {
+export function* submit(action) {
   const currentModelName = yield select(makeSelectModelName());
   const fileRelations = yield select(makeSelectFileRelations());
   const isCreating = yield select(makeSelectIsCreating());
@@ -139,6 +139,8 @@ export function* submit() {
 
     const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
 
+    action.context.emitEvent('willSaveEntry');
+
     // Call our request helper (see 'utils/request')
     // Pass false and false as arguments so the request helper doesn't stringify
     // the body and doesn't watch for the server to restart
@@ -149,11 +151,14 @@ export function* submit() {
       params,
     }, false, false);
 
+    action.context.emitEvent('didSaveEntry');
+
     strapi.notification.success('content-manager.success.record.save');
     // Redirect the user to the ListPage container
     yield put(submitSuccess());
 
   } catch(err) {
+    action.context.emitEvent('didNotSaveEntry', { error: err });
     if (isArray(err.response.payload.message)) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {

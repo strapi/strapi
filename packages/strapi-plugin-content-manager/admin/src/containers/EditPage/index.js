@@ -373,7 +373,7 @@ export class EditPage extends React.Component {
     );
 
     if (isEmpty(formErrors)) {
-      this.props.submit();
+      this.props.submit(this.context);
     }
 
     this.props.setFormErrors(formErrors);
@@ -697,6 +697,7 @@ export class EditPage extends React.Component {
 }
 
 EditPage.contextTypes = {
+  emitEvent: PropTypes.func,
   currentEnvironment: PropTypes.string,
   plugins: PropTypes.object,
 };

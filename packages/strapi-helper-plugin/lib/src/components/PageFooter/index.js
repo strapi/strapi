@@ -30,6 +30,7 @@ function PageFooter(props) {
                   name: 'params._limit',
                   value: parseInt(e.target.value, 10),
                 };
+                props.context.emitEvent('willChangeNumberOfEntriesPerPage');
                 props.onChangeParams({ target });
               }}
               value={get(props, ['params', '_limit'], 10)}

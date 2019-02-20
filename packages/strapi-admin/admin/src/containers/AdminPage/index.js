@@ -300,6 +300,7 @@ AdminPage.childContextTypes = {
 };
 
 AdminPage.contextTypes = {
+  emitEvent: PropTypes.func,
   router: PropTypes.object.isRequired,
 };
 
