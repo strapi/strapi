@@ -38,6 +38,7 @@ import Content from 'containers/Content';
 import LocaleToggle from 'containers/LocaleToggle';
 import CTAWrapper from 'components/CtaWrapper';
 import Header from 'components/Header/index';
+import Onboarding from 'containers/Onboarding';
 import HomePage from 'containers/HomePage/Loadable';
 import Marketplace from 'containers/Marketplace/Loadable';
 import LeftMenu from 'containers/LeftMenu';
@@ -52,7 +53,7 @@ import FullStory from 'components/FullStory';
 import auth from 'utils/auth';
 import injectReducer from 'utils/injectReducer';
 import injectSaga from 'utils/injectSaga';
-import { getAdminData } from './actions';
+import { emitEvent, getAdminData } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import selectAdminPage from './selectors';
@@ -70,6 +71,7 @@ export class AdminPage extends React.Component {
   getChildContext = () => ({
     currentEnvironment: this.props.adminPage.currentEnvironment,
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
+    emitEvent: this.props.emitEvent,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
     plugins: this.props.plugins,
     updatePlugin: this.props.updatePlugin,
@@ -267,7 +269,11 @@ export class AdminPage extends React.Component {
               <Route path="/plugins/:pluginId" component={PluginPage} />
               <Route path="/plugins" component={ComingSoonPage} />
               <Route path="/list-plugins" component={ListPluginsPage} exact />
-              <Route path="/marketplace" render={this.renderMarketPlace} exact />
+              <Route
+                path="/marketplace"
+                render={this.renderMarketPlace}
+                exact
+              />
               <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
               <Route path="404" component={NotFoundPage} />
@@ -278,6 +284,7 @@ export class AdminPage extends React.Component {
           isOpen={this.props.blockApp && this.props.showGlobalAppBlocker}
           {...this.props.overlayBlockerData}
         />
+        <Onboarding />
       </div>
     );
   }
@@ -285,6 +292,7 @@ export class AdminPage extends React.Component {
 
 AdminPage.childContextTypes = {
   currentEnvironment: PropTypes.string.isRequired,
+  emitEvent: PropTypes.func,
   disableGlobalOverlayBlocker: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
   plugins: PropTypes.object,
@@ -336,6 +344,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       disableGlobalOverlayBlocker,
+      emitEvent,
       enableGlobalOverlayBlocker,
       getAdminData,
       pluginLoaded,

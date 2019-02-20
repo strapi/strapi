@@ -15,6 +15,12 @@ import styles from './styles.scss';
 
 class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
   handleGoTo = () => {
+    if (this.props.routePath.indexOf('#create::contentType') !== -1 && this.props.name === 'advancedSettings') {
+      this.context.emitEvent('didSelectContentTypeSettings');
+    } else if (this.props.routePath.indexOf('#create') !== -1 && this.props.routePath.indexOf('::attribute') !== -1 && this.props.name === 'advancedSettings') {
+      this.context.emitEvent('didSelectContentTypeFieldSettings');
+    }
+
     router.push(replace(this.props.routePath, this.props.nameToReplace, this.props.name));
   }
 
@@ -28,6 +34,10 @@ class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/
     );
   }
 }
+
+PopUpHeaderNavLink.contextTypes = {
+  emitEvent: PropTypes.func
+};
 
 PopUpHeaderNavLink.propTypes = {
   message: PropTypes.string.isRequired,

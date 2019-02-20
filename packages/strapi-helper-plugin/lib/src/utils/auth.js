@@ -73,7 +73,6 @@ const auth = {
     return null;
   },
 
-
   setToken(value = '', isLocalStorage = false, tokenKey = TOKEN_KEY) {
     return auth.set(value, tokenKey, isLocalStorage);
   },

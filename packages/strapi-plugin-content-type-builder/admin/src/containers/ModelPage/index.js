@@ -315,6 +315,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 }
 
 ModelPage.contextTypes = {
+  emitEvent: PropTypes.func,
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
 };

@@ -5,7 +5,35 @@ import { makeSelectAppPlugins } from 'containers/App/selectors';
 import {
   getAdminDataSucceeded,
 } from './actions';
-import { GET_ADMIN_DATA } from './constants';
+import { makeSelectUuid } from './selectors';
+import { EMIT_EVENT, GET_ADMIN_DATA } from './constants';
+
+function* emitter(action) {
+  try {
+    const requestURL = 'https://analytics.strapi.io/track';
+    const uuid = yield select(makeSelectUuid());
+    const { event, properties } = action;
+
+    if (uuid) {
+      yield call(
+        fetch,
+        requestURL,
+        {
+          method: 'POST',
+          body: JSON.stringify({ event, uuid, properties }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+        false,
+        true,
+        { noAuth: true },
+      );
+    }
+  } catch(err) {
+    console.log(err); // eslint-disable-line no-console
+  }
+}
 
 function* getData() {
   try {
@@ -32,6 +60,7 @@ function* getData() {
 function* defaultSaga() {
   yield all([
     fork(takeLatest, GET_ADMIN_DATA, getData),
+    fork(takeLatest, EMIT_EVENT, emitter),
   ]);
 }
 

@@ -1,0 +1,100 @@
+li.listItem {
+  display: block;
+  padding: 10px 15px;
+  cursor: pointer;
+  &.finished {
+    .title {
+      color: #919bae;
+    }
+    .thumbWrapper {
+      .play {
+        background-color: #5a9e06;
+        &::before {
+          content: '\f00c';
+          font-size: 11px;
+        }
+      }
+    }
+  }
+  &:hover {
+    background-color: #f7f8f8;
+    .title {
+      color: #0e7de7;
+    }
+  }
+  .txtWrapper,
+  .thumbWrapper {
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .thumbWrapper {
+    width: 55px;
+    height: 38px;
+    background-color: #d8d8d8;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    img {
+      width: 100%;
+      height: 100%;
+    }
+    .play {
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      border-radius: 50%;
+      background-color: #0e7de7;
+      position: absolute;
+      top: 50%;
+      margin-top: -10px;
+      left: 50%;
+      margin-left: -10px;
+      text-align: center;
+      &::before {
+        content: '\f04b';
+        font-family: 'FontAwesome';
+        font-size: 9px;
+        color: white;
+        display: inline-block;
+        vertical-align: middle;
+      }
+    }
+  }
+  .txtWrapper {
+    padding: 0 15px;
+    p {
+      font-size: 14px;
+      font-family: Lato-SemiBold;
+    }
+    .time {
+      font-size: 11px;
+      color: #919bae;
+      font-family: Lato-Bold;
+    }
+  }
+}
+.modal .modal-dialog {
+  background: red;
+}
+
+.hiddenPlayerWrapper {
+  display: none;
+}
+
+.videoModal {
+  margin-right: auto !important;
+  margin-left: auto !important;
+  .videoModalHeader {
+    border-bottom: 0;
+    padding-bottom: 0;
+    > h5 {
+      font-family: Lato;
+      font-weight: bold!important;
+      font-size: 1.8rem!important;
+    }
+    > button {
+      margin-top: 0;
+      margin-right: 0;
+    }
+  }
+}

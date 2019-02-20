@@ -107,15 +107,22 @@ export function* submitChanges(action) {
       set(body, 'plugin', pluginModel);
     }
 
+    const { emitEvent } = action.context;
     const method = modelName === body.name ? 'POST' : 'PUT';
     const baseUrl = '/content-type-builder/models/';
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
     const opts = { method, body };
+
+    // Send event.
+    yield put(emitEvent('willSaveContentType'));
+
+    // Send request to save the content type.
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
       if (method === 'POST') {
         storeData.clearAppStorage();
+        yield put(emitEvent('didSaveContentType'));
         yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
         yield put(postContentTypeSucceeded());
 
