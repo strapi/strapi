@@ -27,8 +27,9 @@ module.exports = (mongoose = new Mongoose()) => {
         case 'binary':
           return 'Buffer';
         case 'date':
-        case 'datetime':
+        // There is no "Time" type in mongo used as an alias for datetime
         case 'time':
+        case 'datetime':
         case 'timestamp':
           return Date;
         case 'decimal':
