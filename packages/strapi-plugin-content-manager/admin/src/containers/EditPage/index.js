@@ -557,7 +557,7 @@ export class EditPage extends React.Component {
       location: { search },
     } = this.props;
     const source = getQueryParameters(search, 'source');
-    const basePath = `/plugins/${pluginId}/ctm-configurations`;
+    const basePath = `/plugins/${pluginId}/ctm-configurations/edit-settings`;
     const pathname =
       source !== pluginId
         ? `${basePath}/plugins/${source}/${this.getModelName()}`
