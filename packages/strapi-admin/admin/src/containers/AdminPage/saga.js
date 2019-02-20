@@ -12,7 +12,7 @@ function* emitter(action) {
   try {
     const requestURL = 'https://analytics.strapi.io/track';
     const uuid = yield select(makeSelectUuid());
-    const { event } = action;
+    const { event, properties } = action;
 
     if (uuid) {
       yield call(
@@ -20,7 +20,7 @@ function* emitter(action) {
         requestURL,
         {
           method: 'POST',
-          body: JSON.stringify({ event, uuid }),
+          body: JSON.stringify({ event, uuid, properties }),
           headers: {
             'Content-Type': 'application/json',
           },

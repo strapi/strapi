@@ -17,8 +17,15 @@ function* getVideos() {
       { noAuth: true },
     );
 
-    let currTimes = Array.apply(null, Array(videos.length)).map(Number.prototype.valueOf,0);
-
+    let currTimes = Array.apply(null, Array(videos.length)).map((e, i) => {
+      return {
+        startTime: 0,
+        end: false,
+        key: i,
+        id: videos[i].id,
+      }
+    });
+    
     // Retrieve start time if enable in localStorage
     if (localStorage.getItem('videos')) {
       currTimes.splice(0, currTimes.length, ...JSON.parse(localStorage.getItem('videos')));
@@ -31,7 +38,8 @@ function* getVideos() {
         videos.map((video, index) => {
           video.isOpen = false;
           video.duration = null;
-          video.startTime = currTimes[index];
+          video.startTime = currTimes[index].startTime;
+          video.end = currTimes[index].end;
 
           return video;
         }),

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { getVideos, onClick, setVideoDuration, updateVideoStartTime } from './actions';
+import { getVideos, onClick, setVideoDuration, updateVideoStartTime, setVideoEnd, removeVideos } from './actions';
 
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
@@ -24,11 +24,16 @@ import styles from './styles.scss';
 export class Onboarding extends React.Component {
   state = { showVideos: false };
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState({ showVideos: true });
     this.props.getVideos();
   }
   
+  componentWillUnmount() {
+    this.props.removeVideos();
+    localStorage.removeItem('videos');
+  }
+
   toggleVideos = () => {
     // Display videos card
     this.setState(prevState => ({ showVideos: !prevState.showVideos }));
@@ -39,14 +44,38 @@ export class Onboarding extends React.Component {
     this.context.emitEvent(eventName);
   };
 
-  updateLocalStorage = (index, current) => {
+  setVideoEnd = () => {
+    this.setVideoEnd();
+  }
+
+  didPlayVideo = (index, currTime) => {
+
+    const eventName = `didPlay${index}GetStartedVideo`;
+    this.context.emitEvent(eventName, {timestamp: currTime});
+  }
+
+  didStopVideo = (index, currTime) => {
+
+    const eventName = `didStop${index}Video`;
+    this.context.emitEvent(eventName, {timestamp: currTime});
+  }
+
+  updateLocalStorage = (index, current, duration) => {
     // Update store
     this.props.updateVideoStartTime(index, current);
 
     // Update localStorage
     let videosTime = JSON.parse(localStorage.getItem('videos'));
-    videosTime.fill(0);
-    videosTime[index] = current;
+    videosTime[index].startTime = current;
+
+    let percent = current * 100 / duration;
+    if (percent >= 80) {
+      if (videosTime[index].end === false) {
+        videosTime[index].end = true;
+        this.props.setVideoEnd(index, true);
+      }
+    }
+
     localStorage.setItem('videos', JSON.stringify(videosTime));
   };
 
@@ -77,6 +106,8 @@ export class Onboarding extends React.Component {
                   onClick={onClick}
                   setVideoDuration={setVideoDuration}
                   getVideoCurrentTime={this.updateLocalStorage}
+                  didPlayVideo={this.didPlayVideo}
+                  didStopVideo={this.didStopVideo}
                 />
               );
             })}
@@ -108,7 +139,7 @@ Onboarding.propTypes = {
 const mapStateToProps = makeSelectOnboarding();
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ getVideos, onClick, setVideoDuration, updateVideoStartTime }, dispatch);
+  return bindActionCreators({ getVideos, onClick, setVideoDuration, updateVideoStartTime, setVideoEnd, removeVideos }, dispatch);
 }
 
 const withConnect = connect(

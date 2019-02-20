@@ -2,20 +2,7 @@ li.listItem {
   display: block;
   padding: 10px 15px;
   cursor: pointer;
-  &.finished {
-    .title {
-      color: #919bae;
-    }
-    .thumbWrapper {
-      .play {
-        background-color: #5a9e06;
-        &::before {
-          content: '\f00c';
-          font-size: 11px;
-        }
-      }
-    }
-  }
+  
   &:hover {
     background-color: #f7f8f8;
     .title {
@@ -34,9 +21,20 @@ li.listItem {
     border-radius: 2px;
     overflow: hidden;
     position: relative;
+    .overlay {
+      width: 100%;
+      height: 100%;
+      background-color: rgba(#0E7DE7, .8);
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
     img {
       width: 100%;
       height: 100%;
+      position: relative;
+      z-index: 0;
     }
     .play {
       width: 20px;
@@ -44,22 +42,47 @@ li.listItem {
       line-height: 20px;
       border-radius: 50%;
       background-color: #0e7de7;
+      border: 1px solid white;
       position: absolute;
       top: 50%;
       margin-top: -10px;
       left: 50%;
       margin-left: -10px;
       text-align: center;
+      z-index: 2;
       &::before {
         content: '\f04b';
         font-family: 'FontAwesome';
         font-size: 9px;
         color: white;
         display: inline-block;
-        vertical-align: middle;
+        vertical-align: top;
+        height: 100%;
       }
     }
   }
+  &.finished {
+    .title {
+      color: #919bae;
+    }
+    .thumbWrapper {
+      .overlay {
+        background-color: transparent;
+      }
+      img {
+        opacity: 0.6;
+      }
+      .play {
+        background-color: #5a9e06;
+        border-color: #5a9e06;
+        &::before {
+          content: '\f00c';
+          font-size: 11px;
+        }
+      }
+    }
+  }
+
   .txtWrapper {
     padding: 0 15px;
     p {
@@ -72,9 +95,6 @@ li.listItem {
       font-family: Lato-Bold;
     }
   }
-}
-.modal .modal-dialog {
-  background: red;
 }
 
 .hiddenPlayerWrapper {
@@ -95,6 +115,14 @@ li.listItem {
     > button {
       margin-top: 0;
       margin-right: 0;
+    }
+  }
+  .videoPlayer {
+    > button {
+      top: 50%;
+      margin-top: -0.75em;
+      left: 50%;
+      margin-left: -1.5em;
     }
   }
 }
