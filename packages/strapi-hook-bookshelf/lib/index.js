@@ -435,10 +435,35 @@ module.exports = function(strapi) {
                             type = 'decimal(10,2)';
                             break;
                           case 'date':
+                            type = 'date';
                           case 'time':
+                            type = 'time';
                           case 'datetime':
+                            switch(definition.client) {
+                              case 'pg':
+                                type = 'timestamp';
+                                break;
+                              case 'sqlite3':
+                                type = 'datetime';
+                                break;
+                              default:
+                                type = 'datetime';
+                                break;
+                            }
+                            break;
                           case 'timestamp':
-                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                            switch(definition.client) {
+                              case 'pg':
+                                type = 'timestamp with time zone';
+                                break;
+                              case 'sqlite3':
+                                // This may need to be changed to a SQLite Function
+                                type = 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                                break;
+                              default:
+                                type = 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                                break;
+                            }
                             break;
                           case 'timestampUpdate':
                             switch(definition.client) {
@@ -446,6 +471,7 @@ module.exports = function(strapi) {
                                 type = 'timestamp with time zone';
                                 break;
                               case 'sqlite3':
+                                // This may need to be changed to a SQLite Function
                                 type = 'timestamp DEFAULT CURRENT_TIMESTAMP';
                                 break;
                               default:
