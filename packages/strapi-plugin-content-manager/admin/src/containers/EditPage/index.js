@@ -621,7 +621,7 @@ export class EditPage extends React.Component {
   render() {
     const { editPage, moveAttr, moveAttrEnd } = this.props;
     const { showWarning, showWarningDelete } = this.state;
-    
+
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
