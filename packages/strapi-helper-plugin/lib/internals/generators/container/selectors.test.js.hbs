@@ -1,10 +1,29 @@
-// import { fromJS } from 'immutable';
-// import { makeSelect{{ properCase name }}Domain } from '../selectors';
+import { fromJS } from 'immutable';
+import pluginId from '../../../pluginId';
 
-// const selector = makeSelect{{ properCase name}}Domain();
+import makeSelect{{ properCase name }}Domain, { select{{ properCase name }}Domain } from '../selectors';
 
-describe('makeSelect{{ properCase name }}Domain', () => {
-  it('Expect to have unit tests specified', () => {
-    expect(true).toEqual(false);
+
+describe('<{{ properCase name }} /> selectors', () => {
+  describe('select{{ properCase name }}Domain selector', () => {
+    it('should select the global state', () => {
+      const state = fromJS({});
+      const mockedState = fromJS({
+        [`${pluginId}_{{ camelCase name }}`]: state,
+      });
+      
+      expect(select{{ properCase name }}Domain()(mockedState)).toEqual(state);
+    });
+  });
+
+  describe('makeSelect{{ properCase name }}Domain', () => {
+    it('should select the global state (.toJS())', () => {
+      const state = fromJS({});
+      const mockedState = fromJS({
+        [`${pluginId}_{{ camelCase name }}`]: state,
+      });
+
+      expect(makeSelect{{ properCase name }}Domain()(mockedState)).toEqual(state.toJS());
+    });
   });
 });

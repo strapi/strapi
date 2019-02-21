@@ -27,4 +27,10 @@ const hoc = () => (WrappedComponent) => {
 global.strapi = {
   injectReducer: hoc,
   injectSaga: hoc,
+  notification: {
+    error: jest.fn(),
+    info: jest.fn(),
+    success: jest.fn(),
+    warning: jest.fn(),
+  },
 };
