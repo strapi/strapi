@@ -22,10 +22,12 @@ module.exports = {
     __webpack_public_path__: 'http://localhost:4000',
     strapi: {},
   },
+  // NOTE: Should be dynamic
   moduleDirectories: [
     'node_modules',
     '<rootDir>/packages/strapi-admin/admin/src',
     '<rootDir>/packages/strapi-plugin-content-manager/admin/src',
+    '<rootDir>/packages/strapi-plugin-users-permissions/admin/src',
     '<rootDir>/packages/strapi-helper-plugin/node_modules',
     '<rootDir>/packages/strapi-helper-plugin',
     '<rootDir>/packages/strapi-helper-plugin/lib/src',
