@@ -462,18 +462,20 @@ module.exports = {
           // eslint-disable-line no-unused-vars
           // Object here corresponds to the filter that needs to be applied to the aggregation
           return new Query(model)
+            .where(obj)
             .thru((query) => {
-              if (_.has(obj, 'limit')) query.limit(obj.limit);
+              if (_.has(obj, 'limit')) return query.limit(obj.limit);
               return query;
             })
-            .count(obj)
+            .count()
             .execute();
         },
         totalCount: async (obj, options, context) => {
           // eslint-disable-line no-unused-vars
           // Object here corresponds to the filter that needs to be applied to the aggregation
           return new Query(model)
-            .count(obj)
+            .where(obj)
+            .count()
             .execute();
         },
       },
