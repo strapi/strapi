@@ -194,7 +194,7 @@ export class EditPage extends React.Component {
     const title = get(this.getSchema(), 'editDisplay.displayedField');
     const valueToDisplay = get(this.props.editPage, ['initialRecord', title], null);
 
-    return isEmpty(valueToDisplay) ? null : truncate(valueToDisplay, { length: '24', separator: '.' });
+    return isEmpty(toString(valueToDisplay)) ? null : truncate(valueToDisplay, { length: '24', separator: '.' });
   };
 
   /**
@@ -621,7 +621,7 @@ export class EditPage extends React.Component {
   render() {
     const { editPage, moveAttr, moveAttrEnd } = this.props;
     const { showWarning, showWarningDelete } = this.state;
-
+    
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
