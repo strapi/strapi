@@ -436,8 +436,10 @@ module.exports = function(strapi) {
                             break;
                           case 'date':
                             type = 'date';
+                            break;
                           case 'time':
                             type = 'time';
+                            break;
                           case 'datetime':
                             switch(definition.client) {
                               case 'pg':
