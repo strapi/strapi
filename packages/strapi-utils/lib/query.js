@@ -19,6 +19,10 @@ class Query {
     return this.instance.thru(cb);
   }
 
+  where(filter) {
+    return this.instance.where(filter);
+  }
+
   populate(populate) {
     return this.instance.populate(populate);
   }

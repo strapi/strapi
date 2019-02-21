@@ -5,6 +5,11 @@ class Query {
   constructor(model) {
     this.model = model;
     this.query = this.model.aggregate();
+    this.postProcessFns = [];
+
+    // Binding
+    this.executePostProcessors = this.executePostProcessors.bind(this);
+    this.clearPostProcessors = this.clearPostProcessors.bind(this);
   }
 
   buildQuery(filter) {
@@ -13,6 +18,12 @@ class Query {
 
   thru(cb) {
     this.query = cb(this.query);
+
+    return this;
+  }
+
+  where(filter) {
+    this.query = this.query.append(this.buildQuery(filter));
 
     return this;
   }
@@ -27,10 +38,14 @@ class Query {
   }
 
   count(filter) {
-    this.query = this.query.append(this.buildQuery(filter));
-    this.query = this.query
-      .count("count")
-      .then(result => _.get(result, `0.count`, 0));
+    if (filter) {
+      this.where(filter);
+    }
+    this.query = this.query.count('count');
+
+    // Format the output of the count stage
+    this.postProcessFns.push((result) => _.get(result, `0.count`, 0));
+
     return this;
   }
 
@@ -44,7 +59,18 @@ class Query {
   }
 
   execute() {
-    return this.query;
+    const result = this.query
+      .then(this.executePostProcessors)
+      .finally(this.clearPostProcessors); // Clear the postProcessors functions
+    return result;
+  }
+
+  executePostProcessors(result) {
+    return _.flow(this.postProcessFns)(result);
+  }
+
+  clearPostProcessors() {
+    this.postProcessFns = [];
   }
 }
 
