@@ -113,6 +113,7 @@ export class HomePage extends React.Component {
   handleButtonClick = () => {
     // TODO change open modal URL
     if (this.props.match.params.settingType === 'roles') {
+      this.context.emitEvent('willCreateRole');
       this.props.history.push(`${this.props.location.pathname}/create`);
     } else if (this.props.match.params.settingType === 'providers') {
       this.props.history.push(`${this.props.location.pathname}#add::${this.props.match.params.settingType}`);
@@ -124,14 +125,14 @@ export class HomePage extends React.Component {
     const modifiedObject = get(this.props.modifiedData, [this.getEndPoint(), this.props.dataToEdit]);
     const initObject = get(this.props.initialData, [this.getEndPoint(), this.props.dataToEdit]);
     const formErrors = checkFormValidity(this.props.match.params.settingType, modifiedObject, this.props.dataToEdit);
-
+    
     if (isEqual(initObject, modifiedObject)) {
       return this.props.unsetDataToEdit();
     }
 
     if (isEmpty(formErrors)) {
       this.setState({ showModalEdit: false });
-      this.props.submit(this.props.match.params.settingType);
+      this.props.submit(this.props.match.params.settingType, this.context);
     } else {
       this.props.setFormErrors(formErrors);
     }
@@ -228,6 +229,10 @@ export class HomePage extends React.Component {
 HomePage.childContextTypes = {
   setDataToEdit: PropTypes.func,
   unsetDataToEdit: PropTypes.func,
+};
+
+HomePage.contextTypes = {
+  emitEvent: PropTypes.func,
 };
 
 HomePage.defaultProps = {};

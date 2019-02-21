@@ -72,9 +72,16 @@ export function* dataFetch(action) {
 export function* submitData(action) {
   try {
     const body = yield select(makeSelectModifiedData());
-    const opts = { method: 'PUT', body: (action.endPoint === 'advanced') ? get(body, ['advanced', 'settings'], {}) : body };
-
+    const opts = { method: 'PUT', body: (action.endPoint === 'advanced') ? get(body, ['advanced', 'settings'], {}) : body };    
+    
     yield call(request, `/users-permissions/${action.endPoint}`, opts);
+
+    if (action.endPoint === 'email-templates') {
+      action.context.emitEvent('didEditEmailTemplates');
+    } else if (action.endPoint === 'providers') {
+      action.context.emitEvent('didEditAuthenticationProvider');
+    }
+    
     yield put(submitSucceeded());
     strapi.notification.success('users-permissions.notification.success.submit');
   } catch(error) {

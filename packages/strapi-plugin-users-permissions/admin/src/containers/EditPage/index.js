@@ -102,7 +102,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
       return this.props.setErrors([{ name: 'name', errors: [{ id: 'users-permissions.EditPage.form.roles.name.error' }] }]);
     }
 
-    this.props.submit();
+    this.props.submit(this.context);
   }
 
   showLoaderForm = () => {
@@ -158,7 +158,10 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
             number: size(get(this.props.editPage, ['modifiedData', 'users'])),
           },
         }}
-        onClickAdd={this.props.onClickAdd}
+        onClickAdd={() => {
+          this.context.emitEvent('didAssociateUserToRole');
+          this.props.onClickAdd();
+        }}
         onClickDelete={this.props.onClickDelete}
         name="users"
         type="text"
@@ -265,6 +268,10 @@ EditPage.childContextTypes = {
   setInputPoliciesPath: PropTypes.func.isRequired,
   setShouldDisplayPolicieshint: PropTypes.func.isRequired,
   resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
+};
+
+EditPage.contextTypes = {
+  emitEvent: PropTypes.func,
 };
 
 EditPage.propTypes = {

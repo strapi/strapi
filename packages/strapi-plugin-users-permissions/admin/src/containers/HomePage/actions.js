@@ -107,10 +107,11 @@ export function setFormErrors(formErrors) {
   };
 }
 
-export function submit(endPoint) {
+export function submit(endPoint, context) {
   return {
     type: SUBMIT,
     endPoint,
+    context,
   };
 }
 
