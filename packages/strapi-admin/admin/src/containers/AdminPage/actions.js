@@ -26,6 +26,6 @@ export function emitEvent(event, properties) {
   return {
     type: EMIT_EVENT,
     event,
-    properties,
+    properties
   };
 }

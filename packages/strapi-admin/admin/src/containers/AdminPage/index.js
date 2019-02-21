@@ -284,7 +284,7 @@ export class AdminPage extends React.Component {
           isOpen={this.props.blockApp && this.props.showGlobalAppBlocker}
           {...this.props.overlayBlockerData}
         />
-        <Onboarding />
+        {this.shouldDisplayLogout() && <Onboarding/>}
       </div>
     );
   }
