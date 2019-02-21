@@ -316,7 +316,10 @@ class SettingPage extends React.PureComponent {
       {
         kind: 'primary',
         label: 'content-manager.containers.Edit.submit',
-        onClick: this.handleSubmit,
+        onClick: (e) => {
+          this.context.emitEvent('willSaveContentTypeLayout');
+          this.handleSubmit(e);
+        },
         type: 'submit',
       },
     ];
@@ -1058,7 +1061,7 @@ class SettingPage extends React.PureComponent {
               confirm: 'content-manager.popUpWarning.button.confirm',
             }}
             popUpWarningType="danger"
-            onConfirm={onSubmit}
+            onConfirm={() => onSubmit(this.context)}
           />
           <PopUpWarning
             isOpen={showWarningCancel}
@@ -1082,6 +1085,10 @@ class SettingPage extends React.PureComponent {
     );
   }
 }
+
+SettingPage.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 SettingPage.defaultProps = {
   draggedItemName: null,

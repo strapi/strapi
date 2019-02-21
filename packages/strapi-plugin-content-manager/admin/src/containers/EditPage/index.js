@@ -427,9 +427,9 @@ export class EditPage extends React.Component {
       },
       icon: 'layout',
     };
-
+    
     return (
-      <li key={`${pluginId}.link`}>
+      <li key={`${pluginId}.link`}  onClick={() => this.context.emitEvent('willEditContentTypeLayoutFromEditView')}>
         <NavLink {...message} url={url} />
       </li>
     );
@@ -499,7 +499,7 @@ export class EditPage extends React.Component {
           const Component = compo.component;
 
           return (
-            <li key={compo.key}>
+            <li key={compo.key} onClick={() => this.context.emitEvent('willEditContentTypeFromEditView') }>
               <Component {...this} {...compo.props} />
             </li>
           );
