@@ -6,7 +6,9 @@ import Initializer from '../index';
 describe('<Initializer />', () => {
   it('Should not crash', () => {
     const updatePlugin = jest.fn();
-    shallow(<Initializer updatePlugin={updatePlugin} />);
+    const renderedComponent = shallow(<Initializer updatePlugin={updatePlugin} />);
+
+    expect(renderedComponent.children()).toHaveLength(0);
   });
 
   it('should call the updatePlugin props when mounted', () => {

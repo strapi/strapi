@@ -241,6 +241,7 @@ export class AdminPage extends React.Component {
     const { adminPage } = this.props;
     const header = this.showLeftMenu() ? <Header /> : '';
     const style = this.showLeftMenu() ? {} : { width: '100%' };
+
     if (this.showLoading()) {
       return <LoadingIndicatorPage />;
     }

@@ -1,3 +1,5 @@
+const jest = require('jest');
+
 module.exports = {
   collectCoverageFrom: [
     'packages/strapi-admin/admin/src/**/**/*.{js,jsx}',
@@ -18,6 +20,7 @@ module.exports = {
   },
   globals: {
     __webpack_public_path__: 'http://localhost:4000',
+    strapi: {},
   },
   moduleDirectories: [
     'node_modules',
@@ -36,7 +39,8 @@ module.exports = {
   setupTestFrameworkScriptFile: '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/test-bundler.js',
   setupFiles: [
     '<rootDir>/packages/strapi-helper-plugin/node_modules/raf/polyfill',
-    '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/enzyme-setup.js'
+    '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/enzyme-setup.js',
+    '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/strapi.js'
   ],
   testRegex: 'tests/.*\\.test\\.js$',
   transform: {

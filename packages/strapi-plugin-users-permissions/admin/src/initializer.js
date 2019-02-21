@@ -12,6 +12,4 @@
  *
  */
 
-const Initializer = require('./containers/Initializer');
-
-module.exports = Initializer.default;
+module.exports = require('./containers/Initializer').default;
