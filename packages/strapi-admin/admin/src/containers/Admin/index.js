@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import ReactGA from 'react-ga';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
@@ -65,16 +66,38 @@ import styles from './styles.scss';
 export class Admin extends React.Component { // eslint-disable-line react/prefer-stateless-function
   // state = { shouldSecureAfterAllPluginsAreMounted: true };
 
-  // componentDidMount() {
-
-  // }
-
   getChildContext = () => ({
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
     plugins: this.props.global.plugins,
     updatePlugin: this.props.updatePlugin,
   });
+
+  componentDidMount() {
+    ReactGA.initialize('UA-54313258-9', { testMode: process.env.NODE_ENV === 'test' });
+
+    // Retrieve the main settings of the application
+    this.props.getInitData();
+    const { admin: { isLoading } } = this.props;
+
+    if (!isLoading) {
+      this.props.getHook('willSecure');
+    }
+  }
+
+  /* istanbul ignore next */
+  componentDidCatch(error, info) {
+    /* eslint-disable */
+    console.log('An error has occured');
+    console.log('--------------------');
+    console.log(error);
+    console.log('Here is some infos');
+    console.log(info);
+    /* eslint-enable */
+
+    // Display the error log component which is not designed yet
+    this.props.setAppError();
+  }
 
   getContentWrapperStyle = () => {
     const { admin: { showMenu } } = this.props;
@@ -189,6 +212,7 @@ Admin.propTypes = {
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  getHook: PropTypes.func.isRequired,
   getInitData: PropTypes.func.isRequired,
   global: PropTypes.shape({
     appPlugins: PropTypes.array,

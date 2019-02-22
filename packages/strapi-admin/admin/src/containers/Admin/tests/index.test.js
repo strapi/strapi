@@ -67,7 +67,7 @@ describe('<Admin />', () => {
       updatePlugin: jest.fn(),
     };
   });
- 
+
   it('should not crash', () => {
     shallow(<Admin {...props} />);
   });
