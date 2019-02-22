@@ -7,12 +7,11 @@ import { getVideosSucceeded } from './actions';
 function* getVideos() {
   try {
     const videos = yield call(request, 'https://strapi.io/videos', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'no-cors',
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
       },
+      mode: 'no-cors',
     },
     false,
     true,
