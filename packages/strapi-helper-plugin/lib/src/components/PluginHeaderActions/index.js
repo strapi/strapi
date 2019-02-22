@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isArray, isFunction } from 'lodash';
 
-import Button from 'components/Button';
+import Button from '../Button';
 
 import styles from './styles.scss';
 
