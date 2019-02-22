@@ -6,12 +6,12 @@
  */
 
 import { findIndex } from 'lodash';
+import 'babel-polyfill';
+import 'sanitize.css/sanitize.css';
 import {
   getAppPluginsSucceeded,
   unsetHasUserPlugin,
-} from 'containers/App/actions';
-import 'babel-polyfill';
-import 'sanitize.css/sanitize.css';
+} from './containers/App/actions';
 import { store } from './createStore';
 import render from './renderApp';
 import './intlPolyfill';

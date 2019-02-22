@@ -7,8 +7,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+
 import Button from 'components/Button';
 import PluginHeader from 'components/PluginHeader';
+
 import styles from './styles.scss';
 
 function EmptyAttributesView({ currentModelName, history, modelEntries }) {

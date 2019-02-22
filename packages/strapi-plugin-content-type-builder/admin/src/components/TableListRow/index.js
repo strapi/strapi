@@ -11,8 +11,8 @@ import { FormattedMessage } from 'react-intl';
 import IcoContainer from 'components/IcoContainer';
 import ListRow from 'components/ListRow';
 import PopUpWarning from 'components/PopUpWarning';
-import styles from 'components/TableList/styles.scss';
 import { router } from 'app';
+import styles from '../TableList/styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-curly-brace-presence */
 

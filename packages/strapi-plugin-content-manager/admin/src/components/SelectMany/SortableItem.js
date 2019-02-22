@@ -12,8 +12,11 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import PropTypes from 'prop-types';
 import { flow, get } from 'lodash';
 import cn from 'classnames';
-import SelectManyDraggedItem from 'components/SelectManyDraggedItem';
-import ItemTypes from 'utils/ItemTypes';
+
+import ItemTypes from '../../utils/ItemTypes';
+
+import SelectManyDraggedItem from '../SelectManyDraggedItem';
+
 import styles from './styles.scss';
 
 const sortableItemSource = {

@@ -8,12 +8,12 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 
-import pluginId from 'pluginId';
+import pluginId from '../../pluginId';
 
 // Containers
-import ConfigPage from 'containers/ConfigPage';
-import HomePage from 'containers/HomePage';
-import NotFoundPage from 'containers/NotFoundPage';
+import ConfigPage from '../ConfigPage';
+import HomePage from '../HomePage';
+import NotFoundPage from '../NotFoundPage';
 
 function App() {
   return (

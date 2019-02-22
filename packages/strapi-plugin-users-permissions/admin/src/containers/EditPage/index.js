@@ -12,17 +12,18 @@ import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isEmpty, isEqual, size } from 'lodash';
 import cn from 'classnames';
-import pluginId from 'pluginId';
 
 // Design
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
-import InputSearch from 'components/InputSearchContainer';
 import LoadingIndicator from 'components/LoadingIndicator';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import PluginHeader from 'components/PluginHeader';
-import Plugins from 'components/Plugins';
-import Policies from 'components/Policies';
+
+import InputSearch from '../../components/InputSearchContainer';
+import Plugins from '../../components/Plugins';
+import Policies from '../../components/Policies';
+import pluginId from '../../pluginId';
 
 // Actions
 import {
