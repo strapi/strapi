@@ -1,8 +1,8 @@
+import request from 'utils/request';
+import { all, call, fork, takeLatest, put } from 'redux-saga/effects';
+
 import { GET_VIDEOS } from './constants';
 import { getVideosSucceeded } from './actions';
-import request from 'utils/request';
-
-import { all, call, fork, takeLatest, put } from 'redux-saga/effects';
 
 function* getVideos() {
   try {
@@ -13,9 +13,10 @@ function* getVideos() {
         },
         mode: 'no-cors',
       },
-      false,
-      true,
-      { noAuth: true },
+    },
+    false,
+    true,
+    { noAuth: true },
     );
 
     let currTimes = Array.apply(null, Array(videos.length)).map((e, i) => {
@@ -24,7 +25,7 @@ function* getVideos() {
         end: false,
         key: i,
         id: videos[i].id,
-      }
+      };
     });
     
     // Retrieve start time if enable in localStorage
@@ -47,8 +48,7 @@ function* getVideos() {
       ),
     );
   } catch (err) {
-    console.log('err');
-    console.log({ err });
+    console.log(err); // eslint-disable-line no-console
   }
 }
 

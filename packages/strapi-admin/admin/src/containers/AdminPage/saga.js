@@ -16,7 +16,7 @@ function* emitter(action) {
 
     if (uuid) {
       yield call(
-        fetch,
+        fetch, // eslint-disable-line no-undef
         requestURL,
         {
           method: 'POST',
