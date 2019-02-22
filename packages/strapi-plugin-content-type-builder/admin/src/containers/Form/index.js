@@ -32,13 +32,13 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { router } from 'app';
 
-import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
-import { addAttributeToContentType, addAttributeRelationToContentType, editContentTypeAttribute, editContentTypeAttributeRelation, updateContentType } from 'containers/ModelPage/actions';
+import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from '../App/actions';
+import { addAttributeToContentType, addAttributeRelationToContentType, editContentTypeAttribute, editContentTypeAttributeRelation, updateContentType } from '../ModelPage/actions';
 
-import AttributeCard from 'components/AttributeCard';
-import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
-import PopUpForm from 'components/PopUpForm';
-import PopUpRelations from 'components/PopUpRelations';
+import AttributeCard from '../../components/AttributeCard';
+import InputCheckboxWithNestedInputs from '../../components/InputCheckboxWithNestedInputs';
+import PopUpForm from '../../components/PopUpForm';
+import PopUpRelations from '../../components/PopUpRelations';
 
 // Utils
 import { checkFormValidity } from '../../utils/formValidations';
