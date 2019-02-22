@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import makeSelectApp from '../App/selectors';
 
-class AppLoader extends React.Component {
+export class AppLoader extends React.Component {
   shouldLoad = () => {
     const { appPlugins, plugins: mountedPlugins } = this.props;
 

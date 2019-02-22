@@ -19,8 +19,10 @@ import {
 } from 'actions/overlayBlocker';
 
 // Components from strapi-helper-plugin
-// import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import OverlayBlocker from 'components/OverlayBlocker';
+
+import injectHooks from 'utils/injectHooks';
 
 import FullStory from '../../components/FullStory';
 import Header from '../../components/Header/index';
@@ -63,6 +65,10 @@ import styles from './styles.scss';
 export class Admin extends React.Component { // eslint-disable-line react/prefer-stateless-function
   // state = { shouldSecureAfterAllPluginsAreMounted: true };
 
+  // componentDidMount() {
+
+  // }
+
   getChildContext = () => ({
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
@@ -101,6 +107,8 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
   render() {
     const {
       admin: {
+        appError,
+        isLoading,
         layout,
         showMenu,
         strapiVersion,
@@ -112,6 +120,14 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
         showGlobalAppBlocker,
       },
     } = this.props;
+
+    if (appError) {
+      return <div>An error has occured please check your logs</div>;
+    }
+
+    if (isLoading) {
+      return <LoadingIndicatorPage />;
+    }
 
     return (
       <div className={styles.adminPage}>
@@ -215,10 +231,12 @@ const withConnect = connect(mapStateToProps, mapDispatchToProps);
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
 const withLocaleToggleReducer = injectReducer({ key: 'localeToggle', reducer: localeToggleReducer });
+const withHooks = injectHooks({ key: 'admin' });
 
 export default compose(
   withReducer,
   withLocaleToggleReducer,
   withSaga,
   withConnect,
+  withHooks,
 )(Admin);

@@ -6,6 +6,7 @@ import {
   enableGlobalOverlayBlocker,
 } from 'actions/overlayBlocker';
 
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import OverlayBlocker from 'components/OverlayBlocker';
 
 import { updatePlugin } from '../../App/actions';
@@ -26,6 +27,7 @@ import {
 } from '../actions';
 
 import styles from '../styles.scss';
+import FullStory from '../../../components/FullStory';
 
 describe('<Admin />', () => {
   let props;
@@ -37,6 +39,7 @@ describe('<Admin />', () => {
         appError: false,
         currentEnvironment: 'development',
         isLoading: true,
+        isSecured: false,
         layout: {},
         showMenu: true,
         strapiVersion: '3',
@@ -71,7 +74,7 @@ describe('<Admin />', () => {
 
   describe('render', () => {
     it('should not display the header if the showMenu prop is false', () => {
-      const adminProps = Object.assign(props.admin, { showMenu: false });
+      const adminProps = Object.assign(props.admin, { isLoading: false, showMenu: false });
       const renderedComponent = shallow(<Admin {...props} {...adminProps} />);
 
       expect(renderedComponent.find(Header)).toHaveLength(0);
@@ -79,9 +82,31 @@ describe('<Admin />', () => {
 
     it('should display the OverlayBlocker if blockApp and showGlobalOverlayBlocker are true', () => {
       const globalProps = Object.assign(props.global, { blockApp: true });
+      props.admin.isLoading = false;
       const renderedComponent = shallow(<Admin {...props} {...globalProps} />);
 
       expect(renderedComponent.find(OverlayBlocker)).toHaveLength(1);
+    });
+
+    it('should display the LoadingIndicatorPage if the isLoading prop is true', () => {
+      const renderedComponent = shallow(<Admin {...props} />);
+
+      expect(renderedComponent.find(LoadingIndicatorPage)).toHaveLength(1);
+    });
+
+    it('should display the appErrorComponent if the appError prop is true', () => {
+      props.admin.appError = true;
+      const renderedComponent = shallow(<Admin {...props} />);
+
+      expect(renderedComponent.text()).toEqual('An error has occured please check your logs');
+    });
+
+    it('should display the <FullStory /> if the user is accepting to be tracked', () => {
+      props.admin.uuid = 'uuid';
+      props.admin.isLoading = false;
+      const renderedComponent = shallow(<Admin {...props} />);
+
+      expect(renderedComponent.find(FullStory)).toHaveLength(1);
     });
   });
 

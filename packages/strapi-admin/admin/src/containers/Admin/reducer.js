@@ -17,6 +17,7 @@ const initialState = fromJS({
   appError: false,
   currentEnvironment: 'development',
   isLoading: true,
+  isSecured: false,
   layout: Map({}),
   showMenu: true,
   strapiVersion: '3',

@@ -34,7 +34,6 @@ describe('initialize Saga', () => {
     const response = new Error('Some error');
     initializeGenerator.throw(response).value;
 
-    // NOTE: Until I find a way to test strapi.notification.error;
     expect(strapi.notification.error).toHaveBeenCalled();
   });
 });
@@ -42,7 +41,7 @@ describe('initialize Saga', () => {
 describe('defaultSaga Saga', () => {
   const defaultSagaSaga = defaultSaga();
 
-  it('should start task to watch for LOAD_REPOS action', () => {
+  it('should start task to watch for INITIALIZE action', () => {
     const forkDescriptor = defaultSagaSaga.next().value;
     expect(forkDescriptor).toEqual(fork(takeLatest, INITIALIZE, initialize));
   });
