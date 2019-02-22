@@ -108,7 +108,7 @@ export class Onboarding extends React.Component {
   // eslint-disable-line jsx-handler-names
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
-    console.log(videos);
+
     return (
       <div className={cn(styles.videosWrapper, videos.length > 0 ? styles.visible : styles.hidden)}>
         <div className={cn(styles.videosContent, this.state.showVideos ? styles.shown : styles.hide)}>
