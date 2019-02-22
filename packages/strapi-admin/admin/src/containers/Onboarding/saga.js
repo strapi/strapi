@@ -11,7 +11,6 @@ function* getVideos() {
       headers: {
         'Content-Type': 'application/json',
       },
-      mode: 'no-cors',
     },
     false,
     true,

@@ -9,7 +9,6 @@ import auth from 'utils/auth';
  * @return {object}          The parsed JSON from the request
  */
 function parseJSON(response) {
-  // return response;
   return response.json ? response.json() : response;
 }
 
@@ -21,7 +20,7 @@ function parseJSON(response) {
  * @return {object|undefined} Returns either the response, or throws an error
  */
 function checkStatus(response, checkToken = true) {
-  if (response.status >= 200 && response.status < 300) {
+  if ((response.status >= 200 && response.status < 300) || response.status === 0) {
     return response;
   }
 
@@ -155,7 +154,7 @@ export default function request(...args) {
   if (options && options.body && stringify) {
     options.body = JSON.stringify(options.body);
   }
-
+  
   return fetch(url, options)
     .then(checkStatus)
     .then(parseJSON)
