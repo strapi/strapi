@@ -49,7 +49,6 @@ export function* defaultSaga() {
   yield take(LOCATION_CHANGE);
 
   yield cancel(loadModelsWatcher);
-  yield cancel(loadedModelsWatcher);
   yield cancel(loadEntriesWatcher);
 }
 

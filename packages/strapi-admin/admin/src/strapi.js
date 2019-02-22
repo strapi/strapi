@@ -1,5 +1,6 @@
 /**
  * Common configuration for the app in both dev an prod mode
+ *
  */
 
 import { merge, isFunction } from 'lodash';
@@ -10,6 +11,8 @@ import {
   updatePlugin,
 } from 'containers/App/actions';
 import { showNotification } from 'containers/NotificationProvider/actions';
+import injectReducer from './utils/injectReducer';
+import injectSaga from './utils/injectSaga';
 import { history, store } from './createStore';
 import { translationMessages, languages } from './i18n';
 import './public-path';
@@ -20,6 +23,7 @@ const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' 
  *
  * @param params
  */
+// NOTE: Should be changed with the new lifecycle.
 const registerPlugin = (plugin) => {
   // Merge admin translation messages
   merge(translationMessages, plugin.translationMessages);
@@ -94,4 +98,7 @@ window.strapi = Object.assign(window.strapi || {}, {
   currentLanguage: window.localStorage.getItem('strapi-admin-language') ||  window.navigator.language ||  window.navigator.userLanguage || 'en',
   lockApp,
   unlockApp,
+  injectReducer,
+  injectSaga,
+  store,
 });

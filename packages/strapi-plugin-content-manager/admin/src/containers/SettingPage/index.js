@@ -14,6 +14,7 @@ import { DragDropContext } from 'react-dnd';
 import { FormattedMessage } from 'react-intl';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import PropTypes from 'prop-types';
+import pluginId from 'pluginId';
 import {
   beginMove,
   endMove,
@@ -53,9 +54,6 @@ import InputSelect from 'components/InputSelect';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 import VariableDraggableAttr from 'components/VariableDraggableAttr';
-
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 
 import { onClickEditField, onClickEditListItem, onClickEditRelation } from './actions';
 import reducer from './reducer';
@@ -1161,8 +1159,8 @@ const withConnect = connect(
   mapStateToProps,
   mapDispatchToProps,
 );
-const withReducer = injectReducer({ key: 'settingPage', reducer });
-const withSaga = injectSaga({ key: 'settingPage', saga });
+const withReducer = strapi.injectReducer({ key: 'settingPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'settingPage', saga, pluginId });
 
 export default compose(
   withReducer,

@@ -9,10 +9,10 @@
 // Node.js core.
 const fs = require('fs');
 const path = require('path');
-const exec = require('child_process').exec;
 
 // Public node modules.
 const _ = require('lodash');
+const shell = require('shelljs');
 
 // Logger.
 const logger = require('strapi-utils').logger;
@@ -45,8 +45,8 @@ module.exports = function () {
         try {
           process.chdir(path.resolve(__dirname, '..', 'node_modules', 'strapi-generate-' + name));
           logger.debug('Pulling the latest updates of `strapi-generate-' + name + '`.');
-          exec('git pull ' + info.remote + ' ' + info.branch, err => {
-            if (err) {
+          shell.exec(`git pull ${info.remote} ${info.branch}`, (code) => {
+            if (code) {
               logger.error('Impossible to update `strapi-generate-' + name + '`.');
             } else {
               logger.info('Successfully updated `strapi-generate-' + name + '`.');
@@ -55,18 +55,18 @@ module.exports = function () {
         } catch (err) {
           process.chdir(path.resolve(__dirname, '..', 'node_modules'));
           logger.debug('Cloning the `strapi-generate-' + name + '` repository for the first time...');
-          exec('git clone ' + info.repository + ' strapi-generate-' + name, err => {
-            if (err) {
+          shell.exec(`git clone ${info.repository} strapi-generate-${name}`, (code, stdout, stderr) => {
+            if (code) {
               logger.error('Impossible to clone the `strapi-generate-' + name + '` repository.');
-              console.log(err);
+              console.log(stderr);
             } else {
               logger.info('Successfully cloned the `strapi-generate-' + name + '` repository.');
               process.chdir(path.resolve(__dirname, '..', 'node_modules', 'strapi-generate-' + name));
               logger.debug('Installing dependencies for `strapi-generate-' + name + '`...');
-              exec('npm install', err => {
-                if (err) {
+              shell.exec('npm install', (code, stdout, stderr) => {
+                if (code) {
                   logger.error('Impossible to install dependencies for `strapi-generate-' + name + '`.');
-                  console.log(err);
+                  console.log(stderr);
                 } else {
                   logger.info('Successfully installed dependencies for `strapi-generate-' + name + '`.');
                 }

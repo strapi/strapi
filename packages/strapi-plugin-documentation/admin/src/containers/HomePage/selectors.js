@@ -1,9 +1,10 @@
 import { createSelector } from 'reselect';
+import pluginId from 'pluginId';
 
 /**
  * Direct selector to the homePage state domain
  */
-const selectHomePageDomain = () => state => state.get('homePage');
+const selectHomePageDomain = () => state => state.get(`${pluginId}_homePage`);
 
 /**
  * Default selector used by HomePage
