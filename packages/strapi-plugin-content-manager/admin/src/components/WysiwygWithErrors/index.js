@@ -14,10 +14,11 @@ import Label from 'components/Label';
 import InputDescription from 'components/InputDescription';
 import InputErrors from 'components/InputErrors';
 import InputSpacer from 'components/InputSpacer';
-import Wysiwyg from 'components/Wysiwyg';
 
 // Utils
 import validateInput from 'utils/inputsValidations';
+
+import Wysiwyg from '../Wysiwyg';
 
 import styles from './styles.scss';
 
