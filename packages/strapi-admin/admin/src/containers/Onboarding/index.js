@@ -25,7 +25,6 @@ export class Onboarding extends React.Component {
 
   componentDidMount() {
     this.props.getVideos();
-
   }
 
   componentWillReceiveProps(){
@@ -34,7 +33,7 @@ export class Onboarding extends React.Component {
       setTimeout(() => { 
         this.setState({ showVideos: true });
         localStorage.setItem('onboarding', true);
-      }, 500);
+      }, 800);
     }
     this.getCompletedPercentage();
   }
@@ -74,7 +73,6 @@ export class Onboarding extends React.Component {
     this.context.emitEvent(eventName, {timestamp: currTime});
   }
 
-
   handleVideosToggle = () => {
     // Display videos card
     this.setState(prevState => ({ showVideos: !prevState.showVideos }));
@@ -110,6 +108,7 @@ export class Onboarding extends React.Component {
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
 
+    console.log(videos);
     return (
       <div className={cn(styles.videosWrapper, videos.length > 0 ? styles.visible : styles.hidden)}>
         <div className={cn(styles.videosContent, this.state.showVideos ? styles.shown : styles.hide)}>

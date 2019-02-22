@@ -32,7 +32,7 @@ function* getVideos() {
     } else {
       localStorage.setItem('videos', JSON.stringify(currTimes));
     }
-
+    
     yield put(
       getVideosSucceeded(
         videos.map((video, index) => {
@@ -42,7 +42,7 @@ function* getVideos() {
           video.end = currTimes[index].end;
 
           return video;
-        }),
+        }).sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0)),
       ),
     );
   } catch (err) {

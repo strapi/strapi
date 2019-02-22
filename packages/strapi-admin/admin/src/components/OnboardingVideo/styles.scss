@@ -1,6 +1,6 @@
 li.listItem {
   display: block;
-  padding: 10px 15px;
+  padding: 17px 15px;
   cursor: pointer;
   
   &:hover {
@@ -53,11 +53,13 @@ li.listItem {
       &::before {
         content: '\f04b';
         font-family: 'FontAwesome';
-        font-size: 9px;
+        font-size: 10px;
         color: white;
         display: inline-block;
         vertical-align: top;
         height: 100%;
+        margin-left: 3px;
+        line-height: 18px;
       }
     }
   }
@@ -78,6 +80,8 @@ li.listItem {
         &::before {
           content: '\f00c';
           font-size: 11px;
+          margin-left: 0;
+          line-height: 20px;
         }
       }
     }
@@ -87,10 +91,12 @@ li.listItem {
     padding: 0 15px;
     p {
       font-size: 14px;
+      line-height: 24px;
       font-family: Lato-SemiBold;
     }
     .time {
       font-size: 11px;
+      line-height: 11px;
       color: #919bae;
       font-family: Lato-Bold;
     }
@@ -111,11 +117,21 @@ li.listItem {
       font-family: Lato;
       font-weight: bold!important;
       font-size: 1.8rem!important;
+      line-height: 3.1rem;
       color: #333740;
     }
     > button {
       margin-top: 0;
       margin-right: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      padding: 10px;
+      display: flex;
+      cursor: pointer;
+      span {
+        line-height: 0.6em;
+      }
     }
   }
   .videoPlayer {
