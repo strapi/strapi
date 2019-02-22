@@ -42,6 +42,14 @@ import NavTopRightWrapper from './NavTopRightWrapper';
 import styles from './styles.scss';
 
 export class Admin extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getContentWrapperStyle = () => {
+    const { admin: { showLeftMenu } } = this.props;
+
+    return showLeftMenu
+      ? { main: {}, sub: styles.content }
+      : { main: { width: '100%' }, sub: styles.wrapper };
+  }
+
   isAcceptingTracking = () => {
     const { admin: { uuid } } = this.props;
 
@@ -59,7 +67,6 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
         plugins,
       },
     } = this.props;
-    const contentWrapperStyle = showLeftMenu ? { main: {}, sub: styles.content } : { main: { width: '100%' }, sub: styles.wrapper };
 
     return (
       <div className={styles.adminPage}>
@@ -74,9 +81,9 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
         <NavTopRightWrapper>
           <LocaleToggle isLogged />
         </NavTopRightWrapper>
-        <div className={styles.adminPageRightWrapper} style={contentWrapperStyle.main}>
+        <div className={styles.adminPageRightWrapper} style={this.getContentWrapperStyle().main}>
           {showLeftMenu ? <Header /> : ''}
-          <div className={contentWrapperStyle.sub}></div>
+          <div className={this.getContentWrapperStyle().sub}></div>
         </div>
       </div>
     );

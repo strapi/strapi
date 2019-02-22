@@ -5,6 +5,8 @@ import {
   setLocaleCustomClassName,
 } from '../../LocaleToggle/actions';
 
+import Header from '../../../components/Header/index';
+
 import { Admin, mapDispatchToProps } from '../index';
 import {
   getInitData,
@@ -12,6 +14,8 @@ import {
   setAppError,
   showLeftMenu,
 } from '../actions';
+
+import styles from '../styles.scss';
 
 describe('<Admin />', () => {
   let props;
@@ -44,7 +48,35 @@ describe('<Admin />', () => {
     shallow(<Admin {...props} />);
   });
 
-  describe('isAcceptingTracking', () => {
+  describe('render', () => {
+    it('should not display the header if the showLeftMenu prop is false', () => {
+      const adminProps = Object.assign(props.admin, { showLeftMenu: false });
+      const renderedComponent = shallow(<Admin {...props} {...adminProps} />);
+
+      expect(renderedComponent.find(Header)).toHaveLength(0);
+    });
+  });
+
+  describe('getContentWrapperStyle instance', () => {
+    it('should return an empty object for the main key if showLeftMenu prop is true', () => {
+      const renderedComponent = shallow(<Admin {...props} />);
+      const { getContentWrapperStyle } = renderedComponent.instance();
+      const expected = { main: {}, sub: styles.content };
+
+      expect(getContentWrapperStyle()).toEqual(expected);  
+    });
+
+    it('should not return an empty object for the main key if showLeftMenu prop is true', () => {
+      const adminProps = Object.assign(props.admin, { showLeftMenu: false });
+      const renderedComponent = shallow(<Admin {...props} {...adminProps} />);
+      const { getContentWrapperStyle } = renderedComponent.instance();
+      const expected = { main: { width: '100%' }, sub: styles.wrapper };
+
+      expect(getContentWrapperStyle()).toEqual(expected);
+    });
+  });
+
+  describe('isAcceptingTracking instance', () => {
     it('should return false if the uuid prop is false', () => {
       const renderedComponent = shallow(<Admin {...props} />);
       const { isAcceptingTracking } = renderedComponent.instance();

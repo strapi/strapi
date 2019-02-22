@@ -12,10 +12,10 @@ module.exports = {
   coverageThreshold: {
     global: {
       // NOTE: This should be increased at some point
-      statements: 0,
-      branches: 0,
-      functions: 0,
-      lines: 0,
+      statements: 1,
+      branches: 1,
+      functions: 1,
+      lines: 1,
     },
   },
   globals: {
@@ -26,8 +26,6 @@ module.exports = {
   moduleDirectories: [
     'node_modules',
     '<rootDir>/packages/strapi-admin/admin/src',
-    '<rootDir>/packages/strapi-plugin-content-manager/admin/src',
-    '<rootDir>/packages/strapi-plugin-users-permissions/admin/src',
     '<rootDir>/packages/strapi-helper-plugin/node_modules',
     '<rootDir>/packages/strapi-helper-plugin',
     '<rootDir>/packages/strapi-helper-plugin/lib/src',
