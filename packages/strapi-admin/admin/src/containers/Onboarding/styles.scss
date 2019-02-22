@@ -15,6 +15,7 @@
     padding: 15px 15px 0 15px;
     p {
       font-family: Lato-Bold;
+      letter-spacing: 0.5px;
       font-size: 11px;
       text-transform: uppercase;
       display: inline-block;
@@ -27,20 +28,25 @@
       }
     }
   }
+  &.visible {
+    opacity: 1;
+  }
+  &.hidden {
+    opacity: 0;
+  }
   .videosContent {
+    min-width: 320px;
     background-color: white;
     margin-bottom: 10px;
     margin-right: 15px;
     box-shadow: 0 2px 4px 0 #e3e9f3;
     border-radius: 3px;
-    transition: all 0.3s linear;
+    overflow: hidden;  
     &.shown {
-      visibility: visible;
-      opacity: 1;
+      animation: fadeIn 0.5s forwards;
     }
     &.hide {
-      opacity: 0;
-      visibility: hidden;
+      animation: fadeOut 0.5s forwards;
     }
 
     ul {
@@ -73,5 +79,38 @@
         }
       }
     }
+  }
+}
+
+
+@keyframes fadeIn {
+  0% {
+    width: auto;
+    height: auto;
+    opacity: 0;
+  }
+
+  5% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  60% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+    width: 0;
+    height: 0;
   }
 }

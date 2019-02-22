@@ -284,7 +284,7 @@ export class AdminPage extends React.Component {
           isOpen={this.props.blockApp && this.props.showGlobalAppBlocker}
           {...this.props.overlayBlockerData}
         />
-        {this.shouldDisplayLogout() && <Onboarding/>}
+        {this.shouldDisplayLogout() && <Onboarding />}
       </div>
     );
   }
@@ -315,6 +315,7 @@ AdminPage.propTypes = {
   appPlugins: PropTypes.array,
   blockApp: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getAdminData: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
