@@ -5,6 +5,7 @@
     "babel-jest": "^24.1.0",
     "babel-preset-stage-0": "^6.24.1",
     "cross-env": "^5.2.0",
+    "husky": "^1.3.1",
     "rimraf": "^2.6.3"
   },
   "devDependencies": {
@@ -35,7 +36,8 @@
     "jest-cli": "^23.6.0",
     "lerna": "^2.0.0",
     "lodash": "^4.17.5",
-    "pre-commit": "~1.1.2",
+    "prettier": "^1.16.4",
+    "pretty-quick": "^1.10.0",
     "redux-saga": "^0.14.3",
     "request": "^2.87.0",
     "shelljs": "^0.7.7",
@@ -73,10 +75,11 @@
       "url": "http://strapi.io"
     }
   ],
-  "pre-commit": [
-    "clean",
-    "lint"
-  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run clean && pretty-quick --staged && npm run lint"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
