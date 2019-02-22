@@ -15,9 +15,13 @@ if (!isSetup) {
   strapi.log.level = 'silent';
 
   (async () => {
-    await strapi.load({
-      environment: process.env.NODE_ENV,
-    });
+    try {
+      await strapi.load({
+        environment: process.env.NODE_ENV,
+      });
+    } catch (e) {
+      // console.log(e);
+    }
 
     // Force exit process if an other process doen't exit during Strapi load.
     process.exit();

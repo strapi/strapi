@@ -11,6 +11,7 @@ function* getVideos() {
       headers: {
         'Content-Type': 'application/json',
       },
+      mode: 'no-cors',
     },
     false,
     true,
@@ -32,7 +33,7 @@ function* getVideos() {
     } else {
       localStorage.setItem('videos', JSON.stringify(currTimes));
     }
-    
+
     yield put(
       getVideosSucceeded(
         videos.map((video, index) => {
