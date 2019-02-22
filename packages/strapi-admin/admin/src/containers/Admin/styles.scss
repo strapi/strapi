@@ -1,0 +1,52 @@
+/* Import */
+@import '../../styles/variables/variables';
+
+.adminPage { /* stylelint-disable */
+  display: flex;
+  overflow-x: hidden;
+}
+
+.adminPageRightWrapper {
+  width: calc(100% - #{$left-menu-width});
+}
+
+.adminPageSeparator {
+  height: 6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.content { /* stylelint-ignore */
+  background: $content-background;
+  min-height: calc(100vh - #{$header-height});
+  width: calc(100vw - #{$left-menu-width});
+  margin-top: $header-height;
+  margin-left: $left-menu-width;
+}
+
+.wrapper { /* stylelint-ignore */
+  background: $content-background;
+  min-height: 100%;
+  width: 100%;
+}
+
+
+.localeDropdownMenuNotLogged{
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 1px solid #e3e9f3 !important;
+  border-top: 0px !important;
+
+  button {
+    padding-left: 17px;
+
+    &:hover {
+      background-color: #F7F8F8 !important;
+    }
+  }
+
+  &:before{
+    box-shadow: none !important;
+  }
+}

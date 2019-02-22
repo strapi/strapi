@@ -15,7 +15,8 @@ import styles from './styles.scss';
 import messages from './messages.json';
 
 function LeftMenuLinkContainer({ layout, plugins }) {
-  const pluginsObject = plugins.toJS();
+  // const pluginsObject = plugins.toJS();
+  const pluginsObject = plugins;
   
   // Generate the list of sections
   const pluginsSections = Object.keys(pluginsObject).reduce((acc, current) => {
