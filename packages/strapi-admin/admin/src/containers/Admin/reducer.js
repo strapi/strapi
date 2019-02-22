@@ -18,7 +18,7 @@ const initialState = fromJS({
   currentEnvironment: 'development',
   isLoading: true,
   layout: Map({}),
-  showLeftMenu: true,
+  showMenu: true,
   strapiVersion: '3',
   uuid: false,
 });
@@ -34,11 +34,11 @@ function adminReducer(state = initialState, action) {
         .update('strapiVersion', () => action.data.strapiVersion)
         .update('uuid', () => action.data.uuid);
     case HIDE_LEFT_MENU:
-      return state.update('showLeftMenu', () => false);
+      return state.update('showMenu', () => false);
     case SET_APP_ERROR:
       return state.update('appError', () => true);
     case SHOW_LEFT_MENU:
-      return state.update('showLeftMenu', () => true);
+      return state.update('showMenu', () => true);
     default:
       return state;
   }

@@ -19,7 +19,7 @@ describe('adminReducer', () => {
       currentEnvironment: 'development',
       isLoading: true,
       layout: Map({}),
-      showLeftMenu: true,
+      showMenu: true,
       strapiVersion: '3',
       uuid: false,
     });
@@ -52,7 +52,7 @@ describe('adminReducer', () => {
   });
 
   it('should handle the hideLeftMenu action correctly', () => {
-    const expected = state.set('showLeftMenu', false);
+    const expected = state.set('showMenu', false);
 
     expect(adminReducer(state, hideLeftMenu())).toEqual(expected);
   });
@@ -64,8 +64,8 @@ describe('adminReducer', () => {
   });
 
   it('should handle the showLeftMenu action correctly', () => {
-    const expected = state.set('showLeftMenu', true);
-    state.set('showLeftMenu', false);
+    const expected = state.set('showMenu', true);
+    state.set('showMenu', false);
 
     expect(adminReducer(state, showLeftMenu())).toEqual(expected);
   });

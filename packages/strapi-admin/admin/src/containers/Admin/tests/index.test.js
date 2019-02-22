@@ -1,5 +1,15 @@
 import React from 'react';
 import { shallow } from 'enzyme';
+
+import {
+  disableGlobalOverlayBlocker,
+  enableGlobalOverlayBlocker,
+} from 'actions/overlayBlocker';
+
+import OverlayBlocker from 'components/OverlayBlocker';
+
+import { updatePlugin } from '../../App/actions';
+
 import {
   resetLocaleDefaultClassName,
   setLocaleCustomClassName,
@@ -28,10 +38,14 @@ describe('<Admin />', () => {
         currentEnvironment: 'development',
         isLoading: true,
         layout: {},
-        showLeftMenu: true,
+        showMenu: true,
         strapiVersion: '3',
         uuid: false,
       },
+      disableGlobalOverlayBlocker: jest.fn(),
+      enableGlobalOverlayBlocker: jest.fn(),
+      getInitData: jest.fn(),
+      getHook: jest.fn(),
       global: {
         appPlugins: [],
         blockApp: false,
@@ -41,6 +55,13 @@ describe('<Admin />', () => {
         plugins: {},
         showGlobalAppBlocker: true,
       },
+      hideLeftMenu: jest.fn(),
+      location: {},
+      resetLocaleDefaultClassName: jest.fn(),
+      setAppError: jest.fn(),
+      showLeftMenu: jest.fn(),
+      showGlobalAppBlocker: jest.fn(),
+      updatePlugin: jest.fn(),
     };
   });
  
@@ -49,16 +70,23 @@ describe('<Admin />', () => {
   });
 
   describe('render', () => {
-    it('should not display the header if the showLeftMenu prop is false', () => {
-      const adminProps = Object.assign(props.admin, { showLeftMenu: false });
+    it('should not display the header if the showMenu prop is false', () => {
+      const adminProps = Object.assign(props.admin, { showMenu: false });
       const renderedComponent = shallow(<Admin {...props} {...adminProps} />);
 
       expect(renderedComponent.find(Header)).toHaveLength(0);
     });
+
+    it('should display the OverlayBlocker if blockApp and showGlobalOverlayBlocker are true', () => {
+      const globalProps = Object.assign(props.global, { blockApp: true });
+      const renderedComponent = shallow(<Admin {...props} {...globalProps} />);
+
+      expect(renderedComponent.find(OverlayBlocker)).toHaveLength(1);
+    });
   });
 
   describe('getContentWrapperStyle instance', () => {
-    it('should return an empty object for the main key if showLeftMenu prop is true', () => {
+    it('should return an empty object for the main key if showMenu prop is true', () => {
       const renderedComponent = shallow(<Admin {...props} />);
       const { getContentWrapperStyle } = renderedComponent.instance();
       const expected = { main: {}, sub: styles.content };
@@ -66,8 +94,8 @@ describe('<Admin />', () => {
       expect(getContentWrapperStyle()).toEqual(expected);  
     });
 
-    it('should not return an empty object for the main key if showLeftMenu prop is true', () => {
-      const adminProps = Object.assign(props.admin, { showLeftMenu: false });
+    it('should not return an empty object for the main key if showMenu prop is true', () => {
+      const adminProps = Object.assign(props.admin, { showMenu: false });
       const renderedComponent = shallow(<Admin {...props} {...adminProps} />);
       const { getContentWrapperStyle } = renderedComponent.instance();
       const expected = { main: { width: '100%' }, sub: styles.wrapper };
@@ -108,9 +136,61 @@ describe('<Admin />', () => {
       expect(isAcceptingTracking()).toEqual(true);
     });
   });
+
+  describe('renderMarketPlace instance', () => {
+    it('should return the MarketPlace', () => {
+      const renderedComponent = shallow(<Admin {...props} />);
+      const { renderMarketPlace } = renderedComponent.instance();
+      
+      expect(renderMarketPlace()).not.toBeNull();
+    });
+  });
+
+  describe('renderPluginDispatcher instance', () => {
+    it('should return the MarketPlace', () => {
+      const renderedComponent = shallow(<Admin {...props} />);
+      const { renderPluginDispatcher } = renderedComponent.instance();
+      
+      expect(renderPluginDispatcher()).not.toBeNull();
+    });
+  });
 });
 
 describe('<Admin />, mapDispatchToProps', () => {
+  describe('disableGlobalOverlayBlocker', () => {
+    it('should be injected', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+
+      expect(result.disableGlobalOverlayBlocker).toBeDefined();
+    });
+
+    it('should dispatch the disableGlobalOverlayBlocker action when called', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+      result.disableGlobalOverlayBlocker();
+
+      expect(dispatch).toHaveBeenCalledWith(disableGlobalOverlayBlocker());
+    });
+  });
+
+  describe('enableGlobalOverlayBlocker', () => {
+    it('should be injected', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+
+      expect(result.enableGlobalOverlayBlocker).toBeDefined();
+    });
+
+    it('should dispatch the enableGlobalOverlayBlocker action when called', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+      result.enableGlobalOverlayBlocker();
+
+      expect(dispatch).toHaveBeenCalledWith(enableGlobalOverlayBlocker());
+    });
+  });
+
   describe('getInitData', () => {
     it('should be injected', () => {
       const dispatch = jest.fn();
@@ -210,6 +290,23 @@ describe('<Admin />, mapDispatchToProps', () => {
       result.setLocaleCustomClassName();
 
       expect(dispatch).toHaveBeenCalledWith(setLocaleCustomClassName());
+    });
+  });
+
+  describe('updatePlugin', () => {
+    it('should be injected', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+
+      expect(result.updatePlugin).toBeDefined();
+    });
+
+    it('should dispatch the updatePlugin action when called', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+      result.updatePlugin();
+
+      expect(dispatch).toHaveBeenCalledWith(updatePlugin());
     });
   });
 });
