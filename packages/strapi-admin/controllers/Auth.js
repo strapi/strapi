@@ -7,12 +7,13 @@
  */
 
 /* eslint-disable no-useless-escape */
+const crypto = require('crypto');
 const _ = require('lodash');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
-  adminCallback: async (ctx) => {
+  callback: async (ctx) => {
     const params = ctx.request.body;
 
     // The identifier is required.
@@ -62,7 +63,7 @@ module.exports = {
     }
   },
 
-  adminRegister: async (ctx) => {
+  register: async (ctx) => {
     const params = ctx.request.body;
 
     // Username is required.
@@ -130,5 +131,87 @@ module.exports = {
 
       ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message);
     }
-  }
+  },
+
+  changePassword: async (ctx) => {
+    const params = _.assign({}, ctx.request.body, ctx.params);
+
+    if (params.password && params.passwordConfirmation && params.password === params.passwordConfirmation && params.code) {
+      const admin = await strapi.query('administrator', 'admin').findOne({ resetPasswordToken: params.code });
+
+      if (!admin) {
+        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }] : 'Incorrect code provided.');
+      }
+
+      // Delete the current code
+      admin.resetPasswordToken = null;
+
+      admin.password =  await strapi.plugins['users-permissions'].services.user.hashPassword(params);
+
+      // Update the admin.
+      await strapi.query('administrator', 'admin').update(admin);
+
+      ctx.send({
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(admin.toJSON ? admin.toJSON() : admin, ['_id', 'id'])),
+        user: _.omit(admin.toJSON ? admin.toJSON() : admin, ['password', 'resetPasswordToken'])
+      });
+    } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }] : 'Passwords do not match.');
+    } else {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.params.provide' }] }] : 'Incorrect params provided.');
+    }
+  },
+
+  forgotPassword: async (ctx) => {
+    const { email, url } = ctx.request.body;
+
+    // Find the admin thanks to his email.
+    const admin = await strapi.query('administrator', 'admin').findOne({ email });
+
+    // admin not found.
+    if (!admin) {
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.user.not-exist' }] }] : 'This email does not exist.');
+    }
+
+    // Generate random token.
+    const resetPasswordToken = crypto.randomBytes(64).toString('hex');
+
+    // Set the property code.
+    admin.resetPasswordToken = resetPasswordToken;
+
+    const settings = {
+      from: {
+        name: 'Administration Panel',
+        email: 'no-reply@strapi.io'
+      },
+      response_email: '',
+      object: '­Reset password',
+      message: `<p>We heard that you lost your password. Sorry about that!</p>
+
+<p>But don’t worry! You can use the following link to reset your password:</p>
+
+<p>${url}?code=${resetPasswordToken}</p>
+
+<p>Thanks.</p>`
+    };
+
+    try {
+      // Send an email to the admin.
+      await strapi.plugins['email'].services.email.send({
+        to: admin.email,
+        from: (settings.from.email || settings.from.name) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
+        replyTo: settings.response_email,
+        subject: settings.object,
+        text: settings.message,
+        html: settings.message
+      });
+    } catch (err) {
+      return ctx.badRequest(null, err);
+    }
+
+    // Update the admin.
+    await strapi.query('administrator', 'admin').update(admin);
+
+    ctx.send({ ok: true });
+  },
 };

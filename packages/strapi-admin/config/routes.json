@@ -51,12 +51,22 @@
     {
       "method": "POST",
       "path": "/auth/local",
-      "handler": "Auth.adminCallback"
+      "handler": "Auth.callback"
     },
     {
       "method": "POST",
       "path": "/auth/local/register",
-      "handler": "Auth.adminRegister"
+      "handler": "Auth.register"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/forgot-password",
+      "handler": "Auth.forgotPassword"
+    },
+    {
+      "method": "POST",
+      "path": "/auth/reset-password",
+      "handler": "Auth.changePassword"
     }
   ]
 }

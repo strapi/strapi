@@ -24,10 +24,10 @@ export function* submitForm(action) {
         requestURL = '/admin/auth/local/register';
         break;
       case 'reset-password':
-        requestURL = '/auth/reset-password';
+        requestURL = '/admin/auth/reset-password';
         break;
       case 'forgot-password':
-        requestURL = '/auth/forgot-password';
+        requestURL = '/admin/auth/forgot-password';
         set(body, 'url', `${strapi.backendURL}/admin/plugins/users-permissions/auth/reset-password`);
         break;
       default:
