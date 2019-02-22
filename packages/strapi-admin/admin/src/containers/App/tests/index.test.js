@@ -25,4 +25,11 @@ describe('<App />', () => {
     const insideAppLoaderLoading = shallow(topComp.find(AppLoader).prop('children')({ shouldLoad: true }));
     expect(insideAppLoaderLoading.find(Route).length).toBe(0);
   });
+
+  it('renderAdminShould return some jsx', () => {
+    const renderedComponent = shallow(<App />);
+    const { renderAdmin } = renderedComponent.instance();
+
+    expect(renderAdmin({history})).not.toBeNull();
+  });
 });

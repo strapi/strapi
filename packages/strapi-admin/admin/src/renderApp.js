@@ -15,7 +15,7 @@ const render = (translatedMessages) => {
     <Provider store={store}>
       <LanguageProvider messages={translatedMessages}>
         <ConnectedRouter history={history}>
-          <App />
+          <App store={store} />
         </ConnectedRouter>
       </LanguageProvider>
     </Provider>,
