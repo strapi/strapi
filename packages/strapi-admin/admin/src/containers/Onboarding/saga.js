@@ -11,19 +11,19 @@ function* getVideos() {
       headers: {
         'Content-Type': 'application/json',
       },
-      mode: 'no-cors',
     },
     false,
     true,
     { noAuth: true },
     );
-
+    
     let currTimes = Array.apply(null, Array(videos.length)).map((e, i) => {
       return {
         startTime: 0,
         end: false,
         key: i,
         id: videos[i].id,
+        order: videos[i].order,
       };
     });
     
@@ -36,6 +36,7 @@ function* getVideos() {
 
     yield put(
       getVideosSucceeded(
+
         videos.map((video, index) => {
           video.isOpen = false;
           video.duration = null;

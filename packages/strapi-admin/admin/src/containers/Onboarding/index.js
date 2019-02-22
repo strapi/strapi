@@ -40,7 +40,6 @@ export class Onboarding extends React.Component {
 
   componentWillUnmount() {
     this.props.removeVideos();
-    localStorage.removeItem('videos');
   }
 
   setVideoEnd = () => {
@@ -84,6 +83,7 @@ export class Onboarding extends React.Component {
   };
 
   updateLocalStorage = (index, current, duration) => {
+
     // Update store
     this.props.updateVideoStartTime(index, current);
 
@@ -91,10 +91,11 @@ export class Onboarding extends React.Component {
     let videosTime = JSON.parse(localStorage.getItem('videos'));
     videosTime[index].startTime = current;
     let percent = current * 100 / duration;
+    const video = videosTime.find((element) => element.order === index);
 
     if (percent >= 80) {
-      if (videosTime[index].end === false) {
-        videosTime[index].end = true;
+      if (video.end === false) {
+        video.end = true;
         this.props.setVideoEnd(index, true);
       }
     }
@@ -107,7 +108,7 @@ export class Onboarding extends React.Component {
   // eslint-disable-line jsx-handler-names
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
-
+    console.log(videos);
     return (
       <div className={cn(styles.videosWrapper, videos.length > 0 ? styles.visible : styles.hidden)}>
         <div className={cn(styles.videosContent, this.state.showVideos ? styles.shown : styles.hide)}>
