@@ -10,11 +10,11 @@ import cn from 'classnames';
 import { differenceBy, isEmpty } from 'lodash';
 
 // Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputFile from 'components/InputFile';
-import InputSpacer from 'components/InputSpacer';
-import InputErrors from 'components/InputErrors';
+import Label from '../Label';
+import InputDescription from '../InputDescription';
+import InputFile from '../InputFile';
+import InputSpacer from '../InputSpacer';
+import InputErrors from '../InputErrors';
 
 // Styles
 import styles from './styles.scss';

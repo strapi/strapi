@@ -8,10 +8,10 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 // Utils
-import pluginId from 'pluginId';
+import pluginId from '../../pluginId';
 // Containers
-import HomePage from 'containers/HomePage';
-import NotFoundPage from 'containers/NotFoundPage';
+import HomePage from '../HomePage';
+import NotFoundPage from '../NotFoundPage';
 
 function App() {
   return (

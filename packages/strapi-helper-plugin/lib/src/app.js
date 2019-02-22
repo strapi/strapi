@@ -11,7 +11,7 @@ import './public-path.js'; // eslint-disable-line import/extensions
 
 import React from 'react';
 import Loadable from 'react-loadable';
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
+import LoadingIndicatorPage from './components/LoadingIndicatorPage';
 import { translationMessages } from './i18n';
 
 const LoadableApp = Loadable({
