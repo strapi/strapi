@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
 // Components.
-import SelectOne from 'components/SelectOne';
-import SelectMany from 'components/SelectMany';
+import SelectOne from '../SelectOne';
+import SelectMany from '../SelectMany';
 
 import styles from './styles.scss';
 

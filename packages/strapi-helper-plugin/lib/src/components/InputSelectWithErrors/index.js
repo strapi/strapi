@@ -10,10 +10,10 @@ import { get, isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputSelect from 'components/InputSelect';
+import Label from '../Label';
+import InputDescription from '../InputDescription';
+import InputErrors from '../InputErrors';
+import InputSelect from '../InputSelect';
 
 import styles  from './styles.scss';
 

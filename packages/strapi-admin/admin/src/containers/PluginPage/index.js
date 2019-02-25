@@ -13,7 +13,7 @@ import { createSelector } from 'reselect';
 import BlockerComponent from 'components/BlockerComponent';
 import ErrorBoundary from 'components/ErrorBoundary';
 
-import { selectPlugins } from 'containers/App/selectors';
+import { selectPlugins } from '../App/selectors';
 
 export class PluginPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {

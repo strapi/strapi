@@ -14,13 +14,15 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { flow } from 'lodash';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import ClickOverHint from 'components/ClickOverHint';
-import DraggedRemovedIcon from 'components/DraggedRemovedIcon';
-import VariableEditIcon from 'components/VariableEditIcon';
-import ItemTypes from 'utils/ItemTypes';
 
-import GrabIconBlue from 'assets/images/icon_grab_blue.svg';
-import GrabIcon from 'assets/images/icon_grab.svg';
+import ItemTypes from '../../utils/ItemTypes';
+
+import GrabIconBlue from '../../assets/images/icon_grab_blue.svg';
+import GrabIcon from '../../assets/images/icon_grab.svg';
+
+import ClickOverHint from '../ClickOverHint';
+import DraggedRemovedIcon from '../DraggedRemovedIcon';
+import VariableEditIcon from '../VariableEditIcon';
 
 import styles from './styles.scss';
 

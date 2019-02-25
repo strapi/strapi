@@ -14,11 +14,12 @@ import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
 import PluginHeader from 'components/PluginHeader';
-import ListPlugins from 'components/ListPlugins';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
+import ListPlugins from '../../components/ListPlugins';
+
+import injectSaga from '../../utils/injectSaga';
+import injectReducer from '../../utils/injectReducer';
 import {
   makeSelectCurrentEnv,
   makeSelectPluginDeleteAction,
