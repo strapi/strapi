@@ -201,7 +201,7 @@ export class EditPage extends React.Component {
     const title = get(this.getSchema(), 'editDisplay.displayedField');
     const valueToDisplay = get(this.props.editPage, ['initialRecord', title], null);
 
-    return isEmpty(valueToDisplay) ? null : truncate(valueToDisplay, { length: '24', separator: '.' });
+    return isEmpty(toString(valueToDisplay)) ? null : truncate(valueToDisplay, { length: '24', separator: '.' });
   };
 
   /**
@@ -564,7 +564,7 @@ export class EditPage extends React.Component {
       location: { search },
     } = this.props;
     const source = getQueryParameters(search, 'source');
-    const basePath = `/plugins/${pluginId}/ctm-configurations`;
+    const basePath = `/plugins/${pluginId}/ctm-configurations/edit-settings`;
     const pathname =
       source !== pluginId
         ? `${basePath}/plugins/${source}/${this.getModelName()}`
