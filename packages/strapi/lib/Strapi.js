@@ -383,7 +383,7 @@ class Strapi extends EventEmitter {
       if (index !== -1) {
         pluginPath = pathTerms[index + 1];
       }
-    } if (plugin === 'admin') {
+    } else if (plugin === 'admin') {
       pluginPath = 'admin';
     }
 

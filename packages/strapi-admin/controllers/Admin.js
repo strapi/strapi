@@ -128,7 +128,7 @@ module.exports = {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
     }
 
-    const data = await strapi.query('admin', 'users-permissions').update(_.assign(ctx.params, values));
+    const data = await strapi.query('admin', 'users-permissions').update(Object.assign({}, ctx.params, values));
 
     // Send 200 `ok`
     ctx.send(data);
