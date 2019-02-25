@@ -12,14 +12,14 @@ describe('<App />', () => {
     expect(renderedComponent.find(AppLoader)).toHaveLength(1);
   });
 
-  it('Should not render the <Switch /> if the app is loading', () => {
+  it('Should render the <Switch /> if the app is loading', () => {
     const topComp = shallow(<App />);
     const insideAppLoaderNotLoading = shallow(topComp.find(AppLoader).prop('children')({ shouldLoad: false }));
 
     expect(insideAppLoaderNotLoading.find(Route).length).toBe(2);
   });
 
-  it('should render the <Switch /> if the app is loading', () => {
+  it('should not render the <Switch /> if the app is loading', () => {
     const topComp = shallow(<App />);
 
     const insideAppLoaderLoading = shallow(topComp.find(AppLoader).prop('children')({ shouldLoad: true }));
