@@ -1,7 +1,16 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+// import { LOCATION_CHANGE } from 'react-router-redux';
 import { Map } from 'immutable';
 import { isEmpty } from 'lodash';
-import { all, call, fork, put, select, take, takeLatest } from 'redux-saga/effects';
+import {
+  all,
+  call,
+  // cancel,
+  fork,
+  put,
+  select,
+  // take,
+  takeLatest,
+} from 'redux-saga/effects';
 import request from 'utils/request';
 
 import {
@@ -106,11 +115,13 @@ export function* defaultSaga() {
   yield fork(takeLatest, ON_DROP, uploadFiles);
   yield fork(takeLatest, ON_SEARCH, search);
 
-  const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
+  yield fork(takeLatest, GET_DATA, dataGet);
+  // TODO: Fix router (Other PR)
+  // const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
 
-  yield take(LOCATION_CHANGE);
+  // yield take(LOCATION_CHANGE);
 
-  yield cancel(loadDataWatcher);
+  // yield cancel(loadDataWatcher);
 }
 
 // All sagas to be loaded

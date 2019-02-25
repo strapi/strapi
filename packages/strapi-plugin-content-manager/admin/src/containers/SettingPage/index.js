@@ -14,6 +14,21 @@ import { DragDropContext } from 'react-dnd';
 import { FormattedMessage } from 'react-intl';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import PropTypes from 'prop-types';
+import BackHeader from 'components/BackHeader';
+import HeaderNav from 'components/HeaderNav';
+import Input from 'components/InputsIndex';
+import InputSelect from 'components/InputSelect';
+import PluginHeader from 'components/PluginHeader';
+import PopUpWarning from 'components/PopUpWarning';
+
+import pluginId from '../../pluginId';
+
+import Block from '../../components/Block';
+import CustomDragLayer from '../../components/CustomDragLayer';
+import DraggableAttr from '../../components/DraggableAttr';
+import FormTitle from '../../components/FormTitle';
+import VariableDraggableAttr from '../../components/VariableDraggableAttr';
+
 import {
   beginMove,
   endMove,
@@ -30,7 +45,7 @@ import {
   onReset,
   onSubmit,
   setLayout,
-} from 'containers/App/actions';
+} from '../App/actions';
 import {
   makeSelectAddedField,
   makeSelectDraggedItemName,
@@ -40,22 +55,7 @@ import {
   makeSelectModifiedSchema,
   makeSelectShouldResetGrid,
   makeSelectSubmitSuccess,
-} from 'containers/App/selectors';
-
-import BackHeader from 'components/BackHeader';
-import Block from 'components/Block';
-import CustomDragLayer from 'components/CustomDragLayer';
-import DraggableAttr from 'components/DraggableAttr';
-import FormTitle from 'components/FormTitle';
-import HeaderNav from 'components/HeaderNav';
-import Input from 'components/InputsIndex';
-import InputSelect from 'components/InputSelect';
-import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning';
-import VariableDraggableAttr from 'components/VariableDraggableAttr';
-
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
+} from '../App/selectors';
 
 import { onClickEditField, onClickEditListItem, onClickEditRelation } from './actions';
 import reducer from './reducer';
@@ -1161,8 +1161,8 @@ const withConnect = connect(
   mapStateToProps,
   mapDispatchToProps,
 );
-const withReducer = injectReducer({ key: 'settingPage', reducer });
-const withSaga = injectSaga({ key: 'settingPage', saga });
+const withReducer = strapi.injectReducer({ key: 'settingPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'settingPage', saga, pluginId });
 
 export default compose(
   withReducer,

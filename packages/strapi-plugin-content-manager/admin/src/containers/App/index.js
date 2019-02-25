@@ -12,22 +12,24 @@ import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
 import { isEmpty, get } from 'lodash';
 import { Switch, Route } from 'react-router-dom';
+import pluginId from 'pluginId';
 
-import injectSaga from 'utils/injectSaga';
 import getQueryParameters from 'utils/getQueryParameters';
 
-import EditPage from 'containers/EditPage';
-import ListPage from 'containers/ListPage';
-import SettingsPage from 'containers/SettingsPage';
-import SettingPage from 'containers/SettingPage';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import EmptyAttributesView from 'components/EmptyAttributesView';
+import EmptyAttributesView from '../../components/EmptyAttributesView';
+
+import EditPage from '../EditPage';
+import ListPage from '../ListPage';
+import SettingsPage from '../SettingsPage';
+import SettingPage from '../SettingPage';
 
 import {
   loadModels,
 } from './actions';
 import { makeSelectLoading, makeSelectModelEntries, makeSelectSchema } from './selectors';
 
+import reducer from './reducer';
 import saga from './sagas';
 
 class App extends React.Component {
@@ -93,9 +95,11 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withSaga = injectSaga({ key: 'global', saga });
+const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId });
 
 export default compose(
+  withReducer,
   withSaga,
   withConnect,
 )(App);

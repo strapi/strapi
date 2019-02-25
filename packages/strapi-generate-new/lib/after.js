@@ -5,7 +5,6 @@
  */
 
 // Node.js core.
-const { exec, execSync } = require('child_process');
 const path = require('path');
 
 // Public node modules.
@@ -30,11 +29,6 @@ const trackSuccess = require('./success');
 /* eslint-disable no-console */
 /* eslint-disable prefer-template */
 module.exports = (scope, cb) => {
-  console.log(`The app has been connected to the database ${green('successfully')}!`);
-  console.log();
-
-  trackSuccess('didConnectDatabase', scope);
-
   console.log('🏗  Application generation:');
 
   let loader = ora('Copy dashboard').start();
@@ -55,7 +49,7 @@ module.exports = (scope, cb) => {
   const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1);
   // Add this check to know if we are in development mode so the creation is faster.
   const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
-  const globalRootPath = execSync(packageManager.commands('root -g'));
+  const globalRootPath = shell.exec(packageManager.commands('root -g'), {silent: true});
 
   // Verify if the dependencies are available into the global
   _.forEach(strapiDependencies, (key) => {
@@ -151,11 +145,11 @@ module.exports = (scope, cb) => {
       installPlugin = installPlugin.then(() => {
         return new Promise(resolve => {
           loader = ora(`Install plugin ${cyan(defaultPlugin.name)}.`).start();
-          exec(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`, (err) => {
-            if (err) {
+          shell.exec(`node ${strapiBin} install ${defaultPlugin.name} ${scope.developerMode && defaultPlugin.core ? '--dev' : ''}`, {silent: true}, (code, stdout, stderr) => {
+            if (code) {
               trackSuccess('didNotInstallProjectPlugins', scope);
               loader.warn(`An error occurred during ${defaultPlugin.name} plugin installation.`);
-              console.log(err);
+              console.log(stderr);
               return resolve();
             }
 
@@ -175,14 +169,14 @@ module.exports = (scope, cb) => {
           if (dependency.global) {
             try {
               fs.accessSync(dependency.path, fs.constants.R_OK | fs.constants.F_OK);
-              fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+              fs.symlinkSync(dependency.path, path.resolve(scope.rootPath, 'node_modules', dependency.key), 'junction');
             } catch (e) {
               // Silent.
             }
           } else {
             try {
               fs.accessSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), fs.constants.R_OK | fs.constants.F_OK);
-              fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'dir');
+              fs.symlinkSync(path.resolve(scope.strapiRoot, 'node_modules', dependency.key), path.resolve(scope.rootPath, 'node_modules', dependency.key), 'junction');
             } catch (e) {
               // Silent.
             }
@@ -201,7 +195,7 @@ module.exports = (scope, cb) => {
         console.log(`$ ${green('strapi start')}`);
 
         trackSuccess('didCreateProject', scope);
-        
+
         cb();
       });
   }

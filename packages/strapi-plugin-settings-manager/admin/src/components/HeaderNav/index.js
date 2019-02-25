@@ -8,9 +8,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { join, map, take } from 'lodash';
-import EditForm from 'components/EditForm';
-import List from 'components/List';
+
 import { darken } from '../../utils/colors';
+
+import EditForm from '../EditForm';
+import List from '../List';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props  */
