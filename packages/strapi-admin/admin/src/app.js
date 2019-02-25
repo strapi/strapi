@@ -13,7 +13,7 @@ import 'whatwg-fetch';
 import {
   getAppPluginsSucceeded,
   unsetHasUserPlugin,
-} from 'containers/App/actions';
+} from './containers/App/actions';
 import { basename, store } from './createStore';
 import './intlPolyfill';
 import './public-path';

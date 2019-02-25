@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 
-import en from 'translations/en.json';
+import en from '../../translations/en.json';
 
 import styles from './styles.scss';
 

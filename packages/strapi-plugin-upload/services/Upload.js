@@ -125,9 +125,10 @@ module.exports = {
   },
 
   fetch: params => {
+    params.id = params._id || params.id;
     return strapi
       .query('file', 'upload')
-      .findOne(_.pick(params, ['_id', 'id']));
+      .findOne(_.pick(params, ['id']));
   },
 
   fetchAll: params => {

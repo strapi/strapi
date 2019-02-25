@@ -1,7 +1,7 @@
 /**
  * Language Generator
  */
-const exec = require('child_process').exec;
+const shell = require('shelljs');
 
 module.exports = {
   description: 'Add a langauge',
@@ -66,11 +66,12 @@ module.exports = {
     actions.push(
       () => {
         const cmd = 'npm run extract-intl';
-        exec(cmd, (err, result, stderr) => {
-          if (err || stderr) {
-            throw err || stderr;
+        shell.exec(cmd, {silent: true}, (code, stdout, stderr) => {
+          if (code) {
+            throw stderr;
           }
-          process.stdout.write(result);
+
+          process.stdout.write(stdout);
         });
       }
     );

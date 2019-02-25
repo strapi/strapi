@@ -13,8 +13,7 @@ import { capitalize, findIndex, get, isUndefined, toInteger, upperFirst } from '
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
-// App selectors
-import { makeSelectSchema } from 'containers/App/selectors';
+
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
@@ -22,17 +21,21 @@ import PageFooter from 'components/PageFooter';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 import InputCheckbox from 'components/InputCheckbox';
-// Components from the plugin itself
-import AddFilterCTA from 'components/AddFilterCTA';
-import FiltersPickWrapper from 'components/FiltersPickWrapper/Loadable';
-import Filter from 'components/Filter/Loadable';
-import Search from 'components/Search';
-import Table from 'components/Table';
-// Utils located in `strapi/packages/strapi-helper-plugin/lib/src/utils`;
+
 import getQueryParameters from 'utils/getQueryParameters';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import storeData from 'utils/storeData';
+
+import pluginId from '../../pluginId';
+// Components from the plugin itself
+import AddFilterCTA from '../../components/AddFilterCTA';
+import FiltersPickWrapper from '../../components/FiltersPickWrapper/Loadable';
+import Filter from '../../components/Filter/Loadable';
+import Search from '../../components/Search';
+import Table from '../../components/Table';
+
+// App selectors
+import { makeSelectSchema } from '../App/selectors';
+
 import Div from './Div';
 import {
   addAttr,
@@ -681,7 +684,7 @@ const mapStateToProps = createStructuredSelector({
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = injectReducer({ key: 'listPage', reducer });
-const withSaga = injectSaga({ key: 'listPage', saga });
+const withReducer = strapi.injectReducer({ key: 'listPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'listPage', saga, pluginId });
 
 export default compose(withReducer, withSaga, withConnect)(ListPage);

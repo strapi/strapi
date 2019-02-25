@@ -1,6 +1,15 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+// import { LOCATION_CHANGE } from 'react-router-redux';
 import { forEach, set, map, replace } from 'lodash';
-import { all, call, take, put, fork, cancel, select, takeLatest } from 'redux-saga/effects';
+import {
+  all,
+  call,
+  // take,
+  put,
+  fork,
+  // cancel,
+  select,
+  takeLatest,
+} from 'redux-saga/effects';
 import request from 'utils/request';
 // selectors
 import { makeSelectModifiedData } from './selectors';
@@ -240,28 +249,40 @@ export function* fetchSpecificDatabase(action) {
 
 // Individual exports for testing
 export function* defaultSaga() {
-  const loadConfigWatcher = yield fork(takeLatest, CONFIG_FETCH, fetchConfig);
-  const loadLanguagesWatcher = yield fork(takeLatest, LANGUAGES_FETCH, fetchLanguages);
-  const editConfigWatcher = yield fork(takeLatest, EDIT_SETTINGS, settingsEdit);
-  const postLanguageWatcher = yield fork(takeLatest, NEW_LANGUAGE_POST, postLanguage);
-  const deleteLanguageWatcher = yield fork(takeLatest, LANGUAGE_DELETE, deleteLanguage);
-  const loadDatabasesWatcher = yield fork(takeLatest, DATABASES_FETCH, fetchDatabases);
-  const postDatabaseWatcher = yield fork(takeLatest, NEW_DATABASE_POST, postDatabase);
-  const deleteDatabaseWatcher = yield fork(takeLatest, DATABASE_DELETE, deleteDatabase);
-  const fetchSpecificDatabaseWatcher = yield fork(takeLatest, SPECIFIC_DATABASE_FETCH, fetchSpecificDatabase);
-  const editDatabaseWatcher = yield fork(takeLatest, DATABASE_EDIT, editDatabase);
+  yield fork(takeLatest, CONFIG_FETCH, fetchConfig);
+  yield fork(takeLatest, LANGUAGES_FETCH, fetchLanguages);
+  yield fork(takeLatest, EDIT_SETTINGS, settingsEdit);
+  yield fork(takeLatest, NEW_LANGUAGE_POST, postLanguage);
+  yield fork(takeLatest, LANGUAGE_DELETE, deleteLanguage);
+  yield fork(takeLatest, DATABASES_FETCH, fetchDatabases);
+  yield fork(takeLatest, NEW_DATABASE_POST, postDatabase);
+  yield fork(takeLatest, DATABASE_DELETE, deleteDatabase);
+  yield fork(takeLatest, SPECIFIC_DATABASE_FETCH, fetchSpecificDatabase);
+  yield fork(takeLatest, DATABASE_EDIT, editDatabase);
 
-  yield take(LOCATION_CHANGE);
-  yield cancel(loadConfigWatcher);
-  yield cancel(loadLanguagesWatcher);
-  yield cancel(editConfigWatcher);
-  yield cancel(postLanguageWatcher);
-  yield cancel(deleteLanguageWatcher);
-  yield cancel(loadDatabasesWatcher);
-  yield cancel(postDatabaseWatcher);
-  yield cancel(deleteDatabaseWatcher);
-  yield cancel(fetchSpecificDatabaseWatcher);
-  yield cancel(editDatabaseWatcher);
+  // TODO Fix router (Other PR)
+  // const loadConfigWatcher = yield fork(takeLatest, CONFIG_FETCH, fetchConfig);
+  // const loadLanguagesWatcher = yield fork(takeLatest, LANGUAGES_FETCH, fetchLanguages);
+  // const editConfigWatcher = yield fork(takeLatest, EDIT_SETTINGS, settingsEdit);
+  // const postLanguageWatcher = yield fork(takeLatest, NEW_LANGUAGE_POST, postLanguage);
+  // const deleteLanguageWatcher = yield fork(takeLatest, LANGUAGE_DELETE, deleteLanguage);
+  // const loadDatabasesWatcher = yield fork(takeLatest, DATABASES_FETCH, fetchDatabases);
+  // const postDatabaseWatcher = yield fork(takeLatest, NEW_DATABASE_POST, postDatabase);
+  // const deleteDatabaseWatcher = yield fork(takeLatest, DATABASE_DELETE, deleteDatabase);
+  // const fetchSpecificDatabaseWatcher = yield fork(takeLatest, SPECIFIC_DATABASE_FETCH, fetchSpecificDatabase);
+  // const editDatabaseWatcher = yield fork(takeLatest, DATABASE_EDIT, editDatabase);
+
+  // yield take(LOCATION_CHANGE);
+  // yield cancel(loadConfigWatcher);
+  // yield cancel(loadLanguagesWatcher);
+  // yield cancel(editConfigWatcher);
+  // yield cancel(postLanguageWatcher);
+  // yield cancel(deleteLanguageWatcher);
+  // yield cancel(loadDatabasesWatcher);
+  // yield cancel(postDatabaseWatcher);
+  // yield cancel(deleteDatabaseWatcher);
+  // yield cancel(fetchSpecificDatabaseWatcher);
+  // yield cancel(editDatabaseWatcher);
 }
 
 // All sagas to be loaded

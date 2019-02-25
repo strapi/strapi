@@ -8,11 +8,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { toString } from 'lodash';
 
-import TableDelete from 'components/TableDelete';
-import TableHeader from 'components/TableHeader';
-import TableRow from 'components/TableRow';
-import TableEmpty from 'components/TableEmpty';
-import TableLoading from 'components/TableLoading';
+import TableDelete from '../TableDelete';
+import TableHeader from '../TableHeader';
+import TableRow from '../TableRow';
+import TableEmpty from '../TableEmpty';
+import TableLoading from '../TableLoading';
 
 import styles from './styles.scss';
 
