@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, isFunction, isObject } from 'lodash';
 
-import LoadingBar from 'components/LoadingBar';
+import LoadingBar from '../LoadingBar';
 
 import styles from './styles.scss';
 

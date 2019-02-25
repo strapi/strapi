@@ -14,9 +14,10 @@ import 'flag-icon-css/css/flag-icon.css';
 import 'react-select/dist/react-select.css';
 import { Switch, Route } from 'react-router-dom';
 import { isEmpty } from 'lodash';
-import pluginId from 'pluginId';
 
-import HomePage from 'containers/HomePage';
+import pluginId from '../../pluginId';
+
+import HomePage from '../HomePage';
 
 import { menuFetch, environmentsFetch } from './actions';
 import { makeSelectLoading, makeSelectSections } from './selectors';

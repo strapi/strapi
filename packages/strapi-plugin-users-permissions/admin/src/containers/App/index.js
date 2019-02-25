@@ -8,13 +8,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-import pluginId from 'pluginId';
+import pluginId from '../../pluginId';
 
 // Containers
-import AuthPage from 'containers/AuthPage';
-import EditPage from 'containers/EditPage';
-import HomePage from 'containers/HomePage';
-import NotFoundPage from 'containers/NotFoundPage';
+import AuthPage from '../AuthPage';
+import EditPage from '../EditPage';
+import HomePage from '../HomePage';
+import NotFoundPage from '../NotFoundPage';
 
 class App extends React.Component {
   componentDidMount() {

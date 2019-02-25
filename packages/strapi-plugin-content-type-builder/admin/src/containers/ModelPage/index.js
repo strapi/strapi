@@ -13,17 +13,23 @@ import { FormattedMessage } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { router } from 'app';
-import pluginId from 'pluginId';
-// Global selectors
-import { makeSelectMenu } from 'containers/App/selectors';
-import { makeSelectContentTypeUpdated } from 'containers/Form/selectors';
-import AttributeRow from 'components/AttributeRow';
-import ContentHeader from 'components/ContentHeader';
+
 import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
-import Form from 'containers/Form';
-import List from 'components/List';
-import PluginLeftMenu from 'components/PluginLeftMenu';
-import forms from 'containers/Form/forms.json';
+
+import pluginId from '../../pluginId';
+
+import AttributeRow from '../../components/AttributeRow';
+import ContentHeader from '../../components/ContentHeader';
+import List from '../../components/List';
+import PluginLeftMenu from '../../components/PluginLeftMenu';
+import Form from '../Form';
+
+import forms from '../Form/forms.json';
+
+// Global selectors
+import { makeSelectMenu } from '../App/selectors';
+import { makeSelectContentTypeUpdated } from '../Form/selectors';
+
 import { storeData } from '../../utils/storeData';
 import {
   cancelChanges,

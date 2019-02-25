@@ -8,8 +8,8 @@ import {
   pluginLoaded,
   unfreezeApp,
   updatePlugin,
-} from 'containers/App/actions';
-import { showNotification } from 'containers/NotificationProvider/actions';
+} from './containers/App/actions';
+import { showNotification } from './containers/NotificationProvider/actions';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
 import { history, store } from './createStore';

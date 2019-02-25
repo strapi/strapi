@@ -11,14 +11,16 @@ import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
-import pluginId from 'pluginId';
+
+import HeaderNav from 'components/HeaderNav';
+import PluginHeader from 'components/PluginHeader';
+
+import pluginId from '../../pluginId';
 
 // Design
-import EditForm from 'components/EditForm';
-import HeaderNav from 'components/HeaderNav';
-import List from 'components/List';
-import PluginHeader from 'components/PluginHeader';
-import PopUpForm from 'components/PopUpForm';
+import EditForm from '../../components/EditForm';
+import List from '../../components/List';
+import PopUpForm from '../../components/PopUpForm';
 
 // Selectors
 import selectHomePage from './selectors';

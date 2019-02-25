@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { selectPlugins } from 'containers/App/selectors';
+import { selectPlugins } from '../App/selectors';
 
 import styles from './styles.scss';
 

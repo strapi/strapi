@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import PluginLeftMenuLink from 'components/PluginLeftMenuLink';
+import PluginLeftMenuLink from '../PluginLeftMenuLink';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props  */

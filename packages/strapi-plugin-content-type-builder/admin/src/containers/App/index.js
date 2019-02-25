@@ -12,20 +12,19 @@ import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { Switch, Route, withRouter } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import pluginId from 'pluginId';
 
-import HomePage from 'containers/HomePage';
-import ModelPage from 'containers/ModelPage';
-import NotFoundPage from 'containers/NotFoundPage';
-import formSaga from 'containers/Form/sagas';
-import formReducer from 'containers/Form/reducer';
+import pluginId from '../../pluginId';
+
+import HomePage from '../HomePage';
+import ModelPage from '../ModelPage';
+import NotFoundPage from '../NotFoundPage';
+import formSaga from '../Form/sagas';
+import formReducer from '../Form/reducer';
 
 // Other containers actions
-import { makeSelectShouldRefetchContentType } from 'containers/Form/selectors';
+import { makeSelectShouldRefetchContentType } from '../Form/selectors';
 
 // Utils
-// import injectSaga from 'utils/injectSaga';
-// import injectReducer from 'utils/injectReducer';
 import { storeData } from '../../utils/storeData';
 
 import styles from './styles.scss';
