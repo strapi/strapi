@@ -87,7 +87,7 @@ function LeftMenuLinkContainer({ layout, plugins }) {
     })
   ) : (
     <li className={styles.noPluginsInstalled}>
-      <FormattedMessage {...messages.noPluginsInstalled} />.
+      <FormattedMessage key="noPlugins" {...messages.noPluginsInstalled} />.
     </li>
   );
 
@@ -98,13 +98,13 @@ function LeftMenuLinkContainer({ layout, plugins }) {
       {linkSections}
       <div>
         <p className={styles.title}>
-          <FormattedMessage {...messages.plugins} />
+          <FormattedMessage key="plugins" {...messages.plugins} />
         </p>
         <ul className={styles.list}>{pluginsLinks}</ul>
       </div>
       <div>
         <p className={styles.title}>
-          <FormattedMessage {...messages.general} />
+          <FormattedMessage key="general" {...messages.general} />
         </p>
         <ul className={styles.list}>
           <LeftMenuLink icon="list" label={messages.listPlugins.id} destination="/list-plugins" />

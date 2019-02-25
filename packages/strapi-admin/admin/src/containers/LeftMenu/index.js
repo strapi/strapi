@@ -17,7 +17,7 @@ function LeftMenu(props) {
   return (
     <div className={styles.leftMenu}>
       <LeftMenuHeader />
-      <LeftMenuLinkContainer {...props} />
+      <LeftMenuLinkContainer key="leftMenuLinkContainer" {...props} /> 
       <LeftMenuFooter plugins={props.plugins} version={props.version} />
     </div>
   );

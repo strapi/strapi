@@ -75,6 +75,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
   componentDidMount() {
     // Initialize Google Analytics
     // Refer to ../../../doc/disable-tracking.md for more informations
+    /* istanbul ignore next */
     ReactGA.initialize(
       'UA-54313258-9',
       { testMode: process.env.NODE_ENV === 'test' },

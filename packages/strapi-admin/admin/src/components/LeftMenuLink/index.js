@@ -37,6 +37,7 @@ class LeftMenuLink extends React.Component {
     const content = en[this.props.label] ? (
       <FormattedMessage
         id={this.props.label}
+        key={this.props.label}
         defaultMessage="{label}"
         values={{
           label: `${this.props.label}`,
