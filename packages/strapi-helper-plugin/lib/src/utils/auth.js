@@ -25,9 +25,7 @@ const auth = {
       const videos = auth.get('videos');
       const onboarding = auth.get('onboarding');
       localStorage.clear();
-      if (videos !== null) {
-        localStorage.setItem('videos', JSON.stringify(videos));
-      }
+      localStorage.setItem('videos', JSON.stringify(videos));
       localStorage.setItem('onboarding', onboarding);
     }
 
