@@ -16,12 +16,13 @@ import pluginId from 'pluginId';
 
 import getQueryParameters from 'utils/getQueryParameters';
 
-import EditPage from 'containers/EditPage';
-import ListPage from 'containers/ListPage';
-import SettingsPage from 'containers/SettingsPage';
-import SettingPage from 'containers/SettingPage';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import EmptyAttributesView from 'components/EmptyAttributesView';
+import EmptyAttributesView from '../../components/EmptyAttributesView';
+
+import EditPage from '../EditPage';
+import ListPage from '../ListPage';
+import SettingsPage from '../SettingsPage';
+import SettingPage from '../SettingPage';
 
 import {
   loadModels,

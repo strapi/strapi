@@ -12,10 +12,6 @@ import { Link } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isBoolean, isEmpty, map, replace } from 'lodash';
 import cn from 'classnames';
-import pluginId from 'pluginId';
-
-// Logo
-import LogoStrapi from 'assets/images/logo_strapi.png';
 
 // Design
 import Button from 'components/Button';
@@ -23,6 +19,11 @@ import Input from 'components/InputsIndex';
 
 // Utils
 import auth from 'utils/auth';
+
+import pluginId from '../../pluginId';
+
+// Logo
+import LogoStrapi from '../../assets/images/logo_strapi.png';
 
 import {
   hideLoginErrorsInput,

@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 import { map, isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 // HOC Form
-import WithFormSection from 'components/WithFormSection';
+import WithFormSection from '../WithFormSection';
 // nested form
-import EditFormSectionNested from 'components/EditFormSectionNested';
+import EditFormSectionNested from '../EditFormSectionNested';
 
 /* eslint-disable react/require-default-props  */
 class EditFormSection extends React.Component { // eslint-disable-line react/prefer-stateless-function

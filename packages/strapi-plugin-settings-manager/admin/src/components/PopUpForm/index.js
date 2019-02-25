@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
-import WithFormSection from 'components/WithFormSection';
+import WithFormSection from '../WithFormSection';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props  */

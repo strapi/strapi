@@ -22,7 +22,13 @@ import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
 } from 'actions/overlayBlocker';
-import { pluginLoaded, updatePlugin } from 'containers/App/actions';
+
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
+import OverlayBlocker from 'components/OverlayBlocker';
+// Utils
+import auth from 'utils/auth';
+
+import { pluginLoaded, updatePlugin } from '../App/actions';
 import {
   makeSelectAppPlugins,
   makeSelectBlockApp,
@@ -31,27 +37,26 @@ import {
   makeSelectShowGlobalAppBlocker,
   selectHasUserPlugin,
   selectPlugins,
-} from 'containers/App/selectors';
+} from '../App/selectors';
+import injectReducer from '../../utils/injectReducer';
+import injectSaga from '../../utils/injectSaga';
+
 // Design
-import ComingSoonPage from 'containers/ComingSoonPage';
-import Content from 'containers/Content';
-import LocaleToggle from 'containers/LocaleToggle';
-import CTAWrapper from 'components/CtaWrapper';
-import Header from 'components/Header/index';
-import HomePage from 'containers/HomePage/Loadable';
-import Marketplace from 'containers/Marketplace/Loadable';
-import LeftMenu from 'containers/LeftMenu';
-import ListPluginsPage from 'containers/ListPluginsPage/Loadable';
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import Logout from 'components/Logout';
-import NotFoundPage from 'containers/NotFoundPage/Loadable';
-import OverlayBlocker from 'components/OverlayBlocker';
-import PluginPage from 'containers/PluginPage';
-import FullStory from 'components/FullStory';
-// Utils
-import auth from 'utils/auth';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
+import CTAWrapper from '../../components/CtaWrapper';
+import Header from '../../components/Header/index';
+import Logout from '../../components/Logout';
+import FullStory from '../../components/FullStory';
+
+import ComingSoonPage from '../ComingSoonPage';
+import Content from '../Content';
+import LocaleToggle from '../LocaleToggle';
+import HomePage from '../HomePage/Loadable';
+import Marketplace from '../Marketplace/Loadable';
+import LeftMenu from '../LeftMenu';
+import ListPluginsPage from '../ListPluginsPage/Loadable';
+import NotFoundPage from '../NotFoundPage/Loadable';
+import PluginPage from '../PluginPage';
+
 import { getAdminData } from './actions';
 import reducer from './reducer';
 import saga from './saga';

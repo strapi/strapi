@@ -10,7 +10,7 @@ import cn from 'classnames';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
-import GlobalPagination from 'components/GlobalPagination';
+import GlobalPagination from '../GlobalPagination';
 
 import styles from './styles.scss';
 
