@@ -1,5 +1,10 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
+
+import { BrowserRouter as Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { IntlProvider } from 'react-intl';
+import { compose } from 'redux';
 
 import {
   disableGlobalOverlayBlocker,
@@ -9,14 +14,20 @@ import {
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import OverlayBlocker from 'components/OverlayBlocker';
 
+import injectReducer from '../../../utils/injectReducer';
+import { messages } from '../../../i18n';
+import { store } from '../../../createStore';
+import Header from '../../../components/Header/index';
+
 import { updatePlugin } from '../../App/actions';
+import localeToggleReducer from '../../LocaleToggle/reducer';
 
 import {
   resetLocaleDefaultClassName,
   setLocaleCustomClassName,
 } from '../../LocaleToggle/actions';
 
-import Header from '../../../components/Header/index';
+
 
 import { Admin, mapDispatchToProps } from '../index';
 import {
@@ -27,7 +38,79 @@ import {
 } from '../actions';
 
 import styles from '../styles.scss';
-import FullStory from '../../../components/FullStory';
+
+const withLocaleToggleReducer = injectReducer({ key: 'localeToggle', reducer: localeToggleReducer });
+const WithAdmin = compose(withLocaleToggleReducer)(Admin);
+
+const renderComponent = properties => mount(
+  React.createElement(
+    props => (
+      <Provider store={store}>
+        <IntlProvider locale="en" defaultLocale="en" messages={messages}>
+          <Router>
+            <WithAdmin store={store} {...props} />
+          </Router>
+        </IntlProvider>
+      </Provider>
+    ),
+    properties));
+
+describe('<Admin />, (with Redux), React lifecycle', () => {
+  let props;
+
+  beforeEach(() => {
+    props = {
+      admin: {
+        autoReload: false,
+        appError: false,
+        currentEnvironment: 'development',
+        isLoading: true,
+        isSecured: false,
+        layout: {},
+        showMenu: true,
+        strapiVersion: '3',
+        uuid: false,
+      },
+      disableGlobalOverlayBlocker: jest.fn(),
+      enableGlobalOverlayBlocker: jest.fn(),
+      getInitData: jest.fn(),
+      getHook: jest.fn(),
+      global: {
+        appPlugins: [],
+        blockApp: false,
+        overlayBlockerData: null,
+        hasUserPlugin: true,
+        isAppLoading: true,
+        plugins: {},
+        showGlobalAppBlocker: true,
+      },
+      localeToggle: {},
+      hideLeftMenu: jest.fn(),
+      location: {},
+      resetLocaleDefaultClassName: jest.fn(),
+      setAppError: jest.fn(),
+      showLeftMenu: jest.fn(),
+      showGlobalAppBlocker: jest.fn(),
+      updatePlugin: jest.fn(),
+    };
+  });
+
+  it('should not crash when mounted', () => {
+    renderComponent(props);
+  });
+
+  describe('ComponentDidUpdate', () => {
+    it('should call the getHook props wil the willSecure arg if the pathname has changed', () => {
+      props.admin.isLoading = false;
+      props.global.isAppLoading = false;
+
+      const renderedComponent = renderComponent(props);
+      renderedComponent.setProps({ admin: { isLoading: false }, location: { pathname: '/admin/marketPlace' } });
+
+      expect(props.getHook).toHaveBeenCalledWith('willSecure');
+    });
+  });
+});
 
 describe('<Admin />', () => {
   let props;
@@ -58,6 +141,7 @@ describe('<Admin />', () => {
         plugins: {},
         showGlobalAppBlocker: true,
       },
+      localeToggle: {},
       hideLeftMenu: jest.fn(),
       location: {},
       resetLocaleDefaultClassName: jest.fn(),
@@ -81,7 +165,7 @@ describe('<Admin />', () => {
     });
 
     it('should display the OverlayBlocker if blockApp and showGlobalOverlayBlocker are true', () => {
-      const globalProps = Object.assign(props.global, { blockApp: true });
+      const globalProps = Object.assign(props.global, { blockApp: true, isAppLoading: false });
       props.admin.isLoading = false;
       const renderedComponent = shallow(<Admin {...props} {...globalProps} />);
 
@@ -99,14 +183,6 @@ describe('<Admin />', () => {
       const renderedComponent = shallow(<Admin {...props} />);
 
       expect(renderedComponent.text()).toEqual('An error has occured please check your logs');
-    });
-
-    it('should display the <FullStory /> if the user is accepting to be tracked', () => {
-      props.admin.uuid = 'uuid';
-      props.admin.isLoading = false;
-      const renderedComponent = shallow(<Admin {...props} />);
-
-      expect(renderedComponent.find(FullStory)).toHaveLength(1);
     });
   });
 

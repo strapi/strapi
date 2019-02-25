@@ -6,7 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 
 import LeftMenuHeader from '../../components/LeftMenuHeader';
 import LeftMenuLinkContainer from '../../components/LeftMenuLinkContainer';
@@ -33,10 +32,4 @@ LeftMenu.propTypes = {
   version: PropTypes.string,
 };
 
-function mapDispatchToProps(dispatch) {
-  return {
-    dispatch,
-  };
-}
-
-export default connect(mapDispatchToProps)(LeftMenu);
+export default LeftMenu;

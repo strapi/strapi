@@ -30,7 +30,9 @@ export default ({ key, pluginId }) => WrappedComponent => {
     getHook = (hookName) => {
       const that = this.compo.current;
 
-      return this.state.hooks[hookName].bind(that)();
+      if (this.state.hooks[hookName]) {      
+        this.state.hooks[hookName].bind(that)();
+      }
     }
 
     setHooks = (...args) => {

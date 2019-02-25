@@ -4,7 +4,7 @@ module.exports = {
   collectCoverageFrom: [
     'packages/strapi-admin/admin/src/**/**/*.{js,jsx}',
     'packages/strapi-plugin-**/**/admin/src/**/**/*.{js,jsx}',
-    'packages/strapi-admin/admin/src/*.{js,jsx}',
+    '!packages/strapi-admin/admin/src/*.{js,jsx}',
     '!packages/strapi-plugin-**/**/admin/src/*.{js,jsx}',
     '!packages/strapi-admin/admin/src/**/**/tests/*.test.{js,jsx}',
     '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',

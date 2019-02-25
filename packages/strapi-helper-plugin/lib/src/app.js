@@ -90,6 +90,15 @@ const initializer = (() => {
   }
 })();
 
+// Require the plugin's lifecycle
+const lifecycles = (() => {
+  try {
+    return require('../../../../admin/src/lifecycles.js'); // eslint-disable-line import/no-unresolved
+  } catch(err) {
+    return null;
+  }
+})();
+
 // Register the plugin.
 strapi.registerPlugin({
   blockerComponent: null,
@@ -102,6 +111,7 @@ strapi.registerPlugin({
   initializer,
   isReady: false,
   layout,
+  lifecycles,
   leftMenuLinks: [],
   mainComponent: Comp,
   name: pluginPkg.strapi.name,

@@ -25,7 +25,6 @@ import OverlayBlocker from 'components/OverlayBlocker';
 
 import injectHooks from 'utils/injectHooks';
 
-import FullStory from '../../components/FullStory';
 import Header from '../../components/Header/index';
 
 import ComingSoonPage from '../ComingSoonPage';
@@ -64,7 +63,7 @@ import NavTopRightWrapper from './NavTopRightWrapper';
 import styles from './styles.scss';
 
 export class Admin extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  // state = { shouldSecureAfterAllPluginsAreMounted: true };
+  state = { shouldSecureAfterAllPluginsAreMounted: true };
 
   getChildContext = () => ({
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
@@ -74,14 +73,39 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
   });
 
   componentDidMount() {
-    ReactGA.initialize('UA-54313258-9', { testMode: process.env.NODE_ENV === 'test' });
+    // Initialize Google Analytics
+    // Refer to ../../../doc/disable-tracking.md for more informations
+    ReactGA.initialize(
+      'UA-54313258-9',
+      { testMode: process.env.NODE_ENV === 'test' },
+    );
 
     // Retrieve the main settings of the application
     this.props.getInitData();
-    const { admin: { isLoading } } = this.props;
+  }
 
-    if (!isLoading) {
+  componentDidUpdate(prevProps) {
+    const {
+      admin: { isLoading },
+      location: { pathname },
+    } = this.props;
+
+    if (!isLoading && this.state.shouldSecureAfterAllPluginsAreMounted) {
+      if (!this.hasApluginNotReady(this.props)) {
+        this.props.getHook('willSecure');
+      }
+    }
+
+    if (prevProps.location.pathname !== pathname) {
       this.props.getHook('willSecure');
+
+      /* istanbul ignore if */
+      if (this.isAcceptingTracking()) {
+        ReactGA.pageview(
+          pathname,
+          { testMode: process.env.NODE_ENV === 'test' },
+        );
+      }
     }
   }
 
@@ -107,6 +131,12 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
       : { main: { width: '100%' }, sub: styles.wrapper };
   }
 
+  hasApluginNotReady = props => {
+    const { global: { plugins } } = props;
+
+    return !Object.keys(plugins).every(plugin => (plugins[plugin].isReady === true));
+  } 
+
   helpers = {
     hideLeftMenu: this.props.hideLeftMenu,
     showLeftMenu: this.props.showLeftMenu,
@@ -118,6 +148,45 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
 
     return !!uuid;
   }
+
+  /**
+   * Display the app loader until the app is ready
+   * @returns {Boolean}
+   */
+  showLoader = () => {
+    const {
+      admin: { isLoading },
+      global: { isAppLoading },
+    } = this.props;
+
+    if (isAppLoading) {
+      return true;
+    }
+
+    if (isLoading) {
+      return true;
+    }
+
+    return this.hasApluginNotReady(this.props);
+  }
+
+  renderInitializers = () => {
+    const {
+      global: { plugins },
+    } = this.props;
+
+    return Object.keys(plugins).reduce((acc, current) => {
+      const Compo = plugins[current].initializer;
+      const key = plugins[current].id;
+
+      if (Compo) {
+        // We don't check if the initializer is correct because there's a fallback in cdc
+        acc.push(<Compo key={key} {...this.props} {...this.helpers} />);
+      }
+
+      return acc;
+    }, []);
+  };
 
   renderMarketPlace = props => <Marketplace {...props} {...this.props} />;
 
@@ -152,9 +221,18 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
       return <LoadingIndicatorPage />;
     }
 
+    // We need the admin data in order to make the initializers work
+    if (this.showLoader()) {
+      return (
+        <React.Fragment>
+          {this.renderInitializers()}
+          <LoadingIndicatorPage />
+        </React.Fragment>
+      );
+    }
+
     return (
       <div className={styles.adminPage}>
-        {this.isAcceptingTracking() && <FullStory org="GK708" />}
         {showMenu  && (
           <LeftMenu
             layout={layout}
@@ -169,18 +247,19 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
           {showMenu ? <Header /> : ''}
           <div className={this.getContentWrapperStyle().sub}>
             <Switch>
-              <Route path="/" component={HomePage} exact />
-              <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
-              <Route path="/plugins" component={ComingSoonPage} />
-              <Route path="/list-plugins" component={ListPluginsPage} exact />
-              <Route path="/marketplace" render={this.renderMarketPlace} exact />
-              <Route path="/configuration" component={ComingSoonPage} exact />
-              <Route path="" component={NotFoundPage} />
-              <Route path="404" component={NotFoundPage} />
+              <Route key="1" path="/" component={HomePage} exact />
+              <Route key="2" path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
+              <Route key="3" path="/plugins" component={ComingSoonPage} />
+              <Route key="4" path="/list-plugins" component={ListPluginsPage} exact />
+              <Route key="5" path="/marketplace" render={this.renderMarketPlace} exact />
+              <Route key="6" path="/configuration" component={ComingSoonPage} exact />
+              <Route key="7" path="" component={NotFoundPage} />
+              <Route key="8" path="404" component={NotFoundPage} />
             </Switch>
           </div>
         </div>
         <OverlayBlocker
+          key="overlayBlocker"
           isOpen={blockApp && showGlobalAppBlocker}
           {...overlayBlockerData}
         />
@@ -223,6 +302,7 @@ Admin.propTypes = {
     showGlobalAppBlocker: PropTypes.bool,
   }).isRequired,
   hideLeftMenu: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
   resetLocaleDefaultClassName: PropTypes.func.isRequired,
   setAppError: PropTypes.func.isRequired,
   showLeftMenu: PropTypes.func.isRequired,
