@@ -12,7 +12,7 @@ import { map, size } from 'lodash';
 
 // Design
 import Button from 'components/Button';
-import Row from 'components/Row';
+import Row from '../Row';
 
 import styles from './styles.scss';
 

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 
-import NotificationsContainer from 'components/NotificationsContainer';
+import NotificationsContainer from '../../components/NotificationsContainer';
 import { selectNotifications } from './selectors';
 import { hideNotification } from './actions';
 

@@ -9,7 +9,7 @@ import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-import Logo from 'assets/images/icon_filter_blue.svg';
+import Logo from '../../assets/images/icon_filter_blue.svg';
 import styles from './styles.scss';
 
 const WAIT = 400;
