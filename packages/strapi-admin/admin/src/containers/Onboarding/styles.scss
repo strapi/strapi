@@ -14,17 +14,17 @@
   .videosHeader {
     padding: 25px 15px 0 15px;
     p {
-      font-family: Lato-Bold;
-      letter-spacing: 0.5px;
-      font-size: 11px;
-      text-transform: uppercase;
       display: inline-block;
-      width: 50%;
       vertical-align: top;
+      width: 50%;
+      font-family: Lato-Bold;
+      font-size: 11px;
       color: #5c5f66;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
       &:last-of-type {
-        text-align: right;
         color: #5a9e06;
+        text-align: right;
       }
     }
   }
@@ -36,12 +36,12 @@
   }
   .videosContent {
     min-width: 320px;
-    background-color: white;
     margin-bottom: 10px;
     margin-right: 15px;
+    background-color: white;
     box-shadow: 0 2px 4px 0 #e3e9f3;
     border-radius: 3px;
-    overflow: hidden;  
+    overflow: hidden;
     &.shown {
       animation: fadeIn 0.5s forwards;
     }
@@ -50,15 +50,15 @@
     }
 
     ul {
-      list-style: none;
       padding: 10px 0;
       margin-bottom: 0;
+      list-style: none;
     }
   }
   .openBtn {
+    float: right;
     width: 38px;
     height: 38px;
-    float: right;
     button {
       width: 100%;
       height: 100%;

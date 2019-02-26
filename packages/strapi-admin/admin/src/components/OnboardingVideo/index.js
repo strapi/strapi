@@ -35,7 +35,6 @@ class OnboardingVideo extends React.Component {
   };
 
   handleChangeIsPlayingState = (state, prevState) => {
-
     const { isActive } = state;
     const { id } = this.props;
 

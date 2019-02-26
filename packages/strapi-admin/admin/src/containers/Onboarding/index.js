@@ -26,9 +26,7 @@ export class Onboarding extends React.Component {
   componentDidMount() {
     this.props.getVideos();
 
-    const isFirstTime = JSON.parse(localStorage.getItem('onboarding')) || null;
-
-    if (isFirstTime === null) {
+    if (JSON.parse(localStorage.getItem('onboarding')) === null) {
       setTimeout(() => { 
         this.setState({ showVideos: true });
         localStorage.setItem('onboarding', true);

@@ -2,7 +2,6 @@ li.listItem {
   display: block;
   padding: 17px 15px;
   cursor: pointer;
-  
   &:hover {
     background-color: #f7f8f8;
     .title {
@@ -15,49 +14,49 @@ li.listItem {
     vertical-align: middle;
   }
   .thumbWrapper {
+    position: relative;
     width: 55px;
     height: 38px;
     background-color: #d8d8d8;
     border-radius: 2px;
     overflow: hidden;
-    position: relative;
     .overlay {
-      width: 100%;
-      height: 100%;
-      background-color: rgba(#0E7DE7, .8);
       position: absolute;
       top: 0;
       left: 0;
       z-index: 1;
-    }
-    img {
       width: 100%;
       height: 100%;
+      background-color: rgba(#0E7DE7, .8);
+    }
+    img {
       position: relative;
       z-index: 0;
+      width: 100%;
+      height: 100%;
     }
     .play {
-      width: 20px;
-      height: 20px;
-      line-height: 20px;
-      border-radius: 50%;
-      background-color: #0e7de7;
-      border: 1px solid white;
       position: absolute;
       top: 50%;
       margin-top: -10px;
       left: 50%;
       margin-left: -10px;
+      width: 20px;
+      height: 20px;
+      background-color: #0e7de7;
+      border: 1px solid white;
       text-align: center;
+      line-height: 20px;
+      border-radius: 50%;
       z-index: 2;
       &::before {
         content: '\f04b';
-        font-family: 'FontAwesome';
-        font-size: 10px;
-        color: white;
         display: inline-block;
         vertical-align: top;
         height: 100%;
+        font-family: 'FontAwesome';
+        color: white;
+        font-size: 10px;
         margin-left: 3px;
         line-height: 18px;
       }
@@ -79,8 +78,8 @@ li.listItem {
         border-color: #5a9e06;
         &::before {
           content: '\f00c';
-          font-size: 11px;
           margin-left: 0;
+          font-size: 11px;
           line-height: 20px;
         }
       }
@@ -95,10 +94,10 @@ li.listItem {
       font-family: Lato-SemiBold;
     }
     .time {
-      font-size: 11px;
-      line-height: 11px;
       color: #919bae;
       font-family: Lato-Bold;
+      font-size: 11px;
+      line-height: 11px;
     }
   }
 }
@@ -111,8 +110,8 @@ li.listItem {
   margin-right: auto !important;
   margin-left: auto !important;
   .videoModalHeader {
-    border-bottom: 0;
     padding-bottom: 0;
+    border-bottom: 0;
     > h5 {
       font-family: Lato;
       font-weight: bold!important;
@@ -121,13 +120,13 @@ li.listItem {
       color: #333740;
     }
     > button {
-      margin-top: 0;
-      margin-right: 0;
+      display: flex;
       position: absolute;
       right: 0;
       top: 0;
+      margin-top: 0;
+      margin-right: 0;
       padding: 10px;
-      display: flex;
       cursor: pointer;
       span {
         line-height: 0.6em;
