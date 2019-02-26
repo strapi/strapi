@@ -50,9 +50,12 @@ import {
 
 import {
   getInitData,
+  getSecuredData,
   hideLeftMenu,
   setAppError,
+  setAppSecured,
   showLeftMenu,
+  unsetAppSecured,
 } from './actions';
 import makeSelectAdmin from './selectors';
 import reducer from './reducer';
@@ -87,7 +90,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
 
   componentDidUpdate(prevProps) {
     const {
-      admin: { isLoading },
+      admin: { didGetSecuredData, isLoading, isSecured },
       location: { pathname },
     } = this.props;
 
@@ -107,6 +110,14 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
           { testMode: process.env.NODE_ENV === 'test' },
         );
       }
+    }
+
+    if (prevProps.admin.isSecured !== isSecured) {
+      this.props.getSecuredData();
+    }
+
+    if (prevProps.admin.didGetSecuredData !== didGetSecuredData) {
+      this.props.getHook('didGetSecuredData');
     }
   }
 
@@ -140,7 +151,9 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
 
   helpers = {
     hideLeftMenu: this.props.hideLeftMenu,
+    setAppSecured: this.props.setAppSecured,
     showLeftMenu: this.props.showLeftMenu,
+    unsetAppSecured: this.props.unsetAppSecured,
     updatePlugin: this.props.updatePlugin,
   };
 
@@ -281,7 +294,9 @@ Admin.propTypes = {
     autoReload: PropTypes.bool,
     appError: PropTypes.bool,
     currentEnvironment: PropTypes.string,
+    didGetSecuredData: PropTypes.bool,
     isLoading: PropTypes.bool,
+    isSecured: PropTypes.bool,
     layout: PropTypes.object,
     showMenu: PropTypes.bool,
     strapiVersion: PropTypes.string,
@@ -294,6 +309,7 @@ Admin.propTypes = {
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getHook: PropTypes.func.isRequired,
   getInitData: PropTypes.func.isRequired,
+  getSecuredData: PropTypes.func.isRequired,
   global: PropTypes.shape({
     appPlugins: PropTypes.array,
     blockApp: PropTypes.bool,
@@ -306,7 +322,9 @@ Admin.propTypes = {
   location: PropTypes.object.isRequired,
   resetLocaleDefaultClassName: PropTypes.func.isRequired,
   setAppError: PropTypes.func.isRequired,
+  setAppSecured: PropTypes.func.isRequired,
   showLeftMenu: PropTypes.func.isRequired,
+  unsetAppSecured: PropTypes.func.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
 
@@ -321,11 +339,14 @@ export function mapDispatchToProps(dispatch) {
       disableGlobalOverlayBlocker,
       enableGlobalOverlayBlocker,
       getInitData,
+      getSecuredData,
       hideLeftMenu,
       resetLocaleDefaultClassName,
       setAppError,
+      setAppSecured,
       setLocaleCustomClassName,
       showLeftMenu,
+      unsetAppSecured,
       updatePlugin,
     },
     dispatch,

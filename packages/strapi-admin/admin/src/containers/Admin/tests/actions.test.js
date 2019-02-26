@@ -4,14 +4,18 @@ import {
   getInitDataSucceeded,
   hideLeftMenu,
   setAppError,
+  setAppSecured,
   showLeftMenu,
+  unsetAppSecured,
 } from '../actions';
 import {
   GET_INIT_DATA,
   GET_INIT_DATA_SUCCEEDED,
   HIDE_LEFT_MENU,
   SET_APP_ERROR,
+  SET_APP_SECURED,
   SHOW_LEFT_MENU,
+  UNSET_APP_SECURED,
 } from '../constants';
 
 describe('<Admin /> actions', () => {
@@ -57,6 +61,16 @@ describe('<Admin /> actions', () => {
     });
   });
 
+  describe('SetAppSecured Action', () => {
+    it('has a type of SET_APP_SECURED', () => {
+      const expected = {
+        type: SET_APP_SECURED,
+      };
+
+      expect(setAppSecured()).toEqual(expected);
+    });
+  });
+
   describe('ShowLeftMenu Action', () => {
     it('has a type of SHOW_LEFT_MENU', () => {
       const expected = {
@@ -64,6 +78,16 @@ describe('<Admin /> actions', () => {
       };
 
       expect(showLeftMenu()).toEqual(expected);
+    });
+  });
+
+  describe('UnsetAppSecured Action', () => {
+    it('has a type of UNSET_APP_SECURED', () => {
+      const expected = {
+        type: UNSET_APP_SECURED,
+      };
+
+      expect(unsetAppSecured()).toEqual(expected);
     });
   });
 });

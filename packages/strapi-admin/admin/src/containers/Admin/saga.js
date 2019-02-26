@@ -1,8 +1,8 @@
 import { all, fork, call, put, takeLatest } from 'redux-saga/effects';
 import request from 'utils/request';
 
-import { getInitDataSucceeded } from './actions';
-import { GET_INIT_DATA } from './constants';
+import { getInitDataSucceeded, getSecuredDataSucceeded } from './actions';
+import { GET_INIT_DATA, GET_SECURED_DATA } from './constants';
 
 export function* getData() {
   try {
@@ -20,9 +20,21 @@ export function* getData() {
   }
 }
 
+/* istanbul ignore next */
+export function* getSecuredData() {
+  try {
+    const data = {};
+
+    yield put(getSecuredDataSucceeded(data));
+  } catch(err) {
+    console.log(err); // eslint-lint-disable-line no-console
+  }
+}
+
 // Individual exports for testing
 export default function* defaultSaga() {
   yield all([
     fork(takeLatest, GET_INIT_DATA, getData),
+    fork(takeLatest, GET_SECURED_DATA, getSecuredData),
   ]);
 }

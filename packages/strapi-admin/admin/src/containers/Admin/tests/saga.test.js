@@ -5,10 +5,10 @@
 /* eslint-disable redux-saga/yield-effects */
 import { all, fork, put, takeLatest } from 'redux-saga/effects';
 // import { take, call, put, select } from 'redux-saga/effects';
-import defaultSaga, { getData } from '../saga';
+import defaultSaga, { getData, getSecuredData } from '../saga';
 
 import { getInitDataSucceeded } from '../actions';
-import { GET_INIT_DATA } from '../constants';
+import { GET_INIT_DATA, GET_SECURED_DATA } from '../constants';
 
 describe('getData Saga', () => {
   let getDataGenerator;
@@ -59,6 +59,11 @@ describe('defaultSaga Saga', () => {
   it('should start task to watch for GET_INIT_DATA action', () => {
     const forkDescriptor = defaultSagaSaga.next().value;
 
-    expect(forkDescriptor).toEqual(all([fork(takeLatest, GET_INIT_DATA, getData)]));
+    expect(forkDescriptor)
+      .toEqual(
+        all([
+          fork(takeLatest, GET_INIT_DATA, getData),
+          fork(takeLatest, GET_SECURED_DATA, getSecuredData),
+        ]));
   });
 });

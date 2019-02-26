@@ -11,6 +11,7 @@ describe('<Initializer />', () => {
     defaultProps = {
       initialize: jest.fn(),
       shouldUpdate: false,
+      unsetAppSecured: jest.fn(),
       updatePlugin: jest.fn(),
     };
   });
@@ -25,6 +26,12 @@ describe('<Initializer />', () => {
     expect(defaultProps.initialize).toHaveBeenCalled();
   });
 
+  it('should call the unsetAppSecured prop on mount', () => {
+    mount(<Initializer {...defaultProps} />);
+
+    expect(defaultProps.unsetAppSecured).toHaveBeenCalled();
+  });
+  
   it('should call the updatePlugin prop when the shouldUpdate prop has changed', () => {
     const renderedComponent = mount(<Initializer {...defaultProps} />);
 

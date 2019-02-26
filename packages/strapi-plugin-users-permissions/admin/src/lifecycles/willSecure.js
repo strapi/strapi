@@ -4,11 +4,13 @@ const auth = require('utils/auth').default;
 module.exports = function willSecure() {
   const {
     props: {
-      showLeftMenu,
       hideLeftMenu,
-      location: { pathname },
       history,
+      location: { pathname },
+      setAppSecured,
+      showLeftMenu,
       store,
+      unsetAppSecured,
     },
   } = this;
 
@@ -27,12 +29,14 @@ module.exports = function willSecure() {
 
   if (auth.getToken()) {
     showLeftMenu();
+    setAppSecured();
 
     return cb();
   }
 
   if (!includes(nonProtectedURLs, pathname)) {
     hideLeftMenu();
+    unsetAppSecured();
     history.push(redirectEndPoint);
 
     return cb();
@@ -43,12 +47,14 @@ module.exports = function willSecure() {
     pathname === '/plugins/users-permissions/auth/register'
   ) {
     hideLeftMenu();
+    unsetAppSecured();
     history.push(redirectEndPoint);
 
     return cb();
   }
 
   showLeftMenu();
+  setAppSecured();
 
   return cb();
 };

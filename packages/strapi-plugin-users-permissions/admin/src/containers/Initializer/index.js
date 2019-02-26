@@ -19,6 +19,7 @@ import saga from './saga';
 class Initializer extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
     this.props.initialize();
+    this.props.unsetAppSecured();
   }
 
   componentDidUpdate(prevProps) {
@@ -38,6 +39,7 @@ class Initializer extends React.Component { // eslint-disable-line react/prefer-
 Initializer.propTypes = {
   initialize: PropTypes.func.isRequired,
   shouldUpdate: PropTypes.bool.isRequired,
+  unsetAppSecured: PropTypes.func.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
 

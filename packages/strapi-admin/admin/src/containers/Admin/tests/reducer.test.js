@@ -5,7 +5,9 @@ import {
   getInitDataSucceeded,
   hideLeftMenu,
   setAppError,
+  setAppSecured,
   showLeftMenu,
+  unsetAppSecured,
 } from '../actions';
 import adminReducer from '../reducer';
 
@@ -17,9 +19,11 @@ describe('adminReducer', () => {
       autoReload: false,
       appError: false,
       currentEnvironment: 'development',
+      didGetSecuredData: false,
       isLoading: true,
       isSecured: false,
       layout: Map({}),
+      securedData: {},
       showMenu: true,
       strapiVersion: '3',
       uuid: false,
@@ -64,10 +68,23 @@ describe('adminReducer', () => {
     expect(adminReducer(state, setAppError())).toEqual(expected);
   });
 
+  it('should handle the setAppSecured action correctly', () => {
+    const expected = state.set('isSecured', true);
+
+    expect(adminReducer(state, setAppSecured())).toEqual(expected);
+  });
+
   it('should handle the showLeftMenu action correctly', () => {
     const expected = state.set('showMenu', true);
     state.set('showMenu', false);
 
     expect(adminReducer(state, showLeftMenu())).toEqual(expected);
+  });
+
+  it('should handle the unsetAppSecured action correctly', () => {
+    state.set('isSecured', true);
+    const expected = state.set('isSecured', false);
+
+    expect(adminReducer(state, unsetAppSecured())).toEqual(expected);
   });
 });
