@@ -29,9 +29,12 @@ export default ({ key, pluginId }) => WrappedComponent => {
 
     getHook = (hookName) => {
       const that = this.compo.current;
+      const { hooks } = this.state;
 
-      if (this.state.hooks[hookName]) {      
-        this.state.hooks[hookName].bind(that)();
+      if (hooks[hookName]) {
+        hooks[hookName].forEach(hook => {
+          hook.bind(that)();
+        });
       }
     }
 
@@ -41,13 +44,38 @@ export default ({ key, pluginId }) => WrappedComponent => {
       if (args.length === 1) {
         const [hooks] = args;
 
-        return this.setState(prevState => ({ hooks: {...prevState.hooks, ...hooks } }));
+        return this.setState(prevState => {
+          const newHooks = Object.keys(hooks).reduce((acc, current) => {
+            if (acc[current]) {
+              acc[current].push(hooks[current]);
+            } else {
+              acc[current] = [hooks[current]];
+            }
+
+            return acc;
+          }, { ...prevState.hooks });
+
+          return { hooks: newHooks };
+        });
       }
 
       const [target, hooks] = args;
       
       if (target === `${pluginId}.${key}`) {
-        return this.setState(prevState => ({ hooks: {...prevState.hooks, ...hooks } }));
+        // return this.setState(prevState => ({ hooks: {...prevState.hooks, ...hooks } }));
+        return this.setState(prevState => {
+          const newHooks = Object.keys(hooks).reduce((acc, current) => {
+            if (acc[current]) {
+              acc[current].push(hooks[current]);
+            } else {
+              acc[current] = [hooks[current]];
+            }
+
+            return acc;
+          }, { ...prevState.hooks });
+
+          return { hooks: newHooks };
+        });
       }
     }
 

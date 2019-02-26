@@ -1,21 +1,22 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import Initializer from '../index';
+import { Initializer } from '../index';
 
 describe('<Initializer />', () => {
   it('Should not crash', () => {
     const updatePlugin = jest.fn();
-    const renderedComponent = shallow(<Initializer updatePlugin={updatePlugin} />);
+    const initialize = jest.fn();
+    const renderedComponent = shallow(<Initializer updatePlugin={updatePlugin} initialize={initialize} />);
 
     expect(renderedComponent.children()).toHaveLength(0);
   });
 
-  it('should call the updatePlugin props when mounted', () => {
-    const updatePlugin = jest.fn();
+  it('should call the initialize props when mounted', () => {
+    const initialize = jest.fn();
 
-    const wrapper = mount(<Initializer updatePlugin={updatePlugin} />);
+    const wrapper = mount(<Initializer initialize={initialize} />);
 
-    expect(wrapper.prop('updatePlugin')).toHaveBeenCalledWith('content-manager', 'isReady', true);
+    expect(wrapper.prop('initialize')).toHaveBeenCalled();
   });
 });

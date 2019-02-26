@@ -527,7 +527,15 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   renderModalBodyChooseAttributes = () => {
-    const attributesDisplay = has(this.context.plugins.toJS(), 'upload')
+    let plugins;
+
+    try {
+      plugins = this.context.plugins.toJS();
+    } catch(err) {
+      plugins = this.context.plugins;
+    }
+
+    const attributesDisplay = has(plugins, 'upload')
       ? forms.attributesDisplay.items
       : forms.attributesDisplay.items.filter(obj => obj.type !== 'media'); // Don't display the media field if the upload plugin isn't installed
 

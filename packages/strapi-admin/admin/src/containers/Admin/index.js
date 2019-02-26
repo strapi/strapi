@@ -313,7 +313,10 @@ Admin.propTypes = {
   global: PropTypes.shape({
     appPlugins: PropTypes.array,
     blockApp: PropTypes.bool,
-    overlayBlockerData: PropTypes.object,
+    overlayBlockerData: PropTypes.oneOfType([
+      PropTypes.bool,
+      PropTypes.object,
+    ]),
     isAppLoading: PropTypes.bool,
     plugins: PropTypes.object,
     showGlobalAppBlocker: PropTypes.bool,
