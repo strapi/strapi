@@ -15,7 +15,6 @@ import '../../../../node_modules/video-react/dist/video-react.css';
 import styles from './styles.scss';
 
 class OnboardingVideo extends React.Component {
-
   componentDidMount() {
     this.hiddenPlayer.current.subscribeToStateChange(
       this.handleChangeState,
@@ -23,6 +22,7 @@ class OnboardingVideo extends React.Component {
   }
 
   hiddenPlayer = React.createRef();
+
   player = React.createRef();
 
   handleChangeState = (state, prevState) => {
@@ -49,7 +49,6 @@ class OnboardingVideo extends React.Component {
   }
 
   handleModalOpen = () => {
-
     this.player.current.subscribeToStateChange(
       this.handleChangeIsPlayingState,
     );
@@ -59,6 +58,7 @@ class OnboardingVideo extends React.Component {
     if (this.props.video.startTime === 0) {
       const { player } = this.player.current.getState();
       player.isActive = true;
+
       this.props.didPlayVideo(this.props.id, this.props.video.startTime);
     } else {
       this.player.current.pause();
@@ -68,6 +68,7 @@ class OnboardingVideo extends React.Component {
   handleVideoPause = () => {
     const { player } = this.player.current.getState();
     const currTime = player.currentTime;
+
     this.handleCurrentTimeChange(currTime);
     this.props.didStopVideo(this.props.id, currTime);
   };
@@ -89,7 +90,7 @@ class OnboardingVideo extends React.Component {
         key={this.props.id}
         onClick={this.props.onClick}
         id={this.props.id}
-        className={cn(styles.listItem, video.end ? styles.finished : '')}
+        className={cn(styles.listItem, video.end && (styles.finished))}
       >
         <div className={styles.thumbWrapper}>
           <img src={video.preview} alt="preview" />
@@ -98,7 +99,7 @@ class OnboardingVideo extends React.Component {
         </div>
         <div className={styles.txtWrapper}>
           <p className={styles.title}>{video.title}</p>
-          <p className={styles.time}>{isNaN(video.duration) ? ' ' :  `${Math.floor(video.duration / 60)}:${Math.floor(video.duration)%60}`}</p>
+          <p className={styles.time}>{isNaN(video.duration) ? '\xA0' :  `${Math.floor(video.duration / 60)}:${Math.floor(video.duration)%60}`}</p>
         </div>
         
         <Modal

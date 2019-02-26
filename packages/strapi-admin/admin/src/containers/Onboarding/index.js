@@ -21,21 +21,19 @@ import saga from './saga';
 import styles from './styles.scss';
 
 export class Onboarding extends React.Component {
-  state = { showVideos: false, percentage: 0 };
+  state = { showVideos: false };
 
   componentDidMount() {
     this.props.getVideos();
-  }
 
-  componentWillReceiveProps(){
+    const isFirstTime = JSON.parse(localStorage.getItem('onboarding')) || null;
 
-    if(!localStorage.getItem('onboarding')) {
+    if (isFirstTime === null) {
       setTimeout(() => { 
         this.setState({ showVideos: true });
         localStorage.setItem('onboarding', true);
-      }, 800);
+      }, 1000);
     }
-    this.getCompletedPercentage();
   }
 
   componentWillUnmount() {
@@ -44,22 +42,6 @@ export class Onboarding extends React.Component {
 
   setVideoEnd = () => {
     this.setVideoEnd();
-  }
-
-  getCompletedPercentage = () => {
-
-    let videosEnd = 0;
-    let videos = JSON.parse(localStorage.getItem('videos'));
-
-    for (let i = 0; i < videos.length; i++) {
-      let video = videos[i];
-
-      if (video.end) {
-        videosEnd++;
-      }
-    }
-
-    this.setState({ percentage: Math.floor(videosEnd*100/videos.length)});
   }
   
   didPlayVideo = (index, currTime) => {
@@ -73,38 +55,32 @@ export class Onboarding extends React.Component {
   }
 
   handleVideosToggle = () => {
-    // Display videos card
     this.setState(prevState => ({ showVideos: !prevState.showVideos }));
 
-    // EmitEvent
     const { showVideos } = this.state;
     const eventName = showVideos ? 'didOpenGetStartedVideoContainer' : 'didCloseGetStartedVideoContainer';
+
     this.context.emitEvent(eventName);
   };
 
-  updateLocalStorage = (index, current, duration) => {
+  updateCurrentTime = (index, current, duration) => {
 
-    // Update store
     this.props.updateVideoStartTime(index, current);
 
-    // Update localStorage
-    let videosTime = JSON.parse(localStorage.getItem('videos'));
-    videosTime[index].startTime = current;
-    let percent = current * 100 / duration;
-    const video = videosTime.find((element) => element.order === index);
+    const percent = current * 100 / duration;
+    const video = this.props.videos[index];
 
     if (percent >= 80) {
       if (video.end === false) {
-        video.end = true;
-        this.props.setVideoEnd(index, true);
+        this.updateEnd(index);
       }
     }
-
-    localStorage.setItem('videos', JSON.stringify(videosTime));
-    this.getCompletedPercentage();
   };
 
-  // eslint-disable-line react/prefer-stateless-function
+  updateEnd = (index) => {
+    this.props.setVideoEnd(index, true);
+  };
+
   // eslint-disable-line jsx-handler-names
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
@@ -114,7 +90,9 @@ export class Onboarding extends React.Component {
         <div className={cn(styles.videosContent, this.state.showVideos ? styles.shown : styles.hide)}>
           <div className={styles.videosHeader}>
             <p>Get started video</p>
-            <p>{this.state.percentage}% completed</p>
+            {videos.length && (
+              <p>{Math.floor((videos.filter(v => v.end).length)*100/videos.length)}% completed</p>
+            )}
           </div>
           <ul className={styles.onboardingList}>
             {videos.map((video, i) => {
@@ -125,7 +103,7 @@ export class Onboarding extends React.Component {
                   video={video}
                   onClick={onClick}
                   setVideoDuration={setVideoDuration}
-                  getVideoCurrentTime={this.updateLocalStorage}
+                  getVideoCurrentTime={this.updateCurrentTime}
                   didPlayVideo={this.didPlayVideo}
                   didStopVideo={this.didStopVideo}
                 />

@@ -28,19 +28,35 @@ function onboardingReducer(state = initialState, action) {
       });
     case SET_VIDEOS_DURATION:
       return state.updateIn(['videos', action.index, 'duration'], () => action.duration);
-    case UPDATE_VIDEO_START_TIME:
-      return state.updateIn(['videos'], list => {
+    case UPDATE_VIDEO_START_TIME: {
+      
+      const storedVideos = JSON.parse(localStorage.getItem('videos'));
+      const videos = state.updateIn(['videos'], list => {
         return list.reduce((acc, current, index) => {
 
           if (index === action.index) {
+            storedVideos[index].startTime = action.startTime;
             return acc.updateIn([index, 'startTime'], () => action.startTime);
           }
+
+          storedVideos[index].startTime = 0;
 
           return acc.updateIn([index, 'startTime'], () => 0);
         }, list);
       });
-    case SET_VIDEO_END:
+
+      localStorage.setItem('videos', JSON.stringify(storedVideos));
+
+      return videos;
+    }
+    case SET_VIDEO_END: {
+
+      const storedVideos = JSON.parse(localStorage.getItem('videos'));
+      storedVideos[action.index].end = action.end;
+      localStorage.setItem('videos', JSON.stringify(storedVideos));
+
       return state.updateIn(['videos', action.index, 'end'], () => action.end);
+    }
     case REMOVE_VIDEOS:
       return initialState;
     default:

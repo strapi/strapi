@@ -20,18 +20,18 @@ function* getVideos() {
     const storedVideo = JSON.parse(localStorage.getItem('videos')) || null;
 
     const videos = data.map(video => {
-      const end = storedVideo ? storedVideo.end : false;
-      const startTime = storedVideo ? storedVideo.startTime : 0;
+      const end = storedVideo ? storedVideo.find( v => v.order === video.order).end : false;
+      const startTime = storedVideo ? storedVideo.find( v => v.order === video.order).startTime : 0;
 
       return {
         ...video,
         duration: null,
-        end,
+        end: end,
         isOpen: false,
         key: video.order,
         startTime: startTime,
       };
-    }).sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0));
+    }).sort((a,b) => (a.order - b.order));
 
     localStorage.setItem('videos', JSON.stringify(videos));
 
