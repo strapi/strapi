@@ -9,8 +9,10 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
+import { FormattedMessage } from 'react-intl';
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
+
 import OnboardingVideo from 'components/OnboardingVideo';
 
 import { getVideos, onClick, removeVideos, setVideoDuration, setVideoEnd, updateVideoStartTime } from './actions';
@@ -87,9 +89,9 @@ export class Onboarding extends React.Component {
       <div className={cn(styles.videosWrapper, videos.length > 0 ? styles.visible : styles.hidden)}>
         <div className={cn(styles.videosContent, this.state.showVideos ? styles.shown : styles.hide)}>
           <div className={styles.videosHeader}>
-            <p>Get started video</p>
+            <p><FormattedMessage id="app.components.Onboarding.title" /></p>
             {videos.length && (
-              <p>{Math.floor((videos.filter(v => v.end).length)*100/videos.length)}% completed</p>
+              <p>{Math.floor((videos.filter(v => v.end).length)*100/videos.length)}<FormattedMessage id="app.components.Onboarding.label.completed" /></p>
             )}
           </div>
           <ul className={styles.onboardingList}>

@@ -85,6 +85,8 @@
   "app.components.NotFoundPage.back": "Retourner à la page d'accueil",
   "app.components.NotFoundPage.description": "Page introuvable",
   "app.components.Official": "Officiel",
+  "app.components.Onboarding.label.completed": "% complétées",
+  "app.components.Onboarding.title": "Videos de démarrage",
   "app.components.PluginCard.Button.label.download": "Télécharger",
   "app.components.PluginCard.Button.label.install": "Déjà installé",
   "app.components.PluginCard.Button.label.support": "Nous soutenir",
