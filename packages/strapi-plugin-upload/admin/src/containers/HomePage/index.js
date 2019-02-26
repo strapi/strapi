@@ -11,7 +11,6 @@ import { connect } from 'react-redux';
 import { injectIntl } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import { isEmpty } from 'lodash';
-import pluginId from 'pluginId';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -22,13 +21,15 @@ import InputSearch from 'components/InputSearch';
 import PageFooter from 'components/PageFooter';
 import PluginHeader from 'components/PluginHeader';
 
-// Plugin's component
-import EntriesNumber from 'components/EntriesNumber';
-import List from 'components/List';
-import PluginInputFile from 'components/PluginInputFile';
-
 // Utils
 import getQueryParameters from 'utils/getQueryParameters';
+
+import pluginId from '../../pluginId';
+
+// Plugin's component
+import EntriesNumber from '../../components/EntriesNumber';
+import List from '../../components/List';
+import PluginInputFile from '../../components/PluginInputFile';
 
 // Actions
 import {

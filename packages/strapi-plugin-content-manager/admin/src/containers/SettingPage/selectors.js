@@ -4,7 +4,7 @@
  */
 
 import { createSelector } from 'reselect';
-import pluginId from 'pluginId';
+import pluginId from '../../pluginId';
 
 /**
 * Direct selector to the settingPage state domain
