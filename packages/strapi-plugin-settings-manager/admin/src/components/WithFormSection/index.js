@@ -8,12 +8,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { findIndex, forEach, has, isObject , join, pullAt, split, includes} from 'lodash';
 
-import InputNumber from 'components/InputNumber';
-import InputText from 'components/InputText';
-import InputToggle from 'components/InputToggle';
-import InputPassword from 'components/InputPassword';
-import InputSelect from 'components/InputSelect';
-import InputEnum from 'components/InputEnum';
+import InputNumber from '../InputNumber';
+import InputText from '../InputText';
+import InputToggle from '../InputToggle';
+import InputPassword from '../InputPassword';
+import InputSelect from '../InputSelect';
+import InputEnum from '../InputEnum';
 import config from './config.json';
 import styles from './styles.scss';
 

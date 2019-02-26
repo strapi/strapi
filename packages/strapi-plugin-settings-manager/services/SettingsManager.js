@@ -3,7 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
-const exec = require('child_process').spawnSync;
+
+const shell = require('shelljs');
 
 module.exports = {
   menu: {
@@ -198,7 +199,12 @@ module.exports = {
             validations: {
               required: true
             }
-          },
+          }
+        ]
+      },
+      {
+        name: '',
+        items: [
           {
             name: 'form.response.item.responseTime.enabled',
             target: 'response.responseTime.enabled',
@@ -207,6 +213,28 @@ module.exports = {
             validations: {
               required: true
             }
+          }
+        ]
+      },
+      {
+        name: '',
+        items: [
+          {
+            name: 'form.response.item.poweredBy.enabled',
+            target: 'response.poweredBy.enabled',
+            type: 'boolean',
+            value: _.get(strapi.config, `environments.${env}.response.poweredBy.enabled`, null),
+            items: [
+              {
+                name: 'form.response.item.poweredBy.value',
+                target: 'response.poweredBy.value',
+                type: 'string',
+                value: _.get(strapi.config, `environments.${env}.response.poweredBy.value`, null),
+                validations : {
+                  required: true
+                }
+              }
+            ]
           }
         ]
       }
@@ -936,12 +964,12 @@ module.exports = {
 
     if (connector && !installedConnector) {
       strapi.log.info(`Installing ${connector} dependency ...`);
-      exec('npm', ['install', `${connector}@${strapi.config.info.strapi}`]);
+      shell.exec(`npm install ${connector}@${strapi.config.info.strapi}`, {silent: true});
     }
 
     if (client && !installedClient) {
       strapi.log.info(`Installing ${client} dependency ...`);
-      exec('npm', ['install', client]);
+      shell.exec(`npm install ${client}`, {silent: true});
     }
   },
 
