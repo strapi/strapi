@@ -119,7 +119,16 @@ export function* submitChanges(action) {
         yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
         yield put(postContentTypeSucceeded());
 
-        const leftMenuContentTypes = get(action.context.plugins.toJS(), ['content-manager', 'leftMenuSections']);
+        // TODO: Remove these lines when migration is completed
+        let plugins;
+
+        try {
+          plugins = action.context.plugins.toJS();
+        } catch(err) {
+          plugins = action.context.plugins;
+        }
+
+        const leftMenuContentTypes = get(plugins, ['content-manager', 'leftMenuSections']);
         const newContentType = body.name.toLowerCase();
 
         if (leftMenuContentTypes) {

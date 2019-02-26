@@ -131,8 +131,18 @@ export class HomePage extends React.PureComponent {
     }
   };
 
-  showFirstBlock = () =>
-    get(this.props.plugins.toJS(), 'content-manager.leftMenuSections.0.links', []).length === 0;
+  showFirstBlock = () => {
+    const { plugins } = this.props;
+    let pluginsObj;
+
+    try {
+      pluginsObj = plugins.toJS();
+    } catch(err) {
+      pluginsObj = plugins;
+    }
+
+    get(pluginsObj, 'content-manager.leftMenuSections.0.links', []).length === 0;
+  }
 
   renderButton = () => {
     const data = this.showFirstBlock()

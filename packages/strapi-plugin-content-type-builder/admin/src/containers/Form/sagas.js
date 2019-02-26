@@ -33,8 +33,18 @@ export function* editContentType(action) {
     };
 
     yield put(setButtonLoading());
+    
+    let plugins;
 
-    const leftMenuContentTypes = get(action.context.plugins.toJS(), ['content-manager', 'leftMenuSections']);
+    // TODO: Remove these lines when migration is completed
+
+    try {
+      plugins = action.plugins.toJS();
+    } catch(err) {
+      plugins = action.plugins;
+    }
+
+    const leftMenuContentTypes = get(plugins, ['content-manager', 'leftMenuSections']);
     const leftMenuContentTypesIndex = !isEmpty(leftMenuContentTypes) ? findIndex(get(leftMenuContentTypes[0], 'links'), ['destination', initialContentType.name.toLowerCase()]) : -1;
     const response = yield call(request, requestUrl, opts, true);
 

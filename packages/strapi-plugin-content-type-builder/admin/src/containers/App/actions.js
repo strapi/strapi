@@ -22,7 +22,15 @@ import {
 
 export function deleteContentType(itemToDelete, context) {
   const oldMenu = storeData.getMenu();
-  const leftMenuContentTypes = get(context.plugins.toJS(), ['content-manager', 'leftMenuSections']);
+  let plugins;
+
+  // TODO: Remove these lines when migration is completed
+  try {
+    plugins = context.plugins.toJS();
+  } catch(err) {
+    plugins = context.plugins;
+  }  
+  const leftMenuContentTypes = get(plugins, ['content-manager', 'leftMenuSections']);
   const leftMenuContentTypesIndex = !isEmpty(leftMenuContentTypes) ? findIndex(leftMenuContentTypes[0].links, ['destination', itemToDelete]) : -1;
 
   let updateLeftMenu = false;

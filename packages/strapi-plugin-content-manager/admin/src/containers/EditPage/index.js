@@ -486,9 +486,20 @@ export class EditPage extends React.Component {
    * @type {Array} List of external links to display
    */
   retrieveLinksContainerComponent = () => {
+    // TODO: Retrieve plugins from the props instead of the context
+    // Or change the context to the new API
     // Should be retrieved from the global props (@soupette)
     const { plugins } = this.context;
-    const appPlugins = plugins.toJS();
+
+    // TODO: Remove these lines when migration is completed
+    let appPlugins;
+
+    try {
+      appPlugins = plugins.toJS();
+    } catch(err) {
+      appPlugins = plugins;
+    }
+
     const componentToInject = Object.keys(appPlugins).reduce((acc, current) => {
       // Retrieve injected compos from plugin
       // if compo can be injected in left.links area push the compo in the array

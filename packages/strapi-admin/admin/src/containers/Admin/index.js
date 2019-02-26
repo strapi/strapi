@@ -72,6 +72,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
   state = { shouldSecureAfterAllPluginsAreMounted: true };
 
   getChildContext = () => ({
+    currentEnvironment: this.props.admin.currentEnvironment,
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
     plugins: this.props.global.plugins,
@@ -291,6 +292,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
 }
 
 Admin.childContextTypes = {
+  currentEnvironment: PropTypes.string,
   disableGlobalOverlayBlocker: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
   plugins: PropTypes.object,

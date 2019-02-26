@@ -16,14 +16,14 @@ describe('Test CTB', () => {
   context('Check create and update API', () => {
     beforeEach(() => {
       cy.server();
-      cy.route(`${backendUrl}/content-type-builder/autoReload`).as('initContentTypeBuilder');
+      // cy.route(`${backendUrl}/content-type-builder/autoReload`).as('initContentTypeBuilder');
       cy.login().then(data => {
         jwt = data.jwt;
         userId = data.user._id || data.user.id;
       });
       cy.visit('/admin');
       cy.wait(frontLoadingDelay);
-      cy.wait('@initContentTypeBuilder');
+      // cy.wait('@initContentTypeBuilder');
     });
 
     it('Should visit the content type builder', () => {
