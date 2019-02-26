@@ -11,13 +11,13 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  className: '',
+  className: null,
 });
 
 function localeToggleReducer(state = initialState, action) {
   switch (action.type) {
     case RESET_DEFAULT_CLASSNAME:
-      return state.update('className', () => '');
+      return state.update('className', () => null);
     case SET_CUSTOM_CLASSNAME:
       return state.update('className', () => action.className);
     default:

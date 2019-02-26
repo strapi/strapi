@@ -10,7 +10,7 @@ describe('<LocaleToggle />, reducer', () => {
 
   beforeEach(() => {
     state = fromJS({
-      className: '',
+      className: null,
     });
   });
 

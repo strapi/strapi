@@ -24,6 +24,7 @@ describe('adminReducer', () => {
       isSecured: false,
       layout: Map({}),
       securedData: {},
+      showLogoutComponent: false,
       showMenu: true,
       strapiVersion: '3',
       uuid: false,

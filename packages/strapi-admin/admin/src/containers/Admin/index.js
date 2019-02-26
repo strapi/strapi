@@ -26,6 +26,7 @@ import OverlayBlocker from 'components/OverlayBlocker';
 import injectHooks from 'utils/injectHooks';
 
 import Header from '../../components/Header/index';
+import Logout from '../../components/Logout';
 
 import ComingSoonPage from '../ComingSoonPage';
 import LeftMenu from '../LeftMenu';
@@ -52,9 +53,11 @@ import {
   getInitData,
   getSecuredData,
   hideLeftMenu,
+  hideLogout,
   setAppError,
   setAppSecured,
   showLeftMenu,
+  showLogout,
   unsetAppSecured,
 } from './actions';
 import makeSelectAdmin from './selectors';
@@ -151,8 +154,10 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
 
   helpers = {
     hideLeftMenu: this.props.hideLeftMenu,
+    hideLogout: this.props.hideLogout,
     setAppSecured: this.props.setAppSecured,
     showLeftMenu: this.props.showLeftMenu,
+    showLogout: this.props.showLogout,
     unsetAppSecured: this.props.unsetAppSecured,
     updatePlugin: this.props.updatePlugin,
   };
@@ -216,6 +221,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
         appError,
         isLoading,
         layout,
+        showLogoutComponent,
         showMenu,
         strapiVersion,
       },
@@ -255,6 +261,8 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
           />
         )}
         <NavTopRightWrapper>
+          {/* Injection zone not ready yet */}
+          {showLogoutComponent && <Logout />}
           <LocaleToggle isLogged />
         </NavTopRightWrapper>
         <div className={styles.adminPageRightWrapper} style={this.getContentWrapperStyle().main}>
@@ -298,6 +306,7 @@ Admin.propTypes = {
     isLoading: PropTypes.bool,
     isSecured: PropTypes.bool,
     layout: PropTypes.object,
+    showLogoutComponent: PropTypes.bool,
     showMenu: PropTypes.bool,
     strapiVersion: PropTypes.string,
     uuid: PropTypes.oneOfType([
@@ -322,11 +331,13 @@ Admin.propTypes = {
     showGlobalAppBlocker: PropTypes.bool,
   }).isRequired,
   hideLeftMenu: PropTypes.func.isRequired,
+  hideLogout: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   resetLocaleDefaultClassName: PropTypes.func.isRequired,
   setAppError: PropTypes.func.isRequired,
   setAppSecured: PropTypes.func.isRequired,
   showLeftMenu: PropTypes.func.isRequired,
+  showLogout: PropTypes.func.isRequired,
   unsetAppSecured: PropTypes.func.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };
@@ -344,11 +355,13 @@ export function mapDispatchToProps(dispatch) {
       getInitData,
       getSecuredData,
       hideLeftMenu,
+      hideLogout,
       resetLocaleDefaultClassName,
       setAppError,
       setAppSecured,
       setLocaleCustomClassName,
       showLeftMenu,
+      showLogout,
       unsetAppSecured,
       updatePlugin,
     },

@@ -5,10 +5,14 @@ module.exports = function willSecure() {
   const {
     props: {
       hideLeftMenu,
+      hideLogout,
       history,
       location: { pathname },
+      resetLocaleDefaultClassName,
       setAppSecured,
+      setLocaleCustomClassName,
       showLeftMenu,
+      showLogout,
       store,
       unsetAppSecured,
     },
@@ -28,14 +32,18 @@ module.exports = function willSecure() {
     : '/plugins/users-permissions/auth/register';
 
   if (auth.getToken()) {
-    showLeftMenu();
+    resetLocaleDefaultClassName(); // NOTE: Temporary should be removed when we switch to administrators  
     setAppSecured();
+    showLeftMenu();
+    showLogout();
 
     return cb();
   }
 
   if (!includes(nonProtectedURLs, pathname)) {
     hideLeftMenu();
+    hideLogout();
+    setLocaleCustomClassName('localeDropdownMenuNotLogged'); // NOTE: Temporary should be removed when we switch to administrators
     unsetAppSecured();
     history.push(redirectEndPoint);
 
@@ -47,13 +55,17 @@ module.exports = function willSecure() {
     pathname === '/plugins/users-permissions/auth/register'
   ) {
     hideLeftMenu();
+    hideLogout();
+    setLocaleCustomClassName('localeDropdownMenuNotLogged'); // NOTE: Temporary should be removed when we switch to administrators  
     unsetAppSecured();
     history.push(redirectEndPoint);
 
     return cb();
   }
 
+  resetLocaleDefaultClassName(); // NOTE: Temporary should be removed when we switch to administrators  
   showLeftMenu();
+  showLogout();
   setAppSecured();
 
   return cb();

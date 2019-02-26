@@ -47,7 +47,7 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 
   render() {
     const { currentLocale: { locale }, localeToggle: { className } } = this.props;
-    const style = cn(styles.localeDropdownMenu, className);
+    const style = cn(styles.localeDropdownMenu, styles[className] );
 
     return (
       <div className={styles.localeToggle}>
