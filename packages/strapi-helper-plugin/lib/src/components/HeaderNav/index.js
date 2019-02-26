@@ -11,7 +11,7 @@ import { map } from 'lodash';
 import PropTypes from 'prop-types';
 
 // Utils
-import { darken } from 'utils/colors';
+import { darken } from '../../utils/colors';
 
 // Styles
 import styles from './styles.scss';

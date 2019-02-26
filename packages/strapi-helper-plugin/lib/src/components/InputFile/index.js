@@ -11,8 +11,8 @@ import { FormattedMessage } from 'react-intl';
 import { cloneDeep, isArray, isObject } from 'lodash';
 import cn from 'classnames';
 
-import ImgPreview from 'components/ImgPreview';
-import InputFileDetails from 'components/InputFileDetails';
+import ImgPreview from '../ImgPreview';
+import InputFileDetails from '../InputFileDetails';
 
 import styles from './styles.scss';
 

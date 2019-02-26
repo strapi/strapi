@@ -11,9 +11,10 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import cn from 'classnames';
 import moment from 'moment';
 
-import FileIcon from 'components/FileIcon';
 import IcoContainer from 'components/IcoContainer';
 import PopUpWarning from 'components/PopUpWarning';
+
+import FileIcon from '../FileIcon';
 
 import styles from './styles.scss';
 

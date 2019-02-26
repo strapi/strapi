@@ -8,8 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 
-import PluginHeaderTitle from 'components/PluginHeaderTitle';
-import PluginHeaderActions from 'components/PluginHeaderActions';
+import PluginHeaderTitle from '../PluginHeaderTitle';
+import PluginHeaderActions from '../PluginHeaderActions';
 
 import styles from './styles.scss';
 

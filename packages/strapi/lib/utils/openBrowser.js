@@ -82,8 +82,7 @@ function startBrowserProcess(browser, url) {
       });
       return true;
     } catch (err) {
-      console.log(err);
-      // Ignore errors.
+      strapi.log.error('Failed to open Google Chrome with AppleScript');
     }
   }
 
