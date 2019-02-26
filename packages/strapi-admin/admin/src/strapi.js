@@ -1,5 +1,6 @@
 /**
  * Common configuration for the app in both dev an prod mode
+ *
  */
 
 import { merge, isFunction } from 'lodash';
@@ -8,8 +9,8 @@ import {
   pluginLoaded,
   unfreezeApp,
   updatePlugin,
-} from 'containers/App/actions';
-import { showNotification } from 'containers/NotificationProvider/actions';
+} from './containers/App/actions';
+import { showNotification } from './containers/NotificationProvider/actions';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
 import { history, store } from './createStore';
@@ -22,6 +23,7 @@ const isPluginAllowedToRegister = (plugin) => plugin.id === 'users-permissions' 
  *
  * @param params
  */
+// NOTE: Should be changed with the new lifecycle.
 const registerPlugin = (plugin) => {
   // Merge admin translation messages
   merge(translationMessages, plugin.translationMessages);
