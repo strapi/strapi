@@ -14,12 +14,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
-import AdminPage from 'containers/AdminPage';
-import NotFoundPage from 'containers/NotFoundPage';
-import NotificationProvider from 'containers/NotificationProvider';
-import AppLoader from 'containers/AppLoader';
+// From strapi-helper-plugin
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
+
 import '../../styles/main.scss';
+
+import AdminPage from '../AdminPage';
+import NotFoundPage from '../NotFoundPage';
+import NotificationProvider from '../NotificationProvider';
+import AppLoader from '../AppLoader';
 import styles from './styles.scss';
 
 export class App extends React.Component { // eslint-disable-line react/prefer-stateless-function

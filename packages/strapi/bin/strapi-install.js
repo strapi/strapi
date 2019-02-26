@@ -7,14 +7,13 @@
  */
 
 // Node.js core.
-const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs-extra');
-const shell = require('shelljs');
 
 // Public
 const {cyan} = require('chalk');
 const ora = require('ora');
+const shell = require('shelljs');
 
 // Logger.
 const { cli, packageManager } = require('strapi-utils');
@@ -49,7 +48,7 @@ module.exports = function (plugin, cliArguments) {
 
   if (cliArguments.dev) {
     try {
-      fs.symlinkSync(path.resolve(__dirname, '..', '..', pluginID), path.resolve(process.cwd(), pluginPath), 'dir');
+      fs.symlinkSync(path.resolve(__dirname, '..', '..', pluginID), path.resolve(process.cwd(), pluginPath), 'junction');
 
       loader.succeed(`The ${cyan(plugin)} plugin has been successfully installed.`);
       process.exit(0);
@@ -71,8 +70,8 @@ module.exports = function (plugin, cliArguments) {
     }
 
     const cmd = isStrapiInstalledWithNPM ? `npm install ${pluginID}@${packageJSON.version} --ignore-scripts --no-save --prefix ${pluginPath}` : `yarn --cwd ${pluginPath} add ${pluginID}@${packageJSON.version} --ignore-scripts --no-save`;
-    exec(cmd, (err) => {
-      if (err) {
+    shell.exec(cmd, {silent: true}, (code) => {
+      if (code) {
         loader.fail(`An error occurred during plugin installation. \nPlease make sure this plugin is available on npm: https://www.npmjs.com/package/${pluginID}`);
         process.exit(1);
       }

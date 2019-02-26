@@ -31,7 +31,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, includes, mapKeys, reject, map, isObject, union, findIndex, uniqBy, size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import WithInput from 'components/WithInput';
+import WithInput from '../WithInput';
 
 /* eslint-disable react/require-default-props  */
 class InputText extends React.Component { // eslint-disable-line react/prefer-stateless-function

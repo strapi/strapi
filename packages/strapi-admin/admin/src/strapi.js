@@ -8,8 +8,10 @@ import {
   pluginLoaded,
   unfreezeApp,
   updatePlugin,
-} from 'containers/App/actions';
-import { showNotification } from 'containers/NotificationProvider/actions';
+} from './containers/App/actions';
+import { showNotification } from './containers/NotificationProvider/actions';
+import injectReducer from './utils/injectReducer';
+import injectSaga from './utils/injectSaga';
 import { history, store } from './createStore';
 import { translationMessages, languages } from './i18n';
 import './public-path';
@@ -94,4 +96,7 @@ window.strapi = Object.assign(window.strapi || {}, {
   currentLanguage: window.localStorage.getItem('strapi-admin-language') ||  window.navigator.language ||  window.navigator.userLanguage || 'en',
   lockApp,
   unlockApp,
+  injectReducer,
+  injectSaga,
+  store,
 });

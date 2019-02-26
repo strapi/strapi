@@ -9,15 +9,15 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
-// Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputDate from 'components/InputDate';
-import InputSpacer from 'components/InputSpacer';
-
 // Utils
-import validateInput from 'utils/inputsValidations';
+import validateInput from '../../utils/inputsValidations';
+
+// Design
+import Label from '../Label';
+import InputDescription from '../InputDescription';
+import InputErrors from '../InputErrors';
+import InputDate from '../InputDate';
+import InputSpacer from '../InputSpacer';
 
 import styles from './styles.scss';
 
