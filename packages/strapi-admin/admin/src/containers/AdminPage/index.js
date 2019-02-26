@@ -55,10 +55,11 @@ import HomePage from '../HomePage/Loadable';
 import Marketplace from '../Marketplace/Loadable';
 import LeftMenu from '../LeftMenu';
 import ListPluginsPage from '../ListPluginsPage/Loadable';
+import Onboarding from '../Onboarding';
 import NotFoundPage from '../NotFoundPage/Loadable';
 import PluginPage from '../PluginPage';
 
-import { getAdminData } from './actions';
+import { emitEvent, getAdminData } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import selectAdminPage from './selectors';
@@ -87,7 +88,7 @@ export class AdminPage extends React.Component {
     this.checkLogin(this.props);
     ReactGA.initialize('UA-54313258-9');
   }
-
+  
   componentDidUpdate(prevProps) {
     const {
       adminPage: { uuid },

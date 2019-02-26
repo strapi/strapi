@@ -6,7 +6,7 @@ import { getVideosSucceeded } from './actions';
 
 function* getVideos() {
   try {
-    const videos = yield call(request, 'https://strapi.io/videos', {
+    const data = yield call(request, 'https://strapi.io/videos', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -16,36 +16,27 @@ function* getVideos() {
     true,
     { noAuth: true },
     );
-    
-    let currTimes = Array.apply(null, Array(videos.length)).map((e, i) => {
+
+    const storedVideo = JSON.parse(localStorage.getItem('videos')) || null;
+
+    const videos = data.map(video => {
+      const end = storedVideo ? storedVideo.end : false;
+      const startTime = storedVideo ? storedVideo.startTime : 0;
+
       return {
-        startTime: 0,
-        end: false,
-        key: i,
-        id: videos[i].id,
-        order: videos[i].order,
+        ...video,
+        duration: null,
+        end,
+        isOpen: false,
+        key: video.order,
+        startTime: startTime,
       };
-    });
-    
-    // Retrieve start time if enable in localStorage
-    if (localStorage.getItem('videos')) {
-      currTimes.splice(0, currTimes.length, ...JSON.parse(localStorage.getItem('videos')));
-    } else {
-      localStorage.setItem('videos', JSON.stringify(currTimes));
-    }
+    }).sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0));
+
+    localStorage.setItem('videos', JSON.stringify(videos));
 
     yield put(
-      getVideosSucceeded(
-
-        videos.map((video, index) => {
-          video.isOpen = false;
-          video.duration = null;
-          video.startTime = currTimes[index].startTime;
-          video.end = currTimes[index].end;
-
-          return video;
-        }).sort((a,b) => (a.order > b.order) ? 1 : ((b.order > a.order) ? -1 : 0)),
-      ),
+      getVideosSucceeded(videos),
     );
   } catch (err) {
     console.log(err); // eslint-disable-line no-console
