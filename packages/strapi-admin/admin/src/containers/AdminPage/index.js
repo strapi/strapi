@@ -88,7 +88,6 @@ export class AdminPage extends React.Component {
     this.checkLogin(this.props);
     ReactGA.initialize('UA-54313258-9');
   }
-  
   componentDidUpdate(prevProps) {
     const {
       adminPage: { uuid },
@@ -103,7 +102,7 @@ export class AdminPage extends React.Component {
         ReactGA.pageview(pathname);
       }
     }
-
+    
     const hasAdminPath = ['users-permissions', 'hasAdminUser'];
 
     if (
