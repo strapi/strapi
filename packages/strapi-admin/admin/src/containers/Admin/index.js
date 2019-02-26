@@ -116,7 +116,7 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
       }
     }
 
-    if (prevProps.admin.isSecured !== isSecured) {
+    if (prevProps.admin.isSecured !== isSecured && isSecured) {
       this.props.getSecuredData();
     }
 

@@ -26,7 +26,8 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
 
   handleLogout = () => {
     auth.clearAppStorage();
-    window.location.reload();
+    // TODO: Change the routing
+    this.context.router.history.push('/plugins/users-permissions/auth/login');
   }
 
   toggle = () => this.setState({ isOpen: !this.state.isOpen });

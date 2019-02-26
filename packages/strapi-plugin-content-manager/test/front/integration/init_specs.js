@@ -45,7 +45,8 @@ describe('Testing build and schema core_store', () => {
       cy.route(`${backendUrl}/content-manager/models`).as('initCTM');
       cy.get(`a[href="${links.settings}"]`)
         .click()
-        .wait('@initCTM');
+        .wait(1000);
+        // .wait('@initCTM');
   
       // Check all list views are rendered without any error
       for (let i = 0; i < 4; i++) {
@@ -63,10 +64,11 @@ describe('Testing build and schema core_store', () => {
   
     it('Should visit all views once without any errors', () => {
       cy.server();
-      cy.route(`${backendUrl}/content-manager/models`).as('initCTM');
+      // cy.route(`${backendUrl}/content-manager/models`).as('initCTM');
       cy.get(`a[href="${links.settings}"]`)
         .click()
-        .wait('@initCTM');
+        // .wait('@initCTM');
+        .wait(1000);
       
       // Testing errors related to reactstrap
       cy.get('#cancelChanges')
