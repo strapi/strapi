@@ -13,9 +13,9 @@ module.exports = {
   name: 'Local server',
   init: (config) => {
     // write file in public/assets folder
-    const write = (file, path) => {
+    const write = (file, dirPath) => {
       return new Promise((resolve, reject) => {
-        fs.writeFile(path.join(path, `${file.hash}${file.ext}`), file.buffer, (err) => {
+        fs.writeFile(path.join(dirPath, `${file.hash}${file.ext}`), file.buffer, (err) => {
           if (err) {
             return reject(err);
           }
@@ -30,20 +30,20 @@ module.exports = {
     return {
       upload: (file) => {
         return new Promise((resolve, reject) => {
-          const path = path.join(strapi.config.appPath, 'public', 'uploads');
-
+          const dirPath = path.join(strapi.config.appPath, 'public', 'uploads');
+          
           // Check if directory exists
-          fs.exists(path, (exists) => {
+          fs.exists(dirPath, (exists) => {
             if (exists) {
-              resolve(write(file, path));
+              resolve(write(file, dirPath));
             } else {
               // Create directory if not exists
-              fs.mkdir(path, {recursive: true}, (err) => {
+              fs.mkdir(dirPath, {recursive: true}, (err) => {
                 if (err) {
                   return reject(err);
                 }
 
-                resolve(write(file, path));
+                resolve(write(file, dirPath));
               });
             }
           });
