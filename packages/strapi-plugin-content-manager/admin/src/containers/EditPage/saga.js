@@ -96,7 +96,7 @@ export function* submit() {
           cleanedData = record[current];
           break;
         case 'date':
-          cleanedData = record[current]._isAMomentObject === true ? record[current].format('YYYY-MM-DD HH:mm:ss') : record[current];
+          cleanedData = record[current] && record[current]._isAMomentObject === true ? record[current].format('YYYY-MM-DD HH:mm:ss') : record[current];
           break;
         default:
           cleanedData = cleanData(record[current], 'value', 'id');
@@ -155,7 +155,7 @@ export function* submit() {
     yield put(submitSuccess());
 
   } catch(err) {
-    if (isArray(err.response.payload.message)) {
+    if (isArray(get(err, 'responsepayload.message'))) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {
           if (includes(current.id, 'Auth')) {
