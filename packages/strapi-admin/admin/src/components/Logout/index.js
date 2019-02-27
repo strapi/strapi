@@ -24,10 +24,14 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
     });
   }
 
-  handleGoToAdmin = () => {
+  handleGoToAdministrator = () => {
+    const id = auth.getUserInfo() ? auth.getUserInfo().id : null;
+
     this.context.router.history.push({
-      pathname: `/plugins/content-manager/admin`,
-      search: '?source=admin',
+      pathname: `/plugins/content-manager/administrator/${id}`,
+      // pathname: `/plugins/content-manager/administrator`,
+      search: '?redirectUrl=/admin&source=admin',
+      // search: '?source=admin'
     });
   }
 
@@ -50,7 +54,7 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
             <DropdownItem onClick={this.handleGoTo} className={styles.item}>
               <FormattedMessage id="app.components.Logout.profile" />
             </DropdownItem>
-            <DropdownItem onClick={this.handleGoToAdmin} className={styles.item}>
+            <DropdownItem onClick={this.handleGoToAdministrator} className={styles.item}>
               <FormattedMessage id="app.components.Logout.admin" />
             </DropdownItem>
             <DropdownItem onClick={this.handleLogout}>

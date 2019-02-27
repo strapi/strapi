@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import NavLink from 'components/NavLink';
+import LiLink from 'components/LiLink';
 
 // Create link from content-type-builder to content-manager
 function EditViewLink(props) {
@@ -14,7 +14,11 @@ function EditViewLink(props) {
   const base = `${props.getContentTypeBuilderBaseUrl()}${props.getModelName()}`;
   const url = props.getSource() === 'users-permissions' ? `${base}&source=${props.getSource()}` : base;
 
-  return <NavLink {...props} url={url} />;
+  if (props.getSource() === 'admin') {
+    return null;
+  }
+
+  return <LiLink {...props} url={url} />;
 }
 
 EditViewLink.propTypes = {
