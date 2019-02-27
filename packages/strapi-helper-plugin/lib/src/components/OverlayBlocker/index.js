@@ -66,10 +66,17 @@ class OverlayBlocker extends React.Component {
     let { title, description, icon } = this.props;
     const { elapsed } = this.state;
 
+    let button = (
+      <div className={styles.buttonContainer}>
+        <a className={cn(styles.primary, 'btn')} href="https://strapi.io/documentation/configurations/configurations.html#server" target="_blank">Read the documentation</a>
+      </div>
+    );
+
     if (elapsed > 30) {
-      title = 'components.OverlayBlocker.title.serverError';
-      description = 'components.OverlayBlocker.description.serverError';
+      button = null;
       icon = 'fa fa-clock-o';
+      description = 'components.OverlayBlocker.description.serverError';
+      title = 'components.OverlayBlocker.title.serverError';
     }
 
     const content = this.props.children ? (
@@ -86,11 +93,7 @@ class OverlayBlocker extends React.Component {
           <p>
             <FormattedMessage id={description} />
           </p>
-          { elapsed < 30 && (
-            <div className={styles.buttonContainer}>
-              <a className={cn(styles.primary, 'btn')} href="https://strapi.io/documentation/configurations/configurations.html#server" target="_blank">Read the documentation</a>
-            </div>
-          )}
+          {button}
         </div>
       </div>
     );
