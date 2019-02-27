@@ -32,11 +32,7 @@ module.exports = {
           const path = path.join(strapi.config.appPath, 'public', 'uploads');
 
           // write file in public/assets folder
-          fs.exists(path, (err, exists) => {
-            if (err) {
-              return reject(err);
-            }
-
+          fs.exists(path, (exists) => {
             if (exists) {
               resolve(write(file, path));
             } else {
