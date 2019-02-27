@@ -83,7 +83,7 @@ export class AdminPage extends React.Component {
   componentDidMount() {
     this.props.getAdminData();
     this.checkLogin(this.props);
-    ReactGA.initialize('UA-54313258-9');
+    ReactGA.initialize('UA-54313258-9', { testMode: process.env.NODE_ENV === 'test' });
   }
 
   componentDidUpdate(prevProps) {

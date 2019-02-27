@@ -28,6 +28,7 @@ before_script:
 script:
   - npm run lint
   - npm run doc
+  - npm run test:front
 
 cache:
   directories:
