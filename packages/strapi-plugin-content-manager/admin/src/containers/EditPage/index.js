@@ -32,7 +32,7 @@ import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
-import NavLink from 'components/NavLink';
+import LiLink from 'components/LiLink';
 
 import getQueryParameters from 'utils/getQueryParameters';
 import inputValidations from 'utils/inputsValidations';
@@ -217,7 +217,7 @@ export class EditPage extends React.Component {
   getContentManagerBaseUrl = () => {
     let url = `/plugins/${pluginId}/ctm-configurations/edit-settings/`;
 
-    if (this.getSource() === 'users-permissions') {
+    if (this.getSource() !== 'content-manager') {
       url = `${url}plugins/${this.getSource()}/`;
     }
 
@@ -422,7 +422,7 @@ export class EditPage extends React.Component {
 
   /**
    * Render the edit layout link
-   * @type {NavLink}
+   * @type {LiLink}
    */
   layoutLink = () => {
     // Retrieve URL
@@ -435,11 +435,7 @@ export class EditPage extends React.Component {
       icon: 'layout',
     };
 
-    return (
-      <li key={`${pluginId}.link`}>
-        <NavLink {...message} url={url} />
-      </li>
-    );
+    return <LiLink key={`${pluginId}.link`} {...message} url={url} />;
   };
 
   pluginHeaderActions = () => [
@@ -505,11 +501,7 @@ export class EditPage extends React.Component {
         .map(compo => {
           const Component = compo.component;
 
-          return (
-            <li key={compo.key}>
-              <Component {...this} {...compo.props} />
-            </li>
-          );
+          return <Component key={compo.key} {...this} {...compo.props} />;
         });
 
       return [...acc, ...compos];
