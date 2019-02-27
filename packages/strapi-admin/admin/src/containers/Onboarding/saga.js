@@ -2,7 +2,7 @@ import request from 'utils/request';
 import { all, call, fork, takeLatest, put } from 'redux-saga/effects';
 
 import { GET_VIDEOS } from './constants';
-import { getVideosSucceeded } from './actions';
+import { getVideosSucceeded, shouldOpenModal } from './actions';
 
 function* getVideos() {
   try {
@@ -38,10 +38,27 @@ function* getVideos() {
     yield put(
       getVideosSucceeded(videos),
     );
+    
+    const isFirstTime = JSON.parse(localStorage.getItem('onboarding')) || null;
+
+    if (isFirstTime === null) {
+      yield new Promise(resolve => {
+        setTimeout(() => {
+          resolve();
+        }, 500);
+      });
+      
+      yield put(
+        shouldOpenModal(true),
+      );
+      localStorage.setItem('onboarding', true);
+    }
+
   } catch (err) {
     console.log(err); // eslint-disable-line no-console
   }
 }
+
 
 function* defaultSaga() {
   yield all([fork(takeLatest, GET_VIDEOS, getVideos)]);

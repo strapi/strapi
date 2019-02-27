@@ -4,6 +4,13 @@
  *
  */
 
+
+//  shouldopenmodal -> action
+//  reduceur => videos (false, true)
+//  componentdidupdate if shouldopenmodal is different
+
+
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';

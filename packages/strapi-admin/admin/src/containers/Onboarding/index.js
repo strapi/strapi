@@ -27,12 +27,13 @@ export class Onboarding extends React.Component {
 
   componentDidMount() {
     this.props.getVideos();
+  }
 
-    if (JSON.parse(localStorage.getItem('onboarding')) === null) {
-      setTimeout(() => { 
-        this.setState({ showVideos: true });
-        localStorage.setItem('onboarding', true);
-      }, 1000);
+  componentDidUpdate(prevProps) {
+    const { shouldOpenModal } = this.props;
+
+    if (shouldOpenModal !== prevProps.shouldOpenModal && shouldOpenModal) {
+      this.handleOpenModal();
     }
   }
 
@@ -53,6 +54,8 @@ export class Onboarding extends React.Component {
     const eventName = `didStop${index}Video`;
     this.context.emitEvent(eventName, {timestamp: currTime});
   }
+
+  handleOpenModal = () => this.setState({ showVideos: true });
 
   handleVideosToggle = () => {
     this.setState(prevState => ({ showVideos: !prevState.showVideos }));
@@ -135,8 +138,9 @@ Onboarding.defaultProps = {
   removeVideos: () => {},
   setVideoDuration: () => {},
   setVideoEnd: () => {},
-  updateVideoStartTime: () => {},
+  shouldOpenModal: false,
   videos: [],
+  updateVideoStartTime: () => {},
 };
 
 Onboarding.propTypes = {
@@ -145,6 +149,7 @@ Onboarding.propTypes = {
   removeVideos: PropTypes.func,
   setVideoDuration: PropTypes.func,
   setVideoEnd: PropTypes.func,
+  shouldOpenModal: PropTypes.bool,
   updateVideoStartTime: PropTypes.func,
   videos: PropTypes.array,
 };

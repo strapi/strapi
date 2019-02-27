@@ -5,7 +5,7 @@
  */
 
 import { fromJS } from 'immutable';
-import { GET_VIDEOS_SUCCEEDED, ON_CLICK, SET_VIDEOS_DURATION, UPDATE_VIDEO_START_TIME, SET_VIDEO_END, REMOVE_VIDEOS } from './constants';
+import { GET_VIDEOS_SUCCEEDED, SHOULD_OPEN_MODAL, ON_CLICK, SET_VIDEOS_DURATION, UPDATE_VIDEO_START_TIME, SET_VIDEO_END, REMOVE_VIDEOS } from './constants';
 
 const initialState = fromJS({
   videos: fromJS([]),
@@ -15,6 +15,8 @@ function onboardingReducer(state = initialState, action) {
   switch (action.type) {
     case GET_VIDEOS_SUCCEEDED:
       return state.update('videos', () => fromJS(action.videos));
+    case SHOULD_OPEN_MODAL:
+      return state.update('shouldOpenModal', () => action.opened);
     case ON_CLICK:
       return state.updateIn(['videos'], list => {
         return list.reduce((acc, current, index) => {
