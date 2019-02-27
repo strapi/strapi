@@ -21,9 +21,11 @@ class ErrorBoundary extends React.Component { // eslint-disable-line react/prefe
   render() {
     if (this.state.error) {
       return (
-        <div>
+        <div style={{ padding: '30px' }}>
           <h2><FormattedMessage id="components.ErrorBoundary.title" /></h2>
           <details style={{ whiteSpace: 'pre-wrap' }}>
+            <b>Please check your browser console</b>
+            <br />
             <br />
             {this.state.errorInfo.stack}
           </details>

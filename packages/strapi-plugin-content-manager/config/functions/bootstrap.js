@@ -40,6 +40,8 @@ module.exports = async cb => {
 
     return acc;
   }, {});
+  const administratorLayout = _.get(strapi.admin, 'config.layout.administrator', {});
+  console.log(_.get(strapi.admin, 'config.layout.administrator'));
   // Remove the core_store layout since it is not needed
   // And create a temporay one
   const tempLayout = Object.keys(strapi.models)
@@ -48,16 +50,25 @@ module.exports = async cb => {
       acc[current] = { attributes: {} };
 
       return acc;
-    }, pluginsLayout);
+    }, _.merge(pluginsLayout, { administrator: administratorLayout }));
   const models = _.mapValues(strapi.models, pickData);
   delete models['core_store'];
+  const adminModels = {
+    admin: {
+      models:  _.mapValues(strapi.admin.models, pickData),
+    },
+  };
+    
+  console.log({ adminModels });
+  // The models from the admin will be under plugins/admin which I know is not correct
+  // but the schema is going to be made so I feel like I won't update the ctm front right now...
   const pluginsModel = Object.keys(strapi.plugins).reduce((acc, current) => {
     acc[current] = {
       models: _.mapValues(strapi.plugins[current].models, pickData),
     };
 
     return acc;
-  }, {});
+  }, adminModels );
   // Reference all current models
   const appModels = Object.keys(pluginsModel).reduce((acc, curr) => {
     const models = Object.keys(_.get(pluginsModel, [curr, 'models'], {}));
