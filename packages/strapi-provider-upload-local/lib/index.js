@@ -14,7 +14,7 @@ module.exports = {
   init: (config) => {
     const write = (file, path) => {
       return new Promise((resolve, reject) => {
-        fs.writeFile(, path.join(path, `${file.hash}${file.ext}`)), file.buffer, (err) => {
+        fs.writeFile(path.join(path, `${file.hash}${file.ext}`)), file.buffer, (err) => {
           if (err) {
             return reject(err);
           }
