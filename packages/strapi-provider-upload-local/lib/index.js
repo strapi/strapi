@@ -12,19 +12,45 @@ module.exports = {
   provider: 'local',
   name: 'Local server',
   init: (config) => {
+    const write = (file, path) => {
+      return new Promise((resolve, reject) => {
+        fs.writeFile(, path.join(path, `${file.hash}${file.ext}`)), file.buffer, (err) => {
+          if (err) {
+            return reject(err);
+          }
+
+          file.url = `/uploads/${file.hash}${file.ext}`;
+
+          resolve();
+        });
+      });
+    };
+
     return {
       upload: (file) => {
         return new Promise((resolve, reject) => {
+          const path = path.join(strapi.config.appPath, 'public', 'uploads');
+
           // write file in public/assets folder
-          fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}${file.ext}`), file.buffer, (err) => {
+          fs.exists(path, (err, exists) => {
             if (err) {
               return reject(err);
             }
 
-            file.url = `/uploads/${file.hash}${file.ext}`;
+            if (exists) {
+              resolve(write(file, path));
+            } else {
+              fs.mkdir(path, {recursive: true}, (err) => {
+                if (err) {
+                  return reject(err);
+                }
 
-            resolve();
+                resolve(write(file, path));
+              });
+            }
           });
+          
+          
         });
       },
       delete: (file) => {
