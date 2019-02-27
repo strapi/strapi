@@ -46,7 +46,6 @@ class App extends React.Component {
     const source = getQueryParameters(this.props.location.search, 'source');
     const attrPath = source === 'content-manager' ? ['models', currentModelName, 'editDisplay', 'availableFields'] : ['models', 'plugins', source, currentModelName, 'editDisplay', 'availableFields'];
 
-    // console.log(this.props.schema.models.admin);
     if (currentModelName && source && isEmpty(get(this.props.schema, attrPath))) {
       return <EmptyAttributesView currentModelName={currentModelName} history={this.props.history} modelEntries={this.props.modelEntries} />;
     }
