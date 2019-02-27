@@ -3,8 +3,10 @@ const _ = require('lodash');
 module.exports = async (ctx, next) => {
   const { source } = ctx.request.query;
 
-  if (source && _.get(strapi.plugins, [source, 'config', 'layout', ctx.params.model, 'actions', ctx.request.route.action])) {
-    const [ controller, action ] = _.get(strapi.plugins, [source, 'config', 'layout', ctx.params.model, 'actions', ctx.request.route.action], []).split('.');
+  const target = source === 'admin' ? strapi.admin : strapi.plugins[source];
+
+  if (source && _.get(target, ['config', 'layout', ctx.params.model, 'actions', ctx.request.route.action])) {
+    const [ controller, action ] = _.get(target, ['config', 'layout', ctx.params.model, 'actions', ctx.request.route.action], []).split('.');
 
     if (controller && action) {
       // Redirect to specific controller.
@@ -29,7 +31,7 @@ module.exports = async (ctx, next) => {
 
         ctx.request.body = fields;
 
-        await strapi.plugins[source].controllers[controller.toLowerCase()][action](ctx);
+        await target.controllers[controller.toLowerCase()][action](ctx);
         const resBody = ctx.body;
 
         await Promise.all(Object.keys(files).map(async field => {
@@ -51,7 +53,7 @@ module.exports = async (ctx, next) => {
         return ctx.send(resBody);
       }
 
-      return await strapi.plugins[source].controllers[controller.toLowerCase()][action](ctx);
+      return await target.controllers[controller.toLowerCase()][action](ctx);
     }
   }
 

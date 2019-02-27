@@ -109,7 +109,7 @@ module.exports = {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
     }
 
-    const data = await strapi.query('admin', 'users-permissions').create(values);
+    const data = await strapi.query('administrator', 'admin').create(values);
 
     // Send 201 `created`
     ctx.created(data);
@@ -124,11 +124,19 @@ module.exports = {
   update: async (ctx) => {
     const values = ctx.request.body;
 
+    const { _id, id } = values;
+
+    const admin = await strapi.query('administrator', 'admin').findOne({ _id, id });
+
+    if (_.get(values, 'password') === admin.password) {
+      delete values.password;
+    }
+
     if (values.password) {
       values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
     }
 
-    const data = await strapi.query('admin', 'users-permissions').update(Object.assign({}, ctx.params, values));
+    const data = await strapi.query('administrator', 'admin').update(Object.assign({}, ctx.params, values));
 
     // Send 200 `ok`
     ctx.send(data);
