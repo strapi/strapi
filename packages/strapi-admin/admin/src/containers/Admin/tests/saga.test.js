@@ -56,7 +56,7 @@ describe('getData Saga', () => {
 describe('defaultSaga Saga', () => {
   const defaultSagaSaga = defaultSaga();
 
-  it('should start task to watch for GET_INIT_DATA action', () => {
+  it('should start task to watch for GET_INIT_DATA and GET_SECURED_DATA actions', () => {
     const forkDescriptor = defaultSagaSaga.next().value;
 
     expect(forkDescriptor)

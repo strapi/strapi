@@ -6,7 +6,7 @@ const BlockerComponent2 = () => <div>BlockerComponent</div>;
 const Email = () => <div>Email Plugin</div>;
 
 describe('<PluginDispatcher />', () => {
-  it('Should return null if the params does not match a pluginId', () => {
+  it('Should return null if the params does not match the pluginId', () => {
     const props = {
       global: { plugins: {} },
       match: { params: { pluginId: 'email' } },

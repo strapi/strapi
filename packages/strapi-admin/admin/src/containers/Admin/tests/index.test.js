@@ -237,7 +237,7 @@ describe('<Admin />', () => {
       expect(isAcceptingTracking()).toEqual(false);
     });
 
-    it('should return false if the uuid prop is true', () => {
+    it('should return true if the uuid prop is true', () => {
       const adminProps = Object.assign(props.admin, { uuid: true });
       const renderedComponent = shallow(<Admin {...props} {...adminProps} />);
       const { isAcceptingTracking } = renderedComponent.instance();
@@ -245,7 +245,7 @@ describe('<Admin />', () => {
       expect(isAcceptingTracking()).toEqual(true);
     });
 
-    it('should return false if the uuid prop is a string', () => {
+    it('should return true if the uuid prop is a string', () => {
       const adminProps = Object.assign(props.admin, { uuid: 'uuid' });
       const renderedComponent = shallow(<Admin {...props} {...adminProps} />);
       const { isAcceptingTracking } = renderedComponent.instance();
@@ -255,7 +255,7 @@ describe('<Admin />', () => {
   });
 
   describe('renderMarketPlace instance', () => {
-    it('should return the MarketPlace', () => {
+    it('should return the MarketPlace container', () => {
       const renderedComponent = shallow(<Admin {...props} />);
       const { renderMarketPlace } = renderedComponent.instance();
       
@@ -264,7 +264,7 @@ describe('<Admin />', () => {
   });
 
   describe('renderPluginDispatcher instance', () => {
-    it('should return the MarketPlace', () => {
+    it('should return the pluginDispatcher component', () => {
       const renderedComponent = shallow(<Admin {...props} />);
       const { renderPluginDispatcher } = renderedComponent.instance();
       

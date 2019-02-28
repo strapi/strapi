@@ -133,13 +133,7 @@ export class HomePage extends React.PureComponent {
 
   showFirstBlock = () => {
     const { plugins } = this.props;
-    let pluginsObj;
-
-    try {
-      pluginsObj = plugins.toJS();
-    } catch(err) {
-      pluginsObj = plugins;
-    }
+    const pluginsObj = plugins.toJS ? plugins.toJS() : plugins;
 
     get(pluginsObj, 'content-manager.leftMenuSections.0.links', []).length === 0;
   }
