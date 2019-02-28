@@ -1,7 +1,7 @@
 /**
  * 
  * Strapi
- * This fle
+ * This file allow to mock any key that is in the global strapi variable
  * 
  */
 

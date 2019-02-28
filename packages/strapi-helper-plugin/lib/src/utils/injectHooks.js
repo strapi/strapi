@@ -28,12 +28,12 @@ export default ({ key, pluginId }) => WrappedComponent => {
     }
 
     getHook = (hookName) => {
-      const that = this.compo.current;
+      const self = this.compo.current;
       const { hooks } = this.state;
 
       if (hooks[hookName]) {
         hooks[hookName].forEach(hook => {
-          hook.bind(that)();
+          hook.bind(self)();
         });
       }
     }
@@ -69,32 +69,16 @@ export default ({ key, pluginId }) => WrappedComponent => {
     }
 
     prepareHooks = () => {
-      let plugins;
-
-      try {
-        plugins = this.props.global.plugins;
-      } catch(err) {
-        plugins = this.context.plugins;
-      }
+      const plugins = this.props.global.plugins || this.context.plugins;
       
       const errMsg = 'The plugins object needs to be passed either in the context or the props to your container.\n'
         + `Please check the ${key} container in the ${pluginId} plugin\n\n`;
 
       invariant(plugins, errMsg);
 
-      const pluginsLifecycles = Object.keys(plugins).reduce((acc, current) => {
-        const lifecycles = plugins[current].lifecycles;
-
-        if (lifecycles) {
-          acc.push(lifecycles);
-        }
-
-        return acc;
-      }, []);
-
-      pluginsLifecycles.forEach(lifecycles => {
-        lifecycles.bind(this)();
-      });
+      Object.keys(plugins)
+        .filter(plugin => !!plugins[plugin].lifecycles)
+        .forEach(plugin => plugins[plugin].lifecycles.bind(this)());
     }
 
     compo = React.createRef();
