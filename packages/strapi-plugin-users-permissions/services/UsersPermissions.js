@@ -214,10 +214,9 @@ module.exports = {
 
   updatePermissions: async function (cb) {
     // fetch all the current permissions from the database, and format them into an array of actions.
-    const databasePermissions = await strapi.query('permission', 'users-permissions').find();
+    const databasePermissions = await strapi.query('permission', 'users-permissions').find({limit: -1});
     const actions = databasePermissions
       .map(permission => `${permission.type}.${permission.controller}.${permission.action}`);
-
 
     // Aggregate first level actions.
     const appActions = Object.keys(strapi.api || {}).reduce((acc, api) => {
@@ -310,7 +309,8 @@ module.exports = {
 
     // Retrieve permissions by creation date (ID or ObjectID).
     const permissions = await strapi.query('permission', 'users-permissions').find({
-      sort: `${primaryKey}`
+      sort: `${primaryKey}`,
+      limit: -1
     });
 
     const value = permissions.reduce((acc, permission) => {
