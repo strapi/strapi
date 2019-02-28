@@ -47,7 +47,7 @@ const addDevMiddlewares = (app, webpackConfig) => {
 /**
  * Front-end middleware
  */
-module.exports = (app) => {
+module.exports = app => {
   const webpackConfig = require('../../internals/webpack/webpack.dev.babel');
 
   // const webpackConfig = require(path.resolve(process.cwd(), 'node_modules', 'strapi-helper-plugin', 'internals', 'webpack', 'webpack.dev.babel'));
