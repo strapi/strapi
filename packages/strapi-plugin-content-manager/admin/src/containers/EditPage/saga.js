@@ -155,7 +155,7 @@ export function* submit() {
     yield put(submitSuccess());
 
   } catch(err) {
-    if (isArray(get(err, 'responsepayload.message'))) {
+    if (isArray(get(err, 'response.payload.message'))) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {
           if (includes(current.id, 'Auth')) {
