@@ -10,9 +10,10 @@ import { FormattedMessage } from 'react-intl';
 
 // modal
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import PopUpForm from 'components/PopUpForm';
 import PopUpWarning from 'components/PopUpWarning';
-import styles from 'components/List/styles.scss';
+
+import PopUpForm from '../PopUpForm';
+import styles from '../List/styles.scss';
 
 /* eslint-disable react/require-default-props  */
 class RowDatabase extends React.Component { // eslint-disable-line react/prefer-stateless-function

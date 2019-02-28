@@ -9,13 +9,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { capitalize, findIndex, get, isUndefined, toInteger, upperFirst } from 'lodash';
+import { capitalize, findIndex, get, isEmpty, isUndefined, toInteger, upperFirst } from 'lodash';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
-import pluginId from 'pluginId';
-// App selectors
-import { makeSelectSchema } from 'containers/App/selectors';
+
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
@@ -23,15 +21,21 @@ import PageFooter from 'components/PageFooter';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 import InputCheckbox from 'components/InputCheckbox';
-// Components from the plugin itself
-import AddFilterCTA from 'components/AddFilterCTA';
-import FiltersPickWrapper from 'components/FiltersPickWrapper/Loadable';
-import Filter from 'components/Filter/Loadable';
-import Search from 'components/Search';
-import Table from 'components/Table';
-// Utils located in `strapi/packages/strapi-helper-plugin/lib/src/utils`;
+
 import getQueryParameters from 'utils/getQueryParameters';
 import storeData from 'utils/storeData';
+
+import pluginId from '../../pluginId';
+// Components from the plugin itself
+import AddFilterCTA from '../../components/AddFilterCTA';
+import FiltersPickWrapper from '../../components/FiltersPickWrapper/Loadable';
+import Filter from '../../components/Filter/Loadable';
+import Search from '../../components/Search';
+import Table from '../../components/Table';
+
+// App selectors
+import { makeSelectSchema } from '../App/selectors';
+
 import Div from './Div';
 import {
   addAttr,
@@ -368,7 +372,13 @@ export class ListPage extends React.Component {
 
   showSearch = () => get(this.getCurrentModel(), ['search']);
 
-  showFilters = () => get(this.getCurrentModel(), ['filters']);
+  showFilters = () => {
+    if (isEmpty(get(this.getCurrentModel(), ['editDisplay', 'availableFields']))) {
+      return false;
+    }
+
+    return get(this.getCurrentModel(), ['filters']);
+  }
 
   showBulkActions = () => get(this.getCurrentModel(), ['bulkActions']);
 
@@ -450,7 +460,7 @@ export class ListPage extends React.Component {
           this.props.history.push({
             pathname: `${this.props.location.pathname}/create`,
             search: this.generateRedirectURI(),
-          })
+          });
         },
       },
     ];

@@ -4,7 +4,7 @@
  *
  */
 
-import { GET_VIDEOS, GET_VIDEOS_SUCCEEDED, ON_CLICK, SET_VIDEOS_DURATION, UPDATE_VIDEO_START_TIME, SET_VIDEO_END, REMOVE_VIDEOS } from './constants';
+import { GET_VIDEOS, GET_VIDEOS_SUCCEEDED, SHOULD_OPEN_MODAL, ON_CLICK, SET_VIDEOS_DURATION, UPDATE_VIDEO_START_TIME, SET_VIDEO_END, REMOVE_VIDEOS } from './constants';
 
 export function getVideos() {
   return {
@@ -16,6 +16,13 @@ export function getVideosSucceeded(videos) {
   return {
     type: GET_VIDEOS_SUCCEEDED,
     videos,
+  };
+}
+
+export function shouldOpenModal(opened) {
+  return {
+    type: SHOULD_OPEN_MODAL,
+    opened,
   };
 }
 

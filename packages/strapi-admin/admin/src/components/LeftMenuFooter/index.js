@@ -8,7 +8,7 @@ import React from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import { PropTypes } from 'prop-types';
 
-import LeftMenuLink from 'components/LeftMenuLink';
+import LeftMenuLink from '../LeftMenuLink';
 
 import styles from './styles.scss';
 import messages from './messages.json';

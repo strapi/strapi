@@ -9,15 +9,16 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { getVideos, onClick, setVideoDuration, updateVideoStartTime, setVideoEnd, removeVideos } from './actions';
-
+import { FormattedMessage } from 'react-intl';
 import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
+
+import OnboardingVideo from 'components/OnboardingVideo';
+
+import { getVideos, onClick, removeVideos, setVideoDuration, setVideoEnd, updateVideoStartTime } from './actions';
 import makeSelectOnboarding from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-
-import OnboardingVideo from 'components/OnboardingVideo';
 
 import styles from './styles.scss';
 
@@ -25,77 +26,77 @@ export class Onboarding extends React.Component {
   state = { showVideos: false };
 
   componentDidMount() {
-    this.setState({ showVideos: true });
     this.props.getVideos();
   }
-  
-  componentWillUnmount() {
-    this.props.removeVideos();
-    localStorage.removeItem('videos');
+
+  componentDidUpdate(prevProps) {
+    const { shouldOpenModal } = this.props;
+
+    if (shouldOpenModal !== prevProps.shouldOpenModal && shouldOpenModal) {
+      this.handleOpenModal();
+    }
   }
 
-  toggleVideos = () => {
-    // Display videos card
-    this.setState(prevState => ({ showVideos: !prevState.showVideos }));
-
-    // EmitEvent
-    const { showVideos } = this.state;
-    const eventName = showVideos ? 'didOpenGetStartedVideoContainer' : 'didCloseGetStartedVideoContainer';
-    this.context.emitEvent(eventName);
-  };
+  componentWillUnmount() {
+    this.props.removeVideos();
+  }
 
   setVideoEnd = () => {
     this.setVideoEnd();
   }
-
+  
   didPlayVideo = (index, currTime) => {
-
     const eventName = `didPlay${index}GetStartedVideo`;
     this.context.emitEvent(eventName, {timestamp: currTime});
   }
 
   didStopVideo = (index, currTime) => {
-
     const eventName = `didStop${index}Video`;
     this.context.emitEvent(eventName, {timestamp: currTime});
   }
 
-  updateLocalStorage = (index, current, duration) => {
-    // Update store
-    this.props.updateVideoStartTime(index, current);
+  handleOpenModal = () => this.setState({ showVideos: true });
 
-    // Update localStorage
-    let videosTime = JSON.parse(localStorage.getItem('videos'));
-    videosTime[index].startTime = current;
+  handleVideosToggle = () => {
+    this.setState(prevState => ({ showVideos: !prevState.showVideos }));
 
-    let percent = current * 100 / duration;
-    if (percent >= 80) {
-      if (videosTime[index].end === false) {
-        videosTime[index].end = true;
-        this.props.setVideoEnd(index, true);
-      }
-    }
+    const { showVideos } = this.state;
+    const eventName = showVideos ? 'didOpenGetStartedVideoContainer' : 'didCloseGetStartedVideoContainer';
 
-    localStorage.setItem('videos', JSON.stringify(videosTime));
+    this.context.emitEvent(eventName);
   };
 
-  // eslint-disable-line react/prefer-stateless-function
+  updateCurrentTime = (index, current, duration) => {
+
+    this.props.updateVideoStartTime(index, current);
+
+    const percent = current * 100 / duration;
+    const video = this.props.videos[index];
+
+    if (percent >= 80) {
+      if (video.end === false) {
+        this.updateEnd(index);
+      }
+    }
+  };
+
+  updateEnd = (index) => {
+    this.props.setVideoEnd(index, true);
+  };
+
+  // eslint-disable-line jsx-handler-names
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
 
     return (
-      <div className={styles.videosWrapper}>
-        <div
-          className={cn(
-            styles.videosContent,
-            this.state.showVideos ? styles.shown : styles.hide,
-          )}
-        >
+      <div className={cn(styles.videosWrapper, videos.length > 0 ? styles.visible : styles.hidden)}>
+        <div className={cn(styles.videosContent, this.state.showVideos ? styles.shown : styles.hide)}>
           <div className={styles.videosHeader}>
-            <p>Get started video</p>
-            <p>25% completed</p>
+            <p><FormattedMessage id="app.components.Onboarding.title" /></p>
+            {videos.length && (
+              <p>{Math.floor((videos.filter(v => v.end).length)*100/videos.length)}<FormattedMessage id="app.components.Onboarding.label.completed" /></p>
+            )}
           </div>
-
           <ul className={styles.onboardingList}>
             {videos.map((video, i) => {
               return (
@@ -105,7 +106,7 @@ export class Onboarding extends React.Component {
                   video={video}
                   onClick={onClick}
                   setVideoDuration={setVideoDuration}
-                  getVideoCurrentTime={this.updateLocalStorage}
+                  getVideoCurrentTime={this.updateCurrentTime}
                   didPlayVideo={this.didPlayVideo}
                   didStopVideo={this.didStopVideo}
                 />
@@ -116,7 +117,7 @@ export class Onboarding extends React.Component {
 
         <div className={styles.openBtn}>
           <button
-            onClick={this.toggleVideos}
+            onClick={this.handleVideosToggle}
             className={this.state.showVideos ? styles.active : ''}
           >
             <i className="fa fa-question" />
@@ -132,8 +133,25 @@ Onboarding.contextTypes = {
   emitEvent: PropTypes.func,
 };
 
+Onboarding.defaultProps = {
+  onClick: () => {},
+  removeVideos: () => {},
+  setVideoDuration: () => {},
+  setVideoEnd: () => {},
+  shouldOpenModal: false,
+  videos: [],
+  updateVideoStartTime: () => {},
+};
+
 Onboarding.propTypes = {
   getVideos: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
+  removeVideos: PropTypes.func,
+  setVideoDuration: PropTypes.func,
+  setVideoEnd: PropTypes.func,
+  shouldOpenModal: PropTypes.bool,
+  updateVideoStartTime: PropTypes.func,
+  videos: PropTypes.array,
 };
 
 const mapStateToProps = makeSelectOnboarding();

@@ -10,8 +10,9 @@ import moment from 'moment';
 import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import cn from 'classnames';
 
-import CustomInputCheckbox from 'components/CustomInputCheckbox';
 import IcoContainer from 'components/IcoContainer';
+
+import CustomInputCheckbox from '../CustomInputCheckbox';
 
 import styles from './styles.scss';
 

@@ -10,7 +10,7 @@ import cn from 'classnames';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
-import GlobalPagination from 'components/GlobalPagination';
+import GlobalPagination from '../GlobalPagination';
 
 import styles from './styles.scss';
 
@@ -55,6 +55,7 @@ function PageFooter(props) {
 }
 
 PageFooter.defaultProps = {
+  context: {},
   count: 1,
   onChangeParams: () => {},
   params: {
@@ -65,6 +66,7 @@ PageFooter.defaultProps = {
 };
 
 PageFooter.propTypes = {
+  context: PropTypes.object,
   count: PropTypes.number,
   onChangeParams: PropTypes.func,
   params: PropTypes.object,

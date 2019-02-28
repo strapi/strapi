@@ -79,7 +79,7 @@ class ContentHeader extends React.Component { // eslint-disable-line react/prefe
 }
 
 ContentHeader.contextTypes = {
-  emitEvent: PropTypes.func
+  emitEvent: PropTypes.func,
 }; 
 
 ContentHeader.propTypes = {

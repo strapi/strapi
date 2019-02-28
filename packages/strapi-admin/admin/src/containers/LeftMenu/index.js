@@ -8,9 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import LeftMenuHeader from 'components/LeftMenuHeader';
-import LeftMenuLinkContainer from 'components/LeftMenuLinkContainer';
-import LeftMenuFooter from 'components/LeftMenuFooter';
+import LeftMenuHeader from '../../components/LeftMenuHeader';
+import LeftMenuLinkContainer from '../../components/LeftMenuLinkContainer';
+import LeftMenuFooter from '../../components/LeftMenuFooter';
 
 import styles from './styles.scss';
 

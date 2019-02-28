@@ -14,19 +14,20 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, upperFirst } from 'lodash';
 import cn from 'classnames';
 
-import Block from 'components/HomePageBlock';
 import Button from 'components/Button';
-import Sub from 'components/Sub';
 import Input from 'components/InputText';
-import SupportUsCta from 'components/SupportUsCta';
-import SupportUsTitle from 'components/SupportUsTitle';
-
-import { selectPlugins } from 'containers/App/selectors';
-
 import auth from 'utils/auth';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import validateInput from 'utils/inputsValidations';
+
+import Block from '../../components/HomePageBlock';
+import Sub from '../../components/Sub';
+import SupportUsCta from '../../components/SupportUsCta';
+import SupportUsTitle from '../../components/SupportUsTitle';
+
+import { selectPlugins } from '../App/selectors';
+
+import injectReducer from '../../utils/injectReducer';
+import injectSaga from '../../utils/injectSaga';
 
 import BlockLink from './BlockLink';
 import CommunityContent from './CommunityContent';
@@ -146,7 +147,7 @@ export class HomePage extends React.PureComponent {
       ? {
         className: styles.homePageTutorialButton,
         href:
-            'https://strapi.io/documentation/3.x.x/getting-started/quick-start.html#_3-create-a-content-type',
+            'https://strapi.io/documentation/getting-started/quick-start.html#_3-create-a-content-type',
         id: 'app.components.HomePage.button.quickStart',
         primary: true,
       }

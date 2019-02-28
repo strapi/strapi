@@ -36,7 +36,7 @@ class PopUpHeaderNavLink extends React.Component { // eslint-disable-line react/
 }
 
 PopUpHeaderNavLink.contextTypes = {
-  emitEvent: PropTypes.func
+  emitEvent: PropTypes.func,
 };
 
 PopUpHeaderNavLink.propTypes = {

@@ -10,11 +10,12 @@ import {
   // take,
   takeLatest,
 } from 'redux-saga/effects';
-import { makeSelectSchema } from 'containers/App/selectors';
 // Utils.
 import cleanData from 'utils/cleanData';
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
+
+import { makeSelectSchema } from '../App/selectors';
 import {
   getDataSucceeded,
   setFormErrors,

@@ -15,14 +15,15 @@ import '../../../../node_modules/video-react/dist/video-react.css';
 import styles from './styles.scss';
 
 class OnboardingVideo extends React.Component {
-  player = React.createRef();
-  hiddenPlayer = React.createRef();
-
   componentDidMount() {
     this.hiddenPlayer.current.subscribeToStateChange(
       this.handleChangeState,
     );
   }
+
+  hiddenPlayer = React.createRef();
+
+  player = React.createRef();
 
   handleChangeState = (state, prevState) => {
     const { duration } = state;
@@ -34,22 +35,19 @@ class OnboardingVideo extends React.Component {
   };
 
   handleChangeIsPlayingState = (state, prevState) => {
-
     const { isActive } = state;
     const { id } = this.props;
-    // Manual play
+
     if (isActive !== prevState.isActive && isActive) {
       this.props.didPlayVideo(id, this.props.video.startTime);
     }
   };
 
   handleCurrentTimeChange = (curr) => {
-
     this.props.getVideoCurrentTime(this.props.id, curr, this.props.video.duration);            
   }
 
-  afterOpenModal = () => {
-
+  handleModalOpen = () => {
     this.player.current.subscribeToStateChange(
       this.handleChangeIsPlayingState,
     );
@@ -59,28 +57,28 @@ class OnboardingVideo extends React.Component {
     if (this.props.video.startTime === 0) {
       const { player } = this.player.current.getState();
       player.isActive = true;
+
       this.props.didPlayVideo(this.props.id, this.props.video.startTime);
     } else {
       this.player.current.pause();
     }
   };
 
-  onModalClose = () => {
+  handleVideoPause = () => {
+    const { player } = this.player.current.getState();
+    const currTime = player.currentTime;
 
+    this.handleCurrentTimeChange(currTime);
+    this.props.didStopVideo(this.props.id, currTime);
+  };
+
+  handleModalClose = () => {
     const { player } = this.player.current.getState();
     const paused = player.paused;
 
     if (!paused) {
-      this.videoPause();
+      this.handleVideoPause();
     }
-  };
-
-  videoPause = () => {
-
-    const { player } = this.player.current.getState();
-    const currTime = player.currentTime;
-    this.handleCurrentTimeChange(currTime);
-    this.props.didStopVideo(this.props.id, currTime);
   };
 
   render() {
@@ -91,27 +89,27 @@ class OnboardingVideo extends React.Component {
         key={this.props.id}
         onClick={this.props.onClick}
         id={this.props.id}
-        className={cn(styles.listItem, video.end ? styles.finished : '')}
+        className={cn(styles.listItem, video.end && (styles.finished))}
       >
         <div className={styles.thumbWrapper}>
-          <img src={video.preview} />
-          <div className={styles.overlay}/>
+          <img src={video.preview} alt="preview" />
+          <div className={styles.overlay} />
           <div className={styles.play} />
         </div>
         <div className={styles.txtWrapper}>
           <p className={styles.title}>{video.title}</p>
-          <p className={styles.time}>{isNaN(video.duration) ? ' ' :  `${Math.floor(video.duration / 60)}:${Math.floor(video.duration)%60}`}</p>
+          <p className={styles.time}>{isNaN(video.duration) ? '\xA0' :  `${Math.floor(video.duration / 60)}:${Math.floor(video.duration)%60}`}</p>
         </div>
-
+        
         <Modal
           isOpen={video.isOpen}
-          toggle={this.props.onClick}
+          toggle={this.props.onClick} // eslint-disable-line react/jsx-handler-names
           className={styles.videoModal}
-          onOpened={this.afterOpenModal}
-          onClosed={this.onModalClose}
+          onOpened={this.handleModalOpen}
+          onClosed={this.handleModalClose}
         >
           <ModalHeader
-            toggle={this.props.onClick}
+            toggle={this.props.onClick} // eslint-disable-line react/jsx-handler-names
             className={styles.videoModalHeader}
           >
             {video.title}
@@ -125,7 +123,7 @@ class OnboardingVideo extends React.Component {
                 src={video.video}
                 startTime={video.startTime}
                 preload="auto"
-                onPause={this.videoPause}
+                onPause={this.handleVideoPause}
                 onplay={this.videoStart}
                 subscribeToStateChange={this.subscribeToStateChange}
               />
@@ -150,21 +148,23 @@ class OnboardingVideo extends React.Component {
 }
 
 OnboardingVideo.defaultProps = {
-  currTime: 0,
-  video: {},
-  setVideoDuration: () => {},
-  getVideoCurrentTime: () => {},
-  didStopVideo: () => {},
   didPlayVideo: () => {},
+  didStopVideo: () => {},
+  getVideoCurrentTime: () => {},
+  id: 0,
+  onClick: () => {},
+  setVideoDuration: () => {},
+  video: {},
 };
 
 OnboardingVideo.propTypes = {
-  currTime: PropTypes.number,
-  videos: PropTypes.object,
-  setVideoDuration: PropTypes.func,
-  getVideoCurrentTime: PropTypes.func,
-  didStopVideo: PropTypes.func,
   didPlayVideo: PropTypes.func,
+  didStopVideo: PropTypes.func,
+  getVideoCurrentTime: PropTypes.func,
+  id: PropTypes.number,
+  onClick: PropTypes.func,
+  setVideoDuration: PropTypes.func,
+  video: PropTypes.object,
 };
 
 export default OnboardingVideo;
