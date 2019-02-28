@@ -83,6 +83,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
       placeholder,
       style,
       tabIndex,
+      step,
       value,
     } = this.props;
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
@@ -121,6 +122,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
           placeholder={placeholder}
           style={inputStyle}
           tabIndex={tabIndex}
+          step={step}
           value={value}
         />
         <InputDescription
@@ -162,6 +164,7 @@ InputNumberWithErrors.defaultProps = {
   labelStyle: {},
   noErrorsDescription: false,
   placeholder: 'app.utils.placeholder.defaultMessage',
+  step: 1,
   style: {},
   tabIndex: '0',
   validations: {},
@@ -209,6 +212,7 @@ InputNumberWithErrors.propTypes = {
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,
+  step: PropTypes.number,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,

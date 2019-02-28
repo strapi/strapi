@@ -72,7 +72,7 @@ class EditForm extends React.Component  {
             name="sizeLimit"
             onChange={this.props.onChange}
             type="number"
-            step="0.01"
+            step={0.01}
             value={get(this.props.modifiedData, 'sizeLimit', 1) / 1000}
           />
         </div>
