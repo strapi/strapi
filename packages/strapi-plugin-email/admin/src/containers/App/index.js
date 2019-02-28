@@ -8,11 +8,10 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 
-// Utils
-import { pluginId } from 'app';
+import pluginId from '../../pluginId';
 
 // Containers
-import ConfigPage from 'containers/ConfigPage';
+import ConfigPage from '../ConfigPage';
 
 function App() {
   return (

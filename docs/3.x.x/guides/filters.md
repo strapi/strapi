@@ -24,8 +24,11 @@ Easily filter results according to fields values.
  - `_gt`: Greater than
  - `_lte`: Lower than or equal to
  - `_gte`: Greater than or equal to
+ - `_in`: Include in array
  - `_contains`: Contains
  - `_containss`: Contains case sensitive
+ - `_in`: Matches any value in the array of values
+ - `_nin`: Doesn't match any value in the array of values
 
 #### Examples
 
@@ -36,6 +39,9 @@ Find users having `John` as first name.
 Find products having a price equal or greater than `3`.
 
 `GET /products?price_gte=3`
+
+Find multiple product with id 3, 6, 8
+`GET /products?id_in=3&id_in=6&id_in=8`
 
 ::: note
 You can't use filter to have specific results inside relation, like "Find users and only their posts older than yesterday" as example. If you need it, you can modify or create your own service or use [GraphQL](./graphql.md#query-api).

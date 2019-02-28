@@ -174,6 +174,8 @@ module.exports = strapi => {
         serverParams.playground = {
           endpoint: strapi.plugins.graphql.config.endpoint,
         };
+
+        serverParams.introspection = true;
       }
 
       const server = new ApolloServer(serverParams);

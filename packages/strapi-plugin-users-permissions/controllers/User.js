@@ -95,6 +95,7 @@ module.exports = {
 
     try {
       const data = await strapi.plugins['users-permissions'].services.user.add(ctx.request.body);
+
       // Send 201 `created`
       ctx.created(data);
     } catch(error) {
@@ -120,7 +121,7 @@ module.exports = {
       if (advancedConfigs.unique_email && ctx.request.body.email) {
         const users = await strapi.plugins['users-permissions'].services.user.fetchAll({ email: ctx.request.body.email });
 
-        if (users && _.find(users, user => (user.id || user._id).toString() !== ctx.params._id)) {
+        if (users && _.find(users, user => (user.id || user._id).toString() !== (ctx.params.id || ctx.params._id))) {
           return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
         }
       }
@@ -140,7 +141,7 @@ module.exports = {
           email: ctx.request.body.email
         });
 
-        if (user !== null && (user.id || user._id).toString() !== ctx.params._id) {
+        if (user !== null && (user.id || user._id).toString() !== (ctx.params.id || ctx.params._id)) {
           return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
         }
       }
@@ -162,7 +163,7 @@ module.exports = {
 
   destroy: async (ctx) => {
     const data = await strapi.plugins['users-permissions'].services.user.remove(ctx.params);
-
+    
     // Send 200 `ok`
     ctx.send(data);
   },

@@ -1,9 +1,9 @@
 import { LOCATION_CHANGE } from 'react-router-redux';
 import { get } from 'lodash';
 import { all, fork, call, put, select, takeLatest, take, cancel } from 'redux-saga/effects';
-import { pluginDeleted } from 'containers/App/actions';
 import auth from 'utils/auth';
 import request from 'utils/request';
+import { pluginDeleted } from '../App/actions';
 import { selectLocale } from '../LanguageProvider/selectors';
 import { deletePluginSucceeded, getAppCurrentEnvSucceeded, getPluginsSucceeded } from './actions';
 import { GET_PLUGINS, ON_DELETE_PLUGIN_CONFIRM } from './constants';

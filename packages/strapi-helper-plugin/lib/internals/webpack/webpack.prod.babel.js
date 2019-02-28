@@ -16,10 +16,10 @@ const base = require('./webpack.base.babel');
 const isAdmin = process.env.IS_ADMIN === 'true';
 // const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
 const isSetup = process.env.IS_MONOREPO || false;
-const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', isAdmin ? '' : '..');
+const appPath = process.env.APP_PATH || path.resolve(process.env.PWD || process.cwd(), '..', isAdmin ? '' : '..');
 const adminPath = (() => {
   if (isSetup) {
-    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(process.env.PWD, '..');
+    return isAdmin ? path.resolve(appPath, 'strapi-admin') : path.resolve(process.env.PWD || process.cwd(), '..');
   }
 
   return path.resolve(appPath, 'admin');
@@ -71,7 +71,7 @@ if (isAdmin && !isSetup) {
   try {
     const server = require(serverConfig);
 
-    if (process.env.PWD.indexOf('/admin') !== -1) {
+    if ((process.env.PWD || process.cwd()).indexOf('/admin') !== -1) {
       if (_.get(server, 'admin.build.host')) {
         publicPath = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
       } else {
@@ -128,7 +128,7 @@ const main = (() => {
     return path.join(appPath, 'admin', 'admin', 'src', 'app.js');
   }
 
-  return path.join(process.env.PWD, 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
+  return path.join(process.env.PWD || process.cwd(), 'node_modules', 'strapi-helper-plugin', 'lib', 'src', 'app.js');
 })();
 
 module.exports = base({

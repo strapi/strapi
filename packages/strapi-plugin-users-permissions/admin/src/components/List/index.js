@@ -16,7 +16,7 @@ import LoadingIndicator from 'components/LoadingIndicator';
 
 // Design
 import Button from 'components/Button';
-import ListRow from 'components/ListRow';
+import ListRow from '../ListRow';
 
 import styles from './styles.scss';
 

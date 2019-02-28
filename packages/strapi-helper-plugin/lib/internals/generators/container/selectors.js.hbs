@@ -1,9 +1,10 @@
 import { createSelector } from 'reselect';
+import pluginId from 'pluginId';
 
 /**
  * Direct selector to the {{ camelCase name }} state domain
  */
-const select{{ properCase name }}Domain = () => (state) => state.get('{{ camelCase name }}');
+const select{{ properCase name }}Domain = () => (state) => state.get(`${pluginId}-{{ camelCase name }}`);
 
 /**
  * Other specific selectors

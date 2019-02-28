@@ -6,7 +6,7 @@ module.exports = {
       Object.keys(params.where).forEach((key) => {
         const where = params.where[key];
 
-        if (Array.isArray(where.value)) {
+        if (Array.isArray(where.value) && where.symbol !== 'IN' && where.symbol !== 'NOT IN') {
           for (const value in where.value) {
             qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
           }

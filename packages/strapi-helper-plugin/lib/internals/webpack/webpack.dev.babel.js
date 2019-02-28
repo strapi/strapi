@@ -15,8 +15,8 @@ const postcssReporter = require('postcss-reporter');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 const isAdmin = process.env.IS_ADMIN === 'true';
-const isSetup = path.resolve(process.env.PWD, '..', '..') === path.resolve(process.env.INIT_CWD);
-const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', isAdmin ? '' : '..');
+const isSetup = path.resolve(process.env.PWD || process.cwd(), '..', '..') === path.resolve(process.env.INIT_CWD);
+const appPath = process.env.APP_PATH || path.resolve(process.env.PWD || process.cwd(), '..', isAdmin ? '' : '..');
 
 const rootAdminpath = (() => {
   if (isSetup) {

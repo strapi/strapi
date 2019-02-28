@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.0-alpha.19",
+  "version": "3.0.0-alpha.24.1",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -8,14 +8,14 @@
     "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI."
   },
   "scripts": {
-    "analyze:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf stats.json",
+    "analyze:clean": "rimraf stats.json",
     "preanalyze": "npm run analyze:clean",
     "analyze": "node ./node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
     "prebuild": "npm run build:clean",
-    "build:dev": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node ./node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=production node node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf admin/build",
-    "start": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node ./node_modules/strapi-helper-plugin/lib/server",
+    "build:dev": "cross-env NODE_ENV=development ./node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build": "cross-env NODE_ENV=production node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
+    "build:clean": "rimraf admin/build",
+    "start": "cross-env NODE_ENV=development ./node_modules/strapi-helper-plugin/lib/server",
     "generate": "node ./node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "lint": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern '/admin/build/' --config ./node_modules/strapi-helper-plugin/lib/internals/eslint/.eslintrc.json admin",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
@@ -29,7 +29,9 @@
     "swagger-ui-dist": "^3.18.3-republish2"
   },
   "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.19"
+    "cross-env": "^5.2.0",
+    "rimraf": "^2.6.3",
+    "strapi-helper-plugin": "3.0.0-alpha.24.1"
   },
   "author": {
     "name": "soupette",
