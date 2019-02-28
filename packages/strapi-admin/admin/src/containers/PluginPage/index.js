@@ -21,14 +21,7 @@ export class PluginPage extends React.Component { // eslint-disable-line react/p
 
     // Detect plugin id from url params
     const pluginId = this.props.match.params.pluginId;
-    let plugins;
-
-    // TODO: Remove these lines when migration is completed
-    try {
-      plugins = this.props.plugins.toJS();
-    } catch(err) {
-      plugins = this.props.plugins;
-    }
+    const plugins = plugins.toJS ? plugins.toJS() : plugins;
 
     const containers = Object.keys(plugins).map((name) => {
       const plugin = plugins[name];

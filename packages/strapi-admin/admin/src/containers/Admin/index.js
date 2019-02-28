@@ -196,12 +196,12 @@ export class Admin extends React.Component { // eslint-disable-line react/prefer
     } = this.props;
 
     return Object.keys(plugins).reduce((acc, current) => {
-      const Compo = plugins[current].initializer;
+      const InitializerComponent = plugins[current].initializer;
       const key = plugins[current].id;
 
-      if (Compo) {
+      if (InitializerComponent) {
         // We don't check if the initializer is correct because there's a fallback in cdc
-        acc.push(<Compo key={key} {...this.props} {...this.helpers} />);
+        acc.push(<InitializerComponent key={key} {...this.props} {...this.helpers} />);
       }
 
       return acc;

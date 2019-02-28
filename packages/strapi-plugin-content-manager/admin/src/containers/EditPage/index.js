@@ -492,14 +492,7 @@ export class EditPage extends React.Component {
     const { plugins } = this.context;
 
     // TODO: Remove these lines when migration is completed
-    let appPlugins;
-
-    try {
-      appPlugins = plugins.toJS();
-    } catch(err) {
-      appPlugins = plugins;
-    }
-
+    const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
     const componentToInject = Object.keys(appPlugins).reduce((acc, current) => {
       // Retrieve injected compos from plugin
       // if compo can be injected in left.links area push the compo in the array

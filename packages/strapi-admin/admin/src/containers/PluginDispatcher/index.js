@@ -29,17 +29,17 @@ function PluginDispatcher(props) {
     preventComponentRendering,
   } = pluginToRender;
   const blockerComponentProps = pluginToRender.blockerComponentProps;
-  let Compo = preventComponentRendering ? BlockerComponent : mainComponent;
+  let PluginEntryComponent = preventComponentRendering ? BlockerComponent : mainComponent;
 
   if (preventComponentRendering && pluginToRender.blockerComponent) {
-    Compo = pluginToRender.blockerComponent;
+    PluginEntryComponent = pluginToRender.blockerComponent;
   }
 
   return (
     <div>
       <Helmet title={`Stapi - ${name}`} />
       <ErrorBoundary>
-        <Compo {...props} {...blockerComponentProps} />
+        <PluginEntryComponent {...props} {...blockerComponentProps} />
       </ErrorBoundary>
     </div>
   );
