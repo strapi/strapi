@@ -19,8 +19,8 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
   handleGoTo = () => {
     const id = get(auth.getUserInfo(), 'id') || get(auth.getUserInfo(), '_id');
     this.context.router.history.push({
-      pathname: `/plugins/content-manager/user/${id}`,
-      search: '?redirectUrl=/plugins/content-manager/user/?page=0&limit=0&sort=id&source=users-permissions',
+      pathname: `/plugins/content-manager/administrator/${id}`,
+      search: '?redirectUrl=/plugins/content-manager/administrator/?page=0&limit=0&sort=id&source=admin',
     });
   }
 
