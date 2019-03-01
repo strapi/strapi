@@ -35,7 +35,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
             if (shouldLoad) {
               return <LoadingIndicatorPage />;
             }
-
+            
             return (
               <div className={styles.container}>
                 <Switch>
@@ -52,7 +52,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 }
 
 App.contextTypes = {
-  router: PropTypes.object.isRequired,
+  router: PropTypes.object,
 };
 
 App.propTypes = {};
