@@ -18,16 +18,16 @@ export function* submitForm(action) {
 
     switch (formType) {
       case 'login':
-        requestURL = '/auth/local';
+        requestURL = '/admin/auth/local';
         break;
       case 'register':
-        requestURL = '/auth/local/register';
+        requestURL = '/admin/auth/local/register';
         break;
       case 'reset-password':
-        requestURL = '/auth/reset-password';
+        requestURL = '/admin/auth/reset-password';
         break;
       case 'forgot-password':
-        requestURL = '/auth/forgot-password';
+        requestURL = '/admin/auth/forgot-password';
         set(body, 'url', `${strapi.backendURL}/admin/plugins/users-permissions/auth/reset-password`);
         break;
       default:
@@ -36,8 +36,7 @@ export function* submitForm(action) {
 
     const response = yield call(request, requestURL, { method: 'POST', body: omit(body, 'news') });
 
-    if(get(response, 'user.role.name', '') === 'Administrator' || isRegister){
-
+    if (get(response, 'user.role.name', '') === 'Administrator' || isRegister || get(response, 'user.isAdmin', false)) {
       yield call(auth.setToken, response.jwt, body.rememberMe);
       yield call(auth.setUserInfo, response.user, body.rememberMe);
     }

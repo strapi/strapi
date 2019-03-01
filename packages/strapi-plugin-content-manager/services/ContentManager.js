@@ -167,7 +167,7 @@ module.exports = {
 
     params[primaryKey] = response[primaryKey];
     params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
-      const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
+      const association = (strapi.models[params.model] || strapi.admin.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
 
       // Remove relationships.
       if (association) {

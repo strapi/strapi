@@ -23,7 +23,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
 
   // Roles that can't be deleted && modified
   // Don't delete this line
-  protectedRoleIDs = ['root'];
+  protectedRoleIDs = [];
 
   // Roles that can't be deleted;
   undeletableIDs = ['public', 'authenticated'];

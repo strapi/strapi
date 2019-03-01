@@ -41,13 +41,9 @@ module.exports = {
   },
 
   deleteRole: async ctx => {
-    // Fetch root and public role.
-    const [root, publicRole] = await Promise.all([
-      strapi.query('role', 'users-permissions').findOne({ type: 'root' }),
-      strapi.query('role', 'users-permissions').findOne({ type: 'public' })
-    ]);
+    // Fetch public role.
+    const publicRole = await strapi.query('role', 'users-permissions').findOne({ type: 'public' });
 
-    const rootID = root.id || root._id;
     const publicRoleID = publicRole.id || publicRole._id;
 
     const roleID = ctx.params.role;
@@ -56,8 +52,8 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
     }
 
-    // Prevent from removing the root role.
-    if (roleID.toString() === rootID.toString() || roleID.toString() === publicRoleID.toString()) {
+    // Prevent from removing the public role.
+    if (roleID.toString() === publicRoleID.toString()) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Unauthorized' }] }]);
     }
 
@@ -131,9 +127,9 @@ module.exports = {
   },
 
   init: async (ctx) => {
-    const role = await strapi.query('role', 'users-permissions').findOne({ type: 'root' }, ['users']);
+    const admins = await strapi.query('administrator', 'admin').find();
 
-    ctx.send({ hasAdmin: !_.isEmpty(role.users) });
+    ctx.send({ hasAdmin: admins.length > 0 });
   },
 
   searchUsers: async (ctx) => {
@@ -143,16 +139,7 @@ module.exports = {
   },
 
   updateRole: async function (ctx) {
-    // Fetch root role.
-    const root = await strapi.query('role', 'users-permissions').findOne({ type: 'root' });
-
     const roleID = ctx.params.role;
-    const rootID = root.id || root._id;
-
-    // Prevent from updating the root role.
-    if (roleID === rootID) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Unauthorized' }] }]);
-    }
 
     if (_.isEmpty(ctx.request.body)) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
@@ -160,7 +147,7 @@ module.exports = {
 
     try {
       await strapi.plugins['users-permissions'].services.userspermissions.updateRole(roleID, ctx.request.body);
-      
+
       strapi.emit('didOpenAccessToFetchContentTypeEntries', ctx.request.body);
 
       ctx.send({ ok: true });

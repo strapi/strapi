@@ -1048,6 +1048,9 @@ module.exports = function(strapi) {
         // Mount `./api` models.
         mountModels(_.pickBy(strapi.models, { connection: connectionName }), strapi.models);
 
+        // Mount `./admin` models.
+        mountModels(_.pickBy(strapi.admin.models, { connection: connectionName }), strapi.admin.models);
+
         // Mount `./plugins` models.
         _.forEach(strapi.plugins, (plugin, name) => {
           mountModels(_.pickBy(strapi.plugins[name].models, { connection: connectionName }), plugin.models, name);

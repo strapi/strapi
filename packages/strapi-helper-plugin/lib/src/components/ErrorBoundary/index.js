@@ -14,15 +14,20 @@ class ErrorBoundary extends React.Component { // eslint-disable-line react/prefe
     this.state = { error: null, errorInfo: null };
   }
 
+  static getDerivedStateFromError(errorInfo) {
+    return { error: true, errorInfo };
+  }
+
   render() {
-    if (this.state.errorInfo) {
+    if (this.state.error) {
       return (
-        <div>
+        <div style={{ padding: '30px' }}>
           <h2><FormattedMessage id="components.ErrorBoundary.title" /></h2>
           <details style={{ whiteSpace: 'pre-wrap' }}>
-            {this.state.error && this.state.error.toString()}
+            <b>Please check your browser console</b>
             <br />
-            {this.state.errorInfo.componentStack}
+            <br />
+            {this.state.errorInfo.stack}
           </details>
         </div>
       );

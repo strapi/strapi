@@ -428,7 +428,7 @@ module.exports = {
 
     const model = entity.toLowerCase();
 
-    const models = _.assign(_.clone(strapi.models), Object.keys(strapi.plugins).reduce((acc, current) => {
+    const models = _.assign(_.clone(strapi.models), _.clone(strapi.admin.models), Object.keys(strapi.plugins).reduce((acc, current) => {
       _.assign(acc, _.get(strapi.plugins[current], ['models'], {}));
       return acc;
     }, {}));

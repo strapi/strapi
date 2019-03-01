@@ -94,5 +94,51 @@ module.exports = {
       strapi.reload.isWatching = true;
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
+  },
+
+  /**
+   * Create a/an admin record.
+   *
+   * @return {Object}
+   */
+
+  create: async (ctx) => {
+    const values = ctx.request.body;
+
+    if (values.password) {
+      values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
+    }
+
+    const data = await strapi.query('administrator', 'admin').create(values);
+
+    // Send 201 `created`
+    ctx.created(data);
+  },
+
+  /**
+   * Update a/an admin record.
+   *
+   * @return {Object}
+   */
+
+  update: async (ctx) => {
+    const values = ctx.request.body;
+
+    const { _id, id } = values;
+
+    const admin = await strapi.query('administrator', 'admin').findOne({ _id, id });
+
+    if (_.get(values, 'password') === admin.password) {
+      delete values.password;
+    }
+
+    if (values.password) {
+      values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(values);
+    }
+
+    const data = await strapi.query('administrator', 'admin').update(values);
+
+    // Send 200 `ok`
+    ctx.send(data);
   }
 };
