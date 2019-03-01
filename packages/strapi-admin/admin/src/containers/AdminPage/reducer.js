@@ -11,7 +11,7 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  uuid: true,
+  uuid: false,
   currentEnvironment: 'development',
   isLoading: true,
   layout: Map({}),

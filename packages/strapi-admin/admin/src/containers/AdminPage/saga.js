@@ -25,9 +25,6 @@ function* emitter(action) {
             'Content-Type': 'application/json',
           },
         },
-        false,
-        true,
-        { noAuth: true },
       );
     }
   } catch(err) {
