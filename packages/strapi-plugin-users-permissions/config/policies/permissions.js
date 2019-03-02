@@ -32,11 +32,11 @@ module.exports = async (ctx, next) => {
       name: 'users-permissions'
     });
 
-    if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && ctx.state.user.confirmed !== true) {
+    if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && !ctx.state.user.confirmed) {
       return handleErrors(ctx, 'Your account email is not confirmed.', 'unauthorized');
     }
 
-    if (ctx.state.user.blocked === true) {
+    if (ctx.state.user.blocked) {
       return handleErrors(ctx, 'Your account has been blocked by the administrator.', 'unauthorized');
     }
   }

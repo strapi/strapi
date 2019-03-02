@@ -10,7 +10,7 @@ import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import Button from 'components/Button';
-import TableListRow from 'components/TableListRow';
+import TableListRow from '../TableListRow';
 import styles from './styles.scss';
 
 class TableList extends React.Component { // eslint-disable-line react/prefer-stateless-function

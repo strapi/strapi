@@ -11,9 +11,8 @@ const appPath = isDevelopmentMode ? path.resolve(process.env.PWD, '..') : path.r
 
 shell.echo('🏗  Building the admin...');
 
-const build = shell.exec(`cd "${path.resolve(appPath, 'admin')}" && APP_PATH="${appPath}" npm run build`, {
-  silent
-});
+shell.cd(path.resolve(appPath, 'admin'));
+const build = shell.exec(`cross-env APP_PATH="${appPath}" npm run build`, {silent});
 
 if (build.stderr && build.code !== 0) {
   console.error(build.stderr);
@@ -43,25 +42,20 @@ if (process.env.npm_config_plugins === 'true') {
     .forEach(function (plugin) {
       shell.echo(`🔸  Plugin - ${_.upperFirst(plugin)}`);
       shell.echo('📦  Installing packages...');
-      shell.exec(`cd "${path.resolve(plugins, plugin)}" && npm install`, {
-        silent
-      });
+      shell.cd(path.resolve(plugins, plugin));
+      shell.exec('npm install', {silent});
 
       if (isDevelopmentMode) {
-        shell.exec(`cd "${path.resolve(plugins, plugin)}" && npm link strapi-helper-plugin`, {
-          silent
-        });
+        shell.cd(path.resolve(plugins, plugin));
+        shell.exec('npm link strapi-helper-plugin', {silent});
       } else {
-        shell.exec(`cd "${path.resolve(plugins, plugin, 'node_modules', 'strapi-helper-plugin')}" && npm install`, {
-          silent
-        });
+        shell.cd(path.resolve(plugins, plugin, 'node_modules', 'strapi-helper-plugin'));
+        shell.exec('npm install', {silent});
       }
 
       shell.echo('🏗  Building...');
-
-      const build = shell.exec(`cd "${path.resolve(plugins, plugin)}" && APP_PATH="${appPath}" npm run build`, {
-        silent
-      });
+      shell.cd(path.resolve(plugins, plugin));
+      const build = shell.exec(`cross-env APP_PATH="${appPath}" npm run build`, {silent});
 
       if (build.stderr && build.code !== 0) {
         console.error(build.stderr);

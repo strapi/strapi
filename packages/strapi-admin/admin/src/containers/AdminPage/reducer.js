@@ -16,6 +16,8 @@ const initialState = fromJS({
   isLoading: true,
   layout: Map({}),
   strapiVersion: '3',
+  eventName: '',
+  shouldEmit: true,
 });
 
 function adminPageReducer(state = initialState, action) {

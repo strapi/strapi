@@ -8,12 +8,11 @@
 const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
-const exec = require('child_process').exec;
 
 
 // Public node modules.
 const _ = require('lodash');
-const {cyan} = require('chalk');
+const {cyan, green} = require('chalk');
 const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const shell = require('shelljs');
@@ -284,7 +283,11 @@ module.exports = (scope, cb) => {
         }
 
         console.log();
-        console.log('⏳ Testing database connection...');
+        console.log(
+          isQuick
+          ? '✅ Connected to the database'
+          : '⏳ Testing database connection...\r\nIt might take a minute, please have a coffee ☕️'
+        );
 
         resolve();
       }),
@@ -310,19 +313,32 @@ module.exports = (scope, cb) => {
           scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
         }
 
-        exec(cmd, () => {
+        if (isQuick) {
+          scope.client.version = 'latest';
+
+          return resolve();
+        }
+
+        shell.exec(cmd, { silent: true }, () => {
           if (scope.client.module) {
             const lock = require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.module}/package.json`));
             scope.client.version = lock.version;
 
             if (scope.developerMode === true && scope.client.connector === 'strapi-hook-bookshelf') {
-              const knexVersion = require(path.join(`${scope.tmpPath}`,`/node_modules/`,`knex/package.json`));
+              let knexVersion;
+
+              try {
+                knexVersion = require(path.join(`${scope.tmpPath}`,'/node_modules/', 'knex', 'package.json'));
+              } catch (e) {
+                knexVersion = require(path.join(`${scope.tmpPath}`,'/node_modules/','strapi-hook-knex', 'node_modules', 'knex', 'package.json'));
+              }
+
               scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
             }
           }
 
           if (scope.developerMode) {
-            exec(linkNodeModulesCommand, () => {
+            shell.exec(linkNodeModulesCommand, { silent: true }, () => {
               resolve();
             });
           } else {
@@ -332,10 +348,30 @@ module.exports = (scope, cb) => {
       })
     ];
 
+    const connectedToTheDatabase = (withMessage = true) => {
+      console.log();
+
+      if (withMessage) {
+        console.log(`The app has been connected to the database ${green('successfully')}!`);
+        console.log();
+      }
+
+      trackSuccess('didConnectDatabase', scope);
+
+      cb.success();
+    };
+
     Promise.all(asyncFn)
       .then(() => {
+        // Bypass real connection test.
+        if (isQuick) {
+          return connectedToTheDatabase(false);
+        }
+
         try {
-          require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.connector}/lib/utils/connectivity.js`))(scope, cb.success, connectionValidation);
+          const connectivityFile = path.join(scope.tmpPath, 'node_modules', scope.client.connector, 'lib', 'utils', 'connectivity.js');
+
+          require(connectivityFile)(scope, connectedToTheDatabase, connectionValidation);
         } catch(err) {
           trackSuccess('didNotConnectDatabase', scope, err);
           console.log(err);

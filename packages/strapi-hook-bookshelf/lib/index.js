@@ -644,11 +644,12 @@ module.exports = function(strapi) {
                         })
                       ));
 
-                      if (sqlite3Change) {
+                      if (sqlite3Change && definition.client === 'sqlite3') {
                         await createTable(`tmp_${table}`);
 
                         try {
-                          await ORM.knex.raw(`INSERT INTO ${quote}tmp_${table}${quote}(${Object.keys(attributes).join(' ,')}) SELECT ${Object.keys(attributes).join(' ,')} FROM ${quote}${table}${quote}`);
+                          const attrs = Object.keys(attributes).filter(attribute => getType(attributes[attribute], attribute)).join(' ,');
+                          await ORM.knex.raw(`INSERT INTO ${quote}tmp_${table}${quote}(${attrs}) SELECT ${attrs} FROM ${quote}${table}${quote}`);
                         } catch (err) {
                           console.log('Warning!');
                           console.log('We can\'t migrate your data due to the following error.');
