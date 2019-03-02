@@ -182,7 +182,8 @@ module.exports = {
 
     for (let i = 0; i < roles.length; ++i) {
       roles[i].id = roles[i].id || roles[i]._id;
-      roles[i].nb_users = await strapi.query('user', 'users-permissions').count({ role: roles[i].id });
+
+      roles[i].nb_users = await strapi.query('user', 'users-permissions').count(strapi.utils.models.convertParams('user', { role: roles[i].id }));
     }
 
     return roles;
