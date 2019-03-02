@@ -42,7 +42,7 @@ strapi -v
 
 That should print `3.0.0-alpha.x`.
 
-Strapi is installed globally on your computer. Type `strapi` in your terminal you will have access to every available command lines.
+Strapi is installed globally on your computer. Type `strapi` in your terminal you will have access to every available command line command.
 
 ***
 

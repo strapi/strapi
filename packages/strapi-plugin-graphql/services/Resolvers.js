@@ -59,21 +59,10 @@ module.exports = {
       }
 
       // Add timestamps attributes.
-      if (_.get(model, 'options.timestamps') === true) {
+      if (_.isArray(_.get(model, 'options.timestamps'))) {
         Object.assign(initialState, {
-          createdAt: 'DateTime!',
-          updatedAt: 'DateTime!',
-        });
-
-        Object.assign(acc.resolver[globalId], {
-          createdAt: (obj) => {
-            // eslint-disable-line no-unused-vars
-            return obj.createdAt || obj.created_at;
-          },
-          updatedAt: (obj) => {
-            // eslint-disable-line no-unused-vars
-            return obj.updatedAt || obj.updated_at;
-          },
+          [_.get(model, 'options.timestamps[0]')]: 'DateTime!',
+          [_.get(model, 'options.timestamps[1]')]: 'DateTime!'
         });
       }
 

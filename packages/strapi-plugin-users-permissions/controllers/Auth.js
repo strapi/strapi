@@ -56,12 +56,12 @@ module.exports = {
       if (!user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       }
-
-      if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && user.confirmed !== true) {
+      
+      if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && !user.confirmed) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }] : 'Your account email is not confirmed.');
       }
 
-      if (user.blocked === true) {
+      if (user.blocked) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }] : 'Your account has been blocked by the administrator.');
       }
 
@@ -324,7 +324,7 @@ module.exports = {
         try {
           // Send an email to the user.
           await strapi.plugins['email'].services.email.send({
-            to: user.email,
+            to: (user.toJSON ? user.toJSON() : user).email,
             from: (settings.from.email && settings.from.name) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
             replyTo: settings.response_email,
             subject: settings.object,

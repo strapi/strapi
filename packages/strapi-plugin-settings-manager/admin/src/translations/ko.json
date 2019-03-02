@@ -48,6 +48,8 @@
   "form.response.description": "응답(response) 환경을 설정하세요.",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "응답 시간 (Response Time)",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "값",
   "form.response.name": "응답 (Response)",
   "form.security.description": "보안 환경을 설정하세요.",
   "form.security.item.cors": "Cors",

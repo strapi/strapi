@@ -13,7 +13,8 @@ let appStart;
 const databases = {
   mongo: `--dbclient=mongo --dbhost=127.0.0.1 --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername= --dbpassword=`,
   postgres: '--dbclient=postgres --dbhost=127.0.0.1 --dbport=5432 --dbname=strapi-test --dbusername= --dbpassword=',
-  mysql: '--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi-test --dbusername=root --dbpassword=root'
+  mysql: '--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi-test --dbusername=root --dbpassword=root',
+  sqlite: '--dbclient=sqlite --dbfile=./tmp/data.db'
 };
 
 const {runCLI: jest} = require('jest-cli/build/cli');
@@ -103,7 +104,7 @@ const main = async () => {
 
   const cypressTest = () => {
     const config = Object.assign({ spec: './packages/**/test/front/integration/*' }, process.env.npm_config_browser === 'true' ? { browser: 'chrome' } : {});
-    
+
     return cypress
       .run(config);
   }
@@ -125,6 +126,7 @@ const main = async () => {
   await testProcess(databases.mongo);
   // await testProcess(databases.postgres);
   // await testProcess(databases.mysql);
+  // await testProcess(databases.sqlite);
   // process.exit(testExitCode);
 };
 

@@ -37,6 +37,14 @@ const getFilters = (type) => {
           id: 'content-manager.components.FilterOptions.FILTER_TYPES._containss',
           value: '_containss',
         },
+        {
+          id: 'content-manager.components.FilterOptions.FILTER_TYPES._in',
+          value: '_in',
+        },
+        {
+          id: 'content-manager.components.FilterOptions.FILTER_TYPES._nin',
+          value: '_nin',
+        },
       ];
     case 'integer':
     case 'float':
@@ -66,6 +74,14 @@ const getFilters = (type) => {
         {
           id: 'content-manager.components.FilterOptions.FILTER_TYPES._gte',
           value: '_gte',
+        },
+        {
+          id: 'content-manager.components.FilterOptions.FILTER_TYPES._in',
+          value: '_in',
+        },
+        {
+          id: 'content-manager.components.FilterOptions.FILTER_TYPES._nin',
+          value: '_nin',
         },
       ];
     default:

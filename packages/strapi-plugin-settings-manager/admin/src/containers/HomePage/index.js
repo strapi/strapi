@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-
 import {
   endsWith,
   find,
@@ -30,27 +29,25 @@ import Helmet from 'react-helmet';
 import Select from 'react-select';
 import { router } from 'app';
 
+import pluginId from '../../pluginId';
 // design
-import ContentHeader from 'components/ContentHeader';
-import EditForm from 'components/EditForm';
-import HeaderNav from 'components/HeaderNav';
-import List from 'components/List';
-import RowDatabase from 'components/RowDatabase';
-import SelectOptionLanguage from 'components/SelectOptionLanguage';
-import RowLanguage from 'components/RowLanguage';
-import PluginLeftMenu from 'components/PluginLeftMenu';
-
-// App selectors
-import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
+import ContentHeader from '../../components/ContentHeader';
+import EditForm from '../../components/EditForm';
+import HeaderNav from '../../components/HeaderNav';
+import List from '../../components/List';
+import RowDatabase from '../../components/RowDatabase';
+import SelectOptionLanguage from '../../components/SelectOptionLanguage';
+import RowLanguage from '../../components/RowLanguage';
+import PluginLeftMenu from '../../components/PluginLeftMenu';
 
 // utils
 import unknowFlag from 'assets/images/unknow_flag.png';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import supportedFlags from 'utils/supportedFlags.json';
 import { checkFormValidity, getRequiredInputsDb } from '../../utils/inputValidations';
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 import sendUpdatedParams from '../../utils/sendUpdatedParams';
+// App selectors
+import { makeSelectSections, makeSelectEnvironments } from '../App/selectors';
 import selectHomePage from './selectors';
 import {
   cancelChanges,
@@ -564,8 +561,8 @@ HomePage.propTypes = {
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,

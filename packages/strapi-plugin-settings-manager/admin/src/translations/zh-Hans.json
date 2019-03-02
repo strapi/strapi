@@ -47,6 +47,8 @@
   "form.response.description": "配置您的响应设置。",
   "form.response.item.gzip.enabled": "Gzip",
   "form.response.item.responseTime.enabled": "Response Time",
+  "form.response.item.poweredBy.enabled": "Powered by",
+  "form.response.item.poweredBy.value": "Value",
   "form.response.name": "Response",
   "form.security.description": "配置安全设置。",
   "form.security.item.cors": "Cors",

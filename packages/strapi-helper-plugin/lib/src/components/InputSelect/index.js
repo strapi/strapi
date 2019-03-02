@@ -10,7 +10,7 @@ import { isEmpty, isObject, map } from 'lodash';
 import cn from 'classnames';
 
 // Design
-import SelectOption from 'components/SelectOption';
+import SelectOption from '../SelectOption';
 
 import styles from './styles.scss';
 
