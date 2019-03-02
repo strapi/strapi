@@ -43,7 +43,7 @@ module.exports = async (ctx, next) => {
   }
 
   const route = ctx.request.route;
-  let bandera = false;
+  let flag = false;
   let permission;
   for (const role of roles) {
     if (role.type === 'root') {
@@ -57,11 +57,11 @@ module.exports = async (ctx, next) => {
       enabled: true
     }, []);
     if (permission) {
-      bandera = true;
+      flag = true;
       break;
     }
   }
-  if (bandera == false) {
+  if (flag == false) {
     return handleErrors(ctx, undefined, 'forbidden');
   }
 
