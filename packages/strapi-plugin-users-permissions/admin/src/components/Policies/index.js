@@ -10,8 +10,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, map, takeRight, toLower, without } from 'lodash';
 
-import BoundRoute from 'components/BoundRoute';
 import Input from 'components/InputsIndex';
+import BoundRoute from '../BoundRoute';
 
 import styles from './styles.scss';
 

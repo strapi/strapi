@@ -55,7 +55,8 @@ module.exports = {
             to: options.to,
             subject: options.subject,
             text: options.text,
-            html: options.html
+            html: options.html,
+            ...(options.attachment && { attachment: options.attachment })
           };
           msg['h:Reply-To'] = options.replyTo;
 
