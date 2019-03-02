@@ -4,7 +4,7 @@ This Authentication API requires the Users & Permissions plugin which comes with
 
 ## Token usage
 
-A jwt token may be used for making permission-restricted API requests. To make an API request as a user, place the jwt token into an `Authorization` header of the GET request. A request without a token, will assume the `guest` role permissions by default. Modify the permissions of each user's role in admin dashboard. Authentication failures return a 401 (unauthorized) error.
+A jwt token may be used for making permission-restricted API requests. To make an API request as a user, place the jwt token into an `Authorization` header of the GET request. A request without a token, will assume the `public` role permissions by default. Modify the permissions of each user's role in admin dashboard. Authentication failures return a 401 (unauthorized) error.
 
 #### Usage
 
@@ -34,7 +34,7 @@ axios
 
 ## Registration
 
-Creates a new user in the database with a default role as 'guest'.  
+Creates a new user in the database with a default role as 'registered'. 
 
 #### Usage
 
