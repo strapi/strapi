@@ -19,7 +19,6 @@ module.exports = {
 
     // Verify if the file upload is enable.
     if (config.enabled === false) {
-      strapi.log.error('File upload is disabled');
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.disabled' }] }] : 'File upload is disabled');
     }
 
@@ -28,7 +27,6 @@ module.exports = {
     const { files = {} } = ctx.request.body.files;
 
     if (_.isEmpty(files)) {
-      strapi.log.error('Files are empty');
       return ctx.badRequest(null, 'Files are empty');
     }
 
