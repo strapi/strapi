@@ -1,6 +1,6 @@
 // import { LOCATION_CHANGE } from 'react-router-redux';
 import { Map } from 'immutable';
-import { isEmpty } from 'lodash';
+import { isEmpty, get, isObject } from 'lodash';
 import {
   all,
   call,
@@ -81,8 +81,11 @@ function* uploadFiles(action) {
       strapi.notification.success({ id: 'upload.notification.dropFiles.success', values: { number: newFiles.length } });
     }
 
-  } catch(err) {
-    strapi.notification.error('notification.error');
+  } catch(error) {
+    let message = get(error, ['response', 'payload', 'message', '0', 'messages', '0']);
+    if (isObject(message)) message = {...message, id: `upload.${message.id}`};
+
+    strapi.notification.error(message || 'notification.error');
   } finally {
     yield put(unsetLoading());
   }
