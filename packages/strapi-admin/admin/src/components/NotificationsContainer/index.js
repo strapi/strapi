@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
-import Notification from 'components/Notification';
+import Notification from '../Notification';
 
 import styles from './styles.scss';
 

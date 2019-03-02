@@ -11,7 +11,7 @@ import { isEmpty, replace } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import Button from 'components/Button';
-import InstallPluginPopup from 'components/InstallPluginPopup';
+import InstallPluginPopup from '../InstallPluginPopup';
 
 import styles from './styles.scss';
 

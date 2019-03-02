@@ -155,6 +155,10 @@ module.exports = strapi => {
             } catch (err) {
               fs.mkdirSync(fileDirectory);
             }
+            
+            // Force base directory.
+            // Note: it removes the warning logs when starting the administration in development mode.
+            options.connection.filename = path.resolve(strapi.config.appPath, options.connection.filename);
 
             // Disable warn log
             // .returning() is not supported by sqlite3 and will not have any effect.

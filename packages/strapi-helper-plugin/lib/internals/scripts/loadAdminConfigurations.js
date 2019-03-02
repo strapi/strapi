@@ -2,9 +2,10 @@ const path = require('path');
 const shell = require('shelljs');
 
 const pwd = shell.pwd();
+
 const isDevelopmentMode = path.resolve(pwd.stdout).indexOf('strapi-admin') !== -1;
 const isSetup = process.env.IS_MONOREPO || false;
-const appPath = isDevelopmentMode ? path.resolve(process.env.PWD, '..') : path.resolve(pwd.stdout, '..');
+const appPath = isDevelopmentMode ? path.resolve(process.env.PWD || process.cwd(), '..') : path.resolve(pwd.stdout, '..');
 
 // Load the app configurations only when :
 // - starting the app in dev mode
@@ -15,9 +16,13 @@ if (!isSetup) {
   strapi.log.level = 'silent';
 
   (async () => {
-    await strapi.load({
-      environment: process.env.NODE_ENV,
-    });
+    try {
+      await strapi.load({
+        environment: process.env.NODE_ENV,
+      });
+    } catch (e) {
+      // console.log(e);
+    }
 
     // Force exit process if an other process doen't exit during Strapi load.
     process.exit();

@@ -35,6 +35,8 @@
   "containers.Edit.returnList": "Retourner à la liste",
   "containers.Edit.seeDetails": "Détails",
   "containers.Edit.submit": "Valider",
+  "containers.Edit.Link.Layout": "Paramétrer la vue",
+  "containers.Edit.Link.Fields": "Éditer le modèle",
   "containers.Home.introduction": "Pour éditer du contenu, choisissez un type de données dans le menu de gauche.",
   "containers.Home.pluginHeaderDescription": "Créer et modifier votre type de contenu",
   "containers.Home.pluginHeaderTitle": "Type de contenu",
@@ -120,4 +122,3 @@
   "success.record.delete": "Supprimé",
   "success.record.save": "Sauvegardé"
 }
-

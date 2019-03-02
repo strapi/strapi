@@ -1,13 +1,13 @@
 // Dependencies.
-import { LOCATION_CHANGE } from 'react-router-redux';
+// import { LOCATION_CHANGE } from 'react-router-redux';
 import {
   all,
   call,
-  cancel,
+  // cancel,
   fork,
   put,
   select,
-  take,
+  // take,
   takeLatest,
 } from 'redux-saga/effects';
 // Utils.
@@ -114,13 +114,16 @@ export function* dataDeleteAll({ entriesToDelete, model, source }) {
 
 // All sagas to be loaded
 function* defaultSaga() {
-  const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
+  yield fork(takeLatest, GET_DATA, dataGet);
+
+  // TODO fix router (Other PR)
+  // const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
   yield fork(takeLatest, DELETE_DATA, dataDelete);
   yield fork(takeLatest, DELETE_SEVERAL_DATA, dataDeleteAll);
 
-  yield take(LOCATION_CHANGE);
+  // yield take(LOCATION_CHANGE);
 
-  yield cancel(loadDataWatcher);
+  // yield cancel(loadDataWatcher);
 }
 
 export default defaultSaga;

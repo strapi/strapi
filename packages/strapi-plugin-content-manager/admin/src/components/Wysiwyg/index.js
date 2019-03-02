@@ -16,11 +16,14 @@ import {
 import PropTypes from 'prop-types';
 import { isEmpty, isNaN, replace, words } from 'lodash';
 import cn from 'classnames';
-import Controls from 'components/WysiwygInlineControls';
-import Drop from 'components/WysiwygDropUpload';
-import WysiwygBottomControls from 'components/WysiwygBottomControls';
-import WysiwygEditor from 'components/WysiwygEditor';
+
 import request from 'utils/request';
+
+import Controls from '../WysiwygInlineControls';
+import Drop from '../WysiwygDropUpload';
+import WysiwygBottomControls from '../WysiwygBottomControls';
+import WysiwygEditor from '../WysiwygEditor';
+
 import CustomSelect from './customSelect';
 import PreviewControl from './previewControl';
 import PreviewWysiwyg from './previewWysiwyg';
