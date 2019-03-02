@@ -44,9 +44,10 @@
       "configurable": false
     },
     "role": {
-      "model": "role",
+      "collection": "role",
       "via": "users",
       "plugin": "users-permissions",
+      "dominant": true,
       "configurable": false
     }
   },

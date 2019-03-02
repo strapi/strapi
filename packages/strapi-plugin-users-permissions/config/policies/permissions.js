@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
 module.exports = async (ctx, next) => {
-  let role;
+  let roles = [];
 
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
@@ -20,11 +20,7 @@ module.exports = async (ctx, next) => {
       return handleErrors(ctx, 'User Not Found', 'unauthorized');
     }
 
-    role = ctx.state.user.role;
-
-    if (role.type === 'root') {
-      return await next();
-    }
+    roles = ctx.state.user.role;
 
     const store = await strapi.store({
       environment: '',
@@ -32,7 +28,7 @@ module.exports = async (ctx, next) => {
       name: 'users-permissions'
     });
 
-    if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && !ctx.state.user.confirmed) {
+    if (_.get(await store.get({ key: 'advanced' }), 'email_confirmation') && !ctx.state.user.confirmed) {
       return handleErrors(ctx, 'Your account email is not confirmed.', 'unauthorized');
     }
 
@@ -42,18 +38,33 @@ module.exports = async (ctx, next) => {
   }
 
   // Retrieve `public` role.
-  if (!role) {
-    role = await strapi.query('role', 'users-permissions').findOne({ type: 'public' }, []);
+  if (roles.length == 0) {
+    roles.push(await strapi.query('role', 'users-permissions').findOne({ type: 'public' }, []));
   }
 
   const route = ctx.request.route;
-  const permission = await strapi.query('permission', 'users-permissions').findOne({
-    role: role._id || role.id,
-    type: route.plugin || 'application',
-    controller: route.controller,
-    action: route.action,
-    enabled: true
-  }, []);
+  let bandera = false;
+  let permission;
+  for (const role of roles) {
+    if (role.type === 'root') {
+      return await next();
+    }
+    permission = await strapi.query('permission', 'users-permissions').findOne({
+      role: role._id || role.id,
+      type: route.plugin || 'application',
+      controller: route.controller,
+      action: route.action,
+      enabled: true
+    }, []);
+    if (permission) {
+      bandera = true;
+      break;
+    }
+  }
+  if (bandera == false) {
+    return handleErrors(ctx, undefined, 'forbidden');
+  }
+
 
   if (!permission) {
     return handleErrors(ctx, undefined, 'forbidden');
