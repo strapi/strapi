@@ -79,11 +79,9 @@ module.exports = {
       if (!validPassword) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       } else {
-        // Issue a refresh token and save to db.
-        const token = await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']), ctx.request.header['user-agent']);
         ctx.send({
           jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
-          refreshToken: token,
+          refreshToken: await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']), ctx.request.header['user-agent']),
           user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
         });
       }
@@ -104,11 +102,9 @@ module.exports = {
         return ctx.badRequest(null, (error === 'array') ? (ctx.request.admin ? error[0] : error[1]) : error);
       }
 
-      // Issue a refresh token and save to db.
-      const token = await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user, ['_id', 'id']), ctx.request.header['user-agent']);
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user, ['_id', 'id'])),
-        refreshToken: token,
+        refreshToken: await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user, ['_id', 'id']), ctx.request.header['user-agent']),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     }
@@ -135,11 +131,9 @@ module.exports = {
       // Update the user.
       await strapi.query('user', 'users-permissions').update(data);
 
-      // Issue a refresh token and save to db.
-      const token = await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']), ctx.request.header['user-agent']);
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])),
-        refreshToken: token,
+        refreshToken: await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']), ctx.request.header['user-agent']),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     } else if (params.password && params.passwordConfirmation && params.password !== params.passwordConfirmation) {

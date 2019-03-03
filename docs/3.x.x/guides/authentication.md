@@ -54,6 +54,7 @@ axios
     console.log('Well done!');
     console.log('User profile', response.data.user);
     console.log('User token', response.data.jwt);
+    console.log('User refresh token', response.data.refreshToken);
   })
   .catch(error => {
     // Handle error.
@@ -83,6 +84,7 @@ axios
     console.log('Well done!');
     console.log('User profile', response.data.user);
     console.log('User token', response.data.jwt);
+    console.log('User refresh token', response.data.refreshToken);
   })
   .catch(error => {
     // Handle error.
@@ -117,9 +119,67 @@ Response payload:
 ```json
 {
   "user": {},
-  "jwt": ""
+  "jwt": "",
+  "refreshToken": ""
 }
 ```
+## Refresh tokens
+The refresh token is used to generate a new jwt access token. Once the access token expires, the user would have to authenticate again to obtain an access token. With refresh token, this step can be skipped and with a request to `/auth/token` API get a new jwt access token that allows the user to continue accessing the resources.
+
+### Get a new access token with refresh token
+- The `refreshToken` variable is the `data.refreshToken` received when login in or registering.
+
+```js
+import axios from 'axios';
+
+const refreshToken = 'YOUR_TOKEN_HERE';
+
+// Request API.
+axios
+  .post('http://localhost:1337/auth/token', {
+      identifier: 'user@strapi.io',
+      refreshToken: `${refreshToken}`
+  })
+  .then(response => {
+    // Handle success.
+    console.log('Well done!');
+    console.log('User profile', response.data.user);
+    console.log('User token', response.data.jwt);
+  })
+  .catch(error => {
+    // Handle error.
+    console.log('An error occurred:', error);
+  });
+```
+### Revoke a refresh token
+- The `token` variable is the `data.jwt` received when login in or registering.
+- The `refreshToken` variable is one of the refresh tokens in `data.user.tokens` which received when login/register or one of the refresh tokens in `data.tokens` which is received in the response of `/user/me` api.
+
+```js
+import axios from 'axios';
+
+const refreshToken = 'YOUR_TOKEN_HERE';
+
+// Request API.
+axios
+  .post('http://localhost:1337/auth/token/revoke', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    data: {
+      refreshToken: `${refreshToken}`
+    }
+  })
+  .then(response => {
+    // Handle success.
+    console.log('Well done!');
+  })
+  .catch(error => {
+    // Handle error.
+    console.log('An error occurred:', error);
+  });
+```
+
 
 ## Forgotten password
 
