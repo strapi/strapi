@@ -31,20 +31,17 @@ describe('<App /> reducer', () => {
 
   it('should return the initial state', () => {
     const expectedResult = state;
-
     expect(appReducer(undefined, {})).toEqual(expectedResult);
   });
 
   it('should handle the disableGlobalOverlayBlocker action correctly', () => {
     const expectedResult = state.set('showGlobalAppBlocker', false);
-
     expect(appReducer(state, disableGlobalOverlayBlocker())).toEqual(expectedResult);
   });
 
   it('should handle the enableGlobalOverlayBlocker action correctly', () => {
     state = state.set('showGlobalAppBlocker', false);
     const expectedResult = state.set('showGlobalAppBlocker', true);
-
     expect(appReducer(state, enableGlobalOverlayBlocker())).toEqual(expectedResult);
   });
 
@@ -52,7 +49,6 @@ describe('<App /> reducer', () => {
     const expectedResult = state
       .set('blockApp', true)
       .set('overlayBlockerData', { title: 'A title' });
-
     expect(appReducer(state, freezeApp({ title: 'A title' }))).toEqual(expectedResult);
   });
 
@@ -62,7 +58,7 @@ describe('<App /> reducer', () => {
     expect(appReducer(state, freezeApp())).toEqual(expectedResult);
   });
 
-  it('should handle the getAppPlugins action correctly', () => {
+  it('should handle the getAppPlugins action correclty', () => {
     const plugins = [{ id: 'content-manager' }];
     const expectedResult = state
       .set('appPlugins', List(['content-manager']))
@@ -71,7 +67,7 @@ describe('<App /> reducer', () => {
     expect(appReducer(state, getAppPluginsSucceeded(plugins))).toEqual(expectedResult);
   });
 
-  it('should handle the pluginLoaded action correctly', () => {
+  it('should handle the pluginLoaded action correclty', () => {
     const plugin = { id: 'content-manager', description: 'Manage your content' };
     const expectedResult = state.setIn([
       'plugins',
@@ -81,7 +77,7 @@ describe('<App /> reducer', () => {
     expect(appReducer(state, pluginLoaded(plugin))).toEqual(expectedResult);
   });
 
-  it('should handle the updatePlugin action correctly', () => {
+  it('should handle the updatePlugin action correclty', () => {
     const plugin = { id: 'content-manager', isReady: false };
     state = state.setIn(['plugins', 'content-manager'], fromJS(plugin));
 
@@ -95,7 +91,7 @@ describe('<App /> reducer', () => {
     expect(appReducer(state, updatePlugin('content-manager', 'isReady', true))).toEqual(expectedResult);
   });
 
-  it('should handle the pluginDeleted action correctly', () => {
+  it('should handle the pluginDeleted action correclty', () => {
     const plugin = { id: 'content-manager', isReady: false };
     state = state.setIn(['plugins', 'content-manager'], fromJS(plugin));
     const expectedResult = state.deleteIn([
@@ -106,7 +102,7 @@ describe('<App /> reducer', () => {
     expect(appReducer(state, pluginDeleted('content-manager'))).toEqual(expectedResult);
   });
 
-  it('should handle the unfreezeApp action correctly', () => {
+  it('should handle the unfreezeApp action correclty', () => {
     state = state
       .set('blockApp', true)
       .set('overlayBlockerData', { foo: 'bar' });
@@ -117,7 +113,7 @@ describe('<App /> reducer', () => {
     expect(appReducer(state, unfreezeApp())).toEqual(expectedResult);
   });
 
-  it('should handle the unsetHasUserPlugin action correctly', () => {
+  it('should handle the unsetHasUserPlugin action correclty', () => {
     const expectedResult = state.set('hasUserPlugin', false);
 
     expect(appReducer(state, unsetHasUserPlugin())).toEqual(expectedResult);
