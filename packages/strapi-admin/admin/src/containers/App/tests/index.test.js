@@ -26,7 +26,7 @@ describe('<App />', () => {
     expect(insideAppLoaderLoading.find(Route).length).toBe(0);
   });
 
-  it('renderAdminShould return some jsx', () => {
+  it('renderAdmin should return some jsx', () => {
     const renderedComponent = shallow(<App />);
     const { renderAdmin } = renderedComponent.instance();
 
