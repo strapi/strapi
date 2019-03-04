@@ -56,17 +56,13 @@ module.exports = {
       if (!user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       }
-      
+
       if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && user.confirmed !== true) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }] : 'Your account email is not confirmed.');
       }
 
       if (user.blocked === true) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }] : 'Your account has been blocked by the administrator.');
-      }
-
-      if (user.role.type !== 'root' && ctx.request.admin) {
-        return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.noAdminAccess' }] }] : `You're not an administrator.`);
       }
 
       // The user never authenticated with the `local` provider.
@@ -196,7 +192,7 @@ module.exports = {
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.object, {
       USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider'])
     });
-    
+
     try {
       // Send an email to the user.
       await strapi.plugins['email'].services.email.send({
@@ -250,18 +246,10 @@ module.exports = {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.password.format' }] }] : 'Your password cannot contain more than three times the symbol `$`.');
     }
 
-    // Retrieve root role.
-    const root = await strapi.query('role', 'users-permissions').findOne({ type: 'root' }, ['users']);
-    const users = root.users || [];
-
-    // First, check if the user is the first one to register as admin.
-    const hasAdmin = users.length > 0;
-
-    // Check if the user is the first to register
-    const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: settings.default_role }, []);
+    const role = await strapi.query('role', 'users-permissions').findOne({ type: settings.default_role }, []);
 
     if (!role) {
-      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the default role.');
     }
 
     // Check if the provided email is valid or not.
@@ -325,10 +313,6 @@ module.exports = {
         } catch (err) {
           return ctx.badRequest(null, err);
         }
-      }
-
-      if (!hasAdmin) {
-        strapi.emit('didCreateFirstAdmin');
       }
 
       ctx.send({

@@ -497,6 +497,9 @@ module.exports = function (strapi) {
         };
 
         // Mount `./api` models.
+        mountModels(_.pickBy(strapi.admin.models, { connection: connectionName }), strapi.admin.models);
+
+        // Mount `./api` models.
         mountModels(_.pickBy(strapi.models, { connection: connectionName }), strapi.models);
 
         // Mount `./plugins` models.

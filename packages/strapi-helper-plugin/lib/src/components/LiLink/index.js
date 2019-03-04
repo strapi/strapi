@@ -32,10 +32,12 @@ function NavLink(props) {
   }
 
   return (
-    <Link to={props.url} className={cn(styles.navLink)}>
-      {icon}
-      {content}
-    </Link>
+    <li>
+      <Link to={props.url} className={cn(styles.navLink)}>
+        {icon}
+        {content}
+      </Link>
+    </li>
   );
 }
 

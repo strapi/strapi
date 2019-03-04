@@ -1,5 +1,6 @@
 const { findIndex, lowerCase, pullAt, range } = require('lodash');
 const { List } = require('immutable');
+const invariant = require('invariant');
 
 class Manager {
   constructor(state, list, keys, index, layout) {
@@ -18,10 +19,17 @@ class Manager {
    * @returns {Object}
    */
   getAttrInfos(index) {
+    invariant(
+      this.layout,
+      'Some data is missing from your model\'s schema. '
+      + 'We advise you to delete your content_manager-schema entry'
+      + 'in your core_store. '
+      + 'Then restart your server (strapi start');
     const name = this.getAttrName(index);
     const appearance = this.layout.getIn([name, 'appearance']);
     const type = appearance !== '' && appearance !== undefined ? appearance : this.getType(name);
     const bootstrapCol = this.getBootStrapCol(type);
+
 
     const infos = {
       bootstrapCol,

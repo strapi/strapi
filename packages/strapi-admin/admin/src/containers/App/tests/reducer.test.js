@@ -31,17 +31,20 @@ describe('<App /> reducer', () => {
 
   it('should return the initial state', () => {
     const expectedResult = state;
+
     expect(appReducer(undefined, {})).toEqual(expectedResult);
   });
 
   it('should handle the disableGlobalOverlayBlocker action correctly', () => {
     const expectedResult = state.set('showGlobalAppBlocker', false);
+
     expect(appReducer(state, disableGlobalOverlayBlocker())).toEqual(expectedResult);
   });
 
   it('should handle the enableGlobalOverlayBlocker action correctly', () => {
     state = state.set('showGlobalAppBlocker', false);
     const expectedResult = state.set('showGlobalAppBlocker', true);
+
     expect(appReducer(state, enableGlobalOverlayBlocker())).toEqual(expectedResult);
   });
 
@@ -49,6 +52,7 @@ describe('<App /> reducer', () => {
     const expectedResult = state
       .set('blockApp', true)
       .set('overlayBlockerData', { title: 'A title' });
+
     expect(appReducer(state, freezeApp({ title: 'A title' }))).toEqual(expectedResult);
   });
 
