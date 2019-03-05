@@ -369,7 +369,13 @@ module.exports = {
       const routeTagConfig = _.get(current, ['config', 'tag']);
       // Add curly braces between dynamic params
       const endPoint = this.formatApiEndPoint(current.path);
-      const verb = current.method.toLowerCase();
+      let verb;
+
+      if (Array.isArray(current.method)) {
+        verb = current.method.map((method) => method.toLowerCase());
+      } else {
+        verb = current.method.toLowerCase();
+      }
       // The key corresponds to firsts keys of the returned object
       let key;
       let tags;
@@ -932,6 +938,24 @@ module.exports = {
    */
   generateResponseDescription: function(verb, tag, endPoint) {
     const isModelRelated = strapi.models[tag] !== undefined && tag === endPoint;
+    
+    if (Array.isArray(verb)) {
+      verb = verb.map((method) => method.toLocaleLowerCase());
+
+      if (
+        verb.includes('get') ||
+        verb.includes('put') ||
+        verb.includes('post')
+      ) {
+        return isModelRelated ? `Retrieve ${tag} document(s)` : 'response';
+      } else if (verb.includes('delete')) {
+        return isModelRelated
+          ? `deletes a single ${tag} based on the ID supplied`
+          : 'deletes a single record based on the ID supplied';
+      } else {
+        return 'response';
+      }
+    }
 
     switch (verb.toLocaleLowerCase()) {
       case 'get':
@@ -1079,6 +1103,26 @@ module.exports = {
 
     if (description) {
       return description;
+    }
+    
+    if (Array.isArray(verb)) {
+      const [, controllerMethod] = handler.split('.');
+
+      if (
+        (verb.includes('get') && verb.includes('post')) ||
+        controllerMethod === 'findOrCreate'
+      ) {
+        return `Find or create ${tag} record`;
+      }
+
+      if (
+        (verb.includes('put') && verb.includes('post')) ||
+        controllerMethod === 'createOrUpdate'
+      ) {
+        return `Create or update ${tag} record`;
+      }
+
+      return '';
     }
 
     switch (verb) {
