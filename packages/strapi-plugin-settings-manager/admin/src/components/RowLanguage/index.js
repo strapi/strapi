@@ -8,9 +8,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { find, get, join, isObject } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import PopUpWarning from 'components/PopUpWarning';
+
 // utils
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
+
+import PopUpWarning from 'components/PopUpWarning';
 
 /* eslint-disable react/require-default-props  */
 class RowLanguage extends React.Component { // eslint-disable-line react/prefer-stateless-function

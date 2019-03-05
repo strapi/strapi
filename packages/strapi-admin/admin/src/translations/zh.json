@@ -75,6 +75,8 @@
   "app.components.ListPluginsPage.description": "這個專案安裝的擴充功能列表",
   "app.components.ListPluginsPage.helmet.title": "擴充功能列表",
   "app.components.ListPluginsPage.title": "擴充功能",
+  "app.components.Logout.profile": "輪廓",
+  "app.components.Logout.logout": "登出",
   "app.components.NotFoundPage.back": "回到主頁",
   "app.components.NotFoundPage.description": "找不到此頁面",
   "app.components.Official": "官方",

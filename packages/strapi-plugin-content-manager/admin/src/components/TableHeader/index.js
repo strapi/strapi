@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
 
-import CustomInputCheckbox from 'components/CustomInputCheckbox';
+import CustomInputCheckbox from '../CustomInputCheckbox';
 
 import styles from './styles.scss';
 

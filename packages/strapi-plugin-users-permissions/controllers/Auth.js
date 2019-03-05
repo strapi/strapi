@@ -9,6 +9,7 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
+
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
@@ -56,11 +57,11 @@ module.exports = {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       }
       
-      if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && user.confirmed !== true) {
+      if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && !user.confirmed) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }] : 'Your account email is not confirmed.');
       }
 
-      if (user.blocked === true) {
+      if (user.blocked) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }] : 'Your account has been blocked by the administrator.');
       }
 
@@ -314,7 +315,7 @@ module.exports = {
         try {
           // Send an email to the user.
           await strapi.plugins['email'].services.email.send({
-            to: user.email,
+            to: (user.toJSON ? user.toJSON() : user).email,
             from: (settings.from.email && settings.from.name) ? `"${settings.from.name}" <${settings.from.email}>` : undefined,
             replyTo: settings.response_email,
             subject: settings.object,
@@ -324,6 +325,10 @@ module.exports = {
         } catch (err) {
           return ctx.badRequest(null, err);
         }
+      }
+
+      if (!hasAdmin) {
+        strapi.emit('didCreateFirstAdmin');
       }
 
       ctx.send({

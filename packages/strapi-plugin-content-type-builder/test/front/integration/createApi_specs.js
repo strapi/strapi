@@ -167,11 +167,11 @@ describe('Test CTB', () => {
 
       cy.window()
         .its('__store__')
-        .its('content-manager')
+        .its('store')
         .then(pluginStore => {
           const displayedFields = pluginStore
             .getState()
-            .getIn(['global', 'schema', 'models', 'product', 'editDisplay', 'fields'])
+            .getIn(['content-manager_global', 'schema', 'models', 'product', 'editDisplay', 'fields'])
             .toJS();
 
           expect(displayedFields).to.include.members([

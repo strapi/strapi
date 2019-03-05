@@ -21,7 +21,12 @@ const auth = {
 
   clearAppStorage() {
     if (localStorage) {
+      const videos = auth.get('videos');
+      const onboarding = auth.get('onboarding');
+      
       localStorage.clear();
+      localStorage.setItem('videos', JSON.stringify(videos));
+      localStorage.setItem('onboarding', onboarding);
     }
 
     if (sessionStorage) {
@@ -72,7 +77,6 @@ const auth = {
 
     return null;
   },
-
 
   setToken(value = '', isLocalStorage = false, tokenKey = TOKEN_KEY) {
     return auth.set(value, tokenKey, isLocalStorage);

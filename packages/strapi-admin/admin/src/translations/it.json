@@ -75,6 +75,8 @@
   "app.components.ListPluginsPage.description": "Lista dei plugin installati nel progetto.",
   "app.components.ListPluginsPage.helmet.title": "Lista plugin",
   "app.components.ListPluginsPage.title": "Plugins",
+  "app.components.Logout.profile": "Profilo",
+  "app.components.Logout.logout": "Disconnettersi",
   "app.components.NotFoundPage.back": "Torna alla home",
   "app.components.NotFoundPage.description": "Non trovato",
   "app.components.Official": "Ufficiale",

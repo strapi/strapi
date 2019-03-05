@@ -14,13 +14,15 @@ import {
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { get, flow } from 'lodash';
 import cn from 'classnames';
-import ClickOverHint from 'components/ClickOverHint';
-import DraggedRemovedIcon  from 'components/DraggedRemovedIcon';
-import VariableEditIcon from 'components/VariableEditIcon';
-import ItemTypes from 'utils/ItemTypes';
 
-import GrabIconBlue from 'assets/images/icon_grab_blue.svg';
-import GrabIcon from 'assets/images/icon_grab.svg';
+import GrabIconBlue from '../../assets/images/icon_grab_blue.svg';
+import GrabIcon from '../../assets/images/icon_grab.svg';
+
+import ItemTypes from '../../utils/ItemTypes';
+
+import ClickOverHint from '../ClickOverHint';
+import DraggedRemovedIcon  from '../DraggedRemovedIcon';
+import VariableEditIcon from '../VariableEditIcon';
 
 import Carret from './Carret';
 import styles from './styles.scss';
@@ -158,12 +160,23 @@ class VariableDraggableAttr extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
+    const { layout, name } = this.props;
+    const prevLayout = get(prevProps.layout, [name, 'appearance'], '');
+    const newLayout = get(layout, [name, 'appearance'], '');
+
     if (prevProps.isDragging !== this.props.isDragging) {
       this.handleDragEffect();
     }
 
     if (prevProps.isDragging !== this.props.isDragging && this.props.isDragging) {
       this.handleClickEdit();
+    }
+
+    if (prevLayout !== newLayout) {
+      const newType = newLayout === 'WYSIWYG' ? 'WYSIWYG' : 'text';
+      const classNames = getBootstrapClass(newType);
+
+      this.updateClassNames(classNames);
     }
   }
 
@@ -185,6 +198,8 @@ class VariableDraggableAttr extends React.Component {
     const { index, keys, onRemove } = this.props;
     onRemove(index, keys);
   }
+
+  updateClassNames = newClassName => this.setState({ classNames: newClassName });
 
   renderContent = () => {
     let { classNames, isOver, style, dragStart } = this.state;

@@ -75,6 +75,8 @@
   "app.components.ListPluginsPage.description": "قائمة الإضافيات المثبتة في المشروع.",
   "app.components.ListPluginsPage.helmet.title": "قائمة الإضافات",
   "app.components.ListPluginsPage.title": "الإضافات",
+  "app.components.Logout.profile": "الملف الشخصي",
+  "app.components.Logout.logout": "الخروج",
   "app.components.NotFoundPage.back": "العودة للرئيسية",
   "app.components.NotFoundPage.description": "لا يوجد",
   "app.components.Official": "الرسمية",

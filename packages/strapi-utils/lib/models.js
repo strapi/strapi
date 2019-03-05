@@ -477,7 +477,7 @@ module.exports = {
         formattedValue = value;
       }
 
-      if (_.includes(['_start', '_limit'], key)) {
+      if (_.includes(['_start', '_limit', '_populate'], key)) {
         result = convertor(formattedValue, key);
       } else if (key === '_sort') {
         const [attr, order = 'ASC'] = formattedValue.split(':');
@@ -486,12 +486,12 @@ module.exports = {
         const suffix = key.split('_');
         // Mysql stores boolean as 1 or 0
         if (client === 'mysql' && _.get(models, [model, 'attributes', suffix, 'type']) === 'boolean') {
-          formattedValue = value === 'true' ? '1' : '0';
+          formattedValue = value.toString() === 'true' ? '1' : '0';
         }
 
         let type;
 
-        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'containss', 'in'], _.last(suffix))) {
+        if (_.includes(['ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'containss', 'in', 'nin'], _.last(suffix))) {
           type = `_${_.last(suffix)}`;
           key = _.dropRight(suffix).join('_');
         } else {

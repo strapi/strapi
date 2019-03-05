@@ -14,7 +14,7 @@ Each controller’s action must be an `async` function and receives the `context
 
 #### Example
 
-In this example, we are defining a specific route in `./api/hello/config/routes.json` that takes `Hello.index` as handler. It means that every time a web browser is pointed to the `/hello` URL, the server will called the `index` action in the `Hello.js` controller. Our `index` action will return `Hello World!`. You can also return a JSON object.
+In this example, we are defining a specific route in `./api/hello/config/routes.json` that takes `Hello.index` as handler. It means that every time a web browser is pointed to the `/hello` URL, the server will call the `index` action in the `Hello.js` controller. Our `index` action will return `Hello World!`. You can also return a JSON object.
 
 **Path —** `./api/hello/config/routes.json`.
 ```json

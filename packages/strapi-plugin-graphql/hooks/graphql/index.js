@@ -162,6 +162,7 @@ module.exports = strapi => {
           context: ctx,
         }),
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
+        tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
         playground: false,
       };
 
@@ -173,6 +174,8 @@ module.exports = strapi => {
         serverParams.playground = {
           endpoint: strapi.plugins.graphql.config.endpoint,
         };
+
+        serverParams.introspection = true;
       }
 
       const server = new ApolloServer(serverParams);

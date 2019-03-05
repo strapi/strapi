@@ -14,19 +14,20 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, upperFirst } from 'lodash';
 import cn from 'classnames';
 
-import Block from 'components/HomePageBlock';
 import Button from 'components/Button';
-import Sub from 'components/Sub';
 import Input from 'components/InputText';
-import SupportUsCta from 'components/SupportUsCta';
-import SupportUsTitle from 'components/SupportUsTitle';
-
-import { selectPlugins } from 'containers/App/selectors';
-
 import auth from 'utils/auth';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
 import validateInput from 'utils/inputsValidations';
+
+import Block from '../../components/HomePageBlock';
+import Sub from '../../components/Sub';
+import SupportUsCta from '../../components/SupportUsCta';
+import SupportUsTitle from '../../components/SupportUsTitle';
+
+import { selectPlugins } from '../App/selectors';
+
+import injectReducer from '../../utils/injectReducer';
+import injectSaga from '../../utils/injectSaga';
 
 import BlockLink from './BlockLink';
 import CommunityContent from './CommunityContent';
@@ -122,7 +123,11 @@ export class HomePage extends React.PureComponent {
 
   handleSubmit = e => {
     e.preventDefault();
-    const errors = validateInput(this.props.homePage.body.email, { required: true }, 'email');
+    const errors = validateInput(
+      this.props.homePage.body.email,
+      { required: true },
+      'email',
+    );
     this.setState({ errors });
 
     if (isEmpty(errors)) {
@@ -131,13 +136,18 @@ export class HomePage extends React.PureComponent {
   };
 
   showFirstBlock = () =>
-    get(this.props.plugins.toJS(), 'content-manager.leftMenuSections.0.links', []).length === 0;
+    get(
+      this.props.plugins.toJS(),
+      'content-manager.leftMenuSections.0.links',
+      [],
+    ).length === 0;
 
   renderButton = () => {
     const data = this.showFirstBlock()
       ? {
         className: styles.homePageTutorialButton,
-        href: 'https://strapi.io/documentation/getting-started/quick-start.html#create-your-first-api',
+        href:
+            'https://strapi.io/documentation/getting-started/quick-start.html#_3-create-a-content-type',
         id: 'app.components.HomePage.button.quickStart',
         primary: true,
       }
@@ -158,7 +168,9 @@ export class HomePage extends React.PureComponent {
   };
 
   render() {
-    const { homePage: { articles, body } } = this.props;
+    const {
+      homePage: { articles, body },
+    } = this.props;
     const WELCOME_AGAIN_BLOCK = [
       {
         title: {
@@ -177,7 +189,12 @@ export class HomePage extends React.PureComponent {
             <Block>
               {this.showFirstBlock() &&
                 FIRST_BLOCK.map((value, key) => (
-                  <Sub key={key} {...value} underline={key === 0} bordered={key === 0} />
+                  <Sub
+                    key={key}
+                    {...value}
+                    underline={key === 0}
+                    bordered={key === 0}
+                  />
                 ))}
               {!this.showFirstBlock() &&
                 WELCOME_AGAIN_BLOCK.concat(articles).map((value, key) => (
@@ -191,14 +208,21 @@ export class HomePage extends React.PureComponent {
                 ))}
               {this.renderButton()}
               <div className={styles.homePageFlex}>
-                {FIRST_BLOCK_LINKS.map((value, key) => <BlockLink {...value} key={key} />)}
+                {FIRST_BLOCK_LINKS.map((value, key) => (
+                  <BlockLink {...value} key={key} />
+                ))}
               </div>
             </Block>
             <Block>
               <Sub {...SECOND_BLOCK} />
               <div className={styles.homePageFlex}>
-                <div className="row" style={{ width: '100%', marginRight: '0' }}>
-                  {SOCIAL_LINKS.map((value, key) => <SocialLink key={key} {...value} />)}
+                <div
+                  className="row"
+                  style={{ width: '100%', marginRight: '0' }}
+                >
+                  {SOCIAL_LINKS.map((value, key) => (
+                    <SocialLink key={key} {...value} />
+                  ))}
                 </div>
                 <div className={styles.newsLetterWrapper}>
                   <div>
@@ -265,10 +289,17 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
 const withReducer = injectReducer({ key: 'homePage', reducer });
 const withSaga = injectSaga({ key: 'homePage', saga });
 
 // export default connect(mapDispatchToProps)(HomePage);
-export default compose(withReducer, withSaga, withConnect)(HomePage);
+export default compose(
+  withReducer,
+  withSaga,
+  withConnect,
+)(HomePage);

@@ -1,5 +1,5 @@
 import 'whatwg-fetch';
-import auth from 'utils/auth';
+import auth from './auth';
 
 /**
  * Parses the JSON returned by a network request
@@ -20,7 +20,7 @@ function parseJSON(response) {
  * @return {object|undefined} Returns either the response, or throws an error
  */
 function checkStatus(response, checkToken = true) {
-  if (response.status >= 200 && response.status < 300) {
+  if ((response.status >= 200 && response.status < 300) || response.status === 0) {
     return response;
   }
 
@@ -41,21 +41,22 @@ function checkTokenValidity(response) {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${auth.getToken()}`,
+      Authorization: `Bearer ${auth.getToken()}`,
     },
   };
 
   if (auth.getToken()) {
-    return fetch(`${strapi.backendURL}/user/me`, options)
-      .then(() => {
-        if (response.status === 401) {
-          window.location = `${strapi.remoteURL}/plugins/users-permissions/auth/login`;
+    return fetch(`${strapi.backendURL}/user/me`, options).then(() => {
+      if (response.status === 401) {
+        window.location = `${
+          strapi.remoteURL
+        }/plugins/users-permissions/auth/login`;
 
-          auth.clearAppStorage();
-        }
+        auth.clearAppStorage();
+      }
 
-        return checkStatus(response, false);
-      });
+      return checkStatus(response, false);
+    });
   }
 }
 
@@ -72,12 +73,12 @@ function formatQueryParams(params) {
 }
 
 /**
-* Server restart watcher
-* @param response
-* @returns {object} the response data
-*/
+ * Server restart watcher
+ * @param response
+ * @returns {object} the response data
+ */
 function serverRestartWatcher(response) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     fetch(`${strapi.backendURL}/_health`, {
       method: 'HEAD',
       mode: 'no-cors',
@@ -93,8 +94,7 @@ function serverRestartWatcher(response) {
       })
       .catch(() => {
         setTimeout(() => {
-          return serverRestartWatcher(response)
-            .then(resolve);
+          return serverRestartWatcher(response).then(resolve);
         }, 100);
       });
   });
@@ -108,22 +108,38 @@ function serverRestartWatcher(response) {
  *
  * @return {object}           The response data
  */
-export default function request(url, options = {}, shouldWatchServerRestart = false, stringify = true ) {
+export default function request(...args) {
+  let [url, options = {}, shouldWatchServerRestart, stringify = true, ...rest] = args;
+  let noAuth;
+
+  try {
+    [{ noAuth }] = rest;
+  } catch(err) {
+    noAuth = false;
+  }
+
   // Set headers
   if (!options.headers) {
-    options.headers = Object.assign({
-      'Content-Type': 'application/json',
-    }, options.headers, {
-      'X-Forwarded-Host': 'strapi',
-    });
+    options.headers = Object.assign(
+      {
+        'Content-Type': 'application/json',
+      },
+      options.headers,
+      {
+        'X-Forwarded-Host': 'strapi',
+      },
+    );
   }
 
   const token = auth.getToken();
 
-  if (token) {
-    options.headers = Object.assign({
-      'Authorization': `Bearer ${token}`,
-    }, options.headers);
+  if (token && !noAuth) {
+    options.headers = Object.assign(
+      {
+        Authorization: `Bearer ${token}`,
+      },
+      options.headers,
+    );
   }
 
   // Add parameters to url
@@ -138,14 +154,14 @@ export default function request(url, options = {}, shouldWatchServerRestart = fa
   if (options && options.body && stringify) {
     options.body = JSON.stringify(options.body);
   }
-
+  
   return fetch(url, options)
     .then(checkStatus)
     .then(parseJSON)
-    .then((response) => {
+    .then(response => {
       if (shouldWatchServerRestart) {
         // Display the global OverlayBlocker
-        strapi.lockApp();
+        strapi.lockApp(shouldWatchServerRestart);
         return serverRestartWatcher(response);
       }
 
