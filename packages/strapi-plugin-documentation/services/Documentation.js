@@ -941,33 +941,20 @@ module.exports = {
     
     if (Array.isArray(verb)) {
       verb = verb.map((method) => method.toLocaleLowerCase());
-
-      if (
-        verb.includes('get') ||
-        verb.includes('put') ||
-        verb.includes('post')
-      ) {
-        return isModelRelated ? `Retrieve ${tag} document(s)` : 'response';
-      } else if (verb.includes('delete')) {
-        return isModelRelated
-          ? `deletes a single ${tag} based on the ID supplied`
-          : 'deletes a single record based on the ID supplied';
-      } else {
-        return 'response';
-      }
     }
 
-    switch (verb.toLocaleLowerCase()) {
-      case 'get':
-      case 'post':
-      case 'put':
-        return isModelRelated ? `Retrieve ${tag} document(s)` : 'response';
-      case 'delete':
-        return isModelRelated
-          ? `deletes a single ${tag} based on the ID supplied`
-          : 'deletes a single record based on the ID supplied';
-      default:
-        return 'response';
+    if (
+      verb.includes('get') ||
+      verb.includes('put') ||
+      verb.includes('post')
+    ) {
+      return isModelRelated ? `Retrieve ${tag} document(s)` : 'response';
+    } else if (verb.includes('delete')) {
+      return isModelRelated
+        ? `deletes a single ${tag} based on the ID supplied`
+        : 'deletes a single record based on the ID supplied';
+    } else {
+      return 'response';
     }
   },
 
