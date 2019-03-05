@@ -410,9 +410,16 @@ module.exports = {
         tags: _.isEmpty(tags) ? [_.upperFirst(key)] : [_.upperFirst(tags)],
       };
 
-      _.set(acc, [key, 'paths', endPoint, verb], verbObject);
+      // Swagger is not support key with ',' symbol, for array of methods need generate documentation for each method
+      if (Array.isArray(verb)) {
+        verb.forEach((method) => {
+          _.set(acc, [key, 'paths', endPoint, method], verbObject);
+        });
+      } else {
+        _.set(acc, [key, 'paths', endPoint, verb], verbObject);
+      }
 
-      if (verb === 'post' || verb === 'put') {
+      if (verb.includes('post') || verb.includes('put')) {
         let requestBody;
 
         if (controllerMethod === 'create' || controllerMethod === 'update') {
@@ -445,14 +452,38 @@ module.exports = {
           };
         }
 
-        _.set(acc, [key, 'paths', endPoint, verb, 'requestBody'], requestBody);
+        if (Array.isArray(verb)) {
+          verb.forEach((method) => {
+            _.set(
+              acc,
+              [key, 'paths', endPoint, method, 'requestBody'],
+              requestBody,
+            );
+          });
+        } else {
+          _.set(
+            acc,
+            [key, 'paths', endPoint, verb, 'requestBody'],
+            requestBody,
+          );
+        }
       }
 
       // Refer to https://swagger.io/specification/#pathItemObject
       const parameters = this.generateVerbParameters(verb, controllerMethod, current.path);
 
-      if (verb !== 'post') {
-        _.set(acc, [key, 'paths', endPoint, verb, 'parameters'], parameters);
+      if (!verb.includes('post')) {
+        if (Array.isArray(verb)) {
+          verb.forEach((method) => {
+            _.set(
+              acc,
+              [key, 'paths', endPoint, method, 'parameters'],
+              parameters,
+            );
+          });
+        } else {
+          _.set(acc, [key, 'paths', endPoint, verb, 'parameters'], parameters);
+        }
       }
 
       return acc;
@@ -561,7 +592,14 @@ module.exports = {
         prefix === undefined
           ? this.formatApiEndPoint(`/${pluginName}${current.path}`)
           : this.formatApiEndPoint(`${prefix}${current.path}`);
-      const verb = current.method.toLowerCase();
+      let verb;
+
+      if (Array.isArray(current.method)) {
+        verb = current.method.map((method) => method.toLowerCase());
+      } else {
+        verb = current.method.toLowerCase();
+      }
+      
       const actionType = _.get(current, ['config', 'tag', 'actionType'], '');
       let key;
       let tags;
@@ -597,11 +635,25 @@ module.exports = {
       );
 
       if (_.isEmpty(defaultDocumentation)) {
-        if (verb !== 'post') {
-          _.set(acc, [key, 'paths', endPoint, verb, 'parameters'], parameters);
+        if (!verb.includes('post')) {
+          if (Array.isArray(verb)) {
+            verb.forEach((method) => {
+              _.set(
+                acc,
+                [key, 'paths', endPoint, method, 'parameters'],
+                parameters,
+              );
+            });
+          } else {
+            _.set(
+              acc,
+              [key, 'paths', endPoint, verb, 'parameters'],
+              parameters,
+            );
+          }
         }
 
-        if (verb === 'post' || verb === 'put') {
+        if (verb.includes('post') || verb.includes('put')) {
           let requestBody;
 
           if (actionType === 'create' || actionType === 'update') {
@@ -639,7 +691,22 @@ module.exports = {
               },
             };
           }
-          _.set(acc, [key, 'paths', endPoint, verb, 'requestBody'], requestBody);
+          
+          if (Array.isArray(verb)) {
+            verb.forEach((method) => {
+              _.set(
+                acc,
+                [key, 'paths', endPoint, method, 'requestBody'],
+                requestBody,
+              );
+            });
+          } else {
+            _.set(
+              acc,
+              [key, 'paths', endPoint, verb, 'requestBody'],
+              requestBody,
+            );
+          }
         }
       }
 
