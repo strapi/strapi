@@ -11,14 +11,24 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import pluginId from '../../pluginId';
 
+import PluginLeftMenu from '../../components/PluginLeftMenu';
+
 import makeSelectModelPage from './selectors';
 import reducer from './reducer';
 import saga from './saga';
+import styles from './styles.scss';
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <div>
+      <div className={styles.modelpage}>
+        <div className="container-fluid">
+          <div className="row">
+            <PluginLeftMenu
+              sections={[]}
+            />
+          </div>
+        </div>
       </div>
     );
   }
