@@ -11,22 +11,73 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import pluginId from '../../pluginId';
 
-import PluginLeftMenu from '../../components/PluginLeftMenu';
+import LeftMenu from '../../components/LeftMenu';
+import LeftMenuSection from '../../components/LeftMenuSection';
+import LeftMenuSectionTitle from '../../components/LeftMenuSectionTitle';
+import LeftMenuLink from '../../components/LeftMenuLink';
+
+import CustomLink from './CustomLink';
 
 import makeSelectModelPage from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';
+import DocumentationSection from './DocumentationSection';
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getSectionTitle = () => {
+    const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
+
+    return this.getModelNumber() > 1 ? `${base}plural` : `${base}singular`;
+  }
+
+  getModelNumber = () => {
+    const { models } = this.props;
+
+    return models.length;
+  }
+
+  handleClick = () => {}
+
+  renderLinks = () => {
+    const { models } = this.props;
+    const links = models.map(model => {
+      const { name, source } = model;
+      const base = `/plugins/${pluginId}/models/${name}`;
+      const to = source ? `${base}&source=${source}` : base;
+
+      return (
+        <LeftMenuLink
+          key={name}
+          icon="fa fa-caret-square-o-right"
+          name={name}
+          source={source}
+          to={to}
+        />
+      );
+    });
+
+    return links;
+  }
+
   render() {
     return (
       <div className={styles.modelpage}>
         <div className="container-fluid">
           <div className="row">
-            <PluginLeftMenu
-              sections={[]}
-            />
+            <LeftMenu>
+              <LeftMenuSection>
+                <LeftMenuSectionTitle id={this.getSectionTitle()} />
+                <ul>
+                  {this.renderLinks()}
+                  <CustomLink onClick={this.handleClick} />
+                </ul>
+              </LeftMenuSection>
+              <LeftMenuSection>
+                <LeftMenuSectionTitle id={`${pluginId}.menu.section.documentation.name`} />
+                <DocumentationSection />
+              </LeftMenuSection>
+            </LeftMenu>
           </div>
         </div>
       </div>
@@ -34,7 +85,9 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 }
 
-ModelPage.propTypes = {};
+ModelPage.propTypes = {
+  models: PropTypes.array,
+};
 
 const mapStateToProps = createStructuredSelector({
   modelpage: makeSelectModelPage(),

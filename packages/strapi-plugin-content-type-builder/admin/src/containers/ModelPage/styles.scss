@@ -30,3 +30,21 @@
     }
   }
 }
+
+
+.linkContainer {
+  display: flex;
+  margin-left: 2rem;
+  margin-right: .5rem;
+  padding-top: 1rem;
+  padding-left: 1rem;
+  min-height: 3.4rem;
+  color: #1C8FE5 !important;
+  text-decoration: none !important;
+  line-height: 1.6rem;
+  cursor: pointer;
+  > div {
+    width: 1.3rem;
+    margin-right: 1rem;
+  }
+}
