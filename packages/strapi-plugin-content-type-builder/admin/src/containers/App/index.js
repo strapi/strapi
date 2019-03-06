@@ -40,11 +40,13 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
   }
 
   renderRoute = (route) => {
-    const { component: Component } = route;
+    const { component: Component, to } = route;
 
+    /* istanbul ignore next */
     return (
       <Route
-        key={route.to}
+        key={to}
+        path={to}
         render={props => <Component {...props} {...this.props} />}
         exact
       />
@@ -69,7 +71,7 @@ App.propTypes = {
 
 const mapStateToProps = makeSelectApp();
 
-function mapDispatchToProps(dispatch) {
+export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       getData,
