@@ -332,7 +332,7 @@ module.exports = {
       }
 
       ctx.send({
-        jwt,
+        jwt: !settings.email_confirmation ? jwt : undefined,
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     } catch(err) {
