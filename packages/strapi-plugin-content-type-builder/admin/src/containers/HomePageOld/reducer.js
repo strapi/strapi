@@ -1,6 +1,6 @@
 /*
  *
- * ModelPage reducer
+ * HomePage reducer
  *
  */
 
@@ -11,7 +11,7 @@ import {
 
 const initialState = fromJS({});
 
-function modelPageReducer(state = initialState, action) {
+function homePageReducer(state = initialState, action) {
   switch (action.type) {
     case DEFAULT_ACTION:
       return state;
@@ -20,4 +20,4 @@ function modelPageReducer(state = initialState, action) {
   }
 }
 
-export default modelPageReducer;
+export default homePageReducer;

@@ -1,6 +1,6 @@
 /*
  *
- * ModelPage actions
+ * HomePage actions
  *
  */
 

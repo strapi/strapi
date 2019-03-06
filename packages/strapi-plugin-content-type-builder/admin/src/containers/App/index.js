@@ -1,107 +1,89 @@
 /**
  *
- * This component is the skeleton around the actual pages, and should only
- * contain code that should be seen on all pages. (e.g. navigation bar)
+ * App
  *
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-// import { withRouter } from 'react-router';
-import { createStructuredSelector } from 'reselect';
-import { Switch, Route, withRouter } from 'react-router-dom';
-import PropTypes from 'prop-types';
-
+import { Switch, Route } from 'react-router-dom';
 import pluginId from '../../pluginId';
 
 import HomePage from '../HomePage';
 import ModelPage from '../ModelPage';
 import NotFoundPage from '../NotFoundPage';
-import formSaga from '../Form/sagas';
-import formReducer from '../Form/reducer';
 
-// Other containers actions
-import { makeSelectShouldRefetchContentType } from '../Form/selectors';
+import { getData } from './actions';
 
-// Utils
-import { storeData } from '../../utils/storeData';
+import reducer from './reducer';
+import saga from './saga';
+import makeSelectApp from './selectors';
 
 import styles from './styles.scss';
-import { modelsFetch } from './actions';
-import reducer from './reducer';
-import saga from './sagas';
 
-/* eslint-disable consistent-return */
-class App extends React.Component {
+const ROUTES = [
+  {
+    component: HomePage,
+    to: `/plugins/${pluginId}`,
+  },
+  {
+    component: ModelPage,
+    to: `/plugins/${pluginId}/models/:modelName`,
+  },
+];
+
+export class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
-    this.props.modelsFetch();
+    this.props.getData();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.shouldRefetchContentType !== this.props.shouldRefetchContentType) {
-      this.props.modelsFetch();
-    }
-  }
+  renderRoute = (route) => {
+    const { component: Component } = route;
 
-
-  componentWillUnmount() {
-    // Empty the app localStorage
-    storeData.clearAppStorage();
+    return (
+      <Route
+        key={route.to}
+        render={props => <Component {...props} {...this.props} />}
+        exact
+      />
+    );
   }
 
   render() {
     return (
-      <div className={`${pluginId} ${styles.app}`}>
+      <div className={styles.app}>
         <Switch>
-          <Route exact path="/plugins/content-type-builder" component={HomePage} />
-          <Route exact path="/plugins/content-type-builder/models/:modelName" component={ModelPage} />
-          <Route path="" component={NotFoundPage} />
+          {ROUTES.map(this.renderRoute)}
+          <Route component={NotFoundPage} />
         </Switch>
       </div>
     );
   }
 }
 
-App.contextTypes = {
-  plugins: PropTypes.object,
-  router: PropTypes.object.isRequired,
-  updatePlugin: PropTypes.func,
-};
-
 App.propTypes = {
-  modelsFetch: PropTypes.func.isRequired,
-  shouldRefetchContentType: PropTypes.bool,
+  getData: PropTypes.func.isRequired,
 };
 
-App.defaultProps = {
-  shouldRefetchContentType: false,
-};
+const mapStateToProps = makeSelectApp();
 
-export function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      modelsFetch,
+      getData,
     },
-    dispatch
+    dispatch,
   );
 }
 
-const mapStateToProps = createStructuredSelector({
-  shouldRefetchContentType: makeSelectShouldRefetchContentType(),
-});
-
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
-const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId });
-const withFormReducer = strapi.injectReducer({ key: 'form', reducer: formReducer, pluginId });
-const withFormSaga = strapi.injectSaga({ key: 'form', saga: formSaga, pluginId });
+const withReducer = strapi.injectReducer({ key: 'app', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'app', saga, pluginId });
 
 export default compose(
   withReducer,
-  withFormReducer,
-  withFormSaga,
   withSaga,
-  withRouter,
   withConnect,
 )(App);
