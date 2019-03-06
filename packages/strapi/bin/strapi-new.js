@@ -31,7 +31,7 @@ const packageJSON = require('../package.json');
  */
 
 module.exports = function (name, cliArguments) {
-  console.log('🚀 Start creating your Strapi application.');
+  console.log('🚀 Starting to create your Strapi application.');
 
   const developerMode = cliArguments.dev !== undefined;
 

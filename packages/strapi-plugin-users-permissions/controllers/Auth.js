@@ -345,7 +345,12 @@ module.exports = {
   emailConfirmation: async (ctx) => {
     const params = ctx.query;
 
-    const user = await strapi.plugins['users-permissions'].services.jwt.verify(params.confirmation);
+    let user;
+    try {
+      user = await strapi.plugins['users-permissions'].services.jwt.verify(params.confirmation);
+    } catch (err) {
+      return ctx.badRequest(null, 'This confirmation token is invalid.');
+    }
 
     await strapi.plugins['users-permissions'].services.user.edit(_.pick(user, ['_id', 'id']), {confirmed: true});
 

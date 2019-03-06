@@ -127,6 +127,7 @@ module.exports = function (strapi) {
                   findOneAndRemove: 'beforeDestroy',
                   remove: 'beforeDestroy',
                   update: 'beforeUpdate',
+                  updateOne: 'beforeUpdate',
                   find: 'beforeFetchAll',
                   findOne: 'beforeFetch',
                   save: 'beforeSave'
@@ -202,6 +203,7 @@ module.exports = function (strapi) {
                   findOneAndRemove: 'afterDestroy',
                   remove: 'afterDestroy',
                   update: 'afterUpdate',
+                  updateOne: 'afterUpdate',
                   find: 'afterFetchAll',
                   findOne: 'afterFetch',
                   save: 'afterSave'
