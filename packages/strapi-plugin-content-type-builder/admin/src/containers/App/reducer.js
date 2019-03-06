@@ -9,7 +9,7 @@ import {
   GET_DATA_SUCCEEDED,
 } from './constants';
 
-const initialState = fromJS({
+export const initialState = fromJS({
   initialData: {},
   models: [],
   modifiedData: {},

@@ -1,18 +1,109 @@
 
 import {
-  defaultAction,
+  buildModelAttributes,
+  getData,
+  getDataSucceeded,
 } from '../actions';
 import {
-  DEFAULT_ACTION,
+  GET_DATA,
+  GET_DATA_SUCCEEDED,
 } from '../constants';
 
-describe('App actions', () => {
-  describe('Default Action', () => {
-    it('has a type of DEFAULT_ACTION', () => {
+
+describe('Content Type Builder Action utils', () => {
+  describe('BuildModelAttributes', () => {
+    it('should generate an object with an array of attributes', () => {
+      const attributes = [
+        {
+          name: 'type',
+          params: { type: 'string', required: true, configurable: false },
+        },
+        {
+          name: 'controller',
+          params: { type: 'string', required: true, configurable: false },
+        },
+      ];
       const expected = {
-        type: DEFAULT_ACTION,
+        type: {
+          type: 'string',
+          required: true,
+          configurable: false,
+        },
+        controller: {
+          type: 'string',
+          required: true,
+          configurable: false,
+        },
       };
-      expect(defaultAction()).toEqual(expected);
+
+      expect(buildModelAttributes(attributes)).toEqual(expected);
+    });
+  });
+});
+
+describe('App actions', () => {
+  describe('GetData', () => {
+    it('has a type of GET_DATA', () => {
+      const expected = {
+        type: GET_DATA,
+      };
+
+      expect(getData()).toEqual(expected);
+    });
+  });
+
+  describe('GetDataSucceeded', () => {
+    it('has a type of GET_DATA_SUCCEEDED and returns the correct data', () => {
+      const models = [
+        { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions' },
+      ];
+      const allModels = [
+        {
+          collectionName: 'users-permissions_permission',
+          connection: 'default',
+          description: '',
+          mainField: '',
+          name: 'permission',
+          attributes: [
+            {
+              name: 'type',
+              params: { type: 'string', required: true, configurable: false },
+            },
+            {
+              name: 'controller',
+              params: { type: 'string', required: true, configurable: false },
+            },
+          ],
+        },
+      ];
+      const initialData = {
+        permission: {
+          collectionName: 'users-permissions_permission',
+          connection: 'default',
+          description: '',
+          mainField: '',
+          name: 'permission',
+          attributes: {
+            type: {
+              type: 'string',
+              required: true,
+              configurable: false,
+            },
+            controller: {
+              type: 'string',
+              required: true,
+              configurable: false,
+            },
+          },
+        },
+      };
+      const expected = {
+        type: GET_DATA_SUCCEEDED,
+        models,
+        initialData,
+      };
+
+      expect(getDataSucceeded({ models, allModels })).toEqual(expected);
     });
   });
 });

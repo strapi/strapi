@@ -9,7 +9,7 @@ export function* getData() {
   try {
     const requestURL = `/${pluginId}/models`;
     const data = yield call(request, requestURL, { method: 'GET' });
-    
+
     yield put(getDataSucceeded(data));
   } catch(err) {
     strapi.notification.error('notification.error');
