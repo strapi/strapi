@@ -87,11 +87,11 @@ if (shell.test('-e', 'admin/src/config/plugins.json') === false) {
   shell.cd('../../../');
 }
 
-watcher('📦  Linking strapi-admin', 'npm link --no-optional', false);
+// watcher('📦  Linking strapi-admin', 'npm link --no-optional', false);
 
-shell.cd('../strapi-generate-admin');
-watcher('', 'npm link strapi-admin');
-watcher('📦  Linking strapi-generate-admin...', 'npm link');
+// shell.cd('../strapi-generate-admin');
+// watcher('', 'npm link strapi-admin');
+// watcher('📦  Linking strapi-generate-admin...', 'npm link');
 
 shell.cd('../strapi-generate-new');
 watcher('', 'npm link strapi-utils');
@@ -209,7 +209,7 @@ const setup = async () => {
         const pluginName = name === 'admin' ? name : `plugin-${name}`;
         shell.cd(`../strapi-${pluginName}`);
 
-        return watcher(`🏗  Building ${pluginName}...`, 'cross-env IS_MONOREPO=true npm run build');
+        // return watcher(`🏗  Building ${pluginName}...`, 'cross-env IS_MONOREPO=true npm run build');
       });
     }
   }

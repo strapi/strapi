@@ -297,6 +297,7 @@ module.exports = {
     } catch (e) {
       strapi.log.error(`Something went wrong in the model \`${_.upperFirst(currentModelName)}\` with the attribute \`${key}\``);
       strapi.log.error(e);
+      console.log(e.stack);
       strapi.stop();
     }
   },

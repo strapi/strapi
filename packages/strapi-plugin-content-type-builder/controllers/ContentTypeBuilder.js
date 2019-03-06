@@ -84,10 +84,11 @@ module.exports = {
           strapi.emit('didCreateContentType');
         }
 
-        ctx.send({ ok: true });
 
+        ctx.send({ ok: true });
         strapi.reload();
       } catch (e) {
+        console.log('fs error', e);
         strapi.emit('didNotCreateContentType', e);
         return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
       }

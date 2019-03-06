@@ -1,33 +1,40 @@
-sudo: required
+services:
+  - postgresql
 
-git:
-  depth: 1
+sudo: required
+dist: trusty
+
+# git:
+#   depth: 1
 
 language: node_js
 
 node_js:
   - '10'
-  - '11'
+  # - '11'
+
+
 
 before_install:
-  - export CHROME_BIN=chromium-browser
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - git fetch -a
-  - git fetch origin master
+  # - export CHROME_BIN=chromium-browser
+  # - export DISPLAY=:99.0
+  # - sh -e /etc/init.d/xvfb start
+  # - git fetch -a
+  # - git fetch origin master
   # - sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
   # - npm cache clean --force
   # - rm -rf node_modules/
 
 install:
-  - npm run setup:build --debug
+  - npm run setup:build
 
 before_script:
-  - git fetch origin master:master
+  - psql -c 'create database strapi_test;' -U postgres
 
 script:
-  - npm run lint
-  - npm run doc
+  - node test/e2e.js --dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword=
+  # - npm run lint
+  # - npm run doc
 
 cache:
   directories:

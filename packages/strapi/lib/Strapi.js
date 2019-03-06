@@ -1,3 +1,4 @@
+
 'use strict';
 
 // Dependencies.
@@ -104,14 +105,19 @@ class Strapi extends EventEmitter {
 
       // Load the app.
       await this.load();
+
       // Run bootstrap function.
       await this.bootstrap();
+
       // Freeze object.
       await this.freeze();
+
       // Update source admin.
       await admin.call(this);
+
       // Init first start
       utils.init.call(this);
+
       // Launch server.
       this.server.listen(this.config.port, async (err) => {
         if (err) {
@@ -238,6 +244,7 @@ class Strapi extends EventEmitter {
     const state = {
       shouldReload: 0
     };
+
 
     const reload = function () {
       if (state.shouldReload > 0) {

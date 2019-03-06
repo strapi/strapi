@@ -11,12 +11,57 @@ const path = require('path');
 const cluster = require('cluster');
 
 // Public dependencies
-const fs = require('fs');
 const _ = require('lodash');
 const { cyan } = require('chalk');
+const chokidar = require('chokidar');
 
 // Logger.
 const { cli, logger } = require('strapi-utils');
+
+/**
+ * Init file watching to auto restart strapi app
+ * @param {Object} options - Options object
+ * @param {string} options.appPath - This is the path where the app is located, the watcher will watch the files under this folder
+ * @param {Strapi} options.strapi - Strapi instance
+ */
+const watchFileChanges = ({ appPath, strapi }) => {
+  const restart = path => {
+    if (strapi.reload.isWatching && !strapi.reload.isReloading) {
+      strapi.reload.isReloading = true;
+      strapi.reload();
+    }
+  };
+
+  const watcher = chokidar.watch(appPath, {
+    ignoreInitial: true,
+    ignored: [
+      /(^|[\/\\])\../,
+      '**/admin',
+      '**/components',
+      '**/documentation',
+      '**/node_modules',
+      '**/plugins.json',
+      '**/index.html',
+      '**/public',
+      '**/cypress',
+      '**/*.db',
+    ],
+  });
+
+  watcher
+    .on('add', path => {
+      strapi.log.info(`File created: ${path}`);
+      restart(path);
+    })
+    .on('change', path => {
+      strapi.log.info(`File changed: ${path}`);
+      restart(path);
+    })
+    .on('unlink', path => {
+      strapi.log.info(`File deleted: ${path}`);
+      restart(path);
+    });
+};
 
 /**
  * `$ strapi start`
@@ -53,63 +98,23 @@ module.exports = function(appPath = '') {
       'config',
       'environments',
       'development',
-      'server.json',
+      'server.json'
     ));
 
     if (process.env.NODE_ENV === 'development' && _.get(server, 'autoReload.enabled') === true) {
-      const restart = path => {
-        if (strapi.reload.isWatching && cluster.isWorker && !strapi.reload.isReloading) {
-          strapi.reload.isReloading = true;
-          strapi.log.info(`File changed: ${path}`);
-          strapi.reload();
-        }
-      };
-
-      const setFilesToWatch = src => {
-        let files =
-          _.includes(src, '/admin') ||
-          _.includes(src, 'components') ||
-          _.includes(src, '/documentation')
-            ? []
-            : fs.readdirSync(src);
-
-        _.forEach(files, file => {
-          if (
-            _.startsWith(file, '.') ||
-            file === 'node_modules' ||
-            file === 'plugins.json' ||
-            file === 'index.html'   ||
-            file === 'public'       ||
-            file === 'cypress'      ||
-            _.endsWith(file, '.db')
-          ) {
-            return;
-          }
-
-          const filePath = `${src}/${file}`;
-          if (fs.statSync(filePath).isDirectory()) setFilesToWatch(filePath);
-          else fs.watchFile(filePath, () => restart(filePath));
-        });
-      };
-
-      setFilesToWatch(appPath);
-
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {
           switch (message) {
             case 'reload':
               strapi.log.info('The server is restarting\n');
-
-              _.forEach(cluster.workers, worker => worker.send('isKilled'));
+              worker.send('isKilled');
               break;
             case 'kill':
-              _.forEach(cluster.workers, worker => worker.kill());
-
+              worker.kill();
               cluster.fork();
               break;
             case 'stop':
-              _.forEach(cluster.workers, worker => worker.kill());
-
+              worker.kill();
               process.exit(0);
               break;
             default:
@@ -121,6 +126,8 @@ module.exports = function(appPath = '') {
       }
 
       if (cluster.isWorker) {
+        watchFileChanges({ appPath, strapi });
+
         process.on('message', message => {
           switch (message) {
             case 'isKilled':
@@ -137,7 +144,7 @@ module.exports = function(appPath = '') {
           {
             appPath,
           },
-          afterwards,
+          afterwards
         );
       } else {
         return;
@@ -151,7 +158,7 @@ module.exports = function(appPath = '') {
       {
         appPath,
       },
-      afterwards,
+      afterwards
     );
   } catch (e) {
     logger.error(e);
