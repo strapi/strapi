@@ -56,7 +56,7 @@ module.exports = {
       if (!user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }] : 'Identifier or password invalid.');
       }
-      
+
       if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && !user.confirmed) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }] : 'Your account email is not confirmed.');
       }
@@ -196,7 +196,7 @@ module.exports = {
     settings.object = await strapi.plugins['users-permissions'].services.userspermissions.template(settings.object, {
       USER: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken', 'role', 'provider'])
     });
-    
+
     try {
       // Send an email to the user.
       await strapi.plugins['email'].services.email.send({
@@ -345,7 +345,12 @@ module.exports = {
   emailConfirmation: async (ctx) => {
     const params = ctx.query;
 
-    const user = await strapi.plugins['users-permissions'].services.jwt.verify(params.confirmation);
+    let user;
+    try {
+      user = await strapi.plugins['users-permissions'].services.jwt.verify(params.confirmation);
+    } catch (err) {
+      return ctx.badRequest(null, 'This confirmation token is invalid.');
+    }
 
     await strapi.plugins['users-permissions'].services.user.edit(_.pick(user, ['_id', 'id']), {confirmed: true});
 
