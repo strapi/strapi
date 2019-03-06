@@ -5,10 +5,13 @@
  */
 
 import React from 'react';
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
+import { get } from 'lodash';
+
+import PluginHeader from 'components/PluginHeader';
 import pluginId from '../../pluginId';
 
 import LeftMenu from '../../components/LeftMenu';
@@ -25,16 +28,35 @@ import styles from './styles.scss';
 import DocumentationSection from './DocumentationSection';
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  getSectionTitle = () => {
-    const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
+  getModelDescription = () => {
+    const { initialData } = this.props;
+    
+    const description = get(
+      initialData,
+      [this.getModelName(), 'description'],
+      null,
+    );
 
-    return this.getModelNumber() > 1 ? `${base}plural` : `${base}singular`;
+    // eslint-disable-next-line no-extra-boolean-cast
+    return !!description ? description : { id: `${pluginId}.modelPage.contentHeader.emptyDescription.description` };
+  }
+
+  getModelName = () => {
+    const { match: { params: { modelName } } } = this.props;
+
+    return modelName.split('&')[0];
   }
 
   getModelNumber = () => {
     const { models } = this.props;
 
     return models.length;
+  }
+
+  getSectionTitle = () => {
+    const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
+
+    return this.getModelNumber() > 1 ? `${base}plural` : `${base}singular`;
   }
 
   handleClick = () => {}
@@ -61,6 +83,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   render() {
+    console.log(this.props.match);
     return (
       <div className={styles.modelpage}>
         <div className="container-fluid">
@@ -78,6 +101,16 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                 <DocumentationSection />
               </LeftMenuSection>
             </LeftMenu>
+
+            <div className="col-md-9">
+              <div className={styles.componentsContainer}>
+                <PluginHeader
+                  description={this.getModelDescription()}
+                  title={this.getModelName()}
+                />
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -86,7 +119,14 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 }
 
 ModelPage.propTypes = {
-  models: PropTypes.array,
+  initialData: PropTypes.object.isRequired,
+  match: PropTypes.shape({
+    isExact: PropTypes.bool,
+    params: PropTypes.object,
+    path: PropTypes.string,
+    url: PropTypes.string,
+  }).isRequired,
+  models: PropTypes.array.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
