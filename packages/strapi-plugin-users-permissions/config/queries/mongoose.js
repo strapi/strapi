@@ -11,9 +11,10 @@ module.exports = {
       .lean();
   },
 
-  count: async function (params = {}) {
+  count: async function (params = {where: {}}) {
     return Number(await this
-      .countDocuments(params));
+      .countDocuments()
+      .where(params.where));
   },
 
   findOne: async function (params, populate) {
