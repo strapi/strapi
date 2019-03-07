@@ -2,7 +2,7 @@ const container = require('markdown-it-container');
 
 const ogprefix = 'og: http://ogp.me/ns#';
 const title = 'Strapi Documentation';
-const description = 'API creation made simple, secure and fast.';
+const description = 'The headless CMS developers love.';
 const color = '#2F80ED';
 const author = 'Strapi';
 const url = 'https://strapi.io/documentation/';
@@ -69,15 +69,11 @@ module.exports = {
           collapsable: false,
           title: '🚀 Getting started',
           children: [
+            '/3.x.x/getting-started/introduction',
             '/3.x.x/getting-started/install-requirements',
             '/3.x.x/getting-started/quick-start',
-            '/3.x.x/getting-started/community',
+            '/3.x.x/getting-started/quick-start-tutorial',
           ],
-        },
-        {
-          collapsable: true,
-          title: 'Installation Options',
-          children: ['/3.x.x/installation-options/quick-start-detailed.md'],
         },
         {
           collapsable: true,
@@ -148,6 +144,7 @@ module.exports = {
             ],
             '/3.x.x/migration-guide/',
             '/3.x.x/tutorials/',
+            '/3.x.x/community',
           ],
         },
       ],
