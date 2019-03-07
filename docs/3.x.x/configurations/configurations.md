@@ -344,12 +344,12 @@ The session doesn't work with `mongo` as a client. The package that we should us
 **Path —** `./config/environments/**/response.json`.
 
  - [`gzip`](https://en.wikipedia.org/wiki/Gzip)
-  - `enabled` (boolean): Enable or not GZIP response compression.
+   - `enabled` (boolean): Enable or not GZIP response compression.
  - `responseTime`
-  - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
+   - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
  - `poweredBy`
-  - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
-  - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
+   - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
+   - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
 
 ***
 
