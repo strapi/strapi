@@ -47,7 +47,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
       <Route
         key={to}
         path={to}
-        render={props => <Component {...props} {...this.props} />}
+        render={props => <Component {...this.props} {...props} />}
         exact
       />
     );
