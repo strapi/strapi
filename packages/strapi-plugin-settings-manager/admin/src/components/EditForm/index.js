@@ -8,8 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import Button from 'components/Button';
-import EditFormSection from 'components/EditFormSection';
+import Button from '../Button';
+import EditFormSection from '../EditFormSection';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props  */

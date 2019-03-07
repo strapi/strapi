@@ -7,9 +7,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { isFunction, isObject } from 'lodash';
+import { isEmpty, isFunction, isObject } from 'lodash';
 
-import LoadingBar from 'components/LoadingBar';
+import LoadingBar from '../LoadingBar';
 
 import styles from './styles.scss';
 
@@ -20,7 +20,7 @@ function PluginHeaderTitle({ description, title, titleId, withDescriptionAnim })
   return (
     <div>
       <h1 className={styles.pluginHeaderTitleName} id={titleId}>
-        {contentTitle}
+        {contentTitle}&nbsp;
       </h1>
       {withDescriptionAnim ? (
         <LoadingBar />
@@ -32,8 +32,9 @@ function PluginHeaderTitle({ description, title, titleId, withDescriptionAnim })
 }
 
 const formatData = data => {
-  if (isObject(data) && data.id) {
-    return <FormattedMessage id={data.id} defaultMessage={data.id} values={data.values} />;
+  
+  if (isObject(data)) {
+    return isEmpty(data.id) ? null : <FormattedMessage id={data.id} defaultMessage={data.id} values={data.values} />;
   }
 
   if (isFunction(data)) {

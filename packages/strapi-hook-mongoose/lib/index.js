@@ -127,6 +127,7 @@ module.exports = function (strapi) {
                   findOneAndRemove: 'beforeDestroy',
                   remove: 'beforeDestroy',
                   update: 'beforeUpdate',
+                  updateOne: 'beforeUpdate',
                   find: 'beforeFetchAll',
                   findOne: 'beforeFetch',
                   save: 'beforeSave'
@@ -202,6 +203,7 @@ module.exports = function (strapi) {
                   findOneAndRemove: 'afterDestroy',
                   remove: 'afterDestroy',
                   update: 'afterUpdate',
+                  updateOne: 'afterUpdate',
                   find: 'afterFetchAll',
                   findOne: 'afterFetch',
                   save: 'afterSave'
@@ -565,7 +567,11 @@ module.exports = function (strapi) {
           break;
         case '_in':
           result.key = `where.${key}.$in`;
-          result.value = value;
+          result.value = _.castArray(value);
+          break;
+        case '_nin':
+          result.key = `where.${key}.$nin`;
+          result.value = _.castArray(value);
           break;
         default:
           result = undefined;

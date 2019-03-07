@@ -10,7 +10,7 @@ import { Collapse } from 'reactstrap';
 import { capitalize, get, isEmpty, map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
-import Controller from 'components/Controller';
+import Controller from '../Controller';
 
 import styles from './styles.scss';
 
