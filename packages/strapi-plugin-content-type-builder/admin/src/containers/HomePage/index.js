@@ -9,19 +9,26 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
+
+import PluginHeader from 'components/PluginHeader';
+import EmptyContentTypeView from '../../components/EmptyContentTypeView';
+import TableList from '../../components/TableList';
+
 import pluginId from '../../pluginId';
+
+import styles from './styles.scss';
 
 import makeSelectHomePage from './selectors';
 import reducer from './reducer';
 import saga from './saga';
 
-// Design
-import PluginHeader from 'components/PluginHeader';
-import EmptyContentTypeView from '../../components/EmptyContentTypeView';
-import TableList from '../../components/TableList';
-import styles from './styles.scss';
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+
+  handleDeleteModel = (modelName) => {
+    this.props.deleteModel(modelName);
+  }
+
   render() {
     const { models } = this.props;
     const availableNumber = models.length;
@@ -36,7 +43,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         title={title}
         buttonLabel={`${pluginId}.button.contentType.add`}
         onButtonClick={() => {}}
-        onHandleDelete={() => {}}
+        onHandleDelete={this.handleDeleteModel}
         rowItems={this.props.models}
       />
     );
@@ -62,6 +69,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 }
 
 HomePage.propTypes = {
+  deleteModel: PropTypes.func.isRequired,
   models: PropTypes.array.isRequired,
 };
 

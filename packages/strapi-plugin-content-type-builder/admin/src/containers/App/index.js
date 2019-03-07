@@ -15,7 +15,7 @@ import HomePage from '../HomePage';
 import ModelPage from '../ModelPage';
 import NotFoundPage from '../NotFoundPage';
 
-import { getData } from './actions';
+import { getData, deleteModel } from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
@@ -66,6 +66,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 }
 
 App.propTypes = {
+  deleteModel: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
 };
 
@@ -74,6 +75,7 @@ const mapStateToProps = makeSelectApp();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      deleteModel,
       getData,
     },
     dispatch,

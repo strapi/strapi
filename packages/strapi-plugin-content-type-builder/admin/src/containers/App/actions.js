@@ -7,6 +7,8 @@ import { pick, set } from 'lodash';
 import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
+  DELETE_MODEL,
+  DELETE_MODEL_SUCCEEDED,
 } from './constants';
 
 export function getData() {
@@ -31,9 +33,21 @@ export function getDataSucceeded({ allModels, models }) {
   };
 }
 
+export function deleteModel(modelName) {
+  return {
+    type: DELETE_MODEL,
+    modelName,
+  };
+}
+
+export function deleteModelSucceeded(modelName) {
+  return {
+    type: DELETE_MODEL_SUCCEEDED,
+    modelName,
+  };
+}
 
 // utils
-
 export const buildModelAttributes = (attributes) => {
   const formattedAttributes = attributes.reduce((acc, current) => {
     acc[current.name] = current.params;
