@@ -13,17 +13,17 @@ import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isBoolean, isEmpty, map, replace } from 'lodash';
 import cn from 'classnames';
 
-// Logo
-import LogoStrapi from 'assets/images/logo_strapi.png';
-
 // Design
 import Button from 'components/Button';
 import Input from 'components/InputsIndex';
 
 // Utils
 import auth from 'utils/auth';
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
+
+import pluginId from '../../pluginId';
+
+// Logo
+import LogoStrapi from '../../assets/images/logo_strapi.png';
 
 import {
   hideLoginErrorsInput,
@@ -328,16 +328,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-/* Remove this line if the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
-const withReducer = injectReducer({ key: 'authPage', reducer });
-
-/* Remove the line below the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
-const withSaga = injectSaga({ key: 'authPage', saga });
+const withReducer = strapi.injectReducer({ key: 'authPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'authPage', saga, pluginId });
 
 export default compose(
   withReducer,

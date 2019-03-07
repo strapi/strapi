@@ -46,6 +46,7 @@ module.exports = (scope, success, error) => {
           if (err) {
             console.log(`Error removing connection test folder: ${scope.tmpPath}`);
           }
+
           success();
         });
       };

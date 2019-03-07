@@ -11,9 +11,9 @@ import PropTypes from 'prop-types';
 import { get, has, isArray, isEmpty, startsWith, size } from 'lodash';
 import cn from 'classnames';
 
-import BkgImg  from 'assets/icons/icon_upload.svg';
-import ImgPreviewArrow from 'components/ImgPreviewArrow';
-import ImgPreviewHint from 'components/ImgPreviewHint';
+import BkgImg from '../../assets/icons/icon_upload.svg';
+import ImgPreviewArrow from '../ImgPreviewArrow';
+import ImgPreviewHint from '../ImgPreviewHint';
 
 import styles from './styles.scss';
 

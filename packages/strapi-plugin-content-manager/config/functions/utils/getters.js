@@ -54,6 +54,7 @@ const getApisUploadRelations = (data, sameArray) => sameArray.map(apiPath => {
  * @returns {Array}
  */
 const getEditDisplayAvailableFieldsPath = attrPath => [..._.take(attrPath, attrPath.length -2), 'editDisplay', 'availableFields', attrPath[attrPath.length - 1]];
+const getEditDisplayDisplayedField = attrPath => [..._.take(attrPath, attrPath.length -2), 'editDisplay', 'displayedField'];
 const getEditDisplayFieldsPath = attrPath => [..._.take(attrPath, attrPath.length -2), 'editDisplay', 'fields'];
 
 
@@ -63,5 +64,6 @@ module.exports = {
   getApisKeys,
   getApisUploadRelations,
   getEditDisplayAvailableFieldsPath,
+  getEditDisplayDisplayedField,
   getEditDisplayFieldsPath
 };

@@ -11,10 +11,10 @@ import { isEmpty, isObject, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Design
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputCheckbox from 'components/InputCheckbox';
-import InputSpacer from 'components/InputSpacer';
+import InputDescription from '../InputDescription';
+import InputErrors from '../InputErrors';
+import InputCheckbox from '../InputCheckbox';
+import InputSpacer from '../InputSpacer';
 
 import styles from './styles.scss';
 

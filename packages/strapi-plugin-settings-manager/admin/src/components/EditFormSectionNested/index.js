@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import { has, map, forEach } from 'lodash';
 
 // HOC
-import EditFormSectionSubNested from 'components/EditFormSectionSubNested';
-import WithFormSection from 'components/WithFormSection';
+import EditFormSectionSubNested from '../EditFormSectionSubNested';
+import WithFormSection from '../WithFormSection';
 
 /* eslint-disable react/require-default-props  */
 class EditFormSectionNested extends React.Component { // eslint-disable-line react/prefer-stateless-function
