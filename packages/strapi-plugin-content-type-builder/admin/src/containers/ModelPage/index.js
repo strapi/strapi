@@ -12,6 +12,8 @@ import { bindActionCreators, compose } from 'redux';
 import { get } from 'lodash';
 
 import PluginHeader from 'components/PluginHeader';
+
+import { routerPropTypes } from 'commonPropTypes';
 import pluginId from '../../pluginId';
 
 import LeftMenu from '../../components/LeftMenu';
@@ -83,7 +85,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   render() {
-    console.log(this.props.match);
     return (
       <div className={styles.modelpage}>
         <div className="container-fluid">
@@ -119,13 +120,10 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 }
 
 ModelPage.propTypes = {
+  ...routerPropTypes(
+    { params: PropTypes.string },
+  ).isRequired,
   initialData: PropTypes.object.isRequired,
-  match: PropTypes.shape({
-    isExact: PropTypes.bool,
-    params: PropTypes.object,
-    path: PropTypes.string,
-    url: PropTypes.string,
-  }).isRequired,
   models: PropTypes.array.isRequired,
 };
 
@@ -133,7 +131,7 @@ const mapStateToProps = createStructuredSelector({
   modelpage: makeSelectModelPage(),
 });
 
-function mapDispatchToProps(dispatch) {
+export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {},
     dispatch,
