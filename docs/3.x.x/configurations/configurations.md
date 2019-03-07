@@ -330,8 +330,8 @@ Please note that you must give your MLab database name as the authenticationData
    - `exposeInContext` (boolean): Expose logger in context so it can be used through `strapi.log.info(‘my log’)`. Default value: `true`.
    - `requests` (boolean): Enable or disable requests logs. Default value: `false`.
  - `parser`
-  - `enabled`(boolean): Enable or disable parser. Default value: `true`.
-  - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
+   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
+   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
 
 ::: note
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
