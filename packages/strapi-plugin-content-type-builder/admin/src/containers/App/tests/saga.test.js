@@ -4,10 +4,10 @@
 
 /* eslint-disable redux-saga/yield-effects */
 import { all, fork, takeLatest, put } from 'redux-saga/effects';
-import defaultSaga, { getData } from '../saga';
+import defaultSaga, { deleteModel, getData } from '../saga';
 
 import { getDataSucceeded } from '../actions';
-import { GET_DATA } from '../constants';
+import { DELETE_MODEL, GET_DATA } from '../constants';
 
 const response = {
   models: [
@@ -68,6 +68,7 @@ describe('defaultSaga Saga', () => {
       .toEqual(
         all([
           fork(takeLatest, GET_DATA, getData),
+          fork(takeLatest, DELETE_MODEL, deleteModel),
         ]));
   }); 
 });

@@ -10,12 +10,13 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 
-import Loader from './Loader';
 import pluginId from '../../pluginId';
 
-import HomePage from '../HomePage';
+// import HomePage from '../HomePage';
 import ModelPage from '../ModelPage';
 import NotFoundPage from '../NotFoundPage';
+
+import Loader from './Loader';
 
 import { getData, deleteModel } from './actions';
 
@@ -26,10 +27,10 @@ import makeSelectApp from './selectors';
 import styles from './styles.scss';
 
 const ROUTES = [
-  {
-    component: HomePage,
-    to: `/plugins/${pluginId}`,
-  },
+  // {
+  //   component: HomePage,
+  //   to: `/plugins/${pluginId}`,
+  // },
   {
     component: ModelPage,
     to: `/plugins/${pluginId}/models/:modelName`,
@@ -76,6 +77,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 App.propTypes = {
   deleteModel: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
 };
 
 const mapStateToProps = makeSelectApp();

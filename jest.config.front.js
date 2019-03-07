@@ -26,7 +26,7 @@ module.exports = {
   // NOTE: Should be dynamic
   moduleDirectories: [
     'node_modules',
-    '<rootDir>/packages/strapi-admin/admin/src',
+    // '<rootDir>/packages/strapi-admin/admin/src',
     '<rootDir>/packages/strapi-helper-plugin/node_modules',
     '<rootDir>/packages/strapi-helper-plugin',
     '<rootDir>/packages/strapi-helper-plugin/lib/src',

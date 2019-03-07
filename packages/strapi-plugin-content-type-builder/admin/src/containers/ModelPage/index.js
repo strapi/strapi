@@ -9,17 +9,26 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
-import { get } from 'lodash';
+import { FormattedMessage } from 'react-intl';
+import { get, pickBy } from 'lodash';
 
+import Button from 'components/Button';
+import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import PluginHeader from 'components/PluginHeader';
 
 import { routerPropTypes } from 'commonPropTypes';
+
 import pluginId from '../../pluginId';
 
+// import AttributeRow from '../../components/AttributeRow';
+import Block from '../../components/Block';
+import Flex from '../../components/Flex';
 import LeftMenu from '../../components/LeftMenu';
 import LeftMenuSection from '../../components/LeftMenuSection';
 import LeftMenuSectionTitle from '../../components/LeftMenuSectionTitle';
 import LeftMenuLink from '../../components/LeftMenuLink';
+import ListTitle from '../../components/ListTitle';
+import Ul from '../../components/Ul';
 
 import CustomLink from './CustomLink';
 
@@ -36,10 +45,9 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     return get(modifiedData, this.getModelName(), {});
   }
 
-  // getModelAttributesLength = () => {
-  //   const { modifiedData } = this.props;
-  //   const modelAttributes = 
-  // }
+  getModelAttributes = () => get(this.getModel(), 'attributes', {});
+
+  getModelAttributesLength = () => Object.keys(this.getModelAttributes()).length;
 
   getModelDescription = () => {
     const { initialData } = this.props;
@@ -65,6 +73,17 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     return models.length;
   }
+
+  getModelRelationShips = () => {
+    const attributes = this.getModelAttributes();
+    const relations = pickBy(attributes, attribute => {
+      return !!get(attribute, 'target', null);
+    });
+  
+    return relations;
+  }
+
+  getModelRelationShipsLength = () => Object.keys(this.getModelAttributes()).length;
 
   getSectionTitle = () => {
     const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
@@ -95,9 +114,14 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     return links;
   }
 
+  renderLi = attribute => {
+    console.log(attribute);
+    return null;
+  }
+
   render() {
-    console.log(this.props)
-    console.log(this.getModel());
+    const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
+
     return (
       <div className={styles.modelpage}>
         <div className="container-fluid">
@@ -122,6 +146,52 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                   description={this.getModelDescription()}
                   title={this.getModelName()}
                 />
+                {this.getModelAttributesLength() === 0 ? (
+                  <EmptyAttributesBlock
+                    description="content-type-builder.home.emptyAttributes.description"
+                    id="openAddAttr"
+                    label="content-type-builder.button.attributes.add"
+                    onClick={() => {}}
+                    title="content-type-builder.home.emptyAttributes.title"
+                  />
+                ) : (
+                  <Block>
+                    <Flex>
+                      <ListTitle>
+                        {this.getModelAttributesLength()}
+                        &nbsp;
+                        <FormattedMessage
+                          id={`${listTitleMessageIdBasePrefix}.${this.getModelAttributesLength() > 1 ? 'plural' : 'singular'}`}
+                        />
+                        {this.getModelRelationShipsLength() > 0 && (
+                          <React.Fragment>
+                            &nbsp;
+                            <FormattedMessage
+                              id={`${listTitleMessageIdBasePrefix}.including`}
+                            />
+                            &nbsp;
+                            {this.getModelRelationShipsLength()}
+                            &nbsp;
+                            <FormattedMessage
+                              id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${this.getModelRelationShipsLength() > 1 ? 'plural' : 'singular'}`}
+                            />
+                          </React.Fragment>
+                        )}
+                      </ListTitle>
+                      <div>
+                        <Button
+                          label={`${pluginId}.button.attributes.add`}
+                          secondaryHotlineAdd
+                        />
+                      </div>
+                    </Flex>
+                    <div>
+                      <Ul id="attributesList">
+                        {Object.keys(this.getModelAttributes()).map(this.renderLi)} 
+                      </Ul>
+                    </div>
+                  </Block>
+                )}
               </div>
             </div>
 
