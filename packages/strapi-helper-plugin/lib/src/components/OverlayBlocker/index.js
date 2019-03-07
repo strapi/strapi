@@ -43,7 +43,7 @@ class OverlayBlocker extends React.Component {
   tick = () => {
     const { elapsed } = this.state;
 
-    if (elapsed > 30) {
+    if (elapsed > 15) {
       clearInterval(this.timer);
 
       return;
@@ -72,7 +72,7 @@ class OverlayBlocker extends React.Component {
       </div>
     );
 
-    if (elapsed > 30) {
+    if (elapsed > 15) {
       button = null;
       icon = 'fa fa-clock-o';
       description = 'components.OverlayBlocker.description.serverError';
@@ -83,7 +83,7 @@ class OverlayBlocker extends React.Component {
       this.props.children
     ) : (
       <div className={styles.container}>
-        <div className={cn(styles.icoContainer, elapsed < 30 && styles.spin)}>
+        <div className={cn(styles.icoContainer, elapsed < 15 && styles.spin)}>
           <i className={icon} />
         </div>
         <div>
