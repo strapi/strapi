@@ -30,6 +30,17 @@ import styles from './styles.scss';
 import DocumentationSection from './DocumentationSection';
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getModel = () => {
+    const { modifiedData } = this.props;
+
+    return get(modifiedData, this.getModelName(), {});
+  }
+
+  // getModelAttributesLength = () => {
+  //   const { modifiedData } = this.props;
+  //   const modelAttributes = 
+  // }
+
   getModelDescription = () => {
     const { initialData } = this.props;
     
@@ -85,6 +96,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   render() {
+    console.log(this.props)
+    console.log(this.getModel());
     return (
       <div className={styles.modelpage}>
         <div className="container-fluid">

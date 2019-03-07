@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
+
+import Loader from './Loader';
 import pluginId from '../../pluginId';
 
 import HomePage from '../HomePage';
@@ -54,6 +56,12 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
   }
 
   render() {
+    const { isLoading } = this.props;
+
+    if (isLoading) {
+      return <Loader />;
+    }
+
     return (
       <div className={styles.app}>
         <Switch>

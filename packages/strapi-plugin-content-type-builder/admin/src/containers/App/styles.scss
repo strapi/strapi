@@ -3,3 +3,10 @@
   // background: rgba(14,22,34,0.02);
   background: #fff !important;
 }
+
+
+.centered {
+  position: fixed;
+  top: calc(50% - 13px);
+  right: calc(50% - 13px);
+}

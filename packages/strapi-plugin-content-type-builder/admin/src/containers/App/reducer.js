@@ -11,6 +11,7 @@ import {
 
 export const initialState = fromJS({
   initialData: {},
+  isLoading: true,
   models: [],
   modifiedData: {},
 });
@@ -20,6 +21,7 @@ function appReducer(state = initialState, action) {
     case GET_DATA_SUCCEEDED:
       return state
         .update('initialData', () => action.initialData)
+        .update('isLoading', () => false)
         .update('modifiedData', () => action.initialData)
         .update('models', () => action.models);
     default:

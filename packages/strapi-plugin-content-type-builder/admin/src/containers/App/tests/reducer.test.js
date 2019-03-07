@@ -58,6 +58,7 @@ describe('appReducer', () => {
     };
     const expected = state
       .update('initialData', () => initialData)
+      .update('isLoading', () => false)
       .update('models', () => models)
       .update('modifiedData', () => initialData);
     
