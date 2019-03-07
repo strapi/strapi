@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { findIndex, get, isEmpty } from 'lodash';
-import pluginId from 'pluginId';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
@@ -18,8 +17,10 @@ import ContainerFluid from 'components/ContainerFluid';
 import HeaderNav from 'components/HeaderNav';
 import PluginHeader from 'components/PluginHeader';
 
+import pluginId from '../../pluginId';
+
 // Plugin's components
-import EditForm from 'components/EditForm';
+import EditForm from '../../components/EditForm';
 
 import {
   getSettings,

@@ -84,6 +84,8 @@
   "app.components.NotFoundPage.back": "Back to homepage",
   "app.components.NotFoundPage.description": "Not Found",
   "app.components.Official": "Official",
+  "app.components.Onboarding.label.completed": "% completed",
+  "app.components.Onboarding.title": "Get Started Videos",
   "app.components.PluginCard.Button.label.download": "Download",
   "app.components.PluginCard.Button.label.install": "Already installed",
   "app.components.PluginCard.Button.label.support": "Support us",

@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
+
 import Button from 'components/Button';
-import openWithNewTab from 'utils/openWithNewTab';
+import openWithNewTab from '../../utils/openWithNewTab';
 import styles from './styles.scss';
 
 const ButtonContainer = ({ currentDocVersion, isHeader, onClick, onClickDelete, version }) => {

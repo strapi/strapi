@@ -14,13 +14,15 @@ import {
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { get, flow } from 'lodash';
 import cn from 'classnames';
-import ClickOverHint from 'components/ClickOverHint';
-import DraggedRemovedIcon  from 'components/DraggedRemovedIcon';
-import VariableEditIcon from 'components/VariableEditIcon';
-import ItemTypes from 'utils/ItemTypes';
 
-import GrabIconBlue from 'assets/images/icon_grab_blue.svg';
-import GrabIcon from 'assets/images/icon_grab.svg';
+import GrabIconBlue from '../../assets/images/icon_grab_blue.svg';
+import GrabIcon from '../../assets/images/icon_grab.svg';
+
+import ItemTypes from '../../utils/ItemTypes';
+
+import ClickOverHint from '../ClickOverHint';
+import DraggedRemovedIcon  from '../DraggedRemovedIcon';
+import VariableEditIcon from '../VariableEditIcon';
 
 import Carret from './Carret';
 import styles from './styles.scss';
@@ -31,7 +33,7 @@ const getBootstrapClass = attrType => {
     case 'boolean':
     case 'toggle':
     case 'date':
-    case 'bigint':
+    case 'biginteger':
     case 'decimal':
     case 'float':
     case 'integer':

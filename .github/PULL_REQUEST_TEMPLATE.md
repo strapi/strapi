@@ -26,3 +26,4 @@
 - [ ] MongoDB
 - [ ] MySQL
 - [ ] Postgres
+- [ ] SQLite

@@ -25,9 +25,9 @@ import {
 
 import request from 'utils/request';
 
-import { temporaryContentTypePosted } from 'containers/App/actions';
-
 import { storeData } from '../../utils/storeData';
+
+import { temporaryContentTypePosted } from '../App/actions';
 
 import { MODEL_FETCH, SUBMIT } from './constants';
 import {
