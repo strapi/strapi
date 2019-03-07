@@ -29,6 +29,7 @@ import OverlayBlocker from 'components/OverlayBlocker';
 import auth from 'utils/auth';
 
 import { pluginLoaded, updatePlugin } from '../App/actions';
+
 import {
   makeSelectAppPlugins,
   makeSelectBlockApp,
@@ -54,10 +55,11 @@ import HomePage from '../HomePage/Loadable';
 import Marketplace from '../Marketplace/Loadable';
 import LeftMenu from '../LeftMenu';
 import ListPluginsPage from '../ListPluginsPage/Loadable';
+import Onboarding from '../Onboarding';
 import NotFoundPage from '../NotFoundPage/Loadable';
 import PluginPage from '../PluginPage';
 
-import { getAdminData } from './actions';
+import { emitEvent, getAdminData } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import selectAdminPage from './selectors';
@@ -75,6 +77,7 @@ export class AdminPage extends React.Component {
   getChildContext = () => ({
     currentEnvironment: this.props.adminPage.currentEnvironment,
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
+    emitEvent: this.props.emitEvent,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
     plugins: this.props.plugins,
     updatePlugin: this.props.updatePlugin,
@@ -85,7 +88,6 @@ export class AdminPage extends React.Component {
     this.checkLogin(this.props);
     ReactGA.initialize('UA-54313258-9');
   }
-
   componentDidUpdate(prevProps) {
     const {
       adminPage: { uuid },
@@ -100,7 +102,7 @@ export class AdminPage extends React.Component {
         ReactGA.pageview(pathname);
       }
     }
-
+    
     const hasAdminPath = ['users-permissions', 'hasAdminUser'];
 
     if (
@@ -272,7 +274,11 @@ export class AdminPage extends React.Component {
               <Route path="/plugins/:pluginId" component={PluginPage} />
               <Route path="/plugins" component={ComingSoonPage} />
               <Route path="/list-plugins" component={ListPluginsPage} exact />
-              <Route path="/marketplace" render={this.renderMarketPlace} exact />
+              <Route
+                path="/marketplace"
+                render={this.renderMarketPlace}
+                exact
+              />
               <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
               <Route path="404" component={NotFoundPage} />
@@ -283,12 +289,14 @@ export class AdminPage extends React.Component {
           isOpen={this.props.blockApp && this.props.showGlobalAppBlocker}
           {...this.props.overlayBlockerData}
         />
+        {this.shouldDisplayLogout() && <Onboarding />}
       </div>
     );
   }
 }
 
 AdminPage.childContextTypes = {
+  emitEvent: PropTypes.func,
   currentEnvironment: PropTypes.string.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
@@ -313,6 +321,7 @@ AdminPage.propTypes = {
   appPlugins: PropTypes.array,
   blockApp: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getAdminData: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
@@ -341,6 +350,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       disableGlobalOverlayBlocker,
+      emitEvent,
       enableGlobalOverlayBlocker,
       getAdminData,
       pluginLoaded,
