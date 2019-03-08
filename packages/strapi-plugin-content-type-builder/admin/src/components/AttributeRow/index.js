@@ -42,6 +42,7 @@ class AttributeRow extends React.Component {
       string: IcoString,
       text: IcoText,
       integer: IcoNumber,
+      biginteger: IcoNumber,
       float: IcoNumber,
       decimal: IcoNumber,
       email: IcoEmail,
