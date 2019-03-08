@@ -21,9 +21,9 @@ export function* deleteModel({ modelName }) {
     const requestURL = `/${pluginId}/models/${modelName}`;
     const response = yield call(request, requestURL, { method: 'DELETE' }, true);
 
-    if (response.ok) {
-      yield put(deleteModelSucceeded(modelName));
+    if (response.ok === true) {
       strapi.notification.success(`${pluginId}.notification.success.contentTypeDeleted`);
+      yield put(deleteModelSucceeded(modelName));
     }
   } catch(err) {
     strapi.notification.error('notification.error');

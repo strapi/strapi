@@ -1,15 +1,20 @@
 import React from 'react';
 import { shallow } from 'enzyme';
+
 import { App, mapDispatchToProps } from '../index';
 import { getData } from '../actions';
+
+import Loader from '../Loader';
 
 describe('<App />', () => {
   let props;
 
   beforeEach(() => {
     props = {
+      deleteModel: jest.fn(),
       getData: jest.fn(),
       initialData: {},
+      isLoading: true,
       models: [],
       modifiedData: {},
     };
@@ -17,6 +22,19 @@ describe('<App />', () => {
 
   it('should not crash', () => {
     shallow(<App {...props} />);
+  });
+
+  it('should render the Loader if the prop isLoading is true', () => {
+    const wrapper = shallow(<App {...props} />);
+
+    expect(wrapper.find(Loader)).toHaveLength(1);
+  });
+
+  it('should not render the Loader if isLoading is false', () => {
+    props.isLoading = false;
+    const wrapper = shallow(<App {...props} />);
+
+    expect(wrapper.find(Loader)).toHaveLength(0);
   });
 
   describe('<App />, instances', () => {
