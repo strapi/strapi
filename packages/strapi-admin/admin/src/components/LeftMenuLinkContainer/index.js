@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { findIndex, get, snakeCase, isEmpty, map, sortBy } from 'lodash';
 
-import LeftMenuLink from 'components/LeftMenuLink';
+import LeftMenuLink from '../LeftMenuLink';
 
 import styles from './styles.scss';
 import messages from './messages.json';

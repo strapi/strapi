@@ -6,8 +6,8 @@ import { Provider } from 'react-redux';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { ConnectedRouter } from 'react-router-redux';
-import LanguageProvider from 'containers/LanguageProvider';
-import App from 'containers/App';
+import LanguageProvider from './containers/LanguageProvider';
+import App from './containers/App';
 import { history, store } from './createStore';
 
 const render = (translatedMessages) => {

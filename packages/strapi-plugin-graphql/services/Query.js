@@ -19,10 +19,12 @@ module.exports = {
    * @return Object
    */
 
-  convertToParams: params => {
+  convertToParams: (params, primaryKey) => {
     return Object.keys(params).reduce((acc, current) => {
       return Object.assign(acc, {
-        [`_${current}`]: params[current],
+        [`${
+          primaryKey === current || "id" === current ? "" : "_"
+        }${current}`]: params[current]
       });
     }, {});
   },
@@ -260,7 +262,7 @@ module.exports = {
         Object.defineProperties(ctx, {
           query: {
             value: {
-              ...this.convertToParams(_.omit(_options, 'where')),
+              ...this.convertToParams(_.omit(_options, 'where'), model.primaryKey),
               ..._options.where,
               // Avoid population.
               _populate: model.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias),
@@ -269,7 +271,7 @@ module.exports = {
             configurable: true
           },
           params: {
-            value: this.convertToParams(this.amountLimiting(_options)),
+            value: this.convertToParams(this.amountLimiting(_options), model.primaryKey),
             writable: true,
             configurable: true
           }

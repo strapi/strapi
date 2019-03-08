@@ -12,9 +12,9 @@ import pluralize from 'pluralize';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Input from 'components/InputsIndex';
-import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
-import RelationBox from 'components/RelationBox';
-import RelationNaturePicker from 'components/RelationNaturePicker';
+import PopUpHeaderNavLink from '../PopUpHeaderNavLink';
+import RelationBox from '../RelationBox';
+import RelationNaturePicker from '../RelationNaturePicker';
 import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/tabindex-no-positive */
