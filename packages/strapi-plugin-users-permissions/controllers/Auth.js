@@ -336,6 +336,7 @@ module.exports = {
 
       ctx.send({
         jwt,
+        refreshToken: await strapi.plugins['users-permissions'].services.refreshtoken.issue(_.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']), ctx.request.header['user-agent']),
         user: _.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken'])
       });
     } catch(err) {
