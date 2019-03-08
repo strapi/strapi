@@ -27,5 +27,7 @@
   "notification.config.success": "The settings has been updated",
   "notification.delete.success": "The file has been deleted",
   "notification.dropFile.success": "Your file has been uploaded",
-  "notification.dropFiles.success": "{number} files have been uploaded"
+  "notification.dropFiles.success": "{number} files have been uploaded",
+  "Upload.status.sizeLimit": "{file} is bigger than configured limit size",
+  "Upload.status.disabled" : "File upload is disabled"
 }

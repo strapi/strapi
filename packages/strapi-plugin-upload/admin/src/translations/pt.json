@@ -24,5 +24,7 @@
   "notification.config.success": "As configurações foram actualizadas",
   "notification.delete.success": "O arquivo foi apagado",
   "notification.dropFile.success": "Seu arquivo foi transferido com sucesso",
-  "notification.dropFiles.success": "{number} arquivos foram transferidos com sucesso"
+  "notification.dropFiles.success": "{number} arquivos foram transferidos com sucesso",
+  "Upload.status.sizeLimit": "{file} é maior que o tamanho limite configurado",
+  "Upload.status.disabled" : "O upload de arquivos está desativado"
 }
