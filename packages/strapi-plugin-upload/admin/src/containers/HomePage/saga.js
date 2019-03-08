@@ -13,6 +13,9 @@ import {
 } from 'redux-saga/effects';
 import request from 'utils/request';
 
+import pluginId from '../../pluginId';
+
+
 import {
   deleteSuccess,
   dropSuccess,
@@ -83,7 +86,7 @@ function* uploadFiles(action) {
 
   } catch(error) {
     let message = get(error, ['response', 'payload', 'message', '0', 'messages', '0']);
-    if (isObject(message)) message = {...message, id: `upload.${message.id}`};
+    if (isObject(message)) message = {...message, id: `${pluginId}.${message.id}`};
 
     strapi.notification.error(message || 'notification.error');
   } finally {
