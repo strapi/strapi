@@ -1,15 +1,13 @@
 const { auth } = require('./helpers/auth');
-const rq = require('./helpers/request');
-const restart = require('./helpers/restart');
+const createReq = require('./helpers/request');
 
-// const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+const rq = createReq();
 
 module.exports = async () => {
   await rq({
     url: '/auth/local/register',
     method: 'POST',
     body: auth,
-    json: true,
   }).catch(err => {
     console.log(err);
     throw err;

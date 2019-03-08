@@ -1,6 +1,6 @@
 const request = require('request');
 
-module.exports = function(initTime = 3000) {
+module.exports = function(initTime = 8000) {
   const ping = async () => {
     return new Promise((resolve, reject) => {
       // set timeout to avoid ping indefinitely

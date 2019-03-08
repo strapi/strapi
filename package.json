@@ -24,6 +24,7 @@
     "pre-commit": "~1.1.2",
     "redux-saga": "^0.14.3",
     "request": "^2.87.0",
+    "request-promise-native": "^1.0.7",
     "shelljs": "^0.7.7",
     "snyk": "^1.99.0",
     "strapi-lint": "file:packages/strapi-lint"
@@ -41,7 +42,7 @@
     "test": "snyk test && node ./test/start.js",
     "prettier": "node ./packages/strapi-lint/lib/internals/prettier/index.js",
     "snyk": "node ./scripts/snyk.js",
-    "test:e2e": "jest --config jest.config.e2e.js --runInBand --verbose packages/strapi-generate-api"
+    "test:e2e": "jest --config jest.config.e2e.js --runInBand --verbose --forceExit packages/strapi-generate-api"
   },
   "author": {
     "email": "hi@strapi.io",

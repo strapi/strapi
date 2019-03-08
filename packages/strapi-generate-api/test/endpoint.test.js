@@ -2,7 +2,7 @@
 const { login } = require('../../../test/helpers/auth');
 const form = require('../../../test/helpers/generators');
 const restart = require('../../../test/helpers/restart');
-const rq = require('../../../test/helpers/request');
+const createRequest = require('../../../test/helpers/request');
 
 const cleanDate = entry => {
   delete entry.updatedAt;
@@ -13,12 +13,14 @@ const cleanDate = entry => {
 
 let data;
 
-const sleep = time => new Promise(resolve => setTimeout(resolve, time));
+let rq;
+
+jest.setTimeout(30000);
 
 beforeAll(async () => {
   const body = await login();
 
-  rq.defaults({
+  rq = createRequest({
     headers: {
       Authorization: `Bearer ${body.jwt}`,
     },
@@ -28,12 +30,13 @@ beforeAll(async () => {
 describe('Generate test APIs', () => {
   beforeEach(() => restart(), 60000);
 
-  test('Create new article API', async () => {
-    await rq({
+  test('Create new article API', () => {
+    return rq({
       url: '/content-type-builder/models',
       method: 'POST',
       body: form.article,
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -42,7 +45,8 @@ describe('Generate test APIs', () => {
       url: '/content-type-builder/models',
       method: 'POST',
       body: form.tag,
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -51,7 +55,8 @@ describe('Generate test APIs', () => {
       url: '/content-type-builder/models',
       method: 'POST',
       body: form.category,
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -60,7 +65,8 @@ describe('Generate test APIs', () => {
       url: '/content-type-builder/models',
       method: 'POST',
       body: form.reference,
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -69,7 +75,8 @@ describe('Generate test APIs', () => {
       url: '/content-type-builder/models',
       method: 'POST',
       body: form.product,
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 });
@@ -85,13 +92,12 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
   });
 
   test('Create tag1', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: '/tags',
       method: 'POST',
       body: {
         name: 'tag1',
       },
-      json: true,
     });
 
     data.tags.push(body);
@@ -102,13 +108,12 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
   });
 
   test('Create tag2', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: '/tags',
       method: 'POST',
       body: {
         name: 'tag2',
       },
-      json: true,
     });
 
     data.tags.push(body);
@@ -119,13 +124,12 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
   });
 
   test('Create tag3', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: '/tags',
       method: 'POST',
       body: {
         name: 'tag3',
       },
-      json: true,
     });
 
     data.tags.push(body);
@@ -141,11 +145,10 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       content: 'My super content 1',
     };
 
-    let body = await rq({
+    const { body } = await rq({
       url: '/articles',
       method: 'POST',
       body: entry,
-      json: true,
     });
 
     data.articles.push(body);
@@ -164,11 +167,10 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
       tags: [data.tags[0]],
     };
 
-    let body = await rq({
+    const { body } = await rq({
       url: '/articles',
       method: 'POST',
       body: entry,
-      json: true,
     });
 
     data.articles.push(body);
@@ -188,11 +190,10 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
     cleanDate(entry);
 
-    let body = await rq({
+    const { body } = await rq({
       url: `/articles/${entry.id}`,
       method: 'PUT',
       body: entry,
-      json: true,
     });
 
     data.articles[0] = body;
@@ -212,11 +213,10 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
     cleanDate(entry);
 
-    let body = await rq({
+    const { body } = await rq({
       url: `/articles/${entry.id}`,
       method: 'PUT',
       body: entry,
-      json: true,
     });
 
     data.articles[0] = body;
@@ -234,11 +234,10 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
     cleanDate(entry);
 
-    let body = await rq({
+    const { body } = await rq({
       url: `/articles/${entry.id}`,
       method: 'PUT',
       body: entry,
-      json: true,
     });
 
     data.articles[0] = body;
@@ -257,11 +256,10 @@ describe('Test manyToMany relation (article - tag) with Content Manager', () => 
 
     cleanDate(entry);
 
-    let body = await rq({
+    const { body } = await rq({
       url: `/articles/${entry.id}`,
       method: 'PUT',
       body: entry,
-      json: true,
     });
 
     data.articles[0] = body;
@@ -283,13 +281,12 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
   });
 
   test('Create cat1', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: '/categories',
       method: 'POST',
       body: {
         name: 'cat1',
       },
-      json: true,
     });
 
     data.categories.push(body);
@@ -300,13 +297,12 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
   });
 
   test('Create cat2', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: '/categories',
       method: 'POST',
       body: {
         name: 'cat2',
       },
-      json: true,
     });
 
     data.categories.push(body);
@@ -323,11 +319,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       category: data.categories[0],
     };
 
-    let body = await rq({
+    const { body } = await rq({
       url: '/articles',
       method: 'POST',
       body: entry,
-      json: true,
     });
 
     data.articles.push(body);
@@ -346,11 +341,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
     cleanDate(entry);
 
-    let body = await rq({
+    const { body } = await rq({
       url: `/articles/${entry.id}`,
       method: 'PUT',
       body: entry,
-      json: true,
     });
 
     data.articles[0] = body;
@@ -368,11 +362,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       content: 'Content 2',
     };
 
-    let body = await rq({
+    const { body } = await rq({
       url: '/articles',
       method: 'POST',
       body: entry,
-      json: true,
     });
 
     data.articles.push(body);
@@ -390,11 +383,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
     cleanDate(entry);
 
-    let body = await rq({
+    const { body } = await rq({
       url: `/articles/${entry.id}`,
       method: 'PUT',
       body: entry,
-      json: true,
     });
 
     data.articles[1] = body;
@@ -412,11 +404,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
 
     cleanDate(entry);
 
-    let body = await rq({
+    const { body } = await rq({
       url: `/categories/${entry.id}`,
       method: 'PUT',
       body: entry,
-      json: true,
     });
 
     data.categories[0] = body;
@@ -433,11 +424,10 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
       articles: [data.articles[0]],
     };
 
-    let body = await rq({
+    const { body } = await rq({
       url: '/categories',
       method: 'POST',
       body: entry,
-      json: true,
     });
 
     data.categories.push(body);
@@ -449,10 +439,9 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
   });
 
   test('Get article1 with cat3', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: `/articles/${data.articles[0].id}`,
       method: 'GET',
-      json: true,
     });
 
     expect(body.id);
@@ -460,10 +449,9 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
   });
 
   test('Get article2 with cat2', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: `/articles/${data.articles[1].id}`,
       method: 'GET',
-      json: true,
     });
 
     expect(body.id);
@@ -471,10 +459,9 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
   });
 
   test('Get cat1 without relations', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: `/categories/${data.categories[0].id}`,
       method: 'GET',
-      json: true,
     });
 
     expect(body.id);
@@ -482,10 +469,9 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
   });
 
   test('Get cat2 with article2', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: `/categories/${data.categories[1].id}`,
       method: 'GET',
-      json: true,
     });
 
     expect(body.id);
@@ -494,10 +480,9 @@ describe('Test oneToMany - manyToOne relation (article - category) with Content 
   });
 
   test('Get cat3 with article1', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: `/categories/${data.categories[2].id}`,
       method: 'GET',
-      json: true,
     });
 
     expect(body.id);
@@ -515,13 +500,12 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
   });
 
   test('Create ref1', async () => {
-    let body = await rq({
+    const { body } = await rq({
       url: '/references',
       method: 'POST',
       body: {
         name: 'ref1',
       },
-      json: true,
     });
 
     data.references.push(body);
@@ -536,11 +520,10 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       content: 'Content 1',
     };
 
-    let body = await rq({
+    const { body } = await rq({
       url: '/articles',
       method: 'POST',
       body: entry,
-      json: true,
     });
 
     data.articles.push(body);
@@ -557,11 +540,10 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
 
     cleanDate(entry);
 
-    let body = await rq({
+    const { body } = await rq({
       url: `/articles/${entry.id}`,
       method: 'PUT',
       body: entry,
-      json: true,
     });
 
     data.articles[0] = body;
@@ -579,11 +561,10 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
       reference: data.references[0].id,
     };
 
-    let body = await rq({
+    const { body } = await rq({
       url: '/articles',
       method: 'POST',
       body: entry,
-      json: true,
     });
 
     data.articles.push(body);
@@ -597,42 +578,38 @@ describe('Test oneToOne relation (article - reference) with Content Manager', ()
 
 describe('Test oneWay relation (reference - tag) with Content Manager', () => {
   test('Attach Tag to a Reference', async () => {
-    const tagToCreate = await rq({
+    await rq({
       url: '/tags',
       method: 'POST',
-      json: true,
       body: {
         name: 'tag111',
       },
+    }).then(({ body: tagToCreate }) => {
+      return rq({
+        url: '/references',
+        method: 'POST',
+        body: {
+          name: 'cat111',
+          tag: tagToCreate,
+        },
+      }).then(({ body }) => {
+        expect(body.tag.id).toBe(tagToCreate.id);
+      });
     });
-
-    const referenceToCreate = await rq({
-      url: '/references',
-      method: 'POST',
-      json: true,
-      body: {
-        name: 'cat111',
-        tag: tagToCreate,
-      },
-    });
-
-    expect(referenceToCreate.tag.id).toBe(tagToCreate.id);
   });
 
   test('Detach Tag to a Reference', async () => {
-    const tagToCreate = await rq({
+    const { body: tagToCreate } = await rq({
       url: '/tags',
       method: 'POST',
-      json: true,
       body: {
         name: 'tag111',
       },
     });
 
-    const referenceToCreate = await rq({
+    const { body: referenceToCreate } = await rq({
       url: '/references',
       method: 'POST',
-      json: true,
       body: {
         name: 'cat111',
         tag: tagToCreate,
@@ -641,10 +618,9 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
 
     expect(referenceToCreate.tag.id).toBe(tagToCreate.id);
 
-    const referenceToUpdate = await rq({
+    const { body: referenceToUpdate } = await rq({
       url: `/references/${referenceToCreate.id}`,
       method: 'PUT',
-      json: true,
       body: {
         tag: null,
       },
@@ -654,45 +630,34 @@ describe('Test oneWay relation (reference - tag) with Content Manager', () => {
   });
 
   test('Delete Tag so the relation in the Reference side should be removed', async () => {
-    const tagToCreate = await rq({
+    const { body: tagToCreate } = await rq({
       url: '/tags',
       method: 'POST',
-      json: true,
       body: {
         name: 'tag111',
       },
     });
 
-    const referenceToCreate = await rq({
+    const { body: referenceToCreate } = await rq({
       url: '/references',
       method: 'POST',
-      json: true,
       body: {
         name: 'cat111',
         tag: tagToCreate,
       },
     });
 
-    const tagToDelete = await rq({
+    await rq({
       url: `/tags/${tagToCreate.id}`,
       method: 'DELETE',
-      json: true,
     });
 
-    const referenceToGet = await rq({
+    const { body: referenceToGet } = await rq({
       url: `/references/${referenceToCreate.id}`,
       method: 'GET',
-      json: true,
     });
 
-    try {
-      if (Object.keys(referenceToGet.tag).length == 0) {
-        referenceToGet.tag = null;
-      }
-    } catch (err) {
-      // Silent
-    }
-
+    if (Object.keys(referenceToGet.tag).length == 0) return;
     expect(referenceToGet.tag).toBe(null);
   });
 });
@@ -704,7 +669,8 @@ describe('Delete test APIs', () => {
     await rq({
       url: '/content-type-builder/models/article',
       method: 'DELETE',
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -712,7 +678,8 @@ describe('Delete test APIs', () => {
     await rq({
       url: '/content-type-builder/models/tag',
       method: 'DELETE',
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -720,7 +687,8 @@ describe('Delete test APIs', () => {
     await rq({
       url: '/content-type-builder/models/category',
       method: 'DELETE',
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -728,7 +696,8 @@ describe('Delete test APIs', () => {
     await rq({
       url: '/content-type-builder/models/reference',
       method: 'DELETE',
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 
@@ -736,7 +705,8 @@ describe('Delete test APIs', () => {
     await rq({
       url: '/content-type-builder/models/product',
       method: 'DELETE',
-      json: true,
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
     });
   });
 });

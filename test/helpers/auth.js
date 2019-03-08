@@ -1,26 +1,27 @@
-const rq = require('./request');
+const createRq = require('./request');
 
 const auth = {
   username: 'admin',
   email: 'admin@strapi.io',
-  password: 'pcw123'
+  password: 'pcw123',
 };
+
+const rq = createRq();
 
 module.exports = {
   auth,
   login: () => {
-    return new Promise(async (resolve) => {
-      const body = await rq({
-        url: `/auth/local`,
+    return new Promise(async resolve => {
+      const res = await rq({
+        url: '/auth/local',
         method: 'POST',
         body: {
           identifier: auth.email,
-          password: auth.password
+          password: auth.password,
         },
-        json: true
       });
 
-      resolve(body);
+      resolve(res.body);
     });
-  }
+  },
 };
