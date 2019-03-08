@@ -51,7 +51,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   getModelDescription = () => {
     const { initialData } = this.props;
-    
+
     const description = get(
       initialData,
       [this.getModelName(), 'description'],
@@ -68,7 +68,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     return modelName.split('&')[0];
   }
 
-  getModelNumber = () => {
+  getModelsNumber = () => {
     const { models } = this.props;
 
     return models.length;
@@ -79,7 +79,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const relations = pickBy(attributes, attribute => {
       return !!get(attribute, 'target', null);
     });
-  
+
     return relations;
   }
 
@@ -88,7 +88,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   getSectionTitle = () => {
     const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
 
-    return this.getModelNumber() > 1 ? `${base}plural` : `${base}singular`;
+    return this.getModelsNumber() > 1 ? `${base}plural` : `${base}singular`;
   }
 
   handleClick = () => {}
@@ -188,7 +188,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                     </Flex>
                     <div>
                       <Ul id="attributesList">
-                        {Object.keys(this.getModelAttributes()).map(this.renderLi)}   
+                        {Object.keys(this.getModelAttributes()).map(this.renderLi)}
                       </Ul>
                     </div>
                   </Block>
@@ -215,7 +215,9 @@ const mapStateToProps = createStructuredSelector({
   modelpage: makeSelectModelPage(),
 });
 
+/* istanbul ignore next */
 export function mapDispatchToProps(dispatch) {
+  /* istanbul ignore next */
   return bindActionCreators(
     {},
     dispatch,
