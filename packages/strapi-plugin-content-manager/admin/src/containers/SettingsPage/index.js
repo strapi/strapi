@@ -10,14 +10,19 @@ import { createStructuredSelector } from 'reselect';
 import cn from 'classnames';
 import { get, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
-import pluginId from 'pluginId';
-import { onChange, onSubmit, onReset } from 'containers/App/actions';
-import { makeSelectModifiedSchema, makeSelectSubmitSuccess } from 'containers/App/selectors';
+
 import Input from 'components/InputsIndex';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
-import Block from 'components/Block';
-import SettingsRow from 'components/SettingsRow';
+
+import Block from '../../components/Block';
+import SettingsRow from '../../components/SettingsRow';
+
+import pluginId from '../../pluginId';
+
+import { onChange, onSubmit, onReset } from '../App/actions';
+import { makeSelectModifiedSchema, makeSelectSubmitSuccess } from '../App/selectors';
+
 import reducer from './reducer';
 import saga from './saga';
 import styles from './styles.scss';

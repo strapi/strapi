@@ -30,6 +30,20 @@ module.exports = async cb => {
         return _.startsWith(node_module, 'strapi-provider-upload') || _.startsWith(node_module, 'strapi-upload');
       });
 
+      node_modules.filter((node_module) => {
+        return node_module.startsWith('@');
+      })
+        .forEach((orga) => {
+          const node_modules = fs.readdirSync(path.join(basePath, 'node_modules', orga));
+
+          node_modules.forEach((node_module) => {
+            // DEPRECATED strapi-email-* will be remove in next version
+            if (_.startsWith(node_module, 'strapi-provider-upload') || _.startsWith(node_module, 'strapi-upload')) {
+              uploads.push(`${orga}/${node_module}`);
+            }
+          });
+        });
+
       // mount all providers to get configs
       _.forEach(uploads, (node_module) => {
         strapi.plugins.upload.config.providers.push(

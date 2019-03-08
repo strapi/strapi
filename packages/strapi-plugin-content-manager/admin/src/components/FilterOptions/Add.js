@@ -1,4 +1,4 @@
-import FilterOptionsCTA from 'components/FilterOptionsCTA';
+import FilterOptionsCTA from '../FilterOptionsCTA';
 
 const Add = FilterOptionsCTA.extend`
   &:after {

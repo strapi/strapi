@@ -9,7 +9,8 @@ import { FormattedMessage } from 'react-intl';
 import { has, map } from 'lodash';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
-import Plugin from 'components/Plugin';
+
+import Plugin from '../Plugin';
 
 import styles from './styles.scss';
 

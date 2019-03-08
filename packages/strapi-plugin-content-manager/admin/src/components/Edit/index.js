@@ -18,15 +18,16 @@ import {
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
 import Input from 'components/InputsIndex';
-import InputJSONWithErrors from 'components/InputJSONWithErrors';
-import WysiwygWithErrors from 'components/WysiwygWithErrors';
+
+import InputJSONWithErrors from '../InputJSONWithErrors';
+import WysiwygWithErrors from '../WysiwygWithErrors';
 import styles from './styles.scss';
 
 const getInputType = (type = '') => {
   switch (type.toLowerCase()) {
     case 'boolean':
       return 'toggle';
-    case 'bigint':
+    case 'biginteger':
     case 'decimal':
     case 'float':
     case 'integer':

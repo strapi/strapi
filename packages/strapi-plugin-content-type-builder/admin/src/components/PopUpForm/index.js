@@ -10,7 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { get, map, includes, split, isEmpty, findIndex } from 'lodash';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import Input from 'components/InputsIndex';
-import PopUpHeaderNavLink from 'components/PopUpHeaderNavLink';
+import PopUpHeaderNavLink from '../PopUpHeaderNavLink';
 import styles from './styles.scss';
 
 /* eslint-disable react/jsx-wrap-multilines */
