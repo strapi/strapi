@@ -27,7 +27,7 @@ module.exports = {
     const { files = {} } = ctx.request.body.files;
 
     if (_.isEmpty(files)) {
-      return ctx.badRequest(null, 'Files are empty');
+      return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Upload.status.empty' }] }] : 'Files are empty');
     }
 
     // Transform stream files to buffer
