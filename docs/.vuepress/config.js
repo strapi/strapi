@@ -143,7 +143,7 @@ module.exports = {
               'Contributing guide',
             ],
             '/3.x.x/migration-guide/',
-            '/3.x.x/tutorials/',
+            '/3.x.x/articles/',
             '/3.x.x/community',
           ],
         },
