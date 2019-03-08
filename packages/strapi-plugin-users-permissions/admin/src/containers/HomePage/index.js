@@ -127,7 +127,7 @@ export class HomePage extends React.Component {
     const modifiedObject = get(this.props.modifiedData, [this.getEndPoint(), this.props.dataToEdit]);
     const initObject = get(this.props.initialData, [this.getEndPoint(), this.props.dataToEdit]);
     const formErrors = checkFormValidity(this.props.match.params.settingType, modifiedObject, this.props.dataToEdit);
-    
+
     if (isEqual(initObject, modifiedObject)) {
       return this.props.unsetDataToEdit();
     }
@@ -177,7 +177,7 @@ export class HomePage extends React.Component {
   showLoaders = () => {
     const { data, isLoading, modifiedData } = this.props;
     const isAdvanded = this.getEndPoint() === 'advanced';
-    
+
     return isLoading && get(data, this.getEndPoint()) === undefined && !isAdvanded || isLoading && isAdvanded &&  get(modifiedData, this.getEndPoint()) === undefined;
   }
 
@@ -198,7 +198,7 @@ export class HomePage extends React.Component {
           values={get(modifiedData, this.getEndPoint(), {})}
         />
       );
-    
+
     return (
       <div>
         <form onSubmit={(e) => e.preventDefault()}>

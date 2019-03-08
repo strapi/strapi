@@ -94,7 +94,6 @@ export class ListPage extends React.Component {
 
     if (search !== this.props.location.search) {
       this.getData(this.props, true);
-
     }
 
     if (prevProps.listPage.filtersUpdated !== filtersUpdated) {
@@ -193,7 +192,7 @@ export class ListPage extends React.Component {
    * Retrieve the model's schema
    * @return {Object} Fields
    */
-  getCurrentSchema = () => 
+  getCurrentSchema = () =>
     get(this.props.schema, ['models', this.getCurrentModelName(), 'fields']) ||
     get(this.props.schema, ['models', 'plugins', this.getSource(), this.getCurrentModelName(), 'fields']);
 
@@ -285,10 +284,10 @@ export class ListPage extends React.Component {
     } else {
       const attributes = this.getCurrentModelAttributes();
       const searchable = attributes[target.name].type !== 'json' && attributes[target.name] !== 'array';
-      const attrToAdd = defaultSettingsAttrIndex !== -1 
+      const attrToAdd = defaultSettingsAttrIndex !== -1
         ? get(defaultSettingsDisplay, [defaultSettingsAttrIndex], {})
         : Object.assign(attributes[target.name], { name: target.name, label: upperFirst(target.name), searchable, sortable: searchable });
-      
+
       this.props.addAttr(attrToAdd, defaultSettingsAttrIndex);
     }
   }

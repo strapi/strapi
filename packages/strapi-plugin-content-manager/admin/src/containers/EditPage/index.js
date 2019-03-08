@@ -434,7 +434,7 @@ export class EditPage extends React.Component {
       },
       icon: 'layout',
     };
-    
+
     return (
       <li key={`${pluginId}.link`}  onClick={() => this.context.emitEvent('willEditContentTypeLayoutFromEditView')}>
         <NavLink {...message} url={url} />
