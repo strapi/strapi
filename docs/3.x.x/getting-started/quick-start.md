@@ -155,5 +155,5 @@ Give Public access to the Restaurant Content Type.
 The **Restaurant Content Type** is accessible at `http://localhost:1337/restaurants`.
 
 ::: tip CONGRATULATIONS
-👏 Congratulations, you have now completed the Strapi Quick Start. We invite you to [join the vibrant and active Strapi community](/3.x.x/getting-started/community.html). Please continue reviewing our docs and tutorials to further learn how Strapi can solve your needs.
+👏 Congratulations, you have now completed the Strapi Quick Start. We invite you to [join the vibrant and active Strapi community](/3.x.x/community.html). Please continue reviewing our docs and tutorials to further learn how Strapi can solve your needs.
 :::

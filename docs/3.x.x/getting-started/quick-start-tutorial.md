@@ -266,7 +266,7 @@ This will bring you to the **Add New Relation** screen. We will change two eleme
 
 ![Add new Relation Field screen](../assets/quick-start-detailed/addNewRelationScreen.png 'Add new Relation Field screen')
 
-The first element to change is **Permission (Users-Permissions)** to **Restaurant** (on the right).
+First, click on **Permission (Users-Permissions)** and change it to **Restaurant** (on the right side).
 
 ![Change Permission to Restaurant](../assets/quick-start-detailed/categoryChangePermissionToRestaurant.png 'Change Permission to Restaurant')
 
@@ -309,7 +309,7 @@ Next click on the **+ Add New Restaurant** button (in the top right corner). Go 
 
 ![Add Restaurant Name and Description](../assets/quick-start-detailed/addTheRestaurantData.png 'Add Restaurant Name and Description')
 
-When it is saved, you will see your restaurant listed in the entries. From here you can edit it or add a new resturant.
+When it is saved, you will see your restaurant listed in the entries. From here you can edit it or add a new restaurant.
 
 ![Restaurant is now listed](../assets/quick-start-detailed/listedRestaurant.png 'Restaurant is now listed')
 
@@ -321,7 +321,7 @@ Click on **Categories** under the **CONTENT TYPES** menu on the left.
 
 ![Category Add Content Type Screen](../assets/quick-start-detailed/categoryContentTypeScreen.png 'Category Add Content Type Screen')
 
-Now we will add each of the catgeories. Click the **+ Add New Category** button to add the first category **Italian**. Type `Italian` into the **Name** field. Next, you will see **Restaurants (0)** to the right. Select **Strapi Restaurant** to add this category to the restaurant.
+Now we will add each of the categories. Click the **+ Add New Category** button to add the first category **Italian**. Type `Italian` into the **Name** field. Next, you will see **Restaurants (0)** to the right. Select **Strapi Restaurant** to add this category to the restaurant.
 
 After selecting, **Restaurants (0)** to the right, will change to **Restaurants (1)** (see below). And then press the **Save** button.
 
