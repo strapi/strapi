@@ -36,4 +36,4 @@ if (isDevelopmentMode) {
   shell.exec('npm install', {silent});
 }
 
-shell.echo('Packaged installed successfully');
+shell.echo('Packages installed successfully');

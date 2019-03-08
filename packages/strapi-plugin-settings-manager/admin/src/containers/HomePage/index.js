@@ -9,8 +9,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import pluginId from 'pluginId';
-
 import {
   endsWith,
   find,
@@ -31,18 +29,16 @@ import Helmet from 'react-helmet';
 import Select from 'react-select';
 import { router } from 'app';
 
+import pluginId from '../../pluginId';
 // design
-import ContentHeader from 'components/ContentHeader';
-import EditForm from 'components/EditForm';
-import HeaderNav from 'components/HeaderNav';
-import List from 'components/List';
-import RowDatabase from 'components/RowDatabase';
-import SelectOptionLanguage from 'components/SelectOptionLanguage';
-import RowLanguage from 'components/RowLanguage';
-import PluginLeftMenu from 'components/PluginLeftMenu';
-
-// App selectors
-import { makeSelectSections, makeSelectEnvironments } from 'containers/App/selectors';
+import ContentHeader from '../../components/ContentHeader';
+import EditForm from '../../components/EditForm';
+import HeaderNav from '../../components/HeaderNav';
+import List from '../../components/List';
+import RowDatabase from '../../components/RowDatabase';
+import SelectOptionLanguage from '../../components/SelectOptionLanguage';
+import RowLanguage from '../../components/RowLanguage';
+import PluginLeftMenu from '../../components/PluginLeftMenu';
 
 // utils
 import unknowFlag from 'assets/images/unknow_flag.png';
@@ -50,6 +46,8 @@ import supportedFlags from 'utils/supportedFlags.json';
 import { checkFormValidity, getRequiredInputsDb } from '../../utils/inputValidations';
 import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
 import sendUpdatedParams from '../../utils/sendUpdatedParams';
+// App selectors
+import { makeSelectSections, makeSelectEnvironments } from '../App/selectors';
 import selectHomePage from './selectors';
 import {
   cancelChanges,
@@ -149,7 +147,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     if (isEmpty(formErrors)) {
       // this.props.setErrors([]);
-      this.props.newDatabasePost(this.props.match.params.env, newData);
+      this.props.newDatabasePost(this.props.match.params.env, newData, this.context);
     } else {
       this.props.setErrors(formErrors);
     }
@@ -194,7 +192,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const defaultLanguageArray = formatLanguageLocale(target.id);
 
     // Edit the new config
-    this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n');
+    this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n', this.context);
   }
 
   handleFetch(props) {
@@ -262,7 +260,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     if (isEmpty(body)) return strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
     if (isEmpty(formErrors)) {
-      this.props.editSettings(body, apiUrl);
+      this.props.editSettings(body, apiUrl, this.context);
     } else {
       this.props.setErrors(formErrors);
     }
@@ -280,7 +278,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
 
     if (isEmpty(formErrors)) {
-      this.props.databaseEdit(body, apiUrl);
+      this.props.databaseEdit(body, apiUrl, this.context);
     } else {
       this.props.setErrors(formErrors);
     }
@@ -536,6 +534,10 @@ function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
+
+HomePage.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,

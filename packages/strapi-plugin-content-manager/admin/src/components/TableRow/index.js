@@ -10,8 +10,9 @@ import moment from 'moment';
 import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import cn from 'classnames';
 
-import CustomInputCheckbox from 'components/CustomInputCheckbox';
 import IcoContainer from 'components/IcoContainer';
+
+import CustomInputCheckbox from '../CustomInputCheckbox';
 
 import styles from './styles.scss';
 
@@ -67,6 +68,7 @@ class TableRow extends React.Component {
 
   // Redirect to the edit page
   handleClick() {
+    this.context.emitEvent('willEditEntry');
     this.context.router.history.push(`${this.props.destination}${this.props.redirectUrl}`);
   }
 
@@ -127,6 +129,7 @@ class TableRow extends React.Component {
 }
 
 TableRow.contextTypes = {
+  emitEvent: PropTypes.func,
   router: PropTypes.object.isRequired,
 };
 

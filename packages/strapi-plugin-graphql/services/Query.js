@@ -22,7 +22,9 @@ module.exports = {
   convertToParams: (params, primaryKey) => {
     return Object.keys(params).reduce((acc, current) => {
       return Object.assign(acc, {
-        [`${primaryKey === current ? '' : '_'}${current}`]: params[current],
+        [`${
+          primaryKey === current || "id" === current ? "" : "_"
+        }${current}`]: params[current]
       });
     }, {});
   },

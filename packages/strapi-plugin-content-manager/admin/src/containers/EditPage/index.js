@@ -23,7 +23,7 @@ import {
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 import cn from 'classnames';
-import pluginId from 'pluginId';
+
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
@@ -33,17 +33,24 @@ import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
 import NavLink from 'components/NavLink';
-// Plugin's components
-import CustomDragLayer from 'components/CustomDragLayer';
-import Edit from 'components/Edit';
-import EditRelations from 'components/EditRelations';
-// App selectors
-import { makeSelectSchema } from 'containers/App/selectors';
+
 import getQueryParameters from 'utils/getQueryParameters';
-import { bindLayout } from 'utils/bindLayout';
 import inputValidations from 'utils/inputsValidations';
-import { generateRedirectURI } from 'containers/ListPage/utils';
-import { checkFormValidity } from 'utils/formValidations';
+
+import pluginId from '../../pluginId';
+
+// Plugin's components
+import CustomDragLayer from '../../components/CustomDragLayer';
+import Edit from '../../components/Edit';
+import EditRelations from '../../components/EditRelations';
+
+import { bindLayout } from '../../utils/bindLayout';
+import { checkFormValidity } from '../../utils/formValidations';
+
+// App selectors
+import { makeSelectSchema } from '../App/selectors';
+
+import { generateRedirectURI } from '../ListPage/utils';
 import {
   addRelationItem,
   changeData,
@@ -194,7 +201,7 @@ export class EditPage extends React.Component {
     const title = get(this.getSchema(), 'editDisplay.displayedField');
     const valueToDisplay = get(this.props.editPage, ['initialRecord', title], null);
 
-    return isEmpty(valueToDisplay) ? null : truncate(valueToDisplay, { length: '24', separator: '.' });
+    return isEmpty(toString(valueToDisplay)) ? null : truncate(valueToDisplay, { length: '24', separator: '.' });
   };
 
   /**
@@ -373,7 +380,7 @@ export class EditPage extends React.Component {
     );
 
     if (isEmpty(formErrors)) {
-      this.props.submit();
+      this.props.submit(this.context);
     }
 
     this.props.setFormErrors(formErrors);
@@ -429,7 +436,7 @@ export class EditPage extends React.Component {
     };
 
     return (
-      <li key={`${pluginId}.link`}>
+      <li key={`${pluginId}.link`}  onClick={() => this.context.emitEvent('willEditContentTypeLayoutFromEditView')}>
         <NavLink {...message} url={url} />
       </li>
     );
@@ -499,7 +506,7 @@ export class EditPage extends React.Component {
           const Component = compo.component;
 
           return (
-            <li key={compo.key}>
+            <li key={compo.key} onClick={() => this.context.emitEvent('willEditContentTypeFromEditView')}>
               <Component {...this} {...compo.props} />
             </li>
           );
@@ -557,7 +564,7 @@ export class EditPage extends React.Component {
       location: { search },
     } = this.props;
     const source = getQueryParameters(search, 'source');
-    const basePath = `/plugins/${pluginId}/ctm-configurations`;
+    const basePath = `/plugins/${pluginId}/ctm-configurations/edit-settings`;
     const pathname =
       source !== pluginId
         ? `${basePath}/plugins/${source}/${this.getModelName()}`
@@ -697,6 +704,7 @@ export class EditPage extends React.Component {
 }
 
 EditPage.contextTypes = {
+  emitEvent: PropTypes.func,
   currentEnvironment: PropTypes.string,
   plugins: PropTypes.object,
 };

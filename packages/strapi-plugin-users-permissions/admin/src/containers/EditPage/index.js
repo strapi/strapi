@@ -12,17 +12,18 @@ import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
 import { findIndex, get, isEmpty, isEqual, size } from 'lodash';
 import cn from 'classnames';
-import pluginId from 'pluginId';
 
 // Design
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
-import InputSearch from 'components/InputSearchContainer';
 import LoadingIndicator from 'components/LoadingIndicator';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import PluginHeader from 'components/PluginHeader';
-import Plugins from 'components/Plugins';
-import Policies from 'components/Policies';
+
+import InputSearch from '../../components/InputSearchContainer';
+import Plugins from '../../components/Plugins';
+import Policies from '../../components/Policies';
+import pluginId from '../../pluginId';
 
 // Actions
 import {
@@ -102,7 +103,7 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
       return this.props.setErrors([{ name: 'name', errors: [{ id: 'users-permissions.EditPage.form.roles.name.error' }] }]);
     }
 
-    this.props.submit();
+    this.props.submit(this.context);
   }
 
   showLoaderForm = () => {
@@ -158,7 +159,10 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
             number: size(get(this.props.editPage, ['modifiedData', 'users'])),
           },
         }}
-        onClickAdd={this.props.onClickAdd}
+        onClickAdd={() => {
+          this.context.emitEvent('didAssociateUserToRole');
+          this.props.onClickAdd();
+        }}
         onClickDelete={this.props.onClickDelete}
         name="users"
         type="text"
@@ -265,6 +269,10 @@ EditPage.childContextTypes = {
   setInputPoliciesPath: PropTypes.func.isRequired,
   setShouldDisplayPolicieshint: PropTypes.func.isRequired,
   resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
+};
+
+EditPage.contextTypes = {
+  emitEvent: PropTypes.func,
 };
 
 EditPage.propTypes = {

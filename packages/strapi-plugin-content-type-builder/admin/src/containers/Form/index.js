@@ -32,13 +32,13 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import { router } from 'app';
 
-import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from 'containers/App/actions';
-import { addAttributeToContentType, addAttributeRelationToContentType, editContentTypeAttribute, editContentTypeAttributeRelation, updateContentType } from 'containers/ModelPage/actions';
+import { temporaryContentTypeFieldsUpdated, storeTemporaryMenu } from '../App/actions';
+import { addAttributeToContentType, addAttributeRelationToContentType, editContentTypeAttribute, editContentTypeAttributeRelation, updateContentType } from '../ModelPage/actions';
 
-import AttributeCard from 'components/AttributeCard';
-import InputCheckboxWithNestedInputs from 'components/InputCheckboxWithNestedInputs';
-import PopUpForm from 'components/PopUpForm';
-import PopUpRelations from 'components/PopUpRelations';
+import AttributeCard from '../../components/AttributeCard';
+import InputCheckboxWithNestedInputs from '../../components/InputCheckboxWithNestedInputs';
+import PopUpForm from '../../components/PopUpForm';
+import PopUpRelations from '../../components/PopUpRelations';
 
 // Utils
 import { checkFormValidity } from '../../utils/formValidations';
@@ -373,6 +373,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
   }
 
   goToAttributeTypeView = (attributeType) => {
+    this.context.emitEvent('didSelectContentTypeFieldType', { type: attributeType });
     const settings = attributeType === 'relation' ? 'defineRelation' : 'baseSettings';
     router.push(`${this.props.routePath}#create${this.props.modelName}::attribute${attributeType}::${settings}`);
   }
@@ -460,6 +461,12 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
     let cbSuccess;
     let dataSucces = null;
     let cbFail;
+
+    if (redirectToChoose) {
+      this.context.emitEvent('willAddMoreFieldToContentType');
+    } else if (this.props.hash.indexOf('#edit') !== -1 && this.props.hash.indexOf('::attribute') !== -1) {
+      this.context.emitEvent('willEditFieldOfContentType');
+    }
 
     switch (true) {
       case includes(hashArray[0], '#edit'): {
@@ -682,6 +689,7 @@ export class Form extends React.Component { // eslint-disable-line react/prefer-
 }
 
 Form.contextTypes = {
+  emitEvent: PropTypes.func,
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
 };

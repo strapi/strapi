@@ -58,7 +58,7 @@ module.exports = {
 
     const searchInt = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+      .filter(attribute => ['integer','biginteger', 'decimal', 'float'].includes(this._attributes[attribute].type));
 
     const searchBool = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
@@ -129,11 +129,11 @@ module.exports = {
 
     const searchNoText = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => !['string', 'text', 'boolean', 'integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+      .filter(attribute => !['string', 'text', 'boolean', 'integer', 'biginteger', 'decimal', 'float'].includes(this._attributes[attribute].type));
 
     const searchInt = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+      .filter(attribute => ['integer', 'biginteger', 'decimal', 'float'].includes(this._attributes[attribute].type));
 
     const searchBool = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))

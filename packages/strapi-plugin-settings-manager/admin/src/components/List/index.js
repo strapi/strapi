@@ -21,8 +21,8 @@ import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
-import ButtonPrimaryHotline from 'components/Button';
-import PopUpForm from 'components/PopUpForm';
+import ButtonPrimaryHotline from '../Button';
+import PopUpForm from '../PopUpForm';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props  */

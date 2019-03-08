@@ -10,8 +10,6 @@ import { map, startCase } from 'lodash';
 import pluralize from 'pluralize';
 import { FormattedMessage } from 'react-intl';
 
-import RelationIco from 'components/RelationIco';
-
 import OneWay from '../../assets/images/one_way.svg';
 import OneWaySelected from '../../assets/images/one_way_selected.svg';
 import ManyToMany from '../../assets/images/many_to_many.svg';
@@ -22,6 +20,8 @@ import OneToMany from '../../assets/images/one_to_many.svg';
 import OneToManySelected from '../../assets/images/one_to_many_selected.svg';
 import OneToOne from '../../assets/images/one_to_one.svg';
 import OneToOneSelected from '../../assets/images/one_to_one_selected.svg';
+
+import RelationIco from '../RelationIco';
 
 import styles from './styles.scss';
 

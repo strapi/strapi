@@ -13,9 +13,9 @@ import cn from 'classnames';
 
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 
-import { selectLocale } from 'containers/LanguageProvider/selectors';
-import { changeLocale } from 'containers/LanguageProvider/actions';
-import { languages } from 'i18n';
+import { selectLocale } from '../LanguageProvider/selectors';
+import { changeLocale } from '../LanguageProvider/actions';
+import { languages } from '../../i18n';
 
 import styles from './styles.scss';
 

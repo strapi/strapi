@@ -10,11 +10,12 @@ import {
   // take,
   takeLatest,
 } from 'redux-saga/effects';
-import { makeSelectSchema } from 'containers/App/selectors';
 // Utils.
 import cleanData from 'utils/cleanData';
 import request from 'utils/request';
 import templateObject from 'utils/templateObject';
+
+import { makeSelectSchema } from '../App/selectors';
 import {
   getDataSucceeded,
   setFormErrors,
@@ -67,7 +68,7 @@ function* deleteData() {
   }
 }
 
-export function* submit() {
+export function* submit(action) {
   const currentModelName = yield select(makeSelectModelName());
   const fileRelations = yield select(makeSelectFileRelations());
   const isCreating = yield select(makeSelectIsCreating());
@@ -95,7 +96,7 @@ export function* submit() {
           cleanedData = record[current];
           break;
         case 'date':
-          cleanedData = record[current]._isAMomentObject === true ? record[current].format('YYYY-MM-DD HH:mm:ss') : record[current];
+          cleanedData = record[current] && record[current]._isAMomentObject === true ? record[current].format('YYYY-MM-DD HH:mm:ss') : record[current];
           break;
         default:
           cleanedData = cleanData(record[current], 'value', 'id');
@@ -139,6 +140,8 @@ export function* submit() {
 
     const requestUrl = `/content-manager/explorer/${currentModelName}/${id}`;
 
+    action.context.emitEvent('willSaveEntry');
+
     // Call our request helper (see 'utils/request')
     // Pass false and false as arguments so the request helper doesn't stringify
     // the body and doesn't watch for the server to restart
@@ -149,12 +152,15 @@ export function* submit() {
       params,
     }, false, false);
 
+    action.context.emitEvent('didSaveEntry');
+
     strapi.notification.success('content-manager.success.record.save');
     // Redirect the user to the ListPage container
     yield put(submitSuccess());
 
   } catch(err) {
-    if (isArray(err.response.payload.message)) {
+    action.context.emitEvent('didNotSaveEntry', { error: err });
+    if (isArray(get(err, 'response.payload.message'))) {
       const errors = err.response.payload.message.reduce((acc, current) => {
         const error = current.messages.reduce((acc, current) => {
           if (includes(current.id, 'Auth')) {

@@ -8,12 +8,13 @@ import moment from 'moment';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isObject, size } from 'lodash';
-import FilterOptions from 'components/FilterOptions/Loadable';
 
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
 import PluginHeader from 'components/PluginHeader';
+
+import FilterOptions from '../FilterOptions/Loadable';
 
 import Div from './Div';
 import Flex from './Flex';
@@ -72,7 +73,10 @@ class FiltersPickWrapper extends React.PureComponent {
       label: 'content-manager.components.FiltersPickWrapper.PluginHeader.actions.apply',
       kind: 'primary',
       type: 'submit',
-      onClick: this.props.onSubmit,
+      onClick: (e) => {
+        this.context.emitEvent('didFilterEntries');
+        this.props.onSubmit(e);
+      },
     },
   ]);
 
@@ -177,6 +181,10 @@ class FiltersPickWrapper extends React.PureComponent {
     );
   }
 }
+
+FiltersPickWrapper.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 FiltersPickWrapper.defaultProps = {
   appliedFilters: [],

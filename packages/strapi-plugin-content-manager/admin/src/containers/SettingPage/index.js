@@ -14,7 +14,21 @@ import { DragDropContext } from 'react-dnd';
 import { FormattedMessage } from 'react-intl';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 import PropTypes from 'prop-types';
-import pluginId from 'pluginId';
+import BackHeader from 'components/BackHeader';
+import HeaderNav from 'components/HeaderNav';
+import Input from 'components/InputsIndex';
+import InputSelect from 'components/InputSelect';
+import PluginHeader from 'components/PluginHeader';
+import PopUpWarning from 'components/PopUpWarning';
+
+import pluginId from '../../pluginId';
+
+import Block from '../../components/Block';
+import CustomDragLayer from '../../components/CustomDragLayer';
+import DraggableAttr from '../../components/DraggableAttr';
+import FormTitle from '../../components/FormTitle';
+import VariableDraggableAttr from '../../components/VariableDraggableAttr';
+
 import {
   beginMove,
   endMove,
@@ -31,7 +45,7 @@ import {
   onReset,
   onSubmit,
   setLayout,
-} from 'containers/App/actions';
+} from '../App/actions';
 import {
   makeSelectAddedField,
   makeSelectDraggedItemName,
@@ -41,19 +55,7 @@ import {
   makeSelectModifiedSchema,
   makeSelectShouldResetGrid,
   makeSelectSubmitSuccess,
-} from 'containers/App/selectors';
-
-import BackHeader from 'components/BackHeader';
-import Block from 'components/Block';
-import CustomDragLayer from 'components/CustomDragLayer';
-import DraggableAttr from 'components/DraggableAttr';
-import FormTitle from 'components/FormTitle';
-import HeaderNav from 'components/HeaderNav';
-import Input from 'components/InputsIndex';
-import InputSelect from 'components/InputSelect';
-import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning';
-import VariableDraggableAttr from 'components/VariableDraggableAttr';
+} from '../App/selectors';
 
 import { onClickEditField, onClickEditListItem, onClickEditRelation } from './actions';
 import reducer from './reducer';
@@ -316,7 +318,10 @@ class SettingPage extends React.PureComponent {
       {
         kind: 'primary',
         label: 'content-manager.containers.Edit.submit',
-        onClick: this.handleSubmit,
+        onClick: (e) => {
+          this.context.emitEvent('willSaveContentTypeLayout');
+          this.handleSubmit(e);
+        },
         type: 'submit',
       },
     ];
@@ -1058,7 +1063,7 @@ class SettingPage extends React.PureComponent {
               confirm: 'content-manager.popUpWarning.button.confirm',
             }}
             popUpWarningType="danger"
-            onConfirm={onSubmit}
+            onConfirm={() => onSubmit(this.context)}
           />
           <PopUpWarning
             isOpen={showWarningCancel}
@@ -1082,6 +1087,10 @@ class SettingPage extends React.PureComponent {
     );
   }
 }
+
+SettingPage.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 SettingPage.defaultProps = {
   draggedItemName: null,

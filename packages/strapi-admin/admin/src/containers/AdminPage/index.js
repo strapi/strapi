@@ -22,7 +22,14 @@ import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
 } from 'actions/overlayBlocker';
-import { pluginLoaded, updatePlugin } from 'containers/App/actions';
+
+import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
+import OverlayBlocker from 'components/OverlayBlocker';
+// Utils
+import auth from 'utils/auth';
+
+import { pluginLoaded, updatePlugin } from '../App/actions';
+
 import {
   makeSelectAppPlugins,
   makeSelectBlockApp,
@@ -31,28 +38,28 @@ import {
   makeSelectShowGlobalAppBlocker,
   selectHasUserPlugin,
   selectPlugins,
-} from 'containers/App/selectors';
+} from '../App/selectors';
+import injectReducer from '../../utils/injectReducer';
+import injectSaga from '../../utils/injectSaga';
+
 // Design
-import ComingSoonPage from 'containers/ComingSoonPage';
-import Content from 'containers/Content';
-import LocaleToggle from 'containers/LocaleToggle';
-import CTAWrapper from 'components/CtaWrapper';
-import Header from 'components/Header/index';
-import HomePage from 'containers/HomePage/Loadable';
-import Marketplace from 'containers/Marketplace/Loadable';
-import LeftMenu from 'containers/LeftMenu';
-import ListPluginsPage from 'containers/ListPluginsPage/Loadable';
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import Logout from 'components/Logout';
-import NotFoundPage from 'containers/NotFoundPage/Loadable';
-import OverlayBlocker from 'components/OverlayBlocker';
-import PluginPage from 'containers/PluginPage';
-import FullStory from 'components/FullStory';
-// Utils
-import auth from 'utils/auth';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
-import { getAdminData } from './actions';
+import CTAWrapper from '../../components/CtaWrapper';
+import Header from '../../components/Header/index';
+import Logout from '../../components/Logout';
+import FullStory from '../../components/FullStory';
+
+import ComingSoonPage from '../ComingSoonPage';
+import Content from '../Content';
+import LocaleToggle from '../LocaleToggle';
+import HomePage from '../HomePage/Loadable';
+import Marketplace from '../Marketplace/Loadable';
+import LeftMenu from '../LeftMenu';
+import ListPluginsPage from '../ListPluginsPage/Loadable';
+import Onboarding from '../Onboarding';
+import NotFoundPage from '../NotFoundPage/Loadable';
+import PluginPage from '../PluginPage';
+
+import { emitEvent, getAdminData } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import selectAdminPage from './selectors';
@@ -70,6 +77,7 @@ export class AdminPage extends React.Component {
   getChildContext = () => ({
     currentEnvironment: this.props.adminPage.currentEnvironment,
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
+    emitEvent: this.props.emitEvent,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
     plugins: this.props.plugins,
     updatePlugin: this.props.updatePlugin,
@@ -80,7 +88,6 @@ export class AdminPage extends React.Component {
     this.checkLogin(this.props);
     ReactGA.initialize('UA-54313258-9');
   }
-
   componentDidUpdate(prevProps) {
     const {
       adminPage: { uuid },
@@ -95,7 +102,7 @@ export class AdminPage extends React.Component {
         ReactGA.pageview(pathname);
       }
     }
-
+    
     const hasAdminPath = ['users-permissions', 'hasAdminUser'];
 
     if (
@@ -267,7 +274,11 @@ export class AdminPage extends React.Component {
               <Route path="/plugins/:pluginId" component={PluginPage} />
               <Route path="/plugins" component={ComingSoonPage} />
               <Route path="/list-plugins" component={ListPluginsPage} exact />
-              <Route path="/marketplace" render={this.renderMarketPlace} exact />
+              <Route
+                path="/marketplace"
+                render={this.renderMarketPlace}
+                exact
+              />
               <Route path="/configuration" component={ComingSoonPage} exact />
               <Route path="" component={NotFoundPage} />
               <Route path="404" component={NotFoundPage} />
@@ -278,6 +289,7 @@ export class AdminPage extends React.Component {
           isOpen={this.props.blockApp && this.props.showGlobalAppBlocker}
           {...this.props.overlayBlockerData}
         />
+        {this.shouldDisplayLogout() && <Onboarding />}
       </div>
     );
   }
@@ -285,6 +297,7 @@ export class AdminPage extends React.Component {
 
 AdminPage.childContextTypes = {
   currentEnvironment: PropTypes.string.isRequired,
+  emitEvent: PropTypes.func,
   disableGlobalOverlayBlocker: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
   plugins: PropTypes.object,
@@ -292,6 +305,7 @@ AdminPage.childContextTypes = {
 };
 
 AdminPage.contextTypes = {
+  emitEvent: PropTypes.func,
   router: PropTypes.object.isRequired,
 };
 
@@ -308,6 +322,7 @@ AdminPage.propTypes = {
   appPlugins: PropTypes.array,
   blockApp: PropTypes.bool.isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
+  emitEvent: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getAdminData: PropTypes.func.isRequired,
   hasUserPlugin: PropTypes.bool,
@@ -336,6 +351,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       disableGlobalOverlayBlocker,
+      emitEvent,
       enableGlobalOverlayBlocker,
       getAdminData,
       pluginLoaded,
