@@ -20,7 +20,7 @@ import { routerPropTypes } from 'commonPropTypes';
 
 import pluginId from '../../pluginId';
 
-// import AttributeRow from '../../components/AttributeRow';
+import AttributeLi from '../../components/AttributeLi';
 import Block from '../../components/Block';
 import Flex from '../../components/Flex';
 import LeftMenu from '../../components/LeftMenu';
@@ -83,7 +83,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     return relations;
   }
 
-  getModelRelationShipsLength = () => Object.keys(this.getModelAttributes()).length;
+  getModelRelationShipsLength = () => Object.keys(this.getModelRelationShips()).length;
 
   getSectionTitle = () => {
     const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
@@ -115,8 +115,9 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   renderLi = attribute => {
-    console.log(attribute);
-    return null;
+    const attributeInfos = get(this.getModelAttributes(), attribute, {});
+
+    return <AttributeLi key={attribute} name={attribute} attributeInfos={attributeInfos} />;
   }
 
   render() {
@@ -187,7 +188,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                     </Flex>
                     <div>
                       <Ul id="attributesList">
-                        {Object.keys(this.getModelAttributes()).map(this.renderLi)} 
+                        {Object.keys(this.getModelAttributes()).map(this.renderLi)}   
                       </Ul>
                     </div>
                   </Block>
