@@ -136,7 +136,12 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
         return;
       }
       case 'providers':
+        this.context.emitEvent('willEditAuthenticationProvider');
+        
+        return this.context.setDataToEdit(this.props.item.name);
       case 'email-templates':
+        this.context.emitEvent('willEditEmailTemplates');
+      
         return this.context.setDataToEdit(this.props.item.name);
       default:
         return;
@@ -165,6 +170,7 @@ class ListRow extends React.Component { // eslint-disable-line react/prefer-stat
 }
 
 ListRow.contextTypes = {
+  emitEvent: PropTypes.func,
   setDataToEdit: PropTypes.func.isRequired,
 };
 

@@ -53,12 +53,13 @@ export function changeParams({ target }) {
   };
 }
 
-export function deleteData(id, modelName, source) {
+export function deleteData(id, modelName, source, context) {
   return {
     type: DELETE_DATA,
     id,
     modelName,
     source,
+    context,
   };
 }
 
