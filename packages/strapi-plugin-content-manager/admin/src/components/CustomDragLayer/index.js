@@ -7,9 +7,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { DragLayer } from 'react-dnd';
 import { flow } from 'lodash';
-import DragBox from 'components/DragBox';
-import SelectManyDraggedItem from 'components/SelectManyDraggedItem';
-import ItemTypes from 'utils/ItemTypes';
+
+import ItemTypes from '../../utils/ItemTypes';
+
+import DragBox from '../DragBox';
+import SelectManyDraggedItem from '../SelectManyDraggedItem';
+
 import styles from './styles.scss';
 
 function getItemStyles(props) {

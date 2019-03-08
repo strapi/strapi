@@ -1,4 +1,4 @@
-import FilterOptionsCTA from 'components/FilterOptionsCTA';
+import FilterOptionsCTA from '../FilterOptionsCTA';
 
 const Remove = FilterOptionsCTA.extend`
   &:after {

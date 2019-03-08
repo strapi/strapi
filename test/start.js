@@ -114,7 +114,7 @@ const main = async () => {
       await clean();
       await generate(database);
       await start();
-      // await cypressTest();
+      await cypressTest();
       // await test();
       process.kill(appStart.pid);
     } catch (e) {
@@ -123,7 +123,7 @@ const main = async () => {
     }
   };
 
-  // await testProcess(databases.mongo);
+  await testProcess(databases.mongo);
   // await testProcess(databases.postgres);
   // await testProcess(databases.mysql);
   // await testProcess(databases.sqlite);

@@ -4,9 +4,9 @@ module.exports = {
   find: async function (params, populate, raw = false) {
     return this.query(function(qb) {
       _.forEach(params.where, (where, key) => {
-        if (_.isArray(where.value) && where.symbol !== 'IN') {
+        if (_.isArray(where.value) && where.symbol !== 'IN' && where.symbol !== 'NOT IN') {
           for (const value in where.value) {
-            qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
+            qb[parseInt(value) ? 'orWhere' : 'where'](key, where.symbol, where.value[value]);
           }
         } else {
           qb.where(key, where.symbol, where.value);
@@ -58,7 +58,7 @@ module.exports = {
 
     const searchInt = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+      .filter(attribute => ['integer','biginteger', 'decimal', 'float'].includes(this._attributes[attribute].type));
 
     const searchBool = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
@@ -129,11 +129,11 @@ module.exports = {
 
     const searchNoText = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => !['string', 'text', 'boolean', 'integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+      .filter(attribute => !['string', 'text', 'boolean', 'integer', 'biginteger', 'decimal', 'float'].includes(this._attributes[attribute].type));
 
     const searchInt = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['integer', 'decimal', 'float'].includes(this._attributes[attribute].type));
+      .filter(attribute => ['integer', 'biginteger', 'decimal', 'float'].includes(this._attributes[attribute].type));
 
     const searchBool = Object.keys(this._attributes)
       .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))

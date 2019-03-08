@@ -21,15 +21,15 @@ import InputSearch from 'components/InputSearch';
 import PageFooter from 'components/PageFooter';
 import PluginHeader from 'components/PluginHeader';
 
-// Plugin's component
-import EntriesNumber from 'components/EntriesNumber';
-import List from 'components/List';
-import PluginInputFile from 'components/PluginInputFile';
-
 // Utils
 import getQueryParameters from 'utils/getQueryParameters';
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
+
+import pluginId from '../../pluginId';
+
+// Plugin's component
+import EntriesNumber from '../../components/EntriesNumber';
+import List from '../../components/List';
+import PluginInputFile from '../../components/PluginInputFile';
 
 // Actions
 import {
@@ -221,8 +221,8 @@ const mapStateToProps = selectHomePage();
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,

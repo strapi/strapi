@@ -5,12 +5,12 @@
  */
 
 // Node.js core
-const exec = require('child_process').execSync;
 const path = require('path');
 const fs = require('fs');
 
 // Public node modules.
 const _ = require('lodash');
+const shell = require('shelljs');
 
 // Define files/dir paths
 const pluginsDirPath = path.join(process.cwd(), 'plugins');
@@ -35,9 +35,8 @@ try {
   // Check if path is existing.
   fs.accessSync(adminDirPath, fs.constants.R_OK | fs.constants.W_OK);
 
-  const install = exec(`cd "${adminDirPath}" && ${installCmd}`, {
-    silent: true
-  });
+  shell.cd(adminDirPath);
+  const install = shell.exec(installCmd, {silent: true});
 
   if (install.stderr && install.code !== 0) {
     console.error(install.stderr);
@@ -71,9 +70,8 @@ try {
     console.log('📦  Installing packages...');
 
     try {
-      const install = exec(`cd "${pluginPath}" && ${installCmd}`, {
-        silent: true
-      });
+      shell.cd(pluginPath);
+      const install = shell.exec(installCmd, {silent: true});
 
       if (install.stderr && install.code !== 0) {
         console.error(install.stderr);
