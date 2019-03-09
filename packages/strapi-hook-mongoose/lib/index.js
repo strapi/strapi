@@ -120,6 +120,13 @@ module.exports = function (strapi) {
                   primaryKey: '_id'
                 });
 
+                // Registering Indexes
+                if (_.isArray(definition.indexes)) {
+                  definition.indexes.forEach(index => {
+                    collection.schema.index(index.key, { unique: index.unique });
+                  });
+                }
+
                 // Initialize lifecycle callbacks.
                 const preLifecycle = {
                   validate: 'beforeCreate',
