@@ -516,6 +516,26 @@ module.exports = function(strapi) {
                             break;
                           }
                         }
+
+                        // Registering custom indexes
+                        if (_.isArray(definition.indexes)) {
+                          const indexes = definition.indexes.map(index => {
+                            const columns = Object.keys(index.key);
+                            const indexName = columns.join('_').toUpperCase();
+                            let query;
+                            switch (connection.settings.client) {
+                              case 'mysql':
+                                query = `CREATE ${index.unique ? 'UNIQUE' : ''} INDEX \`${indexName}\` ON \`${table}\` (${columns.map(column => `\`${column}\``).join(', ')})`;
+                                break;
+                              case 'pg':
+                                query = `CREATE ${index.unique ? 'UNIQUE' : ''} INDEX IF NOT EXISTS \`${indexName}\` ON \`${table}\` (${columns.map(column => `\`${column}\` ${index.key[column] > 0 ? 'ASC' : 'DESC'}`).join(', ')})`;
+                                break;
+                            }
+                            return ORM.knex.raw(query);
+                          });
+                          await Promise.all(indexes);
+                        }
+                        
                       } catch (e) {
                         // Handle duplicate errors.
                         if (e.errno !== 1061 && e.code !== '42P07') {
