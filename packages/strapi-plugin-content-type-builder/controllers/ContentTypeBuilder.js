@@ -89,6 +89,8 @@ module.exports = {
 
         if (_.isEmpty(strapi.api)) {
           strapi.emit('didCreateFirstContentType');
+        } else {
+          strapi.emit('didCreateContentType');
         }
 
         ctx.send({ ok: true });

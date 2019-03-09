@@ -380,7 +380,7 @@ export class EditPage extends React.Component {
     );
 
     if (isEmpty(formErrors)) {
-      this.props.submit();
+      this.props.submit(this.context);
     }
 
     this.props.setFormErrors(formErrors);
@@ -436,7 +436,7 @@ export class EditPage extends React.Component {
     };
 
     return (
-      <li key={`${pluginId}.link`}>
+      <li key={`${pluginId}.link`}  onClick={() => this.context.emitEvent('willEditContentTypeLayoutFromEditView')}>
         <NavLink {...message} url={url} />
       </li>
     );
@@ -506,7 +506,7 @@ export class EditPage extends React.Component {
           const Component = compo.component;
 
           return (
-            <li key={compo.key}>
+            <li key={compo.key} onClick={() => this.context.emitEvent('willEditContentTypeFromEditView')}>
               <Component {...this} {...compo.props} />
             </li>
           );
@@ -704,6 +704,7 @@ export class EditPage extends React.Component {
 }
 
 EditPage.contextTypes = {
+  emitEvent: PropTypes.func,
   currentEnvironment: PropTypes.string,
   plugins: PropTypes.object,
 };

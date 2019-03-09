@@ -35,7 +35,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const title = availableNumber > 1 ? `${pluginId}.table.contentType.title.plural`
       : `${pluginId}.table.contentType.title.singular`;
 
-    const renderViewContent = availableNumber === 0 ? 
+    const renderViewContent = availableNumber === 0 ?
       <EmptyContentTypeView handleButtonClick={() => {}} />
     : (
       <TableList

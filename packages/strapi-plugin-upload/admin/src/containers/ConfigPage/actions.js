@@ -40,7 +40,7 @@ export function onCancel() {
 
 export function onChange({ target }) {
   const keys = ['modifiedData'].concat(target.name.split('.'));
-  const value = target.name === 'sizeLimit' ? parseInt(target.value, 10) * 1000 : target.value;
+  const value = target.name === 'sizeLimit' ? Number(target.value) * 1000 : target.value;
 
   return {
     type: ON_CHANGE,

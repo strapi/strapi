@@ -28,11 +28,13 @@ export function* getModels() {
   }
 }
 
-export function* submit() {
+export function* submit(action) {
   try {
     const schema = yield select(makeSelectModifiedSchema());
     yield call(request, '/content-manager/models', { method: 'PUT', body: { schema } });
-
+    
+    action.context.emitEvent('didSaveContentTypeLayout');  
+    
     yield put(submitSucceeded());
   } catch(err) {
     // Silent

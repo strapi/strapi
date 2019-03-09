@@ -46,7 +46,7 @@ import styles from './styles.scss';
 
 // Array of attributes that the ctb can handle at the moment
 const availableAttributes = Object.keys(forms.attribute);
-availableAttributes.push('integer', 'decimal', 'float');
+availableAttributes.push('integer', 'biginteger', 'decimal', 'float');
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-wrap-multilines */
@@ -149,7 +149,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const attributeToRemove = get(model, ['attributes', index]);
     const parallelAttributeIndex = attributeToRemove.name === attributeToRemove.params.key ?
       -1 : findIndex(model.attributes, (attr) => attr.params.key === attributeName);
-      
+
     this.props.deleteAttribute(index, this.props.match.params.modelName, parallelAttributeIndex !== -1);
   }
 
@@ -169,6 +169,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
     switch (attribute.params.type) {
       case 'integer':
+      case 'biginteger':
       case 'float':
       case 'decimal':
         attributeType = 'number';
@@ -321,6 +322,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 }
 
 ModelPage.contextTypes = {
+  emitEvent: PropTypes.func,
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
 };

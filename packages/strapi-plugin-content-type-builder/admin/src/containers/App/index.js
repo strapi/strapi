@@ -12,7 +12,7 @@ import { Switch, Route } from 'react-router-dom';
 
 import pluginId from '../../pluginId';
 
-// import HomePage from '../HomePage';
+import HomePage from '../HomePage';
 import ModelPage from '../ModelPage';
 import NotFoundPage from '../NotFoundPage';
 
@@ -27,10 +27,10 @@ import makeSelectApp from './selectors';
 import styles from './styles.scss';
 
 const ROUTES = [
-  // {
-  //   component: HomePage,
-  //   to: `/plugins/${pluginId}`,
-  // },
+  {
+    component: HomePage,
+    to: `/plugins/${pluginId}`,
+  },
   {
     component: ModelPage,
     to: `/plugins/${pluginId}/models/:modelName`,

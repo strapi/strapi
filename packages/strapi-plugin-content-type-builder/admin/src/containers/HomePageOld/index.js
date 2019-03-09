@@ -46,6 +46,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     if (storeData.getIsModelTemporary()) {
       strapi.notification.info('content-type-builder.notification.info.contentType.creating.notSaved');
     } else {
+      // Send event.
+      this.context.emitEvent('willCreateContentType');
+      // Open CT modal.
       this.toggleModal();
     }
   }
@@ -108,6 +111,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 }
 
 HomePage.contextTypes = {
+  emitEvent: PropTypes.func,
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
 };
