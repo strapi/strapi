@@ -115,6 +115,7 @@ export class HomePage extends React.Component {
   handleButtonClick = () => {
     // TODO change open modal URL
     if (this.props.match.params.settingType === 'roles') {
+      this.context.emitEvent('willCreateRole');
       this.props.history.push(`${this.props.location.pathname}/create`);
     } else if (this.props.match.params.settingType === 'providers') {
       this.props.history.push(`${this.props.location.pathname}#add::${this.props.match.params.settingType}`);
@@ -133,7 +134,7 @@ export class HomePage extends React.Component {
 
     if (isEmpty(formErrors)) {
       this.setState({ showModalEdit: false });
-      this.props.submit(this.props.match.params.settingType);
+      this.props.submit(this.props.match.params.settingType, this.context);
     } else {
       this.props.setFormErrors(formErrors);
     }
@@ -176,7 +177,7 @@ export class HomePage extends React.Component {
   showLoaders = () => {
     const { data, isLoading, modifiedData } = this.props;
     const isAdvanded = this.getEndPoint() === 'advanced';
-    
+
     return isLoading && get(data, this.getEndPoint()) === undefined && !isAdvanded || isLoading && isAdvanded &&  get(modifiedData, this.getEndPoint()) === undefined;
   }
 
@@ -197,7 +198,7 @@ export class HomePage extends React.Component {
           values={get(modifiedData, this.getEndPoint(), {})}
         />
       );
-    
+
     return (
       <div>
         <form onSubmit={(e) => e.preventDefault()}>
@@ -230,6 +231,10 @@ export class HomePage extends React.Component {
 HomePage.childContextTypes = {
   setDataToEdit: PropTypes.func,
   unsetDataToEdit: PropTypes.func,
+};
+
+HomePage.contextTypes = {
+  emitEvent: PropTypes.func,
 };
 
 HomePage.defaultProps = {};

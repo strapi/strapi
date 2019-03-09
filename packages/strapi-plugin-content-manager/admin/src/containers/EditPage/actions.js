@@ -154,9 +154,10 @@ export function setLoader() {
   };
 }
 
-export function submit() {
+export function submit(context) {
   return {
     type: SUBMIT,
+    context,
   };
 }
 

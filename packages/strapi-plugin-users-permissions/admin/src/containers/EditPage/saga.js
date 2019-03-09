@@ -85,7 +85,7 @@ export function* roleGet(action) {
   }
 }
 
-export function* submit() {
+export function* submit(action) {
   try {
     const actionType = yield select(makeSelectActionType());
     const body = yield select(makeSelectModifiedData());
@@ -97,7 +97,11 @@ export function* submit() {
 
     const requestURL = actionType === 'POST' ? '/users-permissions/roles' : `/users-permissions/roles/${roleId}`;
     const response = yield call(request, requestURL, opts);
-
+    
+    if (actionType === 'POST') {
+      action.context.emitEvent('didCreateRole');
+    }
+    
     if (response.ok) {
       yield put(submitSucceeded());
     }

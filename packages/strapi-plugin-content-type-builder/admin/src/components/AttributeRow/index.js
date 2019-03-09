@@ -57,6 +57,7 @@ class AttributeRow extends React.Component {
   handleEdit = () => this.props.onEditAttribute(this.props.row.name);
 
   handleDelete = () => {
+    this.context.emitEvent('willDeleteFieldOfContentType');
     this.props.onDelete(this.props.row.name);
     this.setState({ showWarning: false });
   };
@@ -136,6 +137,10 @@ class AttributeRow extends React.Component {
     );
   }
 }
+
+AttributeRow.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 AttributeRow.propTypes = {
   onDelete: PropTypes.func.isRequired,
