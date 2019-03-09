@@ -10,7 +10,7 @@ const createReq = (defaults = {}) => {
   });
 
   return async options => {
-    await restart(1000);
+    await restart(2000);
 
     const params = JSON.parse(JSON.stringify(options));
 

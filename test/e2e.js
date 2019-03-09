@@ -50,14 +50,19 @@ const main = async () => {
       });
     })
     .catch(err => {
-      console.log(err);
       process.stdout.write('testApp exited before the end with error', () => {
         process.exit(1);
       });
     });
 
-  await test().catch(() => {});
+  await test().catch(() => {
+    process.stdout.write('Tests failed', () => {
+      process.exit(1);
+    });
+  });
+
   process.kill(testApp.pid);
+  process.exit(0);
 };
 
 main();

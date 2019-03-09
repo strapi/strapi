@@ -1,9 +1,9 @@
 module.exports = {
   name: 'setup',
   displayName: 'Setup',
-  testMatch: ['**/test/?(*.)+(spec|test).js'],
+  testMatch: ['**/test/?(*.)+(spec|test).e2e.js'],
   testEnvironment: 'node',
-  globalSetup: '<rootDir>/test/globalSetup.js',
+  // globalSetup: '<rootDir>/test/globalSetup.js',
   coveragePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/node_modules/',

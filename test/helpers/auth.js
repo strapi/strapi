@@ -10,18 +10,16 @@ const rq = createRq();
 
 module.exports = {
   auth,
-  login: () => {
-    return new Promise(async resolve => {
-      const res = await rq({
-        url: '/auth/local',
-        method: 'POST',
-        body: {
-          identifier: auth.email,
-          password: auth.password,
-        },
-      });
-
-      resolve(res.body);
+  login: async () => {
+    const { body } = await rq({
+      url: '/auth/local',
+      method: 'POST',
+      body: {
+        identifier: auth.email,
+        password: auth.password,
+      },
     });
+
+    return body;
   },
 };

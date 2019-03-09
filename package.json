@@ -42,7 +42,7 @@
     "test": "snyk test && node ./test/start.js",
     "prettier": "node ./packages/strapi-lint/lib/internals/prettier/index.js",
     "snyk": "node ./scripts/snyk.js",
-    "test:e2e": "jest --config jest.config.e2e.js --runInBand --verbose --forceExit packages/strapi-generate-api"
+    "test:e2e": "jest --config jest.config.e2e.js --runInBand --verbose --forceExit --detectOpenHandles --no-cache"
   },
   "author": {
     "email": "hi@strapi.io",
