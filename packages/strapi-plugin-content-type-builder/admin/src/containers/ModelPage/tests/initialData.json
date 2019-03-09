@@ -108,7 +108,7 @@
       }
     }
   },
-  "role ": {
+  "role": {
     "collectionName": "users-permissions_role",
     "connection": "default",
     "description": "",

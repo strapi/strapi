@@ -93,6 +93,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   handleClick = () => {}
 
+  handleClickOpenModalChooseAttributes = () => {}
+
   renderLinks = () => {
     const { models } = this.props;
     const links = models.map(model => {
@@ -145,6 +147,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
               <div className={styles.componentsContainer}>
                 <PluginHeader
                   description={this.getModelDescription()}
+                  icon="fa fa-pencil"
                   title={this.getModelName()}
                 />
                 {this.getModelAttributesLength() === 0 ? (
@@ -152,7 +155,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                     description="content-type-builder.home.emptyAttributes.description"
                     id="openAddAttr"
                     label="content-type-builder.button.attributes.add"
-                    onClick={() => {}}
+                    onClick={this.handleClickOpenModalChooseAttributes}
                     title="content-type-builder.home.emptyAttributes.title"
                   />
                 ) : (
@@ -215,9 +218,7 @@ const mapStateToProps = createStructuredSelector({
   modelpage: makeSelectModelPage(),
 });
 
-/* istanbul ignore next */
 export function mapDispatchToProps(dispatch) {
-  /* istanbul ignore next */
   return bindActionCreators(
     {},
     dispatch,

@@ -11,6 +11,7 @@ import LeftMenuLink from '../../../components/LeftMenuLink';
 
 import { ModelPage } from '../index';
 
+import CustomLink from '../CustomLink';
 import initialData from './initialData.json';
 
 describe('<ModelPage />', () => {
@@ -58,16 +59,50 @@ describe('<ModelPage />', () => {
       expect(wrapper.find(Block)).toHaveLength(1);
     });
 
-    it('should display a singular text if the model\'s attributes relationships is one', () => {
+    it('should display a singular text if the model\'s attributes relationship is one', () => {
       const wrapper = shallow(<ModelPage {...props} />);
 
       expect(wrapper.find(FormattedMessage).last().prop('id')).toContain('singular');
     });
 
-    it('should display a singular text if the model\'s attributes relationships is one', () => {
+    it('should display a plural text if the model\'s attributes relationships is more than one', () => {
+      props.match.params.modelName = 'role&source=users-permissions';
+      props.match.path = `${basePath}/role&source=users-permissions`;
       const wrapper = shallow(<ModelPage {...props} />);
 
-      expect(wrapper.find(FormattedMessage).last().prop('id')).toContain('singular');
+      expect(wrapper.find(FormattedMessage).last().prop('id')).toContain('plural');
+    });
+
+    it('should call the handleClickOpenModalChooseAttributes when clicking on the EmptyAttributesBlock', () => {
+      props.initialData.product.attributes = {};
+      props.modifiedData.product.attributes = {};
+      props.match.params.modelName = 'product';
+      props.match.path = `${basePath}/product`;
+
+      const wrapper = shallow(<ModelPage {...props} />);
+      const spyOnClick = jest.spyOn(wrapper.instance(), 'handleClickOpenModalChooseAttributes');
+      wrapper.instance().forceUpdate();
+
+      const onClick = wrapper.find(EmptyAttributesBlock).prop('onClick');
+      onClick();
+
+      expect(spyOnClick).toHaveBeenCalled();
+    });
+
+    it('should call the handleClick when clicking on the <CustomLink />', () => {
+      props.initialData.product.attributes = {};
+      props.modifiedData.product.attributes = {};
+      props.match.params.modelName = 'product';
+      props.match.path = `${basePath}/product`;
+
+      const wrapper = shallow(<ModelPage {...props} />);
+      const spyOnClick = jest.spyOn(wrapper.instance(), 'handleClick');
+      wrapper.instance().forceUpdate();
+
+      const onClick = wrapper.find(CustomLink).prop('onClick');
+      onClick();
+
+      expect(spyOnClick).toHaveBeenCalled();
     });
   });
 

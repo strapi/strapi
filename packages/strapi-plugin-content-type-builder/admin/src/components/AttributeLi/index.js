@@ -61,7 +61,7 @@ function AttributeLi({ attributeInfos: { configurable, plugin, target, type }, n
                   <span style={{ fontStyle: 'italic' }}>
                     {capitalize(target)}
                     &nbsp;
-                    {plugin ? `(${msg}: ${plugin})` : ''}
+                    {plugin && `(${msg}: ${plugin})`}
                   </span>
                 )}
               </FormattedMessage>

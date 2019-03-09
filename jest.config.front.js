@@ -4,6 +4,14 @@ module.exports = {
   collectCoverageFrom: [
     // 'packages/strapi-admin/admin/src/**/**/*.{js,jsx}',
     'packages/strapi-plugin-content-type-builder/admin/src/**/**/*.js',
+    'packages/strapi-plugin-content-type-builder/admin/src/InjectedComponents/*.js',
+    'packages/strapi-plugin-content-type-builder/admin/src/InjectedComponents/tests/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/containers/AppOld/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/containers/HomePageOld/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/containers/ModelPageOld/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/containers/Form/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/containers/Form/utils/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/utils/*.js',
     // 'packages/strapi-plugin-**/**/admin/src/**/**/*.{js,jsx}',
     '!packages/strapi-admin/admin/src/*.{js,jsx}',
     '!packages/strapi-plugin-**/**/admin/src/*.{js,jsx}',
@@ -13,10 +21,10 @@ module.exports = {
   coverageThreshold: {
     global: {
       // NOTE: This should be increased at some point
-      statements: 1,
-      branches: 1,
-      functions: 1,
-      lines: 1,
+      statements: 20,
+      branches: 20,
+      functions: 20,
+      lines: 20,
     },
   },
   globals: {
