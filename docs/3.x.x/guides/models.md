@@ -112,6 +112,64 @@ To improve the Developer eXperience when developing or using the administration 
 }
 ```
 
+## Indexes
+A database index allows a query to efficiently retrieve data from a database.  Indexes are related to specific tables and consist of one or more keys. A table can have more than one index built from it.
+Beside of declaring a single field index inside attributes block, you can for having custome compound indexes in a model-json file, fill `indexes`. it consists of an array of indexes wich consist of a `key` and a boolean `unique` attribute:
+* `key` is an object that contains the field and value pairs where the field is the index key and the value describes the type of index for that field. For an ascending index on a field, specify a value of 1; for descending index, specify a value of -1.
+* `unique` is Optional. Creates a unique index so that the collection will not accept insertion or update of documents where the index key value matches an existing value in the index.
+Specify true to create a unique index. The default value is false. 
+
+
+#### Example
+```json
+{
+  "connection": "default",
+  "info": {
+    "name": "user",
+    "description": "This represents the User Model",
+    "mainField": "email"
+  },
+  "indexes": [
+    {
+      "key": {
+        "firstname": 1,
+        "lastname": 1
+      },
+      "unique": true
+    }
+  ],
+  "attributes": {
+    "firstname": {
+      "type": "string"
+    },
+    "lastname": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email",
+      "required": true,
+      "unique": true
+    },
+    "password": {
+      "type": "password",
+      "required": true,
+      "private": true
+    },
+    "about": {
+      "type": "description"
+    },
+    "age": {
+      "type": "integer",
+      "min": 18,
+      "max": 99,
+      "index": true
+    },
+    "birthday": {
+      "type": "date"
+    }
+  }
+}
+
 ## Relations
 
 Refer to the [relations concept](../concepts/concepts.md#relations) for more informations about relations type.
