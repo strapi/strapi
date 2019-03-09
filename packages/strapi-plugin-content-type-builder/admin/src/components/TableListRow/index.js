@@ -11,7 +11,6 @@ import { FormattedMessage } from 'react-intl';
 import IcoContainer from 'components/IcoContainer';
 import ListRow from 'components/ListRow';
 import PopUpWarning from 'components/PopUpWarning';
-import { router } from 'app';
 import styles from '../TableList/styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-curly-brace-presence */
@@ -26,7 +25,8 @@ class TableListRow extends React.Component {
   }
 
   handleEdit = () => {
-    router.push(
+    const { push } = this.props;
+    push(
       `/plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`,
     );
   };
@@ -39,7 +39,8 @@ class TableListRow extends React.Component {
   };
 
   handleGoTo = () => {
-    router.push(
+    const { push } = this.props;
+    push(
       `/plugins/content-type-builder/models/${this.props.rowItem.name}${
         this.props.rowItem.source ? `&source=${this.props.rowItem.source}` : ''
       }`,
@@ -109,6 +110,7 @@ class TableListRow extends React.Component {
 
 TableListRow.propTypes = {
   onDelete: PropTypes.func.isRequired,
+  push: PropTypes.func.isRequired,
   rowItem: PropTypes.object.isRequired,
 };
 

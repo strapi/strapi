@@ -11,6 +11,9 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 
 import PluginHeader from 'components/PluginHeader';
+
+import { routerPropTypes } from 'commonPropTypes';
+
 import EmptyContentTypeView from '../../components/EmptyContentTypeView';
 import TableList from '../../components/TableList';
 
@@ -24,13 +27,17 @@ import saga from './saga';
 
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-
   handleDeleteModel = (modelName) => {
     this.props.deleteModel(modelName);
   }
 
   render() {
-    const { models } = this.props;
+    const {
+      history: {
+        push,
+      },
+      models,
+    } = this.props;
     const availableNumber = models.length;
     const title = availableNumber > 1 ? `${pluginId}.table.contentType.title.plural`
       : `${pluginId}.table.contentType.title.singular`;
@@ -45,6 +52,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         onButtonClick={() => {}}
         onHandleDelete={this.handleDeleteModel}
         rowItems={this.props.models}
+        push={push}
       />
     );
 
@@ -69,6 +77,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 }
 
 HomePage.propTypes = {
+  ...routerPropTypes().history,
   deleteModel: PropTypes.func.isRequired,
   models: PropTypes.array.isRequired,
 };

@@ -15,6 +15,8 @@ import styles from './styles.scss';
 
 class TableList extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
+    const { push } = this.props;
+
     return (
       <div className={styles.tableListContainer}>
         <div className="container-fluid">
@@ -49,6 +51,7 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                   <TableListRow
                     key={key}
                     onDelete={this.props.onHandleDelete}
+                    push={push}
                     rowItem={rowItem}
                   />
                 ))}
@@ -66,6 +69,7 @@ TableList.propTypes = {
   buttonLabel: PropTypes.string.isRequired,
   onButtonClick: PropTypes.func.isRequired,
   onHandleDelete: PropTypes.func.isRequired,
+  push: PropTypes.func.isRequired,
   rowItems: PropTypes.array.isRequired,
   title: PropTypes.string.isRequired,
 };
