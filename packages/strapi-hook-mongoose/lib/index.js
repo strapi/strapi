@@ -120,7 +120,7 @@ module.exports = function (strapi) {
                   primaryKey: '_id'
                 });
 
-                // Registering Indexes
+                // Registering custom indexes
                 if (_.isArray(definition.indexes)) {
                   definition.indexes.forEach(index => {
                     collection.schema.index(index.key, { unique: index.unique });
