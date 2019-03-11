@@ -19,6 +19,8 @@ import TableList from '../../components/TableList';
 
 import pluginId from '../../pluginId';
 
+import ModelForm from '../ModelForm';
+
 import styles from './styles.scss';
 
 import makeSelectHomePage from './selectors';
@@ -71,6 +73,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
           actions={[]}
         />
         {renderViewContent}
+        <ModelForm />
       </div>
     );
   }
