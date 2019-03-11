@@ -24,5 +24,7 @@
   "notification.config.success": "De instellingen zijn geüpdatet",
   "notification.delete.success": "Het bestand is verwijderd",
   "notification.dropFile.success": "Je bestand is geüpload",
-  "notification.dropFiles.success": "{number} bestanden zijn geüpload"
+  "notification.dropFiles.success": "{number} bestanden zijn geüpload",
+  "Upload.status.sizeLimit": "{file} is groter dan de geconfigureerde limietgrootte",
+  "Upload.status.disabled" : "Bestand uploaden is uitgeschakeld"
 }

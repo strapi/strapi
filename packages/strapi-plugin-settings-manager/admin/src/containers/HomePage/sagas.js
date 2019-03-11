@@ -54,14 +54,19 @@ export function* editDatabase(action) {
       body,
     };
     const requestUrl = `/settings-manager/configurations/databases/${action.apiUrl}`;
-
+    
+    action.context.emitEvent('willEditDatabaseSettings');
+    
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
+      action.context.emitEvent('didEditDatabaseSettings');
+      
       strapi.notification.success('settings-manager.strapi.notification.success.databaseEdit');
       yield put(databaseActionSucceeded());
     }
   } catch(error) {
+    action.context.emitEvent('didNotEditDatabaseSettings');
     const formErrors = map(error.response.payload.message, err => ({ target: err.target, errors: map(err.messages, mess => ({ id: `settings-manager.${mess.id}`})) }));
 
     yield put(databaseActionError(formErrors));
@@ -190,14 +195,17 @@ export function* postDatabase(action) {
       method: 'POST',
       body,
     };
+    action.context.emitEvent('willAddDatabaseSettings');
     const requestUrl = `/settings-manager/configurations/databases/${action.endPoint}`;
     const resp = yield call(request, requestUrl, opts, true);
 
     if (resp.ok) {
+      action.context.emitEvent('didAddDatabaseSettings');
       yield put(databaseActionSucceeded());
       strapi.notification.success('settings-manager.strapi.notification.success.databaseAdd');
     }
   } catch(error) {
+    action.context.emitEvent('didNotAddDatabaseSettings')
     const formErrors = map(error.response.payload.message, (err) => {
       const target = err.target ? replace(err.target, err.target.split('.')[2], '${name}') : 'database.connections.${name}.name';
       return (
@@ -219,14 +227,19 @@ export function* settingsEdit(action) {
       body: action.newSettings,
       method: 'PUT',
     };
+    
+    action.context.emitEvent('willEditSettings', { category : action.endPoint });
+    
     const requestUrl = `/settings-manager/configurations/${action.endPoint}`;
     const resp = yield  call(request, requestUrl, opts, true);
 
     if (resp.ok) {
+      action.context.emitEvent('didEditSettings', { category : action.endPoint });
       yield put(editSettingsSucceeded());
       strapi.notification.success('settings-manager.strapi.notification.success.settingsEdit');
     }
-  } catch(error) {
+  } catch (error) {
+    action.context.emitEvent('didNotEditSettings', { error });
     strapi.notification.error('settings-manager.strapi.notification.error');
   } finally {
     yield put(unsetLoader());

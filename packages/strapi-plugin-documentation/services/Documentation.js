@@ -369,7 +369,13 @@ module.exports = {
       const routeTagConfig = _.get(current, ['config', 'tag']);
       // Add curly braces between dynamic params
       const endPoint = this.formatApiEndPoint(current.path);
-      const verb = current.method.toLowerCase();
+      let verb;
+
+      if (Array.isArray(current.method)) {
+        verb = current.method.map((method) => method.toLowerCase());
+      } else {
+        verb = current.method.toLowerCase();
+      }
       // The key corresponds to firsts keys of the returned object
       let key;
       let tags;
@@ -404,9 +410,16 @@ module.exports = {
         tags: _.isEmpty(tags) ? [_.upperFirst(key)] : [_.upperFirst(tags)],
       };
 
-      _.set(acc, [key, 'paths', endPoint, verb], verbObject);
+      // Swagger is not support key with ',' symbol, for array of methods need generate documentation for each method
+      if (Array.isArray(verb)) {
+        verb.forEach((method) => {
+          _.set(acc, [key, 'paths', endPoint, method], verbObject);
+        });
+      } else {
+        _.set(acc, [key, 'paths', endPoint, verb], verbObject);
+      }
 
-      if (verb === 'post' || verb === 'put') {
+      if (verb.includes('post') || verb.includes('put')) {
         let requestBody;
 
         if (controllerMethod === 'create' || controllerMethod === 'update') {
@@ -439,14 +452,38 @@ module.exports = {
           };
         }
 
-        _.set(acc, [key, 'paths', endPoint, verb, 'requestBody'], requestBody);
+        if (Array.isArray(verb)) {
+          verb.forEach((method) => {
+            _.set(
+              acc,
+              [key, 'paths', endPoint, method, 'requestBody'],
+              requestBody,
+            );
+          });
+        } else {
+          _.set(
+            acc,
+            [key, 'paths', endPoint, verb, 'requestBody'],
+            requestBody,
+          );
+        }
       }
 
       // Refer to https://swagger.io/specification/#pathItemObject
       const parameters = this.generateVerbParameters(verb, controllerMethod, current.path);
 
-      if (verb !== 'post') {
-        _.set(acc, [key, 'paths', endPoint, verb, 'parameters'], parameters);
+      if (!verb.includes('post')) {
+        if (Array.isArray(verb)) {
+          verb.forEach((method) => {
+            _.set(
+              acc,
+              [key, 'paths', endPoint, method, 'parameters'],
+              parameters,
+            );
+          });
+        } else {
+          _.set(acc, [key, 'paths', endPoint, verb, 'parameters'], parameters);
+        }
       }
 
       return acc;
@@ -555,7 +592,14 @@ module.exports = {
         prefix === undefined
           ? this.formatApiEndPoint(`/${pluginName}${current.path}`)
           : this.formatApiEndPoint(`${prefix}${current.path}`);
-      const verb = current.method.toLowerCase();
+      let verb;
+
+      if (Array.isArray(current.method)) {
+        verb = current.method.map((method) => method.toLowerCase());
+      } else {
+        verb = current.method.toLowerCase();
+      }
+      
       const actionType = _.get(current, ['config', 'tag', 'actionType'], '');
       let key;
       let tags;
@@ -591,11 +635,25 @@ module.exports = {
       );
 
       if (_.isEmpty(defaultDocumentation)) {
-        if (verb !== 'post') {
-          _.set(acc, [key, 'paths', endPoint, verb, 'parameters'], parameters);
+        if (!verb.includes('post')) {
+          if (Array.isArray(verb)) {
+            verb.forEach((method) => {
+              _.set(
+                acc,
+                [key, 'paths', endPoint, method, 'parameters'],
+                parameters,
+              );
+            });
+          } else {
+            _.set(
+              acc,
+              [key, 'paths', endPoint, verb, 'parameters'],
+              parameters,
+            );
+          }
         }
 
-        if (verb === 'post' || verb === 'put') {
+        if (verb.includes('post') || verb.includes('put')) {
           let requestBody;
 
           if (actionType === 'create' || actionType === 'update') {
@@ -633,7 +691,22 @@ module.exports = {
               },
             };
           }
-          _.set(acc, [key, 'paths', endPoint, verb, 'requestBody'], requestBody);
+          
+          if (Array.isArray(verb)) {
+            verb.forEach((method) => {
+              _.set(
+                acc,
+                [key, 'paths', endPoint, method, 'requestBody'],
+                requestBody,
+              );
+            });
+          } else {
+            _.set(
+              acc,
+              [key, 'paths', endPoint, verb, 'requestBody'],
+              requestBody,
+            );
+          }
         }
       }
 
@@ -932,18 +1005,23 @@ module.exports = {
    */
   generateResponseDescription: function(verb, tag, endPoint) {
     const isModelRelated = strapi.models[tag] !== undefined && tag === endPoint;
+    
+    if (Array.isArray(verb)) {
+      verb = verb.map((method) => method.toLocaleLowerCase());
+    }
 
-    switch (verb.toLocaleLowerCase()) {
-      case 'get':
-      case 'post':
-      case 'put':
-        return isModelRelated ? `Retrieve ${tag} document(s)` : 'response';
-      case 'delete':
-        return isModelRelated
-          ? `deletes a single ${tag} based on the ID supplied`
-          : 'deletes a single record based on the ID supplied';
-      default:
-        return 'response';
+    if (
+      verb.includes('get') ||
+      verb.includes('put') ||
+      verb.includes('post')
+    ) {
+      return isModelRelated ? `Retrieve ${tag} document(s)` : 'response';
+    } else if (verb.includes('delete')) {
+      return isModelRelated
+        ? `deletes a single ${tag} based on the ID supplied`
+        : 'deletes a single record based on the ID supplied';
+    } else {
+      return 'response';
     }
   },
 
@@ -1079,6 +1157,26 @@ module.exports = {
 
     if (description) {
       return description;
+    }
+    
+    if (Array.isArray(verb)) {
+      const [, controllerMethod] = handler.split('.');
+
+      if (
+        (verb.includes('get') && verb.includes('post')) ||
+        controllerMethod === 'findOrCreate'
+      ) {
+        return `Find or create ${tag} record`;
+      }
+
+      if (
+        (verb.includes('put') && verb.includes('post')) ||
+        controllerMethod === 'createOrUpdate'
+      ) {
+        return `Create or update ${tag} record`;
+      }
+
+      return '';
     }
 
     switch (verb) {

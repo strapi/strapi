@@ -73,7 +73,7 @@ export function* dataGet(action) {
   }
 }
 
-export function* dataDelete({ id, modelName, source }) {
+export function* dataDelete({ id, modelName, source, context }) {
   try {
     const requestUrl = `/content-manager/explorer/${modelName}/${id}`;
     const params = {};
@@ -81,6 +81,8 @@ export function* dataDelete({ id, modelName, source }) {
     if (source !== undefined) {
       params.source = source;
     }
+
+    context.emitEvent('willDeleteEntry');
 
     yield call(request, requestUrl, {
       method: 'DELETE',
@@ -90,6 +92,8 @@ export function* dataDelete({ id, modelName, source }) {
     strapi.notification.success('content-manager.success.record.delete');
 
     yield put(deleteDataSuccess(id));
+
+    context.emitEvent('didDeleteEntry');
   } catch(err) {
     strapi.notification.error('content-manager.error.record.delete');
   }
