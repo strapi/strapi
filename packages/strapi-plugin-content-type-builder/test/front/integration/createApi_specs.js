@@ -126,7 +126,8 @@ describe('Test CTB', () => {
         .wait('@deleteTag')
         .wait(frontLoadingDelay)
         .get('#ctbModelsList li')
-        .should('have.length', 4);
+        .should('have.length', 4)
+        .waitRestart();
     });
 
     it('Should update PRODUCT API field and visit the create product page', () => {
@@ -136,7 +137,7 @@ describe('Test CTB', () => {
       cy.route('PUT', `${backendUrl}/content-type-builder/models/product`).as('updateProductModel');
 
       cy.visit(
-        '/admin/plugins/content-type-builder/models/product#editproduct::attributestring::baseSettings::0',
+        '/admin/plugins/content-type-builder/models/product#editproduct::attributestring::baseSettings::0'
       );
       cy.wait('@getProductModel');
       cy.wait(frontLoadingDelay);
@@ -171,7 +172,14 @@ describe('Test CTB', () => {
         .then(pluginStore => {
           const displayedFields = pluginStore
             .getState()
-            .getIn(['content-manager_global', 'schema', 'models', 'product', 'editDisplay', 'fields'])
+            .getIn([
+              'content-manager_global',
+              'schema',
+              'models',
+              'product',
+              'editDisplay',
+              'fields',
+            ])
             .toJS();
 
           expect(displayedFields).to.include.members([
@@ -183,6 +191,8 @@ describe('Test CTB', () => {
             'email',
           ]);
         });
+
+      cy.waitRestart();
     });
 
     it('Should update PRODUCT API name and visit the create product page', () => {
@@ -192,7 +202,7 @@ describe('Test CTB', () => {
       cy.route('PUT', `${backendUrl}/content-type-builder/models/product`).as('updateProductModel');
 
       cy.visit(
-        '/admin/plugins/content-type-builder/models/product#editproduct::contentType::baseSettings',
+        '/admin/plugins/content-type-builder/models/product#editproduct::contentType::baseSettings'
       );
       cy.wait('@getProductModel');
       cy.wait(frontLoadingDelay);
@@ -231,8 +241,7 @@ describe('Test CTB', () => {
   });
 
   after(() => {
-    cy.wait(10000)
-      .deleteApi('tag', jwt)
+    cy.deleteApi('tag', jwt)
       .deleteApi('produit', jwt)
       .deleteUser(userId, jwt);
   });

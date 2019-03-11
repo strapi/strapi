@@ -105,19 +105,14 @@ class Strapi extends EventEmitter {
 
       // Load the app.
       await this.load();
-
       // Run bootstrap function.
       await this.bootstrap();
-
       // Freeze object.
       await this.freeze();
-
       // Update source admin.
       await admin.call(this);
-
       // Init first start
       utils.init.call(this);
-
       // Launch server.
       this.server.listen(this.config.port, async (err) => {
         if (err) {
@@ -259,6 +254,7 @@ class Strapi extends EventEmitter {
         this.config.environment === 'development' &&
         get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true
       ) {
+        this.server.close();
         process.send('reload');
       }
     };

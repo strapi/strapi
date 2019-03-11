@@ -1,5 +1,4 @@
 const request = require('request-promise-native');
-const restart = require('./restart');
 
 const createReq = (defaults = {}) => {
   const client = request.defaults({
@@ -10,8 +9,6 @@ const createReq = (defaults = {}) => {
   });
 
   return async options => {
-    await restart(2000);
-
     const params = JSON.parse(JSON.stringify(options));
 
     for (let key in params.formData) {

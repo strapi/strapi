@@ -7,5 +7,6 @@
   "serverRestartDelay": 11000,
   "viewportHeight": 900,
   "viewportWidth": 1440,
+  "video": false,
   "integrationFolder": "./packages"
 }

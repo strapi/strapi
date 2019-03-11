@@ -32,10 +32,9 @@ describe('Create Strapi API End to End', () => {
     });
   });
 
-  afterAll(() => new Promise(resolve, setTimeout(resolve, 5000)));
-
   describe('Generate test APIs', () => {
-    beforeEach(() => restart(), 60000);
+    beforeEach(() => restart(), 30000);
+    afterAll(() => restart(), 30000)
 
     test('Create new article API', async () => {
       await rq({
@@ -90,8 +89,6 @@ describe('Create Strapi API End to End', () => {
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {
-      await restart();
-
       data = {
         articles: [],
         tags: [],
@@ -670,7 +667,8 @@ describe('Create Strapi API End to End', () => {
   });
 
   describe('Delete test APIs', () => {
-    beforeEach(() => restart(), 60000);
+    beforeEach(() => restart(), 30000);
+    afterAll(() => restart(), 30000)
 
     test('Delete article API', async () => {
       await rq({

@@ -17,6 +17,7 @@
     "pluralize": "^6.0.0"
   },
   "scripts": {
+    "test": "echo \"no tests yet\"",
     "prepublishOnly": "npm prune"
   },
   "author": {

@@ -21,7 +21,7 @@
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --single-quote --trailing-comma es5 --write \"{lib,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo \"Error: no test specified\""
+    "test": "echo \"no tests yet\""
   },
   "pre-commit": [
     "lint:admin"

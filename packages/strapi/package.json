@@ -75,6 +75,7 @@
     "strapi-utils": "3.0.0-alpha.24.1"
   },
   "scripts": {
+    "test": "jest --forceExit",
     "postinstall": "node lib/utils/success.js"
   },
   "author": {

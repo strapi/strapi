@@ -26,6 +26,7 @@
     "uuid": "^3.1.0"
   },
   "scripts": {
+    "test": "echo \"no tests yet\"",
     "prepublishOnly": "npm prune"
   },
   "author": {

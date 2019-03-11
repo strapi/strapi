@@ -27,6 +27,12 @@ const stringify = JSON.stringify;
 const backendUrl = Cypress.config('backendUrl');
 const serverRestartDelay = Cypress.config('serverRestartDelay');
 
+const WAIT_ON_CMD = 'wait-on http://localhost:1337';
+
+Cypress.Commands.add('waitRestart', () => {
+  return cy.exec(WAIT_ON_CMD);
+});
+
 Cypress.Commands.add('createUser', () => {
   const user = {
     username: 'admin',
@@ -63,37 +69,40 @@ Cypress.Commands.add('deleteUser', (id, jwt) => {
 });
 
 Cypress.Commands.add('createProductAndTagApis', (jwt = null) => {
-  return cy.fixture('api/tag.json').then(body => {
-    return cy
-      .request({
-        url: `${backendUrl}/content-type-builder/models`,
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-        body,
-      })
-      .wait(serverRestartDelay)
-      .fixture('api/product.json')
-      .then(body => {
-        return cy
-          .request({
-            url: `${backendUrl}/content-type-builder/models`,
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${jwt}`,
-            },
-            body,
-          })
-          .wait(serverRestartDelay);
-      });
-  });
+  return cy
+    .exec(WAIT_ON_CMD)
+    .fixture('api/tag.json')
+    .then(body => {
+      return cy
+        .request({
+          url: `${backendUrl}/content-type-builder/models`,
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+          body,
+        })
+        .exec(WAIT_ON_CMD)
+        .fixture('api/product.json')
+        .then(body => {
+          return cy
+            .request({
+              url: `${backendUrl}/content-type-builder/models`,
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${jwt}`,
+              },
+              body,
+            })
+            .exec(WAIT_ON_CMD);
+        });
+    });
 });
 
 Cypress.Commands.add('createCTMApis', (jwt = null) => {
   return cy
     .createProductAndTagApis(jwt)
-    .wait(serverRestartDelay)
+    .exec(WAIT_ON_CMD)
     .fixture('api/category.json')
     .then(body => {
       return cy
@@ -105,7 +114,7 @@ Cypress.Commands.add('createCTMApis', (jwt = null) => {
           },
           body,
         })
-        .wait(serverRestartDelay);
+        .exec(WAIT_ON_CMD);
     });
 });
 
@@ -137,6 +146,7 @@ Cypress.Commands.add('deleteAllModelData', (model, jwt, source = null) => {
 
 Cypress.Commands.add('deleteApi', (model, jwt) => {
   return cy
+    .exec(WAIT_ON_CMD)
     .request({
       url: `${backendUrl}/content-type-builder/models/${model}`,
       method: 'DELETE',
@@ -144,7 +154,7 @@ Cypress.Commands.add('deleteApi', (model, jwt) => {
         Authorization: `Bearer ${jwt}`,
       },
     })
-    .wait(serverRestartDelay);
+    .exec(WAIT_ON_CMD);
 });
 
 Cypress.Commands.add('login', () => {
