@@ -5,6 +5,7 @@ import HeaderNavLink from '../index';
 
 describe('<HeaderNavLink />', () => {
   it('should not crash', () => {
-    shallow(<HeaderNavLink id="app.utils.default" />);
+    const onClick = jest.fn();
+    shallow(<HeaderNavLink id="app.utils.default" onClick={onClick} />);
   });
 });

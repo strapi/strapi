@@ -9,8 +9,11 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
+import { isEmpty } from 'lodash';
 
 import PluginHeader from 'components/PluginHeader';
+
+import getQueryParameters from 'utils/getQueryParameters';
 
 import { routerPropTypes } from 'commonPropTypes';
 
@@ -29,6 +32,15 @@ import saga from './saga';
 
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  handleClick = () => {
+    const { history: { push }, location: { pathname } } = this.props;
+
+    push({
+      pathname,
+      search: 'modalType=model&settingType=base&actionType=create',
+    });
+  }
+
   handleDeleteModel = (modelName) => {
     this.props.deleteModel(modelName);
   }
@@ -38,8 +50,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       history: {
         push,
       },
+      location: { pathname, search },
       models,
     } = this.props;
+
     const availableNumber = models.length;
     const title = availableNumber > 1 ? `${pluginId}.table.contentType.title.plural`
       : `${pluginId}.table.contentType.title.singular`;
@@ -51,7 +65,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         availableNumber={availableNumber}
         title={title}
         buttonLabel={`${pluginId}.button.contentType.add`}
-        onButtonClick={() => {}}
+        onButtonClick={this.handleClick}
         onHandleDelete={this.handleDeleteModel}
         rowItems={this.props.models}
         push={push}
@@ -73,7 +87,13 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
           actions={[]}
         />
         {renderViewContent}
-        <ModelForm />
+        <ModelForm
+          actionType={getQueryParameters(search, 'actionType')}
+          activeTab={getQueryParameters(search, 'settingType')}
+          isOpen={!isEmpty(search)}
+          pathname={pathname}
+          push={push}
+        />
       </div>
     );
   }
