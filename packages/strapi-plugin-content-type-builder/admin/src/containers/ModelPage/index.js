@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
+import { Redirect } from 'react-router-dom';
 import { get, pickBy } from 'lodash';
 
 import Button from 'components/Button';
@@ -95,6 +96,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   handleClickOpenModalChooseAttributes = () => {}
 
+  shouldRedirect = () => {
+    const { models } = this.props;
+
+    return models.findIndex(model => model.name === this.getModelName()) === -1;
+  }
+
   renderLinks = () => {
     const { models } = this.props;
     const links = models.map(model => {
@@ -124,6 +131,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   render() {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
+    const { models } = this.props;
+
+    if (this.shouldRedirect()) {
+      return <Redirect to={`/plugins/${pluginId}/models/${models[0].name}`} />;
+    }
 
     return (
       <div className={styles.modelpage}>

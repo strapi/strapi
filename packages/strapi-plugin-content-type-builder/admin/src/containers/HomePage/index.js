@@ -63,6 +63,8 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   render() {
     const {
+      cancelNewContentType,
+      createTempContentType,
       history: {
         push,
       },
@@ -107,6 +109,8 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         <ModelForm
           actionType={this.getActionType()}
           activeTab={getQueryParameters(search, 'settingType')}
+          cancelNewContentType={cancelNewContentType}
+          createTempContentType={createTempContentType}
           currentData={modifiedData}
           modifiedData={this.getFormData()}
           onChangeNewContentType={onChangeNewContentType}

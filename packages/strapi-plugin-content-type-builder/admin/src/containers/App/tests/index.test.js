@@ -11,6 +11,7 @@ describe('<App />', () => {
 
   beforeEach(() => {
     props = {
+      cancelNewContentType: jest.fn(),
       deleteModel: jest.fn(),
       getData: jest.fn(),
       initialData: {},

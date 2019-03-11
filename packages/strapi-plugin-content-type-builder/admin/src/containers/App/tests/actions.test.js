@@ -81,7 +81,7 @@ describe('App actions', () => {
   describe('GetDataSucceeded', () => {
     it('has a type of GET_DATA_SUCCEEDED and returns the correct data', () => {
       const models = [
-        { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions' },
+        { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
       ];
       const allModels = [
         {

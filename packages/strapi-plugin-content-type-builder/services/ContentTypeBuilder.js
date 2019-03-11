@@ -131,7 +131,8 @@ module.exports = {
         icon: 'fa-cube',
         name: _.get(model, 'info.name', 'model.name.missing'),
         description: _.get(model, 'info.description', 'model.description.missing'),
-        fields: _.keys(model.attributes).length
+        fields: _.keys(model.attributes).length,
+        isTemporary: false,
       });
     });
 

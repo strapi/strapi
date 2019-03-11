@@ -18,7 +18,13 @@ import NotFoundPage from '../NotFoundPage';
 
 import Loader from './Loader';
 
-import { getData, deleteModel, onChangeNewContentType } from './actions';
+import {
+  cancelNewContentType,
+  createTempContentType,
+  deleteModel,
+  getData,
+  onChangeNewContentType,
+} from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
@@ -75,6 +81,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 }
 
 App.propTypes = {
+  cancelNewContentType: PropTypes.func.isRequired,
   deleteModel: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
@@ -86,6 +93,8 @@ const mapStateToProps = makeSelectApp();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      cancelNewContentType,
+      createTempContentType,
       deleteModel,
       getData,
       onChangeNewContentType,

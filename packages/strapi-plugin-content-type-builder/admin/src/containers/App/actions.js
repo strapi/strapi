@@ -5,12 +5,40 @@
  */
 import { pick, set } from 'lodash';
 import {
-  GET_DATA,
-  GET_DATA_SUCCEEDED,
+  CANCEL_NEW_CONTENT_TYPE,
+  CREATE_TEMP_CONTENT_TYPE,
   DELETE_MODEL,
   DELETE_MODEL_SUCCEEDED,
+  GET_DATA,
+  GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE,
 } from './constants';
+
+export function cancelNewContentType() {
+  return {
+    type: CANCEL_NEW_CONTENT_TYPE,
+  };
+}
+
+export function createTempContentType() {
+  return {
+    type: CREATE_TEMP_CONTENT_TYPE,
+  };
+}
+
+export function deleteModel(modelName) {
+  return {
+    type: DELETE_MODEL,
+    modelName,
+  };
+}
+
+export function deleteModelSucceeded(modelName) {
+  return {
+    type: DELETE_MODEL_SUCCEEDED,
+    modelName,
+  };
+}
 
 export function getData() {
   return {
@@ -32,20 +60,6 @@ export function getDataSucceeded({ allModels, models }, connections) {
     initialData,
     models,
     connections,
-  };
-}
-
-export function deleteModel(modelName) {
-  return {
-    type: DELETE_MODEL,
-    modelName,
-  };
-}
-
-export function deleteModelSucceeded(modelName) {
-  return {
-    type: DELETE_MODEL_SUCCEEDED,
-    modelName,
   };
 }
 

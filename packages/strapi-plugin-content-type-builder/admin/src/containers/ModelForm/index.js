@@ -54,7 +54,17 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
     this.props.onChangeNewContentType({ target });
   }
 
-  handleGotTo = to => {
+  handleCancel = () => {
+    const { actionType, cancelNewContentType, pathname, push } = this.props;
+
+    if (actionType === 'create') {
+      cancelNewContentType();
+    }
+
+    push({ pathname, search: '' });
+  }
+
+  handleGoTo = to => {
     const { actionType, pathname, push } = this.props;
 
     push({
@@ -63,16 +73,10 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
     });
   }
 
-  handleToggle = () => {
-    const { pathname, push } = this.props;
-
-    push({ pathname });
-  };
-
   handleSubmit = (e) => {
     e.preventDefault();
 
-    const { currentData, modifiedData, actionType, createTempContentType } = this.props;
+    const { currentData, modifiedData, actionType, createTempContentType, push } = this.props;
     const alreadyTakenContentTypeNames = Object.keys(currentData);
     let formErrors = [];
 
@@ -89,6 +93,7 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
     if (formErrors.length === 0) {
       if (actionType === 'create') {
         createTempContentType();
+        push(`/plugins/${pluginId}/models/${modifiedData.name}`);
       } else {
         console.log('not ready yet');
       }
@@ -136,7 +141,7 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
         isActive={activeTab === link.id}
         key={link.id}
         {...link}
-        onClick={this.handleGotTo}
+        onClick={this.handleGoTo}
         nextTab={index === NAVLINKS.length - 1 ? 0 : index + 1}
       />
     );
@@ -144,9 +149,10 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
 
   render() {
     const { activeTab, isOpen } = this.props;
+    const currentForm = get(forms, activeTab, forms.base);
 
     return (
-      <WrapperModal isOpen={isOpen} onToggle={this.handleToggle}>
+      <WrapperModal isOpen={isOpen} onToggle={this.handleCancel}>
         <HeaderModal>
           <HeaderModalTitle title={`${pluginId}.popUpForm.create.contentType.header.title`} />
           <HeaderModalNavContainer>
@@ -155,11 +161,11 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
         </HeaderModal>
         <form onSubmit={this.handleSubmit}>
           <BodyModal>
-            {!!activeTab && forms[activeTab].items.map(this.renderInput)}
+            {currentForm.items.map(this.renderInput)}
           </BodyModal>
           <FooterModal>
-            <ButtonModalSecondary message={`${pluginId}.form.button.cancel`} onClick={() => {}} />
-            <ButtonModalPrimary message={`${pluginId}.form.button.save`} onClick={() => {}} type="submit" />
+            <ButtonModalSecondary message={`${pluginId}.form.button.cancel`} onClick={this.handleCancel} />
+            <ButtonModalPrimary message={`${pluginId}.form.button.save`} type="submit" />
           </FooterModal>
         </form>
       </WrapperModal>
@@ -170,6 +176,7 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
 ModelForm.defaultProps = {
   actionType: 'create',
   activeTab: 'base',
+  cancelNewContentType: () => {},
   connections: ['default'],
   createTempContentType: () => {},
   currentData: {},
@@ -183,6 +190,7 @@ ModelForm.defaultProps = {
 ModelForm.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
+  cancelNewContentType: PropTypes.func,
   connections: PropTypes.arrayOf(
     PropTypes.string,
   ),

@@ -27,13 +27,14 @@ function ButtonModalPrimary({ add, message, onClick, type }) {
 
 ButtonModalPrimary.defaultProps = {
   add: false,
+  onClick: () => {},
   type: 'button',
 };
 
 ButtonModalPrimary.propTypes = {
   add: PropTypes.bool,
   message: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
   type: PropTypes.string,
 };
 

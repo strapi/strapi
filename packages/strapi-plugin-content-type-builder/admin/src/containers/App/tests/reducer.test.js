@@ -10,7 +10,7 @@ describe('appReducer', () => {
       connections: [],
       initialData: {},
       isLoading: true,
-      models: [],
+      models: List([]),
       modifiedData: {},
       newContentType: {
         collectionName: "",
@@ -184,7 +184,7 @@ describe('appReducer', () => {
       .update('connections', () => List(connections))
       .update('initialData', () => initialData)
       .update('isLoading', () => false)
-      .update('models', () => models)
+      .update('models', () => List(models))
       .updateIn(['newContentType', 'connection'], () => 'default')
       .update('modifiedData', () => initialData);
 
