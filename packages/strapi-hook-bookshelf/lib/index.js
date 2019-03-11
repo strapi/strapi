@@ -444,9 +444,6 @@ module.exports = function(strapi) {
                           case 'time':
                           case 'datetime':
                           case 'timestamp':
-                            // while altering table, sqlite3 dont allow creating new timestamp field with DEFAULT as CURRENT_TIMESTAMP/CURRENT_DATE/CURRENT_TIME
-                            // So, create timestamp field with DEFAULT NULL (i think we dont have support for adding default value from dashboard yet)
-                            // related issues: #2930
                             type = definition.client === 'pg' ? 'timestamp with time zone' : definition.client === 'sqlite3' && isTableExist ? 'timestamp DEFAULT NULL' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
                             break;
                           case 'timestampUpdate':
