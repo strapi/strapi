@@ -682,8 +682,8 @@ Callbacks on `fetch`:
  - afterFetch
 
 Callbacks on `fetchAll`:
- - beforeFetchAll
- - afterFetchAll
+ - beforeFetchCollection
+ - afterFetchCollection
 
 Callbacks on `create`:
  - beforeCreate
