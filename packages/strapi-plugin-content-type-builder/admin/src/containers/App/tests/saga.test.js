@@ -9,30 +9,33 @@ import defaultSaga, { deleteModel, getData } from '../saga';
 import { deleteModelSucceeded, getDataSucceeded } from '../actions';
 import { DELETE_MODEL, GET_DATA } from '../constants';
 
-const response = {
-  models: [
-    { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions' },
-  ],
-  allModels: [
-    {
-      collectionName: 'users-permissions_permission',
-      connection: 'default',
-      description: '',
-      mainField: '',
-      name: 'permission',
-      attributes: [
-        {
-          name: 'type',
-          params: { type: 'string', required: true, configurable: false },
-        },
-        {
-          name: 'controller',
-          params: { type: 'string', required: true, configurable: false },
-        },
-      ],
-    },
-  ],
-};
+const response = [
+  {
+    models: [
+      { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions' },
+    ],
+    allModels: [
+      {
+        collectionName: 'users-permissions_permission',
+        connection: 'default',
+        description: '',
+        mainField: '',
+        name: 'permission',
+        attributes: [
+          {
+            name: 'type',
+            params: { type: 'string', required: true, configurable: false },
+          },
+          {
+            name: 'controller',
+            params: { type: 'string', required: true, configurable: false },
+          },
+        ],
+      },
+    ],
+  },
+  { connections: ['default'] },
+];
 
 describe('CTB <App /> DeleteModel saga', () => {
   let deleteModelGenerator;
@@ -77,8 +80,9 @@ describe('CTB <App /> GetData saga', () => {
 
   it('should dispatch the getDataSucceeded action if it requests the data successfully', () => {
     const putDescriptor = getDataGenerator.next(response).value;
+    const [data, { connections }] = response;
 
-    expect(putDescriptor).toEqual(put(getDataSucceeded(response)));
+    expect(putDescriptor).toEqual(put(getDataSucceeded(data, connections)));
   });
 
   it('should call the strapi.notification if the request fails', () => {

@@ -123,13 +123,15 @@ describe('App actions', () => {
           },
         },
       };
+      const connections = ['default'];
       const expected = {
         type: GET_DATA_SUCCEEDED,
         models,
         initialData,
+        connections,
       };
 
-      expect(getDataSucceeded({ models, allModels })).toEqual(expected);
+      expect(getDataSucceeded({ models, allModels }, connections)).toEqual(expected);
     });
   });
 });

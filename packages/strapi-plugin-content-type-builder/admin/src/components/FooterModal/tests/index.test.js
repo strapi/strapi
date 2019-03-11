@@ -1,16 +1,16 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import BodyModal from '../index';
+import FooterModal from '../index';
 
-describe('<BodyModal />', () => {
+describe('<FooterModal />', () => {
   it('should not crash', () => {
-    shallow(<BodyModal />);
+    shallow(<FooterModal />);
   });
 
   it('should render its children', () => {
     const Child = () => <div>This is a child</div>;
-    const wrapper = shallow(<BodyModal><Child /></BodyModal>);
+    const wrapper = shallow(<FooterModal><Child /></FooterModal>);
 
     expect(wrapper.find(Child).exists()).toBe(true);
   });

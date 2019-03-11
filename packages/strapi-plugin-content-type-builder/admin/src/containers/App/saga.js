@@ -8,9 +8,12 @@ import { GET_DATA, DELETE_MODEL } from './constants';
 export function* getData() {
   try {
     const requestURL = `/${pluginId}/models`;
-    const data = yield call(request, requestURL, { method: 'GET' });
+    const [data, { connections }] = yield all([
+      call(request, requestURL, { method: 'GET' }),
+      call(request, `/content-type-builder/connections`, { method: 'GET' }),
+    ]);
 
-    yield put(getDataSucceeded(data));
+    yield put(getDataSucceeded(data, connections));
   } catch(err) {
     strapi.notification.error('notification.error');
   }

@@ -32,6 +32,22 @@ import saga from './saga';
 
 
 export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getActionType = () => {
+    const { location: {  search } } = this.props;
+
+    return getQueryParameters(search, 'actionType');
+  }
+
+  getFormData = () => {
+    const { newContentType } = this.props;
+
+    if (this.getActionType() === 'create') {
+      return newContentType;
+    }
+
+    return null;
+  }
+
   handleClick = () => {
     const { history: { push }, location: { pathname } } = this.props;
 
@@ -52,8 +68,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       },
       location: { pathname, search },
       models,
+      modifiedData,
+      onChangeNewContentType,
     } = this.props;
-
     const availableNumber = models.length;
     const title = availableNumber > 1 ? `${pluginId}.table.contentType.title.plural`
       : `${pluginId}.table.contentType.title.singular`;
@@ -88,8 +105,11 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         />
         {renderViewContent}
         <ModelForm
-          actionType={getQueryParameters(search, 'actionType')}
+          actionType={this.getActionType()}
           activeTab={getQueryParameters(search, 'settingType')}
+          currentData={modifiedData}
+          modifiedData={this.getFormData()}
+          onChangeNewContentType={onChangeNewContentType}
           isOpen={!isEmpty(search)}
           pathname={pathname}
           push={push}
@@ -103,6 +123,7 @@ HomePage.propTypes = {
   ...routerPropTypes().history,
   deleteModel: PropTypes.func.isRequired,
   models: PropTypes.array.isRequired,
+  onChangeNewContentType: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

@@ -18,7 +18,7 @@ import NotFoundPage from '../NotFoundPage';
 
 import Loader from './Loader';
 
-import { getData, deleteModel } from './actions';
+import { getData, deleteModel, onChangeNewContentType } from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
@@ -78,6 +78,7 @@ App.propTypes = {
   deleteModel: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  onChangeNewContentType: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectApp();
@@ -87,6 +88,7 @@ export function mapDispatchToProps(dispatch) {
     {
       deleteModel,
       getData,
+      onChangeNewContentType,
     },
     dispatch,
   );

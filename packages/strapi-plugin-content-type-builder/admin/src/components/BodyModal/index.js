@@ -10,16 +10,14 @@ import { ModalBody } from 'reactstrap';
 
 import styles from './styles.scss';
 
-function BodyModal({ children, onSubmit }) {
+function BodyModal({ children }) {
   return (
     <ModalBody className={styles.bodyModal}>
-      <form onSubmit={onSubmit}>
-        <div className="container-fluid">
-          <div className="row">
-            {children}
-          </div>
+      <div className="container-fluid">
+        <div className="row">
+          {children}
         </div>
-      </form>
+      </div>
     </ModalBody>
   );
 }
@@ -27,14 +25,10 @@ function BodyModal({ children, onSubmit }) {
 /* istanbul ignore next */
 BodyModal.defaultProps = {
   children: null,
-  onSubmit: (e) => {
-    e.preventDefault();
-  },
 };
 
 BodyModal.propTypes = {
   children: PropTypes.node,
-  onSubmit: PropTypes.func,
 };
 
 export default BodyModal;

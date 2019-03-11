@@ -9,6 +9,7 @@ import {
   GET_DATA_SUCCEEDED,
   DELETE_MODEL,
   DELETE_MODEL_SUCCEEDED,
+  ON_CHANGE_NEW_CONTENT_TYPE,
 } from './constants';
 
 export function getData() {
@@ -17,7 +18,7 @@ export function getData() {
   };
 }
 
-export function getDataSucceeded({ allModels, models }) {
+export function getDataSucceeded({ allModels, models }, connections) {
   const initialData = allModels.reduce((acc, current) => {
     acc[current.name] = pick(current, ['name', 'collectionName', 'connection', 'description', 'mainField']);
     const attributes = buildModelAttributes(current.attributes);
@@ -30,6 +31,7 @@ export function getDataSucceeded({ allModels, models }) {
     type: GET_DATA_SUCCEEDED,
     initialData,
     models,
+    connections,
   };
 }
 
@@ -44,6 +46,14 @@ export function deleteModelSucceeded(modelName) {
   return {
     type: DELETE_MODEL_SUCCEEDED,
     modelName,
+  };
+}
+
+export function onChangeNewContentType({ target }) {
+  return {
+    type: ON_CHANGE_NEW_CONTENT_TYPE,
+    keys: target.name.split('.'),
+    value: target.value,
   };
 }
 

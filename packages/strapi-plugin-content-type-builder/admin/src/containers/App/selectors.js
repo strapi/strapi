@@ -20,7 +20,13 @@ const makeSelectApp = () => createSelector(
   (substate) => substate.toJS()
 );
 
+const makeSelectConnections = () => createSelector(
+  selectAppDomain(),
+  substate => substate.get('connections').toJS(),
+);
+
 export default makeSelectApp;
 export {
   selectAppDomain,
+  makeSelectConnections,
 };

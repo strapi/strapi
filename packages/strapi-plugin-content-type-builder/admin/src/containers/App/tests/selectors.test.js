@@ -1,8 +1,9 @@
 import { fromJS } from 'immutable';
 import pluginId from '../../../pluginId';
-import makeSelectApp, { selectAppDomain } from '../selectors';
+import makeSelectApp, { makeSelectConnections, selectAppDomain } from '../selectors';
 
 const state = fromJS({
+  connections: ['default'],
   initialData: {},
   models: [],
   modifiedData: {},
@@ -26,6 +27,16 @@ describe('CTB, <App /> selectors', () => {
       });
 
       expect(makeSelectApp()(mockedState)).toEqual(state.toJS());
+    });
+  });
+
+  describe('makeSelectConnections', () => {
+    it('should select the global state', () => {
+      const mockedState = fromJS({
+        [`${pluginId}_app`]: state,
+      });
+
+      expect(makeSelectConnections()(mockedState)).toEqual(['default']);
     });
   });
 });

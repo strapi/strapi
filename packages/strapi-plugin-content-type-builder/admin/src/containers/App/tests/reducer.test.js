@@ -1,4 +1,4 @@
-import { fromJS } from 'immutable';
+import { fromJS, List } from 'immutable';
 import { getDataSucceeded, deleteModelSucceeded } from '../actions';
 import appReducer, { initialState } from '../reducer';
 
@@ -7,10 +7,18 @@ describe('appReducer', () => {
 
   beforeEach(() => {
     state = fromJS({
+      connections: [],
       initialData: {},
       isLoading: true,
       models: [],
       modifiedData: {},
+      newContentType: {
+        collectionName: "",
+        connection: "",
+        description: "",
+        mainField: "",
+        attributes: {},
+      },
     });
   });
 
@@ -171,12 +179,15 @@ describe('appReducer', () => {
         },
       },
     };
+    const connections = ['default'];
     const expected = state
+      .update('connections', () => List(connections))
       .update('initialData', () => initialData)
       .update('isLoading', () => false)
       .update('models', () => models)
+      .updateIn(['newContentType', 'connection'], () => 'default')
       .update('modifiedData', () => initialData);
 
-    expect(appReducer(state, getDataSucceeded({ models, allModels }))).toEqual(expected);
+    expect(appReducer(state, getDataSucceeded({ models, allModels }, connections))).toEqual(expected);
   });
 });

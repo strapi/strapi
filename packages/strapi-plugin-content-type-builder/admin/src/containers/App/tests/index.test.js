@@ -17,6 +17,7 @@ describe('<App />', () => {
       isLoading: true,
       models: [],
       modifiedData: {},
+      onChangeNewContentType: jest.fn(),
     };
   });
 
