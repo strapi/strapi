@@ -14,7 +14,7 @@ class Manager {
 
   /**
    * Retrieve the bootstrap col index, name and type of a field
-   * @param {Number} index 
+   * @param {Number} index
    * @returns {Object}
    */
   getAttrInfos(index) {
@@ -72,7 +72,7 @@ class Manager {
   /**
    * Retrieve a field default bootstrap col
    * NOTE: will change if we add the customisation of an input's width
-   * @param {String} type 
+   * @param {String} type
    * @returns {Number}
    */
   getBootStrapCol(type) {
@@ -80,7 +80,7 @@ class Manager {
       case 'checkbox':
       case 'boolean':
       case 'date':
-      case 'bigint':
+      case 'biginteger':
       case 'decimal':
       case 'float':
       case 'integer':
@@ -109,7 +109,7 @@ class Manager {
   }
 
   /**
-   * 
+   *
    * Retrieve the last element of each line of a bootstrap grid and push it into an array
    * @returns {Array}
    */
@@ -138,7 +138,7 @@ class Manager {
 
       if (i < this.list.size - 1) {
         let { bootstrapCol: nextBootstrapCol, name: nextName, type: nextType } = this.getAttrInfos(i + 1);
-        
+
         if (!nextType && nextName.includes('__col')) {
           nextBootstrapCol = parseInt(nextName.split('__')[1].split('-')[2], 10);
         }
@@ -155,9 +155,9 @@ class Manager {
   }
 
   /**
-   * 
+   *
    * Retrieve the field's type depending on its name
-   * @param {String} itemName 
+   * @param {String} itemName
    * @returns {String}
    */
   getType(itemName) {
@@ -177,8 +177,8 @@ class Manager {
 
   /**
    * Retrieve the line bootstrap col sum
-   * @param {Number} leftBound 
-   * @param {Number} rightBound 
+   * @param {Number} leftBound
+   * @param {Number} rightBound
    * @returns {Number}
    */
 
@@ -237,7 +237,7 @@ class Manager {
       if (lineSize < 10 && i < this.arrayOfEndLineElements.length - 1) {
         const colsToAdd = this.getColsToAdd(12 - lineSize);
         newList = newList.insert(lastLineItem + sum, colsToAdd[0]);
-        
+
         if (colsToAdd.length > 1) {
           newList = newList.insert(lastLineItem + sum, colsToAdd[1]);
         }

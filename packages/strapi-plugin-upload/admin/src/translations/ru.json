@@ -24,5 +24,7 @@
   "notification.config.success": "Настройки обновлены",
   "notification.delete.success": "Файл удален",
   "notification.dropFile.success": "Ваш файл загружен",
-  "notification.dropFiles.success": "Файлов загружено: {number}"
+  "notification.dropFiles.success": "Файлов загружено: {number}",
+  "Upload.status.sizeLimit": "{file} больше настроенного предельного размера",
+  "Upload.status.disabled" : "Загрузка файла отключена"
 }

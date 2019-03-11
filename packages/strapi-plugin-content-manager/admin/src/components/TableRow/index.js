@@ -68,6 +68,7 @@ class TableRow extends React.Component {
 
   // Redirect to the edit page
   handleClick() {
+    this.context.emitEvent('willEditEntry');
     this.context.router.history.push(`${this.props.destination}${this.props.redirectUrl}`);
   }
 
@@ -128,6 +129,7 @@ class TableRow extends React.Component {
 }
 
 TableRow.contextTypes = {
+  emitEvent: PropTypes.func,
   router: PropTypes.object.isRequired,
 };
 

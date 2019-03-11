@@ -551,7 +551,7 @@ module.exports = {
           const getter =
             currentAssociation.plugin !== undefined
               ? ['plugins', currentAssociation.plugin, 'models', name, 'attributes']
-              : ['models', name, 'attributes'];
+              : ['models', name.toLowerCase(), 'attributes'];
           const associationAttributes = _.get(strapi, getter);
           const associationSchema = this.generateAssociationSchema(associationAttributes, getter);
 
@@ -1411,6 +1411,7 @@ module.exports = {
       case 'double':
         return 'number';
       case 'integer':
+      case 'biginteger':
       case 'long':
         return 'integer';
       default:

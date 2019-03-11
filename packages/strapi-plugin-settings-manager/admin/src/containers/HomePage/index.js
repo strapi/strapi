@@ -147,7 +147,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     if (isEmpty(formErrors)) {
       // this.props.setErrors([]);
-      this.props.newDatabasePost(this.props.match.params.env, newData);
+      this.props.newDatabasePost(this.props.match.params.env, newData, this.context);
     } else {
       this.props.setErrors(formErrors);
     }
@@ -192,7 +192,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const defaultLanguageArray = formatLanguageLocale(target.id);
 
     // Edit the new config
-    this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n');
+    this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n', this.context);
   }
 
   handleFetch(props) {
@@ -260,7 +260,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     if (isEmpty(body)) return strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
     if (isEmpty(formErrors)) {
-      this.props.editSettings(body, apiUrl);
+      this.props.editSettings(body, apiUrl, this.context);
     } else {
       this.props.setErrors(formErrors);
     }
@@ -278,7 +278,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
 
     if (isEmpty(formErrors)) {
-      this.props.databaseEdit(body, apiUrl);
+      this.props.databaseEdit(body, apiUrl, this.context);
     } else {
       this.props.setErrors(formErrors);
     }
@@ -534,6 +534,10 @@ function mapDispatchToProps(dispatch) {
     dispatch
   );
 }
+
+HomePage.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 HomePage.propTypes = {
   cancelChanges: PropTypes.func.isRequired,
