@@ -18,6 +18,7 @@ import pluginId from '../../pluginId';
 import BodyModal from '../../components/BodyModal';
 import ButtonModalPrimary from '../../components/ButtonModalPrimary';
 import ButtonModalSecondary from '../../components/ButtonModalSecondary';
+import CustomCheckbox from '../../components/CustomCheckbox';
 import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
@@ -65,7 +66,19 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
 
   renderInput = (input, index) => {
     const { modifiedData, onChange } = this.props;
+    const { custom } = input;
     const value = get(modifiedData, input.name, input.defaultValue);
+
+    if (custom) {
+      return (
+        <CustomCheckbox
+          key={input.name}
+          {...input}
+          onChange={onChange}
+          value={value}
+        />
+      );
+    }
 
     return (
       <Input
