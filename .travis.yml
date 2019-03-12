@@ -20,19 +20,25 @@ before_script:
   - psql -c 'create database strapi_test;' -U postgres
 
 script:
+  # run snyk
+  - npm run -s test:snyk
+
   # default unit test
-  - npm run test:unit
+  - npm run -s test:unit
+
   # e2e trests
-  - node test/createTestApp.js --dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword=
-  - node test/startTestApp.js & wait-on http://localhost:1337
-  - npm run test:e2e
+  - npm run -s test:generate-app --dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword=
+  - npm run -s test:start-app & wait-on http://localhost:1337
+  - npm run -s test:e2e
+
   # cypress tests
-  - node test/createTestApp.js --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
-  - node test/startTestApp.js & wait-on http://localhost:1337
-  - node test/cypress.js
+  - npm run -s test:generate-app --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
+  - npm run -s test:start-app & wait-on http://localhost:1337
+  - npm run -s cypress:run
+
   # lint and doc
-  - npm run lint
-  - npm run doc
+  - npm run -s lint
+  - npm run -s doc
 
 cache:
   directories:

@@ -25,7 +25,7 @@ const { cli, logger } = require('strapi-utils');
  * @param {Strapi} options.strapi - Strapi instance
  */
 const watchFileChanges = ({ appPath, strapi }) => {
-  const restart = path => {
+  const restart = () => {
     if (strapi.reload.isWatching && !strapi.reload.isReloading) {
       strapi.reload.isReloading = true;
       strapi.reload();
@@ -35,7 +35,8 @@ const watchFileChanges = ({ appPath, strapi }) => {
   const watcher = chokidar.watch(appPath, {
     ignoreInitial: true,
     ignored: [
-      /(^|[\/\\])\../,
+      /(^|[/\\])\../,
+      '**/tmp',
       '**/admin',
       '**/components',
       '**/documentation',
@@ -44,22 +45,22 @@ const watchFileChanges = ({ appPath, strapi }) => {
       '**/index.html',
       '**/public',
       '**/cypress',
-      '**/*.db',
+      '**/*.db*',
     ],
   });
 
   watcher
     .on('add', path => {
       strapi.log.info(`File created: ${path}`);
-      restart(path);
+      restart();
     })
     .on('change', path => {
       strapi.log.info(`File changed: ${path}`);
-      restart(path);
+      restart();
     })
     .on('unlink', path => {
       strapi.log.info(`File deleted: ${path}`);
-      restart(path);
+      restart();
     });
 };
 
@@ -115,7 +116,7 @@ module.exports = function(appPath = '') {
               break;
             case 'stop':
               worker.kill();
-              process.exit(0);
+              process.exit(1);
               break;
             default:
               return;
@@ -162,7 +163,7 @@ module.exports = function(appPath = '') {
     );
   } catch (e) {
     logger.error(e);
-    process.exit(0);
+    process.exit(1);
   }
 };
 

@@ -9,10 +9,17 @@ const config = Object.assign(
 
 cypress
   .run(config)
-  .then(() => {
+  .then(results => {
+    if (results.totalFailed > 0) {
+      process.stdout.write('Cypress tests finished with errors\n', () => {
+        process.exit(1);
+      });
+    }
     process.exit(0);
   })
   .catch(err => {
     console.error(err);
-    process.exit(1);
+    process.stdout.write('Error running cypress', () => {
+      process.exit(1);
+    });
   });

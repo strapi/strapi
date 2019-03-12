@@ -1,8 +1,7 @@
-const fs = require('fs');
 const path = require('path');
 const { cleanTestApp, generateTestApp, startTestApp } = require('./helpers/testAppGenerator');
-const shelljs = require('shelljs');
 const execa = require('execa');
+const waitOn = require('wait-on');
 
 const appName = 'testApp';
 
@@ -11,58 +10,45 @@ const databases = {
   postgres:
     '--dbclient=postgres --dbhost=127.0.0.1 --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi',
   mysql:
-    '--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi-test --dbusername=root --dbpassword=root',
+    '--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi',
   sqlite: '--dbclient=sqlite --dbfile=./tmp/data.db',
 };
 
-const { runCLI: jest } = require('jest-cli/build/cli');
-
 const test = async () => {
-  const child = execa.shell('npm run test:e2e', {
-    stdio: 'pipe',
+  return execa.shell('npm run -s test:e2e', {
+    stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {
+      CI: true,
       FORCE_COLOR: 1,
     },
   });
-
-  child.stdout.pipe(process.stdout);
-  child.stderr.pipe(process.stderr);
-
-  return child;
 };
 
 const main = async () => {
-  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.postgres;
+  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.mysql;
 
-  await cleanTestApp(appName);
-  await generateTestApp({ appName, database });
+  try {
+    await cleanTestApp(appName);
+    await generateTestApp({ appName, database });
+    const testAppProcess = startTestApp({ appName });
 
-  const { testApp, ready, end } = startTestApp({ appName });
+    await waitOn({ resources: ['http://localhost:1337'] });
 
-  await ready;
-
-  // stop tests if the testApp stops
-  end
-    .then(() => {
-      process.stdout.write('testApp exited before the end', () => {
-        process.exit(1);
-      });
-    })
-    .catch(err => {
-      process.stdout.write('testApp exited before the end with error', () => {
+    await test().catch(() => {
+      testAppProcess.kill();
+      process.stdout.write('Tests failed\n', () => {
         process.exit(1);
       });
     });
 
-  await test().catch(() => {
-    process.stdout.write('Tests failed', () => {
+    testAppProcess.kill();
+    process.exit(0);
+  } catch (error) {
+    process.stdout.write('Tests failed\n', () => {
       process.exit(1);
     });
-  });
-
-  process.kill(testApp.pid);
-  process.exit(0);
+  }
 };
 
 main();

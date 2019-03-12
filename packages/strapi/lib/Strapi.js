@@ -196,7 +196,7 @@ class Strapi extends EventEmitter {
     }
 
     // Kill process.
-    process.exit(0);
+    process.exit(1);
   }
 
   async load() {

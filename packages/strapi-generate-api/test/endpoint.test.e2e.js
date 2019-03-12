@@ -1,7 +1,7 @@
 // Helpers.
 const { auth, login } = require('../../../test/helpers/auth');
 const form = require('../../../test/helpers/generators');
-const restart = require('../../../test/helpers/restart');
+const waitRestart = require('../../../test/helpers/waitRestart');
 const createRequest = require('../../../test/helpers/request');
 
 const cleanDate = entry => {
@@ -13,7 +13,6 @@ const cleanDate = entry => {
 
 let data;
 let rq;
-jest.setTimeout(30000);
 
 describe('Create Strapi API End to End', () => {
   beforeAll(async () => {
@@ -33,8 +32,8 @@ describe('Create Strapi API End to End', () => {
   });
 
   describe('Generate test APIs', () => {
-    beforeEach(() => restart(), 30000);
-    afterAll(() => restart(), 30000)
+    beforeEach(() => waitRestart(), 30000);
+    afterAll(() => waitRestart(), 30000);
 
     test('Create new article API', async () => {
       await rq({
@@ -667,8 +666,8 @@ describe('Create Strapi API End to End', () => {
   });
 
   describe('Delete test APIs', () => {
-    beforeEach(() => restart(), 30000);
-    afterAll(() => restart(), 30000)
+    beforeEach(() => waitRestart(), 30000);
+    afterAll(() => waitRestart(), 30000);
 
     test('Delete article API', async () => {
       await rq({
