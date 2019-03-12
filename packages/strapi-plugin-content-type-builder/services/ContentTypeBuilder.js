@@ -148,6 +148,7 @@ module.exports = {
           description: _.get(model, 'info.description', 'model.description.missing'),
           fields: _.keys(model.attributes).length,
           source: current,
+          isTemporary: false,
         });
       });
 

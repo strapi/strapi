@@ -32,11 +32,13 @@ const NAVLINKS = [
 ];
 
 class AttributeForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  state = { showForm: false };
+
   handleCancel = () => {
     const { push } = this.props;
 
     push({ search: '' });
-   }
+  }
 
   handleGoTo = to => {
     const { attributeType, push } = this.props;
@@ -46,6 +48,15 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
     });
   }
 
+  handleOnClosed = () => {
+    const { onCancel } = this.props;
+
+    onCancel();
+    this.setState({ showForm: false });
+  }
+
+  handleOnOpened = () => this.setState({ showForm: true });
+
   handleToggle = () => {
     const { push } = this.props;
 
@@ -53,15 +64,18 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
   }
 
   renderInput = (input, index) => {
-    console.log(input);
+    const { modifiedData, onChange } = this.props;
+    const value = get(modifiedData, input.name, input.defaultValue);
 
     return (
       <Input
+        autoFocus={index === 0}
         key={input.name}
         {...input}
-        onChange={() => {}}
+        onChange={onChange}
+        value={value}
       />
-    )
+    );
   }
 
   renderNavLink = (link, index) => {
@@ -80,10 +94,16 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
 
   render() {
     const { activeTab, attributeType, isOpen, onSubmit } = this.props;
+    const { showForm } = this.state;
     const currentForm = get(supportedAttributes, [attributeType, activeTab, 'items'], []);
 
     return (
-      <WrapperModal isOpen={isOpen} onToggle={this.handleToggle}>
+      <WrapperModal
+        isOpen={isOpen}
+        onClosed={this.handleOnClosed}
+        onOpened={this.handleOnOpened}
+        onToggle={this.handleToggle}
+      >
         <HeaderModal>
           <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
             <FormattedMessage id={`${pluginId}.popUpForm.create`} />
@@ -98,7 +118,7 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
         </HeaderModal>
         <form onSubmit={onSubmit}>
           <BodyModal>
-            {currentForm.map(this.renderInput)}
+            {showForm && currentForm.map(this.renderInput)}
           </BodyModal>
           <FooterModal>
             <ButtonModalSecondary message={`${pluginId}.form.button.cancel`} onClick={this.handleCancel} />
@@ -112,30 +132,29 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
 }
 
 AttributeForm.defaultProps = {
+  activeTab: 'base',
   attributeType: 'string',
+  isContentTypeTemporary: true,
   isOpen: false,
+  modifiedData: {},
+  onCancel: () => {},
+  onChange: () => {},
   onSubmit: (e) => {
     e.preventDefault();
   },
+  push: () => {},
 };
 
 AttributeForm.propTypes = {
+  activeTab: PropTypes.string,
   attributeType: PropTypes.string,
+  isContentTypeTemporary: PropTypes.bool,
   isOpen: PropTypes.bool,
+  modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)
+  onCancel: PropTypes.func,
+  onChange: PropTypes.func,
   onSubmit: PropTypes.func,
-  push: PropTypes.func.isRequired,
+  push: PropTypes.func,
 };
 
 export default AttributeForm;
-// function mapDispatchToProps(dispatch) {
-//   return bindActionCreators(
-//     {},
-//     dispatch,
-//   );
-// }
-
-// const withConnect = connect(null, mapDispatchToProps);
-
-// export default compose(
-//   withConnect,
-// )(AttributeForm);

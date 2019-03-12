@@ -158,8 +158,6 @@ describe('<AttributesPickerModal />', () => {
       }),
     };
     const wrapper = renderComponent(props, context);
-
-
     const spyOnHandleKeyDown = jest.spyOn(wrapper.instance(), 'handleKeyDown');
 
     wrapper.instance().forceUpdate();
@@ -167,5 +165,18 @@ describe('<AttributesPickerModal />', () => {
     map.keydown({ key: 'Tab' });
 
     expect(spyOnHandleKeyDown).toHaveBeenCalled();
+  });
+
+  describe('instances', () => {
+    describe('handleClick', () => {
+      it('should handle the click correctly', () => {
+        const wrapper = renderComponent(props);
+        const { handleClick } = wrapper.instance();
+
+        handleClick('test');
+
+        expect(props.push).toHaveBeenCalledWith({ search: 'modalType=attributeForm&attributeType=test&settingType=base' });
+      });
+    });
   });
 });

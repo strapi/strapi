@@ -8,7 +8,7 @@
           },
           "name": "name",
           "type": "string",
-          "value": "",
+          "defaultValue": "",
           "validations": {
             "required": true
           }

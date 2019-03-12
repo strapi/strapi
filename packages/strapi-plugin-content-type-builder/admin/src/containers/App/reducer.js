@@ -7,10 +7,12 @@
 import { fromJS, List, Map } from 'immutable';
 import {
   CANCEL_NEW_CONTENT_TYPE,
+  CLEAR_TEMPORARY_ATTRIBUTE,
   CREATE_TEMP_CONTENT_TYPE,
   DELETE_MODEL_SUCCEEDED,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE,
+  ON_CREATE_ATTRIBUTE,
 } from './constants';
 
 export const initialState = fromJS({
@@ -27,6 +29,7 @@ export const initialState = fromJS({
     name: '',
     attributes: {},
   },
+  temporaryAttribute: {},
 });
 
 function appReducer(state = initialState, action) {
@@ -34,6 +37,8 @@ function appReducer(state = initialState, action) {
     case CANCEL_NEW_CONTENT_TYPE:
       return state
         .update('newContentType', () => Map(initialState.get('newContentType')));
+    case CLEAR_TEMPORARY_ATTRIBUTE:
+      return state.update('temporaryAttribute', () => Map({}));
     case CREATE_TEMP_CONTENT_TYPE:
       return state
         .update('models', list => list.push({
@@ -59,6 +64,9 @@ function appReducer(state = initialState, action) {
     case ON_CHANGE_NEW_CONTENT_TYPE:
       return state
         .updateIn(['newContentType', ...action.keys], () => action.value);
+    case ON_CREATE_ATTRIBUTE:
+      return state
+        .updateIn(['temporaryAttribute', ...action.keys], () => action.value);
     default:
       return state;
   }

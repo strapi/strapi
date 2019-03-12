@@ -1,5 +1,5 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+// import { shallow } from 'enzyme';
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
@@ -15,9 +15,9 @@ const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 const renderComponent = (props = {}) => mountWithIntl(<AttributeForm {...props} />, messages);
 
 describe('<AttributeForm />', () => {
-  it('Expect to have unit tests specified', () => {
-    // shallow(<AttributeForm />);
+  it('should not crash', () => {
+    const wrapper = renderComponent({});
 
-    renderComponent({});
+    wrapper.unmount();
   });
 });

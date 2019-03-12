@@ -6,9 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
-import { bindActionCreators, compose } from 'redux';
 import { isEmpty } from 'lodash';
 
 import PluginHeader from 'components/PluginHeader';
@@ -26,12 +23,7 @@ import ModelForm from '../ModelForm';
 
 import styles from './styles.scss';
 
-import makeSelectHomePage from './selectors';
-import reducer from './reducer';
-import saga from './saga';
-
-
-export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
   getActionType = () => {
     const { location: {  search } } = this.props;
 
@@ -51,13 +43,23 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   handleClick = () => {
     const { history: { push } } = this.props;
 
-    push({
-      search: 'modalType=model&settingType=base&actionType=create',
-    });
+    if (this.shouldOpenModalAdd()) {
+      push({
+        search: 'modalType=model&settingType=base&actionType=create',
+      });
+    } else {
+      strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
+    }
   }
 
   handleDeleteModel = (modelName) => {
     this.props.deleteModel(modelName);
+  }
+
+  shouldOpenModalAdd = () => {
+    const { models } = this.props;
+
+    return models.every(model => (model.isTemporary === false));
   }
 
   render() {
@@ -77,7 +79,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       : `${pluginId}.table.contentType.title.singular`;
 
     const renderViewContent = availableNumber === 0 ?
-      <EmptyContentTypeView handleButtonClick={() => {}} />
+      <EmptyContentTypeView handleButtonClick={this.handleClick} /> // eslint-disable-line react/jsx-handler-names
     : (
       <TableList
         availableNumber={availableNumber}
@@ -122,38 +124,27 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 }
 
-HomePage.propTypes = {
-  ...routerPropTypes().history,
-  deleteModel: PropTypes.func.isRequired,
-  models: PropTypes.array.isRequired,
-  onChangeNewContentType: PropTypes.func.isRequired,
+HomePage.defaultProps = {
+  models: [],
+  modifiedData: {},
 };
 
-const mapStateToProps = createStructuredSelector({
-  homepage: makeSelectHomePage(),
-});
+HomePage.propTypes = {
+  cancelNewContentType: PropTypes.func.isRequired,
+  createTempContentType: PropTypes.func.isRequired,
+  deleteModel: PropTypes.func.isRequired,
+  models: PropTypes.array,
+  modifiedData: PropTypes.object,
+  newContentType: PropTypes.shape({
+    collectionName: PropTypes.string,
+    connection: PropTypes.string,
+    description: PropTypes.string,
+    mainField: PropTypes.string,
+    name: PropTypes.string,
+    attributes: PropTypes.object,
+  }).isRequired,
+  onChangeNewContentType: PropTypes.func.isRequired,
+  ...routerPropTypes().history.isRequired,
+};
 
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {},
-    dispatch,
-  );
-}
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-/* Remove this line if the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
-const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
-
-/* Remove the line below the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
-const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
-
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect,
-)(HomePage);
+export default HomePage;

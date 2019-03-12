@@ -2,6 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { Redirect } from 'react-router-dom';
 
 import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 
@@ -9,7 +10,12 @@ import AttributeLi from '../../../components/AttributeLi';
 import Block from '../../../components/Block';
 import LeftMenuLink from '../../../components/LeftMenuLink';
 
-import { ModelPage } from '../index';
+import {
+  clearTemporaryAttribute,
+  onCreateAttribute,
+} from '../../App/actions';
+
+import { ModelPage, mapDispatchToProps } from '../index';
 
 // import CustomLink from '../CustomLink';
 import initialData from './initialData.json';
@@ -20,6 +26,7 @@ describe('<ModelPage />', () => {
 
   beforeEach(() => {
     props = {
+      clearTemporaryAttribute: jest.fn(),
       history: {
         push: jest.fn(),
       },
@@ -38,11 +45,12 @@ describe('<ModelPage />', () => {
       initialData: cloneDeep(initialData),
       modifiedData: cloneDeep(initialData),
       models: [
-        { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions' },
-        { icon: 'fa-cube', name: 'user', description: '', fields: 6, source: 'users-permissions' },
-        { icon: 'fa-cube', name: 'role', description: '', fields: 6, source: 'users-permissions' },
+        { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
+        { icon: 'fa-cube', name: 'user', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
+        { icon: 'fa-cube', name: 'role', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
         { icon: 'fa-cube', name: 'product', description: 'super api', fields: 6 },
       ],
+      onCreateAttribute: jest.fn(),
     };
   });
 
@@ -51,6 +59,14 @@ describe('<ModelPage />', () => {
   });
 
   describe('CTB <ModelPage /> render', () => {
+    it('should redirect the user if the modelName does not exist in its models props', () => {
+      props.match.params.modelName = 'test';
+
+      const wrapper = shallow(<ModelPage {...props} />);
+      const redirect = wrapper.find(Redirect);
+
+      expect(redirect.length).toEqual(1);
+    });
     it('should display the EmptyAttributeBlock if the model\'s attributes are empty', () => {
       props.initialData.user.attributes = {};
       props.modifiedData.user.attributes = {};
@@ -208,6 +224,44 @@ describe('<ModelPage />', () => {
 
         expect(links).toHaveLength(8);
       });
+    });
+  });
+});
+
+
+describe('CTB <ModelPage />, mapDispatchToProps', () => {
+  describe('ClearTemporaryAttribute', () => {
+    it('should be injected', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+
+      expect(result.clearTemporaryAttribute).toBeDefined();
+    });
+
+    it('should dispatch the clearTemporaryAttribute action when called', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+      result.clearTemporaryAttribute();
+
+      expect(dispatch).toHaveBeenCalledWith(clearTemporaryAttribute());
+    });
+  });
+
+  describe('OnCreateAttribute', () => {
+    it('should be injected', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+
+      expect(result.onCreateAttribute).toBeDefined();
+    });
+
+    it('should dispatch the onCreateAttribute action when called', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+      const target = { name: '' };
+      result.onCreateAttribute({ target });
+
+      expect(dispatch).toHaveBeenCalledWith(onCreateAttribute({ target }));
     });
   });
 });

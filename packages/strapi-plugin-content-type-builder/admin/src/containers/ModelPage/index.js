@@ -36,6 +36,11 @@ import Ul from '../../components/Ul';
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
 
+import {
+  clearTemporaryAttribute,
+  onCreateAttribute,
+} from '../App/actions';
+
 import CustomLink from './CustomLink';
 
 import makeSelectModelPage from './selectors';
@@ -106,6 +111,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   isUpdatingTemporaryContentType = () => {
     const { models } = this.props;
+    /* istanbul ignore next */
     const currentModel = models.find(model => model.name === this.getModelName()) || { isTemporary: true };
 
     const { isTemporary } = currentModel;
@@ -149,11 +155,14 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   render() {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
     const {
+      clearTemporaryAttribute,
       history: { push },
       location: { search },
       models,
+      onCreateAttribute,
+      temporaryAttribute,
     } = this.props;
-    console.log(this.isUpdatingTemporaryContentType());
+
     if (this.shouldRedirect()) {
       return <Redirect to={`/plugins/${pluginId}/models/${models[0].name}`} />;
     }
@@ -241,7 +250,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         <AttributeForm
           activeTab={getQueryParameters(search, 'settingType')}
           attributeType={getQueryParameters(search, 'attributeType')}
+          isContentTypeTemporary={this.isUpdatingTemporaryContentType()}
           isOpen={getQueryParameters(search, 'modalType') === 'attributeForm'}
+          modifiedData={temporaryAttribute}
+          onCancel={clearTemporaryAttribute}
+          onChange={onCreateAttribute}
           push={push}
         />
       </div>
@@ -253,8 +266,10 @@ ModelPage.propTypes = {
   ...routerPropTypes(
     { params: PropTypes.string },
   ).isRequired,
+  clearTemporaryAttribute: PropTypes.func.isRequired,
   initialData: PropTypes.object.isRequired,
   models: PropTypes.array.isRequired,
+  onCreateAttribute: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -263,7 +278,10 @@ const mapStateToProps = createStructuredSelector({
 
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
-    {},
+    {
+      clearTemporaryAttribute,
+      onCreateAttribute,
+    },
     dispatch,
   );
 }

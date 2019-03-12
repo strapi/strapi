@@ -6,17 +6,25 @@
 import { pick, set } from 'lodash';
 import {
   CANCEL_NEW_CONTENT_TYPE,
+  CLEAR_TEMPORARY_ATTRIBUTE,
   CREATE_TEMP_CONTENT_TYPE,
   DELETE_MODEL,
   DELETE_MODEL_SUCCEEDED,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE,
+  ON_CREATE_ATTRIBUTE,
 } from './constants';
 
 export function cancelNewContentType() {
   return {
     type: CANCEL_NEW_CONTENT_TYPE,
+  };
+}
+
+export function clearTemporaryAttribute() {
+  return {
+    type: CLEAR_TEMPORARY_ATTRIBUTE,
   };
 }
 
@@ -66,6 +74,14 @@ export function getDataSucceeded({ allModels, models }, connections) {
 export function onChangeNewContentType({ target }) {
   return {
     type: ON_CHANGE_NEW_CONTENT_TYPE,
+    keys: target.name.split('.'),
+    value: target.value,
+  };
+}
+
+export function onCreateAttribute({ target }) {
+  return {
+    type: ON_CREATE_ATTRIBUTE,
     keys: target.name.split('.'),
     value: target.value,
   };
