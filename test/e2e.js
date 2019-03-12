@@ -6,7 +6,7 @@ const waitOn = require('wait-on');
 const appName = 'testApp';
 
 const databases = {
-  mongo: `--dbclient=mongo --dbhost=127.0.0.1 --dbport=27017 --dbname=strapi-test-${new Date().getTime()} --dbusername= --dbpassword=`,
+  mongo: `--dbclient=mongo --dbhost=127.0.0.1 --dbport=27017 --dbname=strapi_test --dbusername=root --dbpassword=strapi`,
   postgres:
     '--dbclient=postgres --dbhost=127.0.0.1 --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi',
   mysql:
@@ -26,7 +26,7 @@ const test = async () => {
 };
 
 const main = async () => {
-  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.mysql;
+  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.mongo;
 
   try {
     await cleanTestApp(appName);

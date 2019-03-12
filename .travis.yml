@@ -1,6 +1,7 @@
 services:
   - mongodb
   - postgresql
+  - mysql
 
 sudo: required
 dist: trusty
@@ -9,39 +10,68 @@ language: node_js
 
 node_js:
   - '10'
-  # - '11'
-
-install:
-  - npm run setup:build
-  - npm install -g wait-on
-  - cypress install
-
-before_script:
-  - psql -c 'create database strapi_test;' -U postgres
-
-script:
-  # run snyk
-  - npm run -s test:snyk
-
-  # default unit test
-  - npm run -s test:unit
-
-  # e2e trests
-  - npm run -s test:generate-app --dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword=
-  - npm run -s test:start-app & wait-on http://localhost:1337
-  - npm run -s test:e2e
-
-  # cypress tests
-  - npm run -s test:generate-app --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
-  - npm run -s test:start-app & wait-on http://localhost:1337
-  - npm run -s cypress:run
-
-  # lint and doc
-  - npm run -s lint
-  - npm run -s doc
 
 cache:
   directories:
     - node_modules
     - ~/.npm
     - ~/.cache
+
+# end to end testing template
+e2e_tests: &e2e_tests
+  stage: 'End to End tests'
+  script:
+    - npm run -s test:generate-app -- $DB_STRING
+    - npm run -s test:start-app & wait-on http://localhost:1337
+    - npm run -s test:e2e
+
+install:
+  - npm run setup:ci
+  - npm install -g wait-on
+
+jobs:
+  include:
+    - stage: test
+      name: 'Lint / Snyk / Unit Tests '
+      script:
+        - npm run -s lint
+        - npm run -s test:snyk
+        - npm run -s test:unit
+
+    - <<: *e2e_tests
+      name: 'E2E Postgresql'
+      before_install:
+        - psql -c 'create database strapi_test;' -U postgres
+      env:
+        - DB_STRING='--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword='
+
+    - <<: *e2e_tests
+      name: 'E2E Mysql'
+      before_install:
+        - mysql -e 'CREATE DATABASE strapi_test;'
+      env:
+        # mysql
+        - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
+
+    - <<: *e2e_tests
+      name: 'E2E Sqlite'
+      env:
+        # sqlite
+        - DB_STRING='--dbclient=sqlite --dbfile=./tmp/data.db'
+
+    - <<: *e2e_tests
+      name: 'E2E MongoDB'
+      env:
+        # mongo
+        - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
+
+    - name: 'Cypress tests'
+      install:
+        - npm run setup:build
+        - npm install -g wait-on
+        - cypress install
+      script:
+        - npm run -s test:generate-app -- --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
+        - npm run -s test:start-app & wait-on http://localhost:1337
+        - node test/cypress.js
+

@@ -22,7 +22,8 @@ describe('Content Manager End to End', () => {
       method: 'POST',
       body: auth,
     }).catch(err => {
-      console.log(err);
+      if (err.error.message.includes('Email is already taken.')) return;
+      throw err;
     });
 
     const body = await login();
@@ -278,7 +279,7 @@ describe('Content Manager End to End', () => {
     });
 
     test('Delete all articles should remove the association in each tags related to them', async () => {
-      const { body: tagToCreate } = await rq({
+      const { body: createdTag } = await rq({
         url: '/content-manager/explorer/tag/?source=content-manager',
         method: 'POST',
         formData: {
@@ -292,9 +293,15 @@ describe('Content Manager End to End', () => {
         formData: {
           title: 'article12',
           content: 'Content',
-          tags: [tagToCreate],
+          tags: [createdTag],
         },
       });
+
+      const { body: updatedTag } = await rq({
+        url: `/content-manager/explorer/tag/${createdTag.id}?source=content-manager`,
+        method: 'GET',
+      });
+
 
       const { body: article13 } = await rq({
         url: '/content-manager/explorer/article/?source=content-manager',
@@ -302,7 +309,7 @@ describe('Content Manager End to End', () => {
         formData: {
           title: 'article13',
           content: 'Content',
-          tags: [tagToCreate],
+          tags: [updatedTag],
         },
       });
 
@@ -314,7 +321,7 @@ describe('Content Manager End to End', () => {
       expect(articles[1].tags.length).toBe(1);
 
       let { body: tagToGet } = await rq({
-        url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
+        url: `/content-manager/explorer/tag/${createdTag.id}?source=content-manager`,
         method: 'GET',
       });
 
@@ -329,7 +336,7 @@ describe('Content Manager End to End', () => {
       });
 
       let { body: tagToGet2 } = await rq({
-        url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
+        url: `/content-manager/explorer/tag/${createdTag.id}?source=content-manager`,
         method: 'GET',
       });
 
@@ -723,7 +730,7 @@ describe('Content Manager End to End', () => {
         method: 'GET',
       });
 
-      if (Object.keys(referenceToGet.tag).length == 0) return;
+      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
       expect(referenceToGet.tag).toBe(null);
     });
   });

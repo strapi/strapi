@@ -27,7 +27,7 @@ const stringify = JSON.stringify;
 const backendUrl = Cypress.config('backendUrl');
 const serverRestartDelay = Cypress.config('serverRestartDelay');
 
-const WAIT_ON_CMD = 'wait-on http://localhost:1337';
+const WAIT_ON_CMD = `wait-on ${backendUrl}`;
 
 Cypress.Commands.add('waitRestart', () => {
   return cy.exec(WAIT_ON_CMD);

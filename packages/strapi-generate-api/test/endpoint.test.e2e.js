@@ -20,7 +20,10 @@ describe('Create Strapi API End to End', () => {
       url: '/auth/local/register',
       method: 'POST',
       body: auth,
-    }).catch(() => {});
+    }).catch(err => {
+      if (err.error.message.includes('Email is already taken.')) return;
+      throw err;
+    });
 
     const body = await login();
 
@@ -656,11 +659,11 @@ describe('Create Strapi API End to End', () => {
       });
 
       const { body: referenceToGet } = await rq({
-        url: `/references/${referenceToCreate.id}`,
+        url: `/references/${referenceToCreate.id || referenceToCreate._id}`,
         method: 'GET',
       });
 
-      if (Object.keys(referenceToGet.tag).length == 0) return;
+      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
       expect(referenceToGet.tag).toBe(null);
     });
   });
