@@ -20,6 +20,14 @@ module.exports = {
   // After fetching a value.
   // Fired after a `fetch` operation.
   // afterFetch: async (model, response, options) => {},
+  
+  // Before fetching all values.
+  // Fired before a `fetchAll` operation.
+  // beforeFetchAll: async (model, columns, options) => {},
+
+  // After fetching all values.
+  // Fired after a `fetchAll` operation.
+  // afterFetchAll: async (model, response, options) => {},
 
   // Before creating a value.
   // Fired before an `insert` query.
