@@ -49,10 +49,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 
   handleClick = () => {
-    const { history: { push }, location: { pathname } } = this.props;
+    const { history: { push } } = this.props;
 
     push({
-      pathname,
       search: 'modalType=model&settingType=base&actionType=create',
     });
   }

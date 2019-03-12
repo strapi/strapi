@@ -10,9 +10,9 @@ import { ModalBody } from 'reactstrap';
 
 import styles from './styles.scss';
 
-function BodyModal({ children }) {
+function BodyModal({ children, ...rest }) {
   return (
-    <ModalBody className={styles.bodyModal}>
+    <ModalBody className={styles.bodyModal} {...rest}>
       <div className="container-fluid">
         <div className="row">
           {children}

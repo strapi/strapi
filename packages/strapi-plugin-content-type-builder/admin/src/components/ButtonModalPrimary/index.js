@@ -12,6 +12,8 @@ import { Button } from 'reactstrap';
 import styles from './styles.scss';
 
 function ButtonModalPrimary({ add, message, onClick, type }) {
+  /* istanbul ignore next */
+  // Ignoring the style condition is intended...
   const className = add ? styles.buttonModalPrimaryAdd : styles.buttonModalPrimary;
 
   return (

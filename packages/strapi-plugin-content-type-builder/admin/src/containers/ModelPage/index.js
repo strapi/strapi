@@ -19,6 +19,8 @@ import PluginHeader from 'components/PluginHeader';
 
 import { routerPropTypes } from 'commonPropTypes';
 
+import getQueryParameters from 'utils/getQueryParameters';
+
 import pluginId from '../../pluginId';
 
 import AttributeLi from '../../components/AttributeLi';
@@ -30,6 +32,8 @@ import LeftMenuSectionTitle from '../../components/LeftMenuSectionTitle';
 import LeftMenuLink from '../../components/LeftMenuLink';
 import ListTitle from '../../components/ListTitle';
 import Ul from '../../components/Ul';
+
+import AttributesModalPicker from '../AttributesPickerModal';
 
 import CustomLink from './CustomLink';
 
@@ -92,9 +96,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     return this.getModelsNumber() > 1 ? `${base}plural` : `${base}singular`;
   }
 
-  handleClick = () => {}
 
-  handleClickOpenModalChooseAttributes = () => {}
+  handleClickOpenModalChooseAttributes = () => {
+    const { history: { push } } = this.props;
+
+    push({ search: 'modalType=chooseAttributes' });
+  }
 
   shouldRedirect = () => {
     const { models } = this.props;
@@ -131,7 +138,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   render() {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
-    const { models } = this.props;
+    const {
+      history: { push },
+      location: { search },
+      models,
+    } = this.props;
 
     if (this.shouldRedirect()) {
       return <Redirect to={`/plugins/${pluginId}/models/${models[0].name}`} />;
@@ -146,7 +157,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                 <LeftMenuSectionTitle id={this.getSectionTitle()} />
                 <ul>
                   {this.renderLinks()}
-                  <CustomLink onClick={this.handleClick} />
+                  <CustomLink onClick={this.handleClickOpenModalChooseAttributes} />
                 </ul>
               </LeftMenuSection>
               <LeftMenuSection>
@@ -197,6 +208,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                       <div>
                         <Button
                           label={`${pluginId}.button.attributes.add`}
+                          onClick={this.handleClickOpenModalChooseAttributes}
                           secondaryHotlineAdd
                         />
                       </div>
@@ -210,9 +222,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                 )}
               </div>
             </div>
-
           </div>
         </div>
+        <AttributesModalPicker
+          isOpen={getQueryParameters(search, 'modalType') === 'chooseAttributes'}
+          push={push}
+        />
       </div>
     );
   }

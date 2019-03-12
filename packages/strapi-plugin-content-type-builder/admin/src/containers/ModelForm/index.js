@@ -55,20 +55,19 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
   }
 
   handleCancel = () => {
-    const { actionType, cancelNewContentType, pathname, push } = this.props;
+    const { actionType, cancelNewContentType, push } = this.props;
 
     if (actionType === 'create') {
       cancelNewContentType();
     }
 
-    push({ pathname, search: '' });
+    push({ search: '' });
   }
 
   handleGoTo = to => {
-    const { actionType, pathname, push } = this.props;
+    const { actionType, push } = this.props;
 
     push({
-      pathname,
       search: `modalType=model&settingType=${to}&actionType=${actionType}`,
     });
   }

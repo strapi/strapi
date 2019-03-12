@@ -11,7 +11,7 @@ import LeftMenuLink from '../../../components/LeftMenuLink';
 
 import { ModelPage } from '../index';
 
-import CustomLink from '../CustomLink';
+// import CustomLink from '../CustomLink';
 import initialData from './initialData.json';
 
 describe('<ModelPage />', () => {
@@ -20,6 +20,13 @@ describe('<ModelPage />', () => {
 
   beforeEach(() => {
     props = {
+      history: {
+        push: jest.fn(),
+      },
+      location: {
+        search: '',
+        pathname: `${basePath}/product`,
+      },
       match: {
         isExact: true,
         params: {
@@ -84,22 +91,6 @@ describe('<ModelPage />', () => {
       wrapper.instance().forceUpdate();
 
       const onClick = wrapper.find(EmptyAttributesBlock).prop('onClick');
-      onClick();
-
-      expect(spyOnClick).toHaveBeenCalled();
-    });
-
-    it('should call the handleClick when clicking on the <CustomLink />', () => {
-      props.initialData.product.attributes = {};
-      props.modifiedData.product.attributes = {};
-      props.match.params.modelName = 'product';
-      props.match.path = `${basePath}/product`;
-
-      const wrapper = shallow(<ModelPage {...props} />);
-      const spyOnClick = jest.spyOn(wrapper.instance(), 'handleClick');
-      wrapper.instance().forceUpdate();
-
-      const onClick = wrapper.find(CustomLink).prop('onClick');
       onClick();
 
       expect(spyOnClick).toHaveBeenCalled();

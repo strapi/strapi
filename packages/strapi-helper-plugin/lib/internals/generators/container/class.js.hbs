@@ -17,7 +17,7 @@ import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 {{/if}}
 import { bindActionCreators, compose } from 'redux';
-// import pluginId from 'pluginId';
+import pluginId from '../../pluginId';
 
 {{#if wantActionsAndReducer}}
 import makeSelect{{properCase name}} from './selectors';

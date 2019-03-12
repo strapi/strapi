@@ -11,14 +11,14 @@ import { FormattedMessage } from 'react-intl';
 import IcoBoolean from '../../assets/images/icon_boolean.png';
 import IcoDate from '../../assets/images/icon_date.png';
 import IcoEmail from '../../assets/images/icon_email.png';
-import IcoImage from '../../assets/images/icon_image.png';
+import IcoImage from '../../assets/images/icon_media.png';
 import IcoJson from '../../assets/images/icon_json.png';
 import IcoPassword from '../../assets/images/icon_password.png';
 import IcoNumber from '../../assets/images/icon_number.png';
 import IcoRelation from '../../assets/images/icon_relation.png';
 import IcoString from '../../assets/images/icon_string.png';
 import IcoText from '../../assets/images/icon_text.png';
-import IcoEnum from '../../assets/images/icon_enum.png';
+import IcoEnum from '../../assets/images/icon_enumeration.png';
 
 import styles from './styles.scss';
 
