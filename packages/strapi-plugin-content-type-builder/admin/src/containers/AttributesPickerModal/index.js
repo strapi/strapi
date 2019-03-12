@@ -26,7 +26,7 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
     const { isOpen } = this.props;
 
     if (isOpen) {
-      document.addEventListener('keydown', this.handleKeyDown);
+      this.addEventListener();
     }
   }
 
@@ -37,9 +37,9 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
       this.updateNodeToFocus(0);
 
       if (isOpen) {
-        document.addEventListener('keydown', this.handleKeyDown);
+        this.addEventListener();
       } else {
-        document.removeEventListener('keydown', this.handleKeyDown);
+        this.removeEventListener();
       }
     }
   }
@@ -57,16 +57,30 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
     });
   }
 
-  handleKeyDown = (e ) => {
+  addEventListener = () => {
+    document.addEventListener('keydown', this.handleKeyDown);
+  }
+
+  removeEventListener = () => {
+    document.removeEventListener('keydown', this.handleKeyDown);
+  }
+
+  /* istanbul ignore next */
+  handleKeyDown = (e) => {
+    /* istanbul ignore next */
     const { nodeToFocus } = this.state;
+    /* istanbul ignore next */
     const attributesLength = this.getAttributes().length;
+    /* istanbul ignore next */
     let next = 0;
 
     // Disable the tab behavior
+    /* istanbul ignore next */
     if (e.keyCode === 9) {
       e.preventDefault();
     }
 
+    /* istanbul ignore next */
     switch (e.keyCode) {
       case 9: // Tab
       case 39: // Right Arrow
@@ -79,6 +93,7 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
         next = 0;
     }
 
+    /* istanbul ignore next */
     this.updateNodeToFocus(next);
   }
 
