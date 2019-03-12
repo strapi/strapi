@@ -65,6 +65,12 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
     document.removeEventListener('keydown', this.handleKeyDown);
   }
 
+  handleClick = (type) => {
+    const { push } = this.props;
+
+    push({ search: `modalType=attributeForm&attributeType=${type}&settingType=base` });
+  }
+
   /* istanbul ignore next */
   handleKeyDown = (e) => {
     /* istanbul ignore next */
@@ -120,6 +126,7 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
         tabIndex={index}
         isDisplayed={isDisplayed}
         nodeToFocus={nodeToFocus}
+        onClick={this.handleClick}
         {...attribute}
       />
     );

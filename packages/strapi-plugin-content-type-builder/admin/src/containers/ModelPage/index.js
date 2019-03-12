@@ -33,6 +33,7 @@ import LeftMenuLink from '../../components/LeftMenuLink';
 import ListTitle from '../../components/ListTitle';
 import Ul from '../../components/Ul';
 
+import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
 
 import CustomLink from './CustomLink';
@@ -103,6 +104,15 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     push({ search: 'modalType=chooseAttributes' });
   }
 
+  isUpdatingTemporaryContentType = () => {
+    const { models } = this.props;
+    const currentModel = models.find(model => model.name === this.getModelName()) || { isTemporary: true };
+
+    const { isTemporary } = currentModel;
+
+    return isTemporary;
+  }
+
   shouldRedirect = () => {
     const { models } = this.props;
 
@@ -143,7 +153,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       location: { search },
       models,
     } = this.props;
-
+    console.log(this.isUpdatingTemporaryContentType());
     if (this.shouldRedirect()) {
       return <Redirect to={`/plugins/${pluginId}/models/${models[0].name}`} />;
     }
@@ -226,6 +236,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         </div>
         <AttributesModalPicker
           isOpen={getQueryParameters(search, 'modalType') === 'chooseAttributes'}
+          push={push}
+        />
+        <AttributeForm
+          activeTab={getQueryParameters(search, 'settingType')}
+          attributeType={getQueryParameters(search, 'attributeType')}
+          isOpen={getQueryParameters(search, 'modalType') === 'attributeForm'}
           push={push}
         />
       </div>
