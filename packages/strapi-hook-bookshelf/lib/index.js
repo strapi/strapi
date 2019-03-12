@@ -236,9 +236,9 @@ module.exports = function(strapi) {
                     updating: 'beforeUpdate',
                     updated: 'afterUpdate',
                     fetching: 'beforeFetch',
-                    'fetching:collection': 'beforeFetchCollection',
+                    'fetching:collection': 'beforeFetchAll',
                     fetched: 'afterFetch',
-                    'fetched:collection': 'afterFetchCollection',
+                    'fetched:collection': 'afterFetchAll',
                     saving: 'beforeSave',
                     saved: 'afterSave'
                   };
@@ -287,9 +287,9 @@ module.exports = function(strapi) {
                     }
 
                     return _.isFunction(
-                      target[model.toLowerCase()]['beforeFetchCollection']
+                      target[model.toLowerCase()]['beforeFetchAll']
                     )
-                      ? target[model.toLowerCase()]['beforeFetchCollection']
+                      ? target[model.toLowerCase()]['beforeFetchAll']
                       : Promise.resolve();
                   });
 
@@ -314,7 +314,7 @@ module.exports = function(strapi) {
                       target: 'afterFetch'
                     }, {
                       name: 'fetched:collection',
-                      target: 'afterFetchCollection'
+                      target: 'afterFetchAll'
                     }];
 
                     const jsonFormatter = (attributes) => {
