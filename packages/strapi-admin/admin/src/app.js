@@ -57,7 +57,7 @@ if (window.location.port !== '4000') {
           $body.appendChild(newScript);
         };
 
-        script.src = plugin.source[process.env.NODE_ENV].indexOf('://') === -1 ?
+        script.src = !plugin.source[process.env.NODE_ENV].includes('://') ?
           `${basename}${plugin.source[process.env.NODE_ENV]}`.replace('//', '/'): // relative
           plugin.source[process.env.NODE_ENV]; // absolute
 
