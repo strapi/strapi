@@ -10,7 +10,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       strapi.app.use(strapi.koaMiddlewares.compress());
 
       cb();
