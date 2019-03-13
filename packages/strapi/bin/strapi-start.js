@@ -25,7 +25,7 @@ const { cli, logger } = require('strapi-utils');
  * (fire up the application in our working directory).
  */
 
-module.exports = function(appPath = '') {
+module.exports = (appPath = '') => {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(`⛔️ ${cyan('strapi start')} can only be used inside a Strapi project.`);
@@ -34,7 +34,7 @@ module.exports = function(appPath = '') {
   appPath = path.join(process.cwd(), appPath);
 
   try {
-    const strapi = (function() {
+    const strapi = (() => {
       try {
         return require(path.resolve(appPath, 'node_modules', 'strapi'));
       } catch (e) {
