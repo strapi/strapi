@@ -93,7 +93,7 @@ module.exports = function (plugin, cliArguments) {
           fs.accessSync(path.join(pluginPath, '.gitignore'));
         } catch (err) {
           if (err.code === 'ENOENT') {
-            if (process.mainModule.filename.indexOf('yarn') !== -1) {
+            if (process.mainModule.filename.includes('yarn')) {
               fs.copySync(path.resolve(__dirname, '..', '..', 'strapi-generate-plugin', 'templates', 'gitignore'), path.join(pluginPath, '.gitignore'));
             } else {
               fs.copySync(path.resolve(__dirname, '..', 'node_modules', 'strapi-generate-plugin', 'templates', 'gitignore'), path.join(pluginPath, '.gitignore'));
