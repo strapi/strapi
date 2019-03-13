@@ -55,7 +55,7 @@ describe('Test CTB', () => {
         .should('have.value', 'notcamelcase');
     });
 
-    it('Should create a TAG API', function() {
+    it('Should create a TAG API', () => {
       cy.server();
       cy.route('GET', `${backendUrl}/content-type-builder/models`).as('models');
       cy.route('POST', `${backendUrl}/content-type-builder/models`).as('createModel');
