@@ -24,7 +24,7 @@ module.exports = {
 
     // Check if we are in development mode (working with the monorepo)
     // So we don't run `npm -g ls` which takes time
-    if (process.argv.indexOf('new') !== -1 && process.argv.indexOf('--dev') !== -1) {
+    if (process.argv.includes('new') && process.argv.includes('--dev')) {
       skipCheck = true;
     }
 
