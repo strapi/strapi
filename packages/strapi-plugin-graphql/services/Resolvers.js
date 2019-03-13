@@ -22,7 +22,7 @@ module.exports = {
    * @return Object
    */
 
-  shadowCRUD: function(models, plugin) {
+  shadowCRUD: (models, plugin) => {
     // Retrieve generic service from the Content Manager plugin.
     const resolvers =
       strapi.plugins['content-manager'].services['contentmanager'];
