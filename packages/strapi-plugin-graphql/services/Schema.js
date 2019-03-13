@@ -47,7 +47,7 @@ module.exports = {
             _.get(model, `attributes.${attribute}.deprecated`);
 
           // Snakecase an attribute when we find a dash.
-          if (attribute.indexOf('-') !== -1) {
+          if (attribute.includes('-')) {
             line = `  ${_.snakeCase(attribute)}: ${_.trim(split[1])}`;
           }
 
@@ -75,7 +75,7 @@ module.exports = {
           const deprecated = _.get(description[attribute], 'deprecated');
 
           // Snakecase an attribute when we find a dash.
-          if (attribute.indexOf('-') !== -1) {
+          if (attribute.includes('-')) {
             line = `  ${_.snakeCase(attribute)}(${_.trim(split[1])}`;
           }
 
