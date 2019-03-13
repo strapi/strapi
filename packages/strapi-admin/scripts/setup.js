@@ -39,7 +39,7 @@ if (process.env.npm_config_plugins === 'true') {
 
       return hasAdminFolder;
     })
-    .forEach(function (plugin) {
+    .forEach(plugin => {
       shell.echo(`🔸  Plugin - ${_.upperFirst(plugin)}`);
       shell.echo('📦  Installing packages...');
       shell.cd(path.resolve(plugins, plugin));
