@@ -41,7 +41,7 @@ module.exports = {
       return acc;
     }, {}))
       .catch((err) => {
-        if (err.message.indexOf('index:') !== -1) {
+        if (err.message.includes('index:')) {
           const message = err.message.split('index:');
           const field = _.words(_.last(message).split('_')[0]);
           const error = { message: `This ${field} is already taken`, field };
