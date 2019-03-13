@@ -6,7 +6,7 @@ const frontLoadingDelay = Cypress.config('frontLoadingDelay');
 const backendUrl = Cypress.config('backendUrl');
 const pluginUrl = `${frontEndUrl}/admin/plugins/content-manager`;
 
-describe('Testing Content Manager ListPages', function() {
+describe('Testing Content Manager ListPages', () => {
   before(() => {
     cy.login()
       .then(data => {
