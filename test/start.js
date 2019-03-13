@@ -88,7 +88,7 @@ const main = async () => {
       const packagesPath = path.resolve(process.cwd(), 'packages');
 
       const packages = fs.readdirSync(packagesPath)
-        .filter(file => file.indexOf('strapi') !== -1);
+        .filter(file => file.includes('strapi'));
 
       // Run tests in every packages.
       for (let i in packages) {
