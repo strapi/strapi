@@ -42,7 +42,7 @@ module.exports = {
             subject: options.subject,
             text: options.text,
             html: options.html
-          }, function (err) {
+          }, err => {
             if (err) {
               reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
             } else {
