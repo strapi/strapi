@@ -15,7 +15,7 @@ const render = require('koa-ejs'); // eslint-disable-line import/no-unresolved
  * EJS hook
  */
 
-module.exports = function (strapi) {
+module.exports = strapi => {
   const hook = {
 
     /**
