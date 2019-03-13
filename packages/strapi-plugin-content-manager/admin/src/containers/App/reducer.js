@@ -70,7 +70,7 @@ function appReducer(state = initialState, action) {
           const dropIndex = state.get('hoverIndex');
           const toAdd = state.get('draggedItemName');
           const initDragLine = state.get('initDragLine');
-          const canDrop = list.indexOf(toAdd) === -1;
+          const canDrop = !list.includes(toAdd);
           const path = action.keys.split('.');
           const modelName = path.length > 2 ? path[2] : path[0];
           const layout = state.getIn(['modifiedSchema', 'layout', modelName, 'attributes']);
@@ -108,7 +108,7 @@ function appReducer(state = initialState, action) {
               let indexToInsert = dropIndex + 1;
   
               lineToCreate.forEach(item => {
-                const canAdd = newList.indexOf(item) === -1;
+                const canAdd = !newList.includes(item);
   
                 if (canAdd) {
                   newList = newList.insert(indexToInsert, item);
