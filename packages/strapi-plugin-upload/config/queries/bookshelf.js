@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params = {}, populate) {
-    const records = await this.query(function(qb) {
+    const records = await this.query(qb => {
       Object.keys(params.where).forEach((key) => {
         const where = params.where[key];
 
@@ -118,7 +118,7 @@ module.exports = {
 
   search: async function (params) {
     return this
-      .query(function(qb) {
+      .query(qb => {
         qb
           .whereRaw(`LOWER(hash) LIKE ?`, [`%${params.id}%`])
           .orWhereRaw(`LOWER(name) LIKE ?`, [`%${params.id}%`]);
