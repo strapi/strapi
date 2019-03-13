@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 module.exports = {
-  deleteApp: async function(folderName) {
+  deleteApp: async folderName => {
     const recursiveDeleteFiles = async (folderPath) => {
       // Check if folder exists
       try {
