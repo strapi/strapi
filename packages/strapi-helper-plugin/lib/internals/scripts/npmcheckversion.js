@@ -1,6 +1,6 @@
 /* eslint-disable */
 const shell = require('shelljs');
-shell.exec('npm -v', {silent: true}, function (code, stdout, stderr) {
+shell.exec('npm -v', {silent: true}, (code, stdout, stderr) => {
   if (code) throw stderr;
   if (parseFloat(stdout) < 3) {
     throw new Error('[ERROR: Strapi plugin] You need npm version @>=3');
