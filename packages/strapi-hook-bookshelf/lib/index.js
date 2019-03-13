@@ -176,10 +176,10 @@ module.exports = function(strapi) {
 
                   // Extract association except polymorphic.
                   const associations = definition.associations
-                    .filter(association => association.nature.toLowerCase().indexOf('morph') === -1);
+                    .filter(association => !association.nature.toLowerCase().includes('morph'));
                   // Extract polymorphic association.
                   const polymorphicAssociations = definition.associations
-                    .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1);
+                    .filter(association => association.nature.toLowerCase().includes('morph'));
 
                   polymorphicAssociations.map(association => {
                     // Retrieve relation Bookshelf object.
@@ -255,7 +255,7 @@ module.exports = function(strapi) {
                     if (_.isArray(options.withRelated)) {
                       options.withRelated = options.withRelated.map(path => {
                         const association = definition.associations
-                          .filter(association => association.nature.toLowerCase().indexOf('morph') !== -1)
+                          .filter(association => association.nature.toLowerCase().includes('morph'))
                           .filter(association => association.alias === path || association.via === path)[0];
 
                         if (association) {
@@ -330,7 +330,7 @@ module.exports = function(strapi) {
                     events.forEach((event) => {
                       let fn;
 
-                      if (event.name.indexOf('collection') !== -1 ) {
+                      if (event.name.includes('collection') ) {
                         fn = (instance) => instance.models.map((entry) => {
                           jsonFormatter(entry.attributes);
                         });
