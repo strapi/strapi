@@ -117,7 +117,7 @@ module.exports = {
         target: 'name',
         message: 'request.error.config',
         params: {
-          filePath: filePath
+          filePath
         }
       }]));
     }
@@ -143,7 +143,7 @@ module.exports = {
         target: 'name',
         message: 'request.error.config',
         params: {
-          filePath: filePath
+          filePath
         }
       }]));
     }
