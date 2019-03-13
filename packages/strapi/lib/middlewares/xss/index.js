@@ -14,7 +14,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       const defaults = require('./defaults.json');
 
       strapi.app.use(
