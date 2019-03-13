@@ -11,9 +11,7 @@ const _ = require('lodash');
 const { models: { getValuePrimaryKey } } = require('strapi-utils');
 
 module.exports = {
-  getModel: function (model, plugin) {
-    return _.get(strapi.plugins, [plugin, 'models', model]) || _.get(strapi, ['models', model]) || undefined;
-  },
+  getModel: (model, plugin) => _.get(strapi.plugins, [plugin, 'models', model]) || _.get(strapi, ['models', model]) || undefined,
 
   update: async function (params) {
     const virtualFields = [];
