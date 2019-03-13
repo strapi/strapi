@@ -72,7 +72,7 @@ module.exports = {
     // Use map to re-dispatch data correctly based on initial keys.
     return originalMap.map((query, index) => {
       // Find the index of where we should extract the results.
-      const indexResults = map.findIndex(queryMap => queryMap.indexOf(index) !== -1);
+      const indexResults = map.findIndex(queryMap => queryMap.includes(index));
       const data = results[indexResults];
 
       // Retrieving referring model.
