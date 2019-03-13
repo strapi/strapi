@@ -26,7 +26,7 @@ const GLOBALS = {};
  * Bookshelf hook
  */
 
-module.exports = function(strapi) {
+module.exports = strapi => {
   const hook = _.merge({
     /**
      * Default options
