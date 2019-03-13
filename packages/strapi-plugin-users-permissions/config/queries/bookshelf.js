@@ -3,7 +3,7 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params = {}, populate) {
-    const records = await this.query(function(qb) {
+    const records = await this.query(qb => {
       _.forEach(params.where, (where, key) => {
         if (_.isArray(where.value) && where.symbol !== 'IN' && where.symbol !== 'NOT IN') {
           for (const value in where.value) {
@@ -138,7 +138,7 @@ module.exports = {
 
   search: async function (params) {
     return this
-      .query(function(qb) {
+      .query(qb => {
         qb
           .where('username', 'LIKE', `%${params.id}%`)
           .orWhere('email', 'LIKE', `%${params.id}%`);
