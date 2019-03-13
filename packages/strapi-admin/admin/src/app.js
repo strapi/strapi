@@ -39,7 +39,7 @@ if (window.location.port !== '4000') {
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.onerror = function (oError) {
+        script.onerror = oError => {
           const source = new URL(oError.target.src);
           const url = new URL(`${strapi.remoteURL}`);
 
