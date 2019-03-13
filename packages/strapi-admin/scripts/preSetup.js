@@ -11,7 +11,7 @@ shell.echo(`
 const pwd = shell.pwd();
 
 const silent = process.env.npm_config_debug !== 'true';
-const isDevelopmentMode = path.resolve(pwd.stdout).indexOf('strapi-admin') !== -1;
+const isDevelopmentMode = path.resolve(pwd.stdout).includes('strapi-admin');
 const appPath = isDevelopmentMode ? path.resolve(process.env.PWD, '..') : path.resolve(pwd.stdout, '..');
 
 // We just install the admin's dependencies here
