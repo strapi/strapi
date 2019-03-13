@@ -7,10 +7,10 @@ const path = require('path');
 const _ = require('lodash');
 const { logger } = require('strapi-utils');
 
-module.exports = function () {
+module.exports = () => {
   try {
     // Now load up the Strapi framework for real.
-    const strapi = function () {
+    const strapi = () => {
       try {
         return require(path.resolve(process.cwd(), 'node_modules', 'strapi'));
       } catch (e) {
@@ -23,7 +23,7 @@ module.exports = function () {
       strapi.log.info('Starting the application in interactive mode...');
     }
 
-    strapi.start({}, function (err) {
+    strapi.start({}, err => {
 
       // Log and exit the REPL in case there is an error
       // while we were trying to start the server.
@@ -37,7 +37,7 @@ module.exports = function () {
       if ((cluster.isMaster && _.isEmpty(cluster.workers)) || cluster.worker.id === 1) {
         const repl = REPL.start(strapi.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template
 
-        repl.on('exit', function (err) {
+        repl.on('exit', err => {
 
           // Log and exit the REPL in case there is an error
           // while we were trying to open the REPL.
