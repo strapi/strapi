@@ -1,5 +1,4 @@
-module.exports = function (rq) {
-  return new Promise(async (resolve) => {
+module.exports = rq => new Promise(async (resolve) => {
     const ping = async () => {
       try {
         await rq({
@@ -29,4 +28,3 @@ module.exports = function (rq) {
       ping();
     }, 1000);
   });
-};
