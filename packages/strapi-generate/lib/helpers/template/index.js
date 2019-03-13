@@ -20,7 +20,7 @@ const fileHelper = require('../file');
  * Then use `file` helper to write it to its destination.
  */
 
-module.exports = function (options, cb) {
+module.exports = (options, cb) => {
   cb = reportback.extend(cb, {
     noTemplate: 'error',
     alreadyExists: 'error'
