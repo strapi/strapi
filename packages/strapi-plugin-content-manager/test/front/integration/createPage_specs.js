@@ -12,7 +12,7 @@ const getRequest = (model, sort = '_id') => {
   return `${backendUrl}/content-manager/explorer/${model}?_limit=10&_start=0&_sort=${sort}:ASC&source=content-manager`;
 };
 
-describe('Testing Content Manager createPages', function() {
+describe('Testing Content Manager createPages', () => {
   before(() => {
     cy.login()
       .then(data => {
