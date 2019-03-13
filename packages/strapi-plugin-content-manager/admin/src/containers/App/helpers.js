@@ -72,7 +72,7 @@ const removeColsLine = (manager, list) => {
   });
 
   return list.filter((item, index) => {
-    const indexToKeep = addedElsToRemove.indexOf(index) === -1;
+    const indexToKeep = !addedElsToRemove.includes(index);
 
     return indexToKeep;
   });
