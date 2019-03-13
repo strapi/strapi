@@ -13,7 +13,7 @@ const depthLimit = require('graphql-depth-limit');
 
 module.exports = strapi => {
   return {
-    beforeInitialize: async function() {
+    beforeInitialize: async () => {
       // Try to inject this hook just after the others hooks to skip the router processing.
       if (!_.get(strapi.config.hook.load, 'after')) {
         _.set(strapi.config.hook.load, 'after', []);
@@ -141,7 +141,7 @@ module.exports = strapi => {
       }, strapi.plugins.graphql.config._schema.graphql);
     },
 
-    initialize: function(cb) {
+    initialize: cb => {
       const {
         typeDefs,
         resolvers,
