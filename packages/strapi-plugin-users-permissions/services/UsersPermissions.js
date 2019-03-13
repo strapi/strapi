@@ -305,7 +305,7 @@ module.exports = {
     cb();
   },
 
-  removeDuplicate: async function () {
+  removeDuplicate: async () => {
     const primaryKey = strapi.query('permission', 'users-permissions').primaryKey;
 
     // Retrieve permissions by creation date (ID or ObjectID).
