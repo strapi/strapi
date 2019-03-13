@@ -25,7 +25,8 @@
     "request-promise-native": "^1.0.7",
     "shelljs": "^0.7.7",
     "snyk": "^1.99.0",
-    "strapi-lint": "file:packages/strapi-lint"
+    "strapi-lint": "file:packages/strapi-lint",
+    "wait-on": "^3.2.0"
   },
   "scripts": {
     "clean": "npm run removesymlinkdependencies && npx rimraf package-lock.json && npx rimraf packages/*/package-lock.json",

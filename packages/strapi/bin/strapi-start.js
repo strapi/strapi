@@ -36,7 +36,7 @@ const watchFileChanges = ({ appPath, strapi }) => {
     ignoreInitial: true,
     ignored: [
       /(^|[/\\])\../,
-      '**/tmp',
+      /tmp/,
       '**/admin',
       '**/components',
       '**/documentation',

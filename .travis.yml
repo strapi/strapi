@@ -50,19 +50,16 @@ jobs:
       before_install:
         - mysql -e 'CREATE DATABASE strapi_test;'
       env:
-        # mysql
         - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
 
     - <<: *e2e_tests
       name: 'E2E Sqlite'
       env:
-        # sqlite
         - DB_STRING='--dbclient=sqlite --dbfile=./tmp/data.db'
 
     - <<: *e2e_tests
       name: 'E2E MongoDB'
       env:
-        # mongo
         - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
 
     - name: 'Cypress tests'

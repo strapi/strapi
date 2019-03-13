@@ -659,7 +659,7 @@ describe('Create Strapi API End to End', () => {
       });
 
       const { body: referenceToGet } = await rq({
-        url: `/references/${referenceToCreate.id || referenceToCreate._id}`,
+        url: `/references/${referenceToCreate.id}`,
         method: 'GET',
       });
 
