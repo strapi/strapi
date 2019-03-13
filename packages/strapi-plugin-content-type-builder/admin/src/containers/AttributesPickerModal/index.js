@@ -113,7 +113,6 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
     push({ search: '' });
   }
 
-
   updateNodeToFocus = position => this.setState({ nodeToFocus: position });
 
   renderAttribute = (attribute, index) => {

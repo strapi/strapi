@@ -45,7 +45,7 @@ class CustomCheckbox extends React.Component { // eslint-disable-line react/pref
       <div className="col-md-12" style={{ marginTop: -4, marginBottom: 9 }}>
         <FormattedMessage id={label.id}>
           {msg => (
-            <label htmlFor={name} style={{ fontWeight: 'bold', cursor: 'pointer' }}>
+            <label htmlFor={name} style={{ fontWeight: '500', cursor: 'pointer' }}>
               <input
                 style={{ marginLeft: 0, marginRight: 13 }}
                 checked={isChecked}

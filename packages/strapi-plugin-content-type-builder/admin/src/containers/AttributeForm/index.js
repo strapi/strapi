@@ -121,7 +121,7 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
           <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
             <FormattedMessage id={`${pluginId}.popUpForm.create`} />
             &nbsp;
-            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>string</span>
+            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{attributeType}</span>
             &nbsp;
             <FormattedMessage id={`${pluginId}.popUpForm.field`} />
           </div>

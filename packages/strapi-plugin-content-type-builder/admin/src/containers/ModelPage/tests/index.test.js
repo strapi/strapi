@@ -48,7 +48,7 @@ describe('<ModelPage />', () => {
         { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
         { icon: 'fa-cube', name: 'user', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
         { icon: 'fa-cube', name: 'role', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
-        { icon: 'fa-cube', name: 'product', description: 'super api', fields: 6 },
+        { icon: 'fa-cube', name: 'product', description: 'super api', fields: 6, isTemporary: false },
       ],
       onCreateAttribute: jest.fn(),
     };

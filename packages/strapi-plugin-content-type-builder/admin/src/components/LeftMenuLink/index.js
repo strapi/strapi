@@ -9,10 +9,14 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import pluginId from '../../pluginId';
+
+import Span from './Span';
 
 import styles from './styles.scss';
 
-function LeftMenuLink({ icon, name, source, to }) {
+
+function LeftMenuLink({ icon, isTemporary, name, source, to }) {
   return (
     <li className={styles.leftMenuLink}>
       <NavLink className={styles.link} to={to} activeClassName={styles.linkActive}>
@@ -22,8 +26,13 @@ function LeftMenuLink({ icon, name, source, to }) {
         <div className={styles.container}>
           <span className={styles.linkSpan}>{startCase(name)}</span>
           {!!source && (
-            <FormattedMessage id="content-type-builder.from">
-              {msg => <span id="from-wrapper" style={{ marginLeft: '1rem', fontStyle: 'italic', marginRight: '10px' }}>({msg}: {source})</span>}
+            <FormattedMessage id={`${pluginId}.from`}>
+              {msg => <Span>({msg}: {source})</Span>}
+            </FormattedMessage>
+          )}
+          {isTemporary && (
+            <FormattedMessage id={`${pluginId}.contentType.temporaryDisplay`}>
+              {msg => <Span>{msg}</Span>}
             </FormattedMessage>
           )}
         </div>
@@ -34,6 +43,7 @@ function LeftMenuLink({ icon, name, source, to }) {
 
 LeftMenuLink.defaultProps = {
   icon: null,
+  isTemporary: false,
   name: null,
   source: null,
   to: '',
@@ -41,6 +51,7 @@ LeftMenuLink.defaultProps = {
 
 LeftMenuLink.propTypes = {
   icon: PropTypes.string,
+  isTemporary: PropTypes.bool,
   name: PropTypes.string,
   source: PropTypes.string,
   to: PropTypes.string,

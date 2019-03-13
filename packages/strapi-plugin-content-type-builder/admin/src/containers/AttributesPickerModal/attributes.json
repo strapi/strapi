@@ -1,17 +1,5 @@
 [
   {
-    "type": "string",
-    "description": "content-type-builder.popUpForm.attributes.string.description"
-  },
-  {
-    "type": "text",
-    "description": "content-type-builder.popUpForm.attributes.text.description"
-  },
-  {
-    "type": "number",
-    "description": "content-type-builder.popUpForm.attributes.number.description"
-  },
-  {
     "type": "boolean",
     "description": "content-type-builder.popUpForm.attributes.boolean.description"
   },
@@ -20,27 +8,39 @@
     "description": "content-type-builder.popUpForm.attributes.date.description"
   },
   {
-    "type": "json",
-    "description": "content-type-builder.popUpForm.attributes.json.description"
-  },
-  {
     "type": "email",
     "description": "content-type-builder.popUpForm.attributes.email.description"
   },
   {
-    "type": "password",
-    "description": "content-type-builder.popUpForm.attributes.password.description"
+    "type": "enumeration",
+    "description": "content-type-builder.popUpForm.attributes.enumeration.description"
+  },
+  {
+    "type": "json",
+    "description": "content-type-builder.popUpForm.attributes.json.description"
   },
   {
     "type": "media",
     "description": "content-type-builder.popUpForm.attributes.media.description"
   },
   {
+    "type": "number",
+    "description": "content-type-builder.popUpForm.attributes.number.description"
+  },
+  {
+    "type": "password",
+    "description": "content-type-builder.popUpForm.attributes.password.description"
+  },
+  {
     "type": "relation",
     "description": "content-type-builder.popUpForm.attributes.relation.description"
   },
   {
-    "type": "enumeration",
-    "description": "content-type-builder.popUpForm.attributes.enumeration.description"
+    "type": "string",
+    "description": "content-type-builder.popUpForm.attributes.string.description"
+  },
+  {
+    "type": "text",
+    "description": "content-type-builder.popUpForm.attributes.text.description"
   }
 ]

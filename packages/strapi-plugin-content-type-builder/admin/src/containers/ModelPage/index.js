@@ -35,6 +35,7 @@ import Ul from '../../components/Ul';
 
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
+import ModelForm from '../ModelForm';
 
 import {
   clearTemporaryAttribute,
@@ -50,6 +51,16 @@ import styles from './styles.scss';
 import DocumentationSection from './DocumentationSection';
 
 export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+  getFormData = () => {
+    const { location: { search }, newContentType } = this.props;
+
+    if (getQueryParameters(search, 'actionType') === 'create') {
+      return newContentType;
+    }
+
+    return null;
+  }
+
   getModel = () => {
     const { modifiedData } = this.props;
 
@@ -109,6 +120,18 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     push({ search: 'modalType=chooseAttributes' });
   }
 
+  handleClickOpenModalCreateCT = () => {
+    const { history: { push } } = this.props;
+
+    if (this.shouldOpenModalAddCT()) {
+      push({
+        search: 'modalType=model&settingType=base&actionType=create',
+      });
+    } else {
+      strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
+    }
+  }
+
   isUpdatingTemporaryContentType = () => {
     const { models } = this.props;
     /* istanbul ignore next */
@@ -117,6 +140,12 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const { isTemporary } = currentModel;
 
     return isTemporary;
+  }
+
+  shouldOpenModalAddCT = () => {
+    const { models } = this.props;
+
+    return models.every(model => (model.isTemporary === false));
   }
 
   shouldRedirect = () => {
@@ -128,7 +157,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   renderLinks = () => {
     const { models } = this.props;
     const links = models.map(model => {
-      const { name, source } = model;
+      const { isTemporary, name, source } = model;
       const base = `/plugins/${pluginId}/models/${name}`;
       const to = source ? `${base}&source=${source}` : base;
 
@@ -136,6 +165,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         <LeftMenuLink
           key={name}
           icon="fa fa-caret-square-o-right"
+          isTemporary={isTemporary}
           name={name}
           source={source}
           to={to}
@@ -155,17 +185,29 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   render() {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
     const {
+      cancelNewContentType,
       clearTemporaryAttribute,
+      createTempContentType,
       history: { push },
-      location: { search },
+      location: { pathname, search },
       models,
+      modifiedData,
+      onChangeNewContentType,
       onCreateAttribute,
       temporaryAttribute,
     } = this.props;
 
     if (this.shouldRedirect()) {
-      return <Redirect to={`/plugins/${pluginId}/models/${models[0].name}`} />;
+      const { name, source } = models[0];
+      const to = source ? `${name}&source=${source}` : name;
+
+      return <Redirect to={to} />;
     }
+
+    const modalType = getQueryParameters(search, 'modalType');
+    const settingType = getQueryParameters(search, 'settingType');
+    const attributeType = getQueryParameters(search, 'attributeType');
+    const actionType = getQueryParameters(search, 'actionType');
 
     return (
       <div className={styles.modelpage}>
@@ -176,7 +218,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                 <LeftMenuSectionTitle id={this.getSectionTitle()} />
                 <ul>
                   {this.renderLinks()}
-                  <CustomLink onClick={this.handleClickOpenModalChooseAttributes} />
+                  <CustomLink onClick={this.handleClickOpenModalCreateCT} />
                 </ul>
               </LeftMenuSection>
               <LeftMenuSection>
@@ -244,17 +286,29 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           </div>
         </div>
         <AttributesModalPicker
-          isOpen={getQueryParameters(search, 'modalType') === 'chooseAttributes'}
+          isOpen={modalType === 'chooseAttributes'}
           push={push}
         />
         <AttributeForm
-          activeTab={getQueryParameters(search, 'settingType')}
-          attributeType={getQueryParameters(search, 'attributeType')}
+          activeTab={settingType}
+          attributeType={attributeType}
           isContentTypeTemporary={this.isUpdatingTemporaryContentType()}
-          isOpen={getQueryParameters(search, 'modalType') === 'attributeForm'}
+          isOpen={modalType === 'attributeForm' && attributeType !== 'relation'}
           modifiedData={temporaryAttribute}
           onCancel={clearTemporaryAttribute}
           onChange={onCreateAttribute}
+          push={push}
+        />
+        <ModelForm
+          actionType={actionType}
+          activeTab={settingType}
+          cancelNewContentType={cancelNewContentType}
+          createTempContentType={createTempContentType}
+          currentData={modifiedData}
+          modifiedData={this.getFormData()}
+          onChangeNewContentType={onChangeNewContentType}
+          isOpen={modalType === 'model'}
+          pathname={pathname}
           push={push}
         />
       </div>

@@ -24,7 +24,7 @@ describe('<CustomCheckbox />', () => {
     };
   });
   it('should not crash', () => {
-    renderComponent({});
+    renderComponent(props);
   });
 
   it('should have the isChecked state true if a value is given', () => {
