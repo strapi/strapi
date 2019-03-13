@@ -27,7 +27,7 @@ const packageJSON = require('../package.json');
  * Install a Strapi plugin.
  */
 
-module.exports = function (plugin, cliArguments) {
+module.exports = (plugin, cliArguments) => {
   // Define variables.
   const pluginPrefix = 'strapi-plugin-';
   const pluginID = `${pluginPrefix}${plugin}`;
