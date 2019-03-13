@@ -35,7 +35,7 @@ function* emitter(action) {
 function* getData() {
   try {
     const appPlugins = yield select(makeSelectAppPlugins());
-    const hasUserPlugin = appPlugins.indexOf('users-permissions') !== -1;
+    const hasUserPlugin = appPlugins.includes('users-permissions');
 
     if (hasUserPlugin && auth.getToken() !== null) {
       yield call(request, `${strapi.backendURL}/users/me`, { method: 'GET' });
