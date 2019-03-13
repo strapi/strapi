@@ -26,7 +26,7 @@ const logger = require('strapi-utils').logger;
 
 /* eslint-disable prefer-template */
 /* eslint-disable no-console */
-module.exports = function () {
+module.exports = () => {
   const HOME = process.env[process.platform === 'win32' ? 'USERPROFILE' : 'HOME'];
 
   fs.access(path.resolve(HOME, '.strapirc'), fs.F_OK | fs.R_OK | fs.W_OK, err => {
