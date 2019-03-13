@@ -20,7 +20,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       _.forEach(strapi.config.routes, value => {
         composeEndpoint(value, null, strapi.router)(cb);
       });
