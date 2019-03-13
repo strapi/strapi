@@ -14,7 +14,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       strapi.app.use(
         async (ctx, next) => {
           if (ctx.request.admin) return await next();
