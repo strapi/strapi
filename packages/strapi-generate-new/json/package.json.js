@@ -27,7 +27,7 @@ module.exports = scope => {
       const name = pkg[0];
       const version = pkg[1] || 'latest';
 
-      acc[name] = name.indexOf('strapi') !== -1 ? getDependencyVersion(cliPkg, 'strapi') : version;
+      acc[name] = name.includes('strapi') ? getDependencyVersion(cliPkg, 'strapi') : version;
 
       return acc;
     }, {}) : {};
