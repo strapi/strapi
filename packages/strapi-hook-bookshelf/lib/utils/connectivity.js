@@ -76,16 +76,18 @@ module.exports = (scope, success, error) => {
     });
   })
     .catch((err) => {
+      if (scope.debug) {
+        console.log('🐛 Full error log:');
+        console.log(err);
+        return error();
+      }
+
       if (err.sql) {
         console.log('⚠️  Server connection has failed! Make sure your database server is running.');
       } else {
         console.log(`⚠️  Database connection has failed! Make sure your "${scope.database.settings.database}" database exist.`);
       }
-
-      if (scope.debug) {
-        console.log('🐛 Full error log:');
-        console.log(err);
-      }
+      console.log(err.message);
 
       error();
     });

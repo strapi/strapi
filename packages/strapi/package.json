@@ -34,6 +34,7 @@
     "boom": "^5.2.0",
     "chalk": "^2.4.1",
     "cheerio": "^1.0.0-rc.2",
+    "chokidar": "^2.1.2",
     "cross-spawn": "^6.0.5",
     "delegates": "^1.0.0",
     "fs-extra": "^7.0.0",
@@ -74,6 +75,7 @@
     "strapi-utils": "3.0.0-alpha.24.1"
   },
   "scripts": {
+    "test": "jest --forceExit",
     "postinstall": "node lib/utils/success.js"
   },
   "author": {
