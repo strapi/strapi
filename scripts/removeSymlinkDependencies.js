@@ -6,18 +6,18 @@ try {
   const pkgJSON = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'package.json'), 'utf8'));
   const packages = fs.readdirSync(path.resolve(process.cwd(),'packages'), 'utf8');
 
-  packages.filter(pkg => pkg.indexOf('strapi') !== -1).forEach(pkg => {
+  packages.filter(pkg => pkg.includes('strapi')).forEach(pkg => {
     currentPackage = pkg;
     const packageJSON = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'packages', pkg, 'package.json'), 'utf8'));
 
     packageJSON.version = pkgJSON.version;
 
-    Object.keys(packageJSON.dependencies || []).filter(dependency => dependency.indexOf('strapi-') !== -1).forEach(dependency => {
+    Object.keys(packageJSON.dependencies || []).filter(dependency => dependency.includes('strapi-')).forEach(dependency => {
       packageJSON.dependencies[dependency] = pkgJSON.version;
     });
 
     if (packageJSON.devDependencies) {
-      Object.keys(packageJSON.devDependencies || []).filter(devDependency => devDependency.indexOf('strapi-') !== -1).forEach(devDependency => {
+      Object.keys(packageJSON.devDependencies || []).filter(devDependency => devDependency.includes('strapi-')).forEach(devDependency => {
         packageJSON.devDependencies[devDependency] = pkgJSON.version;
       });
     }
