@@ -39,7 +39,7 @@ class Table extends React.Component {
           primaryKey={this.props.primaryKey}
           onDelete={this.props.handleDelete}
           redirectUrl={this.props.redirectUrl}
-          value={this.props.entriesToDelete.indexOf(toString(record.id)) !== -1}
+          value={this.props.entriesToDelete.includes(toString(record.id))}
         />
       ));
     const entriesToDeleteNumber = this.props.entriesToDelete.length;
