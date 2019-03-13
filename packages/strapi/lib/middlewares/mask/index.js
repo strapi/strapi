@@ -103,7 +103,7 @@ module.exports = strapi => {
       return _.omit(value, attributesToHide);
     },
 
-    whichModels: function (value, plugin) {
+    whichModels: (value, plugin) => {
       const keys = Object.keys(value);
       let maxMatch = 0;
       let matchs = [];
@@ -142,8 +142,7 @@ module.exports = strapi => {
       return matchs;
     },
 
-    filteredModels: function (matchs) {
-      return matchs.reduce((acc, match, index) => {
+    filteredModels: matchs => matchs.reduce((acc, match, index) => {
         const attributes = match.plugin ?
           strapi.plugins[match.plugin].models[match.model].attributes:
           strapi.models[match.model].attributes;
@@ -155,7 +154,6 @@ module.exports = strapi => {
         }
 
         return acc;
-      }, []);
-    }
+      }, [])
   };
 };
