@@ -7,7 +7,7 @@ try {
 
   shell.cd('packages/strapi');
 
-  packages.filter(pkg => pkg.indexOf('strapi') !== -1).forEach(pkg => {
+  packages.filter(pkg => pkg.includes('strapi')).forEach(pkg => {
     shell.cd('../' + pkg);
     shell.echo(pkg + ': npm publish --tag ' + process.argv[2]);
     shell.exec('npm publish --tag ' + process.argv[2]);
