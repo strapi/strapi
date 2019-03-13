@@ -113,7 +113,7 @@ module.exports = strapi => {
           Object.keys(strapi.plugins[plugin].models[model].attributes):
           Object.keys(strapi.models[model].attributes);
 
-        const intersection = _.intersection(keys, attributes.filter(attr => ['id', '_id', '_v'].indexOf(attr) === -1 )).length;
+        const intersection = _.intersection(keys, attributes.filter(attr => !['id', '_id', '_v'].includes(attr) )).length;
 
         // Most matched model.
         if (intersection > maxMatch) {
