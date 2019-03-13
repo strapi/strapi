@@ -7,14 +7,14 @@ try {
   shell.cd('packages/strapi');
 
   packages
-    .filter(pkg => pkg.indexOf('strapi') !== -1)
+    .filter(pkg => pkg.includes('strapi'))
     .forEach(pkg => {
       shell.cd('../' + pkg);
       shell.echo(`Testing ${pkg} dependencies`);
 
       const data = shell.exec('snyk test --severity-threshold=high', { silent: true });
 
-      if (data.code !== 0 && data.stdout.indexOf('Missing node_modules folder') === -1) {
+      if (data.code !== 0 && !data.stdout.includes('Missing node_modules folder')) {
         shell.echo(data.stdout);
 
         process.exit(1);
