@@ -4,7 +4,7 @@ const _ = require('lodash');
 
 module.exports = async cb => {
   // Check if the plugin users-permissions is installed because the documentation needs it
-  if (Object.keys(strapi.plugins).indexOf('users-permissions') === -1) {
+  if (!Object.keys(strapi.plugins).includes('users-permissions')) {
     throw new Error(
       'In order to make the documentation plugin works the users-permissions one is required',
     );
@@ -92,7 +92,7 @@ module.exports = async cb => {
         .map(tag => {
           return tag.name.toLowerCase();
         })
-        .filter(tag => defaultGeneratedTags.indexOf(tag) === -1)
+        .filter(tag => !defaultGeneratedTags.includes(tag))
         .sort((a, b) => a - b)
         .join('.');
     };
