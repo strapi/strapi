@@ -71,7 +71,7 @@ if (isAdmin && !isSetup) {
   try {
     const server = require(serverConfig);
 
-    if ((process.env.PWD || process.cwd()).indexOf('/admin') !== -1) {
+    if ((process.env.PWD || process.cwd()).includes('/admin')) {
       if (_.get(server, 'admin.build.host')) {
         publicPath = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
       } else {
