@@ -36,7 +36,8 @@ const assets = [
 }, {});
 
 function AttributeLi({ attributeInfos: { configurable, plugin, target, type }, name, onClick }) {
-  const src = target ? assets.relation : assets[type];
+  const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
+  const src = target ? assets.relation : assets[ico];
   const icons = configurable === false ? [{ icoType: 'lock' }] : [{ icoType: 'pencil' }, { icoType: 'trash' }];
   const relationStyle = target ? styles.relation : null;
   const configurableStyle = configurable === false ? null : styles.editable;

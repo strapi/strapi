@@ -6,6 +6,7 @@
 
 import { fromJS, List, Map } from 'immutable';
 import {
+  ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
   CREATE_TEMP_CONTENT_TYPE,
@@ -34,6 +35,24 @@ export const initialState = fromJS({
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
+    case ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE: {
+      return state
+        .updateIn([
+          'newContentType',
+          'attributes',
+          state.getIn(['temporaryAttribute', 'name']),
+        ], () => {
+          const temporaryAttributeType = state.getIn(['temporaryAttribute', 'type']);
+          const type = type === 'number' && !!temporaryAttributeType ? 'integer' : action.attributeType;
+          const newAttribute = state
+            .get('temporaryAttribute')
+            .remove('name')
+            .setIn(['temporaryAttribute', 'type'], type);
+
+          return newAttribute;
+        })
+        .update('temporaryAttribute', () => Map({}));
+    }
     case CANCEL_NEW_CONTENT_TYPE:
       return state
         .update('newContentType', () => Map(initialState.get('newContentType')));

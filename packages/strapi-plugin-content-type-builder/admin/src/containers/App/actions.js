@@ -5,6 +5,7 @@
  */
 import { pick, set } from 'lodash';
 import {
+  ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
   CREATE_TEMP_CONTENT_TYPE,
@@ -15,6 +16,13 @@ import {
   ON_CHANGE_NEW_CONTENT_TYPE,
   ON_CREATE_ATTRIBUTE,
 } from './constants';
+
+export function addAttributeToTempContentType(attributeType) {
+  return {
+    type: ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
+    attributeType,
+  };
+}
 
 export function cancelNewContentType() {
   return {

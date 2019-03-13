@@ -38,6 +38,7 @@ import AttributesModalPicker from '../AttributesPickerModal';
 import ModelForm from '../ModelForm';
 
 import {
+  addAttributeToTempContentType,
   clearTemporaryAttribute,
   onCreateAttribute,
 } from '../App/actions';
@@ -62,7 +63,11 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   getModel = () => {
-    const { modifiedData } = this.props;
+    const { modifiedData, newContentType } = this.props;
+
+    if (this.isUpdatingTemporaryContentType()) {
+      return newContentType;
+    }
 
     return get(modifiedData, this.getModelName(), {});
   }
@@ -130,6 +135,14 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     } else {
       strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
     }
+  }
+
+  handleSubmit = () => {
+    const { addAttributeToTempContentType, history: { push }, location: { search } } = this.props;
+    const attributeType = getQueryParameters(search, 'attributeType');
+
+    addAttributeToTempContentType(attributeType);
+    push({ search: '' });
   }
 
   isUpdatingTemporaryContentType = () => {
@@ -297,6 +310,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           modifiedData={temporaryAttribute}
           onCancel={clearTemporaryAttribute}
           onChange={onCreateAttribute}
+          onSubmit={this.handleSubmit}
           push={push}
         />
         <ModelForm
@@ -333,6 +347,7 @@ const mapStateToProps = createStructuredSelector({
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addAttributeToTempContentType,
       clearTemporaryAttribute,
       onCreateAttribute,
     },

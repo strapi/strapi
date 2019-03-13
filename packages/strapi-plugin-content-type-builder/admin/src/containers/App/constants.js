@@ -4,6 +4,7 @@
  *
  */
 
+export const ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE = 'ContentTypeBuilder/App/ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE';
 export const CANCEL_NEW_CONTENT_TYPE = 'ContentTypeBuilder/App/CANCEL_NEW_CONTENT_TYPE';
 export const CLEAR_TEMPORARY_ATTRIBUTE = 'ContentTypeBuilder/App/CLEAR_TEMPORARY_ATTRIBUTE';
 export const CREATE_TEMP_CONTENT_TYPE = 'ContentTypeBuilder/App/CREATE_TEMP_CONTENT_TYPE';

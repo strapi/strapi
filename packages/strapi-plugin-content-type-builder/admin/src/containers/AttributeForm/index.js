@@ -93,8 +93,7 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
     }));
 
     if (isEmpty(formErrors)) {
-      console.log('can submit');
-      onSubmit(e);
+      onSubmit();
     }
   }
 
@@ -198,9 +197,6 @@ AttributeForm.defaultProps = {
   modifiedData: {},
   onCancel: () => {},
   onChange: () => {},
-  onSubmit: (e) => {
-    e.preventDefault();
-  },
   push: () => {},
 };
 
@@ -211,7 +207,7 @@ AttributeForm.propTypes = {
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)
   onCancel: PropTypes.func,
   onChange: PropTypes.func,
-  onSubmit: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
   push: PropTypes.func,
 };
 
