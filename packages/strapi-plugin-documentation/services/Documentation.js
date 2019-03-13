@@ -94,7 +94,7 @@ module.exports = {
    * @param {String} targetDir
    *
    */
-  createDocumentationDirectory: function(targetDir) {
+  createDocumentationDirectory: targetDir => {
     const sep = path.sep;
     const initDir = path.isAbsolute(targetDir) ? sep : '';
     const baseDir = '.';
@@ -714,7 +714,7 @@ module.exports = {
     }, {});
   },
 
-  generatePluginResponseSchema: function(tag) {
+  generatePluginResponseSchema: tag => {
     const { actionType, name, plugin } = _.isObject(tag) ? tag : { tag };
     const getter = plugin ? ['plugins', plugin, 'models', name.toLowerCase()] : ['models', name];
     const isModelRelated =
@@ -886,7 +886,7 @@ module.exports = {
    * Retrieve all privates attributes from a model
    * @param {Object} attributes
    */
-  getPrivateAttributes: function(attributes) {
+  getPrivateAttributes: attributes => {
     const privateAttributes = Object.keys(attributes).reduce((acc, current) => {
       if (attributes[current].private === true) {
         acc.push(current);
@@ -1003,7 +1003,7 @@ module.exports = {
    * @param {String} endPoint
    * @returns {String}
    */
-  generateResponseDescription: function(verb, tag, endPoint) {
+  generateResponseDescription: (verb, tag, endPoint) => {
     const isModelRelated = strapi.models[tag] !== undefined && tag === endPoint;
     
     if (Array.isArray(verb)) {
@@ -1135,13 +1135,11 @@ module.exports = {
     };
   },
 
-  generateTags: function(name, docName, tag = '', isPlugin = false) {
-    return [
+  generateTags: (name, docName, tag = '', isPlugin = false) => [
       {
         name: isPlugin ? tag : _.upperFirst(docName),
       },
-    ];
-  },
+    ],
 
   /**
    * Add a default description when it's implied
@@ -1220,7 +1218,7 @@ module.exports = {
    * @param {String} controllerMethod
    * @param {String} endPoint
    */
-  generateVerbParameters: function(verb, controllerMethod, endPoint) {
+  generateVerbParameters: (verb, controllerMethod, endPoint) => {
     const params = pathToRegexp
       .parse(endPoint)
       .filter(token => _.isObject(token))
@@ -1353,16 +1351,14 @@ module.exports = {
   /**
    * Retrieve the documentation plugin documentation directory
    */
-  getMergedDocumentationPath: function(version = this.getDocumentationVersion()) {
-    return path.join(strapi.config.appPath, 'plugins', 'documentation', 'documentation', version);
-  },
+  getMergedDocumentationPath: (version = this.getDocumentationVersion()) => path.join(strapi.config.appPath, 'plugins', 'documentation', 'documentation', version),
 
   /**
    * Retrieve the model's attributes
    * @param {Objet} modelAttributes
    * @returns {Object} { associations: [{ name: 'foo', getter: [], tag: 'foos' }], attributes }
    */
-  getModelAttributes: function(modelAttributes) {
+  getModelAttributes: modelAttributes => {
     const associations = [];
     const attributes = Object.keys(modelAttributes)
       .map(attr => {
@@ -1506,11 +1502,9 @@ module.exports = {
    * @param {String} pluginName
    * @returns {Array}
    */
-  getPluginRoutesWithDescription: function(pluginName) {
-    return _.get(strapi, ['plugins', pluginName, 'config', 'routes'], []).filter(
+  getPluginRoutesWithDescription: pluginName => _.get(strapi, ['plugins', pluginName, 'config', 'routes'], []).filter(
       route => _.get(route, ['config', 'description']) !== undefined,
-    );
-  },
+    ),
 
   /**
    * Given a string and a pluginName retrieve the model and the pluginName
@@ -1594,15 +1588,13 @@ module.exports = {
    * @param {Object} srcObj
    * @returns {Object}
    */
-  mergeVerbObject: function(initObj, srcObj) {
-    return _.mergeWith(initObj, srcObj, (objValue, srcValue) => {
+  mergeVerbObject: (initObj, srcObj) => _.mergeWith(initObj, srcObj, (objValue, srcValue) => {
       if (_.isPlainObject(objValue)) {
         return Object.assign(objValue, srcValue);
       }
 
       return srcValue;
-    });
-  },
+    }),
 
   retrieveDocumentation: function(name, isPlugin = false) {
     const documentationPath = isPlugin
@@ -1739,7 +1731,7 @@ module.exports = {
       .filter(x => x);
   },
 
-  retrieveFrontForm: async function() {
+  retrieveFrontForm: async () => {
     const config = await strapi
       .store({
         environment: '',
