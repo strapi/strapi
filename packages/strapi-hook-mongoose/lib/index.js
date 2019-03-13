@@ -139,12 +139,12 @@ module.exports = function (strapi) {
                   instead of Upload.find().populate('related.item')
                 */
 
-                const morphAssociations = definition.associations.filter(association => association.nature.toLowerCase().indexOf('morph') !== -1);
+                const morphAssociations = definition.associations.filter(association => association.nature.toLowerCase().includes('morph'));
 
                 if (morphAssociations.length > 0) {
                   morphAssociations.forEach(association => {
                     Object.keys(preLifecycle)
-                      .filter(key => key.indexOf('find') !== -1)
+                      .filter(key => key.includes('find'))
                       .forEach(key => {
                         collection.schema.pre(key,  function (next) {
                           if (this._mongooseOptions.populate && this._mongooseOptions.populate[association.alias]) {
