@@ -29,7 +29,7 @@ const relations = require('./relations');
 /* eslint-disable no-case-declarations */
 /* eslint-disable no-const-assign */
 /* eslint-disable no-unused-vars */
-module.exports = function (strapi) {
+module.exports = strapi => {
   const hook = _.merge({
 
     /**
@@ -249,7 +249,7 @@ module.exports = function (strapi) {
 
                 collection.schema.options.toObject = collection.schema.options.toJSON = {
                   virtuals: true,
-                  transform: function (doc, returned, opts) {
+                  transform: (doc, returned, opts) => {
                     // Remover $numberDecimal nested property.
                     Object.keys(returned)
                       .filter(key => returned[key] instanceof mongoose.Types.Decimal128)
