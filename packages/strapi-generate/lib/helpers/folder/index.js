@@ -16,7 +16,7 @@ const reportback = require('reportback')();
  * Generate a folder
  */
 /* eslint-disable prefer-template */
-module.exports = function (options, cb) {
+module.exports = (options, cb) => {
 
   // Provide default values for cb.
   cb = reportback.extend(cb, {
