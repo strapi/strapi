@@ -10,7 +10,7 @@ const strapi = require('../lib/');
    * correctly required and loaded inside `strapi`.
    */
   describe('middleware', () => {
-    before(function(done) {
+    before(done => {
       strapi.log.level = 'silent';
       
       // runs before all tests in this block
