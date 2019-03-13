@@ -142,7 +142,7 @@ module.exports = {
     ctx.send(data);
   },
 
-  updateRole: async function (ctx) {
+  updateRole: async ctx => {
     // Fetch root role.
     const root = await strapi.query('role', 'users-permissions').findOne({ type: 'root' });
 
