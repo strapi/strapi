@@ -11,7 +11,7 @@ import cn from 'classnames';
 import PropTypes from 'prop-types';
 
 import Label from 'components/Label';
-import InputSearchLi from 'components/InputSearchLi';
+import InputSearchLi from '../InputSearchLi';
 
 import styles from './styles.scss';
 

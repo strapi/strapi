@@ -17,6 +17,7 @@ import {
   MOVE_ATTR_EDIT_VIEW,
   MOVE_VARIABLE_ATTR_EDIT_VIEW,
   ON_CHANGE,
+  ON_CHANGE_INPUT_TYPE,
   ON_CHANGE_SETTINGS,
   ON_CLICK_ADD_ATTR,
   ON_CLICK_ADD_ATTR_FIELD,
@@ -116,6 +117,16 @@ export function onChange({ target }) {
   };
 }
 
+export function onChangeInputType({ target }) {
+  const value = target.value === true ? 'WYSIWYG' : '';
+
+  return {
+    type: ON_CHANGE_INPUT_TYPE,
+    keys: target.name.split('.'),
+    value,
+  };
+}
+
 export function onChangeSettings({ target }) {
   const value = includes(target.name, 'pageEntries') ? parseInt(target.value, 10) : target.value;
 
@@ -172,9 +183,10 @@ export function onReset() {
   };
 }
 
-export function onSubmit() {
+export function onSubmit(context) {
   return {
     type: ON_SUBMIT,
+    context,
   };
 }
 

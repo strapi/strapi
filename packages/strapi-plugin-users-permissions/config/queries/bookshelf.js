@@ -5,7 +5,7 @@ module.exports = {
   find: async function (params = {}, populate) {
     const records = await this.query(function(qb) {
       _.forEach(params.where, (where, key) => {
-        if (_.isArray(where.value)) {
+        if (_.isArray(where.value) && where.symbol !== 'IN' && where.symbol !== 'NOT IN') {
           for (const value in where.value) {
             qb[value ? 'where' : 'orWhere'](key, where.symbol, where.value[value]);
           }

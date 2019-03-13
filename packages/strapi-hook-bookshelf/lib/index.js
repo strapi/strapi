@@ -86,10 +86,20 @@ module.exports = function(strapi) {
               primaryKey: 'id',
               primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer')
             });
+
+            // Use default timestamp column names if value is `true`
+            if (_.get(definition, 'options.timestamps', false) === true) {
+              _.set(definition, 'options.timestamps', ['created_at', 'updated_at']);
+            }
+            // Use false for values other than `Boolean` or `Array`
+            if (!_.isArray(_.get(definition, 'options.timestamps')) && !_.isBoolean(_.get(definition, 'options.timestamps'))) {
+              _.set(definition, 'options.timestamps', false);
+            }
+
             // Register the final model for Bookshelf.
             const loadedModel = _.assign({
               tableName: definition.collectionName,
-              hasTimestamps: _.get(definition, 'options.timestamps') === true,
+              hasTimestamps: _.get(definition, 'options.timestamps', false),
               idAttribute: _.get(definition, 'options.idAttribute', 'id'),
               associations: [],
               defaults: Object.keys(definition.attributes).reduce((acc, current) => {
@@ -134,7 +144,7 @@ module.exports = function(strapi) {
               try {
                 // External function to map key that has been updated with `columnName`
                 const mapper = (params = {}) => {
-                  if (definition.client === 'mysql') {
+                  if (definition.client === 'mysql' || definition.client === 'sqlite3') {
                     Object.keys(params).map((key) => {
                       const attr = definition.attributes[key] || {};
 
@@ -226,9 +236,9 @@ module.exports = function(strapi) {
                     updating: 'beforeUpdate',
                     updated: 'afterUpdate',
                     fetching: 'beforeFetch',
-                    'fetching:collection': 'beforeFetchCollection',
+                    'fetching:collection': 'beforeFetchAll',
                     fetched: 'afterFetch',
-                    'fetched:collection': 'afterFetchCollection',
+                    'fetched:collection': 'afterFetchAll',
                     saving: 'beforeSave',
                     saved: 'afterSave'
                   };
@@ -277,9 +287,9 @@ module.exports = function(strapi) {
                     }
 
                     return _.isFunction(
-                      target[model.toLowerCase()]['beforeFetchCollection']
+                      target[model.toLowerCase()]['beforeFetchAll']
                     )
-                      ? target[model.toLowerCase()]['beforeFetchCollection']
+                      ? target[model.toLowerCase()]['beforeFetchAll']
                       : Promise.resolve();
                   });
 
@@ -295,7 +305,7 @@ module.exports = function(strapi) {
                   });
 
                   // Convert to JSON format stringify json for mysql database
-                  if (definition.client === 'mysql') {
+                  if (definition.client === 'mysql' || definition.client === 'sqlite3') {
                     const events = [{
                       name: 'saved',
                       target: 'afterSave'
@@ -304,7 +314,7 @@ module.exports = function(strapi) {
                       target: 'afterFetch'
                     }, {
                       name: 'fetched:collection',
-                      target: 'afterFetchCollection'
+                      target: 'afterFetchAll'
                     }];
 
                     const jsonFormatter = (attributes) => {
@@ -377,7 +387,13 @@ module.exports = function(strapi) {
                   const handler = async (table, attributes) => {
                     const tableExist = await ORM.knex.schema.hasTable(table);
 
-                    const getType = (attribute, name) => {
+                    /**
+                     *
+                     * @param {*} attribute
+                     * @param {*} name
+                     * @param {*} isTableExist Used to determine queries that cant be run while ALTERing TABLE
+                     */
+                    const getType = (attribute, name, isTableExist = false) => {
                       let type;
 
                       if (!attribute.type) {
@@ -401,7 +417,7 @@ module.exports = function(strapi) {
                             type = definition.client === 'pg' ? 'uuid' : 'varchar(36)';
                             break;
                           case 'text':
-                            type = definition.client === 'pg' ? type = 'text' : 'longtext';
+                            type = definition.client === 'pg' ? 'text' : 'longtext';
                             break;
                           case 'json':
                             type = definition.client === 'pg' ? 'jsonb' : 'longtext';
@@ -413,8 +429,10 @@ module.exports = function(strapi) {
                             type = 'varchar(255)';
                             break;
                           case 'integer':
-                          case 'biginteger':
                             type = definition.client === 'pg' ? 'integer' : 'int';
+                            break;
+                          case 'biginteger':
+                            type = definition.client === 'pg' ? 'bigint' : 'bigint(53)';
                             break;
                           case 'float':
                             type = definition.client === 'pg' ? 'double precision' : 'double';
@@ -426,10 +444,20 @@ module.exports = function(strapi) {
                           case 'time':
                           case 'datetime':
                           case 'timestamp':
-                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                            type = definition.client === 'pg' ? 'timestamp with time zone' : definition.client === 'sqlite3' && isTableExist ? 'timestamp DEFAULT NULL' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
                             break;
                           case 'timestampUpdate':
-                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
+                            switch(definition.client) {
+                              case 'pg':
+                                type = 'timestamp with time zone';
+                                break;
+                              case 'sqlite3':
+                                type = 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                                break;
+                              default:
+                                type = 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
+                                break;
+                            }
                             break;
                           case 'boolean':
                             type = 'boolean';
@@ -442,14 +470,14 @@ module.exports = function(strapi) {
                     };
 
                     // Apply field type of attributes definition
-                    const generateColumns = (attrs, start) => {
+                    const generateColumns = (attrs, start, isTableExist = false) => {
                       return Object.keys(attrs).reduce((acc, attr) => {
                         const attribute = attributes[attr];
 
-                        const type = getType(attribute, attr);
+                        const type = getType(attribute, attr, isTableExist);
 
                         if (type) {
-                          acc.push(`${quote}${attr}${quote} ${type}`);
+                          acc.push(`${quote}${attr}${quote} ${type} ${attribute.required ? 'NOT' : ''} NULL `);
                         }
 
                         return acc;
@@ -467,6 +495,14 @@ module.exports = function(strapi) {
                         }
 
                         switch (connection.settings.client) {
+                          case 'mysql':
+                            columns = columns
+                              .map(attribute => `\`${attribute}\``)
+                              .join(',');
+
+                            // Create fulltext indexes for every column.
+                            await ORM.knex.raw(`CREATE FULLTEXT INDEX SEARCH_${_.toUpper(_.snakeCase(table))} ON \`${table}\` (${columns})`);
+                            break;
                           case 'pg': {
                             // Enable extension to allow GIN indexes.
                             await ORM.knex.raw('CREATE EXTENSION IF NOT EXISTS pg_trgm');
@@ -485,15 +521,6 @@ module.exports = function(strapi) {
                             await Promise.all(indexes);
                             break;
                           }
-
-                          default:
-                            columns = columns
-                              .map(attribute => `\`${attribute}\``)
-                              .join(',');
-
-                            // Create fulltext indexes for every column.
-                            await ORM.knex.raw(`CREATE FULLTEXT INDEX SEARCH_${_.toUpper(_.snakeCase(table))} ON \`${table}\` (${columns})`);
-                            break;
                         }
                       } catch (e) {
                         // Handle duplicate errors.
@@ -523,29 +550,35 @@ module.exports = function(strapi) {
                       }
                     };
 
-
-                    if (!tableExist) {
-                      let idAttributeBuilder = [`id ${definition.client === 'pg' ? 'SERIAL' : 'INT AUTO_INCREMENT'} NOT NULL PRIMARY KEY`];
+                    const createTable = async (table) => {
+                      const defaultAttributeDifinitions = {
+                        mysql: [`id INT AUTO_INCREMENT NOT NULL PRIMARY KEY`],
+                        pg: [`id SERIAL NOT NULL PRIMARY KEY`],
+                        sqlite3: ['id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL']
+                      };
+                      let idAttributeBuilder = defaultAttributeDifinitions[definition.client];
                       if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
                         idAttributeBuilder = ['id uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY'];
                       } else if (definition.primaryKeyType !== 'integer') {
                         idAttributeBuilder = [`id ${getType({type: definition.primaryKeyType})} NOT NULL PRIMARY KEY`];
                       }
                       const columns = generateColumns(attributes, idAttributeBuilder).join(',\n\r');
-
                       // Create table
                       await ORM.knex.raw(`
                         CREATE TABLE ${quote}${table}${quote} (
                           ${columns}
                         )
                       `);
+                    };
+
+                    if (!tableExist) {
+                      await createTable(table);
 
                       // Generate indexes.
                       await generateIndexes(table, attributes);
 
                       await storeTable(table, attributes);
                     } else {
-
                       const columns = Object.keys(attributes);
 
                       // Fetch existing column
@@ -567,17 +600,6 @@ module.exports = function(strapi) {
                       // Generate indexes for new attributes.
                       await generateIndexes(table, columnsToAdd);
 
-                      // Generate and execute query to add missing column
-                      if (Object.keys(columnsToAdd).length > 0) {
-                        const columns = generateColumns(columnsToAdd, []);
-                        const queries = columns.reduce((acc, attribute) => {
-                          acc.push(`ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`);
-                          return acc;
-                        }, []);
-
-                        await Promise.all(queries.map(query => ORM.knex.raw(query)));
-                      }
-
                       let previousAttributes;
                       try {
                         previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
@@ -586,16 +608,31 @@ module.exports = function(strapi) {
                         previousAttributes = JSON.parse((await StrapiConfigs.forge({key: `db_model_${table}`}).fetch()).toJSON().value);
                       }
 
+                      // Generate and execute query to add missing column
+                      if (Object.keys(columnsToAdd).length > 0) {
+                        const columns = generateColumns(columnsToAdd, [], tableExist);
+                        const queries = columns.reduce((acc, attribute) => {
+                          acc.push(`ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`);
+                          return acc;
+                        }, []);
+
+                        await Promise.all(queries.map(query => ORM.knex.raw(query)));
+                      }
+
+                      let sqlite3Change = false;
+
                       // Execute query to update column type
                       await Promise.all(columns.map(attribute =>
                         new Promise(async (resolve) => {
                           if (JSON.stringify(previousAttributes[attribute]) ===  JSON.stringify(attributes[attribute])) {
                             return resolve();
+                          } else {
+                            sqlite3Change = true;
                           }
 
                           const type = getType(attributes[attribute], attribute);
 
-                          if (type) {
+                          if (type && definition.client !== 'sqlite3') {
                             const changeType = definition.client === 'pg'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} TYPE ${type} USING ${quote}${attribute}${quote}::${type}`
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} `;
@@ -603,6 +640,7 @@ module.exports = function(strapi) {
                             const changeRequired = definition.client === 'pg'
                               ? `ALTER COLUMN ${quote}${attribute}${quote} ${attributes[attribute].required ? 'SET' : 'DROP'} NOT NULL`
                               : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${attributes[attribute].required ? 'NOT' : ''} NULL`;
+
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeType}`);
                             await ORM.knex.raw(`ALTER TABLE ${quote}${table}${quote} ${changeRequired}`);
                           }
@@ -610,6 +648,29 @@ module.exports = function(strapi) {
                           resolve();
                         })
                       ));
+
+                      if (sqlite3Change && definition.client === 'sqlite3') {
+                        await createTable(`tmp_${table}`);
+
+                        try {
+                          const attrs = Object.keys(attributes).filter(attribute => getType(attributes[attribute], attribute)).join(' ,');
+                          await ORM.knex.raw(`INSERT INTO ${quote}tmp_${table}${quote}(${attrs}) SELECT ${attrs} FROM ${quote}${table}${quote}`);
+                        } catch (err) {
+                          console.log('Warning!');
+                          console.log('We can\'t migrate your data due to the following error.');
+                          console.log();
+                          console.log(err);
+                          console.log();
+                          console.log(`We created a new table "tmp_${table}" with your latest changes.`);
+                          console.log(`We suggest you manually migrate your data from "${table}" to "tmp_${table}" and then to DROP and RENAME the tables.`);
+
+                          return false;
+                        }
+                        await ORM.knex.raw(`DROP TABLE ${quote}${table}${quote}`);
+                        await ORM.knex.raw(`ALTER TABLE ${quote}tmp_${table}${quote} RENAME TO ${quote}${table}${quote}`);
+
+                        await generateIndexes(table, attributes);
+                      }
 
                       await storeTable(table, attributes);
                     }
@@ -619,10 +680,10 @@ module.exports = function(strapi) {
 
                   // Add created_at and updated_at field if timestamp option is true
                   if (loadedModel.hasTimestamps) {
-                    definition.attributes['created_at'] = {
+                    definition.attributes[_.isString(loadedModel.hasTimestamps[0]) ? loadedModel.hasTimestamps[0] : 'created_at'] = {
                       type: 'timestamp'
                     };
-                    definition.attributes['updated_at'] = {
+                    definition.attributes[_.isString(loadedModel.hasTimestamps[1]) ? loadedModel.hasTimestamps[1] : 'updated_at'] = {
                       type: 'timestampUpdate'
                     };
                   }
@@ -701,8 +762,8 @@ module.exports = function(strapi) {
 
                   // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
                   if (loadedModel.hasTimestamps) {
-                    delete definition.attributes['created_at'];
-                    delete definition.attributes['updated_at'];
+                    delete definition.attributes[_.isString(loadedModel.hasTimestamps[0]) ? loadedModel.hasTimestamps[0] : 'created_at'];
+                    delete definition.attributes[_.isString(loadedModel.hasTimestamps[1]) ? loadedModel.hasTimestamps[1] : 'updated_at'];
                   }
 
                   resolve();
@@ -1064,6 +1125,10 @@ module.exports = function(strapi) {
           result.key = 'limit';
           result.value = parseFloat(value);
           break;
+        case '_populate':
+          result.key = 'populate';
+          result.value = value;
+          break;
         case '_contains':
         case '_containss':
           result.key = `where.${key}`;
@@ -1076,7 +1141,14 @@ module.exports = function(strapi) {
           result.key = `where.${key}`;
           result.value = {
             symbol: 'IN',
-            value,
+            value: _.castArray(value),
+          };
+          break;
+        case '_nin':
+          result.key = `where.${key}`;
+          result.value = {
+            symbol: 'NOT IN',
+            value: _.castArray(value),
           };
           break;
         default:

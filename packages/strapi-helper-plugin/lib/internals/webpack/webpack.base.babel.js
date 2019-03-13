@@ -15,14 +15,14 @@ const isAdmin = process.env.IS_ADMIN === 'true';
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const isSetup = process.env.IS_MONOREPO || false;
-const appPath = process.env.APP_PATH || path.resolve(process.env.PWD, '..', ( isAdmin ?  '' : '..' ));
+const appPath = process.env.APP_PATH || path.resolve(process.env.PWD || process.cwd(), '..', ( isAdmin ?  '' : '..' ));
 
 const adminPath = (() => {
   if (isAdmin && isSetup) {
     return path.resolve(appPath, 'strapi-admin');
   }
 
-  return path.resolve(process.env.PWD);
+  return path.resolve(process.env.PWD || process.cwd());
 })();
 
 // Define remote and backend URLs.
@@ -49,7 +49,7 @@ if (isAdmin && !isSetup) {
     let server = require(serverConfig);
     server = templateConfiguration(server);
 
-    if (process.env.PWD.indexOf('/admin') !== -1) {
+    if ((process.env.PWD || process.cwd()).indexOf('/admin') !== -1) {
       if (_.get(server, 'admin.build.host')) {
         URLs.host = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
       } else {

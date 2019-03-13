@@ -16,15 +16,14 @@ import cn from 'classnames';
 // Design
 import BackHeader from 'components/BackHeader';
 import Input from 'components/InputsIndex';
-import InputSearch from 'components/InputSearchContainer';
 import LoadingIndicator from 'components/LoadingIndicator';
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import PluginHeader from 'components/PluginHeader';
-import Plugins from 'components/Plugins';
-import Policies from 'components/Policies';
 
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
+import InputSearch from '../../components/InputSearchContainer';
+import Plugins from '../../components/Plugins';
+import Policies from '../../components/Policies';
+import pluginId from '../../pluginId';
 
 // Actions
 import {
@@ -104,13 +103,13 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
       return this.props.setErrors([{ name: 'name', errors: [{ id: 'users-permissions.EditPage.form.roles.name.error' }] }]);
     }
 
-    this.props.submit();
+    this.props.submit(this.context);
   }
 
   showLoaderForm = () => {
     const { editPage: { modifiedData }, match: { params: { actionType } } } = this.props;
 
-    return actionType !== 'create' && get(modifiedData, ['name'], '') === '';
+    return actionType !== 'create' && isEmpty(modifiedData);
   }
 
   showLoaderPermissions = () => {
@@ -160,7 +159,10 @@ export class EditPage extends React.Component { // eslint-disable-line react/pre
             number: size(get(this.props.editPage, ['modifiedData', 'users'])),
           },
         }}
-        onClickAdd={this.props.onClickAdd}
+        onClickAdd={() => {
+          this.context.emitEvent('didAssociateUserToRole');
+          this.props.onClickAdd();
+        }}
         onClickDelete={this.props.onClickDelete}
         name="users"
         type="text"
@@ -269,6 +271,10 @@ EditPage.childContextTypes = {
   resetShouldDisplayPoliciesHint: PropTypes.func.isRequired,
 };
 
+EditPage.contextTypes = {
+  emitEvent: PropTypes.func,
+};
+
 EditPage.propTypes = {
   addUser: PropTypes.func.isRequired,
   editPage: PropTypes.object.isRequired,
@@ -326,16 +332,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-/* Remove this line if the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
-const withReducer = injectReducer({ key: 'editPage', reducer });
-
-/* Remove the line below the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
-const withSaga = injectSaga({ key: 'editPage', saga });
+const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 
 export default compose(
   withReducer,

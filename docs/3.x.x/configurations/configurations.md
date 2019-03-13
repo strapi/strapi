@@ -202,6 +202,14 @@ You can access the config of the current environment through `strapi.config.curr
       - `ssl` (boolean): For ssl database connection.
       - `debug` (boolean): Show database exchanges and errors.
       - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
+      - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
+        - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
+        - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
+        - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
+        - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
+        - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
+        - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
+        - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
 
 #### Example
 
@@ -339,6 +347,9 @@ The session doesn't work with `mongo` as a client. The package that we should us
   - `enabled` (boolean): Enable or not GZIP response compression.
  - `responseTime`
   - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
+ - `poweredBy`
+  - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
+  - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
 
 ***
 
