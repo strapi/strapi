@@ -16,7 +16,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function (cb) {
+    initialize: cb => {
       strapi.app.use(
         async (ctx, next) => {
           if (ctx.request.admin) {
@@ -31,7 +31,7 @@ module.exports = strapi => {
             })(ctx, next);
           } else if (strapi.config.currentEnvironment.security.cors.enabled) {
             return strapi.koaMiddlewares.kcors({
-              origin: function (ctx) {
+              origin: ctx => {
                 const whitelist = strapi.config.middleware.settings.cors.origin.split(/\s*,\s*/);
                 const requestOrigin = ctx.accept.headers.origin;
                 if (whitelist.includes('*')) {
