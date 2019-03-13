@@ -18,7 +18,7 @@ const reportback = require('reportback')();
  */
 
 /* eslint-disable prefer-template */
-module.exports = function (options, cb) {
+module.exports = (options, cb) => {
 
   // Provide default values for switchback.
   cb = reportback.extend(cb, {
