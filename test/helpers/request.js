@@ -4,7 +4,7 @@ request = request.defaults({
   baseUrl: 'http://localhost:1337'
 });
 
-module.exports = function (options) {
+module.exports = options => {
   const params = JSON.parse(JSON.stringify(options));
 
   for (let key in params.formData) {
@@ -24,6 +24,6 @@ module.exports = function (options) {
   });
 };
 
-module.exports.defaults = function (options) {
+module.exports.defaults = options => {
   request = request.defaults(options);
 }
