@@ -51,7 +51,7 @@ module.exports = {
             html: options.html
           };
 
-          sendgrid.send(msg, function (err) {
+          sendgrid.send(msg, err => {
             if (err) {
               reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
             } else {
