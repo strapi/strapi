@@ -9,6 +9,7 @@
         "name": "name",
         "value": "",
         "type": "string",
+        "autoFocus": true,
         "validations": {
           "required": true
         },
@@ -53,6 +54,7 @@
         "label": {
           "id": "content-type-builder.form.contentType.item.collectionName"
         },
+        "autoFocus": true,
         "name": "collectionName",
         "type": "string",
         "value": "",

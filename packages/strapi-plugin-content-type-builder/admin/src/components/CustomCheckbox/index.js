@@ -18,12 +18,11 @@ class CustomCheckbox extends React.Component { // eslint-disable-line react/pref
   handleChange = ({ target: { checked } }) => {
     this.setState({ isChecked: checked });
 
-    if (!checked) {
-      const { name, onChange } = this.props;
-      const target = { name, value: null };
+    const { name, onChange } = this.props;
+    const value = checked ? '' : null;
+    const target = { name, value };
 
-      onChange({ target });
-    }
+    onChange({ target });
   }
 
   handleInputNumberChange = ({ target: { value } }) => {
@@ -39,7 +38,7 @@ class CustomCheckbox extends React.Component { // eslint-disable-line react/pref
 
   render() {
     const { isChecked } = this.state;
-    const { label, name, value} = this.props;
+    const { didCheckErrors, errors, label, name, value} = this.props;
 
     return (
       <div className="col-md-12" style={{ marginTop: -4, marginBottom: 9 }}>
@@ -60,6 +59,8 @@ class CustomCheckbox extends React.Component { // eslint-disable-line react/pref
         </FormattedMessage>
         {isChecked && (
           <InputNumber
+            didCheckErrors={didCheckErrors}
+            errors={errors}
             name={name}
             onChange={this.handleInputNumberChange}
             value={value || ''}
@@ -72,6 +73,8 @@ class CustomCheckbox extends React.Component { // eslint-disable-line react/pref
 }
 
 CustomCheckbox.defaultProps = {
+  didCheckErrors: false,
+  errors: [],
   label: {
     id: 'app.utils.defaultMessage',
   },
@@ -80,12 +83,17 @@ CustomCheckbox.defaultProps = {
 };
 
 CustomCheckbox.propTypes = {
+  didCheckErrors: PropTypes.bool,
+  errors: PropTypes.array,
   label: PropTypes.shape({
     id: PropTypes.string,
   }),
   name: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.number,
+  value: PropTypes.oneOfType([
+    PropTypes.number,
+    PropTypes.string,
+  ]),
 };
 
 export default CustomCheckbox;

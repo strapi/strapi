@@ -37,7 +37,7 @@ const NAVLINKS = [
 ];
 
 export class ModelForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  state = { didCheckErrors: false, formErrors: {} };
+  state = { didCheckErrors: false, formErrors: {}, isVisible: false };
 
   handleBlur = (e) => {
     let value = e.target.value.trim();
@@ -72,6 +72,10 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
     });
   }
 
+  handleOnOpened = () => this.setState({ isVisible: true });
+
+  handleOnClosed = () => this.setState({ isVisible: false });
+
   handleSubmit = (e) => {
     e.preventDefault();
 
@@ -92,7 +96,10 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
     if (formErrors.length === 0) {
       if (actionType === 'create') {
         createTempContentType();
-        push(`/plugins/${pluginId}/models/${modifiedData.name}`);
+        push({
+          pathname: `/plugins/${pluginId}/models/${modifiedData.name}`,
+          search: 'modalType=chooseAttributes',
+        });
       } else {
         console.log('not ready yet');
       }
@@ -101,7 +108,11 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
 
   renderInput = (input) => {
     const { connections, modifiedData, onChangeNewContentType } = this.props;
-    const { didCheckErrors, formErrors } = this.state;
+    const { didCheckErrors, formErrors, isVisible } = this.state;
+
+    if (!isVisible) {
+      return null;
+    }
 
     if (input.inputDescriptionParams) {
       input.inputDescription = {
@@ -151,7 +162,7 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
     const currentForm = get(forms, activeTab, forms.base);
 
     return (
-      <WrapperModal isOpen={isOpen} onToggle={this.handleCancel}>
+      <WrapperModal isOpen={isOpen} onOpened={this.handleOnOpened} onClosed={this.handleOnClosed} onToggle={this.handleCancel}>
         <HeaderModal>
           <HeaderModalTitle title={`${pluginId}.popUpForm.create.contentType.header.title`} />
           <HeaderModalNavContainer>

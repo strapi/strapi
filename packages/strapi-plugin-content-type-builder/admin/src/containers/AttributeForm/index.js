@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 // import { connect } from 'react-redux';
 // import { bindActionCreators, compose } from 'redux';
 
@@ -33,7 +33,13 @@ const NAVLINKS = [
 ];
 
 class AttributeForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  state = { showForm: false };
+  state = { didCheckErrors: false, formErrors: {}, showForm: false };
+
+  getCurrentForm = () => {
+    const { activeTab, attributeType } = this.props;
+
+    return get(supportedAttributes, [attributeType, activeTab, 'items'], []);
+  }
 
   handleCancel = () => {
     const { push } = this.props;
@@ -53,10 +59,44 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
     const { onCancel } = this.props;
 
     onCancel();
-    this.setState({ showForm: false });
+    this.setState({ formErrors: {}, showForm: false });
   }
 
   handleOnOpened = () => this.setState({ showForm: true });
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+
+    const { modifiedData, onSubmit } = this.props;
+    const currentForm = this.getCurrentForm();
+    let formErrors = {};
+
+    if (isEmpty(modifiedData.name)) {
+      formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
+    }
+
+    // TODO NEED TO HANDLE OTHER VALIDATIONS
+    formErrors = Object.keys(modifiedData).reduce((acc, current) => {
+      const { custom, validations } = currentForm.find(input => input.name === current) || { validations: {} };
+      const value = modifiedData[current];
+
+      if (validations.required === true && value === '' && custom === true) {
+        acc[current] = [{ id: `${pluginId}.error.validation.required` }];
+      }
+
+      return acc;
+    }, formErrors);
+
+    this.setState(prevState => ({
+      didCheckErrors: !prevState.didCheckErrors,
+      formErrors,
+    }));
+
+    if (isEmpty(formErrors)) {
+      console.log('can submit');
+      onSubmit(e);
+    }
+  }
 
   handleToggle = () => {
     const { push } = this.props;
@@ -66,13 +106,18 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
 
   renderInput = (input, index) => {
     const { modifiedData, onChange } = this.props;
-    const { custom } = input;
-    const value = get(modifiedData, input.name, input.defaultValue);
+    const { didCheckErrors, formErrors } = this.state;
+    const { custom, defaultValue, name } = input;
+    const value = get(modifiedData, name, defaultValue);
+
+    const errors = get(formErrors, name, []);
 
     if (custom) {
       return (
         <CustomCheckbox
-          key={input.name}
+          didCheckErrors={didCheckErrors}
+          errors={errors}
+          key={name}
           {...input}
           onChange={onChange}
           value={value}
@@ -83,7 +128,9 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
     return (
       <Input
         autoFocus={index === 0}
-        key={input.name}
+        didCheckErrors={didCheckErrors}
+        errors={errors}
+        key={name}
         {...input}
         onChange={onChange}
         value={value}
@@ -106,9 +153,9 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
   }
 
   render() {
-    const { activeTab, attributeType, isOpen, onSubmit } = this.props;
+    const { attributeType, isOpen } = this.props;
     const { showForm } = this.state;
-    const currentForm = get(supportedAttributes, [attributeType, activeTab, 'items'], []);
+    const currentForm = this.getCurrentForm();
 
     return (
       <WrapperModal
@@ -129,7 +176,7 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
             {NAVLINKS.map(this.renderNavLink)}
           </HeaderModalNavContainer>
         </HeaderModal>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={this.handleSubmit}>
           <BodyModal>
             {showForm && currentForm.map(this.renderInput)}
           </BodyModal>
@@ -147,7 +194,6 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
 AttributeForm.defaultProps = {
   activeTab: 'base',
   attributeType: 'string',
-  isContentTypeTemporary: true,
   isOpen: false,
   modifiedData: {},
   onCancel: () => {},
@@ -161,7 +207,6 @@ AttributeForm.defaultProps = {
 AttributeForm.propTypes = {
   activeTab: PropTypes.string,
   attributeType: PropTypes.string,
-  isContentTypeTemporary: PropTypes.bool,
   isOpen: PropTypes.bool,
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)
   onCancel: PropTypes.func,

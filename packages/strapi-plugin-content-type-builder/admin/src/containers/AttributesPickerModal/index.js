@@ -73,6 +73,8 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
 
   /* istanbul ignore next */
   handleKeyDown = (e) => {
+    const { push } = this.props;
+
     /* istanbul ignore next */
     const { nodeToFocus } = this.state;
     /* istanbul ignore next */
@@ -94,6 +96,13 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
         break;
       case 37: // Left Arrow
         next = nodeToFocus === 0 ? attributesLength - 1 : nodeToFocus - 1;
+        break;
+      case 13: // Enter
+        e.preventDefault();
+
+        push({
+          search: `modalType=attributeForm&attributeType=${attributes[nodeToFocus].type}&settingType=base`,
+        });
         break;
       default:
         next = 0;
