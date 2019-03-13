@@ -19,7 +19,7 @@ const fileHelper = require('../file');
  * Copy file from one place to another
  */
 
-module.exports = function (options, cb) {
+module.exports = (options, cb) => {
   cb = reportback.extend(cb, {
     alreadyExists: 'error',
     invalid: 'error'
