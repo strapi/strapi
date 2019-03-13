@@ -14,7 +14,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       strapi.app.use(
         strapi.koaMiddlewares.ip({
           whiteList: strapi.config.middleware.settings.ip.whiteList,
