@@ -90,14 +90,14 @@ function listPageReducer(state = initialState, action) {
         .updateIn(action.keys, () => action.value)
         .update('filters', list => {
           // Remove the filters
-          if (action.keys.indexOf('_q') !== -1) {
+          if (action.keys.includes('_q')) {
             return List([]);
           }
           return list;
         })
         .update('filtersUpdated', v => {
           // Change the URI
-          if (action.keys.indexOf('_q') !== -1) {
+          if (action.keys.includes('_q')) {
             return !v;
           }
 
