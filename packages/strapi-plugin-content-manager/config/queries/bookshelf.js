@@ -2,7 +2,7 @@ const _ = require('lodash');
 
 module.exports = {
   find: async function (params, populate, raw = false) {
-    return this.query(function(qb) {
+    return this.query(qb => {
       _.forEach(params.where, (where, key) => {
         if (_.isArray(where.value) && where.symbol !== 'IN' && where.symbol !== 'NOT IN') {
           for (const value in where.value) {
@@ -265,9 +265,7 @@ module.exports = {
 
   deleteMany: async function (params) {
     return await this
-      .query(function(qb) {
-        return qb.whereIn('id', params.id);
-      })
+      .query(qb => qb.whereIn('id', params.id))
       .destroy();
   }
 };
