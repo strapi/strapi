@@ -18,7 +18,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       strapi.koaMiddlewares.locale(strapi.app);
 
       strapi.app.use(
