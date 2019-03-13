@@ -1,28 +1,35 @@
 const _ = require('lodash');
-const { Builder, Query } = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 module.exports = {
-  find: async function (params, populate) {
+  find: async function(params, populate, raw = false) {
     const model = this;
-    // Convert `params` object to filter compatible with Mongo.
-    const filter = new Builder(model, params).convert();
+    const filters = convertRestQueryParams(params);
 
-    return new Query(model)
-      .find(filter)
-      .populate(populate)
-      .execute();
+    const query = buildQuery({
+      model,
+      filters,
+      populate: populate || model.associations.map(x => x.alias),
+    });
+
+    return raw ? query.lean() : query;
   },
 
-  count: async function (params) {
+  count: async function(params) {
     const model = this;
-    // Convert `params` object to filter compatible with Mongo.
-    const filter = new Builder(model, params).convert();
-    return new Query(model)
-      .count(filter)
-      .execute();
+
+    const filters = convertRestQueryParams(params);
+
+    return buildQuery({
+      model,
+      filters: { where: filters.where },
+    })
+      .count('count')
+      .then(results => _.get(results, [0, 'count'], 0));
   },
 
-  search: async function (params, populate) { // eslint-disable-line  no-unused-vars
+  search: async function(params, populate) {
+    // eslint-disable-line  no-unused-vars
     const $or = Object.keys(this.attributes).reduce((acc, curr) => {
       switch (this.attributes[curr].type) {
         case 'integer':
@@ -49,8 +56,7 @@ module.exports = {
       }
     }, []);
 
-    return this
-      .find({ $or })
+    return this.find({ $or })
       .limit(Number(params.limit))
       .sort(params.sort)
       .skip(Number(params.skip))
@@ -58,7 +64,8 @@ module.exports = {
       .lean();
   },
 
-  countSearch: async function (params = {}) { // eslint-disable-line  no-unused-vars
+  countSearch: async function(params = {}) {
+    // eslint-disable-line  no-unused-vars
     const $or = Object.keys(this.attributes).reduce((acc, curr) => {
       switch (this.attributes[curr].type) {
         case 'integer':
@@ -85,22 +92,18 @@ module.exports = {
       }
     }, []);
 
-    return this
-      .find({ $or })
-      .countDocuments();
+    return this.find({ $or }).countDocuments();
   },
 
-  findOne: async function (params, populate, raw = true) {
-    const query = this
-      .findOne({
-        [this.primaryKey]: params[this.primaryKey] || params.id
-      })
-      .populate(populate || this.associations.map(x => x.alias).join(' '));
+  findOne: async function(params, populate, raw = true) {
+    const query = this.findOne({
+      [this.primaryKey]: params[this.primaryKey] || params.id,
+    }).populate(populate || this.associations.map(x => x.alias).join(' '));
 
     return raw ? query.lean() : query;
   },
 
-  create: async function (params) {
+  create: async function(params) {
     // Exclude relationships.
     const values = Object.keys(params.values).reduce((acc, current) => {
       if (this._attributes[current] && this._attributes[current].type) {
@@ -110,15 +113,14 @@ module.exports = {
       return acc;
     }, {});
 
-    const request = await this.create(values)
-      .catch((err) => {
-        if (err.message) {
-          const message = err.message.split('index:');
-          const field = _.words(_.last(message).split('_')[0]);
-          err = { message: `This ${field} is already taken`, field };
-        }
-        throw err;
-      });
+    const request = await this.create(values).catch(err => {
+      if (err.message) {
+        const message = err.message.split('index:');
+        const field = _.words(_.last(message).split('_')[0]);
+        err = { message: `This ${field} is already taken`, field };
+      }
+      throw err;
+    });
 
     // Transform to JSON object.
     const entry = request.toJSON ? request.toJSON() : request;
@@ -134,32 +136,33 @@ module.exports = {
 
     return module.exports.update.call(this, {
       [this.primaryKey]: entry[this.primaryKey],
-      values: _.assign({
-        id: entry[this.primaryKey]
-      }, relations)
+      values: _.assign(
+        {
+          id: entry[this.primaryKey],
+        },
+        relations
+      ),
     });
   },
 
-  update: async function (params) {
+  update: async function(params) {
     // Call the business logic located in the hook.
     // This function updates no-relational and relational data.
     return this.updateRelations(params);
   },
 
-  delete: async function (params) {
+  delete: async function(params) {
     // Delete entry.
-    return this
-      .findOneAndDelete({
-        [this.primaryKey]: params.id,
-      });
+    return this.findOneAndDelete({
+      [this.primaryKey]: params.id,
+    });
   },
 
-  deleteMany: async function (params) {
-    return this
-      .deleteMany({
-        [this.primaryKey]: {
-          $in: params[this.primaryKey] || params.id
-        }
-      });
-  }
+  deleteMany: async function(params) {
+    return this.deleteMany({
+      [this.primaryKey]: {
+        $in: params[this.primaryKey] || params.id,
+      },
+    });
+  },
 };

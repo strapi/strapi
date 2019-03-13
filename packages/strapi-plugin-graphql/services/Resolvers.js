@@ -22,10 +22,9 @@ module.exports = {
    * @return Object
    */
 
-  shadowCRUD: function(models, plugin) {
+  buildShadowCRUD: function(models, plugin) {
     // Retrieve generic service from the Content Manager plugin.
-    const resolvers =
-      strapi.plugins['content-manager'].services['contentmanager'];
+    const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
 
     const initialState = {
       definition: '',
@@ -39,9 +38,7 @@ module.exports = {
     }
 
     return models.reduce((acc, name) => {
-      const model = plugin
-        ? strapi.plugins[plugin].models[name]
-        : strapi.models[name];
+      const model = plugin ? strapi.plugins[plugin].models[name] : strapi.models[name];
 
       // Setup initial state with default attribute that should be displayed
       // but these attributes are not properly defined in the models.
@@ -50,9 +47,7 @@ module.exports = {
       };
 
       const globalId = model.globalId;
-      const _schema = _.cloneDeep(
-        _.get(strapi.plugins, 'graphql.config._schema.graphql', {}),
-      );
+      const _schema = _.cloneDeep(_.get(strapi.plugins, 'graphql.config._schema.graphql', {}));
 
       if (!acc.resolver[globalId]) {
         acc.resolver[globalId] = {};
@@ -61,8 +56,8 @@ module.exports = {
       // Add timestamps attributes.
       if (_.isArray(_.get(model, 'options.timestamps'))) {
         Object.assign(initialState, {
-          [_.get(model, 'options.timestamps[0]')]: 'DateTime!',
-          [_.get(model, 'options.timestamps[1]')]: 'DateTime!'
+          [_.get(model, ['options', 'timestamps', 0])]: 'DateTime!',
+          [_.get(model, ['options', 'timestamps', 1])]: 'DateTime!',
         });
       }
 
@@ -92,7 +87,7 @@ module.exports = {
           return `enum ${Types.convertEnumType(
             definition,
             globalId,
-            attribute,
+            attribute
           )} { ${definition.enum.join(' \n ')} }`;
         })
         .join(' ');
@@ -103,89 +98,88 @@ module.exports = {
       (model.associations || [])
         .filter(association => association.type === 'collection')
         .forEach(association => {
-          attributes[
-            `${
-              association.alias
-            }(sort: String, limit: Int, start: Int, where: JSON)`
-          ] = attributes[association.alias];
+          attributes[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
+            attributes[association.alias];
 
           delete attributes[association.alias];
         });
 
       acc.definition += `${Schema.getDescription(
         type[globalId],
-        model,
-      )}type ${globalId} {${Schema.formatGQL(
-        attributes,
-        type[globalId],
-        model,
-      )}}\n\n`;
+        model
+      )}type ${globalId} {${Schema.formatGQL(attributes, type[globalId], model)}}\n\n`;
 
       // Add definition to the schema but this type won't be "queriable" or "mutable".
-      if (
-        type[model.globalId] === false ||
-        _.get(type, `${model.globalId}.enabled`) === false
-      ) {
+      if (type[model.globalId] === false || _.get(type, `${model.globalId}.enabled`) === false) {
         return acc;
       }
 
+      const singularName = pluralize.singular(name);
+      const pluralName = pluralize.plural(name);
       // Build resolvers.
       const queries = {
         singular:
-          _.get(resolver, `Query.${pluralize.singular(name)}`) !== false
+          _.get(resolver, `Query.${singularName}`) !== false
             ? Query.composeQueryResolver(_schema, plugin, name, true)
             : null,
         plural:
-          _.get(resolver, `Query.${pluralize.plural(name)}`) !== false
+          _.get(resolver, `Query.${pluralName}`) !== false
             ? Query.composeQueryResolver(_schema, plugin, name, false)
             : null,
       };
 
+      // check if errors
       Object.keys(queries).forEach(type => {
         // The query cannot be built.
         if (_.isError(queries[type])) {
           strapi.log.error(queries[type]);
           strapi.stop();
         }
-
-        // Only create query if the function is available.
-        if (_.isFunction(queries[type])) {
-          if (type === 'singular') {
-            Object.assign(acc.query, {
-              [`${pluralize.singular(name)}(id: ID!)`]: model.globalId,
-            });
-          } else {
-            Object.assign(acc.query, {
-              [`${pluralize.plural(
-                name,
-              )}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${
-                model.globalId
-              }]`,
-            });
-          }
-
-          _.merge(acc.resolver.Query, {
-            [type === 'singular'
-              ? pluralize.singular(name)
-              : pluralize.plural(name)]: queries[type],
-          });
-        }
       });
+
+      if (_.isFunction(queries.singular)) {
+        _.merge(acc, {
+          query: {
+            [`${singularName}(id: ID!)`]: model.globalId,
+          },
+          resolver: {
+            Query: {
+              [singularName]: queries.singular,
+            },
+          },
+        });
+      }
+
+      if (_.isFunction(queries.plural)) {
+        _.merge(acc, {
+          query: {
+            [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${
+              model.globalId
+            }]`,
+          },
+          resolver: {
+            Query: {
+              [pluralName]: queries.plural,
+            },
+          },
+        });
+      }
 
       // TODO:
       // - Implement batch methods (need to update the content-manager as well).
       // - Implement nested transactional methods (create/update).
+      const capitalizedName = _.capitalize(name);
       const mutations = {
         create:
-          _.get(resolver, `Mutation.create${_.capitalize(name)}`) !== false
+          _.get(resolver, `Mutation.create${capitalizedName}`) !== false
             ? Mutation.composeMutationResolver(_schema, plugin, name, 'create')
             : null,
         update:
-          _.get(resolver, `Mutation.update${_.capitalize(name)}`) !== false
+          _.get(resolver, `Mutation.update${capitalizedName}`) !== false
             ? Mutation.composeMutationResolver(_schema, plugin, name, 'update')
             : null,
         delete:
-          _.get(resolver, `Mutation.delete${_.capitalize(name)}`) !== false
+          _.get(resolver, `Mutation.delete${capitalizedName}`) !== false
             ? Mutation.composeMutationResolver(_schema, plugin, name, 'delete')
             : null,
       };
@@ -196,14 +190,10 @@ module.exports = {
       Object.keys(mutations).forEach(type => {
         if (_.isFunction(mutations[type])) {
           let mutationDefinition;
-          let mutationName = `${type}${_.capitalize(name)}`;
+          let mutationName = `${type}${capitalizedName}`;
 
           // Generate the Input for this specific action.
-          acc.definition += Types.generateInputPayloadArguments(
-            model,
-            name,
-            type,
-          );
+          acc.definition += Types.generateInputPayloadArguments(model, name, type);
 
           switch (type) {
             case 'create':
@@ -228,11 +218,13 @@ module.exports = {
           }
 
           // Assign mutation definition to global definition.
-          Object.assign(acc.mutation, mutationDefinition);
-
-          // Assign resolver to this mutation and merge it with the others.
-          _.merge(acc.resolver.Mutation, {
-            [`${mutationName}`]: mutations[type],
+          _.merge(acc, {
+            mutation: mutationDefinition,
+            resolver: {
+              Mutation: {
+                [`${mutationName}`]: mutations[type],
+              },
+            },
           });
         }
       });
@@ -245,7 +237,7 @@ module.exports = {
           attributes,
           model,
           name,
-          queries.plural,
+          queries.plural
         );
         if (modelAggregator) {
           acc.definition += modelAggregator.type;
@@ -271,19 +263,15 @@ module.exports = {
                   },
                   plugin,
                   [association.alias],
-                  false,
+                  false
                 );
 
                 const entry =
-                  withRelated && withRelated.toJSON
-                    ? withRelated.toJSON()
-                    : withRelated;
+                  withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
                 // Set the _type only when the value is defined
                 if (entry[association.alias]) {
-                  entry[association.alias]._type = _.upperFirst(
-                    association.model,
-                  );
+                  entry[association.alias]._type = _.upperFirst(association.model);
                 }
 
                 return entry[association.alias];
@@ -293,7 +281,7 @@ module.exports = {
           case 'manyMorphToMany':
           case 'manyToManyMorph':
             return _.merge(acc.resolver[globalId], {
-              [association.alias]: async (obj) => {
+              [association.alias]: async obj => {
                 // eslint-disable-line no-unused-vars
                 const [withRelated, withoutRelated] = await Promise.all([
                   resolvers.fetch(
@@ -303,7 +291,7 @@ module.exports = {
                     },
                     plugin,
                     [association.alias],
-                    false,
+                    false
                   ),
                   resolvers.fetch(
                     {
@@ -311,32 +299,25 @@ module.exports = {
                       model: name,
                     },
                     plugin,
-                    [],
+                    []
                   ),
                 ]);
 
                 const entry =
-                  withRelated && withRelated.toJSON
-                    ? withRelated.toJSON()
-                    : withRelated;
+                  withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
 
                 // TODO:
                 // - Handle sort, limit and start (lodash or inside the query)
                 entry[association.alias].map((entry, index) => {
                   const type =
-                    _.get(
-                      withoutRelated,
-                      `${association.alias}.${index}.kind`,
-                    ) ||
+                    _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
                     _.upperFirst(
                       _.camelCase(
                         _.get(
                           withoutRelated,
-                          `${association.alias}.${index}.${
-                            association.alias
-                          }_type`,
-                        ),
-                      ),
+                          `${association.alias}.${index}.${association.alias}_type`
+                        )
+                      )
                     ) ||
                     _.upperFirst(_.camelCase(association[association.type]));
 
@@ -369,13 +350,17 @@ module.exports = {
               : strapi.models[params.model];
 
             if (association.type === 'model') {
-              params[ref.primaryKey] = _.get(obj, [association.alias, ref.primaryKey], obj[association.alias]);
+              params[ref.primaryKey] = _.get(
+                obj,
+                [association.alias, ref.primaryKey],
+                obj[association.alias]
+              );
             } else {
               const queryParams = Query.amountLimiting(options);
               queryOpts = {
                 ...queryOpts,
                 ...Query.convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip)
-                ...Query.convertToQuery(queryParams.where)
+                ...Query.convertToQuery(queryParams.where),
               };
 
               // Construct the "where" query to only retrieve entries which are
@@ -383,16 +368,18 @@ module.exports = {
               _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
             }
 
-            const loaderName = association.plugin ? `${association.plugin}__${params.model}`: params.model;
+            const loaderName = association.plugin
+              ? `${association.plugin}__${params.model}`
+              : params.model;
 
-            return association.model ?
-              Loaders.loaders[loaderName].load({ params, options: queryOpts, single: true }):
-              Loaders.loaders[loaderName].load({ options: queryOpts, association });
+            return association.model
+              ? Loaders.loaders[loaderName].load({ params, options: queryOpts, single: true })
+              : Loaders.loaders[loaderName].load({ options: queryOpts, association });
           },
         });
       });
 
       return acc;
     }, initialState);
-  }
+  },
 };

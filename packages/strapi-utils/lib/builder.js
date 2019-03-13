@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-const getFilterKey = (key) => {
+const getFilterKey = key => {
   const matched = key.match(/^_?(sort|limit|start|skip)$/);
   if (matched) {
     return matched[1];
@@ -8,12 +8,12 @@ const getFilterKey = (key) => {
   return null;
 };
 
-const getOperatorKey = (key) => {
+const getOperatorKey = key => {
   const matched = key.match(/(.*)_(neq?|lte?|gte?|containss?|n?in|exists)$/);
   if (matched) {
     return matched.slice(1);
   }
-  return null;
+  return [key, 'eq'];
 };
 
 class Builder {
@@ -22,9 +22,8 @@ class Builder {
     this.model = model;
     // Initialize the default filter options
     this.filter = {
-      limit: 100,
       start: 0,
-      where: {}
+      where: {},
     };
 
     if (!_.isEmpty(filter)) {
@@ -39,20 +38,19 @@ class Builder {
       // Check if the key is a filter key
       const filterKey = getFilterKey(key);
       if (filterKey) {
-        this[filterKey].apply(this, [value]);
+        this[filterKey]([value]);
       } else {
-        const matched = getOperatorKey(key);
-        let field = key;
-        let operation = 'eq';
-        if (matched) {
-          [field, operation] = matched;
-        }
+        const [field, operation] = getOperatorKey(key);
 
         if (this.isValidFieldId(field)) {
-          this[operation].apply(this, [field, value]);
+          this[operation]([field, value]);
         } else {
           strapi.log.warn(
-            `Your filter: ${JSON.stringify(filter, null, 2)} contains a field "${field}" that doesn't appear neither on your model definition nor in the basic filter operators,
+            `Your filter: ${JSON.stringify(
+              filter,
+              null,
+              2
+            )} contains a field "${field}" that doesn't appear neither on your model definition nor in the basic filter operators,
             This field will be ignored for now.`
           );
         }
@@ -66,17 +64,12 @@ class Builder {
     const fieldPartsSize = fieldParts.length;
     return _.every(fieldParts, (fieldPart, index) => {
       const fieldIdx = index + 1;
-      const isAttribute =
-        !!model.attributes[fieldPart] || model.primaryKey === fieldPart;
-      const association = model.associations.find(
-        ast => ast.alias === fieldPart
-      );
+      const isAttribute = !!model.attributes[fieldPart] || model.primaryKey === fieldPart;
+      const association = model.associations.find(ast => ast.alias === fieldPart);
       const isAssociation = !!association;
       if (fieldIdx < fieldPartsSize) {
         if (isAssociation) {
-          const { models } = association.plugin
-            ? strapi.plugins[association.plugin]
-            : strapi;
+          const { models } = association.plugin ? strapi.plugins[association.plugin] : strapi;
           model = models[association.collection || association.model];
           return true;
         }
@@ -136,7 +129,7 @@ class Builder {
     // Merge the where items
     this.filter.where = {
       ...this.filter.where,
-      ...w
+      ...w,
     };
     return this;
   }
@@ -246,5 +239,7 @@ class Builder {
 }
 
 module.exports = {
-  Builder
+  Builder,
+  getFilterKey,
+  getOperatorKey,
 };

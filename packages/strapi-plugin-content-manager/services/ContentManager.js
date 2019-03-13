@@ -9,6 +9,7 @@ const _ = require('lodash');
 module.exports = {
   fetchAll: async (params, query) => {
     const { query: request, source, populate = [], ...filters } = query;
+
     const queryFilter = !_.isEmpty(request) ? {
       ...filters, // Filters is an object containing the limit/sort and start
       ...request

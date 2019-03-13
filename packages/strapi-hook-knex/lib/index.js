@@ -155,7 +155,7 @@ module.exports = strapi => {
             } catch (err) {
               fs.mkdirSync(fileDirectory);
             }
-            
+
             // Force base directory.
             // Note: it removes the warning logs when starting the administration in development mode.
             options.connection.filename = path.resolve(strapi.config.appPath, options.connection.filename);
@@ -175,7 +175,9 @@ module.exports = strapi => {
         // applications to have `knex` as a dependency.
         try {
           // Try to require from local dependency.
-          _.set(strapi, `connections.${name}`, require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(options));
+          const connection = require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(options);
+          _.set(strapi, `connections.${name}`, connection);
+
         } catch (err) {
           strapi.log.error('Impossible to use the `' + name + '` connection...');
           strapi.log.warn('Be sure that your client `' + name + '` are in the same node_modules directory');

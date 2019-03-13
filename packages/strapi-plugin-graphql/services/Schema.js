@@ -16,7 +16,7 @@ const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Resolvers = require('./Resolvers.js');
 
-module.exports = {
+const schemaBuilder = {
   /**
    * Receive an Object and return a string which is following the GraphQL specs.
    *
@@ -132,37 +132,29 @@ module.exports = {
 
   generateSchema: function() {
     // Generate type definition and query/mutation for models.
-    const shadowCRUD =
-      strapi.plugins.graphql.config.shadowCRUD !== false
-        ? (() => {
-          // Exclude core models.
-          const models = Object.keys(strapi.models).filter(
-            model => model !== 'core_store',
-          );
+    let shadowCRUD = { definition: '', query: '', mutation: '', resolver: '' };
 
-            // Reproduce the same pattern for each plugin.
-          return Object.keys(strapi.plugins).reduce((acc, plugin) => {
-            const {
-              definition,
-              query,
-              mutation,
-              resolver,
-            } = Resolvers.shadowCRUD(
-              Object.keys(strapi.plugins[plugin].models),
-              plugin,
-            );
+    // build defaults schemas if shadowCRUD is enabled
+    if (strapi.plugins.graphql.config.shadowCRUD !== false) {
+      const models = Object.keys(strapi.models).filter(model => model !== 'core_store');
 
-              // We cannot put this in the merge because it's a string.
-            acc.definition += definition || '';
+      const modelCruds = Resolvers.buildShadowCRUD(models);
+      shadowCRUD = Object.keys(strapi.plugins).reduce((acc, plugin) => {
+        const { definition, query, mutation, resolver } = Resolvers.buildShadowCRUD(
+          Object.keys(strapi.plugins[plugin].models),
+          plugin
+        );
 
-            return _.merge(acc, {
-              query,
-              resolver,
-              mutation,
-            });
-          }, Resolvers.shadowCRUD(models));
-        })()
-        : { definition: '', query: '', mutation: '', resolver: '' };
+        // We cannot put this in the merge because it's a string.
+        acc.definition += definition || '';
+
+        return _.merge(acc, {
+          query,
+          resolver,
+          mutation,
+        });
+      }, modelCruds);
+    }
 
     // Extract custom definition, query or resolver.
     const {
@@ -173,17 +165,14 @@ module.exports = {
     } = strapi.plugins.graphql.config._schema.graphql;
 
     // Polymorphic.
-    const {
-      polymorphicDef,
-      polymorphicResolver,
-    } = Types.addPolymorphicUnionType(definition, shadowCRUD.definition);
+    const { polymorphicDef, polymorphicResolver } = Types.addPolymorphicUnionType(
+      definition,
+      shadowCRUD.definition
+    );
 
     // Build resolvers.
     const resolvers =
-      _.omitBy(
-        _.merge(shadowCRUD.resolver, resolver, polymorphicResolver),
-        _.isEmpty,
-      ) || {};
+      _.omitBy(_.merge(shadowCRUD.resolver, resolver, polymorphicResolver), _.isEmpty) || {};
 
     // Transform object to only contain function.
     Object.keys(resolvers).reduce((acc, type) => {
@@ -199,13 +188,8 @@ module.exports = {
           acc[type][resolver] = acc[type][resolver].resolver;
         }
 
-        if (
-          _.isString(acc[type][resolver]) ||
-          _.isPlainObject(acc[type][resolver])
-        ) {
-          const { plugin = '' } = _.isPlainObject(acc[type][resolver])
-            ? acc[type][resolver]
-            : {};
+        if (_.isString(acc[type][resolver]) || _.isPlainObject(acc[type][resolver])) {
+          const { plugin = '' } = _.isPlainObject(acc[type][resolver]) ? acc[type][resolver] : {};
 
           switch (type) {
             case 'Mutation':
@@ -213,7 +197,7 @@ module.exports = {
               acc[type][resolver] = Mutation.composeMutationResolver(
                 strapi.plugins.graphql.config._schema.graphql,
                 plugin,
-                resolver,
+                resolver
               );
               break;
             case 'Query':
@@ -222,7 +206,7 @@ module.exports = {
                 strapi.plugins.graphql.config._schema.graphql,
                 plugin,
                 resolver,
-                'force', // Avoid singular/pluralize and force query name.
+                'force' // Avoid singular/pluralize and force query name.
               );
               break;
           }
@@ -242,19 +226,9 @@ module.exports = {
       ${definition}
       ${shadowCRUD.definition}
       type Query {${shadowCRUD.query &&
-        this.formatGQL(
-          shadowCRUD.query,
-          resolver.Query,
-          null,
-          'query',
-        )}${query}}
+        this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
       type Mutation {${shadowCRUD.mutation &&
-        this.formatGQL(
-          shadowCRUD.mutation,
-          resolver.Mutation,
-          null,
-          'mutation',
-        )}${mutation}}
+        this.formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation')}${mutation}}
       ${Types.addCustomScalar(resolvers)}
       ${Types.addInput()}
       ${polymorphicDef}
@@ -295,7 +269,7 @@ module.exports = {
       'plugins',
       'graphql',
       'config',
-      'generated',
+      'generated'
     );
 
     // Create folder if necessary.
@@ -314,3 +288,5 @@ module.exports = {
     strapi.reload.isWatching = true;
   },
 };
+
+module.exports = schemaBuilder;

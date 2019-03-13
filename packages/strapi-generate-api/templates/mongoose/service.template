@@ -8,7 +8,7 @@
 
 // Public dependencies.
 const _ = require('lodash');
-const { Builder, Query } = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 module.exports = {
 
@@ -19,12 +19,16 @@ module.exports = {
    */
 
   fetchAll: (params, populate) => {
-    const filter = new Builder(<%= globalID %>, params).convert();
+    const filters = convertRestQueryParams(params);
+    const populateOpt = populate || <%= globalID %>.associations
+      .filter(ast => ast.autoPopulate !== false)
+      .map(ast => ast.alias)
 
-    return new Query(<%= globalID %>)
-      .find(filter)
-      .populate(populate)
-      .execute();
+    return buildQuery({
+      model: <%= globalID %>,
+      filters,
+      populate: populateOpt,
+    });
   },
 
   /**
@@ -52,11 +56,16 @@ module.exports = {
    */
 
   count: (params) => {
-      // Convert `params` object to filter compatible with Mongo.
-    const filter = new Builder(<%= globalID %>, params).convert();
-    return new Query(<%= globalID %>)
-      .count(filter)
-      .execute();
+    const model = <%= globalID %>;
+
+    const filters = convertRestQueryParams(params);
+
+    return buildQuery({
+      model,
+      filters: { where: filters.where },
+    })
+      .count('count')
+      .then(results => _.get(results, [0, 'count'], 0));
   },
 
   /**

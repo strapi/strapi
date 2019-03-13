@@ -12,7 +12,8 @@ const _ = require('lodash');
 
 // Strapi utilities.
 const utils = require('strapi-hook-bookshelf/lib/utils/');
-const { Builder, Query } = require('strapi-utils');
+const { Builder, Query, convertRestQueryParams, buildQuery } = require('strapi-utils');
+
 
 module.exports = {
 
@@ -23,15 +24,16 @@ module.exports = {
    */
 
   fetchAll: (params, populate) => {
-    const filter = new Builder(<%= globalID %>, params).convert();
     // Select field to populate.
     const withRelated = populate || <%= globalID %>.associations
       .filter(ast => ast.autoPopulate !== false)
       .map(ast => ast.alias);
 
-    return new Query(<%= globalID %>)
-      .find(filter, withRelated)
-      .execute();
+    const filters = convertRestQueryParams(params);
+
+    return <%= globalID %>.query(buildQuery({ model: <%= globalID %>, filters }))
+      .fetchAll({ withRelated })
+      .then(data => data.toJSON());
   },
 
   /**
@@ -59,11 +61,9 @@ module.exports = {
 
   count: (params) => {
     // Convert `params` object to filters compatible with Bookshelf.
-    const filter = new Builder(<%= globalID %>, params).convert();
+    const filters = convertRestQueryParams(params);
 
-    return new Query(<%= globalID %>)
-      .count(filter)
-      .execute();
+    return <%= globalID %>.query(buildQuery({ model: <%= globalID %>, filters: _.pick(filters, 'where') })).count();
   },
 
   /**
@@ -151,10 +151,6 @@ module.exports = {
       .filter(attribute => attribute !== <%= globalID %>.primaryKey && !associations.includes(attribute))
       .filter(attribute => ['string', 'text'].includes(<%= globalID %>._attributes[attribute].type));
 
-    const searchNoText = Object.keys(<%= globalID %>._attributes)
-      .filter(attribute => attribute !== <%= globalID %>.primaryKey && !associations.includes(attribute))
-      .filter(attribute => !['string', 'text', 'boolean', 'integer', 'decimal', 'float'].includes(<%= globalID %>._attributes[attribute].type));
-
     const searchInt = Object.keys(<%= globalID %>._attributes)
       .filter(attribute => attribute !== <%= globalID %>.primaryKey && !associations.includes(attribute))
       .filter(attribute => ['integer', 'decimal', 'float'].includes(<%= globalID %>._attributes[attribute].type));
@@ -166,11 +162,6 @@ module.exports = {
     const query = (params._q || '').replace(/[^a-zA-Z0-9.-\s]+/g, '');
 
     return <%= globalID %>.query(qb => {
-      // Search in columns which are not text value.
-      searchNoText.forEach(attribute => {
-        qb.orWhereRaw(`LOWER(${attribute}) LIKE '%${_.toLower(query)}%'`);
-      });
-
       if (!_.isNaN(_.toNumber(query))) {
         searchInt.forEach(attribute => {
           qb.orWhereRaw(`${attribute} = ${_.toNumber(query)}`);

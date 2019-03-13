@@ -134,7 +134,6 @@ module.exports = {
       populate: ast ? [query.alias] : [], // Avoid useless population for performance reason
       query: {},
       _start: 0, // Don't apply start or skip
-      _skip: 0, // Don't apply start or skip
       _limit: -1, // Don't apply a limit
     };
 

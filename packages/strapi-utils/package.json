@@ -15,7 +15,7 @@
   },
   "main": "./lib",
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "jest"
   },
   "dependencies": {
     "commander": "^2.11.0",

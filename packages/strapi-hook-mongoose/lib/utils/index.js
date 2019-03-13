@@ -16,7 +16,7 @@ module.exports = (mongoose = Mongoose) => {
    *
    * Refer to: https://github.com/graphql/graphql-js/commit/3521e1429eec7eabeee4da65c93306b51308727b#diff-87c5e74dd1f7d923143e0eee611f598eR183
    */
-  mongoose.Types.ObjectId.prototype.valueOf = function () {
+  mongoose.Types.ObjectId.prototype.valueOf = function() {
     return this.toString();
   };
 
@@ -54,13 +54,15 @@ module.exports = (mongoose = Mongoose) => {
         default:
       }
     },
-    valueToId: (value) => {
-      return utils.isMongoId(value)
-        ? mongoose.Types.ObjectId(value)
-        : value;
+    valueToId: value => {
+      if (utils.isMongoId(value)) {
+        return mongoose.Types.ObjectId(value);
+      }
+
+      return value;
     },
-    isMongoId: (value) => {
-      if(value instanceof mongoose.Types.ObjectId) {
+    isMongoId: value => {
+      if (value instanceof mongoose.Types.ObjectId) {
         return true;
       }
 
@@ -72,7 +74,7 @@ module.exports = (mongoose = Mongoose) => {
       // it returns for instance true for any integer value ¯\_(ツ)_/¯
       const hexadecimal = /^[0-9A-F]+$/i;
       return hexadecimal.test(value) && value.length === 24;
-    }
+    },
   };
 
   return utils;

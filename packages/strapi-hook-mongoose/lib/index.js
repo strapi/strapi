@@ -22,6 +22,7 @@ const utils = require('./utils/');
 const relations = require('./relations');
 const { Query } = require('./query');
 const { Converter } = require('./converter');
+const buildQuery = require('./buildQuery');
 
 /**
  * Mongoose hook
@@ -584,6 +585,7 @@ module.exports = function (strapi) {
 
     Query,
     Converter,
+    buildQuery
   }, relations);
 
   return hook;
