@@ -176,9 +176,7 @@ module.exports = async cb => {
         ]),
         {
           editable:
-            ['updatedAt', 'createdAt', 'updated_at', 'created_at'].indexOf(
-              current
-            ) === -1,
+            !['updatedAt', 'createdAt', 'updated_at', 'created_at'].includes(current),
           placeholder: '',
         }
       );
@@ -338,16 +336,16 @@ module.exports = async cb => {
 
     // Array of apis to add
     const apisToAdd = schemaApis
-      .filter(api => prevSchemaApis.indexOf(api) === -1)
+      .filter(api => !prevSchemaApis.includes(api))
       .map(splitted);
     // Array of apis to remove
     const apisToRemove = prevSchemaApis
-      .filter(api => schemaApis.indexOf(api) === -1)
+      .filter(api => !schemaApis.includes(api))
       .map(splitted);
 
     // Retrieve the same apis by name
     const sameApis = schemaApis
-      .filter(api => prevSchemaApis.indexOf(api) !== -1)
+      .filter(api => prevSchemaApis.includes(api))
       .map(splitted);
     // Retrieve all the field's path of the current unchanged api name
     const schemaSameApisKeys = _.flattenDeep(getApisKeys(schema, sameApis));
@@ -357,7 +355,7 @@ module.exports = async cb => {
     );
     // Determine for the same api if we need to add some fields
     const sameApisAttrToAdd = schemaSameApisKeys
-      .filter(attr => prevSchemaSameApisKeys.indexOf(attr) === -1)
+      .filter(attr => !prevSchemaSameApisKeys.includes(attr))
       .map(splitted);
     // Special case for the relations
     const prevSchemaSameApisUploadRelations = _.flattenDeep(
@@ -367,11 +365,11 @@ module.exports = async cb => {
       getApisUploadRelations(schema, sameApis)
     );
     const sameApisUploadRelationsToAdd = schemaSameApisUploadRelations
-      .filter(attr => prevSchemaSameApisUploadRelations.indexOf(attr) === -1)
+      .filter(attr => !prevSchemaSameApisUploadRelations.includes(attr))
       .map(splitted);
     // Determine the fields to remove for the unchanged api name
     const sameApisAttrToRemove = prevSchemaSameApisKeys
-      .filter(attr => schemaSameApisKeys.indexOf(attr) === -1)
+      .filter(attr => !schemaSameApisKeys.includes(attr))
       .map(splitted);
 
     // Remove api
