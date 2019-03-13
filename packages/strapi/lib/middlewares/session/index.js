@@ -20,7 +20,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       strapi.app.keys =
         _.get(strapi.config.middleware.settings.session, 'secretKeys') ||
         strapi.config.hooks.session.secretKeys;
