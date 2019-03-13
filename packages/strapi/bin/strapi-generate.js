@@ -25,7 +25,7 @@ const packageJSON = require('../package.json');
  * Scaffolding for the application in our working directory.
  */
 
-module.exports = function (id, cliArguments) {
+module.exports = (id, cliArguments) => {
   // Build initial scope.
   const scope = {
     rootPath: process.cwd(),
