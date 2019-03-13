@@ -22,7 +22,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       if (
         _.isPlainObject(strapi.config.middleware.settings.views) &&
         !_.isEmpty(strapi.config.middleware.settings.views)
