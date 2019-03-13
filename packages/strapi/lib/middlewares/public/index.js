@@ -147,7 +147,7 @@ module.exports = strapi => {
         handler: async (ctx, next) => {
           ctx.url = path.basename(ctx.url);
 
-          if (Object.keys(strapi.plugins).indexOf(ctx.params.resource) !== -1) {
+          if (Object.keys(strapi.plugins).includes(ctx.params.resource)) {
             return await strapi.koaMiddlewares.static(`./plugins/${ctx.params.resource}/admin/build`, {
               maxage: strapi.config.middleware.settings.public.maxAge,
               defer: true
