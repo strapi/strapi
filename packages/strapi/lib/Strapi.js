@@ -157,7 +157,7 @@ class Strapi extends EventEmitter {
       const key = conn.remoteAddress + ':' + conn.remotePort;
       connections[key] = conn;
 
-      conn.on('close', function () {
+      conn.on('close', () => {
         delete connections[key];
       });
     });
