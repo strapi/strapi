@@ -930,7 +930,7 @@ module.exports = {
     // Please refer https://github.com/strapi/strapi/blob/585800b7b98093f596759b296a43f89c491d4f4f/packages/strapi/lib/middlewares/mask/index.js#L92-L100
     const getComponent = Object.keys(mainComponent.properties).reduce(
       (acc, current) => {
-        if (privateAttributes.indexOf(current) === -1) {
+        if (!privateAttributes.includes(current)) {
           acc.properties[current] = mainComponent.properties[current];
         }
         return acc;
@@ -942,7 +942,7 @@ module.exports = {
     const postComponent = Object.keys(mainComponent).reduce((acc, current) => {
       if (current === 'required') {
         const required = mainComponent.required.slice().filter(attr => {
-          return associationsWithUpload.indexOf(attr) === -1 && attr !== 'id' && attr !== '_id';
+          return !associationsWithUpload.includes(attr) && attr !== 'id' && attr !== '_id';
         });
 
         if (required.length > 0) {
@@ -953,7 +953,7 @@ module.exports = {
       if (current === 'properties') {
         const properties = Object.keys(mainComponent.properties).reduce((acc, current) => {
           if (
-            associationsWithUpload.indexOf(current) === -1 &&
+            !associationsWithUpload.includes(current) &&
             current !== 'id' &&
             current !== '_id'
           ) {
