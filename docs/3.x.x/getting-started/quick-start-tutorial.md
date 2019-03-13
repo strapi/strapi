@@ -2,12 +2,13 @@
 
 This Tutorial is written for developers who prefer a more detailed step-by-step introduction. (A less detailed introduction can be found at [Quick Start Guide](/3.x.x/getting-started/quick-start.html).)
 
-<iframe width="800" height="450" src="https://www.youtube.com/embed/nux0djdHmY8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+<div class="video-container">
+  <iframe width="800" height="450" src="https://www.youtube.com/embed/nux0djdHmY8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
 By following this tutorial, we will get Strapi installed globally onto your system, and then create your first Strapi project. 
 
-::: warning NOTE
+::: tip NOTE
 
 You need to have ***Node.js and npm*** installed on your system prior to following these steps. If you do not have Node.js and npm installed or are not sure, please visit our [Installation Requirements](http://localhost:8080/documentation/3.x.x/getting-started/install-requirements.html).
 :::
@@ -73,13 +74,13 @@ strapi new cms --quickstart
 
 The command will automatically create a Strapi project `cms` folder within your parent `Projects/` directory.
 
-::: warning NOTE
+::: tip NOTE
 
 When you create a new Quick Start project in Strapi, you will download all the node modules, the Strapi files necessary and the Strapi plugin files. THIS STEP CAN TAKE SEVERAL MINUTES DEPENDING ON YOUR INTERNET CONNECTION SPEED. Please wait for the process to complete before cancelling or trying to continue.
 
 :::
 
-::: warning NOTE
+::: tip NOTE
 You can replace the `/cms` project name with any name you want.
 
 :::
@@ -118,7 +119,7 @@ This will open your default browser to the Welcome page for creating an admin us
 ![Strapi Welcome Page for creating admin user](../assets/quick-start-detailed/strapi-welcome-screen.png 'Strapi Welcome Page for creating admin user')
 
 
-::: warning NOTE
+::: tip NOTE
 Using the `--quickstart` flag will install Strapi using a [SQLite](https://www.sqlite.org/index.html) database. You may leave off the flag, but will need to follow the configuration steps for a different database.
 :::
 
@@ -166,7 +167,7 @@ We will create two content types. We will create a content type called `Restaura
 
 ![Create Content Type Screen](../assets/quick-start-detailed/CreateContentTypeScreen.png 'Create Content Type Screen')
 
-::: warning NOTE
+::: tip NOTE
 
 Content Type `name` is always **singular**. For example, `restaurant` not `restaurants`. For example, `category` not `categories`.
 
@@ -341,7 +342,7 @@ You return to the **Category** Content Type page. You see both categories listed
 
 ![Both categories listed](../assets/quick-start-detailed/categoriesListed.png 'Both categories listed')
 
-::: warning NOTE
+::: tip NOTE
 
 If you want to add Categories directly from the **Restaurants** Content Type, you simply click on the Restaurant and add, edit or change **EXISTING** categories. Otherwise, you can create and add new **Categories** from the **Category Content Type** as we did above.
 
@@ -382,7 +383,7 @@ What we want is the **Restaurant Content Type**. The route is `/restaurants`. In
 
 ![Successful API call to Restaurant Content Type](../assets/quick-start-detailed/successApiCall.png 'Successful API call to Restaurant Content Type')
 
-::: warning NOTE
+::: tip NOTE
 
 If you have incorrectly or not set permissions to your content type, you will get a **"403"** permission error. See the below example.
 
@@ -393,5 +394,11 @@ Forbidden Access Looks like this:
 :::
 
 ::: tip CONGRATULATIONS
-👏 Congratulations, you have now completed the Tutoral showing you how to get started with Strapi. We invite you to [join our community](/3.x.x/community.html). Please continue reviewing our docs and tutorials to further learn how Strapi can solve your needs.
+👏 Congratulations, you have now completed the Strapi Quick Start. Where to go next?
+ - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
+ - Read the [concepts](../concepts/concepts.html) and [articles](../articles/) to deep dive into Strapi.
+ - Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi).
+ - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
+ - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.
+ - [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack. 
 :::
