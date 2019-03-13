@@ -21,7 +21,7 @@ class FullStory extends React.Component {
     window['_fs_host'] = 'fullstory.com';
     window['_fs_org'] = props.org;
     window['_fs_namespace'] = 'FS';
-    (function(m,n,e,t,l,o,g,y) {
+    ((m,n,e,t,l,o,g,y) => {
       if (e in m) {
         if(m.console && m.console.log) { 
           m.console.log('FullStory namespace conflict. Please set window["_fs_namespace"].');
@@ -30,7 +30,7 @@ class FullStory extends React.Component {
         return;
       }
 
-      g = m[e]= function(a,b,s) {
+      g = m[e]= (a,b,s) => {
         g.q ? g.q.push([a,b,s]) : g._api(a,b,s);
       };
       g.q=[];
@@ -39,35 +39,35 @@ class FullStory extends React.Component {
       o.src = `https://${window._fs_host}/s/fs.js`;
       y = n.getElementsByTagName(t)[0];
       y.parentNode.insertBefore(o,y);
-      g.identify = function(i,v,s) {
+      g.identify = (i,v,s) => {
         g(l,{ uid:i },s);
 
         if (v) { 
           g(l,v,s);
         }
       };
-      g.setUserVars = function(v,s) {
+      g.setUserVars = (v,s) => {
         g(l,v,s);
       };
-      g.event = function(i,v,s) {
+      g.event = (i,v,s) => {
         g('event',{ n:i,p:v },s);
       };
-      g.shutdown = function() {
+      g.shutdown = () => {
         g("rec",!1);
       };
-      g.restart = function() {
+      g.restart = () => {
         g("rec",!0);
       };
       g.consent = function(a) {
         g("consent",!arguments.length||a);
       };
-      g.identifyAccount = function(i,v) { 
+      g.identifyAccount = (i,v) => { 
         o = 'account';
         v = v||{};
         v.acctId = i;
         g(o,v);
       };
-      g.clearUserCookie = function() {};
+      g.clearUserCookie = () => {};
     })(window, document, window['_fs_namespace'], 'script', 'user');
   }
 
