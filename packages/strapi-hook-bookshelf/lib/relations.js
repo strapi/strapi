@@ -31,9 +31,7 @@ const transformToArrayID = (array, association) => {
 };
 
 module.exports = {
-  getModel: function (model, plugin) {
-    return _.get(strapi.plugins, [plugin, 'models', model]) || _.get(strapi, ['models', model]) || undefined;
-  },
+  getModel: (model, plugin) => _.get(strapi.plugins, [plugin, 'models', model]) || _.get(strapi, ['models', model]) || undefined,
 
   findOne: async function (params, populate) {
     const record = await this
