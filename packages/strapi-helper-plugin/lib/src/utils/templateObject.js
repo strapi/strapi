@@ -1,6 +1,6 @@
 import { isPlainObject, isString, isArray } from 'lodash';
 
-const templateObject = function (obj, variables) {
+const templateObject = (obj, variables) => {
   // Allow values which looks like such as
   // an ES6 literal string without parenthesis inside (aka function call).
   const regex = /\$\{[\S]*\}/g;
