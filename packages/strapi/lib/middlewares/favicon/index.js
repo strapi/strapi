@@ -17,7 +17,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       strapi.app.use(
         strapi.koaMiddlewares.favicon(
           path.resolve(strapi.config.appPath, strapi.config.middleware.settings.favicon.path),
