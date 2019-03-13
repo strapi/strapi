@@ -92,14 +92,14 @@ module.exports = {
       }
 
       if (
-        p.indexOf('config/functions') !== -1 ||
-        p.indexOf('config/policies') !== -1 ||
-        p.indexOf('config/locales') !== -1 ||
-        p.indexOf('config/hook') !== -1 ||
-        p.indexOf('config/middleware') !== -1 ||
-        p.indexOf('config/language') !== -1 ||
-        p.indexOf('config/queries') !== -1 ||
-        p.indexOf('config/layout') !== -1
+        p.includes('config/functions') ||
+        p.includes('config/policies') ||
+        p.includes('config/locales') ||
+        p.includes('config/hook') ||
+        p.includes('config/middleware') ||
+        p.includes('config/language') ||
+        p.includes('config/queries') ||
+        p.includes('config/layout')
       ) {
         return true;
       }
