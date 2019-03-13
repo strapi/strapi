@@ -17,7 +17,7 @@ const reportback = require('reportback')();
  */
 
 /* eslint-disable prefer-template */
-module.exports = function (options, handlers) {
+module.exports = (options, handlers) => {
 
   // Provide default values for handlers.
   handlers = reportback.extend(handlers, {
