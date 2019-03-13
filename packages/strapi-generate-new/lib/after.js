@@ -45,8 +45,8 @@ module.exports = (scope, cb) => {
 
   let availableDependencies = [];
   const dependencies = _.get(packageJSON, 'dependencies');
-  const strapiDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') !== -1);
-  const othersDependencies = Object.keys(dependencies).filter(key => key.indexOf('strapi') === -1);
+  const strapiDependencies = Object.keys(dependencies).filter(key => key.includes('strapi'));
+  const othersDependencies = Object.keys(dependencies).filter(key => !key.includes('strapi'));
   // Add this check to know if we are in development mode so the creation is faster.
   const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
   const globalRootPath = shell.exec(packageManager.commands('root -g'), {silent: true});
