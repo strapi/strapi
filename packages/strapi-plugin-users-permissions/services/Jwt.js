@@ -48,12 +48,12 @@ module.exports = {
   },
 
   verify: (token) => {
-    return new Promise(function (resolve, reject) {
+    return new Promise((resolve, reject) => {
       jwt.verify(
         token,
         process.env.JWT_SECRET || _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') || 'oursecret',
         {},
-        function (err, tokenPayload = {}) {
+        (err, tokenPayload = {}) => {
           if (err) {
             return reject(new Error('Invalid token.'));
           }
