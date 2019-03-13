@@ -30,7 +30,7 @@ const packageJSON = require('../package.json');
  * Generate a new Strapi application.
  */
 
-module.exports = function (name, cliArguments) {
+module.exports = (name, cliArguments) => {
   console.log('🚀 Starting to create your Strapi application.');
 
   const developerMode = cliArguments.dev !== undefined;
@@ -123,12 +123,12 @@ module.exports = function (name, cliArguments) {
               output: process.stdout
             });
 
-            rl.on("SIGINT", function () {
+            rl.on("SIGINT", () => {
               process.emit("SIGINT");
             });
           }
           // Listen Ctrl+C / SIGINT event to close the process.
-          process.on("SIGINT", function () {
+          process.on("SIGINT", () => {
             process.exit();
           });
           // Launch the server.
