@@ -60,7 +60,7 @@ module.exports = {
           };
           msg['h:Reply-To'] = options.replyTo;
 
-          mailgun.messages().send(msg, function (err) {
+          mailgun.messages().send(msg, err => {
             if (err) {
               reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
             } else {
