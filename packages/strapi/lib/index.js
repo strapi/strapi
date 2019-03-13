@@ -7,7 +7,7 @@ global.startedAt = Date.now();
  * Instantiate and expose a Strapi singleton
  * (maintains legacy support).
  */
-module.exports = function(global) {
+module.exports = global => {
   try {
     return global.strapi = require('./Strapi'); // Strapi instance instanciated
   } catch (error) {
