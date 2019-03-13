@@ -19,7 +19,7 @@ const { cli, logger } = require('strapi-utils');
  * Uninstall a Strapi plugin.
  */
 
-module.exports = function (plugin) {
+module.exports = plugin => {
   // Define variables.
   const pluginPath = `./plugins/${plugin}`;
 
