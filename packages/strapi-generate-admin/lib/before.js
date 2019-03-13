@@ -21,8 +21,8 @@ module.exports = function (scope, cb) {
     fs.copySync(path.resolve(__dirname, '..', '..', 'strapi-admin'), path.resolve(scope.rootPath, 'admin'), {
       // Skip `node_modules` folder.
       filter: (file) => (
-        file.indexOf(path.resolve(__dirname, '..', '..', 'strapi-admin', 'node_modules')) === -1 &&
-        file.indexOf('package-lock.json') === -1
+        !file.includes(path.resolve(__dirname, '..', '..', 'strapi-admin', 'node_modules')) &&
+        !file.includes('package-lock.json')
       )
     });
   }
