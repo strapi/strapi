@@ -12,7 +12,7 @@ const fs = require('fs-extra');
  * @param {Object} scope
  * @param {Function} cb
  */
-module.exports = function (scope, cb) {
+module.exports = (scope, cb) => {
   if (scope.developerMode) {
     fs.mkdirsSync(path.resolve(scope.rootPath));
     fs.symlinkSync(path.resolve(__dirname, '..', '..', 'strapi-admin'), path.resolve(scope.rootPath, 'admin'), 'junction');
