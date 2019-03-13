@@ -14,13 +14,13 @@ const initialRoutes = [];
 module.exports = strapi => {
 
   return {
-    beforeInitialize: function() {
+    beforeInitialize: () => {
       strapi.config.middleware.load.before.push('documentation');
 
       initialRoutes.push(..._.cloneDeep(strapi.plugins.documentation.config.routes));
     },
     
-    initialize: function(cb) {
+    initialize: cb => {
       // Find the plugins routes.
       strapi.plugins.documentation.config.routes = strapi.plugins.documentation.config.routes
         .map((route, index) => {
