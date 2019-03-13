@@ -157,7 +157,7 @@ module.exports = {
     return request && request.toJSON ? request.toJSON() : request;
   },
 
-  retrieveModel: function(model, source) {
+  retrieveModel: (model, source) => {
     // Retrieve refering model.
     return source ?
       strapi.plugins[source].models[model]:
