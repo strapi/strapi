@@ -275,7 +275,7 @@ module.exports = strapi => {
                               strapi.models[association.collection || association.model];
 
                             return {
-                              [`${association.alias}.${model.collectionName}`]: function(query) {
+                              [`${association.alias}.${model.collectionName}`]: query => {
                                 query.orderBy('created_at', 'desc');
                               }
                             };
