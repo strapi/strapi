@@ -23,7 +23,7 @@ module.exports = {
    * @return String
    */
 
-  formatGQL: function(fields, description = {}, model = {}, type = 'field') {
+  formatGQL: (fields, description = {}, model = {}, type = 'field') => {
     const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, '');
     const lines = typeFields.split('\n');
 
