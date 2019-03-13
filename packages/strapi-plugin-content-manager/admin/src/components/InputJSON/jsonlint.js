@@ -131,7 +131,7 @@ var jsonlint = (function(){
                                                 ("'"+(this.terminals_[symbol] || symbol)+"'"));
                   }
                   this.parseError(errStr,
-                      {text: this.lexer.match, token: this.terminals_[symbol] || symbol, line: this.lexer.yylineno, loc: yyloc, expected: expected});
+                      {text: this.lexer.match, token: this.terminals_[symbol] || symbol, line: this.lexer.yylineno, loc: yyloc, expected});
               }
   
               // just recovered from another error
