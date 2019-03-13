@@ -10,7 +10,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       if (strapi.config.middleware.settings.logger.level) {
         strapi.log.level = strapi.config.middleware.settings.logger.level;
       }
