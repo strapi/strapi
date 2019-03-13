@@ -49,7 +49,7 @@ if (isAdmin && !isSetup) {
     let server = require(serverConfig);
     server = templateConfiguration(server);
 
-    if ((process.env.PWD || process.cwd()).indexOf('/admin') !== -1) {
+    if ((process.env.PWD || process.cwd()).includes('/admin')) {
       if (_.get(server, 'admin.build.host')) {
         URLs.host = _.get(server, 'admin.build.host', '/admin').replace(/\/$/, '') || '/';
       } else {
