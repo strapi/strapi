@@ -21,7 +21,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize: cb => {
       // Serve /public index page.
       strapi.router.route({
         method: 'GET',
