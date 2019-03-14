@@ -50,10 +50,11 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
   }
 
   handleGoTo = to => {
-    const { actionType, push } = this.props;
+    const { actionType, modelToEditName, push } = this.props;
+    const model = actionType === 'edit' ? `&model=${modelToEditName}` : '';
 
     push({
-      search: `modalType=model&settingType=${to}&actionType=${actionType}`,
+      search: `modalType=model&settingType=${to}&actionType=${actionType}${model}`,
     });
   }
 
@@ -175,6 +176,7 @@ ModelForm.defaultProps = {
   createTempContentType: () => {},
   currentData: {},
   isOpen: false,
+  modelToEditName: '',
   modifiedData: {},
   onSubmit: (e) => {
     e.preventDefault();
@@ -191,6 +193,7 @@ ModelForm.propTypes = {
   createTempContentType: PropTypes.func,
   currentData: PropTypes.object,
   isOpen: PropTypes.bool,
+  modelToEditName: PropTypes.string,
   modifiedData: PropTypes.object,
   onChangeNewContentType: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,

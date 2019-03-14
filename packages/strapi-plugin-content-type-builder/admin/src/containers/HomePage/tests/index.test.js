@@ -98,12 +98,12 @@ describe('CTB <HomePage />', () => {
       });
 
       // This test needs to be updated when doing the edition
-      it('should return null otherwise', () => {
-        const wrapper = shallow(<HomePage {...props} />);
-        const { getFormData } = wrapper.instance();
+      // it('should return null otherwise', () => {
+      //   const wrapper = shallow(<HomePage {...props} />);
+      //   const { getFormData } = wrapper.instance();
 
-        expect(getFormData()).toBeNull();
-      });
+      //   expect(getFormData()).toBeNull();
+      // });
     });
 
     describe('handleClick', () => {
@@ -129,17 +129,6 @@ describe('CTB <HomePage />', () => {
         expect(strapi.notification.info).toHaveBeenCalled();
 
         wrapper.unmount();
-      });
-    });
-
-    describe('handleDeleteModel', () => {
-      it('should handle the action correctly', () => {
-        const wrapper = shallow(<HomePage {...props} />);
-        const { handleDeleteModel } = wrapper.instance();
-
-        handleDeleteModel('test');
-
-        expect(props.deleteModel).toHaveBeenCalledWith('test');
       });
     });
   });

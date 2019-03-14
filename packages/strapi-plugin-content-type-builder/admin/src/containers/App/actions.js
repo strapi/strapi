@@ -10,11 +10,13 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CREATE_TEMP_CONTENT_TYPE,
   DELETE_MODEL,
+  DELETE_TEMPORARY_MODEL,
   DELETE_MODEL_SUCCEEDED,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE,
   ON_CREATE_ATTRIBUTE,
+  ON_UPDATING_EXISTING_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
 } from './constants';
@@ -47,6 +49,13 @@ export function createTempContentType() {
 export function deleteModel(modelName) {
   return {
     type: DELETE_MODEL,
+    modelName,
+  };
+}
+
+export function deleteTemporaryModel({ modelName }) {
+  return {
+    type: DELETE_TEMPORARY_MODEL,
     modelName,
   };
 }
@@ -96,6 +105,16 @@ export function onCreateAttribute({ target }) {
     type: ON_CREATE_ATTRIBUTE,
     keys: target.name.split('.'),
     value: target.value,
+  };
+}
+
+export function onUpdatingExistingContentType({ target: { name, value } }) {
+  const formattedValue = name === 'name' ? camelCase(value.trim()).toLowerCase() : value.trim();
+
+  return {
+    type: ON_UPDATING_EXISTING_CONTENT_TYPE,
+    keys: name.split('.'),
+    value: formattedValue,
   };
 }
 

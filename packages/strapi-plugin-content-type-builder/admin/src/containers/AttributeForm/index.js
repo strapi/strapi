@@ -156,7 +156,7 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
   }
 
   render() {
-    const { attributeType, modifiedData, isOpen } = this.props;
+    const { attributeType, isOpen } = this.props;
     const { showForm } = this.state;
     const currentForm = this.getCurrentForm();
 
@@ -196,6 +196,7 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
 
 AttributeForm.defaultProps = {
   activeTab: 'base',
+  alreadyTakenAttributes: [],
   attributeType: 'string',
   isOpen: false,
   modifiedData: {},
@@ -206,6 +207,7 @@ AttributeForm.defaultProps = {
 
 AttributeForm.propTypes = {
   activeTab: PropTypes.string,
+  alreadyTakenAttributes: PropTypes.array,
   attributeType: PropTypes.string,
   isOpen: PropTypes.bool,
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)

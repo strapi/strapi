@@ -22,8 +22,10 @@ import {
   cancelNewContentType,
   createTempContentType,
   deleteModel,
+  deleteTemporaryModel,
   getData,
   onChangeNewContentType,
+  onUpdatingExistingContentType,
 } from './actions';
 
 import reducer from './reducer';
@@ -109,7 +111,9 @@ export function mapDispatchToProps(dispatch) {
       cancelNewContentType,
       createTempContentType,
       deleteModel,
+      deleteTemporaryModel,
       getData,
+      onUpdatingExistingContentType,
       onChangeNewContentType,
     },
     dispatch,

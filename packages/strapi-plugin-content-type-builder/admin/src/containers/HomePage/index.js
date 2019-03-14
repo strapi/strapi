@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 import PluginHeader from 'components/PluginHeader';
 
@@ -31,17 +31,23 @@ class HomePage extends React.Component { // eslint-disable-line react/prefer-sta
   }
 
   getFormData = () => {
-    const { newContentType } = this.props;
+    const { modifiedData, newContentType } = this.props;
 
     if (this.getActionType() === 'create') {
       return newContentType;
     }
 
-    return null;
+    return get(modifiedData, this.getModelToEditName(), {});
+  }
+
+  getModelToEditName = () => {
+    const { location: { search } } = this.props;
+
+    return getQueryParameters(search, 'model');
   }
 
   handleClick = () => {
-    const {canOpenModalAddContentType, history: { push } } = this.props;
+    const { canOpenModalAddContentType, history: { push } } = this.props;
 
     if (canOpenModalAddContentType) {
       push({
@@ -52,14 +58,13 @@ class HomePage extends React.Component { // eslint-disable-line react/prefer-sta
     }
   }
 
-  handleDeleteModel = (modelName) => {
-    this.props.deleteModel(modelName);
-  }
-
   render() {
     const {
       cancelNewContentType,
+      canOpenModalAddContentType,
       createTempContentType,
+      deleteModel,
+      deleteTemporaryModel,
       history: {
         push,
       },
@@ -76,11 +81,13 @@ class HomePage extends React.Component { // eslint-disable-line react/prefer-sta
       <EmptyContentTypeView handleButtonClick={this.handleClick} /> // eslint-disable-line react/jsx-handler-names
     : (
       <TableList
+        canOpenModalAddContentType={canOpenModalAddContentType}
         availableNumber={availableNumber}
         title={title}
         buttonLabel={`${pluginId}.button.contentType.add`}
         onButtonClick={this.handleClick}
-        onHandleDelete={this.handleDeleteModel}
+        onDelete={deleteModel}
+        deleteTemporaryModel={deleteTemporaryModel}
         rowItems={this.props.models}
         push={push}
       />
@@ -107,6 +114,7 @@ class HomePage extends React.Component { // eslint-disable-line react/prefer-sta
           cancelNewContentType={cancelNewContentType}
           createTempContentType={createTempContentType}
           currentData={modifiedData}
+          modelToEditName={this.getModelToEditName()}
           modifiedData={this.getFormData()}
           onChangeNewContentType={onChangeNewContentType}
           isOpen={!isEmpty(search)}

@@ -15,7 +15,7 @@ import styles from './styles.scss';
 
 class TableList extends React.Component { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const { push } = this.props;
+    const { canOpenModalAddContentType, deleteTemporaryModel, push } = this.props;
 
     return (
       <div className={styles.tableListContainer}>
@@ -50,7 +50,9 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
                 {map(this.props.rowItems, (rowItem, key) => (
                   <TableListRow
                     key={key}
-                    onDelete={this.props.onHandleDelete}
+                    canOpenModalAddContentType={canOpenModalAddContentType}
+                    deleteTemporaryModel={deleteTemporaryModel}
+                    onDelete={this.props.onDelete}
                     push={push}
                     rowItem={rowItem}
                   />
@@ -64,11 +66,17 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
   }
 }
 
+TableList.defaultProps = {
+  canOpenModalAddContentType: true,
+};
+
 TableList.propTypes = {
   availableNumber: PropTypes.number.isRequired,
   buttonLabel: PropTypes.string.isRequired,
+  canOpenModalAddContentType: PropTypes.bool,
+  deleteTemporaryModel: PropTypes.func.isRequired,
   onButtonClick: PropTypes.func.isRequired,
-  onHandleDelete: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
   push: PropTypes.func.isRequired,
   rowItems: PropTypes.array.isRequired,
   title: PropTypes.string.isRequired,

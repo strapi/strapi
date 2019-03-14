@@ -11,6 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import IcoContainer from 'components/IcoContainer';
 import ListRow from 'components/ListRow';
 import PopUpWarning from 'components/PopUpWarning';
+
 import styles from '../TableList/styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-curly-brace-presence */
@@ -24,23 +25,24 @@ class TableListRow extends React.Component {
     };
   }
 
-  handleEdit = () => {
-    const { push, rowItem: { name } } = this.props;
-
-    push({
-      search: `modalType=model&settingType=base&actionType=edit&model=${name}`,
-    });
-  };
-
   handleDelete = e => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.onDelete(this.props.rowItem.name);
+
+    const { deleteTemporaryModel, onDelete, rowItem: { name, isTemporary } } = this.props;
+
+    if (isTemporary) {
+      deleteTemporaryModel(name);
+    } else {
+      onDelete(name);
+    }
+
     this.setState({ showWarning: false });
   };
 
   handleGoTo = () => {
     const { push } = this.props;
+
     push(
       `/plugins/content-type-builder/models/${this.props.rowItem.name}${
         this.props.rowItem.source ? `&source=${this.props.rowItem.source}` : ''
@@ -77,7 +79,6 @@ class TableListRow extends React.Component {
     const icons = this.props.rowItem.source
       ? []
       : [
-        { icoType: 'pencil', onClick: this.handleEdit },
         { icoType: 'trash', onClick: this.handleShowModalWarning, id: `delete${name}` },
       ];
 
@@ -110,6 +111,7 @@ class TableListRow extends React.Component {
 }
 
 TableListRow.propTypes = {
+  deleteTemporaryModel: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   push: PropTypes.func.isRequired,
   rowItem: PropTypes.object.isRequired,

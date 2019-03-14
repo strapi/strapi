@@ -11,9 +11,11 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CREATE_TEMP_CONTENT_TYPE,
   DELETE_MODEL_SUCCEEDED,
+  DELETE_TEMPORARY_MODEL,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE,
   ON_CREATE_ATTRIBUTE,
+  ON_UPDATING_EXISTING_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
 } from './constants';
 
@@ -73,6 +75,10 @@ function appReducer(state = initialState, action) {
         .removeIn(['models', state.get('models').findIndex(model => model.name === action.modelName)])
         .removeIn(['initialData', action.modelName])
         .removeIn(['modifiedData', action.modelName]);
+    case DELETE_TEMPORARY_MODEL:
+      return state
+        .removeIn(['models', state.get('models').findIndex(model => model.name === action.modelName)])
+        .update('newContentType', () => fromJS(initialState.get('newContentType')));
     case GET_DATA_SUCCEEDED:
       return state
         .update('connections', () => List(action.connections))
@@ -87,6 +93,9 @@ function appReducer(state = initialState, action) {
     case ON_CREATE_ATTRIBUTE:
       return state
         .updateIn(['temporaryAttribute', ...action.keys], () => action.value);
+    case ON_UPDATING_EXISTING_CONTENT_TYPE:
+      return state
+        .updateIn(['modifiedData', ...action.keys], () => action.value);
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state
         .updateIn([
