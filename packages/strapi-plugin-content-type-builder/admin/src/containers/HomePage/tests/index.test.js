@@ -14,6 +14,7 @@ describe('CTB <HomePage />', () => {
   beforeEach(() => {
     props = {
       cancelNewContentType: jest.fn(),
+      canOpenModalAddContentType: true,
       createTempContentType: jest.fn(),
       deleteModel: jest.fn(),
       models: [
@@ -107,7 +108,7 @@ describe('CTB <HomePage />', () => {
 
     describe('handleClick', () => {
       it('should change the search if there is no temporary model', () => {
-        props.models[0].isTemporary = false;
+        props.canOpenModalAddContentType = true;
 
         const wrapper = shallow(<HomePage {...props} />);
         const { handleClick } = wrapper.instance();
@@ -119,7 +120,7 @@ describe('CTB <HomePage />', () => {
       });
 
       it('should display a notification if there is a temporary model', () => {
-        props.models[0].isTemporary = true;
+        props.canOpenModalAddContentType = false;
 
         const wrapper = shallow(<HomePage {...props} />);
         const { handleClick } = wrapper.instance();
@@ -139,23 +140,6 @@ describe('CTB <HomePage />', () => {
         handleDeleteModel('test');
 
         expect(props.deleteModel).toHaveBeenCalledWith('test');
-      });
-    });
-
-    describe('shouldOpenModal', () => {
-      it('should return true if the is no temporary model', () => {
-        const wrapper = shallow(<HomePage {...props} />);
-        const { shouldOpenModalAdd } = wrapper.instance();
-
-        expect(shouldOpenModalAdd()).toBeTruthy();
-      });
-
-      it('should return false if there is more than 1 temporary model', () => {
-        props.models[0].isTemporary = true;
-        const wrapper = shallow(<HomePage {...props} />);
-        const { shouldOpenModalAdd } = wrapper.instance();
-
-        expect(shouldOpenModalAdd()).toBeFalsy();
       });
     });
   });

@@ -48,6 +48,12 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
     this.props.getData();
   }
 
+  canOpenModalCreateContentType = () => {
+    const { models } = this.props;
+
+    return models.every(model => (model.isTemporary === false));
+  }
+
   renderRoute = (route) => {
     const { component: Component, to } = route;
 
@@ -55,9 +61,15 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
     return (
       <Route
         key={to}
-        path={to}
-        render={props => <Component {...this.props} {...props} />}
         exact
+        path={to}
+        render={props => (
+          <Component
+            {...this.props}
+            {...props}
+            canOpenModalAddContentType={this.canOpenModalCreateContentType()}
+          />
+        )}
       />
     );
   }
@@ -85,6 +97,7 @@ App.propTypes = {
   deleteModel: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  models: PropTypes.array.isRequired,
   onChangeNewContentType: PropTypes.func.isRequired,
 };
 

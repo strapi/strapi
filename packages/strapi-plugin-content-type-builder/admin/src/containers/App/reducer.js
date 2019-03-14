@@ -43,13 +43,13 @@ function appReducer(state = initialState, action) {
           state.getIn(['temporaryAttribute', 'name']),
         ], () => {
           const temporaryAttributeType = state.getIn(['temporaryAttribute', 'type']);
-          const type = type === 'number' && !!temporaryAttributeType ? 'integer' : action.attributeType;
+          const type = action.attributeType === 'number' ? temporaryAttributeType : action.attributeType;
           const newAttribute = state
             .get('temporaryAttribute')
             .remove('name')
             .setIn(['temporaryAttribute', 'type'], type);
 
-          return newAttribute;
+          return newAttribute.get('temporaryAttribute');
         })
         .update('temporaryAttribute', () => Map({}));
     }

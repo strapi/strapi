@@ -41,9 +41,9 @@ class HomePage extends React.Component { // eslint-disable-line react/prefer-sta
   }
 
   handleClick = () => {
-    const { history: { push } } = this.props;
+    const {canOpenModalAddContentType, history: { push } } = this.props;
 
-    if (this.shouldOpenModalAdd()) {
+    if (canOpenModalAddContentType) {
       push({
         search: 'modalType=model&settingType=base&actionType=create',
       });
@@ -54,12 +54,6 @@ class HomePage extends React.Component { // eslint-disable-line react/prefer-sta
 
   handleDeleteModel = (modelName) => {
     this.props.deleteModel(modelName);
-  }
-
-  shouldOpenModalAdd = () => {
-    const { models } = this.props;
-
-    return models.every(model => (model.isTemporary === false));
   }
 
   render() {
@@ -125,12 +119,14 @@ class HomePage extends React.Component { // eslint-disable-line react/prefer-sta
 }
 
 HomePage.defaultProps = {
+  canOpenModalAddContentType: true,
   models: [],
   modifiedData: {},
 };
 
 HomePage.propTypes = {
   cancelNewContentType: PropTypes.func.isRequired,
+  canOpenModalAddContentType: PropTypes.bool,
   createTempContentType: PropTypes.func.isRequired,
   deleteModel: PropTypes.func.isRequired,
   models: PropTypes.array,

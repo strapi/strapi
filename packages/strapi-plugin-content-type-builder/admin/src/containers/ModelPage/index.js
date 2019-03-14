@@ -112,6 +112,27 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
 
   getModelRelationShipsLength = () => Object.keys(this.getModelRelationShips()).length;
 
+  getPluginHeaderActions = () => {
+    if (this.isUpdatingTemporaryContentType() && this.getModelAttributesLength() > 0) {
+      return [
+        {
+          label: `${pluginId}.form.button.cancel`,
+          onClick: () => {},
+          kind: 'secondary',
+          type: 'button',
+        },
+        {
+          label: `${pluginId}.form.button.save`,
+          onClick: () => {},
+          kind: 'primary',
+          type: 'submit',
+          id: 'saveData',
+        },
+      ];
+    }
+
+    return [];
+  }
   getSectionTitle = () => {
     const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
 
@@ -126,9 +147,9 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 
   handleClickOpenModalCreateCT = () => {
-    const { history: { push } } = this.props;
+    const { canOpenModalAddContentType, history: { push } } = this.props;
 
-    if (this.shouldOpenModalAddCT()) {
+    if (canOpenModalAddContentType) {
       push({
         search: 'modalType=model&settingType=base&actionType=create',
       });
@@ -153,12 +174,6 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const { isTemporary } = currentModel;
 
     return isTemporary;
-  }
-
-  shouldOpenModalAddCT = () => {
-    const { models } = this.props;
-
-    return models.every(model => (model.isTemporary === false));
   }
 
   shouldRedirect = () => {
@@ -246,6 +261,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                   description={this.getModelDescription()}
                   icon="fa fa-pencil"
                   title={this.getModelName()}
+                  actions={this.getPluginHeaderActions()}
                 />
                 {this.getModelAttributesLength() === 0 ? (
                   <EmptyAttributesBlock
@@ -330,10 +346,15 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   }
 }
 
+ModelPage.defaultProps = {
+  canOpenModalAddContentType: true,
+};
+
 ModelPage.propTypes = {
   ...routerPropTypes(
     { params: PropTypes.string },
   ).isRequired,
+  canOpenModalAddContentType: PropTypes.bool,
   clearTemporaryAttribute: PropTypes.func.isRequired,
   initialData: PropTypes.object.isRequired,
   models: PropTypes.array.isRequired,
