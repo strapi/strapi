@@ -1,4 +1,4 @@
-# Tutorials
+# Articles
 
 Go further with Strapi, official and community tutorials are here to help you:
 
@@ -9,10 +9,10 @@ Go further with Strapi, official and community tutorials are here to help you:
 
 ### Development
 
- - [Building a static blog using Gatsby and Strapi (official)](https://hackernoon.com/building-a-static-blog-using-gatsby-and-strapi-8b5acfc82ad8)
+ - [Building a static blog using Gatsby and Strapi (official)](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi)
  - [🍝 Cooking a Deliveroo clone with Nuxt (Vue.js), GraphQL, Strapi and Stripe (official)](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7)
  - [🍝 Cooking a Deliveroo clone with Next.js (React), GraphQL, Strapi and Stripe](https://blog.strapi.io/strapi-next-setup)
- 
+
 ### Deployment
 
 - [Using mLab with Strapi (official)](https://medium.com/@strapi/using-mlab-with-strapi-e3f968a9c530)
