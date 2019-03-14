@@ -1,5 +1,5 @@
-import { all, fork, takeLatest, call, put } from 'redux-saga/effects';
 import { get } from 'lodash';
+import { all, fork, takeLatest, call, put } from 'redux-saga/effects';
 import request from 'utils/request';
 import pluginId from '../../pluginId';
 
@@ -47,7 +47,7 @@ export function* submitTempCT() {
     yield put(submitTempContentTypeSucceeded());
   } catch(err) {
     const errorMessage = get(error, ['response', 'payload', 'message', '0', 'messages', '0', 'id'], 'notification.error');
-    strapi.notification.error(errorMessage)
+    strapi.notification.error(errorMessage);
   }
 }
 

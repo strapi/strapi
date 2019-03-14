@@ -40,18 +40,15 @@ export class ModelForm extends React.Component { // eslint-disable-line react/pr
   state = { didCheckErrors: false, formErrors: {}, isVisible: false };
 
   handleBlur = (e) => {
-    let value = e.target.value.trim();
-
     if (e.target.name === 'name') {
-      value = camelCase(value).toLowerCase();
+      const value = camelCase(e.target.value.trim()).toLowerCase();
+      const target = {
+        name: e.target.name,
+        value,
+      };
+
+      this.props.onChangeNewContentType({ target });
     }
-
-    const target = {
-      name: e.target.name,
-      value,
-    };
-
-    this.props.onChangeNewContentType({ target });
   }
 
   handleCancel = () => {

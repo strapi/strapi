@@ -76,7 +76,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
 
   render() {
     const { isLoading } = this.props;
-    console.log(this.props.newContentType)
+
     if (isLoading) {
       return <Loader />;
     }
