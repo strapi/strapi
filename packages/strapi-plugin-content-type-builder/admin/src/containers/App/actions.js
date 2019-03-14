@@ -15,6 +15,8 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE,
   ON_CREATE_ATTRIBUTE,
+  SUBMIT_TEMP_CONTENT_TYPE,
+  SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
 } from './constants';
 
 export function addAttributeToTempContentType(attributeType) {
@@ -92,6 +94,18 @@ export function onCreateAttribute({ target }) {
     type: ON_CREATE_ATTRIBUTE,
     keys: target.name.split('.'),
     value: target.value,
+  };
+}
+
+export function submitTempContentType() {
+  return {
+    type: SUBMIT_TEMP_CONTENT_TYPE,
+  };
+}
+
+export function submitTempContentTypeSucceeded() {
+  return {
+    type: SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   };
 }
 

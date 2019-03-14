@@ -14,6 +14,7 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE,
   ON_CREATE_ATTRIBUTE,
+  SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
 } from './constants';
 
 export const initialState = fromJS({
@@ -36,6 +37,7 @@ export const initialState = fromJS({
 function appReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE: {
+      console.log({ reducer: state.get('newContentType').toJS()})
       return state
         .updateIn([
           'newContentType',
@@ -54,6 +56,7 @@ function appReducer(state = initialState, action) {
         .update('temporaryAttribute', () => Map({}));
     }
     case CANCEL_NEW_CONTENT_TYPE:
+      console.log('llll');
       return state
         .update('newContentType', () => Map(initialState.get('newContentType')));
     case CLEAR_TEMPORARY_ATTRIBUTE:
@@ -81,11 +84,24 @@ function appReducer(state = initialState, action) {
         .updateIn(['newContentType', 'connection'], () => action.connections[0])
         .update('models', () => List(action.models));
     case ON_CHANGE_NEW_CONTENT_TYPE:
+    console.log('change', action.keys, action.value);
       return state
         .updateIn(['newContentType', ...action.keys], () => action.value);
     case ON_CREATE_ATTRIBUTE:
       return state
         .updateIn(['temporaryAttribute', ...action.keys], () => action.value);
+    case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
+      console.log(state.get('newContentType'));
+      console.log(state.get('newContentType').toJS());
+      console.log(state.getIn(['newContentType', 'name']));
+      return state
+        .updateIn([
+          'modifiedData',
+          state.getIn(['newContentType', 'name']),
+        ], () => state.get('newContentType'))
+        .updateIn(['models', state.get('models').size - 1, 'isTemporary'], () => false)
+        .update('models', list => list.sortBy(el => el.name))
+        .update('newContentType', () => Map(initialState.get('newContentType')));
     default:
       return state;
   }

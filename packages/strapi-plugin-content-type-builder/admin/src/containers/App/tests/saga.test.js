@@ -4,10 +4,10 @@
 
 /* eslint-disable redux-saga/yield-effects */
 import { all, fork, takeLatest, put } from 'redux-saga/effects';
-import defaultSaga, { deleteModel, getData } from '../saga';
+import defaultSaga, { deleteModel, getData, submitTempCT } from '../saga';
 
 import { deleteModelSucceeded, getDataSucceeded } from '../actions';
-import { DELETE_MODEL, GET_DATA } from '../constants';
+import { DELETE_MODEL, GET_DATA, SUBMIT_TEMP_CONTENT_TYPE } from '../constants';
 
 const response = [
   {
@@ -104,6 +104,7 @@ describe('defaultSaga Saga', () => {
         all([
           fork(takeLatest, GET_DATA, getData),
           fork(takeLatest, DELETE_MODEL, deleteModel),
+          fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
         ]));
   });
 });

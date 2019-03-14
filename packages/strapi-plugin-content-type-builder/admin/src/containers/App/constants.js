@@ -14,3 +14,5 @@ export const GET_DATA = 'ContentTypeBuilder/App/GET_DATA';
 export const GET_DATA_SUCCEEDED = 'ContentTypeBuilder/App/GET_DATA_SUCCEEDED';
 export const ON_CHANGE_NEW_CONTENT_TYPE = 'ContentTypeBuilder/App/ON_CHANGE_NEW_CONTENT_TYPE';
 export const ON_CREATE_ATTRIBUTE = 'ContentTypeBuilder/App/ON_CREATE_ATTRIBUTE';
+export const SUBMIT_TEMP_CONTENT_TYPE = 'ContentTypeBuilder/App/SUBMIT_TEMP_CONTENT_TYPE';
+export const SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED = 'ContentTypeBuilder/App/SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED';

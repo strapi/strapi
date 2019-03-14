@@ -41,6 +41,7 @@ import {
   addAttributeToTempContentType,
   clearTemporaryAttribute,
   onCreateAttribute,
+  submitTempContentType,
 } from '../App/actions';
 
 import CustomLink from './CustomLink';
@@ -113,6 +114,8 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   getModelRelationShipsLength = () => Object.keys(this.getModelRelationShips()).length;
 
   getPluginHeaderActions = () => {
+    const { submitTempContentType } = this.props;
+
     if (this.isUpdatingTemporaryContentType() && this.getModelAttributesLength() > 0) {
       return [
         {
@@ -123,7 +126,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         },
         {
           label: `${pluginId}.form.button.save`,
-          onClick: () => {},
+          onClick: submitTempContentType,
           kind: 'primary',
           type: 'submit',
           id: 'saveData',
@@ -359,6 +362,7 @@ ModelPage.propTypes = {
   initialData: PropTypes.object.isRequired,
   models: PropTypes.array.isRequired,
   onCreateAttribute: PropTypes.func.isRequired,
+  submitTempContentType: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -371,6 +375,7 @@ export function mapDispatchToProps(dispatch) {
       addAttributeToTempContentType,
       clearTemporaryAttribute,
       onCreateAttribute,
+      submitTempContentType,
     },
     dispatch,
   );

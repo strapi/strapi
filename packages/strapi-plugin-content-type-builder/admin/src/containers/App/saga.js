@@ -1,9 +1,18 @@
 import { all, fork, takeLatest, call, put } from 'redux-saga/effects';
+import { get } from 'lodash';
 import request from 'utils/request';
 import pluginId from '../../pluginId';
 
-import {  getDataSucceeded, deleteModelSucceeded } from './actions';
-import { GET_DATA, DELETE_MODEL } from './constants';
+import {
+  getDataSucceeded,
+  deleteModelSucceeded,
+  submitTempContentTypeSucceeded,
+} from './actions';
+import {
+  GET_DATA,
+  DELETE_MODEL,
+  SUBMIT_TEMP_CONTENT_TYPE,
+} from './constants';
 
 export function* getData() {
   try {
@@ -33,10 +42,20 @@ export function* deleteModel({ modelName }) {
   }
 }
 
+export function* submitTempCT() {
+  try {
+    yield put(submitTempContentTypeSucceeded());
+  } catch(err) {
+    const errorMessage = get(error, ['response', 'payload', 'message', '0', 'messages', '0', 'id'], 'notification.error');
+    strapi.notification.error(errorMessage)
+  }
+}
+
 // Individual exports for testing
 export default function* defaultSaga() {
   yield all([
     fork(takeLatest, GET_DATA, getData),
     fork(takeLatest, DELETE_MODEL, deleteModel),
+    fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
   ]);
 }
