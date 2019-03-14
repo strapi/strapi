@@ -67,12 +67,16 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
   handleSubmit = (e) => {
     e.preventDefault();
 
-    const { modifiedData, onSubmit } = this.props;
+    const { alreadyTakenAttributes, modifiedData, onSubmit } = this.props;
     const currentForm = this.getCurrentForm();
     let formErrors = {};
 
     if (isEmpty(modifiedData.name)) {
       formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
+    }
+
+    if (alreadyTakenAttributes.includes(get(modifiedData, 'name', ''))) {
+      formErrors = { name: [{ id: `${pluginId}.error.attribute.taken` }] };
     }
 
     // TODO NEED TO HANDLE OTHER VALIDATIONS
@@ -152,7 +156,7 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
   }
 
   render() {
-    const { attributeType, isOpen } = this.props;
+    const { attributeType, modifiedData, isOpen } = this.props;
     const { showForm } = this.state;
     const currentForm = this.getCurrentForm();
 

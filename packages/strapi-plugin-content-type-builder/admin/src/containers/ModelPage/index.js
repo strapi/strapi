@@ -323,6 +323,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
         />
         <AttributeForm
           activeTab={settingType}
+          alreadyTakenAttributes={Object.keys(this.getModelAttributes())}
           attributeType={attributeType}
           isContentTypeTemporary={this.isUpdatingTemporaryContentType()}
           isOpen={modalType === 'attributeForm' && attributeType !== 'relation'}

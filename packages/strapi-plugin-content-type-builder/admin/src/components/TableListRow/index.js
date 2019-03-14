@@ -25,10 +25,11 @@ class TableListRow extends React.Component {
   }
 
   handleEdit = () => {
-    const { push } = this.props;
-    push(
-      `/plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`,
-    );
+    const { push, rowItem: { name } } = this.props;
+
+    push({
+      search: `modalType=model&settingType=base&actionType=edit&model=${name}`,
+    });
   };
 
   handleDelete = e => {
@@ -115,3 +116,4 @@ TableListRow.propTypes = {
 };
 
 export default TableListRow;
+

@@ -3,7 +3,7 @@
  * App actions
  *
  */
-import { pick, set } from 'lodash';
+import { pick, set, camelCase } from 'lodash';
 import {
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
   CANCEL_NEW_CONTENT_TYPE,
@@ -82,10 +82,12 @@ export function getDataSucceeded({ allModels, models }, connections) {
 }
 
 export function onChangeNewContentType({ target }) {
+  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value.trim();
+
   return {
     type: ON_CHANGE_NEW_CONTENT_TYPE,
     keys: target.name.split('.'),
-    value: target.value,
+    value,
   };
 }
 
