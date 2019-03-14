@@ -30,6 +30,7 @@ function PageFooter(props) {
                   name: 'params._limit',
                   value: parseInt(e.target.value, 10),
                 };
+                props.context.emitEvent('willChangeNumberOfEntriesPerPage');
                 props.onChangeParams({ target });
               }}
               value={get(props, ['params', '_limit'], 10)}
@@ -54,6 +55,7 @@ function PageFooter(props) {
 }
 
 PageFooter.defaultProps = {
+  context: {},
   count: 1,
   onChangeParams: () => {},
   params: {
@@ -64,6 +66,7 @@ PageFooter.defaultProps = {
 };
 
 PageFooter.propTypes = {
+  context: PropTypes.object,
   count: PropTypes.number,
   onChangeParams: PropTypes.func,
   params: PropTypes.object,

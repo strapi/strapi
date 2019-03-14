@@ -144,6 +144,75 @@ The administration panel is available at http://localhost:4000/admin
 
 ---
 
+## Running the tests
+
+You can run three different kind of tests:
+
+- Unit tests
+- End to end tests
+- Cypress (integration) tests
+
+### Unit tests
+
+This will run the npm `test` script in every packages
+
+```bash
+$ npm run test:unit
+```
+
+### End to end
+
+This will create a test app, start it and run the end to end tests against it.
+
+> ️️️️️️️You can change `test/e2e.js` to configure the database you want to use:
+
+```js
+// test/e2e.js
+//...
+const main = async () => {
+  // you can switch databases.mongo for databases.mysql or any other
+  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.mongo;
+  //...
+}
+```
+
+Then run
+
+```bash
+$ node test/e2e.js
+```
+
+### Cypress
+
+This will create a test app, start it and finally run the cypress tests against it.
+
+> You can change `test/createTestApp.js` to configure the database you want to use.
+
+```js
+// test/createTestApp.js
+//...
+const main = async () => {
+  // you can switch databases.mongo for databases.mysql or any other
+  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.postgres;
+  //...
+}
+```
+
+> ⚠️ To run the cypress test you must have run `npm run setup:build` to setup the repository
+
+Then run
+
+```bash
+# generate the test app
+$ node test/createTestApp.js
+# run the testApp in the background (️️️⚠️ be carefull to kill the process after the tests have run)
+$ node test/startTestApp.js & 
+# run cypress
+$ node test/cypress
+```
+
+---
+
 ## Reporting an issue
 
 Before reporting an issue you need to make sure:

@@ -6,7 +6,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "echo \\\"Error: no test specified\\\""
+    "test": "echo \"no tests yet\""
   },
   "author": {
     "email": "hi@strapi.io",

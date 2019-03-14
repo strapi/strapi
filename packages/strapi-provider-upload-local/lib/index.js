@@ -16,7 +16,7 @@ module.exports = {
       upload: (file) => {
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
-          fs.writeFile(path.join(strapi.config.appPath, 'public', `uploads/${file.hash}${file.ext}`), file.buffer, (err) => {
+          fs.writeFile(path.join(strapi.config.public.path, `/uploads/${file.hash}${file.ext}`), file.buffer, (err) => {
             if (err) {
               return reject(err);
             }
@@ -29,7 +29,7 @@ module.exports = {
       },
       delete: (file) => {
         return new Promise((resolve, reject) => {
-          const filePath = path.join(strapi.config.appPath, 'public', `uploads/${file.hash}${file.ext}`);
+          const filePath = path.join(strapi.config.public.path, `/uploads/${file.hash}${file.ext}`);
 
           if (!fs.existsSync(filePath)) {
             return resolve('File doesn\'t exist');

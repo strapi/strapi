@@ -39,6 +39,8 @@ export function* editContentType(action) {
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
+      action.context.emitEvent('didEditNameOfContentType');
+
       yield put(contentTypeActionSucceeded());
       yield put(unsetButtonLoading());
 

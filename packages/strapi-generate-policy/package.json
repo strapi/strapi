@@ -17,6 +17,7 @@
     "lodash": "^4.17.5"
   },
   "scripts": {
+    "test": "echo \"no tests yet\"",
     "prepublishOnly": "npm prune"
   },
   "author": {

@@ -236,9 +236,9 @@ module.exports = function(strapi) {
                     updating: 'beforeUpdate',
                     updated: 'afterUpdate',
                     fetching: 'beforeFetch',
-                    'fetching:collection': 'beforeFetchCollection',
+                    'fetching:collection': 'beforeFetchAll',
                     fetched: 'afterFetch',
-                    'fetched:collection': 'afterFetchCollection',
+                    'fetched:collection': 'afterFetchAll',
                     saving: 'beforeSave',
                     saved: 'afterSave'
                   };
@@ -287,9 +287,9 @@ module.exports = function(strapi) {
                     }
 
                     return _.isFunction(
-                      target[model.toLowerCase()]['beforeFetchCollection']
+                      target[model.toLowerCase()]['beforeFetchAll']
                     )
-                      ? target[model.toLowerCase()]['beforeFetchCollection']
+                      ? target[model.toLowerCase()]['beforeFetchAll']
                       : Promise.resolve();
                   });
 
@@ -314,7 +314,7 @@ module.exports = function(strapi) {
                       target: 'afterFetch'
                     }, {
                       name: 'fetched:collection',
-                      target: 'afterFetchCollection'
+                      target: 'afterFetchAll'
                     }];
 
                     const jsonFormatter = (attributes) => {
@@ -387,7 +387,13 @@ module.exports = function(strapi) {
                   const handler = async (table, attributes) => {
                     const tableExist = await ORM.knex.schema.hasTable(table);
 
-                    const getType = (attribute, name) => {
+                    /**
+                     *
+                     * @param {*} attribute
+                     * @param {*} name
+                     * @param {*} isTableExist Used to determine queries that cant be run while ALTERing TABLE
+                     */
+                    const getType = (attribute, name, isTableExist = false) => {
                       let type;
 
                       if (!attribute.type) {
@@ -438,7 +444,7 @@ module.exports = function(strapi) {
                           case 'time':
                           case 'datetime':
                           case 'timestamp':
-                            type = definition.client === 'pg' ? 'timestamp with time zone' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
+                            type = definition.client === 'pg' ? 'timestamp with time zone' : definition.client === 'sqlite3' && isTableExist ? 'timestamp DEFAULT NULL' : 'timestamp DEFAULT CURRENT_TIMESTAMP';
                             break;
                           case 'timestampUpdate':
                             switch(definition.client) {
@@ -464,11 +470,11 @@ module.exports = function(strapi) {
                     };
 
                     // Apply field type of attributes definition
-                    const generateColumns = (attrs, start) => {
+                    const generateColumns = (attrs, start, isTableExist = false) => {
                       return Object.keys(attrs).reduce((acc, attr) => {
                         const attribute = attributes[attr];
 
-                        const type = getType(attribute, attr);
+                        const type = getType(attribute, attr, isTableExist);
 
                         if (type) {
                           acc.push(`${quote}${attr}${quote} ${type} ${attribute.required ? 'NOT' : ''} NULL `);
@@ -557,7 +563,6 @@ module.exports = function(strapi) {
                         idAttributeBuilder = [`id ${getType({type: definition.primaryKeyType})} NOT NULL PRIMARY KEY`];
                       }
                       const columns = generateColumns(attributes, idAttributeBuilder).join(',\n\r');
-
                       // Create table
                       await ORM.knex.raw(`
                         CREATE TABLE ${quote}${table}${quote} (
@@ -605,7 +610,7 @@ module.exports = function(strapi) {
 
                       // Generate and execute query to add missing column
                       if (Object.keys(columnsToAdd).length > 0) {
-                        const columns = generateColumns(columnsToAdd, []);
+                        const columns = generateColumns(columnsToAdd, [], tableExist);
                         const queries = columns.reduce((acc, attribute) => {
                           acc.push(`ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`);
                           return acc;

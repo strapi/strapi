@@ -75,7 +75,6 @@ describe('Testing Content Manager createPages', function() {
     cy.deleteApi('tag', jwt)
       .deleteApi('category', jwt)
       .deleteApi('product', jwt)
-      .wait(11000);
   });
 
   context('Creating data with no relation', () => {

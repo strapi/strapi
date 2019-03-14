@@ -12,6 +12,9 @@
   "directories": {
     "lib": "./lib"
   },
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
   "dependencies": {
     "async": "^2.5.0",
     "fs-extra": "^4.0.0",

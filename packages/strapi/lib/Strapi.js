@@ -1,3 +1,4 @@
+
 'use strict';
 
 // Dependencies.
@@ -195,7 +196,7 @@ class Strapi extends EventEmitter {
     }
 
     // Kill process.
-    process.exit(0);
+    process.exit(1);
   }
 
   async load() {
@@ -239,6 +240,7 @@ class Strapi extends EventEmitter {
       shouldReload: 0
     };
 
+
     const reload = function () {
       if (state.shouldReload > 0) {
         // Reset the reloading state
@@ -252,6 +254,7 @@ class Strapi extends EventEmitter {
         this.config.environment === 'development' &&
         get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true
       ) {
+        this.server.close();
         process.send('reload');
       }
     };

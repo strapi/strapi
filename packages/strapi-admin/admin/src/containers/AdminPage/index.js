@@ -296,8 +296,8 @@ export class AdminPage extends React.Component {
 }
 
 AdminPage.childContextTypes = {
-  emitEvent: PropTypes.func,
   currentEnvironment: PropTypes.string.isRequired,
+  emitEvent: PropTypes.func,
   disableGlobalOverlayBlocker: PropTypes.func,
   enableGlobalOverlayBlocker: PropTypes.func,
   plugins: PropTypes.object,
@@ -305,6 +305,7 @@ AdminPage.childContextTypes = {
 };
 
 AdminPage.contextTypes = {
+  emitEvent: PropTypes.func,
   router: PropTypes.object.isRequired,
 };
 
