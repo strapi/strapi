@@ -29,10 +29,14 @@ class TableListRow extends React.Component {
     e.preventDefault();
     e.stopPropagation();
 
-    const { deleteTemporaryModel, onDelete, rowItem: { name, isTemporary } } = this.props;
+    const {
+      deleteTemporaryModel,
+      onDelete,
+      rowItem: { name, isTemporary },
+    } = this.props;
 
     if (isTemporary) {
-      deleteTemporaryModel(name);
+      deleteTemporaryModel();
     } else {
       onDelete(name);
     }
@@ -72,15 +76,11 @@ class TableListRow extends React.Component {
     ) : (
       ''
     );
-    const description = isEmpty(this.props.rowItem.description)
-      ? '-'
-      : this.props.rowItem.description;
+    const description = isEmpty(this.props.rowItem.description) ? '-' : this.props.rowItem.description;
     const spanStyle = this.props.rowItem.isTemporary ? '60%' : '100%';
     const icons = this.props.rowItem.source
       ? []
-      : [
-        { icoType: 'trash', onClick: this.handleShowModalWarning, id: `delete${name}` },
-      ];
+      : [{ icoType: 'trash', onClick: this.handleShowModalWarning, id: `delete${name}` }];
 
     return (
       <ListRow onClick={this.handleGoTo}>
@@ -118,4 +118,3 @@ TableListRow.propTypes = {
 };
 
 export default TableListRow;
-

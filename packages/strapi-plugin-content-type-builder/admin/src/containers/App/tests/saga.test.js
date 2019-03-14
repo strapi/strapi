@@ -6,7 +6,7 @@
 import { all, fork, takeLatest, put } from 'redux-saga/effects';
 import defaultSaga, { deleteModel, getData, submitTempCT } from '../saga';
 
-import { deleteModelSucceeded, getDataSucceeded } from '../actions';
+import { deleteModelSucceeded, getDataSucceeded, submitTempContentTypeSucceeded } from '../actions';
 import { DELETE_MODEL, GET_DATA, SUBMIT_TEMP_CONTENT_TYPE } from '../constants';
 
 const response = [
@@ -47,7 +47,7 @@ describe('CTB <App /> DeleteModel saga', () => {
     expect(callDescriptor).toMatchSnapshot();
   });
 
-  it('should not dispatch the deleteModelSucceeded action if the server didn\'t restart', () => {
+  it("should not dispatch the deleteModelSucceeded action if the server didn't restart", () => {
     deleteModelGenerator.next({ ok: false }).value;
 
     expect(strapi.notification.success).not.toHaveBeenCalled();
@@ -93,18 +93,35 @@ describe('CTB <App /> GetData saga', () => {
   });
 });
 
+describe('CTB <App /> SubmitTempCt saga', () => {
+  let submitTempCtGenerator;
+
+  beforeEach(() => {
+    submitTempCtGenerator = submitTempCT();
+    // const callDescriptor = submitTempCtGenerator.next(response).value;
+
+    // expect(callDescriptor).toMatchSnapshot();
+  });
+
+  it('should dispatch the getDataSucceeded action if it requests the data successfully', () => {
+    const putDescriptor = submitTempCtGenerator.next(response).value;
+
+    expect(putDescriptor).toEqual(put(submitTempContentTypeSucceeded()));
+  });
+});
+
 describe('defaultSaga Saga', () => {
   const defaultSagaSaga = defaultSaga();
 
   it('should start a task to watch for GET_DATA', () => {
     const forkDescriptor = defaultSagaSaga.next().value;
 
-    expect(forkDescriptor)
-      .toEqual(
-        all([
-          fork(takeLatest, GET_DATA, getData),
-          fork(takeLatest, DELETE_MODEL, deleteModel),
-          fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
-        ]));
+    expect(forkDescriptor).toEqual(
+      all([
+        fork(takeLatest, GET_DATA, getData),
+        fork(takeLatest, DELETE_MODEL, deleteModel),
+        fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
+      ]),
+    );
   });
 });

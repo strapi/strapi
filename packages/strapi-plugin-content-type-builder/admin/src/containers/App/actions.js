@@ -53,17 +53,16 @@ export function deleteModel(modelName) {
   };
 }
 
-export function deleteTemporaryModel({ modelName }) {
-  return {
-    type: DELETE_TEMPORARY_MODEL,
-    modelName,
-  };
-}
-
 export function deleteModelSucceeded(modelName) {
   return {
     type: DELETE_MODEL_SUCCEEDED,
     modelName,
+  };
+}
+
+export function deleteTemporaryModel() {
+  return {
+    type: DELETE_TEMPORARY_MODEL,
   };
 }
 
@@ -131,7 +130,7 @@ export function submitTempContentTypeSucceeded() {
 }
 
 // utils
-export const buildModelAttributes = (attributes) => {
+export const buildModelAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
     acc[current.name] = current.params;
 

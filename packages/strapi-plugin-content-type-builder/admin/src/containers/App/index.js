@@ -45,7 +45,8 @@ const ROUTES = [
   },
 ];
 
-export class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class App extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
     this.props.getData();
   }
@@ -53,10 +54,10 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
   canOpenModalCreateContentType = () => {
     const { models } = this.props;
 
-    return models.every(model => (model.isTemporary === false));
-  }
+    return models.every(model => model.isTemporary === false);
+  };
 
-  renderRoute = (route) => {
+  renderRoute = route => {
     const { component: Component, to } = route;
 
     /* istanbul ignore next */
@@ -74,7 +75,7 @@ export class App extends React.Component { // eslint-disable-line react/prefer-s
         )}
       />
     );
-  }
+  };
 
   render() {
     const { isLoading } = this.props;
@@ -120,7 +121,10 @@ export function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 const withReducer = strapi.injectReducer({ key: 'app', reducer, pluginId });
 const withSaga = strapi.injectSaga({ key: 'app', saga, pluginId });
 

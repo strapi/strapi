@@ -5,6 +5,7 @@ import pluginId from '../../../pluginId';
 
 import EmptyContentTypeView from '../../../components/EmptyContentTypeView';
 import TableList from '../../../components/TableList';
+import ModelForm from '../../ModelForm';
 
 import HomePage from '../index';
 
@@ -18,10 +19,37 @@ describe('CTB <HomePage />', () => {
       createTempContentType: jest.fn(),
       deleteModel: jest.fn(),
       models: [
-        { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
-        { icon: 'fa-cube', name: 'user', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
-        { icon: 'fa-cube', name: 'role', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
-        { icon: 'fa-cube', name: 'product', description: 'super api', fields: 6, isTemporary: false },
+        {
+          icon: 'fa-cube',
+          name: 'permission',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'user',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'role',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'product',
+          description: 'super api',
+          fields: 6,
+          isTemporary: false,
+        },
       ],
       modifiedData: {},
       newContentType: {
@@ -44,21 +72,25 @@ describe('CTB <HomePage />', () => {
   });
 
   it('should not crash', () => {
-    shallow(<HomePage {...props} />);
+    const context = { emitEvent: jest.fn() };
+
+    shallow(<HomePage {...props} />, { context });
   });
 
   describe('render', () => {
     it('should display the EmptyContentTypeView if there is no model in the application', () => {
       props.models = [];
 
-      const wrapper = shallow(<HomePage {...props} />);
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
       const emptyView = wrapper.find(EmptyContentTypeView);
 
       expect(emptyView).toHaveLength(1);
     });
 
     it('the tableList should have a plural title if there is more than 1 model', () => {
-      const wrapper = shallow(<HomePage {...props} />);
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
       const table = wrapper.find(TableList);
 
       expect(table).toHaveLength(1);
@@ -66,9 +98,19 @@ describe('CTB <HomePage />', () => {
     });
 
     it('the tableList should have a singular title if there is more less 2 model', () => {
-      props.models = [{ icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions', isTemporary: false }];
+      props.models = [
+        {
+          icon: 'fa-cube',
+          name: 'permission',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+      ];
 
-      const wrapper = shallow(<HomePage {...props} />);
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
       const table = wrapper.find(TableList);
 
       expect(table).toHaveLength(1);
@@ -76,60 +118,48 @@ describe('CTB <HomePage />', () => {
     });
   });
 
-  describe('instances', () => {
-    describe('getActionType', () => {
-      it('should return the correct search param', () => {
-        props.location.search = 'modalType=model&settingType=base&actionType=create';
-        const wrapper = shallow(<HomePage {...props} />);
-        const { getActionType } = wrapper.instance();
-
-        expect(getActionType()).toEqual('create');
+  describe('workflow', () => {
+    it('should open the modelForm if there is no saved content type', () => {
+      props.canOpenModalAddContentType = true;
+      props.history.push = jest.fn(({ search }) => {
+        props.location.search = `?${search}`;
       });
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+      const spyOnClick = jest.spyOn(wrapper.instance(), 'handleClick');
+
+      wrapper.instance().forceUpdate();
+      // Simulate the click on button
+      wrapper.find(TableList).prop('onButtonClick')();
+      wrapper.instance().forceUpdate();
+
+      const form = wrapper.find(ModelForm).first();
+
+      expect(spyOnClick).toHaveBeenCalled();
+      expect(context.emitEvent).toHaveBeenCalledWith('willCreateContentType');
+      expect(props.history.push).toHaveBeenCalledWith({
+        search: 'modalType=model&settingType=base&actionType=create',
+      });
+      expect(form.prop('isOpen')).toBe(true);
     });
 
-    describe('getFormData', () => {
-      it('should return the newContentType prop if the search contains create', () => {
-        props.location.search = 'modalType=model&settingType=base&actionType=create';
+    it('should not open the modal if the is one or more not saved content type and display a notification', () => {
+      props.canOpenModalAddContentType = false;
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
 
-        const wrapper = shallow(<HomePage {...props} />);
-        const { getFormData } = wrapper.instance();
+      wrapper.find(TableList).prop('onButtonClick')();
+      wrapper.instance().forceUpdate();
 
-        expect(getFormData()).toEqual(props.newContentType);
-      });
+      const form = wrapper.find(ModelForm).first();
 
-      // This test needs to be updated when doing the edition
-      // it('should return null otherwise', () => {
-      //   const wrapper = shallow(<HomePage {...props} />);
-      //   const { getFormData } = wrapper.instance();
-
-      //   expect(getFormData()).toBeNull();
-      // });
-    });
-
-    describe('handleClick', () => {
-      it('should change the search if there is no temporary model', () => {
-        props.canOpenModalAddContentType = true;
-
-        const wrapper = shallow(<HomePage {...props} />);
-        const { handleClick } = wrapper.instance();
-
-        handleClick();
-
-        expect(strapi.notification.info).not.toHaveBeenCalled();
-        expect(props.history.push).toHaveBeenCalledWith({ search: 'modalType=model&settingType=base&actionType=create' });
-      });
-
-      it('should display a notification if there is a temporary model', () => {
-        props.canOpenModalAddContentType = false;
-
-        const wrapper = shallow(<HomePage {...props} />);
-        const { handleClick } = wrapper.instance();
-        handleClick();
-
-        expect(strapi.notification.info).toHaveBeenCalled();
-
-        wrapper.unmount();
-      });
+      expect(context.emitEvent).not.toHaveBeenCalled();
+      expect(props.history.push).not.toHaveBeenCalled();
+      expect(strapi.notification.info).toHaveBeenCalled();
+      expect(strapi.notification.info).toHaveBeenCalledWith(
+        `${pluginId}.notification.info.contentType.creating.notSaved`,
+      );
+      expect(form.prop('isOpen')).toBe(false);
     });
   });
 });

@@ -1,8 +1,8 @@
 /**
-*
-* AttributeLi
-*
-*/
+ *
+ * AttributeLi
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -27,29 +27,29 @@ const assets = [
   'relation',
   'string',
   'text',
-].map(type => {
-  return { type, icon: require(`../../assets/images/icon_${type}.png`)};
-}).reduce((acc, current) => {
-  acc[current.type] = current.icon;
+]
+  .map(type => {
+    return { type, icon: require(`../../assets/images/icon_${type}.png`) };
+  })
+  .reduce((acc, current) => {
+    acc[current.type] = current.icon;
 
-  return acc;
-}, {});
+    return acc;
+  }, {});
 
 function AttributeLi({ attributeInfos: { configurable, plugin, target, type }, name, onClick }) {
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
   const src = target ? assets.relation : assets[ico];
-  const icons = configurable === false ? [{ icoType: 'lock' }] : [{ icoType: 'pencil' }, { icoType: 'trash' }];
+  const icons =
+    configurable === false ? [{ icoType: 'lock' }] : [{ icoType: 'pencil' }, { icoType: 'trash' }];
   const relationStyle = target ? styles.relation : null;
   const configurableStyle = configurable === false ? null : styles.editable;
 
   return (
-    <li
-      className={`${styles.attributeLi} ${relationStyle} ${configurableStyle}`}
-      onClick={onClick}
-    >
+    <li className={`${styles.attributeLi} ${relationStyle} ${configurableStyle}`} onClick={onClick}>
       <div className={styles.flex}>
         <div className={styles.nameContainer}>
-          <img src={src} alt="icon-type" />
+          <img src={src} alt={`icon-${ico}`} />
           <div>{name}</div>
         </div>
         <div className={styles.relationContainer}>
@@ -67,7 +67,9 @@ function AttributeLi({ attributeInfos: { configurable, plugin, target, type }, n
                 )}
               </FormattedMessage>
             </div>
-          ) : <FormattedMessage id={`${pluginId}.attribute.${type}`} />}
+          ) : (
+            <FormattedMessage id={`${pluginId}.attribute.${type}`} />
+          )}
         </div>
         <div className={styles.mainField} />
         <IcoContainer icons={icons} />

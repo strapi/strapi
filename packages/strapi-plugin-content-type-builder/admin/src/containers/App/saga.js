@@ -3,16 +3,8 @@ import { all, fork, takeLatest, call, put } from 'redux-saga/effects';
 import request from 'utils/request';
 import pluginId from '../../pluginId';
 
-import {
-  getDataSucceeded,
-  deleteModelSucceeded,
-  submitTempContentTypeSucceeded,
-} from './actions';
-import {
-  GET_DATA,
-  DELETE_MODEL,
-  SUBMIT_TEMP_CONTENT_TYPE,
-} from './constants';
+import { getDataSucceeded, deleteModelSucceeded, submitTempContentTypeSucceeded } from './actions';
+import { GET_DATA, DELETE_MODEL, SUBMIT_TEMP_CONTENT_TYPE } from './constants';
 
 export function* getData() {
   try {
@@ -23,7 +15,7 @@ export function* getData() {
     ]);
 
     yield put(getDataSucceeded(data, connections));
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('notification.error');
   }
 }
@@ -37,7 +29,7 @@ export function* deleteModel({ modelName }) {
       strapi.notification.success(`${pluginId}.notification.success.contentTypeDeleted`);
       yield put(deleteModelSucceeded(modelName));
     }
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('notification.error');
   }
 }
@@ -45,8 +37,12 @@ export function* deleteModel({ modelName }) {
 export function* submitTempCT() {
   try {
     yield put(submitTempContentTypeSucceeded());
-  } catch(err) {
-    const errorMessage = get(error, ['response', 'payload', 'message', '0', 'messages', '0', 'id'], 'notification.error');
+  } catch (err) {
+    const errorMessage = get(
+      error,
+      ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+      'notification.error',
+    );
     strapi.notification.error(errorMessage);
   }
 }
