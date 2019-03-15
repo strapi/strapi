@@ -1,4 +1,4 @@
-# Migration guide from alpha.24 to alpha.25.1
+# Migration guide from alpha.24 to alpha.25.2
 
 **Here are the major changes:**
 
@@ -6,8 +6,8 @@
 - New getting started
 
 **Useful links:**
-- Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.25.1](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.25)
-- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.24...v3.0.0-alpha.25.1](https://github.com/strapi/strapi/compare/v3.0.0-alpha.24...v3.0.0-alpha.25.1)
+- Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.25.2](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.25)
+- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.24...v3.0.0-alpha.25.2](https://github.com/strapi/strapi/compare/v3.0.0-alpha.24...v3.0.0-alpha.25.2)
 
 <br>
 
@@ -19,7 +19,7 @@ Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about 
 
 ## Getting started
 
-Install Strapi `alpha.25.1` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.25.1 -g`.
+Install Strapi `alpha.25.2` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.25.2 -g`.
 
 When it's done, generate a new empty project `strapi new myNewProject` (don't pay attention to the database configuration).
 
@@ -27,9 +27,9 @@ When it's done, generate a new empty project `strapi new myNewProject` (don't pa
 
 ## Update node modules
 
-Update the Strapi's dependencies version (move Strapi's dependencies to `3.0.0-alpha.25.1` version) of your project.
+Update the Strapi's dependencies version (move Strapi's dependencies to `3.0.0-alpha.25.2` version) of your project.
 
-Run `npm install strapi@3.0.0-alpha.25.1 --save` to update your strapi version.
+Run `npm install strapi@3.0.0-alpha.25.2 --save` to update your strapi version.
 
 <br>
 
@@ -66,4 +66,4 @@ You will have to replace `beforeFetchCollection` by `beforeFetchAll` if you adde
 
 <br>
 
-That's all, you have now upgraded to Strapi `alpha.25.1`.
+That's all, you have now upgraded to Strapi `alpha.25.2`.
