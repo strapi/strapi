@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-controller",
-  "version": "3.0.0-alpha.25",
+  "version": "3.0.0-alpha.25.1",
   "description": "Generate a controller for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
