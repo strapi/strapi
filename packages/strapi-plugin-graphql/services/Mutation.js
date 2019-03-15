@@ -14,20 +14,6 @@ const Query = require('./Query.js');
 
 module.exports = {
   /**
-   * Convert parameters to valid filters parameters.
-   *
-   * @return Object
-   */
-
-  convertToParams: params => {
-    return Object.keys(params).reduce((acc, current) => {
-      return Object.assign(acc, {
-        [`_${current}`]: params[current],
-      });
-    }, {});
-  },
-
-  /**
    * Execute policies before the specified resolver.
    *
    * @return Promise or Error.
