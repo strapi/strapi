@@ -206,7 +206,7 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.params = Query.convertToParams(options.input.where || {});
+        context.params = Query.convertToParams(options.input.where || {}, (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name]).primaryKey);
         context.request.body = options.input.data || {};
 
         if (isController) {
