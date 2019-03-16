@@ -51,6 +51,30 @@ module.exports = async cb => {
           });
 
           await pluginStore.set({key: 'provider', value});
+
+          const dirPath = `${strapi.config.appPath}/public/uploads`;
+   
+          try {
+            // Check if directory exists
+            await new Promise((resolve, reject) => fs.exists(dirPath, (exists) => {
+              if (exists) {
+                resolve();
+              } else {
+                // Create directory if not exists
+                fs.mkdir(dirPath, {recursive: true}, (err) => {
+                  if (err) {
+                    return reject(err);
+                  }
+
+                  resolve();
+                });
+              }
+            });
+          } catch (err) {
+            strapi.log.error(`Can't access to the public folder`);
+            strapi.log.warn(`Please change access mode / owner to the public folder`);
+            strapi.stop();  
+          }
         }
       } catch (err) {
         strapi.log.error(`Can't load ${config.provider} upload provider.`);
