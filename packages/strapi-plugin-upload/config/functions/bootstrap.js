@@ -69,7 +69,7 @@ module.exports = async cb => {
                   resolve();
                 });
               }
-            });
+            }));
           } catch (err) {
             strapi.log.error(`Can't access to the public folder`);
             strapi.log.warn(`Please change access mode / owner to the public folder`);
