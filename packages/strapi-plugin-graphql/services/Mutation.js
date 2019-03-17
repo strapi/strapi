@@ -192,7 +192,7 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.params = Query.convertToParams(options.input.where || {}, (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name]).primaryKey);
+        context.params = Query.convertToParams(options.input.where || {}, (action && (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name]).primaryKey));
         context.request.body = options.input.data || {};
 
         if (isController) {
@@ -206,9 +206,11 @@ module.exports = {
 
           const body = values && values.toJSON ? values.toJSON() : values;
 
-          return {
-            [pluralize.singular(name)]: body,
-          };
+          return action
+          ? {
+            [pluralize.singular(name)]: body
+          }
+          : body;
         }
 
         return resolver.call(null, obj, options, context);
