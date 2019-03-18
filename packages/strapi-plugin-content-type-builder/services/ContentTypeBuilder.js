@@ -10,6 +10,7 @@ const {
   createManager,
   removeColsLine,
   reorderList,
+  deepTrimObject,
 } = require('../utils/helpers.js');
 
 module.exports = {
@@ -336,8 +337,9 @@ module.exports = {
     });
 
     Object.assign(attributesNotConfigurable, attrs);
+    const trimmedNotConfigurableAttributes = deepTrimObject(attributesNotConfigurable);
 
-    return [attributesNotConfigurable, errors];
+    return [trimmedNotConfigurableAttributes, errors];
   },
 
   clearRelations: (model, source, force) => {
