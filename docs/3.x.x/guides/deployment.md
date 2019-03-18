@@ -34,7 +34,7 @@ If you are passing a number of configuration item values via environment variabl
  **Path —** `./config/environments/production/server.json`.
 ```js
 {
-  "host": "${process.env.APP_HOST || '127.0.0.1'}"
+  "host": "${process.env.APP_HOST || '127.0.0.1'}",
   "port": "${process.env.NODE_PORT || 1337}",
   "autoReload": {
     "enabled": false
