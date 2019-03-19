@@ -6,16 +6,20 @@
 
 import { fromJS, List, Map } from 'immutable';
 import {
+  ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
   CREATE_TEMP_CONTENT_TYPE,
+  DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
   DELETE_TEMPORARY_MODEL,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE,
   ON_CREATE_ATTRIBUTE,
   ON_UPDATING_EXISTING_CONTENT_TYPE,
+  RESET_EDIT_EXISTING_CONTENT_TYPE,
+  RESET_EDIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
 } from './constants';
 
@@ -38,6 +42,23 @@ export const initialState = fromJS({
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
+    case ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE: {
+      return state
+        .updateIn(
+          ['modifiedData', action.contentTypeName, 'attributes', state.getIn(['temporaryAttribute', 'name'])],
+          () => {
+            const temporaryAttributeType = state.getIn(['temporaryAttribute', 'type']);
+            const type = action.attributeType === 'number' ? temporaryAttributeType : action.attributeType;
+            const newAttribute = state
+              .get('temporaryAttribute')
+              .remove('name')
+              .setIn(['type'], type);
+
+            return newAttribute;
+          },
+        )
+        .update('temporaryAttribute', () => Map({}));
+    }
     case ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE: {
       return state
         .updateIn(['newContentType', 'attributes', state.getIn(['temporaryAttribute', 'name'])], () => {
@@ -48,7 +69,7 @@ function appReducer(state = initialState, action) {
             .remove('name')
             .setIn(['type'], type);
 
-          return newAttribute.get('temporaryAttribute');
+          return newAttribute;
         })
         .update('temporaryAttribute', () => Map({}));
     }
@@ -66,6 +87,8 @@ function appReducer(state = initialState, action) {
           isTemporary: true,
         }),
       );
+    case DELETE_MODEL_ATTRIBUTE:
+      return state.removeIn(action.keys);
     case DELETE_MODEL_SUCCEEDED:
       return state
         .removeIn(['models', state.get('models').findIndex(model => model.name === action.modelName)])
@@ -92,8 +115,17 @@ function appReducer(state = initialState, action) {
       return state.updateIn(['temporaryAttribute', ...action.keys], () => action.value);
     case ON_UPDATING_EXISTING_CONTENT_TYPE:
       return state.updateIn(['modifiedData', ...action.keys], () => action.value);
+    case RESET_EDIT_EXISTING_CONTENT_TYPE:
+      return state
+        .update('temporaryAttribute', () => Map({}))
+        .updateIn(['modifiedData', action.contentTypeName], () =>
+          state.getIn(['initialData', action.contentTypeName]),
+        );
+    case RESET_EDIT_TEMP_CONTENT_TYPE:
+      return state.updateIn(['newContentType', 'attributes'], () => Map({}));
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state
+        .updateIn(['initialData', state.getIn(['newContentType', 'name'])], () => state.get('newContentType'))
         .updateIn(['modifiedData', state.getIn(['newContentType', 'name'])], () =>
           state.get('newContentType'),
         )

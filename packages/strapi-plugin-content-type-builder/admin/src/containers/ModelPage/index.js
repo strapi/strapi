@@ -11,12 +11,12 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
 import { Redirect } from 'react-router-dom';
-import { get, pickBy } from 'lodash';
+import { get, isEqual, pickBy } from 'lodash';
 
 import Button from 'components/Button';
 import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import PluginHeader from 'components/PluginHeader';
-
+import PopUpWarning from 'components/PopUpWarning';
 import { routerPropTypes } from 'commonPropTypes';
 
 import getQueryParameters from 'utils/getQueryParameters';
@@ -38,9 +38,13 @@ import AttributesModalPicker from '../AttributesPickerModal';
 import ModelForm from '../ModelForm';
 
 import {
+  addAttributeToExistingContentType,
   addAttributeToTempContentType,
   clearTemporaryAttribute,
+  deleteModelAttribute,
   onCreateAttribute,
+  resetEditExistingContentType,
+  resetEditTempContentType,
   submitTempContentType,
 } from '../App/actions';
 
@@ -52,16 +56,22 @@ import saga from './saga';
 import styles from './styles.scss';
 import DocumentationSection from './DocumentationSection';
 
-export class ModelPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class ModelPage extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
+  state = { attrToDelete: null, showWarning: false };
+
   getFormData = () => {
-    const { location: { search }, newContentType } = this.props;
+    const {
+      location: { search },
+      newContentType,
+    } = this.props;
 
     if (getQueryParameters(search, 'actionType') === 'create') {
       return newContentType;
     }
 
     return null;
-  }
+  };
 
   getModel = () => {
     const { modifiedData, newContentType } = this.props;
@@ -71,7 +81,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     }
 
     return get(modifiedData, this.getModelName(), {});
-  }
+  };
 
   getModelAttributes = () => get(this.getModel(), 'attributes', {});
 
@@ -80,27 +90,29 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
   getModelDescription = () => {
     const { initialData } = this.props;
 
-    const description = get(
-      initialData,
-      [this.getModelName(), 'description'],
-      null,
-    );
+    const description = get(initialData, [this.getModelName(), 'description'], null);
 
     // eslint-disable-next-line no-extra-boolean-cast
-    return !!description ? description : { id: `${pluginId}.modelPage.contentHeader.emptyDescription.description` };
-  }
+    return !!description
+      ? description
+      : { id: `${pluginId}.modelPage.contentHeader.emptyDescription.description` };
+  };
 
   getModelName = () => {
-    const { match: { params: { modelName } } } = this.props;
+    const {
+      match: {
+        params: { modelName },
+      },
+    } = this.props;
 
     return modelName.split('&')[0];
-  }
+  };
 
   getModelsNumber = () => {
     const { models } = this.props;
 
     return models.length;
-  }
+  };
 
   getModelRelationShips = () => {
     const attributes = this.getModelAttributes();
@@ -109,24 +121,37 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     });
 
     return relations;
-  }
+  };
 
   getModelRelationShipsLength = () => Object.keys(this.getModelRelationShips()).length;
 
   getPluginHeaderActions = () => {
-    const { submitTempContentType } = this.props;
+    const {
+      initialData,
+      modifiedData,
+      resetEditExistingContentType,
+      resetEditTempContentType,
+      submitTempContentType,
+    } = this.props;
+    const shouldShowActions = this.isUpdatingTemporaryContentType()
+      ? this.getModelAttributesLength() > 0
+      : !isEqual(modifiedData[this.getModelName()], initialData[this.getModelName()]);
+    const handleSubmit = this.isUpdatingTemporaryContentType() ? submitTempContentType : () => {};
+    const handleCancel = this.isUpdatingTemporaryContentType()
+      ? resetEditTempContentType
+      : () => resetEditExistingContentType(this.getModelName());
 
-    if (this.isUpdatingTemporaryContentType() && this.getModelAttributesLength() > 0) {
+    if (shouldShowActions) {
       return [
         {
           label: `${pluginId}.form.button.cancel`,
-          onClick: () => {},
+          onClick: handleCancel,
           kind: 'secondary',
           type: 'button',
         },
         {
           label: `${pluginId}.form.button.save`,
-          onClick: submitTempContentType,
+          onClick: handleSubmit,
           kind: 'primary',
           type: 'submit',
           id: 'saveData',
@@ -135,22 +160,27 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     }
 
     return [];
-  }
+  };
+
   getSectionTitle = () => {
     const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
 
     return this.getModelsNumber() > 1 ? `${base}plural` : `${base}singular`;
-  }
-
+  };
 
   handleClickOpenModalChooseAttributes = () => {
-    const { history: { push } } = this.props;
+    const {
+      history: { push },
+    } = this.props;
 
     push({ search: 'modalType=chooseAttributes' });
-  }
+  };
 
   handleClickOpenModalCreateCT = () => {
-    const { canOpenModalAddContentType, history: { push } } = this.props;
+    const {
+      canOpenModalAddContentType,
+      history: { push },
+    } = this.props;
 
     if (canOpenModalAddContentType) {
       push({
@@ -159,15 +189,43 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     } else {
       strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
     }
-  }
+  };
 
-  handleSubmit = () => {
-    const { addAttributeToTempContentType, history: { push }, location: { search } } = this.props;
+  handleClickOnTrashIcon = attrToDelete => {
+    this.setState({ showWarning: true, attrToDelete });
+  };
+
+  handleDeleteAttribute = () => {
+    const { deleteModelAttribute } = this.props;
+    const { attrToDelete } = this.state;
+
+    const keys = this.isUpdatingTemporaryContentType()
+      ? ['newContentType', 'attributes', attrToDelete]
+      : ['modifiedData', this.getModelName(), 'attributes', attrToDelete];
+
+    deleteModelAttribute(keys);
+    this.setState({ attrToDelete: null, showWarning: false });
+  };
+
+  handleSubmit = (shouldContinue = false) => {
+    const {
+      addAttributeToExistingContentType,
+      addAttributeToTempContentType,
+      history: { push },
+      location: { search },
+    } = this.props;
     const attributeType = getQueryParameters(search, 'attributeType');
 
-    addAttributeToTempContentType(attributeType);
-    push({ search: '' });
-  }
+    if (this.isUpdatingTemporaryContentType()) {
+      addAttributeToTempContentType(attributeType);
+    } else {
+      addAttributeToExistingContentType(this.getModelName(), attributeType);
+    }
+
+    const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
+
+    push({ search: nextSearch });
+  };
 
   isUpdatingTemporaryContentType = () => {
     const { models } = this.props;
@@ -177,13 +235,15 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     const { isTemporary } = currentModel;
 
     return isTemporary;
-  }
+  };
 
   shouldRedirect = () => {
     const { models } = this.props;
 
     return models.findIndex(model => model.name === this.getModelName()) === -1;
-  }
+  };
+
+  toggleModalWarning = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
   renderLinks = () => {
     const { models } = this.props;
@@ -205,13 +265,20 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
     });
 
     return links;
-  }
+  };
 
   renderLi = attribute => {
     const attributeInfos = get(this.getModelAttributes(), attribute, {});
 
-    return <AttributeLi key={attribute} name={attribute} attributeInfos={attributeInfos} />;
-  }
+    return (
+      <AttributeLi
+        key={attribute}
+        name={attribute}
+        attributeInfos={attributeInfos}
+        onClickOnTrashIcon={this.handleClickOnTrashIcon}
+      />
+    );
+  };
 
   render() {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
@@ -227,6 +294,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
       onCreateAttribute,
       temporaryAttribute,
     } = this.props;
+    const { showWarning } = this.state;
 
     if (this.shouldRedirect()) {
       const { name, source } = models[0];
@@ -281,19 +349,21 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                         {this.getModelAttributesLength()}
                         &nbsp;
                         <FormattedMessage
-                          id={`${listTitleMessageIdBasePrefix}.${this.getModelAttributesLength() > 1 ? 'plural' : 'singular'}`}
+                          id={`${listTitleMessageIdBasePrefix}.${
+                            this.getModelAttributesLength() > 1 ? 'plural' : 'singular'
+                          }`}
                         />
                         {this.getModelRelationShipsLength() > 0 && (
                           <React.Fragment>
                             &nbsp;
-                            <FormattedMessage
-                              id={`${listTitleMessageIdBasePrefix}.including`}
-                            />
+                            <FormattedMessage id={`${listTitleMessageIdBasePrefix}.including`} />
                             &nbsp;
                             {this.getModelRelationShipsLength()}
                             &nbsp;
                             <FormattedMessage
-                              id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${this.getModelRelationShipsLength() > 1 ? 'plural' : 'singular'}`}
+                              id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
+                                this.getModelRelationShipsLength() > 1 ? 'plural' : 'singular'
+                              }`}
                             />
                           </React.Fragment>
                         )}
@@ -307,9 +377,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
                       </div>
                     </Flex>
                     <div>
-                      <Ul id="attributesList">
-                        {Object.keys(this.getModelAttributes()).map(this.renderLi)}
-                      </Ul>
+                      <Ul id="attributesList">{Object.keys(this.getModelAttributes()).map(this.renderLi)}</Ul>
                     </div>
                   </Block>
                 )}
@@ -317,10 +385,7 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
             </div>
           </div>
         </div>
-        <AttributesModalPicker
-          isOpen={modalType === 'chooseAttributes'}
-          push={push}
-        />
+        <AttributesModalPicker isOpen={modalType === 'chooseAttributes'} push={push} />
         <AttributeForm
           activeTab={settingType}
           alreadyTakenAttributes={Object.keys(this.getModelAttributes())}
@@ -345,6 +410,13 @@ export class ModelPage extends React.Component { // eslint-disable-line react/pr
           pathname={pathname}
           push={push}
         />
+        <PopUpWarning
+          isOpen={showWarning}
+          toggleModal={this.toggleModalWarning}
+          content={{ message: `${pluginId}.popUpWarning.bodyMessage.attribute.delete` }}
+          popUpWarningType="danger"
+          onConfirm={this.handleDeleteAttribute}
+        />
       </div>
     );
   }
@@ -355,15 +427,24 @@ ModelPage.defaultProps = {
 };
 
 ModelPage.propTypes = {
-  ...routerPropTypes(
-    { params: PropTypes.string },
-  ).isRequired,
+  ...routerPropTypes({ params: PropTypes.string }).isRequired,
+  addAttributeToExistingContentType: PropTypes.func.isRequired,
+  addAttributeToTempContentType: PropTypes.func.isRequired,
+  cancelNewContentType: PropTypes.func.isRequired,
   canOpenModalAddContentType: PropTypes.bool,
   clearTemporaryAttribute: PropTypes.func.isRequired,
+  createTempContentType: PropTypes.func.isRequired,
+  deleteModelAttribute: PropTypes.func.isRequired,
   initialData: PropTypes.object.isRequired,
   models: PropTypes.array.isRequired,
+  modifiedData: PropTypes.object.isRequired,
+  newContentType: PropTypes.object.isRequired,
+  onChangeNewContentType: PropTypes.func.isRequired,
   onCreateAttribute: PropTypes.func.isRequired,
+  resetEditExistingContentType: PropTypes.func.isRequired,
+  resetEditTempContentType: PropTypes.func.isRequired,
   submitTempContentType: PropTypes.func.isRequired,
+  temporaryAttribute: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -373,25 +454,32 @@ const mapStateToProps = createStructuredSelector({
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addAttributeToExistingContentType,
       addAttributeToTempContentType,
       clearTemporaryAttribute,
+      deleteModelAttribute,
       onCreateAttribute,
+      resetEditExistingContentType,
+      resetEditTempContentType,
       submitTempContentType,
     },
     dispatch,
   );
 }
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
 /* Remove this line if the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
+ *  check the documentation to see how to create the container's store
+ */
 const withReducer = strapi.injectReducer({ key: 'modelPage', reducer, pluginId });
 
 /* Remove the line below the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
+ *  check the documentation to see how to create the container's store
+ */
 const withSaga = strapi.injectSaga({ key: 'modelPage', saga, pluginId });
 
 export default compose(

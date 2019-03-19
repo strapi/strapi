@@ -27,47 +27,20 @@ import WrapperModal from '../../components/WrapperModal';
 
 import supportedAttributes from './supportedAttributes.json';
 
-const NAVLINKS = [
-  { id: 'base' },
-  { id: 'advanced' },
-];
+const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
-class AttributeForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class AttributeForm extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { didCheckErrors: false, formErrors: {}, showForm: false };
 
   getCurrentForm = () => {
     const { activeTab, attributeType } = this.props;
 
     return get(supportedAttributes, [attributeType, activeTab, 'items'], []);
-  }
+  };
 
-  handleCancel = () => {
-    const { push } = this.props;
-
-    push({ search: '' });
-  }
-
-  handleGoTo = to => {
-    const { attributeType, push } = this.props;
-
-    push({
-      search: `modalType=attributeForm&attributeType=${attributeType}&settingType=${to}&actionType=create`,
-    });
-  }
-
-  handleOnClosed = () => {
-    const { onCancel } = this.props;
-
-    onCancel();
-    this.setState({ formErrors: {}, showForm: false });
-  }
-
-  handleOnOpened = () => this.setState({ showForm: true });
-
-  handleSubmit = (e) => {
-    e.preventDefault();
-
-    const { alreadyTakenAttributes, modifiedData, onSubmit } = this.props;
+  getFormErrors = () => {
+    const { alreadyTakenAttributes, modifiedData } = this.props;
     const currentForm = this.getCurrentForm();
     let formErrors = {};
 
@@ -81,7 +54,9 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
 
     // TODO NEED TO HANDLE OTHER VALIDATIONS
     formErrors = Object.keys(modifiedData).reduce((acc, current) => {
-      const { custom, validations } = currentForm.find(input => input.name === current) || { validations: {} };
+      const { custom, validations } = currentForm.find(input => input.name === current) || {
+        validations: {},
+      };
       const value = modifiedData[current];
 
       if (validations.required === true && value === '' && custom === true) {
@@ -96,16 +71,82 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
       formErrors,
     }));
 
-    if (isEmpty(formErrors)) {
-      onSubmit();
+    return formErrors;
+  };
+
+  handleCancel = () => {
+    const { push } = this.props;
+
+    push({ search: '' });
+  };
+
+  handleGoTo = to => {
+    const { attributeType, push } = this.props;
+
+    push({
+      search: `modalType=attributeForm&attributeType=${attributeType}&settingType=${to}&actionType=create`,
+    });
+  };
+
+  handleOnClosed = () => {
+    const { onCancel } = this.props;
+
+    onCancel();
+    this.setState({ formErrors: {}, showForm: false });
+  };
+
+  handleOnOpened = () => this.setState({ showForm: true });
+
+  handleSubmit = () => {
+    if (isEmpty(this.getFormErrors())) {
+      this.props.onSubmit();
     }
-  }
+  };
+
+  handleSubmitAndContinue = e => {
+    e.preventDefault();
+
+    // const { alreadyTakenAttributes, modifiedData, onSubmit } = this.props;
+    // const currentForm = this.getCurrentForm();
+    // let formErrors = {};
+
+    // if (isEmpty(modifiedData.name)) {
+    //   formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
+    // }
+
+    // if (alreadyTakenAttributes.includes(get(modifiedData, 'name', ''))) {
+    //   formErrors = { name: [{ id: `${pluginId}.error.attribute.taken` }] };
+    // }
+
+    // // TODO NEED TO HANDLE OTHER VALIDATIONS
+    // formErrors = Object.keys(modifiedData).reduce((acc, current) => {
+    //   const { custom, validations } = currentForm.find(input => input.name === current) || {
+    //     validations: {},
+    //   };
+    //   const value = modifiedData[current];
+
+    //   if (validations.required === true && value === '' && custom === true) {
+    //     acc[current] = [{ id: `${pluginId}.error.validation.required` }];
+    //   }
+
+    //   return acc;
+    // }, formErrors);
+
+    // this.setState(prevState => ({
+    //   didCheckErrors: !prevState.didCheckErrors,
+    //   formErrors,
+    // }));
+
+    if (isEmpty(this.getFormErrors())) {
+      this.props.onSubmit(true);
+    }
+  };
 
   handleToggle = () => {
     const { push } = this.props;
 
     push({ search: '' });
-  }
+  };
 
   renderInput = (input, index) => {
     const { modifiedData, onChange } = this.props;
@@ -139,7 +180,7 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
         value={value}
       />
     );
-  }
+  };
 
   renderNavLink = (link, index) => {
     const { activeTab } = this.props;
@@ -153,7 +194,7 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
         nextTab={index === NAVLINKS.length - 1 ? 0 : index + 1}
       />
     );
-  }
+  };
 
   render() {
     const { attributeType, isOpen } = this.props;
@@ -175,18 +216,18 @@ class AttributeForm extends React.Component { // eslint-disable-line react/prefe
             &nbsp;
             <FormattedMessage id={`${pluginId}.popUpForm.field`} />
           </div>
-          <HeaderModalNavContainer>
-            {NAVLINKS.map(this.renderNavLink)}
-          </HeaderModalNavContainer>
+          <HeaderModalNavContainer>{NAVLINKS.map(this.renderNavLink)}</HeaderModalNavContainer>
         </HeaderModal>
-        <form onSubmit={this.handleSubmit}>
-          <BodyModal>
-            {showForm && currentForm.map(this.renderInput)}
-          </BodyModal>
+        <form onSubmit={this.handleSubmitAndContinue}>
+          <BodyModal>{showForm && currentForm.map(this.renderInput)}</BodyModal>
           <FooterModal>
             <ButtonModalSecondary message={`${pluginId}.form.button.cancel`} onClick={this.handleCancel} />
             <ButtonModalPrimary message={`${pluginId}.form.button.continue`} type="submit" add />
-            <ButtonModalPrimary message={`${pluginId}.form.button.save`} type="button" />
+            <ButtonModalPrimary
+              message={`${pluginId}.form.button.save`}
+              type="button"
+              onClick={this.handleSubmit}
+            />
           </FooterModal>
         </form>
       </WrapperModal>

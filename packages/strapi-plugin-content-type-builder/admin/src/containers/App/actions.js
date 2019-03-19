@@ -5,21 +5,33 @@
  */
 import { pick, set, camelCase } from 'lodash';
 import {
+  ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
   CREATE_TEMP_CONTENT_TYPE,
   DELETE_MODEL,
-  DELETE_TEMPORARY_MODEL,
+  DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
+  DELETE_TEMPORARY_MODEL,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE,
   ON_CREATE_ATTRIBUTE,
   ON_UPDATING_EXISTING_CONTENT_TYPE,
+  RESET_EDIT_EXISTING_CONTENT_TYPE,
+  RESET_EDIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
 } from './constants';
+
+export function addAttributeToExistingContentType(contentTypeName, attributeType) {
+  return {
+    type: ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
+    attributeType,
+    contentTypeName,
+  };
+}
 
 export function addAttributeToTempContentType(attributeType) {
   return {
@@ -50,6 +62,13 @@ export function deleteModel(modelName) {
   return {
     type: DELETE_MODEL,
     modelName,
+  };
+}
+
+export function deleteModelAttribute(keys) {
+  return {
+    type: DELETE_MODEL_ATTRIBUTE,
+    keys,
   };
 }
 
@@ -114,6 +133,19 @@ export function onUpdatingExistingContentType({ target: { name, value } }) {
     type: ON_UPDATING_EXISTING_CONTENT_TYPE,
     keys: name.split('.'),
     value: formattedValue,
+  };
+}
+
+export function resetEditExistingContentType(contentTypeName) {
+  return {
+    type: RESET_EDIT_EXISTING_CONTENT_TYPE,
+    contentTypeName,
+  };
+}
+
+export function resetEditTempContentType() {
+  return {
+    type: RESET_EDIT_TEMP_CONTENT_TYPE,
   };
 }
 

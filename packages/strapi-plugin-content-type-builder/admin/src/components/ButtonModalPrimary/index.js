@@ -1,8 +1,8 @@
 /**
-*
-* ButtonModalPrimary
-*
-*/
+ *
+ * ButtonModalPrimary
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -17,11 +17,7 @@ function ButtonModalPrimary({ add, message, onClick, type }) {
   const className = add ? styles.buttonModalPrimaryAdd : styles.buttonModalPrimary;
 
   return (
-    <Button
-      className={className}
-      onClick={onClick}
-      type={type}
-    >
+    <Button className={className} onClick={onClick} type={type}>
       <FormattedMessage id={message} />
     </Button>
   );

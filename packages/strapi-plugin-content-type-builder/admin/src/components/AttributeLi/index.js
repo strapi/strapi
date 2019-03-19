@@ -37,11 +37,18 @@ const assets = [
     return acc;
   }, {});
 
-function AttributeLi({ attributeInfos: { configurable, plugin, target, type }, name, onClick }) {
+function AttributeLi({
+  attributeInfos: { configurable, plugin, target, type },
+  name,
+  onClick,
+  onClickOnTrashIcon,
+}) {
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
   const src = target ? assets.relation : assets[ico];
   const icons =
-    configurable === false ? [{ icoType: 'lock' }] : [{ icoType: 'pencil' }, { icoType: 'trash' }];
+    configurable === false
+      ? [{ icoType: 'lock' }]
+      : [{ icoType: 'pencil' }, { icoType: 'trash', onClick: () => onClickOnTrashIcon(name) }];
   const relationStyle = target ? styles.relation : null;
   const configurableStyle = configurable === false ? null : styles.editable;
 
@@ -86,6 +93,7 @@ AttributeLi.defaultProps = {
     type: null,
   },
   onClick: () => {},
+  onClickOnTrashIcon: () => {},
 };
 
 AttributeLi.propTypes = {
@@ -97,6 +105,7 @@ AttributeLi.propTypes = {
   }),
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
+  onClickOnTrashIcon: PropTypes.func,
 };
 
 export default AttributeLi;
