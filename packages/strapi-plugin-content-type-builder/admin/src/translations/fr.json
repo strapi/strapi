@@ -154,5 +154,6 @@
   "table.contentType.head.fields": "Champs",
   "table.contentType.head.name": "Nom",
   "table.contentType.title.plural": "Modèles sont disponibles",
-  "table.contentType.title.singular": "Modèle est disponible"
+  "table.contentType.title.singular": "Modèle est disponible",
+  "prompt.content.unsaved": "Etes-vous sûr de vouloir quitter ce model? Toutes vos modifications seront perdues."
 }

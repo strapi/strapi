@@ -84,8 +84,6 @@ export class App extends React.Component {
       return <Loader />;
     }
 
-    // console.log(this.props);
-
     return (
       <div className={styles.app}>
         <Switch>

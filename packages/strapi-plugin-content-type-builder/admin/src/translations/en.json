@@ -155,5 +155,6 @@
   "table.contentType.head.fields": "Fields",
   "table.contentType.head.name": "Name",
   "table.contentType.title.plural": "Content Types are available",
-  "table.contentType.title.singular": "Content Type is available"
+  "table.contentType.title.singular": "Content Type is available",
+  "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost."
 }

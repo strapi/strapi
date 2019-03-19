@@ -12,6 +12,7 @@ import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
 import { Redirect } from 'react-router-dom';
 import { get, isEqual, pickBy } from 'lodash';
+import { Prompt } from 'react-router';
 
 import Button from 'components/Button';
 import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
@@ -59,6 +60,19 @@ import DocumentationSection from './DocumentationSection';
 export class ModelPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { attrToDelete: null, showWarning: false };
+
+  componentDidUpdate(prevProps) {
+    const {
+      match: {
+        params: { modelName },
+      },
+      resetEditExistingContentType,
+    } = prevProps;
+
+    if (!this.isUpdatingTemporaryContentType(modelName) && modelName !== this.props.match.params.modelName) {
+      resetEditExistingContentType(modelName);
+    }
+  }
 
   getFormData = () => {
     const {
@@ -227,10 +241,21 @@ export class ModelPage extends React.Component {
     push({ search: nextSearch });
   };
 
-  isUpdatingTemporaryContentType = () => {
+  hasModelBeenModified = () => {
+    const {
+      initialData,
+      location: { search },
+      modifiedData,
+    } = this.props;
+    const currentModel = this.getModelName();
+
+    return !isEqual(initialData[currentModel], modifiedData[currentModel]) && search === '';
+  };
+
+  isUpdatingTemporaryContentType = (modelName = this.getModelName()) => {
     const { models } = this.props;
     /* istanbul ignore next */
-    const currentModel = models.find(model => model.name === this.getModelName()) || { isTemporary: true };
+    const currentModel = models.find(model => model.name === modelName) || { isTemporary: true };
 
     const { isTemporary } = currentModel;
 
@@ -310,6 +335,9 @@ export class ModelPage extends React.Component {
 
     return (
       <div className={styles.modelpage}>
+        <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
+          {msg => <Prompt when={this.hasModelBeenModified()} message={msg} />}
+        </FormattedMessage>
         <div className="container-fluid">
           <div className="row">
             <LeftMenu>
