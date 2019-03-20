@@ -11,7 +11,8 @@ import AttributesPickerModal from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 
-const renderComponent = (props = {}, context = {}) => mountWithIntl(<AttributesPickerModal {...props} />, messages, context);
+const renderComponent = (props = {}, context = {}) =>
+  mountWithIntl(<AttributesPickerModal {...props} />, messages, context);
 
 describe('<AttributesPickerModal />', () => {
   let props;
@@ -80,8 +81,8 @@ describe('<AttributesPickerModal />', () => {
     const { getAttributes } = wrapper.instance();
 
     expect(getAttributes()).not.toContain({
-      "type": "media",
-      "description": "content-type-builder.popUpForm.attributes.media.description",
+      type: 'media',
+      description: 'content-type-builder.popUpForm.attributes.media.description',
     });
   });
 
@@ -89,15 +90,15 @@ describe('<AttributesPickerModal />', () => {
     const context = {
       plugins: {
         'content-type-builder': {},
-        'upload': {},
+        upload: {},
       },
     };
     const wrapper = renderComponent(props, context);
     const { getAttributes } = wrapper.instance();
 
     expect(getAttributes()).toContainEqual({
-      "type": "media",
-      "description": "content-type-builder.popUpForm.attributes.media.description",
+      type: 'media',
+      description: 'content-type-builder.popUpForm.attributes.media.description',
     });
 
     wrapper.unmount();
@@ -107,7 +108,7 @@ describe('<AttributesPickerModal />', () => {
     const context = {
       plugins: fromJS({
         'content-type-builder': {},
-        'upload': {},
+        upload: {},
       }),
     };
     const wrapper = renderComponent(props, context);
@@ -154,7 +155,7 @@ describe('<AttributesPickerModal />', () => {
     const context = {
       plugins: fromJS({
         'content-type-builder': {},
-        'upload': {},
+        upload: {},
       }),
     };
     const wrapper = renderComponent(props, context);
@@ -175,7 +176,9 @@ describe('<AttributesPickerModal />', () => {
 
         handleClick('test');
 
-        expect(props.push).toHaveBeenCalledWith({ search: 'modalType=attributeForm&attributeType=test&settingType=base' });
+        expect(props.push).toHaveBeenCalledWith({
+          search: 'modalType=attributeForm&attributeType=test&settingType=base&actionType=create',
+        });
       });
     });
   });

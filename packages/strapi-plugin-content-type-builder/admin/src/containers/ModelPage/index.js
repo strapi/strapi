@@ -62,6 +62,22 @@ export class ModelPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { attrToDelete: null, removePrompt: false, showWarning: false };
 
+  componentDidMount() {
+    const { setTemporaryAttribute } = this.props;
+
+    if (
+      this.getModalType() === 'attributeForm' &&
+      this.getActionType() === 'edit' &&
+      !this.isTryingToEditAnUnknownAttribute()
+    ) {
+      setTemporaryAttribute(
+        this.getAttributeName(),
+        this.isUpdatingTemporaryContentType(),
+        this.getModelName(),
+      );
+    }
+  }
+
   componentDidUpdate(prevProps) {
     const {
       location: { search },
@@ -80,19 +96,21 @@ export class ModelPage extends React.Component {
     }
   }
 
-  getFormData = () => {
-    const {
-      location: { search },
-      modifiedData,
-      newContentType,
-    } = this.props;
+  getActionType = () => getQueryParameters(this.getSearch(), 'actionType');
 
-    if (getQueryParameters(search, 'actionType') === 'create' || this.isUpdatingTemporaryContentType()) {
+  getAttributeName = () => getQueryParameters(this.getSearch(), 'attributeName');
+
+  getFormData = () => {
+    const { modifiedData, newContentType } = this.props;
+
+    if (this.getActionType() === 'create' || this.isUpdatingTemporaryContentType()) {
       return newContentType;
     }
 
     return get(modifiedData, this.getModelName());
   };
+
+  getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
 
   getModel = () => {
     const { modifiedData, newContentType } = this.props;
@@ -194,14 +212,41 @@ export class ModelPage extends React.Component {
     return title;
   };
 
+  getSearch = () => {
+    const {
+      location: { search },
+    } = this.props;
+
+    return search;
+  };
+
   getSectionTitle = () => {
     const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
 
     return this.getModelsNumber() > 1 ? `${base}plural` : `${base}singular`;
   };
 
+  handleClickEditAttribute = async (attributeName, type) => {
+    // modalType=attributeForm&attributeType=boolean&settingType=base
+    const {
+      history: { push },
+    } = this.props;
+    const attributeType = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
+
+    this.props.setTemporaryAttribute(
+      attributeName,
+      this.isUpdatingTemporaryContentType(),
+      this.getModelName(),
+    );
+    await this.wait();
+    push({
+      search: `modalType=attributeForm&attributeType=${attributeType}&settingType=base&actionType=edit&attributeName=${attributeName}`,
+    });
+  };
+
   handleClickEditModelMainInfos = async () => {
     const { canOpenModal } = this.props;
+
     await this.wait();
 
     if (canOpenModal || this.isUpdatingTemporaryContentType()) {
@@ -284,15 +329,25 @@ export class ModelPage extends React.Component {
     push({ search: nextSearch });
   };
 
-  hasModelBeenModified = () => {
+  handleSubmitEdit = (shouldContinue = false) => {
     const {
-      initialData,
-      location: { search },
-      modifiedData,
+      history: { push },
+      saveEditedAttribute,
     } = this.props;
+    const attributeName = this.getAttributeName();
+
+    saveEditedAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
+
+    const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
+
+    push({ search: nextSearch });
+  };
+
+  hasModelBeenModified = () => {
+    const { initialData, modifiedData } = this.props;
     const currentModel = this.getModelName();
 
-    return !isEqual(initialData[currentModel], modifiedData[currentModel]) && search === '';
+    return !isEqual(initialData[currentModel], modifiedData[currentModel]) && this.getSearch() === '';
   };
 
   isUpdatingTemporaryContentType = (modelName = this.getModelName()) => {
@@ -307,10 +362,19 @@ export class ModelPage extends React.Component {
 
   setPrompt = () => this.setState({ removePrompt: false });
 
+  isTryingToEditAnUnknownAttribute = () => {
+    const hasAttribute = Object.keys(this.getModelAttributes()).indexOf(this.getAttributeName()) !== -1;
+
+    return this.getActionType() === 'edit' && this.getModalType() === 'attributeForm' && !hasAttribute;
+  };
+
   shouldRedirect = () => {
     const { models } = this.props;
 
-    return models.findIndex(model => model.name === this.getModelName()) === -1;
+    return (
+      models.findIndex(model => model.name === this.getModelName()) === -1 ||
+      this.isTryingToEditAnUnknownAttribute()
+    );
   };
 
   toggleModalWarning = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
@@ -353,6 +417,7 @@ export class ModelPage extends React.Component {
         key={attribute}
         name={attribute}
         attributeInfos={attributeInfos}
+        onClick={this.handleClickEditAttribute}
         onClickOnTrashIcon={this.handleClickOnTrashIcon}
       />
     );
@@ -385,10 +450,11 @@ export class ModelPage extends React.Component {
       return <Redirect to={to} />;
     }
 
-    const modalType = getQueryParameters(search, 'modalType');
+    // const modalType = getQueryParameters(search, 'modalType');
+    const modalType = this.getModalType();
     const settingType = getQueryParameters(search, 'settingType');
     const attributeType = getQueryParameters(search, 'attributeType');
-    const actionType = getQueryParameters(search, 'actionType');
+    const actionType = this.getActionType();
 
     return (
       <div className={styles.modelpage}>
@@ -473,15 +539,18 @@ export class ModelPage extends React.Component {
         </div>
         <AttributesModalPicker isOpen={modalType === 'chooseAttributes'} push={push} />
         <AttributeForm
+          actionType={actionType}
           activeTab={settingType}
           alreadyTakenAttributes={Object.keys(this.getModelAttributes())}
           attributeType={attributeType}
+          attributeToEditName={this.getAttributeName()}
           isContentTypeTemporary={this.isUpdatingTemporaryContentType()}
           isOpen={modalType === 'attributeForm' && attributeType !== 'relation'}
           modifiedData={temporaryAttribute}
           onCancel={clearTemporaryAttribute}
           onChange={onCreateAttribute}
           onSubmit={this.handleSubmit}
+          onSubmitEdit={this.handleSubmitEdit}
           push={push}
         />
         <ModelForm

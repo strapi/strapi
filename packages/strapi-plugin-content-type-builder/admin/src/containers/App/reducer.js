@@ -24,6 +24,8 @@ import {
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EDIT_TEMP_CONTENT_TYPE,
   RESET_PROPS,
+  SAVE_EDITED_ATTRIBUTE,
+  SET_TEMPORARY_ATTRIBUTE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
 } from './constants';
@@ -158,6 +160,25 @@ function appReducer(state = initialState, action) {
       });
     case RESET_PROPS:
       return initialState;
+    case SAVE_EDITED_ATTRIBUTE: {
+      const basePath = action.isModelTemporary ? ['newContentType'] : ['modifiedData', action.modelName];
+
+      return state.updateIn([...basePath, 'attributes'], attributes => {
+        const temporaryAttribute = state.get('temporaryAttribute');
+        const newAttribute = temporaryAttribute.remove('name');
+
+        return attributes.remove(action.attributeName).set(temporaryAttribute.get('name'), newAttribute);
+      });
+    }
+    case SET_TEMPORARY_ATTRIBUTE:
+      return state.update('temporaryAttribute', () => {
+        const basePath = action.isModelTemporary ? ['newContentType'] : ['modifiedData', action.modelName];
+        const attribute = state
+          .getIn([...basePath, 'attributes', action.attributeName])
+          .set('name', action.attributeName);
+
+        return attribute;
+      });
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state
         .updateIn(['initialData', state.getIn(['newContentType', 'name'])], () => state.get('newContentType'))

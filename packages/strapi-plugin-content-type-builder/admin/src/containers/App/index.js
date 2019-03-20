@@ -29,6 +29,8 @@ import {
   resetExistingContentTypeMainInfos,
   resetNewContentTypeMainInfos,
   resetProps,
+  saveEditedAttribute,
+  setTemporaryAttribute,
   updateTempContentType,
 } from './actions';
 
@@ -106,6 +108,7 @@ App.propTypes = {
   onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
+  saveEditedAttribute: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectApp();
@@ -123,6 +126,8 @@ export function mapDispatchToProps(dispatch) {
       resetExistingContentTypeMainInfos,
       resetNewContentTypeMainInfos,
       resetProps,
+      saveEditedAttribute,
+      setTemporaryAttribute,
       updateTempContentType,
     },
     dispatch,

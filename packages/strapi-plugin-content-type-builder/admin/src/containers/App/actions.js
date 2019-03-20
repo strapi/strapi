@@ -23,6 +23,8 @@ import {
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_TEMP_CONTENT_TYPE,
   RESET_PROPS,
+  SAVE_EDITED_ATTRIBUTE,
+  SET_TEMPORARY_ATTRIBUTE,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
@@ -137,6 +139,24 @@ export function onCreateAttribute({ target }) {
     type: ON_CREATE_ATTRIBUTE,
     keys: target.name.split('.'),
     value: target.value,
+  };
+}
+
+export function saveEditedAttribute(attributeName, isModelTemporary, modelName) {
+  return {
+    type: SAVE_EDITED_ATTRIBUTE,
+    attributeName,
+    isModelTemporary,
+    modelName,
+  };
+}
+
+export function setTemporaryAttribute(attributeName, isModelTemporary, modelName) {
+  return {
+    type: SET_TEMPORARY_ATTRIBUTE,
+    attributeName,
+    isModelTemporary,
+    modelName,
   };
 }
 

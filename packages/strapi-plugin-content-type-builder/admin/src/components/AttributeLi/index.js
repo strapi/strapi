@@ -53,7 +53,14 @@ function AttributeLi({
   const configurableStyle = configurable === false ? null : styles.editable;
 
   return (
-    <li className={`${styles.attributeLi} ${relationStyle} ${configurableStyle}`} onClick={onClick}>
+    <li
+      className={`${styles.attributeLi} ${relationStyle} ${configurableStyle}`}
+      onClick={() => {
+        if (configurable !== false) {
+          onClick(name, type);
+        }
+      }}
+    >
       <div className={styles.flex}>
         <div className={styles.nameContainer}>
           <img src={src} alt={`icon-${ico}`} />

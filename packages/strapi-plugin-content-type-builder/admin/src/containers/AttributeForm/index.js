@@ -40,15 +40,17 @@ class AttributeForm extends React.Component {
   };
 
   getFormErrors = () => {
-    const { alreadyTakenAttributes, modifiedData } = this.props;
+    const { alreadyTakenAttributes, attributeToEditName, modifiedData } = this.props;
     const currentForm = this.getCurrentForm();
     let formErrors = {};
-
+    const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(
+      attribute => attribute !== attributeToEditName,
+    );
     if (isEmpty(modifiedData.name)) {
       formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
     }
 
-    if (alreadyTakenAttributes.includes(get(modifiedData, 'name', ''))) {
+    if (alreadyTakenAttributesUpdated.includes(get(modifiedData, 'name', ''))) {
       formErrors = { name: [{ id: `${pluginId}.error.attribute.taken` }] };
     }
 
@@ -81,10 +83,10 @@ class AttributeForm extends React.Component {
   };
 
   handleGoTo = to => {
-    const { attributeType, push } = this.props;
+    const { actionType, attributeType, push } = this.props;
 
     push({
-      search: `modalType=attributeForm&attributeType=${attributeType}&settingType=${to}&actionType=create`,
+      search: `modalType=attributeForm&attributeType=${attributeType}&settingType=${to}&actionType=${actionType}`,
     });
   };
 
@@ -99,7 +101,11 @@ class AttributeForm extends React.Component {
 
   handleSubmit = () => {
     if (isEmpty(this.getFormErrors())) {
-      this.props.onSubmit();
+      if (this.props.actionType === 'create') {
+        this.props.onSubmit();
+      } else {
+        this.props.onSubmitEdit();
+      }
     }
   };
 
@@ -107,7 +113,11 @@ class AttributeForm extends React.Component {
     e.preventDefault();
 
     if (isEmpty(this.getFormErrors())) {
-      this.props.onSubmit(true);
+      if (this.props.actionType === 'create') {
+        this.props.onSubmit(true);
+      } else {
+        this.props.onSubmitEdit(true);
+      }
     }
   };
 
@@ -166,9 +176,10 @@ class AttributeForm extends React.Component {
   };
 
   render() {
-    const { attributeType, isOpen } = this.props;
+    const { actionType, attributeToEditName, attributeType, isOpen } = this.props;
     const { showForm } = this.state;
     const currentForm = this.getCurrentForm();
+    const titleContent = actionType === 'create' ? attributeType : attributeToEditName;
 
     return (
       <WrapperModal
@@ -179,9 +190,9 @@ class AttributeForm extends React.Component {
       >
         <HeaderModal>
           <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
-            <FormattedMessage id={`${pluginId}.popUpForm.create`} />
+            <FormattedMessage id={`${pluginId}.popUpForm.${actionType || 'create'}`} />
             &nbsp;
-            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{attributeType}</span>
+            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{titleContent}</span>
             &nbsp;
             <FormattedMessage id={`${pluginId}.popUpForm.field`} />
           </div>
@@ -205,7 +216,9 @@ class AttributeForm extends React.Component {
 }
 
 AttributeForm.defaultProps = {
+  actionType: 'create',
   activeTab: 'base',
+  attributeToEditName: '',
   alreadyTakenAttributes: [],
   attributeType: 'string',
   isOpen: false,
@@ -216,14 +229,17 @@ AttributeForm.defaultProps = {
 };
 
 AttributeForm.propTypes = {
+  actionType: PropTypes.string,
   activeTab: PropTypes.string,
   alreadyTakenAttributes: PropTypes.array,
+  attributeToEditName: PropTypes.string,
   attributeType: PropTypes.string,
   isOpen: PropTypes.bool,
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)
   onCancel: PropTypes.func,
   onChange: PropTypes.func,
   onSubmit: PropTypes.func.isRequired,
+  onSubmitEdit: PropTypes.func.isRequired,
   push: PropTypes.func,
 };
 

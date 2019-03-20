@@ -19,7 +19,8 @@ import WrapperModal from '../../components/WrapperModal';
 
 import attributes from './attributes.json';
 
-class AttributesPickerModal extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class AttributesPickerModal extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { isDisplayed: false, nodeToFocus: 0 };
 
   componentDidMount() {
@@ -55,24 +56,24 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
 
       return attr.type !== 'media';
     });
-  }
+  };
 
   addEventListener = () => {
     document.addEventListener('keydown', this.handleKeyDown);
-  }
+  };
 
   removeEventListener = () => {
     document.removeEventListener('keydown', this.handleKeyDown);
-  }
+  };
 
-  handleClick = (type) => {
+  handleClick = type => {
     const { push } = this.props;
 
-    push({ search: `modalType=attributeForm&attributeType=${type}&settingType=base` });
-  }
+    push({ search: `modalType=attributeForm&attributeType=${type}&settingType=base&actionType=create` });
+  };
 
   /* istanbul ignore next */
-  handleKeyDown = (e) => {
+  handleKeyDown = e => {
     const { push } = this.props;
 
     /* istanbul ignore next */
@@ -101,7 +102,9 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
         e.preventDefault();
 
         push({
-          search: `modalType=attributeForm&attributeType=${attributes[nodeToFocus].type}&settingType=base`,
+          search: `modalType=attributeForm&attributeType=${
+            attributes[nodeToFocus].type
+          }&settingType=base&actionType=create`,
         });
         break;
       default:
@@ -110,7 +113,7 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
 
     /* istanbul ignore next */
     this.updateNodeToFocus(next);
-  }
+  };
 
   handleOnClosed = () => this.setState(prevState => ({ isDisplayed: !prevState.isDisplayed }));
 
@@ -120,7 +123,7 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
     const { push } = this.props;
 
     push({ search: '' });
-  }
+  };
 
   updateNodeToFocus = position => this.setState({ nodeToFocus: position });
 
@@ -138,7 +141,7 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
         {...attribute}
       />
     );
-  }
+  };
 
   render() {
     const { isOpen } = this.props;
@@ -151,13 +154,9 @@ class AttributesPickerModal extends React.Component { // eslint-disable-line rea
         onOpened={this.handleOnOpened}
       >
         <HeaderModal>
-          <HeaderModalTitle
-            title={`${pluginId}.popUpForm.choose.attributes.header.title`}
-          />
+          <HeaderModalTitle title={`${pluginId}.popUpForm.choose.attributes.header.title`} />
         </HeaderModal>
-        <BodyModal style={{ paddingTop: '2.3rem' }}>
-          {attributes.map(this.renderAttribute)}
-        </BodyModal>
+        <BodyModal style={{ paddingTop: '2.3rem' }}>{attributes.map(this.renderAttribute)}</BodyModal>
         <FooterModal />
       </WrapperModal>
     );

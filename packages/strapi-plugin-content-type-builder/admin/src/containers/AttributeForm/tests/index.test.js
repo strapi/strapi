@@ -19,6 +19,7 @@ describe('<AttributeForm />', () => {
   beforeEach(() => {
     props = {
       onSubmit: jest.fn(),
+      onSubmitEdit: jest.fn(),
     };
   });
 
