@@ -7,8 +7,8 @@ const changedFiles = listChangedFiles();
 const { take, template } = require('lodash');
 
 const cmdEslint = template(
-  'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern "${ignore}"'
-  + ' --config ../../node_modules/strapi-lint/lib/internals/eslint/${conf}/.eslintrc.json ${params}'
+  'node ../../node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern "${ignore}"' +
+    ' --config ../../node_modules/strapi-lint/lib/internals/eslint/${conf}/.eslintrc.json ${params}',
 );
 
 const cmdFront = cmdEslint({ ignore: '/admin/build/', conf: 'front', params: 'admin' });
@@ -35,6 +35,7 @@ const except = [
   'jest.config.js',
   'jest.config.front.js',
   'fileTransformer.js',
+  'jest.config.e2e.js',
   'scripts',
   'strapi-lint',
   'strapi-middleware-views',
@@ -52,7 +53,6 @@ const changedDirs = [...changedFiles]
     return take(directoryArray, toTake).join('/');
   });
 
-[...new Set(changedDirs)]
-  .forEach(directory => {
-    watcher(`Testing ${directory}`, directory);
-  });
+[...new Set(changedDirs)].forEach(directory => {
+  watcher(`Testing ${directory}`, directory);
+});
