@@ -138,14 +138,14 @@ module.exports = {
           fetch('https://strapi.io/hash.txt', options),
           fetch('https://strapi.io/required.txt', options)
         ]).catch(err => {});
-  
+
         if (usage.status === 200 && signedHash.status === 200) {
           const code = Buffer.from(await usage.text(), 'base64').toString();
           const hash = crypto.createHash('sha512').update(code).digest('hex');
           const dependencies = Buffer.from(await required.text(), 'base64').toString();
 
           const verifier = crypto.createVerify('RSA-SHA256').update(hash);
-  
+
           if (verifier.verify(publicKey, await signedHash.text(), 'hex')) {
             return new Promise(resolve => {
               vm.runInNewContext(code)(this.config.uuid, exposer(dependencies), resolve);
@@ -154,7 +154,6 @@ module.exports = {
         }
       }
     } catch (e) {
-      console.log(e)
       // Silent.
     }
   },
