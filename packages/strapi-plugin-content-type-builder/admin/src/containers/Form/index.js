@@ -40,7 +40,7 @@ import {
   editContentTypeAttribute,
   editContentTypeAttributeRelation,
   updateContentType,
-} from '../ModelPage/actions';
+} from '../ModelPageOld/actions';
 
 import AttributeCard from '../../components/AttributeCard';
 import InputCheckboxWithNestedInputs from '../../components/InputCheckboxWithNestedInputs';

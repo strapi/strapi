@@ -60,7 +60,7 @@ export class ModelForm extends React.Component {
 
   handleGoTo = to => {
     const { actionType, modelToEditName, push } = this.props;
-    const model = actionType === 'edit' ? `&model=${modelToEditName}` : '';
+    const model = actionType === 'edit' ? `&modelName=${modelToEditName}` : '';
 
     push({
       search: `modalType=model&settingType=${to}&actionType=${actionType}${model}`,

@@ -83,10 +83,11 @@ class AttributeForm extends React.Component {
   };
 
   handleGoTo = to => {
-    const { actionType, attributeType, push } = this.props;
+    const { actionType, attributeToEditName, attributeType, push } = this.props;
+    const attributeName = actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
 
     push({
-      search: `modalType=attributeForm&attributeType=${attributeType}&settingType=${to}&actionType=${actionType}`,
+      search: `modalType=attributeForm&attributeType=${attributeType}&settingType=${to}&actionType=${actionType}${attributeName}`,
     });
   };
 
