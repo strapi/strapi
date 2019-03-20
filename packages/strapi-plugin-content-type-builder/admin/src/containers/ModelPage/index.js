@@ -233,7 +233,7 @@ export class ModelPage extends React.Component {
     setTemporaryAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
 
     await this.wait();
-    emitEvent('setTemporaryAttribute');
+    emitEvent('willEditFieldOfContentType');
     push({
       search: `modalType=attributeForm&attributeType=${attributeType}&settingType=base&actionType=edit&attributeName=${attributeName}`,
     });
