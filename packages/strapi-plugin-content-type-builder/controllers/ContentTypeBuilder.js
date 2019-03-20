@@ -41,7 +41,7 @@ module.exports = {
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
     if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
-
+    
     const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes, name, plugin);
 
     if (!_.isEmpty(attributesErrors)) {
@@ -77,16 +77,18 @@ module.exports = {
 
       try {
         fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+        
+        const response = () => {
+          ctx.send({ ok: true });
+
+          strapi.reload();
+        };
 
         if (_.isEmpty(strapi.api)) {
-          strapi.emit('didCreateFirstContentType');
+          strapi.emit('didCreateFirstContentType', response);
         } else {
-          strapi.emit('didCreateContentType');
+          strapi.emit('didCreateContentType', response);
         }
-
-        ctx.send({ ok: true });
-
-        strapi.reload();
       } catch (e) {
         strapi.emit('didNotCreateContentType', e);
         return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
