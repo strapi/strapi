@@ -9,9 +9,8 @@ import {
   cancelNewContentType,
   createTempContentType,
   deleteTemporaryModel,
-  onChangeNewContentType,
+  onChangeNewContentTypeMainInfos,
   onCreateAttribute,
-  onUpdatingExistingContentType,
   submitTempContentType,
   submitTempContentTypeSucceeded,
 } from '../actions';
@@ -25,9 +24,8 @@ import {
   DELETE_MODEL_SUCCEEDED,
   GET_DATA,
   GET_DATA_SUCCEEDED,
-  ON_CHANGE_NEW_CONTENT_TYPE,
+  ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CREATE_ATTRIBUTE,
-  ON_UPDATING_EXISTING_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
 } from '../constants';
@@ -211,8 +209,8 @@ describe('App actions', () => {
     });
   });
 
-  describe('OnChangeNewContentType', () => {
-    it('has a type of ON_CHANGE_NEW_CONTENT_TYPE and returns the correct data tolowercase if the name is equal to name', () => {
+  describe('onChangeNewContentTypeMainInfos', () => {
+    it('has a type of ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS and returns the correct data tolowercase if the name is equal to name', () => {
       const e = {
         target: {
           name: 'name',
@@ -220,12 +218,12 @@ describe('App actions', () => {
         },
       };
       const expected = {
-        type: ON_CHANGE_NEW_CONTENT_TYPE,
+        type: ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
         keys: ['name'],
         value: 'testwithspacesandstuff',
       };
 
-      expect(onChangeNewContentType(e)).toEqual(expected);
+      expect(onChangeNewContentTypeMainInfos(e)).toEqual(expected);
     });
 
     it('should not return the data tolowercase if the name is not equal to name', () => {
@@ -236,12 +234,12 @@ describe('App actions', () => {
         },
       };
       const expected = {
-        type: ON_CHANGE_NEW_CONTENT_TYPE,
+        type: ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
         keys: ['test'],
         value: 'testWith spaces and stuff',
       };
 
-      expect(onChangeNewContentType(e)).toEqual(expected);
+      expect(onChangeNewContentTypeMainInfos(e)).toEqual(expected);
     });
   });
 
@@ -260,40 +258,6 @@ describe('App actions', () => {
       };
 
       expect(onCreateAttribute(e)).toEqual(expected);
-    });
-  });
-
-  describe('onUpdatingExistingContentType', () => {
-    it('has a type of ON_UPDATING_EXISTING_CONTENT_TYPE and returns the correct data tolowercase if the name is equal to name', () => {
-      const e = {
-        target: {
-          name: 'name',
-          value: 'testWith spaces and stuff ',
-        },
-      };
-      const expected = {
-        type: ON_UPDATING_EXISTING_CONTENT_TYPE,
-        keys: ['name'],
-        value: 'testwithspacesandstuff',
-      };
-
-      expect(onUpdatingExistingContentType(e)).toEqual(expected);
-    });
-
-    it('should not return the data tolowercase if the name is not equal to name', () => {
-      const e = {
-        target: {
-          name: 'test',
-          value: 'testWith spaces and stuff ',
-        },
-      };
-      const expected = {
-        type: ON_UPDATING_EXISTING_CONTENT_TYPE,
-        keys: ['test'],
-        value: 'testWith spaces and stuff',
-      };
-
-      expect(onUpdatingExistingContentType(e)).toEqual(expected);
     });
   });
 

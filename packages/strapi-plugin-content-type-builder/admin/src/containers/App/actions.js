@@ -16,13 +16,17 @@ import {
   DELETE_TEMPORARY_MODEL,
   GET_DATA,
   GET_DATA_SUCCEEDED,
-  ON_CHANGE_NEW_CONTENT_TYPE,
+  ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CREATE_ATTRIBUTE,
-  ON_UPDATING_EXISTING_CONTENT_TYPE,
+  RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
+  RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_TEMP_CONTENT_TYPE,
+  RESET_PROPS,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
+  UPDATE_TEMP_CONTENT_TYPE,
+  ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
 } from './constants';
 
 export function addAttributeToExistingContentType(contentTypeName, attributeType) {
@@ -108,11 +112,21 @@ export function getDataSucceeded({ allModels, models }, connections) {
   };
 }
 
-export function onChangeNewContentType({ target }) {
+export function onChangeExistingContentTypeMainInfos({ target }) {
   const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value.trim();
 
   return {
-    type: ON_CHANGE_NEW_CONTENT_TYPE,
+    type: ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+    keys: target.name.split('.'),
+    value,
+  };
+}
+
+export function onChangeNewContentTypeMainInfos({ target }) {
+  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value.trim();
+
+  return {
+    type: ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
     keys: target.name.split('.'),
     value,
   };
@@ -126,13 +140,9 @@ export function onCreateAttribute({ target }) {
   };
 }
 
-export function onUpdatingExistingContentType({ target: { name, value } }) {
-  const formattedValue = name === 'name' ? camelCase(value.trim()).toLowerCase() : value.trim();
-
+export function resetNewContentTypeMainInfos() {
   return {
-    type: ON_UPDATING_EXISTING_CONTENT_TYPE,
-    keys: name.split('.'),
-    value: formattedValue,
+    type: RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   };
 }
 
@@ -143,9 +153,22 @@ export function resetEditExistingContentType(contentTypeName) {
   };
 }
 
+export function resetExistingContentTypeMainInfos(contentTypeName) {
+  return {
+    type: RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+    contentTypeName,
+  };
+}
+
 export function resetEditTempContentType() {
   return {
     type: RESET_EDIT_TEMP_CONTENT_TYPE,
+  };
+}
+
+export function resetProps() {
+  return {
+    type: RESET_PROPS,
   };
 }
 
@@ -158,6 +181,12 @@ export function submitTempContentType() {
 export function submitTempContentTypeSucceeded() {
   return {
     type: SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
+  };
+}
+
+export function updateTempContentType() {
+  return {
+    type: UPDATE_TEMP_CONTENT_TYPE,
   };
 }
 

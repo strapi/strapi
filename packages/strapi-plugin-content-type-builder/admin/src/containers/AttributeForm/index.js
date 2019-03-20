@@ -106,37 +106,6 @@ class AttributeForm extends React.Component {
   handleSubmitAndContinue = e => {
     e.preventDefault();
 
-    // const { alreadyTakenAttributes, modifiedData, onSubmit } = this.props;
-    // const currentForm = this.getCurrentForm();
-    // let formErrors = {};
-
-    // if (isEmpty(modifiedData.name)) {
-    //   formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
-    // }
-
-    // if (alreadyTakenAttributes.includes(get(modifiedData, 'name', ''))) {
-    //   formErrors = { name: [{ id: `${pluginId}.error.attribute.taken` }] };
-    // }
-
-    // // TODO NEED TO HANDLE OTHER VALIDATIONS
-    // formErrors = Object.keys(modifiedData).reduce((acc, current) => {
-    //   const { custom, validations } = currentForm.find(input => input.name === current) || {
-    //     validations: {},
-    //   };
-    //   const value = modifiedData[current];
-
-    //   if (validations.required === true && value === '' && custom === true) {
-    //     acc[current] = [{ id: `${pluginId}.error.validation.required` }];
-    //   }
-
-    //   return acc;
-    // }, formErrors);
-
-    // this.setState(prevState => ({
-    //   didCheckErrors: !prevState.didCheckErrors,
-    //   formErrors,
-    // }));
-
     if (isEmpty(this.getFormErrors())) {
       this.props.onSubmit(true);
     }

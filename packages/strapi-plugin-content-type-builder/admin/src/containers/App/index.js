@@ -24,8 +24,12 @@ import {
   deleteModel,
   deleteTemporaryModel,
   getData,
-  onChangeNewContentType,
-  onUpdatingExistingContentType,
+  onChangeExistingContentTypeMainInfos,
+  onChangeNewContentTypeMainInfos,
+  resetExistingContentTypeMainInfos,
+  resetNewContentTypeMainInfos,
+  resetProps,
+  updateTempContentType,
 } from './actions';
 
 import reducer from './reducer';
@@ -51,7 +55,11 @@ export class App extends React.Component {
     this.props.getData();
   }
 
-  canOpenModalCreateContentType = () => {
+  componentWillUnmount() {
+    this.props.resetProps();
+  }
+
+  canOpenModal = () => {
     const { models } = this.props;
 
     return models.every(model => model.isTemporary === false);
@@ -66,13 +74,7 @@ export class App extends React.Component {
         key={to}
         exact
         path={to}
-        render={props => (
-          <Component
-            {...this.props}
-            {...props}
-            canOpenModalAddContentType={this.canOpenModalCreateContentType()}
-          />
-        )}
+        render={props => <Component {...this.props} {...props} canOpenModal={this.canOpenModal()} />}
       />
     );
   };
@@ -101,7 +103,9 @@ App.propTypes = {
   getData: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
   models: PropTypes.array.isRequired,
-  onChangeNewContentType: PropTypes.func.isRequired,
+  onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
+  onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
+  resetProps: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectApp();
@@ -114,8 +118,12 @@ export function mapDispatchToProps(dispatch) {
       deleteModel,
       deleteTemporaryModel,
       getData,
-      onUpdatingExistingContentType,
-      onChangeNewContentType,
+      onChangeExistingContentTypeMainInfos,
+      onChangeNewContentTypeMainInfos,
+      resetExistingContentTypeMainInfos,
+      resetNewContentTypeMainInfos,
+      resetProps,
+      updateTempContentType,
     },
     dispatch,
   );

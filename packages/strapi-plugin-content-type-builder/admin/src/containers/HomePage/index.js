@@ -27,12 +27,12 @@ class HomePage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   handleClick = () => {
     const {
-      canOpenModalAddContentType,
+      canOpenModal,
       history: { push },
     } = this.props;
     const { emitEvent } = this.context;
 
-    if (canOpenModalAddContentType) {
+    if (canOpenModal) {
       emitEvent('willCreateContentType');
       push({
         search: 'modalType=model&settingType=base&actionType=create',
@@ -45,7 +45,7 @@ class HomePage extends React.Component {
   render() {
     const {
       cancelNewContentType,
-      canOpenModalAddContentType,
+      canOpenModal,
       createTempContentType,
       deleteModel,
       deleteTemporaryModel,
@@ -54,7 +54,7 @@ class HomePage extends React.Component {
       models,
       modifiedData,
       newContentType,
-      onChangeNewContentType,
+      onChangeNewContentTypeMainInfos,
     } = this.props;
     const availableNumber = models.length;
     const title =
@@ -67,7 +67,7 @@ class HomePage extends React.Component {
         <EmptyContentTypeView handleButtonClick={this.handleClick} /> // eslint-disable-line react/jsx-handler-names
       ) : (
         <TableList
-          canOpenModalAddContentType={canOpenModalAddContentType}
+          canOpenModalAddContentType={canOpenModal}
           availableNumber={availableNumber}
           title={title}
           buttonLabel={`${pluginId}.button.contentType.add`}
@@ -98,7 +98,7 @@ class HomePage extends React.Component {
           createTempContentType={createTempContentType}
           currentData={modifiedData}
           modifiedData={newContentType}
-          onChangeNewContentType={onChangeNewContentType}
+          onChangeNewContentTypeMainInfos={onChangeNewContentTypeMainInfos}
           isOpen={!isEmpty(search)}
           pathname={pathname}
           push={push}
@@ -113,14 +113,14 @@ HomePage.contextTypes = {
 };
 
 HomePage.defaultProps = {
-  canOpenModalAddContentType: true,
+  canOpenModal: true,
   models: [],
   modifiedData: {},
 };
 
 HomePage.propTypes = {
   cancelNewContentType: PropTypes.func.isRequired,
-  canOpenModalAddContentType: PropTypes.bool,
+  canOpenModal: PropTypes.bool,
   createTempContentType: PropTypes.func.isRequired,
   deleteModel: PropTypes.func.isRequired,
   models: PropTypes.array,
@@ -133,7 +133,7 @@ HomePage.propTypes = {
     name: PropTypes.string,
     attributes: PropTypes.object,
   }).isRequired,
-  onChangeNewContentType: PropTypes.func.isRequired,
+  onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   ...routerPropTypes().history.isRequired,
 };
 

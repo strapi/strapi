@@ -57,12 +57,14 @@ import saga from './saga';
 import styles from './styles.scss';
 import DocumentationSection from './DocumentationSection';
 
+/* eslint-disable react/sort-comp */
 export class ModelPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
-  state = { attrToDelete: null, showWarning: false };
+  state = { attrToDelete: null, removePrompt: false, showWarning: false };
 
   componentDidUpdate(prevProps) {
     const {
+      location: { search },
       match: {
         params: { modelName },
       },
@@ -72,19 +74,24 @@ export class ModelPage extends React.Component {
     if (!this.isUpdatingTemporaryContentType(modelName) && modelName !== this.props.match.params.modelName) {
       resetEditExistingContentType(modelName);
     }
+
+    if (search !== this.props.location.search) {
+      this.setPrompt();
+    }
   }
 
   getFormData = () => {
     const {
       location: { search },
+      modifiedData,
       newContentType,
     } = this.props;
 
-    if (getQueryParameters(search, 'actionType') === 'create') {
+    if (getQueryParameters(search, 'actionType') === 'create' || this.isUpdatingTemporaryContentType()) {
       return newContentType;
     }
 
-    return null;
+    return get(modifiedData, this.getModelName());
   };
 
   getModel = () => {
@@ -176,37 +183,73 @@ export class ModelPage extends React.Component {
     return [];
   };
 
+  getPluginHeaderTitle = () => {
+    const { modifiedData, newContentType } = this.props;
+    const name = this.getModelName();
+
+    const title = this.isUpdatingTemporaryContentType()
+      ? get(newContentType, 'name', null)
+      : get(modifiedData, [name, 'name'], null);
+
+    return title;
+  };
+
   getSectionTitle = () => {
     const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
 
     return this.getModelsNumber() > 1 ? `${base}plural` : `${base}singular`;
   };
 
-  handleClickOpenModalChooseAttributes = () => {
+  handleClickEditModelMainInfos = async () => {
+    const { canOpenModal } = this.props;
+    await this.wait();
+
+    if (canOpenModal || this.isUpdatingTemporaryContentType()) {
+      this.props.history.push({
+        search: `modalType=model&settingType=base&actionType=edit&modelName=${this.getModelName()}`,
+      });
+    } else {
+      this.displayNotificationCTNotSaved();
+    }
+  };
+
+  handleClickOpenModalChooseAttributes = async () => {
     const {
+      canOpenModal,
       history: { push },
     } = this.props;
+    await this.wait();
 
-    push({ search: 'modalType=chooseAttributes' });
+    if (canOpenModal || this.isUpdatingTemporaryContentType()) {
+      push({ search: 'modalType=chooseAttributes' });
+    } else {
+      this.displayNotificationCTNotSaved();
+    }
   };
 
   handleClickOpenModalCreateCT = () => {
     const {
-      canOpenModalAddContentType,
+      canOpenModal,
       history: { push },
     } = this.props;
 
-    if (canOpenModalAddContentType) {
+    if (canOpenModal) {
       push({
         search: 'modalType=model&settingType=base&actionType=create',
       });
     } else {
-      strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
+      this.displayNotificationCTNotSaved();
     }
   };
 
   handleClickOnTrashIcon = attrToDelete => {
-    this.setState({ showWarning: true, attrToDelete });
+    const { canOpenModal } = this.props;
+
+    if (canOpenModal || this.isUpdatingTemporaryContentType()) {
+      this.setState({ showWarning: true, attrToDelete });
+    } else {
+      this.displayNotificationCTNotSaved();
+    }
   };
 
   handleDeleteAttribute = () => {
@@ -262,6 +305,8 @@ export class ModelPage extends React.Component {
     return isTemporary;
   };
 
+  setPrompt = () => this.setState({ removePrompt: false });
+
   shouldRedirect = () => {
     const { models } = this.props;
 
@@ -269,6 +314,14 @@ export class ModelPage extends React.Component {
   };
 
   toggleModalWarning = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+
+  wait = async () => {
+    this.setState({ removePrompt: true });
+    return new Promise(resolve => setTimeout(resolve, 100));
+  };
+
+  displayNotificationCTNotSaved = () =>
+    strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
 
   renderLinks = () => {
     const { models } = this.props;
@@ -315,11 +368,15 @@ export class ModelPage extends React.Component {
       location: { pathname, search },
       models,
       modifiedData,
-      onChangeNewContentType,
+      onChangeExistingContentTypeMainInfos,
+      onChangeNewContentTypeMainInfos,
       onCreateAttribute,
+      resetExistingContentTypeMainInfos,
+      resetNewContentTypeMainInfos,
       temporaryAttribute,
+      updateTempContentType,
     } = this.props;
-    const { showWarning } = this.state;
+    const { showWarning, removePrompt } = this.state;
 
     if (this.shouldRedirect()) {
       const { name, source } = models[0];
@@ -336,7 +393,7 @@ export class ModelPage extends React.Component {
     return (
       <div className={styles.modelpage}>
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
-          {msg => <Prompt when={this.hasModelBeenModified()} message={msg} />}
+          {msg => <Prompt when={this.hasModelBeenModified() && !removePrompt} message={msg} />}
         </FormattedMessage>
         <div className="container-fluid">
           <div className="row">
@@ -359,8 +416,9 @@ export class ModelPage extends React.Component {
                 <PluginHeader
                   description={this.getModelDescription()}
                   icon="fa fa-pencil"
-                  title={this.getModelName()}
+                  title={this.getPluginHeaderTitle()}
                   actions={this.getPluginHeaderActions()}
+                  onClickIcon={this.handleClickEditModelMainInfos}
                 />
                 {this.getModelAttributesLength() === 0 ? (
                   <EmptyAttributesBlock
@@ -433,10 +491,16 @@ export class ModelPage extends React.Component {
           createTempContentType={createTempContentType}
           currentData={modifiedData}
           modifiedData={this.getFormData()}
-          onChangeNewContentType={onChangeNewContentType}
+          modelToEditName={getQueryParameters(search, 'modelName')}
+          onChangeExistingContentTypeMainInfos={onChangeExistingContentTypeMainInfos}
+          onChangeNewContentTypeMainInfos={onChangeNewContentTypeMainInfos}
           isOpen={modalType === 'model'}
+          isUpdatingTemporaryContentType={this.isUpdatingTemporaryContentType()}
           pathname={pathname}
           push={push}
+          resetExistingContentTypeMainInfos={resetExistingContentTypeMainInfos}
+          resetNewContentTypeMainInfos={resetNewContentTypeMainInfos}
+          updateTempContentType={updateTempContentType}
         />
         <PopUpWarning
           isOpen={showWarning}
@@ -451,7 +515,7 @@ export class ModelPage extends React.Component {
 }
 
 ModelPage.defaultProps = {
-  canOpenModalAddContentType: true,
+  canOpenModal: true,
 };
 
 ModelPage.propTypes = {
@@ -459,7 +523,7 @@ ModelPage.propTypes = {
   addAttributeToExistingContentType: PropTypes.func.isRequired,
   addAttributeToTempContentType: PropTypes.func.isRequired,
   cancelNewContentType: PropTypes.func.isRequired,
-  canOpenModalAddContentType: PropTypes.bool,
+  canOpenModal: PropTypes.bool,
   clearTemporaryAttribute: PropTypes.func.isRequired,
   createTempContentType: PropTypes.func.isRequired,
   deleteModelAttribute: PropTypes.func.isRequired,
@@ -467,12 +531,16 @@ ModelPage.propTypes = {
   models: PropTypes.array.isRequired,
   modifiedData: PropTypes.object.isRequired,
   newContentType: PropTypes.object.isRequired,
-  onChangeNewContentType: PropTypes.func.isRequired,
+  onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
+  onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   onCreateAttribute: PropTypes.func.isRequired,
   resetEditExistingContentType: PropTypes.func.isRequired,
   resetEditTempContentType: PropTypes.func.isRequired,
+  resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
+  resetNewContentTypeMainInfos: PropTypes.func.isRequired,
   submitTempContentType: PropTypes.func.isRequired,
   temporaryAttribute: PropTypes.object.isRequired,
+  updateTempContentType: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({

@@ -12,6 +12,8 @@ import IcoContainer from 'components/IcoContainer';
 import ListRow from 'components/ListRow';
 import PopUpWarning from 'components/PopUpWarning';
 
+import pluginId from '../../pluginId';
+
 import styles from '../TableList/styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-curly-brace-presence */
@@ -56,7 +58,13 @@ class TableListRow extends React.Component {
 
   toggleModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
-  handleShowModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
+  handleShowModalWarning = () => {
+    if (this.props.canOpenModalAddContentType || this.props.rowItem.isTemporary === true) {
+      this.setState({ showWarning: !this.state.showWarning });
+    } else {
+      strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
+    }
+  };
 
   render() {
     const name = get(this.props.rowItem, 'name', 'default');
@@ -111,6 +119,7 @@ class TableListRow extends React.Component {
 }
 
 TableListRow.propTypes = {
+  canOpenModalAddContentType: PropTypes.bool.isRequired,
   deleteTemporaryModel: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   push: PropTypes.func.isRequired,

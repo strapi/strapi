@@ -15,7 +15,7 @@ describe('CTB <HomePage />', () => {
   beforeEach(() => {
     props = {
       cancelNewContentType: jest.fn(),
-      canOpenModalAddContentType: true,
+      canOpenModal: true,
       createTempContentType: jest.fn(),
       deleteModel: jest.fn(),
       models: [
@@ -60,7 +60,7 @@ describe('CTB <HomePage />', () => {
         name: '',
         attributes: {},
       },
-      onChangeNewContentType: jest.fn(),
+      onChangeNewContentTypeMainInfos: jest.fn(),
       history: {
         push: jest.fn(),
       },
@@ -120,7 +120,7 @@ describe('CTB <HomePage />', () => {
 
   describe('workflow', () => {
     it('should open the modelForm if there is no saved content type', () => {
-      props.canOpenModalAddContentType = true;
+      props.canOpenModal = true;
       props.history.push = jest.fn(({ search }) => {
         props.location.search = `?${search}`;
       });
@@ -144,7 +144,7 @@ describe('CTB <HomePage />', () => {
     });
 
     it('should not open the modal if the is one or more not saved content type and display a notification', () => {
-      props.canOpenModalAddContentType = false;
+      props.canOpenModal = false;
       const context = { emitEvent: jest.fn() };
       const wrapper = shallow(<HomePage {...props} />, { context });
 

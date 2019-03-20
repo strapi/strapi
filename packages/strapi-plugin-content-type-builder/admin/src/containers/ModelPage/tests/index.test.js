@@ -10,10 +10,7 @@ import AttributeLi from '../../../components/AttributeLi';
 import Block from '../../../components/Block';
 import LeftMenuLink from '../../../components/LeftMenuLink';
 
-import {
-  clearTemporaryAttribute,
-  onCreateAttribute,
-} from '../../App/actions';
+import { clearTemporaryAttribute, onCreateAttribute } from '../../App/actions';
 
 import { ModelPage, mapDispatchToProps } from '../index';
 
@@ -26,7 +23,12 @@ describe('<ModelPage />', () => {
 
   beforeEach(() => {
     props = {
+      addAttributeToExistingContentType: jest.fn(),
+      addAttributeToTempContentType: jest.fn(),
+      cancelNewContentType: jest.fn(),
       clearTemporaryAttribute: jest.fn(),
+      createTempContentType: jest.fn(),
+      deleteModelAttribute: jest.fn(),
       history: {
         push: jest.fn(),
       },
@@ -45,12 +47,50 @@ describe('<ModelPage />', () => {
       initialData: cloneDeep(initialData),
       modifiedData: cloneDeep(initialData),
       models: [
-        { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
-        { icon: 'fa-cube', name: 'user', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
-        { icon: 'fa-cube', name: 'role', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
+        {
+          icon: 'fa-cube',
+          name: 'permission',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'user',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'role',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
         { icon: 'fa-cube', name: 'product', description: 'super api', fields: 6, isTemporary: false },
       ],
+      newContentType: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        mainField: '',
+        name: '',
+        attributes: {},
+      },
+      onChangeExistingContentTypeMainInfos: jest.fn(),
+      onChangeNewContentTypeMainInfos: jest.fn(),
       onCreateAttribute: jest.fn(),
+      resetEditExistingContentType: jest.fn(),
+      resetEditTempContentType: jest.fn(),
+      resetExistingContentTypeMainInfos: jest.fn(),
+      resetNewContentTypeMainInfos: jest.fn(),
+      submitTempContentType: jest.fn(),
+      temporaryAttribute: {},
+      updateTempContentType: jest.fn(),
     };
   });
 
@@ -67,7 +107,7 @@ describe('<ModelPage />', () => {
 
       expect(redirect.length).toEqual(1);
     });
-    it('should display the EmptyAttributeBlock if the model\'s attributes are empty', () => {
+    it("should display the EmptyAttributeBlock if the model's attributes are empty", () => {
       props.initialData.user.attributes = {};
       props.modifiedData.user.attributes = {};
 
@@ -76,24 +116,34 @@ describe('<ModelPage />', () => {
       expect(wrapper.find(EmptyAttributesBlock)).toHaveLength(1);
     });
 
-    it('should display the Block if the model\'s attributes are not empty', () => {
+    it("should display the Block if the model's attributes are not empty", () => {
       const wrapper = shallow(<ModelPage {...props} />);
 
       expect(wrapper.find(Block)).toHaveLength(1);
     });
 
-    it('should display a singular text if the model\'s attributes relationship is one', () => {
+    it("should display a singular text if the model's attributes relationship is one", () => {
       const wrapper = shallow(<ModelPage {...props} />);
 
-      expect(wrapper.find(FormattedMessage).last().prop('id')).toContain('singular');
+      expect(
+        wrapper
+          .find(FormattedMessage)
+          .last()
+          .prop('id'),
+      ).toContain('singular');
     });
 
-    it('should display a plural text if the model\'s attributes relationships is more than one', () => {
+    it("should display a plural text if the model's attributes relationships is more than one", () => {
       props.match.params.modelName = 'role&source=users-permissions';
       props.match.path = `${basePath}/role&source=users-permissions`;
       const wrapper = shallow(<ModelPage {...props} />);
 
-      expect(wrapper.find(FormattedMessage).last().prop('id')).toContain('plural');
+      expect(
+        wrapper
+          .find(FormattedMessage)
+          .last()
+          .prop('id'),
+      ).toContain('plural');
     });
 
     it('should call the handleClickOpenModalChooseAttributes when clicking on the EmptyAttributesBlock', () => {
@@ -123,7 +173,7 @@ describe('<ModelPage />', () => {
     });
 
     describe('GetModelAttributes', () => {
-      it('should return the model\'s attributes', () => {
+      it("should return the model's attributes", () => {
         const { getModelAttributes } = shallow(<ModelPage {...props} />).instance();
 
         expect(getModelAttributes()).toEqual(initialData.user.attributes);
@@ -131,7 +181,7 @@ describe('<ModelPage />', () => {
     });
 
     describe('GetModelAttributesLength', () => {
-      it('should return the model\'s attributes length', () => {
+      it("should return the model's attributes length", () => {
         const { getModelAttributesLength } = shallow(<ModelPage {...props} />).instance();
 
         expect(getModelAttributesLength()).toEqual(8);
@@ -139,7 +189,7 @@ describe('<ModelPage />', () => {
     });
 
     describe('GetModelDescription', () => {
-      it('should return the model\'s description field', () => {
+      it("should return the model's description field", () => {
         const { getModelDescription } = shallow(<ModelPage {...props} />).instance();
 
         expect(getModelDescription()).toEqual('user model');
@@ -147,7 +197,7 @@ describe('<ModelPage />', () => {
     });
 
     describe('getModelName', () => {
-      it('should return the model\'s name field', () => {
+      it("should return the model's name field", () => {
         const { getModelName } = shallow(<ModelPage {...props} />).instance();
 
         expect(getModelName()).toEqual('user');
@@ -165,7 +215,11 @@ describe('<ModelPage />', () => {
     describe('GetModelRelationShips', () => {
       it('should return the model`s relations', () => {
         const { getModelRelationShips } = shallow(<ModelPage {...props} />).instance();
-        const { user: { attributes: { role } } } = initialData;
+        const {
+          user: {
+            attributes: { role },
+          },
+        } = initialData;
 
         expect(getModelRelationShips()).toEqual({ role });
       });
@@ -227,7 +281,6 @@ describe('<ModelPage />', () => {
     });
   });
 });
-
 
 describe('CTB <ModelPage />, mapDispatchToProps', () => {
   describe('ClearTemporaryAttribute', () => {

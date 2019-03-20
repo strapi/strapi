@@ -17,13 +17,36 @@ describe('<App />', () => {
       initialData: {},
       isLoading: true,
       models: [
-        { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
-        { icon: 'fa-cube', name: 'user', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
-        { icon: 'fa-cube', name: 'role', description: '', fields: 6, source: 'users-permissions', isTemporary: false },
+        {
+          icon: 'fa-cube',
+          name: 'permission',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'user',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'role',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
         { icon: 'fa-cube', name: 'product', description: 'super api', fields: 6, isTemporary: false },
       ],
       modifiedData: {},
-      onChangeNewContentType: jest.fn(),
+      onChangeExistingContentTypeMainInfos: jest.fn(),
+      onChangeNewContentTypeMainInfos: jest.fn(),
+      resetProps: jest.fn(),
     };
   });
 
@@ -53,23 +76,6 @@ describe('<App />', () => {
         const { renderRoute } = renderedComponent.instance();
 
         expect(renderRoute(route)).not.toBeNull();
-      });
-    });
-
-    describe('shouldcanOpenModalCreateContentTypeOpenModal', () => {
-      it('should return true if the is no temporary model', () => {
-        const wrapper = shallow(<App {...props} />);
-        const { canOpenModalCreateContentType } = wrapper.instance();
-
-        expect(canOpenModalCreateContentType()).toBeTruthy();
-      });
-
-      it('should return false if there is more than 1 temporary model', () => {
-        props.models[0].isTemporary = true;
-        const wrapper = shallow(<App {...props} />);
-        const { canOpenModalCreateContentType } = wrapper.instance();
-
-        expect(canOpenModalCreateContentType()).toBeFalsy();
       });
     });
   });
