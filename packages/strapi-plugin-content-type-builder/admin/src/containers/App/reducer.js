@@ -18,7 +18,6 @@ import {
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CREATE_ATTRIBUTE,
-  ON_UPDATING_EXISTING_CONTENT_TYPE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
@@ -89,7 +88,9 @@ function appReducer(state = initialState, action) {
         .update('temporaryAttribute', () => Map({}));
     }
     case CANCEL_NEW_CONTENT_TYPE:
-      return state.update('newContentType', () => Map(initialState.get('newContentType')));
+      return state.update('newContentType', () =>
+        Map(initialState.get('newContentType').set('connection', state.getIn(['connections', 0]))),
+      );
     case CLEAR_TEMPORARY_ATTRIBUTE:
       return state.update('temporaryAttribute', () => Map({}));
     case CREATE_TEMP_CONTENT_TYPE:
@@ -117,7 +118,8 @@ function appReducer(state = initialState, action) {
           'models',
           state.get('models').findIndex(model => model.name === state.getIn(['newContentType', 'name'])),
         ])
-        .update('newContentType', () => fromJS(initialState.get('newContentType')));
+        .update('newContentType', () => fromJS(initialState.get('newContentType')))
+        .update('newContentTypeClone', () => fromJS(initialState.get('newContentType')));
     case GET_DATA_SUCCEEDED:
       return state
         .update('connections', () => List(action.connections))
@@ -132,16 +134,7 @@ function appReducer(state = initialState, action) {
       return state.updateIn(['newContentType', ...action.keys], () => action.value);
     case ON_CREATE_ATTRIBUTE:
       return state.updateIn(['temporaryAttribute', ...action.keys], () => action.value);
-    case ON_UPDATING_EXISTING_CONTENT_TYPE:
-      return state.updateIn(['modifiedData', ...action.keys], () => action.value);
-    case RESET_NEW_CONTENT_TYPE_MAIN_INFOS:
-      return state.updateIn(['newContentType'], () => {
-        const initialContentType = state
-          .get('newContentTypeClone')
-          .set('attributes', state.getIn(['newContentType', 'attributes']));
 
-        return initialContentType;
-      });
     case RESET_EDIT_EXISTING_CONTENT_TYPE:
       return state
         .update('temporaryAttribute', () => Map({}))
@@ -155,6 +148,14 @@ function appReducer(state = initialState, action) {
         const initialContentType = state
           .getIn(['initialData', action.contentTypeName])
           .set('attributes', state.getIn(['modifiedData', action.contentTypeName, 'attributes']));
+
+        return initialContentType;
+      });
+    case RESET_NEW_CONTENT_TYPE_MAIN_INFOS:
+      return state.updateIn(['newContentType'], () => {
+        const initialContentType = state
+          .get('newContentTypeClone')
+          .set('attributes', state.getIn(['newContentType', 'attributes']));
 
         return initialContentType;
       });
@@ -187,7 +188,8 @@ function appReducer(state = initialState, action) {
         )
         .updateIn(['models', state.get('models').size - 1, 'isTemporary'], () => false)
         .update('models', list => list.sortBy(el => el.name))
-        .update('newContentType', () => Map(initialState.get('newContentType')));
+        .update('newContentType', () => Map(initialState.get('newContentType')))
+        .update('newContentTypeClone', () => Map(initialState.get('newContentType')));
     case UPDATE_TEMP_CONTENT_TYPE:
       return state
         .updateIn(

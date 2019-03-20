@@ -31,7 +31,7 @@ describe('<AttributeLi />', () => {
     expect(insideCompo.text()).toContain('users-permissions');
   });
 
-  it("should not show the origin of the model if it's comming from a plugin", () => {
+  it("should not show the origin of the model if it's not comming from a plugin", () => {
     const props = {
       attributeInfos: {
         configurable: false,
@@ -68,5 +68,21 @@ describe('<AttributeLi />', () => {
 
     expect(img.props('alt')).toBeDefined();
     expect(img.prop('alt')).toBe('icon-number');
+  });
+
+  it('should the call the onClick prop with the correct data if it is configurable', () => {
+    const props = {
+      attributeInfos: {
+        type: 'string',
+      },
+      name: 'name',
+      onClick: jest.fn(),
+    };
+    const wrapper = shallow(<AttributeLi {...props} />);
+    const { onClick } = wrapper.find('li').props();
+
+    onClick();
+
+    expect(props.onClick).toHaveBeenCalledWith('name', 'string');
   });
 });

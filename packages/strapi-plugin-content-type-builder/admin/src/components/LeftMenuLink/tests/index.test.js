@@ -19,4 +19,15 @@ describe('<LeftMenuLink />', () => {
 
     expect(insideCompo.find('span').length).toBe(1);
   });
+
+  it('should add a not saved span if the isTemporary prop is true', () => {
+    const renderedComponent = shallow(<LeftMenuLink to="" name="test" isTemporary />);
+    const isTemporaryInfo = renderedComponent.find(FormattedMessage).first();
+
+    expect(isTemporaryInfo.exists()).toBe(true);
+
+    const insideCompo = shallow(isTemporaryInfo.prop('children')());
+
+    expect(insideCompo.find('span').length).toBe(1);
+  });
 });

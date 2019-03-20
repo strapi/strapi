@@ -68,7 +68,38 @@ describe('<App />', () => {
     expect(wrapper.find(Loader)).toHaveLength(0);
   });
 
+  it('should call the resetProps when the component unmounts', () => {
+    const wrapper = shallow(<App {...props} />);
+
+    wrapper.unmount();
+
+    expect(props.resetProps).toHaveBeenCalled();
+  });
+
   describe('<App />, instances', () => {
+    describe('CanOpenModal', () => {
+      it('should return true if all models have isTemporary to false', () => {
+        const wrapper = shallow(<App {...props} />);
+        const { canOpenModal } = wrapper.instance();
+
+        expect(canOpenModal()).toBeTruthy();
+      });
+
+      it('should return false if at least model has isTemporary set to true', () => {
+        props.models.push({
+          icon: 'fa-cube',
+          name: 'test',
+          description: 'super api',
+          fields: 6,
+          isTemporary: true,
+        });
+        const wrapper = shallow(<App {...props} />);
+        const { canOpenModal } = wrapper.instance();
+
+        expect(canOpenModal()).toBeFalsy();
+      });
+    });
+
     describe('renderRoute', () => {
       it('should return a route', () => {
         const renderedComponent = shallow(<App {...props} />);
