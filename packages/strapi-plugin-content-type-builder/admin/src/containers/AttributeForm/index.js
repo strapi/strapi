@@ -83,8 +83,13 @@ class AttributeForm extends React.Component {
   };
 
   handleGoTo = to => {
+    const { emitEvent } = this.context;
     const { actionType, attributeToEditName, attributeType, push } = this.props;
     const attributeName = actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
+
+    if (to === 'advanced') {
+      emitEvent('didSelectContentTypeFieldSettings');
+    }
 
     push({
       search: `modalType=attributeForm&attributeType=${attributeType}&settingType=${to}&actionType=${actionType}${attributeName}`,
@@ -112,6 +117,7 @@ class AttributeForm extends React.Component {
 
   handleSubmitAndContinue = e => {
     e.preventDefault();
+    const { emitEvent } = this.context;
 
     if (isEmpty(this.getFormErrors())) {
       if (this.props.actionType === 'create') {
@@ -119,6 +125,8 @@ class AttributeForm extends React.Component {
       } else {
         this.props.onSubmitEdit(true);
       }
+
+      emitEvent('willAddMoreFieldToContentType');
     }
   };
 
@@ -215,6 +223,10 @@ class AttributeForm extends React.Component {
     );
   }
 }
+
+AttributeForm.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 AttributeForm.defaultProps = {
   actionType: 'create',

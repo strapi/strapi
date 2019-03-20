@@ -67,8 +67,10 @@ class AttributesPickerModal extends React.Component {
   };
 
   handleClick = type => {
+    const { emitEvent } = this.context;
     const { push } = this.props;
 
+    emitEvent('didSelectContentTypeFieldType', { type });
     push({ search: `modalType=attributeForm&attributeType=${type}&settingType=base&actionType=create` });
   };
 
@@ -164,6 +166,7 @@ class AttributesPickerModal extends React.Component {
 }
 
 AttributesPickerModal.contextTypes = {
+  emitEvent: PropTypes.func,
   plugins: PropTypes.object,
 };
 

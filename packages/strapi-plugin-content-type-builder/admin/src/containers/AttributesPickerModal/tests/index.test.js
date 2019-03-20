@@ -11,8 +11,15 @@ import AttributesPickerModal from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 
-const renderComponent = (props = {}, context = {}) =>
-  mountWithIntl(<AttributesPickerModal {...props} />, messages, context);
+const renderComponent = (
+  props = {},
+  context = {
+    emitEvent: jest.fn(),
+    plugins: {
+      'content-type-builder': {},
+    },
+  },
+) => mountWithIntl(<AttributesPickerModal {...props} />, messages, context);
 
 describe('<AttributesPickerModal />', () => {
   let props;
@@ -73,6 +80,7 @@ describe('<AttributesPickerModal />', () => {
 
   it('should remove the media option if the upload plugin is not installed', () => {
     const context = {
+      emitEvent: jest.fn(),
       plugins: {
         'content-type-builder': {},
       },
@@ -88,6 +96,7 @@ describe('<AttributesPickerModal />', () => {
 
   it('should not remove the media option if the upload plugin is installed', () => {
     const context = {
+      emitEvent: jest.fn(),
       plugins: {
         'content-type-builder': {},
         upload: {},
@@ -106,6 +115,7 @@ describe('<AttributesPickerModal />', () => {
 
   it('should handle the plugins context object correctly', () => {
     const context = {
+      emitEvent: jest.fn(),
       plugins: fromJS({
         'content-type-builder': {},
         upload: {},
@@ -153,6 +163,7 @@ describe('<AttributesPickerModal />', () => {
       map[event] = cb;
     });
     const context = {
+      emitEvent: jest.fn(),
       plugins: fromJS({
         'content-type-builder': {},
         upload: {},

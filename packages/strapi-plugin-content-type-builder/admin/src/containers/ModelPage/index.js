@@ -223,24 +223,24 @@ export class ModelPage extends React.Component {
   };
 
   handleClickEditAttribute = async (attributeName, type) => {
-    // modalType=attributeForm&attributeType=boolean&settingType=base
+    const { emitEvent } = this.context;
     const {
       history: { push },
+      setTemporaryAttribute,
     } = this.props;
     const attributeType = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
-    this.props.setTemporaryAttribute(
-      attributeName,
-      this.isUpdatingTemporaryContentType(),
-      this.getModelName(),
-    );
+    setTemporaryAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
+
     await this.wait();
+    emitEvent('setTemporaryAttribute');
     push({
       search: `modalType=attributeForm&attributeType=${attributeType}&settingType=base&actionType=edit&attributeName=${attributeName}`,
     });
   };
 
   handleClickEditModelMainInfos = async () => {
+    const { emitEvent } = this.context;
     const { canOpenModal } = this.props;
 
     await this.wait();
@@ -249,6 +249,7 @@ export class ModelPage extends React.Component {
       this.props.history.push({
         search: `modalType=model&settingType=base&actionType=edit&modelName=${this.getModelName()}`,
       });
+      emitEvent('willEditNameOfContentType');
     } else {
       this.displayNotificationCTNotSaved();
     }
@@ -259,6 +260,7 @@ export class ModelPage extends React.Component {
       canOpenModal,
       history: { push },
     } = this.props;
+
     await this.wait();
 
     if (canOpenModal || this.isUpdatingTemporaryContentType()) {
@@ -284,10 +286,12 @@ export class ModelPage extends React.Component {
   };
 
   handleClickOnTrashIcon = attrToDelete => {
+    const { emitEvent } = this.context;
     const { canOpenModal } = this.props;
 
     if (canOpenModal || this.isUpdatingTemporaryContentType()) {
       this.setState({ showWarning: true, attrToDelete });
+      emitEvent('willDeleteFieldOfContentType');
     } else {
       this.displayNotificationCTNotSaved();
     }
@@ -578,6 +582,10 @@ export class ModelPage extends React.Component {
     );
   }
 }
+
+ModelPage.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 ModelPage.defaultProps = {
   canOpenModal: true,

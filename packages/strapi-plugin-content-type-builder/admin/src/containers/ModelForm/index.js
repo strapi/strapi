@@ -59,8 +59,13 @@ export class ModelForm extends React.Component {
   };
 
   handleGoTo = to => {
+    const { emitEvent } = this.context;
     const { actionType, modelToEditName, push } = this.props;
     const model = actionType === 'edit' ? `&modelName=${modelToEditName}` : '';
+
+    if (to === 'advanced') {
+      emitEvent('didSelectContentTypeSettings');
+    }
 
     push({
       search: `modalType=model&settingType=${to}&actionType=${actionType}${model}`,
@@ -210,6 +215,10 @@ export class ModelForm extends React.Component {
     );
   }
 }
+
+ModelForm.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 ModelForm.defaultProps = {
   actionType: 'create',
