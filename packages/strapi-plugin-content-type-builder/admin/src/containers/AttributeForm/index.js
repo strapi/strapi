@@ -116,7 +116,8 @@ class AttributeForm extends React.Component {
     }
   };
 
-  handleSubmitAndContinue = () => {
+  handleSubmitAndContinue = e => {
+    e.preventDefault();
     const { emitEvent } = this.context;
 
     if (isEmpty(this.getFormErrors())) {

@@ -45,6 +45,7 @@ import {
   onChangeAttribute,
   resetEditExistingContentType,
   resetEditTempContentType,
+  submitContentType,
   submitTempContentType,
 } from '../App/actions';
 
@@ -54,6 +55,7 @@ import styles from './styles.scss';
 import DocumentationSection from './DocumentationSection';
 
 /* eslint-disable react/sort-comp */
+/* eslint-disable no-extra-boolean-cast */
 export class ModelPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { attrToDelete: null, removePrompt: false, showWarning: false };
@@ -128,7 +130,6 @@ export class ModelPage extends React.Component {
     const description = get(initialData, [this.getModelName(), 'description'], null);
 
     /* istanbul ignore if */
-    // eslint-disable-next-line no-extra-boolean-cast
     return !!description
       ? description
       : { id: `${pluginId}.modelPage.contentHeader.emptyDescription.description` };
@@ -165,19 +166,32 @@ export class ModelPage extends React.Component {
     const {
       initialData,
       modifiedData,
+      newContentType,
       resetEditExistingContentType,
       resetEditTempContentType,
+      submitContentType,
       submitTempContentType,
     } = this.props;
     /* istanbul ignore if */
     const shouldShowActions = this.isUpdatingTemporaryContentType()
       ? this.getModelAttributesLength() > 0
       : !isEqual(modifiedData[this.getModelName()], initialData[this.getModelName()]);
-    const handleSubmit = this.isUpdatingTemporaryContentType() ? submitTempContentType : () => {};
+    /* eslint-disable indent */
+    const handleSubmit = this.isUpdatingTemporaryContentType()
+      ? () => submitTempContentType(newContentType, this.context)
+      : () => {
+          submitContentType(
+            this.getModelName(),
+            get(modifiedData, this.getModelName()),
+            this.context,
+            this.getSource(),
+          );
+        };
     /* istanbul ignore next */
     const handleCancel = this.isUpdatingTemporaryContentType()
       ? resetEditTempContentType
       : () => resetEditExistingContentType(this.getModelName());
+    /* eslint-enable indent */
 
     /* istanbul ignore if */
     if (shouldShowActions) {
@@ -226,6 +240,18 @@ export class ModelPage extends React.Component {
 
     /* istanbul ignore if */
     return this.getModelsNumber() > 1 ? `${base}plural` : `${base}singular`;
+  };
+
+  getSource = () => {
+    const {
+      match: {
+        params: { modelName },
+      },
+    } = this.props;
+
+    const source = getQueryParameters(modelName, 'source');
+
+    return !!source ? source : null;
   };
 
   handleClickEditAttribute = async (attributeName, type) => {
@@ -459,11 +485,11 @@ export class ModelPage extends React.Component {
       return <Redirect to={to} />;
     }
 
-    // const modalType = getQueryParameters(search, 'modalType');
     const modalType = this.getModalType();
     const settingType = getQueryParameters(search, 'settingType');
     const attributeType = getQueryParameters(search, 'attributeType');
     const actionType = this.getActionType();
+    const icon = this.getSource() ? null : 'fa fa-pencil';
 
     return (
       <div className={styles.modelpage}>
@@ -490,7 +516,7 @@ export class ModelPage extends React.Component {
               <div className={styles.componentsContainer}>
                 <PluginHeader
                   description={this.getModelDescription()}
-                  icon="fa fa-pencil"
+                  icon={icon}
                   title={this.getPluginHeaderTitle()}
                   actions={this.getPluginHeaderActions()}
                   onClickIcon={this.handleClickEditModelMainInfos}
@@ -595,6 +621,8 @@ export class ModelPage extends React.Component {
 
 ModelPage.contextTypes = {
   emitEvent: PropTypes.func,
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
 };
 
 ModelPage.defaultProps = {
@@ -622,6 +650,7 @@ ModelPage.propTypes = {
   resetEditTempContentType: PropTypes.func.isRequired,
   resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
   resetNewContentTypeMainInfos: PropTypes.func.isRequired,
+  submitContentType: PropTypes.func.isRequired,
   submitTempContentType: PropTypes.func.isRequired,
   temporaryAttribute: PropTypes.object.isRequired,
   updateTempContentType: PropTypes.func.isRequired,
@@ -638,6 +667,7 @@ export function mapDispatchToProps(dispatch) {
       onChangeAttribute,
       resetEditExistingContentType,
       resetEditTempContentType,
+      submitContentType,
       submitTempContentType,
     },
     dispatch,

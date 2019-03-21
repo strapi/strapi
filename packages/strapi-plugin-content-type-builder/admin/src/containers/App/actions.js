@@ -3,7 +3,7 @@
  * App actions
  *
  */
-import { pick, set, camelCase } from 'lodash';
+import { cloneDeep, pick, set, camelCase } from 'lodash';
 import {
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
@@ -25,6 +25,8 @@ import {
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE,
+  SUBMIT_CONTENT_TYPE,
+  SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
@@ -192,9 +194,34 @@ export function resetProps() {
   };
 }
 
-export function submitTempContentType() {
+export function submitContentType(oldContentTypeName, data, context, source) {
+  const attributes = formatModelAttributes(data.attributes);
+  const body = Object.assign(cloneDeep(data), { attributes });
+
+  return {
+    type: SUBMIT_CONTENT_TYPE,
+    oldContentTypeName,
+    body,
+    source,
+    context,
+  };
+}
+
+export function submitContentTypeSucceeded(oldContentTypeName) {
+  return {
+    type: SUBMIT_CONTENT_TYPE_SUCCEEDED,
+    oldContentTypeName,
+  };
+}
+
+export function submitTempContentType(data, context) {
+  const attributes = formatModelAttributes(data.attributes);
+  const body = Object.assign(cloneDeep(data), { attributes });
+
   return {
     type: SUBMIT_TEMP_CONTENT_TYPE,
+    body,
+    context,
   };
 }
 
@@ -220,3 +247,22 @@ export const buildModelAttributes = attributes => {
 
   return formattedAttributes;
 };
+
+export const formatModelAttributes = attributes =>
+  Object.keys(attributes).reduce((acc, current) => {
+    const attribute = Object.keys(attributes[current]).reduce(
+      (acc2, curr) => {
+        if (curr === 'plugin' && !!attributes[current][curr]) {
+          acc2.params.pluginValue = attributes[current][curr];
+          acc2.params.plugin = true;
+        } else {
+          acc2.params[curr] = attributes[current][curr];
+        }
+
+        return acc2;
+      },
+      { name: current, params: {} },
+    );
+
+    return acc.concat(attribute);
+  }, []);

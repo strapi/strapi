@@ -3,6 +3,7 @@ import { capitalize, findIndex, get, isEmpty, sortBy } from 'lodash';
 import { takeLatest, call, put, fork, select } from 'redux-saga/effects';
 import request from 'utils/request';
 
+/* eslint-disable */
 import {
   connectionsFetchSucceeded,
   contentTypeActionSucceeded,
@@ -11,16 +12,9 @@ import {
   unsetButtonLoading,
 } from './actions';
 
-import {
-  CONNECTIONS_FETCH,
-  CONTENT_TYPE_EDIT,
-  CONTENT_TYPE_FETCH,
-} from './constants';
+import { CONNECTIONS_FETCH, CONTENT_TYPE_EDIT, CONTENT_TYPE_FETCH } from './constants';
 
-import {
-  makeSelectInitialDataEdit,
-  makeSelectModifiedDataEdit,
-} from './selectors';
+import { makeSelectInitialDataEdit, makeSelectModifiedDataEdit } from './selectors';
 
 export function* editContentType(action) {
   try {
@@ -35,7 +29,12 @@ export function* editContentType(action) {
     yield put(setButtonLoading());
 
     const leftMenuContentTypes = get(action.context.plugins.toJS(), ['content-manager', 'leftMenuSections']);
-    const leftMenuContentTypesIndex = !isEmpty(leftMenuContentTypes) ? findIndex(get(leftMenuContentTypes[0], 'links'), ['destination', initialContentType.name.toLowerCase()]) : -1;
+    const leftMenuContentTypesIndex = !isEmpty(leftMenuContentTypes)
+      ? findIndex(get(leftMenuContentTypes[0], 'links'), [
+          'destination',
+          initialContentType.name.toLowerCase(),
+        ])
+      : -1;
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
@@ -58,7 +57,7 @@ export function* editContentType(action) {
       }
       strapi.notification.success('content-type-builder.notification.success.message.contentType.edit');
     }
-  } catch(error) {
+  } catch (error) {
     strapi.notification.error(get(error, ['response', 'payload', 'message'], 'notification.error'));
   }
 }
@@ -69,8 +68,7 @@ export function* fetchConnections() {
     const data = yield call(request, requestUrl, { method: 'GET' });
 
     yield put(connectionsFetchSucceeded(data));
-
-  } catch(error) {
+  } catch (error) {
     strapi.notification.error('content-type-builder.notification.error.message');
   }
 }
@@ -88,8 +86,7 @@ export function* fetchContentType(action) {
     const data = yield call(request, requestUrl, { method: 'GET', params });
 
     yield put(contentTypeFetchSucceeded(data));
-
-  } catch(error) {
+  } catch (error) {
     strapi.notification.error('content-type-builder.notification.error.message');
   }
 }

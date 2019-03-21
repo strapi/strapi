@@ -1,10 +1,16 @@
-import { get } from 'lodash';
+import pluralize from 'pluralize';
+import { capitalize, get, sortBy } from 'lodash';
 import { all, fork, takeLatest, call, put } from 'redux-saga/effects';
 import request from 'utils/request';
 import pluginId from '../../pluginId';
 
-import { getDataSucceeded, deleteModelSucceeded, submitTempContentTypeSucceeded } from './actions';
-import { GET_DATA, DELETE_MODEL, SUBMIT_TEMP_CONTENT_TYPE } from './constants';
+import {
+  getDataSucceeded,
+  deleteModelSucceeded,
+  submitContentTypeSucceeded,
+  submitTempContentTypeSucceeded,
+} from './actions';
+import { GET_DATA, DELETE_MODEL, SUBMIT_CONTENT_TYPE, SUBMIT_TEMP_CONTENT_TYPE } from './constants';
 
 export function* getData() {
   try {
@@ -38,10 +44,70 @@ export function* deleteModel({ modelName }) {
 //  yield put(emitEvent('willSaveContentType'));
 // emitEvent('didSaveContentType')
 
-export function* submitTempCT() {
+export function* submitCT({
+  oldContentTypeName,
+  body,
+  source,
+  context: { emitEvent, plugins, updatePlugin },
+}) {
   try {
+    const requestURL = `/${pluginId}/models/${oldContentTypeName}`;
+    const { name } = body;
+
+    if (source) {
+      body.plugin = source;
+    }
+
+    yield put(emitEvent('willSaveContentType'));
+
+    const opts = { method: 'PUT', body };
+
+    yield call(request, requestURL, opts, true);
+    yield put(emitEvent('didSaveContentType'));
+    yield put(submitContentTypeSucceeded(oldContentTypeName));
+
+    if (name !== oldContentTypeName) {
+      yield put(emitEvent('didEditNameOfContentType'));
+
+      const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
+      const appMenu = get(appPlugins, ['content-manager', 'leftMenuSections'], []);
+      const oldContentTypeNameIndex = appMenu[0].links.findIndex(el => el.destination === oldContentTypeName);
+      const updatedLink = { destination: name.toLowerCase(), label: capitalize(pluralize(name)) };
+      appMenu[0].links.splice(oldContentTypeNameIndex, 1, updatedLink);
+      appMenu[0].links = sortBy(appMenu[0].links, 'label');
+      updatePlugin('content-manager', 'leftMenuSections', appMenu);
+    }
+  } catch (error) {
+    const errorMessage = get(
+      error,
+      ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+      'notification.error',
+    );
+    strapi.notification.error(errorMessage);
+  }
+}
+
+export function* submitTempCT({ body, context: { emitEvent, plugins, updatePlugin } }) {
+  try {
+    yield put(emitEvent('willSaveContentType'));
+
+    const requestURL = `/${pluginId}/models`;
+    const opts = { method: 'POST', body };
+
+    yield call(request, requestURL, opts, true);
+
+    yield put(emitEvent('didSaveContentType'));
     yield put(submitTempContentTypeSucceeded());
-  } catch (err) {
+
+    const { name } = body;
+    const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
+    const appMenu = get(appPlugins, ['content-manager', 'leftMenuSections'], []);
+    const newLink = { destination: name.toLowerCase(), label: capitalize(pluralize(name)) };
+    appMenu[0].links.push(newLink);
+    appMenu[0].links = sortBy(appMenu[0].links, 'label');
+
+    updatePlugin('content-manager', 'leftMenuSections', appMenu);
+  } catch (error) {
     const errorMessage = get(
       error,
       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
@@ -56,6 +122,7 @@ export default function* defaultSaga() {
   yield all([
     fork(takeLatest, GET_DATA, getData),
     fork(takeLatest, DELETE_MODEL, deleteModel),
+    fork(takeLatest, SUBMIT_CONTENT_TYPE, submitCT),
     fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
   ]);
 }

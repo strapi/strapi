@@ -12,7 +12,7 @@ import {
   onChangeExistingContentTypeMainInfos,
   onChangeNewContentTypeMainInfos,
   onChangeAttribute,
-  submitTempContentType,
+  // submitTempContentType,
   submitTempContentTypeSucceeded,
   saveEditedAttribute,
   setTemporaryAttribute,
@@ -38,7 +38,7 @@ import {
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
-  SUBMIT_TEMP_CONTENT_TYPE,
+  // SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   SAVE_EDITED_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE,
@@ -429,15 +429,15 @@ describe('App actions', () => {
     });
   });
 
-  describe('SubmitTempContentType', () => {
-    it('has a type SUBMIT_TEMP_CONTENT_TYPE and returns the correct data', () => {
-      const expected = {
-        type: SUBMIT_TEMP_CONTENT_TYPE,
-      };
+  // describe('SubmitTempContentType', () => {
+  //   it('has a type SUBMIT_TEMP_CONTENT_TYPE and returns the correct data', () => {
+  //     const expected = {
+  //       type: SUBMIT_TEMP_CONTENT_TYPE,
+  //     };
 
-      expect(submitTempContentType()).toEqual(expected);
-    });
-  });
+  //     expect(submitTempContentType()).toEqual(expected);
+  //   });
+  // });
 
   describe('SubmitTempContentTypeSucceeded', () => {
     it('has a type SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED and returns the correct data', () => {

@@ -25,8 +25,10 @@ import {
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE,
+  // SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
+  SUBMIT_CONTENT_TYPE_SUCCEEDED,
 } from './constants';
 
 export const initialState = fromJS({
@@ -127,7 +129,7 @@ function appReducer(state = initialState, action) {
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.initialData))
         .updateIn(['newContentType', 'connection'], () => action.connections[0])
-        .update('models', () => List(action.models));
+        .update('models', () => List(action.models).sortBy(model => model.name));
     case ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS:
       return state.updateIn(['modifiedData', ...action.keys], () => action.value);
     case ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS:
@@ -180,6 +182,33 @@ function appReducer(state = initialState, action) {
 
         return attribute;
       });
+    case SUBMIT_CONTENT_TYPE_SUCCEEDED: {
+      const newName = state.getIn(['modifiedData', action.oldContentTypeName, 'name']);
+      const newState = state
+        .updateIn(['modifiedData', newName], () => state.getIn(['modifiedData', action.oldContentTypeName]))
+        .updateIn(['initialData', newName], () => state.getIn(['modifiedData', action.oldContentTypeName]));
+
+      if (newName === action.oldContentTypeName) {
+        return newState;
+      }
+
+      return (
+        newState
+          // .updateIn(['modifiedData', newName], () => state.getIn(['modifiedData', action.oldContentTypeName]))
+          // .updateIn(['initialData', newName], () => state.getIn(['modifiedData', action.oldContentTypeName]))
+          .removeIn(['modifiedData', action.oldContentTypeName])
+          .removeIn(['initialData', action.oldContentTypeName])
+          .updateIn(
+            [
+              'models',
+              state.get('models').findIndex(model => model.name === action.oldContentTypeName),
+              'name',
+            ],
+            () => newName,
+          )
+          .update('models', models => models.sortBy(model => model.name))
+      );
+    }
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state
         .updateIn(['initialData', state.getIn(['newContentType', 'name'])], () => state.get('newContentType'))

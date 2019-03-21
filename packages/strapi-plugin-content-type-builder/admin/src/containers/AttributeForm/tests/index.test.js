@@ -265,7 +265,7 @@ describe('<AttributeForm />', () => {
 
         const { handleSubmitAndContinue } = wrapper.instance();
 
-        handleSubmitAndContinue();
+        handleSubmitAndContinue({ preventDefault: jest.fn() });
 
         expect(props.onSubmit).toHaveBeenCalledWith(true);
       });
@@ -278,7 +278,7 @@ describe('<AttributeForm />', () => {
 
         const { handleSubmitAndContinue } = wrapper.instance();
 
-        handleSubmitAndContinue();
+        handleSubmitAndContinue({ preventDefault: jest.fn() });
 
         expect(props.onSubmitEdit).toHaveBeenCalledWith(true);
         expect(context.emitEvent).toHaveBeenCalledWith('willAddMoreFieldToContentType');
@@ -289,7 +289,7 @@ describe('<AttributeForm />', () => {
 
         const { handleSubmitAndContinue } = wrapper.instance();
 
-        handleSubmitAndContinue();
+        handleSubmitAndContinue({ preventDefault: jest.fn() });
 
         expect(props.onSubmitEdit).not.toHaveBeenCalled();
         expect(props.onSubmit).not.toHaveBeenCalled();
