@@ -59,6 +59,10 @@ module.exports = {
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
       // Silent recursive parser.
       const parser = (value) => {
+        if (_.isString(value)) {
+          return value;
+        }
+
         try {
           value = JSON.parse(value);
         } catch (e) {
@@ -107,6 +111,10 @@ module.exports = {
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
       // Silent recursive parser.
       const parser = (value) => {
+        if (_.isString(value)) {
+          return value;
+        }
+
         try {
           value = JSON.parse(value);
         } catch (e) {
