@@ -118,8 +118,11 @@ const hydrateModel = ({ model: rootModel, populatedModels }) => obj => {
     const val = _.get(obj, key);
     if (!val) return acc;
 
+    const assocModel = findModelByPath({ rootModel, path: key });
+
+    if (!assocModel) return acc;
     const subHydrate = hydrateModel({
-      model: findModelByPath({ rootModel, path: key }),
+      model: assocModel,
       populatedModels: populatedModels[key],
     });
 
@@ -283,6 +286,7 @@ const buildMatch = ({ assoc }) => {
         },
       };
     }
+    case 'manyToManyMorph':
     case 'oneToManyMorph': {
       return [
         { $unwind: { path: `$${assoc.via}`, preserveNullAndEmptyArrays: true } },
@@ -298,12 +302,15 @@ const buildMatch = ({ assoc }) => {
         },
       ];
     }
+    default: return []
   }
 };
 
 const buildLookup = ({ part, model, paths }) => {
   const assoc = model.associations.find(a => a.alias === part);
   const assocModel = findModelByAssoc({ assoc });
+
+  if (!assocModel) return []
 
   return [
     {
