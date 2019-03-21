@@ -5,9 +5,6 @@
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
-import { compose } from 'redux';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
@@ -26,13 +23,11 @@ import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperModal from '../../components/WrapperModal';
 
-import { makeSelectConnections } from '../App/selectors';
-
 import forms from './forms.json';
 
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
-export class ModelForm extends React.Component {
+class ModelForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { didCheckErrors: false, formErrors: {}, isVisible: false };
 
@@ -261,13 +256,4 @@ ModelForm.propTypes = {
   updateTempContentType: PropTypes.func,
 };
 
-const mapStateToProps = createStructuredSelector({
-  connections: makeSelectConnections(),
-});
-
-const withConnect = connect(
-  mapStateToProps,
-  null,
-);
-
-export default compose(withConnect)(ModelForm);
+export default ModelForm;

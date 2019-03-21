@@ -8,7 +8,7 @@ import Input from 'components/InputsIndex';
 import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
 
-import { ModelForm } from '../index';
+import ModelForm from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 const context = { emitEvent: jest.fn() };

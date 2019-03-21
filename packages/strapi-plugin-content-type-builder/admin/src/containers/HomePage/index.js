@@ -46,6 +46,7 @@ class HomePage extends React.Component {
     const {
       cancelNewContentType,
       canOpenModal,
+      connections,
       createTempContentType,
       deleteModel,
       deleteTemporaryModel,
@@ -95,6 +96,7 @@ class HomePage extends React.Component {
           actionType="create"
           activeTab={getQueryParameters(search, 'settingType')}
           cancelNewContentType={cancelNewContentType}
+          connections={connections}
           createTempContentType={createTempContentType}
           currentData={modifiedData}
           modifiedData={newContentType}
@@ -114,6 +116,7 @@ HomePage.contextTypes = {
 
 HomePage.defaultProps = {
   canOpenModal: true,
+  connections: ['default'],
   models: [],
   modifiedData: {},
 };
@@ -121,6 +124,7 @@ HomePage.defaultProps = {
 HomePage.propTypes = {
   cancelNewContentType: PropTypes.func.isRequired,
   canOpenModal: PropTypes.bool,
+  connections: PropTypes.array,
   createTempContentType: PropTypes.func.isRequired,
   deleteModel: PropTypes.func.isRequired,
   models: PropTypes.array,

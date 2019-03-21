@@ -2,9 +2,15 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { Redirect } from 'react-router-dom';
+import { Redirect, BrowserRouter } from 'react-router-dom';
+
+import mountWithIntl from 'testUtils/mountWithIntl';
+import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
 import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
+
+import pluginId from '../../../pluginId';
+import pluginTradsEn from '../../../translations/en.json';
 
 import AttributeLi from '../../../components/AttributeLi';
 import Block from '../../../components/Block';
@@ -16,6 +22,18 @@ import { ModelPage, mapDispatchToProps } from '../index';
 
 // import CustomLink from '../CustomLink';
 import initialData from './initialData.json';
+
+const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
+
+const context = { emitEvent: jest.fn() };
+const renderComponent = (props = {}) =>
+  mountWithIntl(
+    <BrowserRouter>
+      <ModelPage {...props} />
+    </BrowserRouter>,
+    messages,
+    context,
+  );
 
 describe('<ModelPage />', () => {
   let props;
@@ -34,7 +52,7 @@ describe('<ModelPage />', () => {
       },
       location: {
         search: '',
-        pathname: `${basePath}/product`,
+        pathname: `${basePath}/user&source=users-permissions`,
       },
       match: {
         isExact: true,
@@ -71,7 +89,20 @@ describe('<ModelPage />', () => {
           source: 'users-permissions',
           isTemporary: false,
         },
-        { icon: 'fa-cube', name: 'product', description: 'super api', fields: 6, isTemporary: false },
+        {
+          icon: 'fa-cube',
+          name: 'product',
+          description: 'super api',
+          fields: 6,
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'test1',
+          description: 'super api',
+          fields: 6,
+          isTemporary: true,
+        },
       ],
       newContentType: {
         collectionName: '',
@@ -165,10 +196,19 @@ describe('<ModelPage />', () => {
 
   describe('CTB <ModelPage /> instances', () => {
     describe('GetModel', () => {
-      it('should return the model', () => {
+      it('should return the correct model', () => {
         const { getModel } = shallow(<ModelPage {...props} />).instance();
 
         expect(getModel()).toEqual(initialData.user);
+      });
+
+      it('should return the newContentType if the url matches', () => {
+        (props.location.pathname = `${basePath}/test1`), (props.match.params.modelName = 'test1');
+        props.newContentType.name = 'test1';
+
+        const { getModel } = shallow(<ModelPage {...props} />).instance();
+
+        expect(getModel()).toEqual(props.newContentType);
       });
     });
 
@@ -196,7 +236,7 @@ describe('<ModelPage />', () => {
       });
     });
 
-    describe('getModelName', () => {
+    describe('GetModelName', () => {
       it("should return the model's name field", () => {
         const { getModelName } = shallow(<ModelPage {...props} />).instance();
 
@@ -204,11 +244,11 @@ describe('<ModelPage />', () => {
       });
     });
 
-    describe('getModelsNumber', () => {
+    describe('GetModelsNumber', () => {
       it('should return the number of models', () => {
         const { getModelsNumber } = shallow(<ModelPage {...props} />).instance();
 
-        expect(getModelsNumber()).toEqual(4);
+        expect(getModelsNumber()).toEqual(5);
       });
     });
 
@@ -225,7 +265,7 @@ describe('<ModelPage />', () => {
       });
     });
 
-    describe('getModelRelationShipsLength', () => {
+    describe('GetModelRelationShipsLength', () => {
       it('should return 0 if there is no relation', () => {
         props.match.params.modelName = 'product';
         props.match.path = `${basePath}/product`;
@@ -263,11 +303,11 @@ describe('<ModelPage />', () => {
     });
 
     describe('RenderLinks', () => {
-      it('should render 4 links in the menu', () => {
+      it('should render 5 links in the menu', () => {
         const wrapper = shallow(<ModelPage {...props} />);
         const links = wrapper.find(LeftMenuLink);
 
-        expect(links).toHaveLength(4);
+        expect(links).toHaveLength(5);
       });
     });
 
@@ -278,6 +318,292 @@ describe('<ModelPage />', () => {
 
         expect(links).toHaveLength(8);
       });
+    });
+  });
+});
+
+const wait = async () => new Promise(resolve => setTimeout(resolve, 100));
+
+describe('<ModelPage /> lifecycle', () => {
+  let props;
+  let topCompo;
+  const basePath = '/plugins/content-type-builder/models';
+
+  beforeEach(() => {
+    props = {
+      addAttributeToExistingContentType: jest.fn(),
+      addAttributeToTempContentType: jest.fn(),
+      cancelNewContentType: jest.fn(),
+      canOpenModal: true,
+      clearTemporaryAttribute: jest.fn(),
+      createTempContentType: jest.fn(),
+      deleteModelAttribute: jest.fn(),
+      history: {
+        push: jest.fn(),
+      },
+      location: {
+        search: '',
+        pathname: `${basePath}/product`,
+      },
+      match: {
+        isExact: true,
+        params: {
+          modelName: 'product',
+        },
+        path: `${basePath}/product`,
+        url: `${basePath}/:modelName`,
+      },
+      initialData: cloneDeep(initialData),
+      modifiedData: cloneDeep(initialData),
+      models: [
+        {
+          icon: 'fa-cube',
+          name: 'permission',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'user',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'role',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'product',
+          description: 'super api',
+          fields: 6,
+          isTemporary: false,
+        },
+        {
+          icon: 'fa-cube',
+          name: 'test1',
+          description: 'super api',
+          fields: 6,
+          isTemporary: true,
+        },
+      ],
+      newContentType: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        mainField: '',
+        name: '',
+        attributes: {},
+      },
+      onChangeExistingContentTypeMainInfos: jest.fn(),
+      onChangeNewContentTypeMainInfos: jest.fn(),
+      onChangeAttribute: jest.fn(),
+      resetEditExistingContentType: jest.fn(),
+      resetEditTempContentType: jest.fn(),
+      resetExistingContentTypeMainInfos: jest.fn(),
+      resetNewContentTypeMainInfos: jest.fn(),
+      setTemporaryAttribute: jest.fn(),
+      submitTempContentType: jest.fn(),
+      temporaryAttribute: {},
+      updateTempContentType: jest.fn(),
+    };
+  });
+
+  afterEach(() => {
+    topCompo.unmount();
+  });
+
+  describe('HandleClickEditAttribute', () => {
+    it('should emit the event editFieldOfContentType', async () => {
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
+
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const { handleClickEditAttribute } = wrapper.instance();
+
+      handleClickEditAttribute('username', 'string');
+
+      expect(spyOnWait).toHaveBeenCalled();
+
+      await wait();
+
+      expect(context.emitEvent).toHaveBeenCalledWith('willEditFieldOfContentType');
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=attributeForm&attributeType=string&settingType=base&actionType=edit&attributeName=username',
+      });
+    });
+
+    it('should handle the <number> type correctly', async () => {
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
+
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const { handleClickEditAttribute } = wrapper.instance();
+
+      handleClickEditAttribute('username', 'float');
+
+      expect(spyOnWait).toHaveBeenCalled();
+
+      await wait();
+
+      expect(context.emitEvent).toHaveBeenCalledWith('willEditFieldOfContentType');
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=attributeForm&attributeType=number&settingType=base&actionType=edit&attributeName=username',
+      });
+    });
+  });
+
+  describe('HandleClickEditModelMainInfos', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
+      props.canOpenModal = false;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
+
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const spyOnDisplayNotification = jest.spyOn(wrapper.instance(), 'displayNotificationCTNotSaved');
+      const { handleClickEditModelMainInfos } = wrapper.instance();
+
+      handleClickEditModelMainInfos();
+
+      expect(spyOnWait).toHaveBeenCalled();
+
+      await wait();
+
+      expect(context.emitEvent).not.toHaveBeenCalledWith('willEditNameOfContentType');
+      expect(props.history.push).not.toHaveBeenCalled();
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
+
+    it('should emit the event editFieldOfContentType', async () => {
+      props.canOpenModal = true;
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
+
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const { handleClickEditModelMainInfos } = wrapper.instance();
+
+      handleClickEditModelMainInfos();
+
+      expect(spyOnWait).toHaveBeenCalled();
+
+      await wait();
+
+      expect(context.emitEvent).toHaveBeenCalledWith('willEditNameOfContentType');
+      expect(props.history.push).toHaveBeenCalledWith({
+        search: 'modalType=model&settingType=base&actionType=edit&modelName=product',
+      });
+    });
+  });
+
+  describe('HandleClickOpenModalChooseAttributes', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
+      props.canOpenModal = false;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
+
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const spyOnDisplayNotification = jest.spyOn(wrapper.instance(), 'displayNotificationCTNotSaved');
+      const { handleClickOpenModalChooseAttributes } = wrapper.instance();
+
+      handleClickOpenModalChooseAttributes();
+
+      expect(spyOnWait).toHaveBeenCalled();
+
+      await wait();
+
+      expect(props.history.push).not.toHaveBeenCalled();
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
+
+    it('should emit the event editFieldOfContentType', async () => {
+      props.canOpenModal = true;
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
+
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const { handleClickOpenModalChooseAttributes } = wrapper.instance();
+
+      handleClickOpenModalChooseAttributes();
+
+      expect(spyOnWait).toHaveBeenCalled();
+
+      await wait();
+
+      expect(context.emitEvent).toHaveBeenCalledWith('willEditNameOfContentType');
+      expect(props.history.push).toHaveBeenCalledWith({
+        search: 'modalType=chooseAttributes',
+      });
+    });
+  });
+
+  describe('handleClickOpenModalCreateCT', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
+      props.canOpenModal = false;
+      topCompo = renderComponent(props);
+
+      const wrapper = topCompo.find(ModelPage);
+      const spyOnDisplayNotification = jest.spyOn(wrapper.instance(), 'displayNotificationCTNotSaved');
+      const { handleClickOpenModalCreateCT } = wrapper.instance();
+
+      handleClickOpenModalCreateCT();
+
+      expect(props.history.push).not.toHaveBeenCalled();
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
+
+    it('should emit the event editFieldOfContentType', async () => {
+      props.canOpenModal = true;
+      topCompo = renderComponent(props);
+
+      const wrapper = topCompo.find(ModelPage);
+      const { handleClickOpenModalCreateCT } = wrapper.instance();
+
+      handleClickOpenModalCreateCT();
+
+      expect(props.history.push).toHaveBeenCalledWith({
+        search: 'modalType=model&settingType=base&actionType=create',
+      });
+    });
+  });
+
+  describe('HandleClickOnTrashIcon', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
+      props.canOpenModal = false;
+      topCompo = renderComponent(props);
+
+      const wrapper = topCompo.find(ModelPage);
+      const spyOnDisplayNotification = jest.spyOn(wrapper.instance(), 'displayNotificationCTNotSaved');
+      const { handleClickOnTrashIcon } = wrapper.instance();
+
+      handleClickOnTrashIcon('username');
+
+      expect(context.emitEvent).not.toHaveBeenCalledWith('willDeleteFieldOfContentType');
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
+
+    it('should emit the event willDeleteFieldOfContentType', async () => {
+      props.canOpenModal = true;
+      topCompo = renderComponent(props);
+
+      const wrapper = topCompo.find(ModelPage);
+      const { handleClickOnTrashIcon } = wrapper.instance();
+
+      handleClickOnTrashIcon('username');
+
+      expect(wrapper.state()).toEqual({ showWarning: true, removePrompt: false, attrToDelete: 'username' });
+      expect(context.emitEvent).toHaveBeenCalledWith('willDeleteFieldOfContentType');
     });
   });
 });

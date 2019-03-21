@@ -127,6 +127,7 @@ export class ModelPage extends React.Component {
 
     const description = get(initialData, [this.getModelName(), 'description'], null);
 
+    /* istanbul ignore if */
     // eslint-disable-next-line no-extra-boolean-cast
     return !!description
       ? description
@@ -168,14 +169,17 @@ export class ModelPage extends React.Component {
       resetEditTempContentType,
       submitTempContentType,
     } = this.props;
+    /* istanbul ignore if */
     const shouldShowActions = this.isUpdatingTemporaryContentType()
       ? this.getModelAttributesLength() > 0
       : !isEqual(modifiedData[this.getModelName()], initialData[this.getModelName()]);
     const handleSubmit = this.isUpdatingTemporaryContentType() ? submitTempContentType : () => {};
+    /* istanbul ignore next */
     const handleCancel = this.isUpdatingTemporaryContentType()
       ? resetEditTempContentType
       : () => resetEditExistingContentType(this.getModelName());
 
+    /* istanbul ignore if */
     if (shouldShowActions) {
       return [
         {
@@ -201,6 +205,7 @@ export class ModelPage extends React.Component {
     const { modifiedData, newContentType } = this.props;
     const name = this.getModelName();
 
+    /* istanbul ignore if */
     const title = this.isUpdatingTemporaryContentType()
       ? get(newContentType, 'name', null)
       : get(modifiedData, [name, 'name'], null);
@@ -219,6 +224,7 @@ export class ModelPage extends React.Component {
   getSectionTitle = () => {
     const base = `${pluginId}.menu.section.contentTypeBuilder.name.`;
 
+    /* istanbul ignore if */
     return this.getModelsNumber() > 1 ? `${base}plural` : `${base}singular`;
   };
 
@@ -233,6 +239,7 @@ export class ModelPage extends React.Component {
     setTemporaryAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
 
     await this.wait();
+
     emitEvent('willEditFieldOfContentType');
     push({
       search: `modalType=attributeForm&attributeType=${attributeType}&settingType=base&actionType=edit&attributeName=${attributeName}`,
@@ -301,6 +308,7 @@ export class ModelPage extends React.Component {
     const { deleteModelAttribute } = this.props;
     const { attrToDelete } = this.state;
 
+    /* istanbul ignore if */
     const keys = this.isUpdatingTemporaryContentType()
       ? ['newContentType', 'attributes', attrToDelete]
       : ['modifiedData', this.getModelName(), 'attributes', attrToDelete];
@@ -427,6 +435,7 @@ export class ModelPage extends React.Component {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
     const {
       cancelNewContentType,
+      connections,
       clearTemporaryAttribute,
       createTempContentType,
       history: { push },
@@ -557,6 +566,7 @@ export class ModelPage extends React.Component {
           actionType={actionType}
           activeTab={settingType}
           cancelNewContentType={cancelNewContentType}
+          connections={connections}
           createTempContentType={createTempContentType}
           currentData={modifiedData}
           modifiedData={this.getFormData()}
@@ -588,16 +598,17 @@ ModelPage.contextTypes = {
 };
 
 ModelPage.defaultProps = {
+  connections: ['default'],
   canOpenModal: true,
 };
 
 ModelPage.propTypes = {
-  ...routerPropTypes({ params: PropTypes.string }).isRequired,
   addAttributeToExistingContentType: PropTypes.func.isRequired,
   addAttributeToTempContentType: PropTypes.func.isRequired,
   cancelNewContentType: PropTypes.func.isRequired,
   canOpenModal: PropTypes.bool,
   clearTemporaryAttribute: PropTypes.func.isRequired,
+  connections: PropTypes.array,
   createTempContentType: PropTypes.func.isRequired,
   deleteModelAttribute: PropTypes.func.isRequired,
   initialData: PropTypes.object.isRequired,
@@ -614,6 +625,7 @@ ModelPage.propTypes = {
   submitTempContentType: PropTypes.func.isRequired,
   temporaryAttribute: PropTypes.object.isRequired,
   updateTempContentType: PropTypes.func.isRequired,
+  ...routerPropTypes({ params: PropTypes.string }).isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
