@@ -87,6 +87,7 @@ export function* submitCT({
   }
 }
 
+/* istanbul ignore-next */
 export function* submitTempCT({ body, context: { emitEvent, plugins, updatePlugin } }) {
   try {
     yield put(emitEvent('willSaveContentType'));

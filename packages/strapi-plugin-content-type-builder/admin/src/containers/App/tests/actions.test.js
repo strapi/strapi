@@ -12,7 +12,7 @@ import {
   onChangeExistingContentTypeMainInfos,
   onChangeNewContentTypeMainInfos,
   onChangeAttribute,
-  // submitTempContentType,
+  submitTempContentType,
   submitTempContentTypeSucceeded,
   saveEditedAttribute,
   setTemporaryAttribute,
@@ -24,6 +24,9 @@ import {
   updateTempContentType,
   addAttributeToExistingContentType,
   deleteModelAttribute,
+  submitContentType,
+  submitContentTypeSucceeded,
+  formatModelAttributes,
 } from '../actions';
 import {
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
@@ -38,7 +41,7 @@ import {
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
-  // SUBMIT_TEMP_CONTENT_TYPE,
+  SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   SAVE_EDITED_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE,
@@ -50,11 +53,13 @@ import {
   UPDATE_TEMP_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
   DELETE_MODEL_ATTRIBUTE,
+  SUBMIT_CONTENT_TYPE,
+  SUBMIT_CONTENT_TYPE_SUCCEEDED,
 } from '../constants';
 
 describe('Content Type Builder Action utils', () => {
   describe('BuildModelAttributes', () => {
-    it('should generate an object with an array of attributes', () => {
+    it('should generate an object with an attributes object', () => {
       const attributes = [
         {
           name: 'type',
@@ -79,6 +84,66 @@ describe('Content Type Builder Action utils', () => {
       };
 
       expect(buildModelAttributes(attributes)).toEqual(expected);
+    });
+  });
+
+  describe('formatModelAttributes', () => {
+    it('should generate an array of object', () => {
+      const expected = [
+        { name: 'action', params: { type: 'string', required: true, configurable: false } },
+        { name: 'controller', params: { type: 'string', required: true, configurable: false } },
+        { name: 'enabled', params: { type: 'boolean', required: true, configurable: false } },
+        { name: 'policy', params: { type: 'boolean', configurable: false } },
+        {
+          name: 'role',
+          params: {
+            key: 'permissions',
+            nature: 'manyToOne',
+            pluginValue: 'users-permissions',
+            plugin: true,
+            configurable: false,
+            targetColumnName: '',
+            target: 'role',
+          },
+        },
+        { name: 'type', params: { type: 'string', required: true, configurable: false } },
+      ];
+      const data = {
+        action: {
+          type: 'string',
+          required: true,
+          configurable: false,
+        },
+        controller: {
+          type: 'string',
+          required: true,
+          configurable: false,
+        },
+        enabled: {
+          type: 'boolean',
+          required: true,
+          configurable: false,
+        },
+        policy: {
+          type: 'boolean',
+          configurable: false,
+        },
+        role: {
+          configurable: false,
+          key: 'permissions',
+          nature: 'manyToOne',
+          plugin: 'users-permissions',
+          targetColumnName: '',
+          target: 'role',
+        },
+        type: {
+          type: 'string',
+          required: true,
+          configurable: false,
+        },
+      };
+
+      expect(formatModelAttributes(data)).toEqual(expected);
     });
   });
 });
@@ -429,15 +494,178 @@ describe('App actions', () => {
     });
   });
 
-  // describe('SubmitTempContentType', () => {
-  //   it('has a type SUBMIT_TEMP_CONTENT_TYPE and returns the correct data', () => {
-  //     const expected = {
-  //       type: SUBMIT_TEMP_CONTENT_TYPE,
-  //     };
+  describe('SubmitContentType', () => {
+    it('has a type SUBMIT_CONTENT_TYPE and returns the correct data', () => {
+      const data = {
+        attributes: {
+          action: {
+            type: 'string',
+            required: true,
+            configurable: false,
+          },
+          controller: {
+            type: 'string',
+            required: true,
+            configurable: false,
+          },
+          enabled: {
+            type: 'boolean',
+            required: true,
+            configurable: false,
+          },
+          policy: {
+            type: 'boolean',
+            configurable: false,
+          },
+          role: {
+            configurable: false,
+            key: 'permissions',
+            nature: 'manyToOne',
+            plugin: 'users-permissions',
+            targetColumnName: '',
+            target: 'role',
+          },
+          type: {
+            type: 'string',
+            required: true,
+            configurable: false,
+          },
+        },
+        collectionName: 'users-permissions_permission',
+        connection: 'default',
+        description: '',
+        mainField: '',
+        name: 'permission',
+      };
+      const expectedData = {
+        collectionName: 'users-permissions_permission',
+        connection: 'default',
+        description: '',
+        mainField: '',
+        name: 'permission',
+        attributes: [
+          { name: 'action', params: { type: 'string', required: true, configurable: false } },
+          { name: 'controller', params: { type: 'string', required: true, configurable: false } },
+          { name: 'enabled', params: { type: 'boolean', required: true, configurable: false } },
+          { name: 'policy', params: { type: 'boolean', configurable: false } },
+          {
+            name: 'role',
+            params: {
+              key: 'permissions',
+              nature: 'manyToOne',
+              pluginValue: 'users-permissions',
+              plugin: true,
+              configurable: false,
+              targetColumnName: '',
+              target: 'role',
+            },
+          },
+          { name: 'type', params: { type: 'string', required: true, configurable: false } },
+        ],
+      };
+      const context = {};
+      const expected = {
+        type: SUBMIT_CONTENT_TYPE,
+        oldContentTypeName: 'permission',
+        body: expectedData,
+        source: null,
+        context,
+      };
 
-  //     expect(submitTempContentType()).toEqual(expected);
-  //   });
-  // });
+      expect(submitContentType('permission', data, context, null)).toEqual(expected);
+    });
+  });
+
+  describe('SubmitContentTypeSucceeded', () => {
+    it('should have a type SUBMIT_CONTENT_TYPE_SUCCEEDED and returns the correct data', () => {
+      const expected = {
+        type: SUBMIT_CONTENT_TYPE_SUCCEEDED,
+        oldContentTypeName: 'test',
+      };
+
+      expect(submitContentTypeSucceeded('test')).toEqual(expected);
+    });
+  });
+
+  describe('SubmitTempContentType', () => {
+    it('has a type SUBMIT_TEMP_CONTENT_TYPE and returns the correct data', () => {
+      const data = {
+        attributes: {
+          action: {
+            type: 'string',
+            required: true,
+            configurable: false,
+          },
+          controller: {
+            type: 'string',
+            required: true,
+            configurable: false,
+          },
+          enabled: {
+            type: 'boolean',
+            required: true,
+            configurable: false,
+          },
+          policy: {
+            type: 'boolean',
+            configurable: false,
+          },
+          role: {
+            configurable: false,
+            key: 'permissions',
+            nature: 'manyToOne',
+            plugin: 'users-permissions',
+            targetColumnName: '',
+            target: 'role',
+          },
+          type: {
+            type: 'string',
+            required: true,
+            configurable: false,
+          },
+        },
+        collectionName: 'users-permissions_permission',
+        connection: 'default',
+        description: '',
+        mainField: '',
+        name: 'permission',
+      };
+      const expectedData = {
+        collectionName: 'users-permissions_permission',
+        connection: 'default',
+        description: '',
+        mainField: '',
+        name: 'permission',
+        attributes: [
+          { name: 'action', params: { type: 'string', required: true, configurable: false } },
+          { name: 'controller', params: { type: 'string', required: true, configurable: false } },
+          { name: 'enabled', params: { type: 'boolean', required: true, configurable: false } },
+          { name: 'policy', params: { type: 'boolean', configurable: false } },
+          {
+            name: 'role',
+            params: {
+              key: 'permissions',
+              nature: 'manyToOne',
+              pluginValue: 'users-permissions',
+              plugin: true,
+              configurable: false,
+              targetColumnName: '',
+              target: 'role',
+            },
+          },
+          { name: 'type', params: { type: 'string', required: true, configurable: false } },
+        ],
+      };
+      const context = {};
+      const expected = {
+        type: SUBMIT_TEMP_CONTENT_TYPE,
+        body: expectedData,
+        context,
+      };
+
+      expect(submitTempContentType(data, context)).toEqual(expected);
+    });
+  });
 
   describe('SubmitTempContentTypeSucceeded', () => {
     it('has a type SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED and returns the correct data', () => {

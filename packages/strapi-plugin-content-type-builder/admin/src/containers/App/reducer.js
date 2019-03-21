@@ -25,10 +25,9 @@ import {
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE,
-  // SUBMIT_CONTENT_TYPE_SUCCEEDED,
+  SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
-  SUBMIT_CONTENT_TYPE_SUCCEEDED,
 } from './constants';
 
 export const initialState = fromJS({
@@ -192,22 +191,18 @@ function appReducer(state = initialState, action) {
         return newState;
       }
 
-      return (
-        newState
-          // .updateIn(['modifiedData', newName], () => state.getIn(['modifiedData', action.oldContentTypeName]))
-          // .updateIn(['initialData', newName], () => state.getIn(['modifiedData', action.oldContentTypeName]))
-          .removeIn(['modifiedData', action.oldContentTypeName])
-          .removeIn(['initialData', action.oldContentTypeName])
-          .updateIn(
-            [
-              'models',
-              state.get('models').findIndex(model => model.name === action.oldContentTypeName),
-              'name',
-            ],
-            () => newName,
-          )
-          .update('models', models => models.sortBy(model => model.name))
-      );
+      return newState
+        .removeIn(['modifiedData', action.oldContentTypeName])
+        .removeIn(['initialData', action.oldContentTypeName])
+        .updateIn(
+          [
+            'models',
+            state.get('models').findIndex(model => model.name === action.oldContentTypeName),
+            'name',
+          ],
+          () => newName,
+        )
+        .update('models', models => models.sortBy(model => model.name));
     }
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state

@@ -93,30 +93,6 @@ describe('CTB <App /> GetData saga', () => {
   });
 });
 
-// describe('CTB <App /> SubmitTempCt saga', () => {
-//   let submitTempCtGenerator;
-
-//   beforeEach(() => {
-//     submitTempCtGenerator = submitTempCT({
-//       action: {
-//         oldContentTypeName: '',
-//         body: {},
-//         source: null,
-//         context: { emitEvent: jest.fn(), plugins: {}, updatePlugin: jest.fn() },
-//       },
-//     });
-//     // const callDescriptor = submitTempCtGenerator.next(response).value;
-
-//     // expect(callDescriptor).toMatchSnapshot();
-//   });
-
-//   it('should dispatch the getDataSucceeded action if it requests the data successfully', () => {
-//     const putDescriptor = submitTempCtGenerator.next(response).value;
-
-//     expect(putDescriptor).toEqual(put(submitTempContentTypeSucceeded()));
-//   });
-// });
-
 describe('defaultSaga Saga', () => {
   const defaultSagaSaga = defaultSaga();
 
