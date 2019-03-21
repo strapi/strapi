@@ -11,7 +11,7 @@ import {
   deleteTemporaryModel,
   onChangeExistingContentTypeMainInfos,
   onChangeNewContentTypeMainInfos,
-  onCreateAttribute,
+  onChangeAttribute,
   submitTempContentType,
   submitTempContentTypeSucceeded,
   saveEditedAttribute,
@@ -37,7 +37,7 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
-  ON_CREATE_ATTRIBUTE,
+  ON_CHANGE_ATTRIBUTE,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   SAVE_EDITED_ATTRIBUTE,
@@ -325,8 +325,8 @@ describe('App actions', () => {
     });
   });
 
-  describe('OnCreateAttribute', () => {
-    it('has a type ON_CREATE_ATTRIBUTE and returns the correct data', () => {
+  describe('onChangeAttribute', () => {
+    it('has a type ON_CHANGE_ATTRIBUTE and returns the correct data', () => {
       const e = {
         target: {
           name: 'test',
@@ -334,12 +334,12 @@ describe('App actions', () => {
         },
       };
       const expected = {
-        type: ON_CREATE_ATTRIBUTE,
+        type: ON_CHANGE_ATTRIBUTE,
         keys: ['test'],
         value: 'test',
       };
 
-      expect(onCreateAttribute(e)).toEqual(expected);
+      expect(onChangeAttribute(e)).toEqual(expected);
     });
   });
 

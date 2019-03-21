@@ -42,7 +42,7 @@ import {
   addAttributeToTempContentType,
   clearTemporaryAttribute,
   deleteModelAttribute,
-  onCreateAttribute,
+  onChangeAttribute,
   resetEditExistingContentType,
   resetEditTempContentType,
   submitTempContentType,
@@ -435,7 +435,7 @@ export class ModelPage extends React.Component {
       modifiedData,
       onChangeExistingContentTypeMainInfos,
       onChangeNewContentTypeMainInfos,
-      onCreateAttribute,
+      onChangeAttribute,
       resetExistingContentTypeMainInfos,
       resetNewContentTypeMainInfos,
       temporaryAttribute,
@@ -548,7 +548,7 @@ export class ModelPage extends React.Component {
           isOpen={modalType === 'attributeForm' && attributeType !== 'relation'}
           modifiedData={temporaryAttribute}
           onCancel={clearTemporaryAttribute}
-          onChange={onCreateAttribute}
+          onChange={onChangeAttribute}
           onSubmit={this.handleSubmit}
           onSubmitEdit={this.handleSubmitEdit}
           push={push}
@@ -604,9 +604,9 @@ ModelPage.propTypes = {
   models: PropTypes.array.isRequired,
   modifiedData: PropTypes.object.isRequired,
   newContentType: PropTypes.object.isRequired,
+  onChangeAttribute: PropTypes.func.isRequired,
   onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
-  onCreateAttribute: PropTypes.func.isRequired,
   resetEditExistingContentType: PropTypes.func.isRequired,
   resetEditTempContentType: PropTypes.func.isRequired,
   resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
@@ -623,7 +623,7 @@ export function mapDispatchToProps(dispatch) {
       addAttributeToTempContentType,
       clearTemporaryAttribute,
       deleteModelAttribute,
-      onCreateAttribute,
+      onChangeAttribute,
       resetEditExistingContentType,
       resetEditTempContentType,
       submitTempContentType,

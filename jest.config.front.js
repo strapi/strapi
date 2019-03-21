@@ -10,6 +10,22 @@ module.exports = {
     '!packages/strapi-plugin-content-type-builder/admin/src/containers/HomePageOld/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/containers/ModelPageOld/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/containers/Form/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/ContentHeader/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/AttributeCard/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/AttributeRow/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/InputCheckboxWithNestedInputs/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/List/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/PluginLeftMenu/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/PluginLeftMenuLink/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/PluginLeftMenuSection/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/PopUpForm/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/PopUpHeaderNavLink/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/PopUpRelations/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/RelationBox/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/RelationIco/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/RelationNaturePicker/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
+    '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/containers/Form/utils/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/utils/*.js',
     // 'packages/strapi-plugin-**/**/admin/src/**/**/*.{js,jsx}',
@@ -21,10 +37,10 @@ module.exports = {
   coverageThreshold: {
     global: {
       // NOTE: This should be increased at some point
-      statements: 30,
-      branches: 30,
-      functions: 30,
-      lines: 30,
+      statements: 80,
+      branches: 80,
+      functions: 80,
+      lines: 80,
     },
   },
   globals: {
@@ -40,23 +56,24 @@ module.exports = {
     '<rootDir>/packages/strapi-helper-plugin/lib/src',
   ],
   moduleNameMapper: {
-    '.*\\.(css|less|styl|scss|sass)$': '<rootDir>/packages/strapi-helper-plugin/lib/internals/mocks/cssModule.js',
+    '.*\\.(css|less|styl|scss|sass)$':
+      '<rootDir>/packages/strapi-helper-plugin/lib/internals/mocks/cssModule.js',
     '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/packages/strapi-helper-plugin/lib/internals/mocks/image.js',
   },
   rootDir: process.cwd(),
-  setupTestFrameworkScriptFile: '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/test-bundler.js',
+  setupTestFrameworkScriptFile:
+    '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/test-bundler.js',
   setupFiles: [
     '<rootDir>/packages/strapi-helper-plugin/node_modules/raf/polyfill',
     '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/enzyme-setup.js',
-    '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/strapi.js'
+    '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/strapi.js',
   ],
   testRegex: 'tests/.*\\.test\\.js$',
   transform: {
     '^.+\\.js$': 'babel-jest',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$': '<rootDir>/fileTransformer.js',
-
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+      '<rootDir>/fileTransformer.js',
   },
   testURL: 'http://localhost:4000/admin',
 };
-

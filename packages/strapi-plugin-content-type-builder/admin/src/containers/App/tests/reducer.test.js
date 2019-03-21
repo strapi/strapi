@@ -12,7 +12,7 @@ import {
   getDataSucceeded,
   onChangeExistingContentTypeMainInfos,
   onChangeNewContentTypeMainInfos,
-  onCreateAttribute,
+  onChangeAttribute,
   resetNewContentTypeMainInfos,
   resetEditExistingContentType,
   resetEditTempContentType,
@@ -360,11 +360,11 @@ describe('appReducer', () => {
     expect(appReducer(state, onChangeNewContentTypeMainInfos({ target }))).toEqual(expected);
   });
 
-  it('should handle the onCreateAttribute action correctly', () => {
+  it('should handle the onChangeAttribute action correctly', () => {
     const expected = state.setIn(['temporaryAttribute', 'name'], 'test');
     const target = { name: 'name', value: 'test' };
 
-    expect(appReducer(state, onCreateAttribute({ target }))).toEqual(expected);
+    expect(appReducer(state, onChangeAttribute({ target }))).toEqual(expected);
   });
 
   it('should handle the resetEditExistingContentType action correctly', () => {

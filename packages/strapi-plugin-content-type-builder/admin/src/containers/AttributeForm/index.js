@@ -46,6 +46,7 @@ class AttributeForm extends React.Component {
     const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(
       attribute => attribute !== attributeToEditName,
     );
+
     if (isEmpty(modifiedData.name)) {
       formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
     }
@@ -115,8 +116,7 @@ class AttributeForm extends React.Component {
     }
   };
 
-  handleSubmitAndContinue = e => {
-    e.preventDefault();
+  handleSubmitAndContinue = () => {
     const { emitEvent } = this.context;
 
     if (isEmpty(this.getFormErrors())) {

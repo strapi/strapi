@@ -17,7 +17,7 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
-  ON_CREATE_ATTRIBUTE,
+  ON_CHANGE_ATTRIBUTE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
@@ -132,7 +132,7 @@ function appReducer(state = initialState, action) {
       return state.updateIn(['modifiedData', ...action.keys], () => action.value);
     case ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS:
       return state.updateIn(['newContentType', ...action.keys], () => action.value);
-    case ON_CREATE_ATTRIBUTE:
+    case ON_CHANGE_ATTRIBUTE:
       return state.updateIn(['temporaryAttribute', ...action.keys], () => action.value);
 
     case RESET_EDIT_EXISTING_CONTENT_TYPE:

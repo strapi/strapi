@@ -17,7 +17,7 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
-  ON_CREATE_ATTRIBUTE,
+  ON_CHANGE_ATTRIBUTE,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
@@ -134,9 +134,9 @@ export function onChangeNewContentTypeMainInfos({ target }) {
   };
 }
 
-export function onCreateAttribute({ target }) {
+export function onChangeAttribute({ target }) {
   return {
-    type: ON_CREATE_ATTRIBUTE,
+    type: ON_CHANGE_ATTRIBUTE,
     keys: target.name.split('.'),
     value: target.value,
   };

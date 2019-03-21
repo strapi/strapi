@@ -10,7 +10,7 @@ import AttributeLi from '../../../components/AttributeLi';
 import Block from '../../../components/Block';
 import LeftMenuLink from '../../../components/LeftMenuLink';
 
-import { clearTemporaryAttribute, onCreateAttribute } from '../../App/actions';
+import { clearTemporaryAttribute, onChangeAttribute } from '../../App/actions';
 
 import { ModelPage, mapDispatchToProps } from '../index';
 
@@ -83,7 +83,7 @@ describe('<ModelPage />', () => {
       },
       onChangeExistingContentTypeMainInfos: jest.fn(),
       onChangeNewContentTypeMainInfos: jest.fn(),
-      onCreateAttribute: jest.fn(),
+      onChangeAttribute: jest.fn(),
       resetEditExistingContentType: jest.fn(),
       resetEditTempContentType: jest.fn(),
       resetExistingContentTypeMainInfos: jest.fn(),
@@ -300,21 +300,21 @@ describe('CTB <ModelPage />, mapDispatchToProps', () => {
     });
   });
 
-  describe('OnCreateAttribute', () => {
+  describe('onChangeAttribute', () => {
     it('should be injected', () => {
       const dispatch = jest.fn();
       const result = mapDispatchToProps(dispatch);
 
-      expect(result.onCreateAttribute).toBeDefined();
+      expect(result.onChangeAttribute).toBeDefined();
     });
 
-    it('should dispatch the onCreateAttribute action when called', () => {
+    it('should dispatch the onChangeAttribute action when called', () => {
       const dispatch = jest.fn();
       const result = mapDispatchToProps(dispatch);
       const target = { name: '' };
-      result.onCreateAttribute({ target });
+      result.onChangeAttribute({ target });
 
-      expect(dispatch).toHaveBeenCalledWith(onCreateAttribute({ target }));
+      expect(dispatch).toHaveBeenCalledWith(onChangeAttribute({ target }));
     });
   });
 });

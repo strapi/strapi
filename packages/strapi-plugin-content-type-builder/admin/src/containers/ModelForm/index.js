@@ -10,7 +10,7 @@ import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 import Input from 'components/InputsIndex';
 
@@ -90,7 +90,7 @@ export class ModelForm extends React.Component {
       updateTempContentType,
     } = this.props;
     const alreadyTakenContentTypeNames = Object.keys(currentData).filter(name => name !== modelToEditName);
-    let formErrors = [];
+    let formErrors = {};
 
     if (alreadyTakenContentTypeNames.includes(modifiedData.name)) {
       formErrors = { name: [{ id: `${pluginId}.error.contentTypeName.taken` }] };
@@ -102,7 +102,7 @@ export class ModelForm extends React.Component {
 
     this.setState(prevState => ({ formErrors, didCheckErrors: !prevState.didCheckErrors }));
 
-    if (formErrors.length === 0) {
+    if (isEmpty(formErrors)) {
       if (actionType === 'create') {
         createTempContentType();
         push({
@@ -111,7 +111,7 @@ export class ModelForm extends React.Component {
         });
       } else if (isUpdatingTemporaryContentType) {
         updateTempContentType();
-        push({ pathname: `/plugins/${pluginId}/models/${modifiedData.name}`, search: '' });
+        push({ search: '' });
       } else {
         push({ search: '' });
       }
@@ -134,6 +134,7 @@ export class ModelForm extends React.Component {
       return null;
     }
 
+    /* istanbul ignore if */
     if (input.inputDescriptionParams) {
       input.inputDescription = {
         ...input.inputDescription,
@@ -254,7 +255,6 @@ ModelForm.propTypes = {
   onChangeExistingContentTypeMainInfos: PropTypes.func,
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
-  pathname: PropTypes.string.isRequired,
   push: PropTypes.func.isRequired,
   resetExistingContentTypeMainInfos: PropTypes.func,
   resetNewContentTypeMainInfos: PropTypes.func,
