@@ -142,7 +142,7 @@ class RelationForm extends React.Component {
           modelName={modelToEditName}
           nature={nature}
           name={name}
-          keyTarget={key}
+          target={target}
           onClick={onChangeRelationNature}
         />
         <RelationBox

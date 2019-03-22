@@ -53,11 +53,11 @@ RelationBox.defaultProps = {
   main: false,
   modelName: '',
   models: [],
-  nature: 'oneWay',
+  nature: null,
+  onClick: () => {},
   plugin: null,
   selectedModel: null,
   source: null,
-  value: null,
 };
 
 RelationBox.propTypes = {
@@ -66,11 +66,11 @@ RelationBox.propTypes = {
   models: PropTypes.array,
   nature: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  onClick: PropTypes.func.isRequired,
+  onClick: PropTypes.func,
   plugin: PropTypes.string,
   selectedModel: PropTypes.string,
   source: PropTypes.string,
-  value: PropTypes.string,
+  value: PropTypes.string.isRequired,
 };
 
 export default RelationBox;

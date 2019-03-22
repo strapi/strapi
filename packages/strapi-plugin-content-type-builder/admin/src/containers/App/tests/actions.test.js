@@ -1,4 +1,5 @@
 import {
+  addAttributeRelation,
   buildModelAttributes,
   deleteModel,
   deleteModelSucceeded,
@@ -6,16 +7,22 @@ import {
   getDataSucceeded,
   addAttributeToTempContentType,
   clearTemporaryAttribute,
+  clearTemporaryAttributeRelation,
   cancelNewContentType,
   createTempContentType,
   deleteTemporaryModel,
   onChangeExistingContentTypeMainInfos,
   onChangeNewContentTypeMainInfos,
   onChangeAttribute,
+  onChangeRelation,
+  onChangeRelationTarget,
+  onChangeRelationNature,
   submitTempContentType,
   submitTempContentTypeSucceeded,
   saveEditedAttribute,
+  saveEditedAttributeRelation,
   setTemporaryAttribute,
+  setTemporaryAttributeRelation,
   resetNewContentTypeMainInfos,
   resetEditExistingContentType,
   resetExistingContentTypeMainInfos,
@@ -29,9 +36,11 @@ import {
   formatModelAttributes,
 } from '../actions';
 import {
+  ADD_ATTRIBUTE_RELATION,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
+  CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
   DELETE_MODEL,
   DELETE_TEMPORARY_MODEL,
@@ -41,10 +50,15 @@ import {
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
+  ON_CHANGE_RELATION,
+  ON_CHANGE_RELATION_TARGET,
+  ON_CHANGE_RELATION_NATURE,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   SAVE_EDITED_ATTRIBUTE,
+  SAVE_EDITED_ATTRIBUTE_RELATION,
   SET_TEMPORARY_ATTRIBUTE,
+  SET_TEMPORARY_ATTRIBUTE_RELATION,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
@@ -106,6 +120,18 @@ describe('Content Type Builder Action utils', () => {
             target: 'role',
           },
         },
+        {
+          name: 'test',
+          params: {
+            dominant: true,
+            key: 'permissions2',
+            nature: 'manyToMany',
+            pluginValue: 'users-permissions',
+            plugin: true,
+            targetColumnName: '',
+            target: 'role2',
+          },
+        },
         { name: 'type', params: { type: 'string', required: true, configurable: true } },
         {
           name: 'price',
@@ -138,11 +164,20 @@ describe('Content Type Builder Action utils', () => {
         },
         role: {
           configurable: false,
+          dominant: false,
           key: 'permissions',
           nature: 'manyToOne',
           plugin: 'users-permissions',
           targetColumnName: '',
           target: 'role',
+        },
+        test: {
+          dominant: true,
+          key: 'permissions2',
+          nature: 'manyToMany',
+          plugin: 'users-permissions',
+          targetColumnName: '',
+          target: 'role2',
         },
         type: {
           type: 'string',
@@ -163,6 +198,20 @@ describe('Content Type Builder Action utils', () => {
 });
 
 describe('App actions', () => {
+  describe('AddAttributeRelation', () => {
+    it('has a type ADD_ATTRIBUTE_RELATION and pass the correct data', () => {
+      const isModelTemporary = true;
+      const modelName = 'test';
+      const expected = {
+        type: ADD_ATTRIBUTE_RELATION,
+        isModelTemporary,
+        modelName,
+      };
+
+      expect(addAttributeRelation(isModelTemporary, modelName)).toEqual(expected);
+    });
+  });
+
   describe('AddAttributeToExistingContentType', () => {
     it('has a type ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE and returns the correct data', () => {
       const attributeType = 'string';
@@ -195,6 +244,16 @@ describe('App actions', () => {
       };
 
       expect(cancelNewContentType()).toEqual(expected);
+    });
+  });
+
+  describe('clearTemporaryAttributeRelation', () => {
+    it('has a type CLEAR_TEMPORARY_ATTRIBUTE and returns the correct data', () => {
+      const expected = {
+        type: CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
+      };
+
+      expect(clearTemporaryAttributeRelation()).toEqual(expected);
     });
   });
 
@@ -422,6 +481,48 @@ describe('App actions', () => {
     });
   });
 
+  describe('OnChangeRelation', () => {
+    it('has a type ON_CHANGE_RELATION and returns the correct data', () => {
+      const target = { name: 'test', value: 'test' };
+      const expected = {
+        type: ON_CHANGE_RELATION,
+        keys: ['test'],
+        value: 'test',
+      };
+
+      expect(onChangeRelation({ target })).toEqual(expected);
+    });
+  });
+
+  describe('OnChangeRelationNature', () => {
+    it('has a type ON_CHANGE_RELATION_NATURE and pass the correct data', () => {
+      const nature = 'test';
+      const currentModel = 'test';
+      const expected = {
+        type: ON_CHANGE_RELATION_NATURE,
+        nature,
+        currentModel,
+      };
+
+      expect(onChangeRelationNature(nature, currentModel)).toEqual(expected);
+    });
+  });
+
+  describe('OnChangeRelationTarget', () => {
+    it('has a TYPE ON_CHANGE_RELATION_TARGET and pass the correct data', () => {
+      const model = 'test';
+      const currentModel = 'test1';
+      const expected = {
+        type: ON_CHANGE_RELATION_TARGET,
+        currentModel,
+        model,
+        isEditing: false,
+      };
+
+      expect(onChangeRelationTarget(model, currentModel)).toEqual(expected);
+    });
+  });
+
   describe('SaveEditedAttribute', () => {
     it('has a type of SAVE_EDITED_ATTRIBUTE and returns the correct data', () => {
       const attributeName = 'test';
@@ -505,6 +606,43 @@ describe('App actions', () => {
       };
 
       expect(resetProps()).toEqual(expected);
+    });
+  });
+
+  describe('SaveEditedAttributeRelation', () => {
+    it('should have a type SAVE_EDITED_ATTRIBUTE_RELATION and pass the correct data', () => {
+      const attributeName = 'test';
+      const isModelTemporary = false;
+      const modelName = 'test';
+      const expected = {
+        type: SAVE_EDITED_ATTRIBUTE_RELATION,
+        attributeName,
+        isModelTemporary,
+        modelName,
+      };
+
+      expect(saveEditedAttributeRelation(attributeName, isModelTemporary, modelName)).toEqual(expected);
+    });
+  });
+
+  describe('SetTemporaryAttributeRelation', () => {
+    it('should have a type SET_TEMPORARY_ATTRIBUTE_RELATION and pass the correct data', () => {
+      const attributeName = 'test';
+      const isModelTemporary = false;
+      const source = 'test';
+      const target = 'test';
+      const expected = {
+        type: SET_TEMPORARY_ATTRIBUTE_RELATION,
+        attributeName,
+        isEditing: false,
+        isModelTemporary,
+        source,
+        target,
+      };
+
+      expect(setTemporaryAttributeRelation(target, isModelTemporary, source, attributeName, false)).toEqual(
+        expected,
+      );
     });
   });
 

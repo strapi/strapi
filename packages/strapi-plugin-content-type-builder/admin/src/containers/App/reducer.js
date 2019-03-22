@@ -191,6 +191,7 @@ function appReducer(state = initialState, action) {
           .removeIn(action.keys)
           .removeIn([...action.keys.slice(0, action.keys.length - 1), attributeToDelete.get('key')]);
       }
+
       return state.removeIn(action.keys);
     }
     case DELETE_MODEL_SUCCEEDED:

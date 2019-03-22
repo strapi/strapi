@@ -7,6 +7,7 @@ import styles from './styles.scss';
 
 const ModelPicker = ({ models, onClick, plugin, selectedModel }) => {
   const [isOpen, toggleIsOpen] = useState(false);
+  /* istanbul ignore next */
   const handleToggle = () => toggleIsOpen(!isOpen);
 
   return (

@@ -70,7 +70,7 @@ describe('<AttributeLi />', () => {
     expect(img.prop('alt')).toBe('icon-number');
   });
 
-  it('should the call the onClick prop with the correct data if it is configurable', () => {
+  it('should call the onClick prop with the correct data if it is configurable', () => {
     const props = {
       attributeInfos: {
         type: 'string',
@@ -84,5 +84,33 @@ describe('<AttributeLi />', () => {
     onClick();
 
     expect(props.onClick).toHaveBeenCalledWith('name', 'string');
+  });
+
+  it('should not call the onClick prop with the correct data if it is configurable', () => {
+    const props = {
+      attributeInfos: {
+        configurable: false,
+        type: 'string',
+      },
+      name: 'name',
+      onClick: jest.fn(),
+    };
+    const wrapper = shallow(<AttributeLi {...props} />);
+    const { onClick } = wrapper.find('li').props();
+
+    onClick();
+
+    expect(props.onClick).not.toHaveBeenCalled();
+  });
+
+  it('should use the defaultProps', () => {
+    const {
+      defaultProps: { onClick, onClickOnTrashIcon },
+    } = AttributeLi;
+
+    expect(onClick).toBeDefined();
+    expect(onClick()).toBe(undefined);
+    expect(onClickOnTrashIcon).toBeDefined();
+    expect(onClickOnTrashIcon()).toBe(undefined);
   });
 });

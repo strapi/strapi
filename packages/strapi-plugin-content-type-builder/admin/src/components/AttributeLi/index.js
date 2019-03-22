@@ -45,6 +45,7 @@ function AttributeLi({
 }) {
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
   const src = target ? assets.relation : assets[ico];
+  /* istanbul ignore next */
   const icons =
     configurable === false
       ? [{ icoType: 'lock' }]

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { camelCase, truncate } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import pluralize from 'pluralize';
 
 import pluginId from '../../pluginId';
 
@@ -23,11 +24,19 @@ const assets = ['one_way', 'one_to_one', 'one_to_many', 'many_to_one', 'many_to_
     return acc;
   }, {});
 
-const NaturePicker = ({ keyTarget, modelName, name, onClick, nature }) => {
-  const nameModel = keyTarget === '-' ? modelName : keyTarget || modelName;
-  const { leftName, rightName } = ['manyToMany', 'oneToMany', 'oneToOne', 'oneWay'].includes(nature)
-    ? { leftName: nameModel, rightName: name }
-    : { leftName: name, rightName: keyTarget };
+const availableRelations = ['manyToMany', 'oneToMany', 'oneToOne', 'oneWay'];
+
+/* eslint-disable indent */
+const NaturePicker = ({ modelName, onClick, nature, target }) => {
+  const { leftName, rightName } = availableRelations.includes(nature)
+    ? {
+        leftName: pluralize(modelName, nature === 'manyToMany' ? 2 : 1),
+        rightName: pluralize(target, ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1),
+      }
+    : {
+        leftName: target,
+        rightName: pluralize(modelName, ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1),
+      };
 
   return (
     <InlineBlock style={{ width: '100%', paddingTop: '70px' }}>
@@ -48,19 +57,17 @@ const NaturePicker = ({ keyTarget, modelName, name, onClick, nature }) => {
 };
 
 NaturePicker.defaultProps = {
-  keyTarget: '',
   modelName: '',
-  name: '',
   nature: 'oneWay',
   onClick: () => {},
+  target: '',
 };
 
 NaturePicker.propTypes = {
-  keyTarget: PropTypes.string,
   modelName: PropTypes.string,
-  name: PropTypes.string,
   nature: PropTypes.string,
   onClick: PropTypes.func,
+  target: PropTypes.string,
 };
 
 export default NaturePicker;

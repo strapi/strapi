@@ -1,7 +1,7 @@
 .relationWrapper {
   width: 100%;
   display: flex;
-  margin-bottom: 10px;
+  // margin-bottom: 10px;
   padding: 2.7rem 15px;
   .relationNatureWrapper {
     position: relative;
@@ -164,7 +164,10 @@
 }
 
 .infoContainer {
+  margin-bottom: 10px;
   padding-top: 1px;
+  padding-right: 10px;
+  padding-left: 10px;
   word-wrap: break-word;
   line-height: 1.8rem !important;
   text-align: center;
