@@ -155,8 +155,7 @@ module.exports = {
     if (_.isEmpty(populate)) {
       const arrayOfPromises = this.associations
         .filter(association => ['manyMorphToOne', 'manyMorphToMany'].includes(association.nature))
-        .map(association => {
-          // eslint-disable-line no-unused-vars
+        .map(() => {
           return this.morph
             .forge()
             .where({

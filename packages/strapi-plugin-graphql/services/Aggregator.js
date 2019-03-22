@@ -8,7 +8,7 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
-const { Builder, Query, convertRestQueryParams, buildQuery } = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 const Schema = require('./Schema.js');
 const GraphQLQuery = require('./Query.js');

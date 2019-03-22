@@ -1,29 +1,34 @@
 const _ = require('lodash');
 
+const findModelByAssoc = assoc => {
+  const { models } = assoc.plugin ? strapi.plugins[assoc.plugin] : strapi;
+  return models[assoc.collection || assoc.model];
+};
+
+const isAttribute = (model, field) => _.has(model.attributes, field) || model.primaryKey === field;
+
 const createFilterValidator = model => ({ field }) => {
   const fieldParts = field.split('.');
-  const fieldPartsSize = fieldParts.length;
 
-  return _.every(fieldParts, (fieldPart, index) => {
-    const fieldIdx = index + 1;
-    const isAttribute = !!model.attributes[fieldPart] || model.primaryKey === fieldPart;
+  let isValid = true;
+  let tmpModel = model;
+  for (let i = 0; i < fieldParts.length; i++) {
+    const field = fieldParts[i];
 
-    const association = model.associations.find(ast => ast.alias === fieldPart);
-    const isAssociation = !!association;
-    if (fieldIdx < fieldPartsSize) {
-      if (isAssociation) {
-        const { models } = association.plugin ? strapi.plugins[association.plugin] : strapi;
-        model = models[association.collection || association.model];
-        return true;
-      }
-    } else if (fieldIdx === fieldPartsSize) {
-      if (isAttribute || isAssociation) {
-        return true;
-      }
+    const assoc = tmpModel.associations.find(ast => ast.alias === field);
+
+    if (assoc) {
+      tmpModel = findModelByAssoc(assoc);
+      continue;
     }
 
-    return false;
-  });
+    if (!assoc && (!isAttribute(tmpModel, field) || i !== fieldParts.length - 1)) {
+      isValid = false;
+      break;
+    }
+  }
+
+  return isValid;
 };
 
 const buildQuery = ({ model, filters, ...rest }) => {
@@ -32,11 +37,14 @@ const buildQuery = ({ model, filters, ...rest }) => {
   if (filters.where && Array.isArray(filters.where)) {
     filters.where.forEach(whereClause => {
       if (!validator(whereClause)) {
-        throw new Error(
-          `Your filters contain a field "${
+        const err = new Error(
+          `Your filters contain a field '${
             whereClause.field
-          }" that doesn't appear on your model definition nor it's relations`
+          }' that doesn't appear on your model definition nor it's relations`
         );
+
+        err.status = 400;
+        throw err;
       }
     });
   }

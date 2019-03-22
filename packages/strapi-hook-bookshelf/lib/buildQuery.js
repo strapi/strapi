@@ -2,8 +2,10 @@ const _ = require('lodash');
 
 const buildQuery = ({ model, filters }) => qb => {
   if (_.has(filters, 'where') && Array.isArray(filters.where)) {
+    // build path with aliases and return a mapping of the paths with there aliases;
+
     // build joins
-    buildQueryJoins(qb)(model, filters.where);
+    buildQueryJoins(qb, { model, where: filters.where });
 
     // apply filters
     filters.where.forEach(whereClause => {
@@ -18,7 +20,8 @@ const buildQuery = ({ model, filters }) => qb => {
         fieldKey = `${fieldModel.collectionName}.${fieldModel.primaryKey}`;
       }
 
-      buildWhereClause(qb)({
+      buildWhereClause({
+        qb,
         ...whereClause,
         field: fieldKey,
       });
@@ -43,7 +46,15 @@ const buildQuery = ({ model, filters }) => qb => {
   }
 };
 
-const buildWhereClause = qb => ({ field, operator, value }) => {
+const buildWhereClause = ({ qb, field, operator, value }) => {
+  if (Array.isArray(value) && !['in', 'nin'].includes(operator)) {
+    return qb.where(subQb => {
+      for (let val of value) {
+        subQb.orWhere(q => buildWhereClause({ qb: q, field, operator, value: val }));
+      }
+    });
+  }
+
   switch (operator) {
     case 'eq':
       return qb.where(field, value);
@@ -60,7 +71,7 @@ const buildWhereClause = qb => ({ field, operator, value }) => {
     case 'in':
       return qb.whereIn(field, Array.isArray(value) ? value : [value]);
     case 'nin':
-      return qb.whereNotIn(field, 'NOT IN', Array.isArray(value) ? value : [value]);
+      return qb.whereNotIn(field, Array.isArray(value) ? value : [value]);
     case 'contains': {
       return qb.whereRaw('LOWER(??) LIKE LOWER(?)', [field, `%${value}%`]);
     }
@@ -72,28 +83,8 @@ const buildWhereClause = qb => ({ field, operator, value }) => {
       return qb.whereNot(field, 'like', `%${value}%`);
 
     default:
-      throw new Error(`Unhandled whereClause : ${fullField} ${operator} ${value}`);
+      throw new Error(`Unhandled whereClause : ${field} ${operator} ${value}`);
   }
-};
-
-const buildQueryJoins = qb => {
-  return (strapiModel, where) => {
-    const relationToPopulate = extractRelationsFromWhere(where);
-
-    relationToPopulate.forEach(fieldPath => {
-      const associationParts = fieldPath.split('.');
-
-      let currentModel = strapiModel;
-      associationParts.forEach(astPart => {
-        const { association, model } = getAssociationFromFieldKey(currentModel, astPart);
-
-        if (association) {
-          buildSingleJoin(qb)(currentModel, model, association);
-          currentModel = model;
-        }
-      });
-    });
-  };
 };
 
 const extractRelationsFromWhere = where => {
@@ -113,8 +104,8 @@ const extractRelationsFromWhere = where => {
     }, []);
 };
 
-const getAssociationFromFieldKey = (strapiModel, fieldKey) => {
-  let model = strapiModel;
+const getAssociationFromFieldKey = (model, fieldKey) => {
+  let tmpModel = model;
   let association;
   let attributeKey;
 
@@ -122,55 +113,76 @@ const getAssociationFromFieldKey = (strapiModel, fieldKey) => {
 
   for (let key of parts) {
     attributeKey = key;
-    association = model.associations.find(ast => ast.alias === key);
+    association = tmpModel.associations.find(ast => ast.alias === key);
     if (association) {
-      const { models } = strapi.plugins[association.plugin] || strapi;
-      model = models[association.model || association.collection];
+      tmpModel = findModelByAssoc(association);
     }
   }
 
   return {
     association,
-    model,
+    model: tmpModel,
     attributeKey,
   };
 };
 
-const buildSingleJoin = qb => {
-  return (strapiModel, astModel, association) => {
-    const relationTable = astModel.collectionName;
+const findModelByAssoc = assoc => {
+  const { models } = assoc.plugin ? strapi.plugins[assoc.plugin] : strapi;
+  return models[assoc.collection || assoc.model];
+};
 
-    qb.distinct();
+const buildQueryJoins = (qb, { model, where }) => {
+  const relationToPopulate = extractRelationsFromWhere(where);
 
-    if (association.nature === 'manyToMany') {
-      // Join on both ends
-      qb.innerJoin(
-        association.tableCollectionName,
-        `${association.tableCollectionName}.${strapiModel.info.name}_${strapiModel.primaryKey}`,
-        `${strapiModel.collectionName}.${strapiModel.primaryKey}`
-      );
+  return relationToPopulate.forEach(path => {
+    const parts = path.split('.');
 
-      qb.innerJoin(
-        relationTable,
-        `${association.tableCollectionName}.${
-          strapiModel.attributes[association.alias].attribute
-        }_${strapiModel.attributes[association.alias].column}`,
-        `${relationTable}.${astModel.primaryKey}`
-      );
-    } else {
-      const externalKey =
-        association.type === 'collection'
-          ? `${relationTable}.${association.via}`
-          : `${relationTable}.${astModel.primaryKey}`;
+    let tmpModel = model;
+    for (let part of parts) {
+      const association = tmpModel.associations.find(assoc => assoc.alias === part);
+      const assocModel = findModelByAssoc(association);
 
-      const internalKey =
-        association.type === 'collection'
-          ? `${strapiModel.collectionName}.${strapiModel.primaryKey}`
-          : `${strapiModel.collectionName}.${association.alias}`;
-
-      qb.innerJoin(relationTable, externalKey, internalKey);
+      if (association) {
+        buildSingleJoin(qb, tmpModel, assocModel, association);
+        tmpModel = assocModel;
+      }
     }
-  };
+  });
+};
+
+const buildSingleJoin = (qb, strapiModel, astModel, association) => {
+  const relationTable = astModel.collectionName;
+
+  qb.distinct();
+
+  if (association.nature === 'manyToMany') {
+    // Join on both ends
+    qb.innerJoin(
+      association.tableCollectionName,
+      `${association.tableCollectionName}.${strapiModel.info.name}_${strapiModel.primaryKey}`,
+      `${strapiModel.collectionName}.${strapiModel.primaryKey}`
+    );
+
+    qb.innerJoin(
+      relationTable,
+      `${association.tableCollectionName}.${strapiModel.attributes[association.alias].attribute}_${
+        strapiModel.attributes[association.alias].column
+      }`,
+      `${relationTable}.${astModel.primaryKey}`
+    );
+  } else {
+    const externalKey =
+      association.type === 'collection'
+        ? `${relationTable}.${association.via}`
+        : `${relationTable}.${astModel.primaryKey}`;
+
+    const internalKey =
+      association.type === 'collection'
+        ? `${strapiModel.collectionName}.${strapiModel.primaryKey}`
+        : `${strapiModel.collectionName}.${association.alias}`;
+
+    qb.innerJoin(relationTable, externalKey, internalKey);
+  }
 };
 
 module.exports = buildQuery;
