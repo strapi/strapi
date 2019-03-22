@@ -193,17 +193,9 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
 const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
   const _result = _.toArray(result);
   return _.map(_result, value => {
-    const params = {
-      ...GraphQLQuery.convertToParams(_.omit(filters, 'where')),
-      where: {
-        ...GraphQLQuery.convertToQuery(filters.where),
-        [fieldKey]: value._id,
-      },
-    };
-
     return {
       key: value._id,
-      connection: () => params,
+      connection: () => filters,
     };
   });
 };
@@ -229,7 +221,15 @@ const preProcessGroupByData = function({ result, fieldKey, filters, model }) {
  */
 const createGroupByFieldsResolver = function(model, fields, name) {
   const resolver = async (filters, options, context, fieldResolver, fieldKey) => {
-    const result = await buildQuery({ model, filters }).group({
+    const params = {
+      ...GraphQLQuery.convertToParams(_.omit(filters, 'where')),
+      ...GraphQLQuery.convertToQuery(filters.where),
+    };
+
+    const result = await buildQuery({
+      model,
+      filters: convertRestQueryParams(params),
+    }).group({
       _id: `$${fieldKey}`,
     });
 
@@ -322,10 +322,10 @@ const formatConnectionAggregator = function(fields, model) {
         return buildQuery({
           model,
           filters: {
+            limit: obj.limit,
             where: obj.where,
           },
         })
-          .limit(obj.limit)
           .count('count')
           .then(results => _.get(results, [0, 'count'], 0));
       },

@@ -297,7 +297,7 @@ const formatValue = value => {
     return value.map(formatValue);
   }
 
-  const number = _.toNumber(value);
+  const number = typeof value === 'string' && _.toNumber(value);
   if (_.isFinite(number)) return number;
 
   return utils.valueToId(value);
