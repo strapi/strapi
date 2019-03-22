@@ -30,7 +30,7 @@
     ]
   },
   "scripts": {
-    "test": "jest",
+    "test": "echo \"no tests yet\"",
     "prepublishOnly": "npm prune"
   },
   "author": {

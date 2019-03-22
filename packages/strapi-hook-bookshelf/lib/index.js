@@ -18,8 +18,6 @@ const utilsModels = require('strapi-utils').models;
 // Local helpers.
 const utils = require('./utils/');
 const relations = require('./relations');
-const { Query } = require('./query');
-const { Converter } = require('./converter');
 const buildQuery = require('./buildQuery');
 
 const PIVOT_PREFIX = '_pivot_';
@@ -1292,9 +1290,6 @@ module.exports = function(strapi) {
 
         return result;
       },
-
-      Query,
-      Converter,
       buildQuery,
     },
     relations

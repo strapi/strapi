@@ -19,8 +19,6 @@ const { models: utilsModels } = require('strapi-utils');
 const utils = require('./utils/');
 
 const relations = require('./relations');
-const { Query } = require('./query');
-const { Converter } = require('./converter');
 const buildQuery = require('./buildQuery');
 
 /**
@@ -701,9 +699,6 @@ module.exports = function(strapi) {
 
         return result;
       },
-
-      Query,
-      Converter,
       buildQuery,
     },
     relations

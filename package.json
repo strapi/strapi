@@ -42,7 +42,7 @@
     "lint": "node ./scripts/lint.js",
     "snyk": "node ./scripts/snyk.js",
     "test:snyk": "snyk test",
-    "test:unit": "FORCE_COLOR=true lerna run test --parallel",
+    "test:unit": "lerna exec -- npm run test -s",
     "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --runInBand --verbose --forceExit --detectOpenHandles",
     "test:generate-app": "node test/createTestApp.js",
     "test:start-app": "node test/startTestApp.js"
