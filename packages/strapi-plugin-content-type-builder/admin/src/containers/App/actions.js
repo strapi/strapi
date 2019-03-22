@@ -5,6 +5,7 @@
  */
 import { cloneDeep, pick, set, camelCase } from 'lodash';
 import {
+  ADD_ATTRIBUTE_RELATION,
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
   CANCEL_NEW_CONTENT_TYPE,
@@ -19,6 +20,7 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
+  ON_CHANGE_RELATION,
   ON_CHANGE_RELATION_NATURE,
   ON_CHANGE_RELATION_TARGET,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
@@ -27,6 +29,7 @@ import {
   RESET_EDIT_TEMP_CONTENT_TYPE,
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
+  SAVE_EDITED_ATTRIBUTE_RELATION,
   SET_TEMPORARY_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE_RELATION,
   SUBMIT_CONTENT_TYPE,
@@ -36,6 +39,14 @@ import {
   UPDATE_TEMP_CONTENT_TYPE,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
 } from './constants';
+
+export function addAttributeRelation(isModelTemporary, modelName) {
+  return {
+    type: ADD_ATTRIBUTE_RELATION,
+    isModelTemporary,
+    modelName,
+  };
+}
 
 export function addAttributeToExistingContentType(contentTypeName, attributeType) {
   return {
@@ -154,9 +165,18 @@ export function onChangeAttribute({ target }) {
   };
 }
 
-export function onChangeRelationNature(nature) {
+export function onChangeRelation({ target }) {
+  return {
+    type: ON_CHANGE_RELATION,
+    keys: target.name.split('.'),
+    value: target.value,
+  };
+}
+
+export function onChangeRelationNature(nature, currentModel) {
   return {
     type: ON_CHANGE_RELATION_NATURE,
+    currentModel,
     nature,
   };
 }
@@ -205,6 +225,15 @@ export function resetProps() {
 export function saveEditedAttribute(attributeName, isModelTemporary, modelName) {
   return {
     type: SAVE_EDITED_ATTRIBUTE,
+    attributeName,
+    isModelTemporary,
+    modelName,
+  };
+}
+
+export function saveEditedAttributeRelation(attributeName, isModelTemporary, modelName) {
+  return {
+    type: SAVE_EDITED_ATTRIBUTE_RELATION,
     attributeName,
     isModelTemporary,
     modelName,
@@ -291,7 +320,11 @@ export const formatModelAttributes = attributes =>
       (acc2, curr) => {
         const value = attributes[current][curr];
 
-        if (((curr.includes('max') || curr.includes('min')) && !value) || curr === 'isVirtual') {
+        if (
+          ((curr.includes('max') || curr.includes('min')) && !value) ||
+          curr === 'isVirtual' ||
+          (curr === 'dominant' && !value)
+        ) {
           return acc2;
         }
 

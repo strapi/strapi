@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { camelCase } from 'lodash';
+import { camelCase, truncate } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import pluginId from '../../pluginId';
@@ -23,7 +23,7 @@ const assets = ['one_way', 'one_to_one', 'one_to_many', 'many_to_one', 'many_to_
     return acc;
   }, {});
 
-const NaturePicker = ({ keyTarget, modelName, name, nature }) => {
+const NaturePicker = ({ keyTarget, modelName, name, onClick, nature }) => {
   const nameModel = keyTarget === '-' ? modelName : keyTarget || modelName;
   const { leftName, rightName } = ['manyToMany', 'oneToMany', 'oneToOne', 'oneWay'].includes(nature)
     ? { leftName: nameModel, rightName: name }
@@ -35,13 +35,13 @@ const NaturePicker = ({ keyTarget, modelName, name, nature }) => {
         {Object.keys(assets).map(iconName => {
           const src = iconName === nature ? assets[iconName].iconSelected : assets[iconName].icon;
 
-          return <img key={iconName} src={src} alt={iconName} />;
+          return <img key={iconName} onClick={() => onClick(iconName, modelName)} src={src} alt={iconName} />;
         })}
       </div>
       <div className={styles.infoContainer}>
-        <span>{leftName}</span>
+        <span>{truncate(leftName, { length: 24 })}</span>
         &nbsp; <FormattedMessage id={`${pluginId}.relation.${nature}`} /> &nbsp;
-        <span>{rightName}</span>
+        <span>{truncate(rightName, { length: 24 })}</span>
       </div>
     </InlineBlock>
   );
@@ -52,6 +52,7 @@ NaturePicker.defaultProps = {
   modelName: '',
   name: '',
   nature: 'oneWay',
+  onClick: () => {},
 };
 
 NaturePicker.propTypes = {
@@ -59,6 +60,7 @@ NaturePicker.propTypes = {
   modelName: PropTypes.string,
   name: PropTypes.string,
   nature: PropTypes.string,
+  onClick: PropTypes.func,
 };
 
 export default NaturePicker;

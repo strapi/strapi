@@ -8,7 +8,18 @@ import ModelPicker from './ModelPicker';
 
 import styles from './styles.scss';
 
-const RelationBox = ({ main, models, modelName, nature, onClick, selectedModel, plugin, source, value }) => {
+const RelationBox = ({
+  main,
+  models,
+  modelName,
+  nature,
+  onChange,
+  onClick,
+  selectedModel,
+  plugin,
+  source,
+  value,
+}) => {
   return (
     <InlineBlock>
       <div className={styles.relationBox}>
@@ -28,7 +39,7 @@ const RelationBox = ({ main, models, modelName, nature, onClick, selectedModel, 
             label="Field Name"
             disabled={value === '-' || nature === 'oneWay'}
             name={main ? 'name' : 'key'}
-            onChange={() => {}}
+            onChange={onChange}
             type="text"
             value={nature === 'oneWay' ? '-' : value}
           />
@@ -42,7 +53,9 @@ RelationBox.defaultProps = {
   main: false,
   modelName: '',
   models: [],
+  nature: 'oneWay',
   plugin: null,
+  selectedModel: null,
   source: null,
   value: null,
 };
@@ -51,7 +64,11 @@ RelationBox.propTypes = {
   main: PropTypes.bool,
   modelName: PropTypes.string,
   models: PropTypes.array,
+  nature: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  onClick: PropTypes.func.isRequired,
   plugin: PropTypes.string,
+  selectedModel: PropTypes.string,
   source: PropTypes.string,
   value: PropTypes.string,
 };

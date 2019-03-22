@@ -99,6 +99,8 @@ export class ModelPage extends React.Component {
 
   getAttributeName = () => getQueryParameters(this.getSearch(), 'attributeName');
 
+  getAttributeType = () => getQueryParameters(this.getSearch(), 'attributeType');
+
   getFormData = () => {
     const { modifiedData, newContentType } = this.props;
 
@@ -347,6 +349,7 @@ export class ModelPage extends React.Component {
 
   handleSubmit = (shouldContinue = false) => {
     const {
+      addAttributeRelation,
       addAttributeToExistingContentType,
       addAttributeToTempContentType,
       history: { push },
@@ -354,12 +357,15 @@ export class ModelPage extends React.Component {
     } = this.props;
     const attributeType = getQueryParameters(search, 'attributeType');
 
-    if (this.isUpdatingTemporaryContentType()) {
-      addAttributeToTempContentType(attributeType);
+    if (this.getAttributeType() === 'relation') {
+      addAttributeRelation(this.isUpdatingTemporaryContentType(), this.getModelName());
     } else {
-      addAttributeToExistingContentType(this.getModelName(), attributeType);
+      if (this.isUpdatingTemporaryContentType()) {
+        addAttributeToTempContentType(attributeType);
+      } else {
+        addAttributeToExistingContentType(this.getModelName(), attributeType);
+      }
     }
-
     const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
 
     push({ search: nextSearch });
@@ -369,10 +375,15 @@ export class ModelPage extends React.Component {
     const {
       history: { push },
       saveEditedAttribute,
+      saveEditedAttributeRelation,
     } = this.props;
     const attributeName = this.getAttributeName();
 
-    saveEditedAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
+    if (this.getAttributeType() === 'relation') {
+      saveEditedAttributeRelation(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
+    } else {
+      saveEditedAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
+    }
 
     const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
 
@@ -474,6 +485,8 @@ export class ModelPage extends React.Component {
       onChangeAttribute,
       onChangeExistingContentTypeMainInfos,
       onChangeNewContentTypeMainInfos,
+      onChangeRelation,
+      onChangeRelationNature,
       onChangeRelationTarget,
       resetExistingContentTypeMainInfos,
       resetNewContentTypeMainInfos,
@@ -493,7 +506,7 @@ export class ModelPage extends React.Component {
 
     const modalType = this.getModalType();
     const settingType = getQueryParameters(search, 'settingType');
-    const attributeType = getQueryParameters(search, 'attributeType');
+    const attributeType = this.getAttributeType();
     const actionType = this.getActionType();
     const icon = this.getSource() ? null : 'fa fa-pencil';
     // console.log(this.getModelAttributes());
@@ -632,8 +645,11 @@ export class ModelPage extends React.Component {
           modelToEditName={this.getModelName()}
           modifiedData={temporaryAttributeRelation}
           onCancel={clearTemporaryAttributeRelation}
+          onChange={onChangeRelation}
+          onChangeRelationNature={onChangeRelationNature}
           onChangeRelationTarget={onChangeRelationTarget}
-          // onChange={onChangeAttribute}
+          onSubmit={this.handleSubmit}
+          onSubmitEdit={this.handleSubmitEdit}
           push={push}
           source={this.getSource()}
         />
@@ -654,6 +670,7 @@ ModelPage.defaultProps = {
 };
 
 ModelPage.propTypes = {
+  addAttributeRelation: PropTypes.func.isRequired,
   addAttributeToExistingContentType: PropTypes.func.isRequired,
   addAttributeToTempContentType: PropTypes.func.isRequired,
   cancelNewContentType: PropTypes.func.isRequired,
@@ -670,11 +687,15 @@ ModelPage.propTypes = {
   onChangeAttribute: PropTypes.func.isRequired,
   onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
+  onChangeRelation: PropTypes.func.isRequired,
+  onChangeRelationNature: PropTypes.func.isRequired,
+  onChangeRelationTarget: PropTypes.func.isRequired,
   resetEditExistingContentType: PropTypes.func.isRequired,
   resetEditTempContentType: PropTypes.func.isRequired,
   resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
   resetNewContentTypeMainInfos: PropTypes.func.isRequired,
   saveEditedAttribute: PropTypes.func.isRequired,
+  saveEditedAttributeRelation: PropTypes.func.isRequired,
   setTemporaryAttribute: PropTypes.func.isRequired,
   setTemporaryAttributeRelation: PropTypes.func.isRequired,
   submitContentType: PropTypes.func.isRequired,

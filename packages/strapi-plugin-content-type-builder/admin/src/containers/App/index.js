@@ -19,6 +19,7 @@ import NotFoundPage from '../NotFoundPage';
 import Loader from './Loader';
 
 import {
+  addAttributeRelation,
   cancelNewContentType,
   clearTemporaryAttributeRelation,
   createTempContentType,
@@ -27,11 +28,14 @@ import {
   getData,
   onChangeExistingContentTypeMainInfos,
   onChangeNewContentTypeMainInfos,
+  onChangeRelation,
+  onChangeRelationNature,
   onChangeRelationTarget,
   resetExistingContentTypeMainInfos,
   resetNewContentTypeMainInfos,
   resetProps,
   saveEditedAttribute,
+  saveEditedAttributeRelation,
   setTemporaryAttribute,
   setTemporaryAttributeRelation,
   updateTempContentType,
@@ -103,6 +107,7 @@ export class App extends React.Component {
 }
 
 App.propTypes = {
+  addAttributeRelation: PropTypes.func.isRequired,
   cancelNewContentType: PropTypes.func.isRequired,
   deleteModel: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
@@ -112,6 +117,7 @@ App.propTypes = {
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   saveEditedAttribute: PropTypes.func.isRequired,
+  saveEditedAttributeRelation: PropTypes.func.isRequired,
   setTemporaryAttribute: PropTypes.func.isRequired,
   setTemporaryAttributeRelation: PropTypes.func.isRequired,
 };
@@ -121,6 +127,7 @@ const mapStateToProps = makeSelectApp();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addAttributeRelation,
       cancelNewContentType,
       clearTemporaryAttributeRelation,
       createTempContentType,
@@ -129,11 +136,14 @@ export function mapDispatchToProps(dispatch) {
       getData,
       onChangeExistingContentTypeMainInfos,
       onChangeNewContentTypeMainInfos,
+      onChangeRelation,
+      onChangeRelationNature,
       onChangeRelationTarget,
       resetExistingContentTypeMainInfos,
       resetNewContentTypeMainInfos,
       resetProps,
       saveEditedAttribute,
+      saveEditedAttributeRelation,
       setTemporaryAttribute,
       setTemporaryAttributeRelation,
       updateTempContentType,

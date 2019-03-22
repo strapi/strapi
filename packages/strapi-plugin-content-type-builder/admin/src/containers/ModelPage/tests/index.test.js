@@ -41,10 +41,12 @@ describe('<ModelPage />', () => {
 
   beforeEach(() => {
     props = {
+      addAttributeRelation: jest.fn(),
       addAttributeToExistingContentType: jest.fn(),
       addAttributeToTempContentType: jest.fn(),
       cancelNewContentType: jest.fn(),
       clearTemporaryAttribute: jest.fn(),
+      clearTemporaryAttributeRelation: jest.fn(),
       createTempContentType: jest.fn(),
       deleteModelAttribute: jest.fn(),
       history: {
@@ -115,11 +117,15 @@ describe('<ModelPage />', () => {
       onChangeExistingContentTypeMainInfos: jest.fn(),
       onChangeNewContentTypeMainInfos: jest.fn(),
       onChangeAttribute: jest.fn(),
+      onChangeRelation: jest.fn(),
+      onChangeRelationNature: jest.fn(),
+      onChangeRelationTarget: jest.fn(),
       resetEditExistingContentType: jest.fn(),
       resetEditTempContentType: jest.fn(),
       resetExistingContentTypeMainInfos: jest.fn(),
       resetNewContentTypeMainInfos: jest.fn(),
       saveEditedAttribute: jest.fn(),
+      saveEditedAttributeRelation: jest.fn(),
       setTemporaryAttribute: jest.fn(),
       setTemporaryAttributeRelation: jest.fn(),
       submitContentType: jest.fn(),
@@ -346,11 +352,13 @@ describe('<ModelPage /> lifecycle', () => {
 
   beforeEach(() => {
     props = {
+      addAttributeRelation: jest.fn(),
       addAttributeToExistingContentType: jest.fn(),
       addAttributeToTempContentType: jest.fn(),
       cancelNewContentType: jest.fn(),
       canOpenModal: true,
       clearTemporaryAttribute: jest.fn(),
+      clearTemporaryAttributeRelation: jest.fn(),
       createTempContentType: jest.fn(),
       deleteModelAttribute: jest.fn(),
       history: {
@@ -421,11 +429,15 @@ describe('<ModelPage /> lifecycle', () => {
       onChangeExistingContentTypeMainInfos: jest.fn(),
       onChangeNewContentTypeMainInfos: jest.fn(),
       onChangeAttribute: jest.fn(),
+      onChangeRelation: jest.fn(),
+      onChangeRelationNature: jest.fn(),
+      onChangeRelationTarget: jest.fn(),
       resetEditExistingContentType: jest.fn(),
       resetEditTempContentType: jest.fn(),
       resetExistingContentTypeMainInfos: jest.fn(),
       resetNewContentTypeMainInfos: jest.fn(),
       saveEditedAttribute: jest.fn(),
+      saveEditedAttributeRelation: jest.fn(),
       setTemporaryAttribute: jest.fn(),
       setTemporaryAttributeRelation: jest.fn(),
       submitContentType: jest.fn(),

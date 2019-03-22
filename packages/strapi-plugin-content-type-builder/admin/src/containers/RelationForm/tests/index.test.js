@@ -30,6 +30,11 @@ describe('<RelationForm />', () => {
         source: '',
       },
       onCancel: jest.fn(),
+      onChange: jest.fn(),
+      onChangeRelationNature: jest.fn(),
+      onChangeRelationTarget: jest.fn(),
+      onSubmit: jest.fn(),
+      onSubmitEdit: jest.fn(),
       push: () => {},
       source: null,
     };

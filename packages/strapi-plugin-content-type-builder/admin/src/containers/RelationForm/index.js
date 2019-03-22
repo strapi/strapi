@@ -27,7 +27,8 @@ const NAVLINKS = [{ id: 'base', custom: 'relation' }, { id: 'advanced' }];
 
 class RelationForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
-  state = { didCheckErrors: false, formErrors: {}, showForm: false };
+
+  state = { didCheckErrors: false, formErrors: {}, showForm: false }; // eslint-disable-line react/no-unused-state
 
   handleClick = model => {
     const { actionType, modelToEditName, onChangeRelationTarget } = this.props;
@@ -59,7 +60,7 @@ class RelationForm extends React.Component {
     const { onCancel } = this.props;
 
     onCancel();
-    this.setState({ formErrors: {}, showForm: false });
+    this.setState({ formErrors: {}, showForm: false }); // eslint-disable-line react/no-unused-state
   };
 
   handleOnOpened = () => {
@@ -80,12 +81,30 @@ class RelationForm extends React.Component {
 
   handleSubmit = e => {
     e.preventDefault();
+
+    this.submit();
+  };
+
+  handleSubmitAndContinue = e => {
+    e.preventDefault();
+
+    this.submit(true);
   };
 
   handleToggle = () => {
     const { push } = this.props;
 
     push({ search: '' });
+  };
+
+  submit = (shouldContinue = false) => {
+    const { actionType, onSubmit, onSubmitEdit } = this.props;
+
+    if (actionType === 'edit') {
+      onSubmitEdit(shouldContinue);
+    } else {
+      onSubmit(shouldContinue);
+    }
   };
 
   renderAdvancedSettings = () => {
@@ -111,16 +130,25 @@ class RelationForm extends React.Component {
       modifiedData: { key, name, nature, plugin, target },
       models,
       modelToEditName,
+      onChange,
+      onChangeRelationNature,
       source,
     } = this.props;
 
     return (
       <RelationWrapper>
-        <RelationBox modelName={modelToEditName} source={source} main value={name} />
-        <NaturePicker nature={nature} modelName={modelToEditName} name={name} keyTarget={key} />
+        <RelationBox main modelName={modelToEditName} onChange={onChange} source={source} value={name} />
+        <NaturePicker
+          modelName={modelToEditName}
+          nature={nature}
+          name={name}
+          keyTarget={key}
+          onClick={onChangeRelationNature}
+        />
         <RelationBox
           models={models}
           nature={nature}
+          onChange={onChange}
           onClick={this.handleClick}
           selectedModel={target}
           plugin={plugin}
@@ -154,7 +182,7 @@ class RelationForm extends React.Component {
           </div>
           <HeaderModalNavContainer>{NAVLINKS.map(this.renderNavLink)}</HeaderModalNavContainer>
         </HeaderModal>
-        <form onSubmit={this.handleSubmit}>
+        <form onSubmit={this.handleSubmitAndContinue}>
           <BodyModal>{showForm && content}</BodyModal>
           <FooterModal>
             <ButtonModalSecondary message={`${pluginId}.form.button.cancel`} onClick={this.handleCancel} />
@@ -198,6 +226,11 @@ RelationForm.propTypes = {
   modelToEditName: PropTypes.string,
   modifiedData: PropTypes.object.isRequired,
   onCancel: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onChangeRelationNature: PropTypes.func.isRequired,
+  onChangeRelationTarget: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onSubmitEdit: PropTypes.func.isRequired,
   push: PropTypes.func,
   source: PropTypes.string,
 };

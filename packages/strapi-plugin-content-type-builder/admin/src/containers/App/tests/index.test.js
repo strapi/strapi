@@ -11,6 +11,7 @@ describe('<App />', () => {
 
   beforeEach(() => {
     props = {
+      addAttributeRelation: jest.fn(),
       cancelNewContentType: jest.fn(),
       deleteModel: jest.fn(),
       getData: jest.fn(),
@@ -47,6 +48,7 @@ describe('<App />', () => {
       onChangeExistingContentTypeMainInfos: jest.fn(),
       onChangeNewContentTypeMainInfos: jest.fn(),
       saveEditedAttribute: jest.fn(),
+      saveEditedAttributeRelation: jest.fn(),
       resetProps: jest.fn(),
     };
   });
