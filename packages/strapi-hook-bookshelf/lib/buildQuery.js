@@ -140,9 +140,9 @@ const buildQueryJoins = (qb, { model, where }) => {
     let tmpModel = model;
     for (let part of parts) {
       const association = tmpModel.associations.find(assoc => assoc.alias === part);
-      const assocModel = findModelByAssoc(association);
 
       if (association) {
+        const assocModel = findModelByAssoc(association);
         buildSingleJoin(qb, tmpModel, assocModel, association);
         tmpModel = assocModel;
       }

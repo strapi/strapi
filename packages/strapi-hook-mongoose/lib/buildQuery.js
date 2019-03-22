@@ -292,36 +292,55 @@ const buildQueryMatches = (model, filters) => {
   return [];
 };
 
+const formatValue = value => {
+  if (Array.isArray(value)) {
+    return value.map(formatValue);
+  }
+
+  const number = _.toNumber(value);
+  if (_.isFinite(number)) return number;
+
+  return utils.valueToId(value);
+};
+
 const buildWhereClause = ({ field, operator, value }) => {
+  const val = formatValue(value);
+
+  if (Array.isArray(val) && !['in', 'nin'].includes(operator)) {
+    return {
+      $or: val.map(value => buildWhereClause({ field, operator, value })),
+    };
+  }
+
   switch (operator) {
     case 'eq':
-      return { [field]: utils.valueToId(value) };
+      return { [field]: val };
     case 'ne':
-      return { [field]: { $ne: utils.valueToId(value) } };
+      return { [field]: { $ne: val } };
     case 'lt':
-      return { [field]: { $lt: value } };
+      return { [field]: { $lt: val } };
     case 'lte':
-      return { [field]: { $lte: value } };
+      return { [field]: { $lte: val } };
     case 'gt':
-      return { [field]: { $gt: value } };
+      return { [field]: { $gt: val } };
     case 'gte':
-      return { [field]: { $gte: value } };
+      return { [field]: { $gte: val } };
     case 'in':
       return {
         [field]: {
-          $in: Array.isArray(value) ? value.map(utils.valueToId) : [utils.valueToId(value)],
+          $in: Array.isArray(val) ? val : [val],
         },
       };
     case 'nin':
       return {
         [field]: {
-          $nin: Array.isArray(value) ? value.map(utils.valueToId) : [utils.valueToId(value)],
+          $nin: Array.isArray(val) ? val : [val],
         },
       };
     case 'contains': {
       return {
         [field]: {
-          $regex: value,
+          $regex: `${val}`,
           $options: 'i',
         },
       };
@@ -329,19 +348,19 @@ const buildWhereClause = ({ field, operator, value }) => {
     case 'ncontains':
       return {
         [field]: {
-          $not: new RegExp(value, 'i'),
+          $not: new RegExp(val, 'i'),
         },
       };
     case 'containss':
       return {
         [field]: {
-          $regex: value,
+          $regex: `${val}`,
         },
       };
     case 'ncontainss':
       return {
         [field]: {
-          $not: new RegExp(value),
+          $not: new RegExp(val),
         },
       };
 

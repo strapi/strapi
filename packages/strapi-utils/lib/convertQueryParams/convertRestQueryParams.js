@@ -88,7 +88,7 @@ const convertStartQueryParams = startQuery => {
   const startAsANumber = _.toNumber(startQuery);
 
   if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
-    throw new Error(`convertStartQueryParams expected a positive integer go ${startAsANumber}`);
+    throw new Error(`convertStartQueryParams expected a positive integer got ${startAsANumber}`);
   }
 
   return {
@@ -104,7 +104,7 @@ const convertLimitQueryParams = limitQuery => {
   const limitAsANumber = _.toNumber(limitQuery);
 
   if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
-    throw new Error(`convertLimitQueryParams expected a positive integer go ${limitAsANumber}`);
+    throw new Error(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
   }
 
   return {
