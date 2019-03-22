@@ -106,7 +106,15 @@ describe('Content Type Builder Action utils', () => {
             target: 'role',
           },
         },
-        { name: 'type', params: { type: 'string', required: true, configurable: false } },
+        { name: 'type', params: { type: 'string', required: true, configurable: true } },
+        {
+          name: 'price',
+          params: {
+            type: 'integer',
+            required: true,
+            min: 2,
+          },
+        },
       ];
       const data = {
         action: {
@@ -139,7 +147,13 @@ describe('Content Type Builder Action utils', () => {
         type: {
           type: 'string',
           required: true,
-          configurable: false,
+          configurable: true,
+        },
+        price: {
+          type: 'integer',
+          required: true,
+          max: null,
+          min: 2,
         },
       };
 

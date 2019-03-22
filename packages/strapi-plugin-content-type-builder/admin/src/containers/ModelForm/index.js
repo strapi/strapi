@@ -186,7 +186,7 @@ class ModelForm extends React.Component {
   };
 
   render() {
-    const { activeTab, isOpen } = this.props;
+    const { actionType, activeTab, isOpen } = this.props;
     const currentForm = get(forms, activeTab, forms.base);
 
     return (
@@ -197,7 +197,9 @@ class ModelForm extends React.Component {
         onToggle={this.handleCancel}
       >
         <HeaderModal>
-          <HeaderModalTitle title={`${pluginId}.popUpForm.create.contentType.header.title`} />
+          <HeaderModalTitle
+            title={`${pluginId}.popUpForm.${actionType || 'create'}.contentType.header.title`}
+          />
           <HeaderModalNavContainer>{NAVLINKS.map(this.renderNavLinks)}</HeaderModalNavContainer>
         </HeaderModal>
         <form onSubmit={this.handleSubmit}>

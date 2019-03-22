@@ -5,11 +5,13 @@
  */
 
 import { fromJS, List, Map } from 'immutable';
+import pluralize from 'pluralize';
 import {
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
+  CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
   DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
@@ -18,6 +20,7 @@ import {
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
+  ON_CHANGE_RELATION_TARGET,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
@@ -25,6 +28,7 @@ import {
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE,
+  SET_TEMPORARY_ATTRIBUTE_RELATION,
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
@@ -53,7 +57,21 @@ export const initialState = fromJS({
     attributes: {},
   },
   temporaryAttribute: {},
+  temporaryAttributeRelation: {
+    name: '',
+    columnName: '',
+    dominant: false,
+    targetColumnName: '',
+    key: '-',
+    nature: 'oneWay',
+    plugin: '',
+    target: '',
+    unique: false,
+  },
 });
+
+const shouldPluralizeName = nature => ['manyToMany', 'oneToMany'].includes(nature);
+const shouldPluralizeKey = nature => ['manyToMany', 'manyToOne'].includes(nature);
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
@@ -94,6 +112,8 @@ function appReducer(state = initialState, action) {
       );
     case CLEAR_TEMPORARY_ATTRIBUTE:
       return state.update('temporaryAttribute', () => Map({}));
+    case CLEAR_TEMPORARY_ATTRIBUTE_RELATION:
+      return state.update('temporaryAttributeRelation', () => initialState.get('temporaryAttributeRelation'));
     case CREATE_TEMP_CONTENT_TYPE:
       return state
         .update('models', list =>
@@ -136,6 +156,32 @@ function appReducer(state = initialState, action) {
     case ON_CHANGE_ATTRIBUTE:
       return state.updateIn(['temporaryAttribute', ...action.keys], () => action.value);
 
+    case ON_CHANGE_RELATION_TARGET: {
+      const {
+        model: { source },
+      } = action;
+      const nature = state.getIn(['temporaryAttributeRelation', 'nature']);
+      // const name = ['manyToMany', 'oneToMany'].includes(nature)
+      const name = shouldPluralizeName(nature) ? pluralize(action.model.name) : action.model.name;
+      // let key = ['manyToMany', 'manyToOne'].includes(nature)
+      let key = shouldPluralizeKey(nature) ? pluralize(action.currentModel) : action.currentModel;
+
+      if (nature === 'oneWay') {
+        key = '-';
+      }
+
+      if (action.isEditing) {
+        return state
+          .updateIn(['temporaryAttributeRelation', 'target'], () => action.model.name)
+          .updateIn(['temporaryAttributeRelation', 'plugin'], () => source || '');
+      }
+
+      return state
+        .updateIn(['temporaryAttributeRelation', 'target'], () => action.model.name)
+        .updateIn(['temporaryAttributeRelation', 'plugin'], () => source)
+        .updateIn(['temporaryAttributeRelation', 'name'], () => name)
+        .updateIn(['temporaryAttributeRelation', 'key'], () => key);
+    }
     case RESET_EDIT_EXISTING_CONTENT_TYPE:
       return state
         .update('temporaryAttribute', () => Map({}))
@@ -181,6 +227,21 @@ function appReducer(state = initialState, action) {
 
         return attribute;
       });
+
+    case SET_TEMPORARY_ATTRIBUTE_RELATION: {
+      if (action.isEditing) {
+        const basePath = action.isModelTemporary ? ['newContentType'] : ['modifiedData', action.target];
+
+        return state.update('temporaryAttributeRelation', () =>
+          state.getIn([...basePath, 'attributes', action.attributeName]).set('name', action.attributeName),
+        );
+      }
+
+      return state
+        .updateIn(['temporaryAttributeRelation', 'target'], () => action.target)
+        .updateIn(['temporaryAttributeRelation', 'name'], () => action.target)
+        .updateIn(['temporaryAttributeRelation', 'plugin'], () => action.source || '');
+    }
     case SUBMIT_CONTENT_TYPE_SUCCEEDED: {
       const newName = state.getIn(['modifiedData', action.oldContentTypeName, 'name']);
       const newState = state

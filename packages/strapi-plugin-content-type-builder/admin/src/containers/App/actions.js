@@ -9,6 +9,7 @@ import {
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
+  CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
   DELETE_MODEL,
   DELETE_MODEL_ATTRIBUTE,
@@ -18,6 +19,8 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
+  ON_CHANGE_RELATION_NATURE,
+  ON_CHANGE_RELATION_TARGET,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
@@ -25,6 +28,7 @@ import {
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE,
+  SET_TEMPORARY_ATTRIBUTE_RELATION,
   SUBMIT_CONTENT_TYPE,
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE,
@@ -57,6 +61,12 @@ export function cancelNewContentType() {
 export function clearTemporaryAttribute() {
   return {
     type: CLEAR_TEMPORARY_ATTRIBUTE,
+  };
+}
+
+export function clearTemporaryAttributeRelation() {
+  return {
+    type: CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   };
 }
 
@@ -144,21 +154,19 @@ export function onChangeAttribute({ target }) {
   };
 }
 
-export function saveEditedAttribute(attributeName, isModelTemporary, modelName) {
+export function onChangeRelationNature(nature) {
   return {
-    type: SAVE_EDITED_ATTRIBUTE,
-    attributeName,
-    isModelTemporary,
-    modelName,
+    type: ON_CHANGE_RELATION_NATURE,
+    nature,
   };
 }
 
-export function setTemporaryAttribute(attributeName, isModelTemporary, modelName) {
+export function onChangeRelationTarget(model, currentModel, isEditing = false) {
   return {
-    type: SET_TEMPORARY_ATTRIBUTE,
-    attributeName,
-    isModelTemporary,
-    modelName,
+    type: ON_CHANGE_RELATION_TARGET,
+    currentModel,
+    model,
+    isEditing,
   };
 }
 
@@ -191,6 +199,35 @@ export function resetEditTempContentType() {
 export function resetProps() {
   return {
     type: RESET_PROPS,
+  };
+}
+
+export function saveEditedAttribute(attributeName, isModelTemporary, modelName) {
+  return {
+    type: SAVE_EDITED_ATTRIBUTE,
+    attributeName,
+    isModelTemporary,
+    modelName,
+  };
+}
+
+export function setTemporaryAttribute(attributeName, isModelTemporary, modelName) {
+  return {
+    type: SET_TEMPORARY_ATTRIBUTE,
+    attributeName,
+    isModelTemporary,
+    modelName,
+  };
+}
+
+export function setTemporaryAttributeRelation(target, isModelTemporary, source, attributeName, isEditing) {
+  return {
+    type: SET_TEMPORARY_ATTRIBUTE_RELATION,
+    attributeName,
+    isEditing,
+    isModelTemporary,
+    source,
+    target,
   };
 }
 
@@ -252,11 +289,17 @@ export const formatModelAttributes = attributes =>
   Object.keys(attributes).reduce((acc, current) => {
     const attribute = Object.keys(attributes[current]).reduce(
       (acc2, curr) => {
-        if (curr === 'plugin' && !!attributes[current][curr]) {
-          acc2.params.pluginValue = attributes[current][curr];
+        const value = attributes[current][curr];
+
+        if (((curr.includes('max') || curr.includes('min')) && !value) || curr === 'isVirtual') {
+          return acc2;
+        }
+
+        if (curr === 'plugin' && !!value) {
+          acc2.params.pluginValue = value;
           acc2.params.plugin = true;
         } else {
-          acc2.params[curr] = attributes[current][curr];
+          acc2.params[curr] = value;
         }
 
         return acc2;

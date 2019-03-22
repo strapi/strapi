@@ -4,6 +4,9 @@
   list-style: none;
   font-size: 1.3rem;
   line-height: 5.3rem;
+  // white-space: nowrap;
+  // overflow: hidden;
+  // text-overflow: ellipsis;
 
   &:last-child .flex {
     border-bottom: none;
@@ -14,7 +17,7 @@
   &:hover {
     background-color: #F7F8F8;
   }
-  
+
   cursor: pointer;
 }
 
@@ -48,6 +51,9 @@
 .relationContainer {
   width: 30rem;
   text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mainField {

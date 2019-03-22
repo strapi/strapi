@@ -82,6 +82,17 @@ describe('appReducer', () => {
         attributes: {},
       },
       temporaryAttribute: {},
+      temporaryAttributeRelation: {
+        name: '',
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: '',
+        unique: false,
+      },
     });
   });
 
@@ -428,6 +439,17 @@ describe('appReducer', () => {
         attributes: {},
       },
       temporaryAttribute: {},
+      temporaryAttributeRelation: {
+        name: '',
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: '',
+        unique: false,
+      },
     });
 
     expect(appReducer(state, resetProps())).toEqual(expected);

@@ -36,6 +36,7 @@ import Ul from '../../components/Ul';
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
 import ModelForm from '../ModelForm';
+import RelationForm from '../RelationForm';
 
 import {
   addAttributeToExistingContentType,
@@ -268,7 +269,8 @@ export class ModelPage extends React.Component {
 
     emitEvent('willEditFieldOfContentType');
     push({
-      search: `modalType=attributeForm&attributeType=${attributeType}&settingType=base&actionType=edit&attributeName=${attributeName}`,
+      search: `modalType=attributeForm&attributeType=${attributeType ||
+        'relation'}&settingType=base&actionType=edit&attributeName=${attributeName}`,
     });
   };
 
@@ -463,17 +465,21 @@ export class ModelPage extends React.Component {
       cancelNewContentType,
       connections,
       clearTemporaryAttribute,
+      clearTemporaryAttributeRelation,
       createTempContentType,
       history: { push },
       location: { pathname, search },
       models,
       modifiedData,
+      onChangeAttribute,
       onChangeExistingContentTypeMainInfos,
       onChangeNewContentTypeMainInfos,
-      onChangeAttribute,
+      onChangeRelationTarget,
       resetExistingContentTypeMainInfos,
       resetNewContentTypeMainInfos,
+      setTemporaryAttributeRelation,
       temporaryAttribute,
+      temporaryAttributeRelation,
       updateTempContentType,
     } = this.props;
     const { showWarning, removePrompt } = this.state;
@@ -490,6 +496,7 @@ export class ModelPage extends React.Component {
     const attributeType = getQueryParameters(search, 'attributeType');
     const actionType = this.getActionType();
     const icon = this.getSource() ? null : 'fa fa-pencil';
+    // console.log(this.getModelAttributes());
 
     return (
       <div className={styles.modelpage}>
@@ -614,6 +621,22 @@ export class ModelPage extends React.Component {
           popUpWarningType="danger"
           onConfirm={this.handleDeleteAttribute}
         />
+        <RelationForm
+          actionType={actionType}
+          activeTab={settingType}
+          attributeToEditName={this.getAttributeName()}
+          initData={setTemporaryAttributeRelation}
+          isOpen={modalType === 'attributeForm' && attributeType === 'relation'}
+          isUpdatingTemporaryContentType={this.isUpdatingTemporaryContentType()}
+          models={models}
+          modelToEditName={this.getModelName()}
+          modifiedData={temporaryAttributeRelation}
+          onCancel={clearTemporaryAttributeRelation}
+          onChangeRelationTarget={onChangeRelationTarget}
+          // onChange={onChangeAttribute}
+          push={push}
+          source={this.getSource()}
+        />
       </div>
     );
   }
@@ -636,6 +659,7 @@ ModelPage.propTypes = {
   cancelNewContentType: PropTypes.func.isRequired,
   canOpenModal: PropTypes.bool,
   clearTemporaryAttribute: PropTypes.func.isRequired,
+  clearTemporaryAttributeRelation: PropTypes.func.isRequired,
   connections: PropTypes.array,
   createTempContentType: PropTypes.func.isRequired,
   deleteModelAttribute: PropTypes.func.isRequired,
@@ -650,9 +674,13 @@ ModelPage.propTypes = {
   resetEditTempContentType: PropTypes.func.isRequired,
   resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
   resetNewContentTypeMainInfos: PropTypes.func.isRequired,
+  saveEditedAttribute: PropTypes.func.isRequired,
+  setTemporaryAttribute: PropTypes.func.isRequired,
+  setTemporaryAttributeRelation: PropTypes.func.isRequired,
   submitContentType: PropTypes.func.isRequired,
   submitTempContentType: PropTypes.func.isRequired,
   temporaryAttribute: PropTypes.object.isRequired,
+  temporaryAttributeRelation: PropTypes.object.isRequired,
   updateTempContentType: PropTypes.func.isRequired,
   ...routerPropTypes({ params: PropTypes.string }).isRequired,
 };

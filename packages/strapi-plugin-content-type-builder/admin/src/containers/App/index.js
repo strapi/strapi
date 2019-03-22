@@ -20,17 +20,20 @@ import Loader from './Loader';
 
 import {
   cancelNewContentType,
+  clearTemporaryAttributeRelation,
   createTempContentType,
   deleteModel,
   deleteTemporaryModel,
   getData,
   onChangeExistingContentTypeMainInfos,
   onChangeNewContentTypeMainInfos,
+  onChangeRelationTarget,
   resetExistingContentTypeMainInfos,
   resetNewContentTypeMainInfos,
   resetProps,
   saveEditedAttribute,
   setTemporaryAttribute,
+  setTemporaryAttributeRelation,
   updateTempContentType,
 } from './actions';
 
@@ -109,6 +112,8 @@ App.propTypes = {
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   saveEditedAttribute: PropTypes.func.isRequired,
+  setTemporaryAttribute: PropTypes.func.isRequired,
+  setTemporaryAttributeRelation: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectApp();
@@ -117,17 +122,20 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       cancelNewContentType,
+      clearTemporaryAttributeRelation,
       createTempContentType,
       deleteModel,
       deleteTemporaryModel,
       getData,
       onChangeExistingContentTypeMainInfos,
       onChangeNewContentTypeMainInfos,
+      onChangeRelationTarget,
       resetExistingContentTypeMainInfos,
       resetNewContentTypeMainInfos,
       resetProps,
       saveEditedAttribute,
       setTemporaryAttribute,
+      setTemporaryAttributeRelation,
       updateTempContentType,
     },
     dispatch,

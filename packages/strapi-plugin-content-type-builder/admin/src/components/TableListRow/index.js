@@ -91,7 +91,7 @@ class TableListRow extends React.Component {
       : [{ icoType: 'trash', onClick: this.handleShowModalWarning, id: `delete${name}` }];
 
     return (
-      <ListRow onClick={this.handleGoTo}>
+      <ListRow onClick={this.handleGoTo} style={{ height: '5.4rem' }}>
         <div className={`col-md-4 ${styles.italic} ${styles.nameContainer}`}>
           <i className={`fa ${this.props.rowItem.icon}`} />
           <span style={{ width: spanStyle }}>
