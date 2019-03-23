@@ -308,6 +308,8 @@ export const buildModelAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
     if (current.params.type === 'enumeration') {
       acc[current.name] = Object.assign(current.params, { enum: current.params.enum.join(',') });
+    } else if (current.params.nature === 'oneWay') {
+      acc[current.name] = Object.assign(current.params, { key: '-' });
     } else {
       acc[current.name] = current.params;
     }

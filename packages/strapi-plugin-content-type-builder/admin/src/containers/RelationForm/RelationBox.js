@@ -9,6 +9,8 @@ import ModelPicker from './ModelPicker';
 import styles from './styles.scss';
 
 const RelationBox = ({
+  didCheckErrors,
+  errors,
   main,
   models,
   modelName,
@@ -36,6 +38,8 @@ const RelationBox = ({
         </div>
         <div className={styles.relationBoxBody}>
           <InputText
+            didCheckErrors={didCheckErrors}
+            errors={errors}
             label="Field Name"
             disabled={value === '-' || nature === 'oneWay'}
             name={main ? 'name' : 'key'}
@@ -50,6 +54,8 @@ const RelationBox = ({
 };
 
 RelationBox.defaultProps = {
+  didCheckErrors: false,
+  errors: [],
   main: false,
   modelName: '',
   models: [],
@@ -61,6 +67,8 @@ RelationBox.defaultProps = {
 };
 
 RelationBox.propTypes = {
+  didCheckErrors: PropTypes.bool,
+  errors: PropTypes.array,
   main: PropTypes.bool,
   modelName: PropTypes.string,
   models: PropTypes.array,

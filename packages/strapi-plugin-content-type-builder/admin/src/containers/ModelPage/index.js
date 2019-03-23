@@ -637,6 +637,7 @@ export class ModelPage extends React.Component {
         <RelationForm
           actionType={actionType}
           activeTab={settingType}
+          alreadyTakenAttributes={Object.keys(this.getModelAttributes())}
           attributeToEditName={this.getAttributeName()}
           initData={setTemporaryAttributeRelation}
           isOpen={modalType === 'attributeForm' && attributeType === 'relation'}

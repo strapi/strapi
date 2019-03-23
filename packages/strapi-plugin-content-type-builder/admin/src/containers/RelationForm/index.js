@@ -7,6 +7,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { get, isEmpty } from 'lodash';
+
+import Input from 'components/InputsIndex';
 
 import pluginId from '../../pluginId';
 
@@ -23,12 +26,60 @@ import NaturePicker from './NaturePicker';
 import RelationWrapper from './RelationWrapper';
 import RelationBox from './RelationBox';
 
+import formAdvanced from './advanced.json';
+
+import styles from './styles.scss';
+
 const NAVLINKS = [{ id: 'base', custom: 'relation' }, { id: 'advanced' }];
 
 class RelationForm extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
 
-  state = { didCheckErrors: false, formErrors: {}, showForm: false }; // eslint-disable-line react/no-unused-state
+  state = { didCheckErrors: false, formErrors: {}, showForm: false };
+
+  getFormErrors = () => {
+    const { actionType, alreadyTakenAttributes, attributeToEditName, modifiedData } = this.props;
+    const formValidations = {
+      name: { required: true, unique: true },
+      key: { required: true, unique: true },
+    };
+
+    const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(attribute => {
+      if (actionType === 'edit') {
+        return attribute !== attributeToEditName && attribute !== modifiedData.key;
+      }
+
+      return attribute !== attributeToEditName;
+    });
+
+    let formErrors = {};
+
+    if (modifiedData.name === modifiedData.key) {
+      formErrors = { key: [{ id: `${pluginId}.error.attribute.key.taken` }] };
+    }
+
+    formErrors = Object.keys(formValidations).reduce((acc, current) => {
+      const { required, unique } = formValidations[current];
+      const value = modifiedData[current];
+
+      if (required === true && !value) {
+        acc[current] = [{ id: `${pluginId}.error.validation.required` }];
+      }
+
+      if (unique === true && alreadyTakenAttributesUpdated.includes(value)) {
+        acc[current] = [{ id: `${pluginId}.error.attribute.key.taken` }];
+      }
+
+      return acc;
+    }, formErrors);
+
+    this.setState(prevState => ({
+      didCheckErrors: !prevState.didCheckErrors,
+      formErrors,
+    }));
+
+    return formErrors;
+  };
 
   handleClick = model => {
     const { actionType, modelToEditName, onChangeRelationTarget } = this.props;
@@ -82,13 +133,17 @@ class RelationForm extends React.Component {
   handleSubmit = e => {
     e.preventDefault();
 
-    this.submit();
+    if (isEmpty(this.getFormErrors())) {
+      this.submit();
+    }
   };
 
   handleSubmitAndContinue = e => {
     e.preventDefault();
 
-    this.submit(true);
+    if (isEmpty(this.getFormErrors())) {
+      this.submit(true);
+    }
   };
 
   handleToggle = () => {
@@ -108,7 +163,26 @@ class RelationForm extends React.Component {
   };
 
   renderAdvancedSettings = () => {
-    return null;
+    const { didCheckErrors } = this.state;
+    const { modifiedData, onChange } = this.props;
+
+    return formAdvanced.map((input, i) => {
+      const divider = i === 0 ? <div className={styles.divider} /> : null;
+
+      return (
+        <React.Fragment key={input.name}>
+          <Input
+            {...input}
+            addon={modifiedData[input.addon]}
+            didCheckErrors={didCheckErrors}
+            key={input.name}
+            onChange={onChange}
+            value={modifiedData[input.name]}
+          />
+          {divider}
+        </React.Fragment>
+      );
+    });
   };
 
   renderNavLink = (link, index) => {
@@ -134,10 +208,19 @@ class RelationForm extends React.Component {
       onChangeRelationNature,
       source,
     } = this.props;
+    const { formErrors, didCheckErrors } = this.state;
 
     return (
       <RelationWrapper>
-        <RelationBox main modelName={modelToEditName} onChange={onChange} source={source} value={name} />
+        <RelationBox
+          errors={get(formErrors, 'name', [])}
+          didCheckErrors={didCheckErrors}
+          main
+          modelName={modelToEditName}
+          onChange={onChange}
+          source={source}
+          value={name}
+        />
         <NaturePicker
           modelName={modelToEditName}
           nature={nature}
@@ -146,6 +229,8 @@ class RelationForm extends React.Component {
           onClick={onChangeRelationNature}
         />
         <RelationBox
+          errors={get(formErrors, 'key', [])}
+          didCheckErrors={didCheckErrors}
           models={models}
           nature={nature}
           onChange={onChange}
@@ -206,6 +291,7 @@ RelationForm.contextTypes = {
 RelationForm.defaultProps = {
   actionType: 'create',
   activeTab: 'base',
+  alreadyTakenAttributes: [],
   attributeToEditName: '',
   isOpen: false,
   isUpdatingTemporaryContentType: false,
@@ -218,6 +304,7 @@ RelationForm.defaultProps = {
 RelationForm.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
+  alreadyTakenAttributes: PropTypes.array,
   attributeToEditName: PropTypes.string,
   initData: PropTypes.func.isRequired,
   isOpen: PropTypes.bool,
