@@ -1,10 +1,12 @@
 import { fromJS, List, Map } from 'immutable';
 
 import {
+  addAttributeRelation,
   addAttributeToExistingContentType,
   addAttributeToTempContentType,
   cancelNewContentType,
   clearTemporaryAttribute,
+  clearTemporaryAttributeRelation,
   createTempContentType,
   deleteModelAttribute,
   deleteModelSucceeded,
@@ -22,8 +24,37 @@ import {
   submitTempContentTypeSucceeded,
   updateTempContentType,
   resetExistingContentTypeMainInfos,
+  onChangeRelation,
+  onChangeRelationNature,
+  onChangeRelationTarget,
 } from '../actions';
-import appReducer from '../reducer';
+import appReducer, { shouldPluralizeKey, shouldPluralizeName } from '../reducer';
+
+describe('Reducer utils', () => {
+  describe('ShouldPluralizeKey', () => {
+    it('should return true for the manyToMany & manyToOne relations', () => {
+      expect(shouldPluralizeKey('manyToMany')).toBeTruthy();
+      expect(shouldPluralizeKey('manyToOne')).toBeTruthy();
+    });
+
+    it('should return false otherwise', () => {
+      expect(shouldPluralizeKey('oneWay')).toBeFalsy();
+      expect(shouldPluralizeKey('oneToMay')).toBeFalsy();
+    });
+  });
+
+  describe('ShouldPluralizeName', () => {
+    it('should return true for the manyToMany & oneToMany relations', () => {
+      expect(shouldPluralizeName('manyToMany')).toBeTruthy();
+      expect(shouldPluralizeName('oneToMany')).toBeTruthy();
+    });
+
+    it('should return false otherwise', () => {
+      expect(shouldPluralizeName('oneWay')).toBeFalsy();
+      expect(shouldPluralizeName('manyToOne')).toBeFalsy();
+    });
+  });
+});
 
 describe('appReducer', () => {
   let state;
@@ -117,6 +148,194 @@ describe('appReducer', () => {
     expect(appReducer(undefined, {})).toEqual(expected);
   });
 
+  it('should handle the addAttributeRelation action correctly if the target is different than the current model (temporaryModel)', () => {
+    state = state
+      .setIn(['temporaryAttributeRelation', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'target'], 'test1');
+
+    const expected = state.setIn(
+      ['modifiedData', 'product', 'attributes', 'test'],
+      Map({
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: 'test1',
+        unique: false,
+      }),
+    );
+
+    expect(appReducer(state, addAttributeRelation(false, 'product'))).toEqual(expected);
+  });
+
+  it('should handle the addAttributeRelation action correctly if the target is different than the current model ', () => {
+    state = state
+      .setIn(['newContentType', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'target'], 'test1');
+
+    const expected = state.setIn(
+      ['newContentType', 'attributes', 'test'],
+      Map({
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: 'test1',
+        unique: false,
+      }),
+    );
+
+    expect(appReducer(state, addAttributeRelation(true, null))).toEqual(expected);
+  });
+
+  it('should handle the addAttributeRelation action correctly if the target is equal the current model and the relation is oneWay', () => {
+    state = state
+      .setIn(['newContentType', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'target'], 'test1');
+
+    const expected = state.setIn(
+      ['newContentType', 'attributes', 'test'],
+      Map({
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: 'test1',
+        unique: false,
+      }),
+    );
+
+    expect(appReducer(state, addAttributeRelation(true, null))).toEqual(expected);
+  });
+
+  it('should handle the addAttributeRelation action correctly if the target is equal the current model and the relation is manyToMany', () => {
+    state = state
+      .setIn(['newContentType', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'name'], 'strapi')
+      .setIn(['temporaryAttributeRelation', 'key'], 'notstrapi')
+      .setIn(['temporaryAttributeRelation', 'target'], 'test')
+      .setIn(['temporaryAttributeRelation', 'nature'], 'manyToMany')
+      .setIn(['temporaryAttributeRelation', 'dominant'], true);
+
+    const expected = state
+      .setIn(
+        ['newContentType', 'attributes', 'strapi'],
+        Map({
+          dominant: true,
+          columnName: '',
+          targetColumnName: '',
+          key: 'notstrapi',
+          nature: 'manyToMany',
+          plugin: '',
+          target: 'test',
+          unique: false,
+        }),
+      )
+      .setIn(
+        ['newContentType', 'attributes', 'notstrapi'],
+        Map({
+          dominant: false,
+          columnName: '',
+          targetColumnName: '',
+          key: 'strapi',
+          nature: 'manyToMany',
+          plugin: '',
+          target: 'test',
+          unique: false,
+        }),
+      );
+
+    expect(appReducer(state, addAttributeRelation(true, 'test'))).toEqual(expected);
+  });
+
+  it('should handle the addAttributeRelation action correctly if the target is equal the current model and the relation is manyToOne', () => {
+    state = state
+      .setIn(['newContentType', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'name'], 'strapi')
+      .setIn(['temporaryAttributeRelation', 'key'], 'notstrapi')
+      .setIn(['temporaryAttributeRelation', 'target'], 'test')
+      .setIn(['temporaryAttributeRelation', 'nature'], 'manyToOne')
+      .setIn(['temporaryAttributeRelation', 'dominant'], true);
+
+    const expected = state
+      .setIn(
+        ['newContentType', 'attributes', 'strapi'],
+        Map({
+          dominant: true,
+          columnName: '',
+          targetColumnName: '',
+          key: 'notstrapi',
+          nature: 'manyToOne',
+          plugin: '',
+          target: 'test',
+          unique: false,
+        }),
+      )
+      .setIn(
+        ['newContentType', 'attributes', 'notstrapi'],
+        Map({
+          dominant: false,
+          columnName: '',
+          targetColumnName: '',
+          key: 'strapi',
+          nature: 'oneToMany',
+          plugin: '',
+          target: 'test',
+          unique: false,
+        }),
+      );
+
+    expect(appReducer(state, addAttributeRelation(true, 'test'))).toEqual(expected);
+  });
+
+  it('should handle the addAttributeRelation action correctly if the target is equal the current model and the relation is oneToMany', () => {
+    state = state
+      .setIn(['newContentType', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'name'], 'strapi')
+      .setIn(['temporaryAttributeRelation', 'key'], 'notstrapi')
+      .setIn(['temporaryAttributeRelation', 'target'], 'test')
+      .setIn(['temporaryAttributeRelation', 'nature'], 'oneToMany')
+      .setIn(['temporaryAttributeRelation', 'dominant'], true);
+
+    const expected = state
+      .setIn(
+        ['newContentType', 'attributes', 'strapi'],
+        Map({
+          dominant: true,
+          columnName: '',
+          targetColumnName: '',
+          key: 'notstrapi',
+          nature: 'oneToMany',
+          plugin: '',
+          target: 'test',
+          unique: false,
+        }),
+      )
+      .setIn(
+        ['newContentType', 'attributes', 'notstrapi'],
+        Map({
+          dominant: false,
+          columnName: '',
+          targetColumnName: '',
+          key: 'strapi',
+          nature: 'manyToOne',
+          plugin: '',
+          target: 'test',
+          unique: false,
+        }),
+      );
+
+    expect(appReducer(state, addAttributeRelation(true, 'test'))).toEqual(expected);
+  });
+
   it('should handle the addAttributeToExistingContentType action correctly if the type is different than number', () => {
     state = state
       .setIn(['temporaryAttribute', 'name'], 'test')
@@ -195,6 +414,46 @@ describe('appReducer', () => {
     expect(appReducer(state, clearTemporaryAttribute())).toEqual(expected);
   });
 
+  it('should handle the clearTemporaryAttributeRelation action correctly', () => {
+    state = state
+      .setIn(['initialTemporaryAttributeRelation', 'name'], 'test')
+      .setIn(['initialTemporaryAttributeRelation', 'target'], 'test1')
+      .setIn(['temporaryAttributeRelation', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'target'], 'test1');
+
+    const expected = state
+      .set(
+        'temporaryAttributeRelation',
+        Map({
+          name: '',
+          columnName: '',
+          dominant: false,
+          targetColumnName: '',
+          key: '-',
+          nature: 'oneWay',
+          plugin: '',
+          target: '',
+          unique: false,
+        }),
+      )
+      .set(
+        'initialTemporaryAttributeRelation',
+        Map({
+          name: '',
+          columnName: '',
+          dominant: false,
+          targetColumnName: '',
+          key: '-',
+          nature: 'oneWay',
+          plugin: '',
+          target: '',
+          unique: false,
+        }),
+      );
+
+    expect(appReducer(state, clearTemporaryAttributeRelation())).toEqual(expected);
+  });
+
   it('should handle the createTempContentType action correctly', () => {
     const newContentType = {
       collectionName: 'test',
@@ -233,6 +492,63 @@ describe('appReducer', () => {
   it('should handle the deleteModelAttribute action correctly', () => {
     const keys = ['modifiedData', 'product', 'attributes', 'name'];
     const expected = state.removeIn(['modifiedData', 'product', 'attributes', 'name']);
+
+    expect(appReducer(state, deleteModelAttribute(keys))).toEqual(expected);
+  });
+
+  it('should handle the deleteModelAttribute action correctly if the attribute has a relation with itself that is not oneWay', () => {
+    const keys = ['modifiedData', 'product', 'attributes', 'strapi'];
+    state = state
+      .setIn(
+        ['modifiedData', 'product', 'attributes', 'strapi'],
+        Map({
+          dominant: true,
+          columnName: '',
+          targetColumnName: '',
+          key: 'notstrapi',
+          nature: 'manyToOne',
+          plugin: '',
+          target: 'product',
+          unique: false,
+        }),
+      )
+      .setIn(
+        ['modifiedData', 'product', 'attributes', 'notstrapi'],
+        Map({
+          dominant: false,
+          columnName: '',
+          targetColumnName: '',
+          key: 'strapi',
+          nature: 'oneToMany',
+          plugin: '',
+          target: 'product',
+          unique: false,
+        }),
+      );
+    const expected = state
+      .removeIn(['modifiedData', 'product', 'attributes', 'strapi'])
+      .removeIn(['modifiedData', 'product', 'attributes', 'notstrapi']);
+
+    expect(appReducer(state, deleteModelAttribute(keys))).toEqual(expected);
+  });
+
+  it('should handle the deleteModelAttribute action correctly if the attribute has a relation with itself that is oneWay', () => {
+    const keys = ['modifiedData', 'product', 'attributes', 'strapi'];
+    state = state.setIn(
+      ['modifiedData', 'product', 'attributes', 'strapi'],
+      Map({
+        dominant: true,
+        columnName: '',
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneway',
+        plugin: '',
+        target: 'product',
+        unique: false,
+      }),
+    );
+
+    const expected = state.removeIn(['modifiedData', 'product', 'attributes', 'strapi']);
 
     expect(appReducer(state, deleteModelAttribute(keys))).toEqual(expected);
   });
@@ -387,6 +703,92 @@ describe('appReducer', () => {
     const target = { name: 'name', value: 'test' };
 
     expect(appReducer(state, onChangeAttribute({ target }))).toEqual(expected);
+  });
+
+  it('should handle the onChangeRelation action correctly', () => {
+    const expected = state.setIn(['temporaryAttributeRelation', 'name'], 'test');
+    const target = { name: 'name', value: 'test' };
+
+    expect(appReducer(state, onChangeRelation({ target }))).toEqual(expected);
+  });
+
+  it('should handle the onChangeRelationNature action correctly for the oneWay', () => {
+    state = state
+      .setIn(['temporaryAttributeRelation', 'name'], 'tests')
+      .setIn(['temporaryAttributeRelation', 'nature'], 'manyToMany')
+      .setIn(['temporaryAttributeRelation', 'key'], 'something');
+
+    const expected = state
+      .setIn(['temporaryAttributeRelation', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'nature'], 'oneWay')
+      .setIn(['temporaryAttributeRelation', 'key'], '-');
+
+    expect(appReducer(state, onChangeRelationNature('oneWay', null))).toEqual(expected);
+  });
+
+  it('should handle the onChangeRelationNature action correctly for the manyToMany', () => {
+    state = state.setIn(['temporaryAttributeRelation', 'name'], 'test');
+
+    const expected = state
+      .setIn(['temporaryAttributeRelation', 'name'], 'tests')
+      .setIn(['temporaryAttributeRelation', 'dominant'], true)
+      .setIn(['temporaryAttributeRelation', 'nature'], 'manyToMany')
+      .setIn(['temporaryAttributeRelation', 'key'], 'strapis');
+
+    expect(appReducer(state, onChangeRelationNature('manyToMany', 'strapi'))).toEqual(expected);
+  });
+
+  it('should handle the onChangeRelationNature action correctly for the manyToOne', () => {
+    state = state.setIn(['temporaryAttributeRelation', 'name'], 'test');
+
+    const expected = state
+      .setIn(['temporaryAttributeRelation', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'nature'], 'manyToOne')
+      .setIn(['temporaryAttributeRelation', 'key'], 'strapis');
+
+    expect(appReducer(state, onChangeRelationNature('manyToOne', 'strapi'))).toEqual(expected);
+  });
+
+  it('should handle the onChangeRelationNature action correctly for the oneToMany', () => {
+    state = state.setIn(['temporaryAttributeRelation', 'name'], 'test');
+
+    const expected = state
+      .setIn(['temporaryAttributeRelation', 'name'], 'tests')
+      .setIn(['temporaryAttributeRelation', 'nature'], 'oneToMany')
+      .setIn(['temporaryAttributeRelation', 'key'], 'strapi');
+
+    expect(appReducer(state, onChangeRelationNature('oneToMany', 'strapi'))).toEqual(expected);
+  });
+
+  it('should handle the onChangeRelationTarget action correctly for the oneWay', () => {
+    state = state
+      .setIn(['temporaryAttributeRelation', 'name'], 'test')
+      .setIn(['temporaryAttributeRelation', 'target'], 'test');
+
+    const expected = state
+      .setIn(['temporaryAttributeRelation', 'target'], 'strapi')
+      .setIn(['temporaryAttributeRelation', 'plugin'], '');
+
+    expect(appReducer(state, onChangeRelationTarget({ name: 'strapi', source: null }, null, true))).toEqual(
+      expected,
+    );
+  });
+
+  it('should handle the onChangeRelationTarget action correctly for the manyToMany', () => {
+    state = state
+      .setIn(['temporaryAttributeRelation', 'name'], 'tests')
+      .setIn(['temporaryAttributeRelation', 'nature'], 'manyToMany')
+      .setIn(['temporaryAttributeRelation', 'key'], 'something')
+      .setIn(['temporaryAttributeRelation', 'target'], 'something');
+
+    const expected = state
+      .setIn(['temporaryAttributeRelation', 'target'], 'strapi')
+      .setIn(['temporaryAttributeRelation', 'key'], 'soupettes')
+      .setIn(['temporaryAttributeRelation', 'name'], 'strapis');
+
+    expect(
+      appReducer(state, onChangeRelationTarget({ name: 'strapi', source: null }, 'soupette', false)),
+    ).toEqual(expected);
   });
 
   it('should handle the resetEditExistingContentType action correctly', () => {

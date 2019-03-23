@@ -83,6 +83,19 @@ describe('Content Type Builder Action utils', () => {
           name: 'controller',
           params: { type: 'string', required: true, configurable: false },
         },
+        {
+          name: 'test',
+          params: { type: 'enumeration', enum: ['test', 'test1'] },
+        },
+        {
+          name: 'otherTest',
+          params: {
+            columnName: '',
+            nature: 'oneWay',
+            target: 'super',
+            targetColumnName: '',
+          },
+        },
       ];
       const expected = {
         type: {
@@ -94,6 +107,17 @@ describe('Content Type Builder Action utils', () => {
           type: 'string',
           required: true,
           configurable: false,
+        },
+        test: {
+          type: 'enumeration',
+          enum: 'test,test1',
+        },
+        otherTest: {
+          columnName: '',
+          nature: 'oneWay',
+          key: '-',
+          target: 'super',
+          targetColumnName: '',
         },
       };
 
@@ -140,6 +164,10 @@ describe('Content Type Builder Action utils', () => {
             required: true,
             min: 2,
           },
+        },
+        {
+          name: 'otherTest',
+          params: { type: 'enumeration', enum: ['test', 'test1'] },
         },
       ];
       const data = {
@@ -189,6 +217,10 @@ describe('Content Type Builder Action utils', () => {
           required: true,
           max: null,
           min: 2,
+        },
+        otherTest: {
+          type: 'enumeration',
+          enum: 'test,test1',
         },
       };
 

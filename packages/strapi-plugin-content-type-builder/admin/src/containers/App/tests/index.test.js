@@ -49,6 +49,8 @@ describe('<App />', () => {
       onChangeNewContentTypeMainInfos: jest.fn(),
       saveEditedAttribute: jest.fn(),
       saveEditedAttributeRelation: jest.fn(),
+      setTemporaryAttribute: jest.fn(),
+      setTemporaryAttributeRelation: jest.fn(),
       resetProps: jest.fn(),
     };
   });

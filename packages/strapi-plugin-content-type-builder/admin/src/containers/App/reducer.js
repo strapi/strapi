@@ -85,8 +85,8 @@ export const initialState = fromJS({
   },
 });
 
-const shouldPluralizeName = nature => ['manyToMany', 'oneToMany'].includes(nature);
-const shouldPluralizeKey = nature => ['manyToMany', 'manyToOne'].includes(nature);
+export const shouldPluralizeKey = nature => ['manyToMany', 'manyToOne'].includes(nature);
+export const shouldPluralizeName = nature => ['manyToMany', 'oneToMany'].includes(nature);
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
@@ -267,7 +267,7 @@ function appReducer(state = initialState, action) {
 
       return state
         .updateIn(['temporaryAttributeRelation', 'target'], () => action.model.name)
-        .updateIn(['temporaryAttributeRelation', 'plugin'], () => source)
+        .updateIn(['temporaryAttributeRelation', 'plugin'], () => source || '')
         .updateIn(['temporaryAttributeRelation', 'name'], () => name)
         .updateIn(['temporaryAttributeRelation', 'key'], () => key);
     }
