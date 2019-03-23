@@ -16,7 +16,11 @@ import styles from './styles.scss';
 /* istanbul ignore next */
 function HeaderNavLink({ custom, id, isActive, onClick }) {
   return (
-    <div className={cn(isActive && styles.headerNavLink)} onClick={() => onClick(id)}>
+    <div
+      className={cn(isActive && styles.headerNavLink)}
+      style={{ cursor: 'pointer' }}
+      onClick={() => onClick(id)}
+    >
       <FormattedMessage id={`${pluginId}.popUpForm.navContainer.${custom || id}`} />
     </div>
   );

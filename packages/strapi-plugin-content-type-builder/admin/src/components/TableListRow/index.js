@@ -17,6 +17,7 @@ import pluginId from '../../pluginId';
 import styles from '../TableList/styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-curly-brace-presence */
+/* eslint-disable indent */
 
 class TableListRow extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -44,6 +45,18 @@ class TableListRow extends React.Component {
     }
 
     this.setState({ showWarning: false });
+  };
+
+  handleEdit = () => {
+    const {
+      push,
+      rowItem: { name, source },
+    } = this.props;
+
+    push({
+      pathname: `/plugins/content-type-builder/models/${name}${source ? `&source=${source}` : ''}`,
+      search: `modalType=model&settingType=base&actionType=edit&modelName=${name}`,
+    });
   };
 
   handleGoTo = () => {
@@ -88,7 +101,10 @@ class TableListRow extends React.Component {
     const spanStyle = this.props.rowItem.isTemporary ? '60%' : '100%';
     const icons = this.props.rowItem.source
       ? []
-      : [{ icoType: 'trash', onClick: this.handleShowModalWarning, id: `delete${name}` }];
+      : [
+          { icoType: 'pencil', onClick: this.handleEdit },
+          { icoType: 'trash', onClick: this.handleShowModalWarning, id: `delete${name}` },
+        ];
 
     return (
       <ListRow onClick={this.handleGoTo} style={{ height: '5.4rem' }}>
