@@ -219,7 +219,7 @@
           "label": {
             "id": "content-type-builder.form.attribute.item.enumeration.rules"
           },
-          "name": "enumValue",
+          "name": "enum",
           "type": "textarea",
           "placeholder": "content-type-builder.form.attribute.item.enumeration.placeholder",
           "value": false,

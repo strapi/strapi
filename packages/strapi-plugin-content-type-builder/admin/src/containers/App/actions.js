@@ -306,7 +306,11 @@ export function updateTempContentType() {
 // utils
 export const buildModelAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
-    acc[current.name] = current.params;
+    if (current.params.type === 'enumeration') {
+      acc[current.name] = Object.assign(current.params, { enum: current.params.enum.join(',') });
+    } else {
+      acc[current.name] = current.params;
+    }
 
     return acc;
   }, {});
@@ -331,6 +335,8 @@ export const formatModelAttributes = attributes =>
         if (curr === 'plugin' && !!value) {
           acc2.params.pluginValue = value;
           acc2.params.plugin = true;
+        } else if (curr === 'enum') {
+          acc2.params.enum = value.split(',');
         } else {
           acc2.params[curr] = value;
         }

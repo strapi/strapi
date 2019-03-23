@@ -41,8 +41,9 @@ class AttributeForm extends React.Component {
 
   getFormErrors = () => {
     const { alreadyTakenAttributes, attributeToEditName, modifiedData } = this.props;
-    const currentForm = this.getCurrentForm();
+
     let formErrors = {};
+    const formValidations = this.getFormValidations();
     const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(
       attribute => attribute !== attributeToEditName,
     );
@@ -55,14 +56,15 @@ class AttributeForm extends React.Component {
       formErrors = { name: [{ id: `${pluginId}.error.attribute.taken` }] };
     }
 
-    // TODO NEED TO HANDLE OTHER VALIDATIONS
-    formErrors = Object.keys(modifiedData).reduce((acc, current) => {
-      const { custom, validations } = currentForm.find(input => input.name === current) || {
-        validations: {},
-      };
+    formErrors = Object.keys(formValidations).reduce((acc, current) => {
+      const { custom, validations } = formValidations[current];
       const value = modifiedData[current];
 
-      if (validations.required === true && value === '' && custom === true) {
+      if (!value && validations.required === true && custom !== true) {
+        acc[current] = [{ id: `${pluginId}.error.validation.required` }];
+      }
+
+      if (custom === true && validations.required === true && value === '') {
         acc[current] = [{ id: `${pluginId}.error.validation.required` }];
       }
 
@@ -75,6 +77,22 @@ class AttributeForm extends React.Component {
     }));
 
     return formErrors;
+  };
+
+  getFormValidations = () => {
+    const { attributeType } = this.props;
+    const form = supportedAttributes[attributeType];
+
+    return Object.keys(form).reduce((acc, current) => {
+      return {
+        ...acc,
+        ...form[current].items.reduce((acc2, curr) => {
+          acc2[curr.name] = { validations: curr.validations, custom: curr.custom };
+
+          return acc2;
+        }, {}),
+      };
+    }, {});
   };
 
   handleCancel = () => {
