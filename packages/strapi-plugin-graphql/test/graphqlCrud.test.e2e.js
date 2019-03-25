@@ -153,7 +153,7 @@ describe('Test Graphql API End to End', () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            posts(sort: "createdAt:desc") {
+            posts(sort: "id:desc") {
               id
               name
             }
@@ -336,7 +336,6 @@ describe('Test Graphql API End to End', () => {
             mutation deletePost($input: deletePostInput) {
               deletePost(input: $input) {
                 post {
-                  id
                   name
                 }
               }
@@ -352,13 +351,6 @@ describe('Test Graphql API End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual({
-          data: {
-            deletePost: {
-              post,
-            },
-          },
-        });
       }
     });
   });
