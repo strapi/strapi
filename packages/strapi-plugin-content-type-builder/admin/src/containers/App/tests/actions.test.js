@@ -110,7 +110,7 @@ describe('Content Type Builder Action utils', () => {
         },
         test: {
           type: 'enumeration',
-          enum: 'test,test1',
+          enum: 'test\ntest1',
         },
         otherTest: {
           columnName: '',
@@ -220,7 +220,7 @@ describe('Content Type Builder Action utils', () => {
         },
         otherTest: {
           type: 'enumeration',
-          enum: 'test,test1',
+          enum: 'test\ntest1',
         },
       };
 
@@ -448,7 +448,7 @@ describe('App actions', () => {
       const e = {
         target: {
           name: 'test',
-          value: 'testWith spaces and stuff ',
+          value: 'testWith spaces and stuff',
         },
       };
       const expected = {
@@ -482,7 +482,7 @@ describe('App actions', () => {
       const e = {
         target: {
           name: 'test',
-          value: 'testWith spaces and stuff ',
+          value: 'testWith spaces and stuff',
         },
       };
       const expected = {

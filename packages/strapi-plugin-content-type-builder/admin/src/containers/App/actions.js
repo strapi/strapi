@@ -138,7 +138,7 @@ export function getDataSucceeded({ allModels, models }, connections) {
 }
 
 export function onChangeExistingContentTypeMainInfos({ target }) {
-  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value.trim();
+  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value;
 
   return {
     type: ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
@@ -148,7 +148,7 @@ export function onChangeExistingContentTypeMainInfos({ target }) {
 }
 
 export function onChangeNewContentTypeMainInfos({ target }) {
-  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value.trim();
+  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value;
 
   return {
     type: ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
@@ -307,7 +307,7 @@ export function updateTempContentType() {
 export const buildModelAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
     if (current.params.type === 'enumeration') {
-      acc[current.name] = Object.assign(current.params, { enum: current.params.enum.join(',') });
+      acc[current.name] = Object.assign(current.params, { enum: current.params.enum.join('\n') });
     } else if (current.params.nature === 'oneWay') {
       acc[current.name] = Object.assign(current.params, { key: '-' });
     } else {
@@ -338,7 +338,7 @@ export const formatModelAttributes = attributes =>
           acc2.params.pluginValue = value;
           acc2.params.plugin = true;
         } else if (curr === 'enum') {
-          acc2.params.enum = value.split(',');
+          acc2.params.enum = value.split('\n');
         } else {
           acc2.params[curr] = value;
         }
