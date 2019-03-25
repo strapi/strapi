@@ -1,5 +1,4 @@
 services:
-  - mongodb
   - postgresql
   - mysql
 
@@ -24,6 +23,14 @@ e2e_tests: &e2e_tests
     - npm run -s test:generate-app -- $DB_STRING
     - npm run -s test:start-app & wait-on http://localhost:1337
     - npm run -s test:e2e
+
+install_mongo: &install_mongo
+  before_install:
+    - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.6.tgz
+    - tar -zxvf mongodb-linux-x86_64-3.6.6.tgz
+    - mkdir -p ./data/db/27017
+    - mkdir -p ./data/db/27000
+    - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
 
 install:
   - npm run setup:ci
@@ -59,10 +66,12 @@ jobs:
 
     - <<: *e2e_tests
       name: 'E2E MongoDB'
+      <<: *install_mongo
       env:
         - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
 
     - name: 'Cypress tests'
+      <<: *install_mongo
       install:
         - npm run setup:build
         - npm install -g wait-on
@@ -71,4 +80,3 @@ jobs:
         - npm run -s test:generate-app -- --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
         - npm run -s test:start-app & wait-on http://localhost:1337
         - node test/cypress.js
-

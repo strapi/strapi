@@ -261,9 +261,6 @@ const schemaBuilder = {
    */
 
   writeGenerateSchema: schema => {
-    // Disable auto-reload.
-    strapi.reload.isWatching = false;
-
     const generatedFolder = path.resolve(
       strapi.config.appPath,
       'plugins',
@@ -284,8 +281,6 @@ const schemaBuilder = {
     }
 
     fs.writeFileSync(path.join(generatedFolder, 'schema.graphql'), schema);
-
-    strapi.reload.isWatching = true;
   },
 };
 

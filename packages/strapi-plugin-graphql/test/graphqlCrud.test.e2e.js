@@ -153,7 +153,7 @@ describe('Test Graphql API End to End', () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            posts(sort: "id:desc") {
+            posts(sort: "name:desc") {
               id
               name
             }
