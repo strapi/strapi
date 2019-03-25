@@ -43,9 +43,7 @@ module.exports = {
       const resolver = _.get(handler, `Mutation.${queryName}.resolver`);
 
       if (_.isString(resolver) || _.isPlainObject(resolver)) {
-        const { handler = resolver } = _.isPlainObject(resolver)
-          ? resolver
-          : {};
+        const { handler = resolver } = _.isPlainObject(resolver) ? resolver : {};
 
         // Retrieve the controller's action to be executed.
         const [name, action] = handler.split('.');
@@ -55,9 +53,7 @@ module.exports = {
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
-          return new Error(
-            `Cannot find the controller's action ${name}.${action}`,
-          );
+          return new Error(`Cannot find the controller's action ${name}.${action}`);
         }
 
         // We're going to return a controller instead.
@@ -71,8 +67,8 @@ module.exports = {
               handler: `${name}.${action}`,
             },
             undefined,
-            plugin,
-          ),
+            plugin
+          )
         );
 
         // Return the controller.
@@ -85,20 +81,13 @@ module.exports = {
       // We're going to return a controller instead.
       isController = true;
 
-      const controllers = plugin
-        ? strapi.plugins[plugin].controllers
-        : strapi.controllers;
+      const controllers = plugin ? strapi.plugins[plugin].controllers : strapi.controllers;
 
       // Try to find the controller that should be related to this model.
-      const controller = _.get(
-        controllers,
-        `${name}.${action === 'delete' ? 'destroy' : action}`,
-      );
+      const controller = _.get(controllers, `${name}.${action === 'delete' ? 'destroy' : action}`);
 
       if (!controller) {
-        return new Error(
-          `Cannot find the controller's action ${name}.${action}`,
-        );
+        return new Error(`Cannot find the controller's action ${name}.${action}`);
       }
 
       // Push global policy to make sure the permissions will work as expected.
@@ -110,8 +99,8 @@ module.exports = {
             handler: `${name}.${action === 'delete' ? 'destroy' : action}`,
           },
           undefined,
-          plugin,
-        ),
+          plugin
+        )
       );
 
       // Make the query compatible with our controller by
@@ -136,9 +125,7 @@ module.exports = {
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
-        return new Error(
-          `Cannot find the controller's action ${name}.${action}`,
-        );
+        return new Error(`Cannot find the controller's action ${name}.${action}`);
       }
 
       policiesFn[0] = policyUtils.globalPolicy(
@@ -147,7 +134,7 @@ module.exports = {
           handler: `${name}.${action}`,
         },
         undefined,
-        plugin,
+        plugin
       );
     }
 
@@ -157,13 +144,7 @@ module.exports = {
 
     // Populate policies.
     policies.forEach(policy =>
-      policyUtils.get(
-        policy,
-        plugin,
-        policiesFn,
-        `GraphQL query "${queryName}"`,
-        name,
-      ),
+      policyUtils.get(policy, plugin, policiesFn, `GraphQL query "${queryName}"`, name)
     );
 
     return async (obj, options, { context }) => {
@@ -178,10 +159,7 @@ module.exports = {
       const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
 
       // Policy doesn't always return errors but they update the current context.
-      if (
-        _.isError(ctx.request.graphql) ||
-        _.get(ctx.request.graphql, 'isBoom')
-      ) {
+      if (_.isError(ctx.request.graphql) || _.get(ctx.request.graphql, 'isBoom')) {
         return ctx.request.graphql;
       }
 
@@ -192,7 +170,10 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.params = Query.convertToParams(options.input.where || {}, (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name]).primaryKey);
+        context.params = Query.convertToParams(
+          options.input.where || {},
+          (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name]).primaryKey
+        );
         context.request.body = options.input.data || {};
 
         if (isController) {

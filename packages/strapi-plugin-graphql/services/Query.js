@@ -10,8 +10,6 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 const policyUtils = require('strapi-utils').policy;
 
-const Loaders = require('./Loaders');
-
 module.exports = {
   /**
    * Convert parameters to valid filters parameters.
@@ -92,7 +90,7 @@ module.exports = {
 
     const policiesFn = [];
 
-    // Boolean to define if the resolver is going to be a resolver or not.
+    // Boolean to define if the resolver is going to be a controller or not.
     let isController = false;
 
     // Retrieve resolver. It could be the custom resolver of the user
@@ -243,9 +241,6 @@ module.exports = {
       if (policy) {
         return policy;
       }
-
-      // Initiliase loaders for this request.
-      Loaders.initializeLoader();
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {

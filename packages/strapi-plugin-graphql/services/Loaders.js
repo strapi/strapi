@@ -19,23 +19,27 @@ module.exports = {
     Object.keys(strapi.models)
       .filter(model => model !== 'core_store')
       .forEach(model => {
-        (strapi.models[model].associations || []).forEach(association => this.createLoader(association.collection || association.model, association.plugin));
+        (strapi.models[model].associations || []).forEach(association =>
+          this.createLoader(association.collection || association.model, association.plugin)
+        );
       });
 
     // Reproduce the same pattern for each plugin.
     Object.keys(strapi.plugins).forEach(plugin => {
       Object.keys(strapi.plugins[plugin].models).forEach(model => {
-        (strapi.plugins[plugin].models[model].associations || []).forEach(association => this.createLoader(association.collection || association.model, association.plugin));
+        (strapi.plugins[plugin].models[model].associations || []).forEach(association =>
+          this.createLoader(association.collection || association.model, association.plugin)
+        );
       });
     });
   },
 
-  resetLoaders: function () {
+  resetLoaders: function() {
     this.loaders = {};
   },
 
   createLoader: function(model, plugin) {
-    const name = plugin ? `${plugin}__${model}`: model;
+    const name = plugin ? `${plugin}__${model}` : model;
 
     // Exclude polymorphic from loaders.
     if (name === undefined) {
@@ -46,26 +50,29 @@ module.exports = {
       return this.loaders[name];
     }
 
-    this.loaders[name] = new DataLoader(keys => {
-      return new Promise(async (resolve, reject) => {
-        try {
-          // Extract queries from keys and merge similar queries.
-          const { queries, map } = this.extractQueries(model, _.cloneDeep(keys));
-          // Run queries in parallel.
-          const results = await Promise.all(queries.map((query) => this.makeQuery(model, query)));
-          // Use to match initial queries order.
-          const data = this.mapData(model, keys, map, results);
+    this.loaders[name] = new DataLoader(
+      keys => {
+        return new Promise(async (resolve, reject) => {
+          try {
+            // Extract queries from keys and merge similar queries.
+            const { queries, map } = this.extractQueries(model, _.cloneDeep(keys));
+            // Run queries in parallel.
+            const results = await Promise.all(queries.map(query => this.makeQuery(model, query)));
+            // Use to match initial queries order.
+            const data = this.mapData(model, keys, map, results);
 
-          resolve(data);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    }, {
-      cacheKeyFn: (key) => {
-        return _.isObjectLike(key) ? JSON.stringify(_.cloneDeep(key)) : key;
+            resolve(data);
+          } catch (e) {
+            reject(e);
+          }
+        });
+      },
+      {
+        cacheKeyFn: key => {
+          return _.isObjectLike(key) ? JSON.stringify(_.cloneDeep(key)) : key;
+        },
       }
-    });
+    );
   },
 
   mapData: function(model, originalMap, map, results) {
@@ -80,7 +87,10 @@ module.exports = {
 
       if (query.single) {
         // Return object instead of array for one-to-many relationship.
-        return data.find(entry => entry[ref.primaryKey].toString() === (query.params[ref.primaryKey] || '').toString());
+        return data.find(
+          entry =>
+            entry[ref.primaryKey].toString() === (query.params[ref.primaryKey] || '').toString()
+        );
       }
 
       // Generate constant for skip parameters.
@@ -98,10 +108,7 @@ module.exports = {
         .filter(entry => {
           const aliasEntry = entry[ids.alias];
           if (_.isArray(aliasEntry)) {
-            return _.find(
-              aliasEntry,
-              value => value[astModel.primaryKey].toString() ===  ids.value
-            );
+            return _.find(aliasEntry, value => value[astModel.primaryKey].toString() === ids.value);
           }
 
           const entryValue = aliasEntry[astModel.primaryKey].toString();
@@ -111,9 +118,9 @@ module.exports = {
     });
   },
 
-  extractIds: (query) => {
+  extractIds: query => {
     const alias = _.first(Object.keys(query.options.query));
-    const value =  query.options.query[alias].toString();
+    const value = query.options.query[alias].toString();
     return {
       alias,
       value,
@@ -144,28 +151,29 @@ module.exports = {
       .value();
 
     // Run query and remove duplicated ID.
-    const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll({ model }, params);
+    const request = await strapi.plugins['content-manager'].services['contentmanager'].fetchAll(
+      { model },
+      params
+    );
 
     return request && request.toJSON ? request.toJSON() : request;
   },
 
   retrieveModel: function(model, source) {
     // Retrieve refering model.
-    return source ?
-      strapi.plugins[source].models[model]:
-      strapi.models[model];
+    return source ? strapi.plugins[source].models[model] : strapi.models[model];
   },
 
   extractQueries: function(model, keys) {
     const queries = [];
     const map = [];
-    
+
     keys.forEach((current, index) => {
       // Extract query options.
       // Note: the `single` means that we've only one entry to fetch.
       const { single = false, params = {}, association } = current;
       const { query = {}, ...options } = current.options;
-  
+
       // Retrieving referring model.
       const ref = this.retrieveModel(model, options.source);
 
@@ -173,8 +181,8 @@ module.exports = {
       const indexQueries = queries.findIndex(query => _.isEqual(query.options, options));
 
       // Generate array of IDs to fetch.
-      const ids = []; 
-      
+      const ids = [];
+
       // Only one entry to fetch.
       if (single) {
         ids.push(params[ref.primaryKey]);
@@ -191,9 +199,9 @@ module.exports = {
         queries.push({
           ids,
           options,
-          alias: _.first(Object.keys(query)) || ref.primaryKey
+          alias: _.first(Object.keys(query)) || ref.primaryKey,
         });
-        
+
         map[queries.length - 1 > 0 ? queries.length - 1 : 0] = [];
         map[queries.length - 1].push(index);
       }
@@ -201,7 +209,7 @@ module.exports = {
 
     return {
       queries,
-      map
+      map,
     };
-  }
+  },
 };

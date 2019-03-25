@@ -27,7 +27,7 @@ module.exports = strapi => {
         'node_modules',
         'strapi',
         'lib',
-        'utils',
+        'utils'
       ));
 
       // Set '*.graphql' files configurations in the global variable.
@@ -48,7 +48,7 @@ module.exports = strapi => {
                 .call(strapi, files, true)
                 .then(resolve)
                 .catch(reject);
-            },
+            }
           );
         }),
         // Load APIs configurations.
@@ -67,7 +67,7 @@ module.exports = strapi => {
                 .call(strapi, files, true)
                 .then(resolve)
                 .catch(reject);
-            },
+            }
           );
         }),
         // Load plugins configurations.
@@ -86,7 +86,7 @@ module.exports = strapi => {
                 .call(strapi, files, true)
                 .then(resolve)
                 .catch(reject);
-            },
+            }
           );
         }),
       ]);
@@ -109,7 +109,7 @@ module.exports = strapi => {
         const { definition, query, mutation, type, resolver } = _.get(
           strapi.api[current],
           'config.schema.graphql',
-          {},
+          {}
         );
 
         acc.definition += definition || '';
@@ -127,7 +127,7 @@ module.exports = strapi => {
         const { definition, query, mutation, type, resolver } = _.get(
           strapi.plugins[current],
           'config.schema.graphql',
-          {},
+          {}
         );
 
         acc.definition += definition || '';
@@ -142,15 +142,10 @@ module.exports = strapi => {
     },
 
     initialize: function(cb) {
-      const {
-        typeDefs,
-        resolvers,
-      } = strapi.plugins.graphql.services.schema.generateSchema();
+      const { typeDefs, resolvers } = strapi.plugins.graphql.services.schema.generateSchema();
 
       if (_.isEmpty(typeDefs)) {
-        strapi.log.warn(
-          'GraphQL schema has not been generated because it\'s empty',
-        );
+        strapi.log.warn('GraphQL schema has not been generated because it\'s empty');
 
         return cb();
       }
@@ -158,9 +153,14 @@ module.exports = strapi => {
       const serverParams = {
         typeDefs,
         resolvers,
-        context: async ({ ctx }) => ({
-          context: ctx,
-        }),
+        context: ({ ctx }) => {
+          // Initiliase loaders for this request.
+          strapi.plugins.graphql.services.loaders.initializeLoader();
+
+          return {
+            context: ctx,
+          };
+        },
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
         tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
         playground: false,
