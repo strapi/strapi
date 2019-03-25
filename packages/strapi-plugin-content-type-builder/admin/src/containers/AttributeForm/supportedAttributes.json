@@ -359,7 +359,6 @@
           "type": "checkbox",
           "value": false,
           "validations": {
-            "required": true
           }
         }
       ]

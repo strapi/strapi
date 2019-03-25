@@ -266,7 +266,7 @@ export class ModelPage extends React.Component {
     } = this.props;
     const attributeType = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
-    if (canOpenModal) {
+    if (canOpenModal || this.isUpdatingTemporaryContentType()) {
       setTemporaryAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
 
       await this.wait();

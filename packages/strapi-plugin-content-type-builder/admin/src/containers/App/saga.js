@@ -54,16 +54,16 @@ export function* submitCT({
       body.plugin = source;
     }
 
-    yield put(emitEvent('willSaveContentType'));
+    emitEvent('willSaveContentType');
 
     const opts = { method: 'PUT', body };
 
     yield call(request, requestURL, opts, true);
-    yield put(emitEvent('didSaveContentType'));
+    emitEvent('didSaveContentType');
     yield put(submitContentTypeSucceeded(oldContentTypeName));
 
     if (name !== oldContentTypeName) {
-      yield put(emitEvent('didEditNameOfContentType'));
+      emitEvent('didEditNameOfContentType');
 
       const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
       const appMenu = get(appPlugins, ['content-manager', 'leftMenuSections'], []);
@@ -86,14 +86,14 @@ export function* submitCT({
 /* istanbul ignore-next */
 export function* submitTempCT({ body, context: { emitEvent, plugins, updatePlugin } }) {
   try {
-    yield put(emitEvent('willSaveContentType'));
+    emitEvent('willSaveContentType');
 
     const requestURL = `/${pluginId}/models`;
     const opts = { method: 'POST', body };
 
     yield call(request, requestURL, opts, true);
 
-    yield put(emitEvent('didSaveContentType'));
+    emitEvent('didSaveContentType');
     yield put(submitTempContentTypeSucceeded());
 
     const { name } = body;

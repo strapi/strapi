@@ -329,7 +329,9 @@ export const formatModelAttributes = attributes =>
         if (
           ((curr.includes('max') || curr.includes('min')) && !value) ||
           curr === 'isVirtual' ||
-          (curr === 'dominant' && !value)
+          (curr === 'dominant' && !value) ||
+          (curr === 'columnName' && value === '') ||
+          (curr === 'targetColumnName' && value === '')
         ) {
           return acc2;
         }
