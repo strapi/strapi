@@ -260,20 +260,25 @@ export class ModelPage extends React.Component {
   handleClickEditAttribute = async (attributeName, type) => {
     const { emitEvent } = this.context;
     const {
+      canOpenModal,
       history: { push },
       setTemporaryAttribute,
     } = this.props;
     const attributeType = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
-    setTemporaryAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
+    if (canOpenModal) {
+      setTemporaryAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
 
-    await this.wait();
+      await this.wait();
 
-    emitEvent('willEditFieldOfContentType');
-    push({
-      search: `modalType=attributeForm&attributeType=${attributeType ||
-        'relation'}&settingType=base&actionType=edit&attributeName=${attributeName}`,
-    });
+      emitEvent('willEditFieldOfContentType');
+      push({
+        search: `modalType=attributeForm&attributeType=${attributeType ||
+          'relation'}&settingType=base&actionType=edit&attributeName=${attributeName}`,
+      });
+    } else {
+      this.displayNotificationCTNotSaved();
+    }
   };
 
   handleClickEditModelMainInfos = async () => {
