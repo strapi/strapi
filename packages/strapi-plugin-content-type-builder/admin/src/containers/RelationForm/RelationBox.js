@@ -9,6 +9,7 @@ import ModelPicker from './ModelPicker';
 import styles from './styles.scss';
 
 const RelationBox = ({
+  autoFocus,
   didCheckErrors,
   errors,
   main,
@@ -38,6 +39,7 @@ const RelationBox = ({
         </div>
         <div className={styles.relationBoxBody}>
           <InputText
+            autoFocus={autoFocus}
             didCheckErrors={didCheckErrors}
             errors={errors}
             label="Field Name"
@@ -54,6 +56,7 @@ const RelationBox = ({
 };
 
 RelationBox.defaultProps = {
+  autoFocus: false,
   didCheckErrors: false,
   errors: [],
   main: false,
@@ -67,6 +70,7 @@ RelationBox.defaultProps = {
 };
 
 RelationBox.propTypes = {
+  autoFocus: PropTypes.bool,
   didCheckErrors: PropTypes.bool,
   errors: PropTypes.array,
   main: PropTypes.bool,

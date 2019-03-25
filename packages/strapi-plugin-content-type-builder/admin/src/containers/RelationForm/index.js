@@ -213,6 +213,7 @@ class RelationForm extends React.Component {
     return (
       <RelationWrapper>
         <RelationBox
+          autoFocus
           errors={get(formErrors, 'name', [])}
           didCheckErrors={didCheckErrors}
           main

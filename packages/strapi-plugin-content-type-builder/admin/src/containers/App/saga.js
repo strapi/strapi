@@ -40,10 +40,6 @@ export function* deleteModel({ modelName }) {
   }
 }
 
-// TODO: SUBMIT PUT action.context.emitEvent('didEditNameOfContentType');
-//  yield put(emitEvent('willSaveContentType'));
-// emitEvent('didSaveContentType')
-
 export function* submitCT({
   oldContentTypeName,
   body,

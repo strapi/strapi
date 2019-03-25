@@ -509,7 +509,6 @@ export class ModelPage extends React.Component {
     const attributeType = this.getAttributeType();
     const actionType = this.getActionType();
     const icon = this.getSource() ? null : 'fa fa-pencil';
-    // console.log(this.getModelAttributes());
 
     return (
       <div className={styles.modelpage}>
