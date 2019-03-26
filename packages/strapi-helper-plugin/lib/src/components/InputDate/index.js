@@ -17,9 +17,8 @@ import styles from './styles.scss';
 
 /* eslint-disable react/jsx-boolean-value */
 function InputDate(props) {
-  const value = isObject(props.value) && props.value._isAMomentObject === true ? props.value : moment(props.value);
+  const value = isObject(props.value) && props.value._isAMomentObject === true ? props.value.local() : moment.utc(props.value).local();
   const formattedPlaceholder = props.placeholder === '' ? 'app.utils.placeholder.defaultMessage' : props.placeholder;
-
   return (
     <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
       {(placeholder) => (
