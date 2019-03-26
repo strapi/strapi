@@ -369,8 +369,10 @@ const buildShadowCRUD = (models, plugin) => {
               ...Query.convertToQuery(queryParams.where),
             };
 
-            // Construct the "where" query to only retrieve entries which are
-            // related to this entry.
+            if (association.nature === 'manyToMany' && association.dominant) {
+              _.set(queryOpts, ['query', ref.primaryKey], obj[association.alias] || []);
+            }
+
             _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
           }
 

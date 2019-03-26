@@ -99,26 +99,44 @@ module.exports = {
       const limit = _.get(query, 'options._limit', 100); // Take into account the limit if its equal 0
 
       // Extracting ids from original request to map with query results.
-      const ids = this.extractIds(query);
+      const ids = this.extractIds(query, ref);
+
       const ast = ref.associations.find(ast => ast.alias === ids.alias);
-      const astModel = this.retrieveModel(ast.model || ast.collection, ast.plugin);
+      const astModel = ast
+        ? this.retrieveModel(ast.model || ast.collection, ast.plugin)
+        : this.retrieveModel(model);
+
+      if (!_.isArray(ids)) {
+        return data
+          .filter(entry => entry !== undefined)
+          .filter(entry => {
+            const aliasEntry = entry[ids.alias];
+
+            if (_.isArray(aliasEntry)) {
+              return _.find(
+                aliasEntry,
+                value => value[astModel.primaryKey].toString() === ids.value
+              );
+            }
+
+            const entryValue = aliasEntry[astModel.primaryKey].toString();
+            return entryValue === ids.value;
+          })
+          .slice(skip, skip + limit);
+      }
 
       return data
         .filter(entry => entry !== undefined)
-        .filter(entry => {
-          const aliasEntry = entry[ids.alias];
-          if (_.isArray(aliasEntry)) {
-            return _.find(aliasEntry, value => value[astModel.primaryKey].toString() === ids.value);
-          }
-
-          const entryValue = aliasEntry[astModel.primaryKey].toString();
-          return entryValue === ids.value;
-        })
+        .filter(entry => ids.map(id => id.toString()).includes(entry[ref.primaryKey].toString()))
         .slice(skip, skip + limit);
     });
   },
 
-  extractIds: query => {
+  extractIds: (query, ref) => {
+    if (_.get(query.options, `query.${ref.primaryKey}`)) {
+      return _.get(query.options, `query.${ref.primaryKey}`);
+    }
+
     const alias = _.first(Object.keys(query.options.query));
     const value = query.options.query[alias].toString();
     return {
@@ -186,6 +204,8 @@ module.exports = {
       // Only one entry to fetch.
       if (single) {
         ids.push(params[ref.primaryKey]);
+      } else if (_.isArray(query[ref.primaryKey])) {
+        ids.push(...query[ref.primaryKey]);
       } else {
         ids.push(query[association.via]);
       }
