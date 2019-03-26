@@ -96,7 +96,7 @@ export function* submit(action) {
           cleanedData = record[current];
           break;
         case 'date':
-          cleanedData = record[current] && record[current]._isAMomentObject === true ? record[current].format('YYYY-MM-DD HH:mm:ss') : record[current];
+          cleanedData = record[current] && record[current]._isAMomentObject === true ? record[current].valueOf() : record[current];
           break;
         default:
           cleanedData = cleanData(record[current], 'value', 'id');

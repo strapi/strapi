@@ -51,7 +51,7 @@ function InputDate(props) {
           ref={props.inputRef}
           tabIndex={props.tabIndex}
           timeFormat='HH:mm:ss'
-          utc={true}
+          utc={false}
           value={value}
           style={props.style}
         />
