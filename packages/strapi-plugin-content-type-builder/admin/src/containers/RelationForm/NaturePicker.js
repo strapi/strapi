@@ -39,7 +39,7 @@ const NaturePicker = ({ modelName, onClick, nature, target }) => {
       };
 
   return (
-    <InlineBlock style={{ width: '100%', paddingTop: '70px' }}>
+    <InlineBlock style={{ width: '100%', paddingTop: '70px', cursor: 'pointer' }}>
       <div className={styles.relationNatureWrapper}>
         {Object.keys(assets).map(iconName => {
           const src = iconName === nature ? assets[iconName].iconSelected : assets[iconName].icon;

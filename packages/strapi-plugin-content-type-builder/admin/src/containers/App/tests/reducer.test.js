@@ -1,4 +1,4 @@
-import { fromJS, List, Map } from 'immutable';
+import { fromJS, List, Map, OrderedMap } from 'immutable';
 
 import {
   addAttributeRelation,
@@ -657,18 +657,20 @@ describe('appReducer', () => {
         description: '',
         mainField: '',
         name: 'permission',
-        attributes: {
-          type: {
-            type: 'string',
-            required: true,
-            configurable: false,
-          },
-          controller: {
-            type: 'string',
-            required: true,
-            configurable: false,
-          },
-        },
+        attributes: OrderedMap(
+          fromJS({
+            type: {
+              type: 'string',
+              required: true,
+              configurable: false,
+            },
+            controller: {
+              type: 'string',
+              required: true,
+              configurable: false,
+            },
+          }),
+        ),
       },
     };
     const connections = ['default'];

@@ -4,6 +4,7 @@
  *
  */
 import { cloneDeep, pick, set, camelCase } from 'lodash';
+import { fromJS, OrderedMap } from 'immutable';
 import {
   ADD_ATTRIBUTE_RELATION,
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
@@ -123,7 +124,7 @@ export function getData() {
 export function getDataSucceeded({ allModels, models }, connections) {
   const initialData = allModels.reduce((acc, current) => {
     acc[current.name] = pick(current, ['name', 'collectionName', 'connection', 'description', 'mainField']);
-    const attributes = buildModelAttributes(current.attributes);
+    const attributes = OrderedMap(fromJS(buildModelAttributes(current.attributes)));
     set(acc, [current.name, 'attributes'], attributes);
 
     return acc;

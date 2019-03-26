@@ -1,3 +1,4 @@
+import { fromJS, OrderedMap } from 'immutable';
 import {
   addAttributeRelation,
   buildModelAttributes,
@@ -399,18 +400,20 @@ describe('App actions', () => {
           description: '',
           mainField: '',
           name: 'permission',
-          attributes: {
-            type: {
-              type: 'string',
-              required: true,
-              configurable: false,
-            },
-            controller: {
-              type: 'string',
-              required: true,
-              configurable: false,
-            },
-          },
+          attributes: OrderedMap(
+            fromJS({
+              type: {
+                type: 'string',
+                required: true,
+                configurable: false,
+              },
+              controller: {
+                type: 'string',
+                required: true,
+                configurable: false,
+              },
+            }),
+          ),
         },
       };
       const connections = ['default'];
