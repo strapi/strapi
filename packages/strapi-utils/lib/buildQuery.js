@@ -31,10 +31,25 @@ const createFilterValidator = model => ({ field }) => {
   return isValid;
 };
 
+/**
+ *
+ * @param {Object} options - Options
+ * @param {Object} options.model - The model for which the query will be built
+ * @param {Object} options.filters - The filters for the query (start, sort, limit, and where clauses)
+ * @param {Object} options.rest - In case the database layer requires any other params pass them
+ */
 const buildQuery = ({ model, filters, ...rest }) => {
   const validator = createFilterValidator(model);
 
+  // Validate query clauses
   if (filters.where && Array.isArray(filters.where)) {
+    const deepFilters = filters.where.filter(({ field }) => field.split('.').length > 1);
+    if (deepFilters.length > 0) {
+      strapi.log.warn(
+        'Deep filtering queries should be used carefully (e.g Can cause performance issues).\nWhen possible build custom routes which will in most case be more optimised.'
+      );
+    }
+
     filters.where.forEach(whereClause => {
       if (!validator(whereClause)) {
         const err = new Error(
@@ -49,9 +64,10 @@ const buildQuery = ({ model, filters, ...rest }) => {
     });
   }
 
-  const hook = strapi.hook[model.orm];
+  const orm = strapi.hook[model.orm];
 
-  return hook.load().buildQuery({ model, filters, ...rest });
+  // call the orm's buildQuery implementation
+  return orm.load().buildQuery({ model, filters, ...rest });
 };
 
 module.exports = buildQuery;

@@ -7,8 +7,52 @@ const utils = require('./utils')();
  * @param {Object} options.model - The model you are querying
  * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
+ * @param {boolean} options.aggregate - Force aggregate function to use group by feature
  */
-const buildQuery = ({ model, filters, populate = [] } = {}) => {
+const buildQuery = ({ model, filters = {}, populate = [], aggregate = false } = {}) => {
+  const deepFilters = (filters.where || []).filter(({ field }) => field.split('.').length > 1);
+
+  if (deepFilters.length === 0 && aggregate === false) {
+    return buildSimpleQuery({ model, filters, populate });
+  }
+
+  return buildDeepQuery({ model, filters, populate });
+};
+
+/**
+ * Builds a simple find query when there are no deep filters
+ * @param {Object} options - Query options
+ * @param {Object} options.model - The model you are querying
+ * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.populate - An array of paths to populate
+ */
+const buildSimpleQuery = ({ model, filters, populate }) => {
+  const { where = [] } = filters;
+
+  const wheres = where.reduce(
+    (acc, whereClause) => _.assign(acc, buildWhereClause(whereClause)),
+    {}
+  );
+
+  let query = model.find(wheres).populate(populate);
+  query = applyQueryParams({ query, filters });
+
+  return Object.assign(query, {
+    // override count to use countDocuments on simple find query
+    count(...args) {
+      return query.countDocuments(...args);
+    },
+  });
+};
+
+/**
+ * Builds a deep aggregate query when there are deep filters
+ * @param {Object} options - Query options
+ * @param {Object} options.model - The model you are querying
+ * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.populate - An array of paths to populate
+ */
+const buildDeepQuery = ({ model, filters, populate }) => {
   // build a tree of paths to populate based on the filtering and the populate option
   const { populatePaths, wherePaths } = computePopulatedPaths({
     model,
@@ -21,6 +65,65 @@ const buildQuery = ({ model, filters, populate = [] } = {}) => {
     .aggregate(buildQueryAggregate(model, { paths: _.merge({}, populatePaths, wherePaths) }))
     .append(buildQueryMatches(model, filters));
 
+  query = applyQueryParams({ query, filters });
+
+  return {
+    /**
+     * Overrides the promise to rehydrate mongoose docs after the aggregation query
+     */
+    then(...args) {
+      // hydrate function
+      const hydrateFn = hydrateModel({
+        model,
+        populatedModels: populatePaths,
+      });
+
+      return query
+        .then(async result => {
+          const hydratedResults = await Promise.all(result.map(hydrateFn));
+
+          // TODO: run this only when necessary
+          const populatedResults = await model.populate(hydratedResults, [
+            {
+              path: 'related.ref',
+            },
+          ]);
+
+          return populatedResults;
+        })
+        .then(...args);
+    },
+    catch(...args) {
+      return this.then(r => r).catch(...args);
+    },
+    /**
+     * Maps to query.count
+     */
+    count() {
+      return query.count('count').then(results => _.get(results, ['0', 'count'], 0));
+    },
+
+    group(...args) {
+      return query.group(...args);
+    },
+    /**
+     * Returns an array of plain JS object instead of mongoose documents
+     */
+    lean() {
+      // return plain js objects without the transformations we normally do on find
+      return this.then(results => {
+        return results.map(r => r.toObject({ transform: false }));
+      });
+    },
+  };
+};
+
+/**
+ * @param {Object} options - Options
+ * @param {Object} options.query - Mongoose query
+ * @param {Object} options.filters - Filters object
+ */
+const applyQueryParams = ({ query, filters }) => {
   // apply sort
   if (_.has(filters, 'sort')) {
     const sortFilter = filters.sort.reduce((acc, sort) => {
@@ -42,60 +145,7 @@ const buildQuery = ({ model, filters, populate = [] } = {}) => {
     query = query.limit(filters.limit);
   }
 
-  return {
-    /**
-     * Overrides the promise to rehydrate mongoose docs after the aggregation query
-     */
-    then(onSuccess, onError) {
-      // hydrate function
-      const hydrateFn = hydrateModel({
-        model,
-        populatedModels: populatePaths,
-      });
-
-      return query
-        .then(async result => {
-          const hydratedResults = await Promise.all(result.map(hydrateFn));
-
-          // TODO: run this only when necessary
-          const populatedResults = await model.populate(hydratedResults, [
-            {
-              path: 'related.ref',
-            },
-          ]);
-
-          return populatedResults;
-        })
-        .then(onSuccess, onError);
-    },
-    /**
-     * Pass through query.catch
-     */
-    catch(...args) {
-      return query.catch(...args);
-    },
-    /**
-     * Maps to query.count
-     */
-    count(...args) {
-      return query.count(...args);
-    },
-    /**
-     * Maps to query.group
-     */
-    group(...args) {
-      return query.group(...args);
-    },
-    /**
-     * Returns an array of plain JS object instead of mongoose documents
-     */
-    lean() {
-      // return plain js objects without the transformations we normally do on find
-      return this.then(results => {
-        return results.map(r => r.toObject({ transform: false }));
-      });
-    },
-  };
+  return query;
 };
 
 /**
@@ -280,6 +330,11 @@ const buildLookupMatch = ({ assoc }) => {
   }
 };
 
+/**
+ * Match query for lookups
+ * @param {Object} model - Mongoose model
+ * @param {Object} filters - Filters object
+ */
 const buildQueryMatches = (model, filters) => {
   if (_.has(filters, 'where') && Array.isArray(filters.where)) {
     return filters.where.map(whereClause => {
@@ -292,6 +347,10 @@ const buildQueryMatches = (model, filters) => {
   return [];
 };
 
+/**
+ * Cast values
+ * @param {*} value - Value to cast
+ */
 const formatValue = value => {
   if (Array.isArray(value)) {
     return value.map(formatValue);
@@ -303,6 +362,13 @@ const formatValue = value => {
   return utils.valueToId(value);
 };
 
+/**
+ * Builds a where clause
+ * @param {Object} options - Options
+ * @param {string} options.field - Where clause field
+ * @param {string} options.operator - Where clause operator
+ * @param {*} options.value - Where clause alue
+ */
 const buildWhereClause = ({ field, operator, value }) => {
   const val = formatValue(value);
 
@@ -369,6 +435,14 @@ const buildWhereClause = ({ field, operator, value }) => {
   }
 };
 
+/**
+ * Add primaryKey on relation where clause for lookups match
+ * @param {Object} model - Mongoose model
+ * @param {Object} whereClause - Where clause
+ * @param {string} whereClause.field - Where clause field
+ * @param {string} whereClause.operator - Where clause operator
+ * @param {*} whereClause.value - Where clause alue
+ */
 const formatWhereClause = (model, { field, operator, value }) => {
   const { assoc, model: assocModel } = getAssociationFromFieldKey(model, field);
 
@@ -385,25 +459,36 @@ const formatWhereClause = (model, { field, operator, value }) => {
   };
 };
 
-const getAssociationFromFieldKey = (strapiModel, fieldKey) => {
-  let model = strapiModel;
+/**
+ * Returns an association from a path starting from model
+ * @param {Object} model - Mongoose model
+ * @param {string} fieldKey - Relation path
+ */
+const getAssociationFromFieldKey = (model, fieldKey) => {
+  let tmpModel = model;
   let assoc;
 
   const parts = fieldKey.split('.');
 
   for (let key of parts) {
-    assoc = model.associations.find(ast => ast.alias === key);
+    assoc = tmpModel.associations.find(ast => ast.alias === key);
     if (assoc) {
-      model = findModelByAssoc({ assoc });
+      tmpModel = findModelByAssoc({ assoc });
     }
   }
 
   return {
     assoc,
-    model,
+    model: tmpModel,
   };
 };
 
+/**
+ * Re hydrate mongoose model from lookup data
+ * @param {Object} options - Options
+ * @param {Object} options.model - Mongoose model
+ * @param {Object} options.populatedModels - Population models
+ */
 const hydrateModel = ({ model: rootModel, populatedModels }) => async obj => {
   const toSet = Object.keys(populatedModels).reduce((acc, key) => {
     const val = _.get(obj, key);
@@ -434,6 +519,12 @@ const hydrateModel = ({ model: rootModel, populatedModels }) => async obj => {
   return doc;
 };
 
+/**
+ * Returns a model from a realtion path and a root model
+ * @param {Object} options - Options
+ * @param {Object} options.rootModel - Mongoose model
+ * @param {string} options.path - Relation path
+ */
 const findModelByPath = ({ rootModel, path }) => {
   const parts = path.split('.');
 
@@ -448,6 +539,12 @@ const findModelByPath = ({ rootModel, path }) => {
   return tmpModel;
 };
 
+/**
+ * Returns a model path from an attribute path and a root model
+ * @param {Object} options - Options
+ * @param {Object} options.rootModel - Mongoose model
+ * @param {string} options.path - Attribute path
+ */
 const findModelPath = ({ rootModel, path }) => {
   const parts = path.split('.');
 

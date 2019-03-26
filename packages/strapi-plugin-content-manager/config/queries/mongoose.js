@@ -23,9 +23,7 @@ module.exports = {
     return buildQuery({
       model,
       filters: { where: filters.where },
-    })
-      .count('count')
-      .then(results => _.get(results, [0, 'count'], 0));
+    }).count();
   },
 
   search: async function(params, populate) {

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Aggregator.js service
  *
@@ -176,11 +174,12 @@ const createAggregationFieldsResolver = function(model, fields, operation, typeC
     fields,
     async (filters, options, context, fieldResolver, fieldKey) => {
       // eslint-disable-line no-unused-vars
-      return buildQuery({ model, filters })
+      return buildQuery({ model, filters, aggregate: true })
         .group({
           _id: null,
           [fieldKey]: { [`$${operation}`]: `$${fieldKey}` },
         })
+        .exec()
         .then(result => _.get(result, [0, fieldKey]));
     },
     typeCheck
@@ -229,6 +228,7 @@ const createGroupByFieldsResolver = function(model, fields, name) {
     const result = await buildQuery({
       model,
       filters: convertRestQueryParams(params),
+      aggregate: true,
     }).group({
       _id: `$${fieldKey}`,
     });
@@ -325,9 +325,7 @@ const formatConnectionAggregator = function(fields, model) {
             limit: obj.limit,
             where: obj.where,
           },
-        })
-          .count('count')
-          .then(results => _.get(results, [0, 'count'], 0));
+        }).count();
       },
       totalCount: async (obj, options, context) => {
         return buildQuery({
@@ -335,9 +333,7 @@ const formatConnectionAggregator = function(fields, model) {
           filters: {
             where: obj.where,
           },
-        })
-          .count('count')
-          .then(results => _.get(results, [0, 'count'], 0));
+        }).count();
       },
     },
   };

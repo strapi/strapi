@@ -21,9 +21,7 @@ module.exports = {
     return buildQuery({
       model,
       filters: { where: filters.where },
-    })
-      .count('count')
-      .then(results => _.get(results, [0, 'count'], 0));
+    }).count();
   },
 
   findOne: async function(params, populate) {

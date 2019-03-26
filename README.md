@@ -60,7 +60,7 @@ Node:
 **Please note that right now Node 11 is not supported, and the current Node LTS (v10) should be used.**
 
 Database:
- * MongoDB >= 3.x
+ * MongoDB >= 3.6
  * MySQL >= 5.6
  * MariaDB >= 10.1
  * PostgreSQL >= 10
