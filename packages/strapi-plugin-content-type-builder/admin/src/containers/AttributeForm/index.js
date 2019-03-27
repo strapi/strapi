@@ -8,8 +8,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
-// import { connect } from 'react-redux';
-// import { bindActionCreators, compose } from 'redux';
 
 import Input from 'components/InputsIndex';
 

@@ -58,11 +58,7 @@ class HomePage extends React.Component {
       onChangeNewContentTypeMainInfos,
     } = this.props;
     const availableNumber = models.length;
-    const title =
-      availableNumber > 1
-        ? `${pluginId}.table.contentType.title.plural`
-        : `${pluginId}.table.contentType.title.singular`;
-
+    const title = `${pluginId}.table.contentType.title.${availableNumber > 1 ? 'plural' : 'singular'}`;
     const renderViewContent =
       availableNumber === 0 ? (
         <EmptyContentTypeView handleButtonClick={this.handleClick} /> // eslint-disable-line react/jsx-handler-names
