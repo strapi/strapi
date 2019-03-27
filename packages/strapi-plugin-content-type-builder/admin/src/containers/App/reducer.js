@@ -385,9 +385,6 @@ function appReducer(state = initialState, action) {
       return state
         .updateIn(['temporaryAttributeRelation', 'target'], () => action.target)
         .updateIn(['temporaryAttributeRelation', 'name'], () => action.target)
-        .updateIn(['temporaryAttributeRelation', 'plugin'], () => action.source || '')
-        .updateIn(['temporaryAttributeRelation', 'target'], () => action.target)
-        .updateIn(['temporaryAttributeRelation', 'name'], () => action.target)
         .updateIn(['temporaryAttributeRelation', 'plugin'], () => action.source || '');
     }
     case SUBMIT_CONTENT_TYPE_SUCCEEDED: {

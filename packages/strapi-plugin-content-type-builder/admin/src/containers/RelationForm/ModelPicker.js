@@ -8,6 +8,7 @@ import styles from './styles.scss';
 class ModelPicker extends React.Component {
   state = { isOpen: false };
 
+  /* istanbul ignore next */
   toggle = () => this.setState(prevState => ({ isOpen: !prevState.isOpen }));
 
   render() {

@@ -8,6 +8,7 @@ import ModelPicker from './ModelPicker';
 
 import styles from './styles.scss';
 
+/* istanbul ignore next */
 const RelationBox = ({
   autoFocus,
   didCheckErrors,

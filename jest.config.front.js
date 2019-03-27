@@ -2,41 +2,16 @@ const jest = require('jest');
 
 module.exports = {
   collectCoverageFrom: [
-    // 'packages/strapi-admin/admin/src/**/**/*.{js,jsx}',
     'packages/strapi-plugin-content-type-builder/admin/src/**/**/*.js',
     'packages/strapi-plugin-content-type-builder/admin/src/InjectedComponents/*.js',
     'packages/strapi-plugin-content-type-builder/admin/src/InjectedComponents/tests/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/containers/AppOld/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/containers/HomePageOld/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/containers/ModelPageOld/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/containers/Form/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/ContentHeader/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/AttributeCard/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/AttributeRow/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/InputCheckboxWithNestedInputs/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/List/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/PluginLeftMenu/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/PluginLeftMenuLink/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/PluginLeftMenuSection/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/PopUpForm/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/PopUpHeaderNavLink/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/PopUpRelations/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/RelationBox/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/RelationIco/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/RelationNaturePicker/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/containers/Form/utils/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/utils/*.js',
-    // 'packages/strapi-plugin-**/**/admin/src/**/**/*.{js,jsx}',
-    '!packages/strapi-admin/admin/src/*.{js,jsx}',
-    '!packages/strapi-plugin-**/**/admin/src/*.{js,jsx}',
-    '!packages/strapi-admin/admin/src/**/**/tests/*.test.{js,jsx}',
     '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
   ],
   coverageThreshold: {
     global: {
-      // NOTE: This should be increased at some point
       statements: 90,
       branches: 90,
       functions: 90,
@@ -47,10 +22,8 @@ module.exports = {
     __webpack_public_path__: 'http://localhost:4000',
     strapi: {},
   },
-  // NOTE: Should be dynamic
   moduleDirectories: [
     'node_modules',
-    // '<rootDir>/packages/strapi-admin/admin/src',
     '<rootDir>/packages/strapi-helper-plugin/node_modules',
     '<rootDir>/packages/strapi-helper-plugin',
     '<rootDir>/packages/strapi-helper-plugin/lib/src',

@@ -298,7 +298,6 @@ RelationForm.defaultProps = {
   isUpdatingTemporaryContentType: false,
   models: [],
   modelToEditName: '',
-  push: () => {},
   source: null,
 };
 
@@ -319,7 +318,7 @@ RelationForm.propTypes = {
   onChangeRelationTarget: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onSubmitEdit: PropTypes.func.isRequired,
-  push: PropTypes.func,
+  push: PropTypes.func.isRequired,
   source: PropTypes.string,
 };
 
