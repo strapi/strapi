@@ -713,7 +713,7 @@ module.exports = {
    const passwordHashed = await strapi.api.user.services.user.hashPassword(model.password);
 
    // Set the password.
-   model.password = passwordHashed;
+   return model.password = passwordHashed;
  }
 }
 ```
@@ -734,7 +734,7 @@ module.exports = {
     const passwordHashed = await strapi.api.user.services.user.hashPassword(model.attributes.password);
 
     // Set the password.
-    model.set('password', passwordHashed);
+    return model.set('password', passwordHashed);
   }
 }
 ```
