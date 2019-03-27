@@ -99,27 +99,27 @@ describe('Content Type Builder Action utils', () => {
         },
       ];
       const expected = {
-        type: {
+        type: fromJS({
           type: 'string',
           required: true,
           configurable: false,
-        },
-        controller: {
+        }),
+        controller: fromJS({
           type: 'string',
           required: true,
           configurable: false,
-        },
-        test: {
+        }),
+        test: fromJS({
           type: 'enumeration',
           enum: 'test\ntest1',
-        },
-        otherTest: {
+        }),
+        otherTest: fromJS({
           columnName: '',
           nature: 'oneWay',
           key: '-',
           target: 'super',
           targetColumnName: '',
-        },
+        }),
       };
 
       expect(buildModelAttributes(attributes)).toEqual(expected);
@@ -149,10 +149,12 @@ describe('Content Type Builder Action utils', () => {
           params: {
             dominant: true,
             key: 'permissions2',
+            columnName: 'test2',
             nature: 'manyToMany',
             pluginValue: 'users-permissions',
             plugin: true,
             target: 'role2',
+            targetColumnName: 'test',
           },
         },
         { name: 'type', params: { type: 'string', required: true, configurable: true } },
@@ -193,6 +195,7 @@ describe('Content Type Builder Action utils', () => {
           configurable: false,
           dominant: false,
           key: 'permissions',
+          columnName: '',
           nature: 'manyToOne',
           plugin: 'users-permissions',
           targetColumnName: '',
@@ -203,7 +206,8 @@ describe('Content Type Builder Action utils', () => {
           key: 'permissions2',
           nature: 'manyToMany',
           plugin: 'users-permissions',
-          targetColumnName: '',
+          targetColumnName: 'test',
+          columnName: 'test2',
           target: 'role2',
         },
         type: {
@@ -501,13 +505,29 @@ describe('App actions', () => {
       const e = {
         target: {
           name: 'test',
-          value: 'test',
+          value: 'test ',
         },
       };
       const expected = {
         type: ON_CHANGE_ATTRIBUTE,
         keys: ['test'],
-        value: 'test',
+        value: 'test ',
+      };
+
+      expect(onChangeAttribute(e)).toEqual(expected);
+    });
+
+    it('should remove the spaces if the user is modifying the name input', () => {
+      const e = {
+        target: {
+          name: 'name',
+          value: 'attribute with space',
+        },
+      };
+      const expected = {
+        type: ON_CHANGE_ATTRIBUTE,
+        keys: ['name'],
+        value: 'attributewithspace',
       };
 
       expect(onChangeAttribute(e)).toEqual(expected);
@@ -516,11 +536,11 @@ describe('App actions', () => {
 
   describe('OnChangeRelation', () => {
     it('has a type ON_CHANGE_RELATION and returns the correct data', () => {
-      const target = { name: 'test', value: 'test' };
+      const target = { name: 'test', value: 'super test ' };
       const expected = {
         type: ON_CHANGE_RELATION,
         keys: ['test'],
-        value: 'test',
+        value: 'supertest',
       };
 
       expect(onChangeRelation({ target })).toEqual(expected);
@@ -764,10 +784,9 @@ describe('App actions', () => {
     it('should have a type SUBMIT_CONTENT_TYPE_SUCCEEDED and returns the correct data', () => {
       const expected = {
         type: SUBMIT_CONTENT_TYPE_SUCCEEDED,
-        oldContentTypeName: 'test',
       };
 
-      expect(submitContentTypeSucceeded('test')).toEqual(expected);
+      expect(submitContentTypeSucceeded()).toEqual(expected);
     });
   });
 

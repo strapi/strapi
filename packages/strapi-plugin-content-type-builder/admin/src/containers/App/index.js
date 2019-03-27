@@ -64,6 +64,12 @@ export class App extends React.Component {
     this.props.getData();
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.shouldRefetchData !== this.props.shouldRefetchData) {
+      this.props.getData();
+    }
+  }
+
   componentWillUnmount() {
     this.props.resetProps();
   }
@@ -106,6 +112,10 @@ export class App extends React.Component {
   }
 }
 
+App.defaultProps = {
+  shouldRefetchData: false,
+};
+
 App.propTypes = {
   addAttributeRelation: PropTypes.func.isRequired,
   cancelNewContentType: PropTypes.func.isRequired,
@@ -120,6 +130,7 @@ App.propTypes = {
   saveEditedAttributeRelation: PropTypes.func.isRequired,
   setTemporaryAttribute: PropTypes.func.isRequired,
   setTemporaryAttributeRelation: PropTypes.func.isRequired,
+  shouldRefetchData: PropTypes.bool,
 };
 
 const mapStateToProps = makeSelectApp();

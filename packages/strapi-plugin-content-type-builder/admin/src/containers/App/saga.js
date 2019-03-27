@@ -60,7 +60,7 @@ export function* submitCT({
 
     yield call(request, requestURL, opts, true);
     emitEvent('didSaveContentType');
-    yield put(submitContentTypeSucceeded(oldContentTypeName));
+    yield put(submitContentTypeSucceeded());
 
     if (name !== oldContentTypeName) {
       emitEvent('didEditNameOfContentType');

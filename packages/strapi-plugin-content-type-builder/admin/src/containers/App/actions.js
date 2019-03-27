@@ -124,7 +124,7 @@ export function getData() {
 export function getDataSucceeded({ allModels, models }, connections) {
   const initialData = allModels.reduce((acc, current) => {
     acc[current.name] = pick(current, ['name', 'collectionName', 'connection', 'description', 'mainField']);
-    const attributes = OrderedMap(fromJS(buildModelAttributes(current.attributes)));
+    const attributes = OrderedMap(buildModelAttributes(current.attributes));
     set(acc, [current.name, 'attributes'], attributes);
 
     return acc;
@@ -159,10 +159,12 @@ export function onChangeNewContentTypeMainInfos({ target }) {
 }
 
 export function onChangeAttribute({ target }) {
+  const value = target.name.includes('name') ? target.value.split(' ').join('') : target.value;
+
   return {
     type: ON_CHANGE_ATTRIBUTE,
     keys: target.name.split('.'),
-    value: target.value,
+    value: value,
   };
 }
 
@@ -170,7 +172,7 @@ export function onChangeRelation({ target }) {
   return {
     type: ON_CHANGE_RELATION,
     keys: target.name.split('.'),
-    value: target.value,
+    value: target.value.split(' ').join(''),
   };
 }
 
@@ -274,10 +276,9 @@ export function submitContentType(oldContentTypeName, data, context, source) {
   };
 }
 
-export function submitContentTypeSucceeded(oldContentTypeName) {
+export function submitContentTypeSucceeded() {
   return {
     type: SUBMIT_CONTENT_TYPE_SUCCEEDED,
-    oldContentTypeName,
   };
 }
 
@@ -314,6 +315,8 @@ export const buildModelAttributes = attributes => {
     } else {
       acc[current.name] = current.params;
     }
+
+    acc[current.name] = fromJS(acc[current.name]);
 
     return acc;
   }, {});

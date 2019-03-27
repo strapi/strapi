@@ -83,6 +83,7 @@ export const initialState = fromJS({
     target: '',
     unique: false,
   },
+  shouldRefetchData: false,
 });
 
 export const shouldPluralizeKey = nature => ['manyToMany', 'manyToOne'].includes(nature);
@@ -390,38 +391,14 @@ function appReducer(state = initialState, action) {
         .updateIn(['temporaryAttributeRelation', 'plugin'], () => action.source || '');
     }
     case SUBMIT_CONTENT_TYPE_SUCCEEDED: {
-      const newName = state.getIn(['modifiedData', action.oldContentTypeName, 'name']);
-      const newState = state
-        .updateIn(['modifiedData', newName], () => state.getIn(['modifiedData', action.oldContentTypeName]))
-        .updateIn(['initialData', newName], () => state.getIn(['modifiedData', action.oldContentTypeName]));
-
-      if (newName === action.oldContentTypeName) {
-        return newState;
-      }
-
-      return newState
-        .removeIn(['modifiedData', action.oldContentTypeName])
-        .removeIn(['initialData', action.oldContentTypeName])
-        .updateIn(
-          [
-            'models',
-            state.get('models').findIndex(model => model.name === action.oldContentTypeName),
-            'name',
-          ],
-          () => newName,
-        )
-        .update('models', models => models.sortBy(model => model.name));
+      return state.update('isLoading', () => true).update('shouldRefetchData', v => !v);
     }
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state
-        .updateIn(['initialData', state.getIn(['newContentType', 'name'])], () => state.get('newContentType'))
-        .updateIn(['modifiedData', state.getIn(['newContentType', 'name'])], () =>
-          state.get('newContentType'),
-        )
-        .updateIn(['models', state.get('models').size - 1, 'isTemporary'], () => false)
-        .update('models', list => list.sortBy(el => el.name))
+        .update('isLoading', () => true)
         .update('newContentType', () => Map(initialState.get('newContentType')))
-        .update('newContentTypeClone', () => Map(initialState.get('newContentType')));
+        .update('newContentTypeClone', () => Map(initialState.get('newContentType')))
+        .update('shouldRefetchData', v => !v);
     case UPDATE_TEMP_CONTENT_TYPE:
       return state
         .updateIn(

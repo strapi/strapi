@@ -12,21 +12,22 @@ import {
   deleteModelSucceeded,
   deleteTemporaryModel,
   getDataSucceeded,
+  onChangeAttribute,
   onChangeExistingContentTypeMainInfos,
   onChangeNewContentTypeMainInfos,
-  onChangeAttribute,
+  onChangeRelation,
+  onChangeRelationNature,
+  onChangeRelationTarget,
   resetNewContentTypeMainInfos,
   resetEditExistingContentType,
   resetEditTempContentType,
   resetProps,
   saveEditedAttribute,
+  // saveEditedAttributeRelation,
   setTemporaryAttribute,
   submitTempContentTypeSucceeded,
   updateTempContentType,
   resetExistingContentTypeMainInfos,
-  onChangeRelation,
-  onChangeRelationNature,
-  onChangeRelationTarget,
 } from '../actions';
 import appReducer, { shouldPluralizeKey, shouldPluralizeName } from '../reducer';
 
@@ -135,6 +136,7 @@ describe('appReducer', () => {
         target: '',
         unique: false,
       },
+      shouldRefetchData: false,
     });
   });
 
@@ -876,6 +878,7 @@ describe('appReducer', () => {
         target: '',
         unique: false,
       },
+      shouldRefetchData: false,
     });
 
     expect(appReducer(state, resetProps())).toEqual(expected);
@@ -889,6 +892,10 @@ describe('appReducer', () => {
 
     expect(appReducer(state, saveEditedAttribute('name', false, 'product'))).toEqual(expected);
   });
+
+  // it('it should handle the saveEditedAttributeRelation action correctly if the model is temporary and the initial attribute is not related to the edited model',  () => {
+
+  // })
 
   it('should handle the saveEditedAttribute action correctly if the model is temporary', () => {
     state = state
@@ -918,61 +925,8 @@ describe('appReducer', () => {
     expect(appReducer(state, setTemporaryAttribute('name', true, undefined))).toEqual(expected);
   });
 
-  it('should handle the submitTempContentType action correctly', () => {
-    state = state
-      .setIn(['newContentType', 'name'], 'atest')
-      .setIn(['newContentType', 'attributes', 'name', 'type'], 'string')
-      .set(
-        'models',
-        List([
-          {
-            icon: 'fa-cube',
-            name: 'product',
-            description: '',
-            fields: 1,
-            isTemporary: false,
-          },
-          {
-            icon: 'fa-cube',
-            name: 'atest',
-            description: '',
-            fields: 1,
-            isTemporary: true,
-          },
-        ]),
-      );
-    const newCt = fromJS({
-      collectionName: '',
-      connection: '',
-      description: '',
-      mainField: '',
-      name: '',
-      attributes: {},
-    });
-    const expected = state
-      .setIn(['modifiedData', 'atest'], state.get('newContentType'))
-      .setIn(['initialData', 'atest'], state.get('newContentType'))
-      .set(
-        'models',
-        List([
-          {
-            icon: 'fa-cube',
-            name: 'atest',
-            description: '',
-            fields: 1,
-            isTemporary: false,
-          },
-          {
-            icon: 'fa-cube',
-            name: 'product',
-            description: '',
-            fields: 1,
-            isTemporary: false,
-          },
-        ]),
-      )
-      .set('newContentType', newCt)
-      .set('newContentTypeClone', newCt);
+  it('should handle the submitTempContentTypeSucceeded action correctly', () => {
+    const expected = state.set('isLoading', true).set('shouldRefetchData', true);
 
     expect(appReducer(state, submitTempContentTypeSucceeded())).toEqual(expected);
   });

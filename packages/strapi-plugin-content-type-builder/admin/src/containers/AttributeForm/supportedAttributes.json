@@ -3,6 +3,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.string.name"
           },
@@ -65,6 +68,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.string.name"
           },
@@ -124,6 +130,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.string.name"
           },
@@ -204,6 +213,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.enumeration.name"
           },
@@ -290,6 +302,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.string.name"
           },
@@ -340,6 +355,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.string.name"
           },
@@ -401,6 +419,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.number.name"
           },
@@ -500,6 +521,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.string.name"
           },
@@ -580,6 +604,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.string.name"
           },
@@ -660,6 +687,9 @@
     "base": {
       "items": [
         {
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.info.no-space-allowed"
+          },
           "label": {
             "id": "content-type-builder.form.attribute.item.textarea.name"
           },
