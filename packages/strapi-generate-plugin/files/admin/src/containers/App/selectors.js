@@ -5,6 +5,6 @@
  * Direct selector to the list state domain
  */
 
-// const selectGlobalDomain = () => state => state.get(`${pluginId}-global`);
+// const selectGlobalDomain = () => state => state.get(`${pluginId}_global`);
 
 export {};
