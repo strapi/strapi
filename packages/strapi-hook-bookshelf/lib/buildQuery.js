@@ -23,7 +23,7 @@ const buildQuery = ({ model, filters }) => qb => {
 
       let fieldKey = `${associationModel.collectionName}.${attributeKey}`;
 
-      if (association && attributeKey === whereClause.field) {
+      if (association && attributeKey === field) {
         fieldKey = `${associationModel.collectionName}.${associationModel.primaryKey}`;
       }
 

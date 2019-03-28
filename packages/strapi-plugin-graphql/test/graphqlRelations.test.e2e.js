@@ -217,7 +217,7 @@ describe('Test Graphql Relations API End to End', () => {
           createDocument: {
             document: {
               ...selectFields(document),
-              labels: data.labels.map(selectFields),
+              labels: expect.arrayContaining(data.labels.map(selectFields)),
             },
           },
         },
