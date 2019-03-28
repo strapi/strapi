@@ -15,6 +15,6 @@ You are invited to get started using Strapi. You may explore Strapi by:
 1. A [Quick Start Guide](../getting-started/quick-start.html) for more intermediate to advanced developers.
 2. A [Tutorial](../getting-started/quick-start-tutorial.html) for those who prefer a step-by-step introduction.
 
-When you're done getting started, we invite you to join our [community](https://slack.strapi.io/). 
+When you're done getting started, we invite you to join our [community](https://strapi.io/community). 
 
 
