@@ -1,30 +1,39 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
+/**
+ * Build filters on a bookshelf query
+ * @param {Object} options - Options
+ * @param {Object} options.model - Bookshelf model
+ * @param {Object} options.filters - Filters params (start, limit, sort, where)
+ */
 const buildQuery = ({ model, filters }) => qb => {
   if (_.has(filters, 'where') && Array.isArray(filters.where)) {
     // build path with aliases and return a mapping of the paths with there aliases;
 
     // build joins
-    buildQueryJoins(qb, { model, where: filters.where });
+    buildQueryJoins(qb, { model, whereClauses: filters.where });
 
     // apply filters
     filters.where.forEach(whereClause => {
-      const { association, model: fieldModel, attributeKey } = getAssociationFromFieldKey(
+      const { association, model: associationModel, attributeKey } = getAssociationFromFieldKey(
         model,
         whereClause.field
       );
 
-      let fieldKey = `${fieldModel.collectionName}.${attributeKey}`;
+      let fieldKey = `${associationModel.collectionName}.${attributeKey}`;
 
       if (association && attributeKey === whereClause.field) {
-        fieldKey = `${fieldModel.collectionName}.${fieldModel.primaryKey}`;
+        fieldKey = `${associationModel.collectionName}.${associationModel.primaryKey}`;
       }
 
       buildWhereClause({
         qb,
-        ...whereClause,
+        model: associationModel,
+        attribute: attributeKey,
         field: fieldKey,
+        operator: whereClause.operator,
+        value: whereClause.value,
       });
     });
   }
@@ -47,47 +56,76 @@ const buildQuery = ({ model, filters }) => qb => {
   }
 };
 
-const buildWhereClause = ({ qb, field, operator, value }) => {
+const castToFieldType = ({ model, attribute, value }) => {
+  const { type = 'string' } = model._attributes[attribute] || {};
+
+  switch (type) {
+    case 'boolean':
+      return ['true', 't', '1'].includes(value) ? true : false;
+    default:
+      return value;
+  }
+};
+
+/**
+ * Builds a sql where clause
+ * @param {Object} options - Options
+ * @param {Object} options.qb - Bookshelf (knex) query builder
+ * @param {Object} options.model - Bookshelf model
+ * @param {Object} options.field - Filtered field
+ * @param {Object} options.operator - Filter operator (=,in,not eq etc..)
+ * @param {Object} options.value - Filter value
+ */
+const buildWhereClause = ({ qb, model, attribute, field, operator, value }) => {
   if (Array.isArray(value) && !['in', 'nin'].includes(operator)) {
     return qb.where(subQb => {
       for (let val of value) {
-        subQb.orWhere(q => buildWhereClause({ qb: q, field, operator, value: val }));
+        subQb.orWhere(q => buildWhereClause({ qb: q, model, field, operator, value: val }));
       }
     });
   }
 
+  const formattedValue = castToFieldType({ model, attribute, value });
+
   switch (operator) {
     case 'eq':
-      return qb.where(field, value);
+      return qb.where(field, formattedValue);
     case 'ne':
-      return qb.where(field, '!=', value);
+      return qb.where(field, '!=', formattedValue);
     case 'lt':
-      return qb.where(field, '<', value);
+      return qb.where(field, '<', formattedValue);
     case 'lte':
-      return qb.where(field, '<=', value);
+      return qb.where(field, '<=', formattedValue);
     case 'gt':
-      return qb.where(field, '>', value);
+      return qb.where(field, '>', formattedValue);
     case 'gte':
-      return qb.where(field, '>=', value);
+      return qb.where(field, '>=', formattedValue);
     case 'in':
-      return qb.whereIn(field, Array.isArray(value) ? value : [value]);
+      return qb.whereIn(field, Array.isArray(formattedValue) ? formattedValue : [formattedValue]);
     case 'nin':
-      return qb.whereNotIn(field, Array.isArray(value) ? value : [value]);
+      return qb.whereNotIn(
+        field,
+        Array.isArray(formattedValue) ? formattedValue : [formattedValue]
+      );
     case 'contains': {
-      return qb.whereRaw('LOWER(??) LIKE LOWER(?)', [field, `%${value}%`]);
+      return qb.whereRaw('LOWER(??) LIKE LOWER(?)', [field, `%${formattedValue}%`]);
     }
     case 'ncontains':
-      return qb.whereRaw('LOWER(??) NOT LIKE LOWER(?)', [field, `%${value}%`]);
+      return qb.whereRaw('LOWER(??) NOT LIKE LOWER(?)', [field, `%${formattedValue}%`]);
     case 'containss':
-      return qb.where(field, 'like', `%${value}%`);
+      return qb.where(field, 'like', `%${formattedValue}%`);
     case 'ncontainss':
-      return qb.whereNot(field, 'like', `%${value}%`);
+      return qb.whereNot(field, 'like', `%${formattedValue}%`);
 
     default:
-      throw new Error(`Unhandled whereClause : ${field} ${operator} ${value}`);
+      throw new Error(`Unhandled whereClause : ${field} ${operator} ${formattedValue}`);
   }
 };
 
+/**
+ * Returns a list of model path to populate from a list of where clausers
+ * @param {Object} where - where clause
+ */
 const extractRelationsFromWhere = where => {
   return where
     .map(({ field }) => {
@@ -105,6 +143,11 @@ const extractRelationsFromWhere = where => {
     }, []);
 };
 
+/**
+ * Returns a model association and the model concerned based on a model and a field to reach
+ * @param {Object} model - Bookshelf model
+ * @param {*} fieldKey - a path to a model field (e.g author.group.title)
+ */
 const getAssociationFromFieldKey = (model, fieldKey) => {
   let tmpModel = model;
   let association;
@@ -127,13 +170,24 @@ const getAssociationFromFieldKey = (model, fieldKey) => {
   };
 };
 
+/**
+ * Returns a Bookshelf model based on a model association
+ * @param {Object} assoc - A strapi association
+ */
 const findModelByAssoc = assoc => {
   const { models } = assoc.plugin ? strapi.plugins[assoc.plugin] : strapi;
   return models[assoc.collection || assoc.model];
 };
 
-const buildQueryJoins = (qb, { model, where }) => {
-  const relationToPopulate = extractRelationsFromWhere(where);
+/**
+ * Builds database query joins based on a model and a where clause
+ * @param {Object} qb - Bookshelf (knex) query builder
+ * @param {Object} options - Options
+ * @param {Object} options.model - Bookshelf model
+ * @param {Array<Object>} options.whereClauses - a list of where clauses
+ */
+const buildQueryJoins = (qb, { model, whereClauses }) => {
+  const relationToPopulate = extractRelationsFromWhere(whereClauses);
 
   return relationToPopulate.forEach(path => {
     const parts = path.split('.');
@@ -151,8 +205,15 @@ const buildQueryJoins = (qb, { model, where }) => {
   });
 };
 
-const buildSingleJoin = (qb, strapiModel, astModel, association) => {
-  const relationTable = astModel.collectionName;
+/**
+ * Builds an individual join
+ * @param {Object} qb - Bookshelf model
+ * @param {Object} rootModel - The bookshelf model on which we are joining
+ * @param {*} assocModel - The model we are joining to
+ * @param {*} association - The association upo,n which the join is built
+ */
+const buildSingleJoin = (qb, rootModel, assocModel, association) => {
+  const relationTable = assocModel.collectionName;
 
   qb.distinct();
 
@@ -160,27 +221,29 @@ const buildSingleJoin = (qb, strapiModel, astModel, association) => {
     // Join on both ends
     qb.innerJoin(
       association.tableCollectionName,
-      `${association.tableCollectionName}.${pluralize.singular(strapiModel.collectionName)}_${strapiModel.primaryKey}`,
-      `${strapiModel.collectionName}.${strapiModel.primaryKey}`
+      `${association.tableCollectionName}.${pluralize.singular(rootModel.collectionName)}_${
+        rootModel.primaryKey
+      }`,
+      `${rootModel.collectionName}.${rootModel.primaryKey}`
     );
 
     qb.innerJoin(
       relationTable,
-      `${association.tableCollectionName}.${strapiModel.attributes[association.alias].attribute}_${
-        strapiModel.attributes[association.alias].column
+      `${association.tableCollectionName}.${rootModel.attributes[association.alias].attribute}_${
+        rootModel.attributes[association.alias].column
       }`,
-      `${relationTable}.${astModel.primaryKey}`
+      `${relationTable}.${assocModel.primaryKey}`
     );
   } else {
     const externalKey =
       association.type === 'collection'
         ? `${relationTable}.${association.via}`
-        : `${relationTable}.${astModel.primaryKey}`;
+        : `${relationTable}.${assocModel.primaryKey}`;
 
     const internalKey =
       association.type === 'collection'
-        ? `${strapiModel.collectionName}.${strapiModel.primaryKey}`
-        : `${strapiModel.collectionName}.${association.alias}`;
+        ? `${rootModel.collectionName}.${rootModel.primaryKey}`
+        : `${rootModel.collectionName}.${association.alias}`;
 
     qb.innerJoin(relationTable, externalKey, internalKey);
   }
