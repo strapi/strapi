@@ -7,28 +7,76 @@ const findModelByAssoc = assoc => {
 
 const isAttribute = (model, field) => _.has(model.attributes, field) || model.primaryKey === field;
 
-const createFilterValidator = model => ({ field }) => {
+/**
+ * Returns the model, attribute name and association from a path of relation
+ * @param {Object} options - Options
+ * @param {string} options.model - Strapi model
+ * @param {string} options.field - pathj of relation / attribute
+ */
+const getAssociationFromFieldKey = ({ model, field }) => {
   const fieldParts = field.split('.');
 
-  let isValid = true;
   let tmpModel = model;
-  for (let i = 0; i < fieldParts.length; i++) {
-    const field = fieldParts[i];
+  let association;
+  let attribute;
 
-    const assoc = tmpModel.associations.find(ast => ast.alias === field);
+  for (let i = 0; i < fieldParts.length; i++) {
+    const part = fieldParts[i];
+    attribute = part;
+
+    const assoc = tmpModel.associations.find(ast => ast.alias === part);
 
     if (assoc) {
+      association = assoc;
       tmpModel = findModelByAssoc(assoc);
       continue;
     }
 
-    if (!assoc && (!isAttribute(tmpModel, field) || i !== fieldParts.length - 1)) {
-      isValid = false;
-      break;
+    if (!assoc && (!isAttribute(tmpModel, part) || i !== fieldParts.length - 1)) {
+      const err = new Error(
+        `Your filters contain a field '${field}' that doesn't appear on your model definition nor it's relations`
+      );
+
+      err.status = 400;
+      throw err;
     }
   }
 
-  return isValid;
+  return {
+    association,
+    model: tmpModel,
+    attribute,
+  };
+};
+
+/**
+ * Cast basic values based on attribute type
+ * @param {Object} options - Options
+ * @param {string} options.type - type of the atribute
+ * @param {*} options.value - value tu cast
+ */
+const castValueToType = ({ type, value }) => {
+  switch (type) {
+    case 'boolean': {
+      if (['true', 't', '1', 1, true].includes(value)) {
+        return true;
+      }
+
+      if (['false', 'f', '0', 0].includes(value)) {
+        return false;
+      }
+
+      return value;
+    }
+    case 'integer':
+    case 'biginteger':
+    case 'float':
+    case 'decimal': {
+      return _.toNumber(value);
+    }
+    default:
+      return value;
+  }
 };
 
 /**
@@ -38,9 +86,7 @@ const createFilterValidator = model => ({ field }) => {
  * @param {Object} options.filters - The filters for the query (start, sort, limit, and where clauses)
  * @param {Object} options.rest - In case the database layer requires any other params pass them
  */
-const buildQuery = ({ model, filters, ...rest }) => {
-  const validator = createFilterValidator(model);
-
+const buildQuery = ({ model, filters = {}, ...rest }) => {
   // Validate query clauses
   if (filters.where && Array.isArray(filters.where)) {
     const deepFilters = filters.where.filter(({ field }) => field.split('.').length > 1);
@@ -50,18 +96,18 @@ const buildQuery = ({ model, filters, ...rest }) => {
       );
     }
 
-    filters.where.forEach(whereClause => {
-      if (!validator(whereClause)) {
-        const err = new Error(
-          `Your filters contain a field '${
-            whereClause.field
-          }' that doesn't appear on your model definition nor it's relations`
-        );
+    // cast where clauses to match the inner types
+    filters.where = filters.where
+      .filter(({ value }) => value)
+      .map(({ field, operator, value }) => {
+        const { model: assocModel, attribute } = getAssociationFromFieldKey({
+          model,
+          field,
+        });
 
-        err.status = 400;
-        throw err;
-      }
-    });
+        const { type } = _.get(assocModel, ['attributes', attribute], {});
+        return { field, operator, value: castValueToType({ type, value }) };
+      });
   }
 
   const orm = strapi.hook[model.orm];

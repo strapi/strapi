@@ -26,7 +26,7 @@ const test = async () => {
 };
 
 const main = async () => {
-  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.postgres;
+  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.mysql;
 
   try {
     await cleanTestApp(appName);

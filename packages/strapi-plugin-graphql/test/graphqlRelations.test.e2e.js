@@ -244,15 +244,16 @@ describe('Test Graphql Relations API End to End', () => {
 
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
-        data: {
-          documents: expect.arrayContaining(
-            documentsPayload.map(document => ({
-              ...selectFields(document),
-              labels: expect.arrayContaining(data.labels.map(selectFields)),
-            }))
-          ),
-        },
-      });
+          data: {
+            documents: expect.arrayContaining(
+              data.documents.map(document => ({
+                ...selectFields(document),
+                labels: expect.arrayContaining(data.labels.map(selectFields)),
+              }))
+            ),
+          },
+        }
+      );
 
       // assign for later use
       data.documents = res.body.data.documents;
@@ -280,7 +281,7 @@ describe('Test Graphql Relations API End to End', () => {
       expect(body).toMatchObject({
         data: {
           labels: expect.arrayContaining(
-            labelsPayload.map(label => ({
+            data.labels.map(label => ({
               ...selectFields(label),
               documents: expect.arrayContaining(data.documents.map(selectFields)),
             }))

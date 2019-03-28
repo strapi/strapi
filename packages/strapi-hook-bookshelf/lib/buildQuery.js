@@ -15,10 +15,10 @@ const buildQuery = ({ model, filters }) => qb => {
     buildQueryJoins(qb, { model, whereClauses: filters.where });
 
     // apply filters
-    filters.where.forEach(whereClause => {
+    filters.where.forEach(({ field, operator, value }) => {
       const { association, model: associationModel, attributeKey } = getAssociationFromFieldKey(
         model,
-        whereClause.field
+        field
       );
 
       let fieldKey = `${associationModel.collectionName}.${attributeKey}`;
@@ -29,11 +29,9 @@ const buildQuery = ({ model, filters }) => qb => {
 
       buildWhereClause({
         qb,
-        model: associationModel,
-        attribute: attributeKey,
         field: fieldKey,
-        operator: whereClause.operator,
-        value: whereClause.value,
+        operator,
+        value,
       });
     });
   }
@@ -56,17 +54,6 @@ const buildQuery = ({ model, filters }) => qb => {
   }
 };
 
-const castToFieldType = ({ model, attribute, value }) => {
-  const { type = 'string' } = model._attributes[attribute] || {};
-
-  switch (type) {
-    case 'boolean':
-      return ['true', 't', '1'].includes(value) ? true : false;
-    default:
-      return value;
-  }
-};
-
 /**
  * Builds a sql where clause
  * @param {Object} options - Options
@@ -76,49 +63,44 @@ const castToFieldType = ({ model, attribute, value }) => {
  * @param {Object} options.operator - Filter operator (=,in,not eq etc..)
  * @param {Object} options.value - Filter value
  */
-const buildWhereClause = ({ qb, model, attribute, field, operator, value }) => {
+const buildWhereClause = ({ qb, field, operator, value }) => {
   if (Array.isArray(value) && !['in', 'nin'].includes(operator)) {
     return qb.where(subQb => {
       for (let val of value) {
-        subQb.orWhere(q => buildWhereClause({ qb: q, model, field, operator, value: val }));
+        subQb.orWhere(q => buildWhereClause({ qb: q, field, operator, value: val }));
       }
     });
   }
 
-  const formattedValue = castToFieldType({ model, attribute, value });
-
   switch (operator) {
     case 'eq':
-      return qb.where(field, formattedValue);
+      return qb.where(field, value);
     case 'ne':
-      return qb.where(field, '!=', formattedValue);
+      return qb.where(field, '!=', value);
     case 'lt':
-      return qb.where(field, '<', formattedValue);
+      return qb.where(field, '<', value);
     case 'lte':
-      return qb.where(field, '<=', formattedValue);
+      return qb.where(field, '<=', value);
     case 'gt':
-      return qb.where(field, '>', formattedValue);
+      return qb.where(field, '>', value);
     case 'gte':
-      return qb.where(field, '>=', formattedValue);
+      return qb.where(field, '>=', value);
     case 'in':
-      return qb.whereIn(field, Array.isArray(formattedValue) ? formattedValue : [formattedValue]);
+      return qb.whereIn(field, Array.isArray(value) ? value : [value]);
     case 'nin':
-      return qb.whereNotIn(
-        field,
-        Array.isArray(formattedValue) ? formattedValue : [formattedValue]
-      );
+      return qb.whereNotIn(field, Array.isArray(value) ? value : [value]);
     case 'contains': {
-      return qb.whereRaw('LOWER(??) LIKE LOWER(?)', [field, `%${formattedValue}%`]);
+      return qb.whereRaw('LOWER(??) LIKE LOWER(?)', [field, `%${value}%`]);
     }
     case 'ncontains':
-      return qb.whereRaw('LOWER(??) NOT LIKE LOWER(?)', [field, `%${formattedValue}%`]);
+      return qb.whereRaw('LOWER(??) NOT LIKE LOWER(?)', [field, `%${value}%`]);
     case 'containss':
-      return qb.where(field, 'like', `%${formattedValue}%`);
+      return qb.where(field, 'like', `%${value}%`);
     case 'ncontainss':
-      return qb.whereNot(field, 'like', `%${formattedValue}%`);
+      return qb.whereNot(field, 'like', `%${value}%`);
 
     default:
-      throw new Error(`Unhandled whereClause : ${field} ${operator} ${formattedValue}`);
+      throw new Error(`Unhandled whereClause : ${field} ${operator} ${value}`);
   }
 };
 

@@ -351,16 +351,7 @@ const buildQueryMatches = (model, filters) => {
  * Cast values
  * @param {*} value - Value to cast
  */
-const formatValue = value => {
-  if (Array.isArray(value)) {
-    return value.map(formatValue);
-  }
-
-  const number = typeof value === 'string' && _.toNumber(value);
-  if (_.isFinite(number)) return number;
-
-  return utils.valueToId(value);
-};
+const formatValue = value => utils.valueToId(value);
 
 /**
  * Builds a where clause
@@ -370,13 +361,13 @@ const formatValue = value => {
  * @param {*} options.value - Where clause alue
  */
 const buildWhereClause = ({ field, operator, value }) => {
-  const val = formatValue(value);
-
-  if (Array.isArray(val) && !['in', 'nin'].includes(operator)) {
+  if (Array.isArray(value) && !['in', 'nin'].includes(operator)) {
     return {
-      $or: val.map(value => buildWhereClause({ field, operator, value })),
+      $or: value.map(val => buildWhereClause({ field, operator, value: val })),
     };
   }
+
+  const val = formatValue(value);
 
   switch (operator) {
     case 'eq':
