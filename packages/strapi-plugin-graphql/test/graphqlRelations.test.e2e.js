@@ -8,7 +8,7 @@ let rq;
 let graphqlQuery;
 
 // utils
-const selectFields = doc => _.pick(doc[('id', 'name')]);
+const selectFields = doc => _.pick(doc, ['id', 'name']);
 
 const documentModel = {
   attributes: [

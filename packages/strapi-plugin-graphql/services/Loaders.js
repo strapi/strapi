@@ -58,6 +58,7 @@ module.exports = {
             const { queries, map } = this.extractQueries(model, _.cloneDeep(keys));
             // Run queries in parallel.
             const results = await Promise.all(queries.map(query => this.makeQuery(model, query)));
+
             // Use to match initial queries order.
             const data = this.mapData(model, keys, map, results);
 

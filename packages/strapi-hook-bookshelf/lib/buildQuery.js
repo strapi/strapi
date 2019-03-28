@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const pluralize = require('pluralize');
 
 const buildQuery = ({ model, filters }) => qb => {
   if (_.has(filters, 'where') && Array.isArray(filters.where)) {
@@ -159,7 +160,7 @@ const buildSingleJoin = (qb, strapiModel, astModel, association) => {
     // Join on both ends
     qb.innerJoin(
       association.tableCollectionName,
-      `${association.tableCollectionName}.${strapiModel.info.name}_${strapiModel.primaryKey}`,
+      `${association.tableCollectionName}.${pluralize.singular(strapiModel.collectionName)}_${strapiModel.primaryKey}`,
       `${strapiModel.collectionName}.${strapiModel.primaryKey}`
     );
 

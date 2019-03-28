@@ -369,8 +369,8 @@ const buildShadowCRUD = (models, plugin) => {
               ...Query.convertToQuery(queryParams.where),
             };
 
-            if (association.nature === 'manyToMany' && association.dominant) {
-              _.set(queryOpts, ['query', ref.primaryKey], obj[association.alias] || []);
+            if (model.orm === 'mongoose' && association.nature === 'manyToMany' && association.dominant) {
+              _.set(queryOpts, ['query', ref.primaryKey], obj[association.alias].map(val => val[ref.primaryKey] || val) || []);
             }
 
             _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
