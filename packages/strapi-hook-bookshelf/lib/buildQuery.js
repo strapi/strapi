@@ -21,11 +21,10 @@ const buildQuery = ({ model, filters }) => qb => {
         field
       );
 
-      let fieldKey = `${associationModel.collectionName}.${attributeKey}`;
-
-      if (association && attributeKey === field) {
-        fieldKey = `${associationModel.collectionName}.${associationModel.primaryKey}`;
-      }
+      let fieldKey =
+        association && attributeKey === field
+          ? `${associationModel.collectionName}.${associationModel.primaryKey}`
+          : `${associationModel.collectionName}.${attributeKey}`;
 
       buildWhereClause({
         qb,
@@ -89,9 +88,8 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
       return qb.whereIn(field, Array.isArray(value) ? value : [value]);
     case 'nin':
       return qb.whereNotIn(field, Array.isArray(value) ? value : [value]);
-    case 'contains': {
+    case 'contains':
       return qb.whereRaw('LOWER(??) LIKE LOWER(?)', [field, `%${value}%`]);
-    }
     case 'ncontains':
       return qb.whereRaw('LOWER(??) NOT LIKE LOWER(?)', [field, `%${value}%`]);
     case 'containss':
@@ -118,6 +116,7 @@ const extractRelationsFromWhere = where => {
     .reverse()
     .reduce((acc, currentValue) => {
       const alreadyPopulated = _.some(acc, item => _.startsWith(item, currentValue));
+
       if (!alreadyPopulated) {
         acc.push(currentValue);
       }
@@ -128,7 +127,7 @@ const extractRelationsFromWhere = where => {
 /**
  * Returns a model association and the model concerned based on a model and a field to reach
  * @param {Object} model - Bookshelf model
- * @param {*} fieldKey - a path to a model field (e.g author.group.title)
+ * @param {string} fieldKey - a path to a model field (e.g author.group.title)
  */
 const getAssociationFromFieldKey = (model, fieldKey) => {
   let tmpModel = model;
@@ -191,8 +190,8 @@ const buildQueryJoins = (qb, { model, whereClauses }) => {
  * Builds an individual join
  * @param {Object} qb - Bookshelf model
  * @param {Object} rootModel - The bookshelf model on which we are joining
- * @param {*} assocModel - The model we are joining to
- * @param {*} association - The association upo,n which the join is built
+ * @param {Object} assocModel - The model we are joining to
+ * @param {Object} association - The association upo,n which the join is built
  */
 const buildSingleJoin = (qb, rootModel, assocModel, association) => {
   const relationTable = assocModel.collectionName;

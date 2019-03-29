@@ -38,7 +38,7 @@ const buildSimpleQuery = ({ model, filters, populate }) => {
   query = applyQueryParams({ query, filters });
 
   return Object.assign(query, {
-    // override count to use countDocuments on simple find query
+    // Override count to use countDocuments on simple find query
     count(...args) {
       return query.countDocuments(...args);
     },
@@ -53,14 +53,14 @@ const buildSimpleQuery = ({ model, filters, populate }) => {
  * @param {Object} options.populate - An array of paths to populate
  */
 const buildDeepQuery = ({ model, filters, populate }) => {
-  // build a tree of paths to populate based on the filtering and the populate option
+  // Build a tree of paths to populate based on the filtering and the populate option
   const { populatePaths, wherePaths } = computePopulatedPaths({
     model,
     populate,
     where: filters.where,
   });
 
-  // init the query with
+  // Init the query
   let query = model
     .aggregate(buildQueryAggregate(model, { paths: _.merge({}, populatePaths, wherePaths) }))
     .append(buildQueryMatches(model, filters));
@@ -72,7 +72,7 @@ const buildDeepQuery = ({ model, filters, populate }) => {
      * Overrides the promise to rehydrate mongoose docs after the aggregation query
      */
     then(...args) {
-      // hydrate function
+      // Hydrate function
       const hydrateFn = hydrateModel({
         model,
         populatedModels: populatePaths,
@@ -103,6 +103,9 @@ const buildDeepQuery = ({ model, filters, populate }) => {
       return query.count('count').then(results => _.get(results, ['0', 'count'], 0));
     },
 
+    /**
+     * Maps to query group
+     */
     group(...args) {
       return query.group(...args);
     },
@@ -110,7 +113,7 @@ const buildDeepQuery = ({ model, filters, populate }) => {
      * Returns an array of plain JS object instead of mongoose documents
      */
     lean() {
-      // return plain js objects without the transformations we normally do on find
+      // Returns plain js objects without the transformations we normally do on find
       return this.then(results => {
         return results.map(r => r.toObject({ transform: false }));
       });
@@ -119,12 +122,13 @@ const buildDeepQuery = ({ model, filters, populate }) => {
 };
 
 /**
+ * Apply sort limit and start params
  * @param {Object} options - Options
  * @param {Object} options.query - Mongoose query
  * @param {Object} options.filters - Filters object
  */
 const applyQueryParams = ({ query, filters }) => {
-  // apply sort
+  // Apply sort param
   if (_.has(filters, 'sort')) {
     const sortFilter = filters.sort.reduce((acc, sort) => {
       const { field, order } = sort;
@@ -135,12 +139,12 @@ const applyQueryParams = ({ query, filters }) => {
     query = query.sort(sortFilter);
   }
 
-  // apply start
+  // Apply start param
   if (_.has(filters, 'start')) {
     query = query.skip(filters.start);
   }
 
-  // apply limiy
+  // Apply limit param
   if (_.has(filters, 'limit') && filters.limit >= 0) {
     query = query.limit(filters.limit);
   }
@@ -206,7 +210,7 @@ const pathsToTree = paths => paths.reduce((acc, path) => _.merge(acc, _.set({}, 
  * Builds the aggregations pipeling of the query
  * @param {Object} model - Queried model
  * @param {Object} options - Options
- * @param {Object} options.paths - a tree of paths to aggregate e.g { article : { tags : { label: {}}}}
+ * @param {Object} options.paths - A tree of paths to aggregate e.g { article : { tags : { label: {}}}}
  */
 const buildQueryAggregate = (model, { paths } = {}) => {
   return Object.keys(paths).reduce((acc, key) => {
@@ -215,11 +219,11 @@ const buildQueryAggregate = (model, { paths } = {}) => {
 };
 
 /**
- * Build a lookup aggregation for a specific key
- * @param {Object} options - options
+ * Builds a lookup aggregation for a specific key
+ * @param {Object} options - Options
  * @param {Object} options.model - Queried model
- * @param {string} options.key - the attribute name to lookup on the model
- * @param {Object} options.paths - a tree of paths to aggregate inside the current lookup e.g { { tags : { label: {}}}
+ * @param {string} options.key - The attribute name to lookup on the model
+ * @param {Object} options.paths - A tree of paths to aggregate inside the current lookup e.g { { tags : { label: {}}}
  */
 const buildLookup = ({ model, key, paths }) => {
   const assoc = model.associations.find(a => a.alias === key);
@@ -255,7 +259,7 @@ const buildLookup = ({ model, key, paths }) => {
 
 /**
  * Build a lookup match expression (equivalent to a SQL join condition)
- * @param {Object} options - options
+ * @param {Object} options - Options
  * @param {Object} options.assoc - The association on which is based the ematching xpression
  */
 const buildLookupMatch = ({ assoc }) => {

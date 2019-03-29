@@ -21,28 +21,28 @@ const convertRestQueryParams = (params = {}) => {
     );
   }
 
-  let finalParams = _.assign({}, defaults);
+  let finalParams = { ...defaults };
 
   if (Object.keys(params).length === 0) {
     return finalParams;
   }
 
   if (_.has(params, '_sort')) {
-    _.assign(finalParams, convertSortQueryParams(params._sort));
+    Object.assign(finalParams, convertSortQueryParams(params._sort));
   }
 
   if (_.has(params, '_start')) {
-    _.assign(finalParams, convertStartQueryParams(params._start));
+    Object.assign(finalParams, convertStartQueryParams(params._start));
   }
 
   if (_.has(params, '_limit')) {
-    _.assign(finalParams, convertLimitQueryParams(params._limit));
+    Object.assign(finalParams, convertLimitQueryParams(params._limit));
   }
 
   const whereParams = _.omit(params, ['_sort', '_start', '_limit']);
 
   if (_.keys(whereParams).length > 0)
-    _.assign(finalParams, {
+    Object.assign(finalParams, {
       where: convertWhereParams(whereParams),
     });
 

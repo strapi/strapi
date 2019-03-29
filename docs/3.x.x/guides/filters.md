@@ -59,6 +59,11 @@ If you use the same operator (except for in and nin) the values will be use to b
 Find posts written by a user who belongs to a company with the name equal to Strapi
 `GET /posts?author.company.name=strapi`
 
+::: warning
+Querying your API with deep filters may cause performance issues.
+If one of your deep filtering queries is too slow, we recommend building a custom route with an optimized version of your query.
+:::
+
 ::: note
 This feature doesn't allow you to filter nested models, e.g `Find users and only return their posts older than yesterday`.
 
@@ -125,7 +130,7 @@ To transform the query params to Strapi's standard filters a request, you can us
 const { convertRestQueryParams } = require('strapi-utils');
 
 module.exports = {
-  // Find products having a price equal or greater than `3`.
+  // when sending a request like GET /products?_sort:id&id=1
   fetchExpensiveProducts: (params, populate) => {
     const filters = convertRestQueryParams(params);
 
@@ -166,7 +171,6 @@ module.exports = {
 };
 ```
 
-
 #### SQL databases (strapi-hook-bookshelf)
 
 If you are using a SQL database, calling `buildQuery` will return a [`Bookshelf Query`](https://bookshelfjs.org/api.html) on which you can call other functions (e.g `count`)
@@ -175,22 +179,19 @@ If you are using a SQL database, calling `buildQuery` will return a [`Bookshelf 
 
 If you are using a mongo database calling `buildQuery` returns either a [`Mongoose Query`](https://mongoosejs.com/docs/api.html#Query) or a custom query when used with deep filtering.
 
-
-
 ##### Custom Query
 
 When using the deep filtering feature with mongo, we build an aggregation query to avoid too many round-trips with the mongo DB.
-Doing that means we don't get a Mongoose object and instead it returns a plain JS Object. This brings a lot of issues like no virtual fields available and not Mongoose life cycles etc.
+Doing that means we don't get a Mongoose object as a response but instead a plain JS Object. This brings a some issues like no virtual fields available and no Mongoose lifecycles.
 
-To give the best experience possible, we decided to rehydrate the Mongoose models, forcing us to override the Mongoose query
-
+To deliver the best possible experience, we decided to rehydrate the Mongoose models, forcing us to override the Mongoose query
 
 ```js
 const query = buildQuery({
-  model: Product,
+  model: Product, // you can use any models from strapi.models or strapi.plugins[pluginName].models
   filters: { limit: 10 },
-  populate: []
-})
+  populate: [],
+});
 ```
 
 returns a query with the following functions

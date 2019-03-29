@@ -56,12 +56,10 @@ module.exports = {
    */
 
   count: (params) => {
-    const model = <%= globalID %>;
-
     const filters = convertRestQueryParams(params);
 
     return buildQuery({
-      model,
+      model: <%= globalID %>,
       filters: { where: filters.where },
     })
       .count()

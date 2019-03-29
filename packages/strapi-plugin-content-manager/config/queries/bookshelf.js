@@ -2,7 +2,7 @@ const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 module.exports = {
-  find: async function(params, populate) {
+  find: async function(params, populate, raw = false) {
     const model = this;
 
     const filters = convertRestQueryParams(params);
@@ -11,7 +11,7 @@ module.exports = {
       .fetchAll({
         withRelated: populate || this.associations.map(x => x.alias),
       })
-      .then(data => data.toJSON());
+      .then(data => (raw ? data.toJSON() : data));
   },
 
   count: async function(params = {}) {

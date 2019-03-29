@@ -199,7 +199,7 @@ module.exports = {
     }, []);
 
     const filter = { [`${primaryKey}_in`]: toRemove };
-    const entries = await strapi.query(model, source).find(filter);
+    const entries = await strapi.query(model, source).find(filter, null, true);
     const associations = strapi.query(model, source).associations;
 
     for (let i = 0; i < entries.length; ++i) {
