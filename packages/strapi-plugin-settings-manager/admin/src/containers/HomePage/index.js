@@ -255,7 +255,6 @@ export class HomePage extends React.Component {
   };
 
   handleChangeLanguage = ({ target: { value } }) => {
-    console.log({ value });
     this.props.changeInput('language.defaultLocale', value);
   };
 
