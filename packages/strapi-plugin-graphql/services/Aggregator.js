@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Aggregator.js service
  *

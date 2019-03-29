@@ -50,13 +50,13 @@ or
 
 ##### Or clauses
 
-If you use the same operator (except for in and nin) the values will be use to build and `OR` query
+If you use the same operator (except for in and nin) the values will be use to build an `OR` query
 
 `GET /posts?title_contains=article&title_contains=truc`
 
 ### Deep filtering
 
-Find posts written by a user who belongs to a company with the name equal to strapi
+Find posts written by a user who belongs to a company with the name equal to Strapi
 `GET /posts?author.company.name=strapi`
 
 ::: note
@@ -180,7 +180,7 @@ If you are using a mongo database calling `buildQuery` returns either a [`Mongoo
 ##### Custom Query
 
 When using the deep filtering feature with mongo, we build an aggregation query to avoid too many round-trips with the mongo DB.
-Doing that means we don't get a Mongoose object andin return bu a plain JS Object. This brings a lot of issues like no virtual fields available and not Mongoose lifecycles etc.
+Doing that means we don't get a Mongoose object and instead it returns a plain JS Object. This brings a lot of issues like no virtual fields available and not Mongoose life cycles etc.
 
 To give the best experience possible, we decided to rehydrate the Mongoose models, forcing us to override the Mongoose query
 
