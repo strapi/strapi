@@ -113,43 +113,6 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
     }
   };
 
-  const buildSingleJoin = (qb, rootModel, assocModel, association) => {
-    const relationTable = assocModel.collectionName;
-
-    qb.distinct();
-
-    if (association.nature === 'manyToMany') {
-      // Join on both ends
-      qb.innerJoin(
-        association.tableCollectionName,
-        `${association.tableCollectionName}.${pluralize.singular(rootModel.collectionName)}_${
-          rootModel.primaryKey
-        }`,
-        `${rootModel.collectionName}.${rootModel.primaryKey}`
-      );
-
-      qb.innerJoin(
-        relationTable,
-        `${association.tableCollectionName}.${rootModel.attributes[association.alias].attribute}_${
-          rootModel.attributes[association.alias].column
-        }`,
-        `${relationTable}.${assocModel.primaryKey}`
-      );
-    } else {
-      const externalKey =
-        association.type === 'collection'
-          ? `${relationTable}.${association.via}`
-          : `${relationTable}.${assocModel.primaryKey}`;
-
-      const internalKey =
-        association.type === 'collection'
-          ? `${rootModel.collectionName}.${rootModel.primaryKey}`
-          : `${rootModel.collectionName}.${association.alias}`;
-
-      qb.innerJoin(relationTable, externalKey, internalKey);
-    }
-  };
-
   /**
    * Create a query tree node from a key an assoc and a model
    * @param {Object} model - Strapi model
