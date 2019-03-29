@@ -26,7 +26,7 @@ describe('<EditViewLink />', () => {
     expect(navLink.prop('url')).toBe('/plugins/test');
   });
 
-  it('should handle the source correctly if it is undefined', () => {
+  it('should handle the source correctly if it is not undefined', () => {
     props.getSource = jest.fn(() => 'users-permissions');
     const wrapper = shallow(<EditViewLink {...props} />);
     const navLink = wrapper.find(NavLink);

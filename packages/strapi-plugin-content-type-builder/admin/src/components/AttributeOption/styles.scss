@@ -21,17 +21,18 @@
       color: #0097F6;
     }
   }
+
+  .attributeType {
+    margin-right: 1.2rem;
+    color: #323740;
+    text-transform: capitalize;
+    font-size: 1.3rem;
+    font-weight: 500;
+    font-style: normal;
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
 }
 
-.attributeType {
-  margin-right: 1.2rem;
-  color: #323740 !important;
-  text-transform: capitalize;
-  font-size: 1.3rem !important;
-  font-weight: 500 !important;
-  font-style: normal !important;
-  -webkit-font-smoothing: subpixel-antialiased !important;
-}
 
 
 .card {

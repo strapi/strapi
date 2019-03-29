@@ -1,8 +1,8 @@
 /**
-*
-* TableList
-*
-*/
+ *
+ * TableList
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -10,12 +10,20 @@ import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
 import Button from 'components/Button';
+
+import pluginId from '../../pluginId';
+
 import TableListRow from '../TableListRow';
 import styles from './styles.scss';
 
-class TableList extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class TableList extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
-    const { canOpenModalAddContentType, deleteTemporaryModel, push } = this.props;
+    const {
+      canOpenModalAddContentType,
+      deleteTemporaryModel,
+      push,
+    } = this.props;
 
     return (
       <div className={styles.tableListContainer}>
@@ -23,7 +31,8 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
           <div className="row">
             <div className={styles.headerContainer}>
               <div className={styles.titleContainer}>
-                {this.props.availableNumber}&nbsp;<FormattedMessage {...{ id: this.props.title }} />
+                {this.props.availableNumber}&nbsp;
+                <FormattedMessage {...{ id: this.props.title }} />
               </div>
               <div className={styles.buttonContainer}>
                 <Button
@@ -40,11 +49,25 @@ class TableList extends React.Component { // eslint-disable-line react/prefer-st
               <ul id="ctbModelsList">
                 <li>
                   <div className={`${styles.liHeaderContainer} row`}>
-                    <div className="col-md-1"></div>
-                    <div className="col-md-3"><FormattedMessage {...{ id: 'content-type-builder.table.contentType.head.name' }} /></div>
-                    <div className="col-md-5 text-center"><FormattedMessage {...{ id: 'content-type-builder.table.contentType.head.description' }} /></div>
-                    <div className="col-md-2 text-center"><FormattedMessage {...{ id: 'content-type-builder.table.contentType.head.fields' }} /></div>
-                    <div className="col-md-1"></div>
+                    <div className="col-md-1" />
+                    <div className="col-md-3">
+                      <FormattedMessage
+                        {...{ id: `${pluginId}.table.contentType.head.name` }}
+                      />
+                    </div>
+                    <div className="col-md-5 text-center">
+                      <FormattedMessage
+                        {...{
+                          id: `${pluginId}.table.contentType.head.description`,
+                        }}
+                      />
+                    </div>
+                    <div className="col-md-2 text-center">
+                      <FormattedMessage
+                        {...{ id: `${pluginId}.table.contentType.head.fields` }}
+                      />
+                    </div>
+                    <div className="col-md-1" />
                   </div>
                 </li>
                 {map(this.props.rowItems, (rowItem, key) => (
