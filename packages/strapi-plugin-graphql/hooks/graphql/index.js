@@ -185,6 +185,10 @@ module.exports = strapi => {
         path: strapi.plugins.graphql.config.endpoint,
       });
 
+      strapi.addListener('server:started', () => {
+        server.installSubscriptionHandlers(strapi.tcpServer);
+      });
+
       cb();
     },
   };
