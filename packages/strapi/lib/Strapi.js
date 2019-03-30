@@ -114,7 +114,7 @@ class Strapi extends EventEmitter {
       // Init first start
       utils.init.call(this);
       // Launch server.
-      this.server.listen(this.config.port, async (err) => {
+      this.tcpServer = this.server.listen(this.config.port, async (err) => {
         if (err) {
           this.log.debug(`⚠️ Server wasn't able to start properly.`);
           this.log.error(err);
