@@ -113,6 +113,12 @@ $ cd cms
 $ strapi start
 ```
 
+Follow the instructions at the bottom of the response to start the server:
+
+```bash
+cd cms
+strapi start
+```
 
 This will open your default browser to the Welcome page for creating an admin user.
 
