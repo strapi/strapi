@@ -113,7 +113,7 @@ $ cd cms
 $ strapi start
 ```
 
-Follow the instructions at the bottom of the response to start the server:
+Follow the instructions at the bottom of the response to start the server.
 
 ```bash
 cd cms
