@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * GraphQL.js service
@@ -6,15 +6,15 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const fs = require('fs');
-const path = require('path');
-const { gql, makeExecutableSchema } = require('apollo-server-koa');
-const _ = require('lodash');
-const graphql = require('graphql');
-const Query = require('./Query.js');
-const Mutation = require('./Mutation.js');
-const Types = require('./Types.js');
-const Resolvers = require('./Resolvers.js');
+const fs = require("fs");
+const path = require("path");
+const { gql, makeExecutableSchema } = require("apollo-server-koa");
+const _ = require("lodash");
+const graphql = require("graphql");
+const Query = require("./Query.js");
+const Mutation = require("./Mutation.js");
+const Types = require("./Types.js");
+const Resolvers = require("./Resolvers.js");
 
 const schemaBuilder = {
   /**
@@ -23,31 +23,31 @@ const schemaBuilder = {
    * @return String
    */
 
-  formatGQL: function(fields, description = {}, model = {}, type = 'field') {
-    const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, '');
-    const lines = typeFields.split('\n');
+  formatGQL: function(fields, description = {}, model = {}, type = "field") {
+    const typeFields = JSON.stringify(fields, null, 2).replace(/['",]+/g, "");
+    const lines = typeFields.split("\n");
 
     // Try to add description for field.
-    if (type === 'field') {
+    if (type === "field") {
       return lines
         .map(line => {
-          if (['{', '}'].includes(line)) {
-            return '';
+          if (["{", "}"].includes(line)) {
+            return "";
           }
 
-          const split = line.split(':');
+          const split = line.split(":");
           const attribute = _.trim(split[0]);
           const info =
             (_.isString(description[attribute])
               ? description[attribute]
-              : _.get(description[attribute], 'description')) ||
+              : _.get(description[attribute], "description")) ||
             _.get(model, `attributes.${attribute}.description`);
           const deprecated =
-            _.get(description[attribute], 'deprecated') ||
+            _.get(description[attribute], "deprecated") ||
             _.get(model, `attributes.${attribute}.deprecated`);
 
           // Snakecase an attribute when we find a dash.
-          if (attribute.indexOf('-') !== -1) {
+          if (attribute.indexOf("-") !== -1) {
             line = `  ${_.snakeCase(attribute)}: ${_.trim(split[1])}`;
           }
 
@@ -61,21 +61,21 @@ const schemaBuilder = {
 
           return line;
         })
-        .join('\n');
-    } else if (type === 'query' || type === 'mutation') {
+        .join("\n");
+    } else if (type === "query" || type === "mutation") {
       return lines
         .map((line, index) => {
-          if (['{', '}'].includes(line)) {
-            return '';
+          if (["{", "}"].includes(line)) {
+            return "";
           }
 
-          const split = Object.keys(fields)[index - 1].split('(');
+          const split = Object.keys(fields)[index - 1].split("(");
           const attribute = _.trim(split[0]);
-          const info = _.get(description[attribute], 'description');
-          const deprecated = _.get(description[attribute], 'deprecated');
+          const info = _.get(description[attribute], "description");
+          const deprecated = _.get(description[attribute], "deprecated");
 
           // Snakecase an attribute when we find a dash.
-          if (attribute.indexOf('-') !== -1) {
+          if (attribute.indexOf("-") !== -1) {
             line = `  ${_.snakeCase(attribute)}(${_.trim(split[1])}`;
           }
 
@@ -89,18 +89,18 @@ const schemaBuilder = {
 
           return line;
         })
-        .join('\n');
+        .join("\n");
     }
 
     return lines
       .map((line, index) => {
         if ([0, lines.length - 1].includes(index)) {
-          return '';
+          return "";
         }
 
         return line;
       })
-      .join('\n');
+      .join("\n");
   },
 
   /**
@@ -113,15 +113,15 @@ const schemaBuilder = {
     const format = '"""\n';
 
     const str =
-      _.get(description, '_description') || _.isString(description)
+      _.get(description, "_description") || _.isString(description)
         ? description
-        : undefined || _.get(model, 'info.description');
+        : undefined || _.get(model, "info.description");
 
     if (str) {
       return `${format}${str}\n${format}`;
     }
 
-    return '';
+    return "";
   },
 
   /**
@@ -132,26 +132,33 @@ const schemaBuilder = {
 
   generateSchema: function() {
     // Generate type definition and query/mutation for models.
-    let shadowCRUD = { definition: '', query: '', mutation: '', resolver: '' };
+    let shadowCRUD = { definition: "", query: "", mutation: "", resolver: "" };
 
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
-      const models = Object.keys(strapi.models).filter(model => model !== 'core_store');
+      const models = Object.keys(strapi.models).filter(
+        model => model !== "core_store"
+      );
 
       const modelCruds = Resolvers.buildShadowCRUD(models);
       shadowCRUD = Object.keys(strapi.plugins).reduce((acc, plugin) => {
-        const { definition, query, mutation, resolver } = Resolvers.buildShadowCRUD(
+        const {
+          definition,
+          query,
+          mutation,
+          resolver
+        } = Resolvers.buildShadowCRUD(
           Object.keys(strapi.plugins[plugin].models),
           plugin
         );
 
         // We cannot put this in the merge because it's a string.
-        acc.definition += definition || '';
+        acc.definition += definition || "";
 
         return _.merge(acc, {
           query,
           resolver,
-          mutation,
+          mutation
         });
       }, modelCruds);
     }
@@ -161,18 +168,22 @@ const schemaBuilder = {
       definition,
       query,
       mutation,
-      resolver = {},
+      subscription,
+      resolver = {}
     } = strapi.plugins.graphql.config._schema.graphql;
 
     // Polymorphic.
-    const { polymorphicDef, polymorphicResolver } = Types.addPolymorphicUnionType(
-      definition,
-      shadowCRUD.definition
-    );
+    const {
+      polymorphicDef,
+      polymorphicResolver
+    } = Types.addPolymorphicUnionType(definition, shadowCRUD.definition);
 
     // Build resolvers.
     const resolvers =
-      _.omitBy(_.merge(shadowCRUD.resolver, resolver, polymorphicResolver), _.isEmpty) || {};
+      _.omitBy(
+        _.merge(shadowCRUD.resolver, resolver, polymorphicResolver),
+        _.isEmpty
+      ) || {};
 
     // Transform object to only contain function.
     Object.keys(resolvers).reduce((acc, type) => {
@@ -184,15 +195,25 @@ const schemaBuilder = {
           return acc;
         }
 
+        // Resolver should already be a function
+        if (type === "Subscription") {
+          return acc;
+        }
+
         if (!_.isFunction(acc[type][resolver])) {
           acc[type][resolver] = acc[type][resolver].resolver;
         }
 
-        if (_.isString(acc[type][resolver]) || _.isPlainObject(acc[type][resolver])) {
-          const { plugin = '' } = _.isPlainObject(acc[type][resolver]) ? acc[type][resolver] : {};
+        if (
+          _.isString(acc[type][resolver]) ||
+          _.isPlainObject(acc[type][resolver])
+        ) {
+          const { plugin = "" } = _.isPlainObject(acc[type][resolver])
+            ? acc[type][resolver]
+            : {};
 
           switch (type) {
-            case 'Mutation':
+            case "Mutation":
               // TODO: Verify this...
               acc[type][resolver] = Mutation.composeMutationResolver(
                 strapi.plugins.graphql.config._schema.graphql,
@@ -200,13 +221,13 @@ const schemaBuilder = {
                 resolver
               );
               break;
-            case 'Query':
+            case "Query":
             default:
               acc[type][resolver] = Query.composeQueryResolver(
                 strapi.plugins.graphql.config._schema.graphql,
                 plugin,
                 resolver,
-                'force' // Avoid singular/pluralize and force query name.
+                "force" // Avoid singular/pluralize and force query name.
               );
               break;
           }
@@ -226,9 +247,20 @@ const schemaBuilder = {
       ${definition}
       ${shadowCRUD.definition}
       type Query {${shadowCRUD.query &&
-        this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
+        this.formatGQL(
+          shadowCRUD.query,
+          resolver.Query,
+          null,
+          "query"
+        )}${query}}
       type Mutation {${shadowCRUD.mutation &&
-        this.formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation')}${mutation}}
+        this.formatGQL(
+          shadowCRUD.mutation,
+          resolver.Mutation,
+          null,
+          "mutation"
+        )}${mutation}}
+      type Subscription {${subscription}}
       ${Types.addCustomScalar(resolvers)}
       ${Types.addInput()}
       ${polymorphicDef}
@@ -237,7 +269,7 @@ const schemaBuilder = {
     // Build schema.
     const schema = makeExecutableSchema({
       typeDefs,
-      resolvers,
+      resolvers
     });
 
     if (!strapi.config.currentEnvironment.server.production) {
@@ -250,7 +282,7 @@ const schemaBuilder = {
 
     return {
       typeDefs: gql(typeDefs),
-      resolvers,
+      resolvers
     };
   },
 
@@ -263,25 +295,25 @@ const schemaBuilder = {
   writeGenerateSchema: schema => {
     const generatedFolder = path.resolve(
       strapi.config.appPath,
-      'plugins',
-      'graphql',
-      'config',
-      'generated'
+      "plugins",
+      "graphql",
+      "config",
+      "generated"
     );
 
     // Create folder if necessary.
     try {
       fs.accessSync(generatedFolder, fs.constants.R_OK | fs.constants.W_OK);
     } catch (err) {
-      if (err && err.code === 'ENOENT') {
+      if (err && err.code === "ENOENT") {
         fs.mkdirSync(generatedFolder);
       } else {
         strapi.log.error(err);
       }
     }
 
-    fs.writeFileSync(path.join(generatedFolder, 'schema.graphql'), schema);
-  },
+    fs.writeFileSync(path.join(generatedFolder, "schema.graphql"), schema);
+  }
 };
 
 module.exports = schemaBuilder;

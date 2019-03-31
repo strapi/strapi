@@ -1,33 +1,33 @@
-'use strict';
+"use strict";
 
 /**
  * Module dependencies
  */
 
 // Public node modules.
-const _ = require('lodash');
-const path = require('path');
-const glob = require('glob');
-const { ApolloServer } = require('apollo-server-koa');
-const depthLimit = require('graphql-depth-limit');
+const _ = require("lodash");
+const path = require("path");
+const glob = require("glob");
+const { ApolloServer } = require("apollo-server-koa");
+const depthLimit = require("graphql-depth-limit");
 
 module.exports = strapi => {
   return {
     beforeInitialize: async function() {
       // Try to inject this hook just after the others hooks to skip the router processing.
-      if (!_.get(strapi.config.hook.load, 'after')) {
-        _.set(strapi.config.hook.load, 'after', []);
+      if (!_.get(strapi.config.hook.load, "after")) {
+        _.set(strapi.config.hook.load, "after", []);
       }
 
-      strapi.config.hook.load.after.push('graphql');
+      strapi.config.hook.load.after.push("graphql");
 
       // Load core utils.
       const utils = require(path.resolve(
         strapi.config.appPath,
-        'node_modules',
-        'strapi',
-        'lib',
-        'utils'
+        "node_modules",
+        "strapi",
+        "lib",
+        "utils"
       ));
 
       // Set '*.graphql' files configurations in the global variable.
@@ -35,9 +35,9 @@ module.exports = strapi => {
         // Load root configurations.
         new Promise((resolve, reject) => {
           glob(
-            './config/*.graphql?(.js)',
+            "./config/*.graphql?(.js)",
             {
-              cwd: strapi.config.appPath,
+              cwd: strapi.config.appPath
             },
             (err, files) => {
               if (err) {
@@ -54,9 +54,9 @@ module.exports = strapi => {
         // Load APIs configurations.
         new Promise((resolve, reject) => {
           glob(
-            './api/*/config/*.graphql?(.js)',
+            "./api/*/config/*.graphql?(.js)",
             {
-              cwd: strapi.config.appPath,
+              cwd: strapi.config.appPath
             },
             (err, files) => {
               if (err) {
@@ -73,9 +73,9 @@ module.exports = strapi => {
         // Load plugins configurations.
         new Promise((resolve, reject) => {
           glob(
-            './plugins/*/config/*.graphql?(.js)',
+            "./plugins/*/config/*.graphql?(.js)",
             {
-              cwd: strapi.config.appPath,
+              cwd: strapi.config.appPath
             },
             (err, files) => {
               if (err) {
@@ -88,7 +88,7 @@ module.exports = strapi => {
                 .catch(reject);
             }
           );
-        }),
+        })
       ]);
 
       /*
@@ -96,56 +96,70 @@ module.exports = strapi => {
        */
 
       // Set path with initial state.
-      _.set(strapi.plugins.graphql, 'config._schema.graphql', {
-        definition: '',
-        query: '',
-        mutation: '',
+      _.set(strapi.plugins.graphql, "config._schema.graphql", {
+        definition: "",
+        query: "",
+        mutation: "",
+        subscription: "",
         type: {},
-        resolver: {},
+        resolver: {}
       });
 
       // Merge user API.
       Object.keys(strapi.api || {}).reduce((acc, current) => {
-        const { definition, query, mutation, type, resolver } = _.get(
-          strapi.api[current],
-          'config.schema.graphql',
-          {}
-        );
+        const {
+          definition,
+          query,
+          mutation,
+          subscription,
+          type,
+          resolver
+        } = _.get(strapi.api[current], "config.schema.graphql", {});
 
-        acc.definition += definition || '';
-        acc.query += query || '';
-        acc.mutation += mutation || '';
+        acc.definition += definition || "";
+        acc.query += query || "";
+        acc.mutation += mutation || "";
+        acc.subscription += subscription || "";
 
         return _.merge(acc, {
           type,
-          resolver,
+          resolver
         });
       }, strapi.plugins.graphql.config._schema.graphql);
 
       // Merge plugins API.
       Object.keys(strapi.plugins || {}).reduce((acc, current) => {
-        const { definition, query, mutation, type, resolver } = _.get(
-          strapi.plugins[current],
-          'config.schema.graphql',
-          {}
-        );
+        const {
+          definition,
+          query,
+          mutation,
+          subscription,
+          type,
+          resolver
+        } = _.get(strapi.plugins[current], "config.schema.graphql", {});
 
-        acc.definition += definition || '';
-        acc.query += query || '';
-        acc.mutation += mutation || '';
+        acc.definition += definition || "";
+        acc.query += query || "";
+        acc.mutation += mutation || "";
+        acc.subscription += subscription || "";
 
         return _.merge(acc, {
           type,
-          resolver,
+          resolver
         });
       }, strapi.plugins.graphql.config._schema.graphql);
     },
 
     initialize: function(cb) {
-      const { typeDefs, resolvers } = strapi.plugins.graphql.services.schema.generateSchema();
+      const {
+        typeDefs,
+        resolvers
+      } = strapi.plugins.graphql.services.schema.generateSchema();
 
       if (_.isEmpty(typeDefs)) {
-        strapi.log.warn('GraphQL schema has not been generated because it\'s empty');
+        strapi.log.warn(
+          "GraphQL schema has not been generated because it's empty"
+        );
 
         return cb();
       }
@@ -158,21 +172,21 @@ module.exports = strapi => {
           strapi.plugins.graphql.services.loaders.initializeLoader();
 
           return {
-            context: ctx,
+            context: ctx
           };
         },
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
-        tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
-        playground: false,
+        tracing: _.get(strapi.plugins.graphql, "config.tracing", false),
+        playground: false
       };
 
       // Disable GraphQL Playground in production environment.
       if (
-        strapi.config.environment !== 'production' ||
+        strapi.config.environment !== "production" ||
         strapi.plugins.graphql.config.playgroundAlways
       ) {
         serverParams.playground = {
-          endpoint: strapi.plugins.graphql.config.endpoint,
+          endpoint: strapi.plugins.graphql.config.endpoint
         };
 
         serverParams.introspection = true;
@@ -182,14 +196,14 @@ module.exports = strapi => {
 
       server.applyMiddleware({
         app: strapi.app,
-        path: strapi.plugins.graphql.config.endpoint,
+        path: strapi.plugins.graphql.config.endpoint
       });
 
-      strapi.addListener('server:started', () => {
+      strapi.addListener("server:started", () => {
         server.installSubscriptionHandlers(strapi.tcpServer);
       });
 
       cb();
-    },
+    }
   };
 };
