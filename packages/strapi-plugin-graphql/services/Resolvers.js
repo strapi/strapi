@@ -374,7 +374,7 @@ module.exports = {
               // Apply optional arguments to make more precise nested request.
               const convertedParams = strapi.utils.models.convertParams(
                 name,
-                Query.convertToParams(Query.amountLimiting(options)),
+                Query.convertToParams(Query.amountLimiting(options), ref.primaryKey),
               );
 
               const where = strapi.utils.models.convertParams(
@@ -395,7 +395,7 @@ module.exports = {
                       return related[ref.primaryKey] || related;
                     }
                   );
-                  
+
                   Object.assign(queryOpts, {
                     ...queryOpts,
                     query: {

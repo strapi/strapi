@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.24.1",
+  "version": "3.0.0-alpha.25.2",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 10.0.0",
@@ -21,7 +21,7 @@
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --single-quote --trailing-comma es5 --write \"{lib,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo \"Error: no test specified\""
+    "test": "echo \"no tests yet\""
   },
   "pre-commit": [
     "lint:admin"

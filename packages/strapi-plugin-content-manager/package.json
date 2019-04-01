@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-alpha.24.1",
+  "version": "3.0.0-alpha.25.2",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -18,7 +18,7 @@
     "start": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development PLUGIN=true node ./node_modules/strapi-helper-plugin/lib/server",
     "generate": "node ./node_modules/strapi-helper-plugin/node_modules/plop --plopfile ./node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo \"Error: no test specified\"",
+    "test": "echo \"no tests yet\"",
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "devDependencies": {
@@ -26,7 +26,7 @@
     "draft-js": "^0.10.5",
     "react-select": "^1.2.1",
     "showdown": "^1.8.6",
-    "strapi-helper-plugin": "3.0.0-alpha.24.1"
+    "strapi-helper-plugin": "3.0.0-alpha.25.2"
   },
   "dependencies": {
     "pluralize": "^7.0.0"

@@ -40,7 +40,7 @@
 
 ## Getting Started
 
-<a href="https://strapi.io/documentation/3.x.x/getting-started/installation.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://strapi.io/documentation/3.x.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 #### 🖐 Requirements
 
@@ -133,7 +133,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 - [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
 - [Slack](http://slack.strapi.io) (highly recommended for faster support)
-- [GitHub](https://github.com/strapi/strapi)
+- [GitHub](https://github.com/strapi/strapi) (Bug reports and Feature requests only)
 - [Twitter](https://twitter.com/strapijs)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161).
 

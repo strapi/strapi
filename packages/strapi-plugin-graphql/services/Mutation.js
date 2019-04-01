@@ -14,20 +14,6 @@ const Query = require('./Query.js');
 
 module.exports = {
   /**
-   * Convert parameters to valid filters parameters.
-   *
-   * @return Object
-   */
-
-  convertToParams: params => {
-    return Object.keys(params).reduce((acc, current) => {
-      return Object.assign(acc, {
-        [`_${current}`]: params[current],
-      });
-    }, {});
-  },
-
-  /**
    * Execute policies before the specified resolver.
    *
    * @return Promise or Error.
@@ -206,7 +192,7 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.params = Query.convertToParams(options.input.where || {});
+        context.params = Query.convertToParams(options.input.where || {}, (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name]).primaryKey);
         context.request.body = options.input.data || {};
 
         if (isController) {
