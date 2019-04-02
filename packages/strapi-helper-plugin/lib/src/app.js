@@ -60,9 +60,7 @@ const store = strapi.store;
 
 // Define the plugin root component
 function Comp(props) {
-  return (
-    <LoadableApp {...props} />
-  );
+  return <LoadableApp {...props} />;
 }
 
 // Hot reloadable translation json files
@@ -73,13 +71,29 @@ if (module.hot) {
     if (strapi) {
       System.import('./i18n').then(result => {
         const translationMessagesUpdated = result.translationMessages;
-        strapi
-          .refresh(pluginId)
-          .translationMessages(translationMessagesUpdated);
+        strapi.refresh(pluginId).translationMessages(translationMessagesUpdated);
       });
     }
   });
 }
+
+// Require the Initializer component
+const initializer = (() => {
+  try {
+    return require('../../../../admin/src/initializer.js'); // eslint-disable-line import/no-unresolved
+  } catch (err) {
+    return null;
+  }
+})();
+
+// Require the plugin's lifecycle
+const lifecycles = (() => {
+  try {
+    return require('../../../../admin/src/lifecycles.js'); // eslint-disable-line import/no-unresolved
+  } catch (err) {
+    return null;
+  }
+})();
 
 // Register the plugin.
 strapi.registerPlugin({
@@ -89,8 +103,10 @@ strapi.registerPlugin({
   description: pluginDescription,
   icon: pluginPkg.strapi.icon,
   id: pluginId,
+  initializer,
   injectedComponents,
   layout,
+  lifecycles,
   leftMenuLinks: [],
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
