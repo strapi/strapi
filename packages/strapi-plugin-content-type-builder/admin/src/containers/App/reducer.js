@@ -169,13 +169,15 @@ function appReducer(state = initialState, action) {
     case CREATE_TEMP_CONTENT_TYPE:
       return state
         .update('models', list =>
-          list.push({
-            icon: 'fa-cube',
-            name: state.getIn(['newContentType', 'name']),
-            description: state.getIn(['newContentType', 'description']),
-            fields: 0,
-            isTemporary: true,
-          }),
+          list.push(
+            fromJS({
+              icon: 'fa-cube',
+              name: state.getIn(['newContentType', 'name']),
+              description: state.getIn(['newContentType', 'description']),
+              fields: 0,
+              isTemporary: true,
+            }),
+          ),
         )
         .update('newContentTypeClone', () => state.get('newContentType'));
     case DELETE_MODEL_ATTRIBUTE: {
@@ -215,7 +217,7 @@ function appReducer(state = initialState, action) {
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.initialData))
         .updateIn(['newContentType', 'connection'], () => action.connections[0])
-        .update('models', () => List(action.models).sortBy(model => model.name));
+        .update('models', () => List(fromJS(action.models)).sortBy(model => model.get('name')));
     case ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS:
       return state.updateIn(['modifiedData', ...action.keys], () => action.value);
     case ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS:

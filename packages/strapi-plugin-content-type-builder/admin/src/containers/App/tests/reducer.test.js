@@ -78,15 +78,17 @@ describe('appReducer', () => {
         },
       },
       isLoading: true,
-      models: List([
-        {
-          icon: 'fa-cube',
-          name: 'product',
-          description: '',
-          fields: 1,
-          isTemporary: false,
-        },
-      ]),
+      models: List(
+        fromJS([
+          {
+            icon: 'fa-cube',
+            name: 'product',
+            description: '',
+            fields: 1,
+            isTemporary: false,
+          },
+        ]),
+      ),
       modifiedData: {
         product: {
           name: 'product',
@@ -467,11 +469,11 @@ describe('appReducer', () => {
       name: 'test',
       attributes: {},
     };
-    state = state.set('newContentType', newContentType);
+    state = state.set('newContentType', Map(newContentType));
     const expected = state
       .set(
         'models',
-        List([
+        fromJS([
           {
             icon: 'fa-cube',
             name: 'product',
@@ -488,7 +490,7 @@ describe('appReducer', () => {
           },
         ]),
       )
-      .set('newContentTypeClone', newContentType);
+      .set('newContentTypeClone', Map(newContentType));
 
     expect(appReducer(state, createTempContentType())).toEqual(expected);
   });
@@ -626,14 +628,14 @@ describe('appReducer', () => {
 
   it('should handle the getDataSucceededAction correctly', () => {
     const models = [
-      {
+      fromJS({
         icon: 'fa-cube',
         name: 'permission',
         description: '',
         fields: 6,
         source: 'users-permissions',
         isTemporary: false,
-      },
+      }),
     ];
     const allModels = [
       {
@@ -937,13 +939,15 @@ describe('appReducer', () => {
 
   it('should handle the updateTempContentType action correctly', () => {
     state = state.setIn(['newContentType', 'name'], 'test').updateIn(['models'], list =>
-      list.push({
-        icon: 'fa-cube',
-        name: 'test1',
-        description: '',
-        fields: 0,
-        isTemporary: true,
-      }),
+      list.push(
+        fromJS({
+          icon: 'fa-cube',
+          name: 'test1',
+          description: '',
+          fields: 0,
+          isTemporary: true,
+        }),
+      ),
     );
 
     const expected = state
