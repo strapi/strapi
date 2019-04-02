@@ -1,8 +1,8 @@
 /**
-*
-* PopUpForm
-*
-*/
+ *
+ * PopUpForm
+ *
+ */
 
 import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
@@ -23,14 +23,15 @@ import {
   takeRight,
 } from 'lodash';
 
-// Translations
-import en from 'translations/en.json';
-
 import Input from 'components/InputsIndex';
+
+// Translations
+import en from '../../translations/en.json';
 
 import styles from './styles.scss';
 
-class PopUpForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class PopUpForm extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { enabled: false, isEditing: false };
 
   componentWillReceiveProps(nextProps) {
@@ -41,7 +42,8 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     }
   }
 
-  getRedirectURIProviderConf = () => { // NOTE: Still testings providers so the switch statement is likely to change
+  getRedirectURIProviderConf = () => {
+    // NOTE: Still testings providers so the switch statement is likely to change
     switch (this.props.dataToEdit) {
       case 'discord':
         return `${strapi.backendURL}/connect/discord/callback`;
@@ -61,33 +63,38 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         return startsWith(value, 'http') ? value : `${strapi.backendURL}${value}`;
       }
     }
-  }
+  };
 
-  generateRedirectURL = (url) => {
-    return startsWith(url, 'https://') || startsWith(url, 'http://') || this.state.isEditing ? url : `${strapi.backendURL}${startsWith(url, '/') ? '' : '/'}${url}`;
-  }
+  generateRedirectURL = url => {
+    return startsWith(url, 'https://') || startsWith(url, 'http://') || this.state.isEditing
+      ? url
+      : `${strapi.backendURL}${startsWith(url, '/') ? '' : '/'}${url}`;
+  };
 
-  handleChange = (e) => {
+  handleChange = e => {
     this.setState({ enabled: e.target.value });
     this.props.onChange(e);
-  }
+  };
 
-  handleBlur = (e) => {
+  handleBlur = e => {
     this.setState({ isEditing: false });
 
     if (isEmpty(e.target.value)) {
       const { name, type } = e.target;
-      const target = Object.assign({ name, type }, { value: `/auth/${this.props.dataToEdit}/callback` });
+      const target = Object.assign(
+        { name, type },
+        { value: `/auth/${this.props.dataToEdit}/callback` },
+      );
       this.props.onChange({ target });
     }
-  }
+  };
 
   handleFocus = () => this.setState({ isEditing: true });
 
   renderForm = () => {
-    const { dataToEdit, settingType, values }  = this.props;
+    const { dataToEdit, settingType, values } = this.props;
     const form = Object.keys(values.options || values || {}).reduce((acc, current) => {
-      const path = settingType === 'email-templates' ? ['options', current] : [ current ];
+      const path = settingType === 'email-templates' ? ['options', current] : [current];
       const name = settingType === 'email-templates' ? 'options.' : '';
 
       if (isObject(get(values, path)) && !isArray(get(values, path))) {
@@ -96,8 +103,9 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             acc.push(`${name}${current}.${curr}`);
 
             return acc;
-          }, []).concat(acc);
-      } else if (current !== 'icon' && current !== 'scope'){
+          }, [])
+          .concat(acc);
+      } else if (current !== 'icon' && current !== 'scope') {
         acc.push(`${name}${current}`);
       }
 
@@ -112,37 +120,61 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             label={{ id: 'users-permissions.PopUpForm.Providers.enabled.label' }}
             name={`${settingType}.${dataToEdit}.enabled`}
             onChange={this.handleChange}
-            type="toggle"
+            type='toggle'
             validations={{}}
             value={get(this.props.values, 'enabled', this.state.enabled)}
           />
 
-          {form.length > 1 && <div className={styles.separator} /> }
+          {form.length > 1 && <div className={styles.separator} />}
 
           {map(tail(form), (value, key) => (
             <Input
               autoFocus={key === 0}
-              customBootstrapClass="col-md-12"
+              customBootstrapClass='col-md-12'
               didCheckErrors={this.props.didCheckErrors}
-              errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
+              errors={get(
+                this.props.formErrors,
+                [findIndex(this.props.formErrors, ['name', value]), 'errors'],
+                [],
+              )}
               key={value}
-              label={{ id: `users-permissions.PopUpForm.Providers.${ includes(value, 'callback') || includes(value, 'redirect_uri') ? 'redirectURL.front-end' : value}.label` }}
+              label={{
+                id: `users-permissions.PopUpForm.Providers.${
+                  includes(value, 'callback') || includes(value, 'redirect_uri')
+                    ? 'redirectURL.front-end'
+                    : value
+                }.label`,
+              }}
               name={`${settingType}.${dataToEdit}.${value}`}
-              onFocus={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleFocus : () => {}}
-              onBlur={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.handleBlur : false}
+              onFocus={
+                includes(value, 'callback') || includes(value, 'redirect_uri')
+                  ? this.handleFocus
+                  : () => {}
+              }
+              onBlur={
+                includes(value, 'callback') || includes(value, 'redirect_uri')
+                  ? this.handleBlur
+                  : false
+              }
               onChange={this.props.onChange}
-              type="text"
-              value={includes(value, 'callback') || includes(value, 'redirect_uri') ? this.generateRedirectURL(get(values, value)) : get(values, value)}
+              type='text'
+              value={
+                includes(value, 'callback') || includes(value, 'redirect_uri')
+                  ? this.generateRedirectURL(get(values, value))
+                  : get(values, value)
+              }
               validations={{ required: true }}
             />
           ))}
-          { dataToEdit !== 'email' && (
+          {dataToEdit !== 'email' && (
             <Input
-              customBootstrapClass="col-md-12"
+              customBootstrapClass='col-md-12'
               disabled
-              label={{ id: `users-permissions.PopUpForm.Providers.${dataToEdit}.providerConfig.redirectURL` }}
-              name="noName"
-              type="text"
+              label={{
+                id: `users-permissions.PopUpForm.Providers.${dataToEdit}.providerConfig.redirectURL`,
+              }}
+              name='noName'
+              type='text'
               onChange={() => {}}
               value={this.getRedirectURIProviderConf()}
               validations={{}}
@@ -154,20 +186,27 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     const params = {
       link: (
-        <a href="https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md" target="_blank">
-          <FormattedMessage id="users-permissions.PopUpForm.Email.link.documentation" />
+        <a
+          href='https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md'
+          target='_blank'
+        >
+          <FormattedMessage id='users-permissions.PopUpForm.Email.link.documentation' />
         </a>
       ),
     };
 
     return (
-      <div className="row">
+      <div className='row'>
         {map(take(form, 3), (value, key) => (
           <Input
             autoFocus={key === 0}
             key={value}
             didCheckErrors={this.props.didCheckErrors}
-            errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
+            errors={get(
+              this.props.formErrors,
+              [findIndex(this.props.formErrors, ['name', value]), 'errors'],
+              [],
+            )}
             label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
             name={`${settingType}.${dataToEdit}.${value}`}
             onChange={this.props.onChange}
@@ -177,21 +216,29 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
             validations={value !== 'options.response_email' ? { required: true } : {}}
           />
         ))}
-        <div className="col-md-6" />
-        {map(takeRight(form, 2), (value) => (
+        <div className='col-md-6' />
+        {map(takeRight(form, 2), value => (
           <Input
             key={value}
-            customBootstrapClass="col-md-12"
+            customBootstrapClass='col-md-12'
             didCheckErrors={this.props.didCheckErrors}
-            errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', value]), 'errors'], [])}
+            errors={get(
+              this.props.formErrors,
+              [findIndex(this.props.formErrors, ['name', value]), 'errors'],
+              [],
+            )}
             label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
             name={`${settingType}.${dataToEdit}.${value}`}
             inputDescription={{
-              id: includes(value, 'object') ? 'users-permissions.PopUpForm.Email.email_templates.inputDescription' : '',
+              id: includes(value, 'object')
+                ? 'users-permissions.PopUpForm.Email.email_templates.inputDescription'
+                : '',
               params,
             }}
             onChange={this.props.onChange}
-            placeholder={`users-permissions.PopUpForm.Email.${this.props.dataToEdit}.${value}.placeholder`}
+            placeholder={`users-permissions.PopUpForm.Email.${
+              this.props.dataToEdit
+            }.${value}.placeholder`}
             type={includes(value, 'object') ? 'text' : 'textarea'}
             validations={{ required: true }}
             value={get(values, value)}
@@ -200,7 +247,7 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
         ))}
       </div>
     );
-  }
+  };
 
   render() {
     const { display } = this.props.values;
@@ -209,7 +256,12 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
     let header = <span>{dataToEdit}</span>;
 
     if (actionType) {
-      header = <FormattedMessage id={`users-permissions.PopUpForm.header.${actionType}.${settingType}`} values={{ provider: <i>{capitalize(dataToEdit)}</i> }} />;
+      header = (
+        <FormattedMessage
+          id={`users-permissions.PopUpForm.header.${actionType}.${settingType}`}
+          values={{ provider: <i>{capitalize(dataToEdit)}</i> }}
+        />
+      );
     }
 
     if (display && en[display]) {
@@ -218,25 +270,25 @@ class PopUpForm extends React.Component { // eslint-disable-line react/prefer-st
 
     return (
       <div className={styles.popUpForm}>
-        <Modal isOpen={this.props.isOpen} toggle={this.context.unsetDataToEdit} className={`${styles.modalPosition}`}>
+        <Modal
+          isOpen={this.props.isOpen}
+          toggle={this.context.unsetDataToEdit}
+          className={`${styles.modalPosition}`}
+        >
           <ModalHeader toggle={this.context.unsetDataToEdit} className={styles.modalHeader} />
           <div className={styles.headerContainer}>
-            <div>
-              {header}
-            </div>
+            <div>{header}</div>
           </div>
           <form onSubmit={this.props.onSubmit}>
             <ModalBody className={styles.modalBody}>
-              <div className="container-fluid">
-                {this.renderForm()}
-              </div>
+              <div className='container-fluid'>{this.renderForm()}</div>
             </ModalBody>
             <ModalFooter className={styles.modalFooter}>
               <Button onClick={() => this.context.unsetDataToEdit()} className={styles.secondary}>
-                <FormattedMessage id="users-permissions.PopUpForm.button.cancel" />
+                <FormattedMessage id='users-permissions.PopUpForm.button.cancel' />
               </Button>
-              <Button type="submit" onClick={this.props.onSubmit} className={styles.primary}>
-                <FormattedMessage id="users-permissions.PopUpForm.button.save" />
+              <Button type='submit' onClick={this.props.onSubmit} className={styles.primary}>
+                <FormattedMessage id='users-permissions.PopUpForm.button.save' />
               </Button>
             </ModalFooter>
           </form>
