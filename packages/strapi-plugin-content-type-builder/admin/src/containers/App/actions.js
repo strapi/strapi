@@ -88,10 +88,11 @@ export function createTempContentType() {
   };
 }
 
-export function deleteModel(modelName) {
+export function deleteModel(modelName, context) {
   return {
     type: DELETE_MODEL,
     modelName,
+    context,
   };
 }
 
@@ -123,7 +124,13 @@ export function getData() {
 
 export function getDataSucceeded({ allModels, models }, connections) {
   const initialData = allModels.reduce((acc, current) => {
-    acc[current.name] = pick(current, ['name', 'collectionName', 'connection', 'description', 'mainField']);
+    acc[current.name] = pick(current, [
+      'name',
+      'collectionName',
+      'connection',
+      'description',
+      'mainField',
+    ]);
     const attributes = OrderedMap(buildModelAttributes(current.attributes));
     set(acc, [current.name, 'attributes'], attributes);
 
@@ -139,7 +146,8 @@ export function getDataSucceeded({ allModels, models }, connections) {
 }
 
 export function onChangeExistingContentTypeMainInfos({ target }) {
-  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value;
+  const value =
+    target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value;
 
   return {
     type: ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
@@ -149,7 +157,8 @@ export function onChangeExistingContentTypeMainInfos({ target }) {
 }
 
 export function onChangeNewContentTypeMainInfos({ target }) {
-  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value;
+  const value =
+    target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value;
 
   return {
     type: ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
@@ -252,7 +261,13 @@ export function setTemporaryAttribute(attributeName, isModelTemporary, modelName
   };
 }
 
-export function setTemporaryAttributeRelation(target, isModelTemporary, source, attributeName, isEditing) {
+export function setTemporaryAttributeRelation(
+  target,
+  isModelTemporary,
+  source,
+  attributeName,
+  isEditing,
+) {
   return {
     type: SET_TEMPORARY_ATTRIBUTE_RELATION,
     attributeName,
