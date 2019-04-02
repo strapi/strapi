@@ -17,7 +17,7 @@ import saga from './saga';
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   render() {
-    return <div />;
+    return <div>Admin</div>;
   }
 }
 

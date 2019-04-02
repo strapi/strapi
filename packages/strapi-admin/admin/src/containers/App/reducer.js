@@ -8,6 +8,7 @@ import { fromJS, List } from 'immutable';
 
 import {
   FREEZE_APP,
+  GET_APP_DATA_SUCCEEDED,
   GET_APP_PLUGINS_SUCCEEDED,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
@@ -17,6 +18,12 @@ import {
 } from './constants';
 
 const initialState = fromJS({
+  appData: {
+    autoReload: false,
+    currentEnvironment: 'development',
+    strapiVersion: '3',
+    uuid: false,
+  },
   appPlugins: List([]),
   blockApp: false,
   overlayBlockerData: null,
@@ -33,15 +40,34 @@ function appReducer(state = initialState, action) {
     case ENABLE_GLOBAL_OVERLAY_BLOCKER:
       return state.set('showGlobalAppBlocker', true);
     case FREEZE_APP:
-      return state
-        .set('blockApp', true)
-        .update('overlayBlockerData', () => {
-          if (action.data) {
-            return action.data;
-          }
+      return state.set('blockApp', true).update('overlayBlockerData', () => {
+        if (action.data) {
+          return action.data;
+        }
 
-          return null;
-        });
+        return null;
+      });
+    case GET_APP_DATA_SUCCEEDED: {
+      const {
+        data: [
+          { uuid },
+          { strapiVersion },
+          { autoReload, currentEnvironment },
+          { layout },
+        ],
+      } = action;
+
+      return (
+        state
+          .updateIn(['appData', 'autoReload'], () => autoReload)
+          .updateIn(['appData', 'currentEnvironment'], () => currentEnvironment)
+          .updateIn(['appData', 'isLoading'], () => false)
+          // TODO: should be removed
+          .updateIn(['appData', 'layout'], () => layout)
+          .updateIn(['appData', 'strapiVersion'], () => strapiVersion)
+          .updateIn(['appData', 'uuid'], () => uuid)
+      );
+    }
     case GET_APP_PLUGINS_SUCCEEDED:
       return state
         .update('appPlugins', () => List(action.appPlugins))
@@ -49,13 +75,14 @@ function appReducer(state = initialState, action) {
     case PLUGIN_LOADED:
       return state.setIn(['plugins', action.plugin.id], fromJS(action.plugin));
     case UPDATE_PLUGIN:
-      return state.setIn(['plugins', action.pluginId, action.updatedKey], fromJS(action.updatedValue));
+      return state.setIn(
+        ['plugins', action.pluginId, action.updatedKey],
+        fromJS(action.updatedValue),
+      );
     case PLUGIN_DELETED:
       return state.deleteIn(['plugins', action.plugin]);
     case UNFREEZE_APP:
-      return state
-        .set('blockApp', false)
-        .set('overlayBlockerData', null);
+      return state.set('blockApp', false).set('overlayBlockerData', null);
     case UNSET_HAS_USERS_PLUGIN:
       return state.set('hasUserPlugin', false);
     default:

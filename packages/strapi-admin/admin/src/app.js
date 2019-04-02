@@ -7,10 +7,12 @@
 
 /* eslint-disable */
 import 'babel-polyfill';
+import request from 'utils/request';
 import { findIndex } from 'lodash';
 import 'sanitize.css/sanitize.css';
 import 'whatwg-fetch';
 import {
+  getAppDataSucceeded,
   getAppPluginsSucceeded,
   unsetHasUserPlugin,
 } from './containers/App/actions';
@@ -30,6 +32,28 @@ if (window.location.port !== '4000') {
     .then(plugins => {
       dispatch(getAppPluginsSucceeded(plugins));
 
+      const getAppData = async () => {
+        const arrayOfPromises = [
+          'gaConfig',
+          'strapiVersion',
+          'currentEnvironment',
+          'layout',
+        ].map(endPoint => request(`/admin/${endPoint}`, { method: 'GET' }));
+
+        return Promise.all(arrayOfPromises);
+      };
+      const getData = async () => {
+        try {
+          const data = await getAppData();
+
+          dispatch(getAppDataSucceeded(data));
+        } catch (err) {
+          console.log({ err });
+        }
+      };
+
+      getData();
+
       if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
         dispatch(unsetHasUserPlugin());
       }
@@ -39,7 +63,7 @@ if (window.location.port !== '4000') {
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.onerror = function (oError) {
+        script.onerror = function(oError) {
           const source = new URL(oError.target.src);
           const url = new URL(`${strapi.remoteURL}`);
 
@@ -57,9 +81,13 @@ if (window.location.port !== '4000') {
           $body.appendChild(newScript);
         };
 
-        script.src = plugin.source[process.env.NODE_ENV].indexOf('://') === -1 ?
-          `${basename}${plugin.source[process.env.NODE_ENV]}`.replace('//', '/'): // relative
-          plugin.source[process.env.NODE_ENV]; // absolute
+        script.src =
+          plugin.source[process.env.NODE_ENV].indexOf('://') === -1
+            ? `${basename}${plugin.source[process.env.NODE_ENV]}`.replace(
+                '//',
+                '/',
+              ) // relative
+            : plugin.source[process.env.NODE_ENV]; // absolute
 
         $body.appendChild(script);
       });
@@ -69,6 +97,4 @@ if (window.location.port !== '4000') {
     });
 }
 
-export {
-  dispatch,
-};
+export { dispatch };

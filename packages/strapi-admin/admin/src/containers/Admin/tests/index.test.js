@@ -15,6 +15,7 @@
 
 describe('<Admin />', () => {
   it('should not crash', () => {
+    expect(true).toBe(true);
     // shallow(<Admin />);
     // renderComponent({});
   });
