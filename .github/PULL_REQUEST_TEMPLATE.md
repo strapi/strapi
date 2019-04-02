@@ -1,3 +1,10 @@
+> ⚠️ We have stopped merging PRs for now to the Strapi core.<br><br>
+> The reason is that we are developing new architecture for the admin panel and for the plugins.<br>
+> This new architecture will provide stability of the Strapi core as we approach the release of Beta.<br>
+> We appreciate and welcome all your contributions, but until further notice, please do not submit a PR as it will not be merged.<br>
+> Furthermore, you will have to rewrite it based on the new architecture.
+
+
 <!-- ⚠️ Your PR title will appear in the changelogs please make it short detailed and understandable for all. -->
 
 <!-- Write a short description of what your PR does and link the concerned issues of your update. -->
