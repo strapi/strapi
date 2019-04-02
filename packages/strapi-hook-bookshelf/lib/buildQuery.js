@@ -48,7 +48,9 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
       aliasMap[name] = 1;
     }
 
-    return `${name}_${aliasMap[name]++}`;
+    const alias = `${name}_${aliasMap[name]}`;
+    aliasMap[name] += 1;
+    return alias;
   };
 
   /**
@@ -94,23 +96,24 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
         }`,
         `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`
       );
-    } else {
-      const externalKey =
-        assoc.type === 'collection'
-          ? `${destinationInfo.alias}.${assoc.via}`
-          : `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`;
-
-      const internalKey =
-        assoc.type === 'collection'
-          ? `${originInfo.alias}.${originInfo.model.primaryKey}`
-          : `${originInfo.alias}.${assoc.alias}`;
-
-      qb.leftJoin(
-        `${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
-        externalKey,
-        internalKey
-      );
+      return;
     }
+
+    const externalKey =
+      assoc.type === 'collection'
+        ? `${destinationInfo.alias}.${assoc.via}`
+        : `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`;
+
+    const internalKey =
+      assoc.type === 'collection'
+        ? `${originInfo.alias}.${originInfo.model.primaryKey}`
+        : `${originInfo.alias}.${assoc.alias}`;
+
+    qb.leftJoin(
+      `${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
+      externalKey,
+      internalKey
+    );
   };
 
   /**
