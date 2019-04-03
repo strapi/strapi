@@ -6,13 +6,11 @@
  */
 
 import { findIndex } from 'lodash';
-import request from 'utils/request';
 import 'babel-polyfill';
 import 'sanitize.css/sanitize.css';
 import {
   getAppPluginsSucceeded,
   unsetHasUserPlugin,
-  getAppDataSucceeded,
 } from './containers/App/actions';
 import { store } from './createStore';
 import render from './renderApp';
@@ -28,29 +26,7 @@ const plugins = (() => {
   }
 })();
 
-const getAppData = async () => {
-  const arrayOfPromises = [
-    'gaConfig',
-    'strapiVersion',
-    'currentEnvironment',
-    'layout',
-  ].map(endPoint => request(`/admin/${endPoint}`, { method: 'GET' }));
-
-  return Promise.all(arrayOfPromises);
-};
-
-const getData = async () => {
-  try {
-    const data = await getAppData();
-
-    dispatch(getAppDataSucceeded(data));
-    dispatch(getAppPluginsSucceeded(plugins));
-  } catch (err) {
-    console.log({ err });
-  }
-};
-
-getData();
+dispatch(getAppPluginsSucceeded(plugins));
 
 // Hot reloadable translation json files
 if (module.hot) {

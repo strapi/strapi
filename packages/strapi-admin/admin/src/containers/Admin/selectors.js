@@ -19,5 +19,11 @@ const makeSelectAdmin = () =>
     substate => substate.toJS(),
   );
 
+const makeSelectUuid = () =>
+  createSelector(
+    selectAdminDomain(),
+    substate => substate.get('uuid'),
+  );
+
 export default makeSelectAdmin;
-export { selectAdminDomain };
+export { makeSelectUuid, selectAdminDomain };

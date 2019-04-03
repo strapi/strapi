@@ -5,7 +5,6 @@ import {
 } from 'actions/overlayBlocker';
 import {
   freezeApp,
-  getAppDataSucceeded,
   getAppPluginsSucceeded,
   pluginDeleted,
   pluginLoaded,
@@ -20,12 +19,6 @@ describe('<App /> reducer', () => {
 
   beforeEach(() => {
     state = fromJS({
-      appData: {
-        autoReload: false,
-        currentEnvironment: 'development',
-        strapiVersion: '3',
-        uuid: false,
-      },
       appPlugins: List([]),
       blockApp: false,
       overlayBlockerData: null,
@@ -69,25 +62,6 @@ describe('<App /> reducer', () => {
     const expectedResult = state.set('blockApp', true);
 
     expect(appReducer(state, freezeApp())).toEqual(expectedResult);
-  });
-
-  it('should handle the getAppDataSucceeded action correectly', () => {
-    const data = [
-      { uuid: 'test' },
-      { strapiVersion: '3' },
-      { autoReload: true, currentEnvironment: 'test' },
-      { layout: {} },
-    ];
-
-    const expected = state
-      .setIn(['appData', 'uuid'], 'test')
-      .setIn(['appData', 'strapiVersion'], '3')
-      .setIn(['appData', 'autoReload'], true)
-      .setIn(['appData', 'isLoading'], false)
-      .setIn(['appData', 'currentEnvironment'], 'test')
-      .setIn(['appData', 'layout'], {});
-
-    expect(appReducer(state, getAppDataSucceeded(data))).toEqual(expected);
   });
 
   it('should handle the getAppPluginsSucceeded action correclty', () => {

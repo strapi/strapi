@@ -7,11 +7,9 @@ import {
   UNFREEZE_APP,
   UNSET_HAS_USERS_PLUGIN,
   UPDATE_PLUGIN,
-  GET_APP_DATA_SUCCEEDED,
 } from '../constants';
 import {
   freezeApp,
-  getAppDataSucceeded,
   getAppPluginsSucceeded,
   loadPlugin,
   pluginDeleted,
@@ -41,17 +39,6 @@ describe('<App /> actions', () => {
       };
 
       expect(unfreezeApp()).toEqual(expected);
-    });
-  });
-
-  describe('GetAppDataSucceedeed', () => {
-    it('should has a type GET_APP_DATA_SUCCEEDED and return the correct data', () => {
-      const expected = {
-        type: GET_APP_DATA_SUCCEEDED,
-        data: 'test',
-      };
-
-      expect(getAppDataSucceeded('test')).toEqual(expected);
     });
   });
 

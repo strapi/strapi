@@ -8,7 +8,6 @@ import { fromJS, List } from 'immutable';
 
 import {
   FREEZE_APP,
-  GET_APP_DATA_SUCCEEDED,
   GET_APP_PLUGINS_SUCCEEDED,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
@@ -18,12 +17,6 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  appData: {
-    autoReload: false,
-    currentEnvironment: 'development',
-    strapiVersion: '3',
-    uuid: false,
-  },
   appPlugins: List([]),
   blockApp: false,
   overlayBlockerData: null,
@@ -47,27 +40,6 @@ function appReducer(state = initialState, action) {
 
         return null;
       });
-    case GET_APP_DATA_SUCCEEDED: {
-      const {
-        data: [
-          { uuid },
-          { strapiVersion },
-          { autoReload, currentEnvironment },
-          { layout },
-        ],
-      } = action;
-
-      return (
-        state
-          .updateIn(['appData', 'autoReload'], () => autoReload)
-          .updateIn(['appData', 'currentEnvironment'], () => currentEnvironment)
-          .updateIn(['appData', 'isLoading'], () => false)
-          // TODO: should be removed
-          .updateIn(['appData', 'layout'], () => layout)
-          .updateIn(['appData', 'strapiVersion'], () => strapiVersion)
-          .updateIn(['appData', 'uuid'], () => uuid)
-      );
-    }
     case GET_APP_PLUGINS_SUCCEEDED:
       return state
         .update('appPlugins', () => List(action.appPlugins))

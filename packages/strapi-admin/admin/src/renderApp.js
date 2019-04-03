@@ -10,16 +10,16 @@ import LanguageProvider from './containers/LanguageProvider';
 import App from './containers/App';
 import { history, store } from './createStore';
 
-const render = (translatedMessages) => {
+const render = translatedMessages => {
   ReactDOM.render(
     <Provider store={store}>
       <LanguageProvider messages={translatedMessages}>
         <ConnectedRouter history={history}>
-          <App />
+          <App store={store} />
         </ConnectedRouter>
       </LanguageProvider>
     </Provider>,
-    document.getElementById('app')
+    document.getElementById('app'),
   );
 };
 

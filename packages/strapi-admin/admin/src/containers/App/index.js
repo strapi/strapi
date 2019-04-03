@@ -19,13 +19,13 @@ import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import '../../styles/main.scss';
 
 // import AdminPage from '../AdminPage';
-import Admin from '../AdminPage';
+import Admin from '../Admin';
 import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
 import AppLoader from '../AppLoader';
 import styles from './styles.scss';
 
-function App() {
+function App(props) {
   return (
     <div>
       <NotificationProvider />
@@ -38,7 +38,10 @@ function App() {
           return (
             <div className={styles.container}>
               <Switch>
-                <Route path='/' component={Admin} />
+                <Route
+                  path='/'
+                  render={router => <Admin {...props} {...router} />}
+                />
                 <Route path='' component={NotFoundPage} />
               </Switch>
             </div>

@@ -7,12 +7,10 @@
 
 /* eslint-disable */
 import 'babel-polyfill';
-import request from 'utils/request';
 import { findIndex } from 'lodash';
 import 'sanitize.css/sanitize.css';
 import 'whatwg-fetch';
 import {
-  getAppDataSucceeded,
   getAppPluginsSucceeded,
   unsetHasUserPlugin,
 } from './containers/App/actions';
@@ -31,28 +29,6 @@ if (window.location.port !== '4000') {
     })
     .then(plugins => {
       dispatch(getAppPluginsSucceeded(plugins));
-
-      const getAppData = async () => {
-        const arrayOfPromises = [
-          'gaConfig',
-          'strapiVersion',
-          'currentEnvironment',
-          'layout',
-        ].map(endPoint => request(`/admin/${endPoint}`, { method: 'GET' }));
-
-        return Promise.all(arrayOfPromises);
-      };
-      const getData = async () => {
-        try {
-          const data = await getAppData();
-
-          dispatch(getAppDataSucceeded(data));
-        } catch (err) {
-          console.log({ err });
-        }
-      };
-
-      getData();
 
       if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
         dispatch(unsetHasUserPlugin());

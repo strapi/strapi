@@ -6,7 +6,6 @@
 
 import {
   FREEZE_APP,
-  GET_APP_DATA_SUCCEEDED,
   GET_APP_PLUGINS_SUCCEEDED,
   LOAD_PLUGIN,
   PLUGIN_DELETED,
@@ -19,13 +18,6 @@ import {
 export function freezeApp(data) {
   return {
     type: FREEZE_APP,
-    data,
-  };
-}
-
-export function getAppDataSucceeded(data) {
-  return {
-    type: GET_APP_DATA_SUCCEEDED,
     data,
   };
 }

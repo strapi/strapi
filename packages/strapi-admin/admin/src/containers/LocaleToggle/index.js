@@ -7,16 +7,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
-import { bindActionCreators } from 'redux';
+import { createStructuredSelector } from 'reselect';
+import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 
-import { selectLocale } from '../LanguageProvider/selectors';
+import makeSelectLocale from '../LanguageProvider/selectors';
 import { changeLocale } from '../LanguageProvider/actions';
 import { languages } from '../../i18n';
 
+import makeSelectLocaleToggle from './selectors';
 import styles from './styles.scss';
 
 export class LocaleToggle extends React.Component { // eslint-disable-line
@@ -45,7 +46,8 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
   toggle = () => this.setState(prevState => ({ isOpen: !prevState.isOpen }));
 
   render() {
-    const { locale } = this.props;
+    const { currentLocale: { locale }, localeToggle: { className } } = this.props;
+    const style = cn(styles.localeDropdownMenu, styles[className] );
 
     return (
       <div className={styles.localeToggle}>
@@ -54,7 +56,8 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
             <span>{locale}</span>
             <img src={this.getFlagUrl(locale)} alt={locale} />
           </DropdownToggle>
-          <DropdownMenu className={cn(styles.localeDropdownMenu, this.props.isLogged ? '' : styles.localeDropdownMenuNotLogged)}>
+          {/* <DropdownMenu className={cn(styles.localeDropdownMenu, this.props.isLogged ? '' : styles.localeDropdownMenuNotLogged)}> */}
+          <DropdownMenu className={style}>
             {languages.map(language => (
               <DropdownItem key={language} onClick={() => this.props.changeLocale(language)} className={cn(styles.localeToggleItem, locale === language ? styles.localeToggleItemActive : '')}>
                 {language.toUpperCase()}
@@ -71,16 +74,16 @@ export class LocaleToggle extends React.Component { // eslint-disable-line
 
 LocaleToggle.propTypes = {
   changeLocale: PropTypes.func.isRequired,
-  isLogged: PropTypes.bool.isRequired,
-  locale: PropTypes.string.isRequired,
+  currentLocale: PropTypes.object.isRequired,
+  localeToggle: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = createSelector(
-  selectLocale(),
-  (locale) => ({ locale })
-);
+const mapStateToProps = createStructuredSelector({
+  currentLocale: makeSelectLocale(),
+  localeToggle: makeSelectLocaleToggle(),
+});
 
-function mapDispatchToProps(dispatch) {
+export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       changeLocale,
@@ -89,4 +92,8 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(LocaleToggle);
+const withConnect = connect(mapStateToProps, mapDispatchToProps);
+
+export default compose(
+  withConnect,
+)(LocaleToggle);
