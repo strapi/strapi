@@ -1,5 +1,11 @@
 # Contribute to Strapi
 
+> ⚠️ We have stopped merging PRs for now to the Strapi core.<br><br>
+> The reason is that we are developing new architecture for the admin panel and for the plugins.<br>
+> This new architecture will provide stability of the Strapi core as we approach the release of Beta.<br>
+> We appreciate and welcome all your contributions, but until further notice, please do not submit a PR as it will not be merged.<br>
+> Furthermore, you will have to rewrite it based on the new architecture.
+
 First off, thanks for taking the time to contribute! 🎉👍
 
 The following is a set of guidelines for contributing to Strapi and its packages.
@@ -206,7 +212,7 @@ Then run
 # generate the test app
 $ node test/createTestApp.js
 # run the testApp in the background (️️️⚠️ be carefull to kill the process after the tests have run)
-$ node test/startTestApp.js & 
+$ node test/startTestApp.js &
 # run cypress
 $ node test/cypress
 ```

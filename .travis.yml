@@ -39,10 +39,14 @@ install:
 jobs:
   include:
     - stage: test
-      name: 'Lint / Snyk / Unit Tests '
+      name: Snyk
+      script: npm run -s test:snyk
+      if: fork = false
+
+    - stage: test
+      name: 'Lint / Unit Tests '
       script:
         - npm run -s lint
-        - npm run -s test:snyk
         - npm run -s test:unit
 
     - <<: *e2e_tests
