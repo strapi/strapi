@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { startsWith, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -14,80 +14,76 @@ import en from '../../translations/en.json';
 
 import styles from './styles.scss';
 
-class LeftMenuLink extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  render() {
-    // We need to create our own active url checker,
-    // because of the two levels router.
-    const isLinkActive = startsWith(
-      window.location.pathname.replace('/admin', '').concat('/'),
-      this.props.destination.concat('/'),
-    );
+function LeftMenuLink(props) {
+  const isLinkActive = startsWith(
+    props.location.pathname.replace('/admin', '').concat('/'),
+    props.destination.concat('/'),
+  );
 
-    const plugin =
-      this.props.source !== 'content-manager' && this.props.source !== '' ? (
-        <div className={styles.plugin}>
-          <span>{upperFirst(this.props.source.split('-').join(' '))}</span>
-        </div>
-      ) : (
-        ''
-      );
-
-    // Check if messageId exists in en locale to prevent warning messages
-    const content = en[this.props.label] ? (
-      <FormattedMessage
-        id={this.props.label}
-        defaultMessage="{label}"
-        values={{
-          label: `${this.props.label}`,
-        }}
-        className={styles.linkLabel}
-      />
+  const plugin =
+    props.source !== 'content-manager' && props.source !== '' ? (
+      <div className={styles.plugin}>
+        <span>{upperFirst(props.source.split('-').join(' '))}</span>
+      </div>
     ) : (
-      <span className={styles.linkLabel}>{this.props.label}</span>
+      ''
     );
 
-    // Icon.
-    const icon = <i className={`${styles.linkIcon} fa-${this.props.icon} fa`} />;
+  // Check if messageId exists in en locale to prevent warning messages
+  const content = en[props.label] ? (
+    <FormattedMessage
+      id={props.label}
+      defaultMessage='{label}'
+      values={{
+        label: `${props.label}`,
+      }}
+      className={styles.linkLabel}
+    />
+  ) : (
+    <span className={styles.linkLabel}>{props.label}</span>
+  );
 
-    // Create external or internal link.
-    const link = this.props.destination.includes('http')
-      ? (
-        <a
-          className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
-          href={this.props.destination}
-          target="_blank"
-        >
-          {icon}
-          {content}
-        </a>
-      )
-      : (
-        <Link
-          className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
-          to={{
-            pathname: this.props.destination,
-            search: this.props.source ? `?source=${this.props.source}` : '',
-          }}
-        >
-          {icon}
-          {content}
-        </Link>
-      );
+  // Icon.
+  const icon = <i className={`${styles.linkIcon} fa-${props.icon} fa`} />;
 
-    return (
-      <li className={styles.item}>
-        {link}
-        {plugin}
-      </li>
-    );
-  }
+  // Create external or internal link.
+  const link = props.destination.includes('http') ? (
+    <a
+      className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
+      href={props.destination}
+      target='_blank'
+    >
+      {icon}
+      {content}
+    </a>
+  ) : (
+    <Link
+      className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
+      to={{
+        pathname: props.destination,
+        search: props.source ? `?source=${props.source}` : '',
+      }}
+    >
+      {icon}
+      {content}
+    </Link>
+  );
+
+  return (
+    <li className={styles.item}>
+      {link}
+      {plugin}
+    </li>
+  );
 }
 
 LeftMenuLink.propTypes = {
   destination: PropTypes.string.isRequired,
   icon: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
+  location: PropTypes.shape({
+    pathname: PropTypes.string,
+  }).isRequired,
   source: PropTypes.string,
 };
 
@@ -95,4 +91,4 @@ LeftMenuLink.defaultProps = {
   source: '',
 };
 
-export default LeftMenuLink;
+export default memo(LeftMenuLink);
