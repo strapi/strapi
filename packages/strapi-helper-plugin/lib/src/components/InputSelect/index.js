@@ -39,10 +39,22 @@ function InputSelect(props) {
     >
       {map(props.selectOptions, (option, key) => {
         if (isObject(option)) {
-          return <SelectOption key={key} {...option} />;
+          if (option.label) {
+            return (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            );
+          } else {
+            return <SelectOption key={key} {...option} />;
+          }
         }
 
-        return <option key={key} value={option}>{option}</option>;
+        return (
+          <option key={key} value={option}>
+            {option}
+          </option>
+        );
       })}
     </select>
   );
