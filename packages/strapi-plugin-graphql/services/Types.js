@@ -29,6 +29,7 @@ module.exports = {
     modelName = '',
     attributeName = '',
     rootType = 'query',
+    action = ''
   }) {
     // Type
     if (definition.type) {
@@ -40,6 +41,7 @@ module.exports = {
           type = 'Boolean';
           break;
         case 'integer':
+        case 'biginteger':
           type = 'Int';
           break;
         case 'decimal':
@@ -62,7 +64,7 @@ module.exports = {
           break;
       }
 
-      if (definition.required) {
+      if (definition.required && action !== 'update') {
         type += '!';
       }
 
@@ -191,13 +193,26 @@ module.exports = {
     return `
       input ${inputName} {
         ${Object.keys(model.attributes)
-          .filter(attribute => model.attributes[attribute].private !== true)
           .map(attribute => {
             return `${attribute}: ${this.convertType({
               definition: model.attributes[attribute],
               modelName: globalId,
               attributeName: attribute,
               rootType: 'mutation',
+            })}`;
+          })
+          .join('\n')}
+      }
+
+      input edit${inputName} {
+        ${Object.keys(model.attributes)
+          .map(attribute => {
+            return `${attribute}: ${this.convertType({
+              definition: model.attributes[attribute],
+              modelName: globalId,
+              attributeName: attribute,
+              rootType: 'mutation',
+              action: 'update'
             })}`;
           })
           .join('\n')}
@@ -224,7 +239,7 @@ module.exports = {
         `;
       case 'update':
         return `
-          input ${type}${inputName}  { where: InputID, data: ${inputName} }
+          input ${type}${inputName}  { where: InputID, data: edit${inputName} }
           type ${type}${payloadName} { ${pluralize.singular(name)}: ${
           model.globalId
         } }

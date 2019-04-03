@@ -182,7 +182,8 @@ module.exports = {
 
     for (let i = 0; i < roles.length; ++i) {
       roles[i].id = roles[i].id || roles[i]._id;
-      roles[i].nb_users = await strapi.query('user', 'users-permissions').count({ role: roles[i].id });
+
+      roles[i].nb_users = await strapi.query('user', 'users-permissions').count(strapi.utils.models.convertParams('user', { role: roles[i].id }));
     }
 
     return roles;
@@ -420,7 +421,6 @@ module.exports = {
         arrayOfPromises.push(this.updateUserRole(user, authenticated._id || authenticated.id));
       });
 
-
     return Promise.all(arrayOfPromises);
   },
 
@@ -438,8 +438,10 @@ module.exports = {
     try {
       // Disable auto-reload.
       strapi.reload.isWatching = false;
-      // Rewrite actions.json file.
-      fs.writeFileSync(actionsPath, JSON.stringify({ actions: data }), 'utf8');
+      if (!strapi.config.currentEnvironment.server.production) {
+        // Rewrite actions.json file.
+        fs.writeFileSync(actionsPath, JSON.stringify({ actions: data }), 'utf8');
+      }
       // Set value to AST to avoid restart.
       _.set(strapi.plugins['users-permissions'], 'config.actions', data);
       // Disable auto-reload.

@@ -1,8 +1,20 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+// import { LOCATION_CHANGE } from 'react-router-redux';
 import { Map } from 'immutable';
-import { isEmpty } from 'lodash';
-import { all, call, fork, put, select, take, takeLatest } from 'redux-saga/effects';
+import { isEmpty, get, isObject } from 'lodash';
+import {
+  all,
+  call,
+  // cancel,
+  fork,
+  put,
+  select,
+  // take,
+  takeLatest,
+} from 'redux-saga/effects';
 import request from 'utils/request';
+
+import pluginId from '../../pluginId';
+
 
 import {
   deleteSuccess,
@@ -72,8 +84,11 @@ function* uploadFiles(action) {
       strapi.notification.success({ id: 'upload.notification.dropFiles.success', values: { number: newFiles.length } });
     }
 
-  } catch(err) {
-    strapi.notification.error('notification.error');
+  } catch(error) {
+    let message = get(error, ['response', 'payload', 'message', '0', 'messages', '0']);
+    if (isObject(message)) message = {...message, id: `${pluginId}.${message.id}`};
+
+    strapi.notification.error(message || 'notification.error');
   } finally {
     yield put(unsetLoading());
   }
@@ -106,11 +121,13 @@ export function* defaultSaga() {
   yield fork(takeLatest, ON_DROP, uploadFiles);
   yield fork(takeLatest, ON_SEARCH, search);
 
-  const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
+  yield fork(takeLatest, GET_DATA, dataGet);
+  // TODO: Fix router (Other PR)
+  // const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
 
-  yield take(LOCATION_CHANGE);
+  // yield take(LOCATION_CHANGE);
 
-  yield cancel(loadDataWatcher);
+  // yield cancel(loadDataWatcher);
 }
 
 // All sagas to be loaded

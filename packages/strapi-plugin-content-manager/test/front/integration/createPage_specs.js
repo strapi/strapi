@@ -67,7 +67,7 @@ describe('Testing Content Manager createPages', function() {
         .wait(1000)
         .window()
         .its('__store__')
-        .its('content-manager')
+        .its('store');
     });
   });
 
@@ -75,7 +75,6 @@ describe('Testing Content Manager createPages', function() {
     cy.deleteApi('tag', jwt)
       .deleteApi('category', jwt)
       .deleteApi('product', jwt)
-      .wait(11000);
   });
 
   context('Creating data with no relation', () => {
@@ -196,11 +195,11 @@ describe('Testing Content Manager createPages', function() {
         .wait(2000)
         .window()
         .its('__store__')
-        .its('content-manager')
+        .its('store')
         .then(pluginStore => {
           const records = pluginStore
             .getState()
-            .getIn(['listPage', 'records', 'tag'])
+            .getIn(['content-manager_listPage', 'records', 'tag'])
             .toJS();
 
           expect(records).to.have.length(0);
@@ -411,7 +410,7 @@ describe('Testing Content Manager createPages', function() {
         .then(pluginStore => {
           const category = pluginStore
             .getState()
-            .getIn(['editPage', 'record', 'category'])
+            .getIn(['content-manager_editPage', 'record', 'category'])
           
             expect(category).to.equal(null);
         });
@@ -420,7 +419,7 @@ describe('Testing Content Manager createPages', function() {
         .then(pluginStore => {
           const category = pluginStore
             .getState()
-            .getIn(['editPage', 'record', 'category', 'name'])
+            .getIn(['content-manager_editPage', 'record', 'category', 'name'])
           
             expect(category).to.equal('french food');
         })
@@ -428,7 +427,7 @@ describe('Testing Content Manager createPages', function() {
         .then(pluginStore => {
           const category = pluginStore
             .getState()
-            .getIn(['editPage', 'record', 'category', 'name'])
+            .getIn(['content-manager_editPage', 'record', 'category', 'name'])
           
             expect(category).to.equal('french food');
         });

@@ -1,281 +1,78 @@
-# Quick start
+# Quick Start Guide
 
-This section explains how to handle Strapi for the first time, ([check out our video tutorial](https://www.youtube.com/watch?v=yMl5IcFHA74)).
+Get ready to make Strapi up and running in **less than 5 minutes** 🚀
 
-**Table of contents:**
-- [1. Create your first project](#_1-create-a-project)
-- [2. Create your first user](#_2-register-the-first-user)
-- [3. Create your first Content Type](#_3-create-a-content-type)
-  - [Files structure](#files-structure)
-- [4. Manage your data](#_4-add-content)
-- [5. Consume your API](#_5-consume-the-api)
-  - [List entries (GET)](#list-entries-get)
-  - [Get a specific entry (GET)](#get-a-specific-entry-get)
-  - [Create data (POST)](#create-data-post)
-  - [Update data (PUT)](#update-data-put)
-  - [Delete data (DELETE)](#delete-data-delete)
+<div class="video-container">
+   <iframe width="800" height="450" src="https://www.youtube.com/embed/nux0djdHmY8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+</div>
 
-***
+*For a step-by-step guide, please take a look at the [detailed tutorial](quick-start-tutorial.html).*
 
-## 1. Create a project
+## 1. Install Strapi globally
 
-Creating your first project with Strapi is easy:
-
-**#1 — Open your terminal**
-
-Open your terminal in the directory you want to create your application in.
-
-**#2 — Run the following command line in your terminal:**
+Please make sure [Node.js and npm are properly installed](install-requirements.html) on your machine.
 
 ```bash
-strapi new my-project
+npm install strapi@alpha -g
 ```
 
-![Generate a Strapi project](../assets/terminal_new.png)
-
-::: note
-The CLI will ask you to choose your database: select MongoDB, Postgres or MySQL. Then, fill the database information in. The default values should work if you correctly installed the database system on your machine.
-:::
-
-This action creates a new folder named `my-project` with the entire [files structure](../concepts/concepts.md#files-structure) of a Strapi application.
-
-**#3 — Go to your project and launch the server:**
-
-In your terminal run the following commands:
+## 2. Create a new project
 
 ```bash
-cd my-project
-strapi start
+strapi new cms --quickstart
 ```
 
-![Start Strapi](../assets/terminal_start.png)
+## 3. Create an admin user
 
-Now that your app is running let's see how to [create your first user](#_2-register-the-first-user).
+Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 
-***
+ - Fill in the form.
+ - Click **Ready to start**.
 
-## 2. Register the first user
+## 4. Create a Content Type
 
-In order to use the admin panel and to consume your API you first need to register your first user. This process only happens once and is made to create the `admin user` who has all the permissions granted.
+Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder).
 
-To create your first user, start your server (`strapi start`) and go to [http://localhost:1337/admin](http://localhost:1337/admin).
+   - Click the **"+ Add Content Type"** button.
+   - Enter `restaurant`.
+   - Click **"+ Add New Field"**
+      - Click the **String** field.
+      - Type `name` under the **BASE SETTINGS** tab, in the **Name** field. 
+      - Click **Continue**.
+   - Click **"+ Add New Field"** 
+      - Click the **Text** field.
+      - Type `description` under the **BASE SETTINGS** tab, in the **Name** field. 
+      - Click the **ADVANCED SETTINGS** tab, check **Display as a WYSIWYG**. 
+      - Click **Continue**.
+   - Click the **Save** button and wait for Strapi to restart.
 
-![Register View](../assets/getting-started_register.png)
+## 5. Manage and add data to Content Type
 
+Navigate to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager).
 
-Now that your first user is registered let's see how to [create your first Content Type](#_3-create-a-content-type).
+   - Click on **+ Add New Restaurant** button. Type `Strapi Restaurant` in the **Name** field. Type `Strapi restaurant is a cosy restaurant delivering one of the very fastest and nicest dining experiences in the world, combining nods to tradition with fierce modernity, warmth with daring.` into the **Description** field. 
+   - Click **Save**.
 
-***
+You will see your restaurant listed in the entries. 
 
-## 3. Create a Content Type
+## 6. Set roles and permissions
 
-At this point, your project is empty. To create your first Content Type, you are going to use the **Content Type Builder** plugin: a powerful UI to help defining your Content Type's structure within a few clicks. Let's take the example of blog, which manages posts.
+Navigate to [**PLUGINS** - **Roles & Permission**](http://localhost:1337/admin/plugins/users-permissions/roles).
 
-**#1 —** Go to the **Content Type Builder** plugin.
+   - Click the **pencil** edit icon to the right of the **Public** Role.
+   - Scroll down under **Permissions**, find **Restaurant**. Click the checkbox next to **find**.
+   - Click **Save**.
 
-![Content Type Builder - Home](../assets/getting-started_no_content_type.png)
+## 7. Consume the Content Type API
 
-**#2 —** Create a Content Type named `Post` and submit the form.
+Here we are! The list of **restaurants** is accessible at [`http://localhost:1337/restaurants`](http://localhost:1337/restaurants).
 
-![Content Type Builder - Create a new Content Type](../assets/getting-started_create_content_type.png)
-
-**#3 —** Add three fields in this Content Type.
-
-  - A `string` field named `title`.
-  - A `text` field named `content` (tick the `Display as WYSIWYG` in the `Advanced Settings` tab).
-  - A `media` field named `cover`.
-
-![Content Type Builder - List fields in Post](../assets/getting-started_list_fields.png)
-
-**#4 —** Save. That's it!
-
-
-::: note
-See the [CLI documentation](../cli/CLI.md#strapi-generateapi) for more information on how to do it the hacker way.
+::: tip CONGRATULATIONS
+👏 Congratulations, you have now completed the Strapi Quick Start. Where to go next?
+ - Learn how to use Strapi with React ([Gatsby](https://blog.strapi.io/building-a-static-website-using-gatsby-and-strapi) or [Next.js](https://blog.strapi.io/strapi-next-setup/)) or Vue.js ([Nuxt.js](https://blog.strapi.io/cooking-a-deliveroo-clone-with-nuxt-vue-js-graphql-strapi-and-stripe-setup-part-1-7/)).
+ - Read the [concepts](../concepts/concepts.html) and [articles](../articles/) to deep dive into Strapi.
+ - Get help on [StackOverflow](https://stackoverflow.com/questions/tagged/strapi).
+ - Read the [source code](https://github.com/strapi/strapi), [contribute](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) or [give a star](https://github.com/strapi/strapi) on GitHub.
+ - Follow us on [Twitter](https://twitter.com/strapijs) to get the latest news.
+ - [Join the vibrant and active Strapi community](https://slack.strapi.io) on Slack. 
 :::
-
-### Files structure
-
-A new directory has been created in the `./api` folder of your application which contains all the needed stuff for your `Post` Content Type: routes, controllers, services and models. Take a look at the [API structure documentation](../concepts/concepts.md#files-structure) for more informations.
-
-
-**Well done, you created your first Content Type using Strapi!**
-
-***
-
-## 4. Add content
-
-After creating [your first Content Type](#_3-create-a-content-type), you probably want to create, edit or delete entries. No worries, everything is ready for you:
-
-**#1 —** Go to the [**Post list**](http://localhost:1337/admin/plugins/content-manager/post/) by clicking on the link in the left menu (generated by the **Content Manager** plugin).
-
-![Content Type Builder - Home](../assets/getting-started_no_entry.png)
-
-**#2 —** Click on the button `Add New Post` and fill the form.
-
-![Content Type Builder - Home](../assets/getting-started_add_entry.png)
-
-**#3 —** Save! You can edit or delete this entry by clicking on the icons at the right of the row.
-
-![Content Type Builder - Home](../assets/getting-started_with_entry.png)
-
-***
-
-## 5. Consume the API
-
-Your API is now ready and [contains data](#_4-add-content). At this point, you'll probably want to use this data in mobile or desktop applications.
-In order to do so, you'll need to allow access to other users (identified as 'Public').
-
-**1 -** Go to the [**Roles & Permissions View**](http://localhost:1337/admin/plugins/users-permissions/roles) by clicking on **Roles & Permissions** link in the left menu.
-
-![Auth & Permissions - Home](../assets/getting-started_manage_role_home.png)
-
-**2 -** Click on the `Public` role, enable the actions related to your new Content Type and save:
-
-![Auth & Permissions - Edit Public](../assets/getting-started_allow_access.png)
-
-::: note
-You should now be able to get the list of posts from the API: [http://localhost:1337/posts](http://localhost:1337/posts). 
-:::
-
-### List entries (GET)
-
-To retrieve the list of posts, use the `GET /posts` route.
-
-Generated APIs provide a handy way to filter and order queries. In that way, ordering posts by price is as easy as `GET http://localhost:1337/posts?_sort=price:asc`. For more informations, read the [filters documentation](../guides/filters.md).
-
-Here is an example using Axios:
-
-```js
-import axios from 'axios';
-
-// Request API.
-axios
-  .get('http://localhost:1337/posts', {
-    params: {
-      _sort: 'createdAt:desc' // Generates http://localhost:1337/posts?_sort=createdAt:desc
-    }
-  })
-  .then(response => {
-    // Handle success.
-    console.log('Well done, here is the list of posts: ', response.data);
-  })
-  .catch(error => {
-    // Handle error.
-    console.log('An error occurred:', error);
-  });
-```
-
-### Get a specific entry (GET)
-
-If you want to get a specific entry, add the `id` of the wanted post at the end of the url.
-
-Example with Axios:
-
-```js
-import axios from 'axios';
-
-const postId = 'YOUR_POST_ID_HERE'; // Replace with one of your posts id.
-
-// Request API.
-axios
-  .get(`http://localhost:1337/posts/${postId}`)
-  .then(response => {
-    // Handle success.
-    console.log('Well done, here is the post: ', response.data);
-  })
-  .catch(error => {
-    // Handle error.
-    console.log('An error occurred:', error);
-  });
-```
-
-### Create data (POST)
-
-Use the `POST` route to create a new entry.
-
-Example with Axios:
-
-```js
-import axios from 'axios';
-
-// Request API.
-axios
-  .post(`http://localhost:1337/posts/`, {
-    title: 'My new post'
-  })
-  .then(response => {
-    // Handle success.
-    console.log(
-      'Well done, your post has been successfully created: ',
-      response.data
-    );
-  })
-  .catch(error => {
-    // Handle error.
-    console.log('An error occurred:', error);
-  });
-```
-
-### Update data (PUT)
-
-Use the `PUT` route to update an existing entry.
-
-Example with Axios:
-
-```js
-import axios from 'axios';
-
-const postId = 'YOUR_POST_ID_HERE'; // Replace with one of your posts id.
-
-// Request API.
-axios
-  .put(`http://localhost:1337/posts/${postId}`, {
-    title: 'Updated title'
-  })
-  .then(response => {
-    // Handle success.
-    console.log(
-      'Well done, your post has been successfully updated: ',
-      response.data
-    );
-  })
-  .catch(error => {
-    // Handle error.
-    console.log('An error occurred:', error);
-  });
-```
-
-### Delete data (DELETE)
-
-Use the `DELETE` route to delete an existing entry.
-
-Example with Axios:
-
-```js
-import axios from 'axios';
-
-const postId = 'YOUR_POST_ID_HERE'; // Replace with one of your posts id.
-
-// Request API.
-axios
-  .delete(`http://localhost:1337/posts/${postId}`)
-  .then(response => {
-    // Handle success.
-    console.log(
-      'Well done, your post has been successfully updated: ',
-      response.data
-    );
-  })
-  .catch(error => {
-    // Handle error.
-    console.log('An error occurred:', error);
-  });
-```
-***
-
-#### 👏 Congratulations!
-
-You successfully finished the Getting Started guide! Read the [concepts section](../concepts/concepts.md) to understand more deeply how to use and customize Strapi.
-
-Also, feel free to join the community thanks to the different channels listed in the [community page](http://strapi.io/community): team members, contributors and developers will be happy to help you.

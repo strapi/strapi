@@ -12,19 +12,19 @@ import { size } from 'lodash';
 import Helmet from 'react-helmet';
 import PropTypes from 'prop-types';
 import { router } from 'app';
+import pluginId from '../../pluginId';
 
-import { makeSelectLoading, makeSelectMenu, makeSelectModels } from 'containers/App/selectors';
-import { deleteContentType } from 'containers/App/actions';
+import { makeSelectLoading, makeSelectMenu, makeSelectModels } from '../App/selectors';
+import { deleteContentType } from '../App/actions';
 
-import Form from 'containers/Form';
+import Form from '../Form';
 
 // Design
-import ContentHeader from 'components/ContentHeader';
-import EmptyContentTypeView from 'components/EmptyContentTypeView';
-import TableList from 'components/TableList';
+import ContentHeader from '../../components/ContentHeader';
+import EmptyContentTypeView from '../../components/EmptyContentTypeView';
+import TableList from '../../components/TableList';
 
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
+// Utils
 import { storeData } from '../../utils/storeData';
 
 import selectHomePage from './selectors';
@@ -46,6 +46,9 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     if (storeData.getIsModelTemporary()) {
       strapi.notification.info('content-type-builder.notification.info.contentType.creating.notSaved');
     } else {
+      // Send event.
+      this.context.emitEvent('willCreateContentType');
+      // Open CT modal.
       this.toggleModal();
     }
   }
@@ -108,6 +111,7 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 }
 
 HomePage.contextTypes = {
+  emitEvent: PropTypes.func,
   plugins: PropTypes.object,
   updatePlugin: PropTypes.func,
 };
@@ -140,8 +144,8 @@ function mapDispatchToProps(dispatch) {
 }
 
 const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,

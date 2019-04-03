@@ -108,5 +108,25 @@
       "type": "string"
     },
     "deprecated": false
+  },
+  {
+    "name": "_in",
+    "in": "query",
+    "required": false,
+    "description": "Get records that matches any value in the array of values",
+    "schema": {
+      "type": "array"
+    },
+    "deprecated": false
+  },
+  {
+    "name": "_nin",
+    "in": "query",
+    "required": false,
+    "description": "Get records that doesn't match any value in the array of values",
+    "schema": {
+      "type": "array"
+    },
+    "deprecated": false
   }
 ]

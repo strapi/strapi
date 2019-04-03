@@ -1,5 +1,11 @@
 # Contribute to Strapi
 
+> ⚠️ We have stopped merging PRs for now to the Strapi core.<br><br>
+> The reason is that we are developing new architecture for the admin panel and for the plugins.<br>
+> This new architecture will provide stability of the Strapi core as we approach the release of Beta.<br>
+> We appreciate and welcome all your contributions, but until further notice, please do not submit a PR as it will not be merged.<br>
+> Furthermore, you will have to rewrite it based on the new architecture.
+
 First off, thanks for taking the time to contribute! 🎉👍
 
 The following is a set of guidelines for contributing to Strapi and its packages.
@@ -30,7 +36,9 @@ If you send a pull request, please do it against the `master` branch. We are dev
 ***
 
 ## Setup Development Environment
-To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/installation.html#requirements)
+To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/install-requirements.html)
+
+**Note: Fish shell users** - due to the way fish shell deals with symlinks, the following steps will not work.
 
 Then, please follow the instructions below:
 
@@ -72,7 +80,7 @@ npm run setup:build
 
 You can open a new terminal window and go into any folder you want for the next steps.
 ```bash
-cd /.../workspace/
+cd ../workspace/
 ```
 
 The command to generate a project is the same, except you have to add the `--dev` argument at the end of line.
@@ -139,6 +147,75 @@ npm run start
 ```
 
 The administration panel is available at http://localhost:4000/admin
+
+---
+
+## Running the tests
+
+You can run three different kind of tests:
+
+- Unit tests
+- End to end tests
+- Cypress (integration) tests
+
+### Unit tests
+
+This will run the npm `test` script in every packages
+
+```bash
+$ npm run test:unit
+```
+
+### End to end
+
+This will create a test app, start it and run the end to end tests against it.
+
+> ️️️️️️️You can change `test/e2e.js` to configure the database you want to use:
+
+```js
+// test/e2e.js
+//...
+const main = async () => {
+  // you can switch databases.mongo for databases.mysql or any other
+  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.mongo;
+  //...
+}
+```
+
+Then run
+
+```bash
+$ node test/e2e.js
+```
+
+### Cypress
+
+This will create a test app, start it and finally run the cypress tests against it.
+
+> You can change `test/createTestApp.js` to configure the database you want to use.
+
+```js
+// test/createTestApp.js
+//...
+const main = async () => {
+  // you can switch databases.mongo for databases.mysql or any other
+  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.postgres;
+  //...
+}
+```
+
+> ⚠️ To run the cypress test you must have run `npm run setup:build` to setup the repository
+
+Then run
+
+```bash
+# generate the test app
+$ node test/createTestApp.js
+# run the testApp in the background (️️️⚠️ be carefull to kill the process after the tests have run)
+$ node test/startTestApp.js &
+# run cypress
+$ node test/cypress
+```
 
 ---
 

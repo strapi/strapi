@@ -24,5 +24,7 @@
   "notification.config.success": "تم تحديث الإعدادات",
   "notification.delete.success": "تم حذف الملف",
   "notification.dropFile.success": "تم تحميل ملفك",
-  "notification.dropFiles.success": "{number} ملفات تم تحميلها"
+  "notification.dropFiles.success": "{number} ملفات تم تحميلها",
+  "Upload.status.sizeLimit": "{file} أكبر من حجم الحد الذي تمت تهيئته",
+  "Upload.status.disabled" : "تم تعطيل تحميل الملف"
 }

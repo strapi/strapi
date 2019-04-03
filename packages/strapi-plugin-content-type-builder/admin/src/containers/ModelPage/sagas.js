@@ -1,4 +1,4 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+// import { LOCATION_CHANGE } from 'react-router-redux';
 import {
   capitalize,
   cloneDeep,
@@ -13,13 +13,21 @@ import {
   unset,
 } from 'lodash';
 import pluralize from 'pluralize';
-import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
+import {
+  takeLatest,
+  call,
+  // take,
+  put,
+  fork,
+  // cancel,
+  select,
+} from 'redux-saga/effects';
 
 import request from 'utils/request';
 
-import { temporaryContentTypePosted } from 'containers/App/actions';
-
 import { storeData } from '../../utils/storeData';
+
+import { temporaryContentTypePosted } from '../App/actions';
 
 import { MODEL_FETCH, SUBMIT } from './constants';
 import {
@@ -99,15 +107,22 @@ export function* submitChanges(action) {
       set(body, 'plugin', pluginModel);
     }
 
+    const { emitEvent } = action.context;
     const method = modelName === body.name ? 'POST' : 'PUT';
     const baseUrl = '/content-type-builder/models/';
     const requestUrl = method === 'POST' ? baseUrl : `${baseUrl}${body.name}`;
     const opts = { method, body };
+
+    // Send event.
+    yield put(emitEvent('willSaveContentType'));
+
+    // Send request to save the content type.
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
       if (method === 'POST') {
         storeData.clearAppStorage();
+        yield put(emitEvent('didSaveContentType'));
         yield put(temporaryContentTypePosted(size(get(body, 'attributes'))));
         yield put(postContentTypeSucceeded());
 
@@ -139,13 +154,18 @@ export function* submitChanges(action) {
 }
 
 function* defaultSaga() {
-  const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
-  const loadSubmitChanges = yield fork(takeLatest, SUBMIT, submitChanges);
+  yield fork(takeLatest, MODEL_FETCH, fetchModel);
+  yield fork(takeLatest, SUBMIT, submitChanges);
 
-  yield take(LOCATION_CHANGE);
+  // TODO fix Router (Other PR);
+  
+  // const loadModelWatcher = yield fork(takeLatest, MODEL_FETCH, fetchModel);
+  // const loadSubmitChanges = yield fork(takeLatest, SUBMIT, submitChanges);
 
-  yield cancel(loadModelWatcher);
-  yield cancel(loadSubmitChanges);
+  // yield take(LOCATION_CHANGE);
+
+  // yield cancel(loadModelWatcher);
+  // yield cancel(loadSubmitChanges);
 }
 
 export default defaultSaga;

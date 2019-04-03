@@ -9,8 +9,8 @@ import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 
 // Design
-import Button from 'components/CustomButton';
 import Logo from '../../assets/images/icon_filter.png';
+import Button from '../CustomButton';
 
 import styles from './styles.scss';
 

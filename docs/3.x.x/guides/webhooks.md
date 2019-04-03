@@ -63,10 +63,10 @@ Do the same thing for other environments.
 
 #### HTTP call
 
-Now it is time to make the HTTP call. In this example we will use `request` as it is already in the list of Strapi's dependencies. Let's install it:
+Now it is time to make the HTTP call. In this example we will use `axios`. Let's install it:
 
 ```
-npm i request --save
+npm i axios --save
 ```
 
 Edit `api/yourContentType/models/YourContentType.js`:
@@ -76,7 +76,7 @@ Edit `api/yourContentType/models/YourContentType.js`:
 ```js
 'use strict';
 
-const request = require('request');
+const axios = require('axios');
 
 /**
  * Lifecycle callbacks for the `Post` model.
@@ -119,5 +119,5 @@ So, to trigger an url on delete, please add `request.post(strapi.config.currentE
  - `delete` action of `plugins/content-manager/services/ContentManager.js` (triggered by the Content Manager).
 
 ::: note
-Do not forget to require `request` at the top of these files.
+Do not forget to require `axios` at the top of these files.
 :::

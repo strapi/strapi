@@ -1,6 +1,14 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
+// import { LOCATION_CHANGE } from 'react-router-redux';
 import { findIndex, get } from 'lodash';
-import { takeLatest, put, fork, take, cancel, select, call } from 'redux-saga/effects';
+import {
+  takeLatest,
+  put,
+  fork,
+  // take,
+  // cancel,
+  select,
+  call,
+} from 'redux-saga/effects';
 
 import request from 'utils/request';
 
@@ -67,6 +75,13 @@ export function* submitData(action) {
     const opts = { method: 'PUT', body: (action.endPoint === 'advanced') ? get(body, ['advanced', 'settings'], {}) : body };
 
     yield call(request, `/users-permissions/${action.endPoint}`, opts);
+
+    if (action.endPoint === 'email-templates') {
+      action.context.emitEvent('didEditEmailTemplates');
+    } else if (action.endPoint === 'providers') {
+      action.context.emitEvent('didEditAuthenticationProvider');
+    }
+
     yield put(submitSucceeded());
     strapi.notification.success('users-permissions.notification.success.submit');
   } catch(error) {
@@ -75,13 +90,15 @@ export function* submitData(action) {
 }
 // Individual exports for testing
 export function* defaultSaga() {
-  const loadDataWatcher = yield fork(takeLatest, FETCH_DATA, dataFetch);
+  // const loadDataWatcher = yield fork(takeLatest, FETCH_DATA, dataFetch);
+  yield fork(takeLatest, FETCH_DATA, dataFetch);
 
   yield fork(takeLatest, DELETE_DATA, dataDelete);
   yield fork(takeLatest, SUBMIT, submitData);
 
-  yield take(LOCATION_CHANGE);
-  yield cancel(loadDataWatcher);
+  // TODO: Fix router (Other PR)
+  // yield take(LOCATION_CHANGE);
+  // yield cancel(loadDataWatcher);
 }
 
 // All sagas to be loaded

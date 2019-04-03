@@ -11,19 +11,18 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import 'flag-icon-css/css/flag-icon.css';
-import 'react-select/dist/react-select.css';
 import { Switch, Route } from 'react-router-dom';
 import { isEmpty } from 'lodash';
-import { pluginId } from 'app';
 
-import injectSaga from 'utils/injectSaga';
+import pluginId from '../../pluginId';
 
-import HomePage from 'containers/HomePage';
+import HomePage from '../HomePage';
 
 import { menuFetch, environmentsFetch } from './actions';
 import { makeSelectLoading, makeSelectSections } from './selectors';
 import styles from './styles.scss';
 
+import reducer from './reducer';
 import saga from './sagas';
 
 /* eslint-disable react/require-default-props  */
@@ -83,7 +82,7 @@ export function mapDispatchToProps(dispatch) {
       menuFetch,
       environmentsFetch,
     },
-    dispatch
+    dispatch,
   );
 }
 
@@ -93,11 +92,16 @@ const mapStateToProps = createStructuredSelector({
 });
 
 // Wrap the component to inject dispatch and state into it
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
-const withSaga = injectSaga({ key: 'global', saga });
+const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId });
 
 export default compose(
+  withReducer,
   withSaga,
   withConnect,
 )(App);

@@ -15,13 +15,14 @@ module.exports = {
   count: async function (params) {
     return Number(await this
       .where(params.where)
-      .count());
+      .countDocuments());
   },
 
   search: async function (params, populate) { // eslint-disable-line  no-unused-vars
     const $or = Object.keys(this.attributes).reduce((acc, curr) => {
       switch (this.attributes[curr].type) {
         case 'integer':
+        case 'biginteger':
         case 'float':
         case 'decimal':
           if (!_.isNaN(_.toNumber(params.search))) {
@@ -57,6 +58,7 @@ module.exports = {
     const $or = Object.keys(this.attributes).reduce((acc, curr) => {
       switch (this.attributes[curr].type) {
         case 'integer':
+        case 'biginteger':
         case 'float':
         case 'decimal':
           if (!_.isNaN(_.toNumber(params.search))) {
@@ -81,7 +83,7 @@ module.exports = {
 
     return this
       .find({ $or })
-      .count();
+      .countDocuments();
   },
 
   findOne: async function (params, populate, raw = true) {
@@ -143,14 +145,14 @@ module.exports = {
   delete: async function (params) {
     // Delete entry.
     return this
-      .remove({
-        [this.primaryKey]: params.id
+      .findOneAndDelete({
+        [this.primaryKey]: params.id,
       });
   },
 
   deleteMany: async function (params) {
     return this
-      .remove({
+      .deleteMany({
         [this.primaryKey]: {
           $in: params[this.primaryKey] || params.id
         }

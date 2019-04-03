@@ -75,6 +75,8 @@
   "app.components.ListPluginsPage.description": "Lista de extensões instaladas no projecto.",
   "app.components.ListPluginsPage.helmet.title": "Lista de extensões",
   "app.components.ListPluginsPage.title": "Extensões",
+  "app.components.Logout.profile": "Perfil",
+  "app.components.Logout.logout": "Sair",
   "app.components.NotFoundPage.back": "Voltar à página inicial",
   "app.components.NotFoundPage.description": "Não encontrado",
   "app.components.Official": "Oficial",

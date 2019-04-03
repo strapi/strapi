@@ -218,9 +218,10 @@ export function setShouldDisplayPolicieshint() {
   };
 }
 
-export function submit() {
+export function submit(context) {
   return {
     type: SUBMIT,
+    context,
   };
 }
 
