@@ -121,6 +121,12 @@ Be aware that one of the content type builder won't work due to the writing file
 
 ## Contributing
 
+> ⚠️ We have stopped merging PRs for now to the Strapi core.<br><br>
+> The reason is that we are developing new architecture for the admin panel and for the plugins.<br>
+> This new architecture will provide stability of the Strapi core as we approach the release of Beta.<br>
+> We appreciate and welcome all your contributions, but until further notice, please do not submit a PR as it will not be merged.<br>
+> Furthermore, you will have to rewrite it based on the new architecture.
+
 Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull Request to the project.
 
 ## Support
@@ -133,7 +139,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 - [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
 - [Slack](http://slack.strapi.io) (highly recommended for faster support)
-- [GitHub](https://github.com/strapi/strapi)
+- [GitHub](https://github.com/strapi/strapi) (Bug reports and Feature requests only)
 - [Twitter](https://twitter.com/strapijs)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161).
 
