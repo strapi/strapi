@@ -41,7 +41,7 @@ class TableListRow extends React.Component {
     if (isTemporary) {
       deleteTemporaryModel();
     } else {
-      onDelete(name);
+      onDelete(name, this.context);
     }
 
     this.setState({ showWarning: false });
@@ -54,9 +54,7 @@ class TableListRow extends React.Component {
     } = this.props;
 
     push({
-      pathname: `/plugins/${pluginId}/models/${name}${
-        source ? `&source=${source}` : ''
-      }`,
+      pathname: `/plugins/${pluginId}/models/${name}${source ? `&source=${source}` : ''}`,
       search: `modalType=model&settingType=base&actionType=edit&modelName=${name}`,
     });
   };
@@ -71,19 +69,13 @@ class TableListRow extends React.Component {
     );
   };
 
-  toggleModalWarning = () =>
-    this.setState({ showWarning: !this.state.showWarning });
+  toggleModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
 
   handleShowModalWarning = () => {
-    if (
-      this.props.canOpenModalAddContentType ||
-      this.props.rowItem.isTemporary === true
-    ) {
+    if (this.props.canOpenModalAddContentType || this.props.rowItem.isTemporary === true) {
       this.setState({ showWarning: !this.state.showWarning });
     } else {
-      strapi.notification.info(
-        `${pluginId}.notification.info.contentType.creating.notSaved`,
-      );
+      strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
     }
   };
 
@@ -92,9 +84,7 @@ class TableListRow extends React.Component {
     const pluginSource = this.props.rowItem.source ? (
       <FormattedMessage id={`${pluginId}.from`}>
         {message => (
-          <span
-            style={{ fontStyle: 'italic', color: '#787E8F', fontWeight: '500' }}
-          >
+          <span style={{ fontStyle: 'italic', color: '#787E8F', fontWeight: '500' }}>
             ({message}: {this.props.rowItem.source})
           </span>
         )}
@@ -134,16 +124,15 @@ class TableListRow extends React.Component {
         <div className={`col-md-5 text-center ${styles.descriptionContainer}`}>
           <div>{description}</div>
         </div>
-        <div className="col-md-2 text-center">{this.props.rowItem.fields}</div>
-        <div className="col-md-1">
+        <div className='col-md-2 text-center'>{this.props.rowItem.fields}</div>
+        <div className='col-md-1'>
           <IcoContainer icons={icons} />
         </div>
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
           content={{
-            message:
-              'content-type-builder.popUpWarning.bodyMessage.contentType.delete',
+            message: 'content-type-builder.popUpWarning.bodyMessage.contentType.delete',
           }}
           popUpWarningType={'danger'}
           onConfirm={this.handleDelete}
@@ -152,6 +141,11 @@ class TableListRow extends React.Component {
     );
   }
 }
+
+TableListRow.contextTypes = {
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
+};
 
 TableListRow.propTypes = {
   canOpenModalAddContentType: PropTypes.bool.isRequired,

@@ -84,7 +84,7 @@
     "bootstrap": "^4.0.0-alpha.6",
     "classnames": "^2.2.5",
     "history": "^4.6.3",
-    "immutable": "^4.0.0-rc.12",
+    "immutable": "^3.8.2",
     "imports-loader": "^0.7.1",
     "invariant": "2.2.1",
     "json-loader": "^0.5.7",
