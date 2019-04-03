@@ -4,7 +4,7 @@
  *
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, snakeCase, isEmpty, map, sortBy } from 'lodash';
@@ -137,4 +137,4 @@ LeftMenuLinkContainer.propTypes = {
   plugins: PropTypes.object.isRequired,
 };
 
-export default memo(LeftMenuLinkContainer);
+export default LeftMenuLinkContainer;

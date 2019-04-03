@@ -5,19 +5,20 @@
  * only setup and plugin code.
  */
 
-/* eslint-disable import/first */
+/* eslint-disable */
 // Don't move this line!
 import './public-path.js'; // eslint-disable-line import/extensions
 
 import React from 'react';
-import Loadable from 'react-loadable';
-import LoadingIndicatorPage from './components/LoadingIndicatorPage';
+// import Loadable from 'react-loadable';
+// import LoadingIndicatorPage from './components/LoadingIndicatorPage';
 import { translationMessages } from './i18n';
+import App from 'containers/App';
 
-const LoadableApp = Loadable({
-  loader: () => import('containers/App'),
-  loading: LoadingIndicatorPage,
-});
+// const LoadableApp = Loadable({
+//   loader: () => import('containers/App'),
+//   loading: LoadingIndicatorPage,
+// });
 
 // const tryRequireRoot = source => {
 //   try {
@@ -57,7 +58,7 @@ const store = strapi.store;
 
 // Define the plugin root component
 function Comp(props) {
-  return <LoadableApp {...props} />;
+  return <App {...props} />;
 }
 
 // Hot reloadable translation json files

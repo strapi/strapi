@@ -4,7 +4,7 @@
  *
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import { startsWith, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -33,7 +33,7 @@ function LeftMenuLink(props) {
   const content = en[props.label] ? (
     <FormattedMessage
       id={props.label}
-      defaultMessage='{label}'
+      defaultMessage="{label}"
       values={{
         label: `${props.label}`,
       }}
@@ -51,7 +51,7 @@ function LeftMenuLink(props) {
     <a
       className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
       href={props.destination}
-      target='_blank'
+      target="_blank"
     >
       {icon}
       {content}
@@ -91,4 +91,4 @@ LeftMenuLink.defaultProps = {
   source: '',
 };
 
-export default memo(LeftMenuLink);
+export default LeftMenuLink;

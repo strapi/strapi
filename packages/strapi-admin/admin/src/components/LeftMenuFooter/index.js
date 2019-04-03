@@ -4,7 +4,7 @@
  *
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import { defineMessages, FormattedMessage } from 'react-intl';
 import { PropTypes } from 'prop-types';
 
@@ -61,4 +61,4 @@ LeftMenuFooter.propTypes = {
   version: PropTypes.string.isRequired,
 };
 
-export default memo(LeftMenuFooter);
+export default LeftMenuFooter;

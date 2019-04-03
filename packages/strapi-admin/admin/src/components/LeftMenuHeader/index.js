@@ -4,7 +4,7 @@
  *
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 import styles from './styles.scss';
@@ -12,11 +12,11 @@ import styles from './styles.scss';
 function LeftMenuHeader() {
   return (
     <div className={styles.leftMenuHeader}>
-      <Link to='/' className={styles.leftMenuHeaderLink}>
+      <Link to="/" className={styles.leftMenuHeaderLink}>
         <span className={styles.projectName} />
       </Link>
     </div>
   );
 }
 
-export default memo(LeftMenuHeader);
+export default LeftMenuHeader;
