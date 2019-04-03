@@ -3,15 +3,16 @@ import pluginId from 'pluginId';
 /**
  * Direct selector to the homePage state domain
  */
-const selectHomePageDomain = () => state => state.get(`${pluginId}-homePage`);
+const selectHomePageDomain = () => state => state.get(`${pluginId}_homePage`);
 
 /**
  * Default selector used by HomePage
  */
 
-const selectHomePage = () => createSelector(
-  selectHomePageDomain(),
-  (substate) => substate.toJS(),
-);
+const selectHomePage = () =>
+  createSelector(
+    selectHomePageDomain(),
+    substate => substate.toJS(),
+  );
 
 export default selectHomePage;

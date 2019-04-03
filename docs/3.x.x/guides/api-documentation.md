@@ -165,7 +165,7 @@ You can add all the entries listed in the [specification](https://swagger.io/spe
     },
     {
       "url": "YOUR_STAGING_SERVER",
-      "description": "Staging server server"
+      "description": "Staging server"
     },
     {
       "url": "YOUR_PRODUCTION_SERVER",
