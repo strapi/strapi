@@ -125,7 +125,7 @@ strapi generate:plugin my-plugin
 
 #### 2. ✅ Verify the symlink
 
-Make you that the `strapi-helper-plugin` is linked to your project.
+Make sure that the `strapi-helper-plugin` is linked to your project.
 
 Please run this command in the repository folder where Strapi is cloned:
 ```bash
@@ -211,7 +211,7 @@ Then run
 ```bash
 # generate the test app
 $ node test/createTestApp.js
-# run the testApp in the background (️️️⚠️ be carefull to kill the process after the tests have run)
+# run the testApp in the background (️️️⚠️ be careful to kill the process after the tests have run)
 $ node test/startTestApp.js &
 # run cypress
 $ node test/cypress
