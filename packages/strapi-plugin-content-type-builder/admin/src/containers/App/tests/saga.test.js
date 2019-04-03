@@ -7,12 +7,23 @@ import { all, fork, takeLatest, put } from 'redux-saga/effects';
 import defaultSaga, { deleteModel, getData, submitCT, submitTempCT } from '../saga';
 
 import { deleteModelSucceeded, getDataSucceeded } from '../actions';
-import { DELETE_MODEL, GET_DATA, SUBMIT_CONTENT_TYPE, SUBMIT_TEMP_CONTENT_TYPE } from '../constants';
+import {
+  DELETE_MODEL,
+  GET_DATA,
+  SUBMIT_CONTENT_TYPE,
+  SUBMIT_TEMP_CONTENT_TYPE,
+} from '../constants';
 
 const response = [
   {
     models: [
-      { icon: 'fa-cube', name: 'permission', description: '', fields: 6, source: 'users-permissions' },
+      {
+        icon: 'fa-cube',
+        name: 'permission',
+        description: '',
+        fields: 6,
+        source: 'users-permissions',
+      },
     ],
     allModels: [
       {
@@ -41,7 +52,10 @@ describe('CTB <App /> DeleteModel saga', () => {
   let deleteModelGenerator;
 
   beforeEach(() => {
-    deleteModelGenerator = deleteModel({ modelName: 'test' });
+    deleteModelGenerator = deleteModel({
+      context: { plugins: {}, updatePlugin: jest.fn() },
+      modelName: 'test',
+    });
     const callDescriptor = deleteModelGenerator.next({ ok: true }).value;
 
     expect(callDescriptor).toMatchSnapshot();
@@ -56,7 +70,9 @@ describe('CTB <App /> DeleteModel saga', () => {
   it('should dispatch the deleteModelSucceeded action if it requests the data successfully', () => {
     const putDescriptor = deleteModelGenerator.next({ ok: true }).value;
 
-    expect(putDescriptor).toEqual(put(deleteModelSucceeded('test')));
+    expect(putDescriptor).toEqual(
+      put(deleteModelSucceeded('test', { plugins: {}, updatePlugin: jest.fn() })),
+    );
     expect(strapi.notification.success).toHaveBeenCalled();
   });
 
