@@ -95,15 +95,20 @@ export class Onboarding extends React.Component {
   // eslint-disable-line jsx-handler-names
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
+    const { showVideos } = this.state;
+
+    const style = showVideos ? {} : { maxWidth: 0 };
 
     return (
       <div
+        style={style}
         className={cn(
           styles.videosWrapper,
           videos.length > 0 ? styles.visible : styles.hidden,
         )}
       >
         <div
+          style={style}
           className={cn(
             styles.videosContent,
             this.state.showVideos ? styles.shown : styles.hide,
@@ -111,14 +116,14 @@ export class Onboarding extends React.Component {
         >
           <div className={styles.videosHeader}>
             <p>
-              <FormattedMessage id='app.components.Onboarding.title' />
+              <FormattedMessage id="app.components.Onboarding.title" />
             </p>
             {videos.length && (
               <p>
                 {Math.floor(
                   (videos.filter(v => v.end).length * 100) / videos.length,
                 )}
-                <FormattedMessage id='app.components.Onboarding.label.completed' />
+                <FormattedMessage id="app.components.Onboarding.label.completed" />
               </p>
             )}
           </div>
@@ -145,8 +150,8 @@ export class Onboarding extends React.Component {
             onClick={this.handleVideosToggle}
             className={this.state.showVideos ? styles.active : ''}
           >
-            <i className='fa fa-question' />
-            <i className='fa fa-times' />
+            <i className="fa fa-question" />
+            <i className="fa fa-times" />
             <span />
           </button>
         </div>
