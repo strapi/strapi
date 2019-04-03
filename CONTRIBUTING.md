@@ -212,7 +212,7 @@ Then run
 # generate the test app
 $ node test/createTestApp.js
 # run the testApp in the background (️️️⚠️ be careful to kill the process after the tests have run)
-$ node test/startTestApp.js & 
+$ node test/startTestApp.js &
 # run cypress
 $ node test/cypress
 ```
