@@ -25,7 +25,6 @@
   "devDependencies": {
     "cross-env": "^5.2.0",
     "flag-icon-css": "^2.8.0",
-    "react-select": "^1.0.0-rc.5",
     "rimraf": "^2.6.3",
     "strapi-helper-plugin": "3.0.0-alpha.25.2"
   },
