@@ -19,16 +19,13 @@ const LoadableApp = Loadable({
   loading: LoadingIndicatorPage,
 });
 
-const tryRequireRoot = source => {
-  try {
-    return require('../../../../admin/src/' + source + '.js').default; // eslint-disable-line prefer-template
-  } catch (err) {
-    return null;
-  }
-};
-
-const bootstrap = tryRequireRoot('bootstrap');
-const pluginRequirements = tryRequireRoot('requirements');
+// const tryRequireRoot = source => {
+//   try {
+//     return require('../../../../admin/src/' + source + '.js').default; // eslint-disable-line prefer-template
+//   } catch (err) {
+//     return null;
+//   }
+// };
 
 const layout = (() => {
   try {
@@ -71,7 +68,9 @@ if (module.hot) {
     if (strapi) {
       System.import('./i18n').then(result => {
         const translationMessagesUpdated = result.translationMessages;
-        strapi.refresh(pluginId).translationMessages(translationMessagesUpdated);
+        strapi
+          .refresh(pluginId)
+          .translationMessages(translationMessagesUpdated);
       });
     }
   });
@@ -99,7 +98,6 @@ const lifecycles = (() => {
 strapi.registerPlugin({
   blockerComponent: null,
   blockerComponentProps: {},
-  bootstrap,
   description: pluginDescription,
   icon: pluginPkg.strapi.icon,
   id: pluginId,
@@ -110,7 +108,6 @@ strapi.registerPlugin({
   leftMenuLinks: [],
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
-  pluginRequirements,
   preventComponentRendering: false,
   translationMessages,
 });
