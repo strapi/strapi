@@ -47,7 +47,7 @@ class AttributesPickerModal extends React.Component {
 
   getAttributes = () => {
     const { plugins } = this.context;
-    const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
+    const appPlugins = plugins;
 
     return attributes.filter(attr => {
       if (appPlugins.hasOwnProperty('upload')) {
@@ -71,7 +71,9 @@ class AttributesPickerModal extends React.Component {
     const { push } = this.props;
 
     emitEvent('didSelectContentTypeFieldType', { type });
-    push({ search: `modalType=attributeForm&attributeType=${type}&settingType=base&actionType=create` });
+    push({
+      search: `modalType=attributeForm&attributeType=${type}&settingType=base&actionType=create`,
+    });
   };
 
   /* istanbul ignore next */
@@ -117,9 +119,11 @@ class AttributesPickerModal extends React.Component {
     this.updateNodeToFocus(next);
   };
 
-  handleOnClosed = () => this.setState(prevState => ({ isDisplayed: !prevState.isDisplayed }));
+  handleOnClosed = () =>
+    this.setState(prevState => ({ isDisplayed: !prevState.isDisplayed }));
 
-  handleOnOpened = () => this.setState(prevState => ({ isDisplayed: !prevState.isDisplayed }));
+  handleOnOpened = () =>
+    this.setState(prevState => ({ isDisplayed: !prevState.isDisplayed }));
 
   handleToggle = () => {
     const { push } = this.props;
@@ -156,9 +160,13 @@ class AttributesPickerModal extends React.Component {
         onOpened={this.handleOnOpened}
       >
         <HeaderModal>
-          <HeaderModalTitle title={`${pluginId}.popUpForm.choose.attributes.header.title`} />
+          <HeaderModalTitle
+            title={`${pluginId}.popUpForm.choose.attributes.header.title`}
+          />
         </HeaderModal>
-        <BodyModal style={{ paddingTop: '2.3rem' }}>{attributes.map(this.renderAttribute)}</BodyModal>
+        <BodyModal style={{ paddingTop: '2.3rem' }}>
+          {attributes.map(this.renderAttribute)}
+        </BodyModal>
         <FooterModal />
       </WrapperModal>
     );
