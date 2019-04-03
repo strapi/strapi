@@ -95,6 +95,7 @@ export class Admin extends React.Component {
     this.props.getInitData();
   }
 
+  /* istanbul ignore next */
   componentDidUpdate(prevProps) {
     const {
       admin: { didGetSecuredData, isLoading, isSecured },
@@ -185,15 +186,10 @@ export class Admin extends React.Component {
    */
   showLoader = () => {
     const {
-      admin: { isLoading },
       global: { isAppLoading },
     } = this.props;
 
     if (isAppLoading) {
-      return true;
-    }
-
-    if (isLoading) {
       return true;
     }
 
@@ -209,12 +205,9 @@ export class Admin extends React.Component {
       const InitializerComponent = plugins[current].initializer;
       const key = plugins[current].id;
 
-      if (InitializerComponent) {
-        // We don't check if the initializer is correct because there's a fallback in cdc
-        acc.push(
-          <InitializerComponent key={key} {...this.props} {...this.helpers} />,
-        );
-      }
+      acc.push(
+        <InitializerComponent key={key} {...this.props} {...this.helpers} />,
+      );
 
       return acc;
     }, []);
@@ -230,19 +223,9 @@ export class Admin extends React.Component {
 
   render() {
     const {
-      admin: {
-        appError,
-        isLoading,
-        showLogoutComponent,
-        showMenu,
-        strapiVersion,
-      },
+      admin: { isLoading, showLogoutComponent, showMenu, strapiVersion },
       global: { blockApp, overlayBlockerData, plugins, showGlobalAppBlocker },
     } = this.props;
-
-    if (appError) {
-      return <div>An error has occured please check your logs</div>;
-    }
 
     if (isLoading) {
       return <LoadingIndicatorPage />;
@@ -273,26 +256,26 @@ export class Admin extends React.Component {
           {showMenu ? <Header /> : ''}
           <div className={this.getContentWrapperStyle().sub}>
             <Switch>
-              <Route path='/' component={HomePage} exact />
+              <Route path="/" component={HomePage} exact />
               <Route
-                path='/plugins/:pluginId'
+                path="/plugins/:pluginId"
                 render={this.renderPluginDispatcher}
               />
-              <Route path='/plugins' component={ComingSoonPage} />
-              <Route path='/list-plugins' component={ListPluginsPage} exact />
+              <Route path="/plugins" component={ComingSoonPage} />
+              <Route path="/list-plugins" component={ListPluginsPage} exact />
               <Route
-                path='/marketplace'
+                path="/marketplace"
                 render={this.renderMarketPlace}
                 exact
               />
-              <Route path='/configuration' component={ComingSoonPage} exact />
-              <Route key='7' path='' component={NotFoundPage} />
-              <Route key='8' path='404' component={NotFoundPage} />
+              <Route path="/configuration" component={ComingSoonPage} exact />
+              <Route key="7" path="" component={NotFoundPage} />
+              <Route key="8" path="404" component={NotFoundPage} />
             </Switch>
           </div>
         </div>
         <OverlayBlocker
-          key='overlayBlocker'
+          key="overlayBlocker"
           isOpen={blockApp && showGlobalAppBlocker}
           {...overlayBlockerData}
         />

@@ -11,14 +11,18 @@ import LeftMenuHeader from '../../components/LeftMenuHeader';
 import LeftMenuLinkContainer from '../../components/LeftMenuLinkContainer';
 import LeftMenuFooter from '../../components/LeftMenuFooter';
 
+import ErrorBoundary from '../ErrorBoundary';
+
 import styles from './styles.scss';
 
 function LeftMenu(props) {
   return (
     <div className={styles.leftMenu}>
-      <LeftMenuHeader {...props} />
-      <LeftMenuLinkContainer {...props} />
-      <LeftMenuFooter {...props} />
+      <LeftMenuHeader key="header" {...props} />
+      <ErrorBoundary key="plugins">
+        <LeftMenuLinkContainer {...props} />
+      </ErrorBoundary>
+      <LeftMenuFooter key="footer" {...props} />
     </div>
   );
 }

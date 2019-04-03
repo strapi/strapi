@@ -5,7 +5,7 @@ import { getInitDataSucceeded, getSecuredDataSucceeded } from './actions';
 import { EMIT_EVENT, GET_INIT_DATA, GET_SECURED_DATA } from './constants';
 import { makeSelectUuid } from './selectors';
 
-function* emitter(action) {
+export function* emitter(action) {
   try {
     const requestURL = 'https://analytics.strapi.io/track';
     const uuid = yield select(makeSelectUuid());
@@ -69,7 +69,7 @@ export function* getSecuredData() {
 
     yield put(getSecuredDataSucceeded(data));
   } catch (err) {
-    console.log(err); // eslint-lint-disable-line no-console
+    console.log(err); // eslint-disable-line no-console
   }
 }
 

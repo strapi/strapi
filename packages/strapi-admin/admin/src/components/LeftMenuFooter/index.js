@@ -16,30 +16,39 @@ defineMessages(messages);
 
 function LeftMenuFooter({ version, ...rest }) {
   // eslint-disable-line react/prefer-stateless-function
+  const staticLinks = [
+    {
+      icon: 'book',
+      label: 'documentation',
+      destination: 'https://strapi.io/documentation',
+    },
+    {
+      icon: 'question-circle',
+      label: 'help',
+      destination: 'https://strapi.io/help',
+    },
+  ];
   return (
     <div className={styles.leftMenuFooter}>
       <ul className={styles.list}>
-        <LeftMenuLink
-          {...rest}
-          icon='book'
-          label={messages.documentation.id}
-          destination='https://strapi.io/documentation'
-        />
-        <LeftMenuLink
-          {...rest}
-          icon='question-circle'
-          label={messages.help.id}
-          destination='https://strapi.io/help'
-        />
+        {staticLinks.map(link => (
+          <LeftMenuLink
+            {...rest}
+            {...link}
+            destination={messages[link.label].id}
+            key={link.label}
+          />
+        ))}
       </ul>
       <div className={styles.poweredBy}>
-        <FormattedMessage {...messages.poweredBy} />
-        <a href='https://strapi.io' target='_blank'>
+        <FormattedMessage {...messages.poweredBy} key="poweredBy" />
+        <a key="website" href="https://strapi.io" target="_blank">
           Strapi
         </a>{' '}
         <a
           href={`https://github.com/strapi/strapi/releases/tag/v${version}`}
-          target='_blank'
+          key="github"
+          target="_blank"
         >
           v{version}
         </a>

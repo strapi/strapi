@@ -10,7 +10,7 @@ import { get } from 'lodash';
 
 import Helmet from 'react-helmet';
 import BlockerComponent from 'components/BlockerComponent';
-import ErrorBoundary from 'components/ErrorBoundary';
+import ErrorBoundary from '../ErrorBoundary';
 
 export function PluginDispatcher(props) {
   const {

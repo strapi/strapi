@@ -83,12 +83,24 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
       }
     })
   ) : (
-    <li className={styles.noPluginsInstalled}>
-      <FormattedMessage {...messages.noPluginsInstalled} />.
+    <li key="emptyList" className={styles.noPluginsInstalled}>
+      <FormattedMessage {...messages.noPluginsInstalled} key="noPlugins" />.
     </li>
   );
 
   const hasSettingsManager = get(plugins, 'settings-manager', null);
+  const staticLinks = [
+    {
+      icon: 'list',
+      label: messages.listPlugins.id,
+      destination: '/list-plugins',
+    },
+    {
+      icon: 'shopping-basket',
+      label: messages.installNewPlugin.id,
+      destination: '/marketplace',
+    },
+  ];
 
   return (
     <div className={styles.leftMenuLinkContainer}>
@@ -104,24 +116,15 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
           <FormattedMessage {...messages.general} />
         </p>
         <ul className={styles.list}>
-          <LeftMenuLink
-            {...rest}
-            icon='list'
-            label={messages.listPlugins.id}
-            destination='/list-plugins'
-          />
-          <LeftMenuLink
-            {...rest}
-            icon='shopping-basket'
-            label={messages.installNewPlugin.id}
-            destination='/marketplace'
-          />
+          {staticLinks.map(link => (
+            <LeftMenuLink {...rest} key={link.destination} {...link} />
+          ))}
           {hasSettingsManager && (
             <LeftMenuLink
               {...rest}
-              icon='gear'
+              icon="gear"
               label={messages.configuration.id}
-              destination='/plugins/settings-manager'
+              destination="/plugins/settings-manager"
             />
           )}
         </ul>
