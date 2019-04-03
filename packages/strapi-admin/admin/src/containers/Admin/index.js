@@ -30,11 +30,12 @@ import Logout from '../../components/Logout';
 
 import ComingSoonPage from '../ComingSoonPage';
 import LeftMenu from '../LeftMenu';
+import ListPluginsPage from '../ListPluginsPage/Loadable';
 import LocaleToggle from '../LocaleToggle';
 import HomePage from '../HomePage/Loadable';
 import Marketplace from '../Marketplace/Loadable';
-import ListPluginsPage from '../ListPluginsPage/Loadable';
 import NotFoundPage from '../NotFoundPage/Loadable';
+import Onboarding from '../Onboarding';
 import PluginDispatcher from '../PluginDispatcher';
 
 import { updatePlugin } from '../App/actions';
@@ -295,6 +296,7 @@ export class Admin extends React.Component {
           isOpen={blockApp && showGlobalAppBlocker}
           {...overlayBlockerData}
         />
+        {showLogoutComponent && <Onboarding />}
       </div>
     );
   }

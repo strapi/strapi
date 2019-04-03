@@ -73,7 +73,8 @@ export class HomePage extends React.Component {
   componentWillUpdate(nextProps) {
     const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced'];
     const shouldRedirect =
-      allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
+      allowedPaths.filter(el => el === nextProps.match.params.settingType)
+        .length === 0;
 
     if (shouldRedirect) {
       this.props.history.push('/404');
@@ -85,7 +86,9 @@ export class HomePage extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.match.params.settingType !== this.props.match.params.settingType) {
+    if (
+      prevProps.match.params.settingType !== this.props.match.params.settingType
+    ) {
       this.props.fetchData(this.props.match.params.settingType);
     }
   }
@@ -119,7 +122,9 @@ export class HomePage extends React.Component {
       this.props.history.push(`${this.props.location.pathname}/create`);
     } else if (this.props.match.params.settingType === 'providers') {
       this.props.history.push(
-        `${this.props.location.pathname}#add::${this.props.match.params.settingType}`,
+        `${this.props.location.pathname}#add::${
+          this.props.match.params.settingType
+        }`,
       );
     }
   };
@@ -130,7 +135,10 @@ export class HomePage extends React.Component {
       this.getEndPoint(),
       this.props.dataToEdit,
     ]);
-    const initObject = get(this.props.initialData, [this.getEndPoint(), this.props.dataToEdit]);
+    const initObject = get(this.props.initialData, [
+      this.getEndPoint(),
+      this.props.dataToEdit,
+    ]);
     const formErrors = checkFormValidity(
       this.props.match.params.settingType,
       modifiedObject,
@@ -188,13 +196,16 @@ export class HomePage extends React.Component {
     const isAdvanded = this.getEndPoint() === 'advanced';
 
     return (
-      (isLoading && get(data, this.getEndPoint()) === undefined && !isAdvanded) ||
-      (isLoading && isAdvanded && get(modifiedData, this.getEndPoint()) === undefined)
+      (isLoading &&
+        get(data, this.getEndPoint()) === undefined &&
+        !isAdvanded) ||
+      (isLoading &&
+        isAdvanded &&
+        get(modifiedData, this.getEndPoint()) === undefined)
     );
   };
 
   render() {
-    console.log(this.props);
     const {
       data,
       didCheckErrors,
@@ -205,11 +216,13 @@ export class HomePage extends React.Component {
       dataToEdit,
     } = this.props;
     const headerActions =
-      match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData)
+      match.params.settingType === 'advanced' &&
+      !isEqual(modifiedData, initialData)
         ? this.pluginHeaderActions
         : [];
     const noButtonList =
-      match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
+      match.params.settingType === 'email-templates' ||
+      match.params.settingType === 'providers';
     const component =
       match.params.settingType === 'advanced' ? (
         <EditForm
@@ -235,7 +248,9 @@ export class HomePage extends React.Component {
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               title={{ id: 'users-permissions.HomePage.header.title' }}
-              description={{ id: 'users-permissions.HomePage.header.description' }}
+              description={{
+                id: 'users-permissions.HomePage.header.description',
+              }}
               actions={headerActions}
             />
             <HeaderNav links={this.headerNavLinks} />
@@ -317,7 +332,11 @@ const withConnect = connect(
   mapStateToProps,
   mapDispatchToProps,
 );
-const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withReducer = strapi.injectReducer({
+  key: 'homePage',
+  reducer,
+  pluginId,
+});
 const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
