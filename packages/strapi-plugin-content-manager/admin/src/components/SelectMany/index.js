@@ -167,7 +167,7 @@ class SelectMany extends React.PureComponent {
     return (
       <div className={`form-group ${styles.selectMany} ${value.length > 4 && styles.selectManyUpdate}`}>
         <label htmlFor={this.props.relation.alias}>
-          {this.props.relation.alias} <span>({value.length})</span>
+          {get(this.props.relation, 'label', this.props.relation.alias)} <span>({value.length})</span>
         </label>
         {description}
         <Select

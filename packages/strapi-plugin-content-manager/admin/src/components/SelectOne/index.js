@@ -16,7 +16,8 @@ import templateObject from 'utils/templateObject';
 
 import styles from './styles.scss';
 
-class SelectOne extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class SelectOne extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
 
@@ -37,7 +38,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
     }
   }
 
-  getOptions = (query) => {
+  getOptions = query => {
     const params = {
       _limit: 20,
       _start: this.state.toSkip,
@@ -52,8 +53,12 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
     }
 
     // Request URL
-    const requestUrlSuffix = query && get(this.props.record, [this.props.relation.alias]) ? get(this.props.record, [this.props.relation.alias]) : '';
-    const requestUrl = `/content-manager/explorer/${this.props.relation.model || this.props.relation.collection}/${requestUrlSuffix}`;
+    const requestUrlSuffix =
+      query && get(this.props.record, [this.props.relation.alias])
+        ? get(this.props.record, [this.props.relation.alias])
+        : '';
+    const requestUrl = `/content-manager/explorer/${this.props.relation.model ||
+      this.props.relation.collection}/${requestUrlSuffix}`;
 
     // Call our request helper (see 'utils/request')
     return request(requestUrl, {
@@ -61,16 +66,20 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
       params,
     })
       .then(response => {
-        const options = isArray(response) ?
-          map(response, item => ({
-            value: item,
-            label: templateObject({ mainField: this.props.relation.displayedAttribute }, item).mainField,
-          })) :
-          [{
-            value: response,
-            label: templateObject({ mainField: this.props.relation.displayedAttribute }, response).mainField,
-          }];
-
+        /* eslint-disable indent */
+        const options = isArray(response)
+          ? map(response, item => ({
+              value: item,
+              label: templateObject({ mainField: this.props.relation.displayedAttribute }, item).mainField,
+            }))
+          : [
+              {
+                value: response,
+                label: templateObject({ mainField: this.props.relation.displayedAttribute }, response)
+                  .mainField,
+              },
+            ];
+        /* eslint-disable indent */
         const newOptions = cloneDeep(this.state.options);
         options.map(option => {
           // Don't add the values when searching
@@ -87,9 +96,9 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
       .catch(() => {
         strapi.notification.error('content-manager.notification.error.relationship.fetch');
       });
-  }
+  };
 
-  handleChange = (value) => {
+  handleChange = value => {
     const target = {
       name: `record.${this.props.relation.alias}`,
       value,
@@ -97,7 +106,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
     };
 
     this.props.setRecordAttribute({ target });
-  }
+  };
 
   handleBottomScroll = () => {
     this.setState(prevState => {
@@ -105,7 +114,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
         toSkip: prevState.toSkip + 20,
       };
     });
-  }
+  };
 
   // Redirect to the edit page
   handleClick = (item = {}) => {
@@ -114,40 +123,44 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
       id: item.value.id || item.value._id,
       source: this.props.relation.plugin,
     });
-  }
+  };
 
-  handleInputChange = (value) => {
+  handleInputChange = value => {
     const clonedOptions = this.state.options;
     const filteredValues = clonedOptions.filter(data => includes(data.label, value));
 
     if (filteredValues.length === 0) {
       return this.getOptions(value);
     }
-  }
+  };
 
   render() {
-    const description = this.props.relation.description
-      ? <p>{this.props.relation.description}</p>
-      : '';
+    const description = this.props.relation.description ? <p>{this.props.relation.description}</p> : '';
 
     const value = get(this.props.record, this.props.relation.alias);
-    const excludeModel = ['role', 'permission', 'file'].includes(this.props.relation.model || this.props.relation.collection); // Temporary.
-    const entryLink = (isNull(value) || isUndefined(value) || excludeModel ? 
-      '' : 
-      (
-        <FormattedMessage id='content-manager.containers.Edit.clickToJump'>
+    const excludeModel = ['role', 'permission', 'file'].includes(
+      this.props.relation.model || this.props.relation.collection,
+    ); // Temporary.
+    const entryLink =
+      isNull(value) || isUndefined(value) || excludeModel ? (
+        ''
+      ) : (
+        <FormattedMessage id="content-manager.containers.Edit.clickToJump">
           {title => (
-            <a onClick={() => this.handleClick({value})} title={title}><FormattedMessage id='content-manager.containers.Edit.seeDetails' /></a>
+            <a onClick={() => this.handleClick({ value })} title={title}>
+              <FormattedMessage id="content-manager.containers.Edit.seeDetails" />
+            </a>
           )}
         </FormattedMessage>
-      )
-    );
+      );
 
     /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectOne}`}>
         <nav className={styles.headline}>
-          <label htmlFor={this.props.relation.alias}>{this.props.relation.alias}</label>
+          <label htmlFor={this.props.relation.alias}>
+            {get(this.props.relation, 'label', this.props.relation.alias)} <span>({value.length})</span>
+          </label>
           {entryLink}
         </nav>
         {description}
@@ -160,10 +173,18 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
           onInputChange={this.handleInputChange}
           onSelectResetsInput={false}
           simpleValue
-          value={isNull(value) || isUndefined(value) ? null : {
-            value: isFunction(value.toJS) ? value.toJS() : value,
-            label: templateObject({ mainField: this.props.relation.displayedAttribute }, isFunction(value.toJS) ? value.toJS() : value).mainField || (isFunction(value.toJS) ? get(value.toJS(), 'id') : get(value, 'id')),
-          }}
+          value={
+            isNull(value) || isUndefined(value)
+              ? null
+              : {
+                  value: isFunction(value.toJS) ? value.toJS() : value,
+                  label:
+                    templateObject(
+                      { mainField: this.props.relation.displayedAttribute },
+                      isFunction(value.toJS) ? value.toJS() : value,
+                    ).mainField || (isFunction(value.toJS) ? get(value.toJS(), 'id') : get(value, 'id')),
+                }
+          }
         />
       </div>
     );
@@ -173,10 +194,7 @@ class SelectOne extends React.Component { // eslint-disable-line react/prefer-st
 
 SelectOne.propTypes = {
   onRedirect: PropTypes.func.isRequired,
-  record: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.bool,
-  ]).isRequired,
+  record: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
   relation: PropTypes.object.isRequired,
   setRecordAttribute: PropTypes.func.isRequired,
 };
