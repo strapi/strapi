@@ -29,7 +29,8 @@
     "strapi-helper-plugin": "3.0.0-alpha.25.2"
   },
   "dependencies": {
-    "pluralize": "^7.0.0"
+    "pluralize": "^7.0.0",
+    "strapi-utils": "3.0.0-alpha.25.2"
   },
   "author": {
     "name": "Strapi team",
