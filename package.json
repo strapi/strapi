@@ -10,6 +10,7 @@
     "babel-eslint": "^6.1.2",
     "babel-jest": "^24.1.0",
     "babel-loader": "7.1.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-destructuring": "6.23.0",
     "babel-plugin-transform-es2015-parameters": "6.24.1",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
