@@ -7,7 +7,6 @@
  */
 
 // Node.js core.
-const child_process = require('child_process');
 const os = require('os');
 const path = require('path');
 
@@ -16,7 +15,6 @@ const _ = require('lodash');
 const fetch = require('node-fetch');
 const { machineIdSync } = require('node-machine-id');
 const shell = require('shelljs');
-
 
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
@@ -30,7 +28,7 @@ const packageJSON = require('../package.json');
  * Generate a new Strapi application.
  */
 
-module.exports = function (name, cliArguments) {
+module.exports = function(name, cliArguments) {
   console.log('🚀 Starting to create your Strapi application.');
 
   const developerMode = cliArguments.dev !== undefined;
@@ -50,15 +48,27 @@ module.exports = function (name, cliArguments) {
     strapiPackageJSON: packageJSON,
     developerMode,
     debug: cliArguments.debug !== undefined,
-    quick: cliArguments.quickstart !== undefined
+    quick: cliArguments.quickstart !== undefined,
   };
 
-  const dbArguments = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
+  const dbArguments = [
+    'dbclient',
+    'dbhost',
+    'dbport',
+    'dbname',
+    'dbusername',
+    'dbpassword',
+  ];
   const matchingDbArguments = _.intersection(_.keys(cliArguments), dbArguments);
 
   if (matchingDbArguments.length) {
-    if (matchingDbArguments.length !== dbArguments.length && cliArguments.dbclient !== 'sqlite') {
-      console.log(`⛔️ Some database arguments are missing. Required arguments list: ${dbArguments}`);
+    if (
+      matchingDbArguments.length !== dbArguments.length &&
+      cliArguments.dbclient !== 'sqlite'
+    ) {
+      console.log(
+        `⛔️ Some database arguments are missing. Required arguments list: ${dbArguments}`
+      );
       return process.exit(1);
     }
 
@@ -73,16 +83,16 @@ module.exports = function (name, cliArguments) {
         database: cliArguments.dbname,
         username: cliArguments.dbusername,
         password: cliArguments.dbpassword,
-        filename: cliArguments.dbfile
+        filename: cliArguments.dbfile,
       },
       options: {
         authenticationDatabase: cliArguments.dbauth,
-        ssl: cliArguments.dbssl
-      }
+        ssl: cliArguments.dbssl,
+      },
     };
   }
 
-  const error = (error) => {
+  const error = error => {
     fetch('https://analytics.strapi.io/track', {
       method: 'POST',
       body: JSON.stringify({
@@ -90,17 +100,15 @@ module.exports = function (name, cliArguments) {
         deviceId: machineIdSync(),
         properties: {
           error,
-          os: os.type()
-        }
+          os: os.type(),
+        },
       }),
-      headers: { 'Content-Type': 'application/json' }
-    })
-      .catch(() => {});
+      headers: { 'Content-Type': 'application/json' },
+    }).catch(() => {});
   };
 
   // Return the scope and the response (`error` or `success`).
   return generate(scope, {
-
     // Log and exit the REPL in case there is an error
     // while we were trying to generate the new app.
     error: function returnError(err) {
@@ -109,40 +117,41 @@ module.exports = function (name, cliArguments) {
       process.exit(1);
     },
 
-    success:  () => {
+    success: () => {
       if (scope.quick) {
         try {
           // Enter inside the project folder.
-          shell.cd(scope.rootPath);
+          // shell.cd(scope.rootPath);
           // Empty log.
           console.log();
           // Create interface for windows user to let them quit the program.
-          if (process.platform === "win32") {
-            const rl = require("readline").createInterface({
+          if (process.platform === 'win32') {
+            const rl = require('readline').createInterface({
               input: process.stdin,
-              output: process.stdout
+              output: process.stdout,
             });
 
-            rl.on("SIGINT", function () {
-              process.emit("SIGINT");
+            rl.on('SIGINT', function() {
+              process.emit('SIGINT');
             });
           }
           // Listen Ctrl+C / SIGINT event to close the process.
-          process.on("SIGINT", function () {
+          process.on('SIGINT', function() {
             process.exit();
           });
-          // Launch the server.
-          const child  = child_process.exec('strapi start', { stdio: 'inherit' });
-          // Display child process logs in the parent process.
-          child.stdout.pipe(process.stdout);
-          child.stderr.pipe(process.stderr);
 
-          // shell.exec('strapi start');
+          shell.exec('strapi start', {
+            stdio: 'inherit',
+            env: {
+              ...process.env,
+              FORCE_COLOR: 1,
+            },
+          });
         } catch (e) {
           console.log(e);
           error(e);
         }
       }
-    }
+    },
   });
 };

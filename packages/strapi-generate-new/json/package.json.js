@@ -42,9 +42,8 @@ module.exports = scope => {
     'scripts': {
       'setup': 'cd admin && npm run setup', // Ready to deploy setup
       'start': 'node server.js',
-      'strapi': 'node_modules/strapi/bin/strapi.js', // Allow to use `npm run strapi` CLI,
-      'lint': 'node_modules/.bin/eslint api/**/*.js config/**/*.js plugins/**/*.js',
-      'postinstall': 'node node_modules/strapi/lib/utils/post-install.js'
+      'strapi': 'strapi', // Allow to use `npm run strapi` CLI,
+      'lint': 'eslint api/**/*.js config/**/*.js plugins/**/*.js'
     },
     'devDependencies': {
       'babel-eslint': '^7.1.1',
@@ -56,6 +55,7 @@ module.exports = scope => {
     'dependencies': Object.assign({}, {
       'lodash': '^4.17.5',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
+      'strapi-admin': getDependencyVersion(cliPkg, 'strapi'),
       'strapi-utils': getDependencyVersion(cliPkg, 'strapi'),
       [scope.client.connector]: getDependencyVersion(cliPkg, 'strapi'),
     }, additionalsDependencies, {

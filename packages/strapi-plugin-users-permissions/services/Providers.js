@@ -8,7 +8,7 @@
 const _ = require('lodash');
 const request = require('request');
 
-// Purest strategies.
+// Purest strategies.<
 const Purest = require('purest');
 
 /**

@@ -62,6 +62,7 @@
     "rimraf": "^2.6.2",
     "semver": "^5.4.1",
     "shelljs": "^0.8.3",
+    "slash": "^2.0.0",
     "stack-trace": "0.0.10",
     "strapi-generate": "3.0.0-alpha.25.2",
     "strapi-generate-admin": "3.0.0-alpha.25.2",

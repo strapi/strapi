@@ -6,17 +6,23 @@ const path = require('path');
 const cluster = require('cluster');
 const { EventEmitter } = require('events');
 const Koa = require('koa');
-const { includes, get, assign, toLower } = require('lodash');
+const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
 const stackTrace = require('stack-trace');
 const utils = require('./utils');
-const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins, admin, store } = require('./core');
+const {
+  loadConfigs,
+  loadApis,
+  loadMiddlewares,
+  loadHooks,
+  appConfigurations,
+  plugins,
+  admin,
+  store,
+} = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 
-/* eslint-disable prefer-template */
-/* eslint-disable no-console */
-/* eslint-disable indent */
 /**
  * Construct an Strapi instance.
  *
@@ -60,7 +66,7 @@ class Strapi extends EventEmitter {
       appPath: process.cwd(),
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,
-      environment: toLower(process.env.NODE_ENV) || 'development',
+      environment: _.toLower(process.env.NODE_ENV) || 'development',
       environments: {},
       admin: {},
       paths: {
@@ -82,18 +88,14 @@ class Strapi extends EventEmitter {
       functions: {},
       routes: {},
     };
-
-    // Bind context functions.
-    this.loadFile = utils.loadFile.bind(this);
   }
 
   async start(config = {}, cb) {
     try {
-      this.config = assign(this.config, config);
+      this.config = _.assign(this.config, config);
 
       // Emit starting event.
       this.emit('server:starting');
-
       // Load the app.
       await this.load();
       // Run bootstrap function.
@@ -106,17 +108,17 @@ class Strapi extends EventEmitter {
       utils.init.call(this);
       // Launch server.
       this.server.listen(this.config.port, async err => {
-        if (err) {
-          this.log.debug(`⚠️ Server wasn't able to start properly.`);
-          this.log.error(err);
-          return this.stop();
-        }
+        if (err) return this.stopWithError(err);
 
         this.log.info('Time: ' + new Date());
-        this.log.info('Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms');
+        this.log.info(
+          'Launched in: ' + (Date.now() - this.config.launchedAt) + ' ms'
+        );
         this.log.info('Environment: ' + this.config.environment);
         this.log.info('Process PID: ' + process.pid);
-        this.log.info(`Version: ${this.config.info.strapi} (node v${this.config.info.node})`);
+        this.log.info(
+          `Version: ${this.config.info.strapi} (node v${this.config.info.node})`
+        );
         this.log.info('To shut down your server, press <CTRL> + C at any time');
         console.log();
         this.log.info(`☄️  Admin panel: ${this.config.admin.url}`);
@@ -132,21 +134,37 @@ class Strapi extends EventEmitter {
 
         if (
           (this.config.environment === 'development' &&
-            get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
+            _.get(
+              this.config.currentEnvironment,
+              'server.admin.autoOpen',
+              true
+            ) !== false) ||
           this.config.init
         ) {
           await utils.openBrowser.call(this);
         }
       });
     } catch (err) {
-      this.log.debug(`⛔️ Server wasn't able to start properly.`);
-      this.log.error(err);
-      console.log(err);
-      this.stop();
+      this.stopWithError(err);
     }
   }
 
+  /**
+   * Add behaviors to the server
+   */
   async enhancer() {
+    // handle port in use cleanly
+    this.server.on('error', err => {
+      if (err.code === 'EADDRINUSE') {
+        return this.stopWithError(
+          `The port ${err.port} is already used by another application.`
+        );
+      }
+
+      this.log.error(err);
+    });
+
+    // Close current connections to fully destroy the server
     const connections = {};
 
     this.server.on('connection', conn => {
@@ -158,17 +176,6 @@ class Strapi extends EventEmitter {
       });
     });
 
-    this.server.on('error', err => {
-      if (err.code === 'EADDRINUSE') {
-        this.log.debug(`⛔️ Server wasn't able to start properly.`);
-        this.log.error(`The port ${err.port} is already used by another application.`);
-        this.stop();
-        return;
-      }
-
-      console.error(err);
-    });
-
     this.server.destroy = cb => {
       this.server.close(cb);
 
@@ -178,6 +185,12 @@ class Strapi extends EventEmitter {
     };
   }
 
+  stopWithError(err) {
+    this.log.debug(`⛔️ Server wasn't able to start properly.`);
+    this.log.error(err);
+    return this.stop();
+  }
+
   stop() {
     // Destroy server and available connections.
     this.server.destroy();
@@ -185,7 +198,11 @@ class Strapi extends EventEmitter {
     if (
       cluster.isWorker &&
       this.config.environment === 'development' &&
-      get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true
+      _.get(
+        this.config,
+        'currentEnvironment.server.autoReload.enabled',
+        true
+      ) === true
     ) {
       process.send('stop');
     }
@@ -206,20 +223,47 @@ class Strapi extends EventEmitter {
       }
     });
 
-    // Create AST.
-    await Promise.all([nestedConfigurations.call(this), apis.call(this), middlewares.call(this), hooks.call(this)]);
+    this.config.info = require(path.resolve(
+      this.config.appPath,
+      'package.json'
+    ));
+
+    this.config.installedPlugins = Object.keys(
+      this.config.info.dependencies
+    ).filter(d => d.startsWith('strapi-plugin'));
+
+    this.config.installedMiddlewares = Object.keys(
+      this.config.info.dependencies
+    ).filter(d => d.startsWith('strapi-middleware'));
+
+    this.config.installedHooks = Object.keys(
+      this.config.info.dependencies
+    ).filter(d => d.startsWith('strapi-hook'));
+
+    // load configs
+    _.merge(this, await loadConfigs(this.config));
+    // load apis
+    _.merge(this, await loadApis(this.config));
+
+    // load middlewares
+    const { middlewares, koaMiddlewares } = await loadMiddlewares(this.config);
+    this.middleware = middlewares;
+    this.koaMiddlewares = koaMiddlewares;
+
+    // load hooks
+    this.hook = await loadHooks(this.config);
 
     // Populate AST with configurations.
     await appConfigurations.call(this);
-
     // Usage.
-    await utils.usage.call(this);
-
+    await utils.usage(this.config);
     // Init core store
     await store.call(this);
-
     // Initialize hooks and middlewares.
-    await Promise.all([initializeMiddlewares.call(this), initializeHooks.call(this)]);
+    await Promise.all([
+      initializeMiddlewares.call(this),
+      initializeHooks.call(this),
+    ]);
 
     // Harmonize plugins configuration.
     await plugins.call(this);
@@ -241,7 +285,11 @@ class Strapi extends EventEmitter {
       if (
         cluster.isWorker &&
         this.config.environment === 'development' &&
-        get(this.config, 'currentEnvironment.server.autoReload.enabled', true) === true
+        _.get(
+          this.config,
+          'currentEnvironment.server.autoReload.enabled',
+          true
+        ) === true
       ) {
         this.server.close();
         process.send('reload');
@@ -270,48 +318,57 @@ class Strapi extends EventEmitter {
   }
 
   async bootstrap() {
-    const execBootstrap = fn =>
-      !fn
-        ? Promise.resolve()
-        : new Promise((resolve, reject) => {
-            const timeoutMs = this.config.bootstrapTimeout || 3500;
-            const timer = setTimeout(() => {
-              this.log.warn(`Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`);
-              this.log.warn('Perhaps you forgot to call it?');
-            }, timeoutMs);
+    const execBootstrap = fn => {
+      if (!fn) return Promise.resolve();
 
-            let ranBootstrapFn = false;
+      return new Promise((resolve, reject) => {
+        const timeoutMs = this.config.bootstrapTimeout || 3500;
+        const timer = setTimeout(() => {
+          this.log.warn(
+            `The bootstrap function is taking unusually long to execute (${timeoutMs} miliseconds).`
+          );
+          this.log.warn('Make sure you call it?');
+        }, timeoutMs);
 
-            try {
-              fn(err => {
-                if (ranBootstrapFn) {
-                  this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
+        let ranBootstrapFn = false;
 
-                  return reject();
-                }
+        try {
+          fn(err => {
+            if (ranBootstrapFn) {
+              this.log.error(
+                'You called the callback in `strapi.config.boostrap` more than once!'
+              );
 
-                ranBootstrapFn = true;
-                clearTimeout(timer);
-
-                return resolve(err);
-              });
-            } catch (e) {
-              if (ranBootstrapFn) {
-                this.log.error('The bootstrap function threw an error after its callback was called.');
-
-                return reject(e);
-              }
-
-              ranBootstrapFn = true;
-              clearTimeout(timer);
-
-              return resolve(e);
+              return reject();
             }
-          });
 
-    return Promise.all(Object.values(this.plugins).map(x => execBootstrap(get(x, 'config.functions.bootstrap')))).then(
-      () => execBootstrap(this.config.functions.bootstrap),
-    );
+            ranBootstrapFn = true;
+            clearTimeout(timer);
+
+            return resolve(err);
+          });
+        } catch (e) {
+          if (ranBootstrapFn) {
+            this.log.error(
+              'The bootstrap function threw an error after its callback was called.'
+            );
+
+            return reject(e);
+          }
+
+          ranBootstrapFn = true;
+          clearTimeout(timer);
+
+          return resolve(e);
+        }
+      });
+    };
+
+    return Promise.all(
+      Object.values(this.plugins).map(plugin =>
+        execBootstrap(_.get(plugin, 'config.functions.bootstrap'))
+      )
+    ).then(() => execBootstrap(this.config.functions.bootstrap));
   }
 
   async freeze() {
@@ -321,7 +378,7 @@ class Strapi extends EventEmitter {
     delete this.propertiesToNotFreeze;
 
     return Object.keys(this)
-      .filter(x => !includes(propertiesToNotFreeze, x))
+      .filter(x => !_.includes(propertiesToNotFreeze, x))
       .forEach(key => {
         Object.freeze(this[key]);
       });
@@ -329,17 +386,18 @@ class Strapi extends EventEmitter {
 
   query(entity, plugin) {
     if (!entity) {
-      return this.log.error(`You can't call the query method without passing the model's name as a first argument.`);
+      return this.log.error(
+        `You can't call the query method without passing the model's name as a first argument.`
+      );
     }
 
     const model = entity.toLowerCase();
 
     let Model;
-
     if (plugin === 'admin') {
-      Model = get(strapi.admin, ['models', model], undefined);
+      Model = _.get(strapi.admin, ['models', model], undefined);
     } else {
-      Model = get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+      Model = _.get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
     }
 
     if (!Model) {
@@ -349,7 +407,9 @@ class Strapi extends EventEmitter {
     const connector = Model.orm;
 
     if (!connector) {
-      return this.log.error(`Impossible to determine the use ORM for the model ${model}.`);
+      return this.log.error(
+        `Impossible to determine the use ORM for the model ${model}.`
+      );
     }
 
     // Get stack trace.
@@ -361,7 +421,9 @@ class Strapi extends EventEmitter {
     let pluginPath = undefined;
 
     if (file.indexOf('strapi-plugin-') !== -1) {
-      pluginPath = file.split(path.sep).filter(x => x.indexOf('strapi-plugin-') !== -1)[0];
+      pluginPath = file
+        .split(path.sep)
+        .filter(x => x.indexOf('strapi-plugin-') !== -1)[0];
     } else if (file.indexOf(path.sep + 'plugins' + path.sep) !== -1) {
       const pathTerms = file.split(path.sep);
       const index = pathTerms.indexOf('plugins');
@@ -374,18 +436,22 @@ class Strapi extends EventEmitter {
     }
 
     if (!pluginPath) {
-      return this.log.error('Impossible to find the plugin where `strapi.query` has been called.');
+      return this.log.error(
+        'Impossible to find the plugin where `strapi.query` has been called.'
+      );
     }
 
     // Get plugin name.
     const pluginName = pluginPath.replace('strapi-plugin-', '').toLowerCase();
     const queries =
       pluginPath === 'admin'
-        ? get(this.admin, `config.queries.${connector}`)
-        : get(this.plugins, `${pluginName}.config.queries.${connector}`);
+        ? _.get(this.admin, `config.queries.${connector}`)
+        : _.get(this.plugins, `${pluginName}.config.queries.${connector}`);
 
     if (!queries) {
-      return this.log.error(`There is no query available for the model ${model}.`);
+      return this.log.error(
+        `There is no query available for the model ${model}.`
+      );
     }
 
     // Bind queries with the current model to allow the use of `this`.

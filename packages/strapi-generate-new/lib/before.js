@@ -41,7 +41,15 @@ module.exports = (scope, cb) => {
     email: process.env.EMAIL || '',
     year: (new Date()).getFullYear(),
     license: 'MIT',
-    database: {}
+    database: {},
+    additionalsDependencies: [
+      'strapi-plugin-settings-manager',
+      'strapi-plugin-content-type-builder',
+      'strapi-plugin-content-manager',
+      'strapi-plugin-users-permissions',
+      'strapi-plugin-email',
+      'strapi-plugin-upload',
+    ]
   });
 
   // Make changes to the rootPath where the Strapi project will be created.
@@ -133,7 +141,7 @@ module.exports = (scope, cb) => {
 
     scope.quick = answers.type === 'quick' || scope.quick;
     const isQuick = scope.quick;
-    
+
     if (isQuick) {
       answers.client = databaseChoices[0].value;
     }
@@ -307,7 +315,7 @@ module.exports = (scope, cb) => {
           cmd += ` strapi-hook-knex@${scope.strapiPackageJSON.version}`;
           linkNodeModulesCommand += ` && npm link strapi-hook-knex`;
 
-          scope.additionalsDependencies = ['strapi-hook-knex', 'knex'];
+          scope.additionalsDependencies = scope.additionalsDependencies.concat(['strapi-hook-knex', 'knex']);
         }
 
         if (isQuick) {
@@ -315,6 +323,7 @@ module.exports = (scope, cb) => {
 
           return resolve();
         }
+
 
         shell.exec(cmd, { silent: true }, () => {
           if (scope.client.module) {
@@ -352,7 +361,7 @@ module.exports = (scope, cb) => {
         console.log(`The app has been connected to the database ${green('successfully')}!`);
         console.log();
       }
-      
+
       if (isQuick) {
         trackSuccess('didChooseQuickstart', scope);
       } else {

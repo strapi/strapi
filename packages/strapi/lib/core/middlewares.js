@@ -1,189 +1,122 @@
 'use strict';
 
 // Dependencies.
+const fs = require('fs-extra');
 const path = require('path');
-const glob = require('glob');
-const { parallel } = require('async');
-const { upperFirst, lowerFirst, endsWith } = require('lodash');
+const slash = require('slash');
+const _ = require('lodash');
+const glob = require('../load/glob');
+const findPackagePath = require('../load/package-path');
 
-module.exports = function() {
-  this.middleware = {};
-  this.koaMiddlewares = {};
+const MIDDLEWARE_PREFIX = 'strapi-middleware';
 
-  return Promise.all([
-    new Promise((resolve, reject) => {
-      const cwd = path.resolve(__dirname, '..', '..');
+const requiredMiddlewares = {
+  kcors: 'kcors',
+  body: 'koa-body',
+  compose: 'koa-compose',
+  compress: 'koa-compress',
+  convert: 'koa-convert',
+  favicon: 'koa-favicon',
+  i18n: 'koa-i18n',
+  ip: 'koa-ip',
+  locale: 'koa-locale',
+  lusca: 'koa-lusca',
+  routerJoi: 'koa-router-joi',
+  session: 'koa-session',
+  static: 'koa-static',
+};
 
-      glob(
-        './node_modules/*(koa-*|kcors)',
-        {
-          cwd
-        },
-        (err, files) => {
-          if (err) {
-            return reject(err);
-          }
+module.exports = async function(config) {
+  const { installedMiddlewares, installedPlugins, appPath } = config;
 
-          requireMiddlewares.call(this, files, cwd)(resolve, reject);
-        }
-      );
-    }),
-    new Promise((resolve, reject) => {
-      const cwd = this.config.appPath;
+  let middlewares = {};
+  let koaMiddlewares = {};
 
-      glob(
-        './node_modules/*(koa-*|kcors)',
-        {
-          cwd
-        },
-        (err, files) => {
-          if (err) {
-            return reject(err);
-          }
+  Object.keys(requiredMiddlewares).forEach(key => {
+    Object.defineProperty(koaMiddlewares, key, {
+      configurable: false,
+      enumerable: true,
+      get: () => require(requiredMiddlewares[key]),
+    });
+  });
 
-          requireMiddlewares.call(this, files, cwd)(resolve, reject);
-        }
-      );
-    }),
-    new Promise((resolve, reject) => {
-      const cwd = this.config.appPath;
-
-      glob(
-        './node_modules/*(strapi-middleware-*)/*/*(index|defaults).*(js|json)',
-        {
-          cwd
-        },
-        (err, files) => {
-          if (err) {
-            return reject(err);
-          }
-
-          mountMiddlewares.call(this, files, cwd)(resolve, reject);
-        }
-      );
-    }),
-    new Promise((resolve, reject) => {
-      const cwd = path.resolve(__dirname, '..', 'middlewares');
-
-      glob(
-        './*/*(index|defaults).*(js|json)',
-        {
-          cwd
-        },
-        (err, files) => {
-          if (err) {
-            return reject(err);
-          }
-
-          mountMiddlewares.call(this, files, cwd)(resolve, reject);
-        }
-      );
-    }),
-    new Promise((resolve, reject) => {
-      const cwd = path.resolve(this.config.appPath, 'middlewares');
-
-      glob(
-        './*/*(index|defaults).*(js|json)',
-        {
-          cwd
-        },
-        (err, files) => {
-          if (err) {
-            return reject(err);
-          }
-
-          mountMiddlewares.call(this, files, cwd)(resolve, reject);
-        }
-      );
-    }),
-    new Promise((resolve, reject) => {
-      const cwd = path.resolve(this.config.appPath, 'plugins');
-
-      glob(
-        './*/middlewares/*/*(index|defaults).*(js|json)',
-        {
-          cwd
-        },
-        (err, files) => {
-          if (err) {
-            return reject(err);
-          }
-
-          mountMiddlewares.call(this, files, cwd, true)(resolve, reject);
-        }
-      );
-    })
+  await Promise.all([
+    loadMiddlewareDependencies(installedMiddlewares, middlewares),
+    // internal middlewares
+    loadMiddlewaresInDir(
+      path.resolve(__dirname, '..', 'middlewares'),
+      middlewares
+    ),
+    // local middleware
+    loadMiddlewaresInDir(path.resolve(appPath, 'middlewares'), middlewares),
+    // plugins middlewares
+    loadPluginsMiddlewares(installedPlugins, middlewares),
+    // local plugin middlewares
+    loadLocalPluginsMiddlewares(appPath, middlewares),
   ]);
+
+  return {
+    middlewares,
+    koaMiddlewares,
+  };
 };
 
-const requireMiddlewares = function (files, cwd) {
-  return (resolve, reject) =>
-    parallel(
-      files.map(p => cb => {
-        const extractStr = p
-          .split('/')
-          .pop()
-          .replace(/^koa(-|\.)/, '')
-          .split('-');
+const loadMiddlewaresInDir = async (dir, middlewares) => {
+  const files = await glob('*/*(index|defaults).*(js|json)', {
+    cwd: dir,
+  });
 
-        const name = lowerFirst(
-          extractStr.length === 1
-            ? extractStr[0]
-            : extractStr.map(p => upperFirst(p)).join('')
-        );
-
-        // Lazy loading.
-        if (!this.koaMiddlewares.hasOwnProperty(name)) {
-          Object.defineProperty(this.koaMiddlewares, name, {
-            configurable: false,
-            enumerable: true,
-            get: () => require(path.resolve(cwd, p))
-          });
-        }
-
-        cb();
-      }),
-      err => {
-        if (err) {
-          return reject(err);
-        }
-
-        resolve();
-      }
-    );
+  files.forEach(f => {
+    const name = slash(f).split('/')[0];
+    mountMiddleware(name, [path.resolve(dir, f)], middlewares);
+  });
 };
 
-const mountMiddlewares = function (files, cwd, isPlugin) {
-  return (resolve, reject) =>
-    parallel(
-      files.map(p => cb => {
-        const folders = p.replace(/^.\/node_modules\/strapi-middleware-/, './')
-          .split('/');
-        const name = isPlugin ? folders[folders.length - 2] : folders[1];
+const loadPluginsMiddlewares = async (plugins, middlewares) => {
+  for (let pluginName of plugins) {
+    const dir = path.resolve(findPackagePath(pluginName), 'middlewares');
+    await loadMiddlewaresInDir(dir, middlewares);
+  }
+};
 
-        this.middleware[name] = this.middleware[name] || {
-          loaded: false
-        };
+const loadLocalPluginsMiddlewares = async (appPath, middlewares) => {
+  const pluginsFolder = path.resolve(appPath, 'plugins');
+  const pluginsFolders = await fs.readdir(pluginsFolder);
 
-        if (endsWith(p, 'index.js') && !this.middleware[name].load) {
-          // Lazy loading.
-          Object.defineProperty(this.middleware[name], 'load', {
-            configurable: false,
-            enumerable: true,
-            get: () => require(path.resolve(cwd, p))(this)
-          });
-        } else if (endsWith(p, 'defaults.json')) {
-          this.middleware[name].defaults = require(path.resolve(cwd, p));
-        }
+  for (let pluginFolder of pluginsFolders) {
+    const dir = path.resolve(pluginsFolder, pluginFolder, 'middlewares');
+    await loadMiddlewaresInDir(dir, middlewares);
+  }
+};
 
-        cb();
-      }),
-      err => {
-        if (err) {
-          return reject(err);
-        }
+const loadMiddlewareDependencies = async (packages, middlewares) => {
+  for (let packageName of packages) {
+    const baseDir = path.dirname(require.resolve(packageName));
+    const files = await glob('*(index|defaults).*(js|json)', {
+      cwd: baseDir,
+      absolute: true,
+    });
 
-        resolve();
-      }
-    );
+    const name = packageName.substring(MIDDLEWARE_PREFIX.length + 1);
+    mountMiddleware(name, files, middlewares);
+  }
+};
+
+const mountMiddleware = (name, files, middlewares) => {
+  files.forEach(file => {
+    middlewares[name] = middlewares[name] || { loaded: false };
+
+    if (_.endsWith(file, 'index.js') && !middlewares[name].load) {
+      return Object.defineProperty(middlewares[name], 'load', {
+        configurable: false,
+        enumerable: true,
+        get: () => require(file)(strapi),
+      });
+    }
+
+    if (_.endsWith(file, 'defaults.json')) {
+      middlewares[name].defaults = require(file);
+      return;
+    }
+  });
 };

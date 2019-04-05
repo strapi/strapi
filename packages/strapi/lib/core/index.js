@@ -1,20 +1,20 @@
 'use strict';
 
-const { nested, app } = require('./configurations');
-const apis = require('./apis');
-const middlewares = require('./middlewares');
-const hooks = require('./hooks');
+const { loadConfigs, app } = require('./configurations');
+const loadApis = require('./apis');
+const loadMiddlewares = require('./middlewares');
+const loadHooks = require('./hooks');
 const plugins = require('./plugins');
 const admin = require('./admin');
 const store = require('./store');
 
 module.exports = {
-  nestedConfigurations: nested,
+  loadConfigs,
+  loadMiddlewares,
+  loadHooks,
+  loadApis,
   appConfigurations: app,
-  apis,
-  middlewares,
-  hooks,
   plugins,
   admin,
-  store
+  store,
 };

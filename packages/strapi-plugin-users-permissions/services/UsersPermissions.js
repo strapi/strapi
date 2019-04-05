@@ -1,6 +1,6 @@
 'use strict';
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const _ = require('lodash');
 const request = require('request');
@@ -611,24 +611,15 @@ module.exports = {
   },
 
   writeActions: (data, cb) => {
-    const actionsPath = path.join(
-      strapi.config.appPath,
-      'plugins',
-      'users-permissions',
-      'config',
-      'actions.json',
-    );
+    const actionsPath = path.join(strapi.config.appPath, 'extensions', 'users-permissions', 'config', 'actions.json');
 
     try {
       // Disable auto-reload.
       strapi.reload.isWatching = false;
       if (!strapi.config.currentEnvironment.server.production) {
         // Rewrite actions.json file.
-        fs.writeFileSync(
-          actionsPath,
-          JSON.stringify({ actions: data }),
-          'utf8',
-        );
+        fs.ensureFileSync(actionsPath);
+        fs.writeFileSync(actionsPath, JSON.stringify({ actions: data }), 'utf8');
       }
       // Set value to AST to avoid restart.
       _.set(strapi.plugins['users-permissions'], 'config.actions', data);
