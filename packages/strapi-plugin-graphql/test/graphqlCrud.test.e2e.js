@@ -314,7 +314,6 @@ describe('Test Graphql API End to End', () => {
               post {
                 id
                 name
-                bigint
               }
             }
           }
