@@ -249,14 +249,12 @@ describe('Test Graphql API End to End', () => {
       [
         {
           name_in: ['post 1', 'post 2'],
-          bigint_in: [1316130638171, 1416130639261],
         },
         postsPayload,
       ],
       [
         {
           name_nin: ['post 2'],
-          bigint_nin: [1416130639261],
         },
         [postsPayload[0]],
       ],
