@@ -145,7 +145,7 @@ module.exports = {
       Upload: GraphQLUpload,
     });
 
-    return 'scalar JSON \n scalar DateTime \n scalar Upload';
+    return 'scalar JSON \n scalar DateTime \n scalar Long \n scalar Upload';
   },
 
   /**
