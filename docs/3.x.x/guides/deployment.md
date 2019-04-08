@@ -1,8 +1,10 @@
 # Deployment
 
-Strapi gives you many possible deployment options for your project or application. Strapi can be deployed on traditional hosting servers or services such as Heroku, AWS, Azure and others. The following documentation covers how to develop locally with Strapi and deploy Strapi with various hosting options. 
+Strapi gives you many possible deployment options for your project or application. Strapi can be deployed on traditional hosting servers or services such as Heroku, AWS, Azure and others. The following documentation covers how to develop locally with Strapi and deploy Strapi with various hosting options.
 
-(Deploying **databases** along with Strapi is covered in the [Database Guide](/3.x.x/guides/database.html).)
+
+
+(Deploying **databases** along with Strapi is covered in the [Database Guide](/3.x.x/guides/databases.html).)
 
 **Table of contents:**
 
@@ -86,7 +88,7 @@ If you want to host the administration on another server than the API, [please t
 
 ## Heroku
 
-This is a step-by-step guide for deploying a Strapi project on [Heroku](https://www.heroku.com/). Databases that work well with Strapi and Heroku are provided instructions below for connecting to them.  
+This is a step-by-step guide for deploying a Strapi project on [Heroku](https://www.heroku.com/). Databases that work well with Strapi and Heroku are provided instructions on how to get started.
 
 ### Heroku Install Requirements
 
@@ -143,7 +145,9 @@ Follow the instructions and return to your command line.
 Create a [new Strapi project](/3.x.x/getting-started/quick-start.html) (if you want to deploy an existing project go to step 4).
 
 ::: warning NOTE
-If you will use a **MongoDB database** with your project, [create a Strapi project with MongoDB set-up locally](/3.x.x/guides/database.html#install-mongodb-locally) and go to step 4.
+
+If you plan to use **MongoDB** with your project, [refer to the create a Strapi project with MongoDB section of the documentation](/3.x.x/guides/databases.html#install-mongodb-locally) then, jump to step 4.
+
 :::
 
 `Path: ./`
@@ -185,9 +189,9 @@ heroku git:remote -a your-heroku-app-name
 ```
 :::
 
-Your local development environment is now set-up and configured to work with Heroku. You have a new Strapi and a new Heroku app ready to be configured to work with a database and with each other.
+Your local development environment is now set-up and configured to work with Heroku. You have a new Strapi project and a new Heroku app ready to be configured to work with a database and with each other.
 
-### 6. Complete the Strapi project and Database set-up
+### 6. Heroku Database set-up
 
 Below you will find database options when working with Heroku.  Please choose the correct database (e.g. PostgreSQL, MongoDB, etc.) and follow those instructions.
 
@@ -225,7 +229,7 @@ This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:
 
 ##### 3. Set environment variables
 
-Strapi expects a variable for each database connection detail (host, username, etc.). So, from the url above, you have to set several environment variables in the Heroku config:
+Strapi expects a variable for each database connection configuration (host, username, etc.). So, from the url above, you have to set several environment variables in the Heroku config:
 
 ```bash
 heroku config:set DATABASE_USERNAME=ebitxebvixeeqd
@@ -283,12 +287,12 @@ npm install pg --save
 
 Please follow these steps the **deploy a Strapi app with MongoDB on Heroku**.
 
-You must have completed the [steps to use Strapi with MongoDB Atlas in production](/3.x.x/guides/database.html#install-on-atlas-mongodb-atlas).
+You must have completed the [steps to use Strapi with MongoDB Atlas in production](/3.x.x/guides/databases.html#install-on-atlas-mongodb-atlas).
 
 
 ##### 1. Set environment variables
 
-When you [set-up your MongoDB Atlas database](/3.x.x/guides/database.html#install-on-atlas-mongodb-atlas) you created and noted the five key/value pairs that correspond to your **MongoDB Atlas** database. These five keys are: `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE PORT`, and `DATABASE_HOST`.
+When you [set-up your MongoDB Atlas database](/3.x.x/guides/databases.html#install-on-atlas-mongodb-atlas) you created and noted the five key/value pairs that correspond to your **MongoDB Atlas** database. These five keys are: `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE PORT`, and `DATABASE_HOST`.
   
 Strapi expects a variable for each database connection detail (host, username, etc.). So, from **MongoDB Atlas**, you have to set the environment variables in the Heroku config (for **DATABASE_HOST** you need to surround the URL with **""**, and set **DATABASE_PORT** to nothing):
 
@@ -367,7 +371,7 @@ For security reasons, the Content Type Builder plugin is disabled in production.
 
 ### Project updates
 
-You can continue developing your application with Strapi and Heroku by making changes on your computer and then using Git to commit and push those changes. After Heroku applies your changes, you can open your app.
+As you continue developing your application with Strapi, you may want to use [version control](https://devcenter.heroku.com/articles/github-integration), or you can continue to use `Git push heroku master` to commit and push changes to Heroku directly.
 
 `Path: ./my-project/`
 
