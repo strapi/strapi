@@ -156,6 +156,8 @@ If you plan to use **MongoDB** with your project, [refer to the create a Strapi 
 strapi new my-project --quickstart
 ```
 
+**Note:** When you use `--quickstart` to create a Strapi project locally, a **SQLite database** is used which is not compatible with Heroku. Therefore, another database option [must be chosen](#_6-heroku-database-set-up).
+
 ### 4. Init a Git repository and commit your project
 
 `Path: ./my-project/`
@@ -193,7 +195,7 @@ Your local development environment is now set-up and configured to work with Her
 
 ### 6. Heroku Database set-up
 
-Below you will find database options when working with Heroku.  Please choose the correct database (e.g. PostgreSQL, MongoDB, etc.) and follow those instructions.
+Below you will find database options when working with Heroku.  Please choose the correct database (e.g. PostgreSQL, MongoDB, etc.) and follow those instructions. 
 
 :::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
 
@@ -223,7 +225,7 @@ The add-on automatically exposes the database credentials into a single environm
 heroku config
 ```
 
-This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:dc59b16dedb3a1eef84d4999a0be041bd419c474cd4a0973efc7c9339afb4baf@ec2-50-37-231-192.compute-2.amazonaws.com:5432/d516fp1u21ph7b`.
+This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:dc59b16dedb3a1eef84d4999b4baf@ec2-50-37-231-192.compute-2.amazonaws.com: 5432/d516fp1u21ph7b`.
 
 (This url is read like so: *postgres:// **USERNAME** : **PASSWORD** @ **HOST** : **PORT** : **DATABASE_NAME***)
 
