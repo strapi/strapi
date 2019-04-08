@@ -18,7 +18,6 @@ import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 
 import '../../styles/main.scss';
 
-// import AdminPage from '../AdminPage';
 import Admin from '../Admin';
 import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
@@ -39,10 +38,10 @@ function App(props) {
             <div className={styles.container}>
               <Switch>
                 <Route
-                  path='/'
+                  path="/"
                   render={router => <Admin {...props} {...router} />}
                 />
-                <Route path='' component={NotFoundPage} />
+                <Route path="" component={NotFoundPage} />
               </Switch>
             </div>
           );

@@ -54,7 +54,7 @@ export function* deleteModel({
       const appMenu = get(
         appPlugins,
         ['content-manager', 'leftMenuSections'],
-        [],
+        [{ links: [] }],
       );
       const updatedMenu = appMenu[0].links.filter(
         el => el.destination !== modelName,

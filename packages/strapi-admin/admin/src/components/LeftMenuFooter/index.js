@@ -15,7 +15,6 @@ import messages from './messages.json';
 defineMessages(messages);
 
 function LeftMenuFooter({ version, ...rest }) {
-  // eslint-disable-line react/prefer-stateless-function
   const staticLinks = [
     {
       icon: 'book',
@@ -28,6 +27,7 @@ function LeftMenuFooter({ version, ...rest }) {
       destination: 'https://strapi.io/help',
     },
   ];
+
   return (
     <div className={styles.leftMenuFooter}>
       <ul className={styles.list}>
@@ -44,7 +44,8 @@ function LeftMenuFooter({ version, ...rest }) {
         <FormattedMessage {...messages.poweredBy} key="poweredBy" />
         <a key="website" href="https://strapi.io" target="_blank">
           Strapi
-        </a>{' '}
+        </a>
+        &nbsp;
         <a
           href={`https://github.com/strapi/strapi/releases/tag/v${version}`}
           key="github"

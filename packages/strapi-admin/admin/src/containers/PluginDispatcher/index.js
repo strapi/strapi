@@ -32,6 +32,7 @@ export function PluginDispatcher(props) {
     ? BlockerComponent
     : mainComponent;
 
+  // Change the plugin's blockerComponent if the plugin uses a custom one.
   if (preventComponentRendering && pluginToRender.blockerComponent) {
     PluginEntryComponent = pluginToRender.blockerComponent;
   }
@@ -47,9 +48,14 @@ export function PluginDispatcher(props) {
 }
 
 PluginDispatcher.defaultProps = {};
+
 PluginDispatcher.propTypes = {
   global: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      pluginId: PropTypes.string,
+    }),
+  }).isRequired,
 };
 
 export default memo(PluginDispatcher);

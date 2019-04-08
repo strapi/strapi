@@ -99,17 +99,19 @@ export class Admin extends React.Component {
   componentDidUpdate(prevProps) {
     const {
       admin: { didGetSecuredData, isLoading, isSecured },
+      getHook,
+      getSecuredData,
       location: { pathname },
     } = this.props;
 
     if (!isLoading && this.state.shouldSecureAfterAllPluginsAreMounted) {
       if (!this.hasApluginNotReady(this.props)) {
-        this.props.getHook('willSecure');
+        getHook('willSecure');
       }
     }
 
     if (prevProps.location.pathname !== pathname) {
-      this.props.getHook('willSecure');
+      getHook('willSecure');
 
       /* istanbul ignore if */
       if (this.isAcceptingTracking()) {
@@ -120,11 +122,11 @@ export class Admin extends React.Component {
     }
 
     if (prevProps.admin.isSecured !== isSecured && isSecured) {
-      this.props.getSecuredData();
+      getSecuredData();
     }
 
     if (prevProps.admin.didGetSecuredData !== didGetSecuredData) {
-      this.props.getHook('didGetSecuredData');
+      getHook('didGetSecuredData');
     }
   }
 
