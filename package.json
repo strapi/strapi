@@ -65,8 +65,7 @@
     "test:unit": "FORCE_COLOR=true lerna run test --parallel",
     "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --runInBand --verbose --forceExit --detectOpenHandles",
     "test:generate-app": "node test/createTestApp.js",
-    "test:start-app": "node test/startTestApp.js",
-    "build": "node ./scripts/build.js"
+    "test:start-app": "node test/startTestApp.js"
   },
   "author": {
     "email": "hi@strapi.io",

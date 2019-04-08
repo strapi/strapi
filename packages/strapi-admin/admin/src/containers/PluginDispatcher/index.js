@@ -26,14 +26,20 @@ export function PluginDispatcher(props) {
     return null;
   }
 
-  const { mainComponent, name, preventComponentRendering } = pluginToRender;
-  const blockerComponentProps = pluginToRender.blockerComponentProps;
+  const {
+    blockerComponent,
+    blockerComponentProps,
+    mainComponent,
+    name,
+    preventComponentRendering,
+  } = pluginToRender;
   let PluginEntryComponent = preventComponentRendering
     ? BlockerComponent
     : mainComponent;
 
-  if (preventComponentRendering && pluginToRender.blockerComponent) {
-    PluginEntryComponent = pluginToRender.blockerComponent;
+  // Change the plugin's blockerComponent if the plugin uses a custom one.
+  if (preventComponentRendering && blockerComponent) {
+    PluginEntryComponent = blockerComponent;
   }
 
   return (
@@ -47,9 +53,14 @@ export function PluginDispatcher(props) {
 }
 
 PluginDispatcher.defaultProps = {};
+
 PluginDispatcher.propTypes = {
   global: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      pluginId: PropTypes.string,
+    }),
+  }).isRequired,
 };
 
 export default memo(PluginDispatcher);

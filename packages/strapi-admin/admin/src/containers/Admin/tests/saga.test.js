@@ -4,7 +4,6 @@
 
 /* eslint-disable redux-saga/yield-effects */
 import { all, fork, put, takeLatest } from 'redux-saga/effects';
-// import { take, call, put, select } from 'redux-saga/effects';
 import defaultSaga, { emitter, getData, getSecuredData } from '../saga';
 
 import { getInitDataSucceeded } from '../actions';
@@ -26,7 +25,7 @@ describe('getData Saga', () => {
     expect(callDescriptor).toMatchSnapshot();
   });
 
-  it('should dispatch the getInitDataSucceeded action it it requests the data successfully', () => {
+  it('should dispatch the getInitDataSucceeded action if it requests the data successfully', () => {
     const response = [
       { uuid: 'uuid' },
       { strapiVersion: 'beta' },

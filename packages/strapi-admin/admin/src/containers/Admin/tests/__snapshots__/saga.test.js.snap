@@ -60,7 +60,7 @@ Object {
 }
 `;
 
-exports[`getData Saga should dispatch the getInitDataSucceeded action it it requests the data successfully 1`] = `
+exports[`getData Saga should dispatch the getInitDataSucceeded action if it requests the data successfully 1`] = `
 Object {
   "@@redux-saga/IO": true,
   "ALL": Array [
