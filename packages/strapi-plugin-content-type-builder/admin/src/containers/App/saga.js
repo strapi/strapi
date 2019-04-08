@@ -73,9 +73,7 @@ export function* submitCT({
 
       const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
       const appMenu = get(appPlugins, ['content-manager', 'leftMenuSections'], []);
-      const oldContentTypeNameIndex = appMenu[0].links.findIndex(
-        el => el.destination === oldContentTypeName,
-      );
+      const oldContentTypeNameIndex = appMenu[0].links.findIndex(el => el.destination === oldContentTypeName);
       const updatedLink = { destination: name.toLowerCase(), label: capitalize(pluralize(name)) };
       appMenu[0].links.splice(oldContentTypeNameIndex, 1, updatedLink);
       appMenu[0].links = sortBy(appMenu[0].links, 'label');

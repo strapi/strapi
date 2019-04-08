@@ -350,6 +350,8 @@ export const formatModelAttributes = attributes =>
           acc2.params.enum = value.split('\n');
         } else if (value !== false) {
           acc2.params[curr] = value;
+        } else if (curr === 'configurable') {
+          acc2.params[curr] = value;
         }
 
         return acc2;
