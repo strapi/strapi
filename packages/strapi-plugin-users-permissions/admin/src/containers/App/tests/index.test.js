@@ -14,7 +14,7 @@ const renderComponent = properties =>
   mount(
     React.createElement(
       props => (
-        <IntlProvider locale='en' defaultLocale='en' messages={messages}>
+        <IntlProvider locale="en" defaultLocale="en" messages={messages}>
           <Router>
             <App {...props} />
           </Router>
@@ -50,7 +50,7 @@ describe('<App />', () => {
     renderedComponent.unmount();
   });
 
-  it('should not redirect the user on mount if the url more than two params', () => {
+  it('should not redirect the user on mount if the url has more than two params', () => {
     const otherProps = Object.assign(props, {
       location: { pathname: '/plugins/users-permissions/roles' },
     });
@@ -61,7 +61,7 @@ describe('<App />', () => {
     renderedComponent.unmount();
   });
 
-  it('should redirect the user on update if the url more has two params', () => {
+  it('should redirect the user on update if the url has more than two params', () => {
     const otherProps = Object.assign(props, {
       location: { pathname: '/plugins/users-permissions/roles' },
     });
@@ -74,7 +74,7 @@ describe('<App />', () => {
     renderedComponent.unmount();
   });
 
-  it('should n ot redirect the user on update if the url more has more than two params', () => {
+  it('should not redirect the user on update if the url more has more than two params', () => {
     const otherProps = Object.assign(props, {
       location: { pathname: '/plugins/users-permissions/roles' },
     });

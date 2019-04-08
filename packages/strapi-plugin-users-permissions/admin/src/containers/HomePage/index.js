@@ -72,8 +72,7 @@ export class HomePage extends React.Component {
 
   componentWillUpdate(nextProps) {
     const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced'];
-    const shouldRedirect =
-      allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
+    const shouldRedirect = allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
 
     if (shouldRedirect) {
       this.props.history.push('/404');
@@ -118,18 +117,13 @@ export class HomePage extends React.Component {
       this.context.emitEvent('willCreateRole');
       this.props.history.push(`${this.props.location.pathname}/create`);
     } else if (this.props.match.params.settingType === 'providers') {
-      this.props.history.push(
-        `${this.props.location.pathname}#add::${this.props.match.params.settingType}`,
-      );
+      this.props.history.push(`${this.props.location.pathname}#add::${this.props.match.params.settingType}`);
     }
   };
 
   handleSubmit = e => {
     e.preventDefault();
-    const modifiedObject = get(this.props.modifiedData, [
-      this.getEndPoint(),
-      this.props.dataToEdit,
-    ]);
+    const modifiedObject = get(this.props.modifiedData, [this.getEndPoint(), this.props.dataToEdit]);
     const initObject = get(this.props.initialData, [this.getEndPoint(), this.props.dataToEdit]);
     const formErrors = checkFormValidity(
       this.props.match.params.settingType,
@@ -194,16 +188,7 @@ export class HomePage extends React.Component {
   };
 
   render() {
-    console.log(this.props);
-    const {
-      data,
-      didCheckErrors,
-      formErrors,
-      modifiedData,
-      initialData,
-      match,
-      dataToEdit,
-    } = this.props;
+    const { data, didCheckErrors, formErrors, modifiedData, initialData, match, dataToEdit } = this.props;
     const headerActions =
       match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData)
         ? this.pluginHeaderActions
@@ -242,7 +227,7 @@ export class HomePage extends React.Component {
             {component}
           </div>
           <PopUpForm
-            actionType='edit'
+            actionType="edit"
             isOpen={this.state.showModalEdit}
             dataToEdit={dataToEdit}
             didCheckErrors={didCheckErrors}
