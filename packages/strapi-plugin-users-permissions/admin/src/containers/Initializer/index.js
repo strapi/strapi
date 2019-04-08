@@ -28,7 +28,7 @@ class Initializer extends React.Component {
 
     if (prevProps.shouldUpdate !== shouldUpdate) {
       // Emit the event 'pluginReady' so the app can start
-      updatePlugin('users-permissions', 'isReady', true);
+      updatePlugin(pluginId, 'isReady', true);
     }
   }
 
