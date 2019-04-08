@@ -3,13 +3,11 @@
  */
 
 /* eslint-disable redux-saga/yield-effects */
+
 import { fork, put, takeLatest } from 'redux-saga/effects';
-// import { take, call, put, select } from 'redux-saga/effects';
 import defaultSaga, { initialize } from '../saga';
 import { initializeSucceeded } from '../actions';
 import { INITIALIZE } from '../constants';
-
-// const generator = defaultSaga();
 
 describe('initialize Saga', () => {
   let initializeGenerator;

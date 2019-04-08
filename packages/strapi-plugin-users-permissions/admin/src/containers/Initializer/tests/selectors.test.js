@@ -2,8 +2,6 @@ import { fromJS } from 'immutable';
 import makeSelectInitializerDomain, { selectInitializerDomain } from '../selectors';
 import pluginId from '../../../pluginId';
 
-// const selector = makeSelectInitializerDomain();
-
 describe('<Initializer /> selectors', () => {
   describe('selectInitializerDomain', () => {
     it('should select the global state', () => {
