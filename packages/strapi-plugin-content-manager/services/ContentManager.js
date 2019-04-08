@@ -8,18 +8,15 @@ const _ = require('lodash');
 
 module.exports = {
   fetchAll: async (params, query) => {
-    const { limit, skip, sort, query : request, queryAttribute, source, populate = [] } = query;
-    const filters = strapi.utils.models.convertParams(params.model, query);
-    const { where = {} } = !_.isEmpty(request) ? strapi.utils.models.convertParams(params.model, request) : filters;
+    const { query: request, source, populate = [], ...filters } = query;
+
+    const queryFilter = !_.isEmpty(request) ? {
+      ...filters, // Filters is an object containing the limit/sort and start
+      ...request
+    } : filters;
 
     // Find entries using `queries` system
-    return await strapi.query(params.model, source).find({
-      limit: limit || filters.limit,
-      skip: skip || filters.start || 0,
-      sort: sort || filters.sort,
-      where,
-      queryAttribute,
-    }, populate);
+    return await strapi.query(params.model, source).find(queryFilter, populate);
   },
 
   search: async (params, query) => {
@@ -42,10 +39,9 @@ module.exports = {
   },
 
   count: async (params, query) => {
-    const { source } = query;
-    const filters = strapi.utils.models.convertParams(params.model, query);
+    const { source, ...filters } = query;
 
-    return await strapi.query(params.model, source).count({ where: filters.where });
+    return await strapi.query(params.model, source).count(filters);
   },
 
   fetch: async (params, source, populate, raw = true) => {
@@ -166,7 +162,8 @@ module.exports = {
     }
 
     params[primaryKey] = response[primaryKey];
-    params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
+    
+    params.values = Object.keys(response).reduce((acc, current) => {
       const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
 
       // Remove relationships.
@@ -201,8 +198,8 @@ module.exports = {
       return acc;
     }, []);
 
-    const filters = strapi.utils.models.convertParams(model, { [`${primaryKey}_in`]: toRemove });
-    const entries = await strapi.query(model, source).find({ where: filters.where }, null, true);
+    const filter = { [`${primaryKey}_in`]: toRemove };
+    const entries = await strapi.query(model, source).find(filter, null, true);
     const associations = strapi.query(model, source).associations;
 
     for (let i = 0; i < entries.length; ++i) {
