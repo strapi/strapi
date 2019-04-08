@@ -2,22 +2,15 @@ const jest = require('jest');
 
 module.exports = {
   collectCoverageFrom: [
-    'packages/strapi-plugin-content-type-builder/admin/src/**/**/*.js',
-    'packages/strapi-plugin-content-type-builder/admin/src/InjectedComponents/*.js',
-    'packages/strapi-plugin-content-type-builder/admin/src/InjectedComponents/tests/*.js',
+    'packages/strapi-admin/admin/src/**/**/*.js',
+    'packages/strapi-plugin-*/admin/src/**/**/*.js',
+    'packages/strapi-plugin-*/admin/src/InjectedComponents/*.js',
+    'packages/strapi-plugin-*/admin/src/InjectedComponents/tests/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/utils/*.js',
+    '!packages/strapi-plugin-*/admin/src/utils/*.js',
     '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
   ],
-  coverageThreshold: {
-    global: {
-      statements: 90,
-      branches: 90,
-      functions: 90,
-      lines: 90,
-    },
-  },
   globals: {
     __webpack_public_path__: 'http://localhost:4000',
     strapi: {},
