@@ -527,17 +527,6 @@ export class EditPage extends React.Component {
               }}
             />
           );
-
-          // return (
-          //   <li
-          //     key={compo.key}
-          //     onClick={() =>
-          //       this.context.emitEvent('willEditContentTypeFromEditView')
-          //     }
-          //   >
-          //     <Component {...this} {...compo.props} />
-          //   </li>
-          // );
         });
 
       return [...acc, ...compos];

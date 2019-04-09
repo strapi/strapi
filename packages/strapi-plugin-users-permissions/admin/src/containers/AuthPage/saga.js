@@ -19,16 +19,16 @@ export function* submitForm(action) {
 
     switch (formType) {
       case 'login':
-        requestURL = '/admin/local';
+        requestURL = '/admin/auth/local';
         break;
       case 'register':
-        requestURL = '/admin/local/register';
+        requestURL = '/admin/auth/local/register';
         break;
       case 'reset-password':
-        requestURL = '/admin/reset-password';
+        requestURL = '/admin/auth/reset-password';
         break;
       case 'forgot-password':
-        requestURL = '/admin/forgot-password';
+        requestURL = '/admin/auth/forgot-password';
         set(
           body,
           'url',

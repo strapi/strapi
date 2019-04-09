@@ -28,7 +28,7 @@ const postModel = {
 describe('Test Graphql API End to End', () => {
   beforeAll(async () => {
     await createRequest()({
-      url: '/auth/local/register',
+      url: '/admin/auth/local/register',
       method: 'POST',
       body: auth,
     }).catch(err => {

@@ -12,7 +12,7 @@ module.exports = {
   auth,
   login: async () => {
     const { body } = await rq({
-      url: '/auth/local',
+      url: '/admin/auth/local',
       method: 'POST',
       body: {
         identifier: auth.email,

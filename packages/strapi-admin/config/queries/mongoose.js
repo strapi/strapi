@@ -1,17 +1,28 @@
 const _ = require('lodash');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
+/* eslint-disable indent */
 module.exports = {
-  find: async function(params = {}, populate) {
-    return this.find(params.where)
-      .limit(Number(params.limit))
-      .sort(params.sort)
-      .skip(Number(params.skip))
-      .populate(populate || this.associations.map(x => x.alias).join(' '))
-      .lean();
+  find: async function(params, populate) {
+    const model = this;
+    const filters = convertRestQueryParams(params);
+
+    return buildQuery({
+      model,
+      filters,
+      populate: populate || model.associations.map(x => x.alias),
+    }).lean();
   },
 
-  count: async function(params = {}) {
-    return Number(await this.countDocuments(params));
+  count: async function(params) {
+    const model = this;
+
+    const filters = convertRestQueryParams(params);
+
+    return buildQuery({
+      model,
+      filters: { where: filters.where },
+    }).count();
   },
 
   findOne: async function(params, populate) {

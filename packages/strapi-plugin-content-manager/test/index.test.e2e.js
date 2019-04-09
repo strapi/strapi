@@ -18,7 +18,7 @@ let rq;
 describe('Content Manager End to End', () => {
   beforeAll(async () => {
     await createRequest()({
-      url: '/auth/local/register',
+      url: '/admin/auth/local/register',
       method: 'POST',
       body: auth,
     }).catch(err => {
@@ -198,7 +198,9 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/article/${
+          entry.id
+        }?source=content-manager`,
         method: 'PUT',
         formData: entry,
       });
@@ -221,7 +223,9 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/article/${
+          entry.id
+        }?source=content-manager`,
         method: 'PUT',
         formData: entry,
       });
@@ -242,7 +246,9 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/article/${
+          entry.id
+        }?source=content-manager`,
         method: 'PUT',
         formData: entry,
       });
@@ -264,7 +270,9 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/article/${
+          entry.id
+        }?source=content-manager`,
         method: 'PUT',
         formData: entry,
       });
@@ -298,10 +306,11 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: updatedTag } = await rq({
-        url: `/content-manager/explorer/tag/${createdTag.id}?source=content-manager`,
+        url: `/content-manager/explorer/tag/${
+          createdTag.id
+        }?source=content-manager`,
         method: 'GET',
       });
-
 
       const { body: article13 } = await rq({
         url: '/content-manager/explorer/article/?source=content-manager',
@@ -321,7 +330,9 @@ describe('Content Manager End to End', () => {
       expect(articles[1].tags.length).toBe(1);
 
       let { body: tagToGet } = await rq({
-        url: `/content-manager/explorer/tag/${createdTag.id}?source=content-manager`,
+        url: `/content-manager/explorer/tag/${
+          createdTag.id
+        }?source=content-manager`,
         method: 'GET',
       });
 
@@ -336,7 +347,9 @@ describe('Content Manager End to End', () => {
       });
 
       let { body: tagToGet2 } = await rq({
-        url: `/content-manager/explorer/tag/${createdTag.id}?source=content-manager`,
+        url: `/content-manager/explorer/tag/${
+          createdTag.id
+        }?source=content-manager`,
         method: 'GET',
       });
 
@@ -415,7 +428,9 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/article/${
+          entry.id
+        }?source=content-manager`,
         method: 'PUT',
         formData: entry,
       });
@@ -457,7 +472,9 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/article/${
+          entry.id
+        }?source=content-manager`,
         method: 'PUT',
         formData: entry,
       });
@@ -478,7 +495,9 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/category/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/category/${
+          entry.id
+        }?source=content-manager`,
         method: 'PUT',
         formData: entry,
       });
@@ -513,7 +532,9 @@ describe('Content Manager End to End', () => {
 
     test('Get article1 with cat3', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${data.articles[0].id}?source=content-manager`,
+        url: `/content-manager/explorer/article/${
+          data.articles[0].id
+        }?source=content-manager`,
         method: 'GET',
       });
 
@@ -523,7 +544,9 @@ describe('Content Manager End to End', () => {
 
     test('Get article2 with cat2', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${data.articles[1].id}?source=content-manager`,
+        url: `/content-manager/explorer/article/${
+          data.articles[1].id
+        }?source=content-manager`,
         method: 'GET',
       });
 
@@ -533,7 +556,9 @@ describe('Content Manager End to End', () => {
 
     test('Get cat1 without relations', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/category/${data.categories[0].id}?source=content-manager`,
+        url: `/content-manager/explorer/category/${
+          data.categories[0].id
+        }?source=content-manager`,
         method: 'GET',
       });
 
@@ -543,7 +568,9 @@ describe('Content Manager End to End', () => {
 
     test('Get cat2 with article2', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/category/${data.categories[1].id}?source=content-manager`,
+        url: `/content-manager/explorer/category/${
+          data.categories[1].id
+        }?source=content-manager`,
         method: 'GET',
       });
 
@@ -554,7 +581,9 @@ describe('Content Manager End to End', () => {
 
     test('Get cat3 with article1', async () => {
       let { body } = await rq({
-        url: `/content-manager/explorer/category/${data.categories[2].id}?source=content-manager`,
+        url: `/content-manager/explorer/category/${
+          data.categories[2].id
+        }?source=content-manager`,
         method: 'GET',
       });
 
@@ -614,7 +643,9 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
+        url: `/content-manager/explorer/article/${
+          entry.id
+        }?source=content-manager`,
         method: 'PUT',
         formData: entry,
       });
@@ -692,7 +723,9 @@ describe('Content Manager End to End', () => {
       expect(referenceToCreate.tag.id).toBe(tagToCreate.id);
 
       const { body: referenceToUpdate } = await rq({
-        url: `/content-manager/explorer/reference/${referenceToCreate.id}?source=content-manager`,
+        url: `/content-manager/explorer/reference/${
+          referenceToCreate.id
+        }?source=content-manager`,
         method: 'PUT',
         formData: {
           tag: null,
@@ -721,16 +754,21 @@ describe('Content Manager End to End', () => {
       });
 
       await rq({
-        url: `/content-manager/explorer/tag/${tagToCreate.id}?source=content-manager`,
+        url: `/content-manager/explorer/tag/${
+          tagToCreate.id
+        }?source=content-manager`,
         method: 'DELETE',
       });
 
       const { body: referenceToGet } = await rq({
-        url: `/content-manager/explorer/reference/${referenceToCreate.id}?source=content-manager`,
+        url: `/content-manager/explorer/reference/${
+          referenceToCreate.id
+        }?source=content-manager`,
         method: 'GET',
       });
 
-      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
+      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0)
+        return;
       expect(referenceToGet.tag).toBe(null);
     });
   });

@@ -23,7 +23,8 @@
       "type": "password",
       "minLength": 6,
       "configurable": false,
-      "private": true
+      "private": true,
+      "required": true
     },
     "resetPasswordToken": {
       "type": "string",

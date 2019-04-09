@@ -70,7 +70,7 @@ const labelModel = {
 describe('Test Graphql Relations API End to End', () => {
   beforeAll(async () => {
     await createRequest()({
-      url: '/auth/local/register',
+      url: '/admin/auth/local/register',
       method: 'POST',
       body: auth,
     }).catch(err => {
@@ -183,46 +183,49 @@ describe('Test Graphql Relations API End to End', () => {
       data.labels = res.body.data.labels;
     });
 
-    test.each(documentsPayload)('Create document linked to every labels %o', async document => {
-      const res = await graphqlQuery({
-        query: /* GraphQL */ `
-          mutation createDocument($input: createDocumentInput) {
-            createDocument(input: $input) {
-              document {
-                name
-                labels {
-                  id
+    test.each(documentsPayload)(
+      'Create document linked to every labels %o',
+      async document => {
+        const res = await graphqlQuery({
+          query: /* GraphQL */ `
+            mutation createDocument($input: createDocumentInput) {
+              createDocument(input: $input) {
+                document {
                   name
+                  labels {
+                    id
+                    name
+                  }
                 }
               }
             }
-          }
-        `,
-        variables: {
-          input: {
-            data: {
-              ...document,
-              labels: data.labels.map(t => t.id),
+          `,
+          variables: {
+            input: {
+              data: {
+                ...document,
+                labels: data.labels.map(t => t.id),
+              },
             },
           },
-        },
-      });
+        });
 
-      const { body } = res;
+        const { body } = res;
 
-      expect(res.statusCode).toBe(200);
+        expect(res.statusCode).toBe(200);
 
-      expect(body).toMatchObject({
-        data: {
-          createDocument: {
-            document: {
-              ...selectFields(document),
-              labels: expect.arrayContaining(data.labels.map(selectFields)),
+        expect(body).toMatchObject({
+          data: {
+            createDocument: {
+              document: {
+                ...selectFields(document),
+                labels: expect.arrayContaining(data.labels.map(selectFields)),
+              },
             },
           },
-        },
-      });
-    });
+        });
+      },
+    );
 
     test('List documents with labels', async () => {
       const res = await graphqlQuery({
@@ -244,16 +247,15 @@ describe('Test Graphql Relations API End to End', () => {
 
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
-          data: {
-            documents: expect.arrayContaining(
-              data.documents.map(document => ({
-                ...selectFields(document),
-                labels: expect.arrayContaining(data.labels.map(selectFields)),
-              }))
-            ),
-          },
-        }
-      );
+        data: {
+          documents: expect.arrayContaining(
+            data.documents.map(document => ({
+              ...selectFields(document),
+              labels: expect.arrayContaining(data.labels.map(selectFields)),
+            })),
+          ),
+        },
+      });
 
       // assign for later use
       data.documents = res.body.data.documents;
@@ -283,8 +285,10 @@ describe('Test Graphql Relations API End to End', () => {
           labels: expect.arrayContaining(
             data.labels.map(label => ({
               ...selectFields(label),
-              documents: expect.arrayContaining(data.documents.map(selectFields)),
-            }))
+              documents: expect.arrayContaining(
+                data.documents.map(selectFields),
+              ),
+            })),
           ),
         },
       });
@@ -407,7 +411,7 @@ describe('Test Graphql Relations API End to End', () => {
             data.documents.map(document => ({
               ...selectFields(document),
               labels: [],
-            }))
+            })),
           ),
         },
       });
