@@ -3,12 +3,9 @@
 // Dependencies.
 const fs = require('fs-extra');
 const path = require('path');
-const slash = require('slash');
 const _ = require('lodash');
 const glob = require('../load/glob');
 const findPackagePath = require('../load/package-path');
-
-const MIDDLEWARE_PREFIX = 'strapi-middleware';
 
 const requiredMiddlewares = {
   kcors: 'kcors',
@@ -41,14 +38,12 @@ module.exports = async function(config) {
   });
 
   await Promise.all([
+    // load installed middlewares
     loadMiddlewareDependencies(installedMiddlewares, middlewares),
     // internal middlewares
-    loadMiddlewaresInDir(
-      path.resolve(__dirname, '..', 'middlewares'),
-      middlewares
-    ),
+    loadInternalMiddlexares(middlewares),
     // local middleware
-    loadMiddlewaresInDir(path.resolve(appPath, 'middlewares'), middlewares),
+    loadLocalMiddlewares(appPath, middlewares),
     // plugins middlewares
     loadPluginsMiddlewares(installedPlugins, middlewares),
     // local plugin middlewares
@@ -67,38 +62,51 @@ const loadMiddlewaresInDir = async (dir, middlewares) => {
   });
 
   files.forEach(f => {
-    const name = slash(f).split('/')[0];
+    const name = f.split('/')[0];
     mountMiddleware(name, [path.resolve(dir, f)], middlewares);
   });
 };
 
+const loadInternalMiddlexares = middlewares =>
+  loadMiddlewaresInDir(
+    path.resolve(__dirname, '..', 'middlewares'),
+    middlewares
+  );
+
+const loadLocalMiddlewares = (appPath, middlewares) =>
+  loadMiddlewaresInDir(path.resolve(appPath, 'middlewares'), middlewares);
+
 const loadPluginsMiddlewares = async (plugins, middlewares) => {
   for (let pluginName of plugins) {
-    const dir = path.resolve(findPackagePath(pluginName), 'middlewares');
+    const dir = path.resolve(
+      findPackagePath(`strapi-plugin-${pluginName}`),
+      'middlewares'
+    );
     await loadMiddlewaresInDir(dir, middlewares);
   }
 };
 
 const loadLocalPluginsMiddlewares = async (appPath, middlewares) => {
-  const pluginsFolder = path.resolve(appPath, 'plugins');
-  const pluginsFolders = await fs.readdir(pluginsFolder);
+  const pluginsDir = path.resolve(appPath, 'plugins');
+  const pluginsNames = await fs.readdir(pluginsDir);
 
-  for (let pluginFolder of pluginsFolders) {
-    const dir = path.resolve(pluginsFolder, pluginFolder, 'middlewares');
+  for (let pluginFolder of pluginsNames) {
+    const dir = path.resolve(pluginsDir, pluginFolder, 'middlewares');
     await loadMiddlewaresInDir(dir, middlewares);
   }
 };
 
 const loadMiddlewareDependencies = async (packages, middlewares) => {
   for (let packageName of packages) {
-    const baseDir = path.dirname(require.resolve(packageName));
+    const baseDir = path.dirname(
+      require.resolve(`strapi-middleware-${packageName}`)
+    );
     const files = await glob('*(index|defaults).*(js|json)', {
       cwd: baseDir,
       absolute: true,
     });
 
-    const name = packageName.substring(MIDDLEWARE_PREFIX.length + 1);
-    mountMiddleware(name, files, middlewares);
+    mountMiddleware(packageName, files, middlewares);
   }
 };
 

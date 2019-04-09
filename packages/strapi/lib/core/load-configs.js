@@ -4,10 +4,9 @@ const path = require('path');
 const _ = require('lodash');
 const fs = require('fs-extra');
 
-const loadConfig = require('../load/config');
 const findPackagePath = require('../load/package-path');
-
-const PLUGIN_PREFIX = 'strapi-plugin';
+const loadFiles = require('../load/load-files');
+const requireFileAndParse = require('../load/require-file-parse');
 
 module.exports = async ({ appPath, installedPlugins }) => {
   const [config, admin, api, plugins, localPlugins] = await Promise.all([
@@ -26,28 +25,58 @@ module.exports = async ({ appPath, installedPlugins }) => {
   };
 };
 
+const loadConfig = dir => {
+  return loadFiles(dir, 'config/**/*.+(js|json)', {
+    requireFn: requireFileAndParse,
+    shouldUseFileNameAsKey,
+  });
+};
+
+const prefixedPaths = [
+  ...['staging', 'production', 'development'].reduce((acc, env) => {
+    return acc.concat(
+      `environments/${env}/database`,
+      `environments/${env}/security`,
+      `environments/${env}/request`,
+      `environments/${env}/response`,
+      `environments/${env}/server`
+    );
+  }, []),
+  'functions',
+  'policies',
+  'locales',
+  'hook',
+  'middleware',
+  'language',
+  'queries',
+  'layout',
+];
+
+const shouldUseFileNameAsKey = file => {
+  return _.some(prefixedPaths, e => file.startsWith(`config/${e}`))
+    ? true
+    : false;
+};
+
 // Loads an app config folder
-const loadAppConfig = appPath => loadConfig(path.resolve(appPath, 'config'));
+const loadAppConfig = async appPath => {
+  const { config } = await loadConfig(appPath);
+  return config;
+};
 
 // Loads the strapi-admin config folder
-const loadAdminConfig = async () => ({
-  config: await loadConfig(
-    path.resolve(findPackagePath('strapi-admin'), 'config')
-  ),
-});
+const loadAdminConfig = () => loadConfig(findPackagePath('strapi-admin'));
 
 // Loads every apis config folder
 const loadApisConfig = async appPath => {
   let apis = {};
-  const apisFolder = path.resolve(appPath, 'api');
-  const apiFolders = await fs.readdir(apisFolder);
+  const apisDir = path.resolve(appPath, 'api');
+  const apiNames = await fs.readdir(apisDir);
 
-  for (let apiFolder of apiFolders) {
-    const apiConfig = await loadConfig(
-      path.resolve(apisFolder, apiFolder, 'config')
-    );
+  for (let apiDir of apiNames) {
+    const apiConfig = await loadConfig(path.resolve(apisDir, apiDir));
 
-    _.set(apis, [apiFolder, 'config'], apiConfig);
+    _.set(apis, apiDir, apiConfig);
   }
 
   return apis;
@@ -55,15 +84,13 @@ const loadApisConfig = async appPath => {
 
 const loadLocalPluginsConfig = async appPath => {
   let localPlugins = {};
-  const pluginsFolder = path.resolve(appPath, 'plugins');
-  const pluginsFolders = await fs.readdir(pluginsFolder);
+  const pluginsDir = path.resolve(appPath, 'plugins');
+  const pluginsName = await fs.readdir(pluginsDir);
 
-  for (let pluginsFolder of pluginsFolders) {
-    const pluginsConfig = await loadConfig(
-      path.resolve(pluginsFolder, pluginsFolder, 'config')
-    );
+  for (let pluginDir of pluginsName) {
+    const pluginsConfig = await loadConfig(path.resolve(pluginsDir, pluginDir));
 
-    _.set(localPlugins, [pluginsFolder, 'config'], pluginsConfig);
+    _.set(localPlugins, pluginDir, pluginsConfig);
   }
 
   return localPlugins;
@@ -74,14 +101,10 @@ const loadPluginsConfig = async pluginsNames => {
   let plugins = {};
   for (let plugin of pluginsNames) {
     const pluginConfig = await loadConfig(
-      path.resolve(findPackagePath(plugin), 'config')
+      findPackagePath(`strapi-plugin-${plugin}`)
     );
 
-    _.set(
-      plugins,
-      [plugin.substring(PLUGIN_PREFIX.length + 1), 'config'],
-      pluginConfig
-    );
+    _.set(plugins, plugin, pluginConfig);
   }
 
   return plugins;

@@ -9,6 +9,8 @@
     "timestamps": true
   },
   "attributes": {
-    
+    "name": {
+      "type": "string"
+    }
   }
 }

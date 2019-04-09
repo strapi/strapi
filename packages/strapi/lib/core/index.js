@@ -7,7 +7,7 @@ const loadHooks = require('./load-hooks');
 const bootstrap = require('./bootstrap');
 const plugins = require('./plugins');
 const admin = require('./admin');
-const store = require('./store');
+const initCoreStore = require('./init-core-store');
 
 module.exports = {
   loadConfigs,
@@ -17,5 +17,5 @@ module.exports = {
   bootstrap,
   plugins,
   admin,
-  store,
+  initCoreStore,
 };
