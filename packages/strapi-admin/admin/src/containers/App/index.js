@@ -12,48 +12,44 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 // From strapi-helper-plugin
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 
 import '../../styles/main.scss';
 
-import AdminPage from '../AdminPage';
+import Admin from '../Admin';
 import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
 import AppLoader from '../AppLoader';
 import styles from './styles.scss';
 
-export class App extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  render() {
-    return (
-      <div>
-        <NotificationProvider />
-        <AppLoader>
-          {({ shouldLoad }) => {
-            if (shouldLoad) {
-              return <LoadingIndicatorPage />;
-            }
+function App(props) {
+  return (
+    <div>
+      <NotificationProvider />
+      <AppLoader>
+        {({ shouldLoad }) => {
+          if (shouldLoad) {
+            return <LoadingIndicatorPage />;
+          }
 
-            return (
-              <div className={styles.container}>
-                <Switch>
-                  <Route path="/" component={AdminPage} />
-                  <Route path="" component={NotFoundPage} />
-                </Switch>
-              </div>
-            );
-          }}
-        </AppLoader>
-      </div>
-    );
-  }
+          return (
+            <div className={styles.container}>
+              <Switch>
+                <Route
+                  path="/"
+                  render={router => <Admin {...props} {...router} />}
+                />
+                <Route path="" component={NotFoundPage} />
+              </Switch>
+            </div>
+          );
+        }}
+      </AppLoader>
+    </div>
+  );
 }
-
-App.contextTypes = {
-  router: PropTypes.object.isRequired,
-};
 
 App.propTypes = {};
 

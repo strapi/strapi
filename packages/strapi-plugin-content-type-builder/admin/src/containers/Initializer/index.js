@@ -15,6 +15,7 @@ class Initializer extends React.PureComponent {
     const {
       admin: { autoReload, currentEnvironment },
     } = this.props;
+
     let preventComponentRendering;
     let blockerComponentProps;
 
@@ -38,8 +39,16 @@ class Initializer extends React.PureComponent {
     }
 
     // Prevent the plugin from being rendered if currentEnvironment === PRODUCTION
-    this.props.updatePlugin(pluginId, 'preventComponentRendering', preventComponentRendering);
-    this.props.updatePlugin(pluginId, 'blockerComponentProps', blockerComponentProps);
+    this.props.updatePlugin(
+      pluginId,
+      'preventComponentRendering',
+      preventComponentRendering,
+    );
+    this.props.updatePlugin(
+      pluginId,
+      'blockerComponentProps',
+      blockerComponentProps,
+    );
     // Emit the event plugin ready
     this.props.updatePlugin(pluginId, 'isReady', true);
   }

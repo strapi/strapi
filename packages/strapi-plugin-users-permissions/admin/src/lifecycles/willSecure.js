@@ -1,4 +1,3 @@
-const { includes } = require('lodash');
 const auth = require('utils/auth').default;
 
 module.exports = function willSecure() {
@@ -23,9 +22,11 @@ module.exports = function willSecure() {
       shouldSecureAfterAllPluginsAreMounted: false,
     });
 
-  const initializerReducer = store.getState().getIn(['users-permissions_initializer']);
+  const initializerReducer = store
+    .getState()
+    .getIn(['users-permissions_initializer']);
 
-  const nonProtectedURLs = ['/plugins/users-permissions/auth'];
+  const nonProtectedURLs = '/plugins/users-permissions/auth';
   const redirectEndPoint = initializerReducer.get('hasAdminUser')
     ? '/plugins/users-permissions/auth/login'
     : '/plugins/users-permissions/auth/register';
@@ -39,7 +40,7 @@ module.exports = function willSecure() {
     return cb();
   }
 
-  if (!includes(nonProtectedURLs, pathname)) {
+  if (!pathname.includes(nonProtectedURLs)) {
     hideLeftMenu();
     hideLogout();
     setLocaleCustomClassName('localeDropdownMenuNotLogged'); // NOTE: Temporary should be removed when we switch to administrators
@@ -58,6 +59,15 @@ module.exports = function willSecure() {
     setLocaleCustomClassName('localeDropdownMenuNotLogged'); // NOTE: Temporary should be removed when we switch to administrators
     unsetAppSecured();
     history.push(redirectEndPoint);
+
+    return cb();
+  }
+
+  if (pathname.includes(nonProtectedURLs)) {
+    hideLeftMenu();
+    hideLogout();
+    setLocaleCustomClassName('localeDropdownMenuNotLogged'); // NOTE: Temporary should be removed when we switch to administrators
+    unsetAppSecured();
 
     return cb();
   }

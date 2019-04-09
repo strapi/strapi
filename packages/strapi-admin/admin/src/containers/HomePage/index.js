@@ -136,30 +136,29 @@ export class HomePage extends React.PureComponent {
   };
 
   showFirstBlock = () =>
-    get(
-      this.props.plugins.toJS(),
-      'content-manager.leftMenuSections.0.links',
-      [],
-    ).length === 0;
+    get(this.context.plugins, 'content-manager.leftMenuSections.0.links', [])
+      .length === 0;
 
   renderButton = () => {
+    /* eslint-disable indent */
     const data = this.showFirstBlock()
       ? {
-        className: styles.homePageTutorialButton,
-        href:
+          className: styles.homePageTutorialButton,
+          href:
             'https://strapi.io/documentation/getting-started/quick-start.html#_3-create-a-content-type',
-        id: 'app.components.HomePage.button.quickStart',
-        primary: true,
-      }
+          id: 'app.components.HomePage.button.quickStart',
+          primary: true,
+        }
       : {
-        className: styles.homePageBlogButton,
-        id: 'app.components.HomePage.button.blog',
-        href: 'https://blog.strapi.io/',
-        primary: false,
-      };
+          className: styles.homePageBlogButton,
+          id: 'app.components.HomePage.button.blog',
+          href: 'https://blog.strapi.io/',
+          primary: false,
+        };
+    /* eslint-enable indent */
 
     return (
-      <a href={data.href} target="_blank">
+      <a href={data.href} target='_blank'>
         <Button className={data.className} primary={data.primary}>
           <FormattedMessage id={data.id} />
         </Button>
@@ -171,6 +170,7 @@ export class HomePage extends React.PureComponent {
     const {
       homePage: { articles, body },
     } = this.props;
+
     const WELCOME_AGAIN_BLOCK = [
       {
         title: {
@@ -183,9 +183,9 @@ export class HomePage extends React.PureComponent {
 
     return (
       <div className={cn('container-fluid', styles.containerFluid)}>
-        <Helmet title="Home Page" />
-        <div className="row">
-          <div className="col-md-8 col-lg-8">
+        <Helmet title='Home Page' />
+        <div className='row'>
+          <div className='col-md-8 col-lg-8'>
             <Block>
               {this.showFirstBlock() &&
                 FIRST_BLOCK.map((value, key) => (
@@ -217,7 +217,7 @@ export class HomePage extends React.PureComponent {
               <Sub {...SECOND_BLOCK} />
               <div className={styles.homePageFlex}>
                 <div
-                  className="row"
+                  className='row'
                   style={{ width: '100%', marginRight: '0' }}
                 >
                   {SOCIAL_LINKS.map((value, key) => (
@@ -226,20 +226,20 @@ export class HomePage extends React.PureComponent {
                 </div>
                 <div className={styles.newsLetterWrapper}>
                   <div>
-                    <FormattedMessage id="app.components.HomePage.newsLetter" />
+                    <FormattedMessage id='app.components.HomePage.newsLetter' />
                   </div>
                   <form onSubmit={this.handleSubmit}>
                     <div className={cn(styles.homePageForm, 'row')}>
-                      <div className="col-md-12">
+                      <div className='col-md-12'>
                         <Input
                           value={body.email}
                           onChange={this.props.onChange}
-                          name=""
-                          placeholder="johndoe@gmail.com"
+                          name=''
+                          placeholder='johndoe@gmail.com'
                           error={!isEmpty(this.state.errors)}
                         />
-                        <FormattedMessage id="app.components.HomePage.cta">
-                          {message => <button type="submit">{message}</button>}
+                        <FormattedMessage id='app.components.HomePage.cta'>
+                          {message => <button type='submit'>{message}</button>}
                         </FormattedMessage>
                       </div>
                     </div>
@@ -248,11 +248,11 @@ export class HomePage extends React.PureComponent {
               </div>
             </Block>
           </div>
-          <div className="col-lg-4 col-md-4">
+          <div className='col-lg-4 col-md-4'>
             <Block className={styles.blockShirt}>
               <div>
                 <SupportUsTitle />
-                <FormattedMessage id="app.components.HomePage.support.content">
+                <FormattedMessage id='app.components.HomePage.support.content'>
                   {message => <p>{message}</p>}
                 </FormattedMessage>
                 <SupportUsCta />
@@ -265,11 +265,14 @@ export class HomePage extends React.PureComponent {
   }
 }
 
+HomePage.contextTypes = {
+  plugins: PropTypes.object,
+};
+
 HomePage.propTypes = {
   getArticles: PropTypes.func.isRequired,
   homePage: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
-  plugins: PropTypes.object.isRequired,
   submit: PropTypes.func.isRequired,
 };
 

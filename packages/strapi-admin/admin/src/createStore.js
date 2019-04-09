@@ -2,12 +2,13 @@
  * Common configuration for the app in both dev an prod mode
  */
 
-import createHistory from 'history/createBrowserHistory';
+import { createBrowserHistory } from 'history';
+
 import './public-path';
 import configureStore from './configureStore';
 
 const basename = strapi.remoteURL.replace(window.location.origin, '');
-const history = createHistory({
+const history = createBrowserHistory({
   basename,
 });
 const store = configureStore({}, history);
