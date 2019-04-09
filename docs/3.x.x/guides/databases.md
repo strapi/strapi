@@ -15,7 +15,7 @@ Strapi gives you the option to choose the most appropriate database for your pro
 
 ## SQLite Installation
 
-SQLite is the default ([Quick Start](/3.x.x/getting-started/quick-start.html)) and recommended database to quickly deploy an app locally.
+SQLite is the default ([Quick Start](/3.x.x/getting-started/quick-start.html)) and recommended database to quickly create an app locally.
 
 ### Install SQLite locally
 
@@ -31,7 +31,7 @@ This will create a new project and launch it in the browser. (The [Quick Start G
 
 ### Install MongoDB locally
 
-In order to use Strapi with [MongoDB](https://www.mongodb.com/) in production, you must have and use MongoDB on your local development environment. These instructions show how to install a Strapi project locally with a MongoDB database.
+In order to use Strapi with [MongoDB](https://www.mongodb.com/) in production, you must have and use MongoDB on your local development environment. These instructions show how to start using Strapi with a MongoDB database.
 
   - You must have [Strapi installed globally](/3.x.x/getting-started/quick-start-tutorial.html#_1-install-strapi-globally).
 

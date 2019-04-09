@@ -4,7 +4,7 @@ Strapi gives you many possible deployment options for your project or applicatio
 
 
 
-(Deploying **databases** along with Strapi is covered in the [Database Guide](/3.x.x/guides/databases.html).)
+(Deploying **databases** along with Strapi is covered in the [Databases Guide](/3.x.x/guides/databases.html).)
 
 **Table of contents:**
 
@@ -225,7 +225,7 @@ The add-on automatically exposes the database credentials into a single environm
 heroku config
 ```
 
-This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:dc59b16dedb3a1eef84d4999b4baf@ec2-50-37-231-192.compute-2.amazonaws.com: 5432/d516fp1u21ph7b`.
+This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:dc59b16dedb3a1eef84d4999sb4baf@ec2-50-37-231-192.compute-2.amazonaws.com: 5432/d516fp1u21ph7b`.
 
 (This url is read like so: *postgres:// **USERNAME** : **PASSWORD** @ **HOST** : **PORT** : **DATABASE_NAME***)
 
