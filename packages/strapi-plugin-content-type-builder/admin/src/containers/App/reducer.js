@@ -4,7 +4,7 @@
  *
  */
 
-import { fromJS, List, Map } from 'immutable';
+import { fromJS, List, Map, OrderedMap } from 'immutable';
 import pluralize from 'pluralize';
 import {
   ADD_ATTRIBUTE_RELATION,
@@ -50,7 +50,7 @@ export const initialState = fromJS({
     description: '',
     mainField: '',
     name: '',
-    attributes: {},
+    attributes: OrderedMap({}),
   },
   newContentTypeClone: {
     collectionName: '',
@@ -58,7 +58,7 @@ export const initialState = fromJS({
     description: '',
     mainField: '',
     name: '',
-    attributes: {},
+    attributes: OrderedMap({}),
   },
   temporaryAttribute: {},
   temporaryAttributeRelation: {
@@ -164,6 +164,7 @@ function appReducer(state = initialState, action) {
       return state.update('temporaryAttribute', () => Map({}));
     case CLEAR_TEMPORARY_ATTRIBUTE_RELATION:
       return state
+        .update('temporaryAttribute', () => Map({}))
         .update('temporaryAttributeRelation', () => initialState.get('temporaryAttributeRelation'))
         .update('initialTemporaryAttributeRelation', () => initialState.get('temporaryAttributeRelation'));
     case CREATE_TEMP_CONTENT_TYPE:
@@ -199,14 +200,16 @@ function appReducer(state = initialState, action) {
     }
     case DELETE_MODEL_SUCCEEDED:
       return state
-        .removeIn(['models', state.get('models').findIndex(model => model.name === action.modelName)])
+        .removeIn(['models', state.get('models').findIndex(model => model.get('name') === action.modelName)])
         .removeIn(['initialData', action.modelName])
         .removeIn(['modifiedData', action.modelName]);
     case DELETE_TEMPORARY_MODEL:
       return state
         .removeIn([
           'models',
-          state.get('models').findIndex(model => model.name === state.getIn(['newContentType', 'name'])),
+          state
+            .get('models')
+            .findIndex(model => model.get('name') === state.getIn(['newContentType', 'name'])),
         ])
         .update('newContentType', () => fromJS(initialState.get('newContentType')))
         .update('newContentTypeClone', () => fromJS(initialState.get('newContentType')));
@@ -262,12 +265,6 @@ function appReducer(state = initialState, action) {
         key = '-';
       }
 
-      if (action.isEditing) {
-        return state
-          .updateIn(['temporaryAttributeRelation', 'target'], () => action.model.name)
-          .updateIn(['temporaryAttributeRelation', 'plugin'], () => source || '');
-      }
-
       return state
         .updateIn(['temporaryAttributeRelation', 'target'], () => action.model.name)
         .updateIn(['temporaryAttributeRelation', 'plugin'], () => source || '')
@@ -303,62 +300,113 @@ function appReducer(state = initialState, action) {
     case SAVE_EDITED_ATTRIBUTE: {
       const basePath = action.isModelTemporary ? ['newContentType'] : ['modifiedData', action.modelName];
 
-      return state.updateIn([...basePath, 'attributes'], attributes => {
-        const temporaryAttribute = state.get('temporaryAttribute');
-        const newAttribute = temporaryAttribute.remove('name');
+      return state
+        .updateIn([...basePath, 'attributes'], attributes => {
+          const temporaryAttribute = state.get('temporaryAttribute');
+          const newAttribute = temporaryAttribute.remove('name');
 
-        return attributes.remove(action.attributeName).set(temporaryAttribute.get('name'), newAttribute);
-      });
+          return attributes.update(action.attributeName, () => {
+            return newAttribute;
+          });
+        })
+        .updateIn([...basePath], obj => {
+          const newObj = obj
+            .get('attributes')
+            .keySeq()
+            .reduce((acc, current) => {
+              const name =
+                current === action.attributeName ? state.getIn(['temporaryAttribute', 'name']) : current;
+
+              acc[name] = obj.getIn(['attributes', current]);
+
+              return acc;
+            }, {});
+
+          return obj.set('attributes', OrderedMap(newObj));
+        });
     }
     case SAVE_EDITED_ATTRIBUTE_RELATION: {
       const basePath = action.isModelTemporary ? ['newContentType'] : ['modifiedData', action.modelName];
-      const initialTemporaryAttributeRelationTarget = state.getIn([
-        'initialTemporaryAttributeRelation',
-        'target',
-      ]);
+
+      const initialAttribute = state.get('initialTemporaryAttributeRelation');
+      const initialRelationNature = initialAttribute.get('nature');
+      const initialAttributeName = initialAttribute.get('name');
+      const initialAttributeRelationTarget = initialAttribute.get('target');
+      const initialAttributeKey = initialAttribute.get('key');
+      // const initialTemporaryAttributeRelationTarget = state.getIn([
+      //   'initialTemporaryAttributeRelation',
+      //   'target',
+      // ]);
       const temporaryAttributeRelation = state.get('temporaryAttributeRelation');
+      const hasInternalRelation = temporaryAttributeRelation.get('target') === action.modelName;
+      const updatedRelationNature = temporaryAttributeRelation.get('nature');
+      const updatedRelationTarget = temporaryAttributeRelation.get('target');
+
+      const shouldAddComplementaryAttribute =
+        initialRelationNature === 'oneWay' && updatedRelationNature !== 'oneWay';
+      const shouldRemoveComplementaryAttribute =
+        (initialRelationNature !== 'oneWay' && updatedRelationNature === 'oneWay') ||
+        initialAttributeRelationTarget !== updatedRelationTarget;
+      const shouldUpdateComplementaryAttribute =
+        initialRelationNature !== 'oneWay' && updatedRelationNature !== 'oneWay';
+
       let newState = state;
 
-      if (
-        initialTemporaryAttributeRelationTarget === action.modelName &&
-        state.getIn(['initialTemporaryAttributeRelation', 'nature']) !== 'oneWay'
-      ) {
-        newState = newState
-          .removeIn([...basePath, 'attributes', action.attributeName])
-          .removeIn([...basePath, 'attributes', state.getIn(['initialTemporaryAttributeRelation', 'key'])]);
+      if (shouldRemoveComplementaryAttribute) {
+        const attributeToRemove = initialAttribute.get('key');
+
+        newState = newState.removeIn([...basePath, 'attributes', attributeToRemove]);
       }
 
-      if (
-        temporaryAttributeRelation.get('target') === action.modelName &&
-        temporaryAttributeRelation.get('nature') !== 'oneWay'
-      ) {
-        const key = state.getIn(['temporaryAttributeRelation', 'key']);
-        const name = state.getIn(['temporaryAttributeRelation', 'name']);
-        const nature = state.getIn(['temporaryAttributeRelation', 'nature']);
-        const otherNewAttribute = newState
-          .get('temporaryAttributeRelation')
-          .set('key', name)
-          .set('dominant', false)
-          .update('nature', value => {
-            if (nature === 'oneToMany') {
-              return 'manyToOne';
-            } else if (nature === 'manyToOne') {
-              return 'oneToMany';
-            } else {
-              return value;
-            }
-          })
-          .remove('name');
+      const key = state.getIn(['temporaryAttributeRelation', 'key']);
+      const otherNewAttribute = newState
+        .get('temporaryAttributeRelation')
+        .set('key', temporaryAttributeRelation.get('name'))
+        .set('dominant', false)
+        .update('nature', value => {
+          if (updatedRelationNature === 'oneToMany') {
+            return 'manyToOne';
+          } else if (updatedRelationNature === 'manyToOne') {
+            return 'oneToMany';
+          } else {
+            return value;
+          }
+        })
+        .remove('name');
 
+      if (hasInternalRelation && shouldAddComplementaryAttribute) {
         newState = newState.updateIn([...basePath, 'attributes', key], () => otherNewAttribute);
       }
 
-      return newState.updateIn([...basePath, 'attributes'], attributes => {
-        const newAttribute = temporaryAttributeRelation.remove('name');
+      if (
+        hasInternalRelation &&
+        updatedRelationNature !== 'oneWay' &&
+        initialAttributeRelationTarget !== updatedRelationTarget
+      ) {
+        newState = newState.updateIn([...basePath, 'attributes', key], () => otherNewAttribute);
+      }
 
-        return attributes
-          .remove(action.attributeName)
-          .set(temporaryAttributeRelation.get('name'), newAttribute);
+      return newState.updateIn([...basePath], obj => {
+        const newObj = obj
+          .get('attributes')
+          .keySeq()
+          .reduce((acc, current) => {
+            if (current === initialAttributeName) {
+              acc[temporaryAttributeRelation.get('name')] = temporaryAttributeRelation.remove('name');
+            } else if (
+              hasInternalRelation &&
+              shouldUpdateComplementaryAttribute &&
+              current === initialAttributeKey
+            ) {
+              acc[key] = otherNewAttribute;
+            } else {
+              acc[current] = obj.getIn(['attributes', current]);
+            }
+
+            return acc;
+          }, {});
+
+        return obj.set('attributes', OrderedMap(newObj));
       });
     }
     case SET_TEMPORARY_ATTRIBUTE:

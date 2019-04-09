@@ -26,7 +26,7 @@
     },
     {
       "url": "YOUR_STAGING_SERVER",
-      "description": "Staging server server"
+      "description": "Staging server"
     },
     {
       "url": "YOUR_PRODUCTION_SERVER",

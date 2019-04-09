@@ -23,9 +23,14 @@ const cleanTestApp = appName => {
  * @param {string} options.appName - Name of the app that will be created (also the name of the folder)
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
-const generateTestApp = ({ appName, database }) => {
-  return execa.shell(`node ${STRAPI_BIN} new ${appName} --dev ${database}`, {
+const generateTestApp = async ({ appName, database }) => {
+  await execa.shell(`node ${STRAPI_BIN} new ${appName} --dev ${database}`, {
     stdio: 'inherit',
+  });
+
+  await execa.shell(`node ${STRAPI_BIN} install graphql --dev`, {
+    stdio: 'inherit',
+    cwd: path.resolve(appName),
   });
 };
 

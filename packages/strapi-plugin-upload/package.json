@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "strapi-provider-upload-local": "3.0.0-alpha.25.2",
+    "strapi-utils": "3.0.0-alpha.25.2",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },

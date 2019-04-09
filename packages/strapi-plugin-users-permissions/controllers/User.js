@@ -16,8 +16,8 @@ module.exports = {
    * @return {Object|Array}
    */
 
-  find: async (ctx) => {
-    let data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query);
+  find: async (ctx, next, { populate } = {}) => {
+    let data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query, populate);
     data.reduce((acc, user) => {
       acc.push(_.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']));
       return acc;

@@ -10,6 +10,7 @@
 
 // Public dependencies.
 const _ = require('lodash');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 module.exports = {
 
@@ -19,22 +20,17 @@ module.exports = {
    * @return {Promise}
    */
 
-  fetchAll: (params) => {
-    // Convert `params` object to filters compatible with Mongo.
-    const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
-    // Select field to populate.
-    const populate = <%= globalID %>.associations
+  fetchAll: (params, populate) => {
+    const filters = convertRestQueryParams(params);
+    const populateOpt = populate || <%= globalID %>.associations
       .filter(ast => ast.autoPopulate !== false)
       .map(ast => ast.alias)
-      .join(' ');
 
-    return <%= globalID %>
-      .find()
-      .where(filters.where)
-      .sort(filters.sort)
-      .skip(filters.start)
-      .limit(filters.limit)
-      .populate(filters.populate || populate);
+    return buildQuery({
+      model: <%= globalID %>,
+      filters,
+      populate: populateOpt,
+    });
   },
 
   /**
@@ -62,12 +58,13 @@ module.exports = {
    */
 
   count: (params) => {
-    // Convert `params` object to filters compatible with Mongo.
-    const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+    const filters = convertRestQueryParams(params);
 
-    return <%= globalID %>
-      .countDocuments()
-      .where(filters.where);
+    return buildQuery({
+      model: <%= globalID %>,
+      filters: { where: filters.where },
+    })
+      .count()
   },
 
   /**

@@ -153,9 +153,7 @@ class ModelForm extends React.Component {
         ? onChangeNewContentTypeMainInfos
         : onChangeExistingContentTypeMainInfos;
     const name =
-      actionType === 'create' || isUpdatingTemporaryContentType
-        ? input.name
-        : `${modelToEditName}.${input.name}`;
+      actionType === 'create' || isUpdatingTemporaryContentType ? input.name : `${modelToEditName}.${input.name}`;
 
     return (
       <Input
@@ -197,9 +195,7 @@ class ModelForm extends React.Component {
         onToggle={this.handleCancel}
       >
         <HeaderModal>
-          <HeaderModalTitle
-            title={`${pluginId}.popUpForm.${actionType || 'create'}.contentType.header.title`}
-          />
+          <HeaderModalTitle title={`${pluginId}.popUpForm.${actionType || 'create'}.contentType.header.title`} />
           <HeaderModalNavContainer>{NAVLINKS.map(this.renderNavLinks)}</HeaderModalNavContainer>
         </HeaderModal>
         <form onSubmit={this.handleSubmit}>
