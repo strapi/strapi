@@ -41,7 +41,7 @@
   "form.attribute.item.enumeration.graphql.description": "Позволяет переопределить название поля в GraphQL, сгенерированное по умолчанию",
   "form.attribute.item.enumeration.name": "Название",
   "form.attribute.item.enumeration.placeholder": "Например: morning,noon,evening",
-  "form.attribute.item.enumeration.rules": "Значения (через запятую)",
+  "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "Название",
   "form.attribute.item.maximum": "Максимальное значение",
   "form.attribute.item.maximumLength": "Максимальная длина",

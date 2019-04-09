@@ -6,8 +6,8 @@
   "attribute.email": "Email",
   "attribute.enumeration": "Enumeration",
   "attribute.float": "Float",
-  "attribute.integer": "integer",
-  "attribute.biginteger": "big integer",
+  "attribute.integer": "Integer",
+  "attribute.biginteger": "Big Integer",
   "attribute.json": "JSON",
   "attribute.media": "Media",
   "attribute.password": "Password",
@@ -30,6 +30,7 @@
   "error.validation.minSupMax": "Can't be superior",
   "error.validation.regex": "The value does not match the regex.",
   "error.validation.required": "This value input is required.",
+  "form.attribute.info.no-space-allowed": "No space is allowed for the name of the attribute",
   "form.attribute.item.appearance.description": "Otherwise, the value will be editable through a basic textarea field",
   "form.attribute.item.appearance.label": "Display as a WYSIWYG",
   "form.attribute.item.appearance.name": "Appearance",
@@ -42,7 +43,7 @@
   "form.attribute.item.enumeration.graphql.description": "Allows you to override the default generated name for GraphQL",
   "form.attribute.item.enumeration.name": "Name",
   "form.attribute.item.enumeration.placeholder": "Ex: morning,noon,evening",
-  "form.attribute.item.enumeration.rules": "Values (separate them with a comma)",
+  "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "Name",
   "form.attribute.item.maximum": "Maximum value",
   "form.attribute.item.maximumLength": "Maximum length",
@@ -155,5 +156,6 @@
   "table.contentType.head.fields": "Fields",
   "table.contentType.head.name": "Name",
   "table.contentType.title.plural": "Content Types are available",
-  "table.contentType.title.singular": "Content Type is available"
+  "table.contentType.title.singular": "Content Type is available",
+  "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost."
 }
