@@ -1,14 +1,14 @@
 {
   "name": "strapi-provider-upload-rackspace",
-  "version": "3.0.0-alpha.24.1",
+  "version": "3.0.0-alpha.25.2",
   "description": "Rackspace provider for strapi upload",
   "main": "./lib",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [],
   "author": "Pongstr Ordillo <https://github.com/pongstr>",
   "license": "MIT",
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
   "dependencies": {
     "pkgcloud": "^1.5.0",
     "streamifier": "^0.1.1"

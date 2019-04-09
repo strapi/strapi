@@ -1,6 +1,6 @@
 {
   "name": "strapi-middleware-views",
-  "version": "3.0.0-alpha.24.1",
+  "version": "3.0.0-alpha.25.2",
   "description": "Views middleware to enable server-side rendering for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -42,5 +42,8 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  }
 }
