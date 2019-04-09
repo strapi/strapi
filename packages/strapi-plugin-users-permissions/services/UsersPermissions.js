@@ -234,10 +234,11 @@ module.exports = {
   getRoles: async () => {
     const roles = await strapi
       .query('role', 'users-permissions')
-      .find({ sort: 'name' }, []);
+      .find({ _sort: 'name' }, []);
 
     for (let i = 0; i < roles.length; ++i) {
       roles[i].id = roles[i].id || roles[i]._id;
+
       roles[i].nb_users = await strapi
         .query('user', 'users-permissions')
         .count({ role: roles[i].id });
@@ -282,7 +283,7 @@ module.exports = {
     // fetch all the current permissions from the database, and format them into an array of actions.
     const databasePermissions = await strapi
       .query('permission', 'users-permissions')
-      .find();
+      .find({ _limit: -1 });
     const actions = databasePermissions.map(
       permission =>
         `${permission.type}.${permission.controller}.${permission.action}`,
@@ -452,7 +453,8 @@ module.exports = {
     const permissions = await strapi
       .query('permission', 'users-permissions')
       .find({
-        sort: `${primaryKey}`,
+        _sort: `${primaryKey}`,
+        _limit: -1,
       });
 
     const value = permissions.reduce(

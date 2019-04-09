@@ -376,7 +376,7 @@ export class ModelPage extends React.Component {
     push({ search: nextSearch });
   };
 
-  handleSubmitEdit = (shouldContinue = false) => {
+  handleSubmitEdit = () => {
     const {
       history: { push },
       saveEditedAttribute,
@@ -390,9 +390,7 @@ export class ModelPage extends React.Component {
       saveEditedAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
     }
 
-    const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
-
-    push({ search: nextSearch });
+    push({ search: '' });
   };
 
   hasModelBeenModified = () => {

@@ -45,13 +45,18 @@ function AttributeLi({
 }) {
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
   const src = target ? assets.relation : assets[ico];
+  /* eslint-disable indent */
   /* istanbul ignore next */
   const icons =
     configurable === false
       ? [{ icoType: 'lock' }]
-      : [{ icoType: 'pencil' }, { icoType: 'trash', onClick: () => onClickOnTrashIcon(name) }];
+      : [
+          { icoType: 'pencil', onClick: () => onClick(name, type) },
+          { icoType: 'trash', onClick: () => onClickOnTrashIcon(name) },
+        ];
   const relationStyle = target ? styles.relation : null;
   const configurableStyle = configurable === false ? null : styles.editable;
+  /* eslint-enable indent */
 
   return (
     <li
