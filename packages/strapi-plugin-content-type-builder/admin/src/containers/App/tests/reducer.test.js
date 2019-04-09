@@ -583,20 +583,20 @@ describe('appReducer', () => {
       .set(
         'models',
         List([
-          {
+          Map({
             icon: 'fa-cube',
             name: 'product',
             description: '',
             fields: 1,
             isTemporary: false,
-          },
-          {
+          }),
+          Map({
             icon: 'fa-cube',
             name: 'test',
             description: '',
             fields: 0,
             isTemporary: true,
-          },
+          }),
         ]),
       )
       .set('newContentType', tempCt)
@@ -613,13 +613,13 @@ describe('appReducer', () => {
       .set(
         'models',
         List([
-          {
+          Map({
             icon: 'fa-cube',
             name: 'product',
             description: '',
             fields: 1,
             isTemporary: false,
-          },
+          }),
         ]),
       )
       .set('newContentType', fromJS(emptyCt))

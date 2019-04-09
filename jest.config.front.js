@@ -10,14 +10,6 @@ module.exports = {
     '!packages/strapi-plugin-content-type-builder/admin/src/utils/*.js',
     '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
   ],
-  coverageThreshold: {
-    global: {
-      statements: 90,
-      branches: 90,
-      functions: 90,
-      lines: 90,
-    },
-  },
   globals: {
     __webpack_public_path__: 'http://localhost:4000',
     strapi: {},

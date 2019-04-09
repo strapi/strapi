@@ -200,14 +200,16 @@ function appReducer(state = initialState, action) {
     }
     case DELETE_MODEL_SUCCEEDED:
       return state
-        .removeIn(['models', state.get('models').findIndex(model => model.name === action.modelName)])
+        .removeIn(['models', state.get('models').findIndex(model => model.get('name') === action.modelName)])
         .removeIn(['initialData', action.modelName])
         .removeIn(['modifiedData', action.modelName]);
     case DELETE_TEMPORARY_MODEL:
       return state
         .removeIn([
           'models',
-          state.get('models').findIndex(model => model.name === state.getIn(['newContentType', 'name'])),
+          state
+            .get('models')
+            .findIndex(model => model.get('name') === state.getIn(['newContentType', 'name'])),
         ])
         .update('newContentType', () => fromJS(initialState.get('newContentType')))
         .update('newContentTypeClone', () => fromJS(initialState.get('newContentType')));

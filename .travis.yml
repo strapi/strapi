@@ -48,7 +48,7 @@ jobs:
       script:
         - npm run -s lint
         - npm run -s test:unit
-        - npm run -s test:front
+        # - npm run -s test:front
 
     - <<: *e2e_tests
       name: 'E2E Postgresql'
