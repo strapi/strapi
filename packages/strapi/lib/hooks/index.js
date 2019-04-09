@@ -1,6 +1,18 @@
 'use strict';
 
-const { after, includes, indexOf, drop, dropRight, uniq, defaultsDeep, get, set, merge, isUndefined } = require('lodash');
+const {
+  after,
+  includes,
+  indexOf,
+  drop,
+  dropRight,
+  uniq,
+  defaultsDeep,
+  get,
+  set,
+  merge,
+  isUndefined,
+} = require('lodash');
 
 /* eslint-disable prefer-template */
 module.exports = async function() {
@@ -16,7 +28,7 @@ module.exports = async function() {
 
     const loadedModule = module(this);
 
-    loadedModule.initialize.call(module, err => {
+    const onFinish = err => {
       timeout = false;
 
       if (err) {
@@ -34,23 +46,27 @@ module.exports = async function() {
       this.removeAllListeners('hook:' + hook + ':loaded');
 
       resolve();
-    });
+    };
+
+    try {
+      loadedModule.initialize.call(module, onFinish);
+    } catch (err) {
+      reject(err);
+    }
   };
 
   await Promise.all(
-    Object.keys(this.hook).map(
-      async hook => {
-        if (this.config.hook.settings[hook].enabled === false) {
-          return;
-        }
-
-        const module = this.hook[hook].load;
-
-        if (module(this).beforeInitialize) {
-          await module(this).beforeInitialize.call(module);
-        }
+    Object.keys(this.hook).map(async hook => {
+      if (this.config.hook.settings[hook].enabled === false) {
+        return;
       }
-    )
+
+      const module = this.hook[hook].load;
+
+      if (module(this).beforeInitialize) {
+        await module(this).beforeInitialize.call(module);
+      }
+    })
   );
 
   return Promise.all(
@@ -64,10 +80,18 @@ module.exports = async function() {
 
           const module = this.hook[hook].load;
 
-          const hooks = Object.keys(this.hook).filter(hook => this.config.hook.settings[hook].enabled !== false);
-          const hooksBefore = get(this.config.hook, 'load.before', []).filter(hook => !isUndefined(this.hook[hook])).filter(hook => this.config.hook.settings[hook].enabled !== false);
-          const hooksOrder = get(this.config.hook, 'load.order', []).filter(hook => !isUndefined(this.hook[hook])).filter(hook => this.config.hook.settings[hook].enabled !== false);
-          const hooksAfter = get(this.config.hook, 'load.after', []).filter(hook => !isUndefined(this.hook[hook])).filter(hook => this.config.hook.settings[hook].enabled !== false);
+          const hooks = Object.keys(this.hook).filter(
+            hook => this.config.hook.settings[hook].enabled !== false
+          );
+          const hooksBefore = get(this.config.hook, 'load.before', [])
+            .filter(hook => !isUndefined(this.hook[hook]))
+            .filter(hook => this.config.hook.settings[hook].enabled !== false);
+          const hooksOrder = get(this.config.hook, 'load.order', [])
+            .filter(hook => !isUndefined(this.hook[hook]))
+            .filter(hook => this.config.hook.settings[hook].enabled !== false);
+          const hooksAfter = get(this.config.hook, 'load.after', [])
+            .filter(hook => !isUndefined(this.hook[hook]))
+            .filter(hook => this.config.hook.settings[hook].enabled !== false);
 
           // Apply default configurations to middleware.
           if (isUndefined(get(this.config.hook, `settings.${hook}`))) {
@@ -75,7 +99,10 @@ module.exports = async function() {
           }
 
           if (module(this).defaults && this.config.hook.settings[hook] !== false) {
-            defaultsDeep(this.config.hook.settings[hook], module(this).defaults[hook] || module(this).defaults);
+            defaultsDeep(
+              this.config.hook.settings[hook],
+              module(this).defaults[hook] || module(this).defaults
+            );
           }
 
           // Initialize array.
@@ -86,7 +113,9 @@ module.exports = async function() {
           if (includes(hooksBefore, hook)) {
             const position = indexOf(hooksBefore, hook);
 
-            previousDependencies = previousDependencies.concat(dropRight(hooksBefore, hooksBefore.length - position));
+            previousDependencies = previousDependencies.concat(
+              dropRight(hooksBefore, hooksBefore.length - position)
+            );
           } else {
             previousDependencies = previousDependencies.concat(hooksBefore.filter(x => x !== hook));
 
@@ -95,7 +124,9 @@ module.exports = async function() {
             if (includes(hooksOrder, hook)) {
               const position = indexOf(hooksOrder, hook);
 
-              previousDependencies = previousDependencies.concat(dropRight(hooksOrder, hooksOrder.length - position));
+              previousDependencies = previousDependencies.concat(
+                dropRight(hooksOrder, hooksOrder.length - position)
+              );
             } else {
               // Add AFTER hooks to load and remove the current one
               // to avoid that it waits itself.

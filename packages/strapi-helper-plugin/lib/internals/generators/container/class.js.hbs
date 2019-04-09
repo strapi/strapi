@@ -17,13 +17,9 @@ import { FormattedMessage } from 'react-intl';
 import { createStructuredSelector } from 'reselect';
 {{/if}}
 import { bindActionCreators, compose } from 'redux';
-// import pluginId from 'pluginId';
+import pluginId from '../../pluginId';
 
-{{#if wantSaga}}
-import injectSaga from 'utils/injectSaga';
-{{/if}}
 {{#if wantActionsAndReducer}}
-import injectReducer from 'utils/injectReducer';
 import makeSelect{{properCase name}} from './selectors';
 import reducer from './reducer';
 {{/if}}
@@ -73,7 +69,7 @@ const withConnect = connect(mapStateToProps, mapDispatchToProps);
 /* Remove this line if the container doesn't have a route and
 *  check the documentation to see how to create the container's store
 */
-const withReducer = injectReducer({ key: '{{ camelCase name }}', reducer, pluginId });
+const withReducer = strapi.injectReducer({ key: '{{ camelCase name }}', reducer, pluginId });
 {{else}}
 const withConnect = connect(null, mapDispatchToProps);
 {{/if}}
@@ -82,7 +78,7 @@ const withConnect = connect(null, mapDispatchToProps);
 /* Remove the line below the container doesn't have a route and
 *  check the documentation to see how to create the container's store
 */
-const withSaga = injectSaga({ key: '{{ camelCase name }}', saga, pluginId });
+const withSaga = strapi.injectSaga({ key: '{{ camelCase name }}', saga, pluginId });
 {{/if}}
 
 export default compose(

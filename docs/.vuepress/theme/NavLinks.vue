@@ -17,6 +17,22 @@
       Website
       <OutboundLink/>
     </a>
+    <a
+      :href="blogLink"
+      class="repo-link"
+      target="_blank"
+      rel="noopener noreferrer">
+      Blog
+      <OutboundLink/>
+    </a>
+    <a
+      :href="slackLink"
+      class="repo-link"
+      target="_blank"
+      rel="noopener noreferrer">
+      Slack
+      <OutboundLink/>
+    </a>
     <a v-if="repoLink"
        :href="repoLink"
        class="repo-link"
@@ -115,6 +131,14 @@ export default {
         return /^https?:/.test(slack)
           ? slack
           : `https://${slack}`
+      }
+    },
+    blogLink () {
+      const { blog } = this.$site.themeConfig
+      if (blog) {
+        return /^https?:/.test(blog)
+          ? blog
+          : `https://${blog}`
       }
     }
   }

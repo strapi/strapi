@@ -14,11 +14,11 @@ module.exports = {
    * @return {Object|Array}
    */
 
-  find: async (ctx) => {
+  find: async (ctx, next, { populate } = {}) => {
     if (ctx.query._q) {
       return strapi.services.<%= id %>.search(ctx.query);
     } else {
-      return strapi.services.<%= id %>.fetchAll(ctx.query);
+      return strapi.services.<%= id %>.fetchAll(ctx.query, populate);
     }
   },
 
@@ -38,8 +38,8 @@ module.exports = {
    * @return {Number}
    */
 
-  count: async (ctx) => {
-    return strapi.services.<%= id %>.count(ctx.query);
+  count: async (ctx, next, { populate } = {}) => {
+    return strapi.services.<%= id %>.count(ctx.query, populate);
   },
 
   /**

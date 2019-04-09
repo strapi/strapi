@@ -1,5 +1,11 @@
 # Contribute to Strapi
 
+> ⚠️ We have stopped merging PRs for now to the Strapi core.<br><br>
+> The reason is that we are developing new architecture for the admin panel and for the plugins.<br>
+> This new architecture will provide stability of the Strapi core as we approach the release of Beta.<br>
+> We appreciate and welcome all your contributions, but until further notice, please do not submit a PR as it will not be merged.<br>
+> Furthermore, you will have to rewrite it based on the new architecture.
+
 First off, thanks for taking the time to contribute! 🎉👍
 
 The following is a set of guidelines for contributing to Strapi and its packages.
@@ -30,7 +36,7 @@ If you send a pull request, please do it against the `master` branch. We are dev
 ***
 
 ## Setup Development Environment
-To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/installation.html#requirements)
+To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/install-requirements.html)
 
 **Note: Fish shell users** - due to the way fish shell deals with symlinks, the following steps will not work.
 
@@ -119,7 +125,7 @@ strapi generate:plugin my-plugin
 
 #### 2. ✅ Verify the symlink
 
-Make you that the `strapi-helper-plugin` is linked to your project.
+Make sure that the `strapi-helper-plugin` is linked to your project.
 
 Please run this command in the repository folder where Strapi is cloned:
 ```bash
@@ -205,8 +211,8 @@ Then run
 ```bash
 # generate the test app
 $ node test/createTestApp.js
-# run the testApp in the background (️️️⚠️ be carefull to kill the process after the tests have run)
-$ node test/startTestApp.js & 
+# run the testApp in the background (️️️⚠️ be careful to kill the process after the tests have run)
+$ node test/startTestApp.js &
 # run cypress
 $ node test/cypress
 ```

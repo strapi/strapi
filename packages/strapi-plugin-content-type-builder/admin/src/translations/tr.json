@@ -41,7 +41,7 @@
   "form.attribute.item.enumeration.graphql.description": "GraphQL için varsayılan oluşturulan adı geçersiz kılmanıza izin verir.",
   "form.attribute.item.enumeration.name": "İsim",
   "form.attribute.item.enumeration.placeholder": "Örn: sabah, öğlen, akşam",
-  "form.attribute.item.enumeration.rules": "Değerler (virgülle ayırın)",
+  "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "İsim",
   "form.attribute.item.maximum": "En yüksek değer",
   "form.attribute.item.maximumLength": "En yüksek uzunluk",

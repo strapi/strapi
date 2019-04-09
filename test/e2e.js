@@ -26,7 +26,7 @@ const test = async () => {
 };
 
 const main = async () => {
-  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.mongo;
+  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.postgres;
 
   try {
     await cleanTestApp(appName);
@@ -45,6 +45,7 @@ const main = async () => {
     testAppProcess.kill();
     process.exit(0);
   } catch (error) {
+    console.log(error)
     process.stdout.write('Tests failed\n', () => {
       process.exit(1);
     });

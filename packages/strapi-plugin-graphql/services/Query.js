@@ -10,8 +10,6 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 const policyUtils = require('strapi-utils').policy;
 
-const Loaders = require('./Loaders');
-
 module.exports = {
   /**
    * Convert parameters to valid filters parameters.
@@ -21,12 +19,27 @@ module.exports = {
 
   convertToParams: (params, primaryKey) => {
     return Object.keys(params).reduce((acc, current) => {
-      return Object.assign(acc, {
-        [`${
-          primaryKey === current || "id" === current ? "" : "_"
-        }${current}`]: params[current]
-      });
+      const key = current === 'id' ? primaryKey : `_${current}`;
+      acc[key] = params[current];
+      return acc;
     }, {});
+  },
+
+  convertToQuery: function(params) {
+    const result = {};
+
+    _.forEach(params, (value, key) => {
+      if (_.isPlainObject(value)) {
+        const flatObject = this.convertToQuery(value);
+        _.forEach(flatObject, (_value, _key) => {
+          result[`${key}.${_key}`] = _value;
+        });
+      } else {
+        result[key] = value;
+      }
+    });
+
+    return result;
   },
 
   /**
@@ -56,9 +69,7 @@ module.exports = {
       model: name,
     };
 
-    const model = plugin
-      ? strapi.plugins[plugin].models[name]
-      : strapi.models[name];
+    const model = plugin ? strapi.plugins[plugin].models[name] : strapi.models[name];
 
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
@@ -68,9 +79,7 @@ module.exports = {
     if (isSingular === 'force') {
       queryName = name;
     } else {
-      queryName = isSingular
-        ? pluralize.singular(name)
-        : pluralize.plural(name);
+      queryName = isSingular ? pluralize.singular(name) : pluralize.plural(name);
     }
 
     // Retrieve policies.
@@ -81,7 +90,7 @@ module.exports = {
 
     const policiesFn = [];
 
-    // Boolean to define if the resolver is going to be a resolver or not.
+    // Boolean to define if the resolver is going to be a controller or not.
     let isController = false;
 
     // Retrieve resolver. It could be the custom resolver of the user
@@ -91,9 +100,7 @@ module.exports = {
       const resolver = _.get(handler, `Query.${queryName}.resolver`);
 
       if (_.isString(resolver) || _.isPlainObject(resolver)) {
-        const { handler = resolver } = _.isPlainObject(resolver)
-          ? resolver
-          : {};
+        const { handler = resolver } = _.isPlainObject(resolver) ? resolver : {};
 
         // Retrieve the controller's action to be executed.
         const [name, action] = handler.split('.');
@@ -103,9 +110,7 @@ module.exports = {
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
-          return new Error(
-            `Cannot find the controller's action ${name}.${action}`,
-          );
+          return new Error(`Cannot find the controller's action ${name}.${action}`);
         }
 
         // We're going to return a controller instead.
@@ -119,8 +124,8 @@ module.exports = {
               handler: `${name}.${action}`,
             },
             undefined,
-            plugin,
-          ),
+            plugin
+          )
         );
 
         // Return the controller.
@@ -133,9 +138,7 @@ module.exports = {
       // We're going to return a controller instead.
       isController = true;
 
-      const controllers = plugin
-        ? strapi.plugins[plugin].controllers
-        : strapi.controllers;
+      const controllers = plugin ? strapi.plugins[plugin].controllers : strapi.controllers;
 
       // Try to find the controller that should be related to this model.
       const controller = isSingular
@@ -144,9 +147,7 @@ module.exports = {
 
       if (!controller) {
         return new Error(
-          `Cannot find the controller's action ${name}.${
-            isSingular ? 'findOne' : 'find'
-          }`,
+          `Cannot find the controller's action ${name}.${isSingular ? 'findOne' : 'find'}`
         );
       }
 
@@ -159,8 +160,8 @@ module.exports = {
             handler: `${name}.${isSingular ? 'findOne' : 'find'}`,
           },
           undefined,
-          plugin,
-        ),
+          plugin
+        )
       );
 
       // Make the query compatible with our controller by
@@ -196,9 +197,7 @@ module.exports = {
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
-        return new Error(
-          `Cannot find the controller's action ${name}.${action}`,
-        );
+        return new Error(`Cannot find the controller's action ${name}.${action}`);
       }
 
       policiesFn[0] = policyUtils.globalPolicy(
@@ -207,7 +206,7 @@ module.exports = {
           handler: `${name}.${action}`,
         },
         undefined,
-        plugin,
+        plugin
       );
     }
 
@@ -217,18 +216,12 @@ module.exports = {
 
     // Populate policies.
     policies.forEach(policy =>
-      policyUtils.get(
-        policy,
-        plugin,
-        policiesFn,
-        `GraphQL query "${queryName}"`,
-        name,
-      ),
+      policyUtils.get(policy, plugin, policiesFn, `GraphQL query "${queryName}"`, name)
     );
 
     return async (obj, options = {}, { context }) => {
       const _options = _.cloneDeep(options);
-      
+
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
@@ -240,10 +233,7 @@ module.exports = {
       const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
 
       // Policy doesn't always return errors but they update the current context.
-      if (
-        _.isError(ctx.request.graphql) ||
-        _.get(ctx.request.graphql, 'isBoom')
-      ) {
+      if (_.isError(ctx.request.graphql) || _.get(ctx.request.graphql, 'isBoom')) {
         return ctx.request.graphql;
       }
 
@@ -251,9 +241,6 @@ module.exports = {
       if (policy) {
         return policy;
       }
-
-      // Initiliase loaders for this request.
-      Loaders.initializeLoader();
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
@@ -263,22 +250,20 @@ module.exports = {
           query: {
             value: {
               ...this.convertToParams(_.omit(_options, 'where'), model.primaryKey),
-              ..._options.where,
-              // Avoid population.
-              _populate: model.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias),
+              ...this.convertToQuery(_options.where),
             },
             writable: true,
-            configurable: true
+            configurable: true,
           },
           params: {
             value: this.convertToParams(this.amountLimiting(_options), model.primaryKey),
             writable: true,
-            configurable: true
-          }
+            configurable: true,
+          },
         });
 
         if (isController) {
-          const values = await resolver.call(null, ctx);
+          const values = await resolver.call(null, ctx, null, { populate: [] });
 
           if (ctx.body) {
             return ctx.body;

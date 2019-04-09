@@ -38,14 +38,21 @@ const watchFileChanges = ({ appPath, strapi }) => {
       /(^|[/\\])\../,
       /tmp/,
       '**/admin',
+      '**/admin/**',
       '**/components',
+      '**/components/**',
       '**/documentation',
+      '**/documentation/**',
       '**/node_modules',
+      '**/node_modules/**',
       '**/plugins.json',
       '**/index.html',
       '**/public',
+      '**/public/**',
       '**/cypress',
+      '**/cypress/**',
       '**/*.db*',
+      '**/generated/schema.graphql'
     ],
   });
 

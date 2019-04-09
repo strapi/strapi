@@ -133,12 +133,9 @@ module.exports = (scope, cb) => {
 
     scope.quick = answers.type === 'quick' || scope.quick;
     const isQuick = scope.quick;
-
+    
     if (isQuick) {
-      trackSuccess('didChooseQuickstart', scope);
       answers.client = databaseChoices[0].value;
-    } else {
-      trackSuccess('didChooseCustomDatabase', scope);
     }
 
     if (hasDatabaseConfig) {
@@ -354,6 +351,12 @@ module.exports = (scope, cb) => {
       if (withMessage) {
         console.log(`The app has been connected to the database ${green('successfully')}!`);
         console.log();
+      }
+      
+      if (isQuick) {
+        trackSuccess('didChooseQuickstart', scope);
+      } else {
+        trackSuccess('didChooseCustomDatabase', scope);
       }
 
       trackSuccess('didConnectDatabase', scope);

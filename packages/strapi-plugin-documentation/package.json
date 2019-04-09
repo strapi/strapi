@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.0-alpha.24.1",
+  "version": "3.0.0-alpha.25.2",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -31,7 +31,7 @@
   "devDependencies": {
     "cross-env": "^5.2.0",
     "rimraf": "^2.6.3",
-    "strapi-helper-plugin": "3.0.0-alpha.24.1"
+    "strapi-helper-plugin": "3.0.0-alpha.25.2"
   },
   "author": {
     "name": "soupette",
