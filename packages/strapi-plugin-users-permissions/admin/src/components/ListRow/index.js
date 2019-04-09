@@ -23,7 +23,7 @@ class ListRow extends React.Component {
 
   // Roles that can't be deleted && modified
   // Don't delete this line
-  protectedRoleIDs = ['root'];
+  protectedRoleIDs = [];
 
   // Roles that can't be deleted;
   undeletableIDs = ['public', 'authenticated'];
@@ -53,16 +53,19 @@ class ListRow extends React.Component {
         }
 
         return (
-          <div className={cn('row', styles.wrapper)} style={{ paddingLeft: '20px' }}>
-            <div className='col-md-2'>
+          <div
+            className={cn('row', styles.wrapper)}
+            style={{ paddingLeft: '20px' }}
+          >
+            <div className="col-md-2">
               <b>{this.props.item.name}</b>
             </div>
-            <div className='col-md-7'>{this.props.item.description}</div>
-            <div className='col-md-1'>
+            <div className="col-md-7">{this.props.item.description}</div>
+            <div className="col-md-1">
               <strong>{this.props.item.nb_users || 0}</strong>&nbsp;
               {this.props.item.nb_users > 1 ? 'users' : 'user'}
             </div>
-            <div className='col-md-2'>
+            <div className="col-md-2">
               <IcoContainer icons={icons} />
             </div>
           </div>
@@ -72,7 +75,7 @@ class ListRow extends React.Component {
 
         return (
           <div className={cn('row', styles.wrapper)}>
-            <div className='col-md-4'>
+            <div className="col-md-4">
               <div className={styles.flex}>
                 <div>
                   <i className={`fa fa-${this.props.item.icon}`} />
@@ -80,14 +83,17 @@ class ListRow extends React.Component {
                 <div>{capitalize(this.props.item.name)}</div>
               </div>
             </div>
-            <div className='col-md-6' style={{ fontWeight: '500' }}>
-              {get(this.props.values, [get(this.props.item, 'name'), 'enabled']) ? (
+            <div className="col-md-6" style={{ fontWeight: '500' }}>
+              {get(this.props.values, [
+                get(this.props.item, 'name'),
+                'enabled',
+              ]) ? (
                 <span style={{ color: '#5A9E06' }}>Enabled</span>
               ) : (
                 <span style={{ color: '#F64D0A' }}>Disabled</span>
               )}
             </div>
-            <div className='col-md-2'>
+            <div className="col-md-2">
               <IcoContainer icons={icons} />
             </div>
           </div>
@@ -98,21 +104,23 @@ class ListRow extends React.Component {
 
         return (
           <div className={cn('row', styles.wrapper)}>
-            <div className='col-md-4'>
+            <div className="col-md-4">
               <div className={styles.flex}>
                 <div>
                   <i className={`fa fa-${this.props.item.icon}`} />
                 </div>
                 <div>
                   {this.props.item.display && en[this.props.item.display] ? (
-                    <FormattedMessage id={`users-permissions.${this.props.item.display}`} />
+                    <FormattedMessage
+                      id={`users-permissions.${this.props.item.display}`}
+                    />
                   ) : (
                     this.props.item.name
                   )}
                 </div>
               </div>
             </div>
-            <div className='col-md-8'>
+            <div className="col-md-8">
               <IcoContainer icons={icons} />
             </div>
           </div>
@@ -128,7 +136,9 @@ class ListRow extends React.Component {
 
     switch (this.props.settingType) {
       case 'roles': {
-        if (!includes(this.protectedRoleIDs, get(this.props.item, 'type', ''))) {
+        if (
+          !includes(this.protectedRoleIDs, get(this.props.item, 'type', ''))
+        ) {
           return push(`${pathname}/edit/${this.props.item.id}`);
         }
         return;

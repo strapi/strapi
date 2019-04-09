@@ -1,4 +1,3 @@
-
 'use strict';
 
 // Dependencies.
@@ -11,21 +10,13 @@ const { includes, get, assign, toLower } = require('lodash');
 const { logger, models } = require('strapi-utils');
 const stackTrace = require('stack-trace');
 const utils = require('./utils');
-const {
-  nestedConfigurations,
-  appConfigurations,
-  apis,
-  middlewares,
-  hooks,
-  plugins,
-  admin,
-  store,
-} = require('./core');
+const { nestedConfigurations, appConfigurations, apis, middlewares, hooks, plugins, admin, store } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 
 /* eslint-disable prefer-template */
 /* eslint-disable no-console */
+/* eslint-disable indent */
 /**
  * Construct an Strapi instance.
  *
@@ -114,7 +105,7 @@ class Strapi extends EventEmitter {
       // Init first start
       utils.init.call(this);
       // Launch server.
-      this.server.listen(this.config.port, async (err) => {
+      this.server.listen(this.config.port, async err => {
         if (err) {
           this.log.debug(`⚠️ Server wasn't able to start properly.`);
           this.log.error(err);
@@ -139,7 +130,11 @@ class Strapi extends EventEmitter {
           cb();
         }
 
-        if (this.config.environment === 'development' && get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false || this.config.init) {
+        if (
+          (this.config.environment === 'development' &&
+            get(this.config.currentEnvironment, 'server.admin.autoOpen', true) !== false) ||
+          this.config.init
+        ) {
           await utils.openBrowser.call(this);
         }
       });
@@ -158,7 +153,7 @@ class Strapi extends EventEmitter {
       const key = conn.remoteAddress + ':' + conn.remotePort;
       connections[key] = conn;
 
-      conn.on('close', function () {
+      conn.on('close', function() {
         delete connections[key];
       });
     });
@@ -212,12 +207,7 @@ class Strapi extends EventEmitter {
     });
 
     // Create AST.
-    await Promise.all([
-      nestedConfigurations.call(this),
-      apis.call(this),
-      middlewares.call(this),
-      hooks.call(this),
-    ]);
+    await Promise.all([nestedConfigurations.call(this), apis.call(this), middlewares.call(this), hooks.call(this)]);
 
     // Populate AST with configurations.
     await appConfigurations.call(this);
@@ -237,11 +227,10 @@ class Strapi extends EventEmitter {
 
   reload() {
     const state = {
-      shouldReload: 0
+      shouldReload: 0,
     };
 
-
-    const reload = function () {
+    const reload = function() {
       if (state.shouldReload > 0) {
         // Reset the reloading state
         state.shouldReload -= 1;
@@ -285,46 +274,44 @@ class Strapi extends EventEmitter {
       !fn
         ? Promise.resolve()
         : new Promise((resolve, reject) => {
-          const timeoutMs = this.config.bootstrapTimeout || 3500;
-          const timer = setTimeout(() => {
-            this.log.warn(
-              `Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`,
-            );
-            this.log.warn('Perhaps you forgot to call it?');
-          }, timeoutMs);
+            const timeoutMs = this.config.bootstrapTimeout || 3500;
+            const timer = setTimeout(() => {
+              this.log.warn(`Bootstrap is taking unusually long to execute its callback ${timeoutMs} miliseconds).`);
+              this.log.warn('Perhaps you forgot to call it?');
+            }, timeoutMs);
 
-          let ranBootstrapFn = false;
+            let ranBootstrapFn = false;
 
-          try {
-            fn(err => {
+            try {
+              fn(err => {
+                if (ranBootstrapFn) {
+                  this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
+
+                  return reject();
+                }
+
+                ranBootstrapFn = true;
+                clearTimeout(timer);
+
+                return resolve(err);
+              });
+            } catch (e) {
               if (ranBootstrapFn) {
-                this.log.error('You called the callback in `strapi.config.boostrap` more than once!');
+                this.log.error('The bootstrap function threw an error after its callback was called.');
 
-                return reject();
+                return reject(e);
               }
 
               ranBootstrapFn = true;
               clearTimeout(timer);
 
-              return resolve(err);
-            });
-          } catch (e) {
-            if (ranBootstrapFn) {
-              this.log.error('The bootstrap function threw an error after its callback was called.');
-
-              return reject(e);
+              return resolve(e);
             }
+          });
 
-            ranBootstrapFn = true;
-            clearTimeout(timer);
-
-            return resolve(e);
-          }
-        });
-
-    return Promise.all(
-      Object.values(this.plugins).map(x => execBootstrap(get(x, 'config.functions.bootstrap'))),
-    ).then(() => execBootstrap(this.config.functions.bootstrap));
+    return Promise.all(Object.values(this.plugins).map(x => execBootstrap(get(x, 'config.functions.bootstrap')))).then(
+      () => execBootstrap(this.config.functions.bootstrap),
+    );
   }
 
   async freeze() {
@@ -342,15 +329,18 @@ class Strapi extends EventEmitter {
 
   query(entity, plugin) {
     if (!entity) {
-      return this.log.error(
-        `You can't call the query method without passing the model's name as a first argument.`,
-      );
+      return this.log.error(`You can't call the query method without passing the model's name as a first argument.`);
     }
 
     const model = entity.toLowerCase();
 
-    const Model =
-      get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+    let Model;
+
+    if (plugin === 'admin') {
+      Model = get(strapi.admin, ['models', model], undefined);
+    } else {
+      Model = get(strapi.plugins, [plugin, 'models', model]) || get(strapi, ['models', model]) || undefined;
+    }
 
     if (!Model) {
       return this.log.error(`The model ${model} can't be found.`);
@@ -379,6 +369,8 @@ class Strapi extends EventEmitter {
       if (index !== -1) {
         pluginPath = pathTerms[index + 1];
       }
+    } else if (plugin === 'admin') {
+      pluginPath = 'admin';
     }
 
     if (!pluginPath) {
@@ -387,7 +379,10 @@ class Strapi extends EventEmitter {
 
     // Get plugin name.
     const pluginName = pluginPath.replace('strapi-plugin-', '').toLowerCase();
-    const queries = get(this.plugins, `${pluginName}.config.queries.${connector}`);
+    const queries =
+      pluginPath === 'admin'
+        ? get(this.admin, `config.queries.${connector}`)
+        : get(this.plugins, `${pluginName}.config.queries.${connector}`);
 
     if (!queries) {
       return this.log.error(`There is no query available for the model ${model}.`);
@@ -401,7 +396,7 @@ class Strapi extends EventEmitter {
       {
         orm: connector,
         primaryKey: Model.primaryKey,
-        associations: Model.associations
+        associations: Model.associations,
       },
     );
 

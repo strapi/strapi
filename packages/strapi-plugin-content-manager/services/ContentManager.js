@@ -8,18 +8,31 @@ const _ = require('lodash');
 
 module.exports = {
   fetchAll: async (params, query) => {
-    const { limit, skip, sort, query : request, queryAttribute, source, populate = [] } = query;
+    const {
+      limit,
+      skip,
+      sort,
+      query: request,
+      queryAttribute,
+      source,
+      populate = [],
+    } = query;
     const filters = strapi.utils.models.convertParams(params.model, query);
-    const { where = {} } = !_.isEmpty(request) ? strapi.utils.models.convertParams(params.model, request) : filters;
+    const { where = {} } = !_.isEmpty(request)
+      ? strapi.utils.models.convertParams(params.model, request)
+      : filters;
 
     // Find entries using `queries` system
-    return await strapi.query(params.model, source).find({
-      limit: limit || filters.limit,
-      skip: skip || filters.start || 0,
-      sort: sort || filters.sort,
-      where,
-      queryAttribute,
-    }, populate);
+    return await strapi.query(params.model, source).find(
+      {
+        limit: limit || filters.limit,
+        skip: skip || filters.start || 0,
+        sort: sort || filters.sort,
+        where,
+        queryAttribute,
+      },
+      populate,
+    );
   },
 
   search: async (params, query) => {
@@ -27,12 +40,15 @@ module.exports = {
     const filters = strapi.utils.models.convertParams(params.model, query);
 
     // Find entries using `queries` system
-    return await strapi.query(params.model, source).search({
-      limit: limit || filters.limit,
-      skip: skip || filters.start || 0,
-      sort: sort || filters.sort,
-      search: _q
-    }, populate);
+    return await strapi.query(params.model, source).search(
+      {
+        limit: limit || filters.limit,
+        skip: skip || filters.start || 0,
+        sort: sort || filters.sort,
+        search: _q,
+      },
+      populate,
+    );
   },
 
   countSearch: async (params, query) => {
@@ -45,20 +61,26 @@ module.exports = {
     const { source } = query;
     const filters = strapi.utils.models.convertParams(params.model, query);
 
-    return await strapi.query(params.model, source).count({ where: filters.where });
+    return await strapi
+      .query(params.model, source)
+      .count({ where: filters.where });
   },
 
   fetch: async (params, source, populate, raw = true) => {
-    return await strapi.query(params.model, source).findOne({
-      id: params.id
-    }, populate, raw);
+    return await strapi.query(params.model, source).findOne(
+      {
+        id: params.id,
+      },
+      populate,
+      raw,
+    );
   },
 
   add: async (params, values, source) => {
     // Multipart/form-data.
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
       // Silent recursive parser.
-      const parser = (value) => {
+      const parser = value => {
         try {
           value = JSON.parse(value);
         } catch (e) {
@@ -79,26 +101,30 @@ module.exports = {
 
       // Update JSON fields.
       const entry = await strapi.query(params.model, source).create({
-        values
+        values,
       });
 
       // Then, request plugin upload.
       if (strapi.plugins.upload && Object.keys(files).length > 0) {
         // Upload new files and attach them to this entity.
-        await strapi.plugins.upload.services.upload.uploadToEntity({
-          id: entry.id || entry._id,
-          model: params.model
-        }, files, source);
+        await strapi.plugins.upload.services.upload.uploadToEntity(
+          {
+            id: entry.id || entry._id,
+            model: params.model,
+          },
+          files,
+          source,
+        );
       }
 
       return strapi.query(params.model, source).findOne({
-        id: entry.id || entry._id
+        id: entry.id || entry._id,
       });
     }
 
     // Create an entry using `queries` system
     return await strapi.query(params.model, source).create({
-      values
+      values,
     });
   },
 
@@ -106,7 +132,7 @@ module.exports = {
     // Multipart/form-data.
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
       // Silent recursive parser.
-      const parser = (value) => {
+      const parser = value => {
         try {
           value = JSON.parse(value);
         } catch (e) {
@@ -119,9 +145,11 @@ module.exports = {
       const files = values.files;
 
       // set empty attributes if old values was cleared
-      _.difference(Object.keys(files), Object.keys(values.fields)).forEach(attr => {
-        values.fields[attr] = [];
-      });
+      _.difference(Object.keys(files), Object.keys(values.fields)).forEach(
+        attr => {
+          values.fields[attr] = [];
+        },
+      );
 
       // Parse stringify JSON data.
       values = Object.keys(values.fields).reduce((acc, current) => {
@@ -133,24 +161,28 @@ module.exports = {
       // Update JSON fields.
       await strapi.query(params.model, source).update({
         id: params.id,
-        values
+        values,
       });
 
       // Then, request plugin upload.
       if (strapi.plugins.upload) {
         // Upload new files and attach them to this entity.
-        await strapi.plugins.upload.services.upload.uploadToEntity(params, files, source);
+        await strapi.plugins.upload.services.upload.uploadToEntity(
+          params,
+          files,
+          source,
+        );
       }
 
       return strapi.query(params.model, source).findOne({
-        id: params.id
+        id: params.id,
       });
     }
 
     // Raw JSON.
     return strapi.query(params.model, source).update({
       id: params.id,
-      values
+      values,
     });
   },
 
@@ -158,7 +190,7 @@ module.exports = {
     const query = strapi.query(params.model, source);
     const primaryKey = query.primaryKey;
     const response = await query.findOne({
-      id: params.id
+      id: params.id,
     });
 
     if (!response) {
@@ -166,16 +198,23 @@ module.exports = {
     }
 
     params[primaryKey] = response[primaryKey];
-    params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce((acc, current) => {
-      const association = (strapi.models[params.model] || strapi.plugins[source].models[params.model]).associations.filter(x => x.alias === current)[0];
+    params.values = Object.keys(JSON.parse(JSON.stringify(response))).reduce(
+      (acc, current) => {
+        const association = (
+          strapi.models[params.model] ||
+          strapi.admin.models[params.model] ||
+          strapi.plugins[source].models[params.model]
+        ).associations.filter(x => x.alias === current)[0];
 
-      // Remove relationships.
-      if (association) {
-        acc[current] = _.isArray(response[current]) ? [] : null;
-      }
+        // Remove relationships.
+        if (association) {
+          acc[current] = _.isArray(response[current]) ? [] : null;
+        }
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {},
+    );
 
     if (!_.isEmpty(params.values)) {
       // Run update to remove all relationships.
@@ -184,7 +223,7 @@ module.exports = {
 
     // Delete an entry using `queries` system
     return await strapi.query(params.model, source).delete({
-      id: params.id
+      id: params.id,
     });
   },
 
@@ -201,8 +240,12 @@ module.exports = {
       return acc;
     }, []);
 
-    const filters = strapi.utils.models.convertParams(model, { [`${primaryKey}_in`]: toRemove });
-    const entries = await strapi.query(model, source).find({ where: filters.where }, null, true);
+    const filters = strapi.utils.models.convertParams(model, {
+      [`${primaryKey}_in`]: toRemove,
+    });
+    const entries = await strapi
+      .query(model, source)
+      .find({ where: filters.where }, null, true);
     const associations = strapi.query(model, source).associations;
 
     for (let i = 0; i < entries.length; ++i) {
@@ -229,12 +272,12 @@ module.exports = {
 
       await strapi.query(model, source).update({
         [primaryKey]: entry[primaryKey],
-        values: _.pick(entry, associations.map(a => a.alias))
+        values: _.pick(entry, associations.map(a => a.alias)),
       });
     }
 
     return strapi.query(model, source).deleteMany({
       [primaryKey]: toRemove,
     });
-  }
+  },
 };

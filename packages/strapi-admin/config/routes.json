@@ -47,6 +47,26 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "POST",
+      "path": "/local",
+      "handler": "Auth.callback"
+    },
+    {
+      "method": "POST",
+      "path": "/local/register",
+      "handler": "Auth.register"
+    },
+    {
+      "method": "POST",
+      "path": "/forgot-password",
+      "handler": "Auth.forgotPassword"
+    },
+    {
+      "method": "POST",
+      "path": "/reset-password",
+      "handler": "Auth.changePassword"
     }
   ]
 }

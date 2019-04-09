@@ -25,6 +25,7 @@
     "presetup": "node ./scripts/preSetup.js"
   },
   "dependencies": {
+    "crypto": "^1.0.1",
     "intl": "^1.2.5",
     "react-ga": "^2.4.1",
     "redux": "^4.0.1",

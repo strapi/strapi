@@ -32,7 +32,7 @@ import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
-import NavLink from 'components/NavLink';
+import LiLink from 'components/LiLink';
 
 import getQueryParameters from 'utils/getQueryParameters';
 import inputValidations from 'utils/inputsValidations';
@@ -225,7 +225,7 @@ export class EditPage extends React.Component {
   getContentManagerBaseUrl = () => {
     let url = `/plugins/${pluginId}/ctm-configurations/edit-settings/`;
 
-    if (this.getSource() === 'users-permissions') {
+    if (this.getSource() !== 'content-manager') {
       url = `${url}plugins/${this.getSource()}/`;
     }
 
@@ -430,9 +430,10 @@ export class EditPage extends React.Component {
 
   /**
    * Render the edit layout link
-   * @type {NavLink}
+   * @type {LiLink}
    */
   layoutLink = () => {
+    const { emitEvent } = this.context;
     // Retrieve URL
     const url = `${this.getContentManagerBaseUrl()}${this.getModelName()}`;
     // Link props to display
@@ -444,14 +445,12 @@ export class EditPage extends React.Component {
     };
 
     return (
-      <li
+      <LiLink
+        {...message}
         key={`${pluginId}.link`}
-        onClick={() =>
-          this.context.emitEvent('willEditContentTypeLayoutFromEditView')
-        }
-      >
-        <NavLink {...message} url={url} />
-      </li>
+        url={url}
+        onClick={() => emitEvent('willEditContentTypeLayoutFromEditView')}
+      />
     );
   };
 
@@ -500,7 +499,7 @@ export class EditPage extends React.Component {
    */
   retrieveLinksContainerComponent = () => {
     // Should be retrieved from the global props (@soupette)
-    const { plugins } = this.context;
+    const { emitEvent, plugins } = this.context;
     const appPlugins = plugins;
     const componentToInject = Object.keys(appPlugins).reduce((acc, current) => {
       // Retrieve injected compos from plugin
@@ -519,15 +518,26 @@ export class EditPage extends React.Component {
           const Component = compo.component;
 
           return (
-            <li
+            <Component
+              {...this}
+              {...compo.props}
               key={compo.key}
-              onClick={() =>
-                this.context.emitEvent('willEditContentTypeFromEditView')
-              }
-            >
-              <Component {...this} {...compo.props} />
-            </li>
+              onClick={() => {
+                emitEvent('willEditContentTypeFromEditView');
+              }}
+            />
           );
+
+          // return (
+          //   <li
+          //     key={compo.key}
+          //     onClick={() =>
+          //       this.context.emitEvent('willEditContentTypeFromEditView')
+          //     }
+          //   >
+          //     <Component {...this} {...compo.props} />
+          //   </li>
+          // );
         });
 
       return [...acc, ...compos];
@@ -657,7 +667,7 @@ export class EditPage extends React.Component {
               actions={this.pluginHeaderActions()}
               subActions={this.pluginHeaderSubActions()}
               title={{ id: this.getPluginHeaderTitle() }}
-              titleId='addNewEntry'
+              titleId="addNewEntry"
             />
             <PopUpWarning
               isOpen={showWarning}
@@ -668,7 +678,7 @@ export class EditPage extends React.Component {
                 cancel: `${pluginId}.popUpWarning.button.cancel`,
                 confirm: `${pluginId}.popUpWarning.button.confirm`,
               }}
-              popUpWarningType='danger'
+              popUpWarningType="danger"
               onConfirm={this.handleConfirm}
             />
             <PopUpWarning
@@ -680,10 +690,10 @@ export class EditPage extends React.Component {
                 cancel: `${pluginId}.popUpWarning.button.cancel`,
                 confirm: `${pluginId}.popUpWarning.button.confirm`,
               }}
-              popUpWarningType='danger'
+              popUpWarningType="danger"
               onConfirm={this.handleConfirm}
             />
-            <div className='row'>
+            <div className="row">
               {this.renderEdit()}
               {this.shouldDisplayedRightSection() && (
                 <div className={cn('col-lg-3')}>
