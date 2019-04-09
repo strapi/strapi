@@ -6,7 +6,12 @@ const _ = require('lodash');
 const generator = require('strapi-generate');
 const { fromJS, List, Map } = require('immutable');
 const Manager = require('../utils/Manager.js');
-const { createManager, removeColsLine, reorderList } = require('../utils/helpers.js');
+const {
+  createManager,
+  removeColsLine,
+  reorderList,
+  deepTrimObject,
+} = require('../utils/helpers.js');
 
 module.exports = {
   appearance: async (attributes, model, plugin) => {
@@ -369,8 +374,9 @@ module.exports = {
     });
 
     Object.assign(attributesNotConfigurable, attrs);
+    const trimmedNotConfigurableAttributes = deepTrimObject(attributesNotConfigurable);
 
-    return [attributesNotConfigurable, errors];
+    return [trimmedNotConfigurableAttributes, errors];
   },
 
   clearRelations: (model, source, force) => {
