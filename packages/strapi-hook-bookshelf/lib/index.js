@@ -82,9 +82,8 @@ module.exports = function(strapi) {
           const mountModels = (models, target, plugin = false) => {
             // Parse every authenticated model.
             _.forEach(models, (definition, model) => {
-              definition.globalName = _.upperFirst(
-                _.camelCase(definition.globalId),
-              );
+              definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
+              definition.associations = [];
 
               // Define local GLOBALS to expose every models in this file.
               GLOBALS[definition.globalId] = {};

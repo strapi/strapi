@@ -31,10 +31,14 @@ const loadFile = (obj, dir, file, prefix = null) => {
 
   const propPath = slash(rootPath).split('/');
 
-  _.set(
+  // merge is necessary for models to be able to merge Model.js with Model.settings.js which have the same path
+  _.merge(
     obj,
-    prefix ? [prefix].concat(propPath) : propPath,
-    require(path.join(dir, file))
+    _.set(
+      {},
+      prefix ? [prefix].concat(propPath) : propPath,
+      require(path.join(dir, file))
+    )
   );
 };
 

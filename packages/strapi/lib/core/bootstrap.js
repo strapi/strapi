@@ -1,95 +1,12 @@
 'use strict';
 
-// Dependencies.
-// const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 const fs = require('fs-extra');
 
-const loadConfig = require('../load/config');
-const findPackagePath = require('../load/package-path');
+const getDefaultApi = require('../core-api');
 
-const PLUGIN_PREFIX = 'strapi-plugin';
-
-module.exports.loadConfigs = async function({ appPath, installedPlugins }) {
-  const [config, admin, api, plugins, localPlugins] = await Promise.all([
-    loadAppConfig(appPath),
-    loadAdminConfig(),
-    loadApisConfig(appPath),
-    loadPluginsConfig(installedPlugins),
-    loadLocalPluginsConfig(appPath),
-  ]);
-
-  return {
-    config,
-    admin,
-    api,
-    plugins: _.merge(plugins, localPlugins),
-  };
-};
-
-// Loads an app config folder
-const loadAppConfig = appPath => loadConfig(path.resolve(appPath, 'config'));
-
-// Loads the strapi-admin config folder
-const loadAdminConfig = async () => ({
-  config: await loadConfig(
-    path.resolve(findPackagePath('strapi-admin'), 'config')
-  ),
-});
-
-// Loads every apis config folder
-const loadApisConfig = async appPath => {
-  let apis = {};
-  const apiFolder = path.resolve(appPath, 'api');
-  const apiFolders = await fs.readdir(apiFolder);
-
-  for (let apiFolder of apiFolders) {
-    const apiConfig = await loadConfig(
-      path.resolve(apiFolder, apiFolder, 'config')
-    );
-
-    _.set(apis, [apiFolder, 'config'], apiConfig);
-  }
-
-  return apis;
-};
-
-const loadLocalPluginsConfig = async appPath => {
-  let localPlugins = {};
-  const pluginsFolder = path.resolve(appPath, 'plugins');
-  const pluginsFolders = await fs.readdir(pluginsFolder);
-
-  for (let pluginsFolder of pluginsFolders) {
-    const pluginsConfig = await loadConfig(
-      path.resolve(pluginsFolder, pluginsFolder, 'config')
-    );
-
-    _.set(localPlugins, [pluginsFolder, 'config'], pluginsConfig);
-  }
-
-  return localPlugins;
-};
-
-// Loads installed plugins config
-const loadPluginsConfig = async pluginsNames => {
-  let plugins = {};
-  for (let plugin of pluginsNames) {
-    const pluginConfig = await loadConfig(
-      path.resolve(findPackagePath(plugin), 'config')
-    );
-
-    _.set(
-      plugins,
-      [plugin.substring(PLUGIN_PREFIX.length + 1), 'config'],
-      pluginConfig
-    );
-  }
-
-  return plugins;
-};
-
-module.exports.app = function() {
+module.exports = function() {
   // Retrieve Strapi version.
   this.config.uuid = _.get(this.config.info, 'strapi.uuid', '');
   this.config.info.customs = _.get(this.config.info, 'strapi', {});
@@ -105,6 +22,9 @@ module.exports.app = function() {
   this.config.currentEnvironment =
     this.config.environments[this.config.environment] || {};
 
+  const defaultConnection = this.config.currentEnvironment.database
+    .defaultConnection;
+
   // Set current connections.
   this.config.connections = _.get(
     this.config.currentEnvironment,
@@ -118,44 +38,55 @@ module.exports.app = function() {
     );
   }
 
-  // Template literal string.
-  // this.config = templateConfiguration(this.config);
-
   // Initialize main router to use it in middlewares.
   this.router = this.koaMiddlewares.routerJoi();
-
-  // Set controllers.
-  this.controllers = Object.keys(this.api || []).reduce((acc, key) => {
-    for (let index in this.api[key].controllers) {
-      if (!this.api[key].controllers[index].identity) {
-        this.api[key].controllers[index].identity = _.upperFirst(index);
-      }
-
-      acc[index] = this.api[key].controllers[index];
-    }
-
-    return acc;
-  }, {});
 
   // Set models.
   this.models = Object.keys(this.api || []).reduce((acc, key) => {
     for (let index in this.api[key].models) {
-      if (!this.api[key].models[index].globalId) {
-        this.api[key].models[index].globalId = _.upperFirst(_.camelCase(index));
-      }
+      let model = this.api[key].models[index];
 
-      if (!this.api[key].models[index].connection) {
-        this.api[key].models[
-          index
-        ].connection = this.config.currentEnvironment.database.defaultConnection;
-      }
+      Object.assign(model, {
+        globalId: model.globalId || _.upperFirst(_.camelCase(index)),
+        collectionName: model.collectionName || `${index}`.toLocaleLowerCase(),
+        connection: model.connection || defaultConnection,
+      });
 
-      if (!this.api[key].models[index].collectionName) {
-        this.api[key].models[index].collectionName = `${index}`.toLowerCase();
-      }
+      // build default service and controller
 
-      acc[index] = this.api[key].models[index];
+      // find corresponding service and controller
+      const mService = _.get(this.api[key], ['services', index], {});
+      const mController = _.get(this.api[key], ['controllers', index], {});
+
+      const defaultApi = getDefaultApi(
+        this.config.connections[model.connection]
+      );
+
+      const service = Object.assign(
+        defaultApi.service({ modelId: index }),
+        mService
+      );
+      const controller = Object.assign(
+        defaultApi.controller({ service }),
+        mController,
+        { identity: mController.identity || _.upperFirst(index) }
+      );
+
+      _.set(this.api[key], ['services', index], service);
+      _.set(this.api[key], ['controllers', index], controller);
+
+      acc[index] = model;
     }
+    return acc;
+  }, {});
+
+  // Set controllers.
+  this.controllers = Object.keys(this.api || []).reduce((acc, key) => {
+    for (let index in this.api[key].controllers) {
+      let controller = this.api[key].controllers[index];
+      acc[index] = controller;
+    }
+
     return acc;
   }, {});
 
@@ -173,89 +104,56 @@ module.exports.app = function() {
     return acc.concat(_.get(this.api[key], 'config.routes') || {});
   }, []);
 
-  // Set admin controllers.
-  this.admin.controllers = Object.keys(this.admin.controllers || []).reduce(
-    (acc, key) => {
-      if (!this.admin.controllers[key].identity) {
-        this.admin.controllers[key].identity = key;
-      }
+  // Init admin controllers.
+  Object.keys(this.admin.controllers || []).forEach(key => {
+    if (!this.admin.controllers[key].identity) {
+      this.admin.controllers[key].identity = key;
+    }
+  });
 
-      acc[key] = this.admin.controllers[key];
+  // Init admin models.
+  Object.keys(this.admin.models || []).forEach(key => {
+    let model = this.admin.models[key];
 
-      return acc;
-    },
-    {}
-  );
+    Object.assign(model, {
+      identity: model.identity || _.upperFirst(key),
+      globalId: model.globalId || _.upperFirst(_.camelCase(`admin-${key}`)),
+      connection:
+        model.connection ||
+        this.config.currentEnvironment.database.defaultConnection,
+    });
+  });
 
-  // Set admin models.
-  this.admin.models = Object.keys(this.admin.models || []).reduce(
-    (acc, key) => {
-      if (!this.admin.models[key].identity) {
-        this.admin.models[key].identity = _.upperFirst(key);
-      }
+  Object.keys(this.plugins).forEach(pluginName => {
+    let plugin = this.plugins[pluginName];
+    Object.assign(plugin, {
+      controllers: plugin.controllers || [],
+      services: plugin.services || [],
+      models: plugin.models || [],
+    });
 
-      if (!this.admin.models[key].globalId) {
-        this.admin.models[key].globalId = _.upperFirst(
-          _.camelCase(`admin-${key}`)
-        );
-      }
+    Object.keys(plugin.controllers).forEach(key => {
+      let controller = plugin.controllers[key];
 
-      if (!this.admin.models[key].connection) {
-        this.admin.models[
-          key
-        ].connection = this.config.currentEnvironment.database.defaultConnection;
-      }
+      Object.assign(controller, {
+        identity: controller.identity || key,
+      });
+    });
 
-      acc[key] = this.admin.models[key];
+    Object.keys(plugin.models || []).forEach(key => {
+      let model = plugin.models[key];
 
-      return acc;
-    },
-    {}
-  );
-
-  this.plugins = Object.keys(this.plugins).reduce((acc, key) => {
-    this.plugins[key].controllers = Object.keys(
-      this.plugins[key].controllers || []
-    ).reduce((sum, index) => {
-      if (!this.plugins[key].controllers[index].identity) {
-        this.plugins[key].controllers[index].identity = index;
-      }
-
-      sum[index] = this.plugins[key].controllers[index];
-
-      return sum;
-    }, {});
-
-    this.plugins[key].models = Object.keys(
-      this.plugins[key].models || []
-    ).reduce((sum, index) => {
-      if (!this.plugins[key].models[index].connection) {
-        this.plugins[key].models[
-          index
-        ].connection = this.config.currentEnvironment.database.defaultConnection;
-      }
-
-      if (!this.plugins[key].models[index].globalId) {
-        this.plugins[key].models[index].globalId = _.upperFirst(
-          _.camelCase(`${key}-${index}`)
-        );
-      }
-
-      if (!this.plugins[key].models[index].collectionName) {
-        this.plugins[key].models[
-          index
-        ].collectionName = `${key}_${index}`.toLowerCase();
-      }
-
-      sum[index] = this.plugins[key].models[index];
-
-      return sum;
-    }, {});
-
-    acc[key] = this.plugins[key];
-
-    return acc;
-  }, {});
+      Object.assign(model, {
+        collectionName:
+          model.collectionName || `${pluginName}_${key}`.toLowerCase(),
+        globalId:
+          model.globalId || _.upperFirst(_.camelCase(`${pluginName}-${key}`)),
+        connection:
+          model.connection ||
+          this.config.currentEnvironment.database.defaultConnection,
+      });
+    });
+  });
 
   // Define required middlewares categories.
   const middlewareCategories = ['request', 'response', 'security', 'server'];

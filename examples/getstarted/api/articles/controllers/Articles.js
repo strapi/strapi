@@ -1,5 +1,5 @@
 module.exports = {
-  test() {
-    console.log('test');
+  find(ctx) {
+    ctx.body = 'coucou';
   },
 };
