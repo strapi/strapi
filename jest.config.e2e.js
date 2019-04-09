@@ -9,4 +9,5 @@ module.exports = {
     '<rootDir>/out-tsc/',
     '<rootDir>/test/',
   ],
+  transform: {},
 };

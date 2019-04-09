@@ -230,6 +230,13 @@ module.exports = require('./webpack.base.babel')({
       'node_modules',
       'react-dnd-html5-backend',
     ),
+    'enzyme': path.resolve(
+      rootAdminpath,
+      'node_modules',
+      'strapi-helper-plugin',
+      'node_modules',
+      'enzyme',
+    ),
   },
 
   // Emit a source map for easier debugging
