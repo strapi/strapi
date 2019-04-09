@@ -12,3 +12,12 @@
   color: #787E8F;
   margin: 0;
 }
+
+.icon {
+  margin-top: 16px;
+  margin-left: 3px;
+  color: rgba(16,22,34,.35);
+  &:hover {
+    cursor: pointer;
+  }
+}
