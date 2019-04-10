@@ -8,7 +8,16 @@ const { escapeNewlines } = require('../utils/helpers.js');
 
 module.exports = {
   getModels: async ctx => {
-    ctx.send({ models: Service.getModels() });
+    const models = Service.getModels();
+    const arrayOfPromises = [];
+    models.forEach(currentModel => {
+      const model = Service.getModel(currentModel.name, currentModel.source);
+
+      arrayOfPromises.push(model);
+    });
+    const allModels = await Promise.all(arrayOfPromises);
+
+    ctx.send({ allModels, models });
   },
 
   getModel: async ctx => {

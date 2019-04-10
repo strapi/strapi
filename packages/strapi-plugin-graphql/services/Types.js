@@ -11,6 +11,7 @@ const { GraphQLUpload } = require('apollo-server-koa');
 const graphql = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const GraphQLDateTime = require('graphql-type-datetime');
+const GraphQLLong = require('graphql-type-long');
 const pluralize = require('pluralize');
 /* eslint-disable no-unused-vars */
 
@@ -41,8 +42,10 @@ module.exports = {
           type = 'Boolean';
           break;
         case 'integer':
-        case 'biginteger':
           type = 'Int';
+          break;
+        case 'biginteger':
+          type = 'Long';
           break;
         case 'decimal':
           type = 'Float';
@@ -138,10 +141,11 @@ module.exports = {
     Object.assign(resolvers, {
       JSON: GraphQLJSON,
       DateTime: GraphQLDateTime,
+      Long: GraphQLLong,
       Upload: GraphQLUpload,
     });
 
-    return 'scalar JSON \n scalar DateTime \n scalar Upload';
+    return 'scalar JSON \n scalar DateTime \n scalar Long \n scalar Upload';
   },
 
   /**
