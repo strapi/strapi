@@ -158,7 +158,21 @@ strapi new my-project --quickstart
 
 **Note:** When you use `--quickstart` to create a Strapi project locally, a **SQLite database** is used which is not compatible with Heroku. Therefore, another database option [must be chosen](#_6-heroku-database-set-up).
 
-### 4. Init a Git repository and commit your project
+### 4. Update `.gitignore`
+
+Add the following line at end of `.gitignore`:
+
+`Path: ./my-project/.gitignore`
+
+```
+package-lock.json
+```
+
+Even if it is usually recommended to version this file, it may create issues on Heroku.
+
+### 5. Init a Git repository and commit your project
+
+Init the Git repository and commit yoru project.
 
 `Path: ./my-project/`
 
@@ -169,7 +183,7 @@ git add .
 git commit -am "Initial Commit" 
 ```
 
-### 5. Create a Heroku project
+### 6. Create a Heroku project
 
 Create a new Heroku project.
 
@@ -193,7 +207,7 @@ heroku git:remote -a your-heroku-app-name
 
 Your local development environment is now set-up and configured to work with Heroku. You have a new Strapi project and a new Heroku app ready to be configured to work with a database and with each other.
 
-### 6. Heroku Database set-up
+### 7. Heroku Database set-up
 
 Below you will find database options when working with Heroku.  Please choose the correct database (e.g. PostgreSQL, MongoDB, etc.) and follow those instructions. 
 
@@ -337,7 +351,7 @@ Replace the contents of `database.json` with the following:
 
 ::::
 
-### 6. Commit your changes
+### 8. Commit your changes
 
 `Path: ./my-project/`
 
@@ -345,7 +359,7 @@ Replace the contents of `database.json` with the following:
 git commit -am "Update database config"
 ```
 
-### 7. Deploy
+### 9. Deploy
 
 `Path: ./my-project/`
 
