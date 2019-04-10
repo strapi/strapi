@@ -21,7 +21,7 @@ describe('Create Strapi API End to End', () => {
       method: 'POST',
       body: auth,
     }).catch(err => {
-      if (err.error.message.includes('Email is already taken.')) return;
+      if (err.error.message.includes("You can't register a new admin")) return;
       throw err;
     });
 
