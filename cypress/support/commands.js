@@ -64,7 +64,7 @@ Cypress.Commands.add('checkModalOpening', () => {
 
 Cypress.Commands.add('deleteUser', (id, jwt) => {
   cy.request({
-    url: `${backendUrl}/users/${id}`,
+    url: `${backendUrl}/content-manager/explorer/administrator/${id}?source=admin`,
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${jwt}`,
