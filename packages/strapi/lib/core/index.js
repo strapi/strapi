@@ -3,6 +3,7 @@
 const loadConfigs = require('./load-configs');
 const loadApis = require('./load-apis');
 const loadMiddlewares = require('./load-middlewares');
+const loadExtensions = require('./load-extensions');
 const loadHooks = require('./load-hooks');
 const bootstrap = require('./bootstrap');
 const plugins = require('./plugins');
@@ -14,6 +15,7 @@ module.exports = {
   loadMiddlewares,
   loadHooks,
   loadApis,
+  loadExtensions,
   bootstrap,
   plugins,
   admin,

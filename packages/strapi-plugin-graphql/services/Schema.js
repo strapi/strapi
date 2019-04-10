@@ -260,15 +260,15 @@ const schemaBuilder = {
     `;
 
     // // Build schema.
-    // const schema = makeExecutableSchema({
-    //   typeDefs,
-    //   resolvers,
-    // });
+    if (!strapi.config.currentEnvironment.server.production) {
+      // Write schema.
+      const schema = makeExecutableSchema({
+        typeDefs,
+        resolvers,
+      });
 
-    // if (!strapi.config.currentEnvironment.server.production) {
-    //   // Write schema.
-    //   this.writeGenerateSchema(graphql.printSchema(schema));
-    // }
+      this.writeGenerateSchema(graphql.printSchema(schema));
+    }
 
     // Remove custom scaler (like Upload);
     typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
@@ -286,27 +286,8 @@ const schemaBuilder = {
    */
 
   writeGenerateSchema: schema => {
-    const generatedFolder = path.resolve(
-      strapi.config.appPath,
-      'extensions',
-      'graphql',
-      'config',
-      'generated'
-    );
-
-    // Create folder if necessary.
-    try {
-      fs.accessSync(generatedFolder, fs.constants.R_OK | fs.constants.W_OK);
-    } catch (err) {
-      if (err && err.code === 'ENOENT') {
-        fs.mkdirSync(generatedFolder);
-      } else {
-        strapi.log.error(err);
-      }
-    }
-
-    fs.writeFileSync(path.join(generatedFolder, 'schema.graphql'), schema);
-  },
+    return strapi.fs.writeFile('exports/graphql/schema.graphql', schema);
+  }
 };
 
 module.exports = schemaBuilder;

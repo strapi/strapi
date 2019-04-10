@@ -18,10 +18,18 @@ const {
   bootstrap,
   plugins,
   admin,
+  loadExtensions,
   initCoreStore,
 } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
+const createStrapiFs = require('./core/fs');
+
+const getPrefixedDependencies = (prefix, pkgJSON) => {
+  return Object.keys(pkgJSON.dependencies)
+    .filter(d => d.startsWith(prefix))
+    .map(pkgName => pkgName.substring(prefix.length + 1));
+};
 
 /**
  * Construct an Strapi instance.
@@ -88,6 +96,8 @@ class Strapi extends EventEmitter {
       functions: {},
       routes: {},
     };
+
+    this.fs = createStrapiFs(this);
   }
 
   async start(config = {}, cb) {
@@ -211,6 +221,7 @@ class Strapi extends EventEmitter {
     process.exit(1);
   }
 
+  // TODO: Split code
   async load() {
     await this.enhancer();
 
@@ -223,24 +234,13 @@ class Strapi extends EventEmitter {
       }
     });
 
-    this.config.info = require(path.resolve(
-      this.config.appPath,
-      'package.json'
-    ));
-
-    this.config.installedPlugins = Object.keys(this.config.info.dependencies)
-      .filter(d => d.startsWith('strapi-plugin'))
-      .map(pkgName => pkgName.substring('strapi-plugin'.length + 1));
-
-    this.config.installedMiddlewares = Object.keys(
-      this.config.info.dependencies
-    )
-      .filter(d => d.startsWith('strapi-middleware'))
-      .map(pkgName => pkgName.substring('strapi-middleware'.length + 1));
-
-    this.config.installedHooks = Object.keys(this.config.info.dependencies)
-      .filter(d => d.startsWith('strapi-hook'))
-      .map(pkgName => pkgName.substring('strapi-hook'.length + 1));
+    const pkgJSON = require(path.resolve(this.config.appPath, 'package.json'));
+    Object.assign(this.config, {
+      info: pkgJSON,
+      installedPlugins: getPrefixedDependencies('strapi-plugin', pkgJSON),
+      installedMiddlewares: getPrefixedDependencies('strapi-middleware', pkgJSON),
+      installedHooks: getPrefixedDependencies('strapi-hook', pkgJSON),
+    });
 
     // load configs
     _.merge(this, await loadConfigs(this.config));
@@ -254,6 +254,17 @@ class Strapi extends EventEmitter {
 
     // load hooks
     this.hook = await loadHooks(this.config);
+
+    /**
+     * Handle plugin extensions
+     */
+    const extensions = await loadExtensions(this.config);
+    // merge extensions config folders
+    _.merge(strapi.plugins, extensions.configs);
+    // overwrite plugins with extensions overwrites
+    extensions.overwrites.forEach(({ path, mod }) =>
+      _.set(strapi.plugins, path, mod)
+    );
 
     // Populate AST with configurations.
     await bootstrap.call(this);

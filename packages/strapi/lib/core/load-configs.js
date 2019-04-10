@@ -5,8 +5,7 @@ const _ = require('lodash');
 const fs = require('fs-extra');
 
 const findPackagePath = require('../load/package-path');
-const loadFiles = require('../load/load-files');
-const requireFileAndParse = require('../load/require-file-parse');
+const loadConfig = require('../load/load-config-files');
 
 module.exports = async ({ appPath, installedPlugins }) => {
   const [config, admin, api, plugins, localPlugins] = await Promise.all([
@@ -25,38 +24,6 @@ module.exports = async ({ appPath, installedPlugins }) => {
   };
 };
 
-const loadConfig = dir => {
-  return loadFiles(dir, 'config/**/*.+(js|json)', {
-    requireFn: requireFileAndParse,
-    shouldUseFileNameAsKey,
-  });
-};
-
-const prefixedPaths = [
-  ...['staging', 'production', 'development'].reduce((acc, env) => {
-    return acc.concat(
-      `environments/${env}/database`,
-      `environments/${env}/security`,
-      `environments/${env}/request`,
-      `environments/${env}/response`,
-      `environments/${env}/server`
-    );
-  }, []),
-  'functions',
-  'policies',
-  'locales',
-  'hook',
-  'middleware',
-  'language',
-  'queries',
-  'layout',
-];
-
-const shouldUseFileNameAsKey = file => {
-  return _.some(prefixedPaths, e => file.startsWith(`config/${e}`))
-    ? true
-    : false;
-};
 
 // Loads an app config folder
 const loadAppConfig = async appPath => {

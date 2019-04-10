@@ -52,7 +52,7 @@ const watchFileChanges = ({ appPath, strapi }) => {
       '**/cypress',
       '**/cypress/**',
       '**/*.db*',
-      '**/generated/schema.graphql'
+      '**/exports/**'
     ],
   });
 
