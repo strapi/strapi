@@ -1,6 +1,6 @@
 /**
  *
- * NavLink
+ * LiLink
  *
  */
 
@@ -13,7 +13,7 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-function NavLink(props) {
+function LiLink(props) {
   let content;
 
   if (typeof props.message === 'string') {
@@ -32,21 +32,23 @@ function NavLink(props) {
   }
 
   return (
-    <Link to={props.url} className={cn(styles.navLink)}>
-      {icon}
-      {content}
-    </Link>
+    <li>
+      <Link to={props.url} className={cn(styles.navLink)}>
+        {icon}
+        {content}
+      </Link>
+    </li>
   );
 }
 
-NavLink.defaultProps = {
+LiLink.defaultProps = {
   children: '',
   icon: '',
   message: '',
   url: '',
 };
 
-NavLink.propTypes = {
+LiLink.propTypes = {
   children: PropTypes.node,
   icon: PropTypes.string,
   message: PropTypes.oneOfType([
@@ -60,4 +62,4 @@ NavLink.propTypes = {
   url: PropTypes.string,
 };
 
-export default NavLink;
+export default LiLink;
