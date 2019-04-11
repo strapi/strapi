@@ -3,6 +3,7 @@
 // Dependencies.
 const http = require('http');
 const path = require('path');
+const fs = require('fs-extra');
 const cluster = require('cluster');
 const { EventEmitter } = require('events');
 const Koa = require('koa');
@@ -62,10 +63,13 @@ class Strapi extends EventEmitter {
     // Expose `plugin`.
     this.plugins = {};
 
+    const rootPath = appPath || process.cwd();
+    const pkgJSON = require(path.resolve(rootPath, 'package.json'));
+
     // Default configurations.
     this.config = {
       launchedAt: Date.now(),
-      appPath: appPath || process.cwd(),
+      appPath: rootPath,
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,
       environment: _.toLower(process.env.NODE_ENV) || 'development',
@@ -89,9 +93,24 @@ class Strapi extends EventEmitter {
       hook: {},
       functions: {},
       routes: {},
+      info: pkgJSON,
+      installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
+      installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
+      installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
 
     this.fs = createStrapiFs(this);
+    this.runChecks();
+  }
+
+  runChecks() {
+    try {
+      checkFoldersExist(this.config);
+      checkPluginsConflicts(this.config);
+    } catch (err) {
+      this.log.error(err.message);
+      process.exit(1);
+    }
   }
 
   async start(config = {}, cb) {
@@ -226,14 +245,6 @@ class Strapi extends EventEmitter {
       } else {
         await next();
       }
-    });
-
-    const pkgJSON = require(path.resolve(this.config.appPath, 'package.json'));
-    Object.assign(this.config, {
-      info: pkgJSON,
-      installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
-      installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
-      installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     });
 
     // load configs
@@ -481,6 +492,42 @@ const getPrefixedDeps = (prefix, pkgJSON) => {
   return Object.keys(pkgJSON.dependencies)
     .filter(d => d.startsWith(prefix))
     .map(pkgName => pkgName.substring(prefix.length + 1));
+};
+
+const requiredPaths = ['api', 'extensions', 'plugins', 'config', 'public'];
+const checkFoldersExist = ({ appPath }) => {
+  let missingPaths = [];
+  for (let reqPath of requiredPaths) {
+    if (!fs.pathExistsSync(path.resolve(appPath, reqPath))) {
+      missingPaths.push(reqPath);
+    }
+  }
+
+  if (missingPaths.length > 0) {
+    const err = new Error(
+      `Missing required folders:\n${missingPaths
+        .map(p => `- ./${p}`)
+        .join('\n')}`
+    );
+    delete err.stack;
+    throw err;
+  }
+};
+
+const checkPluginsConflicts = ({ appPath, installedPlugins }) => {
+  const localPluginNames = fs.readdirSync(path.resolve(appPath, 'plugins'));
+  const pluginsIntersection = _.intersection(
+    localPluginNames,
+    installedPlugins
+  );
+
+  if (pluginsIntersection.length > 0) {
+    throw new Error(
+      `You have some local plugins with the same name as npm installed plugins (${pluginsIntersection.join(
+        ','
+      )}).`
+    );
+  }
 };
 
 module.exports = options => {
