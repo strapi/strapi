@@ -1,76 +1,160 @@
-/**
- * app.js
- *
- * This is the entry file for the application when running the build
- * code.
- */
+// /**
+//  *
+//  * app.js
+//  *
+//  * Entry point of the application
+//  */
 
-/* eslint-disable */
-import 'babel-polyfill';
-import { findIndex } from 'lodash';
+import '@babel/polyfill';
 import 'sanitize.css/sanitize.css';
-import 'whatwg-fetch';
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
+import { ConnectedRouter } from 'react-router-redux';
+
+import { merge } from 'lodash';
 import {
-  getAppPluginsSucceeded,
-  unsetHasUserPlugin,
+  freezeApp,
+  pluginLoaded,
+  unfreezeApp,
+  updatePlugin,
 } from './containers/App/actions';
-import { basename, store } from './createStore';
-import './intlPolyfill';
-import './public-path';
-import './strapi';
+import { showNotification } from './containers/NotificationProvider/actions';
+import injectReducer from './utils/injectReducer';
+import injectSaga from './utils/injectSaga';
 
-const dispatch = store.dispatch;
+// Import root component
+import App from './containers/App';
+// Import Language provider
+import LanguageProvider from './containers/LanguageProvider';
 
-// Don't inject plugins in development mode.
-if (window.location.port !== '4000') {
-  fetch(`${strapi.remoteURL}/config/plugins.json`, { cache: 'no-cache' })
-    .then(response => {
-      return response.json();
-    })
-    .then(plugins => {
-      dispatch(getAppPluginsSucceeded(plugins));
+import configureStore from './configureStore';
 
-      if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
-        dispatch(unsetHasUserPlugin());
-      }
+// Import i18n messages
+import { translationMessages, languages } from './i18n';
 
-      const $body = document.getElementsByTagName('body')[0];
+// Create redux store with history
+import history from './utils/history';
+const initialState = {};
+const store = configureStore(initialState, history);
+const { dispatch } = store;
+const MOUNT_NODE = document.getElementById('app');
 
-      (plugins || []).forEach(plugin => {
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.onerror = function(oError) {
-          const source = new URL(oError.target.src);
-          const url = new URL(`${strapi.remoteURL}`);
+// TODO
+const remoteURL = (() => {
+  if (window.location.port === '4000') {
+    return 'http://localhost:4000/admin';
+  }
 
-          if (!source || !url) {
-            throw new Error(`Impossible to load: ${oError.target.src}`);
-          }
+  // Relative URL (ex: /dashboard)
+  if (process.env.REMOTE_URL[0] === '/') {
+    return (window.location.origin + process.env.REMOTE_URL).replace(/\/$/, '');
+  }
 
-          // Remove tag.
-          $body.removeChild(script);
+  return process.env.REMOTE_URL.replace(/\/$/, '');
+})();
 
-          // New attempt with new src.
-          const newScript = document.createElement('script');
-          newScript.type = 'text/javascript';
-          newScript.src = `${url.origin}${source.pathname}`;
-          $body.appendChild(newScript);
-        };
+const registerPlugin = plugin => {
+  // Merge admin translation messages
+  merge(translationMessages, plugin.translationMessages);
 
-        script.src =
-          plugin.source[process.env.NODE_ENV].indexOf('://') === -1
-            ? `${basename}${plugin.source[process.env.NODE_ENV]}`.replace(
-                '//',
-                '/',
-              ) // relative
-            : plugin.source[process.env.NODE_ENV]; // absolute
+  plugin.leftMenuSections = plugin.leftMenuSections || [];
 
-        $body.appendChild(script);
-      });
-    })
-    .catch(err => {
-      console.log(err); // eslint-disable-line no-console
-    });
+  dispatch(pluginLoaded(plugin));
+};
+const displayNotification = (message, status) => {
+  dispatch(showNotification(message, status));
+};
+const lockApp = data => {
+  dispatch(freezeApp(data));
+};
+const unlockApp = () => {
+  dispatch(unfreezeApp());
+};
+
+window.strapi = Object.assign(window.strapi || {}, {
+  node: MODE || 'host',
+  remoteURL,
+  backendURL: BACKEND_URL,
+  registerPlugin,
+  notification: {
+    success: message => {
+      displayNotification(message, 'success');
+    },
+    warning: message => {
+      displayNotification(message, 'warning');
+    },
+    error: message => {
+      displayNotification(message, 'error');
+    },
+    info: message => {
+      displayNotification(message, 'info');
+    },
+  },
+  refresh: pluginId => ({
+    translationMessages: translationMessagesUpdated => {
+      render(merge({}, translationMessages, translationMessagesUpdated));
+    },
+    leftMenuSections: leftMenuSectionsUpdated => {
+      store.dispatch(
+        updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated),
+      );
+    },
+  }),
+  router: history,
+  languages,
+  currentLanguage:
+    window.localStorage.getItem('strapi-admin-language') ||
+    window.navigator.language ||
+    window.navigator.userLanguage ||
+    'en',
+  lockApp,
+  unlockApp,
+  injectReducer,
+  injectSaga,
+  store,
+});
+
+const render = messages => {
+  ReactDOM.render(
+    <Provider store={store}>
+      <LanguageProvider messages={messages}>
+        <ConnectedRouter history={history}>
+          <App store={store} />
+        </ConnectedRouter>
+      </LanguageProvider>
+    </Provider>,
+    MOUNT_NODE,
+  );
+};
+
+if (module.hot) {
+  module.hot.accept(['./i18n', './containers/App'], () => {
+    ReactDOM.unmountComponentAtNode(MOUNT_NODE);
+
+    render(translationMessages);
+  });
 }
 
+// Chunked polyfill for browsers without Intl support
+if (!window.Intl) {
+  new Promise(resolve => {
+    resolve(import('intl'));
+  })
+    .then(() =>
+      Promise.all([
+        import('intl/locale-data/jsonp/en.js'),
+        import('intl/locale-data/jsonp/de.js'),
+      ]),
+    ) // eslint-disable-line prettier/prettier
+    .then(() => render(translationMessages))
+    .catch(err => {
+      throw err;
+    });
+} else {
+  render(translationMessages);
+}
+
+// cc/ @Pierre Burgy exporting dispatch for the notifications
 export { dispatch };

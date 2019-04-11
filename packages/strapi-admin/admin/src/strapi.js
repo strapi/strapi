@@ -12,9 +12,9 @@ import {
 import { showNotification } from './containers/NotificationProvider/actions';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
-import { history, store } from './createStore';
+// import { history, store } from './createStore';
 import { translationMessages, languages } from './i18n';
-import './public-path';
+// import './public-path';
 
 /**
  * Register a plugin
