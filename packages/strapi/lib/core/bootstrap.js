@@ -4,7 +4,7 @@ const path = require('path');
 const _ = require('lodash');
 const fs = require('fs-extra');
 
-const getDefaultApi = require('../core-api');
+const { createController, createService } = require('../core-api');
 
 module.exports = function(strapi) {
   // Retrieve Strapi version.
@@ -52,24 +52,19 @@ module.exports = function(strapi) {
         connection: model.connection || defaultConnection,
       });
 
-      // build default service and controller
-
       // find corresponding service and controller
-      const mService = _.get(strapi.api[key], ['services', index], {});
-      const mController = _.get(strapi.api[key], ['controllers', index], {});
-
-      const defaultApi = getDefaultApi(
-        strapi.config.connections[model.connection]
-      );
+      const userService = _.get(strapi.api[key], ['services', index], {});
+      const userController = _.get(strapi.api[key], ['controllers', index], {});
 
       const service = Object.assign(
-        defaultApi.service({ modelId: index }),
-        mService
+        createService({ model: index, strapi }),
+        userService
       );
+
       const controller = Object.assign(
-        defaultApi.controller({ service }),
-        mController,
-        { identity: mController.identity || _.upperFirst(index) }
+        createController({ service }),
+        userController,
+        { identity: userController.identity || _.upperFirst(index) }
       );
 
       _.set(strapi.api[key], ['services', index], service);

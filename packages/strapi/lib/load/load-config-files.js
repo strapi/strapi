@@ -6,6 +6,9 @@ module.exports = (dir, pattern = 'config/**/*.+(js|json)') =>
   loadFiles(dir, pattern, {
     requireFn: requireFileAndParse,
     shouldUseFileNameAsKey,
+    globArgs: {
+      dot: true,
+    },
   });
 
 const shouldUseFileNameAsKey = file => {

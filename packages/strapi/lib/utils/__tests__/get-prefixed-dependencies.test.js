@@ -5,10 +5,10 @@ describe('getPrefixedDeps', () => {
     expect(
       getPrefixedDeps('test-prefix', {
         dependencies: {
-          'test-prefix-coucou': '1',
+          'test-prefix-packagename': '1',
         },
       })
-    ).toEqual(['coucou']);
+    ).toEqual(['packagename']);
   });
 
   test('Ignores exact names', () => {
