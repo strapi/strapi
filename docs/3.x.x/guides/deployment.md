@@ -10,9 +10,6 @@ Strapi gives you many possible deployment options for your project or applicatio
 
 - [Configuration](#configuration)
 - [Heroku](#heroku)
-- [AWS](#aws)
-- [Digital Ocean](#digital-ocean)
-- [Azure](#azure)
 - [Docker](#docker)
 ---
 
@@ -397,18 +394,6 @@ git commit -am "Changes to my-project noted"
 git push heroku master
 heroku open
 ```
-
-## AWS
-
-TBD.
-
-## Digital Ocean
-
-TBD.
-
-## Azure
-
-TBD.
 
 ## Docker
 
