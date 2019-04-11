@@ -158,9 +158,6 @@ module.exports = {
       .map(ast => ast.alias)
       .join(' ');
 
-    console.log(strapi.query('user', 'users-permissions'));
-    console.log(strapi.query('user', 'users-permissions').attributes);
-
     const $or = Object.keys(strapi.query('user', 'users-permissions').attributes).reduce((acc, curr) => {
       switch (strapi.query('user', 'users-permissions').attributes[curr].type) {
         case 'integer':
