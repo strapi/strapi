@@ -7,10 +7,8 @@
  *
  * This is handy in situations where the Strapi CLI is not relevant or useful.
  */
+const strapi = require('strapi');
 
-process.chdir(__dirname);
-
-(() => {
-  const strapi = require('strapi');
-  strapi.start();
-})();
+strapi({
+  appPath: __dirname,
+}).start();
