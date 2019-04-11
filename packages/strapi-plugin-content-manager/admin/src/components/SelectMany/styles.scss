@@ -54,7 +54,7 @@
     overflow: auto;
     max-height: 110px;
   }
- 
+
 }
 
 .sortableListLong {
@@ -93,10 +93,10 @@
   &:active{
     .dragHandle{
       // cursor: pointer;
-  
+
       > span {
         background: #AED4FB;
-      } 
+      }
     }
   }
 
@@ -104,7 +104,7 @@
     outline: none;
     text-decoration: none;
     margin-top: -1px;
-  
+
     > span {
       vertical-align: middle;
       position: relative;
@@ -115,7 +115,7 @@
       background: #B3B5B9;
       overflow: visible !important;
       transition: background .25s ease-out;
-      
+
       &:before, &:after{
         content: '';
         display: inline-block;
@@ -123,23 +123,24 @@
         height: 1px;
         background: inherit;
       }
-  
+
       &:before{
         position: absolute;
         top: -2px;
         left: 0;
       }
-  
+
       &:after{
         position: absolute;
         bottom: -2px;
         left: 0;
       }
     }
-    
+
   }
 
   > div {
+    width: 90%;
     span {
       overflow: hidden;
       white-space: nowrap;
@@ -171,9 +172,12 @@
     &:last-of-type{
       display: inline-block;
       height: 100%;
+      padding-right: 0px;
       line-height: 27px;
       text-align: right;
-      padding-right: 0px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
 
       img{
         display: inline-block;

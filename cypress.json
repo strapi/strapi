@@ -2,10 +2,11 @@
   "chromeWebSecurity": false,
   "backendUrl": "http://localhost:1337",
   "baseUrl": "http://localhost:1337",
-  "frontLoadingDelay": 3000,
+  "frontLoadingDelay": 5000,
   "animDelay": 1000,
   "serverRestartDelay": 11000,
   "viewportHeight": 900,
   "viewportWidth": 1440,
+  "video": false,
   "integrationFolder": "./packages"
 }

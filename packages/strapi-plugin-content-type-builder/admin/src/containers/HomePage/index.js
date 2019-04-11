@@ -1,106 +1,105 @@
-/*
+/**
  *
  * HomePage
  *
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
-import { bindActionCreators, compose } from 'redux';
-import { createStructuredSelector } from 'reselect';
-import { size } from 'lodash';
-import Helmet from 'react-helmet';
 import PropTypes from 'prop-types';
-import { router } from 'app';
-import pluginId from '../../pluginId';
+import { isEmpty } from 'lodash';
 
-import { makeSelectLoading, makeSelectMenu, makeSelectModels } from '../App/selectors';
-import { deleteContentType } from '../App/actions';
+import PluginHeader from 'components/PluginHeader';
 
-import Form from '../Form';
+import getQueryParameters from 'utils/getQueryParameters';
 
-// Design
-import ContentHeader from '../../components/ContentHeader';
+import { routerPropTypes } from 'commonPropTypes';
+
 import EmptyContentTypeView from '../../components/EmptyContentTypeView';
 import TableList from '../../components/TableList';
 
-// Utils
-import { storeData } from '../../utils/storeData';
+import pluginId from '../../pluginId';
 
-import selectHomePage from './selectors';
+import ModelForm from '../ModelForm';
+
 import styles from './styles.scss';
-import saga from './sagas';
-import reducer from './reducer';
 
-export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  constructor(props) {
-    super(props);
+class HomePage extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
+  handleClick = () => {
+    const {
+      canOpenModal,
+      history: { push },
+    } = this.props;
+    const { emitEvent } = this.context;
 
-    this.popUpHeaderNavLinks = [
-      { name: 'baseSettings', message: 'content-type-builder.popUpForm.navContainer.base', nameToReplace: 'advancedSettings' },
-      { name: 'advancedSettings', message: 'content-type-builder.popUpForm.navContainer.advanced', nameToReplace: 'baseSettings' },
-    ];
-  }
-
-  handleButtonClick = () => {
-    if (storeData.getIsModelTemporary()) {
-      strapi.notification.info('content-type-builder.notification.info.contentType.creating.notSaved');
+    if (canOpenModal) {
+      emitEvent('willCreateContentType');
+      push({
+        search: 'modalType=model&settingType=base&actionType=create',
+      });
     } else {
-      this.toggleModal();
+      strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
     }
-  }
-
-  handleDelete = (contentTypeName) => {
-    this.props.deleteContentType(contentTypeName, this.context);
-  }
-
-  toggleModal = () => {
-    const locationHash = this.props.location.hash ? '' : '#create::contentType::baseSettings';
-    router.push(`/plugins/content-type-builder/${locationHash}`);
-  }
-
-  renderTableListComponent = () => {
-    const availableNumber = size(this.props.models);
-    const title = availableNumber > 1 ? 'content-type-builder.table.contentType.title.plural'
-      : 'content-type-builder.table.contentType.title.singular';
-    return (
-      <TableList
-        availableNumber={availableNumber}
-        title={title}
-        buttonLabel="content-type-builder.button.contentType.add"
-        onButtonClick={this.handleButtonClick}
-        onHandleDelete={this.handleDelete}
-        rowItems={this.props.models}
-      />
-    );
-  }
+  };
 
   render() {
-    const component = size(this.props.models) === 0 ?
-      <EmptyContentTypeView handleButtonClick={this.toggleModal} />
-      : this.renderTableListComponent();
+    const {
+      cancelNewContentType,
+      canOpenModal,
+      connections,
+      createTempContentType,
+      deleteModel,
+      deleteTemporaryModel,
+      history: { push },
+      location: { pathname, search },
+      models,
+      modifiedData,
+      newContentType,
+      onChangeNewContentTypeMainInfos,
+    } = this.props;
+    const availableNumber = models.length;
+    const title = `${pluginId}.table.contentType.title.${availableNumber > 1 ? 'plural' : 'singular'}`;
+    const renderViewContent =
+      availableNumber === 0 ? (
+        <EmptyContentTypeView handleButtonClick={this.handleClick} /> // eslint-disable-line react/jsx-handler-names
+      ) : (
+        <TableList
+          canOpenModalAddContentType={canOpenModal}
+          availableNumber={availableNumber}
+          title={title}
+          buttonLabel={`${pluginId}.button.contentType.add`}
+          onButtonClick={this.handleClick}
+          onDelete={deleteModel}
+          deleteTemporaryModel={deleteTemporaryModel}
+          rowItems={this.props.models}
+          push={push}
+        />
+      );
 
     return (
       <div className={styles.homePage}>
-        <Helmet
-          title="HomePage"
-          meta={[
-            { name: 'description', content: 'Description of HomePage' },
-          ]}
+        <PluginHeader
+          title={{
+            id: `${pluginId}.home.contentTypeBuilder.name`,
+          }}
+          description={{
+            id: `${pluginId}.home.contentTypeBuilder.description`,
+          }}
+          actions={[]}
         />
-        <ContentHeader
-          name="content-type-builder.home.contentTypeBuilder.name"
-          description="content-type-builder.home.contentTypeBuilder.description"
-          styles={{ margin: '-1px 0 3rem 0'}}
-        />
-        {component}
-        <Form
-          hash={this.props.location.hash}
-          toggle={this.toggleModal}
-          routePath={this.props.match.path}
-          popUpHeaderNavLinks={this.popUpHeaderNavLinks}
-          menuData={this.props.menu}
-          redirectRoute={`${this.props.match.path}`}
+        {renderViewContent}
+        <ModelForm
+          actionType="create"
+          activeTab={getQueryParameters(search, 'settingType')}
+          cancelNewContentType={cancelNewContentType}
+          connections={connections}
+          createTempContentType={createTempContentType}
+          currentData={modifiedData}
+          modifiedData={newContentType}
+          onChangeNewContentTypeMainInfos={onChangeNewContentTypeMainInfos}
+          isOpen={!isEmpty(search)}
+          pathname={pathname}
+          push={push}
         />
       </div>
     );
@@ -108,43 +107,34 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 }
 
 HomePage.contextTypes = {
-  plugins: PropTypes.object,
-  updatePlugin: PropTypes.func,
+  emitEvent: PropTypes.func.isRequired,
 };
 
-HomePage.propTypes =  {
-  deleteContentType: PropTypes.func.isRequired,
-  location: PropTypes.object.isRequired,
-  match: PropTypes.object.isRequired,
-  menu: PropTypes.array.isRequired,
-  models: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.array,
-  ]).isRequired,
+HomePage.defaultProps = {
+  canOpenModal: true,
+  connections: ['default'],
+  models: [],
+  modifiedData: {},
 };
 
-const mapStateToProps = createStructuredSelector({
-  homePage: selectHomePage(),
-  modelsLoading: makeSelectLoading(),
-  models: makeSelectModels(),
-  menu: makeSelectMenu(),
-});
+HomePage.propTypes = {
+  cancelNewContentType: PropTypes.func.isRequired,
+  canOpenModal: PropTypes.bool,
+  connections: PropTypes.array,
+  createTempContentType: PropTypes.func.isRequired,
+  deleteModel: PropTypes.func.isRequired,
+  models: PropTypes.array,
+  modifiedData: PropTypes.object,
+  newContentType: PropTypes.shape({
+    collectionName: PropTypes.string,
+    connection: PropTypes.string,
+    description: PropTypes.string,
+    mainField: PropTypes.string,
+    name: PropTypes.string,
+    attributes: PropTypes.object,
+  }).isRequired,
+  onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
+  ...routerPropTypes().history.isRequired,
+};
 
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {
-      deleteContentType,
-    },
-    dispatch,
-  );
-}
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
-const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
-
-export default compose(
-  withReducer,
-  withSaga,
-  withConnect,
-)(HomePage);
+export default HomePage;

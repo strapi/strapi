@@ -160,7 +160,7 @@ module.exports = {
 
     try {
       await strapi.plugins['users-permissions'].services.userspermissions.updateRole(roleID, ctx.request.body);
-      
+
       strapi.emit('didOpenAccessToFetchContentTypeEntries', ctx.request.body);
 
       ctx.send({ ok: true });

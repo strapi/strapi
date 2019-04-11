@@ -35,19 +35,19 @@ module.exports = {
       },
       role: {
         resolverOf: 'UsersPermissions.getRole',
-        resolver: async (obj, options, ctx) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.getRole(ctx);
+        resolver: async (obj, options,  { context }) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.getRole(context);
 
-          return ctx.body.role;
+          return context.body.role;
         }
       },
       roles: {
         description: `Retrieve all the existing roles. You can't apply filters on this query.`,
         resolverOf: 'UsersPermissions.getRoles', // Apply the `getRoles` permissions on the resolver.
-        resolver: async (obj, options, ctx) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.getRoles(ctx);
+        resolver: async (obj, options,  { context }) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.getRoles(context);
 
-          return ctx.body.roles;
+          return context.body.roles;
         }
       }
     },
@@ -55,8 +55,8 @@ module.exports = {
       createRole: {
         description: 'Create a new role',
         resolverOf: 'UsersPermissions.createRole',
-        resolver: async (obj, options, ctx) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.createRole(ctx);
+        resolver: async (obj, options,  { context }) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.createRole(context);
 
           return { ok: true };
         }
@@ -64,8 +64,8 @@ module.exports = {
       updateRole: {
         description: 'Update an existing role',
         resolverOf: 'UsersPermissions.updateRole',
-        resolver: async (obj, options, ctx) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(ctx.params, ctx.body);
+        resolver: async (obj, options,  { context }) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(context.params, context.body);
 
           return { ok: true };
         }
@@ -73,8 +73,8 @@ module.exports = {
       deleteRole: {
         description: 'Delete an existing role',
         resolverOf: 'UsersPermissions.deleteRole',
-        resolver: async (obj, options, ctx) => {
-          await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(ctx);
+        resolver: async (obj, options,  { context }) => {
+          await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(context);
 
           return { ok: true };
         }

@@ -73,8 +73,8 @@ module.exports = {
    * @return {Promise}
    */
 
-  fetchAll: (params) => {
-    return strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', params));
+  fetchAll: (params, populate) => {
+    return strapi.query('user', 'users-permissions').find(params, populate);
   },
 
   hashPassword: function (user = {}) {

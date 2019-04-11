@@ -16,12 +16,12 @@ module.exports = {
    * @return {Object|Array}
    */
 
-  find: async (ctx) => {
+  find: async (ctx, next, { populate } = {}) => {
     let data;
     if (ctx.query._q) {
       data = await strapi.plugins['users-permissions'].services.user.search(ctx.query);
     } else {
-      data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query);
+      data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query, populate);
     }
 
     data.reduce((acc, user) => {

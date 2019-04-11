@@ -24,5 +24,7 @@
   "notification.config.success": "设置已更新",
   "notification.delete.success": "文件已被删除",
   "notification.dropFile.success": "您的文件已上传",
-  "notification.dropFiles.success": "{number} 个文件已上传"
+  "notification.dropFiles.success": "{number} 个文件已上传",
+  "Upload.status.sizeLimit": "{file}大于配置的限制大小",
+  "Upload.status.disabled" : "文件上传已禁用"
 }

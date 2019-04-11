@@ -41,7 +41,7 @@
   "form.attribute.item.enumeration.graphql.description": "Permite à si a substituição do nome predefinido para o GraphQL",
   "form.attribute.item.enumeration.name": "Nome",
   "form.attribute.item.enumeration.placeholder": "Ex: manhã,tarde,noite",
-  "form.attribute.item.enumeration.rules": "Valores (separe-os com uma vírgula)",
+  "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "Nome",
   "form.attribute.item.maximum": "Valor máximo",
   "form.attribute.item.maximumLength": "Comprimento máximo",

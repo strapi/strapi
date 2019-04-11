@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * Content
  */
 
@@ -14,20 +14,23 @@ function Content({ index, item, onClick, onRemove }) {
   return (
     <React.Fragment>
       <div>
-        <div className={styles.dragHandle}><span /></div>
+        <div className={styles.dragHandle}>
+          <span />
+        </div>
         <FormattedMessage id="content-manager.containers.Edit.clickToJump">
           {title => (
-            <span
-              onClick={() => onClick(item)}
-              title={title}
-            >
+            <span onClick={() => onClick(item)} title={title}>
               {item.label}
             </span>
           )}
         </FormattedMessage>
       </div>
       <div className={styles.selectManyDraggedItemActions}>
-        <img src={IconRemove} alt="Remove Icon" onClick={() => onRemove(index)} />
+        <img
+          src={IconRemove}
+          alt="Remove Icon"
+          onClick={() => onRemove(index)}
+        />
       </div>
     </React.Fragment>
   );
