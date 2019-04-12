@@ -18,6 +18,12 @@ const postModel = {
         type: 'string',
       },
     },
+    {
+      name: 'bigint',
+      params: {
+        type: 'biginteger'
+      },
+    },
   ],
   connection: 'default',
   name: 'post',
@@ -69,7 +75,7 @@ describe('Test Graphql API End to End', () => {
   });
 
   describe('Test CRUD', () => {
-    const postsPayload = [{ name: 'post 1' }, { name: 'post 2' }];
+    const postsPayload = [{ name: 'post 1', bigint: 1316130638171 }, { name: 'post 2', bigint: 1416130639261 }];
     let data = {
       posts: [],
     };
@@ -81,6 +87,7 @@ describe('Test Graphql API End to End', () => {
             createPost(input: $input) {
               post {
                 name
+                bigint
               }
             }
           }
@@ -111,6 +118,7 @@ describe('Test Graphql API End to End', () => {
             posts {
               id
               name
+              bigint
             }
           }
         `,
@@ -136,6 +144,7 @@ describe('Test Graphql API End to End', () => {
             posts(limit: 1) {
               id
               name
+              bigint
             }
           }
         `,
@@ -156,6 +165,7 @@ describe('Test Graphql API End to End', () => {
             posts(sort: "name:desc") {
               id
               name
+              bigint
             }
           }
         `,
@@ -176,6 +186,7 @@ describe('Test Graphql API End to End', () => {
             posts(start: 1) {
               id
               name
+              bigint
             }
           }
         `,
@@ -193,18 +204,21 @@ describe('Test Graphql API End to End', () => {
       [
         {
           name: 'post 1',
+          bigint: 1316130638171,
         },
         [postsPayload[0]],
       ],
       [
         {
           name_eq: 'post 1',
+          bigint_eq: 1316130638171,
         },
         [postsPayload[0]],
       ],
       [
         {
           name_ne: 'post 1',
+          bigint_ne: 1316130638171,
         },
         [postsPayload[1]],
       ],
@@ -250,6 +264,7 @@ describe('Test Graphql API End to End', () => {
           query findPosts($where: JSON) {
             posts(where: $where) {
               name
+              bigint
             }
           }
         `,
@@ -273,6 +288,7 @@ describe('Test Graphql API End to End', () => {
             post(id: $id) {
               id
               name
+              bigint
             }
           }
         `,
@@ -337,6 +353,7 @@ describe('Test Graphql API End to End', () => {
               deletePost(input: $input) {
                 post {
                   name
+                  bigint
                 }
               }
             }

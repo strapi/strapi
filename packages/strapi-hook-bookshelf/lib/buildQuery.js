@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const pluralize = require('pluralize');
+const { singular } = require('pluralize');
 
 /**
  * Build filters on a bookshelf query
@@ -9,30 +9,8 @@ const pluralize = require('pluralize');
  */
 const buildQuery = ({ model, filters }) => qb => {
   if (_.has(filters, 'where') && Array.isArray(filters.where)) {
-    // build path with aliases and return a mapping of the paths with there aliases;
-
-    // build joins
-    buildQueryJoins(qb, { model, whereClauses: filters.where });
-
-    // apply filters
-    filters.where.forEach(({ field, operator, value }) => {
-      const { association, model: associationModel, attributeKey } = getAssociationFromFieldKey(
-        model,
-        field
-      );
-
-      let fieldKey =
-        association && attributeKey === field
-          ? `${associationModel.collectionName}.${associationModel.primaryKey}`
-          : `${associationModel.collectionName}.${attributeKey}`;
-
-      buildWhereClause({
-        qb,
-        field: fieldKey,
-        operator,
-        value,
-      });
-    });
+    qb.distinct();
+    buildJoinsAndFilter(qb, model, filters.where);
   }
 
   if (_.has(filters, 'sort')) {
@@ -51,6 +29,168 @@ const buildQuery = ({ model, filters }) => qb => {
   if (_.has(filters, 'limit') && filters.limit >= 0) {
     qb.limit(filters.limit);
   }
+};
+
+/**
+ * Add joins and where filters
+ * @param {Object} qb - knex query builder
+ * @param {Object} model - Bookshelf model
+ * @param {Array<Object>} whereClauses - an array of where clause
+ */
+const buildJoinsAndFilter = (qb, model, whereClauses) => {
+  const aliasMap = {};
+  /**
+   * Returns an alias for a name (simple incremental alias name)
+   * @param {string} name - name to alias
+   */
+  const generateAlias = name => {
+    if (!aliasMap[name]) {
+      aliasMap[name] = 1;
+    }
+
+    const alias = `${name}_${aliasMap[name]}`;
+    aliasMap[name] += 1;
+    return alias;
+  };
+
+  /**
+   * Build a query joins and where clauses from a query tree
+   * @param {Object} qb - Knex query builder
+   * @param {Object} tree - Query tree
+   */
+  const buildQueryFromTree = (qb, queryTree) => {
+    // build joins
+    Object.keys(queryTree.children).forEach(key => {
+      const subQueryTree = queryTree.children[key];
+      buildJoin(qb, subQueryTree.assoc, queryTree, subQueryTree);
+
+      buildQueryFromTree(qb, subQueryTree);
+    });
+
+    // build where clauses
+    queryTree.where.forEach(w => buildWhereClause({ qb, ...w }));
+  };
+
+  /**
+   * Add table joins
+   * @param {Object} qb - Knex query builder
+   * @param {Object} assoc - Models association info
+   * @param {Object} originInfo - origin from which you are making a join
+   * @param {Object} destinationInfo - destination with which we are making a join
+   */
+  const buildJoin = (qb, assoc, originInfo, destinationInfo) => {
+    if (assoc.nature === 'manyToMany') {
+      const joinTableAlias = generateAlias(assoc.tableCollectionName);
+      qb.leftJoin(
+        `${assoc.tableCollectionName} AS ${joinTableAlias}`,
+        `${joinTableAlias}.${singular(originInfo.model.collectionName)}_${
+          originInfo.model.attributes[assoc.alias].column
+        }`,
+        `${originInfo.alias}.${originInfo.model.primaryKey}`
+      );
+
+      qb.leftJoin(
+        `${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
+        `${joinTableAlias}.${singular(destinationInfo.model.collectionName)}_${
+          destinationInfo.model.primaryKey
+        }`,
+        `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`
+      );
+      return;
+    }
+
+    const externalKey =
+      assoc.type === 'collection'
+        ? `${destinationInfo.alias}.${assoc.via}`
+        : `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`;
+
+    const internalKey =
+      assoc.type === 'collection'
+        ? `${originInfo.alias}.${originInfo.model.primaryKey}`
+        : `${originInfo.alias}.${assoc.alias}`;
+
+    qb.leftJoin(
+      `${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
+      externalKey,
+      internalKey
+    );
+  };
+
+  /**
+   * Create a query tree node from a key an assoc and a model
+   * @param {Object} model - Strapi model
+   * @param {Object} assoc - Strapi association
+   */
+  const createTreeNode = (model, assoc = null) => {
+    return {
+      alias: generateAlias(model.collectionName),
+      assoc,
+      model,
+      where: [],
+      children: {},
+    };
+  };
+
+  /**
+   * Builds a Strapi query tree easy
+   * @param {Array<Object>} whereClauses - Array of Strapi where clause
+   * @param {Object} model - Strapi model
+   * @param {Object} queryTree - queryTree
+   */
+  const buildQueryTree = (whereClauses, model, queryTree) => {
+    for (let whereClause of whereClauses) {
+      const { field, operator, value } = whereClause;
+      let [key, ...parts] = field.split('.');
+
+      const assoc = findAssoc(model, key);
+
+      // if the key is an attribute add as where clause
+      if (!assoc) {
+        queryTree.where.push({
+          field: `${queryTree.alias}.${key}`,
+          operator,
+          value,
+        });
+        continue;
+      }
+
+      const assocModel = findModelByAssoc(assoc);
+
+      // if the last part of the path is an association
+      // add the primary key of the model to the parts
+      if (parts.length === 0) {
+        parts = [assocModel.primaryKey];
+      }
+
+      // init sub query tree
+      if (!queryTree.children[key]) {
+        queryTree.children[key] = createTreeNode(assocModel, assoc);
+      }
+
+      buildQueryTree(
+        [
+          {
+            field: parts.join('.'),
+            operator,
+            value,
+          },
+        ],
+        assocModel,
+        queryTree.children[key]
+      );
+    }
+
+    return queryTree;
+  };
+
+  const root = buildQueryTree(whereClauses, model, {
+    alias: model.collectionName,
+    assoc: null,
+    model,
+    where: [],
+    children: {},
+  });
+  return buildQueryFromTree(qb, root);
 };
 
 /**
@@ -103,55 +243,6 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
 };
 
 /**
- * Returns a list of model path to populate from a list of where clausers
- * @param {Object} where - where clause
- */
-const extractRelationsFromWhere = where => {
-  return where
-    .map(({ field }) => {
-      const parts = field.split('.');
-      return parts.length === 1 ? field : _.initial(parts).join('.');
-    })
-    .sort()
-    .reverse()
-    .reduce((acc, currentValue) => {
-      const alreadyPopulated = _.some(acc, item => _.startsWith(item, currentValue));
-
-      if (!alreadyPopulated) {
-        acc.push(currentValue);
-      }
-      return acc;
-    }, []);
-};
-
-/**
- * Returns a model association and the model concerned based on a model and a field to reach
- * @param {Object} model - Bookshelf model
- * @param {string} fieldKey - a path to a model field (e.g author.group.title)
- */
-const getAssociationFromFieldKey = (model, fieldKey) => {
-  let tmpModel = model;
-  let association;
-  let attributeKey;
-
-  const parts = fieldKey.split('.');
-
-  for (let key of parts) {
-    attributeKey = key;
-    association = tmpModel.associations.find(ast => ast.alias === key);
-    if (association) {
-      tmpModel = findModelByAssoc(association);
-    }
-  }
-
-  return {
-    association,
-    model: tmpModel,
-    attributeKey,
-  };
-};
-
-/**
  * Returns a Bookshelf model based on a model association
  * @param {Object} assoc - A strapi association
  */
@@ -160,74 +251,6 @@ const findModelByAssoc = assoc => {
   return models[assoc.collection || assoc.model];
 };
 
-/**
- * Builds database query joins based on a model and a where clause
- * @param {Object} qb - Bookshelf (knex) query builder
- * @param {Object} options - Options
- * @param {Object} options.model - Bookshelf model
- * @param {Array<Object>} options.whereClauses - a list of where clauses
- */
-const buildQueryJoins = (qb, { model, whereClauses }) => {
-  const relationToPopulate = extractRelationsFromWhere(whereClauses);
-
-  return relationToPopulate.forEach(path => {
-    const parts = path.split('.');
-
-    let tmpModel = model;
-    for (let part of parts) {
-      const association = tmpModel.associations.find(assoc => assoc.alias === part);
-
-      if (association) {
-        const assocModel = findModelByAssoc(association);
-        buildSingleJoin(qb, tmpModel, assocModel, association);
-        tmpModel = assocModel;
-      }
-    }
-  });
-};
-
-/**
- * Builds an individual join
- * @param {Object} qb - Bookshelf model
- * @param {Object} rootModel - The bookshelf model on which we are joining
- * @param {Object} assocModel - The model we are joining to
- * @param {Object} association - The association upo,n which the join is built
- */
-const buildSingleJoin = (qb, rootModel, assocModel, association) => {
-  const relationTable = assocModel.collectionName;
-
-  qb.distinct();
-
-  if (association.nature === 'manyToMany') {
-    // Join on both ends
-    qb.innerJoin(
-      association.tableCollectionName,
-      `${association.tableCollectionName}.${pluralize.singular(rootModel.collectionName)}_${
-        rootModel.primaryKey
-      }`,
-      `${rootModel.collectionName}.${rootModel.primaryKey}`
-    );
-
-    qb.innerJoin(
-      relationTable,
-      `${association.tableCollectionName}.${rootModel.attributes[association.alias].attribute}_${
-        rootModel.attributes[association.alias].column
-      }`,
-      `${relationTable}.${assocModel.primaryKey}`
-    );
-  } else {
-    const externalKey =
-      association.type === 'collection'
-        ? `${relationTable}.${association.via}`
-        : `${relationTable}.${assocModel.primaryKey}`;
-
-    const internalKey =
-      association.type === 'collection'
-        ? `${rootModel.collectionName}.${rootModel.primaryKey}`
-        : `${rootModel.collectionName}.${association.alias}`;
-
-    qb.innerJoin(relationTable, externalKey, internalKey);
-  }
-};
+const findAssoc = (model, key) => model.associations.find(assoc => assoc.alias === key);
 
 module.exports = buildQuery;

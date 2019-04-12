@@ -48,6 +48,8 @@ module.exports = {
         .use(...createContainer('ubuntu'))
         .use(...createContainer('mac'))
         .use(...createContainer('note'));
+      const vuepressTabs = require('vuepress-tabs')
+      vuepressTabs(md)
     },
   },
   title,
@@ -58,8 +60,6 @@ module.exports = {
     versions: [['Version 3.x.x', '/3.x.x/'], ['Version 1.x.x', '/1.x.x/']],
     repo: 'strapi/strapi',
     website: 'https://strapi.io',
-    slack: 'https://slack.strapi.io',
-    blog: 'https://blog.strapi.io',
     docsDir: 'docs',
     editLinks: true,
     editLinkText: 'Improve this page',
@@ -86,6 +86,7 @@ module.exports = {
             '/3.x.x/guides/authentication',
             '/3.x.x/configurations/configurations',
             '/3.x.x/guides/controllers',
+            '/3.x.x/guides/databases',
             '/3.x.x/guides/deployment',
             '/3.x.x/guides/email',
             '/3.x.x/guides/upload',

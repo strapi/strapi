@@ -46,7 +46,12 @@ export function* deleteModel({ context: { plugins, updatePlugin }, modelName }) 
   }
 }
 
-export function* submitCT({ oldContentTypeName, body, source, context: { emitEvent, plugins, updatePlugin } }) {
+export function* submitCT({
+  oldContentTypeName,
+  body,
+  source,
+  context: { emitEvent, plugins, router, updatePlugin },
+}) {
   try {
     const requestURL = `/${pluginId}/models/${oldContentTypeName}`;
     const { name } = body;
@@ -62,6 +67,7 @@ export function* submitCT({ oldContentTypeName, body, source, context: { emitEve
     yield call(request, requestURL, opts, true);
     emitEvent('didSaveContentType');
     yield put(submitContentTypeSucceeded());
+    router.history.push(`/plugins/${pluginId}/models/${name}`);
 
     if (name !== oldContentTypeName) {
       emitEvent('didEditNameOfContentType');
@@ -69,7 +75,10 @@ export function* submitCT({ oldContentTypeName, body, source, context: { emitEve
       const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
       const appMenu = get(appPlugins, ['content-manager', 'leftMenuSections'], []);
       const oldContentTypeNameIndex = appMenu[0].links.findIndex(el => el.destination === oldContentTypeName);
-      const updatedLink = { destination: name.toLowerCase(), label: capitalize(pluralize(name)) };
+      const updatedLink = {
+        destination: name.toLowerCase(),
+        label: capitalize(pluralize(name)),
+      };
       appMenu[0].links.splice(oldContentTypeNameIndex, 1, updatedLink);
       appMenu[0].links = sortBy(appMenu[0].links, 'label');
       updatePlugin('content-manager', 'leftMenuSections', appMenu);
