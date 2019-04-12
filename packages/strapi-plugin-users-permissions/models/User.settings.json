@@ -1,5 +1,6 @@
 {
   "connection": "default",
+  "collectionName": "users-permissions_user",
   "info": {
     "name": "user",
     "description": ""
@@ -52,6 +53,5 @@
       "plugin": "users-permissions",
       "configurable": false
     }
-  },
-  "collectionName": "users-permissions_user"
+  }
 }
