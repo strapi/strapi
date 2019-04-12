@@ -10,7 +10,12 @@ import {
   submitContentTypeSucceeded,
   submitTempContentTypeSucceeded,
 } from './actions';
-import { GET_DATA, DELETE_MODEL, SUBMIT_CONTENT_TYPE, SUBMIT_TEMP_CONTENT_TYPE } from './constants';
+import {
+  GET_DATA,
+  DELETE_MODEL,
+  SUBMIT_CONTENT_TYPE,
+  SUBMIT_TEMP_CONTENT_TYPE,
+} from './constants';
 
 export function* getData() {
   try {
@@ -26,18 +31,34 @@ export function* getData() {
   }
 }
 
-export function* deleteModel({ context: { plugins, updatePlugin }, modelName }) {
+export function* deleteModel({
+  context: { plugins, updatePlugin },
+  modelName,
+}) {
   try {
     const requestURL = `/${pluginId}/models/${modelName}`;
-    const response = yield call(request, requestURL, { method: 'DELETE' }, true);
+    const response = yield call(
+      request,
+      requestURL,
+      { method: 'DELETE' },
+      true,
+    );
 
     if (response.ok === true) {
-      strapi.notification.success(`${pluginId}.notification.success.contentTypeDeleted`);
+      strapi.notification.success(
+        `${pluginId}.notification.success.contentTypeDeleted`,
+      );
       yield put(deleteModelSucceeded(modelName));
 
       const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
-      const appMenu = get(appPlugins, ['content-manager', 'leftMenuSections'], []);
-      const updatedMenu = appMenu[0].links.filter(el => el.destination !== modelName);
+      const appMenu = get(
+        appPlugins,
+        ['content-manager', 'leftMenuSections'],
+        [],
+      );
+      const updatedMenu = appMenu[0].links.filter(
+        el => el.destination !== modelName,
+      );
       appMenu[0].links = sortBy(updatedMenu, 'label');
       updatePlugin('content-manager', 'leftMenuSections', appMenu);
     }
@@ -50,7 +71,7 @@ export function* submitCT({
   oldContentTypeName,
   body,
   source,
-  context: { emitEvent, plugins, updatePlugin },
+  context: { emitEvent, plugins, router, updatePlugin },
 }) {
   try {
     const requestURL = `/${pluginId}/models/${oldContentTypeName}`;
@@ -67,19 +88,30 @@ export function* submitCT({
     yield call(request, requestURL, opts, true);
     emitEvent('didSaveContentType');
     yield put(submitContentTypeSucceeded());
+    router.history.push(`/plugins/${pluginId}/models/${name}`);
 
     if (name !== oldContentTypeName) {
       emitEvent('didEditNameOfContentType');
 
       const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
-      const appMenu = get(appPlugins, ['content-manager', 'leftMenuSections'], []);
-      const oldContentTypeNameIndex = appMenu[0].links.findIndex(el => el.destination === oldContentTypeName);
-      const updatedLink = { destination: name.toLowerCase(), label: capitalize(pluralize(name)) };
+      const appMenu = get(
+        appPlugins,
+        ['content-manager', 'leftMenuSections'],
+        [],
+      );
+      const oldContentTypeNameIndex = appMenu[0].links.findIndex(
+        el => el.destination === oldContentTypeName,
+      );
+      const updatedLink = {
+        destination: name.toLowerCase(),
+        label: capitalize(pluralize(name)),
+      };
       appMenu[0].links.splice(oldContentTypeNameIndex, 1, updatedLink);
       appMenu[0].links = sortBy(appMenu[0].links, 'label');
       updatePlugin('content-manager', 'leftMenuSections', appMenu);
     }
   } catch (error) {
+    console.log(error);
     const errorMessage = get(
       error,
       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
@@ -90,7 +122,10 @@ export function* submitCT({
 }
 
 /* istanbul ignore-next */
-export function* submitTempCT({ body, context: { emitEvent, plugins, updatePlugin } }) {
+export function* submitTempCT({
+  body,
+  context: { emitEvent, plugins, updatePlugin },
+}) {
   try {
     emitEvent('willSaveContentType');
 
@@ -104,8 +139,15 @@ export function* submitTempCT({ body, context: { emitEvent, plugins, updatePlugi
 
     const { name } = body;
     const appPlugins = plugins.toJS ? plugins.toJS() : plugins;
-    const appMenu = get(appPlugins, ['content-manager', 'leftMenuSections'], []);
-    const newLink = { destination: name.toLowerCase(), label: capitalize(pluralize(name)) };
+    const appMenu = get(
+      appPlugins,
+      ['content-manager', 'leftMenuSections'],
+      [],
+    );
+    const newLink = {
+      destination: name.toLowerCase(),
+      label: capitalize(pluralize(name)),
+    };
     appMenu[0].links.push(newLink);
     appMenu[0].links = sortBy(appMenu[0].links, 'label');
 
