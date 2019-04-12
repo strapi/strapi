@@ -1,0 +1,68 @@
+{
+  "base": {
+    "items": [
+      {
+        "customBootstrapClass": "col-md-6 offset-md-6 mr-md-5",
+        "label": {
+          "id": "content-type-builder.form.contentType.item.name"
+        },
+        "name": "name",
+        "value": "",
+        "type": "string",
+        "autoFocus": true,
+        "validations": {
+          "required": true
+        },
+        "inputDescription": {
+          "id": "content-type-builder.form.contentType.item.name.description"
+        },
+        "inputDescriptionParams": {
+          "id": "content-type-builder.form.contentType.item.name.link.description",
+          "href": "https://strapi.io/documentation/concepts/concepts.html#models"
+        }
+      },
+      {
+        "customBootstrapClass": "col-md-6 offset-md-6 mr-md-5",
+        "label": {
+          "id": "content-type-builder.form.contentType.item.connections"
+        },
+        "name": "connection",
+        "type": "select",
+        "value": "default",
+        "items": [{}],
+        "validations": {
+          "required": true
+        }
+      },
+      {
+        "customBootstrapClass": "col-md-8 offset-md-4 mr-md-5",
+        "label": {
+          "id": "content-type-builder.form.contentType.item.description"
+        },
+        "name": "description",
+        "value": "",
+        "type": "textarea",
+        "placeholder": "content-type-builder.form.contentType.item.description.placeholder",
+        "validations": {}
+      }
+    ]
+  },
+  "advanced": {
+    "items": [
+      {
+        "customBootstrapClass": "col-md-6 offset-md-6 mr-md-5",
+        "label": {
+          "id": "content-type-builder.form.contentType.item.collectionName"
+        },
+        "autoFocus": true,
+        "name": "collectionName",
+        "type": "string",
+        "value": "",
+        "validations": {},
+        "inputDescription": {
+          "id": "content-type-builder.form.contentType.item.collectionName.inputDescription"
+        }
+      }
+    ]
+  }
+}

@@ -18,46 +18,48 @@ describe('Testing Content Manager createPages', function() {
       .then(data => {
         jwt = data.jwt;
 
-        return cy
-          .createCTMApis(data.jwt)
-          .then(() => jwt);
+        return cy.createCTMApis(data.jwt).then(() => jwt);
       })
       .wait(1000);
 
     Cypress.Commands.add('ctmTagLink', () => {
-      return cy.get('a[href="/admin/plugins/content-manager/tag?source=content-manager"]');
+      return cy.get(
+        'a[href="/admin/plugins/content-manager/tag?source=content-manager"]',
+      );
     });
     Cypress.Commands.add('ctmProductLink', () => {
-        return cy.get('a[href="/admin/plugins/content-manager/product?source=content-manager"]');
+      return cy.get(
+        'a[href="/admin/plugins/content-manager/product?source=content-manager"]',
+      );
     });
     Cypress.Commands.add('ctmCategoryLink', () => {
-      return cy.get('a[href="/admin/plugins/content-manager/category?source=content-manager"]');
+      return cy.get(
+        'a[href="/admin/plugins/content-manager/category?source=content-manager"]',
+      );
     });
     Cypress.Commands.add('ctmAddButton', () => {
       return cy.get('button#addEntry');
     });
-    Cypress.Commands.add('inputError', (name) => {
+    Cypress.Commands.add('inputError', name => {
       return cy.get(`#errorOf${name} > span`);
     });
     Cypress.Commands.add('getListTagsOrderedByName', () => {
-      return cy.ctmTagLink()
+      return cy
+        .ctmTagLink()
         .click()
         .get('tr > th:nth-child(3) > span')
         .click();
     });
-    Cypress.Commands.add('fillProductForm', (product) => {
-      Object.keys(product)
-        .forEach(key => {
-          if (key === 'description') {
-            cy.get(`textarea[name="${key}"]`)
-              .type(product[key]);
-          } else {
-            cy.get(`input[name="${key}"]`)
-              .type(product[key]);
-          }
-        })
+    Cypress.Commands.add('fillProductForm', product => {
+      Object.keys(product).forEach(key => {
+        if (key === 'description') {
+          cy.get(`textarea[name="${key}"]`).type(product[key]);
+        } else {
+          cy.get(`input[name="${key}"]`).type(product[key]);
+        }
+      });
     });
-    Cypress.Commands.add('getProduct', (index) => {
+    Cypress.Commands.add('getProduct', index => {
       return cy
         .ctmProductLink()
         .click()
@@ -74,8 +76,7 @@ describe('Testing Content Manager createPages', function() {
   after(() => {
     cy.deleteApi('tag', jwt)
       .deleteApi('category', jwt)
-      .deleteApi('product', jwt)
-      .wait(11000);
+      .deleteApi('product', jwt);
   });
 
   context('Creating data with no relation', () => {
@@ -105,18 +106,24 @@ describe('Testing Content Manager createPages', function() {
         .click()
         .ctmAddButton()
         .click();
-      const tagsToCreate = ['tag1',  'tag2', 'tag3', 'superTag', 'badTag', 'I\'m running out of idea tag'];
+      const tagsToCreate = [
+        'tag1',
+        'tag2',
+        'tag3',
+        'superTag',
+        'badTag',
+        "I'm running out of idea tag",
+      ];
       // Check redirect url
-      cy.url()
-        .should('equal', getCreateRedirectUrl('tag'));
-      
+      cy.url().should('equal', getCreateRedirectUrl('tag'));
+
       // Try to save empty data
       cy.submitForm()
         .get('input#name')
         .invoke('attr', 'class')
         .should('include', 'form-control is-invalid');
-      
-      tagsToCreate.forEach((tagName,  index) => {
+
+      tagsToCreate.forEach((tagName, index) => {
         cy.get('input#name')
           .type(tagName)
           .submitForm()
@@ -124,10 +131,9 @@ describe('Testing Content Manager createPages', function() {
           .get('tbody')
           .children()
           .should('have.length', index + 1);
-        
-        if (index < tagsToCreate.length -1) {
-          cy.ctmAddButton()
-            .click();
+
+        if (index < tagsToCreate.length - 1) {
+          cy.ctmAddButton().click();
         }
       });
     });
@@ -141,11 +147,18 @@ describe('Testing Content Manager createPages', function() {
         .click()
         .ctmAddButton()
         .click();
-      const catsToCreate = ['drinks',  'food', 'junk food', 'french food', 'good french food', 'greasy', 'you don\'t want to eat that'];
+      const catsToCreate = [
+        'drinks',
+        'food',
+        'junk food',
+        'french food',
+        'good french food',
+        'greasy',
+        "you don't want to eat that",
+      ];
       // Check redirect url
-      cy.url()
-        .should('equal', getCreateRedirectUrl('category', 'name'));
-      
+      cy.url().should('equal', getCreateRedirectUrl('category', 'name'));
+
       catsToCreate.forEach((catName, index) => {
         cy.get('input#name')
           .type(catName)
@@ -154,10 +167,9 @@ describe('Testing Content Manager createPages', function() {
           .get('tbody')
           .children()
           .should('have.length', index + 1);
-        
-        if (index < catsToCreate.length -1) {
-          cy.ctmAddButton()
-          .click();
+
+        if (index < catsToCreate.length - 1) {
+          cy.ctmAddButton().click();
         }
       });
     });
@@ -220,9 +232,7 @@ describe('Testing Content Manager createPages', function() {
           return data.jwt;
         })
         .then(jwt => {
-          return cy.seedData('tag', jwt)
-            .then(() => jwt);
-
+          return cy.seedData('tag', jwt).then(() => jwt);
         })
         .then(jwt => {
           return cy.seedData('category', jwt);
@@ -242,16 +252,18 @@ describe('Testing Content Manager createPages', function() {
         .visit('/admin')
         .wait(frontLoadingDelay)
         .wait('@initContentManager');
-    })
+    });
 
     it('Should create a product and link several tags and 1 category', () => {
       cy.server();
-      cy.route(`${backendUrl}/content-manager/explorer/tag?_limit=10&_start=0&_sort=name:ASC&source=content-manager`).as('getTags');
+      cy.route(
+        `${backendUrl}/content-manager/explorer/tag?_limit=10&_start=0&_sort=name:ASC&source=content-manager`,
+      ).as('getTags');
       cy.ctmProductLink()
         .click()
         .ctmAddButton()
         .click();
-      
+
       // Test default value
       cy.get('button#__OFF__bool')
         .invoke('attr', 'class')
@@ -261,23 +273,20 @@ describe('Testing Content Manager createPages', function() {
         .should('includes', 'gradientOn');
 
       // Create a product
-      const product =  {
+      const product = {
         name: 'product1',
         description: 'This is a super description',
         price: 1337,
         email: 'hi@strapi.io',
       };
 
-      Object.keys(product)
-        .forEach(key => {
-          if (key === 'description') {
-            cy.get(`textarea[name="${key}"]`)
-              .type(product[key]);
-          } else {
-            cy.get(`input[name="${key}"]`)
-              .type(product[key]);
-          }
-        });
+      Object.keys(product).forEach(key => {
+        if (key === 'description') {
+          cy.get(`textarea[name="${key}"]`).type(product[key]);
+        } else {
+          cy.get(`input[name="${key}"]`).type(product[key]);
+        }
+      });
 
       cy.get('button#__ON__bool')
         .click()
@@ -291,7 +300,7 @@ describe('Testing Content Manager createPages', function() {
         .type('{enter}', { force: true })
         .get('ul#sortableListOftags')
         .children('li')
-        .should((children) => {
+        .should(children => {
           expect(children[0].innerText.trim()).to.equal('special tag');
           expect(children[1].innerText.trim()).to.equal('tag1');
         })
@@ -309,11 +318,11 @@ describe('Testing Content Manager createPages', function() {
         .click()
         .get('ul#sortableListOfproducts')
         .children()
-        .should((children) => {
+        .should(children => {
           expect(children).to.have.length(1);
           expect(children[0].innerText.trim()).to.equal('product1');
         });
-  
+
       cy.getListTagsOrderedByName()
         .wait('@getTags')
         .wait(2000)
@@ -321,11 +330,11 @@ describe('Testing Content Manager createPages', function() {
         .click()
         .get('ul#sortableListOfproducts')
         .children()
-        .should((children) => {
+        .should(children => {
           expect(children).to.have.length(1);
           expect(children[0].innerText.trim()).to.equal('product1');
         });
-    }); 
+    });
 
     it('Should delete a product in tag1', () => {
       cy.getListTagsOrderedByName()
@@ -333,7 +342,9 @@ describe('Testing Content Manager createPages', function() {
         .get('tbody > tr:nth-child(2)')
         .click()
         .wait(1000)
-        .get('ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2)')
+        .get(
+          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img',
+        )
         .click()
         .submitForm()
         .ctmProductLink()
@@ -344,7 +355,7 @@ describe('Testing Content Manager createPages', function() {
         .wait(frontLoadingDelay)
         .get('ul#sortableListOftags')
         .children()
-        .should((children) => {
+        .should(children => {
           expect(children).to.have.length(1);
           expect(children[0].innerText.trim()).to.equal('special tag');
         });
@@ -352,8 +363,12 @@ describe('Testing Content Manager createPages', function() {
 
     it('Should add several products to category french food', () => {
       cy.server();
-      cy.route(`${backendUrl}/content-manager/explorer/category?_limit=10&_start=0&_sort=_id:ASC&source=content-manager`).as('getCategories');
-      cy.route(`${backendUrl}/content-manager/explorer/product?_limit=10&_start=0&_sort=_id:ASC&source=content-manager`).as('getProducts');
+      cy.route(
+        `${backendUrl}/content-manager/explorer/category?_limit=10&_start=0&_sort=_id:ASC&source=content-manager`,
+      ).as('getCategories');
+      cy.route(
+        `${backendUrl}/content-manager/explorer/product?_limit=10&_start=0&_sort=_id:ASC&source=content-manager`,
+      ).as('getProducts');
       const product = {
         name: 'MacBook',
         description: 'A laptop',
@@ -385,13 +400,16 @@ describe('Testing Content Manager createPages', function() {
         .wait(1000)
         .get('tbody > tr:nth-child(5)')
         .click()
-        .get('ul#sortableListOfproducts').as('relations')
+        .get('ul#sortableListOfproducts')
+        .as('relations')
         .children()
         .should(children => {
           expect(children).to.have.length(1);
           expect(children[0].innerText.trim()).to.equal('product1');
         })
-        .get('ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2)')
+        .get(
+          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img',
+        )
         .click()
         .get('input#products')
         .type('mac', { force: true })
@@ -407,30 +425,29 @@ describe('Testing Content Manager createPages', function() {
         })
         .submitForm();
 
-      cy.getProduct(1)
-        .then(pluginStore => {
-          const category = pluginStore
-            .getState()
-            .getIn(['content-manager_editPage', 'record', 'category'])
-          
-            expect(category).to.equal(null);
-        });
+      cy.getProduct(1).then(pluginStore => {
+        const category = pluginStore
+          .getState()
+          .getIn(['content-manager_editPage', 'record', 'category']);
+
+        expect(category).to.equal(null);
+      });
 
       cy.getProduct(2)
         .then(pluginStore => {
           const category = pluginStore
             .getState()
-            .getIn(['content-manager_editPage', 'record', 'category', 'name'])
-          
-            expect(category).to.equal('french food');
+            .getIn(['content-manager_editPage', 'record', 'category', 'name']);
+
+          expect(category).to.equal('french food');
         })
         .getProduct(3)
         .then(pluginStore => {
           const category = pluginStore
             .getState()
-            .getIn(['content-manager_editPage', 'record', 'category', 'name'])
-          
-            expect(category).to.equal('french food');
+            .getIn(['content-manager_editPage', 'record', 'category', 'name']);
+
+          expect(category).to.equal('french food');
         });
     });
 

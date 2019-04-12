@@ -1,0 +1,120 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CTB <App /> DeleteModel saga should call the strapi.notification if the request fails 1`] = `
+Object {
+  "@@redux-saga/IO": true,
+  "CALL": Object {
+    "args": Array [
+      "/content-type-builder/models/test",
+      Object {
+        "method": "DELETE",
+      },
+      true,
+    ],
+    "context": null,
+    "fn": [Function],
+  },
+}
+`;
+
+exports[`CTB <App /> DeleteModel saga should dispatch the deleteModelSucceeded action if it requests the data successfully 1`] = `
+Object {
+  "@@redux-saga/IO": true,
+  "CALL": Object {
+    "args": Array [
+      "/content-type-builder/models/test",
+      Object {
+        "method": "DELETE",
+      },
+      true,
+    ],
+    "context": null,
+    "fn": [Function],
+  },
+}
+`;
+
+exports[`CTB <App /> DeleteModel saga should not dispatch the deleteModelSucceeded action if the server didn't restart 1`] = `
+Object {
+  "@@redux-saga/IO": true,
+  "CALL": Object {
+    "args": Array [
+      "/content-type-builder/models/test",
+      Object {
+        "method": "DELETE",
+      },
+      true,
+    ],
+    "context": null,
+    "fn": [Function],
+  },
+}
+`;
+
+exports[`CTB <App /> GetData saga should call the strapi.notification if the request fails 1`] = `
+Object {
+  "@@redux-saga/IO": true,
+  "ALL": Array [
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/content-type-builder/models",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/content-type-builder/connections",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+  ],
+}
+`;
+
+exports[`CTB <App /> GetData saga should dispatch the getDataSucceeded action if it requests the data successfully 1`] = `
+Object {
+  "@@redux-saga/IO": true,
+  "ALL": Array [
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/content-type-builder/models",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/content-type-builder/connections",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+  ],
+}
+`;

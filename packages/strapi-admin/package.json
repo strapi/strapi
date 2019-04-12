@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-alpha.24.1",
+  "version": "3.0.0-alpha.25.2",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
     "start": "cross-env NODE_ENV=development PORT=4000 IS_ADMIN=true node ./node_modules/strapi-helper-plugin/lib/server",
     "generate": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/plop --plopfile ./node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo \"Error: no test specified\"",
+    "test": "echo \"no tests yet\"",
     "prepublishOnly": "IS_MONOREPO=true npm run build",
     "setup": "node ./scripts/setup.js",
     "presetup": "node ./scripts/preSetup.js"
@@ -35,8 +35,8 @@
   "devDependencies": {
     "cross-env": "^5.0.5",
     "sanitize.css": "^4.1.0",
-    "strapi-helper-plugin": "3.0.0-alpha.24.1",
-    "strapi-utils": "3.0.0-alpha.24.1"
+    "strapi-helper-plugin": "3.0.0-alpha.25.2",
+    "strapi-utils": "3.0.0-alpha.25.2"
   },
   "author": {
     "name": "Strapi",

@@ -30,6 +30,7 @@
     "users": {
       "collection": "user",
       "via": "role",
+      "configurable": false,
       "plugin": "users-permissions"
     }
   },

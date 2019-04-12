@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-model",
-  "version": "3.0.0-alpha.24.1",
+  "version": "3.0.0-alpha.25.2",
   "description": "Generate a model for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -17,6 +17,7 @@
     "lodash": "^4.17.5"
   },
   "scripts": {
+    "test": "echo \"no tests yet\"",
     "prepublish": "npm prune"
   },
   "author": {

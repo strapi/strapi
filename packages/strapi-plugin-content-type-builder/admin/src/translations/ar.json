@@ -41,7 +41,7 @@
   "form.attribute.item.enumeration.graphql.description": "يسمح لك بتجاوز الاسم الذي تم إنشاؤه افتراضيًا لـ GraphQL",
   "form.attribute.item.enumeration.name": "أسم",
   "form.attribute.item.enumeration.placeholder": "مثال: صباح,قمر,احداث",
-  "form.attribute.item.enumeration.rules": "قيم ( مقسمة بإستخدام الفاصلة )",
+  "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "الأسم",
   "form.attribute.item.maximum": "اقصى قيمة",
   "form.attribute.item.maximumLength": "أقصى طول",

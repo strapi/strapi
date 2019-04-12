@@ -1,0 +1,80 @@
+.attributeOption {
+  display: flex;
+  width: 100% !important;
+  height: 4rem;
+  padding: 0 1rem 0 1rem;
+  margin-top: .6rem;
+  margin-bottom: .8rem;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 0.25rem;
+  border: 1px solid #E3E9F3;
+  background: #FFFFFF;
+  line-height: 4rem;
+  box-shadow: 1px 1px 1px rgba(104, 118,145, 0.05);
+  cursor: pointer;
+
+  &:hover, &:active, &:focus {
+    background: #F7F7F7;
+    outline: 0;
+    > div:after {
+      color: #0097F6;
+    }
+  }
+
+  .attributeType {
+    margin-right: 1.2rem;
+    color: #323740;
+    text-transform: capitalize;
+    font-size: 1.3rem;
+    font-weight: 500;
+    font-style: normal;
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+}
+
+
+
+.card {
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  max-width: calc(100% - 18px);
+
+  &:after {
+    content: '\f05d';
+    position: absolute;
+    top: 7px;
+    right: 26px;
+    color: #E3E9F3;
+    font-size: 1.4rem;
+    font-family: 'FontAwesome';
+    -webkit-font-smoothing: antialiased;
+  }
+
+  &:hover {
+    background: none;
+  }
+
+  > img {
+    display: inline-block;
+    height: 20px;
+    width: 35px;
+    margin-top: -3px;
+    margin-right: 10px;
+  }
+
+  > span {
+    white-space: nowrap;
+    color: #9EA7B8;
+    font-size: 1.2rem;
+    font-style: italic;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+
+    &:last-child {
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+}

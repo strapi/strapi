@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.0.0-alpha.24.1",
+  "version": "3.0.0-alpha.25.2",
   "description": "Helper for Strapi plugins development",
   "engines": {
     "node": ">= 10.0.0",
@@ -21,7 +21,7 @@
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --single-quote --trailing-comma es5 --write \"{lib,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo \"Error: no test specified\""
+    "test": "echo \"no tests yet\""
   },
   "pre-commit": [
     "lint:admin"
@@ -47,6 +47,9 @@
     "copy-webpack-plugin": "^4.3.1",
     "css-loader": "^0.28.5",
     "cross-env": "^5.0.5",
+    "enzyme": "^3.8.0",
+    "enzyme-adapter-react-16": "^1.8.0",
+    "enzyme-to-json": "^3.3.5",
     "exports-loader": "^0.6.4",
     "extract-text-webpack-plugin": "^3.0.0",
     "express": "^4.15.4",
@@ -65,6 +68,7 @@
     "postcss-smart-import": "^0.7.5",
     "precss": "^2.0.0",
     "prettier": "^1.5.3",
+    "react-test-renderer": "^16.7.0",
     "rimraf": "^2.6.1",
     "sass-loader": "^6.0.6",
     "shelljs": "^0.7.8",
@@ -87,7 +91,7 @@
     "lodash": "^4.17.5",
     "moment": "^2.16.0",
     "prop-types": "^15.5.10",
-    "react": "^16.5.2",
+    "react": "^16.8.4",
     "react-copy-to-clipboard": "^5.0.1",
     "react-datetime": "^2.15.0",
     "react-dnd": "^5.0.0",

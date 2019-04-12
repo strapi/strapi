@@ -41,7 +41,7 @@
   "form.attribute.item.enumeration.graphql.description": "GraphQLの既定の生成名をオーバーライドできます",
   "form.attribute.item.enumeration.name": "名前",
   "form.attribute.item.enumeration.placeholder": "例：朝、正午、夕方",
-  "form.attribute.item.enumeration.rules": "値 (カンマ区切り)",
+  "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "名前",
   "form.attribute.item.maximum": "最大値",
   "form.attribute.item.maximumLength": "最大長",
