@@ -1,54 +1,55 @@
 'use strict';
 
 /**
- * Lifecycle callbacks for the `Articles` model.
+ * Lifecycle callbacks for the `Test` model.
  */
 
 module.exports = {
   // Before saving a value.
   // Fired before an `insert` or `update` query.
-  // beforeSave: async (model) => {},
+  // beforeSave: async (model, attrs, options) => {},
 
   // After saving a value.
   // Fired after an `insert` or `update` query.
-  // afterSave: async (model, result) => {},
+  // afterSave: async (model, response, options) => {},
 
-  // Before fetching all values.
-  // Fired before a `fetchAll` operation.
-  // beforeFetchAll: async (model) => {},
-
-  // After fetching all values.
-  // Fired after a `fetchAll` operation.
-  // afterFetchAll: async (model, results) => {},
-
+  // Before fetching a value.
   // Fired before a `fetch` operation.
-  // beforeFetch: async (model) => {},
+  // beforeFetch: async (model, columns, options) => {},
 
   // After fetching a value.
   // Fired after a `fetch` operation.
-  // afterFetch: async (model, result) => {},
+  // afterFetch: async (model, response, options) => {},
+  
+  // Before fetching all values.
+  // Fired before a `fetchAll` operation.
+  // beforeFetchAll: async (model, columns, options) => {},
+
+  // After fetching all values.
+  // Fired after a `fetchAll` operation.
+  // afterFetchAll: async (model, response, options) => {},
 
   // Before creating a value.
   // Fired before an `insert` query.
-  // beforeCreate: async (model) => {},
+  // beforeCreate: async (model, attrs, options) => {},
 
   // After creating a value.
   // Fired after an `insert` query.
-  // afterCreate: async (model, result) => {},
+  // afterCreate: async (model, attrs, options) => {},
 
   // Before updating a value.
   // Fired before an `update` query.
-  // beforeUpdate: async (model) => {},
+  // beforeUpdate: async (model, attrs, options) => {},
 
   // After updating a value.
   // Fired after an `update` query.
-  // afterUpdate: async (model, result) => {},
+  // afterUpdate: async (model, attrs, options) => {},
 
   // Before destroying a value.
   // Fired before a `delete` query.
-  // beforeDestroy: async (model) => {},
+  // beforeDestroy: async (model, attrs, options) => {},
 
   // After destroying a value.
   // Fired after a `delete` query.
-  // afterDestroy: async (model, result) => {}
+  // afterDestroy: async (model, attrs, options) => {}
 };

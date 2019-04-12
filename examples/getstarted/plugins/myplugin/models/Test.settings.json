@@ -8,7 +8,7 @@
     "type": {
       "type": "string",
       "required": true,
-      "configurable": false
+      "configurable": true
     }
   }
 }

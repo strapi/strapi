@@ -286,7 +286,7 @@ const schemaBuilder = {
    */
 
   writeGenerateSchema: schema => {
-    return strapi.fs.writeFile('exports/graphql/schema.graphql', schema);
+    return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
   }
 };
 

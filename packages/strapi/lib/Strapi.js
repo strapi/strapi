@@ -3,7 +3,6 @@
 // Dependencies.
 const http = require('http');
 const path = require('path');
-const fs = require('fs-extra');
 const cluster = require('cluster');
 const { EventEmitter } = require('events');
 const Koa = require('koa');
@@ -36,7 +35,7 @@ const defaultQueries = require('./core-api/queries');
  */
 
 class Strapi extends EventEmitter {
-  constructor({ appPath }) {
+  constructor({ appPath } = {}) {
     super();
 
     this.setMaxListeners(100);

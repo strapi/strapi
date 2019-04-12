@@ -772,11 +772,7 @@ module.exports = function(strapi) {
                               idAttributeBuilder,
                             ).join(',\n\r');
                             // Create table
-                            await ORM.knex.raw(`
-                        CREATE TABLE ${quote}${table}${quote} (
-                          ${columns}
-                        )
-                      `);
+                            await ORM.knex.raw(`CREATE TABLE ${quote}${table}${quote} (${columns})`);
                           };
 
                           if (!tableExist) {
@@ -1085,10 +1081,6 @@ module.exports = function(strapi) {
                   strapi.stop();
                 }
               });
-
-              if (_.isEmpty(definition.attributes)) {
-                done();
-              }
 
               // Add every relationships to the loaded model for Bookshelf.
               // Basic attributes don't need this-- only relations.
@@ -1418,9 +1410,14 @@ module.exports = function(strapi) {
                     break;
                   }
                 }
-
                 done();
               });
+
+
+              if (_.isEmpty(definition.attributes)) {
+                done();
+              }
+
             });
           };
 

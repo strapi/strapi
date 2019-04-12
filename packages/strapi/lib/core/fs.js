@@ -10,7 +10,7 @@ module.exports = strapi => {
    * @param {Array|string} optPath - file path
    * @param {string} data - content
    */
-  const writeFile = (optPath, data) => {
+  const writeAppFile = (optPath, data) => {
     const filePath = Array.isArray(optPath) ? optPath.join('/') : optPath;
 
     const normalizedPath = path.normalize(filePath).replace(/^(\/?\.\.?)+/, '');
@@ -28,11 +28,11 @@ module.exports = strapi => {
    */
   const writePluginFile = (plugin, optPath, data) => {
     const newPath = ['extensions', plugin].concat(optPath).join('/');
-    return writeFile(newPath, data);
+    return writeAppFile(newPath, data);
   };
 
-  return {
-    writeFile,
+  return Object.assign(fs, {
+    writeAppFile,
     writePluginFile,
-  };
+  });
 };

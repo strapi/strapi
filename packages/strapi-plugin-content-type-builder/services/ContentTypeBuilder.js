@@ -122,7 +122,10 @@ module.exports = {
     await pluginStore.set({ key: 'schema', value: schema });
   },
 
-  getModels: () => {
+  /**
+   * Returns a list of user and plugins models 
+   */
+  getModels() {
     const models = [];
 
     _.forEach(strapi.models, (model, name) => {
@@ -161,7 +164,10 @@ module.exports = {
     return models.concat(pluginModels);
   },
 
-  getModel: async (name, source) => {
+  /**
+   * Returns a model info
+   */
+  async getModel (name, source)  {
     name = _.toLower(name);
 
     const model = source ? _.get(strapi.plugins, [source, 'models', name]) : _.get(strapi.models, name);
@@ -221,11 +227,11 @@ module.exports = {
     };
   },
 
-  getConnections: () => {
+  getConnections() {
     return _.keys(strapi.config.currentEnvironment.database.connections);
   },
 
-  generateAPI: (name, description, connection, collectionName, attributes) => {
+  generateAPI(name, description, connection, collectionName, attributes) {
     const template = _.get(
       strapi.config.currentEnvironment,
       `database.connections.${connection}.connector`,
@@ -258,33 +264,58 @@ module.exports = {
     });
   },
 
-  getModelPath: (model, plugin) => {
-    // Retrieve where is located the model.
-    // Note: The target is not found when we are creating a new API. That's why, we are returning the lowercased model.
-    const target =
-      Object.keys((plugin ? strapi.plugins : strapi.api) || {}).filter(x =>
-        _.includes(
-          Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])),
-          model.toLowerCase(),
-        ),
-      )[0] || model.toLowerCase();
+  writeModel(name, data, {api, plugin} = {}) {
+    const filepath = this.getModelPath(name, { api, plugin });
+    const content = JSON.stringify(data, null, 2);
 
-    // Retrieve the filename of the model.
-    const filename = fs
-      .readdirSync(
-        plugin
-          ? path.join(strapi.config.appPath, 'plugins', target, 'models')
-          : path.join(strapi.config.appPath, 'api', target, 'models'),
-      )
-      .filter(x => x[0] !== '.')
-      .filter(x => x.split('.settings.json')[0].toLowerCase() === model.toLowerCase())[0];
-
-    return plugin
-      ? path.resolve(strapi.config.appPath, 'plugins', target, 'models', filename)
-      : path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
+    strapi.fs.ensureFileSync(filepath);
+    return strapi.fs.writeFileSync(filepath, content);
   },
 
-  formatAttributes: (attributes, name, plugin) => {
+  readModel(name, { api, plugin } = {}) {
+    const filepath = this.getModelPath(name, { api, plugin });
+
+    if (plugin && !strapi.fs.pathExistsSync(filepath)) {
+      return _.cloneDeep(
+        _.pick(strapi.plugins[plugin].models[name], [
+          'collectionName',
+          'connection',
+          'info',
+          'options',
+          'attributes',
+        ])
+      );
+    }
+
+    delete require.cache[filepath];
+    return _.cloneDeep(require(filepath));
+  },
+
+  getModelPath(name, { api, plugin } = {})  {
+    const fileName = `${_.upperFirst(name)}.settings.json`;
+    
+    if (plugin) {
+      return path.resolve(
+        strapi.config.appPath,
+        'extensions',
+        plugin,
+        'models',
+        fileName
+      );
+    } else if (api) {
+      return path.resolve(
+        strapi.config.appPath,
+        'api',
+        api,
+        'models',
+        fileName
+      );
+    }
+
+    throw new Error('Expected an api or a plugin, received none');
+  },
+
+  formatAttributes(attributes, name, plugin) {
     const errors = [];
     const attrs = {};
 
@@ -302,6 +333,7 @@ module.exports = {
     const attributesConfigurable = attributes.filter(
       attribute => _.get(model, ['attributes', attribute.name, 'configurable'], true) !== false,
     );
+
     const attributesNotConfigurable = Object.keys(model.attributes || {})
       .filter(attribute => _.get(model, ['attributes', attribute, 'configurable'], true) === false)
       .reduce((acc, attribute) => {
@@ -379,74 +411,40 @@ module.exports = {
     return [trimmedNotConfigurableAttributes, errors];
   },
 
-  clearRelations: (model, source, force) => {
+  clearRelations(model, source, force)  {
     const errors = [];
-    const structure = {
-      models: strapi.models,
-      plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
-        acc[current] = {
-          models: strapi.plugins[current].models,
-        };
-
-        return acc;
-      }, {}),
-    };
 
     // Method to delete the association of the models.
     const deleteAssociations = (models, plugin) => {
       Object.keys(models).forEach(name => {
-        const relationsToDelete = _.get(
-          plugin ? strapi.plugins[plugin].models[name] : strapi.models[name],
-          'associations',
-          [],
-        ).filter(association => {
-          if (source) {
-            return (
-              association[association.type] === model &&
-              association.plugin === source &&
-              (association.nature !== 'oneWay' || force)
-            );
-          }
+        const modelData = models[name];
+        const relationsToDelete = _.get(modelData, 'associations',[])
+          .filter(association => {
+            if (source) {
+              return (
+                association[association.type] === model &&
+                association.plugin === source &&
+                (association.nature !== 'oneWay' || force)
+              );
+            }
 
-          return association[association.type] === model && (association.nature !== 'oneWay' || force);
-        });
+            return association[association.type] === model && (association.nature !== 'oneWay' || force);
+          });
 
         if (!_.isEmpty(relationsToDelete)) {
-          // Retrieve where is located the model.
-          const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {}).filter(x =>
-            _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), name),
-          )[0];
-
-          // Retrieve the filename of the model.
-          const filename = fs
-            .readdirSync(
-              plugin
-                ? path.join(strapi.config.appPath, 'plugins', target, 'models')
-                : path.join(strapi.config.appPath, 'api', target, 'models'),
-            )
-            .filter(x => x[0] !== '.')
-            .filter(x => x.split('.settings.json')[0].toLowerCase() === name)[0];
-
-          // Path to access to the model.
-          const pathToModel = plugin
-            ? path.resolve(strapi.config.appPath, 'plugins', target, 'models', filename)
-            : path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
-
-          // Require the model.
-          const modelJSON = require(pathToModel);
+          const modelJSON = this.readModel(name, { plugin, api: modelData.apiName });
 
           _.forEach(relationsToDelete, relation => {
             modelJSON.attributes[relation.alias] = undefined;
           });
 
           try {
-            fs.writeFileSync(pathToModel, JSON.stringify(modelJSON, null, 2), 'utf8');
+            // fs.writeFileSync(pathToModel, JSON.stringify(modelJSON, null, 2), 'utf8');
+            this.writeModel(name,  modelJSON, { api: modelData.apiName, plugin});
           } catch (e) {
+            strapi.log.error(e);
             errors.push({
               id: 'request.error.model.write',
-              params: {
-                filePath: pathToModel,
-              },
             });
           }
         }
@@ -454,17 +452,17 @@ module.exports = {
     };
 
     // Update `./api` models.
-    deleteAssociations(structure.models);
+    deleteAssociations(strapi.models);
 
-    Object.keys(structure.plugins).forEach(name => {
+    Object.keys(strapi.plugins).forEach(name => {
       // Update `./plugins/${name}` models.
-      deleteAssociations(structure.plugins[name].models, name);
+      deleteAssociations(strapi.plugins[name].models, name);
     });
 
     return errors;
   },
 
-  createRelations: (model, attributes, source) => {
+  createRelations(model, attributes, source) {
     const errors = [];
     const structure = {
       models: strapi.models,
@@ -480,6 +478,7 @@ module.exports = {
     // Method to update the model
     const update = (models, plugin) => {
       Object.keys(models).forEach(name => {
+        const modelData = models[name];
         const relationsToCreate = attributes.filter(attribute => {
           if (plugin) {
             return (
@@ -494,27 +493,7 @@ module.exports = {
         });
 
         if (!_.isEmpty(relationsToCreate)) {
-          // Retrieve where is located the model.
-          const target = Object.keys((plugin ? strapi.plugins : strapi.api) || {}).filter(x =>
-            _.includes(Object.keys(_.get((plugin ? strapi.plugins : strapi.api)[x], 'models', [])), name),
-          )[0];
-
-          // Retrieve the filename of the model.
-          const filename = fs
-            .readdirSync(
-              plugin
-                ? path.join(strapi.config.appPath, 'plugins', target, 'models')
-                : path.join(strapi.config.appPath, 'api', target, 'models'),
-            )
-            .filter(x => x[0] !== '.')
-            .filter(x => x.split('.settings.json')[0].toLowerCase() === name)[0];
-
-          // Path to access to the model.
-          const pathToModel = plugin
-            ? path.resolve(strapi.config.appPath, 'plugins', target, 'models', filename)
-            : path.resolve(strapi.config.appPath, 'api', target, 'models', filename);
-
-          const modelJSON = require(pathToModel);
+          const modelJSON = this.readModel(name, { api: modelData.apiName, plugin});
 
           _.forEach(relationsToCreate, ({ name, params }) => {
             const attr = {};
@@ -548,18 +527,17 @@ module.exports = {
             }
 
             modelJSON.attributes[params.key] = attr;
-
-            try {
-              fs.writeFileSync(pathToModel, JSON.stringify(modelJSON, null, 2), 'utf8');
-            } catch (e) {
-              errors.push({
-                id: 'request.error.model.write',
-                params: {
-                  filePath: pathToModel,
-                },
-              });
-            }
           });
+
+          
+          try {
+            this.writeModel(name, modelJSON, { api: modelData.apiName, plugin});
+          } catch (e) {
+            strapi.log.error(e);
+            errors.push({
+              id: 'request.error.model.write',
+            });
+          }
         }
       });
     };
@@ -576,10 +554,11 @@ module.exports = {
   },
 
   removeModel: model => {
-    model = _.toLower(model);
+    const modelName = _.toLower(model);
+    const apiName = strapi.models[modelName].apiName;
+    const apiPath = path.join(strapi.config.appPath, 'api', apiName);
 
     const errors = [];
-    const apiPath = path.join(strapi.config.appPath, 'api');
 
     const deleteModelFile = (parentPath, fileName) => {
       const filePath = path.join(parentPath, fileName);

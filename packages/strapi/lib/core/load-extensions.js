@@ -5,8 +5,6 @@ const loadConfig = require('../load/load-config-files');
 const glob = require('../load/glob');
 const filePathToPath = require('../load/filepath-to-prop-path');
 
-const overwritableFoldersGlob = 'models';
-
 module.exports = async function({ appPath }) {
   const extensionsDir = path.resolve(appPath, 'extensions');
 
@@ -19,14 +17,20 @@ module.exports = async function({ appPath }) {
   };
 };
 
+const OVERWRITABLE_FOLDERS_GLOB = 'models';
 // returns a list of path and module to overwrite
 const loadOverwrites = async extensionsDir => {
-  const files = await glob(`*/${overwritableFoldersGlob}/*.*(js|json)`, {
+  const files = await glob(`*/${OVERWRITABLE_FOLDERS_GLOB}/*.*(js|json)`, {
     cwd: extensionsDir,
   });
 
   return files.map(file => {
-    const mod = require(path.resolve(extensionsDir, file));
+    const absolutePath = path.resolve(extensionsDir, file);
+
+    // load module
+    delete require.cache[absolutePath];
+    const mod = require(absolutePath);
+
     const propPath = filePathToPath(file);
 
     return {

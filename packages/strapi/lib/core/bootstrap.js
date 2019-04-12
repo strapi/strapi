@@ -47,6 +47,7 @@ module.exports = function(strapi) {
       let model = strapi.api[key].models[index];
 
       Object.assign(model, {
+        apiName: key,
         globalId: model.globalId || _.upperFirst(_.camelCase(index)),
         collectionName: model.collectionName || `${index}`.toLocaleLowerCase(),
         connection: model.connection || defaultConnection,
