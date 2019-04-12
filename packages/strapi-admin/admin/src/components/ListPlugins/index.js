@@ -1,9 +1,9 @@
 /*
-*
-*
-* ListPlugins
-*
-*/
+ *
+ *
+ * ListPlugins
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -16,7 +16,7 @@ import Row from '../Row';
 
 import styles from './styles.scss';
 
-class ListPlugins extends React.PureComponent {
+class ListPlugins extends React.Component {
   render() {
     const listSize = size(this.props.plugins);
     let titleType = listSize === 1 ? 'singular' : 'plural';
@@ -29,14 +29,17 @@ class ListPlugins extends React.PureComponent {
       <div className={styles.container}>
         <div className={styles.titleContainer}>
           <div>
-            <FormattedMessage id={`app.components.listPlugins.title.${titleType}`} values={{ number: listSize}} />
+            <FormattedMessage
+              id={`app.components.listPlugins.title.${titleType}`}
+              values={{ number: listSize }}
+            />
           </div>
           <div>
             <Button
               label="app.components.listPlugins.button"
               onClick={() => this.props.history.push('/install-plugin')}
               secondaryHotlineAdd
-              style={{ display: 'none'}}
+              style={{ display: 'none' }}
             />
           </div>
         </div>

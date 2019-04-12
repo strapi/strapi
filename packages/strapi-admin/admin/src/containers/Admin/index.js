@@ -12,13 +12,6 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 
-// Actions from strapi-helper-plugin
-// Actions required for disabling and enabling the OverlayBlocker
-import {
-  disableGlobalOverlayBlocker,
-  enableGlobalOverlayBlocker,
-} from 'actions/overlayBlocker';
-
 // Components from strapi-helper-plugin
 import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import OverlayBlocker from 'components/OverlayBlocker';
@@ -38,7 +31,11 @@ import NotFoundPage from '../NotFoundPage/Loadable';
 import Onboarding from '../Onboarding';
 import PluginDispatcher from '../PluginDispatcher';
 
-import { updatePlugin } from '../App/actions';
+import {
+  disableGlobalOverlayBlocker,
+  enableGlobalOverlayBlocker,
+  updatePlugin,
+} from '../App/actions';
 import makeSelecApp from '../App/selectors';
 
 import injectSaga from '../../utils/injectSaga';

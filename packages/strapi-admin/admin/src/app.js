@@ -19,6 +19,8 @@ import {
   pluginLoaded,
   unfreezeApp,
   updatePlugin,
+  getAppPluginsSucceeded,
+  // unsetHasUserPlugin,
 } from './containers/App/actions';
 import { showNotification } from './containers/NotificationProvider/actions';
 import injectReducer from './utils/injectReducer';
@@ -40,6 +42,10 @@ const initialState = {};
 const store = configureStore(initialState, history);
 const { dispatch } = store;
 const MOUNT_NODE = document.getElementById('app');
+
+// TODO remove temporary to access the admin
+
+dispatch(getAppPluginsSucceeded([]));
 
 // TODO
 const remoteURL = (() => {
@@ -156,5 +162,10 @@ if (!window.Intl) {
   render(translationMessages);
 }
 
-// cc/ @Pierre Burgy exporting dispatch for the notifications
+// @Pierre Burgy exporting dispatch for the notifications...
 export { dispatch };
+
+// TODO remove this for the new Cypress tests
+if (window.Cypress) {
+  window.__store__ = Object.assign(window.__store__ || {}, { store });
+}

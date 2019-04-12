@@ -27,12 +27,21 @@ const PORT = 4000;
 const webpackPlugins = devMode
   ? [
       new WebpackDashboard(),
-      new DuplicatePckgChecker(),
+      new DuplicatePckgChecker({
+        verbose: true,
+        exclude(instance) {
+          return instance.name === 'core-js';
+        },
+      }),
       new OpenBrowserWebpackPlugin({
         url: `http://localhost:${PORT}/${URLs.publicPath}`,
       }),
     ]
   : [
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/locale$/,
+        contextRegExp: /moment$/,
+      }),
       new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
@@ -63,7 +72,7 @@ module.exports = {
       index: URLs.publicPath,
     },
     port: 4000,
-    hot: true,
+    // hot: true,
   },
   stats: devMode ? 'minimal' : 'errors-only',
   devtool: 'cheap-module-source-map',
