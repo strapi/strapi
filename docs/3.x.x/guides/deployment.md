@@ -384,6 +384,8 @@ For security reasons, the Content Type Builder plugin is disabled in production.
 
 ### Project updates
 
+Due to limitations in Heroku, Strapi can only be deployed in Production mode to Heroku. Therefore, modifications that require writing to model creation or other json files, e.g. creating or changing content-types, require that you make those changes on your dev environment and then push the changes to Heroku.
+
 As you continue developing your application with Strapi, you may want to use [version control](https://devcenter.heroku.com/articles/github-integration), or you can continue to use `Git push heroku master` to commit and push changes to Heroku directly.
 
 `Path: ./my-project/`
