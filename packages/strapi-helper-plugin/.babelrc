@@ -1,0 +1,15 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "modules": false,
+        "loose": true,
+        "targets": {
+          "browsers": ["last 1 version"]
+        }
+      }
+    ],
+    "@babel/preset-react"
+  ]
+}
