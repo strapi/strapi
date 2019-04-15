@@ -28,6 +28,7 @@
     "strapi-middleware-views": "3.0.0-alpha.25.2",
     "strapi-plugin-content-manager": "3.0.0-alpha.25.2",
     "strapi-plugin-content-type-builder": "3.0.0-alpha.25.2",
+    "strapi-plugin-documentation": "^3.0.0-alpha.17",
     "strapi-plugin-email": "3.0.0-alpha.25.2",
     "strapi-plugin-graphql": "^0.0.0",
     "strapi-plugin-settings-manager": "3.0.0-alpha.25.2",
