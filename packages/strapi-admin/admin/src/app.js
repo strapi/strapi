@@ -39,7 +39,7 @@ if (window.location.port !== '4000') {
       (plugins || []).forEach(plugin => {
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.onerror = function (oError) {
+        script.onerror = function(oError) {
           const source = new URL(oError.target.src);
           const url = new URL(`${strapi.remoteURL}`);
 
@@ -57,9 +57,13 @@ if (window.location.port !== '4000') {
           $body.appendChild(newScript);
         };
 
-        script.src = plugin.source[process.env.NODE_ENV].indexOf('://') === -1 ?
-          `${basename}${plugin.source[process.env.NODE_ENV]}`.replace('//', '/'): // relative
-          plugin.source[process.env.NODE_ENV]; // absolute
+        script.src =
+          plugin.source[process.env.NODE_ENV].indexOf('://') === -1
+            ? `${basename}${plugin.source[process.env.NODE_ENV]}`.replace(
+                '//',
+                '/',
+              ) // relative
+            : plugin.source[process.env.NODE_ENV]; // absolute
 
         $body.appendChild(script);
       });
@@ -69,6 +73,4 @@ if (window.location.port !== '4000') {
     });
 }
 
-export {
-  dispatch,
-};
+export { dispatch };

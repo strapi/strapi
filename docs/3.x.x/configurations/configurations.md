@@ -330,8 +330,8 @@ Please note that you must give your MLab database name as the authenticationData
    - `exposeInContext` (boolean): Expose logger in context so it can be used through `strapi.log.info(‘my log’)`. Default value: `true`.
    - `requests` (boolean): Enable or disable requests logs. Default value: `false`.
  - `parser`
-  - `enabled`(boolean): Enable or disable parser. Default value: `true`.
-  - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
+   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
+   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
 
 ::: note
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
@@ -344,12 +344,12 @@ The session doesn't work with `mongo` as a client. The package that we should us
 **Path —** `./config/environments/**/response.json`.
 
  - [`gzip`](https://en.wikipedia.org/wiki/Gzip)
-  - `enabled` (boolean): Enable or not GZIP response compression.
+   - `enabled` (boolean): Enable or not GZIP response compression.
  - `responseTime`
-  - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
+   - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
  - `poweredBy`
-  - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
-  - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
+   - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
+   - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
 
 ***
 
@@ -364,20 +364,20 @@ The session doesn't work with `mongo` as a client. The package that we should us
  - [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)
    - `enabled` (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.
  - [`p3p`](https://en.wikipedia.org/wiki/P3P)
-  - `enabled` (boolean): Enable or disable p3p.
+   - `enabled` (boolean): Enable or disable p3p.
  - [`hsts`](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security)
-  - `enabled` (boolean): Enable or disable HSTS.
-  - `maxAge` (integer): Number of seconds HSTS is in effect. Default value: `31536000`.
-  - `includeSubDomains` (boolean): Applies HSTS to all subdomains of the host. Default value: `true`.
+   - `enabled` (boolean): Enable or disable HSTS.
+   - `maxAge` (integer): Number of seconds HSTS is in effect. Default value: `31536000`.
+   - `includeSubDomains` (boolean): Applies HSTS to all subdomains of the host. Default value: `true`.
  - [`xframe`](https://en.wikipedia.org/wiki/Clickjacking)
    - `enabled` (boolean): Enable or disable `X-FRAME-OPTIONS` headers in response.
    - `value` (string): The value for the header, e.g. DENY, SAMEORIGIN or ALLOW-FROM uri. Default value: `SAMEORIGIN`.
  - [`xss`](https://en.wikipedia.org/wiki/Cross-site_scripting)
-  - `enabled` (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).
+   - `enabled` (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).
  - [`cors`](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-  - `enabled` (boolean): Enable or disable CORS to prevent your server to be requested from another domain.
-  - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `http://localhost`.
-  - `expose` (array): Configures the `Access-Control-Expose-Headers` CORS header. If not specified, no custom headers are exposed. Default value: `["WWW-Authenticate", "Server-Authorization"]`.
+   - `enabled` (boolean): Enable or disable CORS to prevent your server to be requested from another domain.
+   - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `http://localhost`.
+   - `expose` (array): Configures the `Access-Control-Expose-Headers` CORS header. If not specified, no custom headers are exposed. Default value: `["WWW-Authenticate", "Server-Authorization"]`.
    - `maxAge` (integer): Configures the `Access-Control-Max-Age` CORS header. Default value: `31536000`.
    - `credentials` (boolean): Configures the `Access-Control-Allow-Credentials` CORS header. Default value: `true`.
    - `methods` (array)|String - Configures the `Access-Control-Allow-Methods` CORS header. Default value: `["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]`.
@@ -399,21 +399,21 @@ The session doesn't work with `mongo` as a client. The package that we should us
    - `enabled` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
  - `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
  - `proxy`
-  - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
-  - `ssl` (boolean): Enable proxy SSL support
-  - `host` (string): Host name your proxy service uses for Strapi.
-  - `port` (integer): Port that your proxy service accepts connections on.
+   - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
+   - `ssl` (boolean): Enable proxy SSL support
+   - `host` (string): Host name your proxy service uses for Strapi.
+   - `port` (integer): Port that your proxy service accepts connections on.
  - [`cron`](https://en.wikipedia.org/wiki/Cron)
-  - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
+   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
  - `admin`
-  - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
-  - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
-  - `build`
-    - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
-    - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
-      - `plugins`
-        - `source` (string): Define the source mode (origin, host, custom).
-        - `folder` (string): Indicate what the plugins folder in `host` source mode.
+   - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
+   - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
+   - `build`
+     - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
+     - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
+       - `plugins`
+         - `source` (string): Define the source mode (origin, host, custom).
+         - `folder` (string): Indicate what the plugins folder in `host` source mode.
 
 #### Example
 

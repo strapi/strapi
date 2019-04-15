@@ -32,7 +32,7 @@ import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
 import LoadingIndicator from 'components/LoadingIndicator';
 import PluginHeader from 'components/PluginHeader';
 import PopUpWarning from 'components/PopUpWarning';
-import NavLink from 'components/NavLink';
+import LiLink from 'components/LiLink';
 
 import getQueryParameters from 'utils/getQueryParameters';
 import inputValidations from 'utils/inputsValidations';
@@ -184,14 +184,16 @@ export class EditPage extends React.Component {
    * @return {Object}
    */
   getSchema = () =>
+    /* eslint-disable indent */
     this.getSource() !== pluginId
       ? get(this.props.schema, [
-        'models',
-        'plugins',
-        this.getSource(),
-        this.getModelName(),
-      ])
+          'models',
+          'plugins',
+          this.getSource(),
+          this.getModelName(),
+        ])
       : get(this.props.schema, ['models', this.getModelName()]);
+  /* eslint-enable indent */
 
   getPluginHeaderTitle = () => {
     if (this.isCreating()) {
@@ -199,9 +201,15 @@ export class EditPage extends React.Component {
     }
 
     const title = get(this.getSchema(), 'editDisplay.displayedField');
-    const valueToDisplay = get(this.props.editPage, ['initialRecord', title], null);
+    const valueToDisplay = get(
+      this.props.editPage,
+      ['initialRecord', title],
+      null,
+    );
 
-    return isEmpty(toString(valueToDisplay)) ? null : truncate(valueToDisplay, { length: '24', separator: '.' });
+    return isEmpty(toString(valueToDisplay))
+      ? null
+      : truncate(valueToDisplay, { length: '24', separator: '.' });
   };
 
   /**
@@ -217,7 +225,7 @@ export class EditPage extends React.Component {
   getContentManagerBaseUrl = () => {
     let url = `/plugins/${pluginId}/ctm-configurations/edit-settings/`;
 
-    if (this.getSource() === 'users-permissions') {
+    if (this.getSource() !== 'content-manager') {
       url = `${url}plugins/${this.getSource()}/`;
     }
 
@@ -422,9 +430,10 @@ export class EditPage extends React.Component {
 
   /**
    * Render the edit layout link
-   * @type {NavLink}
+   * @type {LiLink}
    */
   layoutLink = () => {
+    const { emitEvent } = this.context;
     // Retrieve URL
     const url = `${this.getContentManagerBaseUrl()}${this.getModelName()}`;
     // Link props to display
@@ -436,9 +445,12 @@ export class EditPage extends React.Component {
     };
 
     return (
-      <li key={`${pluginId}.link`}  onClick={() => this.context.emitEvent('willEditContentTypeLayoutFromEditView')}>
-        <NavLink {...message} url={url} />
-      </li>
+      <LiLink
+        {...message}
+        key={`${pluginId}.link`}
+        url={url}
+        onClick={() => emitEvent('willEditContentTypeLayoutFromEditView')}
+      />
     );
   };
 
@@ -487,8 +499,8 @@ export class EditPage extends React.Component {
    */
   retrieveLinksContainerComponent = () => {
     // Should be retrieved from the global props (@soupette)
-    const { plugins } = this.context;
-    const appPlugins = plugins.toJS();
+    const { emitEvent, plugins } = this.context;
+    const appPlugins = plugins;
     const componentToInject = Object.keys(appPlugins).reduce((acc, current) => {
       // Retrieve injected compos from plugin
       // if compo can be injected in left.links area push the compo in the array
@@ -506,9 +518,14 @@ export class EditPage extends React.Component {
           const Component = compo.component;
 
           return (
-            <li key={compo.key} onClick={() => this.context.emitEvent('willEditContentTypeFromEditView')}>
-              <Component {...this} {...compo.props} />
-            </li>
+            <Component
+              {...this}
+              {...compo.props}
+              key={compo.key}
+              onClick={() => {
+                emitEvent('willEditContentTypeFromEditView');
+              }}
+            />
           );
         });
 
@@ -765,7 +782,11 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
-const withReducer = strapi.injectReducer({ key: 'editPage', reducer, pluginId });
+const withReducer = strapi.injectReducer({
+  key: 'editPage',
+  reducer,
+  pluginId,
+});
 const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 
 export default compose(

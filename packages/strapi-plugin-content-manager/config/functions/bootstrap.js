@@ -6,7 +6,7 @@ const {
   getApisUploadRelations,
   getEditDisplayAvailableFieldsPath,
   getEditDisplayDisplayedField,
-  getEditDisplayFieldsPath
+  getEditDisplayFieldsPath,
 } = require('./utils/getters');
 const splitted = str => str.split('.');
 const pickData = model =>
@@ -25,21 +25,22 @@ const pickData = model =>
     'associations',
   ]);
 
+/* eslint-disable indent */
 module.exports = async cb => {
   // Retrieve all layout files from the plugins config folder
   const pluginsLayout = Object.keys(strapi.plugins).reduce((acc, current) => {
     const models = _.get(strapi.plugins, [current, 'config', 'layout'], {});
     Object.keys(models).forEach(model => {
-      const layout = _.get(
-        strapi.plugins,
-        [current, 'config', 'layout', model],
-        {}
-      );
+      const layout = _.get(strapi.plugins, [current, 'config', 'layout', model], {});
       acc[model] = layout;
     });
 
     return acc;
   }, {});
+
+  // Retrieve the administrator layout
+  const administratorLayout = _.get(strapi.admin, 'config.layout.administrator', {});
+
   // Remove the core_store layout since it is not needed
   // And create a temporay one
   const tempLayout = Object.keys(strapi.models)
@@ -48,16 +49,25 @@ module.exports = async cb => {
       acc[current] = { attributes: {} };
 
       return acc;
-    }, pluginsLayout);
+    }, _.merge(pluginsLayout, { administrator: administratorLayout }));
+
   const models = _.mapValues(strapi.models, pickData);
+
   delete models['core_store'];
+
+  const adminModels = {
+    admin: {
+      models: _.mapValues(strapi.admin.models, pickData),
+    },
+  };
+
   const pluginsModel = Object.keys(strapi.plugins).reduce((acc, current) => {
     acc[current] = {
       models: _.mapValues(strapi.plugins[current].models, pickData),
     };
 
     return acc;
-  }, {});
+  }, adminModels);
   // Reference all current models
   const appModels = Object.keys(pluginsModel).reduce((acc, curr) => {
     const models = Object.keys(_.get(pluginsModel, [curr, 'models'], {}));
@@ -100,21 +110,14 @@ module.exports = async cb => {
           relations: [],
         },
       },
-      model
+      model,
     );
     const fieldsToRemove = [];
     // Fields (non relation)
     const fields = _.mapValues(
-      _.pickBy(
-        model.attributes,
-        attribute => !attribute.model && !attribute.collection
-      ),
+      _.pickBy(model.attributes, attribute => !attribute.model && !attribute.collection),
       (value, attribute) => {
-        const fieldClassName = _.get(
-          tempLayout,
-          [name, 'attributes', attribute, 'className'],
-          ''
-        );
+        const fieldClassName = _.get(tempLayout, [name, 'attributes', attribute, 'className'], '');
 
         if (fieldClassName === 'd-none') {
           fieldsToRemove.push(attribute);
@@ -126,7 +129,7 @@ module.exports = async cb => {
           type: value.type || 'string',
           disabled: false,
         };
-      }
+      },
     );
 
     // Don't display fields that are hidden by default like the resetPasswordToken for the model user
@@ -164,23 +167,13 @@ module.exports = async cb => {
 
     // This object will be used to customise the label and description and so on of an input.
     // TODO: maybe add the customBootstrapClass in it;
-    schemaModel.editDisplay.availableFields = Object.keys(
-      schemaModel.fields
-    ).reduce((acc, current) => {
+    schemaModel.editDisplay.availableFields = Object.keys(schemaModel.fields).reduce((acc, current) => {
       acc[current] = Object.assign(
-        _.pick(_.get(schemaModel, ['fields', current], {}), [
-          'label',
-          'type',
-          'description',
-          'name',
-        ]),
+        _.pick(_.get(schemaModel, ['fields', current], {}), ['label', 'type', 'description', 'name']),
         {
-          editable:
-            ['updatedAt', 'createdAt', 'updated_at', 'created_at'].indexOf(
-              current
-            ) === -1,
+          editable: ['updatedAt', 'createdAt', 'updated_at', 'created_at'].indexOf(current) === -1,
           placeholder: '',
-        }
+        },
       );
 
       return acc;
@@ -191,35 +184,14 @@ module.exports = async cb => {
       schemaModel.relations = model.associations.reduce((acc, current) => {
         const label = _.upperFirst(current.alias);
         const displayedAttribute = current.plugin // Value to modified to custom what's displayed in the react-select
-          ? _.get(pluginsModel, [
-            current.plugin,
-            'models',
-            current.model || current.collection,
-            'info',
-            'mainField',
-          ]) ||
+          ? _.get(pluginsModel, [current.plugin, 'models', current.model || current.collection, 'info', 'mainField']) ||
             _.findKey(
-              _.get(pluginsModel, [
-                current.plugin,
-                'models',
-                current.model || current.collection,
-                'attributes',
-              ]),
-              { type: 'string' }
+              _.get(pluginsModel, [current.plugin, 'models', current.model || current.collection, 'attributes']),
+              { type: 'string' },
             ) ||
             'id'
-          : _.get(models, [
-            current.model || current.collection,
-            'info',
-            'mainField',
-          ]) ||
-            _.findKey(
-              _.get(models, [
-                current.model || current.collection,
-                'attributes',
-              ]),
-              { type: 'string' }
-            ) ||
+          : _.get(models, [current.model || current.collection, 'info', 'mainField']) ||
+            _.findKey(_.get(models, [current.model || current.collection, 'attributes']), { type: 'string' }) ||
             'id';
 
         acc[current.alias] = {
@@ -231,55 +203,40 @@ module.exports = async cb => {
 
         return acc;
       }, {});
-      const relationsArray = Object.keys(schemaModel.relations).filter(
-        relation => {
-          const isUploadRelation =
-            _.get(schemaModel, ['relations', relation, 'plugin'], '') ===
-            'upload';
-          const isMorphSide =
-            _.get(schemaModel, ['relations', relation, 'nature'], '')
-              .toLowerCase()
-              .includes('morp') &&
-            _.get(schemaModel, ['relations', relation, relation]) !== undefined;
+      const relationsArray = Object.keys(schemaModel.relations).filter(relation => {
+        const isUploadRelation = _.get(schemaModel, ['relations', relation, 'plugin'], '') === 'upload';
+        const isMorphSide =
+          _.get(schemaModel, ['relations', relation, 'nature'], '')
+            .toLowerCase()
+            .includes('morp') && _.get(schemaModel, ['relations', relation, relation]) !== undefined;
 
-          return !isUploadRelation && !isMorphSide;
+        return !isUploadRelation && !isMorphSide;
+      });
+
+      const uploadRelations = Object.keys(schemaModel.relations).reduce((acc, current) => {
+        if (_.get(schemaModel, ['relations', current, 'plugin']) === 'upload') {
+          const model = _.get(schemaModel, ['relations', current]);
+
+          acc[current] = {
+            description: '',
+            editable: true,
+            label: _.upperFirst(current),
+            multiple: _.has(model, 'collection'),
+            name: current,
+            placeholder: '',
+            type: 'file',
+            disabled: false,
+          };
         }
-      );
 
-      const uploadRelations = Object.keys(schemaModel.relations).reduce(
-        (acc, current) => {
-          if (
-            _.get(schemaModel, ['relations', current, 'plugin']) === 'upload'
-          ) {
-            const model = _.get(schemaModel, ['relations', current]);
+        return acc;
+      }, {});
 
-            acc[current] = {
-              description: '',
-              editable: true,
-              label: _.upperFirst(current),
-              multiple: _.has(model, 'collection'),
-              name: current,
-              placeholder: '',
-              type: 'file',
-              disabled: false,
-            };
-          }
-
-          return acc;
-        },
-        {}
-      );
-
-      schemaModel.editDisplay.availableFields = _.merge(
-        schemaModel.editDisplay.availableFields,
-        uploadRelations
-      );
+      schemaModel.editDisplay.availableFields = _.merge(schemaModel.editDisplay.availableFields, uploadRelations);
       schemaModel.editDisplay.relations = relationsArray;
     }
 
-    schemaModel.editDisplay.fields = Object.keys(
-      schemaModel.editDisplay.availableFields
-    );
+    schemaModel.editDisplay.fields = Object.keys(schemaModel.editDisplay.availableFields);
 
     if (plugin) {
       return _.set(schema.models.plugins, `${plugin}.${name}`, schemaModel);
@@ -337,35 +294,23 @@ module.exports = async cb => {
     const schemaApis = getApis(schema.models);
 
     // Array of apis to add
-    const apisToAdd = schemaApis
-      .filter(api => prevSchemaApis.indexOf(api) === -1)
-      .map(splitted);
+    const apisToAdd = schemaApis.filter(api => prevSchemaApis.indexOf(api) === -1).map(splitted);
     // Array of apis to remove
-    const apisToRemove = prevSchemaApis
-      .filter(api => schemaApis.indexOf(api) === -1)
-      .map(splitted);
+    const apisToRemove = prevSchemaApis.filter(api => schemaApis.indexOf(api) === -1).map(splitted);
 
     // Retrieve the same apis by name
-    const sameApis = schemaApis
-      .filter(api => prevSchemaApis.indexOf(api) !== -1)
-      .map(splitted);
+    const sameApis = schemaApis.filter(api => prevSchemaApis.indexOf(api) !== -1).map(splitted);
     // Retrieve all the field's path of the current unchanged api name
     const schemaSameApisKeys = _.flattenDeep(getApisKeys(schema, sameApis));
     // Retrieve all the field's path of the previous unchanged api name
-    const prevSchemaSameApisKeys = _.flattenDeep(
-      getApisKeys(prevSchema, sameApis)
-    );
+    const prevSchemaSameApisKeys = _.flattenDeep(getApisKeys(prevSchema, sameApis));
     // Determine for the same api if we need to add some fields
     const sameApisAttrToAdd = schemaSameApisKeys
       .filter(attr => prevSchemaSameApisKeys.indexOf(attr) === -1)
       .map(splitted);
     // Special case for the relations
-    const prevSchemaSameApisUploadRelations = _.flattenDeep(
-      getApisUploadRelations(prevSchema, sameApis)
-    );
-    const schemaSameApisUploadRelations = _.flattenDeep(
-      getApisUploadRelations(schema, sameApis)
-    );
+    const prevSchemaSameApisUploadRelations = _.flattenDeep(getApisUploadRelations(prevSchema, sameApis));
+    const schemaSameApisUploadRelations = _.flattenDeep(getApisUploadRelations(schema, sameApis));
     const sameApisUploadRelationsToAdd = schemaSameApisUploadRelations
       .filter(attr => prevSchemaSameApisUploadRelations.indexOf(attr) === -1)
       .map(splitted);
@@ -387,8 +332,7 @@ module.exports = async cb => {
       // Check default sort and change it if needed
       _.unset(prevSchema.models, attrPath);
       // Retrieve the api path in the schema Object
-      const apiPath =
-        attrPath.length > 3 ? _.take(attrPath, 3) : _.take(attrPath, 1);
+      const apiPath = attrPath.length > 3 ? _.take(attrPath, 3) : _.take(attrPath, 1);
       // Retrieve the listDisplay path in the schema Object
       const listDisplayPath = apiPath.concat('listDisplay');
       const prevListDisplay = _.get(prevSchema.models, listDisplayPath);
@@ -402,11 +346,7 @@ module.exports = async cb => {
       // If the user has deleted the default sort attribute in the content type builder
       // Replace it by new generated one from the current schema
       if (_.includes(currentAttr, defaultSort)) {
-        _.set(
-          prevSchema.models,
-          defaultSortPath,
-          _.get(schema.models, defaultSortPath)
-        );
+        _.set(prevSchema.models, defaultSortPath, _.get(schema.models, defaultSortPath));
       }
 
       // If the user has deleted the edit view displayed field (name in the header)
@@ -414,30 +354,22 @@ module.exports = async cb => {
       if (_.includes(currentAttr, displayedField)) {
         _.set(prevSchema.models, displayedFieldPath, primaryKey);
       }
-      
+
       // Update the displayed fields
-      const updatedListDisplay = prevListDisplay.filter(
-        obj => obj.name !== currentAttr.join()
-      );
+      const updatedListDisplay = prevListDisplay.filter(obj => obj.name !== currentAttr.join());
 
       // Retrieve the model's displayed fields for the `EditPage`
       const fieldsPath = getEditDisplayFieldsPath(attrPath);
       // Retrieve the previous settings
       const prevEditDisplayFields = _.get(prevSchema.models, fieldsPath);
       // Update the fields
-      const updatedEditDisplayFields = prevEditDisplayFields.filter(
-        field => field !== currentAttr.join()
-      );
+      const updatedEditDisplayFields = prevEditDisplayFields.filter(field => field !== currentAttr.join());
       // Set the new layout
       _.set(prevSchema.models, fieldsPath, updatedEditDisplayFields);
 
       if (updatedListDisplay.length === 0) {
         // Update it with the one from the generated schema
-        _.set(
-          prevSchema.models,
-          listDisplayPath,
-          _.get(schema.models, listDisplayPath, [])
-        );
+        _.set(prevSchema.models, listDisplayPath, _.get(schema.models, listDisplayPath, []));
       } else {
         _.set(prevSchema.models, listDisplayPath, updatedListDisplay);
       }
@@ -447,10 +379,7 @@ module.exports = async cb => {
     // Here we just need to add the data from the current schema Object
     apisToAdd.map(apiPath => {
       const api = _.get(schema.models, apiPath);
-      const { search, filters, bulkActions, pageEntries, options } = _.get(
-        prevSchema,
-        'generalSettings'
-      );
+      const { search, filters, bulkActions, pageEntries, options } = _.get(prevSchema, 'generalSettings');
 
       _.set(api, 'options', options);
       _.set(api, 'filters', filters);
@@ -481,13 +410,7 @@ module.exports = async cb => {
     sameApis.forEach(apiPath => {
       // This doesn't keep the prevSettings for the relations,  the user will have to reset it.
       // We might have to improve this if we want the order of the relations to be kept
-      [
-        'relations',
-        'loadedModel',
-        'associations',
-        'attributes',
-        ['editDisplay', 'relations'],
-      ]
+      ['relations', 'loadedModel', 'associations', 'attributes', ['editDisplay', 'relations']]
         .map(key => apiPath.concat(key))
         .forEach(keyPath => {
           const newValue = _.get(schema.models, keyPath);
@@ -509,16 +432,8 @@ module.exports = async cb => {
 
     schemaApis.map(model => {
       const isPlugin = model.includes('plugins.');
-      _.set(
-        prevSchema.models[model],
-        'info',
-        _.get(!isPlugin ? strapi.models[model] : strapi[model], 'info')
-      );
-      _.set(
-        prevSchema.models[model],
-        'options',
-        _.get(!isPlugin ? strapi.models[model] : strapi[model], 'options')
-      );
+      _.set(prevSchema.models[model], 'info', _.get(!isPlugin ? strapi.models[model] : strapi[model], 'info'));
+      _.set(prevSchema.models[model], 'options', _.get(!isPlugin ? strapi.models[model] : strapi[model], 'options'));
     });
 
     await pluginStore.set({ key: 'schema', value: prevSchema });

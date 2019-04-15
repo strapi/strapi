@@ -17,11 +17,11 @@ let rq;
 describe('Create Strapi API End to End', () => {
   beforeAll(async () => {
     await createRequest()({
-      url: '/auth/local/register',
+      url: '/admin/auth/local/register',
       method: 'POST',
       body: auth,
     }).catch(err => {
-      if (err.error.message.includes('Email is already taken.')) return;
+      if (err.error.message.includes("You can't register a new admin")) return;
       throw err;
     });
 
@@ -663,7 +663,8 @@ describe('Create Strapi API End to End', () => {
         method: 'GET',
       });
 
-      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0) return;
+      if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0)
+        return;
       expect(referenceToGet.tag).toBe(null);
     });
   });

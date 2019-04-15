@@ -1,7 +1,7 @@
 /**
- * 
+ *
  * Marketplace
- * 
+ *
  */
 
 import React from 'react';
@@ -33,11 +33,9 @@ import saga from './saga';
 import styles from './styles.scss';
 
 class Marketplace extends React.Component {
-  getChildContext = () => (
-    {
-      downloadPlugin: this.props.downloadPlugin,
-    }
-  );
+  getChildContext = () => ({
+    downloadPlugin: this.props.downloadPlugin,
+  });
 
   componentDidMount() {
     // Fetch the available and installed plugins
@@ -56,9 +54,15 @@ class Marketplace extends React.Component {
   );
 
   renderPluginCard = plugin => {
-    const { adminPage: { currentEnvironment }, availablePlugins, downloadPlugin, history, installedPlugins } = this.props;
+    const {
+      admin: { currentEnvironment },
+      availablePlugins,
+      downloadPlugin,
+      history,
+      installedPlugins,
+    } = this.props;
     const currentPlugin = availablePlugins[plugin];
-    
+
     return (
       <PluginCard
         currentEnvironment={currentEnvironment}
@@ -67,7 +71,7 @@ class Marketplace extends React.Component {
         plugin={currentPlugin}
         showSupportUsButton={currentPlugin.id === 'support-us'}
         isAlreadyInstalled={installedPlugins.includes(currentPlugin.id)}
-        downloadPlugin={(e) => {
+        downloadPlugin={e => {
           e.preventDefault();
           e.stopPropagation();
 
@@ -77,7 +81,7 @@ class Marketplace extends React.Component {
         }}
       />
     );
-  }
+  };
 
   render() {
     const { availablePlugins, isLoading } = this.props;
@@ -113,7 +117,7 @@ Marketplace.childContextTypes = {
 Marketplace.defaultProps = {};
 
 Marketplace.propTypes = {
-  adminPage: PropTypes.object.isRequired,
+  admin: PropTypes.object.isRequired,
   availablePlugins: PropTypes.array.isRequired,
   downloadPlugin: PropTypes.func.isRequired,
   getAvailableAndInstalledPlugins: PropTypes.func.isRequired,
@@ -136,16 +140,19 @@ function mapDispatchToProps(dispatch) {
   );
 }
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
 /* Remove this line if the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
+ *  check the documentation to see how to create the container's store
+ */
 const withReducer = injectReducer({ key: 'marketplace', reducer });
 
 /* Remove the line below the container doesn't have a route and
-*  check the documentation to see how to create the container's store
-*/
+ *  check the documentation to see how to create the container's store
+ */
 const withSaga = injectSaga({ key: 'marketplace', saga });
 
 export default compose(

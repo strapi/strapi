@@ -84,29 +84,37 @@ class ModelForm extends React.Component {
       push,
       updateTempContentType,
     } = this.props;
-    const alreadyTakenContentTypeNames = Object.keys(currentData).filter(name => name !== modelToEditName);
+    const alreadyTakenContentTypeNames = Object.keys(currentData).filter(
+      name => name !== modelToEditName,
+    );
     let formErrors = {};
 
     if (alreadyTakenContentTypeNames.includes(modifiedData.name)) {
-      formErrors = { name: [{ id: `${pluginId}.error.contentTypeName.taken` }] };
+      formErrors = {
+        name: [{ id: `${pluginId}.error.contentTypeName.taken` }],
+      };
     }
 
     if (modifiedData.name === '') {
       formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
     }
 
-    this.setState(prevState => ({ formErrors, didCheckErrors: !prevState.didCheckErrors }));
+    this.setState(prevState => ({
+      formErrors,
+      didCheckErrors: !prevState.didCheckErrors,
+    }));
+    const pathname = `/plugins/${pluginId}/models/${modifiedData.name}`;
 
     if (isEmpty(formErrors)) {
       if (actionType === 'create') {
         createTempContentType();
         push({
-          pathname: `/plugins/${pluginId}/models/${modifiedData.name}`,
+          pathname,
           search: 'modalType=chooseAttributes',
         });
       } else if (isUpdatingTemporaryContentType) {
         updateTempContentType();
-        push({ search: '' });
+        push({ pathname, search: '' });
       } else {
         push({ search: '' });
       }
@@ -153,7 +161,9 @@ class ModelForm extends React.Component {
         ? onChangeNewContentTypeMainInfos
         : onChangeExistingContentTypeMainInfos;
     const name =
-      actionType === 'create' || isUpdatingTemporaryContentType ? input.name : `${modelToEditName}.${input.name}`;
+      actionType === 'create' || isUpdatingTemporaryContentType
+        ? input.name
+        : `${modelToEditName}.${input.name}`;
 
     return (
       <Input
@@ -195,14 +205,25 @@ class ModelForm extends React.Component {
         onToggle={this.handleCancel}
       >
         <HeaderModal>
-          <HeaderModalTitle title={`${pluginId}.popUpForm.${actionType || 'create'}.contentType.header.title`} />
-          <HeaderModalNavContainer>{NAVLINKS.map(this.renderNavLinks)}</HeaderModalNavContainer>
+          <HeaderModalTitle
+            title={`${pluginId}.popUpForm.${actionType ||
+              'create'}.contentType.header.title`}
+          />
+          <HeaderModalNavContainer>
+            {NAVLINKS.map(this.renderNavLinks)}
+          </HeaderModalNavContainer>
         </HeaderModal>
         <form onSubmit={this.handleSubmit}>
           <BodyModal>{currentForm.items.map(this.renderInput)}</BodyModal>
           <FooterModal>
-            <ButtonModalSecondary message={`${pluginId}.form.button.cancel`} onClick={this.handleCancel} />
-            <ButtonModalPrimary message={`${pluginId}.form.button.save`} type="submit" />
+            <ButtonModalSecondary
+              message={`${pluginId}.form.button.cancel`}
+              onClick={this.handleCancel}
+            />
+            <ButtonModalPrimary
+              message={`${pluginId}.form.button.save`}
+              type="submit"
+            />
           </FooterModal>
         </form>
       </WrapperModal>

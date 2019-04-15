@@ -1,8 +1,8 @@
 /**
  * appDev.js
- * 
+ *
  * This is then entry file for the application in development
- * 
+ *
  */
 
 import { findIndex } from 'lodash';
@@ -41,6 +41,4 @@ if (findIndex(plugins, ['id', 'users-permissions']) === -1) {
   dispatch(unsetHasUserPlugin());
 }
 
-export {
-  dispatch,
-};
+export { dispatch };

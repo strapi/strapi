@@ -69,11 +69,11 @@ class TableListRow extends React.Component {
     );
   };
 
-  toggleModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
+  toggleModalWarning = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
   handleShowModalWarning = () => {
     if (this.props.canOpenModalAddContentType || this.props.rowItem.isTemporary === true) {
-      this.setState({ showWarning: !this.state.showWarning });
+      this.setState(prevState => ({ showWarning: !prevState.showWarning }));
     } else {
       strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
     }
@@ -97,9 +97,7 @@ class TableListRow extends React.Component {
     ) : (
       ''
     );
-    const description = isEmpty(this.props.rowItem.description)
-      ? '-'
-      : this.props.rowItem.description;
+    const description = isEmpty(this.props.rowItem.description) ? '-' : this.props.rowItem.description;
     const spanStyle = this.props.rowItem.isTemporary ? '60%' : '100%';
     const icons = this.props.rowItem.source
       ? []
@@ -124,8 +122,8 @@ class TableListRow extends React.Component {
         <div className={`col-md-5 text-center ${styles.descriptionContainer}`}>
           <div>{description}</div>
         </div>
-        <div className='col-md-2 text-center'>{this.props.rowItem.fields}</div>
-        <div className='col-md-1'>
+        <div className="col-md-2 text-center">{this.props.rowItem.fields}</div>
+        <div className="col-md-1">
           <IcoContainer icons={icons} />
         </div>
         <PopUpWarning
