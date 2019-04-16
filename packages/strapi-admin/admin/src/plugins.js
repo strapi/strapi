@@ -24,6 +24,7 @@ module.exports = {
   email: require('../../../strapi-plugin-email/admin/src').default,
   'settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
     .default,
+  upload: require('../../../strapi-plugin-upload/admin/src').default,
   'users-permissions': require('../../../strapi-plugin-users-permissions/admin/src')
     .default,
 };
