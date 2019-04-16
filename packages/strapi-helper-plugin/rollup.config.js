@@ -14,6 +14,7 @@ export default {
       format: 'cjs',
       sourceMap: true,
       name: 'strapi-helper-plugin',
+      compact: true,
     },
     {
       exports: 'named',
@@ -21,6 +22,7 @@ export default {
       file: pkg.module,
       format: 'es',
       name: 'strapi-helper-plugin',
+      compact: true,
     },
   ],
 
@@ -34,6 +36,7 @@ export default {
     resolve(),
     commonjs(),
     svg(),
+    require('rollup-plugin-sizes')(),
   ],
 
   external: [

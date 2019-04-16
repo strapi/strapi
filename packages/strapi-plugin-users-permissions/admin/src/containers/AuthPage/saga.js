@@ -1,7 +1,6 @@
 import { get, includes, isArray, omit, set } from 'lodash';
 import { call, fork, put, select, takeLatest } from 'redux-saga/effects';
-import auth from 'utils/auth';
-import request from 'utils/request';
+import { auth, request } from 'strapi-helper-plugin';
 
 import { updateHasAdmin } from '../Initializer/actions';
 

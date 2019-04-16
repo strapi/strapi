@@ -67,6 +67,7 @@
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-sass": "^1.2.2",
     "rollup-plugin-scss": "^1.0.1",
+    "rollup-plugin-sizes": "^0.5.1",
     "rollup-plugin-svg": "^1.0.1",
     "shelljs": "^0.7.8"
   },

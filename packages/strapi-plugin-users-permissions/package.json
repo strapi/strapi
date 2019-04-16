@@ -28,6 +28,7 @@
     "koa": "^2.1.0",
     "koa2-ratelimit": "^0.6.1",
     "purest": "^2.0.1",
+    "react": "^16.8.6",
     "request": "^2.83.0",
     "strapi-utils": "3.0.0-alpha.25.2",
     "uuid": "^3.1.0"

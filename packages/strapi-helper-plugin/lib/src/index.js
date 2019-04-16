@@ -12,6 +12,7 @@ export {
 export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
 export { default as GlobalPagination } from './components/GlobalPagination';
+export { default as HeaderNav } from './components/HeaderNav';
 export { default as IcoContainer } from './components/IcoContainer';
 export { default as InputAddon } from './components/InputAddon';
 
@@ -22,10 +23,10 @@ export { default as InputCheckbox } from './components/InputCheckbox';
 export {
   default as InputCheckboxWithErrors,
 } from './components/InputCheckboxWithErrors';
-// export { default as InputDate } from './components/InputDate';
-// export {
-//   default as InputDateWithErrors,
-// } from './components/InputDateWithErrors';
+export { default as InputDate } from './components/InputDate';
+export {
+  default as InputDateWithErrors,
+} from './components/InputDateWithErrors';
 export { default as InputEmail } from './components/InputEmail';
 export {
   default as InputEmailWithErrors,

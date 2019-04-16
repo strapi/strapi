@@ -91,11 +91,6 @@ module.exports = {
       {
         test: /\.m?js$/,
         exclude: /node_modules/,
-        include: [
-          path.resolve(__dirname, 'admin/src'),
-          path.resolve(__dirname, '../strapi-helper-plugin/lib/src'),
-          path.resolve(__dirname, 'node_modules/strapi-helper-plugin/lib/src'),
-        ],
         use: {
           loader: require.resolve('babel-loader'),
           options: {

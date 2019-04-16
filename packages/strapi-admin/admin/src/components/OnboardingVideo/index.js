@@ -16,9 +16,7 @@ import styles from './styles.scss';
 
 class OnboardingVideo extends React.Component {
   componentDidMount() {
-    this.hiddenPlayer.current.subscribeToStateChange(
-      this.handleChangeState,
-    );
+    this.hiddenPlayer.current.subscribeToStateChange(this.handleChangeState);
   }
 
   hiddenPlayer = React.createRef();
@@ -28,7 +26,7 @@ class OnboardingVideo extends React.Component {
   handleChangeState = (state, prevState) => {
     const { duration } = state;
     const { id } = this.props;
-    
+
     if (duration !== prevState.duration) {
       this.props.setVideoDuration(id, duration);
     }
@@ -43,14 +41,16 @@ class OnboardingVideo extends React.Component {
     }
   };
 
-  handleCurrentTimeChange = (curr) => {
-    this.props.getVideoCurrentTime(this.props.id, curr, this.props.video.duration);            
-  }
+  handleCurrentTimeChange = curr => {
+    this.props.getVideoCurrentTime(
+      this.props.id,
+      curr,
+      this.props.video.duration,
+    );
+  };
 
   handleModalOpen = () => {
-    this.player.current.subscribeToStateChange(
-      this.handleChangeIsPlayingState,
-    );
+    this.player.current.subscribeToStateChange(this.handleChangeIsPlayingState);
 
     this.player.current.play();
 
@@ -89,7 +89,7 @@ class OnboardingVideo extends React.Component {
         key={this.props.id}
         onClick={this.props.onClick}
         id={this.props.id}
-        className={cn(styles.listItem, video.end && (styles.finished))}
+        className={cn(styles.listItem, video.end && styles.finished)}
       >
         <div className={styles.thumbWrapper}>
           <img src={video.preview} alt="preview" />
@@ -98,9 +98,15 @@ class OnboardingVideo extends React.Component {
         </div>
         <div className={styles.txtWrapper}>
           <p className={styles.title}>{video.title}</p>
-          <p className={styles.time}>{isNaN(video.duration) ? '\xA0' :  `${Math.floor(video.duration / 60)}:${Math.floor(video.duration)%60}`}</p>
+          <p className={styles.time}>
+            {isNaN(video.duration)
+              ? '\xA0'
+              : `${Math.floor(video.duration / 60)}:${Math.floor(
+                video.duration,
+              ) % 60}`}
+          </p>
         </div>
-        
+
         <Modal
           isOpen={video.isOpen}
           toggle={this.props.onClick} // eslint-disable-line react/jsx-handler-names
@@ -119,7 +125,7 @@ class OnboardingVideo extends React.Component {
               <Player
                 ref={this.player}
                 className={styles.videoPlayer}
-                poster="/assets/poster.png"
+                // poster="/assets/poster.png"
                 src={video.video}
                 startTime={video.startTime}
                 preload="auto"
@@ -135,7 +141,7 @@ class OnboardingVideo extends React.Component {
           <div className={cn(styles.hiddenPlayerWrapper)}>
             <Player
               ref={this.hiddenPlayer}
-              poster="/assets/poster.png"
+              // poster="/assets/poster.png"
               src={video.video}
               preload="auto"
               subscribeToStateChange={this.subscribeToStateChange}

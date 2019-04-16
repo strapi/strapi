@@ -1,15 +1,5 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
-import {
-  all,
-  call,
-  cancel,
-  fork,
-  put,
-  select,
-  take,
-  takeLatest,
-} from 'redux-saga/effects';
-import request from 'utils/request';
+import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
+import { request } from 'strapi-helper-plugin';
 import {
   getPermissionsSucceeded,
   getPoliciesSucceeded,
@@ -33,10 +23,14 @@ import {
 
 export function* fetchUser(action) {
   try {
-    const data = yield call(request, `/users-permissions/search/${action.user}`, { method: 'GET' });
+    const data = yield call(
+      request,
+      `/users-permissions/search/${action.user}`,
+      { method: 'GET' },
+    );
 
     yield put(getUserSucceeded(data));
-  } catch(error) {
+  } catch (error) {
     strapi.notification.error('users-permissions.notification.error.fetchUser');
   }
 }
@@ -51,8 +45,10 @@ export function* permissionsGet() {
     });
 
     yield put(getPermissionsSucceeded(response));
-  } catch(err) {
-    strapi.notification.error('users-permissions.EditPage.notification.permissions.error');
+  } catch (err) {
+    strapi.notification.error(
+      'users-permissions.EditPage.notification.permissions.error',
+    );
   }
 }
 
@@ -62,11 +58,13 @@ export function* policiesGet() {
       call(request, '/users-permissions/policies', { method: 'GET' }),
       call(request, '/users-permissions/routes', { method: 'GET' }),
     ]);
-    
+
     yield put(getPoliciesSucceeded(policies));
     yield put(getRoutesSucceeded(routes));
-  } catch(err) {
-    strapi.notification.error('users-permissions.EditPage.notification.policies.error');
+  } catch (err) {
+    strapi.notification.error(
+      'users-permissions.EditPage.notification.policies.error',
+    );
   }
 }
 
@@ -80,8 +78,10 @@ export function* roleGet(action) {
     });
 
     yield put(getRoleSucceeded(role));
-  } catch(err) {
-    strapi.notification.error('users-permissions.EditPage.notification.role.error');
+  } catch (err) {
+    strapi.notification.error(
+      'users-permissions.EditPage.notification.role.error',
+    );
   }
 }
 
@@ -95,32 +95,35 @@ export function* submit(action) {
       body,
     };
 
-    const requestURL = actionType === 'POST' ? '/users-permissions/roles' : `/users-permissions/roles/${roleId}`;
+    const requestURL =
+      actionType === 'POST'
+        ? '/users-permissions/roles'
+        : `/users-permissions/roles/${roleId}`;
     const response = yield call(request, requestURL, opts);
-    
+
     if (actionType === 'POST') {
       action.context.emitEvent('didCreateRole');
     }
-    
+
     if (response.ok) {
       yield put(submitSucceeded());
     }
-  } catch(error) {
+  } catch (error) {
     console.log(error); // eslint-disable-line no-console
   }
 }
 
 export default function* defaultSaga() {
-  const loadPermissionsWatcher = yield fork(takeLatest, GET_PERMISSIONS, permissionsGet);
-  const loadPoliciesWatcher = yield fork(takeLatest, GET_POLICIES, policiesGet);
-  const loadRoleWatcher = yield fork(takeLatest, GET_ROLE, roleGet);
+  yield fork(takeLatest, GET_PERMISSIONS, permissionsGet);
+  yield fork(takeLatest, GET_POLICIES, policiesGet);
+  yield fork(takeLatest, GET_ROLE, roleGet);
 
   yield fork(takeLatest, GET_USER, fetchUser);
   yield fork(takeLatest, SUBMIT, submit);
 
-  yield take(LOCATION_CHANGE);
+  // yield take(LOCATION_CHANGE);
 
-  yield cancel(loadPermissionsWatcher);
-  yield cancel(loadPoliciesWatcher);
-  yield cancel(loadRoleWatcher);
+  // yield cancel(loadPermissionsWatcher);
+  // yield cancel(loadPoliciesWatcher);
+  // yield cancel(loadRoleWatcher);
 }

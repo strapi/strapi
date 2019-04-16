@@ -1,4 +1,4 @@
-const auth = require('utils/auth').default;
+const { auth } = require('strapi-helper-plugin');
 
 module.exports = function willSecure() {
   const {

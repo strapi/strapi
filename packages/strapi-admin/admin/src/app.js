@@ -40,6 +40,9 @@ import { translationMessages, languages } from './i18n';
 
 // Create redux store with history
 import history from './utils/history';
+
+import plugins from './plugins';
+
 const initialState = {};
 const store = configureStore(initialState, history);
 const { dispatch } = store;
@@ -47,7 +50,18 @@ const MOUNT_NODE = document.getElementById('app');
 
 // TODO remove temporary to access the admin
 
-dispatch(getAppPluginsSucceeded([]));
+dispatch(getAppPluginsSucceeded(Object.keys(plugins)));
+
+Object.keys(plugins).forEach(plugin => {
+  const currentPlugin = plugins[plugin];
+
+  try {
+    merge(translationMessages, currentPlugin.translationMessages);
+    dispatch(pluginLoaded(currentPlugin));
+  } catch (err) {
+    console.log({ err });
+  }
+});
 
 // TODO
 const remoteURL = (() => {
@@ -63,14 +77,6 @@ const remoteURL = (() => {
   return process.env.REMOTE_URL.replace(/\/$/, '');
 })();
 
-const registerPlugin = plugin => {
-  // Merge admin translation messages
-  merge(translationMessages, plugin.translationMessages);
-
-  plugin.leftMenuSections = plugin.leftMenuSections || [];
-
-  dispatch(pluginLoaded(plugin));
-};
 const displayNotification = (message, status) => {
   dispatch(showNotification(message, status));
 };
@@ -85,7 +91,6 @@ window.strapi = Object.assign(window.strapi || {}, {
   node: MODE || 'host',
   remoteURL,
   backendURL: BACKEND_URL,
-  registerPlugin,
   notification: {
     success: message => {
       displayNotification(message, 'success');

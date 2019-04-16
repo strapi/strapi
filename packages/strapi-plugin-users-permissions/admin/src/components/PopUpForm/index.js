@@ -23,7 +23,7 @@ import {
   takeRight,
 } from 'lodash';
 
-import Input from 'components/InputsIndex';
+import { InputsIndex as Input } from 'strapi-helper-plugin';
 
 // Translations
 import en from '../../translations/en.json';

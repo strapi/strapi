@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { includes, isEmpty } from 'lodash';
 
@@ -48,7 +49,7 @@ class Row extends React.Component {
           onClick: e => {
             e.preventDefault();
             e.stopPropagation();
-            this.context.router.history.push(settingsPath);
+            this.props.history.push(settingsPath);
           },
         },
         {
@@ -106,7 +107,6 @@ class Row extends React.Component {
 
 Row.contextTypes = {
   currentEnvironment: PropTypes.string,
-  router: PropTypes.object,
 };
 
 Row.propTypes = {
@@ -117,4 +117,4 @@ Row.propTypes = {
   pluginActionSucceeded: PropTypes.bool.isRequired,
 };
 
-export default Row;
+export default withRouter(Row);
