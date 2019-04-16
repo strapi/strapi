@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
-import Input from 'components/InputsIndex';
+import { InputsIndex as Input } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -84,18 +84,25 @@ class ModelForm extends React.Component {
       push,
       updateTempContentType,
     } = this.props;
-    const alreadyTakenContentTypeNames = Object.keys(currentData).filter(name => name !== modelToEditName);
+    const alreadyTakenContentTypeNames = Object.keys(currentData).filter(
+      name => name !== modelToEditName,
+    );
     let formErrors = {};
 
     if (alreadyTakenContentTypeNames.includes(modifiedData.name)) {
-      formErrors = { name: [{ id: `${pluginId}.error.contentTypeName.taken` }] };
+      formErrors = {
+        name: [{ id: `${pluginId}.error.contentTypeName.taken` }],
+      };
     }
 
     if (modifiedData.name === '') {
       formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
     }
 
-    this.setState(prevState => ({ formErrors, didCheckErrors: !prevState.didCheckErrors }));
+    this.setState(prevState => ({
+      formErrors,
+      didCheckErrors: !prevState.didCheckErrors,
+    }));
 
     if (isEmpty(formErrors)) {
       if (actionType === 'create') {
@@ -153,7 +160,9 @@ class ModelForm extends React.Component {
         ? onChangeNewContentTypeMainInfos
         : onChangeExistingContentTypeMainInfos;
     const name =
-      actionType === 'create' || isUpdatingTemporaryContentType ? input.name : `${modelToEditName}.${input.name}`;
+      actionType === 'create' || isUpdatingTemporaryContentType
+        ? input.name
+        : `${modelToEditName}.${input.name}`;
 
     return (
       <Input
@@ -195,14 +204,25 @@ class ModelForm extends React.Component {
         onToggle={this.handleCancel}
       >
         <HeaderModal>
-          <HeaderModalTitle title={`${pluginId}.popUpForm.${actionType || 'create'}.contentType.header.title`} />
-          <HeaderModalNavContainer>{NAVLINKS.map(this.renderNavLinks)}</HeaderModalNavContainer>
+          <HeaderModalTitle
+            title={`${pluginId}.popUpForm.${actionType ||
+              'create'}.contentType.header.title`}
+          />
+          <HeaderModalNavContainer>
+            {NAVLINKS.map(this.renderNavLinks)}
+          </HeaderModalNavContainer>
         </HeaderModal>
         <form onSubmit={this.handleSubmit}>
           <BodyModal>{currentForm.items.map(this.renderInput)}</BodyModal>
           <FooterModal>
-            <ButtonModalSecondary message={`${pluginId}.form.button.cancel`} onClick={this.handleCancel} />
-            <ButtonModalPrimary message={`${pluginId}.form.button.save`} type="submit" />
+            <ButtonModalSecondary
+              message={`${pluginId}.form.button.cancel`}
+              onClick={this.handleCancel}
+            />
+            <ButtonModalPrimary
+              message={`${pluginId}.form.button.save`}
+              type="submit"
+            />
           </FooterModal>
         </form>
       </WrapperModal>

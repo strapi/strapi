@@ -13,13 +13,14 @@ import { Redirect } from 'react-router-dom';
 import { get, isEqual, pickBy } from 'lodash';
 import { Prompt } from 'react-router';
 
-import Button from 'components/Button';
-import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
-import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning';
-import { routerPropTypes } from 'commonPropTypes';
-
-import getQueryParameters from 'utils/getQueryParameters';
+import {
+  Button,
+  EmptyAttributesBlock,
+  PluginHeader,
+  PopUpWarning,
+  routerPropTypes,
+  getQueryParameters,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -86,7 +87,10 @@ export class ModelPage extends React.Component {
       resetEditExistingContentType,
     } = prevProps;
 
-    if (!this.isUpdatingTemporaryContentType(modelName) && modelName !== this.props.match.params.modelName) {
+    if (
+      !this.isUpdatingTemporaryContentType(modelName) &&
+      modelName !== this.props.match.params.modelName
+    ) {
       resetEditExistingContentType(modelName);
     }
 
@@ -97,14 +101,19 @@ export class ModelPage extends React.Component {
 
   getActionType = () => getQueryParameters(this.getSearch(), 'actionType');
 
-  getAttributeName = () => getQueryParameters(this.getSearch(), 'attributeName');
+  getAttributeName = () =>
+    getQueryParameters(this.getSearch(), 'attributeName');
 
-  getAttributeType = () => getQueryParameters(this.getSearch(), 'attributeType');
+  getAttributeType = () =>
+    getQueryParameters(this.getSearch(), 'attributeType');
 
   getFormData = () => {
     const { modifiedData, newContentType } = this.props;
 
-    if (this.getActionType() === 'create' || this.isUpdatingTemporaryContentType()) {
+    if (
+      this.getActionType() === 'create' ||
+      this.isUpdatingTemporaryContentType()
+    ) {
       return newContentType;
     }
 
@@ -125,17 +134,24 @@ export class ModelPage extends React.Component {
 
   getModelAttributes = () => get(this.getModel(), 'attributes', {});
 
-  getModelAttributesLength = () => Object.keys(this.getModelAttributes()).length;
+  getModelAttributesLength = () =>
+    Object.keys(this.getModelAttributes()).length;
 
   getModelDescription = () => {
     const { initialData } = this.props;
 
-    const description = get(initialData, [this.getModelName(), 'description'], null);
+    const description = get(
+      initialData,
+      [this.getModelName(), 'description'],
+      null,
+    );
 
     /* istanbul ignore if */
     return !!description
       ? description
-      : { id: `${pluginId}.modelPage.contentHeader.emptyDescription.description` };
+      : {
+        id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+      };
   };
 
   getModelName = () => {
@@ -163,7 +179,8 @@ export class ModelPage extends React.Component {
     return relations;
   };
 
-  getModelRelationShipsLength = () => Object.keys(this.getModelRelationShips()).length;
+  getModelRelationShipsLength = () =>
+    Object.keys(this.getModelRelationShips()).length;
 
   getPluginHeaderActions = () => {
     const {
@@ -178,7 +195,10 @@ export class ModelPage extends React.Component {
     /* istanbul ignore if */
     const shouldShowActions = this.isUpdatingTemporaryContentType()
       ? this.getModelAttributesLength() > 0
-      : !isEqual(modifiedData[this.getModelName()], initialData[this.getModelName()]);
+      : !isEqual(
+        modifiedData[this.getModelName()],
+        initialData[this.getModelName()],
+      );
     /* eslint-disable indent */
     const handleSubmit = this.isUpdatingTemporaryContentType()
       ? () => submitTempContentType(newContentType, this.context)
@@ -264,10 +284,21 @@ export class ModelPage extends React.Component {
       history: { push },
       setTemporaryAttribute,
     } = this.props;
-    const attributeType = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
+    const attributeType = [
+      'integer',
+      'biginteger',
+      'float',
+      'decimal',
+    ].includes(type)
+      ? 'number'
+      : type;
 
     if (canOpenModal || this.isUpdatingTemporaryContentType()) {
-      setTemporaryAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
+      setTemporaryAttribute(
+        attributeName,
+        this.isUpdatingTemporaryContentType(),
+        this.getModelName(),
+      );
 
       await this.wait();
 
@@ -363,7 +394,10 @@ export class ModelPage extends React.Component {
     const attributeType = getQueryParameters(search, 'attributeType');
 
     if (this.getAttributeType() === 'relation') {
-      addAttributeRelation(this.isUpdatingTemporaryContentType(), this.getModelName());
+      addAttributeRelation(
+        this.isUpdatingTemporaryContentType(),
+        this.getModelName(),
+      );
     } else {
       if (this.isUpdatingTemporaryContentType()) {
         addAttributeToTempContentType(attributeType);
@@ -385,9 +419,17 @@ export class ModelPage extends React.Component {
     const attributeName = this.getAttributeName();
 
     if (this.getAttributeType() === 'relation') {
-      saveEditedAttributeRelation(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
+      saveEditedAttributeRelation(
+        attributeName,
+        this.isUpdatingTemporaryContentType(),
+        this.getModelName(),
+      );
     } else {
-      saveEditedAttribute(attributeName, this.isUpdatingTemporaryContentType(), this.getModelName());
+      saveEditedAttribute(
+        attributeName,
+        this.isUpdatingTemporaryContentType(),
+        this.getModelName(),
+      );
     }
 
     push({ search: '' });
@@ -397,13 +439,18 @@ export class ModelPage extends React.Component {
     const { initialData, modifiedData } = this.props;
     const currentModel = this.getModelName();
 
-    return !isEqual(initialData[currentModel], modifiedData[currentModel]) && this.getSearch() === '';
+    return (
+      !isEqual(initialData[currentModel], modifiedData[currentModel]) &&
+      this.getSearch() === ''
+    );
   };
 
   isUpdatingTemporaryContentType = (modelName = this.getModelName()) => {
     const { models } = this.props;
     /* istanbul ignore next */
-    const currentModel = models.find(model => model.name === modelName) || { isTemporary: true };
+    const currentModel = models.find(model => model.name === modelName) || {
+      isTemporary: true,
+    };
 
     const { isTemporary } = currentModel;
 
@@ -413,9 +460,16 @@ export class ModelPage extends React.Component {
   setPrompt = () => this.setState({ removePrompt: false });
 
   isTryingToEditAnUnknownAttribute = () => {
-    const hasAttribute = Object.keys(this.getModelAttributes()).indexOf(this.getAttributeName()) !== -1;
+    const hasAttribute =
+      Object.keys(this.getModelAttributes()).indexOf(
+        this.getAttributeName(),
+      ) !== -1;
 
-    return this.getActionType() === 'edit' && this.getModalType() === 'attributeForm' && !hasAttribute;
+    return (
+      this.getActionType() === 'edit' &&
+      this.getModalType() === 'attributeForm' &&
+      !hasAttribute
+    );
   };
 
   shouldRedirect = () => {
@@ -427,7 +481,8 @@ export class ModelPage extends React.Component {
     );
   };
 
-  toggleModalWarning = () => this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+  toggleModalWarning = () =>
+    this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
   wait = async () => {
     this.setState({ removePrompt: true });
@@ -435,7 +490,9 @@ export class ModelPage extends React.Component {
   };
 
   displayNotificationCTNotSaved = () =>
-    strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
+    strapi.notification.info(
+      `${pluginId}.notification.info.contentType.creating.notSaved`,
+    );
 
   renderLinks = () => {
     const { models } = this.props;
@@ -516,7 +573,12 @@ export class ModelPage extends React.Component {
     return (
       <div className={styles.modelpage}>
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
-          {msg => <Prompt when={this.hasModelBeenModified() && !removePrompt} message={msg} />}
+          {msg => (
+            <Prompt
+              when={this.hasModelBeenModified() && !removePrompt}
+              message={msg}
+            />
+          )}
         </FormattedMessage>
         <div className="container-fluid">
           <div className="row">
@@ -529,7 +591,9 @@ export class ModelPage extends React.Component {
                 </ul>
               </LeftMenuSection>
               <LeftMenuSection>
-                <LeftMenuSectionTitle id={`${pluginId}.menu.section.documentation.name`} />
+                <LeftMenuSectionTitle
+                  id={`${pluginId}.menu.section.documentation.name`}
+                />
                 <DocumentationSection />
               </LeftMenuSection>
             </LeftMenu>
@@ -559,19 +623,25 @@ export class ModelPage extends React.Component {
                         &nbsp;
                         <FormattedMessage
                           id={`${listTitleMessageIdBasePrefix}.${
-                            this.getModelAttributesLength() > 1 ? 'plural' : 'singular'
+                            this.getModelAttributesLength() > 1
+                              ? 'plural'
+                              : 'singular'
                           }`}
                         />
                         {this.getModelRelationShipsLength() > 0 && (
                           <React.Fragment>
                             &nbsp;
-                            <FormattedMessage id={`${listTitleMessageIdBasePrefix}.including`} />
+                            <FormattedMessage
+                              id={`${listTitleMessageIdBasePrefix}.including`}
+                            />
                             &nbsp;
                             {this.getModelRelationShipsLength()}
                             &nbsp;
                             <FormattedMessage
                               id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
-                                this.getModelRelationShipsLength() > 1 ? 'plural' : 'singular'
+                                this.getModelRelationShipsLength() > 1
+                                  ? 'plural'
+                                  : 'singular'
                               }`}
                             />
                           </React.Fragment>
@@ -586,7 +656,11 @@ export class ModelPage extends React.Component {
                       </div>
                     </Flex>
                     <div>
-                      <Ul id="attributesList">{Object.keys(this.getModelAttributes()).map(this.renderLi)}</Ul>
+                      <Ul id="attributesList">
+                        {Object.keys(this.getModelAttributes()).map(
+                          this.renderLi,
+                        )}
+                      </Ul>
                     </div>
                   </Block>
                 )}
@@ -594,7 +668,10 @@ export class ModelPage extends React.Component {
             </div>
           </div>
         </div>
-        <AttributesModalPicker isOpen={modalType === 'chooseAttributes'} push={push} />
+        <AttributesModalPicker
+          isOpen={modalType === 'chooseAttributes'}
+          push={push}
+        />
         <AttributeForm
           actionType={actionType}
           activeTab={settingType}
@@ -619,7 +696,9 @@ export class ModelPage extends React.Component {
           currentData={modifiedData}
           modifiedData={this.getFormData()}
           modelToEditName={getQueryParameters(search, 'modelName')}
-          onChangeExistingContentTypeMainInfos={onChangeExistingContentTypeMainInfos}
+          onChangeExistingContentTypeMainInfos={
+            onChangeExistingContentTypeMainInfos
+          }
           onChangeNewContentTypeMainInfos={onChangeNewContentTypeMainInfos}
           isOpen={modalType === 'model'}
           isUpdatingTemporaryContentType={this.isUpdatingTemporaryContentType()}
@@ -632,7 +711,9 @@ export class ModelPage extends React.Component {
         <PopUpWarning
           isOpen={showWarning}
           toggleModal={this.toggleModalWarning}
-          content={{ message: `${pluginId}.popUpWarning.bodyMessage.attribute.delete` }}
+          content={{
+            message: `${pluginId}.popUpWarning.bodyMessage.attribute.delete`,
+          }}
           popUpWarningType="danger"
           onConfirm={this.handleDeleteAttribute}
         />
