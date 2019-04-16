@@ -1,7 +1,7 @@
-// CommonPropTypes
+// // CommonPropTypes
 export { default as routerPropTypes } from './commonPropTypes/router/index.js';
 
-// Components
+// // Components
 export { default as BackHeader } from './components/BackHeader';
 export { default as BlockerComponent } from './components/BlockerComponent';
 export { default as Button } from './components/Button';
