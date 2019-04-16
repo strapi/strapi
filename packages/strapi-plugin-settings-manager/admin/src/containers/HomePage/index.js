@@ -26,9 +26,8 @@ import {
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
-import { router } from 'app';
 
-import InputSelect from 'strapi-helper-plugin/lib/src/components/InputSelect';
+import { InputSelect } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 // design
@@ -40,7 +39,10 @@ import RowDatabase from '../../components/RowDatabase';
 import RowLanguage from '../../components/RowLanguage';
 import PluginLeftMenu from '../../components/PluginLeftMenu';
 
-import { checkFormValidity, getRequiredInputsDb } from '../../utils/inputValidations';
+import {
+  checkFormValidity,
+  getRequiredInputsDb,
+} from '../../utils/inputValidations';
 import { formatLanguageLocale } from '../../utils/getFlag';
 import sendUpdatedParams from '../../utils/sendUpdatedParams';
 // App selectors
@@ -96,22 +98,36 @@ export class HomePage extends React.Component {
     if (this.props.match.params.slug) {
       this.handleFetch(this.props);
     } else {
-      router.push(
-        `/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug']) ||
-          'application'}`,
+      this.props.history.push(
+        `/plugins/settings-manager/${get(this.props.menuSections, [
+          '0',
+          'items',
+          '0',
+          'slug',
+        ]) || 'application'}`,
       );
     }
   }
 
   componentWillReceiveProps(nextProps) {
     // check if params slug updated
-    if (this.props.match.params.slug !== nextProps.match.params.slug && nextProps.match.params.slug) {
+    if (
+      this.props.match.params.slug !== nextProps.match.params.slug &&
+      nextProps.match.params.slug
+    ) {
       if (nextProps.match.params.slug) {
         // get data from api if params slug updated
         this.handleFetch(nextProps);
       } else {
         // redirect user if no params slug provided
-        router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
+        this.props.history.push(
+          `/plugins/settings-manager/${get(this.props.menuSections, [
+            '0',
+            'items',
+            '0',
+            'slug',
+          ])}`,
+        );
       }
     } else if (
       this.props.match.params.env !== nextProps.match.params.env &&
@@ -124,7 +140,10 @@ export class HomePage extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.home.didCreatedNewLanguage !== this.props.home.didCreatedNewLanguage) {
+    if (
+      prevProps.home.didCreatedNewLanguage !==
+      this.props.home.didCreatedNewLanguage
+    ) {
       this.handleFetch(this.props);
     }
 
@@ -139,7 +158,10 @@ export class HomePage extends React.Component {
     e.preventDefault();
     const newData = {};
     /* eslint-disable no-template-curly-in-string */
-    const dbName = get(this.props.home.modifiedData, 'database.connections.${name}.name');
+    const dbName = get(
+      this.props.home.modifiedData,
+      'database.connections.${name}.name',
+    );
     map(this.props.home.modifiedData, (data, key) => {
       const k = replace(key, '${name}', dbName);
 
@@ -148,11 +170,18 @@ export class HomePage extends React.Component {
       }
     });
 
-    const formErrors = getRequiredInputsDb(this.props.home.modifiedData, this.props.home.formErrors);
+    const formErrors = getRequiredInputsDb(
+      this.props.home.modifiedData,
+      this.props.home.formErrors,
+    );
 
     if (isEmpty(formErrors)) {
       // this.props.setErrors([]);
-      this.props.newDatabasePost(this.props.match.params.env, newData, this.context);
+      this.props.newDatabasePost(
+        this.props.match.params.env,
+        newData,
+        this.context,
+      );
     } else {
       this.props.setErrors(formErrors);
     }
@@ -178,7 +207,10 @@ export class HomePage extends React.Component {
     };
 
     // Find the index of the new setted language
-    const activeLanguageIndex = findIndex(this.props.home.configsDisplay.sections, ['name', target.id]);
+    const activeLanguageIndex = findIndex(
+      this.props.home.configsDisplay.sections,
+      ['name', target.id],
+    );
 
     forEach(this.props.home.configsDisplay.sections, (section, key) => {
       // set all Language active state to false
@@ -220,7 +252,10 @@ export class HomePage extends React.Component {
   }
 
   handleChange = ({ target }) => {
-    let value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
+    let value =
+      target.type === 'number' && target.value !== ''
+        ? toNumber(target.value)
+        : target.value;
     let name = target.name;
 
     if (this.props.match.params.slug === 'security') {
@@ -234,13 +269,27 @@ export class HomePage extends React.Component {
     if (this.props.match.params.slug === 'databases') {
       if (name === this.props.home.dbNameTarget) {
         const formErrors =
-          value === this.props.home.addDatabaseSection.sections[1].items[0].value
-            ? [{ target: name, errors: [{ id: 'settings-manager.request.error.database.exist' }] }]
+          value ===
+          this.props.home.addDatabaseSection.sections[1].items[0].value
+            ? [
+              {
+                target: name,
+                errors: [
+                  { id: 'settings-manager.request.error.database.exist' },
+                ],
+              },
+            ]
             : [];
         this.props.setErrors(formErrors);
       } else if (endsWith(name, '.settings.client')) {
-        const item = find(this.props.home.addDatabaseSection.sections[0].items[1].items, { value });
-        this.props.changeInput('database.connections.${name}.settings.port', item.port);
+        const item = find(
+          this.props.home.addDatabaseSection.sections[0].items[1].items,
+          { value },
+        );
+        this.props.changeInput(
+          'database.connections.${name}.settings.port',
+          item.port,
+        );
         this.props.changeInput(
           `database.connections.${
             this.props.home.addDatabaseSection.sections[1].items[0].value
@@ -266,7 +315,9 @@ export class HomePage extends React.Component {
       : this.props.home.modifiedData[this.props.home.dbNameTarget];
     const target = { name: 'database.defaultConnection', value };
     this.handleChange({ target });
-    this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
+    this.setState({
+      toggleDefaultConnection: !this.state.toggleDefaultConnection,
+    });
   };
 
   handleSubmit = e => {
@@ -282,7 +333,9 @@ export class HomePage extends React.Component {
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
 
     if (isEmpty(body))
-      return strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
+      return strapi.notification.info(
+        'settings-manager.strapi.notification.info.settingsEqual',
+      );
     if (isEmpty(formErrors)) {
       this.props.editSettings(body, apiUrl, this.context);
     } else {
@@ -294,11 +347,17 @@ export class HomePage extends React.Component {
     // eslint-disable-line consistent-return
     const body = this.sendUpdatedParams();
     const apiUrl = `${databaseName}/${this.props.match.params.env}`;
-    const formErrors = checkFormValidity(body, this.props.home.formValidations, this.props.home.formErrors);
+    const formErrors = checkFormValidity(
+      body,
+      this.props.home.formValidations,
+      this.props.home.formErrors,
+    );
 
     if (isEmpty(body)) {
       this.props.closeModal();
-      return strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
+      return strapi.notification.info(
+        'settings-manager.strapi.notification.info.settingsEqual',
+      );
     }
 
     if (isEmpty(formErrors)) {
@@ -309,12 +368,19 @@ export class HomePage extends React.Component {
   };
 
   // retrieve the language to delete using the target id
-  handleLanguageDelete = languaToDelete => this.props.languageDelete(languaToDelete);
+  handleLanguageDelete = languaToDelete =>
+    this.props.languageDelete(languaToDelete);
 
   handleDatabaseDelete = dbName => {
     this.context.enableGlobalOverlayBlocker();
-    strapi.notification.success('settings-manager.strapi.notification.success.databaseDelete');
-    this.props.databaseDelete(dbName, this.props.match.params.env, this.context);
+    strapi.notification.success(
+      'settings-manager.strapi.notification.success.databaseDelete',
+    );
+    this.props.databaseDelete(
+      dbName,
+      this.props.match.params.env,
+      this.context,
+    );
   };
 
   // custom Row rendering for the component List with params slug === languages
@@ -330,12 +396,18 @@ export class HomePage extends React.Component {
   );
 
   renderListTitle = () => {
-    const availableContentNumber = size(this.props.home.configsDisplay.sections);
+    const availableContentNumber = size(
+      this.props.home.configsDisplay.sections,
+    );
     const title =
       availableContentNumber > 1
         ? `list.${this.props.match.params.slug}.title.plural`
         : `list.${this.props.match.params.slug}.title.singular`;
-    const titleDisplay = title ? <FormattedMessage id={`settings-manager.${title}`} /> : '';
+    const titleDisplay = title ? (
+      <FormattedMessage id={`settings-manager.${title}`} />
+    ) : (
+      ''
+    );
 
     return (
       <span>
@@ -344,19 +416,20 @@ export class HomePage extends React.Component {
     );
   };
 
-  renderListButtonLabel = () => `list.${this.props.match.params.slug}.button.label`;
+  renderListButtonLabel = () =>
+    `list.${this.props.match.params.slug}.button.label`;
 
   renderPopUpFormDatabase = (section, props, popUpStyles) =>
     map(section.items, (item, key) => {
       const isActive =
         props.values[this.props.home.dbNameTarget] ===
         this.props.home.modifiedData['database.defaultConnection'] ? (
-          <div className={popUpStyles.rounded}>
-            <i className="fa fa-check" />
-          </div>
-        ) : (
-          ''
-        );
+            <div className={popUpStyles.rounded}>
+              <i className="fa fa-check" />
+            </div>
+          ) : (
+            ''
+          );
 
       if (item.name === 'form.database.item.default') {
         return (
@@ -377,10 +450,11 @@ export class HomePage extends React.Component {
   renderPopUpFormLanguage = section =>
     map(section.items, item => {
       const value =
-        this.props.home.modifiedData[item.target] || this.props.home.selectOptions.options[0].value;
+        this.props.home.modifiedData[item.target] ||
+        this.props.home.selectOptions.options[0].value;
 
       return (
-        <div className={`col-md-6`} key={item.name}>
+        <div className={'col-md-6'} key={item.name}>
           <div className={styles.modalLanguageLabel}>
             <FormattedMessage id={`settings-manager.${item.name}`} />
           </div>
@@ -429,10 +503,14 @@ export class HomePage extends React.Component {
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
     const addRequiredInputDesign = this.props.match.params.slug === 'databases';
-    const listTitle = ['languages', 'databases'].includes(this.props.match.params.slug)
+    const listTitle = ['languages', 'databases'].includes(
+      this.props.match.params.slug,
+    )
       ? this.renderListTitle()
       : '';
-    const listButtonLabel = ['languages', 'databases'].includes(this.props.match.params.slug)
+    const listButtonLabel = ['languages', 'databases'].includes(
+      this.props.match.params.slug,
+    )
       ? this.renderListButtonLabel()
       : '';
 
@@ -469,7 +547,10 @@ export class HomePage extends React.Component {
     }
 
     // Custom selectOptions for languages
-    const selectOptions = this.props.match.params.slug === 'languages' ? this.props.home.listLanguages : [];
+    const selectOptions =
+      this.props.match.params.slug === 'languages'
+        ? this.props.home.listLanguages
+        : [];
     return (
       <Component
         sections={sections}
@@ -501,7 +582,8 @@ export class HomePage extends React.Component {
   };
 
   // Set the toggleDefaultConnection to false
-  resetToggleDefaultConnection = () => this.setState({ toggleDefaultConnection: false });
+  resetToggleDefaultConnection = () =>
+    this.setState({ toggleDefaultConnection: false });
 
   // Hide database modal
   toggle = () => this.setState({ modal: !this.state.modal });
@@ -518,7 +600,12 @@ export class HomePage extends React.Component {
           <div className={`${styles.home} col-md-9`}>
             <Helmet
               title="Settings Manager"
-              meta={[{ name: 'Settings Manager Plugin', content: 'Modify your app settings' }]}
+              meta={[
+                {
+                  name: 'Settings Manager Plugin',
+                  content: 'Modify your app settings',
+                },
+              ]}
             />
             <ContentHeader
               name={this.props.home.configsDisplay.name}
@@ -596,7 +683,11 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
-const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withReducer = strapi.injectReducer({
+  key: 'homePage',
+  reducer,
+  pluginId,
+});
 const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(

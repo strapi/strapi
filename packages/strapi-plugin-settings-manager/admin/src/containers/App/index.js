@@ -33,7 +33,10 @@ class App extends React.Component {
   }
 
   componentWillUpdate(nextProps) {
-    if (!isEmpty(nextProps.sections) && nextProps.location.pathname !== '/plugins/settings-manager') {
+    if (
+      !isEmpty(nextProps.sections) &&
+      nextProps.location.pathname !== '/plugins/settings-manager'
+    ) {
       const allowedPaths = nextProps.sections.reduce((acc, current) => {
         const slugs = current.items.reduce((acc, current) => {
           acc.push(current.slug);
@@ -44,7 +47,8 @@ class App extends React.Component {
       }, []);
 
       const slug = nextProps.location.pathname.split('/')[3];
-      const shouldRedirect = allowedPaths.filter(el => el === slug).length === 0;
+      const shouldRedirect =
+        allowedPaths.filter(el => el === slug).length === 0;
 
       if (shouldRedirect) {
         this.props.history.push('/404');
@@ -56,7 +60,10 @@ class App extends React.Component {
     return (
       <div className={`${pluginId} ${styles.app}`}>
         <Switch>
-          <Route path="/plugins/settings-manager/:slug/:env" component={HomePage} />
+          <Route
+            path="/plugins/settings-manager/:slug/:env"
+            component={HomePage}
+          />
           <Route path="/plugins/settings-manager/:slug" component={HomePage} />
           <Route path="/plugins/settings-manager" component={HomePage} />
         </Switch>
@@ -64,10 +71,6 @@ class App extends React.Component {
     );
   }
 }
-
-App.contextTypes = {
-  router: PropTypes.object.isRequired,
-};
 
 App.propTypes = {
   environmentsFetch: PropTypes.func.isRequired,

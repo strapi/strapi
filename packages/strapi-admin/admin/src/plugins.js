@@ -22,6 +22,8 @@ module.exports = {
   'content-type-builder': require('../../../strapi-plugin-content-type-builder/admin/src')
     .default,
   email: require('../../../strapi-plugin-email/admin/src').default,
+  'settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
+    .default,
   'users-permissions': require('../../../strapi-plugin-users-permissions/admin/src')
     .default,
 };
