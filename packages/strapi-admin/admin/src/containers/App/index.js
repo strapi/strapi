@@ -13,8 +13,6 @@
 
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import PropTypes from 'prop-types';
-// From strapi-helper-plugin
 import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 
 import '../../styles/main.scss';

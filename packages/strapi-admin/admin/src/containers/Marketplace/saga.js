@@ -1,14 +1,4 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
-import {
-  all,
-  call,
-  cancel,
-  fork,
-  put,
-  select,
-  take,
-  takeLatest,
-} from 'redux-saga/effects';
+import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
 
 import { request } from 'strapi-helper-plugin';
 
@@ -92,14 +82,6 @@ export function* getData() {
 
 // Individual exports for testing
 export default function* defaultSaga() {
-  const loadDataWatcher = yield fork(
-    takeLatest,
-    GET_AVAILABLE_AND_INSTALLED_PLUGINS,
-    getData,
-  );
+  yield fork(takeLatest, GET_AVAILABLE_AND_INSTALLED_PLUGINS, getData);
   yield fork(takeLatest, DOWNLOAD_PLUGIN, pluginDownload);
-
-  yield take(LOCATION_CHANGE);
-
-  yield cancel(loadDataWatcher);
 }

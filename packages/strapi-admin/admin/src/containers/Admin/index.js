@@ -296,10 +296,6 @@ Admin.childContextTypes = {
   updatePlugin: PropTypes.func,
 };
 
-Admin.defaultProps = {
-  getHook: () => {},
-};
-
 Admin.propTypes = {
   admin: PropTypes.shape({
     autoReload: PropTypes.bool,
@@ -378,12 +374,12 @@ const withLocaleToggleReducer = injectReducer({
   key: 'localeToggle',
   reducer: localeToggleReducer,
 });
-// const withHooks = injectHooks({ key: 'admin' });
+const withHooks = injectHooks({ key: 'admin' });
 
 export default compose(
   withReducer,
   withLocaleToggleReducer,
   withSaga,
   withConnect,
-  // withHooks,
+  withHooks,
 )(Admin);

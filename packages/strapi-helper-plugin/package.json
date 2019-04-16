@@ -30,11 +30,15 @@
     "lint:admin"
   ],
   "peerDependencies": {
+    "immutable": "^3.8.2",
+    "invariant": "^2.2.1",
     "react": "^16.0.0",
-    "react-router": "^5.0.0",
+    "reactstrap": "^5.0.0",
     "react-dom": "^16.0.0",
+    "react-intl": "^2.8.0",
+    "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
-    "react-intl": "^2.8.0"
+    "react-transition-group": "^2.5.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",
@@ -80,11 +84,9 @@
     "react-dom": "^16.8.6",
     "react-intl": "^2.8.0",
     "react-loadable": "^5.5.0",
-    "react-router-dom": "^4.3.1",
-    "react-router-redux": "^5.0.0-alpha.9",
+    "react-router-dom": "^5.0.0",
     "react-transition-group": "^2.5.0",
     "reactstrap": "^5.0.0",
-    "reselect": "^3.0.1",
     "styled-components": "^3.2.6",
     "whatwg-fetch": "^2.0.3"
   }

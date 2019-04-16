@@ -1,5 +1,5 @@
 // // CommonPropTypes
-export { default as routerPropTypes } from './commonPropTypes/router/index.js';
+export { default as routerPropTypes } from './commonPropTypes/router';
 
 // // Components
 export { default as BackHeader } from './components/BackHeader';

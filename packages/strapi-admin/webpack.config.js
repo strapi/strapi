@@ -10,6 +10,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackDashboard = require('webpack-dashboard/plugin');
 const OpenBrowserWebpackPlugin = require('open-browser-webpack-plugin');
 const DuplicatePckgChecker = require('duplicate-package-checker-webpack-plugin');
+const alias = require('./webpack.alias.js');
 
 const devMode = process.env.NODE_ENV !== 'production';
 const prodMode = process.env.NODE_ENV === 'production';
@@ -26,44 +27,41 @@ const PORT = 4000;
 
 const webpackPlugins = devMode
   ? [
-    new WebpackDashboard(),
-    new DuplicatePckgChecker({
-      verbose: true,
-      exclude(instance) {
-        return instance.name === 'core-js';
-      },
-    }),
-    new OpenBrowserWebpackPlugin({
-      url: `http://localhost:${PORT}/${URLs.publicPath}`,
-    }),
-  ]
+      new WebpackDashboard(),
+      new DuplicatePckgChecker({
+        verbose: true,
+      }),
+      new OpenBrowserWebpackPlugin({
+        url: `http://localhost:${PORT}/${URLs.publicPath}`,
+      }),
+    ]
   : [
-    new webpack.IgnorePlugin({
-      resourceRegExp: /^\.\/locale$/,
-      contextRegExp: /moment$/,
-    }),
-    new MiniCssExtractPlugin({
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/locale$/,
+        contextRegExp: /moment$/,
+      }),
+      new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
-      filename: devMode ? '[name].css' : '[name].[chunkhash].js',
-      chunkFilename: devMode
+        filename: devMode ? '[name].css' : '[name].[chunkhash].js',
+        chunkFilename: devMode
           ? '[name].chunk.css'
           : '[name].[chunkhash].chunkhash.css',
-    }),
-  ];
+      }),
+    ];
 
 // Use style loader in dev mode to optimize compilation
 const scssLoader = devMode
   ? ['style-loader']
   : [
-    {
-      loader: MiniCssExtractPlugin.loader,
-      options: {
-        fallback: require.resolve('style-loader'),
-        publicPath: URLs.publicPath,
+      {
+        loader: MiniCssExtractPlugin.loader,
+        options: {
+          fallback: require.resolve('style-loader'),
+          publicPath: URLs.publicPath,
+        },
       },
-    },
-  ];
+    ];
 
 module.exports = {
   mode: 'development',
@@ -216,15 +214,7 @@ module.exports = {
     ],
   },
   resolve: {
-    // modules: [
-    //   // TODO handle resolved paths
-    //   // path.resolve(__dirname, 'admin/src'),
-    //   // path.resolve(__dirname, '../strapi-helper-plugin/lib/src'),
-    //   // path.resolve(__dirname, 'node_modules/strapi-helper-plugin/lib/src'),
-    //   // path.resolve(__dirname, 'node_modules/strapi-helper-plugin/node_modules'),
-    //   // path.resolve(__dirname, 'node_modules'),
-    //   // 'node_modules',
-    // ],
+    alias,
     symlinks: false,
     extensions: ['.js', '.jsx', '.react.js'],
   },

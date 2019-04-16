@@ -1,15 +1,5 @@
-import { LOCATION_CHANGE } from 'react-router-redux';
 import { get } from 'lodash';
-import {
-  all,
-  fork,
-  call,
-  put,
-  select,
-  takeLatest,
-  take,
-  cancel,
-} from 'redux-saga/effects';
+import { all, fork, call, put, select, takeLatest } from 'redux-saga/effects';
 import { auth, request } from 'strapi-helper-plugin';
 import { pluginDeleted } from '../App/actions';
 import { selectLocale } from '../LanguageProvider/selectors';
@@ -96,9 +86,5 @@ export function* pluginsGet() {
 // Individual exports for testing
 export default function* defaultSaga() {
   yield fork(takeLatest, ON_DELETE_PLUGIN_CONFIRM, deletePlugin);
-  const loadPluginsWatcher = yield fork(takeLatest, GET_PLUGINS, pluginsGet);
-
-  yield take(LOCATION_CHANGE);
-
-  yield cancel(loadPluginsWatcher);
+  yield fork(takeLatest, GET_PLUGINS, pluginsGet);
 }

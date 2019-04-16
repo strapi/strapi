@@ -12,8 +12,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-// import { ConnectedRouter } from 'react-router-redux';
-import basename from './utils/basename';
 
 import { merge } from 'lodash';
 import {
@@ -25,6 +23,8 @@ import {
   // unsetHasUserPlugin,
 } from './containers/App/actions';
 import { showNotification } from './containers/NotificationProvider/actions';
+
+import basename from './utils/basename';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
 

@@ -15,8 +15,10 @@ import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import OverlayBlocker from 'components/OverlayBlocker';
 
 import injectReducer from '../../../utils/injectReducer';
+import history from '../../../utils/history';
+import configureStore from '../../../configureStore';
 import { messages } from '../../../i18n';
-import { store } from '../../../createStore';
+// import { store } from '../../../createStore';
 import Header from '../../../components/Header/index';
 import Onboarding from '../../Onboarding';
 import Logout from '../../../components/Logout';
@@ -38,6 +40,9 @@ import {
 } from '../actions';
 
 import styles from '../styles.scss';
+
+const initialState = {};
+const store = configureStore(initialState, history);
 
 const withLocaleToggleReducer = injectReducer({
   key: 'localeToggle',
