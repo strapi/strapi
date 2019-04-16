@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import cn from 'classnames';
 
-import InputSelect from 'components/InputSelect/Loadable';
+import { InputSelect } from 'strapi-helper-plugin';
 
 import Add from './Add';
 import Div from './Div';
@@ -19,22 +19,42 @@ import styles from './styles.scss';
 
 import getFilters from './filterTypes';
 
-const defaultInputStyle = { width: '210px', marginRight: '10px', paddingTop: '4px' };
-const midSelectStyle = { minWidth: '130px', maxWidth: '200px', marginLeft: '10px', marginRight: '10px' };
+const defaultInputStyle = {
+  width: '210px',
+  marginRight: '10px',
+  paddingTop: '4px',
+};
+const midSelectStyle = {
+  minWidth: '130px',
+  maxWidth: '200px',
+  marginLeft: '10px',
+  marginRight: '10px',
+};
 
-function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onClickRemove, schema, show, showAddButton }) {
+function FilterOptions({
+  filter,
+  filterToFocus,
+  index,
+  onChange,
+  onClickAdd,
+  onClickRemove,
+  schema,
+  show,
+  showAddButton,
+}) {
   const selectStyle = { minWidth: '170px', maxWidth: '200px' };
   const attrType = get(schema, [filter.attr, 'type'], 'string');
-  const inputStyle = attrType === 'boolean' ?
-    Object.assign(selectStyle, { minWidth: '100px'})
-    : defaultInputStyle;
+  const inputStyle =
+    attrType === 'boolean'
+      ? Object.assign(selectStyle, { minWidth: '100px' })
+      : defaultInputStyle;
 
   // This component is needed in order to add the date icon inside the InputDate
   const isDate = get(schema, [filter.attr, 'type'], 'string') === 'date';
   const isBool = get(schema, [filter.attr, 'type']) === 'boolean';
-  const selectOptionsSchema = Object
-    .keys(schema)
-    .filter(x => schema[x].type !== 'json');
+  const selectOptionsSchema = Object.keys(schema).filter(
+    x => schema[x].type !== 'json',
+  );
 
   return (
     <Div borderLeft={!showAddButton || get(filter, 'value', '') !== ''}>
@@ -73,7 +93,7 @@ function FilterOptions({ filter, filterToFocus, index, onChange, onClickAdd, onC
           <Add
             id="newFilter"
             onClick={onClickAdd}
-            style={{ marginLeft: isBool? '14px': '6px' }}
+            style={{ marginLeft: isBool ? '14px' : '6px' }}
             type="button"
           />
         )}
@@ -96,10 +116,7 @@ FilterOptions.defaultProps = {
 
 FilterOptions.propTypes = {
   filter: PropTypes.object,
-  filterToFocus: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.number,
-  ]),
+  filterToFocus: PropTypes.oneOfType([PropTypes.object, PropTypes.number]),
   index: PropTypes.number,
   onChange: PropTypes.func,
   onClickAdd: PropTypes.func,

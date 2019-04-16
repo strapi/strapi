@@ -10,7 +10,7 @@ import moment from 'moment';
 import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import cn from 'classnames';
 
-import IcoContainer from 'components/IcoContainer';
+import { IcoContainer } from 'strapi-helper-plugin';
 
 import CustomInputCheckbox from '../CustomInputCheckbox';
 
@@ -37,7 +37,9 @@ class TableRow extends React.Component {
       case 'text':
       case 'email':
       case 'enumeration':
-        return (value && !isEmpty(toString(value))) || name === 'id' ? toString(value) : '-';
+        return (value && !isEmpty(toString(value))) || name === 'id'
+          ? toString(value)
+          : '-';
       case 'float':
       case 'integer':
       case 'biginteger':
@@ -53,9 +55,10 @@ class TableRow extends React.Component {
           return '-';
         }
 
-        const date = value && isObject(value) && value._isAMomentObject === true ?
-          value :
-          moment.utc(value);
+        const date =
+          value && isObject(value) && value._isAMomentObject === true
+            ? value
+            : moment.utc(value);
 
         return date.format('YYYY-MM-DD HH:mm:ss');
       }
@@ -69,15 +72,21 @@ class TableRow extends React.Component {
   // Redirect to the edit page
   handleClick() {
     this.context.emitEvent('willEditEntry');
-    this.context.router.history.push(`${this.props.destination}${this.props.redirectUrl}`);
+    this.context.router.history.push(
+      `${this.props.destination}${this.props.redirectUrl}`,
+    );
   }
 
   renderAction = () => (
-    <td key='action' className={styles.actions}>
+    <td key="action" className={styles.actions}>
       <IcoContainer
         icons={[
           { icoType: 'pencil', onClick: this.handleClick },
-          { id: this.props.record.id, icoType: 'trash', onClick: this.props.onDelete },
+          {
+            id: this.props.record.id,
+            icoType: 'trash',
+            onClick: this.props.onDelete,
+          },
         ]}
       />
     </td>
@@ -99,14 +108,15 @@ class TableRow extends React.Component {
               </div>
             </div>
           </td>
-        )))
+        )),
+      )
       .concat([this.renderAction()]);
-  }
+  };
 
   renderDelete = () => {
     if (this.props.enableBulkActions) {
       return (
-        <td onClick={(e) => e.stopPropagation()} key="i">
+        <td onClick={e => e.stopPropagation()} key="i">
           <CustomInputCheckbox
             name={this.props.record.id}
             onChange={this.props.onChange}
@@ -117,11 +127,17 @@ class TableRow extends React.Component {
     }
 
     return null;
-  }
+  };
 
   render() {
     return (
-      <tr className={cn(styles.tableRow, this.props.enableBulkActions && styles.tableRowWithBulk)} onClick={this.handleClick}>
+      <tr
+        className={cn(
+          styles.tableRow,
+          this.props.enableBulkActions && styles.tableRowWithBulk,
+        )}
+        onClick={this.handleClick}
+      >
         {this.renderCells()}
       </tr>
     );

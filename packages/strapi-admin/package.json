@@ -36,6 +36,7 @@
     "immutable": "^3.8.2",
     "intl": "^1.2.5",
     "invariant": "^2.2.4",
+    "moment": "^2.24.0",
     "prop-types": "^15.7.2",
     "react": "^16.5.2",
     "react-copy-to-clipboard": "^5.0.1",
@@ -57,6 +58,7 @@
     "remove-markdown": "^0.2.2",
     "reselect": "^3.0.1",
     "strapi-helper-plugin": "3.0.0-alpha.25.2",
+    "styled-components": "^4.2.0",
     "video-react": "^0.13.2"
   },
   "devDependencies": {

@@ -27,16 +27,14 @@ import {
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
-// You can find these components in either
-// ./node_modules/strapi-helper-plugin/lib/src
-// or strapi/packages/strapi-helper-plugin/lib/src
-import PageFooter from 'components/PageFooter';
-import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning';
-import InputCheckbox from 'components/InputCheckbox';
-
-import getQueryParameters from 'utils/getQueryParameters';
-import storeData from 'utils/storeData';
+import {
+  PageFooter,
+  PluginHeader,
+  PopUpWarning,
+  InputCheckbox,
+  storeData,
+  getQueryParameters,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 // Components from the plugin itself

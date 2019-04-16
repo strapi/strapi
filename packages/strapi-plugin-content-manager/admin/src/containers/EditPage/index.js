@@ -24,18 +24,16 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
 import cn from 'classnames';
 
-// You can find these components in either
-// ./node_modules/strapi-helper-plugin/lib/src
-// or strapi/packages/strapi-helper-plugin/lib/src
-import BackHeader from 'components/BackHeader';
-import EmptyAttributesBlock from 'components/EmptyAttributesBlock';
-import LoadingIndicator from 'components/LoadingIndicator';
-import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning';
-import LiLink from 'components/LiLink';
-
-import getQueryParameters from 'utils/getQueryParameters';
-import inputValidations from 'utils/inputsValidations';
+import {
+  BackHeader,
+  EmptyAttributesBlock,
+  LoadingIndicator,
+  PluginHeader,
+  PopUpWarning,
+  LiLink,
+  getQueryParameters,
+  validateInput as inputValidations,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 

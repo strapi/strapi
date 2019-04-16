@@ -17,6 +17,8 @@ window.strapi = Object.assign(window.strapi || {}, {
 });
 
 module.exports = {
+  'content-manager': require('../../../strapi-plugin-content-manager/admin/src')
+    .default,
   email: require('../../../strapi-plugin-email/admin/src').default,
   'users-permissions': require('../../../strapi-plugin-users-permissions/admin/src')
     .default,
