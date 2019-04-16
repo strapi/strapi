@@ -140,7 +140,7 @@ module.exports = function(name, cliArguments) {
             process.exit();
           });
 
-          shell.exec('strapi start', {
+          shell.exec('npm run strapi start', {
             stdio: 'inherit',
             env: {
               ...process.env,
@@ -148,6 +148,7 @@ module.exports = function(name, cliArguments) {
             },
           });
         } catch (e) {
+          console.log();
           console.log(e);
           error(e);
         }

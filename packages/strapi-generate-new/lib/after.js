@@ -63,7 +63,7 @@ module.exports = async (scope, cb) => {
 
   loader.succeed();
 
-  loader.start('Install dependencies');
+  loader.start('Installing dependencies');
 
   try {
     await runInstall();

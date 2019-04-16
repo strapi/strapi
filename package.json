@@ -96,7 +96,7 @@
     "npm": ">= 6.0.0"
   },
   "license": "MIT",
-  "name": "strapi",
+  "name": "strapi-monorepo",
   "workspaces": [
     "packages/*",
     "examples/*"
