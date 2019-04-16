@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { withRouter } from 'react-router-dom';
 import { isEmpty, isNull, isObject, toLower, toString } from 'lodash';
 import cn from 'classnames';
 
@@ -72,7 +73,7 @@ class TableRow extends React.Component {
   // Redirect to the edit page
   handleClick() {
     this.context.emitEvent('willEditEntry');
-    this.context.router.history.push(
+    this.props.history.push(
       `${this.props.destination}${this.props.redirectUrl}`,
     );
   }
@@ -146,13 +147,13 @@ class TableRow extends React.Component {
 
 TableRow.contextTypes = {
   emitEvent: PropTypes.func,
-  router: PropTypes.object.isRequired,
 };
 
 TableRow.propTypes = {
   destination: PropTypes.string.isRequired,
   enableBulkActions: PropTypes.bool,
   headers: PropTypes.array.isRequired,
+  history: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onDelete: PropTypes.func,
   record: PropTypes.object.isRequired,
@@ -166,4 +167,4 @@ TableRow.defaultProps = {
   value: false,
 };
 
-export default TableRow;
+export default withRouter(TableRow);

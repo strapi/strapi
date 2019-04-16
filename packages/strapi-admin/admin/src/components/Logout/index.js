@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+import { withRouter } from 'react-router-dom';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import {
@@ -24,7 +25,7 @@ class Logout extends React.Component {
 
   handleGoTo = () => {
     const id = get(auth.getUserInfo(), 'id') || get(auth.getUserInfo(), '_id');
-    this.context.router.history.push({
+    this.props.history.push({
       pathname: `/plugins/content-manager/administrator/${id}`,
       search:
         '?redirectUrl=/plugins/content-manager/administrator/?page=0&limit=0&sort=id&source=admin',
@@ -32,7 +33,7 @@ class Logout extends React.Component {
   };
 
   handleGoToAdministrator = () => {
-    this.context.router.history.push({
+    this.props.history.push({
       pathname: '/plugins/content-manager/administrator',
       search: '?source=admin',
     });
@@ -40,7 +41,7 @@ class Logout extends React.Component {
 
   handleLogout = () => {
     auth.clearAppStorage();
-    this.context.router.history.push('/plugins/users-permissions/auth/login');
+    this.props.history.push('/plugins/users-permissions/auth/login');
   };
 
   toggle = () => this.setState({ isOpen: !this.state.isOpen });
@@ -74,8 +75,4 @@ class Logout extends React.Component {
   }
 }
 
-Logout.contextTypes = {
-  router: PropTypes.object,
-};
-
-export default Logout;
+export default withRouter(Logout);
