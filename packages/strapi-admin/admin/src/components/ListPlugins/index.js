@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import { map, size } from 'lodash';
 
 // Design
-import Button from 'components/Button';
+import { Button } from 'strapi-helper-plugin';
 import Row from '../Row';
 
 import styles from './styles.scss';

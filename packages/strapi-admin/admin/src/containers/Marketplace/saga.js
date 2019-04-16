@@ -10,14 +10,17 @@ import {
   takeLatest,
 } from 'redux-saga/effects';
 
-import request from 'utils/request';
+import { request } from 'strapi-helper-plugin';
 
 import { selectLocale } from '../LanguageProvider/selectors';
 import {
   getAvailableAndInstalledPluginsSucceeded,
   downloadPluginSucceeded,
 } from './actions';
-import { DOWNLOAD_PLUGIN, GET_AVAILABLE_AND_INSTALLED_PLUGINS } from './constants';
+import {
+  DOWNLOAD_PLUGIN,
+  GET_AVAILABLE_AND_INSTALLED_PLUGINS,
+} from './constants';
 import { makeSelectPluginToDownload } from './selectors';
 
 export function* pluginDownload() {
@@ -39,13 +42,18 @@ export function* pluginDownload() {
       },
     };
 
-    const response = yield call(request, '/admin/plugins/install', opts, overlayblockerParams);
+    const response = yield call(
+      request,
+      '/admin/plugins/install',
+      opts,
+      overlayblockerParams,
+    );
 
     if (response.ok) {
       yield put(downloadPluginSucceeded());
       window.location.reload();
     }
-  } catch(err) {
+  } catch (err) {
     // Hide the global OverlayBlocker
     strapi.unlockApp();
     strapi.notification.error('notification.error');
@@ -71,16 +79,24 @@ export function* getData() {
       call(request, '/admin/plugins', { method: 'GET' }),
     ]);
 
-    yield put(getAvailableAndInstalledPluginsSucceeded(availablePlugins, Object.keys(plugins)));
-  } catch(err) {
+    yield put(
+      getAvailableAndInstalledPluginsSucceeded(
+        availablePlugins,
+        Object.keys(plugins),
+      ),
+    );
+  } catch (err) {
     strapi.notification.error('notification.error');
   }
 }
 
-
 // Individual exports for testing
 export default function* defaultSaga() {
-  const loadDataWatcher = yield fork(takeLatest, GET_AVAILABLE_AND_INSTALLED_PLUGINS, getData);
+  const loadDataWatcher = yield fork(
+    takeLatest,
+    GET_AVAILABLE_AND_INSTALLED_PLUGINS,
+    getData,
+  );
   yield fork(takeLatest, DOWNLOAD_PLUGIN, pluginDownload);
 
   yield take(LOCATION_CHANGE);

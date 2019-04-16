@@ -18,7 +18,7 @@ const initialState = fromJS({
   blockApp: false,
   overlayBlockerData: null,
   hasUserPlugin: true,
-  isAppLoading: true,
+  isAppLoading: false,
   plugins: {},
   showGlobalAppBlocker: true,
 });

@@ -33,7 +33,8 @@
     "react": "^16.0.0",
     "react-router": "^5.0.0",
     "react-dom": "^16.0.0",
-    "react-router-dom": "^5.0.0"
+    "react-router-dom": "^5.0.0",
+    "react-intl": "^2.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",
@@ -68,7 +69,7 @@
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
     "classnames": "^2.2.5",
-    "immutable": "^4.0.0-rc.12",
+    "immutable": "^3.8.2",
     "imports-loader": "^0.7.1",
     "invariant": "2.2.1",
     "json-loader": "^0.5.7",
@@ -79,7 +80,7 @@
     "react-dom": "^16.8.6",
     "react-intl": "^2.8.0",
     "react-loadable": "^5.5.0",
-    "react-router-dom": "^5.0.0",
+    "react-router-dom": "^4.3.1",
     "react-router-redux": "^5.0.0-alpha.9",
     "react-transition-group": "^2.5.0",
     "reactstrap": "^5.0.0",

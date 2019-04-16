@@ -14,7 +14,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from 'reactstrap';
-import auth from 'utils/auth';
+import { auth } from 'strapi-helper-plugin';
 
 import styles from './styles.scss';
 
@@ -33,7 +33,7 @@ class Logout extends React.Component {
 
   handleGoToAdministrator = () => {
     this.context.router.history.push({
-      pathname: `/plugins/content-manager/administrator`,
+      pathname: '/plugins/content-manager/administrator',
       search: '?source=admin',
     });
   };

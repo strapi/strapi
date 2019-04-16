@@ -26,44 +26,44 @@ const PORT = 4000;
 
 const webpackPlugins = devMode
   ? [
-      new WebpackDashboard(),
-      new DuplicatePckgChecker({
-        verbose: true,
-        exclude(instance) {
-          return instance.name === 'core-js';
-        },
-      }),
-      new OpenBrowserWebpackPlugin({
-        url: `http://localhost:${PORT}/${URLs.publicPath}`,
-      }),
-    ]
+    new WebpackDashboard(),
+    new DuplicatePckgChecker({
+      verbose: true,
+      exclude(instance) {
+        return instance.name === 'core-js';
+      },
+    }),
+    new OpenBrowserWebpackPlugin({
+      url: `http://localhost:${PORT}/${URLs.publicPath}`,
+    }),
+  ]
   : [
-      new webpack.IgnorePlugin({
-        resourceRegExp: /^\.\/locale$/,
-        contextRegExp: /moment$/,
-      }),
-      new MiniCssExtractPlugin({
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^\.\/locale$/,
+      contextRegExp: /moment$/,
+    }),
+    new MiniCssExtractPlugin({
         // Options similar to the same options in webpackOptions.output
         // both options are optional
-        filename: devMode ? '[name].css' : '[name].[chunkhash].js',
-        chunkFilename: devMode
+      filename: devMode ? '[name].css' : '[name].[chunkhash].js',
+      chunkFilename: devMode
           ? '[name].chunk.css'
           : '[name].[chunkhash].chunkhash.css',
-      }),
-    ];
+    }),
+  ];
 
 // Use style loader in dev mode to optimize compilation
 const scssLoader = devMode
   ? ['style-loader']
   : [
-      {
-        loader: MiniCssExtractPlugin.loader,
-        options: {
-          fallback: require.resolve('style-loader'),
-          publicPath: URLs.publicPath,
-        },
+    {
+      loader: MiniCssExtractPlugin.loader,
+      options: {
+        fallback: require.resolve('style-loader'),
+        publicPath: URLs.publicPath,
       },
-    ];
+    },
+  ];
 
 module.exports = {
   mode: 'development',
@@ -154,7 +154,7 @@ module.exports = {
           {
             loader: require.resolve('css-loader'),
             options: {
-              localIdentName: `$[local]__[path][name]__[hash:base64:5]`,
+              localIdentName: '$[local]__[path][name]__[hash:base64:5]',
               modules: true,
               importLoaders: 1,
               sourceMap: false,
@@ -216,15 +216,15 @@ module.exports = {
     ],
   },
   resolve: {
-    modules: [
-      // TODO handle resolved paths
-      path.resolve(__dirname, 'admin/src'),
-      path.resolve(__dirname, '../strapi-helper-plugin/lib/src'),
-      path.resolve(__dirname, 'node_modules/strapi-helper-plugin/lib/src'),
-      path.resolve(__dirname, 'node_modules/strapi-helper-plugin/node_modules'),
-      path.resolve(__dirname, 'node_modules'),
-      'node_modules',
-    ],
+    // modules: [
+    //   // TODO handle resolved paths
+    //   // path.resolve(__dirname, 'admin/src'),
+    //   // path.resolve(__dirname, '../strapi-helper-plugin/lib/src'),
+    //   // path.resolve(__dirname, 'node_modules/strapi-helper-plugin/lib/src'),
+    //   // path.resolve(__dirname, 'node_modules/strapi-helper-plugin/node_modules'),
+    //   // path.resolve(__dirname, 'node_modules'),
+    //   // 'node_modules',
+    // ],
     symlinks: false,
     extensions: ['.js', '.jsx', '.react.js'],
   },
@@ -238,7 +238,7 @@ module.exports = {
     new FriendlyErrorsWebpackPlugin({
       compilationSuccessInfo: {
         messages: [
-          `Your application is running here http://localhost:4000`,
+          'Your application is running here http://localhost:4000',
           `Compiled in ${Date.now() - startDate} seconds`,
         ],
       },

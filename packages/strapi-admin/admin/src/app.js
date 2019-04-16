@@ -11,7 +11,9 @@ import 'sanitize.css/sanitize.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { ConnectedRouter } from 'react-router-redux';
+import { BrowserRouter } from 'react-router-dom';
+// import { ConnectedRouter } from 'react-router-redux';
+import basename from './utils/basename';
 
 import { merge } from 'lodash';
 import {
@@ -126,9 +128,10 @@ const render = messages => {
   ReactDOM.render(
     <Provider store={store}>
       <LanguageProvider messages={messages}>
-        <ConnectedRouter history={history}>
+        {/* <ConnectedRouter history={history}> */}
+        <BrowserRouter basename={basename}>
           <App store={store} />
-        </ConnectedRouter>
+        </BrowserRouter>
       </LanguageProvider>
     </Provider>,
     MOUNT_NODE,

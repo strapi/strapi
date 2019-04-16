@@ -13,8 +13,7 @@ import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
-import PluginHeader from 'components/PluginHeader';
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
+import { PluginHeader, LoadingIndicatorPage } from 'strapi-helper-plugin';
 
 import ListPlugins from '../../components/ListPlugins';
 
