@@ -431,17 +431,20 @@ class Strapi extends EventEmitter {
       );
     }
 
-    if (!_.isNil(plugin) && !_.has(strapi.plugins, plugin)) {
-      throw new Error(`Plugin ${plugin} not found`);
+    let buildQueries = defaultQueries[connector];
+    if (plugin === 'admin') {
+      buildQueries = _.get(
+        this.admin,
+        ['config', 'queries', connector],
+        defaultQueries[connector]
+      );
+    } else if (plugin) {
+      buildQueries = _.get(
+        this.plugins,
+        [plugin, 'config', 'queries', connector],
+        defaultQueries[connector]
+      );
     }
-
-    const buildQueries = plugin
-      ? _.get(
-          this.plugins,
-          [plugin, 'config', 'queries', connector],
-          defaultQueries[connector]
-        )
-      : defaultQueries[connector];
 
     let queries = buildQueries({ model, strapi: this });
 
