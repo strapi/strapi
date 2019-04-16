@@ -56,18 +56,31 @@ Then, delete your old `plugins` folder and replace it with the new one.
 
 ## Add deep filtering feature
 
-By default your generated API will not have the deep filtering feature provideby this release. You will have to make some update.
+By default your generated API will not have the deep filtering feature provide by this release. You will have to make some updates.
 
-### Update Mongoose
+### Updating Mongoose
 
-**Update controller**:  [https://github.com/strapi/strapi/pull/2961/files#diff-008d6bf29828238415549d6caf613284](https://github.com/strapi/strapi/pull/2961/files#diff-008d6bf29828238415549d6caf613284)
+**Updating your controllers**:  [https://github.com/strapi/strapi/pull/2961/files#diff-008d6bf29828238415549d6caf613284](https://github.com/strapi/strapi/pull/2961/files#diff-008d6bf29828238415549d6caf613284)
 
 You will have to add `, next, { populate } = {}` in the arguments of the `find` function.
 
-Before: `find: async (ctx) => {`
-After: `find: async (ctx, next, { populate } = {}) => {`
+Before
 
-**Update service**: [https://github.com/strapi/strapi/pull/2961/files#diff-c36b911d1bc2922e1d7cf93ae692e054](https://github.com/strapi/strapi/pull/2961/files#diff-c36b911d1bc2922e1d7cf93ae692e054)
+```js
+find: async (ctx) => {
+  // ...
+},
+```
+
+After
+
+```js
+find: async (ctx, next, { populate } = {}) => {
+  // ...
+},
+```
+
+**Updating your services**: [https://github.com/strapi/strapi/pull/2961/files#diff-c36b911d1bc2922e1d7cf93ae692e054](https://github.com/strapi/strapi/pull/2961/files#diff-c36b911d1bc2922e1d7cf93ae692e054)
 
 You will have to add this requirement on the top of you file `const { convertRestQueryParams, buildQuery } = require('strapi-utils');`
 
@@ -104,14 +117,27 @@ count: (params) => {
 
 And replace `<%= globalID %>` by the Global of your API.
 
-## Update Bookshelf
+## Updating Bookshelf
 
-**Update controller**: [https://github.com/strapi/strapi/pull/2961/files#diff-a2a09f28ea5f2a78c485c232dd2dbfde](https://github.com/strapi/strapi/pull/2961/files#diff-a2a09f28ea5f2a78c485c232dd2dbfde)
+**Updating your controllers**: [https://github.com/strapi/strapi/pull/2961/files#diff-a2a09f28ea5f2a78c485c232dd2dbfde](https://github.com/strapi/strapi/pull/2961/files#diff-a2a09f28ea5f2a78c485c232dd2dbfde)
 
 You will have to add `, next, { populate } = {}` in the arguments of the `find` function.
 
-Before: `find: async (ctx) => {`
-After: `find: async (ctx, next, { populate } = {}) => {`
+Before
+
+```js
+find: async (ctx) => {
+  // ...
+},
+```
+
+After
+
+```js
+find: async (ctx, next, { populate } = {}) => {
+  // ...
+},
+```
 
 Send this new argument in the service function.
 
@@ -120,7 +146,7 @@ After: `return strapi.services.<%= id %>.fetchAll(ctx.query, populate);`
 
 It will be the same update for the `count` function.
 
-**Update service**: [https://github.com/strapi/strapi/pull/2961/files#diff-61ba361ed6161efcd5f4e583001cc9c9](https://github.com/strapi/strapi/pull/2961/files#diff-61ba361ed6161efcd5f4e583001cc9c9)
+**Updating your services**: [https://github.com/strapi/strapi/pull/2961/files#diff-61ba361ed6161efcd5f4e583001cc9c9](https://github.com/strapi/strapi/pull/2961/files#diff-61ba361ed6161efcd5f4e583001cc9c9)
 
 You will have to add this requirement on the top of you file `const { convertRestQueryParams, buildQuery } = require('strapi-utils');`
 
