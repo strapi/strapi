@@ -33,7 +33,6 @@
     "jest-cli": "^24.5.0",
     "lerna": "^3.13.1",
     "lodash": "^4.17.5",
-    "pre-commit": "~1.1.2",
     "prettier": "^1.16.4",
     "pretty-quick": "^1.10.0",
     "redux-saga": "^0.14.3",
@@ -79,10 +78,6 @@
       "email": "hi@strapi.io",
       "url": "http://strapi.io"
     }
-  ],
-  "pre-commit": [
-    "clean",
-    "lint"
   ],
   "repository": {
     "type": "git",
