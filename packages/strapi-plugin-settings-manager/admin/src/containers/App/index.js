@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
-import 'flag-icon-css/css/flag-icon.css';
 import { Switch, Route } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 

@@ -41,8 +41,6 @@ const webpackPlugins = devMode
       contextRegExp: /moment$/,
     }),
     new MiniCssExtractPlugin({
-      // Options similar to the same options in webpackOptions.output
-      // both options are optional
       filename: devMode ? '[name].css' : '[name].[chunkhash].js',
       chunkFilename: devMode
         ? '[name].chunk.css'
@@ -90,7 +88,6 @@ module.exports = {
     rules: [
       {
         test: /\.m?js$/,
-        // exclude: /node_modules\/(?!strapi-helper-plugin\/).*/,
         exclude: /node_modules/,
         use: {
           loader: require.resolve('babel-loader'),
