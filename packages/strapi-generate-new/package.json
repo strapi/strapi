@@ -13,7 +13,6 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "enpeem": "^2.2.0",
     "fs-extra": "^4.0.0",
     "inquirer": "^6.2.1",
     "listr": "^0.14.1",

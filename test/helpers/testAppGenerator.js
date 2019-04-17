@@ -27,7 +27,7 @@ const cleanTestApp = appName => {
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
 const generateTestApp = async ({ appName, database }) => {
-  await execa.shell(`node ${STRAPI_BIN} new ${appName} ${database}`, {
+  await execa.shell(`node ${STRAPI_BIN} new ${appName} --quickstart ${database}`, {
     stdio: 'inherit',
   });
 

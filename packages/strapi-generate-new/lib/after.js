@@ -7,11 +7,8 @@
 // Node.js core.
 const path = require('path');
 
-// Public node modules.
-const _ = require('lodash');
 const { green, cyan } = require('chalk');
 const fs = require('fs-extra');
-const npm = require('enpeem');
 const ora = require('ora');
 const shell = require('shelljs');
 
@@ -48,10 +45,7 @@ const runInstall = () => {
 module.exports = async (scope, cb) => {
   console.log('🏗  Application generation:');
 
-  let loader = ora('Copy dashboard').start();
-
-  // const packageJSON = require(path.resolve(scope.rootPath, 'package.json'));
-  // const strapiRootPath = path.resolve(scope.strapiRoot, '..');
+  let loader = ora('Copying files').start();
 
   process.chdir(scope.rootPath);
 
@@ -74,29 +68,21 @@ module.exports = async (scope, cb) => {
     cb(err);
   }
 
-  console.log();
   console.log(
-    `👌 Your new application ${green(scope.name)} is ready at ${cyan(
-      scope.rootPath
-    )}.`
+    `\n👌 Your application was created at ${cyan(scope.rootPath)}.\n`
   );
 
   trackSuccess('didCreateProject', scope);
 
   if (scope.quick) {
-    console.log();
-    console.log('⚡️ Starting your application:');
-    console.log(`${green('strapi start')}`);
+    console.log('⚡️ Starting your application...');
   } else {
-    console.log();
     console.log('⚡️ Change directory:');
     console.log(`$ ${green(`cd ${scope.name}`)}`);
     console.log();
-    console.log('⚡️ Start application:');
+    console.log('⚡️ Start your application:');
     console.log(`$ ${green('strapi start')}`);
   }
 
   cb();
-  // });
-  // }
 };

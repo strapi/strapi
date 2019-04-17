@@ -9,7 +9,6 @@ const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
 
-
 // Public node modules.
 const _ = require('lodash');
 const {cyan, green} = require('chalk');
@@ -288,11 +287,11 @@ module.exports = (scope, cb) => {
         }
 
         console.log();
-        console.log(
-          isQuick
-          ? '✅ Connected to the database'
-          : '⏳ Testing database connection...\r\nIt might take a minute, please have a coffee ☕️'
-        );
+        if (isQuick) {
+          console.log('✅ Connected to the database');
+        } else {
+          console.log('⏳ Testing database connection...\r\nIt might take a minute, please have a coffee ☕️');
+        }
 
         resolve();
       }),
@@ -301,11 +300,10 @@ module.exports = (scope, cb) => {
         let packageCmd = packageManager.commands('install --prefix', scope.tmpPath);
         // Manually create the temp directory for yarn
         if (!isStrapiInstalledWithNPM) {
-          shell.exec(`mkdir ${scope.tmpPath}`);
+          fs.ensureDirSync(scope.tmpPath);
         }
 
         let cmd = `${packageCmd} ${scope.client.connector}@${scope.strapiPackageJSON.version}`;
-        let linkNodeModulesCommand = `cd ${scope.tmpPath} && npm link ${scope.client.connector}`;
 
         if (scope.client.module) {
           cmd += ` ${scope.client.module}`;
@@ -313,53 +311,28 @@ module.exports = (scope, cb) => {
 
         if (scope.client.connector === 'strapi-hook-bookshelf') {
           cmd += ` strapi-hook-knex@${scope.strapiPackageJSON.version}`;
-          linkNodeModulesCommand += ` && npm link strapi-hook-knex`;
-
           scope.additionalsDependencies = scope.additionalsDependencies.concat(['strapi-hook-knex', 'knex']);
         }
 
         if (isQuick) {
           scope.client.version = 'latest';
-
           return resolve();
         }
-
 
         shell.exec(cmd, { silent: true }, () => {
           if (scope.client.module) {
             const lock = require(path.join(`${scope.tmpPath}`, '/node_modules/', `${scope.client.module}/package.json`));
             scope.client.version = lock.version;
-
-            if (scope.developerMode === true && scope.client.connector === 'strapi-hook-bookshelf') {
-              let knexVersion;
-
-              try {
-                knexVersion = require(path.join(`${scope.tmpPath}`,'/node_modules/', 'knex', 'package.json'));
-              } catch (e) {
-                knexVersion = require(path.join(`${scope.tmpPath}`,'/node_modules/','strapi-hook-knex', 'node_modules', 'knex', 'package.json'));
-              }
-
-              scope.additionalsDependencies[1] = `knex@${knexVersion.version || 'latest'}`;
-            }
           }
-
-          if (scope.developerMode) {
-            shell.exec(linkNodeModulesCommand, { silent: true }, () => {
-              resolve();
-            });
-          } else {
-            resolve();
-          }
+          resolve();
         });
       })
     ];
 
     const connectedToTheDatabase = (withMessage = true) => {
-      console.log();
-
       if (withMessage) {
-        console.log(`The app has been connected to the database ${green('successfully')}!`);
         console.log();
+        console.log(`The app has been connected to the database ${green('successfully')}!`);
       }
 
       if (isQuick) {

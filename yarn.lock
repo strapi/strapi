@@ -6099,13 +6099,6 @@ enhanced-resolve@^3.4.0:
     object-assign "^4.0.1"
     tapable "^0.2.7"
 
-enpeem@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/enpeem/-/enpeem-2.2.0.tgz#b95e65d376a8b46f5425d0c9c01fd08820f3350f"
-  integrity sha1-uV5l03aotG9UJdDJwB/QiCDzNQ8=
-  dependencies:
-    stream-reduce "1.0.3"
-
 entities@^1.1.1, entities@~1.1.1:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/entities/-/entities-1.1.2.tgz#bdfa735299664dfafd34529ed4f8522a275fea56"
@@ -16606,13 +16599,6 @@ stream-http@^2.7.2:
     to-arraybuffer "^1.0.0"
     xtend "^4.0.0"
 
-stream-reduce@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/stream-reduce/-/stream-reduce-1.0.3.tgz#56d3621fa84370619ae402ffc0468528991b36a9"
-  integrity sha1-VtNiH6hDcGGa5AL/wEaFKJkbNqk=
-  dependencies:
-    through "~2.3.4"
-
 stream-shift@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/stream-shift/-/stream-shift-1.0.0.tgz#d5c752825e5367e786f78e18e445ea223a155952"
@@ -17149,7 +17135,7 @@ through2@^2.0.0, through2@^2.0.2:
     readable-stream "~2.3.6"
     xtend "~4.0.1"
 
-through@2, "through@>=2.2.7 <3", through@^2.3.4, through@^2.3.6, through@^2.3.8, through@~2.3.4, through@~2.3.6:
+through@2, "through@>=2.2.7 <3", through@^2.3.4, through@^2.3.6, through@^2.3.8, through@~2.3.6:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
   integrity sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=
