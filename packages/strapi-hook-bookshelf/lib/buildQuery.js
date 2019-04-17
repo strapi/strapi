@@ -81,8 +81,9 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
   const buildJoin = (qb, assoc, originInfo, destinationInfo) => {
     if (assoc.nature === 'manyToMany') {
       const joinTableAlias = generateAlias(assoc.tableCollectionName);
+
       qb.leftJoin(
-        `${assoc.tableCollectionName} AS ${joinTableAlias}`,
+        `${originInfo.model.databaseName}.${assoc.tableCollectionName} AS ${joinTableAlias}`,
         `${joinTableAlias}.${singular(originInfo.model.collectionName)}_${
           originInfo.model.attributes[assoc.alias].column
         }`,
@@ -90,7 +91,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
       );
 
       qb.leftJoin(
-        `${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
+        `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
         `${joinTableAlias}.${singular(destinationInfo.model.collectionName)}_${
           destinationInfo.model.primaryKey
         }`,
@@ -110,7 +111,7 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
         : `${originInfo.alias}.${assoc.alias}`;
 
     qb.leftJoin(
-      `${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
+      `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
       externalKey,
       internalKey
     );

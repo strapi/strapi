@@ -83,6 +83,7 @@ module.exports = function(strapi) {
 
               // Add some informations about ORM & client connection & tableName
               definition.orm = 'bookshelf';
+              definition.databaseName = _.get(connection.settings, 'database');
               definition.client = _.get(connection.settings, 'client');
               _.defaults(definition, {
                 primaryKey: 'id',
