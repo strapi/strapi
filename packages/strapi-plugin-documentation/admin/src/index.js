@@ -36,37 +36,6 @@ const translationMessages = reduce(
   },
   {},
 );
-// const layout = (() => {
-//   try {
-//     return require('../../config/layout.js'); // eslint-disable-line import/no-unresolved
-//   } catch (err) {
-//     return null;
-//   }
-// })();
-
-const injectedComponents = (() => {
-  try {
-    return require('./injectedComponents').default; // eslint-disable-line import/no-unresolved
-  } catch (err) {
-    return [];
-  }
-})();
-
-const initializer = (() => {
-  try {
-    return require('./initializer');
-  } catch (err) {
-    return null;
-  }
-})();
-
-const lifecycles = (() => {
-  try {
-    return require('./lifecycles');
-  } catch (err) {
-    return null;
-  }
-})();
 
 function Comp(props) {
   return <App {...props} />;
@@ -78,10 +47,10 @@ const plugin = {
   description: pluginDescription,
   icon: pluginPkg.strapi.icon,
   id: pluginId,
-  initializer,
-  injectedComponents,
+  initializer: require('./initializer'),
+  injectedComponents: [],
   layout: null,
-  lifecycles,
+  lifecycles: require('./lifecycles'),
   leftMenuLinks: [],
   leftMenuSections: [],
   mainComponent: Comp,

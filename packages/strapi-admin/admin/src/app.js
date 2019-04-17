@@ -21,7 +21,6 @@ import {
   unfreezeApp,
   updatePlugin,
   getAppPluginsSucceeded,
-  // unsetHasUserPlugin,
 } from './containers/App/actions';
 import { showNotification } from './containers/NotificationProvider/actions';
 
@@ -48,8 +47,6 @@ const initialState = {};
 const store = configureStore(initialState, history);
 const { dispatch } = store;
 const MOUNT_NODE = document.getElementById('app');
-
-// TODO remove temporary to access the admin
 
 dispatch(getAppPluginsSucceeded(Object.keys(plugins)));
 
