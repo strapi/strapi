@@ -1,5 +1,5 @@
 {
-  "connection": "user",
+  "connection": "default",
   "info": {
     "name": "user",
     "description": ""
