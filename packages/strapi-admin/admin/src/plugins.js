@@ -16,6 +16,29 @@ window.strapi = Object.assign(window.strapi || {}, {
   injectSaga,
 });
 
+// const plugins = [
+//   // 'content-manager',
+//   // 'content-type-builder',
+//   // 'email',
+//   // 'settings-manager',
+//   // 'upload',
+//   'users-permissions',
+// ].reduce((acc, curr) => {
+//   const suffix =
+//     process.env.NODE_ENV === 'development'
+//       ? '/src'
+//       : `dist/${current}.esm.min.js`;
+
+//   acc[curr] = require(`../../../strapi-plugin-${current}/admin/${suffix}`);
+
+//   return acc;
+// });
+
+// console.log(plugins);
+
+// module.exports = {};
+// module.exports = plugins;
+
 module.exports = {
   // 'content-manager': require('../../../strapi-plugin-content-manager/admin/src')
   //   .default,
@@ -25,8 +48,10 @@ module.exports = {
   // 'settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
   //   .default,
   // upload: require('../../../strapi-plugin-upload/admin/src').default,
+  upload: require('../../../strapi-plugin-upload/admin/dist/strapi-plugin-upload.esm.min.js')
+    .default,
   // 'users-permissions': require('../../../strapi-plugin-users-permissions/admin/src')
   //   .default,
-  'users-permissions': require('../../../strapi-plugin-users-permissions/admin/dist/strapi-us.esm.min.js')
+  'users-permissions': require('../../../strapi-plugin-users-permissions/admin/dist/strapi-users-permissions.esm.min.js')
     .default,
 };
