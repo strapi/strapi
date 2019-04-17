@@ -53,8 +53,25 @@ dispatch(getAppPluginsSucceeded(Object.keys(plugins)));
 Object.keys(plugins).forEach(plugin => {
   const currentPlugin = plugins[plugin];
 
+  const pluginTradsPrefixed = languages.reduce((acc, lang) => {
+    const currentLocale = currentPlugin.trads[lang];
+
+    const localeprefixedWithPluginId = Object.keys(currentLocale).reduce(
+      (acc2, current) => {
+        acc2[`${plugins[plugin].id}.${current}`] = currentLocale[current];
+
+        return acc2;
+      },
+      {},
+    );
+
+    acc[lang] = localeprefixedWithPluginId;
+
+    return acc;
+  }, {});
+
   try {
-    merge(translationMessages, currentPlugin.translationMessages);
+    merge(translationMessages, pluginTradsPrefixed);
     dispatch(pluginLoaded(currentPlugin));
   } catch (err) {
     console.log({ err });

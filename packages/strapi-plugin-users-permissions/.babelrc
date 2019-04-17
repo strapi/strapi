@@ -6,11 +6,15 @@
         "modules": false,
         "loose": true,
         "targets": {
-          "browsers": ["Since 2017"]
+          "browsers": ["since 2017"]
         }
       }
     ],
     "@babel/preset-react"
   ],
-  "plugins": ["@babel/plugin-proposal-class-properties"]
+  "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-external-helpers"
+  ]
 }

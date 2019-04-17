@@ -7,7 +7,6 @@
 import React from 'react';
 import moment from 'moment';
 import PropTypes from 'prop-types';
-import DateTimeStyle from '../../../../node_modules/react-datetime/css/react-datetime.css'; /* eslint-disable-line no-unused-vars */
 import DateTime from 'react-datetime';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty, isObject } from 'lodash';

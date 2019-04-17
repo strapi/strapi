@@ -1,6 +1,6 @@
-const { auth } = require('strapi-helper-plugin');
+import { auth } from 'strapi-helper-plugin';
 
-module.exports = function willSecure() {
+function willSecure() {
   const {
     props: {
       hideLeftMenu,
@@ -78,4 +78,6 @@ module.exports = function willSecure() {
   setAppSecured();
 
   return cb();
-};
+}
+
+export default willSecure;

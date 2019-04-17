@@ -11,8 +11,8 @@
     "name": "Strapi team",
     "url": "http://strapi.io"
   },
-  "main": "dist/strapi-helper-plugin.cjs.js",
-  "module": "dist/strapi-helper-plugin.esm.js",
+  "main": "dist/strapi-helper-plugin.esm.min.js",
+  "module": "dist/strapi-helper-plugin.cjs.min.js",
   "maine": "lib/src",
   "maintainers": [
     {
@@ -32,8 +32,11 @@
     "lint:admin"
   ],
   "peerDependencies": {
+    "classnames": "^2.2.5",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
+    "lodash": "^4.17.5",
+    "moment": "^2.16.0",
     "react": "^16.0.0",
     "reactstrap": "^5.0.0",
     "react-dom": "^16.0.0",
@@ -54,7 +57,6 @@
     "enzyme-adapter-react-16": "^1.8.0",
     "enzyme-to-json": "^3.3.5",
     "express": "^4.15.4",
-    "node-sass": "^4.11.0",
     "plop": "^2.2.0",
     "postcss-import": "^12.0.1",
     "postcss-smart-import": "^0.7.6",
@@ -72,26 +74,16 @@
     "rollup-plugin-scss": "^1.0.1",
     "rollup-plugin-sizes": "^0.5.1",
     "rollup-plugin-svg": "^1.0.1",
+    "rollup-plugin-terser": "^4.0.4",
+    "rollup-plugin-visualizer": "^1.1.1",
     "shelljs": "^0.7.8"
   },
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
-    "classnames": "^2.2.5",
-    "immutable": "^3.8.2",
     "imports-loader": "^0.7.1",
     "invariant": "2.2.1",
     "json-loader": "^0.5.7",
-    "lodash": "^4.17.5",
-    "moment": "^2.16.0",
-    "react": "^16.8.6",
     "react-datetime": "^2.15.0",
-    "react-dom": "^16.8.6",
-    "react-intl": "^2.8.0",
-    "react-loadable": "^5.5.0",
-    "react-router-dom": "^5.0.0",
-    "react-transition-group": "^2.5.0",
-    "reactstrap": "^5.0.0",
-    "styled-components": "^3.2.6",
     "whatwg-fetch": "^2.0.3"
   }
 }
