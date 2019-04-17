@@ -13,6 +13,7 @@
   },
   "main": "dist/strapi-helper-plugin.cjs.js",
   "module": "dist/strapi-helper-plugin.esm.js",
+  "maine": "lib/src",
   "maintainers": [
     {
       "name": "Strapi team",
@@ -23,6 +24,7 @@
   "license": "MIT",
   "scripts": {
     "prettier": "prettier --single-quote --trailing-comma es5 --write \"{lib,__{tests,mocks}__}/**/*.js\"",
+    "prebuild": "rimraf dist",
     "build": "rollup -c",
     "test": "echo \"no tests yet\""
   },
@@ -59,12 +61,13 @@
     "precss": "^4.0.0",
     "prettier": "^1.5.3",
     "react-test-renderer": "^16.7.0",
-    "rimraf": "^2.6.1",
+    "rimraf": "^2.6.3",
     "rollup": "^1.10.0",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.3.4",
     "rollup-plugin-node-resolve": "^4.2.3",
     "rollup-plugin-postcss": "^2.0.3",
+    "rollup-plugin-rebase": "^3.1.1",
     "rollup-plugin-sass": "^1.2.2",
     "rollup-plugin-scss": "^1.0.1",
     "rollup-plugin-sizes": "^0.5.1",

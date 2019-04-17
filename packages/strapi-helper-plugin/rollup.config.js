@@ -3,6 +3,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import svg from 'rollup-plugin-svg';
 import postcss from 'rollup-plugin-postcss';
+import rebasePlugin from 'rollup-plugin-rebase';
 import pkg from './package.json';
 
 export default {
@@ -29,7 +30,9 @@ export default {
   plugins: [
     postcss({
       modules: true,
+      minimize: true,
     }),
+    rebasePlugin({}),
     babel({
       exclude: 'node_modules/**',
     }),

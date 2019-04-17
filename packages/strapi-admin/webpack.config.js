@@ -27,41 +27,41 @@ const PORT = 4000;
 
 const webpackPlugins = devMode
   ? [
-      new WebpackDashboard(),
-      new DuplicatePckgChecker({
-        verbose: true,
-      }),
-      new OpenBrowserWebpackPlugin({
-        url: `http://localhost:${PORT}/${URLs.publicPath}`,
-      }),
-    ]
+    new WebpackDashboard(),
+    new DuplicatePckgChecker({
+      verbose: true,
+    }),
+    new OpenBrowserWebpackPlugin({
+      url: `http://localhost:${PORT}/${URLs.publicPath}`,
+    }),
+  ]
   : [
-      new webpack.IgnorePlugin({
-        resourceRegExp: /^\.\/locale$/,
-        contextRegExp: /moment$/,
-      }),
-      new MiniCssExtractPlugin({
-        // Options similar to the same options in webpackOptions.output
-        // both options are optional
-        filename: devMode ? '[name].css' : '[name].[chunkhash].js',
-        chunkFilename: devMode
-          ? '[name].chunk.css'
-          : '[name].[chunkhash].chunkhash.css',
-      }),
-    ];
+    new webpack.IgnorePlugin({
+      resourceRegExp: /^\.\/locale$/,
+      contextRegExp: /moment$/,
+    }),
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // both options are optional
+      filename: devMode ? '[name].css' : '[name].[chunkhash].js',
+      chunkFilename: devMode
+        ? '[name].chunk.css'
+        : '[name].[chunkhash].chunkhash.css',
+    }),
+  ];
 
 // Use style loader in dev mode to optimize compilation
 const scssLoader = devMode
-  ? ['style-loader']
+  ? [{ loader: 'style-loader', options: {} }]
   : [
-      {
-        loader: MiniCssExtractPlugin.loader,
-        options: {
-          fallback: require.resolve('style-loader'),
-          publicPath: URLs.publicPath,
-        },
+    {
+      loader: MiniCssExtractPlugin.loader,
+      options: {
+        fallback: require.resolve('style-loader'),
+        publicPath: URLs.publicPath,
       },
-    ];
+    },
+  ];
 
 module.exports = {
   mode: 'development',
@@ -90,6 +90,7 @@ module.exports = {
     rules: [
       {
         test: /\.m?js$/,
+        // exclude: /node_modules\/(?!strapi-helper-plugin\/).*/,
         exclude: /node_modules/,
         use: {
           loader: require.resolve('babel-loader'),
@@ -147,7 +148,7 @@ module.exports = {
           {
             loader: require.resolve('css-loader'),
             options: {
-              localIdentName: '$[local]__[path][name]__[hash:base64:5]',
+              localIdentName: '[local]__[path][name]__[hash:base64:5]',
               modules: true,
               importLoaders: 1,
               sourceMap: false,

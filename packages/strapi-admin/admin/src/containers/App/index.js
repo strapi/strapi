@@ -15,8 +15,6 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 
-import '../../styles/main.scss';
-
 import Admin from '../Admin';
 import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
