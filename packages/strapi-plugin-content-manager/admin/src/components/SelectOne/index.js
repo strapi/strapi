@@ -8,7 +8,7 @@ import React from 'react';
 import Select from 'react-select';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import 'react-select/dist/react-select.css';
+
 import {
   cloneDeep,
   map,

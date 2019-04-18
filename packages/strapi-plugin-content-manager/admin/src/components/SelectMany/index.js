@@ -22,8 +22,6 @@ import {
 // Utils.
 import { request, templateObject } from 'strapi-helper-plugin';
 
-// CSS.
-import 'react-select/dist/react-select.css';
 // Component.
 import SortableList from './SortableList';
 // CSS.
