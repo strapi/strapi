@@ -1,6 +1,7 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.25.2",
+  "version": "3.0.0-alpha.26",
+  "dependencies": {},
   "devDependencies": {
     "assert": "~1.3.0",
     "axios": "^0.18.0",
@@ -41,7 +42,8 @@
     "shelljs": "^0.7.7",
     "snyk": "^1.99.0",
     "strapi-lint": "file:packages/strapi-lint",
-    "wait-on": "^3.2.0"
+    "wait-on": "^3.2.0",
+    "yargs": "^13.2.2"
   },
   "scripts": {
     "bootstrap": "yarn install && lerna bootstrap",

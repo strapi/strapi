@@ -31,3 +31,4 @@
 - [Migration guide from alpha.22 to alpha.23](migration-guide-alpha.22-to-alpha.23.md)
 - [Migration guide from alpha.23 to alpha.24](migration-guide-alpha.23-to-alpha.24.md)
 - [Migration guide from alpha.24 to alpha.25](migration-guide-alpha.24-to-alpha.25.md)
+- [Migration guide from alpha.25 to alpha.26](migration-guide-alpha.25-to-alpha.26.md)
