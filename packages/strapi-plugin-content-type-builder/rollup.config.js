@@ -4,6 +4,8 @@ import commonjs from 'rollup-plugin-commonjs';
 import svg from 'rollup-plugin-svg';
 import postcss from 'rollup-plugin-postcss';
 import { terser } from 'rollup-plugin-terser';
+import rebasePlugin from 'rollup-plugin-rebase';
+
 import url from 'rollup-plugin-url';
 import json from 'rollup-plugin-json';
 import pkg from './package.json';
@@ -17,7 +19,7 @@ export default {
       format: 'cjs',
       sourceMap: true,
       name: pkg.name,
-      // compact: true,
+      compact: true,
     },
     {
       exports: 'named',
@@ -25,19 +27,20 @@ export default {
       file: `admin/dist/${pkg.name}.esm.js`,
       format: 'es',
       name: pkg.name,
-      // compact: true,
+      compact: true,
     },
   ],
 
   plugins: [
     postcss({
       modules: true,
-      // minimize: true,
+      minimize: true,
     }),
     url({
-      limit: 10 * 1024,
-      emitFiles: true,
+      limit: 10 * 1024, // inline files < 10k, copy files > 10k
+      emitFiles: true, // defaults to true
     }),
+    rebasePlugin({}),
     babel({
       exclude: 'node_modules/**',
     }),
@@ -45,7 +48,7 @@ export default {
     resolve(),
     json({
       exclude: 'node_modules/**',
-      // compact: true, // Default: false
+      compact: true, // Default: false
     }),
 
     svg(),

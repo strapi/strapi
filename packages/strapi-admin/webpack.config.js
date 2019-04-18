@@ -68,6 +68,7 @@ module.exports = {
       index: URLs.publicPath,
     },
     port: 4000,
+    stats: 'minimal',
     // hot: true,
   },
   stats: devMode ? 'minimal' : 'errors-only',

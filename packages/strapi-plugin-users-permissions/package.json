@@ -34,6 +34,7 @@
     "uuid": "^3.1.0"
   },
   "peerDependencies": {
+    "classnames": "^2.2.6",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
     "lodash": "^4.17.11",

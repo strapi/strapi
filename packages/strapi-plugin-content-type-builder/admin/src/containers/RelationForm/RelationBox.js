@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { InputText } from 'strapi-helper-plugin';
+import { InputTextWithErrors as InputText } from 'strapi-helper-plugin';
 
 import InlineBlock from './InlineBlock';
 import ModelPicker from './ModelPicker';
