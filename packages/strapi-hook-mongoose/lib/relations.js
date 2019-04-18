@@ -67,23 +67,21 @@ module.exports = {
           return _.set(acc, current, property);
         }
         case 'oneToMany': {
-          // receive array of ids or array of objects with ids
-
           // set relation to null for all the ids not in the list
           const currentIds = response[current];
-          const diff = _.differenceWith(property, currentIds, (a, b) => {
+          const toRemove = _.differenceWith(currentIds, property, (a, b) => {
             return `${a[assocModel.primaryKey] || a}` === `${b[assocModel.primaryKey] || b}`;
           });
 
           const updatePromise = assocModel.updateMany({
             [assocModel.primaryKey]: {
-              $in: currentIds.map(val => new mongoose.Types.ObjectId(val[assocModel.primaryKey]||val))
+              $in: toRemove.map(val => new mongoose.Types.ObjectId(val[assocModel.primaryKey]||val))
             }
           }, { [details.via] : null })
             .then(() => {
               return assocModel.updateMany({
                 [assocModel.primaryKey]: {
-                  $in: diff.map(val => new mongoose.Types.ObjectId(val[assocModel.primaryKey]||val))
+                  $in: property.map(val => new mongoose.Types.ObjectId(val[assocModel.primaryKey]||val))
                 }
               }, { [details.via] : primaryKeyValue });
             });
