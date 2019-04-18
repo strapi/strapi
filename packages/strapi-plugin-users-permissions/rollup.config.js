@@ -52,7 +52,7 @@ export default {
 
     svg(),
     require('rollup-plugin-sizes')(),
-    // terser(),
+    terser(),
   ],
 
   external: [

@@ -13,6 +13,7 @@
     "analyze": "node ./node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
     "prebuild": "npm run build:clean",
     "build": "rollup -c",
+    "build:watch": "rollup -c -v",
     "build:clean": "rimraf admin/dist",
     "lint": "node ./node_modules/strapi-lint/node_modules/.bin/eslint --ignore-path .gitignore --ignore-pattern '/admin/build/' --config ./node_modules/strapi-lint/lib/internals/eslint/.eslintrc.json admin",
     "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",

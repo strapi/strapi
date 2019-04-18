@@ -72,12 +72,6 @@ import saga from './sagas';
 import styles from './styles.scss';
 import config from './config.json';
 
-// export class HomePage extends React.Component {
-//   render() {
-//     return null;
-//   }
-// }
-
 /* eslint-disable react/require-default-props  */
 export class HomePage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
