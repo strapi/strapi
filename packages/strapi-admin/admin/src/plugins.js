@@ -1,4 +1,3 @@
-// console.log(window);
 const injectReducer = require('./utils/injectReducer').default;
 const injectSaga = require('./utils/injectSaga').default;
 const { languages } = require('./i18n');
@@ -29,4 +28,8 @@ module.exports = {
     .default,
   upload: require('../../../strapi-plugin-upload/admin/dist/strapi-plugin-upload.esm.js')
     .default,
+  'settings-manager':
+    // 'settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
+    require('../../../strapi-plugin-settings-manager/admin/dist/strapi-plugin-settings-manager.esm.js')
+      .default,
 };

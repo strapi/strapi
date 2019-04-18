@@ -69,10 +69,10 @@ class RowDatabase extends React.Component {
     const loader = this.state.loader ? (
       <Button
         onClick={this.handleSubmit}
-        className={styles.primary}
+        className={styles.stmprimary}
         disabled={this.state.loader}
       >
-        <p className={styles.saving}>
+        <p className={styles.stmsaving}>
           <span>.</span>
           <span>.</span>
           <span>.</span>
@@ -81,7 +81,7 @@ class RowDatabase extends React.Component {
     ) : (
       <FormattedMessage id="settings-manager.form.button.save">
         {message => (
-          <Button onClick={this.handleSubmit} className={styles.primary}>
+          <Button onClick={this.handleSubmit} className={styles.stmprimary}>
             {message}
           </Button>
         )}
@@ -90,34 +90,34 @@ class RowDatabase extends React.Component {
 
     return (
       <li
-        className={`${styles.databaseFont}`}
+        className={`${styles.stmdatabaseFont}`}
         style={{ cursor: 'pointer' }}
         onClick={this.handleShowDatabaseModal}
       >
-        <div className={styles.flexLi}>
-          <div className={styles.flexed}>
+        <div className={styles.stmflexLi}>
+          <div className={styles.stmflexed}>
             <div
-              className={styles.squared}
+              className={styles.stmsquared}
               style={{ backgroundColor: this.props.data.color }}
             >
               {this.props.data.letter}
             </div>
-            <div className={styles.label} style={{ fontWeight: '500' }}>
+            <div className={styles.stmlabel} style={{ fontWeight: '500' }}>
               {this.props.data.name}
             </div>
           </div>
-          <div className={styles.dbHost}>{this.props.data.host}</div>
-          <div className={styles.centered} style={{ width: '15rem' }}>
+          <div className={styles.stmdbHost}>{this.props.data.host}</div>
+          <div className={styles.stmcentered} style={{ width: '15rem' }}>
             {this.props.data.database}
           </div>
           <div
-            className={styles.flexed}
+            className={styles.stmflexed}
             style={{ minWidth: '3rem', justifyContent: 'space-between' }}
           >
-            <div className={styles.ico}>
+            <div className={styles.stmico}>
               <i className="fa fa-pencil" id={this.props.data.name} />
             </div>
-            <div className={`${styles.leftSpaced} ${styles.ico}`}>
+            <div className={`${styles.stmleftSpaced} ${styles.stmico}`}>
               <i
                 id="trash"
                 className="fa fa-trash"
@@ -130,30 +130,30 @@ class RowDatabase extends React.Component {
           <Modal
             isOpen={this.state.modal}
             toggle={this.toggle}
-            className={styles.modalPosition}
+            className={styles.stmmodalPosition}
           >
             <ModalHeader
               toggle={this.toggle}
-              className={`${styles.noBorder} ${styles.padded} ${
-                styles.mHeader
+              className={`${styles.stmnoBorder} ${styles.stmpadded} ${
+                styles.stmmHeader
               }`}
             >
               Databases
             </ModalHeader>
-            <div className={styles.bordered} />
+            <div className={styles.stmbordered} />
             <form autoComplete="off">
-              <ModalBody className={styles.modalBody}>
-                <div className={styles.spacerSmall} />
+              <ModalBody className={styles.stmmodalBody}>
+                <div className={styles.stmspacerSmall} />
                 <PopUpForm {...this.props} />
               </ModalBody>
               <ModalFooter
-                className={`${styles.noBorder} ${styles.modalFooter}`}
+                className={`${styles.stmnoBorder} ${styles.stmmodalFooter}`}
               >
                 <FormattedMessage id="settings-manager.form.button.cancel">
                   {message => (
                     <Button
                       onClick={this.handleToggle}
-                      className={styles.secondary}
+                      className={styles.stmsecondary}
                     >
                       {message}
                     </Button>

@@ -1,9 +1,4 @@
-.listContainer {
-  /* stylelint-disable */
-  // margin-right: 15px;
-}
-
-.listSubContainer {
+.stmlistSubContainer {
   margin: 0 3.3rem;
   padding: 1rem 2.8rem 0rem 2.8rem;
   border-radius: 0.2rem;
@@ -12,17 +7,17 @@
   box-shadow: 0 0.2rem 0.4rem 0 #e3e9f3;
 }
 
-.paddedTopList {
+.stmpaddedTopList {
   margin-top: 2.7rem !important;
 }
 
-.flex {
+.stmflex {
   display: flex;
   justify-content: space-between;
   margin-top: 0.8rem;
 }
 
-.titleContainer {
+.stmtitleContainer {
   color: #333740;
   font-family: Lato;
   font-size: 1.8rem;
@@ -37,7 +32,7 @@ button {
   }
 }
 
-.ulContainer {
+.stmulContainer {
   padding-top: 1.3rem;
   margin: 0 3.3rem;
   background-color: #ffffff;
@@ -50,17 +45,17 @@ button {
       line-height: 5.2rem;
       font-size: 1.3rem;
       position: relative;
-      &:first-child .language {
+      &:first-child .stmlanguage {
         margin-top: 0.3rem;
       }
-      .language {
+      .stmlanguage {
         margin-top: 0.1rem;
       }
-      &:last-child .borderBottom {
+      &:last-child .stmborderBottom {
         border-bottom: none;
       }
       &:hover {
-        .hoveredLanguage {
+        .stmhoveredLanguage {
           position: absolute;
           top: -0.2rem;
           min-height: 5.4rem;
@@ -72,18 +67,18 @@ button {
   }
 }
 
-.li:first-child .language {
+.stmli:first-child .stmlanguage {
   margin-top: 11rem;
 }
-.liSpacer {
+.stmliSpacer {
   height: 0.2rem !important;
 }
 
-.borderBottom {
+.stmborderBottom {
   border-bottom: 1px solid rgba(14, 22, 34, 0.04);
 }
 
-.flexLi {
+.stmflexLi {
   display: flex;
   justify-content: space-between;
   margin: 0 4.1rem 0 2.8rem;
@@ -91,7 +86,7 @@ button {
   align-items: center;
 }
 
-.flexLiLanguage {
+.stmflexLiLanguage {
   display: flex;
   // justify-content: space-between;
   margin: 0 4.1rem 0 2.8rem;
@@ -102,21 +97,21 @@ button {
   }
 }
 
-.flexLeft {
+.stmflexLeft {
   display: flex;
   align-items: flex-start;
 }
 
-.marged {
+.stmmarged {
   margin-left: 1rem;
 }
 
-.flexed,
-.label {
+.stmflexed,
+.stmlabel {
   display: flex;
 }
 
-.label {
+.stmlabel {
   align-items: center;
   line-height: 1;
   width: 15rem;
@@ -126,11 +121,11 @@ button {
   font-weight: 600;
 }
 
-.capitalized {
+.stmcapitalized {
   text-transform: capitalize;
 }
 
-.centered {
+.stmcentered {
   width: 25rem;
   text-align: right;
   display: block;
@@ -142,7 +137,7 @@ button {
   }
 }
 
-.italicText {
+.stmitalicText {
   font-family: Lato;
   color: #49515a;
   font-style: italic;
@@ -152,13 +147,13 @@ button {
   padding-right: 1rem;
 }
 
-.normal {
+.stmnormal {
   font-family: Lato;
   color: #1c5de7;
   cursor: pointer;
 }
 
-.primary {
+.stmprimary {
   height: 3rem;
   font-family: Lato !important;
   margin-left: 1.9rem !important;
@@ -185,7 +180,7 @@ button {
   }
 }
 
-.secondary {
+.stmsecondary {
   font-family: Lato;
   color: #f64d0a;
   border: 0.1rem solid #f64d0a;
@@ -203,13 +198,13 @@ button {
   border-radius: 3px;
 }
 
-.bordered {
+.stmbordered {
   margin-left: 3rem;
   margin-right: 3rem;
   border-bottom: 1px solid #f6f6f6;
 }
 
-.dbHost {
+.stmdbHost {
   width: 22rem;
   text-align: center;
   display: block;
@@ -218,29 +213,29 @@ button {
   text-overflow: ellipsis;
 }
 
-.noBorder {
+.stmnoBorder {
   border: none !important;
 }
 
-.flexStart {
+.stmflexStart {
   justify-content: flex-start !important;
 }
 
-.italicText {
+.stmitalicText {
   color: #49515a;
   font-style: italic;
 }
 
-.normal {
+.stmnormal {
   color: #1c5de7;
   padding-top: 0rem;
 }
 
-.lighter {
+.stmlighter {
   color: #333740;
 }
 
-.modalPosition {
+.stmmodalPosition {
   margin-top: 22rem;
   margin-left: 25%;
   width: 50% !important;
@@ -248,12 +243,12 @@ button {
   position: relative;
 }
 
-.modalBody {
+.stmmodalBody {
   padding: 0;
   padding-top: 2.1rem;
 }
 
-.modalFooter {
+.stmmodalFooter {
   margin-top: 1.5rem;
   margin-bottom: 1.1rem;
   > input {
@@ -266,7 +261,7 @@ button {
   }
 }
 
-.mHeader {
+.stmmHeader {
   padding-top: 1.6rem;
   padding-bottom: 1rem;
   > h4 {
@@ -302,7 +297,7 @@ button {
   }
 }
 
-.squared {
+.stmsquared {
   margin-top: 1.6rem;
   height: 2rem;
   width: 3.5rem;
@@ -315,44 +310,44 @@ button {
   text-align: center;
 }
 
-.orange {
+.stmorange {
   background-color: #ffb500;
 }
 
-.leftSpaced {
+.stmleftSpaced {
   margin-left: 1rem;
 }
 
-.buttonContainer {
+.stmbuttonContainer {
   > button {
     margin-right: 0;
   }
 }
 
-.trashContainer {
+.stmtrashContainer {
   // width: 5rem;
   margin-left: 6rem;
   cursor: pointer;
 }
 
-.spacer {
+.stmspacer {
   height: 1.6rem;
   margin-bottom: 1.6rem;
   border-bottom: 1px solid rgba(14, 22, 34, 0.04);
 }
 
-.spacerSmall {
+.stmspacerSmall {
   margin-bottom: 0rem;
 }
 
-.ico {
+.stmico {
   color: #0e1622;
   > i {
     font-size: 1.1rem;
   }
 }
 
-.databaseFont {
+.stmdatabaseFont {
   font-size: 1.3rem;
   &:hover {
     height: 5.2rem;
@@ -360,7 +355,7 @@ button {
   }
 }
 
-.flagContainer {
+.stmflagContainer {
   width: 33%;
   margin-left: 1rem;
   height: 5.2rem;
@@ -373,7 +368,7 @@ button {
   }
 }
 
-.bottomSpacer {
+.stmbottomSpacer {
   height: 1.2rem;
   background-color: #ffffff;
 }
@@ -390,11 +385,11 @@ button {
   }
 }
 
-.saving {
+.stmsaving {
   margin-top: -1.2rem;
 }
 
-.saving span {
+.stmsaving span {
   animation-name: blink;
   animation-duration: 1.4s;
   animation-iteration-count: infinite;
@@ -402,10 +397,10 @@ button {
   font-size: 5rem;
 }
 
-.saving span:nth-child(2) {
+.stmsaving span:nth-child(2) {
   animation-delay: 0.2s;
 }
 
-.saving span:nth-child(3) {
+.stmsaving span:nth-child(3) {
   animation-delay: 0.4s;
 }

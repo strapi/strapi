@@ -66,7 +66,7 @@ class RowLanguage extends React.Component {
     const languageLabel = this.props.active ? (
       <FormattedMessage id="settings-manager.list.languages.default.languages">
         {message => (
-          <div className={this.props.liStyles.italicText}>{message}</div>
+          <div className={this.props.liStyles.stmitalicText}>{message}</div>
         )}
       </FormattedMessage>
     ) : (
@@ -74,7 +74,7 @@ class RowLanguage extends React.Component {
       <FormattedMessage id="settings-manager.list.languages.set.languages">
         {message => (
           <button
-            className={this.props.liStyles.normal}
+            className={this.props.liStyles.stmnormal}
             onClick={this.props.onDefaultLanguageChange}
             id={this.props.name}
           >
@@ -86,28 +86,28 @@ class RowLanguage extends React.Component {
 
     return (
       <li style={{ marginTop: '0' }}>
-        <div className={this.props.liStyles.hoveredLanguage} />
-        <div className={this.props.liStyles.language} />
+        <div className={this.props.liStyles.stmhoveredLanguage} />
+        <div className={this.props.liStyles.stmlanguage} />
         <div
-          className={`${this.props.liStyles.borderBottom} ${
-            this.props.liStyles.flexLiLanguage
+          className={`${this.props.liStyles.stmborderBottom} ${
+            this.props.liStyles.stmflexLiLanguage
           }`}
         >
           <div
-            className={`${this.props.liStyles.flexed} ${
-              this.props.liStyles.flagContainer
+            className={`${this.props.liStyles.stmflexed} ${
+              this.props.liStyles.stmflagContainer
             }`}
           >
             <div>
               <span
                 className={`${
-                  this.props.liStyles.flag
+                  this.props.liStyles.stmflag
                 } flag-icon flag-icon-${flag}`}
               />
             </div>
             <div
-              className={`${this.props.liStyles.label} ${
-                this.props.liStyles.capitalized
+              className={`${this.props.liStyles.stmlabel} ${
+                this.props.liStyles.stmcapitalized
               }`}
             >
               {languageDisplay}
@@ -117,8 +117,10 @@ class RowLanguage extends React.Component {
             {this.props.name}
           </div>
           <div style={{ display: 'flex', width: '33%' }}>
-            <div className={this.props.liStyles.centered}>{languageLabel}</div>
-            <div className={this.props.liStyles.trashContainer}>
+            <div className={this.props.liStyles.stmcentered}>
+              {languageLabel}
+            </div>
+            <div className={this.props.liStyles.stmtrashContainer}>
               {deleteIcon}
             </div>
           </div>

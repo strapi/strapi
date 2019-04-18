@@ -1,8 +1,8 @@
 /**
-*
-* HeaderNav
-*
-*/
+ *
+ * HeaderNav
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -16,25 +16,40 @@ import List from '../List';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props  */
-class HeaderNav extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class HeaderNav extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
     const baseUrl = join(take(this.props.path.split('/'), 4), '/');
-    const component = this.props.renderListComponent ? <List {...this.props} /> : <EditForm {...this.props} />;
+    const component = this.props.renderListComponent ? (
+      <List {...this.props} />
+    ) : (
+      <EditForm {...this.props} />
+    );
     let linkColor = '#F5F5F5';
 
     return (
-      <div className={styles.headerNav}>
+      <div className={styles.stmheaderNav}>
         <div className="container-fluid">
           <div className="row">
             <div className="col-md-12">
-              <div className={styles.headerContainer}>
+              <div className={styles.stmheaderContainer}>
                 {map(this.props.links, (link, key) => {
-                  const notifActive = link.active ? <div className={styles.notifPoint} /> : '';
+                  const notifActive = link.active ? (
+                    <div className={styles.stmnotifPoint} />
+                  ) : (
+                    ''
+                  );
                   linkColor = darken(linkColor, 2);
 
                   return (
-                    <NavLink key={key} className={styles.headerLink} style={{ backgroundColor: linkColor}} to={`${baseUrl}/${link.name}`} activeClassName={styles.linkActive}>
-                      <div className={`${styles.linkText} text-center`}>
+                    <NavLink
+                      key={key}
+                      className={styles.stmheaderLink}
+                      style={{ backgroundColor: linkColor }}
+                      to={`${baseUrl}/${link.name}`}
+                      activeClassName={styles.stmlinkActive}
+                    >
+                      <div className={`${styles.stmlinkText} text-center`}>
                         {link.name}
                         {notifActive}
                       </div>

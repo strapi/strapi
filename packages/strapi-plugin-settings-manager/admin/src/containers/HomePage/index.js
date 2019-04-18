@@ -72,6 +72,12 @@ import saga from './sagas';
 import styles from './styles.scss';
 import config from './config.json';
 
+// export class HomePage extends React.Component {
+//   render() {
+//     return null;
+//   }
+// }
+
 /* eslint-disable react/require-default-props  */
 export class HomePage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -424,7 +430,7 @@ export class HomePage extends React.Component {
       const isActive =
         props.values[this.props.home.dbNameTarget] ===
         this.props.home.modifiedData['database.defaultConnection'] ? (
-            <div className={popUpStyles.rounded}>
+            <div className={popUpStyles.stmrounded}>
               <i className="fa fa-check" />
             </div>
           ) : (
@@ -435,7 +441,7 @@ export class HomePage extends React.Component {
         return (
           <div
             key={key}
-            className={popUpStyles.defaultConnection}
+            className={popUpStyles.stmdefaultConnection}
             id={item.target}
             onClick={this.handleSetDefaultConnectionDb}
           >
@@ -455,7 +461,7 @@ export class HomePage extends React.Component {
 
       return (
         <div className={'col-md-6'} key={item.name}>
-          <div className={styles.modalLanguageLabel}>
+          <div className={styles.stmmodalLanguageLabel}>
             <FormattedMessage id={`settings-manager.${item.name}`} />
           </div>
           <InputSelect
@@ -465,7 +471,7 @@ export class HomePage extends React.Component {
             onChange={this.handleChangeLanguage}
             validations={{}}
           />
-          <div className={styles.popUpSpacer} />
+          <div className={styles.stmpopUpSpacer} />
         </div>
       );
     });
@@ -597,7 +603,7 @@ export class HomePage extends React.Component {
             environments={this.props.environments}
             envParams={this.props.match.params.env}
           />
-          <div className={`${styles.home} col-md-9`}>
+          <div className={`${styles.stmhome} col-md-9`}>
             <Helmet
               title="Settings Manager"
               meta={[

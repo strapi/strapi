@@ -1,35 +1,35 @@
-.inputSelect { /* stylelint-disable */
+.stminputSelect {
+  /* stylelint-disable */
   font-size: 1.3rem;
   font-family: Lato;
 
   > label {
     text-transform: capitalize;
-    margin-bottom: .8rem;
+    margin-bottom: 0.8rem;
     font-weight: 500;
   }
   > select {
     font-size: 1.3rem;
     font-family: Lato;
     color: #333740;
-    height: 3.5rem!important;
-    border-radius: 0rem!important;
-    border: 1px solid #E3E9F3;
+    height: 3.5rem !important;
+    border-radius: 0rem !important;
+    border: 1px solid #e3e9f3;
     padding-left: 1rem;
   }
 }
 
-.requiredClass {
+.stmrequiredClass {
   > label:after {
     color: red;
     font-family: Lato;
     font-weight: bold;
     margin-left: 5px;
-    content: "*";
+    content: '*';
   }
 }
 
-
-.input {
+.stminput {
   margin-bottom: 1.5rem;
   font-size: 1.3rem;
   font-family: Lato;
@@ -41,12 +41,12 @@
   }
 
   > select {
-    margin-top: .9rem;
+    margin-top: 0.9rem;
     padding-top: 0rem;
     padding-left: 1rem;
     height: 3.4rem !important;
     line-height: 3.2rem;
-    border: 1px solid #E3E9F3;
+    border: 1px solid #e3e9f3;
     border-radius: 0.25rem;
     -moz-appearance: none;
     -webkit-appearance: none;
@@ -56,5 +56,4 @@
     background-repeat: no-repeat;
     background-image: url('../../assets/images/background_input.svg');
   }
-
 }

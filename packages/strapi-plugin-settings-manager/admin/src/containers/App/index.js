@@ -57,7 +57,7 @@ class App extends React.Component {
 
   render() {
     return (
-      <div className={`${pluginId} ${styles.app}`}>
+      <div className={`${pluginId} ${styles.stmapp}`}>
         <Switch>
           <Route
             path="/plugins/settings-manager/:slug/:env"
