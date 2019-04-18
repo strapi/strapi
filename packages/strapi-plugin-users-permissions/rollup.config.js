@@ -14,7 +14,7 @@ export default {
   output: [
     {
       exports: 'named',
-      file: 'admin/dist/strapi-users-permissions.cjs.min.js',
+      file: 'admin/dist/strapi-users-permissions.cjs.js',
       format: 'cjs',
       sourceMap: true,
       name: 'strapi-plugin-users-permissions',
@@ -23,7 +23,7 @@ export default {
     {
       exports: 'named',
       sourceMap: true,
-      file: 'admin/dist/strapi-users-permissions.esm.min.js',
+      file: 'admin/dist/strapi-users-permissions.esm.js',
       format: 'es',
       name: 'strapi-plugin-users-permissions',
       compact: true,
@@ -53,7 +53,7 @@ export default {
 
     svg(),
     require('rollup-plugin-sizes')(),
-    terser(),
+    // terser(),
   ],
 
   external: [

@@ -48,10 +48,10 @@ module.exports = {
   // 'settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
   //   .default,
   // upload: require('../../../strapi-plugin-upload/admin/src').default,
-  upload: require('../../../strapi-plugin-upload/admin/dist/strapi-plugin-upload.esm.min.js')
-    .default,
+  // upload: require('../../../strapi-plugin-upload/admin/dist/strapi-plugin-upload.esm.min.js')
+  //   .default,
   // 'users-permissions': require('../../../strapi-plugin-users-permissions/admin/src')
   //   .default,
-  'users-permissions': require('../../../strapi-plugin-users-permissions/admin/dist/strapi-users-permissions.esm.min.js')
+  'users-permissions': require('../../../strapi-plugin-users-permissions/admin/dist/strapi-users-permissions.esm.js')
     .default,
 };
