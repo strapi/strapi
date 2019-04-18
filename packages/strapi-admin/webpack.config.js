@@ -31,9 +31,9 @@ const webpackPlugins = devMode
     new DuplicatePckgChecker({
       verbose: true,
     }),
-    new OpenBrowserWebpackPlugin({
-      url: `http://localhost:${PORT}/${URLs.publicPath}`,
-    }),
+    // new OpenBrowserWebpackPlugin({
+    //   url: `http://localhost:${PORT}/${URLs.publicPath}`,
+    // }),
   ]
   : [
     new webpack.IgnorePlugin({

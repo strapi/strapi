@@ -46,7 +46,6 @@ export default {
       exclude: 'node_modules/**',
       compact: true,
     }),
-
     svg(),
     require('rollup-plugin-sizes')(),
   ],

@@ -71,16 +71,18 @@ Object.keys(plugins).forEach(plugin => {
   const pluginTradsPrefixed = languages.reduce((acc, lang) => {
     const currentLocale = currentPlugin.trads[lang];
 
-    const localeprefixedWithPluginId = Object.keys(currentLocale).reduce(
-      (acc2, current) => {
-        acc2[`${plugins[plugin].id}.${current}`] = currentLocale[current];
+    if (currentLocale) {
+      const localeprefixedWithPluginId = Object.keys(currentLocale).reduce(
+        (acc2, current) => {
+          acc2[`${plugins[plugin].id}.${current}`] = currentLocale[current];
 
-        return acc2;
-      },
-      {},
-    );
+          return acc2;
+        },
+        {},
+      );
 
-    acc[lang] = localeprefixedWithPluginId;
+      acc[lang] = localeprefixedWithPluginId;
+    }
 
     return acc;
   }, {});
