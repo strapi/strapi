@@ -23,6 +23,20 @@ const buildQuery = require('./buildQuery');
 const PIVOT_PREFIX = '_pivot_';
 const GLOBALS = {};
 
+const getDatabaseName = connection => {
+  const dbName = _.get(connection.settings, 'database');
+  switch (_.get(connection.settings, 'client')) {
+    case 'sqlite3':
+      return 'main';
+    case 'pg':
+      return `${dbName}.public`;
+    case 'mysql':
+      return dbName;
+    default:
+      return dbName;
+  }
+};
+
 /**
  * Bookshelf hook
  */
@@ -83,6 +97,7 @@ module.exports = function(strapi) {
 
               // Add some informations about ORM & client connection & tableName
               definition.orm = 'bookshelf';
+              definition.databaseName = getDatabaseName(connection);
               definition.client = _.get(connection.settings, 'client');
               _.defaults(definition, {
                 primaryKey: 'id',
