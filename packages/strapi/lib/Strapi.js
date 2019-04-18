@@ -266,7 +266,11 @@ class Strapi extends EventEmitter {
      */
     const extensions = await loadExtensions(this.config);
     // merge extensions config folders
-    _.merge(this.plugins, extensions.configs);
+    _.mergeWith(this.plugins, extensions.merges, (objValue, srcValue) => {
+      if (_.isArray(objValue)) {
+        return objValue.concat(srcValue);
+      }
+    });
     // overwrite plugins with extensions overwrites
     extensions.overwrites.forEach(({ path, mod }) =>
       _.set(this.plugins, path, mod)

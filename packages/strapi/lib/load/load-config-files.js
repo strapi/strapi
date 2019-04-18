@@ -12,7 +12,7 @@ module.exports = (dir, pattern = 'config/**/*.+(js|json)') =>
   });
 
 const shouldUseFileNameAsKey = file => {
-  return _.some(prefixedPaths, e => file.startsWith(`config/${e}`))
+  return _.some(prefixedPaths, e => file.indexOf(`config/${e}`) >= 0)
     ? true
     : false;
 };
