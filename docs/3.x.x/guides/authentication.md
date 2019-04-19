@@ -282,6 +282,46 @@ For our discord provider it will look like:
     }
 ```
 
+OpenID Connect using Keycloak example:
+
+```js
+case 'keycloak': {
+  const keycloak = new Purest({
+    provider: 'keycloak',
+    config: {
+      'keycloak': {
+        'http://localhost:8080/auth/realms/keycloak': {
+          '__domain': {
+            'auth': {
+              'auth': {
+                'bearer': '[0]'
+              }
+            }
+          },
+          '{endpoint}': {
+            '__path': {
+              'alias': '__default'
+            }
+          }
+        }
+      }
+    }
+  });
+
+  keycloak.query().get('protocol/openid-connect/userinfo').auth(access_token).request((err, res, body) => {
+    if (err) {
+      callback(err);
+    } else {
+      callback(null, {
+        username: body.preferred_username,
+        email: body.email
+      });
+    }
+  });
+  break;
+}
+```
+
 Here is the next part of our switch. Now that we have properly configured our provider, we want to use it to retrieve 
 user information.
 
@@ -315,6 +355,21 @@ For our discord provider it will look like:
         'email'
       ]
     },
+```
+OpenID Connect using Keycloak example:
+
+```js
+keycloak: {
+  enabled: false,
+  icon: 'key',
+  key: '',
+  secret: '',
+  oauth: 2,
+  authorize_url: '', // authorization_endpoint
+  access_url: '', // token_endpoint
+  callback: '/auth/keycloak/callback',
+  scope: ['openid']
+}
 ```
 
 <!-- #### Tests -->
