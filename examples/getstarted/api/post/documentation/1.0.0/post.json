@@ -1,18 +1,18 @@
 {
   "paths": {
-    "/articles": {
+    "/posts": {
       "get": {
         "deprecated": false,
-        "description": "Find all the articles's records",
+        "description": "",
         "responses": {
           "200": {
-            "description": "Retrieve articles document(s)",
+            "description": "response",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Articles"
+                    "$ref": "#/components/schemas/Post"
                   }
                 }
               }
@@ -51,7 +51,7 @@
         },
         "summary": "",
         "tags": [
-          "Articles"
+          "Post"
         ],
         "parameters": [
           {
@@ -188,14 +188,14 @@
       },
       "post": {
         "deprecated": false,
-        "description": "Create a new articles record",
+        "description": "Create a new record",
         "responses": {
           "200": {
-            "description": "Retrieve articles document(s)",
+            "description": "response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Articles"
+                  "$ref": "#/components/schemas/Post"
                 }
               }
             }
@@ -233,7 +233,7 @@
         },
         "summary": "",
         "tags": [
-          "Articles"
+          "Post"
         ],
         "requestBody": {
           "description": "",
@@ -241,20 +241,20 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewArticles"
+                "$ref": "#/components/schemas/NewPost"
               }
             }
           }
         }
       }
     },
-    "/articles/count": {
+    "/posts/count": {
       "get": {
         "deprecated": false,
-        "description": "Retrieve the numver of articles documents",
+        "description": "",
         "responses": {
           "200": {
-            "description": "Retrieve articles document(s)",
+            "description": "response",
             "content": {
               "application/json": {
                 "schema": {
@@ -300,22 +300,22 @@
         },
         "summary": "",
         "tags": [
-          "Articles"
+          "Post"
         ],
         "parameters": []
       }
     },
-    "/articles/{id}": {
+    "/posts/{_id}": {
       "get": {
         "deprecated": false,
-        "description": "Find one articles record",
+        "description": "",
         "responses": {
           "200": {
-            "description": "Retrieve articles document(s)",
+            "description": "response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Articles"
+                  "$ref": "#/components/schemas/Post"
                 }
               }
             }
@@ -353,11 +353,11 @@
         },
         "summary": "",
         "tags": [
-          "Articles"
+          "Post"
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "_id",
             "in": "path",
             "description": "",
             "deprecated": false,
@@ -370,14 +370,14 @@
       },
       "put": {
         "deprecated": false,
-        "description": "Update a single articles record",
+        "description": "Update a record",
         "responses": {
           "200": {
-            "description": "Retrieve articles document(s)",
+            "description": "response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Articles"
+                  "$ref": "#/components/schemas/Post"
                 }
               }
             }
@@ -415,7 +415,7 @@
         },
         "summary": "",
         "tags": [
-          "Articles"
+          "Post"
         ],
         "requestBody": {
           "description": "",
@@ -423,14 +423,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewArticles"
+                "$ref": "#/components/schemas/NewPost"
               }
             }
           }
         },
         "parameters": [
           {
-            "name": "id",
+            "name": "_id",
             "in": "path",
             "description": "",
             "deprecated": false,
@@ -443,10 +443,10 @@
       },
       "delete": {
         "deprecated": false,
-        "description": "Delete a single articles record",
+        "description": "Delete a record",
         "responses": {
           "200": {
-            "description": "deletes a single articles based on the ID supplied",
+            "description": "deletes a single record based on the ID supplied",
             "content": {
               "application/json": {
                 "schema": {
@@ -489,11 +489,11 @@
         },
         "summary": "",
         "tags": [
-          "Articles"
+          "Post"
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "_id",
             "in": "path",
             "description": "",
             "deprecated": false,
@@ -508,182 +508,13 @@
   },
   "components": {
     "schemas": {
-      "Articles": {
+      "Post": {
         "required": [
-          "id",
-          "content"
+          "id"
         ],
         "properties": {
           "id": {
             "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "content2": {
-            "type": "string"
-          },
-          "bro": {
-            "required": [
-              "id",
-              "content"
-            ],
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "content": {
-                "type": "string"
-              },
-              "content2": {
-                "type": "string"
-              },
-              "bro": {
-                "type": "string"
-              },
-              "bra": {
-                "type": "string"
-              },
-              "siblingArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "articles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "deluxeSiblingArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "deluxeArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "posts": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "bra": {
-            "required": [
-              "id",
-              "content"
-            ],
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "content": {
-                "type": "string"
-              },
-              "content2": {
-                "type": "string"
-              },
-              "bro": {
-                "type": "string"
-              },
-              "bra": {
-                "type": "string"
-              },
-              "siblingArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "articles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "deluxeSiblingArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "deluxeArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "posts": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "siblingArticles": {
-            "type": "array",
-            "items": {
-              "required": [
-                "id",
-                "content"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "content2": {
-                  "type": "string"
-                },
-                "bro": {
-                  "type": "string"
-                },
-                "bra": {
-                  "type": "string"
-                },
-                "siblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "articles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeSiblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "posts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
           },
           "articles": {
             "type": "array",
@@ -733,137 +564,6 @@
                   }
                 },
                 "posts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "deluxeSiblingArticles": {
-            "type": "array",
-            "items": {
-              "required": [
-                "id",
-                "content"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "content2": {
-                  "type": "string"
-                },
-                "bro": {
-                  "type": "string"
-                },
-                "bra": {
-                  "type": "string"
-                },
-                "siblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "articles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeSiblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "posts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "deluxeArticles": {
-            "type": "array",
-            "items": {
-              "required": [
-                "id",
-                "content"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "content2": {
-                  "type": "string"
-                },
-                "bro": {
-                  "type": "string"
-                },
-                "bra": {
-                  "type": "string"
-                },
-                "siblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "articles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeSiblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "posts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "posts": {
-            "type": "array",
-            "items": {
-              "required": [
-                "id"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "articles": {
                   "type": "array",
                   "items": {
                     "type": "string"
@@ -874,48 +574,9 @@
           }
         }
       },
-      "NewArticles": {
-        "required": [
-          "content"
-        ],
+      "NewPost": {
         "properties": {
-          "content": {
-            "type": "string"
-          },
-          "content2": {
-            "type": "string"
-          },
-          "bro": {
-            "type": "string"
-          },
-          "bra": {
-            "type": "string"
-          },
-          "siblingArticles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
           "articles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "deluxeSiblingArticles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "deluxeArticles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "posts": {
             "type": "array",
             "items": {
               "type": "string"
@@ -927,7 +588,7 @@
   },
   "tags": [
     {
-      "name": "Articles"
+      "name": "Post"
     }
   ]
 }

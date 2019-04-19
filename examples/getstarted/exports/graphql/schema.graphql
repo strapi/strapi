@@ -2,11 +2,27 @@ type Articles {
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
-  content: Int
+  content: String!
+  content2: String
+  bro: Articles
+  bra: Articles
+  siblingArticles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+  articles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+  deluxeSiblingArticles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+  deluxeArticles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+  posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
 }
 
 input ArticlesInput {
-  content: Int
+  content: String!
+  content2: String
+  bro: ID
+  bra: ID
+  siblingArticles: [ID]
+  articles: [ID]
+  deluxeSiblingArticles: [ID]
+  deluxeArticles: [ID]
+  posts: [ID]
 }
 
 input createArticlesInput {
@@ -15,6 +31,14 @@ input createArticlesInput {
 
 type createArticlesPayload {
   article: Articles
+}
+
+input createPostInput {
+  data: PostInput
+}
+
+type createPostPayload {
+  post: Post
 }
 
 input createRoleInput {
@@ -46,6 +70,14 @@ type deleteArticlesPayload {
   article: Articles
 }
 
+input deletePostInput {
+  where: InputID
+}
+
+type deletePostPayload {
+  post: Post
+}
+
 input deleteRoleInput {
   where: InputID
 }
@@ -63,7 +95,15 @@ type deleteUserPayload {
 }
 
 input editArticlesInput {
-  content: Int
+  content: String
+  content2: String
+  bro: ID
+  bra: ID
+  siblingArticles: [ID]
+  articles: [ID]
+  deluxeSiblingArticles: [ID]
+  deluxeArticles: [ID]
+  posts: [ID]
 }
 
 input editFileInput {
@@ -77,6 +117,10 @@ input editFileInput {
   provider: String
   public_id: String
   related: [ID]
+}
+
+input editPostInput {
+  articles: [ID]
 }
 
 input editRoleInput {
@@ -127,12 +171,15 @@ scalar JSON
 """The `Long` scalar type represents 52-bit integers"""
 scalar Long
 
-union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Articles | createArticlesPayload | updateArticlesPayload | deleteArticlesPayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
+union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Articles | createArticlesPayload | updateArticlesPayload | deleteArticlesPayload | Post | createPostPayload | updatePostPayload | deletePostPayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
 
 type Mutation {
   createArticles(input: createArticlesInput): createArticlesPayload
   updateArticles(input: updateArticlesInput): updateArticlesPayload
   deleteArticles(input: deleteArticlesInput): deleteArticlesPayload
+  createPost(input: createPostInput): createPostPayload
+  updatePost(input: updatePostInput): updatePostPayload
+  deletePost(input: deletePostInput): deletePostPayload
 
   """Create a new role"""
   createRole(input: createRoleInput): createRolePayload
@@ -159,9 +206,22 @@ type MypluginTest {
   type: String!
 }
 
+type Post {
+  id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
+  articles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+}
+
+input PostInput {
+  articles: [ID]
+}
+
 type Query {
   article(id: ID!): Articles
   articles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+  post(id: ID!): Post
+  posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
   files(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
   role(id: ID!): UsersPermissionsRole
 
@@ -195,6 +255,15 @@ input updateArticlesInput {
 
 type updateArticlesPayload {
   article: Articles
+}
+
+input updatePostInput {
+  where: InputID
+  data: editPostInput
+}
+
+type updatePostPayload {
+  post: Post
 }
 
 input updateRoleInput {
