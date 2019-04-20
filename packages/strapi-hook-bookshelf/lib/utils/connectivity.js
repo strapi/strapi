@@ -85,7 +85,7 @@ module.exports = (scope, success, error) => {
       if (err.sql) {
         console.log('⚠️  Server connection has failed! Make sure your database server is running.');
       } else {
-        console.log(`⚠️  Database connection has failed! Make sure your "${scope.database.settings.database}" database exist.`);
+        console.log(`⚠️  Database connection has failed! Make sure your "${scope.database.settings.database}" database exist or user "${scope.database.settings.database.user}" have all privileges.`);
       }
       console.log(err.message);
 
