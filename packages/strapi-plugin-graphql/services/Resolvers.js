@@ -306,12 +306,12 @@ const buildShadowCRUD = (models, plugin) => {
             subscriptionDefinition = {
               [`${subscriptionName}`]: `${subscriptionName}Payload`,
             };
-          break;
+            break;
           default:
             subscriptionDefinition = {
               [`${subscriptionName}(id: ID!)`]: `${subscriptionName}Payload`,
             };
-          break;
+            break;
         }
 
         // Assign subscription definition to global definition.

@@ -223,7 +223,7 @@ module.exports = {
       const _options = _.cloneDeep(options);
       context = Object.assign(context.context || context, {
         request: {},
-        send: (res) => {context.body = res}
+        send: (res) => { context.body = res; }
       });
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {

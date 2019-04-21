@@ -8,12 +8,11 @@
 
 const _ = require('lodash');
 const policyUtils = require('strapi-utils').policy;
-const Query = require('./Query.js');
-/* eslint-disable no-unused-vars */
-
 const { RedisPubSub } = require('graphql-redis-subscriptions');
 const { PubSub } = require('graphql-subscriptions');
 const Redis = require('ioredis');
+const Query = require('./Query.js');
+/* eslint-disable no-unused-vars */
 
 const options = {
   host: process.env.REDIS_HOST,
@@ -74,7 +73,7 @@ module.exports = {
         policyName = 'destroy';
         break;
       default:
-        policyName = policyName;
+        policyName = queryName;
         break;
     }
 
@@ -119,7 +118,7 @@ module.exports = {
                 }
               }
             });
-          }
+          };
           break;
         case 'beforeFetchAll':
         case 'afterFetchAll':
@@ -132,7 +131,7 @@ module.exports = {
                 [`${name}`]: obj.models.map(x => {
                   var model = {
                     ...x.attributes
-                  }
+                  };
                   _.keys(x.relations).map(y => {
                     model[y] = x.attributes || x.relations[y].models.map(z => z.attributes);
                   });
@@ -141,7 +140,7 @@ module.exports = {
                 })
               }
             });
-          }
+          };
           break;
         default:
           model[action] = async (obj) => {
@@ -156,7 +155,7 @@ module.exports = {
                 }
               }
             });
-          }
+          };
           break;
       }
 
@@ -172,7 +171,7 @@ module.exports = {
           default:
             return pubsub.asyncIterator(`${queryName}_${ctx.params.id}`);
         }
-      }
+      };
     })();
 
     if (strapi.plugins['users-permissions']) {
@@ -189,7 +188,7 @@ module.exports = {
       subscribe: async (obj, options, context) => {
         context = Object.assign(context.context || context, {
           request: {},
-          send: (res) => { context.body = res }
+          send: (res) => { context.body = res; }
         });
 
         // Hack to be able to handle permissions for each subscription.
@@ -225,6 +224,6 @@ module.exports = {
         // Hopefully Resolver can be a promise.
         return resolver;
       }
-    }
+    };
   }
 };

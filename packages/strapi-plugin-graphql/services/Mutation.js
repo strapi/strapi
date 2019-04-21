@@ -150,7 +150,7 @@ module.exports = {
     return async (obj, options, context) => {
       context = Object.assign(context.context || context, {
         request: {},
-        send: (res) => {context.body = res}
+        send: (res) => { context.body = res; }
       });
 
       // Hack to be able to handle permissions for each query.
