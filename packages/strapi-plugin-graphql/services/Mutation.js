@@ -148,14 +148,11 @@ module.exports = {
     );
 
     return async (obj, options, context) => {
-      context = Object.assign(context.context || context, {
-        request: {},
-        send: (res) => { context.body = res; }
-      });
-
-      // Hack to be able to handle permissions for each query.
-      const ctx = Object.assign(_.clone(context), {
-        request: Object.assign(_.clone(context.request), {
+      const ctx = Object.assign({
+        send: (res) => { ctx.body = res; }
+      },
+      _.clone(context.context || context), {
+        request: Object.assign(_.clone(context.context ? context.context.request : {}), {
           graphql: null,
         }),
       });
