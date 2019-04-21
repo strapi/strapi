@@ -11,6 +11,7 @@ const pluralize = require('pluralize');
 const Aggregator = require('./Aggregator');
 const Query = require('./Query.js');
 const Mutation = require('./Mutation.js');
+const Subscription = require('./Subscription.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
 
@@ -28,7 +29,8 @@ const buildShadowCRUD = (models, plugin) => {
     definition: '',
     query: {},
     mutation: {},
-    resolver: { Query: {}, Mutation: {} },
+    subscription: {},
+    resolver: { Query: {}, Mutation: {}, Subscription: {} },
   };
 
   if (_.isEmpty(models)) {
@@ -192,6 +194,57 @@ const buildShadowCRUD = (models, plugin) => {
           : null,
     };
 
+    const subscriptions = {
+      beforeSave:
+        _.get(resolver, `Subscription.beforeSave${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'beforeSave')
+          : null,
+      afterSave:
+        _.get(resolver, `Subscription.afterSave${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'afterSave')
+          : null,
+      beforeFetch:
+        _.get(resolver, `Subscription.beforeFetch${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'beforeFetch')
+          : null,
+      afterFetch:
+        _.get(resolver, `Subscription.afterFetch${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'afterFetch')
+          : null,
+      beforeFetchAll:
+        _.get(resolver, `Subscription.beforeFetchAll${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'beforeFetchAll')
+          : null,
+      afterFetchAll:
+        _.get(resolver, `Subscription.afterFetchAll${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'afterFetchAll')
+          : null,
+      beforeCreate:
+        _.get(resolver, `Subscription.beforeCreate${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'beforeCreate')
+          : null,
+      afterCreate:
+        _.get(resolver, `Subscription.afterCreate${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'afterCreate')
+          : null,
+      beforeUpdate:
+        _.get(resolver, `Subscription.beforeUpdate${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'beforeUpdate')
+          : null,
+      afterUpdate:
+        _.get(resolver, `Subscription.afterUpdate${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'afterUpdate')
+          : null,
+      beforeDestroy:
+        _.get(resolver, `Subscription.beforeDestroy${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'beforeDestroy')
+          : null,
+      afterDestroy:
+        _.get(resolver, `Subscription.afterDestroy${capitalizedName}`) !== false
+          ? Subscription.composeSubscriptionResolver(_schema, plugin, name, 'afterDestroy')
+          : null,
+    };
+
     // Add model Input definition.
     acc.definition += Types.generateInputModel(model, name);
 
@@ -231,6 +284,42 @@ const buildShadowCRUD = (models, plugin) => {
           resolver: {
             Mutation: {
               [`${mutationName}`]: mutations[type],
+            },
+          },
+        });
+      }
+    });
+
+    Object.keys(subscriptions).forEach(type => {
+      if (_.isFunction(subscriptions[type].subscribe)) {
+        let subscriptionDefinition;
+        let subscriptionName = `${type}${capitalizedName}`;
+
+        // Generate the Input for this specific action.
+        acc.definition += Types.generateInputPayloadArguments(model, name, type);
+
+        switch (type) {
+          case 'beforeCreate':
+          case 'afterCreate':
+          case 'beforeFetchAll':
+          case 'afterFetchAll':
+            subscriptionDefinition = {
+              [`${subscriptionName}`]: `${subscriptionName}Payload`,
+            };
+          break;
+          default:
+            subscriptionDefinition = {
+              [`${subscriptionName}(id: ID!)`]: `${subscriptionName}Payload`,
+            };
+          break;
+        }
+
+        // Assign subscription definition to global definition.
+        _.merge(acc, {
+          subscription: subscriptionDefinition,
+          resolver: {
+            Subscription: {
+              [`${subscriptionName}`]: subscriptions[type],
             },
           },
         });

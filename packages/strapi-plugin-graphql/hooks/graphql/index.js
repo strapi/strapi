@@ -9,7 +9,12 @@ const _ = require('lodash');
 const path = require('path');
 const glob = require('glob');
 const { ApolloServer } = require('apollo-server-koa');
+const { RedisCache } = require('apollo-server-cache-redis');
+
 const depthLimit = require('graphql-depth-limit');
+
+const { SubscriptionServer } = require('subscriptions-transport-ws');
+const { execute, subscribe } = require('graphql');
 
 module.exports = strapi => {
   return {
@@ -100,13 +105,14 @@ module.exports = strapi => {
         definition: '',
         query: '',
         mutation: '',
+        subscription: '',
         type: {},
         resolver: {},
       });
 
       // Merge user API.
       Object.keys(strapi.api || {}).reduce((acc, current) => {
-        const { definition, query, mutation, type, resolver } = _.get(
+        const { definition, query, mutation, subscription, type, resolver } = _.get(
           strapi.api[current],
           'config.schema.graphql',
           {}
@@ -115,6 +121,7 @@ module.exports = strapi => {
         acc.definition += definition || '';
         acc.query += query || '';
         acc.mutation += mutation || '';
+        acc.subscription += subscription || '';
 
         return _.merge(acc, {
           type,
@@ -124,7 +131,7 @@ module.exports = strapi => {
 
       // Merge plugins API.
       Object.keys(strapi.plugins || {}).reduce((acc, current) => {
-        const { definition, query, mutation, type, resolver } = _.get(
+        const { definition, query, mutation, subscription, type, resolver } = _.get(
           strapi.plugins[current],
           'config.schema.graphql',
           {}
@@ -133,6 +140,7 @@ module.exports = strapi => {
         acc.definition += definition || '';
         acc.query += query || '';
         acc.mutation += mutation || '';
+        acc.subscription += subscription || '';
 
         return _.merge(acc, {
           type,
@@ -163,7 +171,7 @@ module.exports = strapi => {
         },
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
         tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
-        playground: false,
+        playground: false
       };
 
       // Disable GraphQL Playground in production environment.
@@ -173,9 +181,21 @@ module.exports = strapi => {
       ) {
         serverParams.playground = {
           endpoint: strapi.plugins.graphql.config.endpoint,
+          subscriptionEndpoint: strapi.plugins.graphql.config.endpoint
         };
 
         serverParams.introspection = true;
+      }
+      else if(['production', 'staging'].indexOf(process.env.NODE_ENV) >= 0 &&
+                process.env.REDIS_HOST){
+                  
+        serverParams.cache = new RedisCache({
+          host: process.env.REDIS_HOST,
+          port: process.env.REDIS_PORT,
+          password: process.env.REDIS_PASSWORD,
+          db: 1
+          // Options are passed through to the Redis client
+        });
       }
 
       const server = new ApolloServer(serverParams);
@@ -184,6 +204,75 @@ module.exports = strapi => {
         app: strapi.app,
         path: strapi.plugins.graphql.config.endpoint,
       });
+
+      SubscriptionServer.create({
+          schema: server.schema,
+          execute,
+          subscribe,
+          onConnect: async (connectionParams, webSocket) => {
+            let _id, id;
+
+            try{
+              let jwt = await strapi.plugins['users-permissions'].services.jwt.verify(connectionParams.authToken);
+              _id = jwt._id;
+              id = jwt.id;
+            }
+            catch(err){
+              return;
+            }
+      
+            const populate = strapi.plugins['users-permissions'].models.user.associations
+            .filter(ast => ast.autoPopulate !== false)
+            .map(ast => ast.alias);
+      
+            let user = (await strapi.plugins['users-permissions'].services.user.fetchAll({ _id, id }, populate))[0];
+        
+            if (!user) {
+              return;
+            }
+        
+            if (user.role.type === 'root') {
+              return Promise.resolve({
+                state: {
+                  user
+                }
+              });
+            }
+        
+            const store = await strapi.store({
+              environment: '',
+              type: 'plugin',
+              name: 'users-permissions'
+            });
+        
+            if (_.get(await store.get({key: 'advanced'}), 'email_confirmation') && !user.confirmed) {
+              throw new Error('Auth.form.error.confirmed');
+            }
+        
+            if (user.blocked) {
+              throw new Error('Auth.form.error.blocked');
+            }
+            return Promise.resolve({
+              state: {
+                user
+              }
+            });
+          },
+          onOperation: (message, params, webSocket) => {
+            return params;
+          },
+          onOperationComplete: webSocket => {
+            // ...
+          },
+          onDisconnect: (webSocket, context) => {
+            // ...
+          },
+        },
+        {
+          server: strapi.server,
+          path: strapi.plugins.graphql.config.endpoint
+        },
+      );
 
       cb();
     },

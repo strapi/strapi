@@ -1,7 +1,7 @@
 const _ = require('lodash');
 
 module.exports = async (ctx, next) => {
-  let role;
+  let role = ctx.state && ctx.state.user ? ctx.state.user.role : undefined;
 
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {

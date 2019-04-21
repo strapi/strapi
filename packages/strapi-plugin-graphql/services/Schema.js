@@ -131,8 +131,8 @@ const schemaBuilder = {
    */
 
   generateSchema: function() {
-    // Generate type definition and query/mutation for models.
-    let shadowCRUD = { definition: '', query: '', mutation: '', resolver: '' };
+    // Generate type definition and query/mutation for models. @
+    let shadowCRUD = { definition: '', query: '', mutation: '', subscription: '', resolver: '' };
 
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
@@ -140,7 +140,7 @@ const schemaBuilder = {
 
       const modelCruds = Resolvers.buildShadowCRUD(models);
       shadowCRUD = Object.keys(strapi.plugins).reduce((acc, plugin) => {
-        const { definition, query, mutation, resolver } = Resolvers.buildShadowCRUD(
+        const { definition, query, mutation, subscription, resolver } = Resolvers.buildShadowCRUD(
           Object.keys(strapi.plugins[plugin].models),
           plugin
         );
@@ -152,6 +152,7 @@ const schemaBuilder = {
           query,
           resolver,
           mutation,
+          subscription
         });
       }, modelCruds);
     }
@@ -161,6 +162,7 @@ const schemaBuilder = {
       definition,
       query,
       mutation,
+      subscription,
       resolver = {},
     } = strapi.plugins.graphql.config._schema.graphql;
 
@@ -181,6 +183,10 @@ const schemaBuilder = {
         if (acc[type][resolver] === false) {
           delete acc[type][resolver];
 
+          return acc;
+        }
+
+        if (type === 'Subscription') {
           return acc;
         }
 
@@ -229,6 +235,8 @@ const schemaBuilder = {
         this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
       type Mutation {${shadowCRUD.mutation &&
         this.formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation')}${mutation}}
+      type Subscription {${shadowCRUD.subscription &&
+        this.formatGQL(shadowCRUD.subscription, resolver.Subscription, null, 'subscription')}${subscription}}
       ${Types.addCustomScalar(resolvers)}
       ${Types.addInput()}
       ${polymorphicDef}

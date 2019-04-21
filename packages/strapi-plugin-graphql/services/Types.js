@@ -255,6 +255,29 @@ module.exports = {
           model.globalId
         } }
         `;
+
+      case 'beforeFetchAll':
+      case 'afterFetchAll':
+        return `
+          type ${type}${payloadName} { ${pluralize.singular(name)}: [${
+          model.globalId
+        }] }
+        `;
+      case 'beforeCreate':
+      case 'afterCreate':
+      case 'beforeSave':
+      case 'afterSave':
+      case 'beforeFetch':
+      case 'afterFetch':
+      case 'beforeUpdate':
+      case 'afterUpdate':
+      case 'beforeDestroy':
+      case 'afterDestroy':
+        return `
+          type ${type}${payloadName} { ${pluralize.singular(name)}: ${
+          model.globalId
+        } }
+        `;
       default:
       // Nothing
     }
