@@ -55,13 +55,13 @@ Then, delete your old `plugins` folder and replace it with the new one.
 
 ## Update Mongoose
 
-Update all your API services by following this update https://github.com/strapi/strapi/pull/2812/files#diff-c36b911d1bc2922e1d7cf93ae692e054R132
+Update all your API services by following this update [https://github.com/strapi/strapi/pull/2812/files#diff-c36b911d1bc2922e1d7cf93ae692e054R132](https://github.com/strapi/strapi/pull/2812/files#diff-c36b911d1bc2922e1d7cf93ae692e054R132)
 
 ## Update Bookshelf
 
-Update all your API services by following this update https://github.com/strapi/strapi/pull/2970/files#diff-61ba361ed6161efcd5f4e583001cc9c9R240 and  https://github.com/strapi/strapi/pull/2864/files#diff-61ba361ed6161efcd5f4e583001cc9c9R124
+Update all your API services by following this update [https://github.com/strapi/strapi/pull/2970/files#diff-61ba361ed6161efcd5f4e583001cc9c9R240](https://github.com/strapi/strapi/pull/2970/files#diff-61ba361ed6161efcd5f4e583001cc9c9R240) and  [https://github.com/strapi/strapi/pull/2864/files#diff-61ba361ed6161efcd5f4e583001cc9c9R124](https://github.com/strapi/strapi/pull/2864/files#diff-61ba361ed6161efcd5f4e583001cc9c9R124)
 
-We update the name of the life cycle for the before/after fetch all https://github.com/strapi/strapi/pull/2965/files
+We update the name of the life cycle for the before/after fetch all [https://github.com/strapi/strapi/pull/2965/files](https://github.com/strapi/strapi/pull/2965/files)
 You will have to replace `beforeFetchCollection` by `beforeFetchAll` if you added theses functions in you `Model.js` files.
 
 <br>
