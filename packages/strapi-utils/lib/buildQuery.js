@@ -98,7 +98,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
 
     // cast where clauses to match the inner types
     filters.where = filters.where
-      .filter(({ value }) => value)
+      .filter(({ value }) => !_.isNil(value))
       .map(({ field, operator, value }) => {
         const { model: assocModel, attribute } = getAssociationFromFieldKey({
           model,
