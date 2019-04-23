@@ -1,6 +1,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import BlockerComponent from 'components/BlockerComponent';
+import { BlockerComponent } from 'strapi-helper-plugin';
 import { PluginDispatcher } from '../index';
 
 const BlockerComponent2 = () => <div>BlockerComponent</div>;
@@ -56,7 +56,7 @@ describe('<PluginDispatcher />', () => {
     expect(renderedComponent.find(BlockerComponent2)).toHaveLength(1);
   });
 
-  it("Should return the plugin's mainComponent if all conditions are met", () => {
+  it('Should return the plugin\'s mainComponent if all conditions are met', () => {
     const props = {
       global: {
         plugins: {

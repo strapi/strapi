@@ -48,9 +48,6 @@ function App(props) {
   );
 }
 
-// App.contextTypes = {
-//   store: PropTypes.object,
-// };
 App.propTypes = {};
 
 export default App;

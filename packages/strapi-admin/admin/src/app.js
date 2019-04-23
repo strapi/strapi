@@ -61,7 +61,8 @@ import plugins from './plugins';
 const initialState = {};
 const store = configureStore(initialState, history);
 const { dispatch } = store;
-const MOUNT_NODE = document.getElementById('app');
+const MOUNT_NODE =
+  document.getElementById('app') || document.createElement('div');
 
 dispatch(getAppPluginsSucceeded(Object.keys(plugins)));
 
@@ -165,7 +166,6 @@ const render = messages => {
   ReactDOM.render(
     <Provider store={store}>
       <LanguageProvider messages={messages}>
-        {/* <ConnectedRouter history={history}> */}
         <BrowserRouter basename={basename}>
           <App store={store} />
         </BrowserRouter>
@@ -183,23 +183,25 @@ if (module.hot) {
   });
 }
 
-// Chunked polyfill for browsers without Intl support
-if (!window.Intl) {
-  new Promise(resolve => {
-    resolve(import('intl'));
-  })
-    .then(() =>
-      Promise.all([
-        import('intl/locale-data/jsonp/en.js'),
-        import('intl/locale-data/jsonp/de.js'),
-      ]),
-    ) // eslint-disable-line prettier/prettier
-    .then(() => render(translationMessages))
-    .catch(err => {
-      throw err;
-    });
-} else {
-  render(translationMessages);
+if (NODE_ENV !== 'test') {
+  // Chunked polyfill for browsers without Intl support
+  if (!window.Intl) {
+    new Promise(resolve => {
+      resolve(import('intl'));
+    })
+      .then(() =>
+        Promise.all([
+          import('intl/locale-data/jsonp/en.js'),
+          import('intl/locale-data/jsonp/de.js'),
+        ]),
+      ) // eslint-disable-line prettier/prettier
+      .then(() => render(translationMessages))
+      .catch(err => {
+        throw err;
+      });
+  } else {
+    render(translationMessages);
+  }
 }
 
 // @Pierre Burgy exporting dispatch for the notifications...

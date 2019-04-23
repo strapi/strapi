@@ -3,37 +3,41 @@ const jest = require('jest');
 module.exports = {
   collectCoverageFrom: [
     'packages/strapi-admin/admin/src/**/**/*.js',
+    '!packages/strapi-admin/admin/src/*.js',
+    '!packages/strapi-admin/admin/src/utils/*.js',
     'packages/strapi-plugin-*/admin/src/**/**/*.js',
-    'packages/strapi-plugin-*/admin/src/InjectedComponents/*.js',
     'packages/strapi-plugin-*/admin/src/InjectedComponents/tests/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
     '!packages/strapi-plugin-*/admin/src/utils/*.js',
+    '!packages/strapi-plugin-*/admin/src/lifecycles/*.js',
     '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
   ],
   globals: {
     __webpack_public_path__: 'http://localhost:4000',
     strapi: {},
+    BACKEND_URL: 'http://localhost:1337',
+    MODE: 'host',
+    PUBLIC_PATH: '/admin',
+    REMOTE_URL: '/',
+    NODE_ENV: 'test',
   },
   moduleDirectories: [
     'node_modules',
-    '<rootDir>/packages/strapi-helper-plugin/node_modules',
-    '<rootDir>/packages/strapi-helper-plugin',
-    '<rootDir>/packages/strapi-helper-plugin/lib/src',
+    '<rootDir>/packages/strapi-admin/node_modules',
+    '<rootDir>/test/config/front',
   ],
   moduleNameMapper: {
     '.*\\.(css|less|styl|scss|sass)$':
-      '<rootDir>/packages/strapi-helper-plugin/lib/internals/mocks/cssModule.js',
+      '<rootDir>/test/config/front/mocks/cssModule.js',
     '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      '<rootDir>/packages/strapi-helper-plugin/lib/internals/mocks/image.js',
+      '<rootDir>/test/config/front/mocks/image.js',
   },
   rootDir: process.cwd(),
-  setupTestFrameworkScriptFile:
-    '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/test-bundler.js',
+  setupFilesAfterEnv: ['<rootDir>/test/config/front/test-bundler.js'],
   setupFiles: [
-    '<rootDir>/packages/strapi-helper-plugin/node_modules/raf/polyfill',
-    '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/enzyme-setup.js',
-    '<rootDir>/packages/strapi-helper-plugin/lib/internals/testing/strapi.js',
+    '<rootDir>/test/config/front/enzyme-setup.js',
+    '<rootDir>/test/config/front/strapi.js',
   ],
   testRegex: 'tests/.*\\.test\\.js$',
   transform: {
