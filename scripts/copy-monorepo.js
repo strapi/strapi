@@ -43,16 +43,10 @@ yargs
     '$0 <dest>',
     'default command',
     yargs => {
-      yargs
-        .option('run-once', {
-          default: false,
-        })
-        .option('quiet', {
-          alias: 'q',
-          default: false,
-        });
+      yargs.boolean('run-once').boolean('quiet');
     },
     argv => {
+      console.log(argv);
       const source = path.resolve(__dirname, '..', 'packages');
       const dest = path.resolve(process.cwd(), argv.dest);
       watch(source, dest, argv);

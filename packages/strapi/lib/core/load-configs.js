@@ -7,6 +7,9 @@ const fs = require('fs-extra');
 const findPackagePath = require('../load/package-path');
 const loadConfig = require('../load/load-config-files');
 
+/**
+ * Load config files from the different possible locations
+ */
 module.exports = async ({ appPath, installedPlugins }) => {
   const [config, admin, api, plugins, localPlugins] = await Promise.all([
     loadAppConfig(appPath),

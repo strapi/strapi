@@ -7,6 +7,9 @@ const _ = require('lodash');
 const glob = require('../load/glob');
 const findPackagePath = require('../load/package-path');
 
+/**
+ * Load hooks
+ */
 module.exports = async function({ installedHooks, installedPlugins, appPath }) {
   let hooks = {};
 

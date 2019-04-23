@@ -3,7 +3,17 @@ const glob = require('./glob');
 const _ = require('lodash');
 const filePathToPath = require('./filepath-to-prop-path');
 
-module.exports = async (
+/**
+ * Returns an Object build from a list of files matching a glob pattern in a directory
+ * It builds a tree structure ressembling the folder structure in dir
+ * @param {string} dir - Directory to load
+ * @param {string} pattern - Glob pattern to search for
+ * @param {Object} options - Options
+ * @param {Function} options.requireFn - Function that will require the matches files
+ * @param {Function} options.shouldUseFileNameAsKey - Weather to use the filename as a key in the Object path or not
+ * @param {Object} options.globArgs - extra glob function arguments
+ */
+const loadFiles = async (
   dir,
   pattern,
   {
@@ -30,3 +40,5 @@ module.exports = async (
 
   return root;
 };
+
+module.exports = loadFiles;

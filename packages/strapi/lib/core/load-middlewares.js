@@ -23,6 +23,9 @@ const requiredMiddlewares = {
   static: 'koa-static',
 };
 
+/**
+ * Load middlewares
+ */
 module.exports = async function(strapi) {
   const { installedMiddlewares, installedPlugins, appPath } = strapi.config;
 

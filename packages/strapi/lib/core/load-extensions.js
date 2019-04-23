@@ -7,6 +7,9 @@ const loadFiles = require('../load/load-files');
 const glob = require('../load/glob');
 const filePathToPath = require('../load/filepath-to-prop-path');
 
+/**
+ * Loads the extensions folder
+ */
 module.exports = async function({ appPath }) {
   const extensionsDir = path.resolve(appPath, 'extensions');
 

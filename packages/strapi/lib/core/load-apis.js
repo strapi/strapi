@@ -5,6 +5,9 @@ const _ = require('lodash');
 const findPackagePath = require('../load/package-path');
 const loadFiles = require('../load/load-files');
 
+/**
+ * Loads the apis from the different possible locations
+ */
 module.exports = async function({ appPath, installedPlugins }) {
   const [api, admin, plugins, localPlugins] = await Promise.all([
     loadLocalApis(appPath),

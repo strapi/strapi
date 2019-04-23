@@ -2,11 +2,16 @@ const _ = require('lodash');
 const loadFiles = require('./load-files');
 const requireFileAndParse = require('./require-file-parse');
 
-module.exports = (dir, pattern = 'config/**/*.+(js|json)') =>
+/**
+ * @param {string} dir - directory from which to load configs
+ * @param {string} pattern - glob pattern to search for config files
+ */
+const laodConfigFiles = (dir, pattern = 'config/**/*.+(js|json)') =>
   loadFiles(dir, pattern, {
     requireFn: requireFileAndParse,
     shouldUseFileNameAsKey,
     globArgs: {
+      // used to load .init.json at first startup
       dot: true,
     },
   });
@@ -16,6 +21,8 @@ const shouldUseFileNameAsKey = file => {
     ? true
     : false;
 };
+
+// files to load with filename key
 const prefixedPaths = [
   ...['staging', 'production', 'development'].reduce((acc, env) => {
     return acc.concat(
@@ -35,3 +42,5 @@ const prefixedPaths = [
   'queries',
   'layout',
 ];
+
+module.exports = laodConfigFiles;
