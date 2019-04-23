@@ -7,6 +7,14 @@
       "config": {
         "policies": ["plugins.users-permissions.customPolicy"]
       }
+    },
+    {
+      "method": "GET",
+      "path": "/",
+      "handler": "UsersPermissions.index",
+      "config": {
+        "policies": ["plugins.users-permissions.customPolicy"]
+      }
     }
   ]
 }
