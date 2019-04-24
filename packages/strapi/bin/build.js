@@ -65,7 +65,13 @@ window.strapi = Object.assign(window.strapi || {}, {
 
 module.exports = {
 ${strapiDeps
-    .map(p => `'${p}': require('../../plugins/${p}/admin/src').default`)
+    .map(
+      p =>
+        `'${p.replace(
+          /^strapi-plugin-/i,
+          '',
+        )}': require('../../plugins/${p}/admin/src').default`,
+    )
     .join(',\n')}
 }\n
     `,

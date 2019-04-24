@@ -42,7 +42,6 @@
     "lodash": "^4.17.5",
     "prettier": "^1.16.4",
     "pretty-quick": "^1.10.0",
-    "redux-saga": "^0.14.3",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.7",
     "shelljs": "^0.7.7",

@@ -21,7 +21,6 @@
     "prepublishOnly": "IS_MONOREPO=true npm run build"
   },
   "dependencies": {
-    "redux-saga": "^1.0.2",
     "strapi-provider-upload-local": "3.0.0-alpha.26",
     "strapi-utils": "3.0.0-alpha.26",
     "stream-to-array": "^2.3.0",
@@ -57,14 +56,14 @@
     "invariant": "^2.2.1",
     "lodash": "^4.17.11",
     "react": "^16.0.0",
-    "reactstrap": "^5.0.0",
+    "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.0.0",
     "react-intl": "^2.8.0",
     "react-redux": "^7.0.2",
-    "redux-saga": "^0.16.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "react-transition-group": "^2.5.0",
+    "reactstrap": "^5.0.0",
     "strapi-helper-plugin": "^3.0.0-alpha.25.2"
   },
   "author": {

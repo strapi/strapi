@@ -49,7 +49,6 @@
     "rollup-plugin-url": "^2.2.1"
   },
   "dependencies": {
-    "redux-saga": "^0.16.0",
     "shelljs": "^0.7.8"
   },
   "peerDependencies": {
@@ -58,15 +57,14 @@
     "invariant": "^2.2.1",
     "lodash": "^4.17.11",
     "react": "^16.0.0",
-    "reactstrap": "^5.0.0",
     "react-dom": "^16.0.0",
+    "react-helmet": "^5.2.0",
     "react-intl": "^2.8.0",
     "react-redux": "^7.0.2",
-    "redux-saga": "^0.16.0",
-    "react-helmet": "^5.2.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "react-transition-group": "^2.5.0",
+    "reactstrap": "^5.0.0",
     "redux": "^4.0.1",
     "reselect": "^3.0.1",
     "strapi-helper-plugin": "^3.0.0-alpha.25.2"

@@ -50,11 +50,12 @@ export default {
 
     svg(),
     require('rollup-plugin-sizes')(),
-    // terser(),
+    terser(),
   ],
 
   external: [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
+    'redux-saga/effects',
   ],
 };

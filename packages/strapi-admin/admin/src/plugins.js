@@ -15,36 +15,36 @@ window.strapi = Object.assign(window.strapi || {}, {
   injectSaga,
 });
 
-module.exports = {
-  // documentation: require('../../../strapi-plugin-documentation/admin/dist/strapi-plugin-documentation.esm.js')
-  //   .default,
-  'content-manager': require('../../../strapi-plugin-content-manager/admin/dist/strapi-plugin-content-manager.esm.js')
-    .default,
-  'content-type-builder': require('../../../strapi-plugin-content-type-builder/admin/dist/strapi-plugin-content-type-builder.esm.js')
-    .default,
-  // email: require('../../../strapi-plugin-email/admin/dist/strapi-plugin-email.esm.js')
-  //   .default,
-  'users-permissions': require('../../../strapi-plugin-users-permissions/admin/dist/strapi-plugin-users-permissions.esm.js')
-    .default,
-  // upload: require('../../../strapi-plugin-upload/admin/dist/strapi-plugin-upload.esm.js')
-  //   .default,
-  // 'settings-manager':
-  //   // 'settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
-  //   require('../../../strapi-plugin-settings-manager/admin/dist/strapi-plugin-settings-manager.esm.js')
-  //     .default,
-};
 // module.exports = {
-//   documentation: require('../../../strapi-plugin-documentation/admin/src')
+// documentation: require('../../../strapi-plugin-documentation/admin/dist/strapi-plugin-documentation.esm.js')
+//   .default,
+// 'content-manager': require('../../../strapi-plugin-content-manager/admin/dist/strapi-plugin-content-manager.esm.js')
+//   .default,
+// 'content-type-builder': require('../../../strapi-plugin-content-type-builder/admin/dist/strapi-plugin-content-type-builder.cjs.js')
+//   .default,
+// email: require('../../../strapi-plugin-email/admin/dist/strapi-plugin-email.esm.js')
+//   .default,
+// 'users-permissions': require('../../../strapi-plugin-users-permissions/admin/dist/strapi-plugin-users-permissions.esm.js')
+//   .default,
+// upload: require('../../../strapi-plugin-upload/admin/dist/strapi-plugin-upload.esm.js')
+//   .default,
+// 'settings-manager':
+//   // 'settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
+//   require('../../../strapi-plugin-settings-manager/admin/dist/strapi-plugin-settings-manager.esm.js')
 //     .default,
-//   'content-manager': require('../../../strapi-plugin-content-manager/admin/src')
-//     .default,
-//   'content-type-builder': require('../../../strapi-plugin-content-type-builder/admin/src')
-//     .default,
-//   email: require('../../../strapi-plugin-email/admin/src').default,
-//   'users-permissions': require('../../../strapi-plugin-users-permissions/admin/src')
-//     .default,
-//   upload: require('../../../strapi-plugin-upload/admin/src').default,
-//   'settings-manager':
-//     // 'settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
-//     require('../../../strapi-plugin-settings-manager/admin/src').default,
 // };
+module.exports = {
+  documentation: require('../../../strapi-plugin-documentation/admin/src')
+    .default,
+  'content-manager': require('../../../strapi-plugin-content-manager/admin/src')
+    .default,
+  'content-type-builder': require('../../../strapi-plugin-content-type-builder/admin/src')
+    .default,
+  email: require('../../../strapi-plugin-email/admin/src').default,
+  'users-permissions': require('../../../strapi-plugin-users-permissions/admin/src')
+    .default,
+  upload: require('../../../strapi-plugin-upload/admin/src').default,
+  'settings-manager':
+    // 'settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
+    require('../../../strapi-plugin-settings-manager/admin/src').default,
+};

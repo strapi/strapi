@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-// const fs = require('fs-extra');
 
 // Webpack plugins
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
@@ -10,11 +9,12 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackDashboard = require('webpack-dashboard/plugin');
 const OpenBrowserWebpackPlugin = require('open-browser-webpack-plugin');
 const DuplicatePckgChecker = require('duplicate-package-checker-webpack-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+  .BundleAnalyzerPlugin;
 const alias = require('./webpack.alias.js');
 
 const devMode = process.env.NODE_ENV !== 'production';
 const prodMode = process.env.NODE_ENV === 'production';
-const startDate = Date.now();
 
 const URLs = {
   host: '/admin/',
@@ -31,6 +31,12 @@ const webpackPlugins = devMode
     new DuplicatePckgChecker({
       verbose: true,
     }),
+    new FriendlyErrorsWebpackPlugin({
+      compilationSuccessInfo: {
+        messages: ['Your application is running here http://localhost:4000'],
+      },
+    }),
+    new BundleAnalyzerPlugin(),
     // new OpenBrowserWebpackPlugin({
     //   url: `http://localhost:${PORT}/${URLs.publicPath}`,
     // }),
@@ -211,6 +217,7 @@ module.exports = {
     alias,
     symlinks: false,
     extensions: ['.js', '.jsx', '.react.js'],
+    mainFields: ['browser', 'jsnext:main', 'main'],
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -219,14 +226,6 @@ module.exports = {
       favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
     }),
     new SimpleProgressWebpackPlugin(),
-    new FriendlyErrorsWebpackPlugin({
-      compilationSuccessInfo: {
-        messages: [
-          'Your application is running here http://localhost:4000',
-          `Compiled in ${Date.now() - startDate} seconds`,
-        ],
-      },
-    }),
 
     new webpack.DefinePlugin({
       NODE_ENV: JSON.stringify(process.env.NODE_ENV),
