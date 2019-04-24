@@ -119,3 +119,9 @@ dist
 ############################
 
 packages/strapi-generate-new/files/public/
+
+############################
+# Example app
+############################
+
+# *.cache

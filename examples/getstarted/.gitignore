@@ -104,3 +104,5 @@ testApp
 coverage
 
 exports
+
+*.cache
