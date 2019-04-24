@@ -147,11 +147,12 @@ export class ModelPage extends React.Component {
     );
 
     /* istanbul ignore if */
+    /* eslint-disable indent */
     return !!description
       ? description
       : {
-        id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
-      };
+          id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+        };
   };
 
   getModelName = () => {
@@ -196,9 +197,9 @@ export class ModelPage extends React.Component {
     const shouldShowActions = this.isUpdatingTemporaryContentType()
       ? this.getModelAttributesLength() > 0
       : !isEqual(
-        modifiedData[this.getModelName()],
-        initialData[this.getModelName()],
-      );
+          modifiedData[this.getModelName()],
+          initialData[this.getModelName()],
+        );
     /* eslint-disable indent */
     const handleSubmit = this.isUpdatingTemporaryContentType()
       ? () => submitTempContentType(newContentType, this.context)
@@ -745,6 +746,7 @@ export class ModelPage extends React.Component {
 ModelPage.contextTypes = {
   emitEvent: PropTypes.func,
   plugins: PropTypes.object,
+  router: PropTypes.object,
   updatePlugin: PropTypes.func,
 };
 

@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "3.0.0-alpha.25.2",
+  "version": "3.0.0-alpha.26",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "Settings Manager",

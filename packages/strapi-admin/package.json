@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-alpha.25.2",
+  "version": "3.0.0-alpha.26",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -54,7 +54,7 @@
     "redux-saga": "^0.16.0",
     "remove-markdown": "^0.2.2",
     "reselect": "^3.0.1",
-    "strapi-helper-plugin": "3.0.0-alpha.25.2",
+    "strapi-helper-plugin": "3.0.0-alpha.26",
     "styled-components": "^4.2.0",
     "video-react": "^0.13.2"
   },
@@ -86,13 +86,13 @@
     "sass-loader": "^7.1.0",
     "shelljs": "^0.7.8",
     "simple-progress-webpack-plugin": "^1.1.2",
-    "strapi-utils": "3.0.0-alpha.25.2",
     "style-loader": "^0.23.1",
     "url-loader": "^1.1.2",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0",
     "webpack-dashboard": "^3.0.2",
-    "webpack-dev-server": "^3.3.1"
+    "webpack-dev-server": "^3.3.1",
+    "strapi-utils": "3.0.0-alpha.26"
   },
   "author": {
     "name": "Strapi",

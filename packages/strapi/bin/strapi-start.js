@@ -9,6 +9,7 @@
 // Node.js core.
 const path = require('path');
 const cluster = require('cluster');
+const strapi = require('../lib');
 
 // Public dependencies
 const _ = require('lodash');
@@ -24,11 +25,14 @@ const { cli, logger } = require('strapi-utils');
  * @param {string} options.appPath - This is the path where the app is located, the watcher will watch the files under this folder
  * @param {Strapi} options.strapi - Strapi instance
  */
-const watchFileChanges = ({ appPath, strapi }) => {
+const watchFileChanges = ({ appPath, strapiInstance }) => {
   const restart = () => {
-    if (strapi.reload.isWatching && !strapi.reload.isReloading) {
-      strapi.reload.isReloading = true;
-      strapi.reload();
+    if (
+      strapiInstance.reload.isWatching &&
+      !strapiInstance.reload.isReloading
+    ) {
+      strapiInstance.reload.isReloading = true;
+      strapiInstance.reload();
     }
   };
 
@@ -52,21 +56,21 @@ const watchFileChanges = ({ appPath, strapi }) => {
       '**/cypress',
       '**/cypress/**',
       '**/*.db*',
-      '**/generated/schema.graphql'
+      '**/exports/**',
     ],
   });
 
   watcher
     .on('add', path => {
-      strapi.log.info(`File created: ${path}`);
+      strapiInstance.log.info(`File created: ${path}`);
       restart();
     })
     .on('change', path => {
-      strapi.log.info(`File changed: ${path}`);
+      strapiInstance.log.info(`File changed: ${path}`);
       restart();
     })
     .on('unlink', path => {
-      strapi.log.info(`File deleted: ${path}`);
+      strapiInstance.log.info(`File deleted: ${path}`);
       restart();
     });
 };
@@ -81,19 +85,15 @@ const watchFileChanges = ({ appPath, strapi }) => {
 module.exports = function(appPath = '') {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
-    return console.log(`⛔️ ${cyan('strapi start')} can only be used inside a Strapi project.`);
+    return console.log(
+      `⛔️ ${cyan('strapi start')} can only be used inside a Strapi project.`
+    );
   }
 
   appPath = path.join(process.cwd(), appPath);
 
   try {
-    const strapi = (function() {
-      try {
-        return require(path.resolve(appPath, 'node_modules', 'strapi'));
-      } catch (e) {
-        return require('strapi'); // eslint-disable-line import/no-unresolved
-      }
-    })();
+    const strapiInstance = strapi({ appPath });
 
     // Set NODE_ENV
     if (_.isEmpty(process.env.NODE_ENV)) {
@@ -109,12 +109,15 @@ module.exports = function(appPath = '') {
       'server.json'
     ));
 
-    if (process.env.NODE_ENV === 'development' && _.get(server, 'autoReload.enabled') === true) {
+    if (
+      process.env.NODE_ENV === 'development' &&
+      _.get(server, 'autoReload.enabled') === true
+    ) {
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {
           switch (message) {
             case 'reload':
-              strapi.log.info('The server is restarting\n');
+              strapiInstance.log.info('The server is restarting\n');
               worker.send('isKilled');
               break;
             case 'kill':
@@ -134,12 +137,12 @@ module.exports = function(appPath = '') {
       }
 
       if (cluster.isWorker) {
-        watchFileChanges({ appPath, strapi });
+        watchFileChanges({ appPath, strapiInstance });
 
         process.on('message', message => {
           switch (message) {
             case 'isKilled':
-              strapi.server.destroy(() => {
+              strapiInstance.server.destroy(() => {
                 process.send('kill');
               });
               break;
@@ -148,21 +151,16 @@ module.exports = function(appPath = '') {
           }
         });
 
-        return strapi.start(
-          {
-            appPath,
-          },
-          afterwards
-        );
+        return strapiInstance.start(afterwards);
       } else {
         return;
       }
     }
 
-    // Otherwise, if no workable local `strapi` module exists,
+    // Otherwise, if no workable local `strapiInstance` module exists,
     // run the application using the currently running version
-    // of `strapi`. This is probably always the global install.
-    strapi.start(
+    // of `strapiInstance`. This is probably always the global install.
+    strapiInstance.start(
       {
         appPath,
       },
@@ -174,10 +172,10 @@ module.exports = function(appPath = '') {
   }
 };
 
-function afterwards(err, strapi) {
+function afterwards(err, strapiInstance) {
   if (err) {
     logger.error(err.stack ? err.stack : err);
 
-    strapi ? strapi.stop() : process.exit(1);
+    strapiInstance ? strapiInstance.stop() : process.exit(1);
   }
 }

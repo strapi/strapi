@@ -121,16 +121,16 @@ module.exports = {
 
           // set relation to null for all the ids not in the list
           const currentIds = response[current];
-          const diff = _.differenceWith(property, currentIds, (a, b) => {
+          const toRemove = _.differenceWith(currentIds, property, (a, b) => {
             return `${a[assocModel.primaryKey] || a}` === `${b[assocModel.primaryKey] || b}`;
           });
 
           const updatePromise = assocModel
-            .where(assocModel.primaryKey, 'in', currentIds.map(val => val[assocModel.primaryKey]||val))
+            .where(assocModel.primaryKey, 'in', toRemove.map(val => val[assocModel.primaryKey]||val))
             .save({ [details.via] : null }, { method: 'update', patch: true, require: false })
             .then(() => {
               return assocModel
-                .where(assocModel.primaryKey, 'in', diff.map(val => val[assocModel.primaryKey]||val))
+                .where(assocModel.primaryKey, 'in', property.map(val => val[assocModel.primaryKey]||val))
                 .save({ [details.via] : primaryKeyValue }, { method: 'update', patch: true, require: false });
             });
 

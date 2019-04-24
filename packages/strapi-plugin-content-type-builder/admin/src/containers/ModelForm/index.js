@@ -103,17 +103,18 @@ class ModelForm extends React.Component {
       formErrors,
       didCheckErrors: !prevState.didCheckErrors,
     }));
+    const pathname = `/plugins/${pluginId}/models/${modifiedData.name}`;
 
     if (isEmpty(formErrors)) {
       if (actionType === 'create') {
         createTempContentType();
         push({
-          pathname: `/plugins/${pluginId}/models/${modifiedData.name}`,
+          pathname,
           search: 'modalType=chooseAttributes',
         });
       } else if (isUpdatingTemporaryContentType) {
         updateTempContentType();
-        push({ search: '' });
+        push({ pathname, search: '' });
       } else {
         push({ search: '' });
       }

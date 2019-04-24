@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-alpha.25.2",
+  "version": "3.0.0-alpha.26",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Files Upload",
@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "redux-saga": "^1.0.2",
-    "strapi-provider-upload-local": "3.0.0-alpha.25.2",
-    "strapi-utils": "3.0.0-alpha.25.2",
+    "strapi-provider-upload-local": "3.0.0-alpha.26",
+    "strapi-utils": "3.0.0-alpha.26",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },

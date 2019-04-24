@@ -263,7 +263,7 @@ module.exports = {
         });
 
         if (isController) {
-          const values = await resolver.call(null, ctx, null, { populate: [] });
+          const values = await resolver.call(null, ctx, null);
 
           if (ctx.body) {
             return ctx.body;

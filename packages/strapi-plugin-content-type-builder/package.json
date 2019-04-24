@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.0.0-alpha.25.2",
+  "version": "3.0.0-alpha.26",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -26,8 +26,8 @@
     "immutable": "^3.8.2",
     "pluralize": "^7.0.0",
     "redux-saga": "^0.16.0",
-    "strapi-generate": "3.0.0-alpha.25.2",
-    "strapi-generate-api": "3.0.0-alpha.25.2"
+    "strapi-generate": "3.0.0-alpha.26",
+    "strapi-generate-api": "3.0.0-alpha.26"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",

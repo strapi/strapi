@@ -31,7 +31,7 @@ class SelectMany extends React.PureComponent {
   state = {
     isLoading: true,
     options: [],
-    toSkip: 0,
+    start: 0,
   };
 
   componentDidMount() {
@@ -51,7 +51,7 @@ class SelectMany extends React.PureComponent {
       this.state.options = options;
     }
 
-    if (prevState.toSkip !== this.state.toSkip) {
+    if (prevState.start !== this.state.start) {
       this.getOptions('');
     }
   }
@@ -59,7 +59,7 @@ class SelectMany extends React.PureComponent {
   getOptions = query => {
     const params = {
       _limit: 20,
-      _start: this.state.toSkip,
+      _start: this.state.start,
       source: this.props.relation.plugin || 'content-manager',
     };
 
@@ -79,21 +79,22 @@ class SelectMany extends React.PureComponent {
       params,
     })
       .then(response => {
+        /* eslint-disable indent */
         const options = isArray(response)
           ? response.map(item => ({
-            value: item,
-            label: templateObject(
-              { mainField: this.props.relation.displayedAttribute },
-              item,
-            ).mainField,
-          }))
+              value: item,
+              label: templateObject(
+                { mainField: this.props.relation.displayedAttribute },
+                item,
+              ).mainField,
+            }))
           : [
-            {
-              value: response,
-              label: response[this.props.relation.displayedAttribute],
-            },
-          ];
-
+              {
+                value: response,
+                label: response[this.props.relation.displayedAttribute],
+              },
+            ];
+        /* eslint-enable indent */
         const newOptions = cloneDeep(this.state.options);
         options.map(option => {
           // Don't add the values when searching
@@ -145,7 +146,7 @@ class SelectMany extends React.PureComponent {
   handleBottomScroll = () => {
     this.setState(prevState => {
       return {
-        toSkip: prevState.toSkip + 20,
+        start: prevState.start + 1,
       };
     });
   };
@@ -213,23 +214,25 @@ class SelectMany extends React.PureComponent {
         />
         <SortableList
           items={
+            /* eslint-disable indent */
             isNull(value) || isUndefined(value) || value.size === 0
               ? null
               : value.map(item => {
-                if (item) {
-                  return {
-                    value: get(item, 'value') || item,
-                    label:
+                  if (item) {
+                    return {
+                      value: get(item, 'value') || item,
+                      label:
                         get(item, 'label') ||
                         templateObject(
                           { mainField: this.props.relation.displayedAttribute },
                           item,
                         ).mainField ||
                         item.id,
-                  };
-                }
-              })
+                    };
+                  }
+                })
           }
+          /* eslint-enable indent */
           isDraggingSibling={this.props.isDraggingSibling}
           keys={this.props.relation.alias}
           moveAttr={this.props.moveAttr}

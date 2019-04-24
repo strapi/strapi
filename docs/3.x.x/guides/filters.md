@@ -74,9 +74,6 @@ To achieve this, there are two options:
   :::
 
 ::: warning
-If you are using SQL, the deep filtering will not working if you have the same model twice in your filters
-e.g: `GET /posts?tags.labels.posts.title=tag 1`
-
 This feature isn't available for the `upload` plugin.
 :::
 

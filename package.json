@@ -1,10 +1,7 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.25.2",
-  "dependencies": {
-    "npm": "^6.9.0",
-    "uninstall": "0.0.0"
-  },
+  "version": "3.0.0-alpha.26",
+  "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
@@ -41,9 +38,8 @@
     "istanbul": "~0.4.2",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
-    "lerna": "^2.0.0",
+    "lerna": "^3.13.1",
     "lodash": "^4.17.5",
-    "pre-commit": "~1.1.2",
     "prettier": "^1.16.4",
     "pretty-quick": "^1.10.0",
     "redux-saga": "^0.14.3",
@@ -52,9 +48,11 @@
     "shelljs": "^0.7.7",
     "snyk": "^1.99.0",
     "strapi-lint": "file:packages/strapi-lint",
-    "wait-on": "^3.2.0"
+    "wait-on": "^3.2.0",
+    "yargs": "^13.2.2"
   },
   "scripts": {
+    "bootstrap": "yarn install && lerna bootstrap",
     "clean": "npm run removesymlinkdependencies && npx rimraf package-lock.json && npx rimraf packages/*/package-lock.json",
     "clean:all": "npm run removesymlinkdependencies && npx rimraf package-lock.json && npx rimraf packages/*/package-lock.json && npx rimraf packages/*/node_modules",
     "doc": "node ./scripts/documentation.js",
@@ -89,10 +87,6 @@
       "url": "http://strapi.io"
     }
   ],
-  "pre-commit": [
-    "clean",
-    "lint"
-  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
@@ -104,5 +98,10 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "name": "strapi-monorepo",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ]
 }

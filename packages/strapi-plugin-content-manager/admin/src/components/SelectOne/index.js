@@ -128,7 +128,7 @@ class SelectOne extends React.Component {
   handleBottomScroll = () => {
     this.setState(prevState => {
       return {
-        toSkip: prevState.toSkip + 20,
+        toSkip: prevState.toSkip + 1,
       };
     });
   };

@@ -7,37 +7,27 @@
  * This gives you an opportunity to set up your data model,
  * run jobs, or perform some special logic.
  */
-
-const path = require('path');
-const fs = require('fs');
 const _ = require('lodash');
 const uuid = require('uuid/v4');
 
 module.exports = async cb => {
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
-    try {
-      const jwtSecret = uuid();
+    const jwtSecret = uuid();
+    _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
 
-      fs.writeFileSync(path.join(strapi.config.appPath, 'plugins', 'users-permissions', 'config', 'jwt.json'), JSON.stringify({
-        jwtSecret
-      }, null, 2), 'utf8');
-
-      _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
-    } catch(err) {
-      strapi.log.error(err);
-    }
+    await strapi.fs.writePluginFile('users-permissions', 'config/jwt.json', JSON.stringify({ jwtSecret }, null, 2));
   }
 
   const pluginStore = strapi.store({
     environment: '',
     type: 'plugin',
-    name: 'users-permissions'
+    name: 'users-permissions',
   });
 
   const grantConfig = {
     email: {
       enabled: true,
-      icon: 'envelope'
+      icon: 'envelope',
     },
     discord: {
       enabled: false,
@@ -45,10 +35,7 @@ module.exports = async cb => {
       key: '',
       secret: '',
       callback: '/auth/discord/callback',
-      scope: [
-        'identify',
-        'email'
-      ]
+      scope: ['identify', 'email'],
     },
     facebook: {
       enabled: false,
@@ -56,7 +43,7 @@ module.exports = async cb => {
       key: '',
       secret: '',
       callback: '/auth/facebook/callback',
-      scope: ['email']
+      scope: ['email'],
     },
     google: {
       enabled: false,
@@ -64,7 +51,7 @@ module.exports = async cb => {
       key: '',
       secret: '',
       callback: '/auth/google/callback',
-      scope: ['email']
+      scope: ['email'],
     },
     github: {
       enabled: false,
@@ -72,10 +59,7 @@ module.exports = async cb => {
       key: '',
       secret: '',
       redirect_uri: '/auth/github/callback',
-      scope: [
-        'user',
-        'user:email'
-      ]
+      scope: ['user', 'user:email'],
     },
     microsoft: {
       enabled: false,
@@ -83,39 +67,42 @@ module.exports = async cb => {
       key: '',
       secret: '',
       callback: '/auth/microsoft/callback',
-      scope: ['user.read']
+      scope: ['user.read'],
     },
     twitter: {
       enabled: false,
       icon: 'twitter',
       key: '',
       secret: '',
-      callback: '/auth/twitter/callback'
-    }
+      callback: '/auth/twitter/callback',
+    },
   };
-  const prevGrantConfig = await pluginStore.get({key: 'grant'}) || {};
+  const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
   // when plugin_users-permissions_grant is not existed in db
   // or we have added/deleted provider here.
-  if (!prevGrantConfig || !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))) {
+  if (
+    !prevGrantConfig ||
+    !_.isEqual(_.keys(prevGrantConfig), _.keys(grantConfig))
+  ) {
     // merge with the previous provider config.
-    _.keys(grantConfig).forEach((key) => {
+    _.keys(grantConfig).forEach(key => {
       if (key in prevGrantConfig) {
         grantConfig[key] = _.merge(grantConfig[key], prevGrantConfig[key]);
       }
     });
-    await pluginStore.set({key: 'grant', value: grantConfig});
+    await pluginStore.set({ key: 'grant', value: grantConfig });
   }
 
-  if (!await pluginStore.get({key: 'email'})) {
+  if (!(await pluginStore.get({ key: 'email' }))) {
     const value = {
-      'reset_password': {
+      reset_password: {
         display: 'Email.template.reset_password',
         icon: 'refresh',
         options: {
           from: {
             name: 'Administration Panel',
-            email: 'no-reply@strapi.io'
+            email: 'no-reply@strapi.io',
           },
           response_email: '',
           object: '­Reset password',
@@ -125,16 +112,16 @@ module.exports = async cb => {
 
 <p><%= URL %>?code=<%= TOKEN %></p>
 
-<p>Thanks.</p>`
-        }
+<p>Thanks.</p>`,
+        },
       },
-      'email_confirmation': {
+      email_confirmation: {
         display: 'Email.template.email_confirmation',
         icon: 'check-square-o',
         options: {
           from: {
             name: 'Administration Panel',
-            email: 'no-reply@strapi.io'
+            email: 'no-reply@strapi.io',
           },
           response_email: '',
           object: 'Account confirmation',
@@ -144,24 +131,26 @@ module.exports = async cb => {
 
 <p><%= URL %>?confirmation=<%= CODE %></p>
 
-<p>Thanks.</p>`
-        }
-      }
+<p>Thanks.</p>`,
+        },
+      },
     };
 
-    await pluginStore.set({key: 'email', value});
+    await pluginStore.set({ key: 'email', value });
   }
 
-  if (!await pluginStore.get({key: 'advanced'})) {
+  if (!(await pluginStore.get({ key: 'advanced' }))) {
     const value = {
       unique_email: true,
       allow_register: true,
       email_confirmation: false,
-      email_confirmation_redirection: `http://${strapi.config.currentEnvironment.server.host}:${strapi.config.currentEnvironment.server.port}/admin`,
-      default_role: 'authenticated'
+      email_confirmation_redirection: `http://${
+        strapi.config.currentEnvironment.server.host
+      }:${strapi.config.currentEnvironment.server.port}/admin`,
+      default_role: 'authenticated',
     };
 
-    await pluginStore.set({key: 'advanced', value});
+    await pluginStore.set({ key: 'advanced', value });
   }
 
   strapi.plugins['users-permissions'].services.userspermissions.initialize(cb);

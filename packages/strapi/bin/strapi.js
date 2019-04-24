@@ -52,7 +52,6 @@ program
 // `$ strapi new`
 program
   .command('new')
-  .option('-d, --dev', 'Development mode')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
   .option('--dbclient <dbclient>', 'Database client')

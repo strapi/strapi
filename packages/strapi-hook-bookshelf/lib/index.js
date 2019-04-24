@@ -19,11 +19,25 @@ const utilsModels = require('strapi-utils').models;
 const utils = require('./utils/');
 const relations = require('./relations');
 const buildQuery = require('./buildQuery');
+const buildDatabaseSchema = require('./buildDatabaseSchema');
 
 const PIVOT_PREFIX = '_pivot_';
 const GLOBALS = {};
 
-/* eslint-disable indent */
+const getDatabaseName = connection => {
+  const dbName = _.get(connection.settings, 'database');
+  switch (_.get(connection.settings, 'client')) {
+    case 'sqlite3':
+      return 'main';
+    case 'pg':
+      return `${dbName}.public`;
+    case 'mysql':
+      return dbName;
+    default:
+      return dbName;
+  }
+};
+
 /**
  * Bookshelf hook
  */
@@ -49,13 +63,13 @@ module.exports = function(strapi) {
           connector: 'strapi-hook-bookshelf',
         });
 
-        const databaseUpdate = [];
+        const databaseUpdates = [];
 
         _.forEach(connections, (connection, connectionName) => {
           // Apply defaults
           _.defaults(
             connection.settings,
-            strapi.config.hook.settings.bookshelf,
+            strapi.config.hook.settings.bookshelf
           );
 
           // Create Bookshelf instance for this connection.
@@ -67,7 +81,7 @@ module.exports = function(strapi) {
               strapi.config.appPath,
               'config',
               'functions',
-              'bookshelf.js',
+              'bookshelf.js'
             ))(ORM, connection);
           } catch (err) {
             // This is not an error if the file is not found.
@@ -83,21 +97,23 @@ module.exports = function(strapi) {
             // Parse every authenticated model.
             _.forEach(models, (definition, model) => {
               definition.globalName = _.upperFirst(
-                _.camelCase(definition.globalId),
+                _.camelCase(definition.globalId)
               );
+              definition.associations = [];
 
               // Define local GLOBALS to expose every models in this file.
               GLOBALS[definition.globalId] = {};
 
               // Add some informations about ORM & client connection & tableName
               definition.orm = 'bookshelf';
+              definition.databaseName = getDatabaseName(connection);
               definition.client = _.get(connection.settings, 'client');
               _.defaults(definition, {
                 primaryKey: 'id',
                 primaryKeyType: _.get(
                   definition,
                   'options.idAttributeType',
-                  'integer',
+                  'integer'
                 ),
               });
 
@@ -134,10 +150,10 @@ module.exports = function(strapi) {
 
                       return acc;
                     },
-                    {},
+                    {}
                   ),
                 },
-                definition.options,
+                definition.options
               );
 
               if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
@@ -151,14 +167,13 @@ module.exports = function(strapi) {
 
                     // Remove pivot attributes with prefix.
                     _.keys(pivot).forEach(
-                      key => delete attributes[`${PIVOT_PREFIX}${key}`],
+                      key => delete attributes[`${PIVOT_PREFIX}${key}`]
                     );
 
                     // Add pivot attributes without prefix.
                     const pivotAttributes = _.mapKeys(
                       pivot,
-                      (value, key) =>
-                        `${connection.options.pivot_prefix}${key}`,
+                      (value, key) => `${connection.options.pivot_prefix}${key}`
                     );
 
                     return Object.assign({}, attributes, pivotAttributes);
@@ -216,14 +231,12 @@ module.exports = function(strapi) {
                     // Extract association except polymorphic.
                     const associations = definition.associations.filter(
                       association =>
-                        association.nature.toLowerCase().indexOf('morph') ===
-                        -1,
+                        association.nature.toLowerCase().indexOf('morph') === -1
                     );
                     // Extract polymorphic association.
                     const polymorphicAssociations = definition.associations.filter(
                       association =>
-                        association.nature.toLowerCase().indexOf('morph') !==
-                        -1,
+                        association.nature.toLowerCase().indexOf('morph') !== -1
                     );
 
                     polymorphicAssociations.map(association => {
@@ -357,7 +370,7 @@ module.exports = function(strapi) {
                             .map(path => {
                               const assoc = definition.associations.find(
                                 assoc =>
-                                  assoc.alias === path || assoc.via === path,
+                                  assoc.alias === path || assoc.via === path
                               );
 
                               if (assoc && isPolymorphic({ assoc })) {
@@ -378,7 +391,7 @@ module.exports = function(strapi) {
                                       assoc,
                                       path: assoc.alias,
                                       prefix: `${path}.`,
-                                    }),
+                                    })
                                   );
                               }
 
@@ -388,11 +401,11 @@ module.exports = function(strapi) {
                         }
 
                         return _.isFunction(
-                          target[model.toLowerCase()]['beforeFetchAll'],
+                          target[model.toLowerCase()]['beforeFetchAll']
                         )
                           ? target[model.toLowerCase()]['beforeFetchAll']
                           : Promise.resolve();
-                      },
+                      }
                     );
 
                     //eslint-disable-next-line
@@ -401,7 +414,7 @@ module.exports = function(strapi) {
                       attrs = mapper(attrs);
 
                       return _.isFunction(
-                        target[model.toLowerCase()]['beforeSave'],
+                        target[model.toLowerCase()]['beforeSave']
                       )
                         ? target[model.toLowerCase()]['beforeSave']
                         : Promise.resolve();
@@ -453,7 +466,7 @@ module.exports = function(strapi) {
                           fn(instance);
 
                           return _.isFunction(
-                            target[model.toLowerCase()][event.target],
+                            target[model.toLowerCase()][event.target]
                           )
                             ? target[model.toLowerCase()][event.target]
                             : Promise.resolve();
@@ -473,8 +486,8 @@ module.exports = function(strapi) {
                           return true;
                         }
                       }),
-                      'columnName',
-                    ),
+                      'columnName'
+                    )
                   );
 
                   GLOBALS[definition.globalId] = ORM.Model.extend(loadedModel);
@@ -489,607 +502,29 @@ module.exports = function(strapi) {
                   // or `strapi.plugins[xxx].models[yyy]` object.
                   target[model] = _.assign(
                     GLOBALS[definition.globalId],
-                    target[model],
+                    target[model]
                   );
 
                   // Push attributes to be aware of model schema.
                   target[model]._attributes = definition.attributes;
                   target[model].updateRelations = relations.update;
 
-                  databaseUpdate.push(
-                    new Promise(async (resolve, reject) => {
-                      try {
-                        // Equilize database tables
-                        const handler = async (table, attributes) => {
-                          const tableExist = await ORM.knex.schema.hasTable(
-                            table,
-                          );
-
-                          /**
-                           *
-                           * @param {*} attribute
-                           * @param {*} name
-                           * @param {*} isTableExist Used to determine queries that cant be run while ALTERing TABLE
-                           */
-                          const getType = (
-                            attribute,
-                            name,
-                            isTableExist = false,
-                          ) => {
-                            let type;
-
-                            if (!attribute.type) {
-                              // Add integer value if there is a relation
-                              const relation = definition.associations.find(
-                                association => {
-                                  return association.alias === name;
-                                },
-                              );
-
-                              switch (relation.nature) {
-                                case 'oneToOne':
-                                case 'manyToOne':
-                                case 'oneWay':
-                                  type = definition.primaryKeyType;
-                                  break;
-                                default:
-                                  return null;
-                              }
-                            } else {
-                              switch (attribute.type) {
-                                case 'uuid':
-                                  type =
-                                    definition.client === 'pg'
-                                      ? 'uuid'
-                                      : 'varchar(36)';
-                                  break;
-                                case 'text':
-                                  type =
-                                    definition.client === 'pg'
-                                      ? 'text'
-                                      : 'longtext';
-                                  break;
-                                case 'json':
-                                  type =
-                                    definition.client === 'pg'
-                                      ? 'jsonb'
-                                      : 'longtext';
-                                  break;
-                                case 'string':
-                                case 'enumeration':
-                                case 'password':
-                                case 'email':
-                                  type = 'varchar(255)';
-                                  break;
-                                case 'integer':
-                                  type =
-                                    definition.client === 'pg'
-                                      ? 'integer'
-                                      : 'int';
-                                  break;
-                                case 'biginteger':
-                                  type =
-                                    definition.client === 'pg'
-                                      ? 'bigint'
-                                      : 'bigint(53)';
-                                  break;
-                                case 'float':
-                                  type =
-                                    definition.client === 'pg'
-                                      ? 'double precision'
-                                      : 'double';
-                                  break;
-                                case 'decimal':
-                                  type = 'decimal(10,2)';
-                                  break;
-                                case 'date':
-                                case 'time':
-                                case 'datetime':
-                                case 'timestamp':
-                                  type =
-                                    definition.client === 'pg'
-                                      ? 'timestamp with time zone'
-                                      : definition.client === 'sqlite3' &&
-                                        isTableExist
-                                      ? 'timestamp DEFAULT NULL'
-                                      : 'timestamp DEFAULT CURRENT_TIMESTAMP';
-                                  break;
-                                case 'timestampUpdate':
-                                  switch (definition.client) {
-                                    case 'pg':
-                                      type = 'timestamp with time zone';
-                                      break;
-                                    case 'sqlite3':
-                                      type =
-                                        'timestamp DEFAULT CURRENT_TIMESTAMP';
-                                      break;
-                                    default:
-                                      type =
-                                        'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';
-                                      break;
-                                  }
-                                  break;
-                                case 'boolean':
-                                  type = 'boolean';
-                                  break;
-                                default:
-                              }
-                            }
-
-                            return type;
-                          };
-
-                          // Apply field type of attributes definition
-                          const generateColumns = (
-                            attrs,
-                            start,
-                            isTableExist = false,
-                          ) => {
-                            return Object.keys(attrs).reduce((acc, attr) => {
-                              const attribute = attributes[attr];
-
-                              const type = getType(
-                                attribute,
-                                attr,
-                                isTableExist,
-                              );
-
-                              if (type) {
-                                acc.push(
-                                  `${quote}${attr}${quote} ${type} ${
-                                    attribute.required ? 'NOT' : ''
-                                  } NULL `,
-                                );
-                              }
-
-                              return acc;
-                            }, start);
-                          };
-
-                          const generateIndexes = async table => {
-                            try {
-                              const connection =
-                                strapi.config.connections[
-                                  definition.connection
-                                ];
-                              let columns = Object.keys(attributes).filter(
-                                attribute =>
-                                  ['string', 'text'].includes(
-                                    attributes[attribute].type,
-                                  ),
-                              );
-
-                              if (!columns.length) {
-                                // No text columns founds, exit from creating Fulltext Index
-                                return;
-                              }
-
-                              switch (connection.settings.client) {
-                                case 'mysql':
-                                  columns = columns
-                                    .map(attribute => `\`${attribute}\``)
-                                    .join(',');
-
-                                  // Create fulltext indexes for every column.
-                                  await ORM.knex.raw(
-                                    `CREATE FULLTEXT INDEX SEARCH_${_.toUpper(
-                                      _.snakeCase(table),
-                                    )} ON \`${table}\` (${columns})`,
-                                  );
-                                  break;
-                                case 'pg': {
-                                  // Enable extension to allow GIN indexes.
-                                  await ORM.knex.raw(
-                                    'CREATE EXTENSION IF NOT EXISTS pg_trgm',
-                                  );
-
-                                  // Create GIN indexes for every column.
-                                  const indexes = columns.map(column => {
-                                    const indexName = `${_.snakeCase(
-                                      table,
-                                    )}_${column}`;
-                                    const attribute =
-                                      _.toLower(column) === column
-                                        ? column
-                                        : `"${column}"`;
-
-                                    return ORM.knex.raw(
-                                      `CREATE INDEX IF NOT EXISTS search_${_.toLower(
-                                        indexName,
-                                      )} ON "${table}" USING gin(${attribute} gin_trgm_ops)`,
-                                    );
-                                  });
-
-                                  await Promise.all(indexes);
-                                  break;
-                                }
-                              }
-                            } catch (e) {
-                              // Handle duplicate errors.
-                              if (e.errno !== 1061 && e.code !== '42P07') {
-                                if (
-                                  _.get(connection, 'options.debug') === true
-                                ) {
-                                  console.log(e);
-                                }
-
-                                strapi.log.warn(
-                                  "The SQL database indexes haven't been generated successfully. Please enable the debug mode for more details.",
-                                );
-                              }
-                            }
-                          };
-
-                          const storeTable = async (table, attributes) => {
-                            const existTable = await StrapiConfigs.forge({
-                              key: `db_model_${table}`,
-                            }).fetch();
-
-                            if (existTable) {
-                              await StrapiConfigs.forge({
-                                id: existTable.id,
-                              }).save({
-                                value: JSON.stringify(attributes),
-                              });
-                            } else {
-                              await StrapiConfigs.forge({
-                                key: `db_model_${table}`,
-                                type: 'object',
-                                value: JSON.stringify(attributes),
-                              }).save();
-                            }
-                          };
-
-                          const createTable = async table => {
-                            const defaultAttributeDifinitions = {
-                              mysql: [
-                                'id INT AUTO_INCREMENT NOT NULL PRIMARY KEY',
-                              ],
-                              pg: ['id SERIAL NOT NULL PRIMARY KEY'],
-                              sqlite3: [
-                                'id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL',
-                              ],
-                            };
-                            let idAttributeBuilder =
-                              defaultAttributeDifinitions[definition.client];
-                            if (
-                              definition.primaryKeyType === 'uuid' &&
-                              definition.client === 'pg'
-                            ) {
-                              idAttributeBuilder = [
-                                'id uuid NOT NULL DEFAULT uuid_generate_v4() NOT NULL PRIMARY KEY',
-                              ];
-                            } else if (
-                              definition.primaryKeyType !== 'integer'
-                            ) {
-                              idAttributeBuilder = [
-                                `id ${getType({
-                                  type: definition.primaryKeyType,
-                                })} NOT NULL PRIMARY KEY`,
-                              ];
-                            }
-                            const columns = generateColumns(
-                              attributes,
-                              idAttributeBuilder,
-                            ).join(',\n\r');
-                            // Create table
-                            await ORM.knex.raw(`
-                        CREATE TABLE ${quote}${table}${quote} (
-                          ${columns}
-                        )
-                      `);
-                          };
-
-                          if (!tableExist) {
-                            await createTable(table);
-
-                            // Generate indexes.
-                            await generateIndexes(table, attributes);
-
-                            await storeTable(table, attributes);
-                          } else {
-                            const columns = Object.keys(attributes);
-
-                            // Fetch existing column
-                            const columnsExist = await Promise.all(
-                              columns.map(attribute =>
-                                ORM.knex.schema.hasColumn(table, attribute),
-                              ),
-                            );
-
-                            const columnsToAdd = {};
-
-                            // Get columns to add
-                            columnsExist.forEach((columnExist, index) => {
-                              const attribute = attributes[columns[index]];
-
-                              if (!columnExist) {
-                                columnsToAdd[columns[index]] = attribute;
-                              }
-                            });
-
-                            // Generate indexes for new attributes.
-                            await generateIndexes(table, columnsToAdd);
-
-                            let previousAttributes;
-                            try {
-                              previousAttributes = JSON.parse(
-                                (await StrapiConfigs.forge({
-                                  key: `db_model_${table}`,
-                                }).fetch()).toJSON().value,
-                              );
-                            } catch (err) {
-                              await storeTable(table, attributes);
-                              previousAttributes = JSON.parse(
-                                (await StrapiConfigs.forge({
-                                  key: `db_model_${table}`,
-                                }).fetch()).toJSON().value,
-                              );
-                            }
-
-                            // Generate and execute query to add missing column
-                            if (Object.keys(columnsToAdd).length > 0) {
-                              const columns = generateColumns(
-                                columnsToAdd,
-                                [],
-                                tableExist,
-                              );
-                              const queries = columns.reduce(
-                                (acc, attribute) => {
-                                  acc.push(
-                                    `ALTER TABLE ${quote}${table}${quote} ADD ${attribute};`,
-                                  );
-                                  return acc;
-                                },
-                                [],
-                              );
-
-                              await Promise.all(
-                                queries.map(query => ORM.knex.raw(query)),
-                              );
-                            }
-
-                            let sqlite3Change = false;
-
-                            // Execute query to update column type
-                            await Promise.all(
-                              columns.map(
-                                attribute =>
-                                  new Promise(async resolve => {
-                                    if (
-                                      JSON.stringify(
-                                        previousAttributes[attribute],
-                                      ) ===
-                                      JSON.stringify(attributes[attribute])
-                                    ) {
-                                      return resolve();
-                                    } else {
-                                      sqlite3Change = true;
-                                    }
-
-                                    const type = getType(
-                                      attributes[attribute],
-                                      attribute,
-                                    );
-
-                                    if (
-                                      type &&
-                                      definition.client !== 'sqlite3'
-                                    ) {
-                                      const changeType =
-                                        definition.client === 'pg'
-                                          ? `ALTER COLUMN ${quote}${attribute}${quote} TYPE ${type} USING ${quote}${attribute}${quote}::${type}`
-                                          : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} `;
-
-                                      const changeRequired =
-                                        definition.client === 'pg'
-                                          ? `ALTER COLUMN ${quote}${attribute}${quote} ${
-                                              attributes[attribute].required
-                                                ? 'SET'
-                                                : 'DROP'
-                                            } NOT NULL`
-                                          : `CHANGE ${quote}${attribute}${quote} ${quote}${attribute}${quote} ${type} ${
-                                              attributes[attribute].required
-                                                ? 'NOT'
-                                                : ''
-                                            } NULL`;
-
-                                      await ORM.knex.raw(
-                                        `ALTER TABLE ${quote}${table}${quote} ${changeType}`,
-                                      );
-                                      await ORM.knex.raw(
-                                        `ALTER TABLE ${quote}${table}${quote} ${changeRequired}`,
-                                      );
-                                    }
-
-                                    resolve();
-                                  }),
-                              ),
-                            );
-
-                            if (
-                              sqlite3Change &&
-                              definition.client === 'sqlite3'
-                            ) {
-                              await createTable(`tmp_${table}`);
-
-                              try {
-                                const attrs = Object.keys(attributes)
-                                  .filter(attribute =>
-                                    getType(attributes[attribute], attribute),
-                                  )
-                                  .join(' ,');
-                                await ORM.knex.raw(
-                                  `INSERT INTO ${quote}tmp_${table}${quote}(${attrs}) SELECT ${attrs} FROM ${quote}${table}${quote}`,
-                                );
-                              } catch (err) {
-                                console.log('Warning!');
-                                console.log(
-                                  "We can't migrate your data due to the following error.",
-                                );
-                                console.log();
-                                console.log(err);
-                                console.log();
-                                console.log(
-                                  `We created a new table "tmp_${table}" with your latest changes.`,
-                                );
-                                console.log(
-                                  `We suggest you manually migrate your data from "${table}" to "tmp_${table}" and then to DROP and RENAME the tables.`,
-                                );
-
-                                return false;
-                              }
-                              await ORM.knex.raw(
-                                `DROP TABLE ${quote}${table}${quote}`,
-                              );
-                              await ORM.knex.raw(
-                                `ALTER TABLE ${quote}tmp_${table}${quote} RENAME TO ${quote}${table}${quote}`,
-                              );
-
-                              await generateIndexes(table, attributes);
-                            }
-
-                            await storeTable(table, attributes);
-                          }
-                        };
-
-                        const quote = definition.client === 'pg' ? '"' : '`';
-
-                        // Add created_at and updated_at field if timestamp option is true
-                        if (loadedModel.hasTimestamps) {
-                          definition.attributes[
-                            _.isString(loadedModel.hasTimestamps[0])
-                              ? loadedModel.hasTimestamps[0]
-                              : 'created_at'
-                          ] = {
-                            type: 'timestamp',
-                          };
-                          definition.attributes[
-                            _.isString(loadedModel.hasTimestamps[1])
-                              ? loadedModel.hasTimestamps[1]
-                              : 'updated_at'
-                          ] = {
-                            type: 'timestampUpdate',
-                          };
-                        }
-
-                        // Equilize tables
-                        if (
-                          connection.options &&
-                          connection.options.autoMigration !== false
-                        ) {
-                          await handler(
-                            loadedModel.tableName,
-                            definition.attributes,
-                          );
-                        }
-
-                        // Equilize polymorphic releations
-                        const morphRelations = definition.associations.find(
-                          association => {
-                            return association.nature
-                              .toLowerCase()
-                              .includes('morphto');
-                          },
-                        );
-
-                        if (morphRelations) {
-                          const attributes = {
-                            [`${loadedModel.tableName}_id`]: {
-                              type: definition.primaryKeyType,
-                            },
-                            [`${morphRelations.alias}_id`]: {
-                              type: definition.primaryKeyType,
-                            },
-                            [`${morphRelations.alias}_type`]: {
-                              type: 'text',
-                            },
-                            [definition.attributes[morphRelations.alias]
-                              .filter]: {
-                              type: 'text',
-                            },
-                          };
-
-                          if (
-                            connection.options &&
-                            connection.options.autoMigration !== false
-                          ) {
-                            await handler(
-                              `${loadedModel.tableName}_morph`,
-                              attributes,
-                            );
-                          }
-                        }
-
-                        // Equilize many to many releations
-                        const manyRelations = definition.associations.find(
-                          association => {
-                            return association.nature === 'manyToMany';
-                          },
-                        );
-
-                        if (manyRelations && manyRelations.dominant) {
-                          const collection = manyRelations.plugin
-                            ? strapi.plugins[manyRelations.plugin].models[
-                                manyRelations.collection
-                              ]
-                            : strapi.models[manyRelations.collection];
-
-                          const attributes = {
-                            [`${pluralize.singular(
-                              manyRelations.collection,
-                            )}_id`]: {
-                              type: definition.primaryKeyType,
-                            },
-                            [`${pluralize.singular(
-                              definition.globalId.toLowerCase(),
-                            )}_id`]: {
-                              type: definition.primaryKeyType,
-                            },
-                          };
-
-                          const table =
-                            _.get(manyRelations, 'collectionName') ||
-                            utilsModels.getCollectionName(
-                              collection.attributes[manyRelations.via],
-                              manyRelations,
-                            );
-
-                          await handler(table, attributes);
-                        }
-
-                        // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
-                        if (loadedModel.hasTimestamps) {
-                          delete definition.attributes[
-                            _.isString(loadedModel.hasTimestamps[0])
-                              ? loadedModel.hasTimestamps[0]
-                              : 'created_at'
-                          ];
-                          delete definition.attributes[
-                            _.isString(loadedModel.hasTimestamps[1])
-                              ? loadedModel.hasTimestamps[1]
-                              : 'updated_at'
-                          ];
-                        }
-
-                        return resolve();
-                      } catch (error) {
-                        return reject(error);
-                      }
-                    }),
+                  databaseUpdates.push(
+                    buildDatabaseSchema({
+                      ORM,
+                      definition,
+                      loadedModel,
+                      connection,
+                    })
                   );
                 } catch (err) {
                   strapi.log.error(
-                    `Impossible to register the '${model}' model.`,
+                    `Impossible to register the '${model}' model.`
                   );
                   strapi.log.error(err);
                   strapi.stop();
                 }
               });
-
-              if (_.isEmpty(definition.attributes)) {
-                done();
-              }
 
               // Add every relationships to the loaded model for Bookshelf.
               // Basic attributes don't need this-- only relations.
@@ -1100,9 +535,9 @@ module.exports = function(strapi) {
                       details,
                       name,
                       undefined,
-                      model.toLowerCase(),
+                      model.toLowerCase()
                     ),
-                    'verbose',
+                    'verbose'
                   ) || '';
 
                 // Build associations key
@@ -1110,7 +545,7 @@ module.exports = function(strapi) {
                   model.toLowerCase(),
                   definition,
                   details,
-                  name,
+                  name
                 );
 
                 let globalId;
@@ -1123,11 +558,11 @@ module.exports = function(strapi) {
                         strapi.plugins,
                         `${
                           details.plugin
-                        }.models.${globalName.toLowerCase()}.globalId`,
+                        }.models.${globalName.toLowerCase()}.globalId`
                       )
                     : _.get(
                         strapi.models,
-                        `${globalName.toLowerCase()}.globalId`,
+                        `${globalName.toLowerCase()}.globalId`
                       );
                 }
 
@@ -1146,7 +581,7 @@ module.exports = function(strapi) {
                             ) {
                               return details;
                             }
-                          },
+                          }
                         )
                       : _.findKey(
                           strapi.models[details.model].attributes,
@@ -1159,7 +594,7 @@ module.exports = function(strapi) {
                             ) {
                               return details;
                             }
-                          },
+                          }
                         );
 
                     const columnName = details.plugin
@@ -1168,12 +603,12 @@ module.exports = function(strapi) {
                           `${details.plugin}.models.${
                             details.model
                           }.attributes.${FK}.columnName`,
-                          FK,
+                          FK
                         )
                       : _.get(
                           strapi.models,
                           `${details.model}.attributes.${FK}.columnName`,
-                          FK,
+                          FK
                         );
 
                     loadedModel[name] = function() {
@@ -1190,12 +625,12 @@ module.exports = function(strapi) {
                           }.models.${globalId.toLowerCase()}.attributes.${
                             details.via
                           }.columnName`,
-                          details.via,
+                          details.via
                         )
                       : _.get(
                           strapi.models[globalId.toLowerCase()].attributes,
                           `${details.via}.columnName`,
-                          details.via,
+                          details.via
                         );
 
                     // Set this info to be able to see if this field is a real database's field.
@@ -1210,32 +645,28 @@ module.exports = function(strapi) {
                     loadedModel[name] = function() {
                       return this.belongsTo(
                         GLOBALS[globalId],
-                        _.get(details, 'columnName', name),
+                        _.get(details, 'columnName', name)
                       );
                     };
                     break;
                   }
                   case 'belongsToMany': {
                     const collection = details.plugin
-                      ? strapi.plugins[details.plugin].models[
-                          details.collection
-                        ]
+                      ? strapi.plugins[details.plugin].models[details.collection]
                       : strapi.models[details.collection];
 
                     const collectionName =
                       _.get(details, 'collectionName') ||
                       utilsModels.getCollectionName(
                         collection.attributes[details.via],
-                        details,
+                        details
                       );
 
-                    const relationship = _.clone(
-                      collection.attributes[details.via],
-                    );
+                    const relationship = collection.attributes[details.via];
 
                     // Force singular foreign key
                     relationship.attribute = pluralize.singular(
-                      relationship.collection,
+                      relationship.collection
                     );
                     details.attribute = pluralize.singular(details.collection);
 
@@ -1243,7 +674,7 @@ module.exports = function(strapi) {
                     details.column = utils.getPK(model, strapi.models);
                     relationship.column = utils.getPK(
                       details.collection,
-                      strapi.models,
+                      strapi.models
                     );
 
                     // Sometimes the many-to-many relationships
@@ -1267,7 +698,7 @@ module.exports = function(strapi) {
                           GLOBALS[globalId],
                           collectionName,
                           `${relationship.attribute}_${relationship.column}`,
-                          `${details.attribute}_${details.column}`,
+                          `${details.attribute}_${details.column}`
                         ).withPivot(details.withPivot);
                       }
 
@@ -1275,7 +706,7 @@ module.exports = function(strapi) {
                         GLOBALS[globalId],
                         collectionName,
                         `${relationship.attribute}_${relationship.column}`,
-                        `${details.attribute}_${details.column}`,
+                        `${details.attribute}_${details.column}`
                       );
                     };
                     break;
@@ -1291,15 +722,15 @@ module.exports = function(strapi) {
                       return this.morphOne(
                         GLOBALS[globalId],
                         details.via,
-                        `${definition.collectionName}`,
+                        `${definition.collectionName}`
                       ).query(qb => {
                         qb.where(
                           _.get(
                             model,
                             `attributes.${details.via}.filter`,
-                            'field',
+                            'field'
                           ),
-                          name,
+                          name
                         );
                       });
                     };
@@ -1318,15 +749,15 @@ module.exports = function(strapi) {
                       return this.morphMany(
                         GLOBALS[globalId],
                         details.via,
-                        `${definition.collectionName}`,
+                        `${definition.collectionName}`
                       ).query(qb => {
                         qb.where(
                           _.get(
                             collection,
                             `attributes.${details.via}.filter`,
-                            'field',
+                            'field'
                           ),
-                          name,
+                          name
                         );
                       });
                     };
@@ -1335,19 +766,19 @@ module.exports = function(strapi) {
                   case 'belongsToMorph':
                   case 'belongsToManyMorph': {
                     const association = definition.associations.find(
-                      association => association.alias === name,
+                      association => association.alias === name
                     );
 
                     const morphValues = association.related.map(id => {
                       let models = Object.values(strapi.models).filter(
-                        model => model.globalId === id,
+                        model => model.globalId === id
                       );
 
                       if (models.length === 0) {
                         models = Object.keys(strapi.plugins).reduce(
                           (acc, current) => {
                             const models = Object.values(
-                              strapi.plugins[current].models,
+                              strapi.plugins[current].models
                             ).filter(model => model.globalId === id);
 
                             if (acc.length === 0 && models.length > 0) {
@@ -1356,16 +787,16 @@ module.exports = function(strapi) {
 
                             return acc;
                           },
-                          [],
+                          []
                         );
                       }
 
                       if (models.length === 0) {
                         strapi.log.error(
-                          `Impossible to register the '${model}' model.`,
+                          `Impossible to register the '${model}' model.`
                         );
                         strapi.log.error(
-                          'The collection name cannot be found for the morphTo method.',
+                          'The collection name cannot be found for the morphTo method.'
                         );
                         strapi.stop();
                       }
@@ -1379,7 +810,7 @@ module.exports = function(strapi) {
                       [definition.collectionName]: function() {
                         return this.belongsTo(
                           GLOBALS[definition.globalId],
-                          `${definition.collectionName}_id`,
+                          `${definition.collectionName}_id`
                         );
                       },
                       related: function() {
@@ -1388,7 +819,7 @@ module.exports = function(strapi) {
                           ...association.related.map((id, index) => [
                             GLOBALS[id],
                             morphValues[index],
-                          ]),
+                          ])
                         );
                       },
                     };
@@ -1404,13 +835,13 @@ module.exports = function(strapi) {
                       if (verbose === 'belongsToMorph') {
                         return this.hasOne(
                           GLOBALS[options.tableName],
-                          `${definition.collectionName}_id`,
+                          `${definition.collectionName}_id`
                         );
                       }
 
                       return this.hasMany(
                         GLOBALS[options.tableName],
-                        `${definition.collectionName}_id`,
+                        `${definition.collectionName}_id`
                       );
                     };
                     break;
@@ -1419,22 +850,25 @@ module.exports = function(strapi) {
                     break;
                   }
                 }
-
                 done();
               });
+
+              if (_.isEmpty(definition.attributes)) {
+                done();
+              }
             });
           };
 
           // Mount `./api` models.
           mountModels(
             _.pickBy(strapi.models, { connection: connectionName }),
-            strapi.models,
+            strapi.models
           );
 
           // Mount `./admin` models.
           mountModels(
             _.pickBy(strapi.admin.models, { connection: connectionName }),
-            strapi.admin.models,
+            strapi.admin.models
           );
 
           // Mount `./plugins` models.
@@ -1444,12 +878,12 @@ module.exports = function(strapi) {
                 connection: connectionName,
               }),
               plugin.models,
-              name,
+              name
             );
           });
         });
 
-        return Promise.all(databaseUpdate).then(() => cb(), cb);
+        return Promise.all(databaseUpdates).then(() => cb(), cb);
       },
 
       getQueryParams: (value, type, key) => {
@@ -1547,7 +981,7 @@ module.exports = function(strapi) {
       },
       buildQuery,
     },
-    relations,
+    relations
   );
 
   return hook;

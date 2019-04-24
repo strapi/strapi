@@ -23,7 +23,7 @@ module.exports = {
   targets: {
 
     // Call the `admin` generator.
-    '.': ['admin'],
+    // '.': ['admin'],
 
     // Main package.
     'package.json': {
@@ -61,6 +61,10 @@ module.exports = {
     },
 
     // Empty plugins directory.
+    'extensions': {
+      folder: {}
+    },
+
     'plugins': {
       folder: {}
     },

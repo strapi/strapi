@@ -1,0 +1,52 @@
+{
+  "connection": "default",
+  "collectionName": "articles",
+  "info": {
+    "name": "articles",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": ["created_at", "updated_at"],
+    "comment": ""
+  },
+  "attributes": {
+    "content": {
+      "required": true,
+      "type": "text"
+    },
+    "content2": {
+      "type": "text"
+    },
+    "bro": {
+      "model": "articles",
+      "via": "bra"
+    },
+    "bra": {
+      "model": "articles",
+      "via": "bro"
+    },
+    "siblingArticles": {
+      "collection": "articles",
+      "dominant": true,
+      "via": "articles"
+    },
+    "articles": {
+      "collection": "articles",
+      "via": "siblingArticles"
+    },
+    "deluxeSiblingArticles": {
+      "collection": "articles",
+      "dominant": true,
+      "via": "deluxeArticles"
+    },
+    "deluxeArticles": {
+      "collection": "articles",
+      "via": "deluxeSiblingArticles"
+    },
+    "posts": {
+      "collection": "post",
+      "via": "articles"
+    }
+  }
+}

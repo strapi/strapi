@@ -71,7 +71,7 @@ export function* submitCT({
   oldContentTypeName,
   body,
   source,
-  context: { emitEvent, plugins, updatePlugin },
+  context: { emitEvent, plugins, router, updatePlugin },
 }) {
   try {
     const requestURL = `/${pluginId}/models/${oldContentTypeName}`;
@@ -88,6 +88,7 @@ export function* submitCT({
     yield call(request, requestURL, opts, true);
     emitEvent('didSaveContentType');
     yield put(submitContentTypeSucceeded());
+    router.history.push(`/plugins/${pluginId}/models/${name}`);
 
     if (name !== oldContentTypeName) {
       emitEvent('didEditNameOfContentType');

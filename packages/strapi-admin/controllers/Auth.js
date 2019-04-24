@@ -144,10 +144,9 @@ module.exports = {
     }
 
     // First, check if the admin is the first one to register as admin.
-    const admins = await strapi.query('administrator', 'admin').find();
-    const hasAdmin = admins.length > 0;
+    const adminsCount = await strapi.query('administrator', 'admin').count();
 
-    if (hasAdmin) {
+    if (adminsCount > 0) {
       return ctx.badRequest(
         null,
         ctx.request.admin
@@ -199,7 +198,7 @@ module.exports = {
         ]),
       });
     } catch (err) {
-      console.log('err', err);
+      strapi.log.error(err);
       const adminError = _.includes(err.message, 'username')
         ? 'Auth.form.error.username.taken'
         : 'Auth.form.error.email.taken';
