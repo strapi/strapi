@@ -1,0 +1,59 @@
+.boundRoute {
+  display: flex;
+  height: 2.4rem;
+  border-radius: 3px;
+  background-color: #E9EAEB;
+  line-height: 2.4rem;
+}
+
+.verb {
+  padding: 0 1rem;
+  border-radius: 3px;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.path {
+  padding: 0 1rem;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333740;
+}
+
+.title {
+  margin-bottom: 3rem;
+  padding-top: 1.1rem;
+  color: #333740;
+  font-size: 18px;
+  font-weight: 600;
+
+  > span:not(:first-child) {
+    color: #787E8F;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  > span:last-child {
+    color: #1642E1;
+    font-weight: 600;
+  }
+}
+
+.get {
+  background-color: #008DFE;
+}
+
+.post {
+  background-color: #69BA05;
+}
+
+.put {
+  background-color: #F68E0E;
+}
+
+.delete {
+  background-color: #F64D0A;
+}

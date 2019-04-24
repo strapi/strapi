@@ -103,11 +103,11 @@ const remoteURL = (() => {
   }
 
   // Relative URL (ex: /dashboard)
-  if (process.env.REMOTE_URL[0] === '/') {
-    return (window.location.origin + process.env.REMOTE_URL).replace(/\/$/, '');
+  if (REMOTE_URL[0] === '/') {
+    return (window.location.origin + REMOTE_URL).replace(/\/$/, '');
   }
 
-  return process.env.REMOTE_URL.replace(/\/$/, '');
+  return REMOTE_URL.replace(/\/$/, '');
 })();
 
 const displayNotification = (message, status) => {

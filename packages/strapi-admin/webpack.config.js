@@ -17,9 +17,9 @@ const prodMode = process.env.NODE_ENV === 'production';
 const startDate = Date.now();
 
 const URLs = {
-  host: '/',
+  host: '/admin/',
   backend: 'http://localhost:1337',
-  publicPath: '/admin',
+  publicPath: '/admin/',
   mode: 'host',
 };
 const appDir = path.resolve(process.cwd(), '..');
@@ -41,7 +41,7 @@ const webpackPlugins = devMode
       contextRegExp: /moment$/,
     }),
     new MiniCssExtractPlugin({
-      filename: devMode ? '[name].css' : '[name].[chunkhash].js',
+      filename: devMode ? '[name].css' : '[name].[chunkhash].css',
       chunkFilename: devMode
         ? '[name].chunk.css'
         : '[name].[chunkhash].chunkhash.css',
@@ -78,7 +78,7 @@ module.exports = {
   // It only work with the monorepo setup
   entry: path.resolve(appDir, 'strapi-admin', 'admin', 'src', 'app.js'),
   output: {
-    path: path.resolve(process.cwd(), 'build'),
+    path: path.resolve(process.cwd(), 'admin', 'build'),
     publicPath: URLs.publicPath,
     // Utilize long-term caching by adding content hashes (not compilation hashes)
     // to compiled assets for production

@@ -1,0 +1,18 @@
+.supportUsCta {
+  padding: 7px 12px 7px 20px;
+  border: 1px solid #FFFFFF;
+  border-radius: 3px;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  &:after {
+    content: '\f178';
+    font-family: 'FontAwesome';
+    margin-left: 10px;
+  }
+  &:hover {
+    color: #FFFFFF;
+    text-decoration: none;
+  }
+}

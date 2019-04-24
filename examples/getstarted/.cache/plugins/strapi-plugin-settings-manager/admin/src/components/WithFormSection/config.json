@@ -1,0 +1,8 @@
+{
+  "application.description": "col-md-6 offset-md-6 mr-md-5",
+  "application.version": "col-md-6 offset-md-6 mr-md-5",
+  "databases.connections.${name}.settings.host": "col-md-12",
+  "database.connections.settings.host": "col-md-12",
+  "database.connections.settings.port": "col-md-6",
+  "showInputLabel": ["form.response.item.gzip.enabled", "form.response.item.responseTime.enabled", "form.response.item.poweredBy.enabled"]
+}

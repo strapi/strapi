@@ -1,0 +1,40 @@
+// Import
+@import "../../styles/variables/variables";
+
+.leftMenuLinkContainer { /* stylelint-ignore */
+  padding-top: .6rem;
+  padding-bottom: 10.2rem; // LeftMenuFooter height
+  position: absolute;
+  top: 60px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow-y: auto;
+}
+
+.title {
+  padding-left: 2rem;
+  padding-right: 1.6rem;
+  padding-top: 1rem;
+  margin-bottom: .8rem;
+  color: $left-menu-title-color;
+  text-transform: uppercase;
+  font-size: 1.1rem;
+  letter-spacing: .1rem;
+  font-weight: 800;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 2rem;
+}
+
+.noPluginsInstalled {
+  color: $white;
+  padding-left: 1.6rem;
+  padding-right: 1.6rem;
+  font-weight: 300;
+  min-height: 3.6rem;
+  padding-top: .9rem;
+}

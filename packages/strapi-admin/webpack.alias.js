@@ -6,8 +6,10 @@ const alias = Object.keys(pkg.dependencies).concat([
   'whatwg-fetch',
 ]);
 
-module.exports = alias.reduce((acc, curr) => {
-  acc[curr] = path.resolve(__dirname, 'node_modules', curr);
+module.exports = {};
 
-  return acc;
-}, {});
+// module.exports = alias.reduce((acc, curr) => {
+//   acc[curr] = path.resolve(__dirname, 'node_modules', curr);
+
+//   return acc;
+// }, {});

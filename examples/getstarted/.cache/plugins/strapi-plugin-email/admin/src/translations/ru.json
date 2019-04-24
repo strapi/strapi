@@ -1,0 +1,11 @@
+{
+  "ConfigPage.description": "Настройка плагина email",
+  "ConfigPage.title": "Email - Настройки",
+  "EditForm.Input.number.label": "Максимально допустимый размер (в МБ)",
+  "EditForm.Input.select.inputDescription": "Письма могут быть отправлены стандартным способом (Sendmail) или с помощью внешних провайдеров",
+  "EditForm.Input.select.label": "Провайдеры",
+  "EditForm.Input.toggle.label": "Активировать отправку писем",
+  "notification.config.success": "Настройки успешно обновлены",
+  "plugin.description.long": "Отсылка почты.",
+  "plugin.description.short": "Отсылка почты."
+}

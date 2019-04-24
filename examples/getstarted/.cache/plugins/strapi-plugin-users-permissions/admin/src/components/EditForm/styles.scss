@@ -1,0 +1,23 @@
+.editForm {
+  background: #ffffff;
+  padding: 45px 30px 22px 30px;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px #E3E9F3;
+}
+
+.separator {
+  box-sizing: border-box;
+  height: 1px;
+  width: 100%;
+  margin-top: 1.4rem;
+  margin-bottom: 2.1rem;
+  background: #F6F6F6;
+}
+
+.loadIndicatorContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  min-height: 209px;
+  padding-top: 88px;
+}

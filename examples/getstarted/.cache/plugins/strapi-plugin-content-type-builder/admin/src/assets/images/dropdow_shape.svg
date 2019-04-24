@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="8px" height="4px" viewBox="0 0 8 4" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.2 (44496) - http://www.bohemiancoding.com/sketch -->
+    <title>Shape</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Pages" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Content-Type-Builder---Content-Type-view" transform="translate(-1124.000000, -335.000000)" fill-rule="nonzero" fill="#000000">
+            <g id="Container">
+                <g id="Content">
+                    <g id="Popup---Add-New-Relation---Define-Relation" transform="translate(427.000000, 230.000000)">
+                        <g id="Card-right" transform="translate(500.000000, 87.000000)">
+                            <g id="caret-down" transform="translate(197.000000, 18.000000)">
+                                <path d="M7.11111111,0.444444444 C7.11111111,0.564814815 7.06712963,0.668981481 6.97916667,0.756944444 L3.86805556,3.86805556 C3.78009259,3.95601852 3.67592593,4 3.55555556,4 C3.43518519,4 3.33101852,3.95601852 3.24305556,3.86805556 L0.131944444,0.756944444 C0.0439814815,0.668981481 0,0.564814815 0,0.444444444 C0,0.324074074 0.0439814815,0.219907407 0.131944444,0.131944444 C0.219907407,0.0439814815 0.324074074,0 0.444444444,0 L6.66666667,0 C6.78703704,0 6.8912037,0.0439814815 6.97916667,0.131944444 C7.06712963,0.219907407 7.11111111,0.324074074 7.11111111,0.444444444 Z" id="Shape"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

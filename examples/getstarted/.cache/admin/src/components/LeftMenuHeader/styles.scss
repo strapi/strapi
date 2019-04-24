@@ -1,0 +1,31 @@
+// Import
+@import "../../styles/variables/variables";
+
+.leftMenuHeader { /* stylelint-ignore */
+  background: $left-menu-link-hover;
+  height: $header-height;
+  background: linear-gradient(100deg , #1C5DE7, #1C91E7);
+}
+
+.projectName {
+  display: block;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  line-height: $header-height;
+  vertical-align: middle;
+  font-size: 2rem;
+  letter-spacing: 0.2rem;
+  color: $white;
+
+  background-image: url('../../assets/images/logo-strapi.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: auto 3rem;
+}
+
+.leftMenuHeaderLink {
+  &:hover {
+    text-decoration: none;
+  }
+}

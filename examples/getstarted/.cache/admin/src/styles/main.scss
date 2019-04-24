@@ -1,0 +1,29 @@
+// Import variables
+@import "variables/variables";
+@import "base/fonts";
+
+:global {
+  // Expose libs styles
+  @import "libs/bootstrap/bootstrap";
+  @import "libs/fontawesome/fontawesome";
+
+  // Expose base styles
+  @import "base/bootstrap-override";
+  @import "base/animations";
+  @import "base/animations";
+
+  // Set the global font-size in order
+  // to be able to have `1rem = 10px`.
+  html {
+    font-size: 62.5%;
+  }
+
+  ::-webkit-scrollbar { 
+    display: none; 
+  }
+
+
+  * {
+    -webkit-font-smoothing: antialiased;
+  }
+}

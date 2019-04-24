@@ -1,0 +1,126 @@
+.tableListContainer { /* stylelint-disable */
+  padding: 19px 0 0rem 0;
+  background: #FFFFFF;
+  font-family: Lato;
+  box-shadow: 0 2px 4px #E3E9F3;
+}
+
+.headerContainer {
+  width: 100%;
+  padding: 0 1rem 0 3rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+}
+
+.titleContainer {
+  color: #333740;
+  font-size: 1.8rem;
+  font-weight: bold;
+  line-height: 2.2rem;
+}
+
+.ulContainer {
+  margin-top: 1.6rem;
+  width: 100%;
+  > ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    > li:first-child {
+      margin-top: 0.1rem;
+      border-radius: 2px 2px 0 0;
+      background-color: #F3F3F4;
+    }
+    > li:not(:first-child) {
+      margin-top: 0!important;
+    }
+    > li:nth-child(2) {
+      min-height: 5.7rem;
+      padding-top: .3rem;
+    }
+    > li:last-child {
+      margin-bottom: 0;
+      .liInnerContainer {
+        border-bottom: none;
+      }
+    }
+  }
+}
+
+.liHeaderContainer {
+  height: 3rem;
+  margin: 0;
+  padding: 0 4.6rem .3rem 1.9rem;
+  font-size: 1.3rem;
+
+  line-height: 1.6rem;
+  font-weight: 600;
+  > div {
+    padding: 0;
+    align-self: center;
+  }
+  > div:last-child {
+    text-align: right;
+  }
+}
+
+.liInnerContainer {
+  margin: 0 3.2rem 0 1.9rem ;
+  padding: 0 1.4rem 0 0rem;
+  border-bottom: 1px solid rgba(14,22,34,0.04);
+  color: #333740;
+  font-size: 1.3rem;
+  > div {
+    padding: 0;
+    align-self: center;
+  }
+  > div:first-child{
+    padding-left: 1.4rem;
+  }
+  > div:last-child {
+    text-align: right;
+  }
+  > div:nth-child(2) {
+    font-weight: 600;
+  }
+}
+
+
+.italic {
+    font-weight: 600;
+  > span:nth-child(2) {
+    font-style: italic;
+  }
+}
+
+.nameContainer {
+  display: flex;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  > span:first-child {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+  }
+  > i {
+    align-self: center;
+    margin-right: 52px;
+  }
+}
+
+.descriptionContainer {
+  > div {
+    display: block;
+    padding-left: 15px;
+    padding-right: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+}

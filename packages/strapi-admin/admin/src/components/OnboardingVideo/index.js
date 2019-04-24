@@ -10,7 +10,8 @@ import cn from 'classnames';
 
 import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { Player } from 'video-react';
-import '../../../../node_modules/video-react/dist/video-react.css';
+
+import 'video-react/dist/video-react.css';
 
 import styles from './styles.scss';
 

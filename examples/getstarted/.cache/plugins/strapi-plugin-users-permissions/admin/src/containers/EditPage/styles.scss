@@ -1,0 +1,40 @@
+.container {
+  padding-top: 18px;
+}
+
+.containerFluid {
+  padding: 18px 30px;
+  > div:first-child {
+    margin-bottom: 11px;
+  }
+}
+
+.form {
+  padding-top: 2rem;
+}
+
+.main_wrapper{
+  background: #ffffff;
+  padding: 22px 28px 0px;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px #E3E9F3;
+}
+
+.separator {
+  margin-top: 15px;
+  border-top: 1px solid #F6F6F6;
+}
+
+.titleContainer {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 18px;
+}
+
+.loaderWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 260px;
+  margin: auto;
+}

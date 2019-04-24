@@ -20,7 +20,9 @@ const requireTranslations = language => {
   try {
     return require(`./translations/${language}.json`); // eslint-disable-line global-require
   } catch (error) {
-    console.error(`Unable to load "${language}" translation. Please make sure "${language}.json" file exists in "admin/public/app/translations" folder.`); // eslint-disable-line no-console
+    console.error(
+      `Unable to load "${language}" translation. Please make sure "${language}.json" file exists in "admin/public/app/translations" folder.`,
+    ); // eslint-disable-line no-console
     return false;
   }
 };
@@ -37,7 +39,7 @@ const addLanguageLocaleData = language => {
     addLocaleData(localeData);
     return true;
   } catch (error) {
-    console.warn(`⚠️ It looks like the language "${language}" is not supported by "react-intl" module.`); // eslint-disable-line no-console
+    // console.warn(`⚠️ It looks like the language "${language}" is not supported by "react-intl" module.`); // eslint-disable-line no-console
     return false;
   }
 };
@@ -45,14 +47,15 @@ const addLanguageLocaleData = language => {
 /**
  * Dynamically generate `translationsMessages object`.
  */
-const translationMessages = reduce(languages, (result, language) => {
-  const obj = result;
-  obj[language] = requireTranslations(language);
-  addLanguageLocaleData(language);
-  return obj;
-}, {});
-
-export {
+const translationMessages = reduce(
   languages,
-  translationMessages,
-};
+  (result, language) => {
+    const obj = result;
+    obj[language] = requireTranslations(language);
+    addLanguageLocaleData(language);
+    return obj;
+  },
+  {},
+);
+
+export { languages, translationMessages };

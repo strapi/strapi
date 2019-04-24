@@ -1,0 +1,6 @@
+{
+  "welcome": {
+    "id": "app.components.HomePage.welcome",
+    "defaultMessage": "Welcome on board!"
+  }
+}

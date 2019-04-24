@@ -1,0 +1,10 @@
+.app { /* stylelint-disable */
+  min-height: calc(100vh - 6rem);
+}
+
+
+.centered {
+  position: fixed;
+  top: calc(50% - 13px);
+  right: calc(50% - 13px);
+}

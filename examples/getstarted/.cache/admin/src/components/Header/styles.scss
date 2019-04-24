@@ -1,0 +1,15 @@
+// Import
+@import "../../styles/variables/variables";
+
+.header { /* stylelint-ignore */
+  width: 100%;
+  height: $header-height;
+  position: fixed;
+  z-index: 1040;
+  left: $left-menu-width;
+
+  box-shadow:  0 1px 2px 0 rgba(40, 42, 49, 0.16);
+  background-color: $white;
+
+  line-height: $header-height;
+}

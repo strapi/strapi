@@ -1,0 +1,59 @@
+.stminputToggle {
+  /* stylelint-disable */
+  margin-top: 0.2rem;
+  margin-bottom: 1rem;
+  > button {
+    // display and box model
+    width: 5.3rem;
+    height: 3.4rem;
+    padding: 0;
+    line-height: 3.4rem;
+    border: 1px solid #e3e9f3;
+
+    margin-bottom: 2.8rem;
+
+    // color
+    color: #ced3db;
+    background-color: white;
+    // text
+    font-weight: 600;
+    font-size: 1.2rem;
+    letter-spacing: 0.1rem;
+    font-family: Lato;
+    cursor: pointer;
+    &:first-of-type {
+      border-right: none;
+      // box-shadow: inset -1px 1 3px 0 rgba(0,0,0,0.1);
+    }
+    &:nth-of-type(2) {
+      border-left: none;
+      // box-shadow: inset -4px 0 0px -2px rgba(0,0,0,0.05), inset 0px -4px 0px -2px rgba(0,0,0,0.05), 0px -4px 0px -2px rgba(0,0,0,0.05);
+    }
+    &:hover {
+      z-index: 0 !important;
+    }
+    &:focus {
+      outline: 0;
+      box-shadow: 0 0 0;
+    }
+  }
+}
+
+.stmgradientOff {
+  background-image: linear-gradient(to bottom right, #f65a1d, #f68e0e);
+  color: white !important;
+  box-shadow: inset -1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stmgradientOn {
+  background-image: linear-gradient(to bottom right, #005eea, #0097f6);
+  color: white !important;
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stmtoggleLabel {
+  font-weight: 500;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  line-height: 1.6rem;
+}

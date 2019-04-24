@@ -1,0 +1,39 @@
+.tableHeader {
+  background: #F3F3F3;
+  height: 41px;
+  overflow: hidden;
+
+  th{
+    height: 41px;
+    border: none !important;
+    font-size: 1.3rem;
+    vertical-align: middle !important;
+    > span {
+      position: relative;
+      cursor: pointer;
+    }
+  }
+}
+
+.withBulk {
+  > tr {
+    th:first-child {
+      width: 50px;
+    }
+  }
+}
+
+.iconAsc{
+  position: absolute;
+  top: 3px; right: -12px;
+
+  &:before{
+    vertical-align: sub;
+  }
+}
+
+.iconDesc{
+  position: absolute;
+  top: 3px; right: -12px;
+  transform: translateY(-3px) rotateZ(180deg);
+}
