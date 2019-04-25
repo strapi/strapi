@@ -7,18 +7,11 @@
     "url": "git://github.com/strapi/strapi-admin.git"
   },
   "scripts": {
-    "analyze:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf stats.json",
-    "preanalyze": "npm run analyze:clean",
-    "analyze": "node ./node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
     "build": "cross-env NODE_ENV=production webpack -c webpack.config.js",
     "start": "cross-env NODE_ENV=development webpack-dev-server --watch",
     "start:infos": "webpack-dashboard -- webpack-dev-server --watch",
-    "generate": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/plop --plopfile ./node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "echo \"no tests yet\"",
-    "prepublishOnly": "IS_MONOREPO=true npm run build",
-    "setup": "node ./scripts/setup.js",
-    "presetup": "node ./scripts/preSetup.js"
+    "prepublishOnly": ""
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.3",

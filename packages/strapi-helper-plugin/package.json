@@ -11,8 +11,8 @@
     "name": "Strapi team",
     "url": "http://strapi.io"
   },
-  "main": "dist/strapi-helper-plugin.esm.min.js",
-  "module": "dist/strapi-helper-plugin.cjs.min.js",
+  "main": "dist/strapi-helper-plugin.cjs.min.js",
+  "module": "dist/strapi-helper-plugin.esm.min.js",
   "maine": "lib/src",
   "maintainers": [
     {
@@ -23,14 +23,10 @@
   ],
   "license": "MIT",
   "scripts": {
-    "prettier": "prettier --single-quote --trailing-comma es5 --write \"{lib,__{tests,mocks}__}/**/*.js\"",
     "prebuild": "rimraf dist",
     "build": "rollup -c",
     "test": "echo \"no tests yet\""
   },
-  "pre-commit": [
-    "lint:admin"
-  ],
   "peerDependencies": {
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",
@@ -39,6 +35,7 @@
     "moment": "^2.16.0",
     "react": "^16.0.0",
     "reactstrap": "^5.0.0",
+    "react-datetime": "^2.16.3",
     "react-dom": "^16.0.0",
     "react-intl": "^2.8.0",
     "react-router": "^5.0.0",
