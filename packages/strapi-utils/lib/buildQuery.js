@@ -106,7 +106,13 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
         });
 
         const { type } = _.get(assocModel, ['attributes', attribute], {});
-        return { field, operator, value: castValueToType({ type, value }) };
+
+        // cast value or array of values
+        const castedValue = Array.isArray(value)
+          ? value.map(val => castValueToType({ type, value: val }))
+          : castValueToType({ type, value: value });
+
+        return { field, operator, value: castedValue };
       });
   }
 
