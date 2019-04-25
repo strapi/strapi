@@ -12,6 +12,14 @@ import 'codemirror/addon/lint/lint';
 import 'codemirror/addon/lint/javascript-lint';
 import 'codemirror/addon/edit/closebrackets';
 import 'codemirror/addon/selection/mark-selection';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/liquibyte.css';
+import 'codemirror/theme/xq-dark.css';
+import 'codemirror/theme/3024-day.css';
+import 'codemirror/theme/3024-night.css';
+import 'codemirror/theme/blackboard.css';
+import 'codemirror/theme/monokai.css';
+import 'codemirror/theme/cobalt.css';
 
 import { isEmpty, isObject, trimStart } from 'lodash';
 import jsonlint from './jsonlint';

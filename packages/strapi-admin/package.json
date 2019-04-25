@@ -24,7 +24,6 @@
     "@babel/polyfill": "^7.4.3",
     "@babel/runtime": "^7.4.3",
     "classnames": "^2.2.6",
-    "codemirror": "^5.45.0",
     "crypto": "^1.0.1",
     "history": "^4.9.0",
     "hoist-non-react-statics": "^3.3.0",

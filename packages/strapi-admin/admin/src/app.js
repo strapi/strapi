@@ -9,15 +9,7 @@ import '@babel/polyfill';
 import 'sanitize.css/sanitize.css';
 
 // Third party css library needed
-// Currently unable to bundle them.
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/liquibyte.css';
-import 'codemirror/theme/xq-dark.css';
-import 'codemirror/theme/3024-day.css';
-import 'codemirror/theme/3024-night.css';
-import 'codemirror/theme/blackboard.css';
-import 'codemirror/theme/monokai.css';
-import 'codemirror/theme/cobalt.css';
+// Currently unable to bundle them
 
 import 'react-select/dist/react-select.css';
 import 'react-datetime/css/react-datetime.css';
