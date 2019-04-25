@@ -1,34 +1,49 @@
 const path = require('path');
+const webpack = require('webpack');
 const fs = require('fs-extra');
+const getPkgPath = require('../lib/load/package-path');
 
-const appPath = process.cwd();
-const pkgPath = pkg => path.dirname(require.resolve(`${pkg}/package.json`));
-const cacheDir = path.resolve(appPath, '.cache');
-const pkgJSON = require(path.join(appPath, 'package.json'));
+function createPluginsJs(plugins, dest) {
+  const content = `
+    const injectReducer = require('./utils/injectReducer').default;
+    const injectSaga = require('./utils/injectSaga').default;
+    const { languages } = require('./i18n');
 
-fs.copySync(
-  path.resolve(pkgPath('strapi-admin'), 'admin'),
-  path.resolve(cacheDir, 'admin'),
-);
-fs.ensureDirSync(path.resolve(cacheDir, 'config'));
-fs.copySync(
-  path.resolve(pkgPath('strapi-admin'), 'config', 'layout.js'),
-  path.resolve(cacheDir, 'config', 'layout.js'),
-);
+    window.strapi = Object.assign(window.strapi || {}, {
+      node: MODE || 'host',
+      backendURL: BACKEND_URL,
+      languages,
+      currentLanguage:
+      window.localStorage.getItem('strapi-admin-language') ||
+      window.navigator.language ||
+      window.navigator.userLanguage ||
+      'en',
+      injectReducer,
+      injectSaga,
+    });
 
-const strapiDeps = Object.keys(pkgJSON.dependencies).filter(
-  dep =>
-    dep.startsWith('strapi-plugin') &&
-    fs.existsSync(path.resolve(pkgPath(dep), 'admin', 'src', 'index.js')),
-);
+    module.exports = {
+      ${plugins
+        .map(name => {
+          const shortName = name.replace(/^strapi-plugin-/i, '');
+          const req = `require('../../plugins/${name}/admin/src').default`;
+          return `'${shortName}': ${req}`;
+        })
+        .join(',\n')}
+    }
+  `;
 
-strapiDeps.forEach(dep => {
-  const pkgFilePath = pkgPath(dep);
+  fs.writeFileSync(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
+}
+
+async function copyPlugin(name, dest) {
+  const pkgFilePath = getPkgPath(name);
+
   const resolveDepPath = (...args) => path.resolve(pkgFilePath, ...args);
-  const resolveCachDir = (...args) =>
-    path.resolve(cacheDir, 'plugins', dep, ...args);
+  const resolveDest = (...args) => path.resolve(dest, 'plugins', name, ...args);
+
   const copy = (...args) => {
-    fs.copySync(resolveDepPath(...args), resolveCachDir(...args));
+    fs.copySync(resolveDepPath(...args), resolveDest(...args));
   };
 
   // Copy the entire admin folder
@@ -36,57 +51,59 @@ strapiDeps.forEach(dep => {
 
   // Copy the layout.js if it exists
   if (fs.existsSync(path.resolve(pkgFilePath, 'config', 'layout.js'))) {
-    fs.ensureDirSync(resolveCachDir('config'));
+    fs.ensureDirSync(resolveDest('config'));
     copy('config', 'layout.js');
   }
 
   copy('package.json');
-});
+}
 
-fs.writeFileSync(
-  path.resolve(cacheDir, 'admin', 'src', 'plugins.js'),
-  `
-const injectReducer = require('./utils/injectReducer').default;
-const injectSaga = require('./utils/injectSaga').default;
-const { languages } = require('./i18n');
+async function copyAdmin(dest) {
+  const adminPath = getPkgPath('strapi-admin');
 
-window.strapi = Object.assign(window.strapi || {}, {
-  node: MODE || 'host',
-  backendURL: BACKEND_URL,
-  languages,
-  currentLanguage:
-    window.localStorage.getItem('strapi-admin-language') ||
-    window.navigator.language ||
-    window.navigator.userLanguage ||
-    'en',
-  injectReducer,
-  injectSaga,
-});
+  await fs.ensureDir(path.resolve(dest, 'config'));
+  await fs.copy(path.resolve(adminPath, 'admin'), path.resolve(dest, 'admin'));
+  await fs.copy(
+    path.resolve(adminPath, 'config', 'layout.js'),
+    path.resolve(dest, 'config', 'layout.js')
+  );
+}
 
-module.exports = {
-${strapiDeps
-    .map(
-      p =>
-        `'${p.replace(
-          /^strapi-plugin-/i,
-          '',
-        )}': require('../../plugins/${p}/admin/src').default`,
-    )
-    .join(',\n')}
-}\n
-    `,
-  'utf8',
-);
+module.exports = async () => {
+  console.log('Building your app');
+  const dir = process.cwd();
+  const cacheDir = path.resolve(dir, '.cache');
 
-// const c = strapiDeps.reduce((acc, current) => {
-//   acc[current] = `require('../../plugins/${current}/admin/src').default`;
+  const pkgJSON = require(path.join(dir, 'package.json'));
 
-//   return acc;
-// }, {});
-// console.log(c);
+  // create .cache dir
+  await fs.ensureDir(cacheDir);
 
-// fs.writeFileSync(
-//   path.resolve(cacheDir, 'admin', 'src', 'plugins.js'),
-//   c,
-//   'utf8',
-// );
+  await copyAdmin(cacheDir);
+
+  const pluginsToCopy = Object.keys(pkgJSON.dependencies).filter(
+    dep =>
+      dep.startsWith('strapi-plugin') &&
+      fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
+  );
+
+  pluginsToCopy.forEach(name => copyPlugin(name, cacheDir));
+
+  createPluginsJs(pluginsToCopy, cacheDir);
+
+  const config = require(path.resolve(
+    getPkgPath('strapi-admin'),
+    'webpack.config.js'
+  ))({
+    entry: path.resolve(cacheDir, 'admin', 'src', 'app.js'),
+    dest: path.resolve(dir, 'build'),
+  });
+
+  webpack(config, (err, stats) => {
+    // Stats Object
+    if (err || stats.hasErrors()) {
+      // Handle errors here
+    }
+    // Done processing
+  });
+};

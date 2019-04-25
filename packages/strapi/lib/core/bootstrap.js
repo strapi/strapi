@@ -302,15 +302,14 @@ module.exports = function(strapi) {
     hostname: strapi.config.host,
     port: strapi.config.port,
   });
+
   const adminPath = _.get(
     strapi.config.currentEnvironment.server,
     'admin.path',
     'admin'
   );
-  strapi.config.admin.devMode = isAdminInDevMode(strapi);
-  strapi.config.admin.url = strapi.config.admin.devMode
-    ? new URL(adminPath, `http://${strapi.config.host}:4000`).toString()
-    : new URL(adminPath, url).toString();
+
+  strapi.config.admin.url = new URL(adminPath, url).toString();
 
   // proxy settings
   const proxy = _.get(strapi.config.currentEnvironment, 'server.proxy', {});
@@ -388,25 +387,6 @@ const enableHookNestedDependencies = function(
         );
       });
     }
-  }
-};
-
-const isAdminInDevMode = function(strapi) {
-  try {
-    fs.accessSync(
-      path.resolve(
-        strapi.config.appPath,
-        'admin',
-        'admin',
-        'build',
-        'index.html'
-      ),
-      fs.constants.R_OK | fs.constants.W_OK
-    );
-
-    return false;
-  } catch (e) {
-    return true;
   }
 };
 

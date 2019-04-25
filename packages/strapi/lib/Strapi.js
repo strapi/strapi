@@ -16,7 +16,6 @@ const {
   loadMiddlewares,
   loadHooks,
   bootstrap,
-  plugins,
   admin,
   loadExtensions,
   initCoreStore,
@@ -287,9 +286,6 @@ class Strapi extends EventEmitter {
       initializeMiddlewares.call(this),
       initializeHooks.call(this),
     ]);
-
-    // Harmonize plugins configuration.
-    await plugins.call(this);
   }
 
   reload() {

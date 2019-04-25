@@ -16,6 +16,7 @@ module.exports = async (ctx, next) => {
       ctx.state.user = await strapi
         .query('user', 'users-permissions')
         .findOne({ _id, id });
+
       ctx.state.admin = await strapi
         .query('administrator', 'admin')
         .findOne({ _id, id });
@@ -28,7 +29,7 @@ module.exports = async (ctx, next) => {
         return handleErrors(
           ctx,
           'Your account has been blocked by the administrator.',
-          'unauthorized',
+          'unauthorized'
         );
       }
 
@@ -59,7 +60,7 @@ module.exports = async (ctx, next) => {
       return handleErrors(
         ctx,
         'Your account email is not confirmed.',
-        'unauthorized',
+        'unauthorized'
       );
     }
 
@@ -67,7 +68,7 @@ module.exports = async (ctx, next) => {
       return handleErrors(
         ctx,
         'Your account has been blocked by the administrator.',
-        'unauthorized',
+        'unauthorized'
       );
     }
   }
@@ -90,7 +91,7 @@ module.exports = async (ctx, next) => {
         action: route.action,
         enabled: true,
       },
-      [],
+      []
     );
 
   if (!permission) {

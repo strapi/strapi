@@ -6,7 +6,6 @@ const loadMiddlewares = require('./load-middlewares');
 const loadExtensions = require('./load-extensions');
 const loadHooks = require('./load-hooks');
 const bootstrap = require('./bootstrap');
-const plugins = require('./plugins');
 const admin = require('./admin');
 const initCoreStore = require('./init-core-store');
 
@@ -17,7 +16,6 @@ module.exports = {
   loadApis,
   loadExtensions,
   bootstrap,
-  plugins,
   admin,
   initCoreStore,
 };

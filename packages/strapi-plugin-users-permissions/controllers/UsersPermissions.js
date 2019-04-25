@@ -161,18 +161,7 @@ module.exports = {
   },
 
   updateRole: async function(ctx) {
-    // Fetch root role.
-    const root = await strapi
-      .query('role', 'users-permissions')
-      .findOne({ type: 'root' });
-
     const roleID = ctx.params.role;
-    const rootID = root.id || root._id;
-
-    // Prevent from updating the root role.
-    if (roleID === rootID) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Unauthorized' }] }]);
-    }
 
     if (_.isEmpty(ctx.request.body)) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);

@@ -13,62 +13,55 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
 const alias = require('./webpack.alias.js');
 
-const devMode = process.env.NODE_ENV !== 'production';
-const prodMode = process.env.NODE_ENV === 'production';
-
 const URLs = {
   host: '/admin/',
   backend: 'http://localhost:1337',
   publicPath: '/admin/',
   mode: 'host',
 };
-const appDir = path.resolve(process.cwd(), '..');
-const PORT = 4000;
 
-const webpackPlugins = devMode
-  ? [
-    new WebpackDashboard(),
-    new DuplicatePckgChecker({
-      verbose: true,
-    }),
-    new FriendlyErrorsWebpackPlugin({
-      compilationSuccessInfo: {
-        messages: ['Your application is running here http://localhost:4000'],
-      },
-    }),
-    new BundleAnalyzerPlugin(),
-    // new OpenBrowserWebpackPlugin({
-    //   url: `http://localhost:${PORT}/${URLs.publicPath}`,
-    // }),
-  ]
-  : [
-    new webpack.IgnorePlugin({
-      resourceRegExp: /^\.\/locale$/,
-      contextRegExp: /moment$/,
-    }),
-    new MiniCssExtractPlugin({
-      filename: devMode ? '[name].css' : '[name].[chunkhash].css',
-      chunkFilename: devMode
-        ? '[name].chunk.css'
-        : '[name].[chunkhash].chunkhash.css',
-    }),
-  ];
+const webpackPlugins = ({ dev }) =>
+  dev
+    ? [
+        new WebpackDashboard(),
+        new DuplicatePckgChecker({
+          verbose: true,
+        }),
+        new FriendlyErrorsWebpackPlugin(),
+        // new BundleAnalyzerPlugin(),
+        // new OpenBrowserWebpackPlugin({
+        //   url: `http://localhost:${PORT}/${URLs.publicPath}`,
+        // }),
+      ]
+    : [
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^\.\/locale$/,
+          contextRegExp: /moment$/,
+        }),
+        new MiniCssExtractPlugin({
+          filename: dev ? '[name].css' : '[name].[chunkhash].css',
+          chunkFilename: dev
+            ? '[name].chunk.css'
+            : '[name].[chunkhash].chunkhash.css',
+        }),
+      ];
 
 // Use style loader in dev mode to optimize compilation
-const scssLoader = devMode
-  ? [{ loader: 'style-loader', options: {} }]
-  : [
-    {
-      loader: MiniCssExtractPlugin.loader,
-      options: {
-        fallback: require.resolve('style-loader'),
-        publicPath: URLs.publicPath,
-      },
-    },
-  ];
+const scssLoader = ({ dev }) =>
+  dev
+    ? [{ loader: 'style-loader', options: {} }]
+    : [
+        {
+          loader: MiniCssExtractPlugin.loader,
+          options: {
+            fallback: require.resolve('style-loader'),
+            publicPath: URLs.publicPath,
+          },
+        },
+      ];
 
-module.exports = {
-  mode: 'development',
+module.exports = ({ entry, dest, dev }) => ({
+  mode: dev ? 'development' : 'production',
   devServer: {
     historyApiFallback: {
       index: URLs.publicPath,
@@ -77,19 +70,17 @@ module.exports = {
     stats: 'minimal',
     // hot: true,
   },
-  stats: devMode ? 'minimal' : 'errors-only',
+  stats: dev ? 'minimal' : 'errors-only',
   devtool: 'cheap-module-source-map',
   context: path.resolve(__dirname),
-  // TODO: change this with the correct path
-  // It only work with the monorepo setup
-  entry: path.resolve(appDir, 'strapi-admin', 'admin', 'src', 'app.js'),
+  entry,
   output: {
-    path: path.resolve(process.cwd(), 'admin', 'build'),
+    path: dest,
     publicPath: URLs.publicPath,
     // Utilize long-term caching by adding content hashes (not compilation hashes)
     // to compiled assets for production
-    filename: devMode ? '[name].js' : '[name].[chunkhash].js',
-    chunkFilename: devMode ? '[name].chunk.js' : '[name].[chunkhash].chunk.js',
+    filename: dev ? '[name].js' : '[name].[chunkhash].js',
+    chunkFilename: dev ? '[name].chunk.js' : '[name].[chunkhash].chunk.js',
   },
   module: {
     rules: [
@@ -100,8 +91,8 @@ module.exports = {
           loader: require.resolve('babel-loader'),
           options: {
             cacheDirectory: true,
-            cacheCompression: prodMode,
-            compact: prodMode,
+            cacheCompression: !dev,
+            compact: !dev,
             presets: [
               require.resolve('@babel/preset-env'),
               require.resolve('@babel/preset-react'),
@@ -110,7 +101,7 @@ module.exports = {
               require.resolve('@babel/plugin-proposal-class-properties'),
               require.resolve('@babel/plugin-syntax-dynamic-import'),
               require.resolve(
-                '@babel/plugin-proposal-async-generator-functions',
+                '@babel/plugin-proposal-async-generator-functions'
               ),
               [
                 require.resolve('@babel/plugin-transform-runtime'),
@@ -148,7 +139,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        use: scssLoader.concat([
+        use: scssLoader({ dev }).concat([
           {
             loader: require.resolve('css-loader'),
             options: {
@@ -234,5 +225,5 @@ module.exports = {
       MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
       PUBLIC_PATH: JSON.stringify(URLs.publicPath),
     }),
-  ].concat(webpackPlugins),
-};
+  ].concat(webpackPlugins({ dev })),
+});
