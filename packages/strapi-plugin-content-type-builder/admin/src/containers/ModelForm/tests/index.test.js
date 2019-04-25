@@ -316,6 +316,7 @@ describe('<ModelForm />', () => {
 
         expect(wrapper.state('formErrors')).toEqual({});
         expect(props.push).toHaveBeenCalledWith({
+          pathname: '/plugins/content-type-builder/models/test',
           search: '',
         });
         expect(props.createTempContentType).not.toHaveBeenCalled();
