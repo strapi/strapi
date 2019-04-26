@@ -43,8 +43,7 @@ module.exports = {
 
   deleteRole: async ctx => {
     // Fetch public role.
-    const publicRole = await strapi
-      .query('role', 'users-permissions')
+    const publicRole = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
       .findOne({ type: 'public' });
 
     const publicRoleID = publicRole.id || publicRole._id;
@@ -147,14 +146,13 @@ module.exports = {
   },
 
   init: async ctx => {
-    const admins = await strapi.query('administrator', 'admin').find();
+    const admins = await strapi.plugins['users-permissions'].queries('administrator', 'admin').find();
 
     ctx.send({ hasAdmin: admins.length > 0 });
   },
 
   searchUsers: async ctx => {
-    const data = await strapi
-      .query('user', 'users-permissions')
+    const data = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
       .search(ctx.params);
 
     ctx.send(data);

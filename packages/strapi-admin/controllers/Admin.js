@@ -136,7 +136,7 @@ module.exports = {
       ].services.user.hashPassword(values);
     }
 
-    const data = await strapi.query('administrator', 'admin').create(values);
+    const data = await strapi.admin.queries('administrator', 'admin').create(values);
 
     // Send 201 `created`
     ctx.created(data);
@@ -157,8 +157,7 @@ module.exports = {
       ].services.user.hashPassword(values);
     }
 
-    const data = await strapi
-      .query('administrator', 'admin')
+    const data = await strapi.admin.queries('administrator', 'admin')
       .update(Object.assign({}, ctx.params, values));
 
     // Send 200 `ok`

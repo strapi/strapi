@@ -403,7 +403,7 @@ class Strapi extends EventEmitter {
       });
   }
 
-  query(entity, plugin) {
+  query(entity, plugin, queriesMap = defaultQueries) {
     if (!entity) {
       throw new Error(
         `You can't call the query method without passing the model's name as a first argument.`
@@ -431,21 +431,7 @@ class Strapi extends EventEmitter {
       );
     }
 
-    let buildQueries = defaultQueries[connector];
-    if (plugin === 'admin') {
-      buildQueries = _.get(
-        this.admin,
-        ['config', 'queries', connector],
-        defaultQueries[connector]
-      );
-    } else if (plugin) {
-      buildQueries = _.get(
-        this.plugins,
-        [plugin, 'config', 'queries', connector],
-        defaultQueries[connector]
-      );
-    }
-
+    let buildQueries = queriesMap[connector];
     let queries = buildQueries({ model, strapi: this });
 
     return Object.assign(queries, {
