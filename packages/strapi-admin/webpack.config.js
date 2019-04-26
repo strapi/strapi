@@ -60,8 +60,9 @@ const scssLoader = ({ dev }) =>
         },
       ];
 
-module.exports = ({ entry, dest, dev }) => ({
+module.exports = ({ entry, dest, dev = false }) => ({
   mode: dev ? 'development' : 'production',
+  bail: dev ? false : true,
   devServer: {
     historyApiFallback: {
       index: URLs.publicPath,
@@ -72,7 +73,6 @@ module.exports = ({ entry, dest, dev }) => ({
   },
   stats: dev ? 'minimal' : 'errors-only',
   devtool: 'cheap-module-source-map',
-  context: path.resolve(__dirname),
   entry,
   output: {
     path: dest,

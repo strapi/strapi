@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const fs = require('fs-extra');
 const getPkgPath = require('../lib/load/package-path');
+const chalk = require('chalk');
 
 function createPluginsJs(plugins, dest) {
   const content = `
@@ -70,6 +71,9 @@ async function copyAdmin(dest) {
 }
 
 module.exports = async () => {
+  // set the node env to prod when building
+  process.env.NODE_ENV = 'production';
+
   console.log('Building your app');
   const dir = process.cwd();
   const cacheDir = path.resolve(dir, '.cache');
@@ -99,11 +103,65 @@ module.exports = async () => {
     dest: path.resolve(dir, 'build'),
   });
 
-  webpack(config, (err, stats) => {
-    // Stats Object
-    if (err || stats.hasErrors()) {
-      // Handle errors here
-    }
-    // Done processing
-  });
+  const compiler = webpack(config);
+
+  new Promise((resolve, reject) => {
+    compiler.run((err, stats) => {
+      let messages;
+      if (err) {
+        if (!err.message) {
+          return reject(err);
+        }
+        messages = {
+          errors: [err.message],
+          warnings: [],
+        };
+      } else {
+        messages = stats.toJson({ all: false, warnings: true, errors: true });
+      }
+
+      if (messages.errors.length) {
+        // Only keep the first error. Others are often indicative
+        // of the same problem, but confuse the reader with noise.
+        if (messages.errors.length > 1) {
+          messages.errors.length = 1;
+        }
+        return reject(new Error(messages.errors.join('\n\n')));
+      }
+
+      return resolve({
+        stats,
+        warnings: messages.warnings,
+      });
+    });
+  })
+    .then(
+      ({ stats, warnings }) => {
+        if (warnings.length) {
+          console.log(chalk.yellow('Compiled with warnings.\n'));
+          console.log(warnings.join('\n\n'));
+        } else {
+          console.log(chalk.green('Compiled successfully.\n'));
+        }
+      },
+      err => {
+        console.log(chalk.red('Failed to compile.\n'));
+        printBuildError(err);
+        process.exit(1);
+      }
+    )
+    .catch(err => {
+      if (err && err.message) {
+        console.log(err.message);
+      }
+      process.exit(1);
+    });
 };
+
+function printBuildError(err) {
+  const message = err != null && err.message;
+  const stack = err != null && err.stack;
+
+  console.log((message || err) + '\n');
+  console.log();
+}
