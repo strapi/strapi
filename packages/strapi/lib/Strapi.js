@@ -8,7 +8,6 @@ const { EventEmitter } = require('events');
 const Koa = require('koa');
 const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
-// const stackTrace = require('stack-trace');
 const utils = require('./utils');
 const {
   loadConfigs,
@@ -16,7 +15,6 @@ const {
   loadMiddlewares,
   loadHooks,
   bootstrap,
-  admin,
   loadExtensions,
   initCoreStore,
 } = require('./core');
@@ -26,6 +24,8 @@ const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 const runChecks = require('./utils/run-checks');
 const defaultQueries = require('./core-api/queries');
+const fs = require('fs-extra');
+const buildAdmin = require('../scripts/build');
 
 /**
  * Construct an Strapi instance.
@@ -113,9 +113,13 @@ class Strapi extends EventEmitter {
     }
   }
 
-  async start(config = {}, cb) {
+  async start(cb) {
     try {
-      this.config = _.assign(this.config, config);
+      // only build in dev mode
+      // if no build dir => build the app
+      if (!fs.existsSync(path.resolve(strapi.config.appPath, 'build'))) {
+        await buildAdmin();
+      }
 
       // Emit starting event.
       this.emit('server:starting');
@@ -125,8 +129,6 @@ class Strapi extends EventEmitter {
       await this.runBootstrapFunctions();
       // Freeze object.
       await this.freeze();
-      // Update source admin.
-      await admin.call(this);
       // Init first start
       utils.init.call(this);
       // Launch server.

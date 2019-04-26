@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "3.0.0-alpha.26",
+  "version": "3.0.0-beta.0",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "Settings Manager",
@@ -8,10 +8,8 @@
     "description": "settings-manager.plugin.description"
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
-    "prepublishOnly": ""
+    "test": "echo \"no tests yet\""
   },
-  "devDependencies": {},
   "dependencies": {
     "shelljs": "^0.7.8"
   },
@@ -31,7 +29,7 @@
     "reactstrap": "^5.0.0",
     "redux": "^4.0.1",
     "reselect": "^3.0.1",
-    "strapi-helper-plugin": "^3.0.0-alpha.25.2"
+    "strapi-helper-plugin": "^3.0.0-beta.0"
   },
   "author": {
     "name": "Strapi team",

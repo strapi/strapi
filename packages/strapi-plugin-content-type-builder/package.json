@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.0.0-alpha.26",
+  "version": "3.0.0-beta.0",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -8,16 +8,14 @@
     "description": "content-type-builder.plugin.description"
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
-    "prepublishOnly": "IS_MONOREPO=true npm run build"
+    "test": "echo \"no tests yet\""
   },
   "dependencies": {
     "immutable": "^3.8.2",
     "pluralize": "^7.0.0",
-    "strapi-generate": "3.0.0-alpha.26",
-    "strapi-generate-api": "3.0.0-alpha.26"
+    "strapi-generate": "^3.0.0-beta.0",
+    "strapi-generate-api": "^3.0.0-beta.0"
   },
-  "devDependencies": {},
   "peerDependencies": {
     "classnames": "^2.2.6",
     "immutable": "^3.8.2",
@@ -34,7 +32,7 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^3.0.1",
-    "strapi-helper-plugin": "^3.0.0-alpha.25.2"
+    "strapi-helper-plugin": "^3.0.0-beta.0"
   },
   "author": {
     "name": "Strapi team",

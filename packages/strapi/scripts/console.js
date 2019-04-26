@@ -16,7 +16,7 @@ module.exports = function() {
       app.log.info('Starting the application in interactive mode...');
     }
 
-    app.start({}, function(err) {
+    app.start(function(err) {
       // Log and exit the REPL in case there is an error
       // while we were trying to start the server.
       if (err) {

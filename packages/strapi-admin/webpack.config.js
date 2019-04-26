@@ -7,10 +7,7 @@ const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackDashboard = require('webpack-dashboard/plugin');
-const OpenBrowserWebpackPlugin = require('open-browser-webpack-plugin');
 const DuplicatePckgChecker = require('duplicate-package-checker-webpack-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
-  .BundleAnalyzerPlugin;
 const alias = require('./webpack.alias.js');
 
 const URLs = {

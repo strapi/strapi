@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.0.0-alpha.26",
+  "version": "3.0.0-beta.0",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Email",
@@ -8,12 +8,11 @@
     "description": "email.plugin.description"
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
-    "prepublishOnly": ""
+    "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "strapi-provider-email-sendmail": "3.0.0-alpha.26",
-    "strapi-utils": "3.0.0-alpha.26"
+    "strapi-provider-email-sendmail": "^3.0.0-beta.0",
+    "strapi-utils": "^3.0.0-beta.0"
   },
   "peerDependencies": {
     "classnames": "^2.2.6",
@@ -29,9 +28,8 @@
     "react-router-dom": "^5.0.0",
     "react-transition-group": "^2.5.0",
     "reactstrap": "^5.0.0",
-    "strapi-helper-plugin": "^3.0.0-alpha.25.2"
+    "strapi-helper-plugin": "^3.0.0-beta.0"
   },
-  "devDependencies": {},
   "author": {
     "name": "Strapi team",
     "email": "hi@strapi.io",

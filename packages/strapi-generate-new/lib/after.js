@@ -20,7 +20,7 @@ const runInstall = () => {
   if (packageManager.isStrapiInstalledWithNPM()) {
     return new Promise((resolve, reject) => {
       shell.exec(
-        'npm install --production',
+        'npm install',
         { silent: true },
         (code, _, stderr) => {
           if (stderr && code !== 0) return reject(new Error(stderr));
@@ -32,7 +32,7 @@ const runInstall = () => {
 
   return new Promise((resolve, reject) => {
     shell.exec(
-      'yarn install --production',
+      'yarn install',
       { silent: true },
       (code, _, stderr) => {
         if (stderr && code !== 0) return reject(new Error(stderr));

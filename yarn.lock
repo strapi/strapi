@@ -11242,6 +11242,14 @@ koa-lusca@~2.2.0:
   dependencies:
     koa-compose "~2.3.0"
 
+koa-qs@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/koa-qs/-/koa-qs-2.0.0.tgz#18d16b43508a541f092e514351dc09563a48819f"
+  integrity sha1-GNFrQ1CKVB8JLlFDUdwJVjpIgZ8=
+  dependencies:
+    merge-descriptors "~0.0.2"
+    qs "~2.3.3"
+
 koa-router-joi@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/koa-router-joi/-/koa-router-joi-1.0.1.tgz#61c5e4899bb168831729bc7be55a590d21c9526d"
@@ -12261,6 +12269,11 @@ merge-descriptors@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/merge-descriptors/-/merge-descriptors-1.0.1.tgz#b00aaa556dd8b44568150ec9d1b953f3f90cbb61"
   integrity sha1-sAqqVW3YtEVoFQ7J0blT8/kMu2E=
+
+merge-descriptors@~0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/merge-descriptors/-/merge-descriptors-0.0.2.tgz#c36a52a781437513c57275f39dd9d317514ac8c7"
+  integrity sha1-w2pSp4FDdRPFcnXzndnTF1FKyMc=
 
 merge-stream@^1.0.1:
   version "1.0.1"
@@ -15421,6 +15434,11 @@ qs@^6.4.0, qs@^6.5.1, qs@^6.5.2, qs@^6.7.0:
   version "6.7.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.7.0.tgz#41dc1a015e3d581f1621776be31afb2876a9b1bc"
   integrity sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
+
+qs@~2.3.3:
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-2.3.3.tgz#e9e85adbe75da0bbe4c8e0476a086290f863b404"
+  integrity sha1-6eha2+ddoLvkyOBHaghikPhjtAQ=
 
 qs@~4.0.0:
   version "4.0.0"
@@ -19248,7 +19266,7 @@ webpack-sources@^1.1.0, webpack-sources@^1.3.0:
     source-list-map "^2.0.0"
     source-map "~0.6.1"
 
-webpack@^4.29.6:
+webpack@^4.29.6, webpack@^4.30.0:
   version "4.30.0"
   resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.30.0.tgz#aca76ef75630a22c49fcc235b39b4c57591d33a9"
   integrity sha512-4hgvO2YbAFUhyTdlR4FNyt2+YaYBYHavyzjCMbZzgglo02rlKi/pcsEzwCuCpsn1ryzIl1cq/u8ArIKu8JBYMg==

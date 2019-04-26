@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-alpha.26",
+  "version": "3.0.0-beta.0",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Files Upload",
@@ -8,16 +8,14 @@
     "description": "Description of upload plugin."
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
-    "prepublishOnly": ""
+    "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "strapi-provider-upload-local": "3.0.0-alpha.26",
-    "strapi-utils": "3.0.0-alpha.26",
+    "strapi-provider-upload-local": "^3.0.0-beta.0",
+    "strapi-utils": "^3.0.0-beta.0",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },
-  "devDependencies": {},
   "peerDependencies": {
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
@@ -31,7 +29,7 @@
     "react-router-dom": "^5.0.0",
     "react-transition-group": "^2.5.0",
     "reactstrap": "^5.0.0",
-    "strapi-helper-plugin": "^3.0.0-alpha.25.2"
+    "strapi-helper-plugin": "^3.0.0-beta.0"
   },
   "author": {
     "name": "A Strapi developer",

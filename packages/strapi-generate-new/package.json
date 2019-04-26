@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-new",
-  "version": "3.0.0-alpha.26",
+  "version": "3.0.0-beta.0",
   "description": "Generate a new Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -21,12 +21,11 @@
     "ora": "^2.1.0",
     "request": "^2.88.0",
     "shelljs": "^0.7.8",
-    "strapi-utils": "3.0.0-alpha.26",
+    "strapi-utils": "^3.0.0-beta.0",
     "uuid": "^3.1.0"
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
-    "prepublishOnly": "npm prune"
+    "test": "echo \"no tests yet\""
   },
   "author": {
     "email": "hi@strapi.io",

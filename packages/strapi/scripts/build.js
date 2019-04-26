@@ -70,6 +70,14 @@ async function copyAdmin(dest) {
   );
 }
 
+function printBuildError(err) {
+  const message = err != null && err.message;
+
+  console.log((message || err) + '\n');
+  console.log();
+}
+
+
 module.exports = async () => {
   // set the node env to prod when building
   process.env.NODE_ENV = 'production';
@@ -105,7 +113,7 @@ module.exports = async () => {
 
   const compiler = webpack(config);
 
-  new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
       let messages;
       if (err) {
@@ -152,10 +160,3 @@ module.exports = async () => {
       process.exit(1);
     });
 };
-
-function printBuildError(err) {
-  const message = err != null && err.message;
-
-  console.log((message || err) + '\n');
-  console.log();
-}

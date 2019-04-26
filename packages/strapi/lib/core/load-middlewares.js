@@ -21,6 +21,7 @@ const requiredMiddlewares = {
   routerJoi: 'koa-router-joi',
   session: 'koa-session',
   static: 'koa-static',
+  qs: 'koa-qs',
 };
 
 /**
