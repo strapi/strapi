@@ -70,6 +70,9 @@ class Strapi extends EventEmitter {
     // Default configurations.
     this.config = {
       launchedAt: Date.now(),
+      pkgManager: fs.existsSync(path.resolve(appPath, 'yarn.lock'))
+        ? 'yarn'
+        : 'npm',
       appPath: rootPath,
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,

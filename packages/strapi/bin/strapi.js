@@ -136,19 +136,6 @@ program
   .description('generate a basic plugin')
   .action(getScript('generate'));
 
-// `$ strapi install`
-program
-  .command('install <plugin>')
-  .option('-d, --dev', 'Development mode')
-  .description('install a Strapi plugin')
-  .action(getScript('install'));
-
-// `$ strapi uninstall`
-program
-  .command('uninstall <plugin>')
-  .description('uninstall a Strapi plugin')
-  .action(getScript('uninstall'));
-
 program
   .command('build')
   .description('Builds the strapi admin app')

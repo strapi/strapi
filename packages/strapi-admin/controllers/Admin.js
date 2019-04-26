@@ -14,7 +14,7 @@ module.exports = {
       const autoReload = _.get(
         strapi.config.currentEnvironment,
         'server.autoReload.enabled',
-        false,
+        false
       );
 
       return ctx.send({ autoReload, currentEnvironment: strapi.app.env });
@@ -56,22 +56,13 @@ module.exports = {
 
   installPlugin: async ctx => {
     try {
-      const { plugin, port } = ctx.request.body;
-      const strapiBin = path.join(
-        process.cwd(),
-        'node_modules',
-        'strapi',
-        'bin',
-        'strapi',
-      );
-
+      const { plugin } = ctx.request.body;
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Installing ${plugin}...`);
-      shell.exec(
-        `node ${strapiBin} install ${plugin} ${port === '4000' ? '--dev' : ''}`,
-        { silent: true },
-      );
+      shell.exec(`${strapi.config.pkgManager} install --save strapi-plugin-${plugin}`, {
+        silent: true,
+      });
 
       ctx.send({ ok: true });
 
@@ -85,13 +76,16 @@ module.exports = {
   plugins: async ctx => {
     try {
       const plugins = Object.keys(strapi.plugins).reduce((acc, key) => {
-        acc[key] = strapi.plugins[key].package.strapi;
+        acc[key] = _.get(strapi.plugins, [key, 'package', 'strapi'], {
+          name: key,
+        });
 
         return acc;
       }, {});
 
       ctx.send({ plugins });
     } catch (err) {
+      strapi.log.error(err);
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
@@ -99,18 +93,10 @@ module.exports = {
   uninstallPlugin: async ctx => {
     try {
       const { plugin } = ctx.params;
-      const strapiBin = path.join(
-        process.cwd(),
-        'node_modules',
-        'strapi',
-        'bin',
-        'strapi',
-      );
-
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Uninstalling ${plugin}...`);
-      shell.exec(`node ${strapiBin} uninstall ${plugin}`, { silent: true });
+      shell.exec(`${strapi.config.pkgManager} uninstall strapi-plugin-${plugin}`, { silent: true });
 
       ctx.send({ ok: true });
 
@@ -136,7 +122,9 @@ module.exports = {
       ].services.user.hashPassword(values);
     }
 
-    const data = await strapi.admin.queries('administrator', 'admin').create(values);
+    const data = await strapi.admin
+      .queries('administrator', 'admin')
+      .create(values);
 
     // Send 201 `created`
     ctx.created(data);
@@ -157,7 +145,8 @@ module.exports = {
       ].services.user.hashPassword(values);
     }
 
-    const data = await strapi.admin.queries('administrator', 'admin')
+    const data = await strapi.admin
+      .queries('administrator', 'admin')
       .update(Object.assign({}, ctx.params, values));
 
     // Send 200 `ok`

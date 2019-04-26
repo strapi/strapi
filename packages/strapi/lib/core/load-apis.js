@@ -33,7 +33,7 @@ const loadAdminApis = () =>
   );
 
 const loadLocalPluginsApis = appPath =>
-  loadFiles(path.resolve(appPath, 'plugins'), '*/!(config)/*.*(js|json)');
+  loadFiles(path.resolve(appPath, 'plugins'), '{*/!(config)/*.*(js|json),*/package.json}');
 
 const loadPluginsApis = async installedPlugins => {
   let plugins = {};
