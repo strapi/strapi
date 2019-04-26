@@ -136,13 +136,8 @@ module.exports = async () => {
     });
   })
     .then(
-      ({ stats, warnings }) => {
-        if (warnings.length) {
-          console.log(chalk.yellow('Compiled with warnings.\n'));
-          console.log(warnings.join('\n\n'));
-        } else {
-          console.log(chalk.green('Compiled successfully.\n'));
-        }
+      () => {
+        console.log(chalk.green('Compiled successfully.\n'));
       },
       err => {
         console.log(chalk.red('Failed to compile.\n'));
@@ -160,7 +155,6 @@ module.exports = async () => {
 
 function printBuildError(err) {
   const message = err != null && err.message;
-  const stack = err != null && err.stack;
 
   console.log((message || err) + '\n');
   console.log();
