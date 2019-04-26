@@ -15,7 +15,7 @@
     "cheerio": "^1.0.0-rc.2",
     "moment": "^2.22.2",
     "path-to-regexp": "^2.4.0",
-    "swagger-ui-dist": "^3.22.1"
+    "swagger-ui-dist": "3.22.1"
   },
   "devDependencies": {},
   "peerDependencies": {
