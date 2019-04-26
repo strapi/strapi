@@ -4,7 +4,6 @@ coverage
 build
 node_modules
 stats.json
-stats.html
 package-lock.json
 yarn-error.log
 

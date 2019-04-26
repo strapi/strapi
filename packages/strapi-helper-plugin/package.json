@@ -2,6 +2,9 @@
   "name": "strapi-helper-plugin",
   "version": "3.0.0-alpha.26",
   "description": "Helper for Strapi plugins development",
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
@@ -13,7 +16,6 @@
   },
   "main": "dist/strapi-helper-plugin.cjs.min.js",
   "module": "dist/strapi-helper-plugin.esm.min.js",
-  "maine": "lib/src",
   "maintainers": [
     {
       "name": "Strapi team",
@@ -23,6 +25,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "prepublishOnly": "npm run build",
     "prebuild": "rimraf dist",
     "build": "rollup -c",
     "test": "echo \"no tests yet\""
@@ -34,52 +37,34 @@
     "lodash": "^4.17.5",
     "moment": "^2.16.0",
     "react": "^16.0.0",
-    "reactstrap": "^5.0.0",
     "react-datetime": "^2.16.3",
     "react-dom": "^16.0.0",
     "react-intl": "^2.8.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
-    "react-transition-group": "^2.5.0"
+    "reactstrap": "^5.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
     "@babel/preset-env": "^7.4.3",
     "@babel/preset-react": "^7.0.0",
-    "autoprefixer": "^9.5.1",
-    "chalk": "^2.1.0",
-    "cross-env": "^5.0.5",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.8.0",
-    "enzyme-to-json": "^3.3.5",
-    "express": "^4.15.4",
-    "plop": "^2.2.0",
-    "postcss-import": "^12.0.1",
-    "postcss-smart-import": "^0.7.6",
-    "precss": "^4.0.0",
-    "prettier": "^1.5.3",
-    "react-test-renderer": "^16.7.0",
     "rimraf": "^2.6.3",
     "rollup": "^1.10.0",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-filesize": "^6.0.1",
     "rollup-plugin-node-resolve": "^4.2.3",
     "rollup-plugin-postcss": "^2.0.3",
     "rollup-plugin-rebase": "^3.1.1",
-    "rollup-plugin-sass": "^1.2.2",
-    "rollup-plugin-scss": "^1.0.1",
-    "rollup-plugin-sizes": "^0.5.1",
+    "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-svg": "^1.0.1",
-    "rollup-plugin-terser": "^4.0.4",
-    "rollup-plugin-visualizer": "^1.1.1",
-    "shelljs": "^0.7.8"
+    "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
     "bootstrap": "^4.0.0-alpha.6",
-    "imports-loader": "^0.7.1",
-    "invariant": "2.2.1",
-    "json-loader": "^0.5.7",
     "react-datetime": "^2.15.0",
     "whatwg-fetch": "^2.0.3"
   }

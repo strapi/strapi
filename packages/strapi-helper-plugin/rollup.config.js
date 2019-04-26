@@ -5,7 +5,8 @@ import svg from 'rollup-plugin-svg';
 import postcss from 'rollup-plugin-postcss';
 import rebasePlugin from 'rollup-plugin-rebase';
 import { terser } from 'rollup-plugin-terser';
-import visualizer from 'rollup-plugin-visualizer';
+import replace from 'rollup-plugin-replace';
+import filesize from 'rollup-plugin-filesize';
 import pkg from './package.json';
 
 export default {
@@ -41,16 +42,18 @@ export default {
       modules: true,
       minimize: true,
     }),
-    rebasePlugin({}),
+    rebasePlugin(),
+    resolve(),
     babel({
       exclude: 'node_modules/**',
     }),
-    resolve(),
     commonjs(),
     svg(),
-    require('rollup-plugin-sizes')(),
     terser(),
-    visualizer(),
+    filesize(),
+    replace({
+      'process.env.NODE_ENV': JSON.stringify('production'),
+    })
   ],
 
   external: [

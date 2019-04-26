@@ -7,11 +7,7 @@
     "url": "git://github.com/strapi/strapi-admin.git"
   },
   "scripts": {
-    "build": "cross-env NODE_ENV=production webpack -c webpack.config.js",
-    "start": "cross-env NODE_ENV=development webpack-dev-server --watch",
-    "start:infos": "webpack-dashboard -- webpack-dev-server --watch",
-    "test": "echo \"no tests yet\"",
-    "prepublishOnly": ""
+    "test": "echo \"no tests yet\""
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.3",
