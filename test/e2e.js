@@ -1,7 +1,12 @@
 const path = require('path');
-const { cleanTestApp, generateTestApp, startTestApp } = require('./helpers/testAppGenerator');
+const {
+  cleanTestApp,
+  generateTestApp,
+  startTestApp,
+} = require('./helpers/testAppGenerator');
 const execa = require('execa');
 const waitOn = require('wait-on');
+const yargs = require('yargs');
 
 const appName = 'testApp';
 
@@ -25,9 +30,7 @@ const test = async () => {
   });
 };
 
-const main = async () => {
-  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.sqlite;
-
+const main = async database => {
   try {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
@@ -45,11 +48,23 @@ const main = async () => {
     testAppProcess.kill();
     process.exit(0);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     process.stdout.write('Tests failed\n', () => {
       process.exit(1);
     });
   }
 };
 
-main();
+yargs
+  .command(
+    '$0 [databaseName]',
+    'run end to end tests',
+    yargs => {
+      yargs.positional('databaseName', {
+        default: 'sqlite',
+        choices: Object.keys(databases),
+      });
+    },
+    ({ databaseName }) => main(databases[databaseName])
+  )
+  .help().argv;
