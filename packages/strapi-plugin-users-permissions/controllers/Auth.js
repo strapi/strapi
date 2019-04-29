@@ -257,8 +257,11 @@ module.exports = {
     // First, check if the user is the first one to register as admin.
     const hasAdmin = users.length > 0;
 
+    // Optional if want to register specific role 
+    const selectedRole = params.role || settings.default_role
+    
     // Check if the user is the first to register
-    const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: settings.default_role }, []);
+    const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: selectedRole }, []);
 
     if (!role) {
       return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }] : 'Impossible to find the root role.');
