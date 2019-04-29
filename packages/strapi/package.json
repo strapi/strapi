@@ -70,8 +70,7 @@
     "strapi-generate-plugin": "^3.0.0-beta.0",
     "strapi-generate-policy": "^3.0.0-beta.0",
     "strapi-generate-service": "^3.0.0-beta.0",
-    "strapi-utils": "^3.0.0-beta.0",
-    "webpack": "^4.30.0"
+    "strapi-utils": "^3.0.0-beta.0"
   },
   "scripts": {
     "test": "jest --verbose",
