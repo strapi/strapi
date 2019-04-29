@@ -73,8 +73,7 @@ async function copyAdmin(dest) {
   );
 }
 
-async function build({ dir, env }) {
-  console.log('Building your app');
+async function build({ dir, env, options }) {
   const cacheDir = path.resolve(dir, '.cache');
 
   const pkgJSON = require(path.join(dir, 'package.json'));
@@ -97,7 +96,7 @@ async function build({ dir, env }) {
   const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
   const dest = path.resolve(dir, 'build');
 
-  const config = getWebpackConfig({ entry, dest, env });
+  const config = getWebpackConfig({ entry, dest, env, options });
 
   const compiler = webpack(config);
 

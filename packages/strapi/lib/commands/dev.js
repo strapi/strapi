@@ -16,7 +16,7 @@ const _ = require('lodash');
 const fs = require('fs-extra');
 const { cyan } = require('chalk');
 const chokidar = require('chokidar');
-const buildApp = require('./build');
+const strapiAdmin = require('strapi-admin');
 
 // Logger.
 const { cli, logger } = require('strapi-utils');
@@ -28,7 +28,9 @@ const { cli, logger } = require('strapi-utils');
  * (fire up the application in our working directory).
  */
 
-module.exports = async function(appPath = '') {
+module.exports = async function(dir = '.') {
+  process.env.NODE_ENV = 'development';
+
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -36,33 +38,29 @@ module.exports = async function(appPath = '') {
     );
   }
 
-  appPath = path.join(process.cwd(), appPath);
+  const appPath = path.join(process.cwd(), dir);
+
+  // Require server configurations
+  const server = require(path.resolve(
+    appPath,
+    'config',
+    'environments',
+    'development',
+    'server.json'
+  ));
 
   if (!fs.existsSync(path.resolve(appPath, 'build'))) {
-    await buildApp();
+    await strapiAdmin.build({
+      dir: process.cwd(),
+      env: 'production',
+    });
+  } else {
   }
 
   try {
     const strapiInstance = strapi({ appPath });
 
-    // Set NODE_ENV
-    if (_.isEmpty(process.env.NODE_ENV)) {
-      process.env.NODE_ENV = 'development';
-    }
-
-    // Require server configurations
-    const server = require(path.resolve(
-      appPath,
-      'config',
-      'environments',
-      'development',
-      'server.json'
-    ));
-
-    if (
-      process.env.NODE_ENV === 'development' &&
-      _.get(server, 'autoReload.enabled') === true
-    ) {
+    if (_.get(server, 'autoReload.enabled') === true) {
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {
           switch (message) {
@@ -101,26 +99,18 @@ module.exports = async function(appPath = '') {
           }
         });
 
-        return strapiInstance.start(afterwards);
+        return strapiInstance.start();
       } else {
         return;
       }
     }
 
-    strapiInstance.start(afterwards);
+    strapiInstance.start();
   } catch (e) {
     logger.error(e);
     process.exit(1);
   }
 };
-
-function afterwards(err, strapiInstance) {
-  if (err) {
-    logger.error(err.stack ? err.stack : err);
-
-    strapiInstance ? strapiInstance.stop() : process.exit(1);
-  }
-}
 
 /**
  * Init file watching to auto restart strapi app

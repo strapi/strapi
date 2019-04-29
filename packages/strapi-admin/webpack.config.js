@@ -13,12 +13,18 @@ const alias = require('./webpack.alias.js');
 
 // TODO: parametrize
 const URLs = {
-  host: '/admin/',
-  backend: 'http://localhost:1337',
   mode: 'host',
 };
 
-module.exports = ({ publicPath = '/admin/', entry, dest, env }) => {
+module.exports = ({
+  entry,
+  dest,
+  env,
+  options = {
+    backend: 'http://localhost:1337',
+    publicPath: '/admin/',
+  },
+}) => {
   const isProduction = env === 'production';
 
   const webpackPlugins = isProduction
@@ -45,7 +51,7 @@ module.exports = ({ publicPath = '/admin/', entry, dest, env }) => {
           loader: MiniCssExtractPlugin.loader,
           options: {
             fallback: require.resolve('style-loader'),
-            publicPath: publicPath,
+            publicPath: options.publicPath,
           },
         },
       ]
@@ -58,7 +64,7 @@ module.exports = ({ publicPath = '/admin/', entry, dest, env }) => {
     entry,
     output: {
       path: dest,
-      publicPath: publicPath,
+      publicPath: options.publicPath,
       // Utilize long-term caching by adding content hashes (not compilation hashes)
       // to compiled assets for production
       filename: isProduction ? '[name].js' : '[name].[chunkhash].js',
@@ -239,12 +245,14 @@ module.exports = ({ publicPath = '/admin/', entry, dest, env }) => {
       new SimpleProgressWebpackPlugin(),
 
       new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
-        REMOTE_URL: JSON.stringify(URLs.host),
-        BACKEND_URL: JSON.stringify(URLs.backend),
+        'process.env.NODE_ENV': JSON.stringify(
+          isProduction ? 'production' : 'development'
+        ),
+        NODE_ENV: JSON.stringify(isProduction ? 'production' : 'development'),
+        REMOTE_URL: JSON.stringify(options.publicPath),
+        BACKEND_URL: JSON.stringify(options.backend),
         MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
-        PUBLIC_PATH: JSON.stringify(publicPath),
+        PUBLIC_PATH: JSON.stringify(options.publicPath),
       }),
 
       ...webpackPlugins,
