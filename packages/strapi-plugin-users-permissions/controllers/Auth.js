@@ -258,7 +258,7 @@ module.exports = {
     const hasAdmin = users.length > 0;
 
     // Optional if want to register specific role 
-    const selectedRole = params.role || settings.default_role
+    const selectedRole = params.role || settings.default_role;
     
     // Check if the user is the first to register
     const role = hasAdmin === false ? root : await strapi.query('role', 'users-permissions').findOne({ type: selectedRole }, []);
