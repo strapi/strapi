@@ -9,71 +9,17 @@
 // Node.js core.
 const path = require('path');
 const cluster = require('cluster');
-const strapi = require('../lib');
+const strapi = require('../strapi');
 
 // Public dependencies
 const _ = require('lodash');
+const fs = require('fs-extra');
 const { cyan } = require('chalk');
 const chokidar = require('chokidar');
+const buildApp = require('./build');
 
 // Logger.
 const { cli, logger } = require('strapi-utils');
-
-/**
- * Init file watching to auto restart strapi app
- * @param {Object} options - Options object
- * @param {string} options.appPath - This is the path where the app is located, the watcher will watch the files under this folder
- * @param {Strapi} options.strapi - Strapi instance
- */
-const watchFileChanges = ({ appPath, strapiInstance }) => {
-  const restart = () => {
-    if (
-      strapiInstance.reload.isWatching &&
-      !strapiInstance.reload.isReloading
-    ) {
-      strapiInstance.reload.isReloading = true;
-      strapiInstance.reload();
-    }
-  };
-
-  const watcher = chokidar.watch(appPath, {
-    ignoreInitial: true,
-    ignored: [
-      /(^|[/\\])\../,
-      /tmp/,
-      '**/admin',
-      '**/admin/**',
-      '**/components',
-      '**/components/**',
-      '**/documentation',
-      '**/documentation/**',
-      '**/node_modules',
-      '**/node_modules/**',
-      '**/plugins.json',
-      '**/index.html',
-      '**/public',
-      '**/public/**',
-      '**/cypress',
-      '**/cypress/**',
-      '**/*.db*',
-      '**/exports/**',
-    ],
-  });
-
-  watcher
-    .on('add', path => {
-      strapiInstance.log.info(`File created: ${path}`);
-      restart();
-    })
-    .on('change', path => {
-      strapiInstance.log.info(`File changed: ${path}`);
-      restart();
-    })
-    .on('unlink', path => {
-      strapiInstance.log.info(`File deleted: ${path}`);
-      restart();
-    });
-};
 
 /**
  * `$ strapi start`
@@ -82,7 +28,7 @@ const watchFileChanges = ({ appPath, strapiInstance }) => {
  * (fire up the application in our working directory).
  */
 
-module.exports = function(appPath = '') {
+module.exports = async function(appPath = '') {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -91,6 +37,10 @@ module.exports = function(appPath = '') {
   }
 
   appPath = path.join(process.cwd(), appPath);
+
+  if (!fs.existsSync(path.resolve(appPath, 'build'))) {
+    await buildApp();
+  }
 
   try {
     const strapiInstance = strapi({ appPath });
@@ -157,15 +107,7 @@ module.exports = function(appPath = '') {
       }
     }
 
-    // Otherwise, if no workable local `strapiInstance` module exists,
-    // run the application using the currently running version
-    // of `strapiInstance`. This is probably always the global install.
-    strapiInstance.start(
-      {
-        appPath,
-      },
-      afterwards
-    );
+    strapiInstance.start(afterwards);
   } catch (e) {
     logger.error(e);
     process.exit(1);
@@ -178,4 +120,60 @@ function afterwards(err, strapiInstance) {
 
     strapiInstance ? strapiInstance.stop() : process.exit(1);
   }
+}
+
+/**
+ * Init file watching to auto restart strapi app
+ * @param {Object} options - Options object
+ * @param {string} options.appPath - This is the path where the app is located, the watcher will watch the files under this folder
+ * @param {Strapi} options.strapi - Strapi instance
+ */
+function watchFileChanges({ appPath, strapiInstance }) {
+  const restart = () => {
+    if (
+      strapiInstance.reload.isWatching &&
+      !strapiInstance.reload.isReloading
+    ) {
+      strapiInstance.reload.isReloading = true;
+      strapiInstance.reload();
+    }
+  };
+
+  const watcher = chokidar.watch(appPath, {
+    ignoreInitial: true,
+    ignored: [
+      /(^|[/\\])\../,
+      /tmp/,
+      '**/admin',
+      '**/admin/**',
+      '**/components',
+      '**/components/**',
+      '**/documentation',
+      '**/documentation/**',
+      '**/node_modules',
+      '**/node_modules/**',
+      '**/plugins.json',
+      '**/index.html',
+      '**/public',
+      '**/public/**',
+      '**/cypress',
+      '**/cypress/**',
+      '**/*.db*',
+      '**/exports/**',
+    ],
+  });
+
+  watcher
+    .on('add', path => {
+      strapiInstance.log.info(`File created: ${path}`);
+      restart();
+    })
+    .on('change', path => {
+      strapiInstance.log.info(`File changed: ${path}`);
+      restart();
+    })
+    .on('unlink', path => {
+      strapiInstance.log.info(`File deleted: ${path}`);
+      restart();
+    });
 }

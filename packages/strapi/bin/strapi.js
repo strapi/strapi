@@ -17,7 +17,7 @@ const packageJSON = require('../package.json');
 
 /* eslint-disable no-console */
 
-const getScript = name => require(`../scripts/${name}`);
+const getScript = name => require(`../lib/commands/${name}`);
 
 /**
  * Normalize version argument
@@ -74,9 +74,17 @@ program
 // `$ strapi start`
 program
   .command('start [appPath]')
-  .description('start your Strapi application')
+  .description('Start your Strapi application')
   .action(appPath => {
     getScript('start')(appPath);
+  });
+
+// `$ strapi dev`
+program
+  .command('dev [appPath]')
+  .description('Start your Strapi application in dev mode')
+  .action(appPath => {
+    getScript('dev')(appPath);
   });
 
 // `$ strapi generate:api`

@@ -25,7 +25,6 @@ const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 const runChecks = require('./utils/run-checks');
 const defaultQueries = require('./core-api/queries');
 const fs = require('fs-extra');
-const buildAdmin = require('../scripts/build');
 
 /**
  * Construct an Strapi instance.
@@ -118,12 +117,6 @@ class Strapi extends EventEmitter {
 
   async start(cb) {
     try {
-      // only build in dev mode
-      // if no build dir => build the app
-      if (!fs.existsSync(path.resolve(strapi.config.appPath, 'build'))) {
-        await buildAdmin();
-      }
-
       // Emit starting event.
       this.emit('server:starting');
       // Load the app.

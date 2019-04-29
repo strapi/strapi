@@ -20,7 +20,7 @@ const shell = require('shelljs');
 const generate = require('strapi-generate');
 
 // Local Strapi dependencies.
-const packageJSON = require('../package.json');
+const packageJSON = require('../../package.json');
 
 /**
  * `$ strapi new`
@@ -127,7 +127,7 @@ module.exports = function(name, cliArguments) {
             process.exit();
           });
 
-          shell.exec('npm run strapi start', {
+          shell.exec('npm run dev', {
             stdio: 'inherit',
             env: {
               ...process.env,

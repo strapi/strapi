@@ -40,8 +40,9 @@ module.exports = scope => {
     'description': 'A Strapi application.',
     'main': './server.js',
     'scripts': {
-      'build': 'strapi build',
+      'dev': 'strapi dev',
       'start': 'strapi start',
+      'build': 'strapi build',
       'strapi': 'strapi', // Allow to use `npm run strapi` CLI,
       'lint': 'eslint api/**/*.js config/**/*.js plugins/**/*.js'
     },
