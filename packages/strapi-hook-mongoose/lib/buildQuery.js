@@ -29,12 +29,10 @@ const buildQuery = ({ model, filters = {}, populate = [], aggregate = false } = 
 const buildSimpleQuery = ({ model, filters, populate }) => {
   const { where = [] } = filters;
 
-  const wheres = where.reduce(
-    (acc, whereClause) => _.assign(acc, buildWhereClause(whereClause)),
-    {}
-  );
+  const wheres = where.map(buildWhereClause);
+  const findCriteria = wheres.length > 0 ? { $and: wheres } : {};
 
-  let query = model.find(wheres).populate(populate);
+  let query = model.find(findCriteria).populate(populate);
   query = applyQueryParams({ query, filters });
 
   return Object.assign(query, {

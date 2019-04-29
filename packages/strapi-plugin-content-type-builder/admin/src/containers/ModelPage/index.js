@@ -133,9 +133,13 @@ export class ModelPage extends React.Component {
     const description = get(initialData, [this.getModelName(), 'description'], null);
 
     /* istanbul ignore if */
+    /* eslint-disable indent */
     return !!description
       ? description
-      : { id: `${pluginId}.modelPage.contentHeader.emptyDescription.description` };
+      : {
+          id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+        };
+    /* eslint-enable indent */
   };
 
   getModelName = () => {
@@ -403,7 +407,9 @@ export class ModelPage extends React.Component {
   isUpdatingTemporaryContentType = (modelName = this.getModelName()) => {
     const { models } = this.props;
     /* istanbul ignore next */
-    const currentModel = models.find(model => model.name === modelName) || { isTemporary: true };
+    const currentModel = models.find(model => model.name === modelName) || {
+      isTemporary: true,
+    };
 
     const { isTemporary } = currentModel;
 
@@ -632,7 +638,9 @@ export class ModelPage extends React.Component {
         <PopUpWarning
           isOpen={showWarning}
           toggleModal={this.toggleModalWarning}
-          content={{ message: `${pluginId}.popUpWarning.bodyMessage.attribute.delete` }}
+          content={{
+            message: `${pluginId}.popUpWarning.bodyMessage.attribute.delete`,
+          }}
           popUpWarningType="danger"
           onConfirm={this.handleDeleteAttribute}
         />
@@ -664,6 +672,7 @@ export class ModelPage extends React.Component {
 ModelPage.contextTypes = {
   emitEvent: PropTypes.func,
   plugins: PropTypes.object,
+  router: PropTypes.object,
   updatePlugin: PropTypes.func,
 };
 
