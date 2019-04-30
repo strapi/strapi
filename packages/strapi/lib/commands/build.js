@@ -25,7 +25,7 @@ module.exports = ({ dir = '' }) => {
     .load()
     .then(() => {
       console.log(
-        `Building your app with ${green(
+        `Building your admin UI with ${green(
           app.config.environment
         )} configuration ...`
       );

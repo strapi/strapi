@@ -36,6 +36,7 @@
     "chokidar": "^2.1.2",
     "cross-spawn": "^6.0.5",
     "delegates": "^1.0.0",
+    "execa": "^1.0.0",
     "fs-extra": "^7.0.0",
     "glob": "^7.1.2",
     "kcors": "^2.2.0",

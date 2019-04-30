@@ -13,6 +13,7 @@
     "lib": "./lib"
   },
   "dependencies": {
+    "execa": "^1.0.0",
     "fs-extra": "^4.0.0",
     "inquirer": "^6.2.1",
     "listr": "^0.14.1",
@@ -20,7 +21,7 @@
     "node-machine-id": "^1.1.10",
     "ora": "^2.1.0",
     "request": "^2.88.0",
-    "shelljs": "^0.7.8",
+    "rimraf": "^2.6.3",
     "strapi-utils": "^3.0.0-beta.0",
     "uuid": "^3.1.0"
   },

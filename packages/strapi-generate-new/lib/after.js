@@ -10,44 +10,25 @@ const path = require('path');
 const { green, cyan } = require('chalk');
 const fs = require('fs-extra');
 const ora = require('ora');
-const shell = require('shelljs');
+const execa = require('execa');
 
 // Logger.
 const { packageManager } = require('strapi-utils');
 const trackSuccess = require('./success');
 
-const runInstall = () => {
+const installArguments = ['install', '--production', '--no-optional'];
+const runInstall = cwd => {
   if (packageManager.isStrapiInstalledWithNPM()) {
-    return new Promise((resolve, reject) => {
-      shell.exec(
-        'npm install --production --no-optional',
-        { silent: true },
-        (code, _, stderr) => {
-          if (stderr && code !== 0) return reject(new Error(stderr));
-          return resolve();
-        }
-      );
-    });
+    return execa('npm', installArguments, { cwd });
   }
 
-  return new Promise((resolve, reject) => {
-    shell.exec(
-      'yarn install --production --no-optional',
-      { silent: true },
-      (code, _, stderr) => {
-        if (stderr && code !== 0) return reject(new Error(stderr));
-        return resolve();
-      }
-    );
-  });
+  return execa('yarn', installArguments, { cwd });
 };
 
 module.exports = async (scope, cb) => {
   console.log('🏗  Application generation:');
 
-  let loader = ora('Copying files').start();
-
-  process.chdir(scope.rootPath);
+  let loader = ora('Copying files ...').start();
 
   // Copy the default files.
   fs.copySync(
@@ -57,10 +38,10 @@ module.exports = async (scope, cb) => {
 
   loader.succeed();
 
-  loader.start('Installing dependencies');
+  loader.start('Installing dependencies ...');
 
   try {
-    await runInstall();
+    await runInstall(scope.rootPath);
     loader.succeed();
   } catch (err) {
     loader.fail();
@@ -68,17 +49,22 @@ module.exports = async (scope, cb) => {
     cb(err);
   }
 
-  console.log(
-    `\n👌 Your application was created at ${cyan(scope.rootPath)}.\n`
-  );
+  loader.start('Building your admin UI ...');
+  try {
+    await execa('npm', ['run', 'build'], {
+      cwd: scope.rootPath,
+    });
+    loader.succeed();
+  } catch (err) {
+    loader.fail();
+    trackSuccess('didNotBuildAdminUI', scope);
+    cb(err);
+  }
 
   trackSuccess('didCreateProject', scope);
 
-  loader.start('Building the admin UI');
-
-  shell.exec('npm run build');
-
-  loader.succeed();
+  console.log();
+  console.log(`👌 Your application was created at ${cyan(scope.rootPath)}.\n`);
 
   if (scope.quick) {
     console.log('⚡️ Starting your application...');
@@ -87,7 +73,7 @@ module.exports = async (scope, cb) => {
     console.log(`$ ${green(`cd ${scope.name}`)}`);
     console.log();
     console.log('⚡️ Start your application:');
-    console.log(`$ ${green('strapi start')}`);
+    console.log(`$ ${green('npm run dev')}`);
   }
 
   cb();

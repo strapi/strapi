@@ -15,6 +15,7 @@ const _ = require('lodash');
 const fetch = require('node-fetch');
 const { machineIdSync } = require('node-machine-id');
 const shell = require('shelljs');
+const execa = require('execa');
 
 // Master of ceremonies for generators.
 const generate = require('strapi-generate');
@@ -108,36 +109,31 @@ module.exports = function(name, cliArguments) {
       process.exit(1);
     },
 
-    success: () => {
+    success: async () => {
       if (scope.quick) {
-        try {
-          // Create interface for windows user to let them quit the program.
-          if (process.platform === 'win32') {
-            const rl = require('readline').createInterface({
-              input: process.stdin,
-              output: process.stdout,
-            });
-
-            rl.on('SIGINT', function() {
-              process.emit('SIGINT');
-            });
-          }
-          // Listen Ctrl+C / SIGINT event to close the process.
-          process.on('SIGINT', function() {
-            process.exit();
+        // Create interface for windows user to let them quit the program.
+        if (process.platform === 'win32') {
+          const rl = require('readline').createInterface({
+            input: process.stdin,
+            output: process.stdout,
           });
 
-          shell.exec('npm run dev', {
-            stdio: 'inherit',
-            env: {
-              ...process.env,
-              FORCE_COLOR: 1,
-            },
+          rl.on('SIGINT', function() {
+            process.emit('SIGINT');
           });
-        } catch (e) {
-          console.log(e);
-          logError(e);
         }
+        // Listen Ctrl+C / SIGINT event to close the process.
+        process.on('SIGINT', function() {
+          process.exit();
+        });
+
+        await execa('npm', ['run', 'dev'], {
+          stdio: 'inherit',
+          cwd: scope.rootPath,
+          env: {
+            FORCE_COLOR: 1,
+          },
+        });
       }
     },
   });
