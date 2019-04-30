@@ -23,7 +23,7 @@ const { cli } = require('strapi-utils');
  * Expose method which starts the appropriate instance of Strapi
  * (fire up the application in our working directory).
  */
-module.exports = function(appPath = '') {
+module.exports = function() {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -31,7 +31,5 @@ module.exports = function(appPath = '') {
     );
   }
 
-  appPath = path.join(process.cwd(), appPath);
-
-  strapi({ appPath }).start();
+  strapi().start();
 };

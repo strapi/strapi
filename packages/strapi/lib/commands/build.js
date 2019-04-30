@@ -6,9 +6,10 @@ const { green } = require('chalk');
 const strapiAdmin = require('strapi-admin');
 const { cli } = require('strapi-utils');
 const strapi = require('../index');
+const ora = require('ora');
 
 // build script shoul only run in production mode
-module.exports = ({ dir = '' }) => {
+module.exports = () => {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -16,15 +17,15 @@ module.exports = ({ dir = '' }) => {
     );
   }
 
-  const appPath = path.join(process.cwd(), dir);
+  const loader = ora();
 
-  const app = strapi({ appPath });
+  const app = strapi();
 
   // prepare the app => load the configurations
   return app
     .load()
     .then(() => {
-      console.log(
+      loader.start(
         `Building your admin UI with ${green(
           app.config.environment
         )} configuration ...`
@@ -47,11 +48,11 @@ module.exports = ({ dir = '' }) => {
       });
     })
     .then(() => {
-      console.log('Compilation successfull');
+      loader.succeed('Compilation successfull');
       process.exit();
     })
     .catch(err => {
-      console.log('Compilation failed');
+      loader.failed('Compilation failed');
       console.error(err);
     });
 };

@@ -5,9 +5,15 @@ const strapi = require('../strapi');
 
 // Public node modules.
 const _ = require('lodash');
-const { logger } = require('strapi-utils');
+const { cli, logger } = require('strapi-utils');
 
 module.exports = function() {
+  if (!cli.isStrapiApp()) {
+    return console.log(
+      `⛔️ ${cyan('strapi start')} can only be used inside a Strapi project.`
+    );
+  }
+
   try {
     // Now load up the Strapi framework for real.
     const app = strapi();

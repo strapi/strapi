@@ -28,7 +28,7 @@ const { cli, logger } = require('strapi-utils');
  * (fire up the application in our working directory).
  */
 
-module.exports = async function(dir = '') {
+module.exports = async function() {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -36,7 +36,7 @@ module.exports = async function(dir = '') {
     );
   }
 
-  const appPath = path.join(process.cwd(), dir);
+  const appPath = process.cwd();
 
   try {
     const strapiInstance = strapi({ appPath });

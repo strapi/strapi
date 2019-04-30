@@ -73,19 +73,15 @@ program
 
 // `$ strapi start`
 program
-  .command('start [appPath]')
+  .command('start')
   .description('Start your Strapi application')
-  .action(appPath => {
-    getScript('start')(appPath);
-  });
+  .action(getScript('start'));
 
 // `$ strapi dev`
 program
-  .command('dev [appPath]')
+  .command('dev')
   .description('Start your Strapi application in dev mode')
-  .action(appPath => {
-    getScript('dev')(appPath);
-  });
+  .action(getScript('dev'));
 
 // `$ strapi generate:api`
 program
@@ -145,9 +141,22 @@ program
   .action(getScript('generate'));
 
 program
-  .command('build [dir]')
+  .command('build')
   .description('Builds the strapi admin app')
-  .action(dir => getScript('build')({ dir }));
+  .action(getScript('build'));
+
+// `$ strapi install`
+program
+  .command('install [plugins...]')
+  .option('-d, --dev', 'Development mode')
+  .description('install a Strapi plugin')
+  .action(getScript('install'));
+
+// `$ strapi uninstall`
+program
+  .command('uninstall [plugins...]')
+  .description('uninstall a Strapi plugin')
+  .action(getScript('uninstall'));
 
 /**
  * Normalize help argument

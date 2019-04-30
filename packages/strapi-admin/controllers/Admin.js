@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const shell = require('shelljs');
+const execa = require('execa');
 const _ = require('lodash');
 
 /**
@@ -60,14 +60,13 @@ module.exports = {
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Installing ${plugin}...`);
-      shell.exec(`${strapi.config.pkgManager} install --save strapi-plugin-${plugin}`, {
-        silent: true,
-      });
+      await execa('npm', ['run', 'strapi', '--', 'install', plugin]);
 
       ctx.send({ ok: true });
 
       strapi.reload();
     } catch (err) {
+      strapi.log.error(err);
       strapi.reload.isWatching = true;
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
@@ -96,12 +95,13 @@ module.exports = {
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Uninstalling ${plugin}...`);
-      shell.exec(`${strapi.config.pkgManager} uninstall strapi-plugin-${plugin}`, { silent: true });
+      await execa('npm', ['run', 'strapi', '--', 'uninstall', plugin]);
 
       ctx.send({ ok: true });
 
       strapi.reload();
     } catch (err) {
+      strapi.log.error(err);
       strapi.reload.isWatching = true;
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
