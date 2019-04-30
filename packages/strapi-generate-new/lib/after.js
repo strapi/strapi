@@ -20,7 +20,7 @@ const runInstall = () => {
   if (packageManager.isStrapiInstalledWithNPM()) {
     return new Promise((resolve, reject) => {
       shell.exec(
-        'npm install',
+        'npm install --production --no-optional',
         { silent: true },
         (code, _, stderr) => {
           if (stderr && code !== 0) return reject(new Error(stderr));
@@ -32,7 +32,7 @@ const runInstall = () => {
 
   return new Promise((resolve, reject) => {
     shell.exec(
-      'yarn install',
+      'yarn install --production --no-optional',
       { silent: true },
       (code, _, stderr) => {
         if (stderr && code !== 0) return reject(new Error(stderr));
@@ -73,6 +73,12 @@ module.exports = async (scope, cb) => {
   );
 
   trackSuccess('didCreateProject', scope);
+
+  loader.start('Building the admin UI');
+
+  shell.exec('npm run build');
+
+  loader.succeed();
 
   if (scope.quick) {
     console.log('⚡️ Starting your application...');

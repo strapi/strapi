@@ -19,8 +19,6 @@ function BlockerComponent({
   blockerComponentContent = '',
 }) {
   let content;
-  console.log(blockerComponentContent);
-
   switch (blockerComponentContent) {
     case 'renderIde':
       content = renderIde();

@@ -3,7 +3,6 @@ const webpack = require('webpack');
 
 // Webpack plugins
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
-const SimpleProgressWebpackPlugin = require('simple-progress-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const DuplicatePckgChecker = require('duplicate-package-checker-webpack-plugin');
@@ -242,8 +241,6 @@ module.exports = ({
         template: path.resolve(__dirname, 'index.html'),
         favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
-      new SimpleProgressWebpackPlugin(),
-
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(
           isProduction ? 'production' : 'development'

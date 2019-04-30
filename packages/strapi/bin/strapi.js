@@ -146,12 +146,8 @@ program
 
 program
   .command('build [dir]')
-  .option('--env [env]', 'Build for which env')
   .description('Builds the strapi admin app')
-  .action((dir, options) => {
-    const env = options.env || 'production';
-    getScript('build')({ dir, env });
-  });
+  .action(dir => getScript('build')({ dir }));
 
 /**
  * Normalize help argument

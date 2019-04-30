@@ -129,27 +129,7 @@ async function build({ dir, env, options }) {
         warnings: messages.warnings,
       });
     });
-  })
-    .then(
-      ({ stats, warnings }) => {
-        console.log(chalk.green('Compiled successfully.\n'));
-      },
-      err => {
-        console.log(chalk.red('Failed to compile.\n'));
-
-        const message = err != null && err.message;
-        console.log((message || err) + '\n');
-        console.log();
-
-        process.exit(1);
-      }
-    )
-    .catch(err => {
-      if (err && err.message) {
-        console.log(err.message);
-      }
-      process.exit(1);
-    });
+  });
 }
 
 module.exports = {

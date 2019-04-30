@@ -14,7 +14,7 @@ const strapi = require('../strapi');
 // Public dependencies
 const _ = require('lodash');
 const fs = require('fs-extra');
-const { cyan } = require('chalk');
+const { cyan, green } = require('chalk');
 const chokidar = require('chokidar');
 const strapiAdmin = require('strapi-admin');
 
@@ -22,15 +22,13 @@ const strapiAdmin = require('strapi-admin');
 const { cli, logger } = require('strapi-utils');
 
 /**
- * `$ strapi start`
+ * `$ strapi dev`
  *
  * Expose method which starts the appropriate instance of Strapi
  * (fire up the application in our working directory).
  */
 
-module.exports = async function(dir = '.') {
-  process.env.NODE_ENV = 'development';
-
+module.exports = async function(dir = '') {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -40,27 +38,27 @@ module.exports = async function(dir = '.') {
 
   const appPath = path.join(process.cwd(), dir);
 
-  // Require server configurations
-  const server = require(path.resolve(
-    appPath,
-    'config',
-    'environments',
-    'development',
-    'server.json'
-  ));
-
-  if (!fs.existsSync(path.resolve(appPath, 'build'))) {
-    await strapiAdmin.build({
-      dir: process.cwd(),
-      env: 'production',
-    });
-  } else {
-  }
-
   try {
     const strapiInstance = strapi({ appPath });
 
-    if (_.get(server, 'autoReload.enabled') === true) {
+    // Set NODE_ENV
+    if (_.isEmpty(process.env.NODE_ENV)) {
+      process.env.NODE_ENV = 'development';
+    }
+
+    // Require server configurations
+    const server = require(path.resolve(
+      appPath,
+      'config',
+      'environments',
+      'development',
+      'server.json'
+    ));
+
+    if (
+      process.env.NODE_ENV === 'development' &&
+      _.get(server, 'autoReload.enabled') === true
+    ) {
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {
           switch (message) {

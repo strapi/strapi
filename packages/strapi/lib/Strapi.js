@@ -119,14 +119,15 @@ class Strapi extends EventEmitter {
     try {
       // Emit starting event.
       this.emit('server:starting');
-      // Load the app.
+
       await this.load();
       // Run bootstrap function.
       await this.runBootstrapFunctions();
       // Freeze object.
       await this.freeze();
       // Init first start
-      utils.init.call(this);
+      utils.init(this.config);
+
       // Launch server.
       this.server.listen(this.config.port, async err => {
         if (err) return this.stopWithError(err);
@@ -232,7 +233,6 @@ class Strapi extends EventEmitter {
     process.exit(1);
   }
 
-  // TODO: Split code
   async load() {
     await this.enhancer();
 

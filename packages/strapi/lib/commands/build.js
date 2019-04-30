@@ -1,13 +1,14 @@
 'use strict';
 
 const path = require('path');
+const _ = require('lodash');
 const { green } = require('chalk');
 const strapiAdmin = require('strapi-admin');
 const { cli } = require('strapi-utils');
+const strapi = require('../index');
 
-process.env.NODE_ENV = 'production';
 // build script shoul only run in production mode
-module.exports = ({ dir = '', env }) => {
+module.exports = ({ dir = '' }) => {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -17,19 +18,40 @@ module.exports = ({ dir = '', env }) => {
 
   const appPath = path.join(process.cwd(), dir);
 
-  console.log(`Building your app with ${green(env)} configuration`);
+  const app = strapi({ appPath });
 
-  // Require server configurations
-  const server = require(path.resolve(
-    appPath,
-    'config',
-    'environments',
-    env,
-    'server.json'
-  ));
+  // prepare the app => load the configurations
+  return app
+    .load()
+    .then(() => {
+      console.log(
+        `Building your app with ${green(
+          app.config.environment
+        )} configuration ...`
+      );
 
-  return strapiAdmin.build({
-    dir: process.cwd(),
-    env: 'production',
-  });
+      const adminPath = _.get(
+        app.config.currentEnvironment.server,
+        'admin.path',
+        'admin'
+      );
+
+      return strapiAdmin.build({
+        dir: process.cwd(),
+        // front end build env is always production for now
+        env: 'production',
+        options: {
+          backend: app.config.url,
+          publicPath: path.join('/', adminPath, '/'),
+        },
+      });
+    })
+    .then(() => {
+      console.log('Compilation successfull');
+      process.exit();
+    })
+    .catch(err => {
+      console.log('Compilation failed');
+      console.error(err);
+    });
 };

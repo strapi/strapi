@@ -72,7 +72,6 @@
     "sanitize.css": "^4.1.0",
     "sass-loader": "^7.1.0",
     "shelljs": "^0.7.8",
-    "simple-progress-webpack-plugin": "^1.1.2",
     "strapi-helper-plugin": "^3.0.0-beta.0",
     "strapi-utils": "^3.0.0-beta.0",
     "style-loader": "^0.23.1",
@@ -80,9 +79,7 @@
     "terser-webpack-plugin": "^1.2.3",
     "url-loader": "^1.1.2",
     "video-react": "^0.13.2",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0",
-    "webpack-dev-server": "^3.3.1"
+    "webpack": "^4.29.6"
   },
   "author": {
     "name": "Strapi",

@@ -1,10 +1,9 @@
 'use strict';
 
-const path = require('path');
 const _ = require('lodash');
-const fs = require('fs-extra');
 
 const { createController, createService } = require('../core-api');
+const getURLFromSegments = require('../utils/url-from-segments');
 
 module.exports = function(strapi) {
   // Retrieve Strapi version.
@@ -119,7 +118,6 @@ module.exports = function(strapi) {
         strapi.config.currentEnvironment.database.defaultConnection,
     });
   });
-
 
   strapi.admin.queries = (model, plugin) => {
     return strapi.query(model, plugin, strapi.admin.config.queries);
@@ -397,13 +395,4 @@ const enableHookNestedDependencies = function(
       });
     }
   }
-};
-
-const getURLFromSegments = function({ hostname, port, ssl = false }) {
-  const protocol = ssl ? 'https' : 'http';
-  const defaultPort = ssl ? 443 : 80;
-  const portString =
-    port === undefined || parseInt(port) === defaultPort ? '' : `:${port}`;
-
-  return `${protocol}://${hostname}${portString}`;
 };
