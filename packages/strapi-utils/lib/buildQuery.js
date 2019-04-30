@@ -5,7 +5,7 @@ const findModelByAssoc = assoc => {
   return models[assoc.collection || assoc.model];
 };
 
-const isAttribute = (model, field) => _.has(model.attributes, field) || model.primaryKey === field;
+const isAttribute = (model, field) => _.has(model.allAttributes, field) || model.primaryKey === field;
 
 /**
  * Returns the model, attribute name and association from a path of relation
