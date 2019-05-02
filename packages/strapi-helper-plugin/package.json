@@ -28,6 +28,7 @@
     "prepublishOnly": "npm run build",
     "prebuild": "rimraf dist",
     "build": "rollup -c",
+    "watch": "rollup -c -w",
     "test": "echo \"no tests yet\""
   },
   "peerDependencies": {

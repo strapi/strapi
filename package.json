@@ -51,7 +51,7 @@
   },
   "scripts": {
     "bootstrap": "yarn install && lerna bootstrap",
-    "doc": "node ./scripts/documentation.js",
+    "watch": "lerna run --stream watch",
     "test:clean": "rimraf ./coverage",
     "test:front": "npm run test:clean && cross-env NODE_ENV=test jest --config ./jest.config.front.js --coverage",
     "test:front:watch": "cross-env NODE_ENV=test jest --config ./jest.config.front.js --watchAll",
