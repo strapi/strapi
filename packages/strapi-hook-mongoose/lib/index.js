@@ -303,6 +303,9 @@ module.exports = function(strapi) {
                       _.get(definition, 'options.minimize', false) === true
                     );
 
+                    // Save all attributes (with timestamps)
+                    target[model].allAttributes = _.clone(definition.attributes);
+
                     collection.schema.options.toObject = collection.schema.options.toJSON = {
                       virtuals: true,
                       transform: function(doc, returned, opts) {

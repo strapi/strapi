@@ -834,6 +834,9 @@ module.exports = function(strapi) {
                           };
                         }
 
+                        // Save all attributes (with timestamps)
+                        target[model].allAttributes = _.clone(definition.attributes);
+
                         // Equilize tables
                         if (connection.options && connection.options.autoMigration !== false) {
                           await handler(loadedModel.tableName, definition.attributes);
