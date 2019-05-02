@@ -22,7 +22,7 @@
     "ora": "^2.1.0",
     "request": "^2.88.0",
     "rimraf": "^2.6.3",
-    "strapi-utils": "^3.0.0-beta.0",
+    "strapi-utils": "3.0.0-beta.0",
     "uuid": "^3.1.0"
   },
   "scripts": {
@@ -51,5 +51,6 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

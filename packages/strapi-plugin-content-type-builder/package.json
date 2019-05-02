@@ -13,8 +13,9 @@
   "dependencies": {
     "immutable": "^3.8.2",
     "pluralize": "^7.0.0",
-    "strapi-generate": "^3.0.0-beta.0",
-    "strapi-generate-api": "^3.0.0-beta.0"
+    "strapi-generate": "3.0.0-beta.0",
+    "strapi-generate-api": "3.0.0-beta.0",
+    "strapi-helper-plugin": "3.0.0-beta.0"
   },
   "peerDependencies": {
     "classnames": "^2.2.6",
@@ -31,8 +32,7 @@
     "reactstrap": "^5.0.0",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
-    "reselect": "^3.0.1",
-    "strapi-helper-plugin": "^3.0.0-beta.0"
+    "reselect": "^3.0.1"
   },
   "author": {
     "name": "Strapi team",
@@ -54,5 +54,6 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

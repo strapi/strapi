@@ -52,7 +52,8 @@ module.exports = () => {
       process.exit();
     })
     .catch(err => {
-      loader.failed('Compilation failed');
+      loader.fail('Compilation failed');
       console.error(err);
+      process.exit(1);
     });
 };

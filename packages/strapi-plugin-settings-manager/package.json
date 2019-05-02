@@ -11,7 +11,8 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "shelljs": "^0.7.8"
+    "shelljs": "^0.7.8",
+    "strapi-helper-plugin": "3.0.0-beta.0"
   },
   "peerDependencies": {
     "classnames": "^2.2.6",
@@ -28,8 +29,7 @@
     "react-transition-group": "^2.5.0",
     "reactstrap": "^5.0.0",
     "redux": "^4.0.1",
-    "reselect": "^3.0.1",
-    "strapi-helper-plugin": "^3.0.0-beta.0"
+    "reselect": "^3.0.1"
   },
   "author": {
     "name": "Strapi team",
@@ -51,5 +51,6 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

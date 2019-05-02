@@ -17,7 +17,8 @@ const packageJSON = require('../package.json');
 
 /* eslint-disable no-console */
 
-const getScript = name => require(`../lib/commands/${name}`);
+const getScript = name => (...args) =>
+  require(`../lib/commands/${name}`)(...args);
 
 /**
  * Normalize version argument
