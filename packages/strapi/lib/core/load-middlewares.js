@@ -99,6 +99,8 @@ const createLoaders = strapi => {
 
   const loadLocalPluginsMiddlewares = async (appPath, middlewares) => {
     const pluginsDir = path.resolve(appPath, 'plugins');
+    if (!fs.existsSync(pluginsDir)) return;
+
     const pluginsNames = await fs.readdir(pluginsDir);
 
     for (let pluginFolder of pluginsNames) {

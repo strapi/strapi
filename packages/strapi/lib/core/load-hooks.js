@@ -52,6 +52,8 @@ const loadPluginsHooks = async (plugins, hooks) => {
 
 const loadLocalPluginsHooks = async (appPath, hooks) => {
   const pluginsDir = path.resolve(appPath, 'plugins');
+  if (!fs.existsSync(pluginsDir)) return;
+
   const pluginsNames = await fs.readdir(pluginsDir);
 
   for (let pluginName of pluginsNames) {

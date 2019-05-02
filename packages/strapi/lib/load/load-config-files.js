@@ -12,7 +12,7 @@ const laodConfigFiles = (dir, pattern = 'config/**/*.+(js|json)') =>
     shouldUseFileNameAsKey,
     globArgs: {
       // used to load .init.json at first startup
-      dot: true,
+      dot: true
     },
   });
 

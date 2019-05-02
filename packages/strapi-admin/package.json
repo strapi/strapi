@@ -81,6 +81,9 @@
     "video-react": "^0.13.2",
     "webpack": "^4.29.6"
   },
+  "peerDependencies": {
+    "strapi-admin": "3.0.0-beta.0"
+  },
   "author": {
     "name": "Strapi",
     "email": "",

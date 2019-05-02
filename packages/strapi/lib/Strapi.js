@@ -10,8 +10,10 @@ const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
 const utils = require('./utils');
 const {
-  loadConfigs,
+  loadConfig,
   loadApis,
+  loadAdmin,
+  loadPlugins,
   loadMiddlewares,
   loadHooks,
   bootstrap,
@@ -22,9 +24,7 @@ const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
-const runChecks = require('./utils/run-checks');
 const defaultQueries = require('./core-api/queries');
-const fs = require('fs-extra');
 
 /**
  * Construct an Strapi instance.
@@ -63,13 +63,13 @@ class Strapi extends EventEmitter {
     // Expose `plugin`.
     this.plugins = {};
 
-    const rootPath = appPath || process.cwd();
-    const pkgJSON = require(path.resolve(rootPath, 'package.json'));
+    this.dir = appPath || process.cwd();
+    const pkgJSON = require(path.resolve(this.dir, 'package.json'));
 
     // Default configurations.
     this.config = {
       launchedAt: Date.now(),
-      appPath: rootPath,
+      appPath: this.dir,
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,
       environment: _.toLower(process.env.NODE_ENV) || 'development',
@@ -100,16 +100,6 @@ class Strapi extends EventEmitter {
     };
 
     this.fs = createStrapiFs(this);
-    this.runChecks();
-  }
-
-  runChecks() {
-    try {
-      runChecks(this.config);
-    } catch (err) {
-      this.log.error(err.message);
-      process.exit(1);
-    }
   }
 
   async start(cb) {
@@ -242,23 +232,36 @@ class Strapi extends EventEmitter {
       }
     });
 
-    // load configs
-    _.merge(this, await loadConfigs(this.config));
-    // load apis
-    _.merge(this, await loadApis(this.config));
+    const [
+      config,
+      api,
+      admin,
+      plugins,
+      { middlewares, koaMiddlewares },
+      hook,
+      extensions,
+    ] = await Promise.all([
+      loadConfig(this),
+      loadApis(this),
+      loadAdmin(this),
+      loadPlugins(this),
+      loadMiddlewares(this),
+      loadHooks(this.config),
+      loadExtensions(this.config),
+    ]);
 
-    // load middlewares
-    const { middlewares, koaMiddlewares } = await loadMiddlewares(this);
+    _.merge(this.config, config);
+
+    this.api = api;
+    this.admin = admin;
+    this.plugins = plugins;
     this.middleware = middlewares;
     this.koaMiddlewares = koaMiddlewares;
-
-    // load hooks
-    this.hook = await loadHooks(this.config);
+    this.hook = hook;
 
     /**
      * Handle plugin extensions
      */
-    const extensions = await loadExtensions(this.config);
     // merge extensions config folders
     _.mergeWith(this.plugins, extensions.merges, (objValue, srcValue) => {
       if (_.isArray(srcValue) && _.isArray(objValue)) {
@@ -271,12 +274,17 @@ class Strapi extends EventEmitter {
     );
 
     // Populate AST with configurations.
+
     await bootstrap(this);
+
     // Usage.
     await utils.usage(this.config);
+
     // Init core store
     initCoreStore(this);
+
     // Initialize hooks and middlewares.
+
     await Promise.all([
       initializeMiddlewares.call(this),
       initializeHooks.call(this),

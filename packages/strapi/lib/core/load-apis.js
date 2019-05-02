@@ -1,52 +1,22 @@
 'use strict';
 
-const path = require('path');
+const { join } = require('path');
+const { existsSync } = require('fs-extra');
 const _ = require('lodash');
-const findPackagePath = require('../load/package-path');
 const loadFiles = require('../load/load-files');
+const loadConfig = require('../load/load-config-files');
 
-/**
- * Loads the apis from the different possible locations
- */
-module.exports = async function({ appPath, installedPlugins }) {
-  const [api, admin, plugins, localPlugins] = await Promise.all([
-    loadLocalApis(appPath),
-    loadAdminApis(),
-    loadPluginsApis(installedPlugins),
-    loadLocalPluginsApis(appPath),
-  ]);
+module.exports = async ({ dir }) => {
+  const apiDir = join(dir, 'api');
 
-  return {
-    api,
-    admin,
-    plugins: _.merge(plugins, localPlugins),
-  };
-};
-
-const loadLocalApis = appPath =>
-  loadFiles(path.resolve(appPath, 'api'), '*/!(config)/*.*(js|json)');
-
-const loadAdminApis = () =>
-  loadFiles(
-    findPackagePath('strapi-admin'),
-    '!(config|node_modules|scripts)//*.*(js|json)'
-  );
-
-const loadLocalPluginsApis = appPath =>
-  loadFiles(path.resolve(appPath, 'plugins'), '{*/!(config)/*.*(js|json),*/package.json}');
-
-const loadPluginsApis = async installedPlugins => {
-  let plugins = {};
-  for (let plugin of installedPlugins) {
-    const pluginPath = findPackagePath(`strapi-plugin-${plugin}`);
-
-    const result = await loadFiles(
-      pluginPath,
-      '{!(config|node_modules|test)//*.*(js|json),package.json}'
+  if (!existsSync(apiDir)) {
+    throw new Error(
+      `Missing api folder. Please create one in your app root directory`
     );
-
-    _.set(plugins, plugin, result);
   }
 
-  return plugins;
+  const apis = await loadFiles(apiDir, '*/!(config)/**/*.*(js|json)');
+  const apiConfigs = await loadConfig(apiDir, '*/config/**/*.*(js|json)');
+
+  return _.merge(apis, apiConfigs);
 };
