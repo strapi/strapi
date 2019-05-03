@@ -28,7 +28,7 @@ const { cli, logger } = require('strapi-utils');
  * (fire up the application in our working directory).
  */
 
-module.exports = async function() {
+module.exports = async function({ build}) {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -38,8 +38,8 @@ module.exports = async function() {
 
   const appPath = process.cwd();
 
-  if (!fs.existsSync(path.join(appPath, 'build'))) {
-    console.log(`> No ${cyan('build')} dir found. Strating build`);
+  if (build && !fs.existsSync(path.join(appPath, 'build'))) {
+    console.log(`> No ${cyan('build')} dir found. Starting build`);
     execa.shellSync('npm run -s build', {
       stdio: 'inherit',
     });

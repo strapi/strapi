@@ -81,6 +81,7 @@ program
 // `$ strapi dev`
 program
   .command('dev')
+  .option('--no-build', 'Disable build', false)
   .description('Start your Strapi application in dev mode')
   .action(getScript('dev'));
 
