@@ -12,16 +12,12 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
-    "moment": "^2.22.2",
-    "path-to-regexp": "^2.4.0",
-    "strapi-helper-plugin": "3.0.0-alpha.26.2",
-    "swagger-ui-dist": "3.22.1"
-  },
-  "peerDependencies": {
     "classnames": "^2.2.6",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
     "lodash": "^4.17.11",
+    "moment": "^2.22.2",
+    "path-to-regexp": "^2.4.0",
     "react": "^16.0.0",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.0.0",
@@ -34,7 +30,9 @@
     "reactstrap": "^5.0.0",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
-    "reselect": "^3.0.1"
+    "reselect": "^3.0.1",
+    "strapi-helper-plugin": "3.0.0-alpha.26.2",
+    "swagger-ui-dist": "3.22.1"
   },
   "author": {
     "name": "soupette",

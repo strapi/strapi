@@ -63,6 +63,7 @@
     "rimraf": "^2.6.2",
     "shelljs": "^0.8.3",
     "strapi-generate": "3.0.0-alpha.26.2",
+    "strapi-admin": "3.0.0-alpha.26.2",
     "strapi-generate-api": "3.0.0-alpha.26.2",
     "strapi-generate-controller": "3.0.0-alpha.26.2",
     "strapi-generate-model": "3.0.0-alpha.26.2",
