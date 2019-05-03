@@ -5,7 +5,7 @@ const findModelByAssoc = assoc => {
   return models[assoc.collection || assoc.model];
 };
 
-const isAttribute = (model, field) => _.has(model.attributes, field) || model.primaryKey === field;
+const isAttribute = (model, field) => _.has(model.allAttributes, field) || model.primaryKey === field;
 
 /**
  * Returns the model, attribute name and association from a path of relation
@@ -98,7 +98,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
 
     // cast where clauses to match the inner types
     filters.where = filters.where
-      .filter(({ value }) => value)
+      .filter(({ value }) => !_.isNil(value))
       .map(({ field, operator, value }) => {
         const { model: assocModel, attribute } = getAssociationFromFieldKey({
           model,
@@ -106,7 +106,13 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
         });
 
         const { type } = _.get(assocModel, ['attributes', attribute], {});
-        return { field, operator, value: castValueToType({ type, value }) };
+
+        // cast value or array of values
+        const castedValue = Array.isArray(value)
+          ? value.map(val => castValueToType({ type, value: val }))
+          : castValueToType({ type, value: value });
+
+        return { field, operator, value: castedValue };
       });
   }
 

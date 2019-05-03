@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-settings-manager",
-  "version": "3.0.0-alpha.26.1",
+  "version": "3.0.0-alpha.26.2",
   "description": "Strapi plugin to manage settings.",
   "strapi": {
     "name": "Settings Manager",
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "shelljs": "^0.7.8",
-    "strapi-helper-plugin": "3.0.0-alpha.26.1"
+    "strapi-helper-plugin": "3.0.0-alpha.26.2"
   },
   "peerDependencies": {
     "classnames": "^2.2.6",

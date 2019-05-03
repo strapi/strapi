@@ -515,8 +515,10 @@ module.exports = function(strapi) {
                       definition,
                       loadedModel,
                       connection,
+                      model: target[model],
                     })
                   );
+
                 } catch (err) {
                   strapi.log.error(
                     `Impossible to register the '${model}' model.`
@@ -652,7 +654,9 @@ module.exports = function(strapi) {
                   }
                   case 'belongsToMany': {
                     const collection = details.plugin
-                      ? strapi.plugins[details.plugin].models[details.collection]
+                      ? strapi.plugins[details.plugin].models[
+                          details.collection
+                        ]
                       : strapi.models[details.collection];
 
                     const collectionName =

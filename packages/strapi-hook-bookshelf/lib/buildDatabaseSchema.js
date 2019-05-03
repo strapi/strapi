@@ -3,7 +3,7 @@ const pluralize = require('pluralize');
 const { models: utilsModels } = require('strapi-utils');
 
 /* global StrapiConfigs */
-module.exports = async ({ ORM, loadedModel, definition, connection }) => {
+module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
   const quote = definition.client === 'pg' ? '"' : '`';
 
   // Equilize database tables
@@ -268,6 +268,9 @@ module.exports = async ({ ORM, loadedModel, definition, connection }) => {
       type: 'timestampUpdate',
     };
   }
+
+  // Save all attributes (with timestamps)
+  model.allAttributes = _.clone(definition.attributes);
 
   // Equilize tables
   if (connection.options && connection.options.autoMigration !== false) {

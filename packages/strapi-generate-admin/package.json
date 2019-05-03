@@ -1,27 +1,30 @@
 {
-  "name": "strapi-plugin-email",
+  "name": "strapi-generate-admin",
   "version": "3.0.0-alpha.26.2",
-  "description": "This is the description of the plugin.",
-  "strapi": {
-    "name": "Email",
-    "icon": "paper-plane",
-    "description": "email.plugin.description"
+  "description": "Generate the default admin panel for a Strapi application.",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "generate",
+    "generator",
+    "strapi"
+  ],
+  "main": "./lib/index.js",
+  "directories": {
+    "lib": "./lib"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "strapi-provider-email-sendmail": "3.0.0-alpha.26.2",
+    "fs-extra": "^4.0.1",
+    "lodash": "^4.17.5",
+    "shelljs": "^0.7.8",
+    "strapi-admin": "3.0.0-alpha.26.2",
     "strapi-utils": "3.0.0-alpha.26.2"
   },
-  "devDependencies": {
-    "react-copy-to-clipboard": "5.0.1",
-    "rimraf": "^2.6.3",
-    "strapi-helper-plugin": "3.0.0-alpha.26.2"
-  },
   "author": {
-    "name": "Strapi team",
     "email": "hi@strapi.io",
+    "name": "Strapi team",
     "url": "http://strapi.io"
   },
   "maintainers": [
@@ -35,10 +38,12 @@
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
   },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
   "engines": {
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
+  "license": "MIT"
 }
