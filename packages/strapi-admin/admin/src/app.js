@@ -71,7 +71,7 @@ Object.keys(plugins).forEach(plugin => {
 
           return acc2;
         },
-        {},
+        {}
       );
 
       acc[lang] = localeprefixedWithPluginId;
@@ -136,7 +136,7 @@ window.strapi = Object.assign(window.strapi || {}, {
     },
     leftMenuSections: leftMenuSectionsUpdated => {
       store.dispatch(
-        updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated),
+        updatePlugin(pluginId, 'leftMenuSections', leftMenuSectionsUpdated)
       );
     },
   }),
@@ -163,7 +163,7 @@ const render = messages => {
         </BrowserRouter>
       </LanguageProvider>
     </Provider>,
-    MOUNT_NODE,
+    MOUNT_NODE
   );
 };
 
@@ -185,7 +185,7 @@ if (NODE_ENV !== 'test') {
         Promise.all([
           import('intl/locale-data/jsonp/en.js'),
           import('intl/locale-data/jsonp/de.js'),
-        ]),
+        ])
       ) // eslint-disable-line prettier/prettier
       .then(() => render(translationMessages))
       .catch(err => {
