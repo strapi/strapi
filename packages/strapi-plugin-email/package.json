@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-email",
-  "version": "3.0.0-beta.0",
+  "version": "3.0.0-alpha.26.1",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Email",
@@ -11,9 +11,9 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "strapi-helper-plugin": "3.0.0-beta.0",
-    "strapi-provider-email-sendmail": "3.0.0-beta.0",
-    "strapi-utils": "3.0.0-beta.0"
+    "strapi-helper-plugin": "3.0.0-alpha.26.1",
+    "strapi-provider-email-sendmail": "3.0.0-alpha.26.1",
+    "strapi-utils": "3.0.0-alpha.26.1"
   },
   "peerDependencies": {
     "classnames": "^2.2.6",

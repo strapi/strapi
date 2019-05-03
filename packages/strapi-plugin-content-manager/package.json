@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.0.0-beta.0",
+  "version": "3.0.0-alpha.26.1",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -15,8 +15,8 @@
     "draft-js": "^0.10.5",
     "pluralize": "^7.0.0",
     "showdown": "^1.9.0",
-    "strapi-helper-plugin": "3.0.0-beta.0",
-    "strapi-utils": "3.0.0-beta.0"
+    "strapi-helper-plugin": "3.0.0-alpha.26.1",
+    "strapi-utils": "3.0.0-alpha.26.1"
   },
   "peerDependencies": {
     "classnames": "^2.2.6",

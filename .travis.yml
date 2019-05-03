@@ -11,18 +11,17 @@ node_js:
   - '10'
 
 cache:
+  yarn: true
   directories:
     - node_modules
-    - ~/.npm
-    - ~/.cache
 
 # end to end testing template
 e2e_tests: &e2e_tests
   stage: 'End to End tests'
   script:
-    - npm run -s test:generate-app -- $DB_STRING
-    - npm run -s test:start-app & wait-on http://localhost:1337
-    - npm run -s test:e2e
+    - yarn run -s test:generate-app -- $DB_STRING
+    - yarn run -s test:start-app & wait-on http://localhost:1337
+    - yarn run -s test:e2e
 
 install_mongo: &install_mongo
   before_install:
@@ -33,22 +32,22 @@ install_mongo: &install_mongo
     - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
 
 install:
-  - npm run setup:ci
-  - npm install -g wait-on
+  - yarn run -s bootstrap
+  - yarn global add -g wait-on
 
 jobs:
   include:
     - stage: test
       name: Snyk
-      script: npm run -s test:snyk
+      script: yarn run -s test:snyk
       if: fork = false
 
     - stage: test
       name: 'Lint / Unit Tests '
       script:
-        - npm run -s lint
-        - npm run -s test:unit
-        # - npm run -s test:front
+        - yarn run -s lint
+        - yarn run -s test:unit
+        # - yarn run -s test:front
 
     - <<: *e2e_tests
       name: 'E2E Postgresql'
@@ -78,10 +77,10 @@ jobs:
     - name: 'Cypress tests'
       <<: *install_mongo
       install:
-        - npm run setup:build
-        - npm install -g wait-on
+        - yarn run -s bootstrap
+        - yarn global add -g wait-on
         - cypress install
       script:
-        - npm run -s test:generate-app -- --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
-        - npm run -s test:start-app & wait-on http://localhost:1337
+        - yarn run -s test:generate-app -- --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
+        - yarn run -s test:start-app & wait-on http://localhost:1337
         - node test/cypress.js

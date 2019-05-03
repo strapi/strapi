@@ -46,7 +46,6 @@ yargs
       yargs.boolean('run-once').boolean('quiet');
     },
     argv => {
-      console.log(argv);
       const source = path.resolve(__dirname, '..', 'packages');
       const dest = path.resolve(process.cwd(), argv.dest);
       watch(source, dest, argv);

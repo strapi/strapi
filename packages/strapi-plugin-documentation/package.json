@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.0-beta.0",
+  "version": "3.0.0-alpha.26.1",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -14,7 +14,7 @@
     "cheerio": "^1.0.0-rc.2",
     "moment": "^2.22.2",
     "path-to-regexp": "^2.4.0",
-    "strapi-helper-plugin": "3.0.0-beta.0",
+    "strapi-helper-plugin": "3.0.0-alpha.26.1",
     "swagger-ui-dist": "3.22.1"
   },
   "peerDependencies": {

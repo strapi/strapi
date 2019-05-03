@@ -49,7 +49,7 @@ const generateTestApp = async ({ appName, database }) => {
  * @param {string} options.appName - Name of the app / folder in which run the start script
  */
 const startTestApp = ({ appName }) => {
-  return execa.shell('strapi start', {
+  return execa.shell('strapi dev', {
     stdio: 'inherit',
     cwd: path.resolve(appName),
   });
