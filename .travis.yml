@@ -74,13 +74,13 @@ jobs:
       env:
         - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
 
-    - name: 'Cypress tests'
-      <<: *install_mongo
-      install:
-        - yarn run -s bootstrap
-        - yarn global add -g wait-on
-        - cypress install
-      script:
-        - yarn run -s test:generate-app -- --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
-        - yarn run -s test:start-app & wait-on http://localhost:1337
-        - node test/cypress.js
+    # - name: 'Cypress tests'
+    #   <<: *install_mongo
+    #   install:
+    #     - yarn run -s bootstrap
+    #     - yarn global add -g wait-on
+    #     - cypress install
+    #   script:
+    #     - yarn run -s test:generate-app -- --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
+    #     - yarn run -s test:start-app & wait-on http://localhost:1337
+    #     - node test/cypress.js
