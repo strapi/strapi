@@ -14,9 +14,9 @@ const strapi = require('../index');
 // Public dependencies
 const _ = require('lodash');
 const fs = require('fs-extra');
-const { cyan, green } = require('chalk');
+const { cyan } = require('chalk');
 const chokidar = require('chokidar');
-const strapiAdmin = require('strapi-admin');
+const execa = require('execa');
 
 // Logger.
 const { cli, logger } = require('strapi-utils');
@@ -37,6 +37,13 @@ module.exports = async function() {
   }
 
   const appPath = process.cwd();
+
+  if (!fs.existsSync(path.join(appPath, 'build'))) {
+    console.log(`> No ${cyan('build')} dir found. Strating build`);
+    execa.shellSync('npm run -s build', {
+      stdio: 'inherit',
+    });
+  }
 
   try {
     const strapiInstance = strapi({ appPath });

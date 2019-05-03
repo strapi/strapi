@@ -50,8 +50,9 @@
     "yargs": "^13.2.2"
   },
   "scripts": {
-    "bootstrap": "yarn install && lerna bootstrap",
-    "watch": "lerna run --stream watch",
+    "setup": "yarn && yarn build",
+    "watch": "lerna run --stream watch --no-private",
+    "build": "lerna run --stream build --no-private",
     "lint": "echo \"To implement\"",
     "test:clean": "rimraf ./coverage",
     "test:front": "npm run test:clean && cross-env NODE_ENV=test jest --config ./jest.config.front.js --coverage",

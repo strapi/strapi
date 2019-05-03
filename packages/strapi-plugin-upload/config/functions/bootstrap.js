@@ -24,7 +24,7 @@ module.exports = async cb => {
   ).filter(d => d.startsWith('strapi-provider-upload-'));
 
   for (let installedProvider of installedProviders) {
-    strapi.plugins.email.config.providers.push(require(installedProvider));
+    strapi.plugins.upload.config.providers.push(require(installedProvider));
   }
 
   try {

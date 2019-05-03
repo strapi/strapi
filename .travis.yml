@@ -32,7 +32,7 @@ install_mongo: &install_mongo
     - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
 
 install:
-  - yarn run -s bootstrap
+  - yarn setup
   - yarn global add -g wait-on
 
 jobs:
@@ -47,7 +47,7 @@ jobs:
       script:
         - yarn run -s lint
         - yarn run -s test:unit
-        # - yarn run -s test:front
+        - yarn run -s test:front
 
     - <<: *e2e_tests
       name: 'E2E Postgresql'
