@@ -9,7 +9,7 @@
 // Node.js core.
 const path = require('path');
 const cluster = require('cluster');
-const strapi = require('../strapi');
+const strapi = require('../index');
 
 // Public dependencies
 const _ = require('lodash');

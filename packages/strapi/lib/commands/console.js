@@ -1,7 +1,7 @@
 // Node.js core.
 const REPL = require('repl');
 const cluster = require('cluster');
-const strapi = require('../strapi');
+const strapi = require('../index');
 
 // Public node modules.
 const _ = require('lodash');
