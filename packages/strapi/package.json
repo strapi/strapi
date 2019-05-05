@@ -60,6 +60,7 @@
     "node-schedule": "^1.2.0",
     "opn": "^5.3.0",
     "ora": "^3.0.0",
+    "resolve-cwd": "^3.0.0",
     "rimraf": "^2.6.2",
     "shelljs": "^0.8.3",
     "strapi-generate": "3.0.0-alpha.26.2",
