@@ -351,6 +351,8 @@ type UsersPermissionsRole {
 
 type UsersPermissionsUser {
   id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
   username: String!
   email: String!
   provider: String

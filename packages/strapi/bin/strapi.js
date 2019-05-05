@@ -11,14 +11,23 @@ const _ = require('lodash');
 
 // Strapi utilities.
 const program = require('strapi-utils').commander;
+const resolveCwd = require('resolve-cwd');
 
 // Local Strapi dependencies.
 const packageJSON = require('../package.json');
 
 /* eslint-disable no-console */
 
-const getScript = name => (...args) =>
-  require(`../lib/commands/${name}`)(...args);
+const getLocalScript = name => (...args) => {
+  const cmdPath = resolveCwd.silent(`strapi/lib/commands/${name}`);
+  if (!cmdPath) {
+    console.log(
+      `> Error loading the local ${name} command. Strapi might not be installed in your "node_modules". You may need to run "npm install"`
+    );
+  }
+
+  return require(cmdPath)(...args);
+};
 
 /**
  * Normalize version argument
@@ -51,7 +60,7 @@ program
 program
   .command('console')
   .description('open the Strapi framework console')
-  .action(getScript('console'));
+  .action(getLocalScript('console'));
 
 // `$ strapi new`
 program
@@ -70,20 +79,20 @@ program
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
   .description('create a new application')
-  .action(getScript('new'));
+  .action(require('../lib/commands/new'));
 
 // `$ strapi start`
 program
   .command('start')
   .description('Start your Strapi application')
-  .action(getScript('start'));
+  .action(getLocalScript('start'));
 
 // `$ strapi dev`
 program
   .command('dev')
   .option('--no-build', 'Disable build', false)
   .description('Start your Strapi application in dev mode')
-  .action(getScript('dev'));
+  .action(getLocalScript('dev'));
 
 // `$ strapi generate:api`
 program
@@ -94,7 +103,7 @@ program
   .description('generate a basic API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
-    getScript('generate')(id, cliArguments);
+    getLocalScript('generate')(id, cliArguments);
   });
 
 // `$ strapi generate:controller`
@@ -104,7 +113,7 @@ program
   .option('-p, --plugin <api>', 'plugin name')
   .option('-t, --tpl <template>', 'template name')
   .description('generate a controller for an API')
-  .action(getScript('generate'));
+  .action(getLocalScript('generate'));
 
 // `$ strapi generate:model`
 program
@@ -115,7 +124,7 @@ program
   .description('generate a model for an API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
-    getScript('generate')(id, cliArguments);
+    getLocalScript('generate')(id, cliArguments);
   });
 
 // `$ strapi generate:policy`
@@ -124,7 +133,7 @@ program
   .option('-a, --api <api>', 'API name')
   .option('-p, --plugin <api>', 'plugin name')
   .description('generate a policy for an API')
-  .action(getScript('generate'));
+  .action(getLocalScript('generate'));
 
 // `$ strapi generate:service`
 program
@@ -133,32 +142,32 @@ program
   .option('-p, --plugin <api>', 'plugin name')
   .option('-t, --tpl <template>', 'template name')
   .description('generate a service for an API')
-  .action(getScript('generate'));
+  .action(getLocalScript('generate'));
 
 // `$ strapi generate:plugin`
 program
   .command('generate:plugin <id>')
   .option('-n, --name <name>', 'Plugin name')
   .description('generate a basic plugin')
-  .action(getScript('generate'));
+  .action(getLocalScript('generate'));
 
 program
   .command('build')
   .description('Builds the strapi admin app')
-  .action(getScript('build'));
+  .action(getLocalScript('build'));
 
 // `$ strapi install`
 program
   .command('install [plugins...]')
   .option('-d, --dev', 'Development mode')
   .description('install a Strapi plugin')
-  .action(getScript('install'));
+  .action(getLocalScript('install'));
 
 // `$ strapi uninstall`
 program
   .command('uninstall [plugins...]')
   .description('uninstall a Strapi plugin')
-  .action(getScript('uninstall'));
+  .action(getLocalScript('uninstall'));
 
 /**
  * Normalize help argument
