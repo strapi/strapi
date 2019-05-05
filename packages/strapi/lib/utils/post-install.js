@@ -18,7 +18,7 @@ const adminDirPath = path.join(process.cwd(), 'admin');
 
 let packageManager;
 try {
-  packageManager = require(path.resolve(process.cwd(), 'package')).strapi.packageManager;
+  packageManager = require(path.resolve(process.cwd(), 'package.json')).strapi.packageManager;
 } catch (error) {
   packageManager = 'npm';
 }

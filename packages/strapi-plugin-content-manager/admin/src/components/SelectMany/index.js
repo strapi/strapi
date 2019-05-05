@@ -8,14 +8,20 @@ import React from 'react';
 import Select from 'react-select';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { cloneDeep, includes, isArray, isNull, isUndefined, get, findIndex, isEmpty } from 'lodash';
+import {
+  cloneDeep,
+  includes,
+  isArray,
+  isNull,
+  isUndefined,
+  get,
+  findIndex,
+  isEmpty,
+} from 'lodash';
 
 // Utils.
-import request from 'utils/request';
-import templateObject from 'utils/templateObject';
+import { request, templateObject } from 'strapi-helper-plugin';
 
-// CSS.
-import 'react-select/dist/react-select.css';
 // Component.
 import SortableList from './SortableList';
 // CSS.
@@ -34,7 +40,9 @@ class SelectMany extends React.PureComponent {
 
   componentDidUpdate(prevProps, prevState) {
     if (isEmpty(prevProps.record) && !isEmpty(this.props.record)) {
-      const values = (get(this.props.record, this.props.relation.alias) || []).map(el => el.id || el._id);
+      const values = (
+        get(this.props.record, this.props.relation.alias) || []
+      ).map(el => el.id || el._id);
 
       const options = this.state.options.filter(el => {
         return !values.includes(el.value.id || el.value._id);
@@ -75,7 +83,10 @@ class SelectMany extends React.PureComponent {
         const options = isArray(response)
           ? response.map(item => ({
               value: item,
-              label: templateObject({ mainField: this.props.relation.displayedAttribute }, item).mainField,
+              label: templateObject(
+                { mainField: this.props.relation.displayedAttribute },
+                item,
+              ).mainField,
             }))
           : [
               {
@@ -87,7 +98,9 @@ class SelectMany extends React.PureComponent {
         const newOptions = cloneDeep(this.state.options);
         options.map(option => {
           // Don't add the values when searching
-          if (findIndex(newOptions, o => o.value.id === option.value.id) === -1) {
+          if (
+            findIndex(newOptions, o => o.value.id === option.value.id) === -1
+          ) {
             return newOptions.push(option);
           }
         });
@@ -98,13 +111,17 @@ class SelectMany extends React.PureComponent {
         });
       })
       .catch(() => {
-        strapi.notification.error('content-manager.notification.error.relationship.fetch');
+        strapi.notification.error(
+          'content-manager.notification.error.relationship.fetch',
+        );
       });
   };
 
   handleInputChange = value => {
     const clonedOptions = this.state.options;
-    const filteredValues = clonedOptions.filter(data => includes(data.label, value));
+    const filteredValues = clonedOptions.filter(data =>
+      includes(data.label, value),
+    );
 
     if (filteredValues.length === 0) {
       return this.getOptions(value);
@@ -114,7 +131,10 @@ class SelectMany extends React.PureComponent {
   handleChange = value => {
     // Remove new added value from available option;
     this.state.options = this.state.options.filter(
-      el => !((el.value._id || el.value.id) === (value.value.id || value.value._id)),
+      el =>
+        !(
+          (el.value._id || el.value.id) === (value.value.id || value.value._id)
+        ),
     );
 
     this.props.onAddRelationalItem({
@@ -137,7 +157,10 @@ class SelectMany extends React.PureComponent {
     // Add removed value from available option;
     const toAdd = {
       value: values[index],
-      label: templateObject({ mainField: this.props.relation.displayedAttribute }, values[index]).mainField,
+      label: templateObject(
+        { mainField: this.props.relation.displayedAttribute },
+        values[index],
+      ).mainField,
     };
 
     this.setState(prevState => ({
@@ -160,14 +183,21 @@ class SelectMany extends React.PureComponent {
   };
 
   render() {
-    const description = this.props.relation.description ? <p>{this.props.relation.description}</p> : '';
+    const description = this.props.relation.description ? (
+      <p>{this.props.relation.description}</p>
+    ) : (
+      ''
+    );
     const value = get(this.props.record, this.props.relation.alias) || [];
 
     /* eslint-disable jsx-a11y/label-has-for */
     return (
-      <div className={`form-group ${styles.selectMany} ${value.length > 4 && styles.selectManyUpdate}`}>
+      <div
+        className={`form-group ${styles.selectMany} ${value.length > 4 &&
+          styles.selectManyUpdate}`}
+      >
         <label htmlFor={this.props.relation.alias}>
-          {get(this.props.relation, 'label', this.props.relation.alias)} <span>({value.length})</span>
+          {this.props.relation.alias} <span>({value.length})</span>
         </label>
         {description}
         <Select
@@ -178,7 +208,9 @@ class SelectMany extends React.PureComponent {
           onInputChange={this.handleInputChange}
           onMenuScrollToBottom={this.handleBottomScroll}
           options={this.state.options}
-          placeholder={<FormattedMessage id="content-manager.containers.Edit.addAnItem" />}
+          placeholder={
+            <FormattedMessage id="content-manager.containers.Edit.addAnItem" />
+          }
         />
         <SortableList
           items={
@@ -191,8 +223,10 @@ class SelectMany extends React.PureComponent {
                       value: get(item, 'value') || item,
                       label:
                         get(item, 'label') ||
-                        templateObject({ mainField: this.props.relation.displayedAttribute }, item)
-                          .mainField ||
+                        templateObject(
+                          { mainField: this.props.relation.displayedAttribute },
+                          item,
+                        ).mainField ||
                         item.id,
                     };
                   }

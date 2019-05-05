@@ -5,30 +5,28 @@
  * only setup and plugin code.
  */
 
-/* eslint-disable import/first */
+/* eslint-disable */
 // Don't move this line!
 import './public-path.js'; // eslint-disable-line import/extensions
 
 import React from 'react';
-import Loadable from 'react-loadable';
-import LoadingIndicatorPage from './components/LoadingIndicatorPage';
+// import Loadable from 'react-loadable';
+// import LoadingIndicatorPage from './components/LoadingIndicatorPage';
 import { translationMessages } from './i18n';
+import App from 'containers/App';
 
-const LoadableApp = Loadable({
-  loader: () => import('containers/App'),
-  loading: LoadingIndicatorPage,
-});
+// const LoadableApp = Loadable({
+//   loader: () => import('containers/App'),
+//   loading: LoadingIndicatorPage,
+// });
 
-const tryRequireRoot = source => {
-  try {
-    return require('../../../../admin/src/' + source + '.js').default; // eslint-disable-line prefer-template
-  } catch (err) {
-    return null;
-  }
-};
-
-const bootstrap = tryRequireRoot('bootstrap');
-const pluginRequirements = tryRequireRoot('requirements');
+// const tryRequireRoot = source => {
+//   try {
+//     return require('../../../../admin/src/' + source + '.js').default; // eslint-disable-line prefer-template
+//   } catch (err) {
+//     return null;
+//   }
+// };
 
 const layout = (() => {
   try {
@@ -60,9 +58,7 @@ const store = strapi.store;
 
 // Define the plugin root component
 function Comp(props) {
-  return (
-    <LoadableApp {...props} />
-  );
+  return <App {...props} />;
 }
 
 // Hot reloadable translation json files
@@ -81,20 +77,39 @@ if (module.hot) {
   });
 }
 
+// Require the Initializer component
+const initializer = (() => {
+  try {
+    return require('../../../../admin/src/initializer.js'); // eslint-disable-line import/no-unresolved
+  } catch (err) {
+    return null;
+  }
+})();
+
+// Require the plugin's lifecycle
+const lifecycles = (() => {
+  try {
+    return require('../../../../admin/src/lifecycles.js'); // eslint-disable-line import/no-unresolved
+  } catch (err) {
+    return null;
+  }
+})();
+
 // Register the plugin.
 strapi.registerPlugin({
   blockerComponent: null,
   blockerComponentProps: {},
-  bootstrap,
   description: pluginDescription,
   icon: pluginPkg.strapi.icon,
   id: pluginId,
+  initializer,
   injectedComponents,
   layout,
+  lifecycles,
   leftMenuLinks: [],
+  leftMenuSections: [],
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
-  pluginRequirements,
   preventComponentRendering: false,
   translationMessages,
 });

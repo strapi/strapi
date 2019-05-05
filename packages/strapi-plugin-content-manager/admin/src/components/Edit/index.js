@@ -6,18 +6,9 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  findIndex,
-  get,
-  has,
-  isEmpty,
-  isFunction,
-  upperFirst,
-} from 'lodash';
-// You can find these components in either
-// ./node_modules/strapi-helper-plugin/lib/src
-// or strapi/packages/strapi-helper-plugin/lib/src
-import Input from 'components/InputsIndex';
+import { findIndex, get, has, isEmpty, isFunction, upperFirst } from 'lodash';
+
+import { InputsIndex as Input } from 'strapi-helper-plugin';
 
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import WysiwygWithErrors from '../WysiwygWithErrors';
@@ -56,26 +47,29 @@ const getInputType = (type = '') => {
 };
 
 class Edit extends React.PureComponent {
-  getInputErrors = (attr) => {
+  getInputErrors = attr => {
     const index = findIndex(this.props.formErrors, ['name', attr]);
     return index !== -1 ? this.props.formErrors[index].errors : [];
-  }
+  };
 
   /**
    * Retrieve the Input layout
    * @param  {String} attr [description]
    * @return {Object}      Object containing the Input's label customBootstrapClass, ...
    */
-  getInputLayout = (attr) => {
+  getInputLayout = attr => {
     const { layout } = this.props;
 
-    return Object.keys(get(layout, ['attributes', attr], {})).reduce((acc, current) => {
-      acc[current] = isFunction(layout.attributes[attr][current]) ?
-        layout.attributes[attr][current](this) :
-        layout.attributes[attr][current];
+    return Object.keys(get(layout, ['attributes', attr], {})).reduce(
+      (acc, current) => {
+        acc[current] = isFunction(layout.attributes[attr][current])
+          ? layout.attributes[attr][current](this)
+          : layout.attributes[attr][current];
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {},
+    );
   };
 
   /**
@@ -83,19 +77,19 @@ class Edit extends React.PureComponent {
    * @param  {String} attr
    * @return {Object}
    */
-  getInputValidations = (attr) => {
+  getInputValidations = attr => {
     const { formValidations } = this.props;
     const index = findIndex(formValidations, ['name', attr]);
 
     return get(formValidations, [index, 'validations'], {});
-  }
+  };
 
   /**
    * Retrieve all relations made with the upload plugin
    * @param  {Object} props
    * @return {Object}
    */
-  getUploadRelations = (props) => (
+  getUploadRelations = props =>
     Object.keys(get(props.schema, 'relations', {})).reduce((acc, current) => {
       if (get(props.schema, ['relations', current, 'plugin']) === 'upload') {
         acc[current] = {
@@ -106,25 +100,31 @@ class Edit extends React.PureComponent {
       }
 
       return acc;
-    }, {})
-  )
+    }, {});
 
-  fileRelationAllowMultipleUpload = (relationName) => has(this.props.schema, ['relations', relationName, 'collection']);
+  fileRelationAllowMultipleUpload = relationName =>
+    has(this.props.schema, ['relations', relationName, 'collection']);
 
   orderAttributes = () => get(this.props.schema, ['editDisplay', 'fields'], []);
 
   renderAttr = (attr, key) => {
     if (attr.includes('__col-md')) {
       const className = attr.split('__')[1];
-      
+
       return <div key={key} className={className} />;
     }
 
-    const details = get(this.props.schema, ['editDisplay', 'availableFields', attr]);
+    const details = get(this.props.schema, [
+      'editDisplay',
+      'availableFields',
+      attr,
+    ]);
     // Retrieve the input's bootstrapClass from the layout
     const layout = this.getInputLayout(attr);
     const appearance = get(layout, 'appearance');
-    const type = !isEmpty(appearance) ? appearance.toLowerCase() : get(layout, 'type', getInputType(details.type));
+    const type = !isEmpty(appearance)
+      ? appearance.toLowerCase()
+      : get(layout, 'type', getInputType(details.type));
     const inputDescription = get(details, 'description', null);
     const inputStyle = type === 'textarea' ? { height: '196px' } : {};
     let className = get(layout, 'className');
@@ -133,7 +133,7 @@ class Edit extends React.PureComponent {
       className = 'col-md-4';
     }
 
-    return (  
+    return (
       <Input
         autoFocus={key === 0}
         customBootstrapClass={className}
@@ -157,14 +157,12 @@ class Edit extends React.PureComponent {
         value={this.props.record[attr]}
       />
     );
-  }
+  };
 
-  render(){
+  render() {
     return (
       <div className={styles.form}>
-        <div className="row">
-          {this.orderAttributes().map(this.renderAttr)}
-        </div>
+        <div className="row">{this.orderAttributes().map(this.renderAttr)}</div>
       </div>
     );
   }

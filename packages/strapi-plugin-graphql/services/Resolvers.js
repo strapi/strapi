@@ -112,6 +112,7 @@ const buildShadowCRUD = (models, plugin) => {
         delete attributes[association.alias];
       });
 
+
     acc.definition += `${Schema.getDescription(
       type[globalId],
       model

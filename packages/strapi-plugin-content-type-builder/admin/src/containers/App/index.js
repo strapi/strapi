@@ -10,11 +10,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 
+import { NotFound } from 'strapi-helper-plugin';
+
 import pluginId from '../../pluginId';
 
 import HomePage from '../HomePage';
 import ModelPage from '../ModelPage';
-import NotFoundPage from '../NotFoundPage';
 
 import Loader from './Loader';
 
@@ -90,7 +91,13 @@ export class App extends React.Component {
         key={to}
         exact
         path={to}
-        render={props => <Component {...this.props} {...props} canOpenModal={this.canOpenModal()} />}
+        render={props => (
+          <Component
+            {...this.props}
+            {...props}
+            canOpenModal={this.canOpenModal()}
+          />
+        )}
       />
     );
   };
@@ -106,7 +113,7 @@ export class App extends React.Component {
       <div className={styles.app}>
         <Switch>
           {ROUTES.map(this.renderRoute)}
-          <Route component={NotFoundPage} />
+          <Route component={NotFound} />
         </Switch>
       </div>
     );

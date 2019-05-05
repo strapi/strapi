@@ -8,51 +8,61 @@
 import { addLocaleData } from 'react-intl';
 import { reduce } from 'lodash';
 
-// Import config
-import { languages } from './config/languages.json';
+// We need to manually import the locales here
+// because dynamic imports causes webpack to build all the locales
+// see https://github.com/yahoo/react-intl/issues/1225
+import ar from 'react-intl/locale-data/ar';
+import de from 'react-intl/locale-data/de';
+import en from 'react-intl/locale-data/en';
+import es from 'react-intl/locale-data/es';
+import fr from 'react-intl/locale-data/fr';
+import it from 'react-intl/locale-data/it';
+import ja from 'react-intl/locale-data/ja';
+import ko from 'react-intl/locale-data/ko';
+import nl from 'react-intl/locale-data/nl';
+import pl from 'react-intl/locale-data/pl';
+import pt from 'react-intl/locale-data/pt';
+import ru from 'react-intl/locale-data/ru';
+import tr from 'react-intl/locale-data/tr';
+import zh from 'react-intl/locale-data/zh';
 
-/**
- * Try to require translation file.
- *
- * @param language {String}
- */
-const requireTranslations = language => {
-  try {
-    return require(`./translations/${language}.json`); // eslint-disable-line global-require
-  } catch (error) {
-    console.error(`Unable to load "${language}" translation. Please make sure "${language}.json" file exists in "admin/public/app/translations" folder.`); // eslint-disable-line no-console
-    return false;
-  }
-};
+import trads from './translations';
 
-/**
- * Try to require the language in `react-intl` locale data
- * and add locale data if it has been found.
- *
- * @param language {String}
- */
-const addLanguageLocaleData = language => {
-  try {
-    const localeData = require(`react-intl/locale-data/${language}`); // eslint-disable-line global-require
-    addLocaleData(localeData);
-    return true;
-  } catch (error) {
-    console.warn(`⚠️ It looks like the language "${language}" is not supported by "react-intl" module.`); // eslint-disable-line no-console
-    return false;
-  }
+// We dismiss pt-BR and zh-Hans locales since they are not supported by react-intl
+const locales = {
+  ar,
+  de,
+  en,
+  es,
+  fr,
+  it,
+  ja,
+  ko,
+  nl,
+  pl,
+  pt,
+  ru,
+  tr,
+  zh,
 };
+const languages = Object.keys(trads);
 
 /**
  * Dynamically generate `translationsMessages object`.
  */
-const translationMessages = reduce(languages, (result, language) => {
-  const obj = result;
-  obj[language] = requireTranslations(language);
-  addLanguageLocaleData(language);
-  return obj;
-}, {});
-
-export {
+const translationMessages = reduce(
   languages,
-  translationMessages,
-};
+  (result, language) => {
+    const obj = result;
+    obj[language] = trads[language];
+
+    if (locales[language]) {
+      addLocaleData(locales[language]);
+    }
+
+    return obj;
+  },
+  {},
+);
+
+export { languages, translationMessages };

@@ -7,12 +7,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
-import InputDate from 'components/InputDate/Loadable';
-import InputNumber from 'components/InputNumber/Loadable';
-import InputSelect from 'components/InputSelect/Loadable';
-import InputText from 'components/InputText/Loadable';
+import {
+  InputDate,
+  InputNumber,
+  InputSelect,
+  InputText,
+} from 'strapi-helper-plugin';
 
-const getInputType = (attrType) => {
+const getInputType = attrType => {
   switch (attrType) {
     case 'boolean':
       return InputSelect;
@@ -28,7 +30,6 @@ const getInputType = (attrType) => {
       return InputText;
   }
 };
-
 
 class InputWithAutoFocus extends React.Component {
   componentDidMount() {
@@ -52,7 +53,7 @@ class InputWithAutoFocus extends React.Component {
 
     return (
       <Input
-        inputRef={input => this.inputEl = input}
+        inputRef={input => (this.inputEl = input)}
         name={name}
         onChange={onChange}
         selectOptions={['true', 'false']}
@@ -69,10 +70,7 @@ InputWithAutoFocus.defaultProps = {
 
 InputWithAutoFocus.propTypes = {
   filter: PropTypes.object.isRequired,
-  filterToFocus: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.number,
-  ]),
+  filterToFocus: PropTypes.oneOfType([PropTypes.object, PropTypes.number]),
   index: PropTypes.number.isRequired,
   inputStyle: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,

@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate",
-  "version": "3.0.0-alpha.25.2",
+  "version": "3.0.0-alpha.26.2",
   "description": "Master of ceremonies for the Strapi generators.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -20,7 +20,7 @@
     "fs-extra": "^4.0.0",
     "lodash": "^4.17.5",
     "reportback": "^2.0.1",
-    "strapi-utils": "3.0.0-alpha.25.2"
+    "strapi-utils": "3.0.0-alpha.26.2"
   },
   "author": {
     "name": "Strapi team",
@@ -45,5 +45,6 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }
