@@ -12,33 +12,34 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 
-// Actions from strapi-helper-plugin
-// Actions required for disabling and enabling the OverlayBlocker
-import {
-  disableGlobalOverlayBlocker,
-  enableGlobalOverlayBlocker,
-} from 'actions/overlayBlocker';
-
 // Components from strapi-helper-plugin
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import OverlayBlocker from 'components/OverlayBlocker';
+import {
+  LoadingIndicatorPage,
+  OverlayBlocker,
+  injectHooks,
+} from 'strapi-helper-plugin';
+// import OverlayBlocker from 'components/OverlayBlocker';
 
-import injectHooks from 'utils/injectHooks';
+// import injectHooks from 'utils/injectHooks';
 
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
 
 import ComingSoonPage from '../ComingSoonPage';
 import LeftMenu from '../LeftMenu';
-import ListPluginsPage from '../ListPluginsPage/Loadable';
+import ListPluginsPage from '../ListPluginsPage';
 import LocaleToggle from '../LocaleToggle';
-import HomePage from '../HomePage/Loadable';
-import Marketplace from '../Marketplace/Loadable';
-import NotFoundPage from '../NotFoundPage/Loadable';
+import HomePage from '../HomePage';
+import Marketplace from '../Marketplace';
+import NotFoundPage from '../NotFoundPage';
 import Onboarding from '../Onboarding';
 import PluginDispatcher from '../PluginDispatcher';
 
-import { updatePlugin } from '../App/actions';
+import {
+  disableGlobalOverlayBlocker,
+  enableGlobalOverlayBlocker,
+  updatePlugin,
+} from '../App/actions';
 import makeSelecApp from '../App/selectors';
 
 import injectSaga from '../../utils/injectSaga';
@@ -90,7 +91,6 @@ export class Admin extends React.Component {
     ReactGA.initialize('UA-54313258-9', {
       testMode: process.env.NODE_ENV === 'test',
     });
-
     // Retrieve the main settings of the application
     this.props.getInitData();
   }

@@ -1,12 +1,9 @@
 // Shared constants
-import {
-  DISABLE_GLOBAL_OVERLAY_BLOCKER,
-  ENABLE_GLOBAL_OVERLAY_BLOCKER,
-} from 'constants/overlayBlocker';
-
 import { fromJS, List } from 'immutable';
 
 import {
+  DISABLE_GLOBAL_OVERLAY_BLOCKER,
+  ENABLE_GLOBAL_OVERLAY_BLOCKER,
   FREEZE_APP,
   GET_APP_PLUGINS_SUCCEEDED,
   PLUGIN_DELETED,

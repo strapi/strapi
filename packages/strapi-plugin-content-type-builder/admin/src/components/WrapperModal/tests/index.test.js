@@ -5,6 +5,6 @@ import WrapperModal from '../index';
 
 describe('<WrapperModal />', () => {
   it('should not crash', () => {
-    shallow(<WrapperModal />);
+    shallow(<WrapperModal isOpen onToggle={jest.fn()} />);
   });
 });

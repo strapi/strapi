@@ -43,8 +43,7 @@ module.exports = {
 
   deleteRole: async ctx => {
     // Fetch public role.
-    const publicRole = await strapi
-      .query('role', 'users-permissions')
+    const publicRole = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
       .findOne({ type: 'public' });
 
     const publicRoleID = publicRole.id || publicRole._id;
@@ -147,32 +146,20 @@ module.exports = {
   },
 
   init: async ctx => {
-    const admins = await strapi.query('administrator', 'admin').find();
+    const admins = await strapi.plugins['users-permissions'].queries('administrator', 'admin').find();
 
     ctx.send({ hasAdmin: admins.length > 0 });
   },
 
   searchUsers: async ctx => {
-    const data = await strapi
-      .query('user', 'users-permissions')
+    const data = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
       .search(ctx.params);
 
     ctx.send(data);
   },
 
   updateRole: async function(ctx) {
-    // Fetch root role.
-    const root = await strapi
-      .query('role', 'users-permissions')
-      .findOne({ type: 'root' });
-
     const roleID = ctx.params.role;
-    const rootID = root.id || root._id;
-
-    // Prevent from updating the root role.
-    if (roleID === rootID) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'Unauthorized' }] }]);
-    }
 
     if (_.isEmpty(ctx.request.body)) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);

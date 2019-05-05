@@ -354,8 +354,20 @@ module.exports = {
    */
   getCollectionName: (associationA, associationB) => {
     return [associationA, associationB]
-      .sort((a, b) => a.collection < b.collection ? -1 : 1)
-      .map(table => _.snakeCase(`${pluralize.plural(table.collection)} ${pluralize.plural(table.via)}`))
+      .sort((a, b) => {
+        if (a.collection === b.collection) {
+          if (a.dominant) return 1;
+          else return -1;
+        }
+        return a.collection < b.collection ? -1 : 1;
+      })
+      .map(table =>
+        _.snakeCase(
+          `${pluralize.plural(table.collection)} ${pluralize.plural(
+            table.via
+          )}`
+        )
+      )
       .join('__');
   },
 

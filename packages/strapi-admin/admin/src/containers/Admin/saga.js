@@ -1,5 +1,5 @@
 import { all, fork, call, put, select, takeLatest } from 'redux-saga/effects';
-import request from 'utils/request';
+import { request } from 'strapi-helper-plugin';
 
 import { getInitDataSucceeded, getSecuredDataSucceeded } from './actions';
 import { EMIT_EVENT, GET_INIT_DATA, GET_SECURED_DATA } from './constants';

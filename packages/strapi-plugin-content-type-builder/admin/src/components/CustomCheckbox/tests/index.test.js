@@ -1,6 +1,6 @@
 import React from 'react';
 
-import InputNumber from 'components/InputNumberWithErrors';
+import { InputNumberWithErrors as InputNumber } from 'strapi-helper-plugin';
 
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
@@ -11,7 +11,8 @@ import pluginTradsEn from '../../../translations/en.json';
 import CustomCheckbox from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
-const renderComponent = (props = {}) => mountWithIntl(<CustomCheckbox {...props} />, messages);
+const renderComponent = (props = {}) =>
+  mountWithIntl(<CustomCheckbox {...props} />, messages);
 
 describe('<CustomCheckbox />', () => {
   let props;
@@ -57,7 +58,10 @@ describe('<CustomCheckbox />', () => {
   it('should work', () => {
     const wrapper = renderComponent(props);
     const spyOnHandleChange = jest.spyOn(wrapper.instance(), 'handleChange');
-    const spyOnHandleChangeNumber = jest.spyOn(wrapper.instance(), 'handleInputNumberChange');
+    const spyOnHandleChangeNumber = jest.spyOn(
+      wrapper.instance(),
+      'handleInputNumberChange',
+    );
     wrapper.instance().forceUpdate();
 
     const input = wrapper.find('input').first();
@@ -72,12 +76,16 @@ describe('<CustomCheckbox />', () => {
 
     inputNumber.prop('onChange')({ target: { name: 'test', value: '1' } });
 
-    expect(props.onChange).toHaveBeenCalledWith({ target: { name: 'test', type: 'number', value: 1 } });
+    expect(props.onChange).toHaveBeenCalledWith({
+      target: { name: 'test', type: 'number', value: 1 },
+    });
     expect(spyOnHandleChangeNumber).toHaveBeenCalled();
 
     input.simulate('change', { target: { checked: false } });
     expect(spyOnHandleChange).toHaveBeenCalled();
-    expect(props.onChange).toHaveBeenCalledWith({ target: { name: 'test', value: null } });
+    expect(props.onChange).toHaveBeenCalledWith({
+      target: { name: 'test', value: null },
+    });
 
     wrapper.unmount();
   });

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
 import Helmet from 'react-helmet';
-import BlockerComponent from 'components/BlockerComponent';
+import { BlockerComponent } from 'strapi-helper-plugin';
 import ErrorBoundary from '../ErrorBoundary';
 
 export function PluginDispatcher(props) {

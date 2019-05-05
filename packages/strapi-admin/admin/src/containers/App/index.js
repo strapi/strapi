@@ -13,10 +13,7 @@
 
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-// From strapi-helper-plugin
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-
-import '../../styles/main.scss';
+import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 
 import Admin from '../Admin';
 import NotFoundPage from '../NotFoundPage';

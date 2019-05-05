@@ -76,10 +76,13 @@ function startBrowserProcess(browser, url) {
       // Try our best to reuse existing tab
       // on OS X Google Chrome with AppleScript
       execSync('ps cax | grep "Google Chrome"');
-      execSync(`osascript resources/openChrome.applescript "${encodeURI(url)}"`, {
-        cwd: __dirname,
-        stdio: 'ignore',
-      });
+      execSync(
+        `osascript resources/openChrome.applescript "${encodeURI(url)}"`,
+        {
+          cwd: __dirname,
+          stdio: 'ignore',
+        }
+      );
       return true;
     } catch (err) {
       strapi.log.error('Failed to open Google Chrome with AppleScript');
@@ -107,24 +110,19 @@ function startBrowserProcess(browser, url) {
 
 async function pingDashboard(url, multipleTime = false) {
   try {
-    await fetch(url, { method:'HEAD', timeout: 300, body: null });
+    await fetch(url, { method: 'HEAD', timeout: 300, body: null });
     // Inform the user that we're going to open the administration panel.
-    this.log.info("⏳ Opening the admin panel...");
+    this.log.info('⏳ Opening the admin panel...');
   } catch (e) {
     if (e.code !== 'ECONNREFUSED' && e.type !== 'request-timeout') {
       return console.error(e);
     }
-    
+
     // Only display once.
     if (!multipleTime) {
-      this.log.warn(`⚠️  The admin panel is unavailable... Impossible to open it in the browser.`);
-    }
-
-    // Only retry if the user is running the administration on another server.
-    if (this.config.admin.devMode) {
-      // Wait 1 second until the next ping.
-      await new Promise((resolve) => { setTimeout(resolve, 1000); });
-      await pingDashboard.call(this, url, true);
+      this.log.warn(
+        `⚠️  The admin panel is unavailable... Impossible to open it in the browser.`
+      );
     }
   }
 }

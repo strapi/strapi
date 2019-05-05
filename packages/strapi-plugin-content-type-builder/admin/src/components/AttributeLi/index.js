@@ -8,34 +8,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { capitalize } from 'lodash';
-
-import IcoContainer from 'components/IcoContainer';
+import { IcoContainer } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
+import assets from './assets';
 import styles from './styles.scss';
-
-const assets = [
-  'boolean',
-  'date',
-  'email',
-  'enumeration',
-  'media',
-  'json',
-  'number',
-  'password',
-  'relation',
-  'string',
-  'text',
-]
-  .map(type => {
-    return { type, icon: require(`../../assets/images/icon_${type}.png`) };
-  })
-  .reduce((acc, current) => {
-    acc[current.type] = current.icon;
-
-    return acc;
-  }, {});
 
 function AttributeLi({
   attributeInfos: { configurable, plugin, target, type },
@@ -43,7 +21,9 @@ function AttributeLi({
   onClick,
   onClickOnTrashIcon,
 }) {
-  const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
+  const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
+    ? 'number'
+    : type;
   const src = target ? assets.relation : assets[ico];
   /* eslint-disable indent */
   /* istanbul ignore next */
@@ -75,7 +55,9 @@ function AttributeLi({
         <div className={styles.relationContainer}>
           {target ? (
             <div>
-              <FormattedMessage id={`${pluginId}.modelPage.attribute.relationWith`} />
+              <FormattedMessage
+                id={`${pluginId}.modelPage.attribute.relationWith`}
+              />
               &nbsp;
               <FormattedMessage id={`${pluginId}.from`}>
                 {msg => (

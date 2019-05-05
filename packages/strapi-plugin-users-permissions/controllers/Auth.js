@@ -64,8 +64,7 @@ module.exports = {
       }
 
       // Check if the user exists.
-      const user = await strapi
-        .query('user', 'users-permissions')
+      const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
         .findOne(query, ['role']);
 
       if (!user) {
@@ -176,8 +175,7 @@ module.exports = {
       params.password === params.passwordConfirmation &&
       params.code
     ) {
-      const user = await strapi
-        .query('user', 'users-permissions')
+      const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
         .findOne({ resetPasswordToken: params.code });
 
       if (!user) {
@@ -205,7 +203,7 @@ module.exports = {
       );
 
       // Update the user.
-      await strapi.query('user', 'users-permissions').update(data);
+      await strapi.plugins['users-permissions'].queries('user', 'users-permissions').update(data);
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(
@@ -270,8 +268,7 @@ module.exports = {
     const { email, url } = ctx.request.body;
 
     // Find the user user thanks to his email.
-    const user = await strapi
-      .query('user', 'users-permissions')
+    const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
       .findOne({ email });
 
     // User not found.
@@ -348,7 +345,7 @@ module.exports = {
     );
 
     // Update the user.
-    await strapi.query('user', 'users-permissions').update(data);
+    await strapi.plugins['users-permissions'].queries('user', 'users-permissions').update(data);
 
     ctx.send({ ok: true });
   },
@@ -402,8 +399,7 @@ module.exports = {
       );
     }
 
-    const role = await strapi
-      .query('role', 'users-permissions')
+    const role = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
       .findOne({ type: settings.default_role }, []);
 
     if (!role) {
@@ -427,7 +423,7 @@ module.exports = {
       'users-permissions'
     ].services.user.hashPassword(params);
 
-    const user = await strapi.query('user', 'users-permissions').findOne({
+    const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions').findOne({
       email: params.email,
     });
 
@@ -454,8 +450,7 @@ module.exports = {
         params.confirmed = true;
       }
 
-      const user = await strapi
-        .query('user', 'users-permissions')
+      const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
         .create(params);
 
       const jwt = strapi.plugins['users-permissions'].services.jwt.issue(

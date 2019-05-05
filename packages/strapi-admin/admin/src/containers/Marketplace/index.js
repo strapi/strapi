@@ -12,9 +12,9 @@ import { FormattedMessage } from 'react-intl';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 
-import PluginHeader from 'components/PluginHeader';
+import { LoadingIndicatorPage, PluginHeader } from 'strapi-helper-plugin';
+
 // Design
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
 import PluginCard from '../../components/PluginCard';
 
 import injectSaga from '../../utils/injectSaga';

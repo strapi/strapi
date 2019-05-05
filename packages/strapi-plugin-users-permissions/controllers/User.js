@@ -78,7 +78,7 @@ module.exports = {
     }).get();
 
     if (advanced.unique_email && ctx.request.body.email) {
-      const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
+      const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions').findOne({ email: ctx.request.body.email });
 
       if (user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
@@ -86,7 +86,7 @@ module.exports = {
     }
 
     if (!ctx.request.body.role) {
-      const defaultRole = await strapi.query('role', 'users-permissions').findOne({ type: advanced.default_role }, []);
+      const defaultRole = await strapi.plugins['users-permissions'].queries('role', 'users-permissions').findOne({ type: advanced.default_role }, []);
 
       ctx.request.body.role = defaultRole._id || defaultRole.id;
     }
@@ -137,7 +137,7 @@ module.exports = {
       }
 
       if (ctx.request.body.email && advancedConfigs.unique_email) {
-        const user = await strapi.query('user', 'users-permissions').findOne({
+        const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions').findOne({
           email: ctx.request.body.email
         });
 

@@ -107,6 +107,7 @@ strapi.registerPlugin({
   layout,
   lifecycles,
   leftMenuLinks: [],
+  leftMenuSections: [],
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
   preventComponentRendering: false,

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import LiLink from 'components/LiLink';
+import { LiLink } from 'strapi-helper-plugin';
 
 // Create link from content-type-builder to content-manager
 function EditViewLink(props) {

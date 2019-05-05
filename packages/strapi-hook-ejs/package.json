@@ -1,6 +1,6 @@
 {
   "name": "strapi-hook-ejs",
-  "version": "3.0.0-alpha.26",
+  "version": "3.0.0-alpha.26.2",
   "description": "EJS hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -17,8 +17,7 @@
     "koa-ejs": "^4.1.0"
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
-    "prepublishOnly": "npm prune"
+    "test": "echo \"no tests yet\""
   },
   "author": {
     "email": "hi@strapi.io",
@@ -43,5 +42,6 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

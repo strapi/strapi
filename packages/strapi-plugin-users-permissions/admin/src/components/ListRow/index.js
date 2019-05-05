@@ -11,8 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import { capitalize, get, includes } from 'lodash';
 
 // Design
-import IcoContainer from 'components/IcoContainer';
-import PopUpWarning from 'components/PopUpWarning';
+import { IcoContainer, PopUpWarning } from 'strapi-helper-plugin';
 
 import en from '../../translations/en.json';
 import styles from './styles.scss';
@@ -88,10 +87,10 @@ class ListRow extends React.Component {
                 get(this.props.item, 'name'),
                 'enabled',
               ]) ? (
-                <span style={{ color: '#5A9E06' }}>Enabled</span>
-              ) : (
-                <span style={{ color: '#F64D0A' }}>Disabled</span>
-              )}
+                  <span style={{ color: '#5A9E06' }}>Enabled</span>
+                ) : (
+                  <span style={{ color: '#F64D0A' }}>Disabled</span>
+                )}
             </div>
             <div className="col-md-2">
               <IcoContainer icons={icons} />
@@ -185,7 +184,7 @@ ListRow.contextTypes = {
 ListRow.defaultProps = {
   item: {
     name: 'Owner',
-    description: "Rule them all. This role can't be deleted",
+    description: 'Rule them all. This role can\'t be deleted',
     nb_users: 1,
     icon: 'envelope',
   },

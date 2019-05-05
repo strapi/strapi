@@ -2,8 +2,6 @@ import { fromJS, List } from 'immutable';
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
-} from 'actions/overlayBlocker';
-import {
   freezeApp,
   getAppPluginsSucceeded,
   pluginDeleted,

@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.0.0-alpha.26",
+  "version": "3.0.0-alpha.26.2",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "graphql",
@@ -8,16 +8,6 @@
     "description": "Description of graphql plugin."
   },
   "scripts": {
-    "analyze:clean": "rimraf stats.json",
-    "preanalyze": "npm run analyze:clean",
-    "analyze": "node ./node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
-    "prebuild": "npm run build:clean && npm run test",
-    "build:dev": "cross-env NODE_ENV=development ./node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build": "cross-env NODE_ENV=production node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build:clean": "rimraf admin/build",
-    "start": "cross-env NODE_ENV=development ./node_modules/strapi-helper-plugin/lib/server",
-    "generate": "node ./node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
@@ -32,7 +22,7 @@
     "graphql-type-json": "^0.2.1",
     "graphql-type-long": "^0.1.1",
     "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.0-alpha.26"
+    "strapi-utils": "3.0.0-alpha.26.2"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
@@ -54,5 +44,6 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

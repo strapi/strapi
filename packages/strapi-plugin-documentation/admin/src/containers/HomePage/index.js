@@ -14,13 +14,13 @@ import { get, isEmpty } from 'lodash';
 import cn from 'classnames';
 
 // Components
-import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning';
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import Input from 'components/InputsIndex';
-
-// Utils
-import auth from 'utils/auth';
+import {
+  auth,
+  PluginHeader,
+  PopUpWarning,
+  LoadingIndicatorPage,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 

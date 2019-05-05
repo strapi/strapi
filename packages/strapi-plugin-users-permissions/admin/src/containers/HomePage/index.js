@@ -12,8 +12,8 @@ import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 
-import HeaderNav from 'components/HeaderNav';
-import PluginHeader from 'components/PluginHeader';
+import { HeaderNav, PluginHeader } from 'strapi-helper-plugin';
+// import PluginHeader from 'components/PluginHeader';
 
 import pluginId from '../../pluginId';
 
@@ -257,7 +257,7 @@ export class HomePage extends React.Component {
             {component}
           </div>
           <PopUpForm
-            actionType='edit'
+            actionType="edit"
             isOpen={this.state.showModalEdit}
             dataToEdit={dataToEdit}
             didCheckErrors={didCheckErrors}

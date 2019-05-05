@@ -8,17 +8,16 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 
-import PluginHeader from 'components/PluginHeader';
+import { PluginHeader } from 'strapi-helper-plugin';
 
 import styles from './styles.scss';
 
-export class ComingSoonPage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class ComingSoonPage extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
       <div>
-        <Helmet
-          title="Coming soon"
-        />
+        <Helmet title="Coming soon" />
         <div>
           <div className={`container-fluid ${styles.containerFluid}`}>
             <PluginHeader
@@ -36,7 +35,6 @@ export class ComingSoonPage extends React.Component { // eslint-disable-line rea
     );
   }
 }
-
 
 function mapDispatchToProps(dispatch) {
   return {

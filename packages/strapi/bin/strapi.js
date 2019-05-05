@@ -17,6 +17,9 @@ const packageJSON = require('../package.json');
 
 /* eslint-disable no-console */
 
+const getScript = name => (...args) =>
+  require(`../lib/commands/${name}`)(...args);
+
 /**
  * Normalize version argument
  *
@@ -33,26 +36,26 @@ program.version(packageJSON.version, '-v, --version');
 
 // Make `-v` option case-insensitive.
 process.argv = _.map(process.argv, arg => {
-  return (arg === '-V') ? '-v' : arg;
+  return arg === '-V' ? '-v' : arg;
 });
 
 // `$ strapi version` (--version synonym)
 program
   .command('version')
   .description('output your version of Strapi')
-  .action(() => { console.log(packageJSON.version); });
-
+  .action(() => {
+    console.log(packageJSON.version);
+  });
 
 // `$ strapi console`
 program
   .command('console')
   .description('open the Strapi framework console')
-  .action(require('./strapi-console'));
+  .action(getScript('console'));
 
 // `$ strapi new`
 program
   .command('new')
-  .option('-d, --dev', 'Development mode')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
   .option('--dbclient <dbclient>', 'Database client')
@@ -67,15 +70,20 @@ program
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
   .description('create a new application')
-  .action(require('./strapi-new'));
+  .action(getScript('new'));
 
 // `$ strapi start`
 program
-  .command('start [appPath]')
-  .description('start your Strapi application')
-  .action((appPath) => {
-    require('./strapi-start')(appPath);
-  });
+  .command('start')
+  .description('Start your Strapi application')
+  .action(getScript('start'));
+
+// `$ strapi dev`
+program
+  .command('dev')
+  .option('--no-build', 'Disable build', false)
+  .description('Start your Strapi application in dev mode')
+  .action(getScript('dev'));
 
 // `$ strapi generate:api`
 program
@@ -86,7 +94,7 @@ program
   .description('generate a basic API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
-    require('./strapi-generate')(id, cliArguments);
+    getScript('generate')(id, cliArguments);
   });
 
 // `$ strapi generate:controller`
@@ -96,7 +104,7 @@ program
   .option('-p, --plugin <api>', 'plugin name')
   .option('-t, --tpl <template>', 'template name')
   .description('generate a controller for an API')
-  .action(require('./strapi-generate'));
+  .action(getScript('generate'));
 
 // `$ strapi generate:model`
 program
@@ -107,7 +115,7 @@ program
   .description('generate a model for an API')
   .action((id, attributes, cliArguments) => {
     cliArguments.attributes = attributes;
-    require('./strapi-generate')(id, cliArguments);
+    getScript('generate')(id, cliArguments);
   });
 
 // `$ strapi generate:policy`
@@ -116,7 +124,7 @@ program
   .option('-a, --api <api>', 'API name')
   .option('-p, --plugin <api>', 'plugin name')
   .description('generate a policy for an API')
-  .action(require('./strapi-generate'));
+  .action(getScript('generate'));
 
 // `$ strapi generate:service`
 program
@@ -125,27 +133,32 @@ program
   .option('-p, --plugin <api>', 'plugin name')
   .option('-t, --tpl <template>', 'template name')
   .description('generate a service for an API')
-  .action(require('./strapi-generate'));
+  .action(getScript('generate'));
 
 // `$ strapi generate:plugin`
 program
   .command('generate:plugin <id>')
   .option('-n, --name <name>', 'Plugin name')
   .description('generate a basic plugin')
-  .action(require('./strapi-generate'));
+  .action(getScript('generate'));
+
+program
+  .command('build')
+  .description('Builds the strapi admin app')
+  .action(getScript('build'));
 
 // `$ strapi install`
 program
-  .command('install <plugin>')
+  .command('install [plugins...]')
   .option('-d, --dev', 'Development mode')
   .description('install a Strapi plugin')
-  .action(require('./strapi-install'));
+  .action(getScript('install'));
 
 // `$ strapi uninstall`
 program
-  .command('uninstall <plugin>')
+  .command('uninstall [plugins...]')
   .description('uninstall a Strapi plugin')
-  .action(require('./strapi-uninstall'));
+  .action(getScript('uninstall'));
 
 /**
  * Normalize help argument
@@ -159,9 +172,7 @@ program
 
 // `$ strapi <unrecognized_cmd>`
 // Mask the '*' in `help`.
-program
-  .command('*')
-  .action(program.usageMinusWildcard);
+program.command('*').action(program.usageMinusWildcard);
 
 // Don't balk at unknown options.
 

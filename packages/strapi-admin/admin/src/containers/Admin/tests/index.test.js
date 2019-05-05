@@ -9,19 +9,20 @@ import { compose } from 'redux';
 import {
   disableGlobalOverlayBlocker,
   enableGlobalOverlayBlocker,
-} from 'actions/overlayBlocker';
+  updatePlugin,
+} from '../../App/actions';
 
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import OverlayBlocker from 'components/OverlayBlocker';
+import { LoadingIndicatorPage, OverlayBlocker } from 'strapi-helper-plugin';
 
 import injectReducer from '../../../utils/injectReducer';
-import { messages } from '../../../i18n';
-import { store } from '../../../createStore';
+import history from '../../../utils/history';
+import configureStore from '../../../configureStore';
+import messages from 'testUtils/commonTrads.json';
+
 import Header from '../../../components/Header/index';
 import Onboarding from '../../Onboarding';
 import Logout from '../../../components/Logout';
 
-import { updatePlugin } from '../../App/actions';
 import localeToggleReducer from '../../LocaleToggle/reducer';
 
 import {
@@ -38,6 +39,9 @@ import {
 } from '../actions';
 
 import styles from '../styles.scss';
+
+const initialState = {};
+const store = configureStore(initialState, history);
 
 const withLocaleToggleReducer = injectReducer({
   key: 'localeToggle',

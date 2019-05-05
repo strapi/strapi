@@ -1,6 +1,7 @@
-const pluginId = require('../pluginId');
+// const pluginId = require('../pluginId');
+import pluginId from '../pluginId';
 
-module.exports = function didGetSecuredData() {
+function didGetSecuredData() {
   const {
     props: { updatePlugin },
   } = this;
@@ -18,4 +19,6 @@ module.exports = function didGetSecuredData() {
   ];
 
   updatePlugin(pluginId, 'leftMenuSections', leftMenuSections);
-};
+}
+
+export default didGetSecuredData;

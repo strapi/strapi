@@ -13,11 +13,10 @@ module.exports = async (ctx, next) => {
         throw new Error('Invalid token: Token did not contain required fields');
       }
 
-      ctx.state.user = await strapi
-        .query('user', 'users-permissions')
+      ctx.state.user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
         .findOne({ _id, id });
-      ctx.state.admin = await strapi
-        .query('administrator', 'admin')
+
+      ctx.state.admin = await strapi.plugins['users-permissions'].queries('administrator', 'admin')
         .findOne({ _id, id });
     } catch (err) {
       return handleErrors(ctx, err, 'unauthorized');
@@ -28,7 +27,7 @@ module.exports = async (ctx, next) => {
         return handleErrors(
           ctx,
           'Your account has been blocked by the administrator.',
-          'unauthorized',
+          'unauthorized'
         );
       }
 
@@ -59,7 +58,7 @@ module.exports = async (ctx, next) => {
       return handleErrors(
         ctx,
         'Your account email is not confirmed.',
-        'unauthorized',
+        'unauthorized'
       );
     }
 
@@ -67,21 +66,19 @@ module.exports = async (ctx, next) => {
       return handleErrors(
         ctx,
         'Your account has been blocked by the administrator.',
-        'unauthorized',
+        'unauthorized'
       );
     }
   }
 
   // Retrieve `public` role.
   if (!role) {
-    role = await strapi
-      .query('role', 'users-permissions')
+    role = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
       .findOne({ type: 'public' }, []);
   }
 
   const route = ctx.request.route;
-  const permission = await strapi
-    .query('permission', 'users-permissions')
+  const permission = await strapi.plugins['users-permissions'].queries('permission', 'users-permissions')
     .findOne(
       {
         role: role._id || role.id,
@@ -90,7 +87,7 @@ module.exports = async (ctx, next) => {
         action: route.action,
         enabled: true,
       },
-      [],
+      []
     );
 
   if (!permission) {

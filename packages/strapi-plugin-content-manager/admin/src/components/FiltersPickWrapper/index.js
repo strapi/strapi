@@ -9,10 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { isObject, size } from 'lodash';
 
-// You can find these components in either
-// ./node_modules/strapi-helper-plugin/lib/src
-// or strapi/packages/strapi-helper-plugin/lib/src
-import PluginHeader from 'components/PluginHeader';
+import { PluginHeader } from 'strapi-helper-plugin';
 
 import FilterOptions from '../FilterOptions';
 

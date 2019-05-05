@@ -9,20 +9,20 @@ import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
-// Design
-import Label from 'components/Label';
-import InputDescription from 'components/InputDescription';
-import InputErrors from 'components/InputErrors';
-import InputSpacer from 'components/InputSpacer';
-
-// Utils
-import validateInput from 'utils/inputsValidations';
+import {
+  Label,
+  InputDescription,
+  InputErrors,
+  InputSpacer,
+  validateInput,
+} from 'strapi-helper-plugin';
 
 import Wysiwyg from '../Wysiwyg';
 
 import styles from './styles.scss';
 
-class WysiwygWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class WysiwygWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -63,7 +63,7 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -137,7 +137,7 @@ class WysiwygWithErrors extends React.Component { // eslint-disable-line react/p
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
           name={name}
           style={errorsStyle}
         />
@@ -208,10 +208,7 @@ WysiwygWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   resetProps: PropTypes.bool,

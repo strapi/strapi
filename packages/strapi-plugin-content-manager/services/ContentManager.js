@@ -19,7 +19,7 @@ module.exports = {
       : filters;
 
     // Find entries using `queries` system
-    return await strapi.query(params.model, source).find(queryFilter, populate);
+    return await strapi.plugins['content-manager'].queries(params.model, source).find(queryFilter, populate);
   },
 
   search: async (params, query) => {
@@ -27,7 +27,7 @@ module.exports = {
     const filters = strapi.utils.models.convertParams(params.model, query);
 
     // Find entries using `queries` system
-    return await strapi.query(params.model, source).search(
+    return await strapi.plugins['content-manager'].queries(params.model, source).search(
       {
         limit: limit || filters.limit,
         skip: skip || filters.start || 0,
@@ -41,17 +41,17 @@ module.exports = {
   countSearch: async (params, query) => {
     const { source, _q } = query;
 
-    return await strapi.query(params.model, source).countSearch({ search: _q });
+    return await strapi.plugins['content-manager'].queries(params.model, source).countSearch({ search: _q });
   },
 
   count: async (params, query) => {
     const { source, ...filters } = query;
 
-    return await strapi.query(params.model, source).count(filters);
+    return await strapi.plugins['content-manager'].queries(params.model, source).count(filters);
   },
 
   fetch: async (params, source, populate, raw = true) => {
-    return await strapi.query(params.model, source).findOne(
+    return await strapi.plugins['content-manager'].queries(params.model, source).findOne(
       {
         id: params.id,
       },
@@ -84,7 +84,7 @@ module.exports = {
       }, {});
 
       // Update JSON fields.
-      const entry = await strapi.query(params.model, source).create({
+      const entry = await strapi.plugins['content-manager'].queries(params.model, source).create({
         values,
       });
 
@@ -101,13 +101,13 @@ module.exports = {
         );
       }
 
-      return strapi.query(params.model, source).findOne({
+      return strapi.plugins['content-manager'].queries(params.model, source).findOne({
         id: entry.id || entry._id,
       });
     }
-
+    
     // Create an entry using `queries` system
-    return await strapi.query(params.model, source).create({
+    return await strapi.plugins['content-manager'].queries(params.model, source).create({
       values,
     });
   },
@@ -143,7 +143,7 @@ module.exports = {
       }, {});
 
       // Update JSON fields.
-      await strapi.query(params.model, source).update({
+      await strapi.plugins['content-manager'].queries(params.model, source).update({
         id: params.id,
         values,
       });
@@ -158,20 +158,20 @@ module.exports = {
         );
       }
 
-      return strapi.query(params.model, source).findOne({
+      return strapi.plugins['content-manager'].queries(params.model, source).findOne({
         id: params.id,
       });
     }
 
     // Raw JSON.
-    return strapi.query(params.model, source).update({
+    return strapi.plugins['content-manager'].queries(params.model, source).update({
       id: params.id,
       values,
     });
   },
 
   delete: async (params, { source }) => {
-    const query = strapi.query(params.model, source);
+    const query = strapi.plugins['content-manager'].queries(params.model, source);
     const primaryKey = query.primaryKey;
     const response = await query.findOne({
       id: params.id,
@@ -200,11 +200,11 @@ module.exports = {
 
     if (!_.isEmpty(params.values)) {
       // Run update to remove all relationships.
-      await strapi.query(params.model, source).update(params);
+      await strapi.plugins['content-manager'].queries(params.model, source).update(params);
     }
 
     // Delete an entry using `queries` system
-    return await strapi.query(params.model, source).delete({
+    return await strapi.plugins['content-manager'].queries(params.model, source).delete({
       id: params.id,
     });
   },
@@ -213,7 +213,7 @@ module.exports = {
     const { source } = query;
     const { model } = params;
 
-    const primaryKey = strapi.query(model, source).primaryKey;
+    const primaryKey = strapi.plugins['content-manager'].queries(model, source).primaryKey;
     const toRemove = Object.keys(query).reduce((acc, curr) => {
       if (curr !== 'source') {
         return acc.concat([query[curr]]);
@@ -223,8 +223,8 @@ module.exports = {
     }, []);
 
     const filter = { [`${primaryKey}_in`]: toRemove };
-    const entries = await strapi.query(model, source).find(filter, null, true);
-    const associations = strapi.query(model, source).associations;
+    const entries = await strapi.plugins['content-manager'].queries(model, source).find(filter, null, true);
+    const associations = strapi.plugins['content-manager'].queries(model, source).associations;
 
     for (let i = 0; i < entries.length; ++i) {
       const entry = entries[i];
@@ -248,13 +248,13 @@ module.exports = {
         }
       });
 
-      await strapi.query(model, source).update({
+      await strapi.plugins['content-manager'].queries(model, source).update({
         [primaryKey]: entry[primaryKey],
         values: _.pick(entry, associations.map(a => a.alias)),
       });
     }
 
-    return strapi.query(model, source).deleteMany({
+    return strapi.plugins['content-manager'].queries(model, source).deleteMany({
       [primaryKey]: toRemove,
     });
   },

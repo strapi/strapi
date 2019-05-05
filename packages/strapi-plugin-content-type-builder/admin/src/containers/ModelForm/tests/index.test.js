@@ -3,7 +3,7 @@ import React from 'react';
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
-import Input from 'components/InputsIndex';
+import { InputsIndex as Input } from 'strapi-helper-plugin';
 
 import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
@@ -12,7 +12,8 @@ import ModelForm from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 const context = { emitEvent: jest.fn() };
-const renderComponent = (props = {}) => mountWithIntl(<ModelForm {...props} />, messages, context);
+const renderComponent = (props = {}) =>
+  mountWithIntl(<ModelForm {...props} />, messages, context);
 
 describe('<ModelForm />', () => {
   let props;
@@ -186,7 +187,8 @@ describe('<ModelForm />', () => {
 
         expect(context.emitEvent).not.toHaveBeenCalled();
         expect(props.push).toHaveBeenCalledWith({
-          search: 'modalType=model&settingType=base&actionType=edit&modelName=test',
+          search:
+            'modalType=model&settingType=base&actionType=edit&modelName=test',
         });
       });
 
@@ -198,7 +200,9 @@ describe('<ModelForm />', () => {
 
         handleGoTo('advanced');
 
-        expect(context.emitEvent).toHaveBeenCalledWith('didSelectContentTypeSettings');
+        expect(context.emitEvent).toHaveBeenCalledWith(
+          'didSelectContentTypeSettings',
+        );
         expect(props.push).toHaveBeenCalledWith({
           search: 'modalType=model&settingType=advanced&actionType=create',
         });
@@ -312,6 +316,7 @@ describe('<ModelForm />', () => {
 
         expect(wrapper.state('formErrors')).toEqual({});
         expect(props.push).toHaveBeenCalledWith({
+          pathname: '/plugins/content-type-builder/models/test',
           search: '',
         });
         expect(props.createTempContentType).not.toHaveBeenCalled();

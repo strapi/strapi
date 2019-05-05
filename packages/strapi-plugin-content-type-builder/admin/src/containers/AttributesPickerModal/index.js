@@ -6,8 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-// import { connect } from 'react-redux';
-// import { bindActionCreators, compose } from 'redux';
+
 import pluginId from '../../pluginId';
 
 import AttributeOption from '../../components/AttributeOption';

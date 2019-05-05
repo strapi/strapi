@@ -8,4 +8,6 @@
  *
  */
 
-module.exports = function lifecycles() {};
+function lifecycles() {}
+
+export default lifecycles;

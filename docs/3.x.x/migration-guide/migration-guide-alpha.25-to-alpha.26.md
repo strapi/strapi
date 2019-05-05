@@ -1,13 +1,12 @@
-# Migration guide from alpha.25 to alpha.26
+# Migration guide from alpha.25 to alpha.26.2
 
 **Here are the major changes:**
 
-- Deep filtering
-- Content type builder refactoring
+- Fix some issues
 
 **Useful links:**
 - Changelog: [https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.26](https://github.com/strapi/strapi/releases/tag/v3.0.0-alpha.26)
-- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.25...v3.0.0-alpha.26](https://github.com/strapi/strapi/compare/v3.0.0-alpha.25...v3.0.0-alpha.26)
+- GitHub diff: [https://github.com/strapi/strapi/compare/v3.0.0-alpha.25...v3.0.0-alpha.26.2](https://github.com/strapi/strapi/compare/v3.0.0-alpha.25...v3.0.0-alpha.26.2)
 
 <br>
 
@@ -19,7 +18,7 @@ Feel free to [join us on Slack](http://slack.strapi.io) and ask questions about 
 
 ## Getting started
 
-Install Strapi `alpha.26` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.26 -g`.
+Install Strapi `alpha.26.2` globally on your computer. To do so run `npm install strapi@3.0.0-alpha.26.2 -g`.
 
 When it's done, generate a new empty project `strapi new myNewProject` (don't pay attention to the database configuration).
 
@@ -27,9 +26,9 @@ When it's done, generate a new empty project `strapi new myNewProject` (don't pa
 
 ## Update node modules
 
-Update the Strapi's dependencies version (move Strapi's dependencies to `3.0.0-alpha.26` version) of your project.
+Update the Strapi's dependencies version (move Strapi's dependencies to `3.0.0-alpha.26.2` version) of your project.
 
-Run `npm install strapi@3.0.0-alpha.26 --save` to update your strapi version.
+Run `npm install strapi@3.0.0-alpha.26.2 --save` to update your strapi version.
 
 <br>
 
@@ -182,4 +181,4 @@ And replace `<%= globalID %>` by the Global of your API.
 
 <br>
 
-That's all, you have now upgraded to Strapi `alpha.26`.
+That's all, you have now upgraded to Strapi `alpha.26.2`.

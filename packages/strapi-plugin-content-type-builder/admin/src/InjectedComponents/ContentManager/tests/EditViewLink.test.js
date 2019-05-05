@@ -1,7 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import LiLink from 'components/LiLink';
+import { LiLink } from 'strapi-helper-plugin';
 import EditViewLink from '../EditViewLink';
 
 describe('<EditViewLink />', () => {

@@ -6,7 +6,7 @@
 
 import { fromJS, List } from 'immutable';
 import { difference, findIndex, get, range, upperFirst } from 'lodash';
-import Manager from 'utils/Manager';
+import { Manager } from 'strapi-helper-plugin';
 import {
   BEGIN_MOVE,
   EMPTY_STORE,
@@ -79,7 +79,7 @@ function appReducer(state = initialState, action) {
           if (shouldUpdateListOnDrop && canDrop) {
             newList = list
               .insert(dropIndex, toAdd);
-        
+
             const addedElementName = state.get('addedElementName');
             const manager = createManager(state, newList, action.keys, dropIndex, layout);
             const arrayOfLastLineElements = manager.arrayOfEndLineElements;
@@ -106,10 +106,10 @@ function appReducer(state = initialState, action) {
               const diffLineSize = newManager.getLineSize(diff);
               const lineToCreate = [...diff, ...manager.getColsToAdd(12 - diffLineSize)];
               let indexToInsert = dropIndex + 1;
-  
+
               lineToCreate.forEach(item => {
                 const canAdd = newList.indexOf(item) === -1;
-  
+
                 if (canAdd) {
                   newList = newList.insert(indexToInsert, item);
                 }
@@ -174,7 +174,7 @@ function appReducer(state = initialState, action) {
           const isFullSize = itemInfos.bootstrapCol === 12;
           const dropLineBounds = { left: manager.getBound(false, action.hoverIndex), right: manager.getBound(true, action.hoverIndex) };
           const hasMoved = state.get('hasMoved'); // Used only for non full-width elements
-          
+
           if (isFullSize && draggedItemIndex !== -1) {
             const upwards = action.dragIndex > action.hoverIndex;
             const indexToDrop = upwards ? get(dropLineBounds, 'left.index', 0) : get(dropLineBounds, 'right.index', list.size -1);
@@ -214,7 +214,7 @@ function appReducer(state = initialState, action) {
           if (addedElementName) {
             return addedElementName;
           }
-          
+
           return name;
         })
         .update('hasMoved', () => true)
@@ -232,7 +232,7 @@ function appReducer(state = initialState, action) {
               if (current !== 'plugins') {
                 return acc.setIn([current, action.keys[1]], action.value);
               }
-              
+
               return acc
                 .get(current)
                 .keySeq()
@@ -241,7 +241,7 @@ function appReducer(state = initialState, action) {
                     .getIn([current, curr])
                     .keySeq()
                     .reduce((acc2, curr1) => {
-                  
+
                       return acc2.setIn([ current, curr, curr1, action.keys[1]], action.value);
                     }, acc1);
                 }, acc);
@@ -272,9 +272,9 @@ function appReducer(state = initialState, action) {
             .filter(attr => {
               return attr.get('name') === '_id' || attr.get('name') === 'id';
             });
-          
+
           attrToAdd.setIn(['0', 'sortable'], () => true);
-          
+
           return list
             .delete(action.index)
             .push(attrToAdd.get('0'));
@@ -297,7 +297,7 @@ function appReducer(state = initialState, action) {
           const arrayOfLastLineElements = manager.arrayOfEndLineElements;
           const isRemovingAFullWidthNode = attrToRemoveInfos.bootstrapCol === 12;
           let newList;
-          
+
           if (isRemovingAFullWidthNode) { // If removing we need to add the corresponding missing col in the prev line
             const currentNodeLine = findIndex(arrayOfLastLineElements, ['index', attrToRemoveInfos.index]); // Used only to know if removing a full size element on the first line
 
@@ -321,7 +321,7 @@ function appReducer(state = initialState, action) {
                 newList = list
                   .delete(attrToRemoveInfos.index)
                   .insert(attrToRemoveInfos.index, colsToAdd[0]);
-              
+
                 if (colsToAdd.length > 1) {
                   newList = newList
                     .insert(attrToRemoveInfos.index, colsToAdd[1]);
@@ -340,7 +340,7 @@ function appReducer(state = initialState, action) {
               newList = list
                 .delete(attrToRemoveInfos.index);
             } else {
-              const random = Math.floor(Math.random() * 1000); 
+              const random = Math.floor(Math.random() * 1000);
               newList = list
                 .delete(attrToRemoveInfos.index)
                 .insert(rightBoundIndex, `__col-md-${attrToRemoveInfos.bootstrapCol}__${random}`);

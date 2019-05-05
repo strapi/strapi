@@ -3,7 +3,7 @@ import { shallow } from 'enzyme';
 import { Route } from 'react-router-dom';
 
 import AppLoader from '../../AppLoader';
-import App from '../index';
+import App from '../../App';
 
 describe('<App />', () => {
   it('should render the <AppLoader />', () => {
