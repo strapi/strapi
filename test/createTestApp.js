@@ -1,4 +1,5 @@
 const { cleanTestApp, generateTestApp } = require('./helpers/testAppGenerator');
+const yargs = require('yargs');
 
 const appName = 'testApp';
 
@@ -11,9 +12,7 @@ const databases = {
   sqlite: '--dbclient=sqlite --dbfile=./tmp/data.db',
 };
 
-const main = async () => {
-  const database = process.argv.length > 2 ? process.argv.slice(2).join(' ') : databases.postgres;
-
+const main = async database => {
   try {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
@@ -24,3 +23,17 @@ const main = async () => {
 };
 
 main();
+
+yargs
+  .command(
+    '$0 [databaseName]',
+    'Create test app',
+    yargs => {
+      yargs.positional('databaseName', {
+        default: 'sqlite',
+        choices: Object.keys(databases),
+      });
+    },
+    ({ databaseName }) => main(databases[databaseName])
+  )
+  .help().argv;
