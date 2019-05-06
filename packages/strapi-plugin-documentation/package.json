@@ -18,6 +18,7 @@
     "lodash": "^4.17.11",
     "moment": "^2.22.2",
     "path-to-regexp": "^2.4.0",
+    "fs-extra": "^7.0.0",
     "react": "^16.0.0",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.0.0",
