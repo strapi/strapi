@@ -1,10 +1,11 @@
 // Helpers.
-const { auth, login } = require('../../../test/helpers/auth');
-const waitRestart = require('../../../test/helpers/waitRestart');
+const { registerAndLogin } = require('../../../test/helpers/auth');
+const createModelsUtils = require('../../../test/helpers/models');
 const createRequest = require('../../../test/helpers/request');
 
 let rq;
 let graphqlQuery;
+let modelsUtils;
 
 const postModel = {
   attributes: [
@@ -21,7 +22,7 @@ const postModel = {
     {
       name: 'bigint',
       params: {
-        type: 'biginteger'
+        type: 'biginteger',
       },
     },
   ],
@@ -31,22 +32,15 @@ const postModel = {
   collectionName: '',
 };
 
+
+
 describe('Test Graphql API End to End', () => {
   beforeAll(async () => {
-    await createRequest()({
-      url: '/admin/auth/local/register',
-      method: 'POST',
-      body: auth,
-    }).catch(err => {
-      if (err.error.message.includes("You can't register a new admin")) return;
-      throw err;
-    });
-
-    const body = await login();
+    const token = await registerAndLogin();
 
     rq = createRequest({
       headers: {
-        Authorization: `Bearer ${body.jwt}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -57,25 +51,21 @@ describe('Test Graphql API End to End', () => {
         body,
       });
     };
-  });
 
-  describe('Generate test APIs', () => {
-    beforeEach(() => waitRestart(), 30000);
-    afterAll(() => waitRestart(), 30000);
+    modelsUtils = createModelsUtils({ rq });
 
-    test('Create new post API', async () => {
-      const res = await rq({
-        url: '/content-type-builder/models',
-        method: 'POST',
-        body: postModel,
-      });
+    await modelsUtils.createModels([postModel]);
+  }, 60000);
 
-      expect(res.statusCode).toBe(200);
-    });
-  });
+  afterAll(async () => {
+    await modelsUtils.deleteModels(['post']);
+  }, 60000);
 
   describe('Test CRUD', () => {
-    const postsPayload = [{ name: 'post 1', bigint: 1316130638171 }, { name: 'post 2', bigint: 1416130639261 }];
+    const postsPayload = [
+      { name: 'post 1', bigint: 1316130638171 },
+      { name: 'post 2', bigint: 1416130639261 },
+    ];
     let data = {
       posts: [],
     };
@@ -369,20 +359,6 @@ describe('Test Graphql API End to End', () => {
 
         expect(res.statusCode).toBe(200);
       }
-    });
-  });
-
-  describe('Delete test APIs', () => {
-    beforeEach(() => waitRestart(), 30000);
-    afterAll(() => waitRestart(), 30000);
-
-    test('Delete post API', async () => {
-      await rq({
-        url: '/content-type-builder/models/post',
-        method: 'DELETE',
-      }).then(res => {
-        expect(res.statusCode).toBe(200);
-      });
     });
   });
 });

@@ -29,7 +29,7 @@
     "test:front:update": "cross-env NODE_ENV=test jest --config ./jest.config.front.js --u",
     "test:snyk": "snyk test",
     "test:unit": "lerna exec -- npm run test -s",
-    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --runInBand --verbose --forceExit --detectOpenHandles",
+    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --runInBand --verbose --forceExit --detectOpenHandles packages/strapi",
     "test:generate-app": "node test/createTestApp.js",
     "test:start-app": "node test/startTestApp.js"
   },
