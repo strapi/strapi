@@ -19,11 +19,11 @@ module.exports = async cb => {
 
   strapi.plugins.upload.config.providers = [];
 
-  const installedProviders = Object.keys(
-    strapi.config.info.dependencies
-  ).filter(d => d.startsWith('strapi-provider-upload-'));
+  const installedProviders = Object.keys(strapi.config.info.dependencies)
+    .filter(d => d.startsWith('strapi-provider-upload-'))
+    .concat('strapi-provider-upload-local');
 
-  for (let installedProvider of installedProviders) {
+  for (let installedProvider of _.uniq(installedProviders)) {
     strapi.plugins.upload.config.providers.push(require(installedProvider));
   }
 
@@ -32,7 +32,7 @@ module.exports = async cb => {
     const config = await pluginStore.get({ key: 'provider' });
 
     if (!config) {
-      const provider = _.find(strapi.plugins.email.config.providers, {
+      const provider = _.find(strapi.plugins.upload.config.providers, {
         provider: 'local',
       });
 

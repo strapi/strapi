@@ -19,11 +19,11 @@ module.exports = async cb => {
 
   strapi.plugins.email.config.providers = [];
 
-  const installedProviders = Object.keys(
-    strapi.config.info.dependencies
-  ).filter(d => d.startsWith('strapi-provider-email-'));
+  const installedProviders = Object.keys(strapi.config.info.dependencies)
+    .filter(d => d.startsWith('strapi-provider-email-'))
+    .concat('strapi-provider-email-sendmail');
 
-  for (let installedProvider of installedProviders) {
+  for (let installedProvider of _.uniq(installedProviders)) {
     strapi.plugins.email.config.providers.push(require(installedProvider));
   }
 
