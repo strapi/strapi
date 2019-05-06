@@ -48,8 +48,8 @@ module.exports = {
         .use(...createContainer('ubuntu'))
         .use(...createContainer('mac'))
         .use(...createContainer('note'));
-      const vuepressTabs = require('vuepress-tabs')
-      vuepressTabs(md)
+      const vuepressTabs = require('vuepress-tabs');
+      vuepressTabs(md);
     },
   },
   title,
@@ -57,15 +57,106 @@ module.exports = {
   base: '/documentation/',
   ga: 'UA-54313258-1',
   themeConfig: {
-    versions: [['Version 3.x.x', '/3.x.x/'], ['Version 1.x.x', '/1.x.x/']],
+    versions: [
+      ['Version 3.0.0-beta.0', '/3.0.0-beta.0/'],
+      ['Version 3.x.x', '/3.x.x/'],
+      ['Version 1.x.x', '/1.x.x/'],
+    ],
     repo: 'strapi/strapi',
     website: 'https://strapi.io',
     docsDir: 'docs',
     editLinks: true,
     editLinkText: 'Improve this page',
     serviceWorker: true,
-    hiddenLinks: ['/3.x.x/cli/CLI.html', '/3.x.x/api-reference/reference.html'],
+    hiddenLinks: [
+      '/3.0.0-beta.0/cli/CLI.html',
+      '/3.0.0-beta.0/api-reference/reference.html',
+    ],
     sidebar: {
+      '/3.0.0-beta.0/': [
+        {
+          collapsable: false,
+          title: '🚀 Getting started',
+          children: [
+            '/3.0.0-beta.0/getting-started/introduction',
+            '/3.0.0-beta.0/getting-started/install-requirements',
+            '/3.0.0-beta.0/getting-started/quick-start',
+            '/3.0.0-beta.0/getting-started/quick-start-tutorial',
+          ],
+        },
+        {
+          collapsable: true,
+          title: '💡 Guides',
+          children: [
+            '/3.0.0-beta.0/concepts/concepts',
+            '/3.0.0-beta.0/guides/api-documentation',
+            '/3.0.0-beta.0/guides/authentication',
+            '/3.0.0-beta.0/configurations/configurations',
+            '/3.0.0-beta.0/guides/controllers',
+            '/3.0.0-beta.0/guides/databases',
+            '/3.0.0-beta.0/guides/deployment',
+            '/3.0.0-beta.0/guides/email',
+            '/3.0.0-beta.0/guides/upload',
+            '/3.0.0-beta.0/guides/filters',
+            '/3.0.0-beta.0/guides/graphql',
+            '/3.0.0-beta.0/guides/i18n',
+            '/3.0.0-beta.0/guides/models',
+            '/3.0.0-beta.0/guides/policies',
+            '/3.0.0-beta.0/guides/public-assets',
+            '/3.0.0-beta.0/guides/requests',
+            '/3.0.0-beta.0/guides/responses',
+            '/3.0.0-beta.0/guides/routing',
+            '/3.0.0-beta.0/guides/services',
+            '/3.0.0-beta.0/guides/webhooks',
+          ],
+        },
+        {
+          collapsable: true,
+          title: '⚙️️ Advanced',
+          children: [
+            '/3.0.0-beta.0/advanced/customize-admin',
+            '/3.0.0-beta.0/advanced/hooks',
+            '/3.0.0-beta.0/advanced/logging',
+            '/3.0.0-beta.0/advanced/middlewares',
+            '/3.0.0-beta.0/advanced/usage-tracking',
+          ],
+        },
+        {
+          collapsable: true,
+          title: '🔌 Plugin Development',
+          children: [
+            '/3.0.0-beta.0/plugin-development/quick-start',
+            '/3.0.0-beta.0/plugin-development/plugin-architecture',
+            '/3.0.0-beta.0/plugin-development/backend-development',
+            '/3.0.0-beta.0/plugin-development/frontend-development',
+
+            
+            // '/3.0.0-beta.0/plugin-development/ui-components', TODO: Add this file
+          ],
+        },
+        {
+          collapsable: true,
+          title: '💻 Command Line Interface',
+          children: ['/3.0.0-beta.0/cli/CLI'],
+        },
+        {
+          collapsable: true,
+          title: '🏗 API Reference',
+          children: ['/3.0.0-beta.0/api-reference/reference'],
+        },
+        {
+          collapsable: false,
+          title: '📚 Resources',
+          children: [
+            [
+              'https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md',
+              'Contributing guide',
+            ],
+            '/3.0.0-beta.0/migration-guide/',
+            '/3.0.0-beta.0/articles/',
+          ],
+        },
+      ],
       '/3.x.x/': [
         {
           collapsable: false,
