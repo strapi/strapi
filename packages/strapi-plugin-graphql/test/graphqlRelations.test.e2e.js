@@ -1,6 +1,6 @@
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
-const createRequest = require('../../../test/helpers/request');
+const { createAuthRequest } = require('../../../test/helpers/request');
 const createModelsUtils = require('../../../test/helpers/models');
 const _ = require('lodash');
 
@@ -71,12 +71,7 @@ const labelModel = {
 describe('Test Graphql Relations API End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
-
-    rq = createRequest({
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    rq = createAuthRequest(token);
 
     graphqlQuery = body => {
       return rq({
@@ -91,9 +86,7 @@ describe('Test Graphql Relations API End to End', () => {
     await modelsUtils.createModels([documentModel, labelModel]);
   }, 60000);
 
-  afterAll(async () => {
-    await modelsUtils.deleteModels(['document', 'label']);
-  }, 60000);
+  afterAll(() => modelsUtils.deleteModels(['document', 'label']), 60000);
 
   describe('Test relations features', () => {
     let data = {

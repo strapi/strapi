@@ -1,6 +1,6 @@
 const request = require('request-promise-native');
 
-const createReq = (defaults = {}) => {
+const createRequest = (defaults = {}) => {
   const client = request.defaults({
     baseUrl: 'http://localhost:1337',
     json: true,
@@ -21,4 +21,15 @@ const createReq = (defaults = {}) => {
   };
 };
 
-module.exports = createReq;
+const createAuthRequest = token => {
+  return createRequest({
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+module.exports = {
+  createRequest,
+  createAuthRequest,
+};

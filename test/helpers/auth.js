@@ -1,4 +1,4 @@
-const createRq = require('./request');
+const { createRequest } = require('./request');
 
 const auth = {
   username: 'admin',
@@ -6,7 +6,7 @@ const auth = {
   password: 'pcw123',
 };
 
-const rq = createRq();
+const rq = createRequest();
 
 const register = async () => {
   await rq({

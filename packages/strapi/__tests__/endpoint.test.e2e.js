@@ -3,7 +3,7 @@ const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const form = require('../../../test/helpers/generators');
 
-const createRequest = require('../../../test/helpers/request');
+const { createAuthRequest } = require('../../../test/helpers/request');
 
 const cleanDate = entry => {
   delete entry.updatedAt;
@@ -19,12 +19,7 @@ let modelsUtils;
 describe('Create Strapi API End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
-
-    rq = createRequest({
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
 

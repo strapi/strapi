@@ -2,7 +2,7 @@
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const form = require('../../../test/helpers/generators');
-const createRequest = require('../../../test/helpers/request');
+const { createAuthRequest } = require('../../../test/helpers/request');
 
 const cleanDate = entry => {
   delete entry.updatedAt;
@@ -18,12 +18,7 @@ let rq;
 describe('Content Manager End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
-
-    rq = createRequest({
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    rq = createAuthRequest(token);
 
     modelsUtils = createModelsUtils({ rq });
 
@@ -36,15 +31,17 @@ describe('Content Manager End to End', () => {
     ]);
   }, 60000);
 
-  afterAll(async () => {
-    await modelsUtils.deleteModels([
-      'article',
-      'tag',
-      'category',
-      'reference',
-      'product',
-    ]);
-  }, 60000);
+  afterAll(
+    () =>
+      modelsUtils.deleteModels([
+        'article',
+        'tag',
+        'category',
+        'reference',
+        'product',
+      ]),
+    60000
+  );
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {

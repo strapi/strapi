@@ -1,7 +1,7 @@
 // Helpers.
 const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
-const createRequest = require('../../../test/helpers/request');
+const { createAuthRequest } = require('../../../test/helpers/request');
 
 let rq;
 let graphqlQuery;
@@ -32,17 +32,10 @@ const postModel = {
   collectionName: '',
 };
 
-
-
 describe('Test Graphql API End to End', () => {
   beforeAll(async () => {
     const token = await registerAndLogin();
-
-    rq = createRequest({
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    rq = createAuthRequest(token);
 
     graphqlQuery = body => {
       return rq({
@@ -57,9 +50,7 @@ describe('Test Graphql API End to End', () => {
     await modelsUtils.createModels([postModel]);
   }, 60000);
 
-  afterAll(async () => {
-    await modelsUtils.deleteModels(['post']);
-  }, 60000);
+  afterAll(() => modelsUtils.deleteModels(['post']), 60000);
 
   describe('Test CRUD', () => {
     const postsPayload = [
