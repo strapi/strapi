@@ -31,7 +31,6 @@ import {
   PageFooter,
   PluginHeader,
   PopUpWarning,
-  InputCheckbox,
   storeData,
   getQueryParameters,
 } from 'strapi-helper-plugin';
@@ -40,6 +39,7 @@ import pluginId from '../../pluginId';
 // Components from the plugin itself
 import AddFilterCTA from '../../components/AddFilterCTA';
 import FiltersPickWrapper from '../../components/FiltersPickWrapper';
+import InputCheckbox from '../../components/InputCheckbox';
 import Filter from '../../components/Filter';
 import Search from '../../components/Search';
 import Table from '../../components/Table';
