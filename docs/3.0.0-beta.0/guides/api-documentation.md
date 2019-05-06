@@ -10,7 +10,7 @@ You'll be able to visualize all your end-points directly from the SWAGGER UI.
 
 As usual run the following in your terminal:
 
-```
+```bash
 # Go to your strapi project
 $ cd my-strapi-project
 
@@ -32,51 +32,15 @@ This plugin follows the OpenApi Specifications ([0AS.3.0.2](https://swagger.io/s
 ### Plugin's architecture
 
 ```
-./plugins
+./extensions
 └─── documentation
-|   └─── admin // The plugin's UI in the administration panel
-|   |
-|   └─── config // Contains the configurations of the plugin
-|   |   └─── functions
-|   |   |   └─── bootstrap.js // Logic to create the documentation file (if needed) when the server starts
-|   |   |
-|   |   └─── policies
-|   |   |   └─── index.js // The plugin's policies
-|   |   |
-|   |   └─── routes.json // The plugin's available end-points
-|   |   └─── settings.json // The OpenAPI Document basic settings
-|   |
-|   └─── controllers
-|   |
-|   └─── documentation // Folder containing your OpenAPI Documents
-|   |    └─── 1.0.0 // OpenAPI Document's version
-|   |    | └─── full_documentation.json // OpenAPI Document used by SWAGGER UI
-|   |    |
-|   |    └─── 2.0.0
-|   |      └─── full_documentation.json
-|   |
-|   └─── middlewares
-|   |   └─── documentation
-|   |        └─── default.json
-|   |        └─── index.js
-|   |
-|   └─── public
-|   |    └─── index.html // SWAGGER UI
-|   |    └─── login.html // Login page (customisable)
-|   |
-|   └─── services
-|   |    └─── utils
-|   |    |    └─── components.json // Default components automatically added to the OpenAPI Document
-|   |    |
-|   |    |    └─── forms.json // Form that is sent to the plugin's UI
-|   |    |    └─── parametersOptions.json // Default parameters for GET requests
-|   |    |    └─── unknownComponent.json // Component used when the algorithm can't infer the response schema
-|   |    |
-|   |    └─── Documentation.js // Plugin's service, most of the logic happens here
-|   |
-|   └─── package.json
-|   |
-|   └─── README.md // Contains some informations
+    |
+    └─── documentation // Folder containing your OpenAPI Documents
+         └─── 1.0.0 // OpenAPI Document's version
+         | └─── full_documentation.json // OpenAPI Document used by SWAGGER UI
+         |
+         └─── 2.0.0
+           └─── full_documentation.json
 ```
 
 ### Generated files
@@ -85,16 +49,14 @@ When you start your server with this plugin installed it will automatically crea
 
 ```
 /my-strapi-project
-    └─── admin
-    |
-    └─── api
-         └─── Foo
-             └── documentation // Folder added to your model
-                 └── 1.0.0
-                     └── foo.json // File containing all the paths where the responses can be infered
-                     └── unclassified.json // File containing the manually added route of your `routes.json` file
-                     |
-                     └── overrides // Folder to override the generated documentation
+  └─── api
+        └─── Foo
+            └── documentation // Folder added to your model
+                └── 1.0.0
+                    └── foo.json // File containing all the paths where the responses can be infered
+                    └── unclassified.json // File containing the manually added route of your `routes.json` file
+                    |
+                    └── overrides // (Optionnal) Folder to override the generated documentation
 ```
 
 ## Basic Configurations
@@ -112,22 +74,62 @@ From your administration panel you can:
 
 ### Manual Configurations
 
-The OpenAPI object (here the `full_documentation.json`) has the following structure:
+You need to create the `./extensions/documentation/config/settings.json` file manually to customize the swagger ui settings.
+
+Here are the file that needs to be created in order to change the documentation version, the server URL and so on.
 
 ```
 {
-  "openapi": "3.0.0" // do not change this version
-  "info": {}
-  "x-strapi-config": {},
-  "servers" {} // Your servers config (it will be automated),
-  "externalDocs": {},
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "DOCUMENTATION",
+    "description": "",
+    "termsOfService": "YOUR_TERMS_OF_SERVICE_URL",
+    "contact": {
+      "name": "TEAM",
+      "email": "contact-email@something.io",
+      "url": "mywebsite.io"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "x-strapi-config": {
+    "path": "/documentation",
+    "showGeneratedFiles": true
+  },
+  "servers": [
+    {
+      "url": "http://localhost:1337",
+      "description": "Development server"
+    },
+    {
+      "url": "YOUR_STAGING_SERVER",
+      "description": "Staging server"
+    },
+    {
+      "url": "YOUR_PRODUCTION_SERVER",
+      "description": "Production server"
+    }
+  ],
+  "externalDocs": {
+    "description": "Find out more",
+    "url": "https://strapi.io/documentation/3.x.x/"
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
   "paths": {} // All your Api routes,
   "tags": [] // Group of routes
-  "components": {} // Default generated components and custom ones
+  "components": {} // Default generat
 }
 ```
 
-The `openapi`, `info`, `x-strapi-config`, `servers`, `externalDocs` and `security` fields are located in the `./plugins/documentation/config/settings.json` file. Here you can specify all your environment variables, licences, external documentation and so one...
+The `openapi`, `info`, `x-strapi-config`, `servers`, `externalDocs` and `security` fields are located in the `./extensions/documentation/config/settings.json` file. Here you can specify all your environment variables, licences, external documentation and so on...
 You can add all the entries listed in the [specification](https://swagger.io/specification/).
 
 #### Usage of the `settings.json` File
@@ -269,7 +271,7 @@ For example this is the plugin email `routes.json` file:
 In this file we have only one route that we want to reference in our documentation (`/`). Usually, the tag object is used for the SWAGGER UI, it will group this route under the `Email - Email` dropdown in the documentation. Furthermore, the algorithm will try to find the model to generate the best response possible. If the model is unknown it generates a response like the following `{ foo: "string" }` that you can easily override later.
 
 There's another property to guide the algorithm to create the best response possible, the `actionType` key.
-When we can't know by the controller name the type of the returned response (like `find` and `findOne`) you can specify it with this key. Here's an example from the `./plugins/users-permissions/config/routes.json` file.
+When we can't know by the controller name the type of the returned response (like `find` and `findOne`) you can specify it with this key. Here's an example from the `users-permissions` route file.
 
 ```
 {
