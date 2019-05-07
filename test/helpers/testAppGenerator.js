@@ -38,9 +38,12 @@ const generateTestApp = async ({ appName, database }) => {
     }
   );
 
-  await execa.shell(`node scripts/copy-monorepo.js ${appName} --run-once --quiet`, {
-    stdio: 'inherit',
-  });
+  await execa.shell(
+    `node scripts/copy-monorepo.js ${appName} --run-once --quiet`,
+    {
+      stdio: 'inherit',
+    }
+  );
 };
 
 /**

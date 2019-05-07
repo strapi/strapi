@@ -22,18 +22,21 @@ const main = async database => {
   }
 };
 
-main();
-
 yargs
   .command(
     '$0 [databaseName]',
     'Create test app',
     yargs => {
       yargs.positional('databaseName', {
-        default: 'sqlite',
         choices: Object.keys(databases),
       });
     },
-    ({ databaseName }) => main(databases[databaseName])
+    ({ databaseName }) => {
+      if (databaseName) {
+        return main(databases[databaseName]);
+      }
+
+      return main(process.argv.slice(2).join(' '));
+    }
   )
   .help().argv;
