@@ -32,6 +32,7 @@ module.exports = {
       }
 
       // The identifier is required.
+      params.identifier = params.identifier ? params.identifier : params.username;
       if (!params.identifier) {
         return ctx.badRequest(
           null,
