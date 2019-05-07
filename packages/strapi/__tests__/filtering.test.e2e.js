@@ -921,8 +921,18 @@ describe('Filtering API', () => {
       expect(res.body).toEqual([]);
     });
 
-    test.todo('Different columns');
-    test.todo('Different columns with some multiple time');
+    test('Combined filters', async () => {
+      let res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          name_contains: 'Product',
+          rank_lt: 45,
+        },
+      });
+
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
   });
 
   describe('Sorting', () => {
