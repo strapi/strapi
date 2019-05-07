@@ -848,7 +848,79 @@ describe('Filtering API', () => {
   });
 
   describe('Complexe filtering', () => {
-    test.todo('Multiple time the same column');
+    test('Greater than and less than at the same time', async () => {
+      let res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          rank_lte: 42,
+          rank_gte: 42,
+        },
+      });
+
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+
+      res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          rank_lt: 43,
+          rank_gt: 41,
+        },
+      });
+
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+
+      res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          rank_lt: 43,
+          rank_gt: 431,
+        },
+      });
+
+      expect(res.body).toEqual([]);
+    });
+
+    test('Contains and Not contains on same column', async () => {
+      let res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          name_contains: 'Product',
+          name_ncontains: '1',
+        },
+      });
+
+      expect(res.body).toEqual(data.products.slice(1));
+
+      res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          name_contains: 'Product 1',
+          name_ncontains: ['2', '3'],
+        },
+      });
+
+      expect(res.body).toEqual(
+        expect.not.arrayContaining([data.products[1], data.products[2]])
+      );
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+
+      res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          name_contains: '2',
+          name_ncontains: 'Product',
+        },
+      });
+
+      expect(res.body).toEqual([]);
+    });
+
     test.todo('Different columns');
     test.todo('Different columns with some multiple time');
   });
