@@ -79,6 +79,7 @@ module.exports = function(strapi) {
   strapi.controllers = Object.keys(strapi.api || []).reduce((acc, key) => {
     for (let index in strapi.api[key].controllers) {
       let controller = strapi.api[key].controllers[index];
+      controller.identity = controller.identity || _.upperFirst(index);
       acc[index] = controller;
     }
 
