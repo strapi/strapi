@@ -35,7 +35,7 @@ The structure of the configurations has been harmonised and simplified. Files ha
 - `./config/environments/**/response.json` added
 - `./config/environments/**/custom.json` added
 
-Please refer to the [new documentation](https://github.com/strapi/strapi/blob/master/docs/3.0.0-beta.0/en/configurations/configurations.md) to set the correct values in each file.
+Please refer to the [new documentation](https://github.com/strapi/strapi/blob/master/docs/3.0.0-x/en/configurations/configurations.md) to set the correct values in each file.
 
 ::: note
 Don't forget that middlewares has been removed. Please refers to the right section of this document for more details.

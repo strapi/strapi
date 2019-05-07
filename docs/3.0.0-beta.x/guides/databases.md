@@ -3,7 +3,7 @@
 Strapi gives you the option to choose the most appropriate database for your project. It currently supports **PostgreSQL**, **MongoDB**, **SQLite**, **MySQL** and
 **MariaDB**. The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
 
-(Deploying **Strapi** itself is covered in the [Deployment Guide](/3.0.0-beta.0/guides/deployment.html).)
+(Deploying **Strapi** itself is covered in the [Deployment Guide](/3.0.0-beta.x/guides/deployment.html).)
 
 **Table of contents:**
 
@@ -14,7 +14,7 @@ Strapi gives you the option to choose the most appropriate database for your pro
 
 ## SQLite Installation
 
-SQLite is the default ([Quick Start](/3.0.0-beta.0/getting-started/quick-start.html)) and recommended database to quickly create an app locally.
+SQLite is the default ([Quick Start](/3.0.0-beta.x/getting-started/quick-start.html)) and recommended database to quickly create an app locally.
 
 ### Install SQLite locally
 
@@ -24,7 +24,7 @@ Simply use the `strapi new my-project --quickstart` command.
 strapi new my-project --quickstart
 ```
 
-This will create a new project and launch it in the browser. (The [Quick Start Guide](/3.0.0-beta.0/getting-started/quick-start.html) is a complete step-by-step tutorial.)
+This will create a new project and launch it in the browser. (The [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html) is a complete step-by-step tutorial.)
 
 ## MongoDB Installation
 
@@ -32,7 +32,7 @@ This will create a new project and launch it in the browser. (The [Quick Start G
 
 In order to use Strapi with [MongoDB](https://www.mongodb.com/) in production, you must have and use MongoDB on your local development environment. These instructions show how to start using Strapi with a MongoDB database.
 
-- You must have [Strapi installed globally](/3.0.0-beta.0/getting-started/quick-start-tutorial.html#_1-install-strapi-globally).
+- You must have [Strapi installed globally](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_1-install-strapi-globally).
 
 ### 1. Install MongoDB on your development environment
 
@@ -217,7 +217,7 @@ $ strapi start
 
 ```
 
-You have successfully installed Strapi with MongoDB on your local development environment. You are now ready to [create your first user](/3.0.0-beta.0/getting-started/quick-start.html#_3-create-an-admin-user).
+You have successfully installed Strapi with MongoDB on your local development environment. You are now ready to [create your first user](/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user).
 
 ---
 
@@ -225,7 +225,7 @@ You have successfully installed Strapi with MongoDB on your local development en
 
 Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) free 512 MB account in production. (Please see [MongoDB Atlas Documentation](https://docs.atlas.mongodb.com/getting-started/) if you have any questions.)
 
-- You must have already [created your Strapi project using MongoDB](/3.0.0-beta.0/guides/databases.html#install-strapi-locally-with-mongodb).
+- You must have already [created your Strapi project using MongoDB](/3.0.0-beta.x/guides/databases.html#install-strapi-locally-with-mongodb).
 - You must have already created a [free MongoDB Atlas account](https://www.mongodb.com/cloud/atlas).
 
 1. Log in to your account to create a **Project** and a **Cluster**

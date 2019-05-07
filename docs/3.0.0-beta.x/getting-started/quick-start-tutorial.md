@@ -1,6 +1,6 @@
 # Tutorial
 
-This Tutorial is written for developers who prefer a more detailed step-by-step introduction. (A less detailed introduction can be found at [Quick Start Guide](/3.0.0-beta.0/getting-started/quick-start.html).)
+This Tutorial is written for developers who prefer a more detailed step-by-step introduction. (A less detailed introduction can be found at [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html).)
 
 <div class="video-container">
   <iframe width="800" height="450" src="https://www.youtube.com/embed/nux0djdHmY8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -10,7 +10,7 @@ By following this tutorial, we will get Strapi installed globally onto your syst
 
 ::: tip NOTE
 
-You need to have **_Node.js and npm_** installed on your system prior to following these steps. If you do not have Node.js and npm installed or are not sure, please visit our [Installation Requirements](http://localhost:8080/documentation/3.0.0-beta.0/getting-started/install-requirements.html).
+You need to have **_Node.js and npm_** installed on your system prior to following these steps. If you do not have Node.js and npm installed or are not sure, please visit our [Installation Requirements](/3.0.0-beta.x/getting-started/install-requirements.html).
 :::
 
 **Table of contents:**

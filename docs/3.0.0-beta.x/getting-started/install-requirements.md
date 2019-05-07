@@ -120,5 +120,5 @@ npm -v
 ## :::
 
 ::: tip NEXT STEPS
-👏 Congrats, you are all set! Now that Node.js is installed you can proceed to the [Quick start](/3.0.0-beta.0/getting-started/quick-start.html).
+👏 Congrats, you are all set! Now that Node.js is installed you can proceed to the [Quick start](/3.0.0-beta.x/getting-started/quick-start.html).
 :::
