@@ -65,6 +65,22 @@ const productFixtures = [
     rank: 42,
     big_rank: 345678912983,
   },
+  {
+    name: 'Product 2',
+    description: 'Product description 2',
+    price: 28.31,
+    decimal_field: 91.22,
+    rank: 82,
+    big_rank: 926371623421,
+  },
+  {
+    name: 'Product 3',
+    description: 'Product description 3',
+    price: 28.31,
+    decimal_field: 12.22,
+    rank: 91,
+    big_rank: 926372323421,
+  },
 ];
 
 async function createFixtures() {
@@ -173,9 +189,7 @@ describe('Filtering API', () => {
         });
 
         expect(res.body).toEqual(
-          expect.not.arrayContaining([
-            expect.objectContaining(data.products[0]),
-          ])
+          expect.not.arrayContaining([data.products[0]])
         );
       });
     });
@@ -303,9 +317,7 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
     });
 
@@ -320,9 +332,7 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
 
       test('Should return an empty array if the case matches', async () => {
@@ -348,9 +358,7 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
 
       test('Should return the Product with an array of values', async () => {
@@ -362,9 +370,7 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
 
       test('Should return a, empty array if no values are matching', async () => {
@@ -391,9 +397,7 @@ describe('Filtering API', () => {
         });
 
         expect(res.body).toEqual(
-          expect.not.arrayContaining([
-            expect.objectContaining(data.products[0]),
-          ])
+          expect.not.arrayContaining([data.products[0]])
         );
       });
 
@@ -407,9 +411,7 @@ describe('Filtering API', () => {
         });
 
         expect(res.body).toEqual(
-          expect.not.arrayContaining([
-            expect.objectContaining(data.products[0]),
-          ])
+          expect.not.arrayContaining([data.products[0]])
         );
       });
 
@@ -422,9 +424,7 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
     });
 
@@ -439,9 +439,7 @@ describe('Filtering API', () => {
         });
 
         expect(res.body).toEqual(
-          expect.not.arrayContaining([
-            expect.objectContaining(data.products[0]),
-          ])
+          expect.not.arrayContaining([data.products[0]])
         );
 
         const res2 = await rq({
@@ -452,9 +450,7 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res2.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res2.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
 
       test('Should work with integers', async () => {
@@ -466,9 +462,7 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
 
       test('Should work with float', async () => {
@@ -480,9 +474,7 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
 
       test('Should work with decimal', async () => {
@@ -494,9 +486,7 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
 
       test('Should work with bigintegers', async () => {
@@ -508,39 +498,353 @@ describe('Filtering API', () => {
           },
         });
 
-        expect(res.body).toEqual(
-          expect.arrayContaining([expect.objectContaining(data.products[0])])
-        );
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
       });
     });
 
-    test.todo('Filter greater than or equal ');
+    describe('Filter greater than or equal', () => {
+      test('Should work correclty on equal values', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            rank_gte: 42,
+          },
+        });
 
-    test.todo('Filter less than ');
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
 
-    test.todo('Filter less than or equal ');
+        const res2 = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            rank_gte: 43,
+          },
+        });
+
+        expect(res2.body).toEqual(
+          expect.not.arrayContaining([data.products[0]])
+        );
+      });
+
+      test('Should work with integers', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            rank_gte: 40,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with float', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            price_gte: 10.99,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with decimal', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            decimal_field_gte: 42.43,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with bigintegers', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            big_rank_gte: 345678912983,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+    });
+
+    describe('Filter less than', () => {
+      test('Should match values only less than', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            rank_lt: 42,
+          },
+        });
+
+        expect(res.body).toEqual(
+          expect.not.arrayContaining([data.products[0]])
+        );
+
+        const res2 = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            rank_lt: 43,
+          },
+        });
+
+        expect(res2.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with integers', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            rank_lt: 45,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with float', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            price_lt: 21.3,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with decimal', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            decimal_field_lt: 46.23,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with bigintegers', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            big_rank_lt: 3456789129812,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+    });
+
+    describe('Filter less than or equal', () => {
+      test('Should work correclty on equal values', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            rank_lte: 52,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+
+        const res2 = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            rank_lte: 21,
+          },
+        });
+
+        expect(res2.body).toEqual(
+          expect.not.arrayContaining([data.products[0]])
+        );
+      });
+
+      test('Should work with integers', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            rank_lte: 42,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with float', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            price_lte: 10.99,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with decimal', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            decimal_field_lte: 42.43,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+
+      test('Should work with bigintegers', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            big_rank_lte: 345678912983,
+          },
+        });
+
+        expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+      });
+    });
   });
 
   describe('Or filtering', () => {
-    test.todo('Filter equals');
+    test('Filter equals', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          rank: [42, 43],
+        },
+      });
 
-    test.todo('Filter not equals');
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
 
-    test.todo('Filter contains insensitive');
+    test('Filter not equals', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          rank_ne: [41, 43],
+        },
+      });
 
-    test.todo('Filter not contains insensitive');
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
 
-    test.todo('Filter contains sensitive');
+    test('Filter contains insensitive', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          name_contains: ['Product', '1'],
+        },
+      });
 
-    test.todo('Filter not contains sensitive');
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
 
-    test.todo('Filter greater than');
+    test('Filter not contains insensitive', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          name_ncontains: ['Product', 'Non existent'],
+        },
+      });
 
-    test.todo('Filter greater than or equal');
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
 
-    test.todo('Filter less than');
+    test('Filter contains sensitive', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          name_containss: ['Product', 'Non existent'],
+        },
+      });
 
-    test.todo('Filter less than or equal');
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
+
+    test('Filter not contains sensitive', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          name_ncontainss: ['product', 'Non existent'],
+        },
+      });
+
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
+
+    test('Filter greater than', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          rank_gt: [12, 56],
+        },
+      });
+
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
+
+    test('Filter greater than or equal', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          rank_gte: [42, 56],
+        },
+      });
+
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
+
+    test('Filter less than', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          rank_lt: [56, 12],
+        },
+      });
+
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
+
+    test('Filter less than or equal', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          rank_lte: [12, 42],
+        },
+      });
+
+      expect(res.body).toEqual(expect.arrayContaining([data.products[0]]));
+    });
   });
 
   describe('Complexe filtering', () => {
@@ -550,12 +854,112 @@ describe('Filtering API', () => {
   });
 
   describe('Sorting', () => {
-    test.todo('Simple sorting');
-    test.todo('Multi column sorting');
+    test('Default sorting is asc', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          _sort: 'rank',
+        },
+      });
+
+      expect(res.body).toEqual(
+        data.products.slice(0).sort((a, b) => a.rank - b.rank)
+      );
+    });
+
+    test('Simple sorting', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          _sort: 'rank:asc',
+        },
+      });
+
+      expect(res.body).toEqual(
+        data.products.slice(0).sort((a, b) => a.rank - b.rank)
+      );
+
+      const res2 = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          _sort: 'rank:desc',
+        },
+      });
+
+      expect(res2.body).toEqual(
+        data.products.slice(0).sort((a, b) => b.rank - a.rank)
+      );
+    });
+
+    test('Multi column sorting', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          _sort: 'price:asc,rank:desc',
+        },
+      });
+
+      expect(res.body).toEqual([
+        data.products[0],
+        data.products[2],
+        data.products[1],
+      ]);
+    });
   });
 
   describe('Limit and offset', () => {
-    test.todo('Limit');
-    test.todo('Offset');
+    test('Limit', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          _limit: 1,
+        },
+      });
+
+      expect(res.body).toEqual([data.products[0]]);
+    });
+
+    test('Limit with sorting', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          _limit: 1,
+          _sort: 'rank:desc',
+        },
+      });
+
+      expect(res.body).toEqual([data.products[data.products.length - 1]]);
+    });
+
+    test('Offset', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          _start: 1,
+        },
+      });
+
+      expect(res.body).toEqual(data.products.slice(1));
+    });
+
+    test('Offset with limit', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/products',
+        qs: {
+          _limit: 1,
+          _start: 1,
+        },
+      });
+
+      expect(res.body).toEqual(data.products.slice(1, 2));
+    });
   });
 });
