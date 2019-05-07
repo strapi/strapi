@@ -115,10 +115,7 @@ It's very common to deploy the front-end and the back-end on different servers. 
     "path": "/dashboard",
     "build": {
       "host": "/",  // Note: The administration will be accessible from the root of the domain (ex: http//yourfrontend.com/)
-      "backend": "http://yourbackend.com",
-      "plugins": {
-        "source": "backend" // What does it means? The script tags in the index.html will use the backend value to load the plugins (ex: http://yourbackend.com/dashboard/content-manager/main.js).
-      }
+      "backend": "http://yourbackend.com"
     }
   }
 }
@@ -145,11 +142,7 @@ In this case, we suppose that you decided to put your administration panel on a 
   "admin": {
     "build": {
       "host": "http://yourfrontend.com/dashboard", // Note: The custom path has moved directly in the host URL.
-      "backend": "http://yourbackend.com",
-      "plugins": {
-        "source":  "host", // What does it means? The script tags in the index.html will use the host value to load the plugins (ex: http://yourfrontend.com/dashboard/plugins/content-manager/main.js).
-        "folder": "/plugins"
-      }
+      "backend": "http://yourbackend.com"
     }
   }
 }
