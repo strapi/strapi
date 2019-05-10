@@ -1,41 +1,41 @@
 ---
 name: 🐛 Bug Report
-about: Create a report to help us improve 🤔.
+about: Create an issue report.
 ---
 
-<!-- ⚠️ If you do not respect this template your issue will be closed. -->
+<!--
+Hello 👋 Thank you for submitting an issue.
 
-<!-- =============================================================================== -->
-<!-- ⚠️ If you are not using the current Strapi release, you will be asked to update. -->
-<!-- Please see the wiki for guides on upgrading to the latest release. -->
-<!-- =============================================================================== -->
+Before you start, please make sure your issue is understandable and reproducible.
+To me it readable please use a well markdown syntax.
 
-<!-- ⚠️ Make sure to browse the opened and closed issues before submitting your issue. -->
+https://guides.github.com/features/mastering-markdown/
+-->
 
-<!-- ⚠️ Before writing your issue make sure you are using:-->
-<!-- Node 10.x.x -->
-<!-- npm 6.x.x -->
-<!-- The latest version of Strapi. -->
+**Describe the bug**
+A clear and concise description of what the bug is.
 
-**Informations**
-- **Node.js version**: <!-- Please ensure you are using the Node LTS version (v10) -->
-- **NPM version**: 
-- **Strapi version**: <!-- Please make sure you are on the latest version -->
-- **Database**: 
-- **Operating system**: 
-- **(Optional) Link to your Project**: <!-- To speedup support, if you have your project on github/gitlab you can provide a link -->
+**Steps to reproduce the behavior**
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
+**Expected behavior**
+A clear and concise description of what you expected to happen.
 
-**What is the current behavior?**
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
 
+**Code snippets**
+If applicable, add code samples to help explain your problem.
 
+**System**
+- Node.js version: <!-- Please ensure you are using the Node LTS version (v10) -->
+- NPM version:
+- Strapi version: <!-- Please make sure you are on the latest version -->
+- Database:
+- Operating system:
 
-**Steps to reproduce the problem**
-
-
-
-**What is the expected behavior?**
-
-
-
-**Suggested solutions**
+**Additional context**
+Add any other context about the problem here.
