@@ -17,6 +17,7 @@ const fs = require('fs-extra');
 const { cyan } = require('chalk');
 const chokidar = require('chokidar');
 const execa = require('execa');
+const loadConfigFile = require('../load/load-config-files');
 
 // Logger.
 const { cli, logger } = require('strapi-utils');
@@ -28,7 +29,7 @@ const { cli, logger } = require('strapi-utils');
  * (fire up the application in our working directory).
  */
 
-module.exports = async function({ build}) {
+module.exports = async function({ build }) {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -36,35 +37,34 @@ module.exports = async function({ build}) {
     );
   }
 
-  const appPath = process.cwd();
+  const dir = process.cwd();
+  const env = process.env.NODE_ENV || 'development';
 
-  if (build && !fs.existsSync(path.join(appPath, 'build'))) {
+  const envConfigDir = path.join(dir, 'config', 'environments', env);
+  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
+
+  if (build && !fs.existsSync(path.join(dir, 'build'))) {
     console.log(`> No ${cyan('build')} dir found. Starting build`);
-    execa.shellSync('npm run -s build', {
-      stdio: 'inherit',
-    });
+    try {
+      execa.shellSync('npm run -s build', {
+        stdio: 'inherit',
+      });
+    } catch (err) {
+      process.exit(1);
+    }
   }
 
   try {
-    const strapiInstance = strapi({ appPath });
+    const strapiInstance = strapi({ appPath: dir });
 
     // Set NODE_ENV
     if (_.isEmpty(process.env.NODE_ENV)) {
       process.env.NODE_ENV = 'development';
     }
 
-    // Require server configurations
-    const server = require(path.resolve(
-      appPath,
-      'config',
-      'environments',
-      'development',
-      'server.json'
-    ));
-
     if (
       process.env.NODE_ENV === 'development' &&
-      _.get(server, 'autoReload.enabled') === true
+      _.get(serverConfig, 'autoReload.enabled') === true
     ) {
       if (cluster.isMaster) {
         cluster.on('message', (worker, message) => {
@@ -90,7 +90,7 @@ module.exports = async function({ build}) {
       }
 
       if (cluster.isWorker) {
-        watchFileChanges({ appPath, strapiInstance });
+        watchFileChanges({ appPath: dir, strapiInstance });
 
         process.on('message', message => {
           switch (message) {
