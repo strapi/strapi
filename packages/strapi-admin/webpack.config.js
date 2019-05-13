@@ -7,6 +7,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const DuplicatePckgChecker = require('duplicate-package-checker-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const WebpackBar = require('webpackbar');
 const isWsl = require('is-wsl');
 const alias = require('./webpack.alias.js');
 
@@ -236,6 +237,7 @@ module.exports = ({
       mainFields: ['browser', 'jsnext:main', 'main'],
     },
     plugins: [
+      new WebpackBar(),
       new HtmlWebpackPlugin({
         inject: true,
         template: path.resolve(__dirname, 'index.html'),

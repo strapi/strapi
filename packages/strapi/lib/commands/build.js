@@ -1,15 +1,15 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs-extra');
 const _ = require('lodash');
-const { green } = require('chalk');
+const { green, cyan, yellow } = require('chalk');
 const strapiAdmin = require('strapi-admin');
 const { cli } = require('strapi-utils');
-const strapi = require('../index');
-const ora = require('ora');
+const loadConfigFile = require('../load/load-config-files');
 
 // build script shoul only run in production mode
-module.exports = () => {
+module.exports = async () => {
   // Check that we're in a valid Strapi project.
   if (!cli.isStrapiApp()) {
     return console.log(
@@ -17,42 +17,44 @@ module.exports = () => {
     );
   }
 
-  const loader = ora();
+  const dir = process.cwd();
+  const env = process.env.NODE_ENV || 'development';
 
-  const app = strapi();
+  const envConfigDir = path.join(dir, 'config', 'environments', env);
 
-  // prepare the app => load the configurations
-  return app
-    .load()
-    .then(() => {
-      loader.start(
-        `Building your admin UI with ${green(
-          app.config.environment
-        )} configuration ...`
-      );
+  if (!fs.existsSync(envConfigDir)) {
+    console.log(
+      `Missing envrionnment config for env: ${green(
+        env
+      )}.\nMake sure the directory ${yellow(
+        `./config/environments/${env}`
+      )} exists`
+    );
+    process.exit(1);
+  }
 
-      const adminPath = _.get(
-        app.config.currentEnvironment.server,
-        'admin.path',
-        'admin'
-      );
+  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
 
-      return strapiAdmin.build({
-        dir: process.cwd(),
-        // front end build env is always production for now
-        env: 'production',
-        options: {
-          backend: app.config.url,
-          publicPath: path.join('/', adminPath, '/'),
-        },
-      });
+  const adminPath = _.get(serverConfig, 'admin.path', '/admin');
+  // const adminHost = _.get(serverConfig, 'admin.build.host', '/admin');
+  const adminBackend = _.get(serverConfig, 'admin.build.backend', '/');
+
+  console.log(`Building your admin UI with ${green(env)} configuration ...`);
+
+  return strapiAdmin
+    .build({
+      dir,
+      // front end build env is always production for now
+      env: 'production',
+      options: {
+        backend: adminBackend,
+        publicPath: path.join('/', adminPath, '/'),
+      },
     })
     .then(() => {
-      loader.succeed('Compilation successfull');
       process.exit();
     })
     .catch(err => {
-      loader.fail('Compilation failed');
       console.error(err);
       process.exit(1);
     });
