@@ -11,12 +11,7 @@ const _ = require('lodash');
 module.exports = {
   getCurrentEnvironment: async ctx => {
     try {
-      const autoReload = _.get(
-        strapi.config.currentEnvironment,
-        'server.autoReload.enabled',
-        false
-      );
-
+      const autoReload = strapi.config.autoReload;
       return ctx.send({ autoReload, currentEnvironment: strapi.app.env });
     } catch (err) {
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);

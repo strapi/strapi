@@ -95,7 +95,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "Abra o seguinte arquivo e ative o recurso.",
   "components.AutoReloadBlocker.header": "Recurso de recarga é necessário para esta extensão.",
   "components.ErrorBoundary.title": "Algo deu errado...",
   "components.Input.error.attribute.key.taken": "Este valor já existe",

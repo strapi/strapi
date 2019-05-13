@@ -3,7 +3,6 @@
 // Dependencies.
 const http = require('http');
 const path = require('path');
-const cluster = require('cluster');
 const { EventEmitter } = require('events');
 const Koa = require('koa');
 const _ = require('lodash');
@@ -33,7 +32,7 @@ const defaultQueries = require('./core-api/queries');
  */
 
 class Strapi extends EventEmitter {
-  constructor({ appPath } = {}) {
+  constructor({ appPath, autoReload = false } = {}) {
     super();
 
     this.setMaxListeners(100);
@@ -70,6 +69,7 @@ class Strapi extends EventEmitter {
     this.config = {
       launchedAt: Date.now(),
       appPath: this.dir,
+      autoReload,
       host: process.env.HOST || process.env.HOSTNAME || 'localhost',
       port: process.env.PORT || 1337,
       environment: _.toLower(process.env.NODE_ENV) || 'development',
@@ -204,15 +204,7 @@ class Strapi extends EventEmitter {
     // Destroy server and available connections.
     this.server.destroy();
 
-    if (
-      cluster.isWorker &&
-      this.config.environment === 'development' &&
-      _.get(
-        this.config,
-        'currentEnvironment.server.autoReload.enabled',
-        true
-      ) === true
-    ) {
+    if (this.config.autoReload) {
       process.send('stop');
     }
 
@@ -304,15 +296,7 @@ class Strapi extends EventEmitter {
         return;
       }
 
-      if (
-        cluster.isWorker &&
-        this.config.environment === 'development' &&
-        _.get(
-          this.config,
-          'currentEnvironment.server.autoReload.enabled',
-          true
-        ) === true
-      ) {
+      if (this.config.autoReload) {
         this.server.close();
         process.send('reload');
       }

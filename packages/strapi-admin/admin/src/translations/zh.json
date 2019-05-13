@@ -95,7 +95,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "開啟以下的檔案來啟動此功能",
   "components.AutoReloadBlocker.header": "這個擴充功能需要自動重新整理功能才能載入",
   "components.ErrorBoundary.title": "有錯誤發生...",
   "components.Input.error.attribute.key.taken": "這個數值已經存在了",

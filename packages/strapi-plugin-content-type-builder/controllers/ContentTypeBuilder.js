@@ -226,13 +226,7 @@ module.exports = {
 
     strapi.reload();
   },
-
-  autoReload: async ctx => {
-    ctx.send({
-      autoReload: _.get(strapi.config.currentEnvironment, 'server.autoReload', { enabled: false })
-    });
-  },
-
+  
   checkTableExists: async ctx => {
     // Get connection
     const { connection } = ctx.params;
