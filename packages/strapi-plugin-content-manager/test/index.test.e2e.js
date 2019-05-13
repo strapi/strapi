@@ -1,8 +1,8 @@
 // Helpers.
-const { auth, login } = require('../../../test/helpers/auth');
+const { registerAndLogin } = require('../../../test/helpers/auth');
+const createModelsUtils = require('../../../test/helpers/models');
 const form = require('../../../test/helpers/generators');
-const waitRestart = require('../../../test/helpers/waitRestart');
-const createRequest = require('../../../test/helpers/request');
+const { createAuthRequest } = require('../../../test/helpers/request');
 
 const cleanDate = entry => {
   delete entry.updatedAt;
@@ -12,83 +12,36 @@ const cleanDate = entry => {
 };
 
 let data;
-
+let modelsUtils;
 let rq;
 
 describe('Content Manager End to End', () => {
   beforeAll(async () => {
-    await createRequest()({
-      url: '/admin/auth/local/register',
-      method: 'POST',
-      body: auth,
-    }).catch(err => {
-      if (err.error.message.includes("You can't register a new admin")) return;
-      throw err;
-    });
+    const token = await registerAndLogin();
+    rq = createAuthRequest(token);
 
-    const body = await login();
+    modelsUtils = createModelsUtils({ rq });
 
-    rq = createRequest({
-      headers: {
-        Authorization: `Bearer ${body.jwt}`,
-      },
-    });
-  });
+    await modelsUtils.createModels([
+      form.article,
+      form.tag,
+      form.category,
+      form.reference,
+      form.product,
+    ]);
+  }, 60000);
 
-  describe('Generate test APIs', () => {
-    beforeEach(() => waitRestart(), 30000);
-    afterAll(() => waitRestart(), 30000);
-
-    test('Create new article API', async () => {
-      await rq({
-        url: '/content-type-builder/models',
-        method: 'POST',
-        body: form.article,
-      }).then(res => {
-        expect(res.statusCode).toBe(200);
-      });
-    });
-
-    test('Create new tag API', async () => {
-      await rq({
-        url: '/content-type-builder/models',
-        method: 'POST',
-        body: form.tag,
-      }).then(res => {
-        expect(res.statusCode).toBe(200);
-      });
-    });
-
-    test('Create new category API', async () => {
-      await rq({
-        url: '/content-type-builder/models',
-        method: 'POST',
-        body: form.category,
-      }).then(res => {
-        expect(res.statusCode).toBe(200);
-      });
-    });
-
-    test('Create new reference API', async () => {
-      await rq({
-        url: '/content-type-builder/models',
-        method: 'POST',
-        body: form.reference,
-      }).then(res => {
-        expect(res.statusCode).toBe(200);
-      });
-    });
-
-    test('Create new product API', async () => {
-      await rq({
-        url: '/content-type-builder/models',
-        method: 'POST',
-        body: form.product,
-      }).then(res => {
-        expect(res.statusCode).toBe(200);
-      });
-    });
-  });
+  afterAll(
+    () =>
+      modelsUtils.deleteModels([
+        'article',
+        'tag',
+        'category',
+        'reference',
+        'product',
+      ]),
+    60000
+  );
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {
     beforeAll(async () => {
@@ -770,46 +723,6 @@ describe('Content Manager End to End', () => {
       if (!referenceToGet.tag || Object.keys(referenceToGet.tag).length == 0)
         return;
       expect(referenceToGet.tag).toBe(null);
-    });
-  });
-
-  describe('Delete test APIs', () => {
-    beforeEach(() => waitRestart(), 30000);
-    afterAll(() => waitRestart(), 30000);
-
-    test('Delete article API', async () => {
-      await rq({
-        url: '/content-type-builder/models/article',
-        method: 'DELETE',
-      });
-    });
-
-    test('Delete tag API', async () => {
-      await rq({
-        url: '/content-type-builder/models/tag',
-        method: 'DELETE',
-      });
-    });
-
-    test('Delete category API', async () => {
-      await rq({
-        url: '/content-type-builder/models/category',
-        method: 'DELETE',
-      });
-    });
-
-    test('Delete reference API', async () => {
-      await rq({
-        url: '/content-type-builder/models/reference',
-        method: 'DELETE',
-      });
-    });
-
-    test('Delete product API', async () => {
-      await rq({
-        url: '/content-type-builder/models/product',
-        method: 'DELETE',
-      });
     });
   });
 });

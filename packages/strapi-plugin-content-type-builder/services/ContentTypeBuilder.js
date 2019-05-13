@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 const _ = require('lodash');
 const generator = require('strapi-generate');
 const { fromJS, List, Map } = require('immutable');
@@ -268,14 +268,14 @@ module.exports = {
     const filepath = this.getModelPath(name, { api, plugin });
     const content = JSON.stringify(data, null, 2);
 
-    strapi.fs.ensureFileSync(filepath);
-    return strapi.fs.writeFileSync(filepath, content);
+    fs.ensureFileSync(filepath);
+    return fs.writeFileSync(filepath, content);
   },
 
   readModel(name, { api, plugin } = {}) {
     const filepath = this.getModelPath(name, { api, plugin });
 
-    if (plugin && !strapi.fs.pathExistsSync(filepath)) {
+    if (plugin && !fs.pathExistsSync(filepath)) {
       return _.cloneDeep(
         _.pick(strapi.plugins[plugin].models[name], [
           'collectionName',

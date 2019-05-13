@@ -1,11 +1,12 @@
 // Helpers.
-const { auth, login } = require('../../../test/helpers/auth');
-const waitRestart = require('../../../test/helpers/waitRestart');
-const createRequest = require('../../../test/helpers/request');
+const { registerAndLogin } = require('../../../test/helpers/auth');
+const { createAuthRequest } = require('../../../test/helpers/request');
+const createModelsUtils = require('../../../test/helpers/models');
 const _ = require('lodash');
 
 let rq;
 let graphqlQuery;
+let modelsUtils;
 
 // utils
 const selectFields = doc => _.pick(doc, ['id', 'name']);
@@ -69,22 +70,8 @@ const labelModel = {
 
 describe('Test Graphql Relations API End to End', () => {
   beforeAll(async () => {
-    await createRequest()({
-      url: '/admin/auth/local/register',
-      method: 'POST',
-      body: auth,
-    }).catch(err => {
-      if (err.error.message.includes("You can't register a new admin")) return;
-      throw err;
-    });
-
-    const body = await login();
-
-    rq = createRequest({
-      headers: {
-        Authorization: `Bearer ${body.jwt}`,
-      },
-    });
+    const token = await registerAndLogin();
+    rq = createAuthRequest(token);
 
     graphqlQuery = body => {
       return rq({
@@ -93,32 +80,13 @@ describe('Test Graphql Relations API End to End', () => {
         body,
       });
     };
-  });
 
-  describe('Generate test APIs', () => {
-    beforeEach(() => waitRestart(), 30000);
-    afterAll(() => waitRestart(), 30000);
+    modelsUtils = createModelsUtils({ rq });
 
-    test('Create new document API', async () => {
-      const res = await rq({
-        url: '/content-type-builder/models',
-        method: 'POST',
-        body: documentModel,
-      });
+    await modelsUtils.createModels([documentModel, labelModel]);
+  }, 60000);
 
-      expect(res.statusCode).toBe(200);
-    });
-
-    test('Create new label API', async () => {
-      const res = await rq({
-        url: '/content-type-builder/models',
-        method: 'POST',
-        body: labelModel,
-      });
-
-      expect(res.statusCode).toBe(200);
-    });
-  });
+  afterAll(() => modelsUtils.deleteModels(['document', 'label']), 60000);
 
   describe('Test relations features', () => {
     let data = {
@@ -224,7 +192,7 @@ describe('Test Graphql Relations API End to End', () => {
             },
           },
         });
-      },
+      }
     );
 
     test('List documents with labels', async () => {
@@ -252,7 +220,7 @@ describe('Test Graphql Relations API End to End', () => {
             data.documents.map(document => ({
               ...selectFields(document),
               labels: expect.arrayContaining(data.labels.map(selectFields)),
-            })),
+            }))
           ),
         },
       });
@@ -286,9 +254,9 @@ describe('Test Graphql Relations API End to End', () => {
             data.labels.map(label => ({
               ...selectFields(label),
               documents: expect.arrayContaining(
-                data.documents.map(selectFields),
+                data.documents.map(selectFields)
               ),
-            })),
+            }))
           ),
         },
       });
@@ -411,7 +379,7 @@ describe('Test Graphql Relations API End to End', () => {
             data.documents.map(document => ({
               ...selectFields(document),
               labels: [],
-            })),
+            }))
           ),
         },
       });
@@ -440,29 +408,6 @@ describe('Test Graphql Relations API End to End', () => {
 
         expect(res.statusCode).toBe(200);
       }
-    });
-  });
-
-  describe('Delete test APIs', () => {
-    beforeEach(() => waitRestart(), 30000);
-    afterAll(() => waitRestart(), 30000);
-
-    test('Delete label API', async () => {
-      await rq({
-        url: '/content-type-builder/models/document',
-        method: 'DELETE',
-      }).then(res => {
-        expect(res.statusCode).toBe(200);
-      });
-    });
-
-    test('Delete label API', async () => {
-      await rq({
-        url: '/content-type-builder/models/label',
-        method: 'DELETE',
-      }).then(res => {
-        expect(res.statusCode).toBe(200);
-      });
     });
   });
 });

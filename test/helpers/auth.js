@@ -1,4 +1,4 @@
-const createRq = require('./request');
+const { createRequest } = require('./request');
 
 const auth = {
   username: 'admin',
@@ -6,20 +6,39 @@ const auth = {
   password: 'pcw123',
 };
 
-const rq = createRq();
+const rq = createRequest();
+
+const register = async () => {
+  await rq({
+    url: '/admin/auth/local/register',
+    method: 'POST',
+    body: auth,
+  }).catch(err => {
+    if (err.error.message.includes("You can't register a new admin")) return;
+    throw err;
+  });
+};
+
+const login = async () => {
+  const { body } = await rq({
+    url: '/admin/auth/local',
+    method: 'POST',
+    body: {
+      identifier: auth.email,
+      password: auth.password,
+    },
+  });
+
+  return body;
+};
 
 module.exports = {
-  auth,
-  login: async () => {
-    const { body } = await rq({
-      url: '/admin/auth/local',
-      method: 'POST',
-      body: {
-        identifier: auth.email,
-        password: auth.password,
-      },
-    });
+  async registerAndLogin() {
+    // register
+    await register();
 
-    return body;
+    // login
+    const { jwt } = await login();
+    return jwt;
   },
 };

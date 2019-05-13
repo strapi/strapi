@@ -10,7 +10,7 @@
 const path = require('path');
 
 // Public dependencies.
-const fs = require('fs');
+const fs = require('fs-extra');
 const cheerio = require('cheerio');
 const _ = require('lodash');
 
@@ -79,8 +79,8 @@ module.exports = {
           // Write the layout with the new Swagger configuration.
           // fs.writeFileSync(layoutPath, $.html());
           const layoutPath = path.resolve(strapi.config.appPath, 'extensions', 'documentation', 'public', 'index.html');
-          await strapi.fs.ensureFile(layoutPath);
-          await strapi.fs.writeFile(layoutPath, $.html());
+          await fs.ensureFile(layoutPath);
+          await fs.writeFile(layoutPath, $.html());
 
           // Serve the file.
           ctx.url = path.basename(`${ctx.url}/index.html`);
@@ -114,8 +114,8 @@ module.exports = {
 
       try {
         const layoutPath = path.resolve(strapi.config.appPath, 'extensions', 'documentation', 'public', 'login.html');
-        await strapi.fs.ensureFile(layoutPath);
-        await strapi.fs.writeFile(layoutPath, $.html());
+        await fs.ensureFile(layoutPath);
+        await fs.writeFile(layoutPath, $.html());
 
         ctx.url = path.basename(`${ctx.url}/login.html`);
 
