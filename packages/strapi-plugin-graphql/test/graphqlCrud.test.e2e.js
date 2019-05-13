@@ -255,10 +255,18 @@ describe('Test Graphql API End to End', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual({
-        data: {
-          posts: expected,
-        },
+
+      // same length
+      expect(res.body.data.posts.length).toBe(expected.length);
+
+      // all the posts returned are in the expected array
+      res.body.data.posts.forEach(post => {
+        expect(expected).toEqual(expect.arrayContaining([post]));
+      });
+
+      // all expected values are in the result
+      expected.forEach(expectedPost => {
+        expect(res.body.data.posts).toEqual(expect.arrayContaining([expectedPost]));
       });
     });
 
