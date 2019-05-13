@@ -38,10 +38,6 @@ module.exports = async function({ build }) {
   }
 
   const dir = process.cwd();
-  const env = process.env.NODE_ENV || 'development';
-
-  const envConfigDir = path.join(dir, 'config', 'environments', env);
-  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
 
   if (build && !fs.existsSync(path.join(dir, 'build'))) {
     console.log(`> No ${cyan('build')} dir found. Starting build`);
@@ -55,62 +51,48 @@ module.exports = async function({ build }) {
   }
 
   try {
-    const strapiInstance = strapi({ appPath: dir });
+    const strapiInstance = strapi({ appPath: dir, autoReload: true });
 
-    // Set NODE_ENV
-    if (_.isEmpty(process.env.NODE_ENV)) {
-      process.env.NODE_ENV = 'development';
+    if (cluster.isMaster) {
+      cluster.on('message', (worker, message) => {
+        switch (message) {
+          case 'reload':
+            strapiInstance.log.info('The server is restarting\n');
+            worker.send('isKilled');
+            break;
+          case 'kill':
+            worker.kill();
+            cluster.fork();
+            break;
+          case 'stop':
+            worker.kill();
+            process.exit(1);
+            break;
+          default:
+            return;
+        }
+      });
+
+      cluster.fork();
     }
 
-    if (
-      process.env.NODE_ENV === 'development' &&
-      _.get(serverConfig, 'autoReload.enabled') === true
-    ) {
-      if (cluster.isMaster) {
-        cluster.on('message', (worker, message) => {
-          switch (message) {
-            case 'reload':
-              strapiInstance.log.info('The server is restarting\n');
-              worker.send('isKilled');
-              break;
-            case 'kill':
-              worker.kill();
-              cluster.fork();
-              break;
-            case 'stop':
-              worker.kill();
-              process.exit(1);
-              break;
-            default:
-              return;
-          }
-        });
+    if (cluster.isWorker) {
+      watchFileChanges({ appPath: dir, strapiInstance });
 
-        cluster.fork();
-      }
+      process.on('message', message => {
+        switch (message) {
+          case 'isKilled':
+            strapiInstance.server.destroy(() => {
+              process.send('kill');
+            });
+            break;
+          default:
+          // Do nothing.
+        }
+      });
 
-      if (cluster.isWorker) {
-        watchFileChanges({ appPath: dir, strapiInstance });
-
-        process.on('message', message => {
-          switch (message) {
-            case 'isKilled':
-              strapiInstance.server.destroy(() => {
-                process.send('kill');
-              });
-              break;
-            default:
-            // Do nothing.
-          }
-        });
-
-        return strapiInstance.start();
-      } else {
-        return;
-      }
+      return strapiInstance.start();
     }
-
-    strapiInstance.start();
   } catch (e) {
     logger.error(e);
     process.exit(1);

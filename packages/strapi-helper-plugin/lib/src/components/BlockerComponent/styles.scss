@@ -32,15 +32,20 @@
 
 .ide {
   padding-top: 2.3rem;
-  > p {
-    color: #006EE7;
-    font-size: 14px;
-  }
+
   > div {
     width: 455px;
-    background: #FFFFFF;
     color: #787E8F;
     font-size: 12px;
+
+    > pre {
+      margin: 10px;
+      padding: 10px;
+      background: #333;
+      color: white;
+      border-radius: 0.3rem;
+    }
+
     > ul {
       padding-left: 20px;
       list-style: none;

@@ -96,7 +96,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": "",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "Öffne die folgende Datei und aktiviere das Feature.",
   "components.AutoReloadBlocker.header": "Dieses Plugin benötigt das Neuladen-Feature.",
   "components.ErrorBoundary.title": "Etwas ist falsch gelaufen...",
   "components.Input.error.attribute.key.taken": "Dieser Wert existiert bereits",

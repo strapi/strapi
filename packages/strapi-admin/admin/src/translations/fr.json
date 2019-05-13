@@ -103,7 +103,7 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "Ouvrez le fichier suivant pour activer cette fonctionnalité.",
+  "components.AutoReloadBlocker.description": "Démarrez Strapi avec l'une des commandes suivantes:",
   "components.AutoReloadBlocker.header": "L'autoReload doit être activé pour ce plugin.",
   "components.ErrorBoundary.title": "Une erreur est survenue...",
   "components.Input.error.attribute.key.taken": "Cette valeur existe déjà",

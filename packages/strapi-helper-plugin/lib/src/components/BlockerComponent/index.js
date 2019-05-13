@@ -52,33 +52,15 @@ function BlockerComponent({
 
 const renderIde = () => (
   <div className={styles.ide}>
-    <p>./config/environments/development/server.json</p>
     <div>
       <pre style={{ whiteSpace: 'pre-wrap' }}>
         <code>
-          &#123;
-          <br />
-          &nbsp;"host": "localhost",
-          <br />
-          &nbsp;"port": 1337,
-          <br />
-          <span style={{ color: '#006EE7' }}>
-            &nbsp;"autoReload": &#123; enabled: true &#125;
-          </span>
-          <br />
-          &nbsp;"proxi": &#123;
-          <br />
-          &nbsp;&nbsp;"enabled": true
-          <br />
-          &nbsp;&#125;,
-          <br />
-          &nbsp;"cron": &#123;
-          <br />
-          &nbsp;&nbsp;"enabled": false
-          <br />
-          &nbsp;&#125;
-          <br />
-          &#125;
+          strapi dev
+        </code>
+      </pre>
+      <pre style={{ whiteSpace: 'pre-wrap' }}>
+        <code>
+          yarn dev
         </code>
       </pre>
     </div>
