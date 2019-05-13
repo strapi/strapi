@@ -893,7 +893,7 @@ describe('Filtering API', () => {
         },
       });
 
-      expect(res.body).toEqual(data.products.slice(1));
+      expect(res.body).toEqual(expect.arrayContaining(data.products.slice(1)));
 
       res = await rq({
         method: 'GET',
