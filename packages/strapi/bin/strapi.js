@@ -167,6 +167,7 @@ program
 program
   .command('uninstall [plugins...]')
   .description('uninstall a Strapi plugin')
+  .option('-d, --delete-files', 'Delete files', false)
   .action(getLocalScript('uninstall'));
 
 /**
