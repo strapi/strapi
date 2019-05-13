@@ -26,11 +26,12 @@ const GLOBALS = {};
 
 const getDatabaseName = connection => {
   const dbName = _.get(connection.settings, 'database');
+  const dbSchema = _.get(connection.settings, 'schema', 'public');
   switch (_.get(connection.settings, 'client')) {
     case 'sqlite3':
       return 'main';
     case 'pg':
-      return `${dbName}.public`;
+      return `${dbName}.${dbSchema}`;
     case 'mysql':
       return dbName;
     default:
@@ -518,7 +519,6 @@ module.exports = function(strapi) {
                       model: target[model],
                     })
                   );
-
                 } catch (err) {
                   strapi.log.error(
                     `Impossible to register the '${model}' model.`
