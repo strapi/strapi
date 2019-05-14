@@ -134,6 +134,14 @@ module.exports = {
   update: async ctx => {
     const values = ctx.request.body;
 
+    const admin = await strapi.admin
+      .queries('administrator', 'admin')
+      .findOne(ctx.params);
+
+    if (values.password === admin.password) {
+      delete values.password;
+    }
+
     if (values.password) {
       values.password = await strapi.plugins[
         'users-permissions'
@@ -142,7 +150,7 @@ module.exports = {
 
     const data = await strapi.admin
       .queries('administrator', 'admin')
-      .update(Object.assign({}, ctx.params, values));
+      .update(ctx.params, values);
 
     // Send 200 `ok`
     ctx.send(data);
