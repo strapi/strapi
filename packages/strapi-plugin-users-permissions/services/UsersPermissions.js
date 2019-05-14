@@ -559,7 +559,7 @@ module.exports = {
     );
 
     // stringify mongoDB _id for add/remove matching
-    if (role._id ? '_id' : 'id' === '_id') {
+    if (role._id) {
       role.users.reduce((acc, user) => {
         const key = role._id ? '_id' : 'id';
         user[key] = user[key].toString();
