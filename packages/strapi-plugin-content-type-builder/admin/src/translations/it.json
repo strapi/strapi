@@ -40,7 +40,7 @@
   "form.attribute.item.enumeration.graphql": "Nome override per GraphQL",
   "form.attribute.item.enumeration.graphql.description": "Consente di ignorare l'impostazione predefinita generata nome per GraphQL",
   "form.attribute.item.enumeration.name": "Nome",
-  "form.attribute.item.enumeration.placeholder": "Ex: mattina,mezzogiorno,sera",
+  "form.attribute.item.enumeration.placeholder": "Ex:\nmattina\nmezzogiorno\nsera",
   "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "Nome",
   "form.attribute.item.maximum": "Valore massimo",

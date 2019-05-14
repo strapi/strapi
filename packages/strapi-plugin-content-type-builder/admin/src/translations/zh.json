@@ -40,7 +40,7 @@
   "form.attribute.item.enumeration.graphql": "GraphQL 名稱覆寫",
   "form.attribute.item.enumeration.graphql.description": "可以讓您覆寫 GraphQL 的預設名稱",
   "form.attribute.item.enumeration.name": "名稱",
-  "form.attribute.item.enumeration.placeholder": "例: morning,noon,evening",
+  "form.attribute.item.enumeration.placeholder": "例:\nmorning\nnoon\nevening",
   "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "名稱",
   "form.attribute.item.maximum": "最大數值",
