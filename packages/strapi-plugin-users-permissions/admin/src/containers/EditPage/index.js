@@ -178,9 +178,9 @@ export class EditPage extends React.Component {
             number: size(get(this.props.editPage, ['modifiedData', 'users'])),
           },
         }}
-        onClickAdd={() => {
+        onClickAdd={itemToAdd => {
           this.context.emitEvent('didAssociateUserToRole');
-          this.props.onClickAdd();
+          this.props.onClickAdd(itemToAdd);
         }}
         onClickDelete={this.props.onClickDelete}
         name="users"
