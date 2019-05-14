@@ -30,6 +30,7 @@
     "strapi": "./bin/strapi.js"
   },
   "dependencies": {
+    "inquirer": "^6.2.1",
     "async": "^2.1.2",
     "boom": "^5.2.0",
     "chalk": "^2.4.1",

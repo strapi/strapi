@@ -90,7 +90,7 @@ module.exports = {
       strapi.reload.isWatching = false;
 
       strapi.log.info(`Uninstalling ${plugin}...`);
-      await execa('npm', ['run', 'strapi', '--', 'uninstall', plugin]);
+      await execa('npm', ['run', 'strapi', '--', 'uninstall', plugin, '-d']);
 
       ctx.send({ ok: true });
 
