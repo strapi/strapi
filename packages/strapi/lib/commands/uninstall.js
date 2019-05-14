@@ -19,6 +19,7 @@ module.exports = async (plugins, { deleteFiles }) => {
     {
       type: 'confirm',
       name: 'deleteFiles',
+      message: `Do you want to delete the plugin generated files in the extensions folder ?`,
       default: true,
       when: !deleteFiles,
     },
