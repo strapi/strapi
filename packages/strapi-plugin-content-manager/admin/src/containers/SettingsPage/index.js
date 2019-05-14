@@ -165,7 +165,7 @@ class SettingsPage extends React.PureComponent {
             confirm: 'content-manager.popUpWarning.button.confirm',
           }}
           popUpWarningType="danger"
-          onConfirm={onSubmit}
+          onConfirm={() => onSubmit(this.context)}
         />
         <PopUpWarning
           isOpen={showWarningCancel}
@@ -209,6 +209,10 @@ class SettingsPage extends React.PureComponent {
 }
 
 SettingsPage.defaultProps = {};
+
+SettingsPage.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 SettingsPage.propTypes = {
   history: PropTypes.object.isRequired,

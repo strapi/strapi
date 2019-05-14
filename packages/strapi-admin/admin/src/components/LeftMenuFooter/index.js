@@ -35,7 +35,7 @@ function LeftMenuFooter({ version, ...rest }) {
           <LeftMenuLink
             {...rest}
             {...link}
-            destination={messages[link.label].id}
+            label={messages[link.label].id}
             key={link.label}
           />
         ))}
