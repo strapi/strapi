@@ -85,10 +85,13 @@ module.exports = ({ model }) => ({
         patch: true,
       })
       .catch(err => {
-        const field = _.last(_.words(err.detail.split('=')[0]));
-        const error = { message: `This ${field} is already taken`, field };
+        if (err && err.detail) {
+          const field = _.last(_.words(err.detail.split('=')[0]));
+          const error = { message: `This ${field} is already taken`, field };
+          throw error;
+        }
 
-        throw error;
+        throw err;
       });
-  }
+  },
 });
