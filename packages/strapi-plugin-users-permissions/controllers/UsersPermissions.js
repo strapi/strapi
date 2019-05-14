@@ -26,6 +26,7 @@ module.exports = {
 
       ctx.send({ ok: true });
     } catch (err) {
+      strapi.log.error(err)
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
   },
@@ -66,6 +67,7 @@ module.exports = {
 
       ctx.send({ ok: true });
     } catch (err) {
+      strapi.log.error(err)
       ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
     }
   },
@@ -173,7 +175,8 @@ module.exports = {
       strapi.emit('didOpenAccessToFetchContentTypeEntries', ctx.request.body);
 
       ctx.send({ ok: true });
-    } catch (error) {
+    } catch (err) {
+      strapi.log.error(err)
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
