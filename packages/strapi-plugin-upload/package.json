@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-alpha.26.1",
+  "version": "3.0.0-alpha.26.2",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Files Upload",
@@ -8,27 +8,26 @@
     "description": "Description of upload plugin."
   },
   "scripts": {
-    "analyze:clean": "rimraf stats.json",
-    "preanalyze": "npm run analyze:clean",
-    "analyze": "node ./node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
-    "prebuild": "npm run build:clean",
-    "build:dev": "cross-env NODE_ENV=development ./node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build": "cross-env NODE_ENV=production node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build:clean": "rimraf admin/build",
-    "start": "cross-env NODE_ENV=development ./node_modules/strapi-helper-plugin/lib/server",
-    "generate": "node ./node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo \"no tests yet\"",
-    "prepublishOnly": "IS_MONOREPO=true npm run build"
+    "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "strapi-provider-upload-local": "3.0.0-alpha.26.1",
-    "strapi-utils": "3.0.0-alpha.26.1",
+    "immutable": "^3.8.2",
+    "invariant": "^2.2.1",
+    "lodash": "^4.17.11",
+    "react": "^16.0.0",
+    "react-copy-to-clipboard": "^5.0.1",
+    "react-dom": "^16.0.0",
+    "react-intl": "^2.8.0",
+    "react-redux": "^7.0.2",
+    "react-router": "^5.0.0",
+    "react-router-dom": "^5.0.0",
+    "react-transition-group": "^2.5.0",
+    "reactstrap": "^5.0.0",
+    "strapi-helper-plugin": "3.0.0-alpha.26.2",
+    "strapi-provider-upload-local": "3.0.0-alpha.26.2",
+    "strapi-utils": "3.0.0-alpha.26.2",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
-  },
-  "devDependencies": {
-    "strapi-helper-plugin": "3.0.0-alpha.26.1"
   },
   "author": {
     "name": "A Strapi developer",
@@ -46,5 +45,6 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import NavLink from 'components/NavLink';
+import { LiLink } from 'strapi-helper-plugin';
 import EditViewLink from '../EditViewLink';
 
 describe('<EditViewLink />', () => {
@@ -21,16 +21,16 @@ describe('<EditViewLink />', () => {
 
   it('should handle the source correctly if it is undefined', () => {
     const wrapper = shallow(<EditViewLink {...props} />);
-    const navLink = wrapper.find(NavLink);
+    const liLink = wrapper.find(LiLink);
 
-    expect(navLink.prop('url')).toBe('/plugins/test');
+    expect(liLink.prop('url')).toBe('/plugins/test');
   });
 
   it('should handle the source correctly if it is not undefined', () => {
     props.getSource = jest.fn(() => 'users-permissions');
     const wrapper = shallow(<EditViewLink {...props} />);
-    const navLink = wrapper.find(NavLink);
+    const liLink = wrapper.find(LiLink);
 
-    expect(navLink.prop('url')).toBe('/plugins/test&source=users-permissions');
+    expect(liLink.prop('url')).toBe('/plugins/test&source=users-permissions');
   });
 });

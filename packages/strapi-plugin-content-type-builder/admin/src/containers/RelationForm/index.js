@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
-import Input from 'components/InputsIndex';
+import { InputsIndex as Input } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -38,19 +38,28 @@ class RelationForm extends React.Component {
   state = { didCheckErrors: false, formErrors: {}, showForm: false };
 
   getFormErrors = () => {
-    const { actionType, alreadyTakenAttributes, attributeToEditName, modifiedData } = this.props;
+    const {
+      actionType,
+      alreadyTakenAttributes,
+      attributeToEditName,
+      modifiedData,
+    } = this.props;
     const formValidations = {
       name: { required: true, unique: true },
       key: { required: true, unique: true },
     };
 
-    const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(attribute => {
-      if (actionType === 'edit') {
-        return attribute !== attributeToEditName && attribute !== modifiedData.key;
-      }
+    const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(
+      attribute => {
+        if (actionType === 'edit') {
+          return (
+            attribute !== attributeToEditName && attribute !== modifiedData.key
+          );
+        }
 
-      return attribute !== attributeToEditName;
-    });
+        return attribute !== attributeToEditName;
+      },
+    );
 
     let formErrors = {};
 
@@ -96,7 +105,8 @@ class RelationForm extends React.Component {
   handleGoTo = to => {
     const { emitEvent } = this.context;
     const { actionType, attributeToEditName, push } = this.props;
-    const attributeName = actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
+    const attributeName =
+      actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
 
     if (to === 'advanced') {
       emitEvent('didSelectContentTypeFieldSettings');
@@ -126,7 +136,13 @@ class RelationForm extends React.Component {
     const [{ name, source }] = models;
     const target = actionType === 'edit' ? modelToEditName : name;
 
-    initData(target, isUpdatingTemporaryContentType, source, attributeToEditName, actionType === 'edit');
+    initData(
+      target,
+      isUpdatingTemporaryContentType,
+      source,
+      attributeToEditName,
+      actionType === 'edit',
+    );
     this.setState({ showForm: true });
   };
 
@@ -247,9 +263,12 @@ class RelationForm extends React.Component {
   render() {
     const { actionType, activeTab, attributeToEditName, isOpen } = this.props;
     const { showForm } = this.state;
-    const titleContent = actionType === 'create' ? 'relation' : attributeToEditName;
+    const titleContent =
+      actionType === 'create' ? 'relation' : attributeToEditName;
     const content =
-      activeTab === 'base' || !activeTab ? this.renderRelationForm() : this.renderAdvancedSettings();
+      activeTab === 'base' || !activeTab
+        ? this.renderRelationForm()
+        : this.renderAdvancedSettings();
 
     return (
       <WrapperModal
@@ -260,19 +279,32 @@ class RelationForm extends React.Component {
       >
         <HeaderModal>
           <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
-            <FormattedMessage id={`${pluginId}.popUpForm.${actionType || 'create'}`} />
+            <FormattedMessage
+              id={`${pluginId}.popUpForm.${actionType || 'create'}`}
+            />
             &nbsp;
-            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{titleContent}</span>
+            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>
+              {titleContent}
+            </span>
             &nbsp;
             <FormattedMessage id={`${pluginId}.popUpForm.field`} />
           </div>
-          <HeaderModalNavContainer>{NAVLINKS.map(this.renderNavLink)}</HeaderModalNavContainer>
+          <HeaderModalNavContainer>
+            {NAVLINKS.map(this.renderNavLink)}
+          </HeaderModalNavContainer>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
           <BodyModal>{showForm && content}</BodyModal>
           <FooterModal>
-            <ButtonModalSecondary message={`${pluginId}.form.button.cancel`} onClick={this.handleCancel} />
-            <ButtonModalPrimary message={`${pluginId}.form.button.continue`} type="submit" add />
+            <ButtonModalSecondary
+              message={`${pluginId}.form.button.cancel`}
+              onClick={this.handleCancel}
+            />
+            <ButtonModalPrimary
+              message={`${pluginId}.form.button.continue`}
+              type="submit"
+              add
+            />
             <ButtonModalPrimary
               message={`${pluginId}.form.button.save`}
               type="button"

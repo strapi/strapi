@@ -1,10 +1,11 @@
 // Helpers.
-const { auth, login } = require('../../../test/helpers/auth');
-const waitRestart = require('../../../test/helpers/waitRestart');
-const createRequest = require('../../../test/helpers/request');
+const { registerAndLogin } = require('../../../test/helpers/auth');
+const createModelsUtils = require('../../../test/helpers/models');
+const { createAuthRequest } = require('../../../test/helpers/request');
 
 let rq;
 let graphqlQuery;
+let modelsUtils;
 
 const postModel = {
   attributes: [
@@ -21,7 +22,7 @@ const postModel = {
     {
       name: 'bigint',
       params: {
-        type: 'biginteger'
+        type: 'biginteger',
       },
     },
   ],
@@ -33,22 +34,8 @@ const postModel = {
 
 describe('Test Graphql API End to End', () => {
   beforeAll(async () => {
-    await createRequest()({
-      url: '/auth/local/register',
-      method: 'POST',
-      body: auth,
-    }).catch(err => {
-      if (err.error.message.includes('Email is already taken.')) return;
-      throw err;
-    });
-
-    const body = await login();
-
-    rq = createRequest({
-      headers: {
-        Authorization: `Bearer ${body.jwt}`,
-      },
-    });
+    const token = await registerAndLogin();
+    rq = createAuthRequest(token);
 
     graphqlQuery = body => {
       return rq({
@@ -57,25 +44,19 @@ describe('Test Graphql API End to End', () => {
         body,
       });
     };
-  });
 
-  describe('Generate test APIs', () => {
-    beforeEach(() => waitRestart(), 30000);
-    afterAll(() => waitRestart(), 30000);
+    modelsUtils = createModelsUtils({ rq });
 
-    test('Create new post API', async () => {
-      const res = await rq({
-        url: '/content-type-builder/models',
-        method: 'POST',
-        body: postModel,
-      });
+    await modelsUtils.createModels([postModel]);
+  }, 60000);
 
-      expect(res.statusCode).toBe(200);
-    });
-  });
+  afterAll(() => modelsUtils.deleteModels(['post']), 60000);
 
   describe('Test CRUD', () => {
-    const postsPayload = [{ name: 'post 1', bigint: 1316130638171 }, { name: 'post 2', bigint: 1416130639261 }];
+    const postsPayload = [
+      { name: 'post 1', bigint: 1316130638171 },
+      { name: 'post 2', bigint: 1416130639261 },
+    ];
     let data = {
       posts: [],
     };
@@ -274,10 +255,18 @@ describe('Test Graphql API End to End', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual({
-        data: {
-          posts: expected,
-        },
+
+      // same length
+      expect(res.body.data.posts.length).toBe(expected.length);
+
+      // all the posts returned are in the expected array
+      res.body.data.posts.forEach(post => {
+        expect(expected).toEqual(expect.arrayContaining([post]));
+      });
+
+      // all expected values are in the result
+      expected.forEach(expectedPost => {
+        expect(res.body.data.posts).toEqual(expect.arrayContaining([expectedPost]));
       });
     });
 
@@ -369,20 +358,6 @@ describe('Test Graphql API End to End', () => {
 
         expect(res.statusCode).toBe(200);
       }
-    });
-  });
-
-  describe('Delete test APIs', () => {
-    beforeEach(() => waitRestart(), 30000);
-    afterAll(() => waitRestart(), 30000);
-
-    test('Delete post API', async () => {
-      await rq({
-        url: '/content-type-builder/models/post',
-        method: 'DELETE',
-      }).then(res => {
-        expect(res.statusCode).toBe(200);
-      });
     });
   });
 });

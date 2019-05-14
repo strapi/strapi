@@ -84,7 +84,7 @@ module.exports = {
       const controllers = plugin ? strapi.plugins[plugin].controllers : strapi.controllers;
 
       // Try to find the controller that should be related to this model.
-      const controller = _.get(controllers, `${name}.${action === 'delete' ? 'destroy' : action}`);
+      const controller = _.get(controllers, `${name}.${action}`);
 
       if (!controller) {
         return new Error(`Cannot find the controller's action ${name}.${action}`);

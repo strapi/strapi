@@ -14,7 +14,9 @@ import styles from './styles.scss';
 function ButtonModalPrimary({ add, message, onClick, type }) {
   /* istanbul ignore next */
   // Ignoring the style condition is intended...
-  const className = add ? styles.buttonModalPrimaryAdd : styles.buttonModalPrimary;
+  const className = add
+    ? styles.buttonModalPrimaryAdd
+    : styles.buttonModalPrimary;
 
   return (
     <Button className={className} onClick={onClick} type={type}>
@@ -25,13 +27,14 @@ function ButtonModalPrimary({ add, message, onClick, type }) {
 
 ButtonModalPrimary.defaultProps = {
   add: false,
+  message: 'app.utils.defaultMessage',
   onClick: () => {},
   type: 'button',
 };
 
 ButtonModalPrimary.propTypes = {
   add: PropTypes.bool,
-  message: PropTypes.string.isRequired,
+  message: PropTypes.string,
   onClick: PropTypes.func,
   type: PropTypes.string,
 };

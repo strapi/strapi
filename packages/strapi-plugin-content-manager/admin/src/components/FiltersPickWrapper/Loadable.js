@@ -1,6 +1,6 @@
 import Loadable from 'react-loadable';
 
-import LoadingIndicator from 'components/LoadingIndicator';
+import { LoadingIndicator } from 'strapi-helper-plugin';
 
 export default Loadable({
   loader: () => import('./index'),

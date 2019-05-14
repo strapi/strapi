@@ -1,41 +1,27 @@
 /**
-*
-* AttributeOption
-*
-*/
+ *
+ * AttributeOption
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import pluginId from '../../pluginId';
+
+import assets from '../AttributeLi/assets';
 import styles from './styles.scss';
-
-const assets = [
-  'boolean',
-  'date',
-  'email',
-  'enumeration',
-  'media',
-  'json',
-  'number',
-  'password',
-  'relation',
-  'string',
-  'text',
-].map(type => {
-  return { type, icon: require(`../../assets/images/icon_${type}.png`)};
-}).reduce((acc, current) => {
-  acc[current.type] = current.icon;
-
-  return acc;
-}, {});
 
 class AttributeOption extends React.Component {
   componentDidUpdate(prevProps) {
     const { isDisplayed, nodeToFocus, tabIndex } = this.props;
 
-    if (prevProps.isDisplayed !== isDisplayed && isDisplayed && nodeToFocus === tabIndex) {
+    if (
+      prevProps.isDisplayed !== isDisplayed &&
+      isDisplayed &&
+      nodeToFocus === tabIndex
+    ) {
       this.focusNode();
     }
 
@@ -50,7 +36,7 @@ class AttributeOption extends React.Component {
     const { current } = this.button;
 
     current.focus();
-  }
+  };
 
   render() {
     const { description, onClick, tabIndex, type } = this.props;
@@ -67,8 +53,12 @@ class AttributeOption extends React.Component {
         >
           <div className={styles.card}>
             <img src={assets[type]} alt="ico" />
-            <FormattedMessage id={`${pluginId}.popUpForm.attributes.${type}.name`}>
-              {(message) => <span className={styles.attributeType}>{message}</span>}
+            <FormattedMessage
+              id={`${pluginId}.popUpForm.attributes.${type}.name`}
+            >
+              {message => (
+                <span className={styles.attributeType}>{message}</span>
+              )}
             </FormattedMessage>
             <FormattedMessage id={description} />
           </div>

@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-controller",
-  "version": "3.0.0-alpha.26.1",
+  "version": "3.0.0-alpha.26.2",
   "description": "Generate a controller for a Strapi API.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -17,8 +17,7 @@
     "lodash": "^4.17.5"
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
-    "prepublish": "npm prune"
+    "test": "echo \"no tests yet\""
   },
   "author": {
     "email": "hi@strapi.io",
@@ -43,5 +42,6 @@
     "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

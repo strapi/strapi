@@ -13,15 +13,19 @@ import pluginId from '../../pluginId';
 // Containers
 import ConfigPage from '../ConfigPage';
 import HomePage from '../HomePage';
-import NotFoundPage from '../NotFoundPage';
+import { NotFound } from 'strapi-helper-plugin';
 
 function App() {
   return (
     <div className={pluginId}>
       <Switch>
-        <Route path={`/plugins/${pluginId}/configurations/:env`} component={ConfigPage} exact />
+        <Route
+          path={`/plugins/${pluginId}/configurations/:env`}
+          component={ConfigPage}
+          exact
+        />
         <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
-        <Route component={NotFoundPage} />
+        <Route component={NotFound} />
       </Switch>
     </div>
   );

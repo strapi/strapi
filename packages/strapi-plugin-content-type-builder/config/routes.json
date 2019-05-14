@@ -50,14 +50,6 @@
     },
     {
       "method": "GET",
-      "path": "/autoReload",
-      "handler": "ContentTypeBuilder.autoReload",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/checkTableExists/:connection/:model",
       "handler": "ContentTypeBuilder.checkTableExists",
       "config": {

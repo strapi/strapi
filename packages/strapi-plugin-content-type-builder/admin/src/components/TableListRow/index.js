@@ -8,9 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get, isEmpty, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import IcoContainer from 'components/IcoContainer';
-import ListRow from 'components/ListRow';
-import PopUpWarning from 'components/PopUpWarning';
+import { IcoContainer, ListRow, PopUpWarning } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -54,7 +52,9 @@ class TableListRow extends React.Component {
     } = this.props;
 
     push({
-      pathname: `/plugins/${pluginId}/models/${name}${source ? `&source=${source}` : ''}`,
+      pathname: `/plugins/${pluginId}/models/${name}${
+        source ? `&source=${source}` : ''
+      }`,
       search: `modalType=model&settingType=base&actionType=edit&modelName=${name}`,
     });
   };
@@ -69,13 +69,19 @@ class TableListRow extends React.Component {
     );
   };
 
-  toggleModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
+  toggleModalWarning = () =>
+    this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
   handleShowModalWarning = () => {
-    if (this.props.canOpenModalAddContentType || this.props.rowItem.isTemporary === true) {
-      this.setState({ showWarning: !this.state.showWarning });
+    if (
+      this.props.canOpenModalAddContentType ||
+      this.props.rowItem.isTemporary === true
+    ) {
+      this.setState(prevState => ({ showWarning: !prevState.showWarning }));
     } else {
-      strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
+      strapi.notification.info(
+        `${pluginId}.notification.info.contentType.creating.notSaved`,
+      );
     }
   };
 
@@ -84,7 +90,9 @@ class TableListRow extends React.Component {
     const pluginSource = this.props.rowItem.source ? (
       <FormattedMessage id={`${pluginId}.from`}>
         {message => (
-          <span style={{ fontStyle: 'italic', color: '#787E8F', fontWeight: '500' }}>
+          <span
+            style={{ fontStyle: 'italic', color: '#787E8F', fontWeight: '500' }}
+          >
             ({message}: {this.props.rowItem.source})
           </span>
         )}
@@ -124,15 +132,16 @@ class TableListRow extends React.Component {
         <div className={`col-md-5 text-center ${styles.descriptionContainer}`}>
           <div>{description}</div>
         </div>
-        <div className='col-md-2 text-center'>{this.props.rowItem.fields}</div>
-        <div className='col-md-1'>
+        <div className="col-md-2 text-center">{this.props.rowItem.fields}</div>
+        <div className="col-md-1">
           <IcoContainer icons={icons} />
         </div>
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
           content={{
-            message: 'content-type-builder.popUpWarning.bodyMessage.contentType.delete',
+            message:
+              'content-type-builder.popUpWarning.bodyMessage.contentType.delete',
           }}
           popUpWarningType={'danger'}
           onConfirm={this.handleDelete}

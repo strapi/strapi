@@ -1,56 +1,56 @@
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
-module.exports = {
-  find: async function(params, populate) {
-    const model = this;
-
+module.exports = ({ model }) => ({
+  find(params, populate) {
     const filters = convertRestQueryParams(params);
 
-    return this.query(buildQuery({ model, filters }))
+    return model
+      .query(buildQuery({ model, filters }))
       .fetchAll({
-        withRelated: populate || this.associations.map(x => x.alias),
+        withRelated: populate || model.associations.map(x => x.alias),
       })
       .then(data => data.toJSON());
   },
 
-  count: async function(params = {}) {
-    const model = this;
-
+  count(params = {}) {
     const { where } = convertRestQueryParams(params);
 
-    return this.query(buildQuery({ model, filters: { where } })).count();
+    return model.query(buildQuery({ model, filters: { where } })).count();
   },
 
-  findOne: async function (params, populate) {
-    const primaryKey = params[this.primaryKey] || params.id;
+  async findOne(params, populate) {
+    const primaryKey = params[model.primaryKey] || params._id;
 
     if (primaryKey) {
       params = {
-        [this.primaryKey]: primaryKey
+        [model.primaryKey]: primaryKey,
       };
     }
 
-    const record = await this
-      .forge(params)
-      .fetch({
-        withRelated: populate || this.associations.map(x => x.alias)
-      });
+    const record = await model.forge(params).fetch({
+      withRelated: populate || model.associations.map(x => x.alias),
+    });
 
     return record ? record.toJSON() : record;
   },
 
-  create: async function (params) {
-    return this
+  create(params) {
+    return model
       .forge()
-      .save(Object.keys(params).reduce((acc, current) => {
-        if (_.get(this._attributes, [current, 'type']) || _.get(this._attributes, [current, 'model'])) {
-          acc[current] = params[current];
-        }
+      .save(
+        Object.keys(params).reduce((acc, current) => {
+          if (
+            _.get(model._attributes, [current, 'type']) ||
+            _.get(model._attributes, [current, 'model'])
+          ) {
+            acc[current] = params[current];
+          }
 
-        return acc;
-      }, {}))
-      .catch((err) => {
+          return acc;
+        }, {})
+      )
+      .catch(err => {
         if (err.detail) {
           const field = _.last(_.words(err.detail.split('=')[0]));
           err = { message: `This ${field} is already taken`, field };
@@ -60,30 +60,31 @@ module.exports = {
       });
   },
 
-  update: async function (search, params = {}) {
+  async update(search, params = {}) {
     if (_.isEmpty(params)) {
       params = search;
     }
 
-    const primaryKey = search[this.primaryKey] || search.id;
+    const primaryKey = search[model.primaryKey] || search.id;
 
     if (primaryKey) {
       search = {
-        [this.primaryKey]: primaryKey
+        [model.primaryKey]: primaryKey,
       };
     } else {
-      const entry = await module.exports.findOne.call(this, search);
+      const entry = await this.findOne(search);
 
       search = {
-        [this.primaryKey]: entry[this.primaryKey] || entry.id
+        [model.primaryKey]: entry[model.primaryKey] || entry.id,
       };
     }
 
-    return this.forge(search)
+    return model
+      .forge(search)
       .save(params, {
-        patch: true
+        patch: true,
       })
-      .catch((err) => {
+      .catch(err => {
         const field = _.last(_.words(err.detail.split('=')[0]));
         const error = { message: `This ${field} is already taken`, field };
 
@@ -91,35 +92,22 @@ module.exports = {
       });
   },
 
-  delete: async function (params) {
-    return await this
+  delete(params) {
+    return model
       .forge({
-        [this.primaryKey]: params[this.primaryKey] || params.id
+        [model.primaryKey]: params[model.primaryKey] || params.id,
       })
       .destroy();
   },
 
-  search: async function (params) {
-    return this
-      .query(function(qb) {
-        qb
-          .whereRaw(`LOWER(hash) LIKE ?`, [`%${params.id}%`])
-          .orWhereRaw(`LOWER(name) LIKE ?`, [`%${params.id}%`]);
+  search(params) {
+    return model
+      .query(qb => {
+        qb.whereRaw('LOWER(hash) LIKE ?', [`%${params.id}%`]).orWhereRaw(
+          'LOWER(name) LIKE ?',
+          [`%${params.id}%`]
+        );
       })
       .fetchAll();
   },
-
-  addPermission: async function (params) {
-    return this
-      .forge(params)
-      .save();
-  },
-
-  removePermission: async function (params) {
-    return this
-      .forge({
-        [this.primaryKey]: params[this.primaryKey] || params.id
-      })
-      .destroy();
-  }
-};
+});

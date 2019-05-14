@@ -2,7 +2,10 @@ const path = require('path');
 const rimraf = require('rimraf');
 const execa = require('execa');
 
-const STRAPI_BIN = path.resolve(__dirname, '../../packages/strapi/bin/strapi.js');
+const STRAPI_BIN = path.resolve(
+  __dirname,
+  '../../packages/strapi/bin/strapi.js'
+);
 
 /**
  * Delete the testApp folder
@@ -24,14 +27,23 @@ const cleanTestApp = appName => {
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
 const generateTestApp = async ({ appName, database }) => {
-  await execa.shell(`node ${STRAPI_BIN} new ${appName} --dev ${database}`, {
+  await execa.shell(`node ${STRAPI_BIN} new ${appName} ${database}`, {
     stdio: 'inherit',
   });
 
-  await execa.shell(`node ${STRAPI_BIN} install graphql --dev`, {
-    stdio: 'inherit',
-    cwd: path.resolve(appName),
-  });
+  await execa.shell(
+    'yarn add strapi-plugin-graphql strapi-plugin-documentation',
+    {
+      cwd: path.resolve(appName),
+    }
+  );
+
+  await execa.shell(
+    `node scripts/copy-monorepo.js ${appName} --run-once --quiet`,
+    {
+      stdio: 'inherit',
+    }
+  );
 };
 
 /**
@@ -40,7 +52,7 @@ const generateTestApp = async ({ appName, database }) => {
  * @param {string} options.appName - Name of the app / folder in which run the start script
  */
 const startTestApp = ({ appName }) => {
-  return execa.shell('strapi start', {
+  return execa.shell('strapi dev --no-build', {
     stdio: 'inherit',
     cwd: path.resolve(appName),
   });

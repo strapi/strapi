@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { getValidationsFromForm } from 'utils/formValidations';
+import { getValidationsFromForm } from '../../utils/formValidations';
 
 import {
   ADD_RELATION_ITEM,
@@ -67,9 +67,18 @@ export function getDataSucceeded(id, data, pluginHeaderTitle) {
   };
 }
 
-export function initModelProps(modelName, isCreating, source, attributes, displayedAttributes) {
+export function initModelProps(
+  modelName,
+  isCreating,
+  source,
+  attributes,
+  displayedAttributes,
+) {
   const formValidations = getValidationsFromForm(
-    Object.keys(attributes).map(attr => ({ name: attr, validations: get(attributes, attr, {}) })),
+    Object.keys(attributes).map(attr => ({
+      name: attr,
+      validations: get(attributes, attr, {}),
+    })),
     [],
   ).filter(field => {
     if (get(field, ['validations', 'required'], false) === true) {

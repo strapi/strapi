@@ -1,6 +1,6 @@
 {
   "name": "strapi-hook-mongoose",
-  "version": "3.0.0-alpha.26.1",
+  "version": "3.0.0-alpha.26.2",
   "description": "Mongoose hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -20,7 +20,7 @@
     "mongoose-float": "^1.0.3",
     "pluralize": "^6.0.0",
     "rimraf": "^2.6.2",
-    "strapi-utils": "3.0.0-alpha.26.1"
+    "strapi-utils": "3.0.0-alpha.26.2"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -48,5 +48,6 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"no tests yet\""
-  }
+  },
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

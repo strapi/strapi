@@ -7,28 +7,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { findIndex, get, snakeCase, isEmpty, map, sortBy } from 'lodash';
+import { get, snakeCase, isEmpty, map, sortBy } from 'lodash';
 
 import LeftMenuLink from '../LeftMenuLink';
 
 import styles from './styles.scss';
 import messages from './messages.json';
 
-function LeftMenuLinkContainer({ layout, plugins }) {
-  const pluginsObject = plugins.toJS();
-  
+function LeftMenuLinkContainer({ plugins, ...rest }) {
   // Generate the list of sections
-  const pluginsSections = Object.keys(pluginsObject).reduce((acc, current) => {
-    pluginsObject[current].leftMenuSections.forEach((section = {}) => {
+  const pluginsSections = Object.keys(plugins).reduce((acc, current) => {
+    plugins[current].leftMenuSections.forEach((section = {}) => {
       if (!isEmpty(section.links)) {
         acc[snakeCase(section.name)] = {
           name: section.name,
           links: get(acc[snakeCase(section.name)], 'links', []).concat(
             section.links.map(link => {
               link.source = current;
-              link.plugin = !isEmpty(pluginsObject[link.plugin])
+              link.plugin = !isEmpty(plugins[link.plugin])
                 ? link.plugin
-                : pluginsObject[current].id;
+                : plugins[current].id;
 
               return link;
             }),
@@ -39,14 +37,9 @@ function LeftMenuLinkContainer({ layout, plugins }) {
 
     return acc;
   }, {});
-  
+
   const linkSections = Object.keys(pluginsSections).map((current, j) => {
-    const contentTypesToShow = get(layout, 'contentTypesToShow');
-    const contentTypes = contentTypesToShow
-      ? pluginsSections[current].links.filter(
-        obj => findIndex(contentTypesToShow, ['destination', obj.destination]) !== -1,
-      )
-      : pluginsSections[current].links;
+    const contentTypes = pluginsSections[current].links;
 
     return (
       <div key={j}>
@@ -54,6 +47,7 @@ function LeftMenuLinkContainer({ layout, plugins }) {
         <ul className={styles.list}>
           {sortBy(contentTypes, 'label').map((link, i) => (
             <LeftMenuLink
+              {...rest}
               key={`${i}-${link.label}`}
               icon={link.icon || 'caret-right'}
               label={link.label}
@@ -67,15 +61,19 @@ function LeftMenuLinkContainer({ layout, plugins }) {
   });
 
   // Check if the plugins list is empty or not and display plugins by name
-  const pluginsLinks = !isEmpty(pluginsObject) ? (
-    map(sortBy(pluginsObject, 'name'), plugin => {
+  const pluginsLinks = !isEmpty(plugins) ? (
+    map(sortBy(plugins, 'name'), plugin => {
       if (plugin.id !== 'email' && plugin.id !== 'settings-manager') {
         const basePath = `/plugins/${get(plugin, 'id')}`;
         // NOTE: this should be dynamic
-        const destination = plugin.id === 'content-manager' ? `${basePath}/ctm-configurations` : basePath;
+        const destination =
+          plugin.id === 'content-manager'
+            ? `${basePath}/ctm-configurations`
+            : basePath;
 
         return (
           <LeftMenuLink
+            {...rest}
             key={get(plugin, 'id')}
             icon={get(plugin, 'icon') || 'plug'}
             label={get(plugin, 'name')}
@@ -85,12 +83,24 @@ function LeftMenuLinkContainer({ layout, plugins }) {
       }
     })
   ) : (
-    <li className={styles.noPluginsInstalled}>
-      <FormattedMessage {...messages.noPluginsInstalled} />.
+    <li key="emptyList" className={styles.noPluginsInstalled}>
+      <FormattedMessage {...messages.noPluginsInstalled} key="noPlugins" />.
     </li>
   );
 
-  const hasSettingsManager = get(pluginsObject, 'settings-manager', null);
+  const hasSettingsManager = get(plugins, 'settings-manager', null);
+  const staticLinks = [
+    {
+      icon: 'list',
+      label: messages.listPlugins.id,
+      destination: '/list-plugins',
+    },
+    {
+      icon: 'shopping-basket',
+      label: messages.installNewPlugin.id,
+      destination: '/marketplace',
+    },
+  ];
 
   return (
     <div className={styles.leftMenuLinkContainer}>
@@ -106,14 +116,12 @@ function LeftMenuLinkContainer({ layout, plugins }) {
           <FormattedMessage {...messages.general} />
         </p>
         <ul className={styles.list}>
-          <LeftMenuLink icon="list" label={messages.listPlugins.id} destination="/list-plugins" />
-          <LeftMenuLink
-            icon="shopping-basket"
-            label={messages.installNewPlugin.id}
-            destination="/marketplace"
-          />
+          {staticLinks.map(link => (
+            <LeftMenuLink {...rest} key={link.destination} {...link} />
+          ))}
           {hasSettingsManager && (
             <LeftMenuLink
+              {...rest}
               icon="gear"
               label={messages.configuration.id}
               destination="/plugins/settings-manager"
@@ -125,12 +133,7 @@ function LeftMenuLinkContainer({ layout, plugins }) {
   );
 }
 
-LeftMenuLinkContainer.defaultProps = {
-  layout: {},
-};
-
 LeftMenuLinkContainer.propTypes = {
-  layout: PropTypes.object,
   plugins: PropTypes.object.isRequired,
 };
 

@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-email-sendmail",
-  "version": "3.0.0-alpha.26.1",
+  "version": "3.0.0-alpha.26.2",
   "description": "Sendmail provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -43,5 +43,6 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"no tests yet\""
-  }
+  },
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

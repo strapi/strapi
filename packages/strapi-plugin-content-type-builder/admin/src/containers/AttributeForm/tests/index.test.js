@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
-import Input from 'components/InputsIndex';
+import { InputsIndex as Input } from 'strapi-helper-plugin';
 // This part is needed if you need to test the lifecycle of a container that contains FormattedMessages
 
 import pluginId from '../../../pluginId';
@@ -15,7 +15,8 @@ import AttributeForm from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 const context = { emitEvent: jest.fn() };
-const renderComponent = (props = {}) => mountWithIntl(<AttributeForm {...props} />, messages, context);
+const renderComponent = (props = {}) =>
+  mountWithIntl(<AttributeForm {...props} />, messages, context);
 
 describe('<AttributeForm />', () => {
   let props;
@@ -100,7 +101,7 @@ describe('<AttributeForm />', () => {
 
   describe('instances', () => {
     describe('GetFormErrors', () => {
-      it("should return an empty object if there is not field that contain the created field's name", () => {
+      it('should return an empty object if there is not field that contain the created field\'s name', () => {
         props.modifiedData = { name: 'test' };
 
         wrapper = renderComponent(props);
@@ -110,12 +111,14 @@ describe('<AttributeForm />', () => {
         expect(getFormErrors()).toEqual({});
       });
 
-      it("should return an object with the input's name and an array of error if the name is empty", () => {
+      it('should return an object with the input\'s name and an array of error if the name is empty', () => {
         wrapper = renderComponent(props);
 
         const { getFormErrors } = wrapper.instance();
 
-        expect(getFormErrors()).toEqual({ name: [{ id: `${pluginId}.error.validation.required` }] });
+        expect(getFormErrors()).toEqual({
+          name: [{ id: `${pluginId}.error.validation.required` }],
+        });
       });
 
       it('should return a unique error if the name of the field is already taken', () => {
@@ -126,7 +129,9 @@ describe('<AttributeForm />', () => {
 
         const { getFormErrors } = wrapper.instance();
 
-        expect(getFormErrors()).toEqual({ name: [{ id: `${pluginId}.error.attribute.taken` }] });
+        expect(getFormErrors()).toEqual({
+          name: [{ id: `${pluginId}.error.attribute.taken` }],
+        });
       });
 
       it('should not return a unique error if the use is editing a field', () => {
@@ -139,7 +144,9 @@ describe('<AttributeForm />', () => {
 
         const { getFormErrors } = wrapper.instance();
 
-        expect(getFormErrors()).toEqual({ minLength: [{ id: `${pluginId}.error.validation.required` }] });
+        expect(getFormErrors()).toEqual({
+          minLength: [{ id: `${pluginId}.error.validation.required` }],
+        });
       });
 
       it('should not return a unique error if the use is editing a field', () => {
@@ -189,9 +196,12 @@ describe('<AttributeForm />', () => {
         handleGoTo('advanced');
 
         expect(props.push).toHaveBeenCalledWith({
-          search: 'modalType=attributeForm&attributeType=string&settingType=advanced&actionType=create',
+          search:
+            'modalType=attributeForm&attributeType=string&settingType=advanced&actionType=create',
         });
-        expect(context.emitEvent).toHaveBeenCalledWith('didSelectContentTypeFieldSettings');
+        expect(context.emitEvent).toHaveBeenCalledWith(
+          'didSelectContentTypeFieldSettings',
+        );
       });
     });
 
@@ -281,7 +291,9 @@ describe('<AttributeForm />', () => {
         handleSubmitAndContinue({ preventDefault: jest.fn() });
 
         expect(props.onSubmitEdit).toHaveBeenCalledWith(true);
-        expect(context.emitEvent).toHaveBeenCalledWith('willAddMoreFieldToContentType');
+        expect(context.emitEvent).toHaveBeenCalledWith(
+          'willAddMoreFieldToContentType',
+        );
       });
 
       it('should not submit if thee form has an error', () => {

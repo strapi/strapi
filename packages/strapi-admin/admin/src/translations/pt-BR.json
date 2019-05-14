@@ -96,7 +96,6 @@
   "app.utils.defaultMessage": " ",
   "app.utils.delete": "Excluir",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "Abra o seguinte arquivo e ative o recurso.",
   "components.AutoReloadBlocker.header": "Auto recarregamento é necessário para esta extensão.",
   "components.ErrorBoundary.title": "Algo deu errado...",
   "components.Input.error.attribute.key.taken": "Este valor já existe",

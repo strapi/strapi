@@ -1,6 +1,6 @@
 {
   "name": "strapi-hook-knex",
-  "version": "3.0.0-alpha.26.1",
+  "version": "3.0.0-alpha.26.2",
   "description": "Knex hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -45,5 +45,6 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"no tests yet\""
-  }
+  },
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

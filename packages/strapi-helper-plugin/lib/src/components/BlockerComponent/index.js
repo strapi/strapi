@@ -1,8 +1,8 @@
 /**
-*
-* BlockerComponent
-*
-*/
+ *
+ * BlockerComponent
+ *
+ */
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -12,9 +12,13 @@ import PropTypes from 'prop-types';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props */
-function BlockerComponent({ blockerComponentTitle, blockerComponentDescription, blockerComponentIcon, blockerComponentContent = '' }) {
+function BlockerComponent({
+  blockerComponentTitle,
+  blockerComponentDescription,
+  blockerComponentIcon,
+  blockerComponentContent = '',
+}) {
   let content;
-
   switch (blockerComponentContent) {
     case 'renderIde':
       content = renderIde();
@@ -48,33 +52,15 @@ function BlockerComponent({ blockerComponentTitle, blockerComponentDescription, 
 
 const renderIde = () => (
   <div className={styles.ide}>
-    <p>./config/environments/development/server.json</p>
     <div>
-      <pre style={{ whiteSpace: 'pre-wrap'}}>
+      <pre style={{ whiteSpace: 'pre-wrap' }}>
         <code>
-          &#123;
-          <br />
-          &nbsp;"host": "localhost",
-          <br />
-          &nbsp;"port": 1337,
-          <br />
-          <span style={{ color: '#006EE7'}}>
-            &nbsp;"autoReload": &#123; enabled: true &#125;
-          </span>
-          <br />
-          &nbsp;"proxi": &#123;
-          <br />
-          &nbsp;&nbsp;"enabled": true
-          <br />
-          &nbsp;&#125;,
-          <br />
-          &nbsp;"cron": &#123;
-          <br />
-          &nbsp;&nbsp;"enabled": false
-          <br />
-          &nbsp;&#125;
-          <br />
-          &#125;
+          strapi dev
+        </code>
+      </pre>
+      <pre style={{ whiteSpace: 'pre-wrap' }}>
+        <code>
+          yarn dev
         </code>
       </pre>
     </div>
@@ -83,12 +69,25 @@ const renderIde = () => (
 
 const renderButton = () => (
   <div className={styles.buttonContainer}>
-    <a className={cn(styles.primary, 'btn')} href="http://strapi.io" target="_blank">Read the documentation</a>
+    <a
+      className={cn(styles.primary, 'btn')}
+      href="http://strapi.io"
+      target="_blank"
+    >
+      Read the documentation
+    </a>
   </div>
 );
 
+BlockerComponent.defaultProps = {
+  blockerComponentContent: '',
+  blockerComponentDescription: 'app.utils.defaultMessage',
+  blockerComponentIcon: '',
+  blockerComponentTitle: 'app.utils.defaultMessage',
+};
+
 BlockerComponent.propTypes = {
-  blockerComponentContent: PropTypes.string.isRequired,
+  blockerComponentContent: PropTypes.string,
   blockerComponentDescription: PropTypes.string.isRequired,
   blockerComponentIcon: PropTypes.string.isRequired,
   blockerComponentTitle: PropTypes.string.isRequired,
