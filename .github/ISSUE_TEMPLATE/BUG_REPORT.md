@@ -7,7 +7,7 @@ about: Create an issue report.
 Hello 👋 Thank you for submitting an issue.
 
 Before you start, please make sure your issue is understandable and reproducible.
-To me it readable please use a well markdown syntax.
+To make your issue readable make sure you use valid Markdown syntax.
 
 https://guides.github.com/features/mastering-markdown/
 -->
