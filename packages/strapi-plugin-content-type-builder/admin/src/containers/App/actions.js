@@ -124,7 +124,7 @@ export function getData() {
 
 export function getDataSucceeded({ allModels, models }, connections) {
   const initialData = allModels.reduce((acc, current) => {
-    acc[current.name] = pick(current, ['name', 'collectionName', 'connection', 'description', 'mainField']);
+    acc[current.name] = pick(current, ['name', 'collectionName', 'connection', 'displayName', 'description', 'mainField']);
     const attributes = OrderedMap(buildModelAttributes(current.attributes));
     set(acc, [current.name, 'attributes'], attributes);
 

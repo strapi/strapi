@@ -128,6 +128,7 @@ HomePage.propTypes = {
   newContentType: PropTypes.shape({
     collectionName: PropTypes.string,
     connection: PropTypes.string,
+    displayName: PropTypes.string,
     description: PropTypes.string,
     mainField: PropTypes.string,
     name: PropTypes.string,

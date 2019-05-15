@@ -72,6 +72,8 @@
   "form.contentType.item.collectionName": "Collection Name",
   "form.contentType.item.collectionName.inputDescription": "Useful when the name of your Content Type and your table name differ",
   "form.contentType.item.connections": "Connection",
+  "form.contentType.item.displayName": "Display Name",
+  "form.contentType.item.displayName.placeholder": "Custom display name",
   "form.contentType.item.description": "Description",
   "form.contentType.item.description.placeholder": "Write your little description here...",
   "form.contentType.item.name": "Name",

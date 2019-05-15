@@ -69,6 +69,8 @@
   "form.contentType.item.collectionName": "Nombre de la colección",
   "form.contentType.item.collectionName.inputDescription": "Útil cuando el nombre de su tipo de contenido y el nombre de su tabla difieren",
   "form.contentType.item.connections": "Conexión",
+  "form.contentType.item.displayName": "Nombre para mostrar",
+  "form.contentType.item.displayName.placeholder": "Nombre para mostrar personalizado",
   "form.contentType.item.description": "Descripción",
   "form.contentType.item.description.placeholder": "Escribe aquí tu breve descripción...",
   "form.contentType.item.name": "Nombre",

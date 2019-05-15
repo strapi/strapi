@@ -4,12 +4,23 @@
       {
         "customBootstrapClass": "col-md-6 offset-md-6 mr-md-5",
         "label": {
+          "id": "content-type-builder.form.contentType.item.displayName"
+        },
+        "name": "displayName",
+        "value": "",
+        "type": "string",
+        "autoFocus": true,
+        "placeholder": "content-type-builder.form.contentType.item.displayName.placeholder",
+        "validations": {}
+      },
+      {
+        "customBootstrapClass": "col-md-6 offset-md-6 mr-md-5",
+        "label": {
           "id": "content-type-builder.form.contentType.item.name"
         },
         "name": "name",
         "value": "",
         "type": "string",
-        "autoFocus": true,
         "validations": {
           "required": true
         },

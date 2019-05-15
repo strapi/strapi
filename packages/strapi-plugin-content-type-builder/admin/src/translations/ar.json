@@ -69,6 +69,8 @@
   "form.contentType.item.collectionName": "اسم المجموعة ( collection )",
   "form.contentType.item.collectionName.inputDescription": "من المفيد أن يختلف اسم نوع المحتوى واسم الجدول الخاص بك",
   "form.contentType.item.connections": "الأتصال",
+  "form.contentType.item.displayName": "اسم العرض",
+  "form.contentType.item.displayName.placeholder": "اسم العرض المخصص",
   "form.contentType.item.description": "الوصف",
   "form.contentType.item.description.placeholder": "اكتب وصفك الصغير هنا...",
   "form.contentType.item.name": "الأسم",

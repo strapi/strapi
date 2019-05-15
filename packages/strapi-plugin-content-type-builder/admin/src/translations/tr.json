@@ -69,6 +69,8 @@
   "form.contentType.item.collectionName": "Koleksiyon Adı",
   "form.contentType.item.collectionName.inputDescription": "İçerik Türünüzün adı ve tablonuzun adı farklı olduğunda kullanışlıdır.",
   "form.contentType.item.connections": "Bağlantı",
+  "form.contentType.item.displayName": "Ekran adı",
+  "form.contentType.item.displayName.placeholder": "Özel görünen ad",
   "form.contentType.item.description": "Açıklama",
   "form.contentType.item.description.placeholder": "Küçük açıklama yaz...",
   "form.contentType.item.name": "İsim",

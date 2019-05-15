@@ -69,6 +69,8 @@
   "form.contentType.item.collectionName": "컬렉션 이름",
   "form.contentType.item.collectionName.inputDescription": "콘텐츠 타입 이름과 테이블 이름이 다를 경우 유용합니다.",
   "form.contentType.item.connections": "연결",
+  "form.contentType.item.displayName": "표시 이름",
+  "form.contentType.item.displayName.placeholder": "사용자 정의 표시 이름",
   "form.contentType.item.description": "설명",
   "form.contentType.item.description.placeholder": "간략한 설명을 작성하세요.",
   "form.contentType.item.name": "이름",

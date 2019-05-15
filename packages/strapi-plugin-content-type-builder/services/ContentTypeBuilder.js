@@ -133,6 +133,7 @@ module.exports = {
       models.push({
         icon: 'fa-cube',
         name: _.get(model, 'info.name', 'model.name.missing'),
+        displayName: _.get(model, 'info.displayName', 'model.displayName.missing'),
         description: _.get(model, 'info.description', 'model.description.missing'),
         fields: _.keys(model.attributes).length,
         isTemporary: false,
@@ -148,6 +149,7 @@ module.exports = {
         acc.push({
           icon: 'fa-cube',
           name: _.get(model, 'info.name', 'model.name.missing'),
+          displayName: _.get(model, 'info.displayName', 'model.displayName.missing'),
           description: _.get(model, 'info.description', 'model.description.missing'),
           fields: _.keys(model.attributes).length,
           source: current,
@@ -213,6 +215,7 @@ module.exports = {
 
     return {
       name: _.get(model, 'info.name', 'model.name.missing'),
+      displayName: _.get(model, 'info.displayName', 'model.displayName.missing'),
       description: _.get(model, 'info.description', 'model.description.missing'),
       mainField: _.get(model, 'info.mainField', ''),
       connection: model.connection,

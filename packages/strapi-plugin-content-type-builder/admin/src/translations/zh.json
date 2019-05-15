@@ -69,6 +69,8 @@
   "form.contentType.item.collectionName": "群組名稱",
   "form.contentType.item.collectionName.inputDescription": "當您的資料結構和資料庫欄位不一樣時很有用",
   "form.contentType.item.connections": "連線",
+  "form.contentType.item.displayName": "顯示名稱",
+  "form.contentType.item.displayName.placeholder": "自定義顯示名稱",
   "form.contentType.item.description": "說明",
   "form.contentType.item.description.placeholder": "請在這裡寫一些說明...",
   "form.contentType.item.name": "名稱",

@@ -77,7 +77,7 @@ export function* submitCT({
       const oldContentTypeNameIndex = appMenu[0].links.findIndex(el => el.destination === oldContentTypeName);
       const updatedLink = {
         destination: name.toLowerCase(),
-        label: capitalize(pluralize(name)),
+        label: body.displayName || capitalize(pluralize(name)),
       };
       appMenu[0].links.splice(oldContentTypeNameIndex, 1, updatedLink);
       appMenu[0].links = sortBy(appMenu[0].links, 'label');
@@ -111,7 +111,7 @@ export function* submitTempCT({ body, context: { emitEvent, plugins, updatePlugi
     const appMenu = get(appPlugins, ['content-manager', 'leftMenuSections'], []);
     const newLink = {
       destination: name.toLowerCase(),
-      label: capitalize(pluralize(name)),
+      label: body.displayName || capitalize(pluralize(name)),
     };
     appMenu[0].links.push(newLink);
     appMenu[0].links = sortBy(appMenu[0].links, 'label');

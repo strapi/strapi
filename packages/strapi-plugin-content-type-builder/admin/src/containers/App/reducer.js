@@ -47,6 +47,7 @@ export const initialState = fromJS({
   newContentType: {
     collectionName: '',
     connection: '',
+    displayName: '',
     description: '',
     mainField: '',
     name: '',
@@ -55,6 +56,7 @@ export const initialState = fromJS({
   newContentTypeClone: {
     collectionName: '',
     connection: '',
+    displayName: '',
     description: '',
     mainField: '',
     name: '',

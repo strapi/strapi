@@ -70,6 +70,8 @@
   "form.contentType.item.collectionName": "Nom de la Collection",
   "form.contentType.item.collectionName.inputDescription": "Pratique quand le Nom de votre Modèle et de votre table sont différents",
   "form.contentType.item.connections": "Connexion",
+  "form.contentType.item.displayName": "Afficher un nom",
+  "form.contentType.item.displayName.placeholder": "Nom d'affichage personnalisé",
   "form.contentType.item.description": "Description",
   "form.contentType.item.description.placeholder": "Ecrivez votre petite description ici...",
   "form.contentType.item.name": "Nom",

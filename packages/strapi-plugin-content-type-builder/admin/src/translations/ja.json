@@ -69,6 +69,8 @@
   "form.contentType.item.collectionName": "コレクション名",
   "form.contentType.item.collectionName.inputDescription": "コンテンツタイプの名前とテーブル名が異なる場合に便利です",
   "form.contentType.item.connections": "接続",
+  "form.contentType.item.displayName": "表示名",
+  "form.contentType.item.displayName.placeholder": "カスタム表示名",
   "form.contentType.item.description": "説明文",
   "form.contentType.item.description.placeholder": "ここに簡単な説明を書いてください...",
   "form.contentType.item.name": "名前",

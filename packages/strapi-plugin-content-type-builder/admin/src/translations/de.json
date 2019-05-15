@@ -68,6 +68,8 @@
   "form.button.save": "Speichern",
   "form.contentType.item.collectionName": "Name des Dokuments in der Datenbank",
   "form.contentType.item.collectionName.inputDescription": "Nützlich, wenn Inhaltstyp und Datenbankname unterschiedlich sind",
+  "form.contentType.item.displayName": "Anzeigename",
+  "form.contentType.item.displayName.placeholder": "Name der benutzerdefinierten Anzeige",
   "form.contentType.item.connections": "Verbindung",
   "form.contentType.item.description": "Beschreibung",
   "form.contentType.item.description.placeholder": "Beschreibe deinen Inhaltstyp",

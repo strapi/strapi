@@ -68,6 +68,8 @@
   "form.button.save": "Salva",
   "form.contentType.item.collectionName": "Nome Della Collezione",
   "form.contentType.item.collectionName.inputDescription": "Utile quando il nome del Tipo di Contenuto e il nome della tabella differiscono",
+  "form.contentType.item.displayName": "Nome da visualizzare",
+  "form.contentType.item.displayName.placeholder": "Nome visualizzato personalizzato",
   "form.contentType.item.connections": "Collegamento",
   "form.contentType.item.description": "Descrizione",
   "form.contentType.item.description.placeholder": "Scrivi la tua piccola descrizione qui...",

@@ -69,6 +69,8 @@
   "form.contentType.item.collectionName": "Название коллекции",
   "form.contentType.item.collectionName.inputDescription": "Полезно, когда название вашего Типа Контента и название вашей таблицы различаются",
   "form.contentType.item.connections": "Соединение",
+  "form.contentType.item.displayName": "Отображаемое имя",
+  "form.contentType.item.displayName.placeholder": "Пользовательское отображаемое имя",
   "form.contentType.item.description": "Описание",
   "form.contentType.item.description.placeholder": "Добавьте короткое описание...",
   "form.contentType.item.name": "Название",

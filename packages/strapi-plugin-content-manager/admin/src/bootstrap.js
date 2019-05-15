@@ -10,7 +10,7 @@ const bootstrap = plugin =>
           {
             name: 'Content Types',
             links: map(omit(models.models.models, 'plugins'), (model, key) => ({
-              label: model.labelPlural || model.label || key,
+              label: model.info.displayName || model.labelPlural || model.label || key,
               destination: key,
             })),
           },

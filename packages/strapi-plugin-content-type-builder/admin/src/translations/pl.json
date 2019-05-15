@@ -69,6 +69,8 @@
   "form.contentType.item.collectionName": "Kolekcja",
   "form.contentType.item.collectionName.inputDescription": "Przydatne kiedy nazwa modelu jest inna niż nazwa tabeli w bazie danych",
   "form.contentType.item.connections": "Połączenie",
+  "form.contentType.item.displayName": "Wyświetlana nazwa",
+  "form.contentType.item.displayName.placeholder": "Niestandardowa nazwa wyświetlana",
   "form.contentType.item.description": "Opis",
   "form.contentType.item.description.placeholder": "Wpisz krótki opis tutaj...",
   "form.contentType.item.name": "Nazwa",

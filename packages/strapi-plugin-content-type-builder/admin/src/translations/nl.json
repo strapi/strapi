@@ -69,6 +69,8 @@
   "form.contentType.item.collectionName": "Collectie naam",
   "form.contentType.item.collectionName.inputDescription": "Handig als de naam van je Content Type en je tabel verschillen",
   "form.contentType.item.connections": "Verbinding",
+  "form.contentType.item.displayName": "Weergavenaam",
+  "form.contentType.item.displayName.placeholder": "Aangepaste weergavenaam",
   "form.contentType.item.description": "Beschrijving",
   "form.contentType.item.description.placeholder": "Schrijf je korte beschrijving hier...",
   "form.contentType.item.name": "Naam",

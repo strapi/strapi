@@ -68,6 +68,8 @@
   "form.contentType.item.collectionName": "Collection Name",
   "form.contentType.item.collectionName.inputDescription": "当你的Content Type和你的数据库表名不一样的时候",
   "form.contentType.item.connections": "连接",
+  "form.contentType.item.displayName": "显示名称",
+  "form.contentType.item.displayName.placeholder": "自定义显示名称",
   "form.contentType.item.description": "描述",
   "form.contentType.item.description.placeholder": "在这里写下你的描述...",
   "form.contentType.item.name": "名称",

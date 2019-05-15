@@ -44,7 +44,7 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
+    const { name, displayName, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
@@ -69,6 +69,8 @@ module.exports = {
 
     try {
       const modelJSON = _.cloneDeep(require(modelFilePath));
+
+      modelJSON.info.displayName = displayName;
 
       modelJSON.attributes = formatedAttributes;
 
@@ -107,7 +109,7 @@ module.exports = {
 
   updateModel: async ctx => {
     const { model } = ctx.params;
-    const { name, description, mainField, connection, collectionName, attributes = [], plugin } = ctx.request.body;
+    const { name, displayName, description, mainField, connection, collectionName, attributes = [], plugin } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
@@ -141,6 +143,7 @@ module.exports = {
       modelJSON.collectionName = collectionName;
       modelJSON.info = {
         name,
+        displayName,
         description: _description
       };
       modelJSON.attributes = formatedAttributes;
