@@ -118,13 +118,36 @@ You may continue after **Digital Ocean** has finished created your **Droplet** a
 
 These next steps involved setting up a production server and user access for development. Continue these steps after you [the create an initial Droplet](/3.x.x/guides/deployment.html#create-a-droplet) steps.
 
-Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04). These steps will have you complete the following steps:
+Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04). These steps will have you complete the following actions:
 
 1. Logging and set up root user access to your server with SSH.
 2. Creating a new user.
 3. Granting Administrative Privileges to the new user.
 4. Setting up a basic firewall.
 5. Allowing your regular user access to the server **with SSH key authentication**.
+
+Next, you should follow the official [Digital Ocean docs for installed a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04).
+
+You need to jump to section to `Install Node using a PPA`. Strapi works best on **Node.js v10+**. After completing the steps to **install Node.js and NPM**, you may continue to the next section.
+
+### Install the database for your project
+
+Digital Ocean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be complete prior to continuing. You can find links to each database guide below:
+
+1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04). Ensure that you create a new `Postgres user and database`. After you have created your database, you may continue to [Strapi installation](#install-and-configure-strapi-globally).
+2.
+
+### Install and Configure Strapi globally
+
+The next steps will install Strapi globally onto your server.
+
+Log into your server with your non-root user.
+
+1. Install Strapi globally:
+
+```bash
+sudo npm install -g strapi@alpha
+```
 
 ## Heroku
 
