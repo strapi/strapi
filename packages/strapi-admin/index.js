@@ -15,7 +15,7 @@ function createPluginsJs(plugins, dest) {
 
     window.strapi = Object.assign(window.strapi || {}, {
       node: MODE || 'host',
-      backendURL: BACKEND_URL,
+      backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
       languages,
       currentLanguage:
       window.localStorage.getItem('strapi-admin-language') ||

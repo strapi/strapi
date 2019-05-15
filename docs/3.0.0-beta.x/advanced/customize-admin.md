@@ -118,9 +118,8 @@ It's very common to deploy the front-end and the back-end on different servers. 
     "enabled": false
   },
   "admin": {
-    "path": "/dashboard",
+    "path": "/", // Note: The administration will be accessible from the root of the domain (ex: http//yourfrontend.com/)
     "build": {
-      "host": "/",  // Note: The administration will be accessible from the root of the domain (ex: http//yourfrontend.com/)
       "backend": "http://yourbackend.com"
     }
   }
@@ -146,8 +145,8 @@ In this case, we suppose that you decided to put your administration panel on a 
     "enabled": false
   },
   "admin": {
+    "path": "/dashboard",
     "build": {
-      "host": "http://yourfrontend.com/dashboard", // Note: The custom path has moved directly in the host URL.
       "backend": "http://yourbackend.com"
     }
   }
