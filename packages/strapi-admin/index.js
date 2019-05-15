@@ -73,15 +73,23 @@ async function copyAdmin(dest) {
   );
 }
 
+async function copyCustomAdmin(src, dest) {
+  await fs.copy(src, path.resolve(dest, 'admin'));
+}
+
 async function build({ dir, env, options }) {
   const cacheDir = path.resolve(dir, '.cache');
 
   const pkgJSON = require(path.join(dir, 'package.json'));
 
   // create .cache dir
-  await fs.ensureDir(cacheDir);
+  await fs.emptyDir(cacheDir);
 
   await copyAdmin(cacheDir);
+
+  if (fs.pathExistsSync(path.join(dir, 'admin'))) {
+    await copyCustomAdmin(path.join(dir, 'admin'), cacheDir);
+  }
 
   const pluginsToCopy = Object.keys(pkgJSON.dependencies).filter(
     dep =>

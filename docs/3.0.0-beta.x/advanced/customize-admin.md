@@ -2,7 +2,7 @@
 
 One of Strapi's main feature is its fully extendable and customizable admin panel. This section explains how the admin panel section is structured and how to customize it.
 
-See the [Contributing Guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for informations on how to develop the Strapi's admin interface.
+See the [Contributing Guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for informations on how to contribute to Strapi's admin interface.
 
 ## Customization
 
@@ -38,11 +38,17 @@ The panel will be available through [http://localhost:1337/dashboard](http://loc
 
 ### Logo
 
-To change the top-left displayed admin panel's logo, replace the image located at `./.cache/admin/src/assets/images/logo-strapi.png`.
+To change the top-left displayed admin panel's logo, add your custom image at `./admin/src/assets/images/logo-strapi.png`.
 
 ::: note
 make sure the size of your image is the same as the existing one (434px x 120px).
 :::
+
+To apply your changes you need to rebuild your admin panel
+
+```
+npm run build
+```
 
 ---
 
@@ -51,7 +57,7 @@ make sure the size of your image is the same as the existing one (434px x 120px)
 To build the administration, run the following command from the root directory of your project.
 
 ```
-yarn build
+npm run build
 ```
 
 This will replace the folder's content located at `./build`. Visit http://localhost:1337/admin/ to make sure your updates have been taken in account.
