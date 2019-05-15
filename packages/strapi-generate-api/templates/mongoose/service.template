@@ -12,6 +12,45 @@
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
+// helper for building search filters
+const getSearchFilters = function getSearchFilters(params) {
+  // Convert `params` object to filters compatible with Mongo.
+  const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
+
+  const $or = Object.keys(<%= globalID %>.attributes).reduce((acc, curr) => {
+    switch (<%= globalID %>.attributes[curr].type) {
+      case 'integer':
+      case 'float':
+      case 'decimal':
+        if (!_.isNaN(_.toNumber(params._q))) {
+          return acc.concat({ [curr]: params._q });
+        }
+
+        return acc;
+      case 'string':
+      case 'text':
+      case 'password':
+        return acc.concat({ [curr]: { $regex: params._q, $options: 'i' } });
+      case 'boolean':
+        if (params._q === 'true' || params._q === 'false') {
+          return acc.concat({ [curr]: params._q === 'true' });
+        }
+
+        return acc;
+      default:
+        return acc;
+    }
+  }, []);
+
+  // Adjust where object for search queries
+  if (filters.where._q) {
+    delete filters.where._q;
+    filters.where = { $or, ...filters.where };
+  }
+
+  return filters;
+};
+
 module.exports = {
 
   /**
@@ -57,14 +96,19 @@ module.exports = {
    * @return {Promise}
    */
 
-  count: (params) => {
-    const filters = convertRestQueryParams(params);
+  count: async (params, limit = 0) => {
+    const { where } = getSearchFilters(params);
 
-    return buildQuery({
-      model: <%= globalID %>,
-      filters: { where: filters.where },
-    })
-      .count()
+    // Filter on where
+    let filtered = <%= globalID %>.find(where);
+
+    // Add limit if necessary
+    if (limit > 0) {
+      filtered = filtered.limit(limit);
+    }
+
+    // Return count
+    return filtered.countDocuments();
   },
 
   /**
@@ -154,44 +198,20 @@ module.exports = {
    */
 
   search: async (params) => {
-    // Convert `params` object to filters compatible with Mongo.
-    const filters = strapi.utils.models.convertParams('<%= globalID.toLowerCase() %>', params);
     // Select field to populate.
     const populate = <%= globalID %>.associations
       .filter(ast => ast.autoPopulate !== false)
       .map(ast => ast.alias)
       .join(' ');
 
-    const $or = Object.keys(<%= globalID %>.attributes).reduce((acc, curr) => {
-      switch (<%= globalID %>.attributes[curr].type) {
-        case 'integer':
-        case 'float':
-        case 'decimal':
-          if (!_.isNaN(_.toNumber(params._q))) {
-            return acc.concat({ [curr]: params._q });
-          }
-
-          return acc;
-        case 'string':
-        case 'text':
-        case 'password':
-          return acc.concat({ [curr]: { $regex: params._q, $options: 'i' } });
-        case 'boolean':
-          if (params._q === 'true' || params._q === 'false') {
-            return acc.concat({ [curr]: params._q === 'true' });
-          }
-
-          return acc;
-        default:
-          return acc;
-      }
-    }, []);
+    // Get search filters
+    const filters = getSearchFilters(params);
 
     return <%= globalID %>
-      .find({ $or })
+      .find(filters.where )
       .sort(filters.sort)
       .skip(filters.start)
       .limit(filters.limit)
       .populate(populate);
-  }
+  },
 };

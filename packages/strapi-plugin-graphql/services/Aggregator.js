@@ -293,6 +293,24 @@ const formatConnectionGroupBy = function(fields, model, name) {
   };
 };
 
+/**
+ * Helper function to undo the where conversion to a "complex object" syntax where
+ * query, back to its simple previous syntax.
+ * @example: { field: 'myvar', operator: 'eq', value: 'e' } converts to {myvar: 'e'}
+ *
+ * @param whereArg
+ */
+const undoWhereConversion = function(whereArg) {
+  const converted = {};
+  whereArg.forEach(where => {
+    // Ignore operator for equal
+    where.operator === 'eq'
+      ? converted[where.field] = where.value
+      : converted[`${where.field}_${where.operator}`] = where.value;
+  });
+  return converted;
+};
+
 const formatConnectionAggregator = function(fields, model) {
   const { globalId } = model;
 
@@ -319,21 +337,14 @@ const formatConnectionAggregator = function(fields, model) {
   let resolvers = {
     [aggregatorGlobalId]: {
       count: async (obj, options, context) => {
-        return buildQuery({
-          model,
-          filters: {
-            limit: obj.limit,
-            where: obj.where,
-          },
-        }).count();
+        // Call count function from service object with limit
+        return strapi.services[model.modelName.toLowerCase()]
+          .count(undoWhereConversion(obj.where), obj.limit);
       },
       totalCount: async (obj, options, context) => {
-        return buildQuery({
-          model,
-          filters: {
-            where: obj.where,
-          },
-        }).count();
+        // Call count function from service object
+        return strapi.services[model.modelName.toLowerCase()]
+          .count(undoWhereConversion(obj.where));
       },
     },
   };
