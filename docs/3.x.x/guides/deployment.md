@@ -130,24 +130,62 @@ Next, you should follow the official [Digital Ocean docs for installed a product
 
 You need to jump to section to `Install Node using a PPA`. Strapi works best on **Node.js v10+**. After completing the steps to **install Node.js and NPM**, you may continue to the next section.
 
+### Install Git versioning
+
 ### Install the database for your project
 
 Digital Ocean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be complete prior to continuing. You can find links to each database guide below:
 
-1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04). Ensure that you create a new `Postgres user and database`. After you have created your database, you may continue to [Strapi installation](#install-and-configure-strapi-globally).
-2.
+1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04). Ensure that you create a new `Postgres user and database` (Through Step 4 - Creating a New Database).
 
-### Install and Configure Strapi globally
-
-The next steps will install Strapi globally onto your server.
-
-Log into your server with your non-root user.
-
-1. Install Strapi globally:
+In order for Strapi connect with a PostgreSQL database it needs either to have a password, or to have specifically stated there is no password. From your server terminal as your `sudo user`, you will `alter` the user you created and `add a password`:
 
 ```bash
-sudo npm install -g strapi@alpha
+sudo -u postgres psql
+[sudo] password for your-name:
+psql (10.8 (Ubuntu 10.8-0ubuntu0.18.04.1))
+Type "help" for help.
+postgres=# ALTER USER your-name PASSWORD 'password';
+ALTER ROLE
+postgres=# \q
 ```
+
+You will need the database name, username and password in order to continue to [configure that database.json file](#local-development-configuration).
+
+Your server is now set-up and ready to pull your Strapi Project from your GitHub repository. There are just a few more steps, in development, to complete prior to continuing.
+
+2. Install MongoDB
+
+### Local Development Configuration
+
+- You must have [Git installed and set-up locally](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
+- You must have created a repository for your Strapi Project and have your development project initilized to this repository.
+
+In your code editor, you will need to edit a file called `database.json`. Replace the contents of the file with the following, but change the `username`, `password` and `database` to match your installation.
+
+`Path: ./config/environments/production`
+
+```json
+{
+  "defaultConnection": "default",
+  "connections": {
+    "postgres": {
+      "connector": "strapi-hook-bookshelf",
+      "settings": {
+        "client": "postgres",
+        "host": "localhost",
+        "port": 5432,
+        "username": "david",
+        "password": "password",
+        "database": "strapi"
+      },
+      "options": {}
+    }
+  }
+}
+```
+
+`npm install pg`
 
 ## Heroku
 
