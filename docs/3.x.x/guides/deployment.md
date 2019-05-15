@@ -2,15 +2,15 @@
 
 Strapi gives you many possible deployment options for your project or application. Strapi can be deployed on traditional hosting servers or services such as Heroku, AWS, Azure and others. The following documentation covers how to develop locally with Strapi and deploy Strapi with various hosting options.
 
-
-
 (Deploying **databases** along with Strapi is covered in the [Databases Guide](/3.x.x/guides/databases.html).)
 
 **Table of contents:**
 
 - [Configuration](#configuration)
+- [Digital Ocean](#digital-ocean)
 - [Heroku](#heroku)
 - [Docker](#docker)
+
 ---
 
 ## Configuration
@@ -20,6 +20,7 @@ Strapi gives you many possible deployment options for your project or applicatio
 Update the `production` settings with the IP and domain name where the project will be running.
 
 **Path —** `./config/environments/production/server.json`.
+
 ```js
 {
   "host": "domain.io", // IP or domain
@@ -33,12 +34,13 @@ Update the `production` settings with the IP and domain name where the project w
 }
 ```
 
-In case your database is not running on the same server, make sure that the environment of your production 
+In case your database is not running on the same server, make sure that the environment of your production
 database (`./config/environments/production/database.json`) is set properly.
 
 If you are passing a number of configuration item values via environment variables which is always encouraged for production environment to keep application stateless, checkout the section for [Dynamic Configuration](../configurations/configurations.md#dynamic-configurations). Here is a hint on how to do it for production, for the configuration mentioned above:
- 
- **Path —** `./config/environments/production/server.json`.
+
+**Path —** `./config/environments/production/server.json`.
+
 ```js
 {
   "host": "${process.env.APP_HOST || '127.0.0.1'}"
@@ -52,7 +54,7 @@ If you are passing a number of configuration item values via environment variabl
 }
 ```
 
-**⚠️  If you changed the path to access to the administration, the step #2 is required.**
+**⚠️ If you changed the path to access to the administration, the step #2 is required.**
 
 #### #2 - Setup (optional)
 
@@ -83,9 +85,38 @@ We highly recommend to use [pm2](https://github.com/Unitech/pm2/) to manage your
 
 If you want to host the administration on another server than the API, [please take a look at this dedicated section](../advanced/customize-admin.md#deployment).
 
+## Digital Ocean
+
+This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be used locally on the server or hosted externally as a service.
+
+### Digital Ocean Install Requirements
+
+- You must have a [Digital Ocean account](https://cloud.digitalocean.com/registrations/new) before doing these steps.
+
+### Create a Droplet
+
+Digital Ocean calls a virtual private server, a **Droplet**. You need to create a new `Droplet` to host your Strapi project.
+
+1. Log in to your [Digital Ocean account](https://cloud.digitalocean.com/login).
+2. `Create a Droplet` by clicking on `New Droplet`. Choose these options:
+
+- Ubuntu 18.04 x64
+- STARTER `Standard`
+- Pricing: \$5/mo _(Scroll to the left)_
+- Choose a datacenter region nearest your audience, for example, `Frankfurt`.
+- Select additional options:`[x] IPv6`
+- Add your SSH key **NOTE:** We recommend adding your SSH key
+  - Copy to your clipboard, your existing SSH public key with `pbcopy < ~/.ssh/id_rsa.pub`.
+  - Click on `New SSH Key` and paste in your `SSH Key`. Name this key and Save.
+    Additional instructions on creating and using SSH Keys can be found [here](https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/create-with-openssh/).
+- `Choose a hostname` or leave as-is.
+- Click the green `Create` button.
+
+You may continue after **Digital Ocean** has finished created your **Droplet** as indicated by the progress bar.
+
 ## Heroku
 
-This is a step-by-step guide for deploying a Strapi project on [Heroku](https://www.heroku.com/). Databases that work well with Strapi and Heroku are provided instructions on how to get started.
+This is a step-by-step guide for deploying a Strapi project to [Heroku](https://www.heroku.com/). Databases that work well with Strapi and Heroku are provided instructions on how to get started.
 
 ### Heroku Install Requirements
 
@@ -108,6 +139,7 @@ Also available via Homebrew:
 ```bash
 brew tap heroku/brew && brew install heroku
 ```
+
 :::
 
 ::: tab "Ubuntu"
@@ -116,6 +148,7 @@ Run the following from your terminal:
 ```bash
 sudo snap install --classic heroku
 ```
+
 :::
 
 ::: tab "Windows"
@@ -135,7 +168,7 @@ Next, you need to login to Heroku from your computer.
 heroku login
 ```
 
-Follow the instructions and return to your command line. 
+Follow the instructions and return to your command line.
 
 ### 3. Create a new project (or use an existing one)
 
@@ -177,7 +210,7 @@ Init the Git repository and commit yoru project.
 cd my-project
 git init
 git add .
-git commit -am "Initial Commit" 
+git commit -am "Initial Commit"
 ```
 
 ### 6. Create a Heroku project
@@ -190,7 +223,7 @@ Create a new Heroku project.
 heroku create
 ```
 
-(You can use `heroku create custom-project-name`, to have Heroku create a `custom-project-name.heroku.com` URL.  Otherwise, Heroku will automatically generating a random project name (and URL) for you.)
+(You can use `heroku create custom-project-name`, to have Heroku create a `custom-project-name.heroku.com` URL. Otherwise, Heroku will automatically generating a random project name (and URL) for you.)
 
 ::: warning NOTE
 If you have a Heroku project app already created. You would use the following step to initialize your local project folder:
@@ -200,13 +233,14 @@ If you have a Heroku project app already created. You would use the following st
 ```bash
 heroku git:remote -a your-heroku-app-name
 ```
+
 :::
 
 Your local development environment is now set-up and configured to work with Heroku. You have a new Strapi project and a new Heroku app ready to be configured to work with a database and with each other.
 
 ### 7. Heroku Database set-up
 
-Below you will find database options when working with Heroku.  Please choose the correct database (e.g. PostgreSQL, MongoDB, etc.) and follow those instructions. 
+Below you will find database options when working with Heroku. Please choose the correct database (e.g. PostgreSQL, MongoDB, etc.) and follow those instructions.
 
 :::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
 
@@ -238,7 +272,7 @@ heroku config
 
 This should print something like this: `DATABASE_URL: postgres://ebitxebvixeeqd:dc59b16dedb3a1eef84d4999sb4baf@ec2-50-37-231-192.compute-2.amazonaws.com: 5432/d516fp1u21ph7b`.
 
-(This url is read like so: *postgres:// **USERNAME** : **PASSWORD** @ **HOST** : **PORT** : **DATABASE_NAME***)
+(This url is read like so: \*postgres:// **USERNAME** : **PASSWORD** @ **HOST** : **PORT** : **DATABASE_NAME\***)
 
 ##### 3. Set environment variables
 
@@ -286,6 +320,7 @@ Replace the contents of `database.json` with the following:
 Unless you originally installed Strapi with PostgreSQL, you need to install the [pg](https://www.npmjs.com/package/pg) node module.
 
 `Path: ./my-project/`
+
 ```bash
 npm install pg --save
 ```
@@ -302,11 +337,10 @@ Please follow these steps the **deploy a Strapi app with MongoDB on Heroku**.
 
 You must have completed the [steps to use Strapi with MongoDB Atlas in production](/3.x.x/guides/databases.html#install-on-atlas-mongodb-atlas).
 
-
 ##### 1. Set environment variables
 
 When you [set-up your MongoDB Atlas database](/3.x.x/guides/databases.html#install-on-atlas-mongodb-atlas) you created and noted the five key/value pairs that correspond to your **MongoDB Atlas** database. These five keys are: `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE PORT`, and `DATABASE_HOST`.
-  
+
 Strapi expects a variable for each database connection detail (host, username, etc.). So, from **MongoDB Atlas**, you have to set the environment variables in the Heroku config (for **DATABASE_HOST** you need to surround the URL with **""**, and set **DATABASE_PORT** to nothing):
 
 ```bash
@@ -316,6 +350,7 @@ heroku config:set DATABASE_HOST="stapi-mongo-heroku-shard-00-00-fty6c.mongodb.ne
 heroku config:set DATABASE_PORT=
 heroku config:set DATABASE_NAME=strapi-mongo-heroku
 ```
+
 **Note:** Please replace these above values with the your actual values.
 
 ##### 2. Update your database config file
