@@ -127,7 +127,7 @@ module.exports = function(name, cliArguments) {
           process.exit();
         });
 
-        await execa('npm', ['run', 'dev'], {
+        await execa('npm', ['run', 'develop'], {
           stdio: 'inherit',
           cwd: scope.rootPath,
           env: {

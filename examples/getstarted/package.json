@@ -5,7 +5,7 @@
   "description": "A Strapi application.",
   "main": "./server.js",
   "scripts": {
-    "dev": "strapi dev",
+    "develop": "strapi develop",
     "start": "strapi start",
     "build": "strapi build",
     "lint": "eslint api/**/*.js config/**/*.js plugins/**/*.js",

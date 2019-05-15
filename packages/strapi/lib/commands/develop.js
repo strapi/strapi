@@ -23,7 +23,7 @@ const loadConfigFile = require('../load/load-config-files');
 const { cli, logger } = require('strapi-utils');
 
 /**
- * `$ strapi dev`
+ * `$ strapi develop`
  *
  * Expose method which starts the appropriate instance of Strapi
  * (fire up the application in our working directory).

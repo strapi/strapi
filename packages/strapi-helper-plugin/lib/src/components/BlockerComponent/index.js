@@ -55,12 +55,12 @@ const renderIde = () => (
     <div>
       <pre style={{ whiteSpace: 'pre-wrap' }}>
         <code>
-          strapi dev
+          strapi develop
         </code>
       </pre>
       <pre style={{ whiteSpace: 'pre-wrap' }}>
         <code>
-          yarn dev
+          npm run develop
         </code>
       </pre>
     </div>

@@ -73,7 +73,7 @@ module.exports = async (scope, cb) => {
     console.log(`$ ${green(`cd ${scope.name}`)}`);
     console.log();
     console.log('⚡️ Start your application:');
-    console.log(`$ ${green('npm run dev')}`);
+    console.log(`$ ${green('strapi develop')}`);
   }
 
   cb();
