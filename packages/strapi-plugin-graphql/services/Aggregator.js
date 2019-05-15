@@ -300,7 +300,7 @@ const formatConnectionGroupBy = function(fields, model, name) {
  *
  * @param whereArg
  */
-const undoWhereConversion = function(whereArg) {
+const undoWhereConversion = function(whereArg = []) {
   const converted = {};
   whereArg.forEach(where => {
     // Ignore operator for equal
