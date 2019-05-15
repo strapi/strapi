@@ -90,6 +90,7 @@ program
 // `$ strapi develop`
 program
   .command('develop')
+  .alias('dev')
   .option('--no-build', 'Disable build', false)
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
