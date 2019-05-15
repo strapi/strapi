@@ -87,12 +87,12 @@ program
   .description('Start your Strapi application')
   .action(getLocalScript('start'));
 
-// `$ strapi dev`
+// `$ strapi develop`
 program
-  .command('dev')
+  .command('develop')
   .option('--no-build', 'Disable build', false)
-  .description('Start your Strapi application in dev mode')
-  .action(getLocalScript('dev'));
+  .description('Start your Strapi application in development mode')
+  .action(getLocalScript('develop'));
 
 // `$ strapi generate:api`
 program
@@ -159,7 +159,6 @@ program
 // `$ strapi install`
 program
   .command('install [plugins...]')
-  .option('-d, --dev', 'Development mode')
   .description('install a Strapi plugin')
   .action(getLocalScript('install'));
 
