@@ -43,5 +43,23 @@ module.exports = {
     'plugins/:humanizeId/package.json': {
       jsonfile: packageJSON
     },
+
+    // Copy dot files.
+    'plugins/:humanizeId/.editorconfig': {
+      copy: 'editorconfig'
+    },
+
+    'plugins/:humanizeId/.gitignore': {
+      copy: 'gitignore'
+    },
+
+    'plugins/:humanizeId/.gitattributes': {
+      copy: 'gitattributes'
+    },
+
+    // Copy Markdown files with some information.
+    'plugins/:humanizeId/README.md': {
+      template: 'README.md'
+    },
   }
 };
