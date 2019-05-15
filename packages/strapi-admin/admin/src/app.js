@@ -90,11 +90,7 @@ Object.keys(plugins).forEach(plugin => {
 
 // TODO
 const remoteURL = (() => {
-  if (window.location.port === '4000') {
-    return 'http://localhost:4000/admin';
-  }
-
-  // Relative URL (ex: /dashboard)
+    // Relative URL (ex: /dashboard)
   if (REMOTE_URL[0] === '/') {
     return (window.location.origin + REMOTE_URL).replace(/\/$/, '');
   }
