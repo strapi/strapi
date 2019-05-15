@@ -114,6 +114,18 @@ Digital Ocean calls a virtual private server, a **Droplet**. You need to create 
 
 You may continue after **Digital Ocean** has finished created your **Droplet** as indicated by the progress bar.
 
+### Setup production server and install Node.js
+
+These next steps involved setting up a production server and user access for development. Continue these steps after you [the create an initial Droplet](/3.x.x/guides/deployment.html#create-a-droplet) steps.
+
+Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04). These steps will have you complete the following steps:
+
+1. Logging and set up root user access to your server with SSH.
+2. Creating a new user.
+3. Granting Administrative Privileges to the new user.
+4. Setting up a basic firewall.
+5. Allowing your regular user access to the server **with SSH key authentication**.
+
 ## Heroku
 
 This is a step-by-step guide for deploying a Strapi project to [Heroku](https://www.heroku.com/). Databases that work well with Strapi and Heroku are provided instructions on how to get started.
