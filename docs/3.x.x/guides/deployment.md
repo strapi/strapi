@@ -87,15 +87,15 @@ If you want to host the administration on another server than the API, [please t
 
 ## Digital Ocean
 
-This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be used locally on the server or hosted externally as a service.
+This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be used locally on the server or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project for development](/3.x.x/getting-started/quick-start.html) that can be pushed to the Digital Ocean server.
 
 ### Digital Ocean Install Requirements
 
 - You must have a [Digital Ocean account](https://cloud.digitalocean.com/registrations/new) before doing these steps.
 
-### Create a Droplet
+### Create a "Droplet"
 
-Digital Ocean calls a virtual private server, a **Droplet**. You need to create a new `Droplet` to host your Strapi project.
+Digital Ocean calls a virtual private server, a [Droplet](https://www.digitalocean.com/docs/droplets/). You need to create a new `Droplet` to host your Strapi project.
 
 1. Log in to your [Digital Ocean account](https://cloud.digitalocean.com/login).
 2. `Create a Droplet` by clicking on `New Droplet`. Choose these options:
@@ -112,11 +112,11 @@ Digital Ocean calls a virtual private server, a **Droplet**. You need to create 
 - `Choose a hostname` or leave as-is.
 - Click the green `Create` button.
 
-You may continue after **Digital Ocean** has finished created your **Droplet** as indicated by the progress bar.
+You may continue after **Digital Ocean** has finished creating your **Droplet** as indicated by the progress bar.
 
 ### Setup production server and install Node.js
 
-These next steps involved setting up a production server and user access for development. Continue these steps after you [the create an initial Droplet](/3.x.x/guides/deployment.html#create-a-droplet) steps.
+These next steps involved setting up a production server and user access for development.
 
 Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04). These steps will have you complete the following actions:
 
@@ -124,35 +124,67 @@ Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 1
 2. Creating a new user.
 3. Granting Administrative Privileges to the new user.
 4. Setting up a basic firewall.
-5. Allowing your regular user access to the server **with SSH key authentication**.
+5. Giving your regular user access to the server **with SSH key authentication**.
 
-Next, you should follow the official [Digital Ocean docs for installed a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04).
+After completing these steps:
 
-You need to jump to section to `Install Node using a PPA`. Strapi works best on **Node.js v10+**. After completing the steps to **install Node.js and NPM**, you may continue to the next section.
+6. You will install `Node.js` using the instructions in section `Install Node using a PPA`. Strapi works best on **Node.js v10+**. Follow the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04).
 
-### Install Git versioning
+After completing the steps to **install Node.js, NPM and the build-essential package**, you may continue to the next section.
+
+### Install Git versioning on your server
+
+A convenient way to maintain your Strapi application and update it during and after initial development is to use [Git Versioning](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control). In order to use Git Versioning, you will need to have Git installed on your Droplet. Droplets should have Git installed by default, so you will check and if not installed, you will need to install it.
+
+1. Check to see if `Git` is installed, if you see a `git version 2.x.x` then you have get installed. Check with the following command:
+
+```bash
+git --version
+```
+
+2.  There are two parts to this step:
+
+- Installing Git - **NOTE:** Only do if not installed, as above.
+- [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
+
+Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
+
+After installing and configuring Git on your Droplet. Please continue to the next step, [installing the database](#install-the-database-for-your-project).
 
 ### Install the database for your project
 
-Digital Ocean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be complete prior to continuing. You can find links to each database guide below:
+Digital Ocean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be completed prior to continuing. You can find links, and any further instructions, to each database guide below:
 
-1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04). Ensure that you create a new `Postgres user and database` (Through Step 4 - Creating a New Database).
+1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04).
 
-In order for Strapi connect with a PostgreSQL database it needs either to have a password, or to have specifically stated there is no password. From your server terminal as your `sudo user`, you will `alter` the user you created and `add a password`:
+- Create a new `Postgres user and database` (Through Step 4 - Creating a New Database).
+
+- In order to connect to a PostgreSQL database with Strapi, it needs either to have a password, or specifically to have stated there is no password by noting a empty string. Follow these commands from your terminal to `alter` the `user` you created and `add a password`:
 
 ```bash
-sudo -u postgres psql
+sudo -u postgres psql     //only necessary if you switched away from the postgres@ user
 [sudo] password for your-name:
 psql (10.8 (Ubuntu 10.8-0ubuntu0.18.04.1))
 Type "help" for help.
+
 postgres=# ALTER USER your-name PASSWORD 'password';
 ALTER ROLE
 postgres=# \q
 ```
 
-You will need the database name, username and password in order to continue to [configure that database.json file](#local-development-configuration).
+- **Optional:** If your **Development** Strapi project is using **SQLite**, you will need to install a dependency package called `pg`:
 
-Your server is now set-up and ready to pull your Strapi Project from your GitHub repository. There are just a few more steps, in development, to complete prior to continuing.
+  - On your **Development** project:
+
+  `Path: ./my-project/`
+
+  ```bash
+  npm install pg --save
+  ```
+
+  **Note:** The `pg` package is automatically installed locally if you choose `PostgreSQL` as the initial database choice when you first set-up Strapi.
+
+You will need the **database name**, **username** and **password** to continue to the next step of [configuring that database.json file](#local-development-configuration).
 
 2. Install MongoDB
 
@@ -185,7 +217,58 @@ In your code editor, you will need to edit a file called `database.json`. Replac
 }
 ```
 
-`npm install pg`
+You are now ready to push these changes to Github:
+
+```bash
+git add .
+git commit -m "Configured production/database.json"
+git push
+```
+
+Please continue to the next section, [Deploy from GitHub](#deploy-from-github).
+
+### Deploy from Github
+
+You will next deploy your Strapi project to your Droplet by `cloning it from GitHub`.
+
+From your terminal, `logged in as your non-root user` to your Droplet:
+
+```bash
+cd ~
+sudo git clone https://github.com/your-name/your-project-repo.git
+```
+
+Next, navigate to the `my-project` folder, the root for Strapi. You will now need to run `sudo npm install` to install the packages for your project, and then `sudo npm run postinstall`. This last command runs scripts that build out your Strapi installation.
+
+`Path: ./my-project/`
+
+```bash
+sudo npm install && sudo npm run postinstall
+```
+
+Strapi uses `Port: 1337` by default. You will need to configure your `ufw firewall` to allow access to this port:
+
+```bash
+sudo ufw allow 1337/tcp
+```
+
+Your Strapi project is now installed on your **Droplet**. You will next need to [install and configure PM2 Runtime](#install-and-configure-pm2-runtime).
+
+### Install and configure PM2 Runtime
+
+[PM2 Runtime](https://pm2.io/doc/en/runtime/overview/?utm_source=pm2&utm_medium=website&utm_campaign=rebranding) allows you to keep your Strapi project alive and to reload it without downtime. You will want to install it globally:
+
+```bash
+sudo npm install pm2@latest -g
+```
+
+Use the following command to set the environment variable to production and start `pm2`:
+
+```bash
+sudo NODE_ENV=production pm2 start --name="strapi" server.js -i max
+```
+
+Your `Strapi` project is now accessible at: `your-ip-address:1337/admin`, in the sections to follow, are a few recommended additional actions to make developing your project more effecient and to set-up a few additional aspects of your server. 
 
 ## Heroku
 
