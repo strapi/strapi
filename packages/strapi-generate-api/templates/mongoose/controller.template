@@ -15,11 +15,7 @@ module.exports = {
    */
 
   find: async (ctx, next, { populate } = {}) => {
-    if (ctx.query._q) {
-      return strapi.services.<%= id %>.search(ctx.query);
-    } else {
-      return strapi.services.<%= id %>.fetchAll(ctx.query, populate);
-    }
+    return strapi.services.<%= id %>.fetchAll(ctx.query, populate);
   },
 
   /**

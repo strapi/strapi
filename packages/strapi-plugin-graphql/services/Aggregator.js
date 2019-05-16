@@ -339,7 +339,7 @@ const formatConnectionAggregator = function(fields, model) {
       count: async (obj, options, context) => {
         // Call count function from service object with limit
         return strapi.services[model.modelName.toLowerCase()]
-          .count(undoWhereConversion(obj.where), obj.limit);
+          .count({...undoWhereConversion(obj.where), _limit: obj.limit, _start: obj.start}, true);
       },
       totalCount: async (obj, options, context) => {
         // Call count function from service object

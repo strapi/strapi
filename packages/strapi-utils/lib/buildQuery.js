@@ -32,7 +32,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
       continue;
     }
 
-    if (!assoc && (!isAttribute(tmpModel, part) || i !== fieldParts.length - 1)) {
+    if (field != '_q' && !assoc && (!isAttribute(tmpModel, part) || i !== fieldParts.length - 1)) {
       const err = new Error(
         `Your filters contain a field '${field}' that doesn't appear on your model definition nor it's relations`
       );

@@ -20,6 +20,35 @@ const buildQuery = ({ model, filters = {}, populate = [], aggregate = false } = 
 };
 
 /**
+ * Return the find criteria and handle search attribute "_q"
+ * @param {Object} model - The model to execute the find method on
+ * @param {Object} filters - An object with the possible filters (start, limit, sort, where)
+ */
+const getFindCriteria = (model, filters) => {
+  const { where = [] } = filters;
+  let whereSearch = {};
+
+  // Handle special search attribute "_q"
+  if (searchObject = where.find(item => item.field === '_q' )) {
+    const fields = Object.keys(model.attributes);
+    whereSearch = {
+      $or: fields.map(val => buildWhereClause({ field: val, operator: 'contains', value: searchObject.value })),
+    }
+    // Remove search entry from where
+    const searchIndex = where.findIndex(item => item.field === '_q' );
+    where.splice(searchIndex, 1);
+  }
+
+  // Build object for find method and return it
+  const wheres = where.map(buildWhereClause);
+  const findCriteria = {
+    ...whereSearch,
+    ...(wheres.length > 0 ? { $and: wheres } : {})
+  };
+  return findCriteria;
+}
+
+/**
  * Builds a simple find query when there are no deep filters
  * @param {Object} options - Query options
  * @param {Object} options.model - The model you are querying
@@ -27,10 +56,7 @@ const buildQuery = ({ model, filters = {}, populate = [], aggregate = false } = 
  * @param {Object} options.populate - An array of paths to populate
  */
 const buildSimpleQuery = ({ model, filters, populate }) => {
-  const { where = [] } = filters;
-
-  const wheres = where.map(buildWhereClause);
-  const findCriteria = wheres.length > 0 ? { $and: wheres } : {};
+  const findCriteria = getFindCriteria(model, filters);
 
   let query = model.find(findCriteria).populate(populate);
   query = applyQueryParams({ query, filters });
