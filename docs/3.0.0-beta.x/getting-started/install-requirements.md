@@ -1,23 +1,23 @@
 # Installation Requirements
 
-This page covers installing the basic installation requirements for Strapi.
+This page covers installing the basic requirements for Strapi.
 
 ## Basic Installation Requirements
 
-Strapi requires just installing [Node.js](https://nodejs.org). We recommend using version 10.x or later.
+Strapi only requires [Node.js](https://nodejs.org). The current recommended version to run strapi is `Node v10` (current `LTS`).
 
-This is all that is needed before Strapi can get up and running on your development environment.
+This is all that is needed before Strapi can run on your local environment.
 
-## Install Node.js (and npm)
+## Installing Node.js
 
-Strapi needs Node.js and npm installed. npm installs at the same time as Node.js. You can following the below instructions to install Node.js on Windows 10, Ubuntu 18.04 and Mac O/S Mojave.
+You can install `Node.js` and `npm` for `Windows 10`, `Ubuntu 18.04` and `Mac O/S Mojave` with the following instructions.
 
 #### Installation Instructions for each Operating System:
 
 ::: windows
 **WINDOWS 10**
 
-### Install Node.js (and npm) on Windows 10
+### Installing Node.js on Windows 10
 
 There are several methods to install Node.js on _Windows 10_.
 
@@ -50,7 +50,7 @@ npm -v
 ::: mac
 **MAC O/S 10.14 MOJAVE**
 
-### Install Node.js (and npm) on Mac O/S X (Mojave)
+### Installing Node.js on Mac O/S X (Mojave)
 
 There are multiple methods to install Node.js on _Mac O/S X (Mojave)_.
 
@@ -84,7 +84,7 @@ npm -v
 
 **UBUNTU 18.04**
 
-### Install Node.js (and npm) on Ubuntu 18.04
+### Installing Node.js on Ubuntu 18.04
 
 There are multiple methods to install Node.js on _Ubuntu 18.04_.
 
@@ -117,8 +117,12 @@ npm -v
 ## You should see "6.x.x"
 ```
 
-## :::
+:::
+
+### Using Yarn
+
+You can also use yarn if you want [Here](https://yarnpkg.com/en/docs/getting-started) are the instructions to get started with it.
 
 ::: tip NEXT STEPS
-👏 Congrats, you are all set! Now that Node.js is installed you can proceed to the [Quick start](/3.0.0-beta.x/getting-started/quick-start.html).
+👏 Congrats, you are all set! Now that Node.js is installed you can continue with the [Quick start guide](/3.0.0-beta.x/getting-started/quick-start.html).
 :::

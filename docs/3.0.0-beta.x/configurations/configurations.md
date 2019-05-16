@@ -409,11 +409,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
    - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
    - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
    - `build`
-     - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
      - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
-       - `plugins`
-         - `source` (string): Define the source mode (origin, host, custom).
-         - `folder` (string): Indicate what the plugins folder in `host` source mode.
 
 #### Example
 

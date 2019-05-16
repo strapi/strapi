@@ -14,6 +14,7 @@
     - [Lifecycle callbacks](#lifecycle-callbacks)
   - [Internationalization](#internationalization-and-localization)
   - [Plugin](#plugin)
+  - [Extensions](#extensions)
   - [Policies](#policies)
     - [Global policies](#global-policies)
     - [Scoped policies](#scoped-policies)
@@ -30,12 +31,12 @@
 
 By default, your project's structure will look like this:
 
-- `/api`: contains the business logic of your project will be in this folder split in sub-folder per API.
+- `/api`: The business logic of your project will be in this folder split in sub-folder per API.
   - `**`
     - `/config`: contains the API's configurations ([`routes`](#routing), [`policies`](#policies), etc).
-    - [`/controllers`](#controllers): contains the API's controllers.
+    - [`/controllers`](#controllers): contains the API's custom controllers.
     - [`/models`](#models): contains the API's models.
-    - [`/services`](#services): contains the API's services.
+    - [`/services`](#services): contains the API's custom services.
 - `/node_modules`: contains the npm's packages used by the project.
 - [`/config`](../configurations/configurations.md)
   - [`/environments`](../configurations/configurations.md#environments): contains the project's configurations per environment.
@@ -57,8 +58,11 @@ By default, your project's structure will look like this:
   - [`middleware.json`](../configurations/configurations.html#middleware): contains the middleware settings of the project.
 - [`/hooks`](../advanced/hooks.html): contains the custom hooks of the project.
 - [`/middlewares`](../advanced/middlewares.html): contains the custom middlewares of the project.
-- [`/plugins`](../configurations/configurations.md#plugins): contains the installed plugins in the project.
-- [`/public`](../concepts/concepts.html#public-assets): contains the file accessible to the outside world.
+- [`/extensions`](#extensions): contains the files to extend installed plugins.
+- [`/plugins`](#plugin): contains your local plugins.
+- [`/public`](#public-assets): contains the file accessible to the outside world.
+- [`/build`](../guides/deployment.md): contains your admin panel UI build.
+- `/.cache`: contains copied files used to build your admin panel. (this folder should be ignored by versionning tools)
 
 ::: note
 Inside the `/config` folder, every folder will be parsed and injected into the global object `strapi.config`. Let's say, you added a folder named `credentials` with two files `stripe.json` and `paypal.json` into it. The content of these files will be accessible through `strapi.config.credentials.stripe` and `strapi.config.credentials.paypal`.
@@ -216,7 +220,7 @@ Please refer to the [internationalization's guide](../guides/i18n.md).
 
 ## Plugin
 
-A plugin is like a fully independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also contain an UI integrated into the admin panel to use it easily. It allows to develop or plugin features in a project in a short time span.
+A plugin is like a small independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also provide a UI form the
 
 ::: note
 Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.

@@ -28,15 +28,15 @@ You can check all the available providers developed by the community on npmjs.or
 To install a new provider run:
 
 ```
-$ npm install strapi-provider-email-sendgrid@alpha --save
+$ npm install strapi-provider-email-sendgrid@beta --save
 ```
 
 ::: note
-If the provider is not in the mono repo, you probably not need `@alpha` depending if the creator published it with this tag or not.
+If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
 :::
 
 Then, visit `/admin/plugins/email/configurations/development` on your web browser and configure the provider.
 
 ## Create providers
 
-If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier to create), modify the `auth` config object and customize the `send` functions.
+If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier), modify the `auth` config object and customize the `send` functions.
