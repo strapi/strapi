@@ -18,9 +18,6 @@ By default, the administration panel is exposed via [http://localhost:1337/admin
 {
   "host": "localhost",
   "port": 1337,
-  "autoReload": {
-    "enabled": true
-  },
   "cron": {
     "enabled": false
   },
@@ -56,13 +53,17 @@ npm run build
 
 To build the administration, run the following command from the root directory of your project.
 
-```
+```bash
 npm run build
 ```
 
-This will replace the folder's content located at `./build`. Visit http://localhost:1337/admin/ to make sure your updates have been taken in account.
+you can build your admin panel with a specific configuration (located in the `./config/environments/**/server.json`) config by specifying a NODE_ENV as follows:
 
-After you have built the admininistration you can now create a new project to develop your API with the changes implemented.
+```bash
+NODE_ENV=production npm run build
+```
+
+This will replace the folder's content located at `./build`. Visit http://localhost:1337/admin/ to make sure your updates have been taken in account.
 
 ---
 
@@ -87,9 +88,6 @@ You might want to change the path to access to the administration panel. Here th
 {
   "host": "localhost",
   "port": 1337,
-  "autoReload": {
-    "enabled": false
-  },
   "cron": {
     "enabled": false
   },
@@ -99,7 +97,7 @@ You might want to change the path to access to the administration panel. Here th
 }
 ```
 
-**You have to rebuild the administration panel to make this work.** Please follow the [step #2 of the deployment guide](../guides/deployment.md).
+**You have to rebuild the administration panel to make this work.** [Build instuctions](#build).
 
 #### Deploy the administration panel on another server (AWS S3, Azure, etc) than the API.
 
@@ -111,9 +109,6 @@ It's very common to deploy the front-end and the back-end on different servers. 
 {
   "host": "localhost",
   "port": 1337,
-  "autoReload": {
-    "enabled": false
-  },
   "cron": {
     "enabled": false
   },
@@ -138,9 +133,6 @@ In this case, we suppose that you decided to put your administration panel on a 
 {
   "host": "localhost",
   "port": 1337,
-  "autoReload": {
-    "enabled": false
-  },
   "cron": {
     "enabled": false
   },
@@ -169,7 +161,3 @@ The generated `index.html` will look like this:
   </body>
 </html>
 ```
-
-::: note
-The plugins are built into one a single build instead of multiple ones.
-:::

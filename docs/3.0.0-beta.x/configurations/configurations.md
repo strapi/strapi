@@ -396,8 +396,6 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
  - `host` (string): Host name. Default value: `localhost`.
  - `port` (integer): Port on which the server should be running. Default value: `1337`.
- - `autoReload`
-   - `enabled` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
  - `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
  - `proxy`
    - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
@@ -429,9 +427,6 @@ As an example using this configuration with Nginx your server would respond to `
     "ssl": true,
     "host": "example.com",
     "port": 8443
-  },
-  "autoReload": {
-    "enabled": true
   },
   "cron": {
     "enabled": true
