@@ -9,8 +9,9 @@ const _ = require('lodash');
  * @param {boolean} useFileNameAsKey - wethear to skip the last path key
  */
 module.exports = (filePath, useFileNameAsKey = true) => {
-  const prop = path
-    .normalize(filePath)
+  let cleanPath = filePath.startsWith('./') ? filePath.slice(2) : filePath;
+
+  const prop = cleanPath
     .replace(/(\.settings|\.json|\.js)/g, '')
     .toLowerCase()
     .split('/')
