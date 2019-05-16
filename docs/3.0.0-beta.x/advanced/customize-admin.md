@@ -149,7 +149,7 @@ The administration URL will be http://yourfrontend.com/dashboard and every reque
 
 The generated `index.html` will look like this:
 
-**Path —** `./admin/admin/build/index.html`.
+**Path —** `./build/index.html`.
 
 ```html
 <html lang="en">

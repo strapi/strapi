@@ -94,7 +94,6 @@ The framework allows the application to override the default middlewares and add
 │        - index.js
 │   └─── views // It will be added into the stack of middleware
 │        - index.js
-└─── plugins
 └─── public
 - favicon.ico
 - package.json

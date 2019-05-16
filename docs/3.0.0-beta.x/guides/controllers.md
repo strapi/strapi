@@ -4,11 +4,11 @@ See the [controllers' concepts](../concepts/concepts.md#controllers) for a simpl
 
 ## Core controllers
 
-When you create a new Content type or a new model. You will see a new empty controller as been created. It is because Strapi builds a generic api for your models by default and allows you to override and extend it in the generated files.
+When you create a new Content type or a new model. You will see a new empty controller has been created. It is because Strapi builds a generic controller for your models by default and allows you to override and extend it in the generated files.
 
 ### Extending a Model Controller
 
-Here are the core methods (and there current implementation).
+Here are the core methods (and their current implementation).
 You can simply copy and paste this code in your own controller file to customize the methods.
 
 ::: warning
@@ -121,11 +121,11 @@ module.exports = {
 
 You can also create custom controllers to build your own business logic and API endpoints.
 
-### Creating a custom controller?
+### How to create a custom controller
 
 There are two ways to create a controller:
 
-- Using the CLI `strapi generate:controller products`. Read the [CLI documentation](../cli/CLI.md#strapi-generatecontroller) for more information.
+- Using the CLI `strapi generate:controller product`. Read the [CLI documentation](../cli/CLI.md#strapi-generatecontroller) for more information.
 - Manually create a JavaScript file in `./api/**/controllers`.
 
 ### Adding Endpoints
