@@ -58,11 +58,12 @@ By default, your project's structure will look like this:
   - [`middleware.json`](../configurations/configurations.html#middleware): contains the middleware settings of the project.
 - [`/hooks`](../advanced/hooks.html): contains the custom hooks of the project.
 - [`/middlewares`](../advanced/middlewares.html): contains the custom middlewares of the project.
+- [`/admin`](../advanced/customize-admin.md): contains your local plugins.
 - [`/extensions`](#extensions): contains the files to extend installed plugins.
 - [`/plugins`](#plugin): contains your local plugins.
 - [`/public`](#public-assets): contains the file accessible to the outside world.
-- [`/build`](../guides/deployment.md): contains your admin panel UI build.
-- `/.cache`: contains copied files used to build your admin panel. (this folder should be ignored by versionning tools)
+- `/build`: contains your admin panel UI build.
+- `/.cache`: contains files used to build your admin panel.
 
 ::: note
 Inside the `/config` folder, every folder will be parsed and injected into the global object `strapi.config`. Let's say, you added a folder named `credentials` with two files `stripe.json` and `paypal.json` into it. The content of these files will be accessible through `strapi.config.credentials.stripe` and `strapi.config.credentials.paypal`.
@@ -225,6 +226,26 @@ A plugin is like a small independent sub-application. It has its own business lo
 ::: note
 Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.
 :::
+
+---
+
+## Extensions
+
+In strapi you can install plugins in your `node_modules`. This allows for easy updates and respect best practices. To customize those installed plugins you can work in the `/extensions` directory. It contains all the plugins' customizable files.
+
+Certain plugins will create files in these folders so you can then modify them. You can also create certain files manually to add some custom configuration for example.
+
+Depending on the plugins you will find extension documentation directly in the plugin's documentation.
+
+Extensions folder structure:
+
+
+- `extensions/`
+  - `**`: Plugin Id
+    - `config`: You can extend a plugin's configuration by add a settings.json file with your custom configuration
+    - `models`: Contains the plugin's models that you have overwritten (e.g: When you add a realtion to the the User model)
+    - `controllers`: You can extend the plugin's controllers by create controllers with the same names and override certain methods
+    - `services`: You can extend the plugin's services by create services with the same names and override certain methods
 
 ---
 
