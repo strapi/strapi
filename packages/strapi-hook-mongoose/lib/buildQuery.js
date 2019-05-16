@@ -46,7 +46,7 @@ const getFindCriteria = (model, filters) => {
     ...whereSearch,
     ...(wheres.length > 0 ? { $and: wheres } : {})
   };
-}
+};
 
 /**
  * Builds a simple find query when there are no deep filters
