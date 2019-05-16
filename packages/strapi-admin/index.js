@@ -7,7 +7,7 @@ const getWebpackConfig = require('./webpack.config.js');
 const getPkgPath = name =>
   path.dirname(require.resolve(`${name}/package.json`));
 
-function createPluginsJs(plugins, dest) {
+async function createPluginsJs(plugins, dest) {
   const content = `
     const injectReducer = require('./utils/injectReducer').default;
     const injectSaga = require('./utils/injectSaga').default;
@@ -37,7 +37,10 @@ function createPluginsJs(plugins, dest) {
     }
   `;
 
-  fs.writeFileSync(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
+  return fs.writeFile(
+    path.resolve(dest, 'admin', 'src', 'plugins.js'),
+    content
+  );
 }
 
 async function copyPlugin(name, dest) {
@@ -47,19 +50,19 @@ async function copyPlugin(name, dest) {
   const resolveDest = (...args) => path.resolve(dest, 'plugins', name, ...args);
 
   const copy = (...args) => {
-    fs.copySync(resolveDepPath(...args), resolveDest(...args));
+    return fs.copy(resolveDepPath(...args), resolveDest(...args));
   };
 
   // Copy the entire admin folder
-  copy('admin');
+  await copy('admin');
 
   // Copy the layout.js if it exists
-  if (fs.existsSync(path.resolve(pkgFilePath, 'config', 'layout.js'))) {
-    fs.ensureDirSync(resolveDest('config'));
-    copy('config', 'layout.js');
+  if (await fs.exists(path.resolve(pkgFilePath, 'config', 'layout.js'))) {
+    await fs.ensureDir(resolveDest('config'));
+    await copy('config', 'layout.js');
   }
 
-  copy('package.json');
+  await copy('package.json');
 }
 
 async function copyAdmin(dest) {
@@ -82,24 +85,30 @@ async function build({ dir, env, options }) {
 
   const pkgJSON = require(path.join(dir, 'package.json'));
 
-  // create .cache dir
-  await fs.emptyDir(cacheDir);
-
-  await copyAdmin(cacheDir);
-
-  if (fs.pathExistsSync(path.join(dir, 'admin'))) {
-    await copyCustomAdmin(path.join(dir, 'admin'), cacheDir);
-  }
-
   const pluginsToCopy = Object.keys(pkgJSON.dependencies).filter(
     dep =>
       dep.startsWith('strapi-plugin') &&
       fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
   );
 
-  pluginsToCopy.forEach(name => copyPlugin(name, cacheDir));
+  // TODO: add logic to avoid copying files if not necessary
 
-  createPluginsJs(pluginsToCopy, cacheDir);
+  // create .cache dir
+  await fs.emptyDir(cacheDir);
+
+  // copy admin core code
+  await copyAdmin(cacheDir);
+
+  // copy plugins code
+  await Promise.all(pluginsToCopy.map(name => copyPlugin(name, cacheDir)));
+
+  // create plugins.js with plugins requires
+  await createPluginsJs(pluginsToCopy, cacheDir);
+
+  // override admin code with user customizations
+  if (fs.pathExistsSync(path.join(dir, 'admin'))) {
+    await copyCustomAdmin(path.join(dir, 'admin'), cacheDir);
+  }
 
   const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
   const dest = path.resolve(dir, 'build');
