@@ -7,7 +7,7 @@ To facilitate the development of a plugin, we drastically reduce the amount of c
 Create a development project
 
 1. Create a new project `cd .. && strapi new myDevelopmentProject`.
-2. `cd myDevelopmentProject && strapi start` To start the strapi project
+2. `cd myDevelopmentProject && strapi develop` To start the strapi project
 
 ## Plugin development Setup
 
@@ -16,5 +16,5 @@ In a new terminal window:
 1. Generate a new plugin: `cd /path/to/myDevelopmentProject && strapi generate:plugin my-plugin`
 
 ::: note
-The admin development is currently not available. (Only the backend part is working)
+The admin panel integration is currently not available. You can still add backend features.
 :::

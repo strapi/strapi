@@ -199,13 +199,7 @@ The app has been connected to the database successfully!
 
 🏗  Application generation:
 ✔ Copy dashboard
-✔ Install plugin settings-manager.
-✔ Install plugin content-type-builder.
-✔ Install plugin content-manager.
-✔ Install plugin users-permissions.
-✔ Install plugin email.
-✔ Install plugin upload.
-✔ Link strapi dependency to the project.
+✔ Installed dependencies.
 
 👌 Your new application my-project is ready at /Users/david/Desktop/Projects/my-project.
 
@@ -213,7 +207,7 @@ The app has been connected to the database successfully!
 $ cd my-project
 
 ⚡️ Start application:
-$ strapi start
+$ strapi develop
 
 ```
 

@@ -198,6 +198,7 @@ You can access the config of the current environment through `strapi.config.curr
        - `password` (string): Password used to establish the connection.
        - `options` (object): List of additional options used by the connector.
        - `timezone` (string): Set the default behavior for local time (used only for a SQL database). Default value: `utc`.
+       - `schema` (string): Set the default database schema. (used only for Postgres DB)
     - `options` Options used for database connection.
       - `ssl` (boolean): For ssl database connection.
       - `debug` (boolean): Show database exchanges and errors.
