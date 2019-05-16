@@ -2,46 +2,68 @@
 
 Strapi comes with a full featured Command Line Interface (CLI) which lets you scaffold and manage your project in seconds.
 
-***
+---
 
 ## strapi new
+
 Create a new project
 
 ```bash
 strapi new <name>
 
-options: [--dev|--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbname=<dbname> --dbusername=<dbusername> --dbpassword=<dbpassword> --dbssl=<dbssl> --dbauth=<dbauth> --dbforce]
+options: [--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=<dbport> --dbname=<dbname> --dbusername=<dbusername> --dbpassword=<dbpassword> --dbssl=<dbssl> --dbauth=<dbauth> --dbforce]
 ```
 
 - **strapi new &#60;name&#62;**<br/>
   Generates a new project called **&#60;name&#62;** and installs the default plugins through the npm registry.
 
-- **strapi new &#60;name&#62; --dev**<br/>
-  Generates a new project called **&#60;name&#62;** and creates symlinks for the `./admin` folder and each plugin inside the `./plugin` folder. It means that the Strapi's development workflow has been set up on the machine earlier.
-
 - **strapi new &#60;name&#62; --debug**<br/>
   Will display the full error message if one is fired during the database connection.
 
 - **strapi new &#60;name&#62; --quickstart**<br/>
-Use the quickstart system to create your app.
+  Use the quickstart system to create your app.
 
 - **strapi new &#60;name&#62; --dbclient=&#60;dbclient&#62; --dbhost=&#60;dbhost&#62; --dbport=&#60;dbport&#62; --dbname=&#60;dbname&#62; --dbusername=&#60;dbusername&#62; --dbpassword=&#60;dbpassword&#62; --dbssl=&#60;dbssl&#62; --dbauth=&#60;dbauth&#62; --dbforce**<br/>
 
   Generates a new project called **&#60;name&#62;** and skip the interactive database configuration and initilize with these options.
+
   - **&#60;dbclient&#62;** can be `mongo`, `postgres`, `mysql`.
   - **&#60;dbssl&#62;** and **&#60;dbauth&#62;** are available only for `mongo` and are optional.
   - **--dbforce** Allows you to overwrite content if the provided database is not empty. Only available for `postgres`, `mysql`, and is optional.
 
-See the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details.
+## strapi develop|dev
+
+Start a Strapi application with autoReload activated.
+
+Strapi modifies/creates files at runtime and needs to restart when new files are created. To achieve that `strapi develop` add a file watcher and restart the application when necessary.
+
+::: note
+You should never use this command to run a Strapi application in production
+:::
 
 ## strapi start
-Start a Strapi application.
 
-That provide some feature like auto restart when you update a file in you application (except public files).
+Start a Strapi application without autoReloading.
 
-If you don't use `strapi start` to start you application some plugin that use `strapi.reload();` (content-type-builder plugin for example) can break or not work well.
+This commands is there to run a Strapi application without restarts and file writes (aimed at production usage).
+When run certain features are disabled because they require application restarts.
+
+::: note
+You can specify a NODE_ENV to use the configurations in the `./config/envrionments` folder (e.g development|staging|production)
+By default the `development` envrionment will be used
+:::
+
+## strapi build
+
+Builds your admin panel
+
+::: note
+You can specify a NODE_ENV to use the configurations in the `./config/envrionments` folder (e.g development|staging|production)
+By default the `development` envrionment will be used
+:::
 
 ## strapi generate:api
+
 Scaffold a complete API with its configurations, controller, model and service.
 
 ```bash
@@ -73,6 +95,7 @@ The first letter of the filename will be uppercased.
 :::
 
 ## strapi generate:controller
+
 Create a new controller
 
 ```bash
@@ -99,6 +122,7 @@ The first letter of the filename will be uppercased.
 :::
 
 ## strapi generate:model
+
 Create a new model
 
 ```bash
@@ -122,11 +146,11 @@ options: [--api <name>|--plugin <name>]
   Generates an empty model called **&#60;name&#62;** in the `./api/<api>/models` folder.
 
   Example: `strapi generate:model category --api product` will create these two files:
+
   - `./api/product/models/Category.js`
   - `./api/product/models/Category.settings.json`.
 
-
-- **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
+* **strapi generate:model &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty model called **&#60;name&#62;** in the `./plugins/<plugin>/models` folder.
 
 ::: note
@@ -134,6 +158,7 @@ The first letter of the filename will be uppercased.
 :::
 
 ## strapi generate:service
+
 Create a new service
 
 ```bash
@@ -160,6 +185,7 @@ The first letter of the filename will be uppercased.
 :::
 
 ## strapi generate:policy
+
 Create a new policy
 
 ```bash
@@ -181,8 +207,8 @@ options: [--api <name>|--plugin <name>]
 - **strapi generate:policy &#60;name&#62; --plugin &#60;plugin&#62;**<br/>
   Generates an empty policy called **&#60;name&#62;** in the `./plugins/<plugin>/config/policies` folder. This policy will be scoped and accessible only by the **&#60;plugin&#62;** routes.
 
-
 ## strapi generate:plugin
+
 Create a new plugin skeleton.
 
 ```bash
@@ -194,69 +220,67 @@ strapi generate:plugin <name>
 
   Example: `strapi generate:plugin user` will create the plugin at `./plugins/user`.
 
+Please refer to the [plugin development|staging|production documentation](../plugin-development|staging|production/quick-start.md) to know more.
 
-Please refer to the [plugin development documentation](../plugin-development/quick-start.md) to know more.
-
-***
+---
 
 ## strapi install
+
 Install a plugin in the project.
 
 ```bash
 strapi install <name>
-
-options: [--dev]
 ```
 
 - **strapi install &#60;name&#62;**<br/>
-  Installs a plugin called **&#60;name&#62;** in the `./plugins` folder.
+  Installs a plugin called **&#60;name&#62;**.
 
-  Example: `strapi install content-type-builder` will install the plugin at `./plugins/content-type-builder`.
-
-- **strapi install &#60;name&#62; --dev**<br/>
-  It will create a symlink from the local Strapi repository plugin folder called **&#60;name&#62;** in the `./plugins` folder.
-
-  Example: `strapi install content-type-builder --dev` will create a symlink from `/path/to/the/repository/packages/strapi-plugin-content-type-builder` to `./plugins/content-type-builder`.
-
-::: note
-Checkout the [CONTRIBUTING guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for more details about the local Strapi development workflow.
-:::
+  Example: `strapi install graphql` will install the plugin `strapi-plugin-graphql`
 
 ::: warning
-You have to restart the server to load the plugin into your project.
+Some plugin having admin panel integration, your admin panel might have to be rebuilt. This can take some time.
 :::
 
-Please refer to the [plugins documentation](../plugin-development/quick-start.md) to know more.
-
-***
+---
 
 ## strapi uninstall
+
 Uninstall a plugin from the project.
 
 ```bash
 strapi uninstall <name>
+
+options [--delete-files]
 ```
 
 - **strapi uninstall &#60;name&#62;**<br/>
-  Uninstalls a plugin called **&#60;name&#62;** in the `./plugins` folder.
+  Uninstalls a plugin called **&#60;name&#62;**.
 
-  Example: `strapi uninstall content-type-builder` will remove the folder at `./plugins/content-type-builder`.
+  Example: `strapi uninstall graphql` will remove the plugin `strapi-plugin-graphql`
 
+- **strapi uninstall &#60;name&#62; --delete-files**<br/>
+  Uninstalls a plugin called **&#60;name&#62;** and removes the files in `./extensions/name/`
 
-Please refer to the [plugins documentation](../plugin-development/quick-start.md) to know more.
+  Example: `strapi uninstall graphql` will remove the plugin `strapi-plugin-graphql` and all the files in `./extensions/graphql`
 
-***
+::: warning
+Some plugin having admin panel integration, your admin panel might have to be rebuilt. This can take some time.
+:::
+
+---
 
 ## strapi version
+
 Print the current globally installed Strapi version.
 
 ```bash
 strapi version
 ```
 
-***
+---
 
 ## strapi help
+
 List CLI commands.
 
 ```
