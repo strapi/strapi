@@ -1,8 +1,10 @@
 # Front-end Development
 
-::: note
+::: danger
 This feature is currenlty not available (Coming soon).
 :::
+
+<!-- 
 
 ## Admin panel
 
@@ -311,4 +313,5 @@ const Foo = props => (
 export default Foo;
 ```
 
-See [the documentation](https://github.com/yahoo/react-intl/wiki/Components#formattedmessage) for more extensive usage.
+See [the documentation](https://github.com/yahoo/react-intl/wiki/Components#formattedmessage) for more extensive usage. 
+-->

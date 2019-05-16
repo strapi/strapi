@@ -123,7 +123,7 @@ module.exports = {
         },
         {
           collapsable: true,
-          title: '🔌 Plugin Development',
+          title: '🔌 Local plugins',
           children: [
             '/3.0.0-beta.x/plugin-development/quick-start',
             '/3.0.0-beta.x/plugin-development/plugin-architecture',

@@ -1,6 +1,6 @@
 # Quick start
 
-To facilitate the development of a plugin, we drastically reduce the amount of commands necessary to install the entire development environment. Before getting started, you need to have Node.js (v8) and npm (v5) installed.
+Strapi allows you to create local plugins that will work exactly the same as external ones. All your local plugins will be located in the `./plugins` folder of your application.
 
 ## Development Environment Setup
 
