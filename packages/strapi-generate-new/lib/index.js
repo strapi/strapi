@@ -68,6 +68,10 @@ module.exports = {
     'extensions': {
       folder: {}
     },
+    
+    'extensions/.gitkeep': {
+      copy: 'gitkeep'
+    },
 
     // Empty public directory.
     'public': {
