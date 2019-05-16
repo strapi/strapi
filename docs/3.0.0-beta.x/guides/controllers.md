@@ -1,6 +1,6 @@
 # Controllers
 
-See the [controllers' concepts](../concepts/concepts.md#controllers) for details.
+See the [controllers' concepts](../concepts/concepts.md#controllers) for a simple overview.
 
 ## Core controllers
 
@@ -11,6 +11,10 @@ When you create a new Content type or a new model. You will see a new empty cont
 Here are the core methods (and there current implementation).
 You can simply copy and paste this code in your own controller file to customize the methods.
 
+::: warning
+In the following example we will consider your controller, service and model is named `product`
+:::
+
 #### `find`
 
 ```js
@@ -18,21 +22,104 @@ module.exports = {
   /**
    * Retrieve records.
    *
-   * @return {Object|Array}
+   * @return {Array}
    */
 
   find(ctx) {
     if (ctx.query._q) {
-      return service.search(ctx.query);
+      return strapi.services.product.search(ctx.query);
     }
-    return service.find(ctx.query);
+    return strapi.services.product.find(ctx.query);
+  },
+};
+```
+
+#### `findOne`
+
+```js
+module.exports = {
+  /**
+   * Retrieve a record.
+   *
+   * @return {Object}
+   */
+
+  findOne(ctx) {
+    return strapi.services.product.findOne(ctx.params);
+  },
+};
+```
+
+#### `count`
+
+```js
+module.exports = {
+  /**
+   * Count records.
+   *
+   * @return {Number}
+   */
+
+  count(ctx) {
+    if (ctx.query._q) {
+      return strapi.services.product.countSearch(ctx.query);
+    }
+    return strapi.services.product.count(ctx.query);
+  },
+};
+```
+
+#### `create`
+
+```js
+module.exports = {
+  /**
+   * Create a record.
+   *
+   * @return {Object}
+   */
+
+  create(ctx) {
+    return strapi.services.product.create(ctx.request.body);
+  },
+};
+```
+
+#### `update`
+
+```js
+module.exports = {
+  /**
+   * Update a record.
+   *
+   * @return {Object}
+   */
+
+  update(ctx) {
+    return strapi.services.product.update(ctx.params, ctx.request.body);
+  },
+};
+```
+
+#### `delete`
+
+```js
+module.exports = {
+  /**
+   * delete a record.
+   *
+   * @return {Object}
+   */
+
+  delete(ctx) {
+    return strapi.services.product.delete(ctx.params);
   },
 };
 ```
 
 ## Custom controllers
 
-You can also add controller outisde of Content Types to build custom business logic and Api endpoints.
+You can also create custom controllers to build your own business logic and API endpoints.
 
 ### Creating a custom controller?
 
