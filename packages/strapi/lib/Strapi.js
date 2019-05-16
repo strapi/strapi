@@ -390,6 +390,12 @@ class Strapi extends EventEmitter {
       });
   }
 
+  /**
+   * Binds queries with a specific model
+   * @param {string} entity - entity name
+   * @param {string} plugin - plugin name or null
+   * @param {Object} queriesMap - a map of orm to queries object factory (defaults to ./core-api/queries)
+   */
   query(entity, plugin, queriesMap = defaultQueries) {
     if (!entity) {
       throw new Error(

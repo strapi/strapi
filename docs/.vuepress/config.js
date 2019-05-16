@@ -107,6 +107,7 @@ module.exports = {
             '/3.0.0-beta.x/guides/responses',
             '/3.0.0-beta.x/guides/routing',
             '/3.0.0-beta.x/guides/services',
+            '/3.0.0-beta.x/guides/queries',
             '/3.0.0-beta.x/guides/webhooks',
           ],
         },
@@ -129,7 +130,6 @@ module.exports = {
             '/3.0.0-beta.x/plugin-development/plugin-architecture',
             '/3.0.0-beta.x/plugin-development/backend-development',
             '/3.0.0-beta.x/plugin-development/frontend-development',
-
 
             // '/3.0.0-beta.x/plugin-development/ui-components', TODO: Add this file
           ],

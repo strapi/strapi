@@ -11,6 +11,8 @@ When you create a new Content type or a new model. You will see a new empty serv
 Here are the core methods (and their current implementation).
 You can simply copy and paste this code in your own service file to customize the methods.
 
+Youc an read about `strapi.query` calls [here](./queries.md)
+
 ::: warning
 In the following example we will consider your controller, service and model is named `product`
 :::

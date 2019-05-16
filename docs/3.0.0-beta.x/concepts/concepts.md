@@ -24,6 +24,7 @@
   - [Responses](#responses)
   - [Routing](#routing)
   - [Services](#services)
+  - [Queries](#queries)
 
 ---
 
@@ -337,6 +338,16 @@ Services are a set of reusable functions. They are particularly useful to respec
 
 ::: note
 Please refer to the [services guide](../guides/services.md) for more informations.
+:::
+
+---
+
+## Queries
+
+Queries are a awayg to implement database agnostic queries in strapi's core or plugins. 
+
+::: note
+Please refer to the [queries guide](../guides/queries.md) for more informations.
 :::
 
 ---
