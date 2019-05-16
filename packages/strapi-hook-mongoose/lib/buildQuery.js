@@ -5,7 +5,7 @@ const utils = require('./utils')();
  * Build a mongo query
  * @param {Object} options - Query options
  * @param {Object} options.model - The model you are querying
- * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  * @param {boolean} options.aggregate - Force aggregate function to use group by feature
  */
@@ -29,11 +29,12 @@ const getFindCriteria = (model, filters) => {
   let whereSearch = {};
 
   // Handle special search attribute "_q"
-  if (searchObject = where.find(item => item.field === '_q' )) {
+  const searchObject = where.find(item => item.field === '_q' );
+  if (searchObject) {
     const fields = Object.keys(model.attributes);
     whereSearch = {
       $or: fields.map(val => buildWhereClause({ field: val, operator: 'contains', value: searchObject.value })),
-    }
+    };
     // Remove search entry from where
     const searchIndex = where.findIndex(item => item.field === '_q' );
     where.splice(searchIndex, 1);
@@ -41,18 +42,17 @@ const getFindCriteria = (model, filters) => {
 
   // Build object for find method and return it
   const wheres = where.map(buildWhereClause);
-  const findCriteria = {
+  return {
     ...whereSearch,
     ...(wheres.length > 0 ? { $and: wheres } : {})
   };
-  return findCriteria;
 }
 
 /**
  * Builds a simple find query when there are no deep filters
  * @param {Object} options - Query options
  * @param {Object} options.model - The model you are querying
- * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
 const buildSimpleQuery = ({ model, filters, populate }) => {
@@ -73,7 +73,7 @@ const buildSimpleQuery = ({ model, filters, populate }) => {
  * Builds a deep aggregate query when there are deep filters
  * @param {Object} options - Query options
  * @param {Object} options.model - The model you are querying
- * @param {Object} options.filers - An object with the possible filters (start, limit, sort, where)
+ * @param {Object} options.filters - An object with the possible filters (start, limit, sort, where)
  * @param {Object} options.populate - An array of paths to populate
  */
 const buildDeepQuery = ({ model, filters, populate }) => {
