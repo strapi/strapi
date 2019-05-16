@@ -60,6 +60,10 @@ module.exports = {
       folder: {}
     },
 
+    'api/.gitkeep': {
+      copy: 'gitkeep'
+    },
+
     // Empty plugins directory.
     'extensions': {
       folder: {}
