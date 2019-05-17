@@ -32,7 +32,7 @@ const defaultQueries = require('./core-api/queries');
  */
 
 class Strapi extends EventEmitter {
-  constructor({ appPath, autoReload = false } = {}) {
+  constructor({ dir, autoReload = false } = {}) {
     super();
 
     this.setMaxListeners(100);
@@ -62,7 +62,7 @@ class Strapi extends EventEmitter {
     // Expose `plugin`.
     this.plugins = {};
 
-    this.dir = appPath || process.cwd();
+    this.dir = dir || process.cwd();
     const pkgJSON = require(path.resolve(this.dir, 'package.json'));
 
     // Default configurations.

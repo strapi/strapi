@@ -1,42 +1,21 @@
-#!/usr/bin/env node
-
 'use strict';
 
-/**
- * Module dependencies
- */
-
-// Node.js core.
 const path = require('path');
 const cluster = require('cluster');
-const strapi = require('../index');
-
-// Public dependencies
 const _ = require('lodash');
 const fs = require('fs-extra');
 const { cyan } = require('chalk');
 const chokidar = require('chokidar');
 const execa = require('execa');
-const loadConfigFile = require('../load/load-config-files');
 
-// Logger.
-const { cli, logger } = require('strapi-utils');
+const { logger } = require('strapi-utils');
+const strapi = require('../index');
 
 /**
  * `$ strapi develop`
  *
- * Expose method which starts the appropriate instance of Strapi
- * (fire up the application in our working directory).
  */
-
 module.exports = async function({ build }) {
-  // Check that we're in a valid Strapi project.
-  if (!cli.isStrapiApp()) {
-    return console.log(
-      `⛔️ ${cyan('strapi start')} can only be used inside a Strapi project.`
-    );
-  }
-
   const dir = process.cwd();
 
   if (build && !fs.existsSync(path.join(dir, 'build'))) {
@@ -51,7 +30,7 @@ module.exports = async function({ build }) {
   }
 
   try {
-    const strapiInstance = strapi({ appPath: dir, autoReload: true });
+    const strapiInstance = strapi({ dir, autoReload: true });
 
     if (cluster.isMaster) {
       cluster.on('message', (worker, message) => {
@@ -77,7 +56,7 @@ module.exports = async function({ build }) {
     }
 
     if (cluster.isWorker) {
-      watchFileChanges({ appPath: dir, strapiInstance });
+      watchFileChanges({ dir, strapiInstance });
 
       process.on('message', message => {
         switch (message) {
@@ -102,10 +81,10 @@ module.exports = async function({ build }) {
 /**
  * Init file watching to auto restart strapi app
  * @param {Object} options - Options object
- * @param {string} options.appPath - This is the path where the app is located, the watcher will watch the files under this folder
+ * @param {string} options.dir - This is the path where the app is located, the watcher will watch the files under this folder
  * @param {Strapi} options.strapi - Strapi instance
  */
-function watchFileChanges({ appPath, strapiInstance }) {
+function watchFileChanges({ dir, strapiInstance }) {
   const restart = () => {
     if (
       strapiInstance.reload.isWatching &&
@@ -116,7 +95,7 @@ function watchFileChanges({ appPath, strapiInstance }) {
     }
   };
 
-  const watcher = chokidar.watch(appPath, {
+  const watcher = chokidar.watch(dir, {
     ignoreInitial: true,
     ignored: [
       /(^|[/\\])\../,
