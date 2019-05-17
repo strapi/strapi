@@ -79,7 +79,7 @@ program
 
 // `$ strapi new`
 program
-  .command('new')
+  .command('new [name]')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
   .option('--dbclient <dbclient>', 'Database client')
