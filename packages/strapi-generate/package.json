@@ -16,10 +16,10 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "async": "^2.5.0",
-    "fs-extra": "^4.0.0",
-    "lodash": "^4.17.5",
-    "reportback": "^2.0.1",
+    "async": "^2.6.2",
+    "fs-extra": "^8.0.1",
+    "lodash": "^4.17.11",
+    "reportback": "^2.0.2",
     "strapi-utils": "3.0.0-alpha.26.2"
   },
   "author": {
