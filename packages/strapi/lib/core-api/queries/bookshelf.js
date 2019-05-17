@@ -112,8 +112,8 @@ module.exports = ({ model }) => {
             qb.orderBy(filters.sort.key, filters.sort.order);
           }
 
-          if (filters.skip) {
-            qb.offset(_.toNumber(filters.skip));
+          if (filters.start) {
+            qb.offset(_.toNumber(filters.start));
           }
 
           if (filters.limit) {
@@ -173,13 +173,13 @@ const buildSearchQuery = (qb, model, params) => {
 
   if (!_.isNaN(_.toNumber(query))) {
     searchInt.forEach(attribute => {
-      qb.orWhereRaw(`${attribute} = ${_.toNumber(query)}`);
+      qb.orWhereRaw(attribute, _.toNumber(query));
     });
   }
 
   if (query === 'true' || query === 'false') {
     searchBool.forEach(attribute => {
-      qb.orWhereRaw(`${attribute} = ${_.toNumber(query === 'true')}`);
+      qb.orWhereRaw(attribute, _.toNumber(query === 'true'));
     });
   }
 
