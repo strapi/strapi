@@ -15,9 +15,9 @@
   },
   "main": "./lib",
   "dependencies": {
-    "consolidate": "^0.14.5",
-    "koa-views": "^6.1.1",
-    "lodash": "^4.17.5"
+    "consolidate": "^0.15.1",
+    "koa-views": "^6.2.0",
+    "lodash": "^4.17.11"
   },
   "author": {
     "email": "hi@strapi.io",

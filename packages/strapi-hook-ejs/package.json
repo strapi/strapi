@@ -14,7 +14,7 @@
   "main": "./lib",
   "dependencies": {
     "co": "^4.6.0",
-    "koa-ejs": "^4.1.0"
+    "koa-ejs": "^4.2.0"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
