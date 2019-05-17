@@ -128,8 +128,8 @@ module.exports = ({ model }) => {
             qb.orderBy(filters.sort.key, filters.sort.order);
           }
 
-          if (filters.skip) {
-            qb.offset(_.toNumber(filters.skip));
+          if (filters.start) {
+            qb.offset(_.toNumber(filters.start));
           }
 
           if (filters.limit) {
