@@ -1,29 +1,44 @@
 #!/usr/bin/env node
-
 'use strict';
 
-/**
- * Module dependencies
- */
-
-// Public node modules.
 const _ = require('lodash');
-
-// Strapi utilities.
-const program = require('strapi-utils').commander;
 const resolveCwd = require('resolve-cwd');
+const { yellow } = require('chalk');
 
-// Local Strapi dependencies.
+const program = require('strapi-utils').commander;
 const packageJSON = require('../package.json');
 
-/* eslint-disable no-console */
+const checkCwdIsStrapiApp = name => {
+  let logErrorAndExit = () => {
+    console.log(
+      `You need to run ${yellow(
+        `strapi ${name}`
+      )} in a Strapi project. Make sure you are in the right directory`
+    );
+    process.exit(1);
+  };
+
+  try {
+    const pkgJSON = require(process.cwd() + '/package.json');
+    if (!_.has(pkgJSON, 'dependencies.strapi')) {
+      logErrorAndExit(name);
+    }
+  } catch (err) {
+    logErrorAndExit(name);
+  }
+};
 
 const getLocalScript = name => (...args) => {
+  checkCwdIsStrapiApp(name);
+
   const cmdPath = resolveCwd.silent(`strapi/lib/commands/${name}`);
   if (!cmdPath) {
     console.log(
-      `> Error loading the local ${name} command. Strapi might not be installed in your "node_modules". You may need to run "npm install"`
+      `Error loading the local ${yellow(
+        name
+      )} command. Strapi might not be installed in your "node_modules". You may need to run "npm install"`
     );
+    process.exit(1);
   }
 
   return require(cmdPath)(...args);

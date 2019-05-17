@@ -16,7 +16,7 @@ module.exports = async function({ appPath }) {
 
   if (!existsSync(extensionsDir)) {
     throw new Error(
-      `Missing extension folder. Please create one in your app root directory`
+      `Missing extensions folder. Please create one in your app root directory`
     );
   }
 
