@@ -13,7 +13,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "mailgun-js": "0.18.0"
+    "mailgun-js": "0.22.0"
   },
   "strapi": {
     "isProvider": true
