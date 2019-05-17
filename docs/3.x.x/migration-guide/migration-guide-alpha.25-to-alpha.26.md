@@ -101,6 +101,22 @@ fetchAll: (params, populate) => {
 },
 ```
 
+Replace the `fetch` function by the following code.
+
+```js
+  fetch: (params) => {
+    // Select field to populate.
+    const populate = <%= globalID %>.associations
+      .filter(ast => ast.autoPopulate !== false)
+      .map(ast => ast.alias)
+      .join(' ');
+
+    return <%= globalID %>
+      .findOne(_.pick(params, _.keys(<%= globalID %>.schema.paths)))
+      .populate(populate);
+  },
+```
+
 Replace the `count` function by the following code.
 
 ```js
@@ -164,6 +180,22 @@ fetchAll: (params, populate) => {
     .fetchAll({ withRelated })
     .then(data => data.toJSON());
 },
+```
+
+Replace the `fetch` function by the following code.
+
+```js
+  fetch: (params) => {
+    // Select field to populate.
+    const populate = <%= globalID %>.associations
+      .filter(ast => ast.autoPopulate !== false)
+      .map(ast => ast.alias)
+      .join(' ');
+
+    return <%= globalID %>
+      .findOne(_.pick(params, _.keys(<%= globalID %>.schema.paths)))
+      .populate(populate);
+  },
 ```
 
 Replace the `count` function by the following code.
