@@ -520,54 +520,23 @@
             "type": "array",
             "items": {
               "required": [
-                "id",
-                "content"
+                "id"
               ],
               "properties": {
                 "id": {
                   "type": "string"
                 },
-                "content": {
-                  "type": "string"
-                },
                 "content2": {
                   "type": "string"
-                },
-                "bro": {
-                  "type": "string"
-                },
-                "bra": {
-                  "type": "string"
-                },
-                "siblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "articles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeSiblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
                 },
                 "posts": {
                   "type": "array",
                   "items": {
                     "type": "string"
                   }
+                },
+                "title": {
+                  "type": "string"
                 }
               }
             }

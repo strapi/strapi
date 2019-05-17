@@ -2,27 +2,15 @@ type Articles {
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
-  content: String!
   content2: String
-  bro: Articles
-  bra: Articles
-  siblingArticles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
-  articles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
-  deluxeSiblingArticles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
-  deluxeArticles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+  title: String
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
 }
 
 input ArticlesInput {
-  content: String!
   content2: String
-  bro: ID
-  bra: ID
-  siblingArticles: [ID]
-  articles: [ID]
-  deluxeSiblingArticles: [ID]
-  deluxeArticles: [ID]
   posts: [ID]
+  title: String
 }
 
 input createArticlesInput {
@@ -95,15 +83,9 @@ type deleteUserPayload {
 }
 
 input editArticlesInput {
-  content: String
   content2: String
-  bro: ID
-  bra: ID
-  siblingArticles: [ID]
-  articles: [ID]
-  deluxeSiblingArticles: [ID]
-  deluxeArticles: [ID]
   posts: [ID]
+  title: String
 }
 
 input editFileInput {
