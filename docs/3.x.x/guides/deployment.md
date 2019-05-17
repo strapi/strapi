@@ -120,15 +120,15 @@ These next steps involved setting up a production server and user access for dev
 
 Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04). These steps will have you complete the following actions:
 
-1. Logging and set up root user access to your server with SSH.
-2. Creating a new user.
-3. Granting Administrative Privileges to the new user.
-4. Setting up a basic firewall.
-5. Giving your regular user access to the server **with SSH key authentication**.
+1. [Logging and set up root user access to your server with SSH](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-1-%E2%80%94-logging-in-as-root).
+2. [Creating a new user](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-2-%E2%80%94-creating-a-new-user).
+3. [Granting Administrative Privileges to the new user](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-3-%E2%80%94-granting-administrative-privileges).
+4. [Setting up a basic firewall](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-4-%E2%80%94-setting-up-a-basic-firewall).
+5. [Giving your regular user access to the server](https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04#step-5-%E2%80%94-enabling-external-access-for-your-regular-user) **with SSH key authentication**.
 
-After completing these steps:
+Next, install `Node.js`:
 
-6. You will install `Node.js` using the instructions in section `Install Node using a PPA`. Strapi works best on **Node.js v10+**. Follow the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04).
+6. You will install `Node.js` using the instructions in section `Install Node using a PPA`. Strapi works best on **Node.js v10+**. Follow the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa).
 
 After completing the steps to **install Node.js, NPM and the build-essential package**, you may continue to the next section.
 
@@ -142,12 +142,9 @@ A convenient way to maintain your Strapi application and update it during and af
 git --version
 ```
 
-2.  There are two parts to this step:
+2. **OPTIONAL:** Install Git. **NOTE:** Only do if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
 
-- Installing Git - **NOTE:** Only do if not installed, as above.
-- [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
-
-Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
+3. Complete the globel **username** and **GitHub** settings: [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
 
 After installing and configuring Git on your Droplet. Please continue to the next step, [installing the database](#install-the-database-for-your-project).
 
@@ -155,11 +152,11 @@ After installing and configuring Git on your Droplet. Please continue to the nex
 
 Digital Ocean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be completed prior to continuing. You can find links, and any further instructions, to each database guide below:
 
-1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04).
+1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04)(Through **Step 4** - Creating a New Database).
 
-- Create a new `Postgres user and database` (Through Step 4 - Creating a New Database).
+Complete the steps to [install PostgreSQL](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04#step-1-%E2%80%94-installing-postgresql), [add a user](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04#step-3-%E2%80%94-creating-a-new-role) and [create a database](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04#step-4-%E2%80%94-creating-a-new-database).
 
-- In order to connect to a PostgreSQL database with Strapi, it needs either to have a password, or specifically to have stated there is no password by noting a empty string. Follow these commands from your terminal to `alter` the `user` you created and `add a password`:
+2. In order to connect to a PostgreSQL database with Strapi, it needs either to have a password, or specifically to have stated there is no password by noting a empty string. Follow these commands from your terminal to `alter` the `user` you created and `add a password`:
 
 ```bash
 sudo -u postgres psql     //only necessary if you switched away from the postgres@ user
@@ -167,14 +164,16 @@ sudo -u postgres psql     //only necessary if you switched away from the postgre
 psql (10.8 (Ubuntu 10.8-0ubuntu0.18.04.1))
 Type "help" for help.
 
+psql
 postgres=# ALTER USER your-name PASSWORD 'password';
 ALTER ROLE
 postgres=# \q
+exit
 ```
 
 - **Optional:** If your **Development** Strapi project is using **SQLite**, you will need to install a dependency package called `pg`:
 
-  - On your **Development** project:
+  - On your **Development** computer:
 
   `Path: ./my-project/`
 
@@ -235,20 +234,22 @@ From your terminal, `logged in as your non-root user` to your Droplet:
 
 ```bash
 cd ~
-sudo git clone https://github.com/your-name/your-project-repo.git
+git clone https://github.com/your-name/your-project-repo.git
 ```
 
-Next, navigate to the `my-project` folder, the root for Strapi. You will now need to run `sudo npm install` to install the packages for your project, and then `sudo npm run postinstall`. This last command runs scripts that build out your Strapi installation.
+Next, navigate to the `my-project` folder, the root for Strapi. You will now need to run `npm install` to install the packages for your project, and then `npm run postinstall`. This last command runs scripts that build out your Strapi installation.
 
 `Path: ./my-project/`
 
 ```bash
-sudo npm install && sudo npm run postinstall
+cd ./path-to-strapi-root-folder/
+npm install
 ```
 
 Strapi uses `Port: 1337` by default. You will need to configure your `ufw firewall` to allow access to this port:
 
 ```bash
+cd ~
 sudo ufw allow 1337/tcp
 ```
 
@@ -256,19 +257,210 @@ Your Strapi project is now installed on your **Droplet**. You will next need to 
 
 ### Install and configure PM2 Runtime
 
-[PM2 Runtime](https://pm2.io/doc/en/runtime/overview/?utm_source=pm2&utm_medium=website&utm_campaign=rebranding) allows you to keep your Strapi project alive and to reload it without downtime. You will want to install it globally:
+[PM2 Runtime](https://pm2.io/doc/en/runtime/overview/?utm_source=pm2&utm_medium=website&utm_campaign=rebranding) allows you to keep your Strapi project alive and to reload it without downtime.
+
+Ensure you are logged in as a **non-root** user. You will install **PM2** globally:
 
 ```bash
 sudo npm install pm2@latest -g
 ```
 
-Use the following command to set the environment variable to production and start `pm2`:
+Navigate to your **Strapi Project folder** and use the following command to set the environment variable to production and start `pm2`:
+
+`Path: ./my-project/`
 
 ```bash
 sudo NODE_ENV=production pm2 start --name="strapi" server.js -i max
 ```
 
-Your `Strapi` project is now accessible at: `your-ip-address:1337/admin`, in the sections to follow, are a few recommended additional actions to make developing your project more effecient and to set-up a few additional aspects of your server. 
+Follow these steps to have your app launch on system startup. (**NOTE:** These steps follow the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).)
+
+- Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:
+
+```bash
+$ cd ~
+$ sudo pm2 startup systemd
+
+[PM2] Init System found: systemd
+[PM2] To setup the Startup Script, copy/paste the following command:
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
+
+$ sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
+
+[PM2] Init System found: systemd
+Platform systemd
+
+. . .
+
+
+[PM2] [v] Command successfully executed.
++---------------------------------------+
+[PM2] Freeze a process list on reboot via:
+   $ pm2 save
+
+[PM2] Remove init script via:
+   $ pm2 unstartup systemd
+```
+
+- Next, `Save` the new PM2 process list and environment. Then `Start` the service with `systemctl`:
+
+```bash
+sudo pm2 save
+
+[PM2] Saving current process list...
+[PM2] Successfully saved in /home/your-name/.pm2/dump.pm2
+
+```
+
+- **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
+
+Your `Strapi` project is now accessible at: `your-ip-address:1337/admin`, in the sections to follow, are a few recommended additional actions to make developing your project more efficient and to set-up a few additional aspects of your server. 
+
+- Lastly, you will need to configure a `ecosystem.config.js` file. It will establish a `watch` for `pm2` and restarts your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+
+  - You will need to open your `nano` editor and then `copy/paste` the following:
+
+```bash
+cd ~
+sudo pm2 init
+sudo nano ecosystem.config.js
+```
+
+- Next, replace the boilerplate content in the file, with the following:
+
+```js
+module.exports = {
+  apps: [
+    {
+      name: 'your-app-name',
+      script: '.path-to/your-strapi-app/server.js',
+      watch: './root-folder/',
+    },
+  ],
+};
+```
+
+`pm2` is now set-up to watch for any file changes in your project, and will restart the service.
+
+### Set up a webhook
+
+Providing that your project is set-up on GitHub, you will need to configure your **Strapi Project Repository** with a webhook. The following articles provide additional information to the steps below: [GitHub Creating Webhooks Guide](https://developer.github.com/webhooks/creating/) and [Digital Ocean Guide to GitHub WebHooks](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync).
+
+- You will need to access the `Settings` tab for your `Strapi Project Repository`:
+
+  1. Navigate and click to `Settings` for your repository.
+  2. Click on `Webhooks`, then click `Add Webhook`.
+  3. The fields are filled out like this:
+     - Payload URL: Enter `http://your-ip-address:8080`
+     - Content type: Select `application/json`
+     - Which events would you like to trigger this webhook: Select `Just the push event`
+     - Secret: Enter `YourSecret`
+     - Active: Select the checkbox
+  4. Review the fields and click `Add Webhook`.
+
+- Next, you need to create a `Webhook Script` on your server. These commands create a new file called `webhook.js` which will hold two variables:
+
+```bash
+cd ~
+mkdir NodeWebHooks
+cd NodeWebHooks
+sudo nano webhook.js
+```
+
+- In the `nano` editor, copy/paste the following script, but make sure to replace `your_secret_key` and `repo` with the values that correspond to your project, then save and exit:
+
+```js
+var secret = 'your_secret_key';
+var repo = '~/path-to-your-repo/';
+
+const http = require('http');
+const crypto = require('crypto');
+const exec = require('child_process').exec;
+
+http
+  .createServer(function(req, res) {
+    req.on('data', function(chunk) {
+      let sig =
+        'sha1=' +
+        crypto
+          .createHmac('sha1', secret)
+          .update(chunk.toString())
+          .digest('hex');
+
+      if (req.headers['x-hub-signature'] == sig) {
+        exec('cd ' + repo + ' && git pull', (error, stdout, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
+            return;
+          }
+          console.log(`stdout: ${stdout}`);
+          console.log(`stderr: ${stderr}`);
+        });
+      }
+    });
+
+    res.end();
+  })
+  .listen(8080);
+```
+
+- Allow the port to communicate with outside web traffic for `port 8080`:
+
+```bash
+sudo ufw allow 8080/tcp
+```
+
+- You may test your **webhook** by following the instructions [here](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync#step-4-testing-the-webhook).
+
+Earlier you setup `pm2` to start the services (your **Strapi project**) whenever the **Droplet** reboots or is started. You will now do the same for the `webhook` script.
+
+- Install the webhook as a `Systemd` service
+
+  - Create a `webhook.service` file:
+
+```bash
+cd ~
+sudo nano /etc/systemd/system/webhook.service
+```
+
+- In the `nano` editor, copy/paste the following script, but make sure to replace `your-name` **in two places** with your username, then save and exit:
+
+```bash
+[Unit]
+Description=Github webhook
+After=network.target
+
+[Service]
+Environment=NODE_PORT=8080
+Type=simple
+User=your-name
+ExecStart=/usr/bin/nodejs /home/your-name/NodeWebHooks/webhook.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- Enable and start the new service so it starts when the system boots:
+
+```bash
+sudo systemctl enable webhook.service
+sudo systemctl start webhook
+```
+
+- Check the status of the webhook:
+
+```bash
+sudo systemctl status webhook
+```
+
+### Further steps to take
+
+- You can **add a domain name** or **use a subdomain name** for your Strapi project, you will need to [install NGINX and configure it](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04).
+- To **install SSL**, you will need to [install and run Certbot by Let's Encrypt](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-18-04).
+- Set-up [Nginx with HTTP/2 Support](https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-with-http-2-support-on-ubuntu-18-04) for Ubuntu 18.04.
+
+Your `Strapi` project has been installed on a **Digital Ocean Droplet** using **Ubuntu 18.04**.
 
 ## Heroku
 
