@@ -14,7 +14,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "x-generation-date": "04/19/2019 5:18:57 PM"
+    "x-generation-date": "05/17/2019 11:09:48 AM"
   },
   "x-strapi-config": {
     "path": "/documentation",
@@ -3125,348 +3125,14 @@
     "schemas": {
       "Articles": {
         "required": [
-          "id",
-          "content"
+          "id"
         ],
         "properties": {
           "id": {
             "type": "string"
           },
-          "content": {
-            "type": "string"
-          },
           "content2": {
             "type": "string"
-          },
-          "bro": {
-            "required": [
-              "id",
-              "content"
-            ],
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "content": {
-                "type": "string"
-              },
-              "content2": {
-                "type": "string"
-              },
-              "bro": {
-                "type": "string"
-              },
-              "bra": {
-                "type": "string"
-              },
-              "siblingArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "articles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "deluxeSiblingArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "deluxeArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "posts": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "bra": {
-            "required": [
-              "id",
-              "content"
-            ],
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "content": {
-                "type": "string"
-              },
-              "content2": {
-                "type": "string"
-              },
-              "bro": {
-                "type": "string"
-              },
-              "bra": {
-                "type": "string"
-              },
-              "siblingArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "articles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "deluxeSiblingArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "deluxeArticles": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "posts": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "siblingArticles": {
-            "type": "array",
-            "items": {
-              "required": [
-                "id",
-                "content"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "content2": {
-                  "type": "string"
-                },
-                "bro": {
-                  "type": "string"
-                },
-                "bra": {
-                  "type": "string"
-                },
-                "siblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "articles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeSiblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "posts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "articles": {
-            "type": "array",
-            "items": {
-              "required": [
-                "id",
-                "content"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "content2": {
-                  "type": "string"
-                },
-                "bro": {
-                  "type": "string"
-                },
-                "bra": {
-                  "type": "string"
-                },
-                "siblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "articles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeSiblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "posts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "deluxeSiblingArticles": {
-            "type": "array",
-            "items": {
-              "required": [
-                "id",
-                "content"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "content2": {
-                  "type": "string"
-                },
-                "bro": {
-                  "type": "string"
-                },
-                "bra": {
-                  "type": "string"
-                },
-                "siblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "articles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeSiblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "posts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "deluxeArticles": {
-            "type": "array",
-            "items": {
-              "required": [
-                "id",
-                "content"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "content2": {
-                  "type": "string"
-                },
-                "bro": {
-                  "type": "string"
-                },
-                "bra": {
-                  "type": "string"
-                },
-                "siblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "articles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeSiblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "posts": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
           },
           "posts": {
             "type": "array",
@@ -3486,55 +3152,25 @@
                 }
               }
             }
+          },
+          "title": {
+            "type": "string"
           }
         }
       },
       "NewArticles": {
-        "required": [
-          "content"
-        ],
         "properties": {
-          "content": {
-            "type": "string"
-          },
           "content2": {
             "type": "string"
-          },
-          "bro": {
-            "type": "string"
-          },
-          "bra": {
-            "type": "string"
-          },
-          "siblingArticles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "articles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "deluxeSiblingArticles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "deluxeArticles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           },
           "posts": {
             "type": "array",
             "items": {
               "type": "string"
             }
+          },
+          "title": {
+            "type": "string"
           }
         }
       },
@@ -3550,54 +3186,23 @@
             "type": "array",
             "items": {
               "required": [
-                "id",
-                "content"
+                "id"
               ],
               "properties": {
                 "id": {
                   "type": "string"
                 },
-                "content": {
-                  "type": "string"
-                },
                 "content2": {
                   "type": "string"
-                },
-                "bro": {
-                  "type": "string"
-                },
-                "bra": {
-                  "type": "string"
-                },
-                "siblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "articles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeSiblingArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "deluxeArticles": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
                 },
                 "posts": {
                   "type": "array",
                   "items": {
                     "type": "string"
                   }
+                },
+                "title": {
+                  "type": "string"
                 }
               }
             }
