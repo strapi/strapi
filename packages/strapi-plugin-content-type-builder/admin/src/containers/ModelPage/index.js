@@ -207,7 +207,9 @@ export class ModelPage extends React.Component {
           submitContentType(
             this.getModelName(),
             get(modifiedData, this.getModelName()),
-            this.context,
+            Object.assign(this.context, {
+              history: this.props.history,
+            }),
             this.getSource(),
           );
         };
