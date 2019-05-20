@@ -7,7 +7,8 @@
     "url": "git://github.com/strapi/strapi-admin.git"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "echo \"no tests yet\"",
+    "dev": "webpack-dev-server --config webpack.config.dev.js"
   },
   "main": "index.js",
   "dependencies": {
@@ -98,5 +99,9 @@
     "npm": ">= 6.0.0"
   },
   "license": "MIT",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9",
+  "devDependencies": {
+    "webpack-cli": "^3.3.2",
+    "webpack-dev-server": "^3.4.1"
+  }
 }

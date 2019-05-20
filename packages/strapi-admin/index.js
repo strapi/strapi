@@ -151,4 +151,5 @@ async function build({ dir, env, options }) {
 
 module.exports = {
   build,
+  createPluginsJs,
 };
