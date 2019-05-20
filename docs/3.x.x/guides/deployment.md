@@ -87,7 +87,7 @@ If you want to host the administration on another server than the API, [please t
 
 ## Digital Ocean
 
-This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be used locally on the server or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project for development](/3.x.x/getting-started/quick-start.html) that can be pushed to the Digital Ocean server.
+This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project for development](/3.x.x/getting-started/quick-start.html).
 
 ### Digital Ocean Install Requirements
 
@@ -102,17 +102,17 @@ Digital Ocean calls a virtual private server, a [Droplet](https://www.digitaloce
 
 - Ubuntu 18.04 x64
 - STARTER `Standard`
-- Pricing: \$5/mo _(Scroll to the left)_
-- Choose a datacenter region nearest your audience, for example, `Frankfurt`.
-- Select additional options:`[x] IPv6`
-- Add your SSH key **NOTE:** We recommend adding your SSH key
-  - Copy to your clipboard, your existing SSH public key with `pbcopy < ~/.ssh/id_rsa.pub`.
-  - Click on `New SSH Key` and paste in your `SSH Key`. Name this key and Save.
-    Additional instructions on creating and using SSH Keys can be found [here](https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/create-with-openssh/).
-- `Choose a hostname` or leave as-is.
+- Choose an appropriate pricing plan. For example, pricing: `$5/mo` _(Scroll to the left)_
+- Choose a `datacenter` region nearest your audience, for example, `Frankfurt`.
+- **OPTIONAL:** Select additional options, for example, `[x] IPv6`.
+- Add your SSH key **NOTE:** We recommend you `add your SSH key` for better security.
+  - In your terminal, use `pbcopy < ~/.ssh/id_rsa.pub` to copy your existing SSH public key, on your development computer, to the clipboard.
+  - Click on `New SSH Key` and paste in your `SSH Key`. `Name` this SSH key and then `Save`.
+    (Additional instructions on creating and using SSH Keys can be found [here](https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/create-with-openssh/).)
+- **OPTIONAL:** `Choose a hostname` or leave as-is.
 - Click the green `Create` button.
 
-You may continue after **Digital Ocean** has finished creating your **Droplet** as indicated by the progress bar.
+**Digital Ocean** will create your **Droplet** and indicate the progress with a percentage bar. You may continue to the next steps, once this is complete.
 
 ### Setup production server and install Node.js
 
@@ -128,15 +128,15 @@ Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 1
 
 Next, install `Node.js`:
 
-6. You will install `Node.js` using the instructions in section `Install Node using a PPA`. Strapi works best on **Node.js v10+**. Follow the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa).
+6. You will install `Node.js` using the instructions in section **Install Node using a PPA`** from the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa). Strapi works best on **Node.js v10+**.
 
-After completing the steps to **install Node.js, NPM and the build-essential package**, you may continue to the next section.
+After completing the steps to **install Node.js, NPM and the "build-essential package"**, you may continue to the next section.
 
 ### Install Git versioning on your server
 
 A convenient way to maintain your Strapi application and update it during and after initial development is to use [Git Versioning](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control). In order to use Git Versioning, you will need to have Git installed on your Droplet. Droplets should have Git installed by default, so you will check and if not installed, you will need to install it.
 
-1. Check to see if `Git` is installed, if you see a `git version 2.x.x` then you have get installed. Check with the following command:
+1. Check to see if `Git` is installed, if you see a `git version 2.x.x` then you do have `Git` installed. Check with the following command:
 
 ```bash
 git --version
@@ -146,11 +146,15 @@ git --version
 
 3. Complete the globel **username** and **GitHub** settings: [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
 
-After installing and configuring Git on your Droplet. Please continue to the next step, [installing the database](#install-the-database-for-your-project).
+After installing and configuring Git on your Droplet. Please continue to the next step, [installing a database](#install-the-database-for-your-project).
 
 ### Install the database for your project
 
 Digital Ocean has excellent documentation regarding the installation and use of the major databases that work with Strapi. The previous steps above should all be completed prior to continuing. You can find links, and any further instructions, to each database guide below:
+
+:::: tabs cache-lifetime="10" :options="{ useUrlFragment: false }"
+
+::: tab "PostgreSQL" id="postgreSQL-ubuntu"
 
 1. [Install PostgresSQL on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04)(Through **Step 4** - Creating a New Database).
 
@@ -185,12 +189,10 @@ exit
 
 You will need the **database name**, **username** and **password** to continue to the next step of [configuring that database.json file](#local-development-configuration).
 
-2. Install MongoDB
-
 ### Local Development Configuration
 
 - You must have [Git installed and set-up locally](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
-- You must have created a repository for your Strapi Project and have your development project initilized to this repository.
+- You must have created a repository for your Strapi project and have your development project initilized to this repository.
 
 In your code editor, you will need to edit a file called `database.json`. Replace the contents of the file with the following, but change the `username`, `password` and `database` to match your installation.
 
@@ -200,7 +202,7 @@ In your code editor, you will need to edit a file called `database.json`. Replac
 {
   "defaultConnection": "default",
   "connections": {
-    "postgres": {
+    "default": {
       "connector": "strapi-hook-bookshelf",
       "settings": {
         "client": "postgres",
@@ -226,6 +228,16 @@ git push
 
 Please continue to the next section, [Deploy from GitHub](#deploy-from-github).
 
+:::
+
+::: tab "MongoDB" id="mongodb-ubuntu"
+
+2. Install MongoDB
+
+:::
+
+::::
+
 ### Deploy from Github
 
 You will next deploy your Strapi project to your Droplet by `cloning it from GitHub`.
@@ -237,7 +249,7 @@ cd ~
 git clone https://github.com/your-name/your-project-repo.git
 ```
 
-Next, navigate to the `my-project` folder, the root for Strapi. You will now need to run `npm install` to install the packages for your project, and then `npm run postinstall`. This last command runs scripts that build out your Strapi installation.
+Next, navigate to the `my-project` folder, the root for Strapi. You will now need to run `npm install` to install the packages for your project.
 
 `Path: ./my-project/`
 
@@ -251,9 +263,41 @@ Strapi uses `Port: 1337` by default. You will need to configure your `ufw firew
 ```bash
 cd ~
 sudo ufw allow 1337/tcp
+sudo ufw enable
+
+Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
+Firewall is active and enabled on system startup
 ```
 
-Your Strapi project is now installed on your **Droplet**. You will next need to [install and configure PM2 Runtime](#install-and-configure-pm2-runtime).
+Your Strapi project is now installed on your **Droplet**.
+
+**OPTIONAL:** You may see your project and set-up your first administrator user, by doing the following:
+
+- Navigate to the Strapi project folder. `Path: ./my-project/`. Run the follow command from within the Strapi project root:
+
+`Path: ./my-project/`
+
+```bash
+npm run start
+
+> my-project@0.1.0 start /home/path-to-your-project-folder/my-project
+> node server.js
+
+[2019-05-20T14:06:01.553Z] info Time: Mon May 20 2019 14:06:01 GMT+0000 (Coordinated Universal Time)
+[2019-05-20T14:06:01.555Z] info Launched in: 2623 ms
+[2019-05-20T14:06:01.555Z] info Environment: development
+[2019-05-20T14:06:01.555Z] info Process PID: 13221
+[2019-05-20T14:06:01.556Z] info Version: 3.0.0-alpha.25.2 (node v10.15.3)
+[2019-05-20T14:06:01.556Z] info To shut down your server, press <CTRL> + C at any time
+
+[2019-05-20T14:06:01.557Z] info ☄️  Admin panel: http://localhost:1337/admin
+[2019-05-20T14:06:01.557Z] info ⚡️ Server: http://localhost:1337
+
+```
+
+Minimumly, [create an admin user](http://localhost:8080/documentation/3.x.x/getting-started/quick-start.html#_3-create-an-admin-user).
+
+You will next need to [install and configure PM2 Runtime](#install-and-configure-pm2-runtime).
 
 ### Install and configure PM2 Runtime
 
@@ -262,7 +306,7 @@ Your Strapi project is now installed on your **Droplet**. You will next need to 
 Ensure you are logged in as a **non-root** user. You will install **PM2** globally:
 
 ```bash
-sudo npm install pm2@latest -g
+npm install pm2@latest -g
 ```
 
 Navigate to your **Strapi Project folder** and use the following command to set the environment variable to production and start `pm2`:
@@ -270,21 +314,25 @@ Navigate to your **Strapi Project folder** and use the following command to set 
 `Path: ./my-project/`
 
 ```bash
-sudo NODE_ENV=production pm2 start --name="strapi" server.js -i max
+NODE_ENV=production pm2 start --name="strapi" server.js -i max
 ```
 
-Follow these steps to have your app launch on system startup. (**NOTE:** These steps follow the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).)
+Follow the steps below to have your app launch on system startup. (**NOTE:** These steps are based on the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).)
 
 - Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:
 
 ```bash
 $ cd ~
-$ sudo pm2 startup systemd
+$ pm2 startup systemd
 
 [PM2] Init System found: systemd
 [PM2] To setup the Startup Script, copy/paste the following command:
 sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
+```
 
+- Copy/paste the generated command:
+
+```bash
 $ sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
 
 [PM2] Init System found: systemd
@@ -305,7 +353,7 @@ Platform systemd
 - Next, `Save` the new PM2 process list and environment. Then `Start` the service with `systemctl`:
 
 ```bash
-sudo pm2 save
+pm2 save
 
 [PM2] Saving current process list...
 [PM2] Successfully saved in /home/your-name/.pm2/dump.pm2
@@ -316,13 +364,13 @@ sudo pm2 save
 
 Your `Strapi` project is now accessible at: `your-ip-address:1337/admin`, in the sections to follow, are a few recommended additional actions to make developing your project more efficient and to set-up a few additional aspects of your server. 
 
-- Lastly, you will need to configure a `ecosystem.config.js` file. It will establish a `watch` for `pm2` and restarts your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+- Lastly, you will need to configure a `ecosystem.config.js` file. It will establish a `watch` for `pm2` and restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
 
   - You will need to open your `nano` editor and then `copy/paste` the following:
 
 ```bash
 cd ~
-sudo pm2 init
+pm2 init
 sudo nano ecosystem.config.js
 ```
 
@@ -408,6 +456,10 @@ http
 
 ```bash
 sudo ufw allow 8080/tcp
+sudo ufw enable
+
+Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
+Firewall is active and enabled on system startup
 ```
 
 - You may test your **webhook** by following the instructions [here](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync#step-4-testing-the-webhook).
