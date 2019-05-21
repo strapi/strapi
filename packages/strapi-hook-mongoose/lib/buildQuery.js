@@ -72,7 +72,7 @@ const getFindCriteria = (model, filters) => {
         if (operator === 'ignore') {
           return null;
         }
-        return buildWhereClause({ field, operator, value: searchObject.value })
+        return buildWhereClause({ field, operator, value: searchObject.value });
 
       }).filter(item => item !== null && item !== undefined)
     };
