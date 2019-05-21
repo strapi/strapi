@@ -32,7 +32,7 @@
 
 By default, your project's structure will look like this:
 
-- `/api`: The business logic of your project will be in this folder split in sub-folder per API.
+- `/api`: contains the business logic of your project split in sub-folder per API.
   - `**`
     - `/config`: contains the API's configurations ([`routes`](#routing), [`policies`](#policies), etc).
     - [`/controllers`](#controllers): contains the API's custom controllers.
@@ -59,7 +59,7 @@ By default, your project's structure will look like this:
   - [`middleware.json`](../configurations/configurations.html#middleware): contains the middleware settings of the project.
 - [`/hooks`](../advanced/hooks.html): contains the custom hooks of the project.
 - [`/middlewares`](../advanced/middlewares.html): contains the custom middlewares of the project.
-- [`/admin`](../advanced/customize-admin.md): contains your local plugins.
+- [`/admin`](../advanced/customize-admin.md): contains your admin customization files.
 - [`/extensions`](#extensions): contains the files to extend installed plugins.
 - [`/plugins`](#plugin): contains your local plugins.
 - [`/public`](#public-assets): contains the file accessible to the outside world.
@@ -222,7 +222,7 @@ Please refer to the [internationalization's guide](../guides/i18n.md).
 
 ## Plugin
 
-A plugin is like a small independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also provide a UI form the
+A plugin is like a small independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also have it's own UI integrated in the admin panel.
 
 ::: note
 Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.
@@ -344,7 +344,7 @@ Please refer to the [services guide](../guides/services.md) for more information
 
 ## Queries
 
-Queries are a awayg to implement database agnostic queries in strapi's core or plugins. 
+Queries are a way to implement database agnostic queries in strapi's core or plugins. 
 
 ::: note
 Please refer to the [queries guide](../guides/queries.md) for more informations.
