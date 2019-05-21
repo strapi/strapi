@@ -20,7 +20,40 @@ const buildQuery = ({ model, filters = {}, populate = [], aggregate = false } = 
 };
 
 /**
- * Return the find criteria and handle search attribute "_q"
+ * Return the operator for the search part of a query
+ *
+ * @param type
+ * @param value
+ * @return {string}
+ */
+const getSearchFieldOperator = function(type, value) {
+  let operator = 'eq';
+  switch (type) {
+    case 'integer':
+    case 'float':
+    case 'decimal':
+      if (_.isNaN(_.toNumber(value))) {
+        operator = 'ignore'; // value is not numeric
+      }
+      break;
+    case 'string':
+    case 'text':
+    case 'password':
+    case 'enumeration':
+      //return acc.concat({ [curr]: { $regex: params._q, $options: 'i' } });
+      operator = 'contains';
+      break;
+    case 'boolean':
+      if (value !== 'true' && value !== 'false') {
+        operator = 'ignore'; // value is not boolean
+      }
+      break;
+  }
+  return operator;
+};
+
+/**
+ * Return the find criteria for a simple query
  * @param {Object} model - The model to execute the find method on
  * @param {Object} filters - An object with the possible filters (start, limit, sort, where)
  */
@@ -33,7 +66,15 @@ const getFindCriteria = (model, filters) => {
   if (searchObject) {
     const fields = Object.keys(model.attributes);
     whereSearch = {
-      $or: fields.map(val => buildWhereClause({ field: val, operator: 'contains', value: searchObject.value })),
+      $or: fields.map((field) => {
+        // get operator by field type and value
+        const operator = getSearchFieldOperator(model.attributes[field].type, searchObject.value);
+        if (operator === 'ignore') {
+          return null;
+        }
+        return buildWhereClause({ field, operator, value: searchObject.value })
+
+      }).filter(item => item !== null && item !== undefined)
     };
     // Remove search entry from where
     const searchIndex = where.findIndex(item => item.field === '_q' );
@@ -42,10 +83,11 @@ const getFindCriteria = (model, filters) => {
 
   // Build object for find method and return it
   const wheres = where.map(buildWhereClause);
-  return {
+  const findCriteria = {
     ...whereSearch,
     ...(wheres.length > 0 ? { $and: wheres } : {})
   };
+  return findCriteria;
 };
 
 /**
@@ -389,7 +431,7 @@ const formatValue = value => utils.valueToId(value);
  * @param {*} options.value - Where clause alue
  */
 const buildWhereClause = ({ field, operator, value }) => {
-  if (Array.isArray(value) && !['in', 'nin'].includes(operator)) {
+  if (Array.isArray(value) && !['in', 'nin', 'or'].includes(operator)) {
     return {
       $or: value.map(val => buildWhereClause({ field, operator, value: val })),
     };
@@ -410,6 +452,8 @@ const buildWhereClause = ({ field, operator, value }) => {
       return { [field]: { $gt: val } };
     case 'gte':
       return { [field]: { $gte: val } };
+    case 'or':
+      return { $or: Array.isArray(val) ? val : [val] }; // this should do the trick
     case 'in':
       return {
         [field]: {
