@@ -19,8 +19,17 @@ const uuid = require('uuid/v4');
 const rimraf = require('rimraf');
 
 // Logger.
-const { packageManager } = require('strapi-utils');
 const trackSuccess = require('./success');
+
+function hasYarn() {
+  try {
+    const { code } = execa.shellSync('yarnpkg --version');
+    if (code === 0) return true;
+    return false;
+  } catch (err) {
+    return false;
+  }
+}
 
 /**
  * This `before` function is run before generating targets.
@@ -45,6 +54,7 @@ module.exports = (scope, cb) => {
     year: new Date().getFullYear(),
     license: 'MIT',
     database: {},
+    hasYarn: hasYarn(),
     additionalsDependencies: [
       'strapi-plugin-settings-manager',
       'strapi-plugin-content-type-builder',
@@ -181,192 +191,6 @@ module.exports = (scope, cb) => {
 
     scope.client = answers.client;
 
-    const asyncFn = [
-      new Promise(async resolve => {
-        const isMongo = scope.client.database === 'mongo';
-        const isSQLite = scope.database.settings.client === 'sqlite';
-
-        let answers = await inquirer.prompt([
-          {
-            when: !hasDatabaseConfig && !isSQLite,
-            type: 'input',
-            name: 'database',
-            message: 'Database name:',
-            default: _.get(scope.database, 'database', scope.name),
-          },
-          {
-            when: !hasDatabaseConfig && !isSQLite,
-            type: 'input',
-            name: 'host',
-            message: 'Host:',
-            default: _.get(scope.database, 'host', '127.0.0.1'),
-          },
-          {
-            when: !hasDatabaseConfig && isMongo,
-            type: 'boolean',
-            name: 'srv',
-            message: '+srv connection:',
-            default: _.get(scope.database, 'srv', false),
-          },
-          {
-            when: !hasDatabaseConfig && !isSQLite,
-            type: 'input',
-            name: 'port',
-            message: `Port${
-              isMongo ? ' (It will be ignored if you enable +srv)' : ''
-            }:`,
-            default: answers => {
-              // eslint-disable-line no-unused-vars
-              if (_.get(scope.database, 'port')) {
-                return scope.database.port;
-              }
-
-              const ports = {
-                mongo: 27017,
-                postgres: 5432,
-                mysql: 3306,
-              };
-
-              return ports[scope.client.database];
-            },
-          },
-          {
-            when: !hasDatabaseConfig && !isSQLite,
-            type: 'input',
-            name: 'username',
-            message: 'Username:',
-            default: _.get(scope.database, 'username', undefined),
-          },
-          {
-            when: !hasDatabaseConfig && !isSQLite,
-            type: 'password',
-            name: 'password',
-            message: 'Password:',
-            mask: '*',
-            default: _.get(scope.database, 'password', undefined),
-          },
-          {
-            when: !hasDatabaseConfig && isMongo,
-            type: 'input',
-            name: 'authenticationDatabase',
-            message: 'Authentication database (Maybe "admin" or blank):',
-            default: _.get(scope.database, 'authenticationDatabase', undefined),
-          },
-          {
-            when: !hasDatabaseConfig && !isSQLite,
-            type: 'boolean',
-            name: 'ssl',
-            message: 'Enable SSL connection:',
-            default: _.get(scope.database, 'ssl', false),
-          },
-          {
-            when: !hasDatabaseConfig && isSQLite && !isQuick,
-            type: 'input',
-            name: 'filename',
-            message: 'Filename:',
-            default: () => '.tmp/data.db',
-          },
-        ]);
-
-        if (isQuick) {
-          answers.filename = '.tmp/data.db';
-        }
-
-        if (hasDatabaseConfig) {
-          answers = _.merge(
-            _.omit(scope.database.settings, ['client']),
-            scope.database.options
-          );
-        }
-
-        scope.database.settings.host = answers.host;
-        scope.database.settings.port = answers.port;
-        scope.database.settings.database = answers.database;
-        scope.database.settings.username = answers.username;
-        scope.database.settings.password = answers.password;
-
-        if (answers.filename) {
-          scope.database.settings.filename = answers.filename;
-        }
-        if (answers.srv) {
-          scope.database.settings.srv = _.toString(answers.srv) === 'true';
-        }
-        if (answers.authenticationDatabase) {
-          scope.database.options.authenticationDatabase =
-            answers.authenticationDatabase;
-        }
-
-        // SQLite requirements.
-        if (isSQLite) {
-          // Necessary for SQLite configuration (https://knexjs.org/#Builder-insert).
-          scope.database.options = {
-            useNullAsDefault: true,
-          };
-        }
-
-        if (answers.ssl && scope.client.database === 'mongo') {
-          scope.database.options.ssl = _.toString(answers.ssl) === 'true';
-        } else if (answers.ssl) {
-          scope.database.settings.ssl = _.toString(answers.ssl) === 'true';
-        }
-
-        console.log();
-        if (isQuick) {
-          console.log('✅ Connected to the database');
-        } else {
-          console.log(
-            '⏳ Testing database connection...\r\nIt might take a minute, please have a coffee ☕️'
-          );
-        }
-
-        resolve();
-      }),
-      new Promise(resolve => {
-        const isStrapiInstalledWithNPM = packageManager.isStrapiInstalledWithNPM();
-        let packageCmd = packageManager.commands(
-          'install --prefix',
-          scope.tmpPath
-        );
-        // Manually create the temp directory for yarn
-        if (!isStrapiInstalledWithNPM) {
-          fs.ensureDirSync(scope.tmpPath);
-        }
-
-        let cmd = `${packageCmd} ${scope.client.connector}@${
-          scope.strapiPackageJSON.version
-        }`;
-
-        if (scope.client.module) {
-          cmd += ` ${scope.client.module}`;
-        }
-
-        if (scope.client.connector === 'strapi-hook-bookshelf') {
-          cmd += ` strapi-hook-knex@${scope.strapiPackageJSON.version}`;
-          scope.additionalsDependencies = scope.additionalsDependencies.concat([
-            'strapi-hook-knex',
-            'knex',
-          ]);
-        }
-
-        if (isQuick) {
-          scope.client.version = 'latest';
-          return resolve();
-        }
-
-        execa.shell(cmd).then(() => {
-          if (scope.client.module) {
-            const lock = require(path.join(
-              `${scope.tmpPath}`,
-              '/node_modules/',
-              `${scope.client.module}/package.json`
-            ));
-            scope.client.version = lock.version;
-          }
-          resolve();
-        });
-      }),
-    ];
-
     const connectedToTheDatabase = (withMessage = true) => {
       if (withMessage) {
         console.log();
@@ -386,35 +210,224 @@ module.exports = (scope, cb) => {
       cb.success();
     };
 
-    Promise.all(asyncFn).then(() => {
-      // Bypass real connection test.
-      if (isQuick) {
-        return connectedToTheDatabase(false);
-      }
+    Promise.all([
+      handleCustomDatabase({ scope, isQuick, hasDatabaseConfig }),
+      installDatabaseTestingDep({ scope, isQuick }),
+    ])
+      .then(() => {
+        // Bypass real connection test.
+        if (isQuick) {
+          return connectedToTheDatabase(false);
+        }
 
-      try {
-        const connectivityFile = path.join(
-          scope.tmpPath,
-          'node_modules',
-          scope.client.connector,
-          'lib',
-          'utils',
-          'connectivity.js'
-        );
+        try {
+          const connectivityFile = path.join(
+            scope.tmpPath,
+            'node_modules',
+            scope.client.connector,
+            'lib',
+            'utils',
+            'connectivity.js'
+          );
 
-        require(connectivityFile)(
-          scope,
-          connectedToTheDatabase,
-          connectionValidation
-        );
-      } catch (err) {
-        trackSuccess('didNotConnectDatabase', scope, err);
+          require(connectivityFile)(
+            scope,
+            connectedToTheDatabase,
+            connectionValidation
+          );
+        } catch (err) {
+          trackSuccess('didNotConnectDatabase', scope, err);
+          console.log(err);
+          rimraf.sync(scope.tmpPath);
+          cb.error();
+        }
+      })
+      .catch(err => {
         console.log(err);
-        rimraf.sync(scope.tmpPath);
-        cb.error();
-      }
-    });
+        cb.error(err);
+      });
   };
 
   connectionValidation();
 };
+
+async function handleCustomDatabase({ scope, hasDatabaseConfig, isQuick }) {
+  const isMongo = scope.client.database === 'mongo';
+  const isSQLite = scope.database.settings.client === 'sqlite';
+
+  let answers = await inquirer.prompt([
+    {
+      when: !hasDatabaseConfig && !isSQLite,
+      type: 'input',
+      name: 'database',
+      message: 'Database name:',
+      default: _.get(scope.database, 'database', scope.name),
+    },
+    {
+      when: !hasDatabaseConfig && !isSQLite,
+      type: 'input',
+      name: 'host',
+      message: 'Host:',
+      default: _.get(scope.database, 'host', '127.0.0.1'),
+    },
+    {
+      when: !hasDatabaseConfig && isMongo,
+      type: 'boolean',
+      name: 'srv',
+      message: '+srv connection:',
+      default: _.get(scope.database, 'srv', false),
+    },
+    {
+      when: !hasDatabaseConfig && !isSQLite,
+      type: 'input',
+      name: 'port',
+      message: `Port${
+        isMongo ? ' (It will be ignored if you enable +srv)' : ''
+      }:`,
+      default: answers => {
+        // eslint-disable-line no-unused-vars
+        if (_.get(scope.database, 'port')) {
+          return scope.database.port;
+        }
+
+        const ports = {
+          mongo: 27017,
+          postgres: 5432,
+          mysql: 3306,
+        };
+
+        return ports[scope.client.database];
+      },
+    },
+    {
+      when: !hasDatabaseConfig && !isSQLite,
+      type: 'input',
+      name: 'username',
+      message: 'Username:',
+      default: _.get(scope.database, 'username', undefined),
+    },
+    {
+      when: !hasDatabaseConfig && !isSQLite,
+      type: 'password',
+      name: 'password',
+      message: 'Password:',
+      mask: '*',
+      default: _.get(scope.database, 'password', undefined),
+    },
+    {
+      when: !hasDatabaseConfig && isMongo,
+      type: 'input',
+      name: 'authenticationDatabase',
+      message: 'Authentication database (Maybe "admin" or blank):',
+      default: _.get(scope.database, 'authenticationDatabase', undefined),
+    },
+    {
+      when: !hasDatabaseConfig && !isSQLite,
+      type: 'boolean',
+      name: 'ssl',
+      message: 'Enable SSL connection:',
+      default: _.get(scope.database, 'ssl', false),
+    },
+    {
+      when: !hasDatabaseConfig && isSQLite && !isQuick,
+      type: 'input',
+      name: 'filename',
+      message: 'Filename:',
+      default: () => '.tmp/data.db',
+    },
+  ]);
+
+  if (isQuick) {
+    answers.filename = '.tmp/data.db';
+  }
+
+  if (hasDatabaseConfig) {
+    answers = _.merge(
+      _.omit(scope.database.settings, ['client']),
+      scope.database.options
+    );
+  }
+
+  scope.database.settings.host = answers.host;
+  scope.database.settings.port = answers.port;
+  scope.database.settings.database = answers.database;
+  scope.database.settings.username = answers.username;
+  scope.database.settings.password = answers.password;
+
+  if (answers.filename) {
+    scope.database.settings.filename = answers.filename;
+  }
+  if (answers.srv) {
+    scope.database.settings.srv = _.toString(answers.srv) === 'true';
+  }
+  if (answers.authenticationDatabase) {
+    scope.database.options.authenticationDatabase =
+      answers.authenticationDatabase;
+  }
+
+  // SQLite requirements.
+  if (isSQLite) {
+    // Necessary for SQLite configuration (https://knexjs.org/#Builder-insert).
+    scope.database.options = {
+      useNullAsDefault: true,
+    };
+  }
+
+  if (answers.ssl && scope.client.database === 'mongo') {
+    scope.database.options.ssl = _.toString(answers.ssl) === 'true';
+  } else if (answers.ssl) {
+    scope.database.settings.ssl = _.toString(answers.ssl) === 'true';
+  }
+
+  console.log();
+  if (isQuick) {
+    console.log('✅ Connected to the database');
+  } else {
+    console.log(
+      '⏳ Testing database connection...\r\nIt might take a minute, please have a coffee ☕️'
+    );
+  }
+}
+
+async function installDatabaseTestingDep({ scope, isQuick }) {
+  let packageCmd = scope.hasYarn
+    ? `yarnpkg --cwd ${scope.tmpPath} add`
+    : `npm install --prefix ${scope.tmpPath}`;
+
+  // Manually create the temp directory for yarn
+  if (scope.hasYarn) {
+    await fs.ensureDir(scope.tmpPath);
+  }
+
+  let cmd = `${packageCmd} ${scope.client.connector}@${
+    scope.strapiPackageJSON.version
+  }`;
+
+  if (scope.client.module) {
+    cmd += ` ${scope.client.module}`;
+  }
+
+  if (scope.client.connector === 'strapi-hook-bookshelf') {
+    cmd += ` strapi-hook-knex@${scope.strapiPackageJSON.version}`;
+    scope.additionalsDependencies = scope.additionalsDependencies.concat([
+      'strapi-hook-knex',
+      'knex',
+    ]);
+  }
+
+  if (isQuick) {
+    scope.client.version = 'latest';
+    return;
+  }
+
+  await execa.shell(cmd);
+
+  if (scope.client.module) {
+    const lock = require(path.join(
+      `${scope.tmpPath}`,
+      '/node_modules/',
+      `${scope.client.module}/package.json`
+    ));
+    scope.client.version = lock.version;
+  }
+}

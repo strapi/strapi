@@ -13,16 +13,14 @@ const ora = require('ora');
 const execa = require('execa');
 
 // Logger.
-const { packageManager } = require('strapi-utils');
 const trackSuccess = require('./success');
 
 const installArguments = ['install', '--production', '--no-optional'];
-const runInstall = cwd => {
-  if (packageManager.isStrapiInstalledWithNPM()) {
-    return execa('npm', installArguments, { cwd });
+const runInstall = ({ rootPath, hasYarn }) => {
+  if (hasYarn) {
+    return execa('yarnpkg', installArguments, { cwd: rootPath });
   }
-
-  return execa('yarn', installArguments, { cwd });
+  return execa('npm', installArguments, { cwd: rootPath });
 };
 
 module.exports = async (scope, cb) => {
@@ -41,7 +39,7 @@ module.exports = async (scope, cb) => {
   loader.start('Installing dependencies ...');
 
   try {
-    await runInstall(scope.rootPath);
+    await runInstall(scope);
     loader.succeed();
   } catch (err) {
     loader.fail();

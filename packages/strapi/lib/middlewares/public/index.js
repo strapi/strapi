@@ -22,6 +22,12 @@ module.exports = strapi => {
      */
 
     initialize: function(cb) {
+      const staticDir = path.resolve(
+        strapi.dir,
+        strapi.config.middleware.settings.public.path ||
+          strapi.config.paths.static
+      );
+
       // Serve /public index page.
       strapi.router.route({
         method: 'GET',
@@ -32,14 +38,10 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static(
-            strapi.config.middleware.settings.public.path ||
-              strapi.config.paths.static,
-            {
-              maxage: strapi.config.middleware.settings.public.maxAge,
-              defer: true,
-            }
-          ),
+          strapi.koaMiddlewares.static(staticDir, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true,
+          }),
         ],
       });
 
@@ -57,14 +59,10 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static(
-            strapi.config.middleware.settings.public.path ||
-              strapi.config.paths.static,
-            {
-              maxage: strapi.config.middleware.settings.public.maxAge,
-              defer: true,
-            }
-          ),
+          strapi.koaMiddlewares.static(staticDir, {
+            maxage: strapi.config.middleware.settings.public.maxAge,
+            defer: true,
+          }),
         ],
       });
 
@@ -74,6 +72,8 @@ module.exports = strapi => {
       )
         ? strapi.config.currentEnvironment.server.admin.path
         : '/admin';
+
+      const buildDir = path.resolve(strapi.dir, 'build');
 
       // Serve /admin index page.
       strapi.router.route({
@@ -85,7 +85,7 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static('./build', {
+          strapi.koaMiddlewares.static(buildDir, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true,
           }),
@@ -106,7 +106,7 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static('./build', {
+          strapi.koaMiddlewares.static(buildDir, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true,
           }),
@@ -123,7 +123,7 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static('./build', {
+          strapi.koaMiddlewares.static(buildDir, {
             maxage: strapi.config.middleware.settings.public.maxAge,
             defer: true,
           }),
