@@ -397,29 +397,29 @@ class Strapi extends EventEmitter {
       );
     }
 
-    const modelName = entity.toLowerCase();
+    const modelKey = entity.toLowerCase();
 
     const model =
       plugin === 'admin'
-        ? _.get(strapi.admin, ['models', modelName], undefined)
-        : _.get(strapi.plugins, [plugin, 'models', modelName]) ||
-          _.get(strapi, ['models', modelName]) ||
+        ? _.get(strapi.admin, ['models', modelKey], undefined)
+        : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
+          _.get(strapi, ['models', modelKey]) ||
           undefined;
 
     if (!model) {
-      throw new Error(`The model ${modelName} can't be found.`);
+      throw new Error(`The model ${modelKey} can't be found.`);
     }
 
     const connector = model.orm;
 
     if (!connector) {
       throw new Error(
-        `Impossible to determine the use ORM for the model ${modelName}.`
+        `Impossible to determine the use ORM for the model ${modelKey}.`
       );
     }
 
     let buildQueries = queriesMap[connector];
-    let queries = buildQueries({ model, strapi: this });
+    let queries = buildQueries({ model, modelKey, strapi: this });
 
     return Object.assign(queries, {
       orm: connector,

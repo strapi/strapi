@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
-module.exports = ({ model }) => {
+module.exports = ({ model, modelKey }) => {
   return {
     find(params, populate) {
       const withRelated =
@@ -95,7 +95,7 @@ module.exports = ({ model }) => {
 
     search(params, populate) {
       // Convert `params` object to filters compatible with Bookshelf.
-      const filters = strapi.utils.models.convertParams(model.globalId, params);
+      const filters = strapi.utils.models.convertParams(modelKey, params);
 
       // Select field to populate.
       const withRelated =

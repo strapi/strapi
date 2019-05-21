@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
-module.exports = ({ model, strapi }) => {
+module.exports = ({ model, modelKey, strapi }) => {
   const assocs = model.associations.map(ast => ast.alias);
 
   const defaultPopulate = model.associations
@@ -108,7 +108,7 @@ module.exports = ({ model, strapi }) => {
 
     search(params, populate) {
       // Convert `params` object to filters compatible with Mongo.
-      const filters = strapi.utils.models.convertParams(model.globalId, params);
+      const filters = strapi.utils.models.convertParams(modelKey, params);
 
       const $or = buildSearchOr(model, params._q);
 
