@@ -4,6 +4,7 @@ type Articles {
   updated_at: DateTime!
   content2: String
   title: String
+  image: UploadFile
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
 }
 
@@ -11,6 +12,7 @@ input ArticlesInput {
   content2: String
   posts: [ID]
   title: String
+  image: ID
 }
 
 input createArticlesInput {
@@ -86,6 +88,7 @@ input editArticlesInput {
   content2: String
   posts: [ID]
   title: String
+  image: ID
 }
 
 input editFileInput {
@@ -145,9 +148,6 @@ input InputID {
   id: ID!
 }
 
-"""
-The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
-"""
 scalar JSON
 
 """The `Long` scalar type represents 52-bit integers"""

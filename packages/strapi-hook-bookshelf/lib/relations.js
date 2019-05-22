@@ -347,6 +347,8 @@ module.exports = {
         [`${params.alias}_type`]: params.ref,
         field: params.field
       }, _.isUndefined))
-      .destroy();
+      .destroy({
+        require: false
+      });
   }
 };

@@ -23,6 +23,11 @@
     },
     "title": {
       "type": "string"
+    },
+    "image": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
     }
   }
 }
