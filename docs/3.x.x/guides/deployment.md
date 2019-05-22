@@ -101,13 +101,13 @@ Digital Ocean calls a virtual private server, a [Droplet](https://www.digitaloce
 2. `Create a Droplet` by clicking on `New Droplet`. Choose these options:
 
 - Ubuntu 18.04 x64
-- STARTER `Standard`
-- Choose an appropriate pricing plan. For example, pricing: `$5/mo` _(Scroll to the left)_
-- Choose a `datacenter` region nearest your audience, for example, `Frankfurt`.
-- **OPTIONAL:** Select additional options, for example, `[x] IPv6`.
+- STARTER `Standard`
+- Choose an appropriate pricing plan. For example, pricing: `$5/mo` _(Scroll to the left)_
+- Choose a `datacenter` region nearest your audience, for example, `New York`.
+- **OPTIONAL:** Select additional options, for example, `[x] IPv6`.
 - Add your SSH key **NOTE:** We recommend you `add your SSH key` for better security.
-  - In your terminal, use `pbcopy < ~/.ssh/id_rsa.pub` to copy your existing SSH public key, on your development computer, to the clipboard.
-  - Click on `New SSH Key` and paste in your `SSH Key`. `Name` this SSH key and then `Save`.
+  - In your terminal, use `pbcopy < ~/.ssh/id_rsa.pub` to copy your existing SSH public key, on your development computer, to the clipboard.
+  - Click on `New SSH Key` and paste in your `SSH Key`. `Name` this SSH key and then `Save`.
     (Additional instructions on creating and using SSH Keys can be found [here](https://www.digitalocean.com/docs/droplets/how-to/add-ssh-keys/create-with-openssh/).)
 - **OPTIONAL:** `Choose a hostname` or leave as-is.
 - Click the green `Create` button.
@@ -128,7 +128,7 @@ Follow the official [Digital Ocean docs for initial server set-up using Ubuntu 1
 
 Next, install `Node.js`:
 
-6. You will install `Node.js` using the instructions in section **Install Node using a PPA** from the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa).
+6. You will install `Node.js` using the instructions in section **Install Node using a PPA** from the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa).
 
 After completing the steps to **install Node.js, NPM and the "build-essential package"**, you may continue to the next section.
 
@@ -162,7 +162,7 @@ Digital Ocean has excellent documentation regarding the installation and use of 
 
 Complete the steps to [install PostgreSQL](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04#step-1-%E2%80%94-installing-postgresql), [add a user](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04#step-3-%E2%80%94-creating-a-new-role) and [create a database](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04#step-4-%E2%80%94-creating-a-new-database).
 
-2. In order to connect to a PostgreSQL database with Strapi, it needs either to have a password, or specifically state there is no password by noting a empty string. Follow these commands from your terminal to `alter` the `user` you created and `add a password`:
+2. In order to connect to a PostgreSQL database with Strapi, it needs either to have a password, or specifically state there is no password by noting a empty string. Follow these commands from your terminal to `alter` the `user` you created and `add a password`:
 
 ```bash
 sudo -u postgres psql     //only necessary if you switched away from the postgres@ user
@@ -177,7 +177,7 @@ postgres=# \q
 exit
 ```
 
-- **Optional:** If in **Development**, your Strapi project is uses **SQLite**, you will need to install a dependency package called `pg`:
+- **Optional:** If in **Development**, your Strapi project is uses **SQLite**, you will need to install a dependency package called `pg`:
 
   - On your **Development** computer:
 
@@ -254,7 +254,7 @@ cd ./path-to-strapi-root-folder/
 npm install
 ```
 
-Strapi uses `Port: 1337` by default. You will need to configure your `ufw firewall` to allow access to this port:
+Strapi uses `Port: 1337` by default. You will need to configure your `ufw firewall` to allow access to this port:
 
 ```bash
 cd ~
@@ -358,9 +358,9 @@ pm2 save
 
 - **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
 
-Your `Strapi` project is now accessible at: `http://your-ip-address:1337/admin`, in the sections to follow, are a few recommended additional actions to make developing your project more efficient and to set-up a few additional aspects of your server. 
+Your `Strapi` project is now accessible at: `http://your-ip-address:1337/admin`, in the sections to follow, are a few recommended additional actions to make developing your project more efficient and to set-up a few additional aspects of your server.
 
-- Lastly, you will need to configure a `ecosystem.config.js` file. It will establish a `watch` for `pm2` and restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+- Lastly, you will need to configure a `ecosystem.config.js` file. It will establish a `watch` for `pm2` and restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
 
   - You will need to open your `nano` editor and then `copy/paste` the following:
 
@@ -379,6 +379,8 @@ module.exports = {
       name: 'your-app-name',
       script: '.path-to/your-strapi-app/server.js',
       watch: './strapi-project-root/',
+      ignore_watch : ["node_modules", "public"],
+      watch_delay: 1000,
     },
   ],
 };
