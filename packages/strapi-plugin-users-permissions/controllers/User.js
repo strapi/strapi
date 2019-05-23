@@ -17,13 +17,19 @@ module.exports = {
    */
 
   find: async (ctx, next, { populate } = {}) => {
-    let data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query, populate);
-    data.reduce((acc, user) => {
-      acc.push(_.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']));
-      return acc;
-    }, []);
+    let users;  
 
-    // Send 200 `ok`
+    if (_.has(ctx.query, '_q')) {
+      // use core strapi query to search for users
+      users = await strapi
+        .query('user', 'users-permissions')
+        .search(ctx.query, populate);
+
+    } else {
+      users = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query, populate);
+    }
+
+    const data = users.map(user => _.omit(user, ['password', 'resetPasswordToken']));
     ctx.send(data);
   },
 

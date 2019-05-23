@@ -163,7 +163,7 @@ module.exports = async ({ ORM, loadedModel, definition, connection, model }) => 
 
             if (type) {
               const col = tbl.specificType(key, type);
-              if (attribute.required) {
+              if (attribute.required && definition.client !== 'sqlite3') {
                 col.notNullable();
               }
             }
