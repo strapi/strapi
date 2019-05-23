@@ -67,10 +67,10 @@ module.exports = ({
       publicPath: options.publicPath,
       // Utilize long-term caching by adding content hashes (not compilation hashes)
       // to compiled assets for production
-      filename: isProduction ? '[name].js' : '[name].[chunkhash].js',
+      filename: isProduction ? '[name].[contenthash:8].js' : 'bundle.js',
       chunkFilename: isProduction
-        ? '[name].chunk.js'
-        : '[name].[chunkhash].chunk.js',
+        ? '[name].[contenthash:8].chunk.js'
+        : '[name].chunk.js',
     },
     optimization: {
       minimize: isProduction,
