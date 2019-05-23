@@ -537,6 +537,9 @@
                 },
                 "title": {
                   "type": "string"
+                },
+                "image": {
+                  "type": "string"
                 }
               }
             }
