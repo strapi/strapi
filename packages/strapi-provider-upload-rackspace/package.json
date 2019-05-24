@@ -10,7 +10,7 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "pkgcloud": "^1.5.0",
+    "pkgcloud": "^2.0.0",
     "streamifier": "^0.1.1"
   },
   "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
