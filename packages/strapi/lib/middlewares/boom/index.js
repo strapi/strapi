@@ -26,18 +26,26 @@ module.exports = strapi => {
           await next();
         } catch (error) {
           // emit error if configured
-          if (_.get(strapi, 'config.currentEnvironment.server.emitErrors', false)) {
+          if (
+            _.get(strapi, 'config.currentEnvironment.server.emitErrors', false)
+          ) {
             strapi.app.emit('error', error, ctx);
           }
 
           // Log error.
-          console.error(error);
+          strapi.log.error(error);
 
-          // Wrap error into a Boom's response.
-          ctx.status = error.status || 500;
-          ctx.body = _.get(ctx.body, 'isBoom')
-            ? ctx.body || error && error.message
-            : Boom.wrap(error, ctx.status);
+          // if the error is a boom error (e.g throw strapi.errors.badRequest)
+          if (error.isBoom) {
+            ctx.status = error.output.statusCode;
+            ctx.body = error.output.payload;
+          } else {
+            // Wrap error into a Boom's response.
+            ctx.status = error.status || 500;
+            ctx.body = _.get(ctx.body, 'isBoom')
+              ? ctx.body || (error && error.message)
+              : Boom.wrap(error, ctx.status);
+          }
         }
 
         if (ctx.response.headers.location) {
@@ -84,9 +92,7 @@ module.exports = strapi => {
         this.body = data;
       };
 
-      this.delegator
-        .method('send')
-        .method('created');
-    }
+      this.delegator.method('send').method('created');
+    },
   };
 };

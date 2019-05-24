@@ -23,6 +23,7 @@
     "@babel/runtime": "^7.4.3",
     "autoprefixer": "^9.5.1",
     "babel-loader": "^8.0.5",
+    "bcryptjs": "^2.4.3",
     "chalk": "^2.4.2",
     "classnames": "^2.2.6",
     "cross-env": "^5.0.5",
