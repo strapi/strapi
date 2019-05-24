@@ -7,6 +7,7 @@ Strapi gives you many possible deployment options for your project or applicatio
 **Table of contents:**
 
 - [Configuration](#configuration)
+- [Amazon AWS](#amazon-aws)
 - [Digital Ocean](#digital-ocean)
 - [Heroku](#heroku)
 - [Docker](#docker)
@@ -84,6 +85,93 @@ We highly recommend to use [pm2](https://github.com/Unitech/pm2/) to manage your
 ### Advanced configurations
 
 If you want to host the administration on another server than the API, [please take a look at this dedicated section](../advanced/customize-admin.md#deployment).
+
+## Amazon AWS
+
+This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect to an [Amazon AWS S3](https://aws.amazon.com/s3/) for hosting and serving the images within your project. Prior to starting this guide, you should have created a [Strapi project](/3.x.x/getting-started/quick-start.html).
+
+### Amazon AWS Install Requirement and creating an IAM non-root user
+
+- You must have a free [Amazon AWS](aws.amazon.com/free) before doing these steps.
+
+Best practices for using **AWS Amazon** services indicate not using your root account user and using instead the [IAM (AWS Identity and Access Management) service](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html). Your root user is only used for a very [few select tasks](https://docs.aws.amazon.com/general/latest/gr/aws_tasks-that-require-root.html). You create an **Administrator user and Group** for such things as billing. And other tasks are done with a **regular IAM User**. You will find your unique **IAM users sign-in link** located at the top of the [IAM Console](https://console.aws.amazon.com/iam/home).
+
+1. Follow these instructions for [creating your Administrator IAM Admin User and Group](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html).
+2. Next, create a **regular user** for the creation and management of your Strapi project.
+
+- Log out of your **root user** and log in to your **administrator** user you just created.
+- Return to the IAM Console by `searching for IAM` and clicking or going here: [IAM Console](https://console.aws.amazon.com/iam/home).
+- Click on `Users`, in the left hand menu, and then click `Add User`:
+  1. In the **Set user details** screen:
+  - Provide a **User name**.
+  - **Access Type**: Check both `Programmatic access` and `AWS Management Console access`.
+  - `Autogenerate a password` or click `Custom password` and provide one.
+  - **OPTIONAL:** For simplicity, `uncheck` the **Require password reset**.
+  - Click `Next: Permissions`.
+  2. In the **Set Permissions** screen, do the following:
+  - Click `Create group`, name it, e.g. `Developers`, and then choose appropriate policies under **Policy Name**:
+    - search for `ec2` and check `AmazonEC2FullAccess`
+    - search for `RDS` and check `AmazonRDSFullAccess`
+    - search for `s3` and check `AmazonS3FullAccess`
+    - Click `Create group`
+  - Ensure your user is part of this new `Developers` group, by clicking to `Add user to group` and check the `Developers` group.
+  - Click `Next: Tags`.
+  3. **Add tags** (optional)
+  - This step is **optional** and based on your workflow and project scope.
+  - Click `Next: Review`.
+  4. **Review**
+  - Review the information and ensure it is correct. Use `Previous` to correct anything.
+  - Click `Create user`.
+  5. **Success** - These are very **IMPORTANT CREDENTIALS**
+     _If you do not do these steps you will have to reset your `Access key ID` and `Secret access key` later._
+  - `Download the .csv file` and store it in a safe place. This contains the user name, login link, Access key ID and Secret access key.
+  - **OPTIONAL:** Add these credentials to your \*Password manager\*\*.
+  - Click on the `AWS Management Console Access sign-in link`. This will log you out of `Administrator`.
+
+3. `Log into` your **AWS Management Console** as your `regular user`.
+
+You may now proceed to the next steps.
+
+#### Additional IAM User Resources
+
+- [IAM Best Practices](https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html).
+- [Instructions to reset Access key ID and Secret access key](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
+
+### Launch an EC2 virtual machine
+
+Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 instance**. To use this service you will `Launch Instance`.
+
+1. From your **AWS Management Console** and as your **_regular_** user:
+
+- `Find Services`, seach for `ec2` and click on `EC2, Virtual Servers in the Cloud`
+
+2. Click on the blue `Launch Instance` button.
+
+- New trial users, click `free tier only` in the left menu
+- `Select` **Ubuntu Server 18.04 LTS (HVM), SSD Volume Type**
+- Ensure `General purpose` + `t2.micro, Free tier eligible` is `checked`.
+- Click the grey `Next: Configure Instance Details` and `Next: Add Storage`
+- In the **Step 4: Add Storage** verify the `General Purpose SSD (gb2)`, then click `Next: Add tags`.
+- In the **Step 5: Add Tags**, add tags to suit your project or leave blank, then click `Next: Configure Security Group`.
+- In the **Step 6: Configure Security Group**, configure the `security settings` as follows:
+  - **Assign a security group:** Check as `Create a new security group`
+  - **Security group name:** Name it, e.g. `Strapi`
+  - **Description:** Write a short description, e.g. `Strapi instance security settings`
+  - You should have a rule: **Type:** `SSH`, **Protocol:** `TCP`, **Port Range** `22`, **Source:** `0.0.0.0/0` (all IP addresses). If not, add it.
+  - Click the grey `Add rule` to add each of these rules:
+    - **Type:** `SSH`, **Protocol:** `TCP`, **Port Range** `22`, **Source:** `::/0`
+    - **Type:** `HTTP`, **Protocol:** `TCP`, **Port Range** `80`, **Source:** `0.0.0.0/0, ::/0`
+    - **Type:** `HTTPS`, **Protocol:** `TCP`, **Port Range** `443`, **Source:** `0.0.0.0/0, ::/0`
+    - **Type:** `Custom TCP IP Rule`, **Protocol:** `TCP`, **Port Range** `1337`, **Source:** `0.0.0.0/0` **Description:** `Strapi Default Port`
+      (These rules are basic configuration and security rules. You may want to tighten and limit these rules based on your own project and organization policies. Note: After setting up youir Nginx rules and domain name with the proper aliases, you will need to delete the rule regarding port 1337 as this is for testing and setting up the project - not for production.)
+- Click the blue `Review and Launch` button.
+- Review the details, in the **Step 7: Review Instance Launch**, then click the blue `Launch` button. Now, you need to **select an existing key pair** or **create a new key pair**. To create a new key pair, do the following:
+  - Select the dropdown option `Create a new key pair`.
+  - Name your the key pair name, e.g. `ec2-strapi-key-pair`
+  - **IMPORTANT** Download the **private key file** (.pem file).
+  - After downloading the file, click the blue `Launch Instances` button.
+
+Your instances are now running. Continue to the next steps.
 
 ## Digital Ocean
 
@@ -379,7 +467,7 @@ module.exports = {
       name: 'your-app-name',
       script: '.path-to/your-strapi-app/server.js',
       watch: './strapi-project-root/',
-      ignore_watch : ["node_modules", "public"],
+      ignore_watch: ['node_modules', 'public'],
       watch_delay: 1000,
     },
   ],
