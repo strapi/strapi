@@ -55,7 +55,7 @@ class Marketplace extends React.Component {
 
   renderPluginCard = plugin => {
     const {
-      admin: { currentEnvironment },
+      admin: { autoReload, currentEnvironment },
       availablePlugins,
       downloadPlugin,
       history,
@@ -65,6 +65,7 @@ class Marketplace extends React.Component {
 
     return (
       <PluginCard
+        autoReload={autoReload}
         currentEnvironment={currentEnvironment}
         history={history}
         key={currentPlugin.id}

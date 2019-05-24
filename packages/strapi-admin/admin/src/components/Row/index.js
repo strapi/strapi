@@ -33,38 +33,39 @@ class Row extends React.Component {
   };
 
   render() {
-    // const uploadPath = `/plugins/upload/configurations/${this.context.currentEnvironment}`;
     // Make sure to match the ctm config URI instead of content-type view URI
+    const {
+      history: { push },
+      name,
+      plugin: { required },
+    } = this.props;
+    const { currentEnvironment } = this.context;
+
     const settingsPath =
-      this.props.name === 'content-manager'
+      name === 'content-manager'
         ? '/plugins/content-manager/ctm-configurations'
-        : `/plugins/${this.props.name}/configurations/${
-          this.context.currentEnvironment
-        }`;
-    // const icons = this.props.name === 'upload' || this.props.name === 'email' ? [
-    const icons = includes(PLUGINS_WITH_CONFIG, this.props.name)
-      ? [
-        {
-          icoType: 'cog',
-          onClick: e => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.props.history.push(settingsPath);
-          },
+        : `/plugins/${name}/configurations/${currentEnvironment}`;
+
+    const icons = [];
+
+    if (PLUGINS_WITH_CONFIG.includes(name)) {
+      icons.push({
+        icoType: 'cog',
+        onClick: e => {
+          e.preventDefault();
+          e.stopPropagation();
+          push(settingsPath);
         },
-        {
-          icoType: 'trash',
-          id: this.props.name,
-          onClick: this.handleClick,
-        },
-      ]
-      : [
-        {
-          icoType: 'trash',
-          id: this.props.name,
-          onClick: this.handleClick,
-        },
-      ];
+      });
+    }
+
+    if (!required && currentEnvironment === 'development') {
+      icons.push({
+        icoType: 'trash',
+        id: name,
+        onClick: this.handleClick,
+      });
+    }
 
     return (
       <ListRow>

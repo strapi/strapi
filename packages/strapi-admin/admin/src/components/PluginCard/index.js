@@ -10,7 +10,7 @@ import cn from 'classnames';
 import { isEmpty, replace } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
-import { Button } from 'strapi-helper-plugin';
+import { Button, PopUpWarning } from 'strapi-helper-plugin';
 import InstallPluginPopup from '../InstallPluginPopup';
 
 import styles from './styles.scss';
@@ -21,6 +21,8 @@ const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
 class PluginCard extends React.Component {
   state = {
     boostrapCol: 'col-lg-4',
+    showModalAutoReload: false,
+    showModalEnv: false,
   };
 
   componentDidMount() {
@@ -63,8 +65,8 @@ class PluginCard extends React.Component {
       this.props.plugin.id === 'content-manager'
         ? '/plugins/content-manager/ctm-configurations'
         : `/plugins/${this.props.plugin.id}/configurations/${
-          this.props.currentEnvironment
-        }`;
+            this.props.currentEnvironment
+          }`;
 
     e.preventDefault();
     e.stopPropagation();
@@ -73,15 +75,23 @@ class PluginCard extends React.Component {
   };
 
   handleDownloadPlugin = e => {
-    if (
-      !this.props.isAlreadyInstalled &&
-      this.props.plugin.id !== 'support-us'
-    ) {
-      this.props.downloadPlugin(e);
-    } else if (this.props.plugin.id === 'support-us') {
-      this.aTag.click();
+    const {
+      autoReload,
+      currentEnvironment,
+      downloadPlugin,
+      history: { push },
+      isAlreadyInstalled,
+      plugin: { id },
+    } = this.props;
+
+    if (!autoReload) {
+      this.setState({ showModalAutoReload: true });
+    } else if (currentEnvironment === 'development') {
+      this.setState({ showModalEnv: true });
+    } else if (!isAlreadyInstalled) {
+      downloadPlugin(e);
     } else {
-      this.props.history.push('/list-plugins');
+      push('/list-plugins');
     }
   };
 
@@ -199,6 +209,34 @@ class PluginCard extends React.Component {
             ) === this.props.plugin.id
           }
           plugin={this.props.plugin}
+        />
+        <PopUpWarning
+          content={{
+            message:
+              'app.components.PluginCard.PopUpWarning.install.impossible.autoReload.needed',
+            title:
+              'app.components.PluginCard.PopUpWarning.install.impossible.title',
+            confirm:
+              'app.components.PluginCard.PopUpWarning.install.impossible.confirm',
+          }}
+          isOpen={this.state.showModalAutoReload}
+          onlyConfirmButton
+          onConfirm={() => this.setState({ showModalAutoReload: false })}
+          popUpWarningType="warning"
+        />
+        <PopUpWarning
+          content={{
+            message:
+              'app.components.PluginCard.PopUpWarning.install.impossible.environment',
+            title:
+              'app.components.PluginCard.PopUpWarning.install.impossible.title',
+            confirm:
+              'app.components.PluginCard.PopUpWarning.install.impossible.confirm',
+          }}
+          isOpen={this.state.showModalEnv}
+          onlyConfirmButton
+          onConfirm={() => this.setState({ showModalEnv: false })}
+          popUpWarningType="warning"
         />
       </div>
     );

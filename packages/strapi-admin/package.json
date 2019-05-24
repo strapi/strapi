@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"no tests yet\"",
-    "dev": "webpack-dev-server --config webpack.config.dev.js"
+    "develop": "webpack-dev-server --config webpack.config.dev.js"
   },
   "main": "index.js",
   "dependencies": {

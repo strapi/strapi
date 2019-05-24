@@ -20,7 +20,10 @@ function parseJSON(response) {
  * @return {object|undefined} Returns either the response, or throws an error
  */
 function checkStatus(response, checkToken = true) {
-  if ((response.status >= 200 && response.status < 300) || response.status === 0) {
+  if (
+    (response.status >= 200 && response.status < 300) ||
+    response.status === 0
+  ) {
     return response;
   }
 
@@ -46,7 +49,7 @@ function checkTokenValidity(response) {
   };
 
   if (auth.getToken()) {
-    return fetch(`${strapi.backendURL}/user/me`, options).then(() => {
+    return fetch(`${strapi.backendURL}/users/me`, options).then(() => {
       if (response.status === 401) {
         window.location = `${
           strapi.remoteURL
@@ -109,12 +112,18 @@ function serverRestartWatcher(response) {
  * @return {object}           The response data
  */
 export default function request(...args) {
-  let [url, options = {}, shouldWatchServerRestart, stringify = true, ...rest] = args;
+  let [
+    url,
+    options = {},
+    shouldWatchServerRestart,
+    stringify = true,
+    ...rest
+  ] = args;
   let noAuth;
 
   try {
     [{ noAuth }] = rest;
-  } catch(err) {
+  } catch (err) {
     noAuth = false;
   }
 
@@ -154,7 +163,7 @@ export default function request(...args) {
   if (options && options.body && stringify) {
     options.body = JSON.stringify(options.body);
   }
-  
+
   return fetch(url, options)
     .then(checkStatus)
     .then(parseJSON)
