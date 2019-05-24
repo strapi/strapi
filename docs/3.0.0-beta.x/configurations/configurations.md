@@ -198,6 +198,7 @@ You can access the config of the current environment through `strapi.config.curr
        - `password` (string): Password used to establish the connection.
        - `options` (object): List of additional options used by the connector.
        - `timezone` (string): Set the default behavior for local time (used only for a SQL database). Default value: `utc`.
+       - `schema` (string): Set the default database schema. (used only for Postgres DB)
     - `options` Options used for database connection.
       - `ssl` (boolean): For ssl database connection.
       - `debug` (boolean): Show database exchanges and errors.
@@ -395,8 +396,6 @@ The session doesn't work with `mongo` as a client. The package that we should us
 
  - `host` (string): Host name. Default value: `localhost`.
  - `port` (integer): Port on which the server should be running. Default value: `1337`.
- - `autoReload`
-   - `enabled` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
  - `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
  - `proxy`
    - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
@@ -409,11 +408,7 @@ The session doesn't work with `mongo` as a client. The package that we should us
    - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
    - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
    - `build`
-     - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
      - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
-       - `plugins`
-         - `source` (string): Define the source mode (origin, host, custom).
-         - `folder` (string): Indicate what the plugins folder in `host` source mode.
 
 #### Example
 
@@ -432,9 +427,6 @@ As an example using this configuration with Nginx your server would respond to `
     "ssl": true,
     "host": "example.com",
     "port": 8443
-  },
-  "autoReload": {
-    "enabled": true
   },
   "cron": {
     "enabled": true

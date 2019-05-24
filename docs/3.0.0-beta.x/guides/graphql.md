@@ -26,9 +26,9 @@ Security limits on maximum number of items in your response by default is limite
 
 You can also enable the Apollo server tracing feature, which is supported by the playground to track the response time of each part of your query. To enable this feature just change/add the `"tracing": true` option in the GraphQL settings file. You can read more about the tracing feature from Apollo [here](https://www.apollographql.com/docs/engine/features/query-tracing.html).
 
-You can edit these configurations in the following files.
+You can edit these configurations by creating following file.
 
-**Path —** `./plugins/graphql/config/settings.json`.
+**Path —** `./extensions/graphql/config/settings.json`.
 
 ```
 {
@@ -441,7 +441,7 @@ Result
 
 ## Customise the GraphQL schema
 
-If you want to define a new scalar, input or enum types, this section is for you. To do so, you will have to create a `schema.graphql` file. This file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./plugins/*/config/schema.graphql`.
+If you want to define a new scalar, input or enum types, this section is for you. To do so, you will have to create a `schema.graphql` file. This file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./extensions/*/config/schema.graphql`.
 
 **Structure —** `schema.graphql`.
 
@@ -641,7 +641,7 @@ One of the most powerful features of GraphQL is the auto-documentation of the sc
 It might happens that you want to add a description to a query or deprecate it. To do that, you need to use the `schema.graphql` file.
 
 ::: warning
-The `schema.graphql` file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./plugins/*/config/schema.graphql`.
+The `schema.graphql` file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./extensions/*/config/schema.graphql`.
 :::
 
 **Path —** `./api/post/config/schema.graphql`.
@@ -693,7 +693,7 @@ module.exports = {
 };
 ```
 
-In this example, the policy `isAuthenticated` located in `./plugins/users-permissions/config/policies/isAuthenticated.js` will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
+In this example, the policy `isAuthenticated` located in the `users-permissions` plugin will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
 
 
 ::: note

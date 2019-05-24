@@ -18,7 +18,7 @@ $ cd my-strapi-project
 $ strapi install documentation
 
 # Start your server
-$ strapi start
+$ strapi develop
 ```
 
 Once the plugin is installed it will create a `documentation` folder in each model of your project, so you can easily modify the default generated documentation. Then, each documentation file is merged into the `full_documentation.json` located in the plugin.
@@ -200,7 +200,7 @@ Overriding the `full_documentation.json` is a bad idea since it will be regenera
 
 **_NOTE 2_**
 
-You can easily modify the description, summary, parameters of a path however, for a response like the `200` you will need to write the full object. Take a look at the `./plugins/users-permissions/documentation/1.0.0/overrides/users-permissions-User.json` for a complete example.
+You can easily modify the description, summary, parameters of a path however, for a response like the `200` you will need to write the full object. Take a look at the `./extensions/users-permissions/documentation/1.0.0/overrides/users-permissions-User.json` for a complete example.
 
 **_NOTE 3_**
 

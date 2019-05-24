@@ -205,7 +205,7 @@ The `user` object is available to successfully authenticated requests.
 
 ```
 
-## Adding a new provider
+## Adding a new provider (to the strapi project)
 
 To add a new provider on Strapi, you will need to perform changes onto the following files:
 

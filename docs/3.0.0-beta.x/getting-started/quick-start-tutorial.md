@@ -45,17 +45,18 @@ Commands:
   version                                        output your version of Strapi
   console                                        open the Strapi framework console
   new [options]                                  create a new application
-  start [appPath]                                start your Strapi application
+  develop|dev [options]                          Start your Strapi application in development mode
+  start                                          Start your Strapi application
+  build                                          Builds the strapi admin app
   generate:api [options] <id> [attributes...]    generate a basic API
   generate:controller [options] <id>             generate a controller for an API
   generate:model [options] <id> [attributes...]  generate a model for an API
   generate:policy [options] <id>                 generate a policy for an API
   generate:service [options] <id>                generate a service for an API
   generate:plugin [options] <id>                 generate a basic plugin
-  install [options] <plugin>                     install a Strapi plugin
-  uninstall <plugin>                             uninstall a Strapi plugin
+  install [plugins...]                           install a Strapi plugin
+  uninstall [options] [plugins...]               uninstall a Strapi plugin
   help                                           output the help
-  *
 ```
 
 ## 2. Create a new project
@@ -92,13 +93,7 @@ The app has been connected to the database successfully!
 
 🏗  Application generation:
 ✔ Copy dashboard
-✔ Install plugin settings-manager.
-✔ Install plugin content-type-builder.
-✔ Install plugin content-manager.
-✔ Install plugin users-permissions.
-✔ Install plugin email.
-✔ Install plugin upload.
-✔ Link strapi dependency to the project.
+✔ Installing dependencies
 
 👌 Your new application cms is ready at /home/str/Desktop/Strapi/Projects/cms
 
@@ -106,7 +101,7 @@ The app has been connected to the database successfully!
 $ cd cms
 
 ⚡️ Start application:
-$ strapi start
+$ strapi develop
 ```
 
 This will open your default browser to the Welcome page for creating an admin user.

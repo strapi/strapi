@@ -186,11 +186,11 @@ You can check all the available providers developed by the community on npmjs.or
 To install a new provider run:
 
 ```
-$ npm install strapi-provider-upload-aws-s3@alpha --save
+$ npm install strapi-provider-upload-aws-s3@beta --save
 ```
 
 ::: note
-If the provider is not in the mono repo, you probably not need `@alpha` depending if the creator published it with this tag or not.
+If the provider is not in the mono repo, you probably don't need `@beta` depending if the creator published it with this tag or not.
 :::
 
 Then, visit `/admin/plugins/upload/configurations/development` on your web browser and configure the provider.

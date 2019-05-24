@@ -1,28 +1,27 @@
 # API Reference
 
-  - strapi
-    - [.admin](#strapi-admin)
-    - [.api](#strapi-api)
-    - [.app](#strapiapp)
-    - [.bootstrap()](#strapi-bootstrap)
-    - [.config](#strapi-config)
-    - [.controllers](#strapi-controllers)
-    - [.hook](#strapi-hook)
-    - [.koaMiddlewares](#strapi-koaMiddlewares)
-    - [.load()](#strapi-load)
-    - [.log](#strapi-log)
-    - [.middleware](#strapi-middleware)
-    - [.models](#strapi-models)
-    - [.plugins](#strapi-plugins)
-    - [.query()](#strapi-query)
-    - [.reload()](#strapi-reload)
-    - [.router](#strapi-router)
-    - [.server](#strapi-server)
-    - [.services](#strapi-services)
-    - [.start()](#strapi-start)
-    - [.stop()](#strapi-stop)
-    - [.utils](#strapi-utils)
-
+- strapi
+  - [.admin](#strapi-admin)
+  - [.api](#strapi-api)
+  - [.app](#strapiapp)
+  - [.bootstrap()](#strapi-bootstrap)
+  - [.config](#strapi-config)
+  - [.controllers](#strapi-controllers)
+  - [.hook](#strapi-hook)
+  - [.koaMiddlewares](#strapi-koaMiddlewares)
+  - [.load()](#strapi-load)
+  - [.log](#strapi-log)
+  - [.middleware](#strapi-middleware)
+  - [.models](#strapi-models)
+  - [.plugins](#strapi-plugins)
+  - [.query()](#strapi-query)
+  - [.reload()](#strapi-reload)
+  - [.router](#strapi-router)
+  - [.server](#strapi-server)
+  - [.services](#strapi-services)
+  - [.start()](#strapi-start)
+  - [.stop()](#strapi-stop)
+  - [.utils](#strapi-utils)
 
 ## strapi.admin
 
@@ -83,11 +82,12 @@ Returns an object of models available in the project. Every JavaScript or JSON f
 
 ## strapi.plugins
 
-Returns an object of plugins available in the project. Each plugin object contains the associated controllers, models, services and configurations contained in the `./plugins/**/` folder.
+Returns an object of plugins available within the project. Each plugin object contains the associated controllers, models, services and configurations.
 
 ## strapi.query
 
-Returns a function that will returns the available queries for this model. This feature is only available inside the plugin's files (controllers, services, custom functions). For more details, see the [ORM queries section](../plugin-development/backend-development.md#ORM queries).
+This utility function allows to bind models with query functions specific to each ORM (e.g: `mongoose` or `booksehlf`).
+For more details, see the [Queries section](../guides/queries.md).
 
 ## strapi.reload
 

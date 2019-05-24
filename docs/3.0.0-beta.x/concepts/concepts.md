@@ -14,6 +14,7 @@
     - [Lifecycle callbacks](#lifecycle-callbacks)
   - [Internationalization](#internationalization-and-localization)
   - [Plugin](#plugin)
+  - [Extensions](#extensions)
   - [Policies](#policies)
     - [Global policies](#global-policies)
     - [Scoped policies](#scoped-policies)
@@ -23,6 +24,7 @@
   - [Responses](#responses)
   - [Routing](#routing)
   - [Services](#services)
+  - [Queries](#queries)
 
 ---
 
@@ -30,12 +32,12 @@
 
 By default, your project's structure will look like this:
 
-- `/api`: contains the business logic of your project will be in this folder split in sub-folder per API.
+- `/api`: contains the business logic of your project split in sub-folder per API.
   - `**`
     - `/config`: contains the API's configurations ([`routes`](#routing), [`policies`](#policies), etc).
-    - [`/controllers`](#controllers): contains the API's controllers.
+    - [`/controllers`](#controllers): contains the API's custom controllers.
     - [`/models`](#models): contains the API's models.
-    - [`/services`](#services): contains the API's services.
+    - [`/services`](#services): contains the API's custom services.
 - `/node_modules`: contains the npm's packages used by the project.
 - [`/config`](../configurations/configurations.md)
   - [`/environments`](../configurations/configurations.md#environments): contains the project's configurations per environment.
@@ -57,8 +59,12 @@ By default, your project's structure will look like this:
   - [`middleware.json`](../configurations/configurations.html#middleware): contains the middleware settings of the project.
 - [`/hooks`](../advanced/hooks.html): contains the custom hooks of the project.
 - [`/middlewares`](../advanced/middlewares.html): contains the custom middlewares of the project.
-- [`/plugins`](../configurations/configurations.md#plugins): contains the installed plugins in the project.
-- [`/public`](../concepts/concepts.html#public-assets): contains the file accessible to the outside world.
+- [`/admin`](../advanced/customize-admin.md): contains your admin customization files.
+- [`/extensions`](#extensions): contains the files to extend installed plugins.
+- [`/plugins`](#plugin): contains your local plugins.
+- [`/public`](#public-assets): contains the file accessible to the outside world.
+- `/build`: contains your admin panel UI build.
+- `/.cache`: contains files used to build your admin panel.
 
 ::: note
 Inside the `/config` folder, every folder will be parsed and injected into the global object `strapi.config`. Let's say, you added a folder named `credentials` with two files `stripe.json` and `paypal.json` into it. The content of these files will be accessible through `strapi.config.credentials.stripe` and `strapi.config.credentials.paypal`.
@@ -216,11 +222,31 @@ Please refer to the [internationalization's guide](../guides/i18n.md).
 
 ## Plugin
 
-A plugin is like a fully independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also contain an UI integrated into the admin panel to use it easily. It allows to develop or plugin features in a project in a short time span.
+A plugin is like a small independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also have it's own UI integrated in the admin panel.
 
 ::: note
 Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.
 :::
+
+---
+
+## Extensions
+
+In strapi you can install plugins in your `node_modules`. This allows for easy updates and respect best practices. To customize those installed plugins you can work in the `/extensions` directory. It contains all the plugins' customizable files.
+
+Certain plugins will create files in these folders so you can then modify them. You can also create certain files manually to add some custom configuration for example.
+
+Depending on the plugins you will find extension documentation directly in the plugin's documentation.
+
+Extensions folder structure:
+
+
+- `extensions/`
+  - `**`: Plugin Id
+    - `config`: You can extend a plugin's configuration by add a settings.json file with your custom configuration
+    - `models`: Contains the plugin's models that you have overwritten (e.g: When you add a realtion to the the User model)
+    - `controllers`: You can extend the plugin's controllers by create controllers with the same names and override certain methods
+    - `services`: You can extend the plugin's services by create services with the same names and override certain methods
 
 ---
 
@@ -312,6 +338,16 @@ Services are a set of reusable functions. They are particularly useful to respec
 
 ::: note
 Please refer to the [services guide](../guides/services.md) for more informations.
+:::
+
+---
+
+## Queries
+
+Queries are a way to implement database agnostic queries in strapi's core or plugins. 
+
+::: note
+Please refer to the [queries guide](../guides/queries.md) for more informations.
 :::
 
 ---

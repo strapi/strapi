@@ -74,7 +74,7 @@ Plugins can add and expose policies into your app. For example, the plugin `Auth
       "handler": "Car.find",
       "config": {
         "policies": [
-          "plugins.auth.isAuthenticated"
+          "plugins.users-permissions.isAuthenticated"
         ]
       }
     }
@@ -82,7 +82,7 @@ Plugins can add and expose policies into your app. For example, the plugin `Auth
 }
 ```
 
-The policy `isAuthenticated` located in `./plugins/auth/config/policies/isAuthenticated.js` will be executed before the `find` action in the `Car.js` controller.
+The policy `isAuthenticated` located in the `users-permissions` plugin will be executed before the `find` action in the `Car.js` controller.
 
 ### Scoped Policies
 

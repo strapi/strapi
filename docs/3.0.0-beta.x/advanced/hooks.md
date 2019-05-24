@@ -73,7 +73,6 @@ The framework allows to load hooks from the project directly without having to i
 │        - index.js
 │   └─── strapi-server-side-rendering
 │        - index.js
-└─── plugins
 └─── public
 - favicon.ico
 - package.json

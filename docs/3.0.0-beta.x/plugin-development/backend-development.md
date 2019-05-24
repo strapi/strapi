@@ -15,6 +15,7 @@ Please refer to [router documentation](../guides/routing.md) for informations.
 Each route of a plugin is prefixed by the name of the plugin (eg: `/my-plugin/my-plugin-route`).
 
 To disable the prefix, add the `prefix` attribute to each concerned route, like below:
+
 ```json
 {
   "method": "GET",
@@ -48,15 +49,14 @@ You already have `User` model defining in your `./api/user/models/User.settings.
 
 ```js
 module.exports = {
-  findUser: async function (params) {
+  findUser: async function(params) {
     // This `User` global variable will always make a reference the User model defining in your `./api/xxx/models/User.settings.json`.
     return await User.find();
-  }
-}
+  },
+};
 ```
 
 Also, the table/collection name won't be `users` because you already have a `User` model. That's why, the framework will automatically prefix the table/collection name for this model with the name of the plugin. Which means in our example, the table/collection name of the `User` model of our plugin `Users & Permissions` will be `users-permissions_users`. If you want to force the table/collection name of the plugin's model, you can add the `collectionName` attribute in your model.
-
 
 Please refer to the [Models documentation](../guides/models.md) for more informations.
 
@@ -74,9 +74,7 @@ A plugin can also use a globally exposed policy in the current Strapi project.
       "path": "/",
       "handler": "MyPlugin.index",
       "config": {
-        "policies": [
-          "global.isAuthenticated"
-        ]
+        "policies": ["global.isAuthenticated"]
       }
     }
   ]
@@ -95,9 +93,7 @@ A plugin can have its own policies, such as adding security rules. For instance,
       "path": "/",
       "handler": "MyPlugin.index",
       "config": {
-        "policies": [
-          "plugins.myPlugin.isAuthenticated"
-        ]
+        "policies": ["plugins.myPlugin.isAuthenticated"]
       }
     }
   ]
@@ -108,37 +104,44 @@ Please refer to the [Policies documentation](../guides/policies.md) for more inf
 
 ## ORM queries
 
-Strapi supports multiple ORMs in order to let the users choose the database management system that suits their needs. Hence, each plugin must be compatible with at least one ORM. Each plugin contains a folder named `queries` in `./plugins/**/api/queries`. A folder must be created for each ORM (eg. `mongoose`) with a file named `mongoose.js` which exports the Mongoose ORM related queries.
+Strapi supports multiple ORMs in order to let the users choose the database management system that suits their needs. Hence, each plugin must be compatible with at least one ORM. Each plugin contains a folder named `queries` in `./plugins/**/api/queries`. A file must be created for each ORM (eg. `mongoose.js` which exports the Mongoose ORM related queries).
 
-The queries are accessible through the `strapi.query()` method, which automatically contains the queries according to the ORM used by the model.
+The queries of a plugin are accessible through the `strapi.plugins.['pluginName'].queries('modelName', 'pluginName')` method, which automatically contains the queries according to the ORM used by the model.
 
 ### Example
 
 Mongoose ORM queries definition:
 
-**Path —** `./plugins/my-plugin/api/config/queries/mongoose/index.js`.
+**Path —** `./plugins/my-plugin/api/config/queries/mongoose.js`.
+
 ```js
-module.exports = {
-  getUsers: async (params) => {
-    return User.find(params);
-  }
-}
+module.exports = () => {
+  return {
+    getUsers: async params => {
+      return User.find(params);
+    },
+  };
+};
 ```
 
 Bookshelf ORM queries definition:
 
-**Path —** `./plugins/my-plugin/api/config/queries/bookshelf/index.js`.
+**Path —** `./plugins/my-plugin/api/config/queries/bookshelf.js`.
+
 ```js
-module.exports = {
-  getUsers: async (params) => {
-    return User.fetchAll(params);
-  }
-}
+module.exports = () => {
+  return {
+    getUsers: async params => {
+      return User.fetchAll(params);
+    },
+  };
+};
 ```
 
 Usage from the plugin:
 
 **Path —** `./plugins/my-plugin/api/controllers/index.js`.
+
 ```js
 module.exports = {
   getUsers: async () => {
@@ -146,47 +149,59 @@ module.exports = {
     const { limit, sort } = ctx.request.query;
 
     // Get the list of users using the plugins queries
-    const users = await strapi.query('User').getUsers({ limit, sort });
+    const users = await strapi.plugins['my-plugin']
+      .queries('User', 'my-plugin')
+      .getUsers({ limit, sort });
 
     // Send the list of users as response
     ctx.body = users;
-  }
-}
+  },
+};
 ```
 
 ### Advanced usage
 
-Each function in the query file is bound with the ORM's model. It means that you can create generic query very easily. This feature is useful for CRUD such as we did in the [Content Manager plugin](https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-content-manager/config/queries).
+Strapi injects the model in the queries when instantiating them. It means you can create reusable queries very easily.
+We use it for example in the [Content Manager plugin](https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-content-manager/config/queries).
+
+#### Example
 
 Mongoose ORM generic queries:
 
-**Path —** `./plugins/my-plugin/api/config/queries/mongoose/index.js`.
+**Path —** `./plugins/my-plugin/api/config/queries/mongoose.js`.
+
 ```js
-module.exports = {
-  getAll: async function (params) {
-    // this refers to the Mongoose model called in the query
-    // ex: strapi.query('User').getAll(), this will be equal to the User Mongoose model.
-    return this.find(params);
-  }
-}
+module.exports = ({ model }) => {
+  return {
+    getAll: async function(params) {
+      // this refers to the Mongoose model called in the query
+      // ex: strapi.plugins['my-plugin'].queries('Product').getAll(), this will be equal to the product Mongoose model.
+      return model.find(params);
+    },
+  };
+};
 ```
 
 Bookshelf ORM generic queries:
 
 **Path —** `./plugins/my-plugin/api/config/queries/bookshelf/index.js`.
+
 ```js
-module.exports = {
-  getAll: async function (params) {
-    // this refers to the Bookshelf model called in the query
-    // ex: strapi.query('User').getAll(), this will be equal to the User Bookshelf model.
-    return this.fetchAll(params);
-  }
-}
+module.exports = ({ model }) => {
+  return {
+    getAll: async function(params) {
+      // this refers to the Bookshelf model called in the query
+      // ex: strapi.plugins['my-plugin'].queries('Product').getAll(), this will be equal to the product Bookshelf model.
+      return model.fetchAll(params);
+    },
+  };
+};
 ```
 
 Usage from the plugin:
 
 **Path —** `./plugins/my-plugin/api/controllers/index.js`.
+
 ```js
 module.exports = {
   getUsers: async () => {
@@ -194,11 +209,14 @@ module.exports = {
     const { limit, sort } = ctx.request.query;
 
     // Get the list of users using the plugin's queries
-    const users = await strapi.query('User').getAll({ limit, sort });
+    const users = await strapi.plugins['my-plugin']
+      .queries('User')
+      .getAll({ limit, sort });
 
     // Send the list of users as response
     ctx.body = users;
-  }
-}
+  },
+};
 ```
-***
+
+---
