@@ -162,7 +162,7 @@ module.exports = {
     if (strapi.plugins['content-manager']) {
       params.model = 'file';
 
-      await strapi.plugins['content-manager'].services['contentmanager'].delete(
+      return await strapi.plugins['content-manager'].services['contentmanager'].delete(
         params,
         { source: 'upload' },
       );
