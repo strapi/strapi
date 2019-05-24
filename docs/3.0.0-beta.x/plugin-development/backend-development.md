@@ -161,7 +161,7 @@ module.exports = {
 
 ### Advanced usage
 
-Strapi injects the model in the queries when instanciating them. It means you can create reusable queries very easily.
+Strapi injects the model in the queries when instantiating them. It means you can create reusable queries very easily.
 We use it for example in the [Content Manager plugin](https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-content-manager/config/queries).
 
 #### Example

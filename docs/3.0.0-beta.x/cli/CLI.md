@@ -35,7 +35,7 @@ options: [--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=
 
 Start a Strapi application with autoReload activated.
 
-Strapi modifies/creates files at runtime and needs to restart when new files are created. To achieve that `strapi develop` add a file watcher and restart the application when necessary.
+Strapi modifies/creates files at runtime and needs to restart when new files are created. To achieve this, `strapi develop` adds a file watcher and restarts the application when necessary.
 
 ::: note
 You should never use this command to run a Strapi application in production
@@ -238,7 +238,7 @@ strapi install <name>
   Example: `strapi install graphql` will install the plugin `strapi-plugin-graphql`
 
 ::: warning
-Some plugin having admin panel integration, your admin panel might have to be rebuilt. This can take some time.
+Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
 :::
 
 ---
@@ -264,7 +264,7 @@ options [--delete-files]
   Example: `strapi uninstall graphql` will remove the plugin `strapi-plugin-graphql` and all the files in `./extensions/graphql`
 
 ::: warning
-Some plugin having admin panel integration, your admin panel might have to be rebuilt. This can take some time.
+Some plugins have admin panel integrations, your admin panel might have to be rebuilt. This can take some time.
 :::
 
 ---

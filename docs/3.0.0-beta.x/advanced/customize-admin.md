@@ -63,7 +63,7 @@ you can build your admin panel with a specific configuration (located in the `./
 NODE_ENV=production npm run build
 ```
 
-This will replace the folder's content located at `./build`. Visit http://localhost:1337/admin/ to make sure your updates have been taken in account.
+This will replace the folder's content located at `./build`. Visit http://localhost:1337/admin/ to make sure your updates have been taken into account.
 
 ---
 

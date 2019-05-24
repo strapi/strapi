@@ -82,11 +82,11 @@ Returns an object of models available in the project. Every JavaScript or JSON f
 
 ## strapi.plugins
 
-Returns an object of plugins available in the project. Each plugin object contains the associated controllers, models, services and configurations.
+Returns an object of plugins available within the project. Each plugin object contains the associated controllers, models, services and configurations.
 
 ## strapi.query
 
-This utility function allows to bind a model to queries (mongooe or booksehlf) methods.
+This utility function allows to bind models with query functions specific to each ORM (e.g: `mongoose` or `booksehlf`).
 For more details, see the [Queries section](../guides/queries.md).
 
 ## strapi.reload

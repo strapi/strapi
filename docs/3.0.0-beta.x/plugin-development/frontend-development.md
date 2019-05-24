@@ -1,7 +1,7 @@
 # Front-end Development
 
 ::: danger
-This feature is currenlty not available (Coming soon).
+This feature is currently not available (coming soon).
 :::
 
 <!-- 

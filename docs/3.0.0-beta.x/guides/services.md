@@ -9,12 +9,12 @@ When you create a new Content type or a new model. You will see a new empty serv
 ### Extending a Model Service
 
 Here are the core methods (and their current implementation).
-You can simply copy and paste this code in your own service file to customize the methods.
+You can simply copy and paste this code to your own service file to customize the methods.
 
 Youc an read about `strapi.query` calls [here](./queries.md)
 
 ::: warning
-In the following example we will consider your controller, service and model is named `product`
+In the following example your controller, service and model is named `product`
 :::
 
 #### `find`
@@ -156,7 +156,7 @@ There are two ways to create a service.
 
 #### Example
 
-The goal of a service is to store reusable functions. An `email` service could be useful, if we plan to send emails from different functions in our codebase:
+The goal of a service is to store reusable functions. An `email` service could be useful to send emails from different functions in our codebase:
 
 **Path —** `./api/email/services/Email.js`.
 
