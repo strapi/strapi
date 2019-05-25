@@ -1,6 +1,6 @@
 {
   "connection": "default",
-  "collectionName": "users-permissions_administrator",
+  "collectionName": "strapi_administrator",
   "info": {
     "name": "Administrator",
     "description": ""

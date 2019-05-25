@@ -10,6 +10,7 @@
 const crypto = require('crypto');
 const _ = require('lodash');
 
+
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
@@ -22,7 +23,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]
-          : 'Please provide your username or your e-mail.',
+          : 'Please provide your username or your e-mail.'
       );
     }
 
@@ -32,7 +33,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]
-          : 'Please provide your password.',
+          : 'Please provide your password.'
       );
     }
 
@@ -49,14 +50,16 @@ module.exports = {
     }
 
     // Check if the admin exists.
-    const admin = await strapi.admin.queries('administrator', 'admin').findOne(query);
+    const admin = await strapi.admin
+      .queries('administrator', 'admin')
+      .findOne(query);
 
     if (!admin) {
       return ctx.badRequest(
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }]
-          : 'Identifier or password invalid.',
+          : 'Identifier or password invalid.'
       );
     }
 
@@ -65,32 +68,28 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }]
-          : 'Your account has been blocked by the administrator.',
+          : 'Your account has been blocked by the administrator.'
       );
     }
 
-    const validPassword = strapi.plugins[
-      'users-permissions'
-    ].services.user.validatePassword(params.password, admin.password);
+    const validPassword = await strapi.admin.services.auth.validatePassword(
+      params.password,
+      admin.password
+    );
 
     if (!validPassword) {
       return ctx.badRequest(
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }]
-          : 'Identifier or password invalid.',
+          : 'Identifier or password invalid.'
       );
     } else {
       admin.isAdmin = true;
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(
-          _.pick(admin.toJSON ? admin.toJSON() : admin, ['_id', 'id']),
-        ),
-        user: _.omit(admin.toJSON ? admin.toJSON() : admin, [
-          'password',
-          'resetPasswordToken',
-        ]),
+        jwt: strapi.admin.services.auth.createJwtToken(admin),
+        user: strapi.admin.services.auth.sanitizeUser(admin),
       });
     }
   },
@@ -104,7 +103,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.username.provide' }] }]
-          : 'Please provide your username.',
+          : 'Please provide your username.'
       );
     }
 
@@ -114,44 +113,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]
-          : 'Please provide your email.',
-      );
-    }
-
-    // Password is required.
-    if (!params.password) {
-      return ctx.badRequest(
-        null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]
-          : 'Please provide your password.',
-      );
-    }
-
-    // Throw an error if the password selected by the user
-    // contains more than two times the symbol '$'.
-    if (
-      strapi.plugins['users-permissions'].services.user.isHashed(
-        params.password,
-      )
-    ) {
-      return ctx.badRequest(
-        null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.password.format' }] }]
-          : 'Your password cannot contain more than three times the symbol `$`.',
-      );
-    }
-
-    // First, check if the admin is the first one to register as admin.
-    const adminsCount = await strapi.admin.queries('administrator', 'admin').count();
-
-    if (adminsCount > 0) {
-      return ctx.badRequest(
-        null,
-        ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.admin.exist' }] }]
-          : "You can't register a new admin.",
+          : 'Please provide your email.'
       );
     }
 
@@ -160,11 +122,37 @@ module.exports = {
 
     if (isEmail) {
       params.email = params.email.toLowerCase();
+    } else {
+      return ctx.badRequest('Invalid email format');
     }
 
-    params.password = await strapi.plugins[
-      'users-permissions'
-    ].services.user.hashPassword(params);
+    // Password is required.
+    if (!params.password) {
+      return ctx.badRequest(
+        null,
+        ctx.request.admin
+          ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]
+          : 'Please provide your password.'
+      );
+    }
+
+    // First, check if their is at least one admin
+    const admins = await strapi.admin
+      .queries('administrator', 'admin')
+      .find({ _limit: 1 });
+
+    if (admins.length > 0) {
+      return ctx.badRequest(
+        null,
+        ctx.request.admin
+          ? [{ messages: [{ id: 'Auth.form.error.admin.exist' }] }]
+          : "You can't register a new admin."
+      );
+    }
+
+    params.password = await strapi.admin.services.auth.hashPassword(
+      params.password
+    );
 
     const admin = await strapi.admin.queries('administrator', 'admin').findOne({
       email: params.email,
@@ -175,27 +163,24 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }]
-          : 'Email is already taken.',
+          : 'Email is already taken.'
       );
     }
 
     try {
-      const admin = await strapi.admin.queries('administrator', 'admin').create(params);
+      const admin = await strapi.admin
+        .queries('administrator', 'admin')
+        .create(params);
 
       admin.isAdmin = true;
 
-      const jwt = strapi.plugins['users-permissions'].services.jwt.issue(
-        _.pick(admin.toJSON ? admin.toJSON() : admin, ['_id', 'id']),
-      );
+      const jwt = strapi.admin.services.auth.createJwtToken(admin);
 
       strapi.emit('didCreateFirstAdmin');
 
       ctx.send({
         jwt,
-        user: _.omit(admin.toJSON ? admin.toJSON() : admin, [
-          'password',
-          'resetPasswordToken',
-        ]),
+        user: strapi.admin.services.auth.sanitizeUser(admin),
       });
     } catch (err) {
       strapi.log.error(err);
@@ -205,7 +190,7 @@ module.exports = {
 
       ctx.badRequest(
         null,
-        ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message,
+        ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message
       );
     }
   },
@@ -219,7 +204,8 @@ module.exports = {
       params.password === params.passwordConfirmation &&
       params.code
     ) {
-      const admin = await strapi.admin.queries('administrator', 'admin')
+      const admin = await strapi.admin
+        .queries('administrator', 'admin')
         .findOne({ resetPasswordToken: params.code });
 
       if (!admin) {
@@ -227,28 +213,23 @@ module.exports = {
           null,
           ctx.request.admin
             ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }]
-            : 'Incorrect code provided.',
+            : 'Incorrect code provided.'
         );
       }
 
       // Delete the current code
       admin.resetPasswordToken = null;
 
-      admin.password = await strapi.plugins[
-        'users-permissions'
-      ].services.user.hashPassword(params);
+      admin.password = await strapi.admin.services.auth.hashPassword(
+        params.password
+      );
 
       // Update the admin.
       await strapi.admin.queries('administrator', 'admin').update(admin);
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(
-          _.pick(admin.toJSON ? admin.toJSON() : admin, ['_id', 'id']),
-        ),
-        user: _.omit(admin.toJSON ? admin.toJSON() : admin, [
-          'password',
-          'resetPasswordToken',
-        ]),
+        jwt: strapi.admin.services.auth.createJwtToken(admin),
+        user: strapi.admin.services.auth.sanitizeUser(admin),
       });
     } else if (
       params.password &&
@@ -259,14 +240,14 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }]
-          : 'Passwords do not match.',
+          : 'Passwords do not match.'
       );
     } else {
       return ctx.badRequest(
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.params.provide' }] }]
-          : 'Incorrect params provided.',
+          : 'Incorrect params provided.'
       );
     }
   },
@@ -275,7 +256,8 @@ module.exports = {
     const { email, url } = ctx.request.body;
 
     // Find the admin thanks to his email.
-    const admin = await strapi.admin.queries('administrator', 'admin')
+    const admin = await strapi.admin
+      .queries('administrator', 'admin')
       .findOne({ email });
 
     // admin not found.
@@ -284,7 +266,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.user.not-exist' }] }]
-          : 'This email does not exist.',
+          : 'This email does not exist.'
       );
     }
 

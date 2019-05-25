@@ -235,7 +235,7 @@ export function* submit(action) {
     }
 
     const notifErrorPrefix =
-      source === 'users-permissions' && shouldAddTranslationSuffix
+      source === 'users-permissions' || 'admin' && shouldAddTranslationSuffix
         ? 'users-permissions.'
         : '';
     strapi.notification.error(

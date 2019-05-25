@@ -5,7 +5,8 @@
   "strapi": {
     "name": "Email",
     "icon": "paper-plane",
-    "description": "email.plugin.description"
+    "description": "email.plugin.description",
+    "required": true
   },
   "scripts": {
     "test": "echo \"no tests yet\""

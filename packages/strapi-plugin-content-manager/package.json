@@ -5,7 +5,8 @@
   "strapi": {
     "name": "Content Manager",
     "icon": "plug",
-    "description": "content-manager.plugin.description"
+    "description": "content-manager.plugin.description",
+    "required": true
   },
   "scripts": {
     "test": "echo \"no tests yet\""
