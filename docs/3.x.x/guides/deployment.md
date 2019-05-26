@@ -139,7 +139,7 @@ You may now proceed to the next steps.
 
 ### Launch an EC2 virtual machine
 
-Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 instance**. To use this service you will `Launch Instance`.
+Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 instance**. To use this service you will `Launch Instance`. In this section, you will **establish IAM credentials**, **launch a new instance** and **set-up primary security rules**.
 
 1. From your **AWS Management Console** and as your **_regular_** user:
 
@@ -172,6 +172,30 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
   - After downloading the file, click the blue `Launch Instances` button.
 
 Your instances are now running. Continue to the next steps.
+
+### Install a PostgreSQL database on AWS RDS
+
+1. Navigate to the `AWS RDS Service`. In the top menu, click on `Services` and do a search for `rds`, click on `RDS, Managed Relational Database Service`.
+2. In the top menu bar, select the region that is the same as the EC2 instance. e.g. `EU (Paris)` or `US East (N. Virgina)`.
+
+3. Click the orange `Create database` button. Follow these steps to complete installation of a `PostgreSQL` database:
+
+- **Engine Options:** Click on `PostgreSQL`, version **PostgreSQL 10.x-R1**
+- **Templates:** Click on `Free Tier`.
+- **Settings**
+  - **DB instance identifier** Give a name to your database, e.g. `strapi-database`
+  - **Credential Settings**: This is your `psql` database _username_ and _password_.
+    - **Master username:** Keep as `postgres`, or change (optional)
+    - `Uncheck` _Auto generate a password_, type in a secret password.
+- **Network & Security** Set `Public Accessibility` to `Yes`.
+- **OPTIONAL:** Review any further options (**DB Instance size**, **Storage**, **Connectivity**), and modify to your project needs.
+- You need to give you Database a name. Under **Additional configuration**:
+  - **Initial database name:** Give your database a name, e.g. `strapi`.
+- Review the rest of the options and click the orange, `Create database` button.
+
+After a few minutes, you may refresh your page and see that your database has been successfully created.
+
+###
 
 ## Digital Ocean
 
