@@ -130,11 +130,39 @@ Next, install `Node.js`:
 
 6. You will install `Node.js` using the instructions in section **Install Node using a PPA** from the official [Digital Ocean docs for installing a production ready Node.js server](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04#installing-using-a-ppa).
 
-After completing the steps to **install Node.js, NPM and the "build-essential package"**, you may continue to the next section.
+After completing the steps to **install Node.js, NPM and the "build-essential package"**, you will manually change npm's default directory. The following steps are based on [how to resolve access permissions from npmjs.com](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally):
+
+- Create a `.npm-global` directory and set the path to this directory for `node_modules`
+
+```bash
+cd ~
+mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+```
+
+- Create (or modify) a `~/.profile` file and add this line:
+
+```bash
+sudo nano ~/.profile
+```
+
+Add this line.
+
+```ini
+export PATH=~/.npm-global/bin:$PATH
+```
+
+- Lastly, update your system variables:
+
+```bash
+source ~/.profile
+```
+
+You are now ready to continue to the next section.
 
 ### Install and Configure Git versioning on your server
 
-A convenient way to maintain your Strapi application and update it during and after initial development is to use [Git](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control). In order to use Git, you will need to have it installed on your Droplet. Droplets should have Git installed by default, so you will first check if it is instqlled and if it is not installed, you will need to install it.
+A convenient way to maintain your Strapi application and update it during and after initial development is to use [Git](https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control). In order to use Git, you will need to have it installed on your Droplet. Droplets should have Git installed by default, so you will first check if it is installed and if it is not installed, you will need to install it.
 
 The last step is to configure Git on your server.
 
@@ -146,7 +174,7 @@ git --version
 
 2. **OPTIONAL:** Install Git. **NOTE:** Only do if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
 
-3. Complete the globel **username** and **GitHub** settings: [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
+3. Complete the global **username** and **GitHub** settings: [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
 
 After installing and configuring Git on your Droplet. Please continue to the next step, [installing a database](#install-the-database-for-your-project).
 
@@ -210,7 +238,7 @@ In your code editor, you will need to edit a file called `database.json`. Replac
         "client": "postgres",
         "host": "localhost",
         "port": 5432,
-        "username": "david",
+        "username": "your-name",
         "password": "password",
         "database": "strapi"
       },
@@ -250,7 +278,7 @@ Next, navigate to the `my-project` folder, the root for Strapi. You will now nee
 `Path: ./my-project/`
 
 ```bash
-cd ./path-to-strapi-root-folder/
+cd ./my-project/
 npm install
 ```
 
@@ -274,15 +302,15 @@ Your Strapi project is now installed on your **Droplet**.
 `Path: ./my-project/`
 
 ```bash
-npm run start
+NODE_ENV=production npm run start
 
 > my-project@0.1.0 start /home/path-to-your-project-folder/my-project
 > node server.js
 
 [2019-05-20T14:06:01.553Z] info Time: Mon May 20 2019 14:06:01 GMT+0000 (Coordinated Universal Time)
 [2019-05-20T14:06:01.555Z] info Launched in: 2623 ms
-[2019-05-20T14:06:01.555Z] info Environment: development
-[2019-05-20T14:06:01.555Z] info Process PID: 13221
+[2019-05-20T14:06:01.555Z] info Environment: production
+[2019-05-20T14:06:01.555Z] info Process PID: 7286
 [2019-05-20T14:06:01.556Z] info Version: 3.0.0-alpha.25.2 (node v10.15.3)
 [2019-05-20T14:06:01.556Z] info To shut down your server, press <CTRL> + C at any time
 
@@ -310,10 +338,10 @@ Navigate to your **Strapi Project folder** and use the following command to set 
 `Path: ./my-project/`
 
 ```bash
-NODE_ENV=production pm2 start --name="strapi" server.js --watch -i max
+NODE_ENV=production pm2 start --name="strapi" server.js
 ```
 
-Follow the steps below to have your app launch on system startup. (**NOTE:** These steps are based on the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).)
+Follow the steps below to have your app launch on system startup. (**NOTE:** These steps are modified from the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).)
 
 - Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:
 
@@ -323,7 +351,7 @@ $ pm2 startup systemd
 
 [PM2] Init System found: systemd
 [PM2] To setup the Startup Script, copy/paste the following command:
-sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
+sudo env PATH=$PATH:/usr/bin /home/your-name/.npm-global/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
 ```
 
 - Copy/paste the generated command:
@@ -358,9 +386,9 @@ pm2 save
 
 - **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
 
-Your `Strapi` project is now accessible at: `http://your-ip-address:1337/admin`, in the sections to follow, are a few recommended additional actions to make developing your project more efficient and to set-up a few additional aspects of your server.
+In the sections to follow, are a few recommended additional actions to make developing your project more efficient and to set-up a few additional aspects of your server.
 
-- Lastly, you will need to configure a `ecosystem.config.js` file. It will establish a `watch` for `pm2` and restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+- Lastly, you will need to configure a `ecosystem.config.js` file. It will be used b y `pm2` to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
 
   - You will need to open your `nano` editor and then `copy/paste` the following:
 
@@ -377,16 +405,17 @@ module.exports = {
   apps: [
     {
       name: 'your-app-name',
-      script: '.path-to/your-strapi-app/server.js',
-      watch: './strapi-project-root/',
-      ignore_watch : ["node_modules", "public"],
-      watch_delay: 1000,
+      cwd: '/home/your-name/my-strapi-project/my-project',
+      script: 'server.js',
+      env: {
+        NODE_ENV: 'production',
+      },
     },
   ],
 };
 ```
 
-`pm2` is now set-up to watch for any file changes in your project, and will restart the service.
+`pm2` is now set-up to be used to manage restarting your application upon changes. Continue below to configure the `webhook`.
 
 ### Set up a webhook
 
@@ -413,7 +442,7 @@ cd NodeWebHooks
 sudo nano webhook.js
 ```
 
-- In the `nano` editor, copy/paste the following script, but make sure to replace `your_secret_key` and `repo` with the values that correspond to your project, then save and exit:
+- In the `nano` editor, copy/paste the following script, but make sure to replace `your_secret_key` and `repo` with the values that correspond to your project, then save and exit. This script creates a variable called `PM2_CMD` which changes to the home directory and then runs pm2 restart the project using the `ecosystem.config.js` file. Later this variable is used after pulling from GitHub. This is done to keep your `ecosystem.config.js`, as the point of starting your application.
 
 ```js
 var secret = 'your_secret_key';
@@ -422,6 +451,8 @@ var repo = '~/path-to-your-repo/';
 const http = require('http');
 const crypto = require('crypto');
 const exec = require('child_process').exec;
+
+const PM2_CMD = 'cd ~ && pm2 startOrRestart ecosystem.config.js';
 
 http
   .createServer(function(req, res) {
@@ -434,14 +465,17 @@ http
           .digest('hex');
 
       if (req.headers['x-hub-signature'] == sig) {
-        exec('cd ' + repo + ' && git pull', (error, stdout, stderr) => {
-          if (error) {
-            console.error(`exec error: ${error}`);
-            return;
-          }
-          console.log(`stdout: ${stdout}`);
-          console.log(`stderr: ${stderr}`);
-        });
+        exec(
+          `cd ${repo} && git pull && ${PM2_CMD}`,
+          (error, stdout, stderr) => {
+            if (error) {
+              console.error(`exec error: ${error}`);
+              return;
+            }
+            console.log(`stdout: ${stdout}`);
+            console.log(`stderr: ${stderr}`);
+          },
+        );
       }
     });
 
@@ -460,16 +494,23 @@ Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
 Firewall is active and enabled on system startup
 ```
 
-- You may test your **webhook** by following the instructions [here](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync#step-4-testing-the-webhook).
-
 Earlier you setup `pm2` to start the services (your **Strapi project**) whenever the **Droplet** reboots or is started. You will now do the same for the `webhook` script.
 
 - Install the webhook as a `Systemd` service
 
-  - Create a `webhook.service` file:
+  - Run `echo $PATH` and copy the output for use in the next step.
+
+```
+echo $PATH
+
+/home/your-name/.npm-global/bin:/home/your-name/bin:/home/your-name/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+```
+
+- Create a `webhook.service` file:
 
 ```bash
 cd ~
+
 sudo nano /etc/systemd/system/webhook.service
 ```
 
@@ -481,7 +522,7 @@ Description=Github webhook
 After=network.target
 
 [Service]
-Environment=NODE_PORT=8080
+Environment=PATH=/PASTE-PATH_HERE
 Type=simple
 User=your-name
 ExecStart=/usr/bin/nodejs /home/your-name/NodeWebHooks/webhook.js
@@ -503,6 +544,8 @@ sudo systemctl start webhook
 ```bash
 sudo systemctl status webhook
 ```
+
+- You may test your **webhook** by following the instructions [here](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync#step-4-testing-the-webhook).
 
 ### Further steps to take
 
