@@ -654,10 +654,68 @@ Finally if you want to run your project in different envrionments use `NODE_ENV=
 
 ## Updating Deployments
 
-When deploying a Strapi project you will have to make sure the `build` script is ran. (e.g `npm run build`)
+### Building your admin panel
+
+If you are deploying your Strapi project with the Admin panel together, you will have to make sure the `build` script runs before running the project. (e.g `npm run build`)
 
 Depending on your deployment environment you might have to run the `build` script with `NODE_ENV=production npm run build` if the envrionment doesn't include it by default.
 
 For example `heroku` will automatically run the `build` script for you and set `NODE_ENV=production` before running the scripts so you won't have to think about it.
+
+### Running the project
+
+Previously you could run your project by running `node server.js`. As we remove the `server.js` file you will have to either run `npm run start` or create a `server.js` file (read more [here](#migrating-server.js))
+
+#### PM2
+
+if you are using pm2 to run your application in production you can update your script like so
+
+**Before**
+
+```bash
+NODE_ENV=production pm2 start server.js
+```
+
+**After**
+
+```bash
+NODE_ENV=production pm2 start npm -- start
+```
+
+If you are using an `ecosystem.config.js` you can do the following
+
+**Before**
+
+```js
+module.exports = {
+  apps: [
+    {
+      name: 'your-app-name',
+      script: '.path-to/your-strapi-app/server.js',
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+  ],
+};
+```
+
+**After**
+
+```js
+module.exports = {
+  apps: [
+    {
+      name: 'your-app-name',
+      cwd: '.path-to/your-strapi-app',
+      script: 'npm',
+      args: 'start',
+      env: {
+        NODE_ENV: 'production',
+      },
+    },
+  ],
+};
+```
 
 ## Conclusion
