@@ -6,7 +6,7 @@ To upgrade a project to the `beta` version of Strapi follow the instructions bel
 
 ## Updating global Strapi installation
 
-If you have previously installed Strapi globally. You will need to upgrade its version:
+If you have installed Strapi globally. You will need to upgrade its version:
 
 ```bash
 npm install -g strapi@beta
@@ -16,7 +16,7 @@ yarn global add strapi@beta
 
 ## Updating dependencies
 
-First let's clean your project's dependencies and update the `package.json` file.
+First let's clean your project's dependencies and update its package.json file.
 
 ### Clean your `node_modules`
 
@@ -161,7 +161,7 @@ yarn
 
 As of now, strapi can start without a `server.js` file. You can now delete it.
 
-If you really need a server.js file to be able to run `node server.js` instead of `npm run start` then create a `./server.js` file as follows:
+If you need a server.js file to be able to run `node server.js` instead of `npm run start` then create a `./server.js` file as follows:
 
 ```js
 const strapi = require('strapi');
@@ -175,9 +175,9 @@ You can leave all your files in `./config` unchanged and remove the `server.auto
 
 ## Migrating `plugins`
 
-One of our main objectives for the `beta` is to make it easier and quicker to upgrade to more recent versions of Strapi. This is why starting from now, plugins will be located in `node_modules`.
+One of our main objectives for the `beta` is to make it easier and quicker to upgrade to more recent versions of Strapi. This is why starting from now, plugins will be located in the `node_modules` folder.
 
-[link to the doc](link)
+[Read more](https://strapi.io/documentation/3.0.0-beta.x/concepts/concepts.html#files-structure)
 
 ### Migrating non customized plugin
 
@@ -321,7 +321,7 @@ module.exports = {
 
 #### Models
 
-If you have modified (or cerated relations) with a plugin's model you will have to move your Model file to `./extensions/pluginName/models/Model.settings.json`
+If you have modified (or cre  ated relations) with a plugin's model you will have to move your Model file to `./extensions/pluginName/models/Model.settings.json`
 
 Here you need to keep the entire model. It will replace the one in the plugin rather than being merged with it.
 
@@ -471,7 +471,8 @@ The only difference is that the admin of a local plugin is ignored for the momen
 
 In the `beta` we are introducing the `Core API`, which is replacing the templates that were generated before.
 
-Now when you create a new model your `controller` and `service` will be empty modules and will only be used to override the default behaviours. [link to the doc](link)
+Now when you create a new model your `controller` and `service` will be empty modules and will be used to override the default behaviours. 
+Read more about [controllers](https://strapi.io/documentation/3.0.0-beta.x/guides/controllers.html) or [services](https://strapi.io/documentation/3.0.0-beta.x/guides/services.html)
 
 To migrate, you will only have to delete the methods you haven't modified or created from your `controllers` and `services`
 
@@ -538,7 +539,7 @@ For custom `controllers` and `services` (the ones without a model) you can leave
 
 In the file `./api/apiName/config/routes.json` we renamed the `destroy` action to `delete` you will have to update your `routes` and `controller` accordingly.
 
-If you haven't customized the `destroy` action then just remove it from your controller instead of renaming it.
+If you haven't customized the `destroy` action then remove it from your controller instead of renaming it.
 
 **Before**
 
@@ -624,7 +625,7 @@ module.exports = {
 
 Customizing the admin is as simple as creating a file in the `./admin` folder of your app. You need to make sure the file you want to customize is at the same location in your `./admin` folder as it is in the `strapi-admin` package. For a reference you can look at the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin).
 
-For the beta there are quite a lot of changes that were made to the admin. If you did customize things you will have to verifiy if the file still exists in the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin) or find its new location.
+For the beta there are quite a lot of changes made to the admin. If you did customize things you will have to verifiy if the file still exists in the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin) or find its new location.
 
 ### Example
 
@@ -660,7 +661,7 @@ If you are deploying your Strapi project with the Admin panel together, you will
 
 Depending on your deployment environment you might have to run the `build` script with `NODE_ENV=production npm run build` if the envrionment doesn't include it by default.
 
-For example `heroku` will automatically run the `build` script for you and set `NODE_ENV=production` before running the scripts so you won't have to think about it.
+For example `heroku` will run the `build` script for you and set `NODE_ENV=production` before running the scripts so you won't have to think about it.
 
 ### Running the project
 
@@ -691,7 +692,7 @@ module.exports = {
   apps: [
     {
       name: 'your-app-name',
-      script: '.path-to/your-strapi-app/server.js',
+      script: './path-to/your-strapi-app/server.js',
       env: {
         NODE_ENV: 'production',
       },
@@ -707,7 +708,7 @@ module.exports = {
   apps: [
     {
       name: 'your-app-name',
-      cwd: '.path-to/your-strapi-app',
+      cwd: './path-to/your-strapi-app',
       script: 'npm',
       args: 'start',
       env: {
