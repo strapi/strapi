@@ -6,7 +6,7 @@ The following is a set of guidelines for contributing to Strapi and its packages
 
 Strapi is an open-source project administered by [the Strapi team](https://strapi.io/company).
 
-Before contributing, ensure that your effort is aligned with the project's roadmap by talking to the maintainers, especially if you are going to spend a lot of time on it. Feel free to [join us on Slack](http://slack.strapi.io) if you are interested in helping us or [drop us an email](mailto:hi@strapi.io) if you are interested in working with us.
+Before contributing, ensure that your effort is aligned with the project's roadmap by talking to the maintainers, especially if you are going to spend a lot of time on it. Feel free to [join us on Slack](http://slack.strapi.io) or [drop us an email](mailto:hi@strapi.io) if you are interested in helping us or working with us.
 
 ## Open Development & Community Driven
 
@@ -21,7 +21,7 @@ This project and everyone participating in it is governed by the [Strapi Code of
 
 ## Bugs
 
-We are using [GitHub Issues](https://github.com/strapi/strapi/issues) to manage our public bugs. We keep a close eye on this so before filling a new task try to make sure the problem doesn't already exist.
+We are using [GitHub Issues](https://github.com/strapi/strapi/issues) to manage our public bugs. We keep a close eye on this so before filling a new issue, try to make sure the problem does not already exist.
 
 ## Get in Touch
 
@@ -34,7 +34,7 @@ We are using [GitHub Issues](https://github.com/strapi/strapi/issues) to manage 
 
 The core team will review your pull request and will either merge it, request changes to it, or close it.
 
-**Before submitting your pull request** make sure the following requirements are done:
+**Before submitting your pull request** make sure the following requirements are fulfilled:
 
 - Fork the repository and create your branch from `master`.
 - Run `yarn setup` in the repository root.
@@ -46,7 +46,7 @@ The core team will review your pull request and will either merge it, request ch
 
 ## Contribution Prerequisites
 
-- You have [Node](https://nodejs.org/en/) at v8.0.0+ and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
+- You have [Node](https://nodejs.org/en/) at v10.0.0 only and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
 - You are familiar with Git.
 
 ## Development Workflow
