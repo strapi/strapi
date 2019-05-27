@@ -118,9 +118,11 @@ We have completely refreshed the `scripts` of a project so update them as follow
 }
 ```
 
-**Warning**
+::: warning
 
 To avoid confusions we have decided to give the same behaviour to the `npm run start` and `strapi start` commands. To do so we had to introduce a new `strapi develop` command to run your project in `watch` mode.
+
+:::
 
 #### `Strapi`
 
@@ -321,7 +323,7 @@ module.exports = {
 
 #### Models
 
-If you have modified (or cre  ated relations) with a plugin's model you will have to move your Model file to `./extensions/pluginName/models/Model.settings.json`
+If you have modified (or cre ated relations) with a plugin's model you will have to move your Model file to `./extensions/pluginName/models/Model.settings.json`
 
 Here you need to keep the entire model. It will replace the one in the plugin rather than being merged with it.
 
@@ -471,7 +473,7 @@ The only difference is that the admin of a local plugin is ignored for the momen
 
 In the `beta` we are introducing the `Core API`, which is replacing the templates that were generated before.
 
-Now when you create a new model your `controller` and `service` will be empty modules and will be used to override the default behaviours. 
+Now when you create a new model your `controller` and `service` will be empty modules and will be used to override the default behaviours.
 Read more about [controllers](https://strapi.io/documentation/3.0.0-beta.x/guides/controllers.html) or [services](https://strapi.io/documentation/3.0.0-beta.x/guides/services.html)
 
 To migrate, you will only have to delete the methods you haven't modified or created from your `controllers` and `services`
@@ -635,15 +637,27 @@ You can do the same with any file in the [source code](https://github.com/strapi
 
 ## Migrating your database
 
-Starting from `beta` we are adding a new model `Administrator` to replace the `users-permissions` plugin `User` model for connecting to the `Strapi admin panel` panel.
+The beta introduces a new `Administrator` model that has been created with the purpose of letting people access the Strapi's administration panel (in the short term this model is not editable). In this way, it replaces the previous `User` model from the `users-permissions` plugin. 
+With this new model, you now have a clear distinction between the people that are allowed to access the administration panel, and the users of the application you are building with Strapi.
 
-The goal is to emphasize the difference between an `Administrator` of the `Strapi admin panel` and a `User` of the application you are building with Strapi. Thus making the `users-permissions` plugin focused on providing an authentication and authorization service to your application.
+More practically, it means that you will have a new strapi_administrator collection that will be created automatically in your database. 
+On startup, this table will be empty so, when migrating from alpha to beta, you can either create this new administrator user with the registeration page OR manually migrate your previous users with `administrator` role.
 
-This means that, from now on you will have a new `strapi_administrator` collection in your database. Since this new table will be empty on startup, you will be asked to create a new administrator.
+### Cleaning up the `users-permissions.users` collection
 
-You can either create this new administrator and manually recreate all your administrators or, create a migration script that will copy your `users` with `administrator` role to the `strapi_administrator` collection.
+If you only used the `administrator` role to give access to the admin panel to certain users, and never used this role for your application business logic; you can delete the role.
 
-In the short term the `Administrator` model will not be customisable. If you need have created relations between your models and the `User` model (e.g: author) to link to the administrator you will have to keep these users in both collections.
+If you haven't created any relation with the `User` model in your `Content Types` and don't use those users in your application business logic; you can remove every user you have migrated to the `strapi_administrator` collection.
+
+
+Finally, if you have chosen to migrate your previous admin users in the new `strapi_administrator` collection and your `User` model has at least one relation with another model you may need to keep both collections in sync 
+
+
+**Example**: Some of your application users can edit their profile and access the admin panel. If theyy change their email you need to make sure their `administrator` entity also changes email.
+::: warning
+We really recommend separating you users from your administrators to avoid this situation which is not a good practice.
+:::
+
 
 ## Running your migrated project
 
