@@ -35,7 +35,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": "^10.0.0",
+    "node": ">= 10.x.x <= 12.x.x",
     "npm": ">= 6.0.0"
   },
   "license": "MIT",

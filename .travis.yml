@@ -8,7 +8,7 @@ dist: trusty
 language: node_js
 
 node_js:
-  - '10'
+  - 10
 
 cache:
   yarn: true
@@ -35,21 +35,34 @@ install:
   - yarn setup
   - yarn global add -g wait-on
 
+
+lint_stage: &lint_stage
+  stage: test
+  name: 'Lint / Unit Tests node 11'
+  script:
+    - yarn run -s lint
+    - yarn run -s test:unit
+    - yarn run -s test:front
+
 jobs:
   include:
     - stage: test
       name: Snyk
       script: yarn run -s test:snyk
+      node_js: 10
       if: fork = false
 
-    - stage: test
-      name: 'Lint / Unit Tests '
-      script:
-        - yarn run -s lint
-        - yarn run -s test:unit
-        - yarn run -s test:front
+    - <<: *lint_stage
+      node_js: 10
+
+    - <<: *lint_stage
+      node_js: 11
+
+    - <<: *lint_stage
+      node_js: 12
 
     - <<: *e2e_tests
+      node_js: 10
       name: 'E2E Postgresql'
       before_install:
         - psql -c 'create database strapi_test;' -U postgres
@@ -57,6 +70,23 @@ jobs:
         - DB_STRING='--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword='
 
     - <<: *e2e_tests
+      node_js: 11
+      name: 'E2E Postgresql'
+      before_install:
+        - psql -c 'create database strapi_test;' -U postgres
+      env:
+        - DB_STRING='--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword='
+
+    - <<: *e2e_tests
+      node_js: 12
+      name: 'E2E Postgresql'
+      before_install:
+        - psql -c 'create database strapi_test;' -U postgres
+      env:
+        - DB_STRING='--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword='
+
+    - <<: *e2e_tests
+      node_js: 10
       name: 'E2E Mysql'
       before_install:
         - mysql -e 'CREATE DATABASE strapi_test;'
@@ -64,11 +94,56 @@ jobs:
         - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
 
     - <<: *e2e_tests
+      node_js: 11
+      name: 'E2E Mysql'
+      before_install:
+        - mysql -e 'CREATE DATABASE strapi_test;'
+      env:
+        - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
+
+
+    - <<: *e2e_tests
+      node_js: 12
+      name: 'E2E Mysql'
+      before_install:
+        - mysql -e 'CREATE DATABASE strapi_test;'
+      env:
+        - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
+
+    - <<: *e2e_tests
+      node_js: 10
       name: 'E2E Sqlite'
       env:
         - DB_STRING='--dbclient=sqlite --dbfile=./tmp/data.db'
 
     - <<: *e2e_tests
+      node_js: 11
+      name: 'E2E Sqlite'
+      env:
+        - DB_STRING='--dbclient=sqlite --dbfile=./tmp/data.db'
+
+    - <<: *e2e_tests
+      node_js: 12
+      name: 'E2E Sqlite'
+      env:
+        - DB_STRING='--dbclient=sqlite --dbfile=./tmp/data.db'
+
+    - <<: *e2e_tests
+      node_js: 10
+      name: 'E2E MongoDB'
+      <<: *install_mongo
+      env:
+        - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
+
+    - <<: *e2e_tests
+      node_js: 11
+      name: 'E2E MongoDB'
+      <<: *install_mongo
+      env:
+        - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
+
+    - <<: *e2e_tests
+      node_js: 12
       name: 'E2E MongoDB'
       <<: *install_mongo
       env:

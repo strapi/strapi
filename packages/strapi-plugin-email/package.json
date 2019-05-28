@@ -37,7 +37,7 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": "^10.0.0",
+    "node": ">= 10.x.x <= 12.x.x",
     "npm": ">= 6.0.0"
   },
   "license": "MIT",
