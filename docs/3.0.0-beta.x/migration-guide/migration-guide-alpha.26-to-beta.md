@@ -16,7 +16,7 @@ yarn global add strapi@beta
 
 ## Updating dependencies
 
-First let's clean your project's dependencies and update its package.json file.
+First, let's clean your project's dependencies and update its `package.json` file.
 
 ### Clean your `node_modules`
 
@@ -68,7 +68,7 @@ You must upgrade the versions and add `strapi-admin` as a dependency.
 }
 ```
 
-Starting from this new release plugins are now npm dependencies so, you need to install them too.
+Starting from this new release, plugins are now npm dependencies so, you need to install them as well.
 
 Here are the default ones. If you have installed other plugins you will also need to add them here (e.g `strapi-plugin-graphql`).
 
@@ -88,7 +88,7 @@ Here are the default ones. If you have installed other plugins you will also nee
 
 #### `Scripts`
 
-We have completely refreshed the `scripts` of a project so update them as follows:
+We have completely refreshed the `scripts` of a project, so update them as follows:
 
 **Before**
 
@@ -120,7 +120,7 @@ We have completely refreshed the `scripts` of a project so update them as follow
 
 ::: warning
 
-To avoid confusions we have decided to give the same behaviour to the `npm run start` and `strapi start` commands. To do so we had to introduce a new `strapi develop` command to run your project in `watch` mode.
+To avoid confusions we have decided to give the same behavior to the `npm run start` and `strapi start` commands. To do so we had to introduce a new `strapi develop` command to run your project in `watch` mode.
 
 :::
 
@@ -171,25 +171,39 @@ const strapi = require('strapi');
 strapi(/* {...} */).start();
 ```
 
+## Migrating `.gitignore`
+
+You need to add a new section to the `.gitignore` file.
+
+```text
+############################
+# Strapi
+############################
+
+exports
+.cache
+build
+```
+
 ## Migrating `config`
 
-You can leave all your files in `./config` unchanged and remove the `server.autoReload` key in `./config/environments/**/server.json`.
+You can leave all your files in `./config` unchanged but remove the `server.autoReload` key in `./config/environments/**/server.json`.
 
 ## Migrating `plugins`
 
-One of our main objectives for the `beta` is to make it easier and quicker to upgrade to more recent versions of Strapi. This is why starting from now, plugins will be located in the `node_modules` folder.
+One of our main objectives for the `beta` is to make it easier and quicker to upgrade to more recent versions of Strapi. This is why moving forward, plugins will be located in the `node_modules` folder.
 
 [Read more](https://strapi.io/documentation/3.0.0-beta.x/concepts/concepts.html#files-structure)
 
 ### Migrating non customized plugin
 
-If you installed a plugin but never modified any file inside `./plugins/pluginName/**/*`, you can remove the `./plugins/pluginName` folder.
+If you installed a plugin but never modified any files inside `./plugins/pluginName/**/*`, you can remove the `./plugins/pluginName` folder.
 
 ### Migrating customized plugin
 
-If you have made some modifications in one of your plugins you will have to do some manual migrations.
+If you have made some modifications to one of your plugins, you will have to do some manual migrations:
 
-The main principle is to keep only the files you modify and move them to the `./extensions/pluginName` folder.
+The main principle is to keep only the files you modified and move them to the `./extensions/pluginName` folder.
 
 Read the following instructions for more details.
 
@@ -197,7 +211,7 @@ Read the following instructions for more details.
 
 When customizing configurations you only need to move the modified files.
 
-Strapi merges the plugin's configurations with the ones in `./extensions/pluginName/config`. Hence you should also only add the fields that you modified in your custom configurations files.
+Strapi merges the plugin's configurations with the ones in `./extensions/pluginName/config`. Therefore, you should also only add the fields that you modified in your custom configurations files.
 
 **Before**
 
@@ -287,7 +301,7 @@ All the unchanged routes must be removed from this file.
 
 To migrate controllers and services you must move your customized controllers and services to the `./extensions/pluginName/**/*`, delete all the non customized ones and keep only the methods you modified in your customized files·
 
-For example if you have a `customIndex` action in the `User` controller you only have to create the `./extensions/users-permissions/controllers/User.js` file and keep your `customIndex` action in it. You can delete the rest of the files and methods.
+For example, if you have a `customIndex` action in the `User` controller you only have to create the `./extensions/users-permissions/controllers/User.js` file and keep your `customIndex` action in it. You can delete the rest of the files and methods.
 
 **Before**
 
@@ -323,7 +337,7 @@ module.exports = {
 
 #### Models
 
-If you have modified (or cre ated relations) with a plugin's model you will have to move your Model file to `./extensions/pluginName/models/Model.settings.json`
+If you have modified (or created relations) with a plugin's model, you will have to move your Model file to `./extensions/pluginName/models/Model.settings.json`
 
 Here you need to keep the entire model. It will replace the one in the plugin rather than being merged with it.
 
@@ -471,9 +485,9 @@ The only difference is that the admin of a local plugin is ignored for the momen
 
 ### Migrating controllers and services
 
-In the `beta` we are introducing the `Core API`, which is replacing the templates that were generated before.
+In the `beta`, we are introducing the `Core API`, which is replacing the templates that were generated before.
 
-Now when you create a new model your `controller` and `service` will be empty modules and will be used to override the default behaviours.
+Now when you create a new model your `controller` and `service` will be empty modules and will be used to override the default behaviors.
 Read more about [controllers](https://strapi.io/documentation/3.0.0-beta.x/guides/controllers.html) or [services](https://strapi.io/documentation/3.0.0-beta.x/guides/services.html)
 
 To migrate, you will only have to delete the methods you haven't modified or created from your `controllers` and `services`
@@ -541,7 +555,7 @@ For custom `controllers` and `services` (the ones without a model) you can leave
 
 In the file `./api/apiName/config/routes.json` we renamed the `destroy` action to `delete` you will have to update your `routes` and `controller` accordingly.
 
-If you haven't customized the `destroy` action then remove it from your controller instead of renaming it.
+If you haven't customized the `destroy` action, then remove it from your controller rather than renaming it.
 
 **Before**
 
@@ -627,21 +641,21 @@ module.exports = {
 
 Customizing the admin is as simple as creating a file in the `./admin` folder of your app. You need to make sure the file you want to customize is at the same location in your `./admin` folder as it is in the `strapi-admin` package. For a reference you can look at the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin).
 
-For the beta there are quite a lot of changes made to the admin. If you did customize things you will have to verifiy if the file still exists in the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin) or find its new location.
+For the beta there are quite a lot of changes made to the admin. If you previously customized things you will have to verify if the file still exists in the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin) or find its new location.
 
 ### Example
 
 You can modify the logo of the app by creating a file `./admin/src/assets/images/logo-strapi.png` to replace the admin logo.
 
-You can do the same with any file in the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin) of the admin panel
+You can do the same with any file found in the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin) of the admin panel
 
 ## Migrating your database
 
-The beta introduces a new `Administrator` model that has been created with the purpose of letting people access the Strapi's administration panel (in the short term this model is not editable). In this way, it replaces the previous `User` model from the `users-permissions` plugin. 
-With this new model, you now have a clear distinction between the people that are allowed to access the administration panel, and the users of the application you are building with Strapi.
+The beta introduces a new `Administrator` model created solely to allow user access to the Strapi administration panel (at this time this model is not editable). In this way, the `Administrator` model replaces the previous `User` model from the `users-permissions` plugin.
+With this new model, you now have a clear distinction between the people that are allowed to access the administration panel, and the users of the application you built with Strapi.
 
-More practically, it means that you will have a new strapi_administrator collection that will be created automatically in your database. 
-On startup, this table will be empty so, when migrating from alpha to beta, you can either create this new administrator user with the registeration page OR manually migrate your previous users with `administrator` role.
+More practically, it means that a new `strapi_administrator` collection will be created automatically in your database.
+On startup, the `strapi_administrator` table is empty, therefore when migrating from alpha to beta, you may either create a new administrator user with the registration page OR you may manually migrate your previous users with `administrator` role.
 
 ### Cleaning up the `users-permissions.users` collection
 
@@ -650,10 +664,10 @@ If you only used the `administrator` role to give access to the admin panel to c
 If you haven't created any relation with the `User` model in your `Content Types` and don't use those users in your application business logic; you can remove every user you have migrated to the `strapi_administrator` collection.
 
 
-Finally, if you have chosen to migrate your previous admin users in the new `strapi_administrator` collection and your `User` model has at least one relation with another model you may need to keep both collections in sync 
+Finally, if you have chosen to migrate your previous admin users in the new `strapi_administrator` collection but your `User` model has at least one relation with another model, then you may need to keep both the `strapi_administrator` and `users-pemrissions_user` collection manually in sync.
 
 
-**Example**: Some of your application users can edit their profile and access the admin panel. If theyy change their email you need to make sure their `administrator` entity also changes email.
+**Example**: Some of your application users can edit their profile and access the admin panel. If they change their email you need to make sure their `administrator` entity also changes email.
 ::: warning
 We really recommend separating you users from your administrators to avoid this situation which is not a good practice.
 :::
@@ -663,9 +677,9 @@ We really recommend separating you users from your administrators to avoid this 
 
 To run your migrated project you will now need to run `strapi develop` or `npm run develop` to run the project in watch mode (e.g auto reloading on content-type creation).
 
-To run strapi without watch mode then run `strapi start` or `npm run start`
+To run strapi without watch mode then run `strapi start` or `npm run start`.
 
-Finally if you want to run your project in different envrionments use `NODE_ENV=env npm run start`
+Finally, if you want to run your project in different environments use `NODE_ENV=env npm run start`, eg. `NODE_ENV=production npm run start` or `NODE_ENV=development npm run start`.
 
 ## Updating Deployments
 
@@ -675,11 +689,11 @@ If you are deploying your Strapi project with the Admin panel together, you will
 
 Depending on your deployment environment you might have to run the `build` script with `NODE_ENV=production npm run build` if the envrionment doesn't include it by default.
 
-For example `heroku` will run the `build` script for you and set `NODE_ENV=production` before running the scripts so you won't have to think about it.
+For example, `Heroku` will run the build script for you and set `NODE_ENV=production` before running the scripts so you won't have to think about it.
 
 ### Running the project
 
-Previously you could run your project by running `node server.js`. As we remove the `server.js` file you will have to either run `npm run start` or create a `server.js` file (read more [here](#migrating-server.js))
+Previously, you could run your project by running `node server.js`. The beta version removes the `server.js` file, and so you will have to either run `npm run start` or manually create a `server.js` file (read more [here](#migrating-server.js))
 
 #### PM2
 
@@ -697,7 +711,7 @@ NODE_ENV=production pm2 start server.js
 NODE_ENV=production pm2 start npm -- start
 ```
 
-If you are using an `ecosystem.config.js` you can do the following
+If you are using an `ecosystem.config.js` you can do the following:
 
 **Before**
 
@@ -734,3 +748,5 @@ module.exports = {
 ```
 
 ## Conclusion
+
+The beta release of Strapi marks an important milestone in the long-term development of the project. Going forward the Strapi Community, their users and clients can continue to use and deploy Strapi with even greater confidence. Thank you for all the contributions that made this beta release possible.
