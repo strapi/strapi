@@ -277,7 +277,7 @@ Your Strapi project is now installed on your **Droplet**.
 
 **OPTIONAL:** You may see your project and set-up your first administrator user, by doing the following:
 
-- Navigate to the Strapi project folder. `Path: ./my-project/`. Run the follow command from within the Strapi project root:
+- Navigate to the Strapi project folder. `Path: ./my-project/`. Run the following command from within the Strapi project root:
 
 `Path: ./my-project/`
 
@@ -365,11 +365,11 @@ pm2 save
 
 - **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
 
-In the sections to follow, are a few recommended additional actions to make developing your project more efficient and to set-up a few additional aspects of your server.
+In the sections to follow, are a few recommended additional actions to make developing your project more efficient.
 
 ### The ecosystem.config.js file
 
-- You will need to configure a `ecosystem.config.js` file. It will be used by `pm2` to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+- You will need to configure an `ecosystem.config.js` file. It will be used by `pm2` to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
 
   - You will need to open your `nano` editor and then `copy/paste` the following:
 
