@@ -1,30 +1,30 @@
 # Contribute to Strapi
 
-First off, thanks for taking the time to contribute! 🎉👍
+Strapi is an open-source project administered by [the Strapi team](https://strapi.io/company). We appreciate your interest and efforts to contribute to Strapi.
 
-The following is a set of guidelines for contributing to Strapi and its packages.
-
-Strapi is an open-source project administered by [the Strapi team](https://strapi.io/company).
-
-Before contributing, ensure that your effort is aligned with the project's roadmap by talking to the maintainers, especially if you are going to spend a lot of time on it. Feel free to [join us on Slack](http://slack.strapi.io) or [drop us an email](mailto:hi@strapi.io) if you are interested in helping us or working with us.
+All efforts to contribute are highly appreciated, we recommend you talk to a maintainer prior to spending a lot of time making a pull request that may not align with the project roadmap.
 
 ## Open Development & Community Driven
 
 Strapi is open-source under the [MIT license](https://github.com/strapi/strapi/blob/master/LICENSE.md). All the work done is available on GitHub.
+
 The core team and the contributors send pull requests which go through the same validation process.
 
-Every user can send a feature request using the [issues](https://github.com/strapi/strapi/issues/new?template=FEATURE_REQUEST.md) on GitHub. Feel free to upvote 👍 [existing feature request](https://portal.productboard.com/strapi)
+## Feature Requests
+
+Feature Requests by the community are highly encouraged. Please feel free to submit a [feature request](https://portal.productboard.com/strapi) or to upvote 👍 [an existing feature request](https://portal.productboard.com/strapi) in the ProductBoard.
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](CODE_OF_CONDUCT.md) so that you can understand what actions will and will not be tolerated.
+This project and everyone participating in it are governed by the [Strapi Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please read the [full text](CODE_OF_CONDUCT.md) so that you can read which actions may or may not be tolerated.
 
 ## Bugs
 
-We are using [GitHub Issues](https://github.com/strapi/strapi/issues) to manage our public bugs. We keep a close eye on this so before filling a new issue, try to make sure the problem does not already exist.
+We are using [GitHub Issues](https://github.com/strapi/strapi/issues) to manage our public bugs. We keep a close eye on this so before filing a new issue, try to make sure the problem does not already exist.
 
 ## Get in Touch
 
+- [Email](mailto:hi@strapi.io)
 - [Slack](https://slack.strapi.io/)
 - [Spectrum](https://spectrum.chat/strapi?tab=posts)
 
@@ -38,8 +38,8 @@ The core team will review your pull request and will either merge it, request ch
 
 - Fork the repository and create your branch from `master`.
 - Run `yarn setup` in the repository root.
-- If you’ve fixed a bug or added code that should be tested, add tests and link the corresponding issue in either your commit or your PR!
-- Ensure the test suite passes:
+- If you’ve fixed a bug or added code that should be tested, add the tests and then link the corresponding issue in either your commit or your PR!
+- Ensure the test suites are passing:
   - `yarn test:unit`
   - `yarn test:front`
 - Make sure your code lints (`yarn lint`).
@@ -51,7 +51,9 @@ The core team will review your pull request and will either merge it, request ch
 
 ## Development Workflow
 
-To facilitate the contribution, we drastically reduce the amount of commands necessary to install the entire development environment. First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/install-requirements.html)
+To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
+
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/install-requirements.html)
 
 Then, please follow the instructions below:
 
@@ -116,9 +118,9 @@ The administration panel is available at http://localhost:4000/admin
 
 ## Running the tests
 
-You can run three different kind of tests:
-
 **Changing the database:**
+
+You can run the test suites using different databases:
 
 ```bash
 $ node test/e2e.js sqlite
@@ -129,32 +131,29 @@ $ node test/e2e.js mysql
 
 ---
 
-## Additional informations
+## Miscellaneous
 
 ### Repository Organization
 
-We made the choice to use a monorepo design such as [React](https://github.com/facebook/react/tree/master/packages), [Babel](https://github.com/babel/babel/tree/master/packages), [Meteor](https://github.com/meteor/meteor/tree/devel/packages) or [Ember](https://github.com/emberjs/ember.js/tree/master/packages) do. It allows the community to easily maintain the whole ecosystem up-to-date and consistent.
+We chose to to use a monorepo design that exploits [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows the community to easily maintain the whole ecosystem, keep it up-to-date and consistent.
 
-The Babel team wrote an excellent short post about [the pros and cons of the monorepo design](https://github.com/babel/babel/blob/master/doc/design/monorepo.md).
-
-We will do our best to keep the master branch as clean as possible, with tests passing all the times. However, it can happen that the master branch moves faster than the release cycle. To ensure you have the latest stable version, please refer to the [release on npm](https://www.npmjs.com/package/strapi).
-
-If you send a pull request, please do it against the `master` branch. We are developing upcoming versions separately to ensure non-breaking changes from master to the latest stable major version.
+We do our best to keep the master branch as clean as possible, with tests passing at all times. However, it may happen that the master branch moves faster than the release cycle. Therefore check the [releases on npm](https://www.npmjs.com/package/strapi) so that you're always up-to-date with the latest stable version.
 
 ### Reporting an issue
 
-Before reporting an issue you need to make sure:
+Before submitting an issue you need to make sure:
 
-- You are experiencing a concrete technical issue with Strapi (ideas and feature proposals should happen [on Slack](http://slack.strapi.io)).
-- You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, please refer to [the official Strapi documentation](http://strapi.io). For additional help, ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/strapi).
-- You have already searched for related [issues](https://github.com/strapi/strapi/issues), and found none open (if you found a related _closed_ issue, please link to it in your post).
+- You are experiencing a concrete technical issue with Strapi.
+- You have already searched for related [issues](https://github.com/strapi/strapi/issues), and found none open (if you found a related _closed_ issue, please link to it from your post).
+- You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
+  - Refer to [the official Strapi documentation](http://strapi.io).
+  - Ask a member of the community in the [Strapi Slack Community](https://slack.strapi.io/).
+  - Ask a question on [StackOverflow](http://stackoverflow.com/questions/tagged/strapi).
 - Your issue title is concise, on-topic and polite.
-- You can provide steps to reproduce this issue that others can follow.
+- You can and do provide steps to reproduce your issue.
 - You have tried all the following (if relevant) and your issue remains:
   - Make sure you have the right application started.
   - Make sure you've killed the Strapi server with CTRL+C and started it again.
-  - Make sure you closed any open browser tabs pointed at `localhost` before starting Strapi.
-  - Make sure you do not have any other Strapi applications running in other terminal windows.
   - Make sure the application you are using to reproduce the issue has a clean `node_modules` directory, meaning:
     - no dependencies are linked (e.g. you haven't run `npm link`)
     - that you haven't made any inline changes to files in the `node_modules` folder
