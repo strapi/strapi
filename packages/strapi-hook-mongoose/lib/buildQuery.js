@@ -27,25 +27,33 @@ const buildQuery = ({ model, filters = {}, populate = [], aggregate = false } = 
  * @return {string}
  */
 const getSearchFieldOperator = function(type, value) {
-  let operator = 'eq';
+  let operator = "ignore"; // types that are not suitable for search
   switch (type) {
-    case 'integer':
-    case 'float':
-    case 'decimal':
+    case "biginteger":
+    case "integer":
+    case "float":
+    case "decimal":
       if (_.isNaN(_.toNumber(value))) {
-        operator = 'ignore'; // value is not numeric
+        operator = "ignore"; // value is not numeric
+      } else {
+        operator = "eq";
       }
       break;
-    case 'string':
-    case 'text':
-    case 'password':
-    case 'enumeration':
-      //return acc.concat({ [curr]: { $regex: params._q, $options: 'i' } });
-      operator = 'contains';
+    case "string":
+    case "text":
+    case "password":
+    case "enumeration":
+    case "email":
+      operator = "contains";
       break;
-    case 'boolean':
-      if (value !== 'true' && value !== 'false') {
-        operator = 'ignore'; // value is not boolean
+    case "boolean":
+      if (value === "true" && value === "false") {
+        operator = "eq";
+      }
+      break;
+    case "binary":
+      if (value === 1 && value === 0) {
+        operator = "eq";
       }
       break;
   }
