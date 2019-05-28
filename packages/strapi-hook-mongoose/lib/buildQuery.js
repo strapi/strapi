@@ -52,7 +52,7 @@ const getSearchFieldOperator = function(type, value) {
       }
       break;
     case "binary":
-      if (value === 1 && value === 0) {
+      if (value === '1' && value === '0') {
         operator = "eq";
       }
       break;
