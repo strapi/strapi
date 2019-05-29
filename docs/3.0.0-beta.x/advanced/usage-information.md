@@ -50,4 +50,4 @@ Should you decide to opt-out, you may do so by removing the `uuid` property in t
 
 ### Questions?
 
-Should you have any questions regarding this feature, feel free to email [hi@strapi.io](mailto:hi@strapi.io), and we will answer you right away.
+Should you have any questions regarding this feature, feel free to email [privacy@strapi.io](mailto:privacy@strapi.io), and we will answer as soon as possible.
