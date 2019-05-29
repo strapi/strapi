@@ -77,7 +77,7 @@ module.exports = strapi => {
         // `node_modules` directory.
         let client;
         try {
-          client = require(path.resolve(strapi.config.appPath, 'node_modules', connection.settings.client));
+          client = require(connection.settings.client);
         } catch (err) {
           strapi.log.error('The client `' + connection.settings.client + '` is not installed.');
           strapi.log.error('You can install it with `$ npm install ' + connection.settings.client + ' --save`.');
@@ -175,7 +175,7 @@ module.exports = strapi => {
         // applications to have `knex` as a dependency.
         try {
           // Try to require from local dependency.
-          const connection = require(path.resolve(strapi.config.appPath, 'node_modules', 'knex'))(options);
+          const connection = require('knex')(options);
           _.set(strapi, `connections.${name}`, connection);
 
         } catch (err) {

@@ -94,7 +94,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "다음 파일을 열고 이 기능을 사용하세요.",
   "components.AutoReloadBlocker.header": "이 플러그인은 리로드 기능이 필요합니다.",
   "components.ErrorBoundary.title": "에러가 발생했습니다.",
   "components.Input.error.attribute.key.taken": "이미 사용중인 키입니다.",

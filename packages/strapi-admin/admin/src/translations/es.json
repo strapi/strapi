@@ -95,7 +95,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "Abra el siguiente archivo y habilite la función.",
   "components.AutoReloadBlocker.header": "Es necesario recargar para este plugin.",
   "components.ErrorBoundary.title": "Algo salió mal...",
   "components.Input.error.attribute.key.taken": "Este valor ya existe",

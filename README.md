@@ -47,7 +47,7 @@ Operating system:
 **Please note that Strapi may work on other Operating Systems, but are not tested at this time.**
 
 Node:
- * NodeJS >= 10.x
+ * NodeJS 10.x
  * NPM >= 6.x
 
 **Please note that right now Node 11 is not supported, and the current Node LTS (v10) should be used.**
@@ -61,7 +61,7 @@ Database:
 #### ⏳ Installation
 
 ```bash
-npm install strapi@alpha -g
+npm install strapi@beta -g
 ````
 
 **We recommend always using the latest version of Strapi to start your new project**.
@@ -79,7 +79,7 @@ This command will generate a brand new project with the default features (authen
 
 ```bash
 cd my-project
-strapi start
+strapi develop
 ```
 
 Congratulations, you made it! Enjoy 🎉
@@ -113,12 +113,6 @@ Be aware that one of the content type builder won't work due to the writing file
 **[See more on our website](https://strapi.io/overview)**
 
 ## Contributing
-
-> ⚠️ We have stopped merging PRs for now to the Strapi core.<br><br>
-> The reason is that we are developing new architecture for the admin panel and for the plugins.<br>
-> This new architecture will provide stability of the Strapi core as we approach the release of Beta.<br>
-> We appreciate and welcome all your contributions, but until further notice, please do not submit a PR as it will not be merged.<br>
-> Furthermore, you will have to rewrite it based on the new architecture.
 
 Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull Request to the project.
 

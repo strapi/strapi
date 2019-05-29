@@ -1,30 +1,30 @@
-.popUpForm { /* stylelint-disable */
-
+.stmpopUpForm {
+  /* stylelint-disable */
 }
 
-.padded {
+.stmpadded {
   padding: 0 15px 0 15px;
 }
 
-.defaultConnection {
+.stmdefaultConnection {
   position: absolute;
   bottom: -5.5rem;
   left: 3rem;
   display: flex;
-  color: #27B710;
+  color: #27b710;
   cursor: pointer;
 }
 
-.rounded {
-  margin-top: .5rem;
+.stmrounded {
+  margin-top: 0.5rem;
   margin-left: 1rem;
   width: 1.2rem;
   height: 1.2rem;
   border-radius: 50%;
-  padding-left: .1rem;
-  padding-bottom: .1rem;
-  border: 1px solid #27B710;
-  font-size: .4rem;
+  padding-left: 0.1rem;
+  padding-bottom: 0.1rem;
+  border: 1px solid #27b710;
+  font-size: 0.4rem;
   vertical-align: middle;
   display: flex;
   align-items: center;

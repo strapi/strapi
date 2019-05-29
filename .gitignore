@@ -119,4 +119,9 @@ dist
 ############################
 
 packages/strapi-generate-new/files/public/
-packages/*/yarn.lock
+
+############################
+# Example app
+############################
+
+# *.cache

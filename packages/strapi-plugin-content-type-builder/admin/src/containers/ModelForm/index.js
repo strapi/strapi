@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
-import Input from 'components/InputsIndex';
+import { InputsIndex as Input } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 

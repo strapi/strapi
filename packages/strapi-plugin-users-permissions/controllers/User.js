@@ -17,13 +17,19 @@ module.exports = {
    */
 
   find: async (ctx, next, { populate } = {}) => {
-    let data = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query, populate);
-    data.reduce((acc, user) => {
-      acc.push(_.omit(user.toJSON ? user.toJSON() : user, ['password', 'resetPasswordToken']));
-      return acc;
-    }, []);
+    let users;  
 
-    // Send 200 `ok`
+    if (_.has(ctx.query, '_q')) {
+      // use core strapi query to search for users
+      users = await strapi
+        .query('user', 'users-permissions')
+        .search(ctx.query, populate);
+
+    } else {
+      users = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query, populate);
+    }
+
+    const data = users.map(user => _.omit(user, ['password', 'resetPasswordToken']));
     ctx.send(data);
   },
 
@@ -78,7 +84,7 @@ module.exports = {
     }).get();
 
     if (advanced.unique_email && ctx.request.body.email) {
-      const user = await strapi.query('user', 'users-permissions').findOne({ email: ctx.request.body.email });
+      const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions').findOne({ email: ctx.request.body.email });
 
       if (user) {
         return ctx.badRequest(null, ctx.request.admin ? [{ messages: [{ id: 'Auth.form.error.email.taken', field: ['email'] }] }] : 'Email is already taken.');
@@ -86,7 +92,7 @@ module.exports = {
     }
 
     if (!ctx.request.body.role) {
-      const defaultRole = await strapi.query('role', 'users-permissions').findOne({ type: advanced.default_role }, []);
+      const defaultRole = await strapi.plugins['users-permissions'].queries('role', 'users-permissions').findOne({ type: advanced.default_role }, []);
 
       ctx.request.body.role = defaultRole._id || defaultRole.id;
     }
@@ -137,7 +143,7 @@ module.exports = {
       }
 
       if (ctx.request.body.email && advancedConfigs.unique_email) {
-        const user = await strapi.query('user', 'users-permissions').findOne({
+        const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions').findOne({
           email: ctx.request.body.email
         });
 
