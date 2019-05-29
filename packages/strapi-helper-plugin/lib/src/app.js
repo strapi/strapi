@@ -7,7 +7,7 @@
 
 /* eslint-disable */
 // Don't move this line!
-import './public-path.js'; // eslint-disable-line import/extensions
+// import './public-path.js'; // eslint-disable-line import/extensions
 
 import React from 'react';
 // import Loadable from 'react-loadable';
