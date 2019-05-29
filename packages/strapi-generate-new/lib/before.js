@@ -284,7 +284,7 @@ async function handleCustomDatabase({ scope, hasDatabaseConfig, isQuick }) {
       message: `Port${
         isMongo ? ' (It will be ignored if you enable +srv)' : ''
       }:`,
-      default: answers => {
+      default: () => {
         // eslint-disable-line no-unused-vars
         if (_.get(scope.database, 'port')) {
           return scope.database.port;

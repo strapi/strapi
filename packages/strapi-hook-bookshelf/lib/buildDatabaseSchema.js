@@ -1,9 +1,14 @@
 const _ = require('lodash');
-const pluralize = require('pluralize');
 const { models: utilsModels } = require('strapi-utils');
 
 /* global StrapiConfigs */
-module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
+module.exports = async ({
+  ORM,
+  loadedModel,
+  definition,
+  connection,
+  model,
+}) => {
   const quote = definition.client === 'pg' ? '"' : '`';
 
   // Equilize database tables

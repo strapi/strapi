@@ -1,6 +1,3 @@
-const path = require('path');
-const pkg = require('./package.json');
-
 const alias = [
   'object-assign',
   'whatwg-fetch',
