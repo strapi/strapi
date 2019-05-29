@@ -175,7 +175,7 @@ module.exports = {
         if (plugin) {
           await Service.writeModel(name, modelJSON, { plugin });
         } else {
-          await Service.writeModel(name, modelJSON, { api: modelData.apiName });
+          await Service.writeModel(name, modelJSON, { api: name !== model ? name.toLowerCase() : modelData.apiName});
         }
 
         ctx.send({ ok: true });
