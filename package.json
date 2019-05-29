@@ -31,7 +31,7 @@
     "setup": "yarn && yarn build",
     "watch": "lerna run --stream watch --no-private",
     "build": "lerna run --stream build --no-private",
-    "lint": "npm-run-all -p lint:*",
+    "lint": "npm-run-all -p lint:code",
     "lint:code": "eslint .",
     "lint:other": "npm run prettier:other -- --check",
     "format": "npm-run-all -p format:*",
