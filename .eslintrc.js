@@ -13,6 +13,7 @@ module.exports = {
     es6: true,
     node: true,
     jest: true,
+    mocha: true,
   },
   parserOptions: {
     ecmaVersion: 2018,
@@ -30,6 +31,12 @@ module.exports = {
     expect: false,
     assert: false,
     chai: false,
+    // TODO: put all this in process.env in webpack to avoid having to set them here
+    REMOTE_URL: true,
+    BACKEND_URL: true,
+    PUBLIC_PATH: true,
+    MODE: true,
+    NODE_ENV: true,
   },
   rules: {
     'generator-star-spacing': 0,
