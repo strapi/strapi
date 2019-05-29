@@ -1,6 +1,7 @@
 const { join } = require('path');
 const { existsSync } = require('fs-extra');
 const ora = require('ora');
+const { cyan } = require('chalk');
 const execa = require('execa');
 const { cli } = require('strapi-utils');
 const findPackagePath = require('../load/package-path');

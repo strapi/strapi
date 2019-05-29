@@ -3,23 +3,14 @@
   "private": true,
   "version": "3.0.0-alpha.26.2",
   "description": "A Strapi application.",
-  "main": "./server.js",
   "scripts": {
     "develop": "strapi develop",
     "start": "strapi start",
     "build": "strapi build",
-    "lint": "eslint api/**/*.js config/**/*.js plugins/**/*.js",
     "strapi": "strapi"
   },
-  "devDependencies": {
-    "babel-eslint": "^7.1.1",
-    "eslint": "^4.19.1",
-    "eslint-config-airbnb": "^13.0.0",
-    "eslint-plugin-import": "^2.11.0",
-    "eslint-plugin-react": "^7.7.0"
-  },
   "dependencies": {
-    "knex": "latest",
+    "knex": "^0.16.5",
     "lodash": "^4.17.5",
     "pg": "^7.10.0",
     "sqlite3": "^4.0.6",
@@ -39,21 +30,6 @@
     "strapi-provider-email-mailgun": "3.0.0-alpha.26.2",
     "strapi-provider-upload-aws-s3": "3.0.0-alpha.26.2",
     "strapi-utils": "3.0.0-alpha.26.2"
-  },
-  "author": {
-    "name": "alex",
-    "email": "",
-    "url": ""
-  },
-  "maintainers": [
-    {
-      "name": "alex",
-      "email": "",
-      "url": ""
-    }
-  ],
-  "strapi": {
-    "uuid": "8917e89f-c8ff-4f80-b963-e3d568088422"
   },
   "engines": {
     "node": "^10.0.0",

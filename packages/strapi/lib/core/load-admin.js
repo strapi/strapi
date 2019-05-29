@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const findPackagePath = require('../load/package-path');
 const loadFiles = require('../load/load-files');
 const loadConfig = require('../load/load-config-files');

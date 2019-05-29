@@ -14,7 +14,6 @@ const path = require('path');
 const _ = require('lodash');
 const fetch = require('node-fetch');
 const { machineIdSync } = require('node-machine-id');
-const shell = require('shelljs');
 const execa = require('execa');
 
 // Master of ceremonies for generators.

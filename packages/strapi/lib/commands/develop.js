@@ -2,7 +2,6 @@
 
 const path = require('path');
 const cluster = require('cluster');
-const _ = require('lodash');
 const fs = require('fs-extra');
 const { cyan } = require('chalk');
 const chokidar = require('chokidar');
