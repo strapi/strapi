@@ -1,11 +1,12 @@
+import styled from 'styled-components';
 import FilterOptionsCTA from '../FilterOptionsCTA';
 
-const Remove = FilterOptionsCTA.extend`
+const Remove = styled(FilterOptionsCTA)`
   &:after {
     content: '\f068';
     font-family: FontAwesome;
     font-size: 8px;
-    color: #007EFF;
+    color: #007eff;
   }
 `;
 

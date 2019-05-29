@@ -1,4 +1,4 @@
-.button {
+.stmbutton {
   height: 3rem;
   position: relative;
   border-radius: 0.3rem;
@@ -22,45 +22,45 @@
       border-radius: 0.3rem;
       content: '';
       opacity: 0.1;
-      background: #FFFFFF;
+      background: #ffffff;
     }
   }
 }
 
-.buttonLg {
+.stmbuttonLg {
   width: 15rem;
 }
 
-.buttonMd {
+.stmbuttonMd {
   width: 10rem;
 }
 
-.primary {
+.stmprimary {
   font-weight: 500;
-  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
   -webkit-font-smoothing: antialiased;
   color: white;
   &:active {
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15);
   }
 }
 
-.secondary {
-  color: #F64D0A;
-  border: 0.1rem solid #F64D0A;
+.stmsecondary {
+  color: #f64d0a;
+  border: 0.1rem solid #f64d0a;
   position: relative;
   border-radius: 3px;
   overflow: hidden;
   &:active {
-    border: 0.15rem solid #F64D0A;
+    border: 0.15rem solid #f64d0a;
   }
 }
 
-.secondaryAddType {
+.stmsecondaryAddType {
   height: 2.6rem;
-  color: #1C5DE7;
+  color: #1c5de7;
   line-height: 1.6rem;
-  border: 0.1rem solid #1C5DE7;
+  border: 0.1rem solid #1c5de7;
   font-weight: 500;
   font-size: 1.3rem;
   padding-left: 1.6rem;
@@ -69,23 +69,23 @@
 
 @keyframes blink {
   0% {
-    opacity: .2;
+    opacity: 0.2;
   }
   20% {
     opacity: 1;
   }
   100% {
-    opacity: .2;
+    opacity: 0.2;
   }
 }
 
-.saving {
+.stmsaving {
   height: 3rem;
   display: flex;
   justify-content: center;
 }
 
-.loader {
+.stmloader {
   height: 3rem;
   padding: 0 0 0 1.2rem;
   line-height: 3.2rem;
@@ -94,7 +94,7 @@
   font-family: Lato;
   cursor: not-allowed;
   position: relative;
-  opacity: .65;
+  opacity: 0.65;
   width: 15rem;
   font-size: 1rem;
   &:focus {
@@ -102,7 +102,7 @@
   }
 }
 
-.saving p {
+.stmsaving p {
   margin-bottom: 0;
   animation-name: blink;
   animation-duration: 1.4s;
@@ -114,10 +114,10 @@
   }
 }
 
-.saving p:nth-child(2) {
-  animation-delay: .2s;
+.stmsaving p:nth-child(2) {
+  animation-delay: 0.2s;
 }
 
-.saving p:nth-child(3) {
-  animation-delay: .4s;
+.stmsaving p:nth-child(3) {
+  animation-delay: 0.4s;
 }

@@ -8,7 +8,7 @@ import React from 'react';
 import Select from 'react-select';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import 'react-select/dist/react-select.css';
+
 import {
   cloneDeep,
   map,
@@ -21,9 +21,8 @@ import {
   findIndex,
 } from 'lodash';
 
-import request from 'utils/request';
-import templateObject from 'utils/templateObject';
-/* eslint-disable indent */
+import { request, templateObject } from 'strapi-helper-plugin';
+
 import styles from './styles.scss';
 
 class SelectOne extends React.Component {
@@ -78,21 +77,21 @@ class SelectOne extends React.Component {
       .then(response => {
         const options = isArray(response)
           ? map(response, item => ({
-              value: item,
+            value: item,
+            label: templateObject(
+              { mainField: this.props.relation.displayedAttribute },
+              item,
+            ).mainField,
+          }))
+          : [
+            {
+              value: response,
               label: templateObject(
                 { mainField: this.props.relation.displayedAttribute },
-                item,
+                response,
               ).mainField,
-            }))
-          : [
-              {
-                value: response,
-                label: templateObject(
-                  { mainField: this.props.relation.displayedAttribute },
-                  response,
-                ).mainField,
-              },
-            ];
+            },
+          ];
 
         const newOptions = cloneDeep(this.state.options);
         options.map(option => {
@@ -201,8 +200,8 @@ class SelectOne extends React.Component {
             isNull(value) || isUndefined(value)
               ? null
               : {
-                  value: isFunction(value.toJS) ? value.toJS() : value,
-                  label:
+                value: isFunction(value.toJS) ? value.toJS() : value,
+                label:
                     templateObject(
                       { mainField: this.props.relation.displayedAttribute },
                       isFunction(value.toJS) ? value.toJS() : value,
@@ -210,7 +209,7 @@ class SelectOne extends React.Component {
                     (isFunction(value.toJS)
                       ? get(value.toJS(), 'id')
                       : get(value, 'id')),
-                }
+              }
           }
         />
       </div>

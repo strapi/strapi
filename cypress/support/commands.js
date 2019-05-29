@@ -25,7 +25,6 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 const stringify = JSON.stringify;
 const backendUrl = Cypress.config('backendUrl');
-const serverRestartDelay = Cypress.config('serverRestartDelay');
 
 const WAIT_ON_CMD = `wait-on ${backendUrl}`;
 
@@ -49,7 +48,11 @@ Cypress.Commands.add('createUser', () => {
 
       if (!hasAdmin) {
         // Create one
-        cy.request({ url: `${backendUrl}/auth/local/register`, method: 'POST', body: user });
+        cy.request({
+          url: `${backendUrl}/admin/auth/local/register`,
+          method: 'POST',
+          body: user,
+        });
       }
     });
 });
@@ -60,7 +63,7 @@ Cypress.Commands.add('checkModalOpening', () => {
 
 Cypress.Commands.add('deleteUser', (id, jwt) => {
   cy.request({
-    url: `${backendUrl}/users/${id}`,
+    url: `${backendUrl}/content-manager/explorer/administrator/${id}?source=admin`,
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${jwt}`,
@@ -161,7 +164,7 @@ Cypress.Commands.add('login', () => {
   cy.createUser();
   return cy
     .request({
-      url: `${backendUrl}/auth/local`,
+      url: `${backendUrl}/admin/auth/local`,
       method: 'POST',
       body: {
         identifier: 'admin',
@@ -176,7 +179,7 @@ Cypress.Commands.add('login', () => {
     });
 });
 
-Cypress.Commands.add('seedData', (model, jwt, source = null) => {
+Cypress.Commands.add('seedData', (model, jwt) => {
   return cy.fixture(`seeds/${model}.json`).then(seed => {
     seed.forEach(body => {
       cy.request({

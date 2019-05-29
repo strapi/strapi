@@ -1,11 +1,11 @@
 /**
- * 
+ *
  * TableLoading
  */
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import LoadingIndicator from 'components/LoadingIndicator';
+import { LoadingIndicator } from 'strapi-helper-plugin';
 
 import styles from './styles.scss';
 
@@ -18,7 +18,6 @@ function TableLoading({ colspan }) {
     </tr>
   );
 }
-
 
 TableLoading.propTypes = {
   colspan: PropTypes.number.isRequired,

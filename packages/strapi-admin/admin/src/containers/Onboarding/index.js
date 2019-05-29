@@ -10,10 +10,10 @@ import cn from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
+import injectSaga from '../../utils/injectSaga';
+import injectReducer from '../../utils/injectReducer';
 
-import OnboardingVideo from 'components/OnboardingVideo';
+import OnboardingVideo from '../../components/OnboardingVideo';
 
 import {
   getVideos,
@@ -68,7 +68,9 @@ export class Onboarding extends React.Component {
     this.setState(prevState => ({ showVideos: !prevState.showVideos }));
 
     const { showVideos } = this.state;
-    const eventName = showVideos ? 'didOpenGetStartedVideoContainer' : 'didCloseGetStartedVideoContainer';
+    const eventName = showVideos
+      ? 'didOpenGetStartedVideoContainer'
+      : 'didCloseGetStartedVideoContainer';
 
     this.context.emitEvent(eventName);
   };
@@ -100,11 +102,17 @@ export class Onboarding extends React.Component {
     return (
       <div
         style={style}
-        className={cn(styles.videosWrapper, videos.length > 0 ? styles.visible : styles.hidden)}
+        className={cn(
+          styles.videosWrapper,
+          videos.length > 0 ? styles.visible : styles.hidden,
+        )}
       >
         <div
           style={style}
-          className={cn(styles.videosContent, this.state.showVideos ? styles.shown : styles.hide)}
+          className={cn(
+            styles.videosContent,
+            this.state.showVideos ? styles.shown : styles.hide,
+          )}
         >
           <div className={styles.videosHeader}>
             <p>
@@ -112,7 +120,9 @@ export class Onboarding extends React.Component {
             </p>
             {videos.length && (
               <p>
-                {Math.floor((videos.filter(v => v.end).length * 100) / videos.length)}
+                {Math.floor(
+                  (videos.filter(v => v.end).length * 100) / videos.length,
+                )}
                 <FormattedMessage id="app.components.Onboarding.label.completed" />
               </p>
             )}
@@ -136,7 +146,10 @@ export class Onboarding extends React.Component {
         </div>
 
         <div className={styles.openBtn}>
-          <button onClick={this.handleVideosToggle} className={this.state.showVideos ? styles.active : ''}>
+          <button
+            onClick={this.handleVideosToggle}
+            className={this.state.showVideos ? styles.active : ''}
+          >
             <i className="fa fa-question" />
             <i className="fa fa-times" />
             <span />
@@ -175,7 +188,14 @@ const mapStateToProps = makeSelectOnboarding();
 
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
-    { getVideos, onClick, setVideoDuration, updateVideoStartTime, setVideoEnd, removeVideos },
+    {
+      getVideos,
+      onClick,
+      setVideoDuration,
+      updateVideoStartTime,
+      setVideoEnd,
+      removeVideos,
+    },
     dispatch,
   );
 }

@@ -6,10 +6,10 @@ import AttributeLi from '../index';
 
 describe('<AttributeLi />', () => {
   it('should not crash', () => {
-    shallow(<AttributeLi />);
+    shallow(<AttributeLi name="test" />);
   });
 
-  it("should show the origin of the model if it's comming from a plugin", () => {
+  it('should show the origin of the model if it\'s comming from a plugin', () => {
     const props = {
       attributeInfos: {
         configurable: false,
@@ -31,7 +31,7 @@ describe('<AttributeLi />', () => {
     expect(insideCompo.text()).toContain('users-permissions');
   });
 
-  it("should not show the origin of the model if it's not comming from a plugin", () => {
+  it('should not show the origin of the model if it\'s not comming from a plugin', () => {
     const props = {
       attributeInfos: {
         configurable: false,

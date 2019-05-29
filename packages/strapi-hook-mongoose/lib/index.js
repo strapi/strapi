@@ -29,6 +29,8 @@ const buildQuery = require('./buildQuery');
 /* eslint-disable no-case-declarations */
 /* eslint-disable no-const-assign */
 /* eslint-disable no-unused-vars */
+/* eslint-disable no-unexpected-multiline */
+/* eslint-disable indent */
 module.exports = function(strapi) {
   const hook = _.merge(
     {
@@ -52,18 +54,28 @@ module.exports = function(strapi) {
 
       initialize: cb =>
         _.forEach(
-          _.pickBy(strapi.config.connections, { connector: 'strapi-hook-mongoose' }),
+          _.pickBy(strapi.config.connections, {
+            connector: 'strapi-hook-mongoose',
+          }),
           async (connection, connectionName) => {
             const instance = new Mongoose();
-            const { uri, host, port, username, password, database, srv } = _.defaults(
+            const {
+              uri,
+              host,
+              port,
+              username,
+              password,
+              database,
+              srv,
+            } = _.defaults(
               connection.settings,
-              strapi.config.hook.settings.mongoose
+              strapi.config.hook.settings.mongoose,
             );
             const uriOptions = uri ? url.parse(uri, true).query : {};
             const { authenticationDatabase, ssl, debug } = _.defaults(
               connection.options,
               uriOptions,
-              strapi.config.hook.settings.mongoose
+              strapi.config.hook.settings.mongoose,
             );
             const isSrv = srv === true || srv === 'true';
 
@@ -97,10 +109,12 @@ module.exports = function(strapi) {
                * https://github.com/Automattic/mongoose/issues/6881 */
               await instance.connect(
                 uri ||
-                  `mongodb${isSrv ? '+srv' : ''}://${username}:${password}@${host}${
+                  `mongodb${
+                    isSrv ? '+srv' : ''
+                  }://${username}:${password}@${host}${
                     !isSrv ? ':' + port : ''
                   }/`,
-                connectOptions
+                connectOptions,
               );
             } catch ({ message }) {
               const errMsg = message.includes(`:${port}`)
@@ -112,10 +126,12 @@ module.exports = function(strapi) {
 
             try {
               // Require `config/functions/mongoose.js` file to customize connection.
-              require(path.resolve(strapi.config.appPath, 'config', 'functions', 'mongoose.js'))(
-                instance,
-                connection
-              );
+              require(path.resolve(
+                strapi.config.appPath,
+                'config',
+                'functions',
+                'mongoose.js',
+              ))(instance, connection);
             } catch (err) {
               // This is not an error if the file is not found.
             }
@@ -158,7 +174,9 @@ module.exports = function(strapi) {
                 */
 
                     const morphAssociations = definition.associations.filter(
-                      association => association.nature.toLowerCase().indexOf('morph') !== -1
+                      association =>
+                        association.nature.toLowerCase().indexOf('morph') !==
+                        -1,
                     );
 
                     if (morphAssociations.length > 0) {
@@ -169,25 +187,35 @@ module.exports = function(strapi) {
                             collection.schema.pre(key, function(next) {
                               if (
                                 this._mongooseOptions.populate &&
-                                this._mongooseOptions.populate[association.alias]
+                                this._mongooseOptions.populate[
+                                  association.alias
+                                ]
                               ) {
                                 if (
                                   association.nature === 'oneToManyMorph' ||
                                   association.nature === 'manyToManyMorph'
                                 ) {
-                                  this._mongooseOptions.populate[association.alias].match = {
-                                    [`${association.via}.${association.filter}`]: association.alias,
-                                    [`${association.via}.kind`]: definition.globalId,
+                                  this._mongooseOptions.populate[
+                                    association.alias
+                                  ].match = {
+                                    [`${association.via}.${
+                                      association.filter
+                                    }`]: association.alias,
+                                    [`${
+                                      association.via
+                                    }.kind`]: definition.globalId,
                                   };
 
                                   // Select last related to an entity.
-                                  this._mongooseOptions.populate[association.alias].options = {
+                                  this._mongooseOptions.populate[
+                                    association.alias
+                                  ].options = {
                                     sort: '-createdAt',
                                   };
                                 } else {
-                                  this._mongooseOptions.populate[association.alias].path = `${
+                                  this._mongooseOptions.populate[
                                     association.alias
-                                  }.ref`;
+                                  ].path = `${association.alias}.ref`;
                                 }
                               } else {
                                 if (!this._mongooseOptions.populate) {
@@ -200,13 +228,17 @@ module.exports = function(strapi) {
                                   association.nature === 'oneToManyMorph' ||
                                   association.nature === 'manyToManyMorph'
                                 ) {
-                                  this._mongooseOptions.populate[association.alias] = {
+                                  this._mongooseOptions.populate[
+                                    association.alias
+                                  ] = {
                                     path: association.alias,
                                     match: {
                                       [`${association.via}.${
                                         association.filter
                                       }`]: association.alias,
-                                      [`${association.via}.kind`]: definition.globalId,
+                                      [`${
+                                        association.via
+                                      }.kind`]: definition.globalId,
                                     },
                                     options: {
                                       sort: '-createdAt',
@@ -226,7 +258,8 @@ module.exports = function(strapi) {
                     _.forEach(preLifecycle, (fn, key) => {
                       if (_.isFunction(target[model.toLowerCase()][fn])) {
                         collection.schema.pre(key, function(next) {
-                          target[model.toLowerCase()][fn](this)
+                          target[model.toLowerCase()]
+                            [fn](this)
                             .then(next)
                             .catch(err => strapi.log.error(err));
                         });
@@ -249,7 +282,8 @@ module.exports = function(strapi) {
                     _.forEach(postLifecycle, (fn, key) => {
                       if (_.isFunction(target[model.toLowerCase()][fn])) {
                         collection.schema.post(key, function(doc, next) {
-                          target[model.toLowerCase()][fn](this, doc)
+                          target[model.toLowerCase()]
+                            [fn](this, doc)
                             .then(next)
                             .catch(err => {
                               strapi.log.error(err);
@@ -271,16 +305,20 @@ module.exports = function(strapi) {
                           foreignField: value.via,
                           justOne: value.justOne || false,
                         });
-                      }
+                      },
                     );
 
                     // Use provided timestamps if the elemnets in the array are string else use default.
                     if (_.isArray(_.get(definition, 'options.timestamps'))) {
                       const timestamps = {
-                        createdAt: _.isString(_.get(definition, 'options.timestamps[0]'))
+                        createdAt: _.isString(
+                          _.get(definition, 'options.timestamps[0]'),
+                        )
                           ? _.get(definition, 'options.timestamps[0]')
                           : 'createdAt',
-                        updatedAt: _.isString(_.get(definition, 'options.timestamps[1]'))
+                        updatedAt: _.isString(
+                          _.get(definition, 'options.timestamps[1]'),
+                        )
                           ? _.get(definition, 'options.timestamps[1]')
                           : 'updatedAt',
                       };
@@ -288,30 +326,39 @@ module.exports = function(strapi) {
                     } else {
                       collection.schema.set(
                         'timestamps',
-                        _.get(definition, 'options.timestamps') === true
+                        _.get(definition, 'options.timestamps') === true,
                       );
                       _.set(
                         definition,
                         'options.timestamps',
                         _.get(definition, 'options.timestamps') === true
                           ? ['createdAt', 'updatedAt']
-                          : false
+                          : false,
                       );
                     }
                     collection.schema.set(
                       'minimize',
-                      _.get(definition, 'options.minimize', false) === true
+                      _.get(definition, 'options.minimize', false) === true,
                     );
+
+                    // Save all attributes (with timestamps)
+                    target[model].allAttributes = _.clone(definition.attributes);
 
                     collection.schema.options.toObject = collection.schema.options.toJSON = {
                       virtuals: true,
                       transform: function(doc, returned, opts) {
                         // Remover $numberDecimal nested property.
                         Object.keys(returned)
-                          .filter(key => returned[key] instanceof mongoose.Types.Decimal128)
+                          .filter(
+                            key =>
+                              returned[key] instanceof
+                              mongoose.Types.Decimal128,
+                          )
                           .forEach((key, index) => {
                             // Parse to float number.
-                            returned[key] = parseFloat(returned[key].toString());
+                            returned[key] = parseFloat(
+                              returned[key].toString(),
+                            );
                           });
 
                         morphAssociations.forEach(association => {
@@ -322,13 +369,14 @@ module.exports = function(strapi) {
                             // Reformat data by bypassing the many-to-many relationship.
                             switch (association.nature) {
                               case 'oneMorphToOne':
-                                returned[association.alias] = returned[association.alias][0].ref;
+                                returned[association.alias] =
+                                  returned[association.alias][0].ref;
                                 break;
                               case 'manyMorphToMany':
                               case 'manyMorphToOne':
-                                returned[association.alias] = returned[association.alias].map(
-                                  obj => obj.ref
-                                );
+                                returned[association.alias] = returned[
+                                  association.alias
+                                ].map(obj => obj.ref);
                                 break;
                               default:
                             }
@@ -341,7 +389,7 @@ module.exports = function(strapi) {
                     const Model = instance.model(
                       definition.globalId,
                       collection.schema,
-                      definition.collectionName
+                      definition.collectionName,
                     );
 
                     if (!plugin) {
@@ -355,7 +403,9 @@ module.exports = function(strapi) {
                     target[model]._attributes = definition.attributes;
                     target[model].updateRelations = relations.update;
                   } catch (err) {
-                    strapi.log.error('Impossible to register the `' + model + '` model.');
+                    strapi.log.error(
+                      'Impossible to register the `' + model + '` model.',
+                    );
                     strapi.log.error(err);
                     strapi.stop();
                   }
@@ -364,7 +414,9 @@ module.exports = function(strapi) {
 
               // Parse every authenticated model.
               _.forEach(models, (definition, model) => {
-                definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
+                definition.globalName = _.upperFirst(
+                  _.camelCase(definition.globalId),
+                );
 
                 // Make sure the model has a connection.
                 // If not, use the default connection.
@@ -380,7 +432,7 @@ module.exports = function(strapi) {
                       definition.connection +
                       '` specified in the `' +
                       model +
-                      '` model does not exist.'
+                      '` model does not exist.',
                   );
                   strapi.stop();
                 }
@@ -389,7 +441,7 @@ module.exports = function(strapi) {
                 definition.orm = 'mongoose';
                 definition.client = _.get(
                   strapi.config.connections[definition.connection],
-                  'client'
+                  'client',
                 );
                 definition.associations = [];
 
@@ -409,7 +461,7 @@ module.exports = function(strapi) {
                     'collections.' +
                       mongooseUtils.toCollectionName(definition.globalName) +
                       '.schema',
-                    new instance.Schema({})
+                    new instance.Schema({}),
                   );
 
                   return loadedAttributes();
@@ -422,7 +474,7 @@ module.exports = function(strapi) {
                   const schema = new instance.Schema(
                     _.omitBy(definition.loadedModel, model => {
                       return model.type === 'virtual';
-                    })
+                    }),
                   );
 
                   _.set(
@@ -430,7 +482,7 @@ module.exports = function(strapi) {
                     'collections.' +
                       mongooseUtils.toCollectionName(definition.globalName) +
                       '.schema',
-                    schema
+                    schema,
                   );
 
                   loadedAttributes();
@@ -441,21 +493,34 @@ module.exports = function(strapi) {
                 _.forEach(definition.attributes, (details, name) => {
                   const verbose =
                     _.get(
-                      utilsModels.getNature(details, name, undefined, model.toLowerCase()),
-                      'verbose'
+                      utilsModels.getNature(
+                        details,
+                        name,
+                        undefined,
+                        model.toLowerCase(),
+                      ),
+                      'verbose',
                     ) || '';
 
                   // Build associations key
-                  utilsModels.defineAssociations(model.toLowerCase(), definition, details, name);
+                  utilsModels.defineAssociations(
+                    model.toLowerCase(),
+                    definition,
+                    details,
+                    name,
+                  );
 
                   if (_.isEmpty(verbose)) {
-                    definition.loadedModel[name].type = utils(instance).convertType(details.type);
+                    definition.loadedModel[name].type = utils(
+                      instance,
+                    ).convertType(details.type);
                   }
 
                   switch (verbose) {
                     case 'hasOne': {
                       const ref = details.plugin
-                        ? strapi.plugins[details.plugin].models[details.model].globalId
+                        ? strapi.plugins[details.plugin].models[details.model]
+                            .globalId
                         : strapi.models[details.model].globalId;
 
                       definition.loadedModel[name] = {
@@ -465,9 +530,13 @@ module.exports = function(strapi) {
                       break;
                     }
                     case 'hasMany': {
-                      const FK = _.find(definition.associations, { alias: name });
+                      const FK = _.find(definition.associations, {
+                        alias: name,
+                      });
                       const ref = details.plugin
-                        ? strapi.plugins[details.plugin].models[details.collection].globalId
+                        ? strapi.plugins[details.plugin].models[
+                            details.collection
+                          ].globalId
                         : strapi.models[details.collection].globalId;
 
                       if (FK) {
@@ -491,9 +560,12 @@ module.exports = function(strapi) {
                       break;
                     }
                     case 'belongsTo': {
-                      const FK = _.find(definition.associations, { alias: name });
+                      const FK = _.find(definition.associations, {
+                        alias: name,
+                      });
                       const ref = details.plugin
-                        ? strapi.plugins[details.plugin].models[details.model].globalId
+                        ? strapi.plugins[details.plugin].models[details.model]
+                            .globalId
                         : strapi.models[details.model].globalId;
 
                       if (
@@ -522,13 +594,20 @@ module.exports = function(strapi) {
                       break;
                     }
                     case 'belongsToMany': {
-                      const FK = _.find(definition.associations, { alias: name });
+                      const FK = _.find(definition.associations, {
+                        alias: name,
+                      });
                       const ref = details.plugin
-                        ? strapi.plugins[details.plugin].models[details.collection].globalId
+                        ? strapi.plugins[details.plugin].models[
+                            details.collection
+                          ].globalId
                         : strapi.models[details.collection].globalId;
 
                       // One-side of the relationship has to be a virtual field to be bidirectional.
-                      if ((FK && _.isUndefined(FK.via)) || details.dominant !== true) {
+                      if (
+                        (FK && _.isUndefined(FK.via)) ||
+                        details.dominant !== true
+                      ) {
                         definition.loadedModel[name] = {
                           type: 'virtual',
                           ref,
@@ -548,9 +627,12 @@ module.exports = function(strapi) {
                       break;
                     }
                     case 'morphOne': {
-                      const FK = _.find(definition.associations, { alias: name });
+                      const FK = _.find(definition.associations, {
+                        alias: name,
+                      });
                       const ref = details.plugin
-                        ? strapi.plugins[details.plugin].models[details.model].globalId
+                        ? strapi.plugins[details.plugin].models[details.model]
+                            .globalId
                         : strapi.models[details.model].globalId;
 
                       definition.loadedModel[name] = {
@@ -565,9 +647,13 @@ module.exports = function(strapi) {
                       break;
                     }
                     case 'morphMany': {
-                      const FK = _.find(definition.associations, { alias: name });
+                      const FK = _.find(definition.associations, {
+                        alias: name,
+                      });
                       const ref = details.plugin
-                        ? strapi.plugins[details.plugin].models[details.collection].globalId
+                        ? strapi.plugins[details.plugin].models[
+                            details.collection
+                          ].globalId
                         : strapi.models[details.collection].globalId;
 
                       definition.loadedModel[name] = {
@@ -614,19 +700,30 @@ module.exports = function(strapi) {
             };
 
             // Mount `./api` models.
-            mountModels(_.pickBy(strapi.models, { connection: connectionName }), strapi.models);
+            mountModels(
+              _.pickBy(strapi.models, { connection: connectionName }),
+              strapi.models,
+            );
+
+            // Mount `./admin` models.
+            mountModels(
+              _.pickBy(strapi.admin.models, { connection: connectionName }),
+              strapi.admin.models,
+            );
 
             // Mount `./plugins` models.
             _.forEach(strapi.plugins, (plugin, name) => {
               mountModels(
-                _.pickBy(strapi.plugins[name].models, { connection: connectionName }),
+                _.pickBy(strapi.plugins[name].models, {
+                  connection: connectionName,
+                }),
                 plugin.models,
-                name
+                name,
               );
             });
 
             cb();
-          }
+          },
         ),
 
       getQueryParams: (value, type, key) => {
@@ -701,7 +798,7 @@ module.exports = function(strapi) {
       },
       buildQuery,
     },
-    relations
+    relations,
   );
 
   return hook;

@@ -1,8 +1,6 @@
 let jwt;
-let userId;
 const animDelay = Cypress.config('animDelay');
 const backendUrl = Cypress.config('backendUrl');
-const frontEndUrl = Cypress.config('baseUrl');
 const frontLoadingDelay = Cypress.config('frontLoadingDelay');
 const links = {
   Category: '/admin/plugins/content-manager/category?source=content-manager',
@@ -11,7 +9,6 @@ const links = {
   Tag: '/admin/plugins/content-manager/tag?source=content-manager',
   User: '/admin/plugins/content-manager/user?source=users-permissions',
 };
-const pluginUrl = `${frontEndUrl}/admin/plugins/content-manager`;
 
 describe('Testing build and schema core_store', () => {
   before(() => {
@@ -34,40 +31,38 @@ describe('Testing build and schema core_store', () => {
       cy.login()
         .then(data => {
           jwt = data.jwt;
-          userId = data.user._id || data.user.id;
         })
         .visit('/admin')
         .wait(frontLoadingDelay);
     });
-  
+
     it('Should visit all list pages without any errors', () => {
       cy.server();
       cy.route(`${backendUrl}/content-manager/models`).as('initCTM');
       cy.get(`a[href="${links.settings}"]`)
         .click()
         .wait('@initCTM');
-  
+
       // Check all list views are rendered without any error
       for (let i = 0; i < 4; i++) {
         Object.keys(links).forEach(link => {
           const name = link === 'settings' ? 'Content Manager' : link;
-    
+
           cy.get(`a[href="${links[link]}"]`)
             .click()
             .get('h1')
             .should('have', name);
         });
       }
-      
     });
-  
+
     it('Should visit all views once without any errors', () => {
       cy.server();
       cy.route(`${backendUrl}/content-manager/models`).as('initCTM');
       cy.get(`a[href="${links.settings}"]`)
         .click()
         .wait('@initCTM');
-      
+
       // Testing errors related to reactstrap
       cy.get('#cancelChanges')
         .click()
@@ -76,7 +71,6 @@ describe('Testing build and schema core_store', () => {
         .should('be.visible')
         .type('{esc}');
 
-      
       // Test setting view
       Object.keys(links).forEach(link => {
         if (link !== 'settings') {
@@ -88,7 +82,7 @@ describe('Testing build and schema core_store', () => {
             .click();
         }
       });
-  
+
       Object.keys(links).forEach(link => {
         if (link !== 'settings') {
           cy.get(`a[href="${links[link]}"]`)

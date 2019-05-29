@@ -33,9 +33,21 @@ class App extends React.Component {
     return (
       <div className={pluginId}>
         <Switch>
-          <Route path={`/plugins/${pluginId}/auth/:authType/:id?`} component={AuthPage} exact />
-          <Route path={`/plugins/${pluginId}/:settingType/:actionType/:id?`} component={EditPage} exact />
-          <Route path={`/plugins/${pluginId}/:settingType`} component={HomePage} exact />
+          <Route
+            path={`/plugins/${pluginId}/auth/:authType/:id?`}
+            component={AuthPage}
+            exact
+          />
+          <Route
+            path={`/plugins/${pluginId}/:settingType/:actionType/:id?`}
+            component={EditPage}
+            exact
+          />
+          <Route
+            path={`/plugins/${pluginId}/:settingType`}
+            component={HomePage}
+            exact
+          />
           <Route component={NotFoundPage} />
         </Switch>
       </div>
@@ -45,7 +57,6 @@ class App extends React.Component {
 
 App.contextTypes = {
   plugins: PropTypes.object,
-  router: PropTypes.object.isRequired,
   updatePlugin: PropTypes.func,
 };
 

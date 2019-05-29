@@ -1,10 +1,9 @@
 let jwt;
-let userId;
-const animDelay = Cypress.config('animDelay');
+
 const frontEndUrl = Cypress.config('baseUrl');
 const frontLoadingDelay = Cypress.config('frontLoadingDelay');
 const backendUrl = Cypress.config('backendUrl');
-const pluginUrl = `${frontEndUrl}/admin/plugins/content-manager`;
+
 const getCreateRedirectUrl = (model, sort = '_id') => {
   return `${frontEndUrl}/admin/plugins/content-manager/${model}/create?redirectUrl=/plugins/content-manager/${model}?_limit=10&_page=1&_sort=${sort}&source=content-manager`;
 };
@@ -24,17 +23,17 @@ describe('Testing Content Manager createPages', function() {
 
     Cypress.Commands.add('ctmTagLink', () => {
       return cy.get(
-        'a[href="/admin/plugins/content-manager/tag?source=content-manager"]',
+        'a[href="/admin/plugins/content-manager/tag?source=content-manager"]'
       );
     });
     Cypress.Commands.add('ctmProductLink', () => {
       return cy.get(
-        'a[href="/admin/plugins/content-manager/product?source=content-manager"]',
+        'a[href="/admin/plugins/content-manager/product?source=content-manager"]'
       );
     });
     Cypress.Commands.add('ctmCategoryLink', () => {
       return cy.get(
-        'a[href="/admin/plugins/content-manager/category?source=content-manager"]',
+        'a[href="/admin/plugins/content-manager/category?source=content-manager"]'
       );
     });
     Cypress.Commands.add('ctmAddButton', () => {
@@ -86,7 +85,6 @@ describe('Testing Content Manager createPages', function() {
       cy.login()
         .then(data => {
           jwt = data.jwt;
-          userId = data.user._id || data.user.id;
         })
         .visit('/admin')
         .wait(frontLoadingDelay)
@@ -227,7 +225,6 @@ describe('Testing Content Manager createPages', function() {
       cy.login()
         .then(data => {
           jwt = data.jwt;
-          userId = data.user._id || data.user.id;
 
           return data.jwt;
         })
@@ -245,7 +242,6 @@ describe('Testing Content Manager createPages', function() {
       cy.login()
         .then(data => {
           jwt = data.jwt;
-          userId = data.user._id || data.user.id;
 
           return data.jwt;
         })
@@ -257,7 +253,7 @@ describe('Testing Content Manager createPages', function() {
     it('Should create a product and link several tags and 1 category', () => {
       cy.server();
       cy.route(
-        `${backendUrl}/content-manager/explorer/tag?_limit=10&_start=0&_sort=name:ASC&source=content-manager`,
+        `${backendUrl}/content-manager/explorer/tag?_limit=10&_start=0&_sort=name:ASC&source=content-manager`
       ).as('getTags');
       cy.ctmProductLink()
         .click()
@@ -343,7 +339,7 @@ describe('Testing Content Manager createPages', function() {
         .click()
         .wait(1000)
         .get(
-          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img',
+          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img'
         )
         .click()
         .submitForm()
@@ -364,10 +360,10 @@ describe('Testing Content Manager createPages', function() {
     it('Should add several products to category french food', () => {
       cy.server();
       cy.route(
-        `${backendUrl}/content-manager/explorer/category?_limit=10&_start=0&_sort=_id:ASC&source=content-manager`,
+        `${backendUrl}/content-manager/explorer/category?_limit=10&_start=0&_sort=_id:ASC&source=content-manager`
       ).as('getCategories');
       cy.route(
-        `${backendUrl}/content-manager/explorer/product?_limit=10&_start=0&_sort=_id:ASC&source=content-manager`,
+        `${backendUrl}/content-manager/explorer/product?_limit=10&_start=0&_sort=_id:ASC&source=content-manager`
       ).as('getProducts');
       const product = {
         name: 'MacBook',
@@ -408,7 +404,7 @@ describe('Testing Content Manager createPages', function() {
           expect(children[0].innerText.trim()).to.equal('product1');
         })
         .get(
-          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img',
+          'ul#sortableListOfproducts > li:nth-child(1) > div:nth-child(2) > img'
         )
         .click()
         .get('input#products')

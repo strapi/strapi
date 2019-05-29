@@ -95,7 +95,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "Откройте соответствующий файл и активируйте функционал.",
   "components.AutoReloadBlocker.header": "Функционал перезапуска необходим для этого плагина.",
   "components.ErrorBoundary.title": "Что-то пошло не так...",
   "components.Input.error.attribute.key.taken": "Это значение уже существует",
