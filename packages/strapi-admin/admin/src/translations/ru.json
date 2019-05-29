@@ -112,7 +112,7 @@
   "components.Input.error.validation.regex": "Не соответствует регулярному выражению.",
   "components.Input.error.validation.required": "Необходимое поле для заполнения.",
   "components.ListRow.empty": "Нет данных для отображения.",
-  "components.OverlayBlocker.description": "Вы воспользовались функционалом, который требует перезапуска сервера. Пожалуйста, подождете.",
+  "components.OverlayBlocker.description": "Вы воспользовались функционалом, который требует перезапуска сервера. Пожалуйста, подождите.",
   "components.OverlayBlocker.title": "Ожидание перезапуска...",
   "components.PageFooter.select": "записей на странице",
   "components.ProductionBlocker.description": "Для безопасности мы должны заблокировать его для других вариантов.",
