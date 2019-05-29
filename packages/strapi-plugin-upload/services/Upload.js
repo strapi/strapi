@@ -134,7 +134,7 @@ module.exports = {
   fetchAll: params => {
     return strapi
       .query('file', 'upload')
-      .find(strapi.utils.models.convertParams('file', params));
+      .find(params);
   },
 
   count: async () => {

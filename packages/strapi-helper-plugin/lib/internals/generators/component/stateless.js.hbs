@@ -5,12 +5,7 @@
 */
 
 import React from 'react';
-
-{{#if wantMessages}}
-import { FormattedMessage } from 'react-intl';
-import messages from './messages';
-{{/if}}
-
+import PropTypes from 'prop-types';
 {{#if wantCSS}}
 import styles from './styles.scss';
 {{/if}}

@@ -24,5 +24,7 @@
   "notification.config.success": "Die Einstellungen wurden aktualisiert",
   "notification.delete.success": "Die Datei wurde gelöscht",
   "notification.dropFile.success": "Deine Datei wurde hochgeladen",
-  "notification.dropFiles.success": "{number} Dateien wurden hochgeladen"
+  "notification.dropFiles.success": "{number} Dateien wurden hochgeladen",
+  "Upload.status.sizeLimit": "{file} ist größer als die konfigurierte Begrenzungsgröße",
+  "Upload.status.disabled" : "Das Hochladen von Dateien ist deaktiviert"
 }

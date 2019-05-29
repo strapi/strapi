@@ -1,0 +1,12 @@
+{
+  "presets": ["babel-preset-env", "babel-preset-react", "babel-preset-stage-0"],
+  "plugins": [
+    "babel-plugin-transform-class-properties",
+    "babel-plugin-transform-react-remove-prop-types",
+    "babel-plugin-transform-react-constant-elements",
+    "babel-plugin-transform-react-inline-elements",
+    "babel-plugin-transform-es2015-destructuring",
+    "babel-plugin-transform-es2015-parameters",
+    "babel-plugin-transform-object-rest-spread"
+  ]
+}

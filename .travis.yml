@@ -1,34 +1,87 @@
-sudo: required
+services:
+  - postgresql
+  - mysql
 
-git:
-  depth: 1
+sudo: required
+dist: trusty
 
 language: node_js
 
 node_js:
   - '10'
-  - '11'
-
-before_install:
-  - export CHROME_BIN=chromium-browser
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - git fetch -a
-  - git fetch origin master
-  # - sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
-  # - npm cache clean --force
-  # - rm -rf node_modules/
-
-install:
-  - npm run setup:build --debug
-
-before_script:
-  - git fetch origin master:master
-
-script:
-  - npm run lint
-  - npm run doc
 
 cache:
   directories:
-    - 'node_modules'
+    - node_modules
+    - ~/.npm
+    - ~/.cache
+
+# end to end testing template
+e2e_tests: &e2e_tests
+  stage: 'End to End tests'
+  script:
+    - npm run -s test:generate-app -- $DB_STRING
+    - npm run -s test:start-app & wait-on http://localhost:1337
+    - npm run -s test:e2e
+
+install_mongo: &install_mongo
+  before_install:
+    - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.6.tgz
+    - tar -zxvf mongodb-linux-x86_64-3.6.6.tgz
+    - mkdir -p ./data/db/27017
+    - mkdir -p ./data/db/27000
+    - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
+
+install:
+  - npm run setup:ci
+  - npm install -g wait-on
+
+jobs:
+  include:
+    - stage: test
+      name: Snyk
+      script: npm run -s test:snyk
+      if: fork = false
+
+    - stage: test
+      name: 'Lint / Unit Tests '
+      script:
+        - npm run -s lint
+        - npm run -s test:unit
+        # - npm run -s test:front
+
+    - <<: *e2e_tests
+      name: 'E2E Postgresql'
+      before_install:
+        - psql -c 'create database strapi_test;' -U postgres
+      env:
+        - DB_STRING='--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword='
+
+    - <<: *e2e_tests
+      name: 'E2E Mysql'
+      before_install:
+        - mysql -e 'CREATE DATABASE strapi_test;'
+      env:
+        - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
+
+    - <<: *e2e_tests
+      name: 'E2E Sqlite'
+      env:
+        - DB_STRING='--dbclient=sqlite --dbfile=./tmp/data.db'
+
+    - <<: *e2e_tests
+      name: 'E2E MongoDB'
+      <<: *install_mongo
+      env:
+        - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
+
+    - name: 'Cypress tests'
+      <<: *install_mongo
+      install:
+        - npm run setup:build
+        - npm install -g wait-on
+        - cypress install
+      script:
+        - npm run -s test:generate-app -- --dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword=
+        - npm run -s test:start-app & wait-on http://localhost:1337
+        - node test/cypress.js

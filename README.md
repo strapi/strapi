@@ -1,11 +1,4 @@
 <p align="center">
-  <strong>We're hiring!</strong> Located in Paris 🇫🇷 and dreaming of being full-time on Strapi?
-  <a href="https://strapi.io/company#looking-for-talents">Join us</a>!
-</p>
-
----
-
-<p align="center">
   <a href="https://strapi.io">
     <img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" alt="Strapi logo" />
   </a>
@@ -40,7 +33,7 @@
 
 ## Getting Started
 
-<a href="https://strapi.io/documentation/3.x.x/getting-started/installation.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://strapi.io/documentation/3.x.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 #### 🖐 Requirements
 
@@ -60,7 +53,7 @@ Node:
 **Please note that right now Node 11 is not supported, and the current Node LTS (v10) should be used.**
 
 Database:
- * MongoDB >= 3.x
+ * MongoDB >= 3.6
  * MySQL >= 5.6
  * MariaDB >= 10.1
  * PostgreSQL >= 10
@@ -121,6 +114,12 @@ Be aware that one of the content type builder won't work due to the writing file
 
 ## Contributing
 
+> ⚠️ We have stopped merging PRs for now to the Strapi core.<br><br>
+> The reason is that we are developing new architecture for the admin panel and for the plugins.<br>
+> This new architecture will provide stability of the Strapi core as we approach the release of Beta.<br>
+> We appreciate and welcome all your contributions, but until further notice, please do not submit a PR as it will not be merged.<br>
+> Furthermore, you will have to rewrite it based on the new architecture.
+
 Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull Request to the project.
 
 ## Support
@@ -133,7 +132,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 - [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
 - [Slack](http://slack.strapi.io) (highly recommended for faster support)
-- [GitHub](https://github.com/strapi/strapi)
+- [GitHub](https://github.com/strapi/strapi) (Bug reports and Feature requests only)
 - [Twitter](https://twitter.com/strapijs)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161).
 

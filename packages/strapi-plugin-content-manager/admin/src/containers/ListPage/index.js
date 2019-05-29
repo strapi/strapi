@@ -192,7 +192,7 @@ export class ListPage extends React.Component {
    * Retrieve the model's schema
    * @return {Object} Fields
    */
-  getCurrentSchema = () => 
+  getCurrentSchema = () =>
     get(this.props.schema, ['models', this.getCurrentModelName(), 'fields']) ||
     get(this.props.schema, ['models', 'plugins', this.getSource(), this.getCurrentModelName(), 'fields']);
 
@@ -257,6 +257,8 @@ export class ListPage extends React.Component {
     const attrIndex = this.findAttrIndex(target.name);
     const defaultSettingsAttrIndex = findIndex(defaultSettingsDisplay, ['name', target.name]);
 
+    this.context.emitEvent('didChangeDisplayedFields');
+
     if (attrIndex !== -1) {
       if (get(this.props.listPage, 'displayedFields', []).length === 1) {
         strapi.notification.error('content-manager.notification.error.displayedFields');
@@ -282,10 +284,10 @@ export class ListPage extends React.Component {
     } else {
       const attributes = this.getCurrentModelAttributes();
       const searchable = attributes[target.name].type !== 'json' && attributes[target.name] !== 'array';
-      const attrToAdd = defaultSettingsAttrIndex !== -1 
+      const attrToAdd = defaultSettingsAttrIndex !== -1
         ? get(defaultSettingsDisplay, [defaultSettingsAttrIndex], {})
         : Object.assign(attributes[target.name], { name: target.name, label: upperFirst(target.name), searchable, sortable: searchable });
-      
+
       this.props.addAttr(attrToAdd, defaultSettingsAttrIndex);
     }
   }
@@ -332,7 +334,7 @@ export class ListPage extends React.Component {
   handleDelete = e => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.deleteData(this.state.target, this.getCurrentModelName(), this.getSource());
+    this.props.deleteData(this.state.target, this.getCurrentModelName(), this.getSource(), this.context);
     this.setState({ showWarning: false });
   };
 
@@ -379,7 +381,13 @@ export class ListPage extends React.Component {
 
   showBulkActions = () => get(this.getCurrentModel(), ['bulkActions']);
 
-  toggle = () => this.setState(prevState => ({ isOpen: !prevState.isOpen }));
+  toggle = () => {
+    if (!this.state.isOpen) {
+      this.context.emitEvent('willChangeDisplayedFields');
+    }
+
+    this.setState(prevState => ({ isOpen: !prevState.isOpen }));
+  }
 
   toggleModalWarning = e => {
     if (!isUndefined(e)) {
@@ -446,11 +454,13 @@ export class ListPage extends React.Component {
           entity: capitalize(this.props.match.params.slug) || 'Content Manager',
         },
         kind: 'primaryAddShape',
-        onClick: () =>
+        onClick: () => {
+          this.context.emitEvent('willCreateEntry');
           this.props.history.push({
             pathname: `${this.props.location.pathname}/create`,
             search: this.generateRedirectURI(),
-          }),
+          });
+        },
       },
     ];
     const { listPage: { count } } = this.props;
@@ -555,7 +565,7 @@ export class ListPage extends React.Component {
                       decreaseMarginBottom={filters.length > 0}
                     >
                       <div className="row">
-                        <AddFilterCTA onClick={onToggleFilters} showHideText={showFilter} id="addFilterCTA" />
+                        <AddFilterCTA onClick={(e) => this.context.emitEvent('willFilterEntries') && onToggleFilters(e)} showHideText={showFilter} id="addFilterCTA" />
                         {filters.map(this.renderFilter)}
                       </div>
                     </Div>
@@ -613,6 +623,7 @@ export class ListPage extends React.Component {
                 />
                 {this.renderPopUpWarningDeleteAll()}
                 <PageFooter
+                  context={this.context}
                   count={get(count, this.getCurrentModelName(), 0)}
                   onChangeParams={this.handleChangeParams}
                   params={listPage.params}
@@ -626,6 +637,10 @@ export class ListPage extends React.Component {
     );
   }
 }
+
+ListPage.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 ListPage.propTypes = {
   addAttr: PropTypes.func.isRequired,

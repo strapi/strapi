@@ -183,9 +183,10 @@ export function onReset() {
   };
 }
 
-export function onSubmit() {
+export function onSubmit(context) {
   return {
     type: ON_SUBMIT,
+    context,
   };
 }
 

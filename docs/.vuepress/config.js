@@ -1,11 +1,11 @@
-const container = require('markdown-it-container')
+const container = require('markdown-it-container');
 
-const ogprefix = 'og: http://ogp.me/ns#'
-const title = 'Strapi Documentation'
-const description = 'API creation made simple, secure and fast.'
-const color = '#2F80ED'
-const author = 'Strapi'
-const url = 'https://strapi.io/documentation/'
+const ogprefix = 'og: http://ogp.me/ns#';
+const title = 'Strapi Documentation';
+const description = 'The headless CMS developers love.';
+const color = '#2F80ED';
+const author = 'Strapi';
+const url = 'https://strapi.io/documentation/';
 
 module.exports = {
   head: [
@@ -15,11 +15,23 @@ module.exports = {
     ['meta', { prefix: ogprefix, property: 'twitter:title', content: title }],
     ['meta', { prefix: ogprefix, property: 'og:type', content: 'article' }],
     ['meta', { prefix: ogprefix, property: 'og:url', content: url }],
-    ['meta', { prefix: ogprefix, property: 'og:description', content: description }],
-    ['meta', { prefix: ogprefix, property: 'og:image', content: `${url}rocket.png` }],
-    ['meta', { prefix: ogprefix, property: 'og:article:author', content: author }],
+    [
+      'meta',
+      { prefix: ogprefix, property: 'og:description', content: description },
+    ],
+    [
+      'meta',
+      { prefix: ogprefix, property: 'og:image', content: `${url}rocket.png` },
+    ],
+    [
+      'meta',
+      { prefix: ogprefix, property: 'og:article:author', content: author },
+    ],
     ['meta', { name: 'apple-mobile-web-app-capable', content: 'yes' }],
-    ['meta', { name: 'apple-mobile-web-app-status-bar-style', content: 'black' }],
+    [
+      'meta',
+      { name: 'apple-mobile-web-app-status-bar-style', content: 'black' },
+    ],
     // ['link', { rel: 'apple-touch-icon', href: `/assets/apple-touch-icon.png` }],
     // ['link', { rel: 'mask-icon', href: '/assets/safari-pinned-tab.svg', color: color }],
     ['meta', { name: 'msapplication-TileImage', content: '/rocket.png' }],
@@ -30,50 +42,51 @@ module.exports = {
       permalink: true,
     },
     config: md => {
-      md
-        .use(require('markdown-it-decorate'))
+      md.use(require('markdown-it-decorate'))
         .use(...createContainer('intro'))
-        .use(...createContainer('note'))
-    }
+        .use(...createContainer('windows'))
+        .use(...createContainer('ubuntu'))
+        .use(...createContainer('mac'))
+        .use(...createContainer('note'));
+      const vuepressTabs = require('vuepress-tabs')
+      vuepressTabs(md)
+    },
   },
   title,
   description,
   base: '/documentation/',
   ga: 'UA-54313258-1',
   themeConfig: {
-    versions: [
-      ['Version 3.x.x', '/3.x.x/'],
-      ['Version 1.x.x', '/1.x.x/'],
-    ],
+    versions: [['Version 3.x.x', '/3.x.x/'], ['Version 1.x.x', '/1.x.x/']],
     repo: 'strapi/strapi',
     website: 'https://strapi.io',
     docsDir: 'docs',
     editLinks: true,
     editLinkText: 'Improve this page',
     serviceWorker: true,
-    hiddenLinks: [
-      '/3.x.x/cli/CLI.html',
-      '/3.x.x/api-reference/reference.html',
-    ],
+    hiddenLinks: ['/3.x.x/cli/CLI.html', '/3.x.x/api-reference/reference.html'],
     sidebar: {
       '/3.x.x/': [
         {
           collapsable: false,
           title: '🚀 Getting started',
           children: [
-            '/3.x.x/getting-started/installation',
+            '/3.x.x/getting-started/introduction',
+            '/3.x.x/getting-started/install-requirements',
             '/3.x.x/getting-started/quick-start',
-            '/3.x.x/concepts/concepts',
+            '/3.x.x/getting-started/quick-start-tutorial',
           ],
         },
         {
           collapsable: true,
           title: '💡 Guides',
           children: [
+            '/3.x.x/concepts/concepts',
             '/3.x.x/guides/api-documentation',
             '/3.x.x/guides/authentication',
             '/3.x.x/configurations/configurations',
             '/3.x.x/guides/controllers',
+            '/3.x.x/guides/databases',
             '/3.x.x/guides/deployment',
             '/3.x.x/guides/email',
             '/3.x.x/guides/upload',
@@ -117,24 +130,23 @@ module.exports = {
         {
           collapsable: true,
           title: '💻 Command Line Interface',
-          children: [
-            '/3.x.x/cli/CLI',
-          ],
+          children: ['/3.x.x/cli/CLI'],
         },
         {
           collapsable: true,
           title: '🏗 API Reference',
-          children: [
-            '/3.x.x/api-reference/reference',
-          ],
+          children: ['/3.x.x/api-reference/reference'],
         },
         {
           collapsable: false,
           title: '📚 Resources',
           children: [
-            ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contributing guide'],
+            [
+              'https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md',
+              'Contributing guide',
+            ],
             '/3.x.x/migration-guide/',
-            '/3.x.x/tutorials/',
+            '/3.x.x/articles/',
           ],
         },
       ],
@@ -146,7 +158,10 @@ module.exports = {
             ['/1.x.x/', 'Introduction'],
             ['https://strapi.io', 'Strapi Website'],
             ['https://github.com/strapi/strapi', 'GitHub Repository'],
-            ['https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md', 'Contribution Guide'],
+            [
+              'https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md',
+              'Contribution Guide',
+            ],
           ],
         },
         '/1.x.x/admin.md',
@@ -174,17 +189,21 @@ module.exports = {
       ],
     },
   },
-}
+};
 
 function createContainer(className) {
-  return [container, className, {
-    render(tokens, idx) {
-      const token = tokens[idx]
-      if (token.nesting === 1) {
-        return `<div class="${className} custom-block">\n`
-      } else {
-        return `</div>\n`
-      }
-    }
-  }]
+  return [
+    container,
+    className,
+    {
+      render(tokens, idx) {
+        const token = tokens[idx];
+        if (token.nesting === 1) {
+          return `<div class="${className} custom-block">\n`;
+        } else {
+          return `</div>\n`;
+        }
+      },
+    },
+  ];
 }
