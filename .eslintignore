@@ -1,3 +1,4 @@
-packages/strapi-generate-new/files/public/**
-website/
 **/node_modules/**
+**/build/**
+**/dist/**
+testApp/**
