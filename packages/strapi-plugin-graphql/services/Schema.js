@@ -6,8 +6,6 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const fs = require('fs');
-const path = require('path');
 const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
@@ -287,7 +285,7 @@ const schemaBuilder = {
 
   writeGenerateSchema: schema => {
     return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
-  }
+  },
 };
 
 module.exports = schemaBuilder;

@@ -1,5 +1,6 @@
 import 'whatwg-fetch';
 import auth from './auth';
+import _ from 'lodash';
 
 /**
  * Parses the JSON returned by a network request
@@ -136,7 +137,7 @@ export default function request(...args) {
       options.headers,
       {
         'X-Forwarded-Host': 'strapi',
-      },
+      }
     );
   }
 
@@ -147,7 +148,7 @@ export default function request(...args) {
       {
         Authorization: `Bearer ${token}`,
       },
-      options.headers,
+      options.headers
     );
   }
 

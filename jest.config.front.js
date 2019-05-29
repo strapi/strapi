@@ -1,5 +1,3 @@
-const jest = require('jest');
-
 module.exports = {
   collectCoverageFrom: [
     'packages/strapi-admin/admin/src/**/**/*.js',
