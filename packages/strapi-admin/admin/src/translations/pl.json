@@ -95,7 +95,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "Otwórz następujący plik i włącz funkcjonalność.",
   "components.AutoReloadBlocker.header": "Do tej wtyczki wymagana jest funkcja przeładowania.",
   "components.ErrorBoundary.title": "Coś poszło nie tak...",
   "components.Input.error.attribute.key.taken": "Ta wartość już istnieje",

@@ -8,13 +8,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get, isEmpty, startCase } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import IcoContainer from 'components/IcoContainer';
-import ListRow from 'components/ListRow';
-import PopUpWarning from 'components/PopUpWarning';
-import { router } from 'app';
+import { IcoContainer, ListRow, PopUpWarning } from 'strapi-helper-plugin';
+
+import pluginId from '../../pluginId';
+
 import styles from '../TableList/styles.scss';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-curly-brace-presence */
+/* eslint-disable indent */
 
 class TableListRow extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -25,37 +26,73 @@ class TableListRow extends React.Component {
     };
   }
 
-  handleEdit = () => {
-    router.push(
-      `/plugins/content-type-builder/#edit${this.props.rowItem.name}::contentType::baseSettings`,
-    );
-  };
-
   handleDelete = e => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.onDelete(this.props.rowItem.name);
+
+    const {
+      deleteTemporaryModel,
+      onDelete,
+      rowItem: { name, isTemporary },
+    } = this.props;
+
+    if (isTemporary) {
+      deleteTemporaryModel();
+    } else {
+      onDelete(name, this.context);
+    }
+
     this.setState({ showWarning: false });
   };
 
+  handleEdit = () => {
+    const {
+      push,
+      rowItem: { name, source },
+    } = this.props;
+
+    push({
+      pathname: `/plugins/${pluginId}/models/${name}${
+        source ? `&source=${source}` : ''
+      }`,
+      search: `modalType=model&settingType=base&actionType=edit&modelName=${name}`,
+    });
+  };
+
   handleGoTo = () => {
-    router.push(
-      `/plugins/content-type-builder/models/${this.props.rowItem.name}${
+    const { push } = this.props;
+
+    push(
+      `/plugins/${pluginId}/models/${this.props.rowItem.name}${
         this.props.rowItem.source ? `&source=${this.props.rowItem.source}` : ''
       }`,
     );
   };
 
-  toggleModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
+  toggleModalWarning = () =>
+    this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
-  handleShowModalWarning = () => this.setState({ showWarning: !this.state.showWarning });
+  handleShowModalWarning = () => {
+    if (
+      this.props.canOpenModalAddContentType ||
+      this.props.rowItem.isTemporary === true
+    ) {
+      this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+    } else {
+      strapi.notification.info(
+        `${pluginId}.notification.info.contentType.creating.notSaved`,
+      );
+    }
+  };
 
   render() {
     const name = get(this.props.rowItem, 'name', 'default');
     const pluginSource = this.props.rowItem.source ? (
-      <FormattedMessage id="content-type-builder.from">
+      <FormattedMessage id={`${pluginId}.from`}>
         {message => (
-          <span style={{ fontStyle: 'italic', color: '#787E8F', fontWeight: '500' }}>
+          <span
+            style={{ fontStyle: 'italic', color: '#787E8F', fontWeight: '500' }}
+          >
             ({message}: {this.props.rowItem.source})
           </span>
         )}
@@ -64,7 +101,7 @@ class TableListRow extends React.Component {
       ''
     );
     const temporary = this.props.rowItem.isTemporary ? (
-      <FormattedMessage id="content-type-builder.contentType.temporaryDisplay" />
+      <FormattedMessage id={`${pluginId}.contentType.temporaryDisplay`} />
     ) : (
       ''
     );
@@ -75,12 +112,16 @@ class TableListRow extends React.Component {
     const icons = this.props.rowItem.source
       ? []
       : [
-        { icoType: 'pencil', onClick: this.handleEdit },
-        { icoType: 'trash', onClick: this.handleShowModalWarning, id: `delete${name}` },
-      ];
+          { icoType: 'pencil', onClick: this.handleEdit },
+          {
+            icoType: 'trash',
+            onClick: this.handleShowModalWarning,
+            id: `delete${name}`,
+          },
+        ];
 
     return (
-      <ListRow onClick={this.handleGoTo}>
+      <ListRow onClick={this.handleGoTo} style={{ height: '5.4rem' }}>
         <div className={`col-md-4 ${styles.italic} ${styles.nameContainer}`}>
           <i className={`fa ${this.props.rowItem.icon}`} />
           <span style={{ width: spanStyle }}>
@@ -98,7 +139,10 @@ class TableListRow extends React.Component {
         <PopUpWarning
           isOpen={this.state.showWarning}
           toggleModal={this.toggleModalWarning}
-          content={{ message: 'content-type-builder.popUpWarning.bodyMessage.contentType.delete' }}
+          content={{
+            message:
+              'content-type-builder.popUpWarning.bodyMessage.contentType.delete',
+          }}
           popUpWarningType={'danger'}
           onConfirm={this.handleDelete}
         />
@@ -107,8 +151,16 @@ class TableListRow extends React.Component {
   }
 }
 
+TableListRow.contextTypes = {
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
+};
+
 TableListRow.propTypes = {
+  canOpenModalAddContentType: PropTypes.bool.isRequired,
+  deleteTemporaryModel: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  push: PropTypes.func.isRequired,
   rowItem: PropTypes.object.isRequired,
 };
 

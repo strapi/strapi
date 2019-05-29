@@ -13,8 +13,7 @@ import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
-import PluginHeader from 'components/PluginHeader';
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
+import { PluginHeader, LoadingIndicatorPage } from 'strapi-helper-plugin';
 
 import ListPlugins from '../../components/ListPlugins';
 
@@ -49,6 +48,7 @@ export class ListPluginsPage extends React.Component {
     if (this.props.isLoading) {
       return <LoadingIndicatorPage />;
     }
+
     return (
       <div>
         <FormattedMessage id="app.components.ListPluginsPage.helmet.title">

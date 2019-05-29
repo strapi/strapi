@@ -29,6 +29,7 @@
   "error.validation.minSupMax": "Ne peut pas être plus grand",
   "error.validation.regex": "La valeur ne correspond pas au format attendu.",
   "error.validation.required": "Ce champ est obligatoire.",
+  "form.attribute.info.no-space-allowed": "Les espaces ne sont pas autorisés pour les noms du champ",
   "form.attribute.item.appearance.description": "Sinon, il sera editable à partir d'une simple zone de texte",
   "form.attribute.item.appearance.label": "Editable avec un WYSIWYG",
   "form.attribute.item.appearance.name": "Apparence",
@@ -40,8 +41,8 @@
   "form.attribute.item.enumeration.graphql": "Surchage du nom pour GraphQL",
   "form.attribute.item.enumeration.graphql.description": "Vous permet de remplacer le nom généré par défaut pour GraphQL",
   "form.attribute.item.enumeration.name": "Nom",
-  "form.attribute.item.enumeration.placeholder": "Ex : matin,midi,soir",
-  "form.attribute.item.enumeration.rules": "Valeurs (les séparer par une virgule)",
+  "form.attribute.item.enumeration.placeholder": "Ex:\nmatin\nmidi\nsoir",
+  "form.attribute.item.enumeration.rules": "Valeurs (les séparer par une nouvelle ligne)",
   "form.attribute.item.json.name": "Nom",
   "form.attribute.item.maximum": "Valeur maximum",
   "form.attribute.item.maximumLength": "Taille maximum",
@@ -154,5 +155,6 @@
   "table.contentType.head.fields": "Champs",
   "table.contentType.head.name": "Nom",
   "table.contentType.title.plural": "Modèles sont disponibles",
-  "table.contentType.title.singular": "Modèle est disponible"
+  "table.contentType.title.singular": "Modèle est disponible",
+  "prompt.content.unsaved": "Etes-vous sûr de vouloir quitter ce model? Toutes vos modifications seront perdues."
 }

@@ -107,7 +107,7 @@ module.exports = {
       );
     }
 
-    return strapi.query('file', 'upload').create(values);
+    return strapi.plugins['upload'].queries('file', 'upload').create(values);
   },
 
   edit: async (params, values) => {
@@ -121,24 +121,22 @@ module.exports = {
       ].edit(params, values, 'upload');
     }
 
-    return strapi.query('file', 'upload').update(_.assign(params, values));
+    return strapi.plugins['upload'].queries('file', 'upload').update(_.assign(params, values));
   },
 
   fetch: params => {
     params.id = params._id || params.id;
-    return strapi
-      .query('file', 'upload')
+    return strapi.plugins['upload'].queries('file', 'upload')
       .findOne(_.pick(params, ['id']));
   },
 
   fetchAll: params => {
-    return strapi
-      .query('file', 'upload')
-      .find(strapi.utils.models.convertParams('file', params));
+    return strapi.plugins['upload'].queries('file', 'upload')
+      .find(params);
   },
 
   count: async () => {
-    return await strapi.query('file', 'upload').count();
+    return await strapi.plugins['upload'].queries('file', 'upload').count();
   },
 
   remove: async (params, config) => {
@@ -164,13 +162,13 @@ module.exports = {
     if (strapi.plugins['content-manager']) {
       params.model = 'file';
 
-      await strapi.plugins['content-manager'].services['contentmanager'].delete(
+      return await strapi.plugins['content-manager'].services['contentmanager'].delete(
         params,
         { source: 'upload' },
       );
     }
 
-    return strapi.query('file', 'upload').delete(params);
+    return strapi.plugins['upload'].queries('file', 'upload').delete(params);
   },
 
   uploadToEntity: async function(params, files, source) {

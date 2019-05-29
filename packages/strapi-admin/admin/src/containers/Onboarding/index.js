@@ -10,12 +10,19 @@ import cn from 'classnames';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { FormattedMessage } from 'react-intl';
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
+import injectSaga from '../../utils/injectSaga';
+import injectReducer from '../../utils/injectReducer';
 
-import OnboardingVideo from 'components/OnboardingVideo';
+import OnboardingVideo from '../../components/OnboardingVideo';
 
-import { getVideos, onClick, removeVideos, setVideoDuration, setVideoEnd, updateVideoStartTime } from './actions';
+import {
+  getVideos,
+  onClick,
+  removeVideos,
+  setVideoDuration,
+  setVideoEnd,
+  updateVideoStartTime,
+} from './actions';
 import makeSelectOnboarding from './selectors';
 import reducer from './reducer';
 import saga from './saga';
@@ -43,17 +50,17 @@ export class Onboarding extends React.Component {
 
   setVideoEnd = () => {
     this.setVideoEnd();
-  }
-  
+  };
+
   didPlayVideo = (index, currTime) => {
     const eventName = `didPlay${index}GetStartedVideo`;
-    this.context.emitEvent(eventName, {timestamp: currTime});
-  }
+    this.context.emitEvent(eventName, { timestamp: currTime });
+  };
 
   didStopVideo = (index, currTime) => {
     const eventName = `didStop${index}Video`;
-    this.context.emitEvent(eventName, {timestamp: currTime});
-  }
+    this.context.emitEvent(eventName, { timestamp: currTime });
+  };
 
   handleOpenModal = () => this.setState({ showVideos: true });
 
@@ -61,16 +68,17 @@ export class Onboarding extends React.Component {
     this.setState(prevState => ({ showVideos: !prevState.showVideos }));
 
     const { showVideos } = this.state;
-    const eventName = showVideos ? 'didOpenGetStartedVideoContainer' : 'didCloseGetStartedVideoContainer';
+    const eventName = showVideos
+      ? 'didOpenGetStartedVideoContainer'
+      : 'didCloseGetStartedVideoContainer';
 
     this.context.emitEvent(eventName);
   };
 
   updateCurrentTime = (index, current, duration) => {
-
     this.props.updateVideoStartTime(index, current);
 
-    const percent = current * 100 / duration;
+    const percent = (current * 100) / duration;
     const video = this.props.videos[index];
 
     if (percent >= 80) {
@@ -80,21 +88,43 @@ export class Onboarding extends React.Component {
     }
   };
 
-  updateEnd = (index) => {
+  updateEnd = index => {
     this.props.setVideoEnd(index, true);
   };
 
   // eslint-disable-line jsx-handler-names
   render() {
     const { videos, onClick, setVideoDuration } = this.props;
+    const { showVideos } = this.state;
+
+    const style = showVideos ? {} : { maxWidth: 0 };
 
     return (
-      <div className={cn(styles.videosWrapper, videos.length > 0 ? styles.visible : styles.hidden)}>
-        <div className={cn(styles.videosContent, this.state.showVideos ? styles.shown : styles.hide)}>
+      <div
+        style={style}
+        className={cn(
+          styles.videosWrapper,
+          videos.length > 0 ? styles.visible : styles.hidden,
+        )}
+      >
+        <div
+          style={style}
+          className={cn(
+            styles.videosContent,
+            this.state.showVideos ? styles.shown : styles.hide,
+          )}
+        >
           <div className={styles.videosHeader}>
-            <p><FormattedMessage id="app.components.Onboarding.title" /></p>
+            <p>
+              <FormattedMessage id="app.components.Onboarding.title" />
+            </p>
             {videos.length && (
-              <p>{Math.floor((videos.filter(v => v.end).length)*100/videos.length)}<FormattedMessage id="app.components.Onboarding.label.completed" /></p>
+              <p>
+                {Math.floor(
+                  (videos.filter(v => v.end).length * 100) / videos.length,
+                )}
+                <FormattedMessage id="app.components.Onboarding.label.completed" />
+              </p>
             )}
           </div>
           <ul className={styles.onboardingList}>
@@ -157,7 +187,17 @@ Onboarding.propTypes = {
 const mapStateToProps = makeSelectOnboarding();
 
 function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ getVideos, onClick, setVideoDuration, updateVideoStartTime, setVideoEnd, removeVideos }, dispatch);
+  return bindActionCreators(
+    {
+      getVideos,
+      onClick,
+      setVideoDuration,
+      updateVideoStartTime,
+      setVideoEnd,
+      removeVideos,
+    },
+    dispatch,
+  );
 }
 
 const withConnect = connect(

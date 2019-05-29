@@ -5,9 +5,6 @@
   "proxy": {
     "enabled": false
   },
-  "autoReload": {
-    "enabled": false
-  },
   "cron": {
     "enabled": false
   },

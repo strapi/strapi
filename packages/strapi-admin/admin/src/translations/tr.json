@@ -95,7 +95,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "Aşağıdaki dosyayı açın ve özelliği etkinleştirin.",
   "components.AutoReloadBlocker.header": "Bu eklenti için tekrar yükleme özelliği gerekiyor.",
   "components.ErrorBoundary.title": "Bir şeyler yanlış gitti...",
   "components.Input.error.attribute.key.taken": "Bu değer zaten var.",

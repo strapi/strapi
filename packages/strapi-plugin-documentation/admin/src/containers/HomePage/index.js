@@ -14,13 +14,13 @@ import { get, isEmpty } from 'lodash';
 import cn from 'classnames';
 
 // Components
-import PluginHeader from 'components/PluginHeader';
-import PopUpWarning from 'components/PopUpWarning';
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import Input from 'components/InputsIndex';
-
-// Utils
-import auth from 'utils/auth';
+import {
+  auth,
+  PluginHeader,
+  PopUpWarning,
+  LoadingIndicatorPage,
+  InputsIndex as Input,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -202,7 +202,7 @@ HomePage.defaultProps = {
   didCheckErrors: false,
   docVersions: [],
   form: [],
-  formErrors: [],
+  formErrors: {},
   isLoading: true,
   onChange: () => {},
   onClickDeleteDoc: () => {},
@@ -210,7 +210,6 @@ HomePage.defaultProps = {
   onSubmit: () => {},
   onUpdateDoc: () => {},
   versionToDelete: '',
-
 };
 
 HomePage.propTypes = {
@@ -218,7 +217,7 @@ HomePage.propTypes = {
   didCheckErrors: PropTypes.bool,
   docVersions: PropTypes.array,
   form: PropTypes.array,
-  formErrors: PropTypes.array,
+  formErrors: PropTypes.object,
   getDocInfos: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
   onChange: PropTypes.func,
@@ -249,7 +248,11 @@ const withConnect = connect(
   mapStateToProps,
   mapDispatchToProps,
 );
-const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withReducer = strapi.injectReducer({
+  key: 'homePage',
+  reducer,
+  pluginId,
+});
 const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(

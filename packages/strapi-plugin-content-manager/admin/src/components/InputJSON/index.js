@@ -1,19 +1,18 @@
 /**
- * 
+ *
  * InputJSON
- * 
+ *
  */
-
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import cm from 'codemirror';
-import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/addon/lint/lint';
 import 'codemirror/addon/lint/javascript-lint';
 import 'codemirror/addon/edit/closebrackets';
 import 'codemirror/addon/selection/mark-selection';
+import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/liquibyte.css';
 import 'codemirror/theme/xq-dark.css';
 import 'codemirror/theme/3024-day.css';
@@ -30,7 +29,15 @@ const WAIT = 600;
 const stringify = JSON.stringify;
 const parse = JSON.parse;
 const DEFAULT_THEME = 'monokai';
-const THEMES = ['blackboard', 'cobalt', 'monokai', '3024-day', '3024-night', 'liquibyte', 'xq-dark'];
+const THEMES = [
+  'blackboard',
+  'cobalt',
+  'monokai',
+  '3024-day',
+  '3024-night',
+  'liquibyte',
+  'xq-dark',
+];
 
 class InputJSON extends React.Component {
   constructor(props) {
@@ -60,7 +67,11 @@ class InputJSON extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (isEmpty(prevProps.value) && !isEmpty(this.props.value) && !this.state.hasInitValue) {
+    if (
+      isEmpty(prevProps.value) &&
+      !isEmpty(this.props.value) &&
+      !this.state.hasInitValue
+    ) {
       this.setInitValue();
     }
   }
@@ -74,30 +85,24 @@ class InputJSON extends React.Component {
         this.setState({ hasInitValue: true });
 
         return this.codeMirror.setValue(stringify(value, null, 2));
-      } catch(err) {
-
+      } catch (err) {
         return this.setState({ error: true });
       }
     }
-  }
+  };
 
   setSize = () => this.codeMirror.setSize('100%', 'auto');
 
-  setTheme = (theme) => this.codeMirror.setOption('theme', theme);
+  setTheme = theme => this.codeMirror.setOption('theme', theme);
 
-  getContentAtLine = (line) => this.codeMirror.getLine(line);
+  getContentAtLine = line => this.codeMirror.getLine(line);
 
-  getEditorOption = (opt) => this.codeMirror.getOption(opt);
+  getEditorOption = opt => this.codeMirror.getOption(opt);
 
   getValue = () => this.codeMirror.getValue();
 
   markSelection = ({ message }) => {
-    let line = parseInt(
-      message
-        .split(':')[0]
-        .split('line ')[1],
-      10,
-    ) - 1;
+    let line = parseInt(message.split(':')[0].split('line ')[1], 10) - 1;
 
     let content = this.getContentAtLine(line);
 
@@ -107,16 +112,21 @@ class InputJSON extends React.Component {
     }
     const chEnd = content.length;
     const chStart = chEnd - trimStart(content, ' ').length;
-    const markedText = this.codeMirror.markText({ line, ch: chStart }, { line, ch: chEnd }, { className: styles.colored });
+    const markedText = this.codeMirror.markText(
+      { line, ch: chStart },
+      { line, ch: chEnd },
+      { className: styles.colored },
+    );
     this.setState({ markedText });
-  }
+  };
 
   timer = null;
 
   handleBlur = ({ target }) => {
     const { name, onBlur } = this.props;
-  
-    if (target === undefined) { // codemirror catches multiple events
+
+    if (target === undefined) {
+      // codemirror catches multiple events
       onBlur({
         target: {
           name,
@@ -124,9 +134,8 @@ class InputJSON extends React.Component {
           value: this.getValue(),
         },
       });
-
     }
-  }
+  };
 
   handleChange = () => {
     const { hasInitValue } = this.state;
@@ -135,7 +144,7 @@ class InputJSON extends React.Component {
 
     try {
       value = parse(value);
-    } catch(err) {
+    } catch (err) {
       // Silent
     }
 
@@ -157,18 +166,21 @@ class InputJSON extends React.Component {
       this.state.markedText.clear();
       this.setState({ markedText: null, error: null });
     }
-    
-    clearTimeout(this.timer);
-    this.timer = setTimeout(() => this.testJSON(this.codeMirror.getValue()), WAIT);
-  }
 
-  testJSON = (value) => {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(
+      () => this.testJSON(this.codeMirror.getValue()),
+      WAIT,
+    );
+  };
+
+  testJSON = value => {
     try {
       jsonlint.parse(value);
-    } catch(err) {
+    } catch (err) {
       this.markSelection(err);
     }
-  }
+  };
 
   render() {
     if (this.state.error) {
@@ -177,9 +189,22 @@ class InputJSON extends React.Component {
 
     return (
       <div className={styles.jsonWrapper}>
-        <textarea ref={this.editor} autoComplete='off' id={this.props.name} defaultValue="" />
-        <select className={styles.select} onChange={({ target }) => this.setTheme(target.value)} defaultValue={DEFAULT_THEME}>
-          {THEMES.sort().map(theme => <option key={theme} value={theme}>{theme}</option>)}
+        <textarea
+          ref={this.editor}
+          autoComplete="off"
+          id={this.props.name}
+          defaultValue=""
+        />
+        <select
+          className={styles.select}
+          onChange={({ target }) => this.setTheme(target.value)}
+          defaultValue={DEFAULT_THEME}
+        >
+          {THEMES.sort().map(theme => (
+            <option key={theme} value={theme}>
+              {theme}
+            </option>
+          ))}
         </select>
       </div>
     );

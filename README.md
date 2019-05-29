@@ -1,11 +1,4 @@
 <p align="center">
-  <strong>We're hiring!</strong> Located in Paris 🇫🇷 and dreaming of being full-time on Strapi?
-  <a href="https://strapi.io/company#looking-for-talents">Join us</a>!
-</p>
-
----
-
-<p align="center">
   <a href="https://strapi.io">
     <img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" alt="Strapi logo" />
   </a>
@@ -54,13 +47,13 @@ Operating system:
 **Please note that Strapi may work on other Operating Systems, but are not tested at this time.**
 
 Node:
- * NodeJS >= 10.x
+ * NodeJS 10.x
  * NPM >= 6.x
 
 **Please note that right now Node 11 is not supported, and the current Node LTS (v10) should be used.**
 
 Database:
- * MongoDB >= 3.x
+ * MongoDB >= 3.6
  * MySQL >= 5.6
  * MariaDB >= 10.1
  * PostgreSQL >= 10
@@ -68,7 +61,7 @@ Database:
 #### ⏳ Installation
 
 ```bash
-npm install strapi@alpha -g
+npm install strapi@beta -g
 ````
 
 **We recommend always using the latest version of Strapi to start your new project**.
@@ -86,7 +79,7 @@ This command will generate a brand new project with the default features (authen
 
 ```bash
 cd my-project
-strapi start
+strapi develop
 ```
 
 Congratulations, you made it! Enjoy 🎉
@@ -133,7 +126,7 @@ For general help using Strapi, please refer to [the official Strapi documentatio
 
 - [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
 - [Slack](http://slack.strapi.io) (highly recommended for faster support)
-- [GitHub](https://github.com/strapi/strapi)
+- [GitHub](https://github.com/strapi/strapi) (Bug reports and Feature requests only)
 - [Twitter](https://twitter.com/strapijs)
 - [Facebook](https://www.facebook.com/Strapi-616063331867161).
 

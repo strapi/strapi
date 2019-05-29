@@ -26,8 +26,8 @@ import {
 } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import Helmet from 'react-helmet';
-import Select from 'react-select';
-import { router } from 'app';
+
+import { InputSelect } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 // design
@@ -36,15 +36,14 @@ import EditForm from '../../components/EditForm';
 import HeaderNav from '../../components/HeaderNav';
 import List from '../../components/List';
 import RowDatabase from '../../components/RowDatabase';
-import SelectOptionLanguage from '../../components/SelectOptionLanguage';
 import RowLanguage from '../../components/RowLanguage';
 import PluginLeftMenu from '../../components/PluginLeftMenu';
 
-// utils
-import unknowFlag from 'assets/images/unknow_flag.png';
-import supportedFlags from 'utils/supportedFlags.json';
-import { checkFormValidity, getRequiredInputsDb } from '../../utils/inputValidations';
-import getFlag, { formatLanguageLocale } from '../../utils/getFlag';
+import {
+  checkFormValidity,
+  getRequiredInputsDb,
+} from '../../utils/inputValidations';
+import { formatLanguageLocale } from '../../utils/getFlag';
 import sendUpdatedParams from '../../utils/sendUpdatedParams';
 // App selectors
 import { makeSelectSections, makeSelectEnvironments } from '../App/selectors';
@@ -74,7 +73,8 @@ import styles from './styles.scss';
 import config from './config.json';
 
 /* eslint-disable react/require-default-props  */
-export class HomePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class HomePage extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
     this.customComponents = config.customComponents;
@@ -98,28 +98,52 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     if (this.props.match.params.slug) {
       this.handleFetch(this.props);
     } else {
-      router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug']) || 'application'}`);
+      this.props.history.push(
+        `/plugins/settings-manager/${get(this.props.menuSections, [
+          '0',
+          'items',
+          '0',
+          'slug',
+        ]) || 'application'}`,
+      );
     }
   }
 
   componentWillReceiveProps(nextProps) {
     // check if params slug updated
-    if (this.props.match.params.slug !== nextProps.match.params.slug && nextProps.match.params.slug) {
+    if (
+      this.props.match.params.slug !== nextProps.match.params.slug &&
+      nextProps.match.params.slug
+    ) {
       if (nextProps.match.params.slug) {
         // get data from api if params slug updated
         this.handleFetch(nextProps);
       } else {
         // redirect user if no params slug provided
-        router.push(`/plugins/settings-manager/${get(this.props.menuSections, ['0', 'items', '0', 'slug'])}`);
+        this.props.history.push(
+          `/plugins/settings-manager/${get(this.props.menuSections, [
+            '0',
+            'items',
+            '0',
+            'slug',
+          ])}`,
+        );
       }
-    } else if (this.props.match.params.env !== nextProps.match.params.env && nextProps.match.params.env && this.props.match.params.env) {
+    } else if (
+      this.props.match.params.env !== nextProps.match.params.env &&
+      nextProps.match.params.env &&
+      this.props.match.params.env
+    ) {
       // get data if params env updated
       this.handleFetch(nextProps);
     }
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.home.didCreatedNewLanguage !== this.props.home.didCreatedNewLanguage) {
+    if (
+      prevProps.home.didCreatedNewLanguage !==
+      this.props.home.didCreatedNewLanguage
+    ) {
       this.handleFetch(this.props);
     }
 
@@ -130,11 +154,14 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
   /* eslint-disable react/sort-comp */
   /* eslint-disable jsx-a11y/no-static-element-interactions */
-  addConnection = (e) => {
+  addConnection = e => {
     e.preventDefault();
     const newData = {};
     /* eslint-disable no-template-curly-in-string */
-    const dbName = get(this.props.home.modifiedData, 'database.connections.${name}.name');
+    const dbName = get(
+      this.props.home.modifiedData,
+      'database.connections.${name}.name',
+    );
     map(this.props.home.modifiedData, (data, key) => {
       const k = replace(key, '${name}', dbName);
 
@@ -143,26 +170,33 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       }
     });
 
-    const formErrors = getRequiredInputsDb(this.props.home.modifiedData, this.props.home.formErrors);
+    const formErrors = getRequiredInputsDb(
+      this.props.home.modifiedData,
+      this.props.home.formErrors,
+    );
 
     if (isEmpty(formErrors)) {
       // this.props.setErrors([]);
-      this.props.newDatabasePost(this.props.match.params.env, newData, this.context);
+      this.props.newDatabasePost(
+        this.props.match.params.env,
+        newData,
+        this.context,
+      );
     } else {
       this.props.setErrors(formErrors);
     }
-  }
+  };
 
   emptyDbModifiedData = () => {
     this.setState({ toggleDefaultConnection: false });
     this.props.emptyDbModifiedData();
-  }
+  };
 
-  getDatabase = (databaseName) => {
+  getDatabase = databaseName => {
     // allow state here just for modal purpose
     this.props.specificDatabaseFetch(databaseName, this.props.match.params.env);
     // this.setState({ modal: !this.state.modal });
-  }
+  };
 
   handleDefaultLanguageChange = ({ target }) => {
     // create new object configsDisplay based on store property configsDisplay
@@ -173,7 +207,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     };
 
     // Find the index of the new setted language
-    const activeLanguageIndex = findIndex(this.props.home.configsDisplay.sections, ['name', target.id]);
+    const activeLanguageIndex = findIndex(
+      this.props.home.configsDisplay.sections,
+      ['name', target.id],
+    );
 
     forEach(this.props.home.configsDisplay.sections, (section, key) => {
       // set all Language active state to false
@@ -192,13 +229,19 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     const defaultLanguageArray = formatLanguageLocale(target.id);
 
     // Edit the new config
-    this.props.editSettings({ 'language.defaultLocale': join(defaultLanguageArray, '_') }, 'i18n', this.context);
-  }
+    this.props.editSettings(
+      { 'language.defaultLocale': join(defaultLanguageArray, '_') },
+      'i18n',
+      this.context,
+    );
+  };
 
   handleFetch(props) {
-    const apiUrl = props.match.params.env ? `${props.match.params.slug}/${props.match.params.env}` : props.match.params.slug;
+    const apiUrl = props.match.params.env
+      ? `${props.match.params.slug}/${props.match.params.env}`
+      : props.match.params.slug;
 
-    switch(props.match.params.slug) {
+    switch (props.match.params.slug) {
       case 'languages':
         return this.props.languagesFetch();
       case 'databases':
@@ -209,7 +252,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
   }
 
   handleChange = ({ target }) => {
-    let value = target.type === 'number' && target.value !== '' ? toNumber(target.value) : target.value;
+    let value =
+      target.type === 'number' && target.value !== ''
+        ? toNumber(target.value)
+        : target.value;
     let name = target.name;
 
     if (this.props.match.params.slug === 'security') {
@@ -222,21 +268,44 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
 
     if (this.props.match.params.slug === 'databases') {
       if (name === this.props.home.dbNameTarget) {
-        const formErrors = value === this.props.home.addDatabaseSection.sections[1].items[0].value ?
-          [{ target: name, errors: [{ id: 'settings-manager.request.error.database.exist' }] }] : [];
+        const formErrors =
+          value ===
+          this.props.home.addDatabaseSection.sections[1].items[0].value
+            ? [
+              {
+                target: name,
+                errors: [
+                  { id: 'settings-manager.request.error.database.exist' },
+                ],
+              },
+            ]
+            : [];
         this.props.setErrors(formErrors);
       } else if (endsWith(name, '.settings.client')) {
-        const item = find(this.props.home.addDatabaseSection.sections[0].items[1].items, { value });
-        this.props.changeInput('database.connections.${name}.settings.port', item.port);
-        this.props.changeInput(`database.connections.${this.props.home.addDatabaseSection.sections[1].items[0].value}.settings.port`, item.port);
+        const item = find(
+          this.props.home.addDatabaseSection.sections[0].items[1].items,
+          { value },
+        );
+        this.props.changeInput(
+          'database.connections.${name}.settings.port',
+          item.port,
+        );
+        this.props.changeInput(
+          `database.connections.${
+            this.props.home.addDatabaseSection.sections[1].items[0].value
+          }.settings.port`,
+          item.port,
+        );
       } else {
         this.props.setErrors([]);
       }
     }
     this.props.changeInput(name, value);
-  }
+  };
 
-  handleChangeLanguage = (value) => this.props.changeInput('language.defaultLocale', value.value);
+  handleChangeLanguage = ({ target: { value } }) => {
+    this.props.changeInput('language.defaultLocale', value);
+  };
 
   handleCancel = () => this.props.cancelChanges();
 
@@ -245,56 +314,74 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       ? this.props.home.addDatabaseSection.sections[1].items[0].value
       : this.props.home.modifiedData[this.props.home.dbNameTarget];
     const target = { name: 'database.defaultConnection', value };
-    this.handleChange({target});
-    this.setState({ toggleDefaultConnection: !this.state.toggleDefaultConnection });
-  }
+    this.handleChange({ target });
+    this.setState({
+      toggleDefaultConnection: !this.state.toggleDefaultConnection,
+    });
+  };
 
-  handleSubmit = (e) => { // eslint-disable-line consistent-return
+  handleSubmit = e => {
+    // eslint-disable-line consistent-return
     e.preventDefault();
-    const apiUrl = this.props.match.params.env ? `${this.props.match.params.slug}/${this.props.match.params.env}` : this.props.match.params.slug;
+    const apiUrl = this.props.match.params.env
+      ? `${this.props.match.params.slug}/${this.props.match.params.env}`
+      : this.props.match.params.slug;
 
     const isCreatingNewFields = this.props.match.params.slug === 'security';
     // send only updated settings
     const body = this.sendUpdatedParams(isCreatingNewFields);
     const formErrors = checkFormValidity(body, this.props.home.formValidations);
 
-    if (isEmpty(body)) return strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
+    if (isEmpty(body))
+      return strapi.notification.info(
+        'settings-manager.strapi.notification.info.settingsEqual',
+      );
     if (isEmpty(formErrors)) {
       this.props.editSettings(body, apiUrl, this.context);
     } else {
       this.props.setErrors(formErrors);
     }
-  }
+  };
 
-  handleSubmitEditDatabase = (databaseName) => { // eslint-disable-line consistent-return
+  handleSubmitEditDatabase = databaseName => {
+    // eslint-disable-line consistent-return
     const body = this.sendUpdatedParams();
     const apiUrl = `${databaseName}/${this.props.match.params.env}`;
-    const formErrors = checkFormValidity(body, this.props.home.formValidations, this.props.home.formErrors);
+    const formErrors = checkFormValidity(
+      body,
+      this.props.home.formValidations,
+      this.props.home.formErrors,
+    );
 
     if (isEmpty(body)) {
       this.props.closeModal();
-      return strapi.notification.info('settings-manager.strapi.notification.info.settingsEqual');
+      return strapi.notification.info(
+        'settings-manager.strapi.notification.info.settingsEqual',
+      );
     }
-
 
     if (isEmpty(formErrors)) {
       this.props.databaseEdit(body, apiUrl, this.context);
     } else {
       this.props.setErrors(formErrors);
     }
-  }
+  };
 
   // retrieve the language to delete using the target id
-  handleLanguageDelete = (languaToDelete) => this.props.languageDelete(languaToDelete);
+  handleLanguageDelete = languaToDelete =>
+    this.props.languageDelete(languaToDelete);
 
-  handleDatabaseDelete = (dbName) => {
+  handleDatabaseDelete = dbName => {
     this.context.enableGlobalOverlayBlocker();
-    strapi.notification.success('settings-manager.strapi.notification.success.databaseDelete');
-    this.props.databaseDelete(dbName, this.props.match.params.env, this.context);
-  }
-
-  // function used for react-select option
-  optionComponent = (props) => <SelectOptionLanguage {...props} />;
+    strapi.notification.success(
+      'settings-manager.strapi.notification.success.databaseDelete',
+    );
+    this.props.databaseDelete(
+      dbName,
+      this.props.match.params.env,
+      this.context,
+    );
+  };
 
   // custom Row rendering for the component List with params slug === languages
   renderRowLanguage = (props, key, liStyles) => (
@@ -306,64 +393,82 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       listLanguages={this.props.home.listLanguages}
       onDefaultLanguageChange={this.handleDefaultLanguageChange}
     />
-  )
+  );
 
   renderListTitle = () => {
-    const availableContentNumber = size(this.props.home.configsDisplay.sections);
-    const title = availableContentNumber > 1 ? `list.${this.props.match.params.slug}.title.plural` : `list.${this.props.match.params.slug}.title.singular`;
-    const titleDisplay = title ? <FormattedMessage id={`settings-manager.${title}`} /> : '';
+    const availableContentNumber = size(
+      this.props.home.configsDisplay.sections,
+    );
+    const title =
+      availableContentNumber > 1
+        ? `list.${this.props.match.params.slug}.title.plural`
+        : `list.${this.props.match.params.slug}.title.singular`;
+    const titleDisplay = title ? (
+      <FormattedMessage id={`settings-manager.${title}`} />
+    ) : (
+      ''
+    );
 
-    return <span>{availableContentNumber}&nbsp;{titleDisplay}</span>;
-  }
+    return (
+      <span>
+        {availableContentNumber}&nbsp;{titleDisplay}
+      </span>
+    );
+  };
 
-  renderListButtonLabel = () => `list.${this.props.match.params.slug}.button.label`;
+  renderListButtonLabel = () =>
+    `list.${this.props.match.params.slug}.button.label`;
 
-  renderPopUpFormDatabase = (section, props, popUpStyles) => (
+  renderPopUpFormDatabase = (section, props, popUpStyles) =>
     map(section.items, (item, key) => {
-      const isActive = props.values[this.props.home.dbNameTarget] === this.props.home.modifiedData['database.defaultConnection'] ?
-        <div className={popUpStyles.rounded}><i className="fa fa-check" /></div> : '';
+      const isActive =
+        props.values[this.props.home.dbNameTarget] ===
+        this.props.home.modifiedData['database.defaultConnection'] ? (
+            <div className={popUpStyles.stmrounded}>
+              <i className="fa fa-check" />
+            </div>
+          ) : (
+            ''
+          );
 
       if (item.name === 'form.database.item.default') {
         return (
           <div
             key={key}
-            className={popUpStyles.defaultConnection}
+            className={popUpStyles.stmdefaultConnection}
             id={item.target}
             onClick={this.handleSetDefaultConnectionDb}
           >
-            <FormattedMessage id={`settings-manager.${item.name}`} />{isActive}
+            <FormattedMessage id={`settings-manager.${item.name}`} />
+            {isActive}
           </div>
         );
       }
-      return (
-        props.renderInput(item, key)
-      );
-    })
-  )
+      return props.renderInput(item, key);
+    });
 
-  renderPopUpFormLanguage = (section) => (
-    map(section.items, (item) => {
-      const value = this.props.home.modifiedData[item.target] || this.props.home.selectOptions.options[0].value;
+  renderPopUpFormLanguage = section =>
+    map(section.items, item => {
+      const value =
+        this.props.home.modifiedData[item.target] ||
+        this.props.home.selectOptions.options[0].value;
 
       return (
-        <div className={`col-md-6`} key={item.name}>
-          <div className={styles.modalLanguageLabel}>
+        <div className={'col-md-6'} key={item.name}>
+          <div className={styles.stmmodalLanguageLabel}>
             <FormattedMessage id={`settings-manager.${item.name}`} />
           </div>
-          <Select
+          <InputSelect
             name={item.target}
             value={value}
-            options={this.props.home.selectOptions.options}
+            selectOptions={this.props.home.selectOptions.options}
             onChange={this.handleChangeLanguage}
-            valueComponent={this.valueComponent}
-            optionComponent={this.optionComponent}
-            clearable={false}
+            validations={{}}
           />
-          <div className={styles.popUpSpacer} />
+          <div className={styles.stmpopUpSpacer} />
         </div>
       );
-    })
-  )
+    });
 
   renderRowDatabase = (props, key) => (
     <RowDatabase
@@ -380,22 +485,34 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
       error={this.props.home.error}
       resetToggleDefaultConnection={this.resetToggleDefaultConnection}
     />
-  )
+  );
 
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
-    let specificComponent = findKey(this.customComponents, (value) => includes(value, this.props.match.params.slug));
+    let specificComponent = findKey(this.customComponents, value =>
+      includes(value, this.props.match.params.slug),
+    );
 
     if (!specificComponent) {
       // Check if params env : render HeaderNav component
-      specificComponent = !this.props.match.params.env ? 'defaultComponent' : 'defaultComponentWithEnvironments';
+      specificComponent = !this.props.match.params.env
+        ? 'defaultComponent'
+        : 'defaultComponentWithEnvironments';
     }
 
     // if custom view display render specificComponent
     const Component = this.components[specificComponent];
     const addRequiredInputDesign = this.props.match.params.slug === 'databases';
-    const listTitle = ['languages', 'databases'].includes(this.props.match.params.slug) ? this.renderListTitle() : '';
-    const listButtonLabel = ['languages', 'databases'].includes(this.props.match.params.slug) ? this.renderListButtonLabel() : '';
+    const listTitle = ['languages', 'databases'].includes(
+      this.props.match.params.slug,
+    )
+      ? this.renderListTitle()
+      : '';
+    const listButtonLabel = ['languages', 'databases'].includes(
+      this.props.match.params.slug,
+    )
+      ? this.renderListButtonLabel()
+      : '';
 
     // check if HeaderNav component needs to render a form or a list
     const renderListComponent = this.props.match.params.slug === 'databases';
@@ -430,7 +547,10 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
     }
 
     // Custom selectOptions for languages
-    const selectOptions = this.props.match.params.slug === 'languages' ? this.props.home.listLanguages : [];
+    const selectOptions =
+      this.props.match.params.slug === 'languages'
+        ? this.props.home.listLanguages
+        : [];
     return (
       <Component
         sections={sections}
@@ -459,37 +579,32 @@ export class HomePage extends React.Component { // eslint-disable-line react/pre
         showLoader={this.props.home.showLoader}
       />
     );
-  }
+  };
 
   // Set the toggleDefaultConnection to false
-  resetToggleDefaultConnection = () => this.setState({ toggleDefaultConnection: false });
+  resetToggleDefaultConnection = () =>
+    this.setState({ toggleDefaultConnection: false });
 
   // Hide database modal
   toggle = () => this.setState({ modal: !this.state.modal });
-
-  // function used for react-select
-  valueComponent = (props) => {
-    const flagName = formatLanguageLocale(props.value.value);
-    const flag = getFlag(flagName);
-    const spanStyle = includes(supportedFlags.flags, flag) ? {} : { backgroundImage: `url(${unknowFlag})` };
-
-    return (
-      <span className={`${styles.flagContainer} flag-icon-background flag-icon-${flag}`} style={spanStyle}>
-        <FormattedMessage id="settings-manager.selectValue" defaultMessage='{language}' values={{ language: props.value.label}} className={styles.marginLeft} />
-      </span>
-    );
-  }
 
   render() {
     return (
       <div className="container-fluid">
         <div className="row">
-          <PluginLeftMenu sections={this.props.menuSections} environments={this.props.environments} envParams={this.props.match.params.env} />
-          <div className={`${styles.home} col-md-9`}>
+          <PluginLeftMenu
+            sections={this.props.menuSections}
+            environments={this.props.environments}
+            envParams={this.props.match.params.env}
+          />
+          <div className={`${styles.stmhome} col-md-9`}>
             <Helmet
               title="Settings Manager"
               meta={[
-                { name: 'Settings Manager Plugin', content: 'Modify your app settings' },
+                {
+                  name: 'Settings Manager Plugin',
+                  content: 'Modify your app settings',
+                },
               ]}
             />
             <ContentHeader
@@ -531,7 +646,7 @@ function mapDispatchToProps(dispatch) {
       setErrors,
       specificDatabaseFetch,
     },
-    dispatch
+    dispatch,
   );
 }
 
@@ -563,9 +678,16 @@ HomePage.propTypes = {
   specificDatabaseFetch: PropTypes.func.isRequired,
 };
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
-const withReducer = strapi.injectReducer({ key: 'homePage', reducer, pluginId });
+const withReducer = strapi.injectReducer({
+  key: 'homePage',
+  reducer,
+  pluginId,
+});
 const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(

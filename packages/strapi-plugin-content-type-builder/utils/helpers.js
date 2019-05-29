@@ -44,7 +44,7 @@ const removeColsLine = (manager, list) => {
 const reorderList = (manager, list) => {
   const array = createArrayOfLastEls(manager, list);
   const lines = [];
-  
+
   array.forEach((item, i) => {
     const { elements } = getElementsOnALine(manager, i, list);
     lines.push(elements);
@@ -57,12 +57,31 @@ const reorderList = (manager, list) => {
       return acc.concat(line);
     }, [])
     .filter(a => a !== undefined);
-  
+
   return List(flattenDeep(reordered));
 };
 
-const escapeNewlines = (content, placeholder = '\n') => {
+const escapeNewlines = (content = '', placeholder = '\n') => {
   return content.replace(/[\r\n]+/g, placeholder);
+};
+
+const deepTrimObject = attribute => {
+  if (Array.isArray(attribute)) {
+    return attribute.map(deepTrimObject);
+  }
+
+  if (typeof attribute === 'object') {
+    return Object.entries(attribute)
+      .reduce((acc, [key, value]) => {
+        const trimmedObject = deepTrimObject(value);
+
+        return { ...acc, [key]: trimmedObject };
+      }, {});
+  }
+
+  return typeof attribute === 'string'
+    ? attribute.trim()
+    : attribute;
 }
 
 module.exports = {
@@ -71,5 +90,6 @@ module.exports = {
   getElementsOnALine,
   removeColsLine,
   reorderList,
-  escapeNewlines
+  escapeNewlines,
+  deepTrimObject
 };

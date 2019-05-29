@@ -14,10 +14,12 @@ import PropTypes from 'prop-types';
 import { get, isEmpty, upperFirst } from 'lodash';
 import cn from 'classnames';
 
-import Button from 'components/Button';
-import Input from 'components/InputText';
-import auth from 'utils/auth';
-import validateInput from 'utils/inputsValidations';
+import {
+  Button,
+  InputText as Input,
+  auth,
+  validateInput,
+} from 'strapi-helper-plugin';
 
 import Block from '../../components/HomePageBlock';
 import Sub from '../../components/Sub';
@@ -136,27 +138,26 @@ export class HomePage extends React.PureComponent {
   };
 
   showFirstBlock = () =>
-    get(
-      this.props.plugins.toJS(),
-      'content-manager.leftMenuSections.0.links',
-      [],
-    ).length === 0;
+    get(this.context.plugins, 'content-manager.leftMenuSections.0.links', [])
+      .length === 0;
 
   renderButton = () => {
+    /* eslint-disable indent */
     const data = this.showFirstBlock()
       ? {
-        className: styles.homePageTutorialButton,
-        href:
+          className: styles.homePageTutorialButton,
+          href:
             'https://strapi.io/documentation/getting-started/quick-start.html#_3-create-a-content-type',
-        id: 'app.components.HomePage.button.quickStart',
-        primary: true,
-      }
+          id: 'app.components.HomePage.button.quickStart',
+          primary: true,
+        }
       : {
-        className: styles.homePageBlogButton,
-        id: 'app.components.HomePage.button.blog',
-        href: 'https://blog.strapi.io/',
-        primary: false,
-      };
+          className: styles.homePageBlogButton,
+          id: 'app.components.HomePage.button.blog',
+          href: 'https://blog.strapi.io/',
+          primary: false,
+        };
+    /* eslint-enable indent */
 
     return (
       <a href={data.href} target="_blank">
@@ -171,6 +172,7 @@ export class HomePage extends React.PureComponent {
     const {
       homePage: { articles, body },
     } = this.props;
+
     const WELCOME_AGAIN_BLOCK = [
       {
         title: {
@@ -265,11 +267,14 @@ export class HomePage extends React.PureComponent {
   }
 }
 
+HomePage.contextTypes = {
+  plugins: PropTypes.object,
+};
+
 HomePage.propTypes = {
   getArticles: PropTypes.func.isRequired,
   homePage: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
-  plugins: PropTypes.object.isRequired,
   submit: PropTypes.func.isRequired,
 };
 
