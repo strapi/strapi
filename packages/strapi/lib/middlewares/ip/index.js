@@ -17,8 +17,8 @@ module.exports = strapi => {
     initialize: function(cb) {
       strapi.app.use(
         strapi.koaMiddlewares.ip({
-          whiteList: strapi.config.middleware.settings.ip.whiteList,
-          blackList: strapi.config.middleware.settings.ip.blackList
+          whitelist: strapi.config.middleware.settings.ip.whiteList,
+          blacklist: strapi.config.middleware.settings.ip.blackList
         })
       );
 

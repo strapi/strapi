@@ -119,7 +119,7 @@ module.exports = {
             '/3.0.0-beta.x/advanced/hooks',
             '/3.0.0-beta.x/advanced/logging',
             '/3.0.0-beta.x/advanced/middlewares',
-            '/3.0.0-beta.x/advanced/usage-tracking',
+            '/3.0.0-beta.x/advanced/usage-information',
           ],
         },
         {
@@ -202,7 +202,7 @@ module.exports = {
             '/3.x.x/advanced/hooks',
             '/3.x.x/advanced/logging',
             '/3.x.x/advanced/middlewares',
-            '/3.x.x/advanced/usage-tracking',
+            '/3.x.x/advanced/usage-information',
           ],
         },
         {

@@ -3,15 +3,24 @@
   "version": "3.0.0-alpha.26.2",
   "dependencies": {},
   "devDependencies": {
+    "babel-eslint": "^10.0.1",
     "cross-env": "^5.2.0",
     "cypress": "3.1.2",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-react": "^7.13.0",
+    "eslint-plugin-redux-saga": "^1.0.0",
     "execa": "^1.0.0",
+    "husky": "^2.3.0",
     "istanbul": "~0.4.2",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "lerna": "^3.13.1",
+    "lint-staged": "^8.1.7",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.17.1",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.7",
     "snyk": "^1.99.0",
@@ -22,7 +31,14 @@
     "setup": "yarn && yarn build",
     "watch": "lerna run --stream watch --no-private",
     "build": "lerna run --stream build --no-private",
-    "lint": "echo \"To implement\"",
+    "lint": "npm-run-all -p lint:code",
+    "lint:code": "eslint .",
+    "lint:other": "npm run prettier:other -- --check",
+    "format": "npm-run-all -p format:*",
+    "format:code": "npm run prettier:code -- --write",
+    "format:other": "npm run prettier:other -- --write",
+    "prettier:code": "prettier \"**/*.js\"",
+    "prettier:other": "prettier \"**/*.{md,css,scss,yaml,yml}\"",
     "test:clean": "rimraf ./coverage",
     "test:front": "npm run test:clean && cross-env NODE_ENV=test jest --config ./jest.config.front.js --coverage",
     "test:front:watch": "cross-env NODE_ENV=test jest --config ./jest.config.front.js --watchAll",
@@ -61,5 +77,20 @@
   "workspaces": [
     "packages/*",
     "examples/*"
-  ]
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,md,css,scss,yaml,yml}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
 }

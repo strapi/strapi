@@ -25,7 +25,6 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 const stringify = JSON.stringify;
 const backendUrl = Cypress.config('backendUrl');
-const serverRestartDelay = Cypress.config('serverRestartDelay');
 
 const WAIT_ON_CMD = `wait-on ${backendUrl}`;
 
@@ -180,7 +179,7 @@ Cypress.Commands.add('login', () => {
     });
 });
 
-Cypress.Commands.add('seedData', (model, jwt, source = null) => {
+Cypress.Commands.add('seedData', (model, jwt) => {
   return cy.fixture(`seeds/${model}.json`).then(seed => {
     seed.forEach(body => {
       cy.request({
