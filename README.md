@@ -4,7 +4,7 @@
   </a>
 </p>
 <h3 align="center">API creation made simple, secure and fast.</h3>
-<p align="center">The most advanced open-source Content Management Framework (Headless-CMS) to build powerful API with no effort.</p>
+<p align="center">The most advanced open-source Headless-CMS to build powerful APIs with no effort.</p>
 <br />
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
