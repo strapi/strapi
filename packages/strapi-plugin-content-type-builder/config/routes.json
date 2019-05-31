@@ -50,8 +50,8 @@
     },
     {
       "method": "GET",
-      "path": "/checkTableExists/:connection/:model",
-      "handler": "ContentTypeBuilder.checkTableExists",
+      "path": "/groups",
+      "handler": "Groups.getGroups",
       "config": {
         "policies": []
       }

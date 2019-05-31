@@ -100,6 +100,8 @@ class Strapi extends EventEmitter {
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
 
+    this.groupManager = new UniqueWritetMap('Group');
+    this.serviceManager = new UniqueWritetMap('Service');
     this.fs = createStrapiFs(this);
     this.requireProjectBootstrap();
   }
@@ -282,6 +284,10 @@ class Strapi extends EventEmitter {
 
     await bootstrap(this);
 
+    // init service manager
+    this.initServices();
+    this.initGroups();
+
     // Usage.
     await utils.usage(this.config);
 
@@ -449,6 +455,56 @@ class Strapi extends EventEmitter {
       associations: model.associations,
     });
   }
+
+  initServices() {
+    this.serviceManager.clear();
+
+    Object.entries(this.plugins).forEach(([pluginKey, plugin]) => {
+      if (!plugin.services) {
+        return;
+      }
+
+      Object.entries(plugin.services).forEach(([serviceKey, service]) => {
+        this.serviceManager.set(`${pluginKey}.${serviceKey}`, service);
+      });
+    });
+
+    if (this.admin.services) {
+      Object.entries(this.admin.services).forEach(([serviceKey, service]) => {
+        this.serviceManager.set(`admin.${serviceKey}`, service);
+      });
+    }
+
+    Object.entries(this.api).forEach(([apiKey, api]) => {
+      if (!api.services) {
+        return;
+      }
+
+      Object.entries(api.services).forEach(([serviceKey, service]) => {
+        this.serviceManager.set(`${apiKey}.${serviceKey}`, service);
+      });
+    });
+
+    return this;
+  }
+
+  service(key) {
+    return this.serviceManager.get(key);
+  }
+
+  initGroups() {
+    this.groupManager.clear();
+
+    Object.entries(this.api).forEach(([apiKey, api]) => {
+      if (!api.groups) {
+        return;
+      }
+
+      Object.entries(api.groups).forEach(([groupKey, group]) => {
+        this.groupManager.set(`${apiKey}.${groupKey}`, group);
+      });
+    });
+  }
 }
 
 module.exports = options => {
@@ -456,3 +512,31 @@ module.exports = options => {
   global.strapi = strapi;
   return strapi;
 };
+
+class UniqueWritetMap extends Map {
+  constructor(mapName) {
+    super();
+    this.mapName = mapName;
+  }
+
+  get(key) {
+    if (!this.has(key)) {
+      throw new Error(`${this.mapName} ${key} not found`);
+    }
+
+    return super.get(key);
+  }
+
+  set(key, value) {
+    if (this.has(key)) {
+      throw new Error(
+        `${
+          this.mapName
+        } ${key} already exists. Make sure you don't have conflicts with your installed plugins`
+      );
+    }
+
+    super.set(key, value);
+    return this;
+  }
+}

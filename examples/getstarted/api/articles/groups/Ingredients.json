@@ -1,0 +1,19 @@
+{
+  "name": "ingredient",
+  "collectionName": "ingredients",
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "quantity": {
+      "type": "float",
+      "required": true
+    },
+    "picture": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
+    }
+  }
+}
