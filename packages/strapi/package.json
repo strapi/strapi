@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "3.0.0-alpha.26.2",
+  "version": "3.0.0-beta.0",
   "description": "An open source solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier.",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -30,7 +30,6 @@
     "strapi": "./bin/strapi.js"
   },
   "dependencies": {
-    "inquirer": "^6.2.1",
     "async": "^2.1.2",
     "boom": "^5.2.0",
     "chalk": "^2.4.1",
@@ -40,6 +39,7 @@
     "execa": "^1.0.0",
     "fs-extra": "^7.0.0",
     "glob": "^7.1.2",
+    "inquirer": "^6.2.1",
     "kcors": "^2.2.0",
     "koa": "^2.1.0",
     "koa-body": "^2.5.0",
@@ -64,16 +64,16 @@
     "resolve-cwd": "^3.0.0",
     "rimraf": "^2.6.2",
     "shelljs": "^0.8.3",
-    "strapi-generate": "3.0.0-alpha.26.2",
-    "strapi-admin": "3.0.0-alpha.26.2",
-    "strapi-generate-api": "3.0.0-alpha.26.2",
-    "strapi-generate-controller": "3.0.0-alpha.26.2",
-    "strapi-generate-model": "3.0.0-alpha.26.2",
-    "strapi-generate-new": "3.0.0-alpha.26.2",
-    "strapi-generate-plugin": "3.0.0-alpha.26.2",
-    "strapi-generate-policy": "3.0.0-alpha.26.2",
-    "strapi-generate-service": "3.0.0-alpha.26.2",
-    "strapi-utils": "3.0.0-alpha.26.2"
+    "strapi-admin": "3.0.0-beta.0",
+    "strapi-generate": "3.0.0-beta.0",
+    "strapi-generate-api": "3.0.0-beta.0",
+    "strapi-generate-controller": "3.0.0-beta.0",
+    "strapi-generate-model": "3.0.0-beta.0",
+    "strapi-generate-new": "3.0.0-beta.0",
+    "strapi-generate-plugin": "3.0.0-beta.0",
+    "strapi-generate-policy": "3.0.0-beta.0",
+    "strapi-generate-service": "3.0.0-beta.0",
+    "strapi-utils": "3.0.0-beta.0"
   },
   "scripts": {
     "test": "jest --verbose",

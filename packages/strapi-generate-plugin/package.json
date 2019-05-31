@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-plugin",
-  "version": "3.0.0-alpha.26.2",
+  "version": "3.0.0-beta.0",
   "description": "Generate an plugin for a Strapi application.",
   "homepage": "http://strapi.io",
   "keywords": [

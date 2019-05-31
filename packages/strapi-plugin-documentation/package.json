@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.0-alpha.26.2",
+  "version": "3.0.0-beta.0",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -13,12 +13,12 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "classnames": "^2.2.6",
+    "fs-extra": "^8.0.1",
     "immutable": "^3.8.2",
     "invariant": "^2.2.4",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
     "path-to-regexp": "^3.0.0",
-    "fs-extra": "^8.0.1",
     "react": "^16.8.6",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "^16.8.6",
@@ -32,7 +32,7 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-helper-plugin": "3.0.0-alpha.26.2",
+    "strapi-helper-plugin": "3.0.0-beta.0",
     "swagger-ui-dist": "3.22.1"
   },
   "author": {
