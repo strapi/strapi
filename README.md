@@ -106,7 +106,7 @@ Enjoy 🎉
 - **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
 - **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
 - **Powerful CLI:** Scaffold projects and APIs on the fly.
-- **SQL & NoSQL databases:** Work with Mongo as a main database, also supports Postgres, MySQL, etc.
+- **SQL & NoSQL databases:** Works with Mongo, Postgres, MySQL, MariaDB, SQLite.
 
 **[See more on our website](https://strapi.io/overview)**.
 
