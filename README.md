@@ -31,7 +31,7 @@
 
 <br>
 
-Strapi is a free and open-source framework with headless CMS capabilities for delivering your content anywhere you need.
+Strapi is a free and open-source headless CMS delivering your content anywhere you need.
 
 - **Keep control over your data**. With Strapi, you know where your data is stored and you keep full control at any time.
 - **Self hosted**. You can host and scale Strapi project the way you want. You can choose any hosting platform you want: AWS, Netlify, Heroku at VPS or a dedicated server. You can scale as you grow, 100% independently.
@@ -49,7 +49,7 @@ Operating system:
 - Ubuntu/Debian
 - CentOS/RHEL
 - MacOS
-- Windows - [WSL Only](https://github.com/strapi/strapi/wiki/Frequently-Asked-Questions#windows)
+- Windows
 - Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
 
 **Please note that Strapi may work on other Operating Systems, but are not tested at this time.**
