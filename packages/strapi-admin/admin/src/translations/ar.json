@@ -95,7 +95,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "افتح الملف التالي وقم بتمكين الميزة.",
   "components.AutoReloadBlocker.header": "مطلوب ميزة إعادة التحميل لهذه الإضافة.",
   "components.ErrorBoundary.title": "هناك خطأ ما...",
   "components.Input.error.attribute.key.taken": "هذه القيمة موجودة مسبقًا",

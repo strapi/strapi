@@ -1,74 +1,8 @@
 'use strict';
 
 /**
- * <%= filename %> controller
- *
- * @description: A set of functions called "actions" for managing `<%= globalID %>`.
+ * Read the documentation (https://strapi.io/documentation/3.0.0-beta.x/guides/controllers.html#core-controllers)
+ * to customize this controller
  */
 
-module.exports = {
-
-  /**
-   * Retrieve <%= id %> records.
-   *
-   * @return {Object|Array}
-   */
-
-  find: async (ctx, next, { populate } = {}) => {
-    if (ctx.query._q) {
-      return strapi.services.<%= id %>.search(ctx.query);
-    } else {
-      return strapi.services.<%= id %>.fetchAll(ctx.query, populate);
-    }
-  },
-
-  /**
-   * Retrieve a <%= id %> record.
-   *
-   * @return {Object}
-   */
-
-  findOne: async (ctx) => {
-    return strapi.services.<%= id %>.fetch(ctx.params);
-  },
-
-  /**
-   * Count <%= id %> records.
-   *
-   * @return {Number}
-   */
-
-  count: async (ctx, next, { populate } = {}) => {
-    return strapi.services.<%= id %>.count(ctx.query, populate);
-  },
-
-  /**
-   * Create a/an <%= id %> record.
-   *
-   * @return {Object}
-   */
-
-  create: async (ctx) => {
-    return strapi.services.<%= id %>.add(ctx.request.body);
-  },
-
-  /**
-   * Update a/an <%= id %> record.
-   *
-   * @return {Object}
-   */
-
-  update: async (ctx, next) => {
-    return strapi.services.<%= id %>.edit(ctx.params, ctx.request.body) ;
-  },
-
-  /**
-   * Destroy a/an <%= id %> record.
-   *
-   * @return {Object}
-   */
-
-  destroy: async (ctx, next) => {
-    return strapi.services.<%= id %>.remove(ctx.params);
-  }
-};
+module.exports = {};

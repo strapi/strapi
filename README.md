@@ -4,7 +4,7 @@
   </a>
 </p>
 <h3 align="center">API creation made simple, secure and fast.</h3>
-<p align="center">The most advanced open-source Content Management Framework (headless-CMS) to build powerful API with no effort.</p>
+<p align="center">The most advanced open-source Headless-CMS to build powerful APIs with no effort.</p>
 <br />
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
@@ -31,41 +31,53 @@
 
 <br>
 
+Strapi is a free and open-source Headless CMS delivering your content anywhere you need.
+
+- **Keep control over your data**. With Strapi, you know where your data is stored and you keep full control at any time.
+- **Self hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Netlify, Heroku, a VPS or a dedicated server. You can scale as you grow, 100% independently.
+- **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgresQL, MySQL, MariaDB, SQLite.
+- **Customisable**. You can easily build your own logic by fully customising APIs, routes or plugins to perfectly fit your needs.
+
 ## Getting Started
 
 <a href="https://strapi.io/documentation/3.x.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 #### 🖐 Requirements
 
-Operating system:
- * Ubuntu/Debian
- * CentOS/RHEL
- * MacOS
- * Windows - [WSL Only](https://github.com/strapi/strapi/wiki/Frequently-Asked-Questions#windows)
- * Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
+**Supported operating systems**:
 
-**Please note that Strapi may work on other Operating Systems, but are not tested at this time.**
+- Ubuntu 18.04/Debian 9.x
+- CentOS/RHEL 8
+- MacOS Mojave
+- Windows 10
+- Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
 
-Node:
- * NodeJS >= 10.x
- * NPM >= 6.x
+(Please note that Strapi may work on other operating systems, but these are not tested nor officially supported at this time.)
 
-**Please note that right now Node 11 is not supported, and the current Node LTS (v10) should be used.**
+**Node:**
 
-Database:
- * MongoDB >= 3.6
- * MySQL >= 5.6
- * MariaDB >= 10.1
- * PostgreSQL >= 10
+- NodeJS 10.x
+- NPM >= 6.x
+
+(Please note that Node 11/12 are not supported, and the current Node LTS (v10) is the officially supported version.)
+
+**Database:**
+
+- MongoDB >= 3.6
+- MySQL >= 5.6
+- MariaDB >= 10.1
+- PostgreSQL >= 10
+- SQLite >= 3
 
 #### ⏳ Installation
 
 ```bash
-npm install strapi@alpha -g
-````
+npm install strapi@beta -g
+```
 
-**We recommend always using the latest version of Strapi to start your new project**.
-As this project is currently in Alpha, some breaking changes may occur. New releases are shipped every two weeks to fix/enhance the project.
+**We recommend always using the latest version of Strapi to start your new projects**.
+
+This project is currently in **Beta**. Large breaking changes are unlikely at this stage of the project, but using the latest version of Strapi ensures you have all the latest features and updates. New releases are usually shipped every two weeks to fix/enhance the project.
 
 #### 🏗 Create a new project
 
@@ -79,10 +91,24 @@ This command will generate a brand new project with the default features (authen
 
 ```bash
 cd my-project
-strapi start
+strapi develop
 ```
 
-Congratulations, you made it! Enjoy 🎉
+Congratulations, you made it!
+
+Enjoy 🎉
+
+## Features
+
+- **Modern Admin Panel:** Elegant, entirely customizable and a fully extensible admin panel.
+- **Secure by default:** Reusable policies, CSRF, CORS, P3P, Xframe, XSS, and more.
+- **Plugins Oriented:** Install auth system, content management, custom plugins, and more, in seconds.
+- **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
+- **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
+- **Powerful CLI:** Scaffold projects and APIs on the fly.
+- **SQL & NoSQL databases:** Works with Mongo, Postgres, MySQL, MariaDB, SQLite.
+
+**[See more on our website](https://strapi.io/overview)**.
 
 ### Try on Heroku
 
@@ -92,33 +118,15 @@ You can also give it a try using Heroku in one click!
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
 </a>
 
-Be aware that one of the content type builder won't work due to the writing files restriction on the Heroku servers. If you do want to change content types, you need to follow these steps:
+Be aware that the Content Type Builder won't work due to the restriction of writing files on the Heroku servers. If you would like to change/edit/add Content Types, you need to follow these steps:
 
 1. Click the button above and deploy your app
-2. Clone that repo by using `heroku git:clone -a ` followed by your repo's name
+2. Clone that repo by using `heroku git:clone -a` followed by your repo's name
 3. Go into the cloned projects' folder using `cd` followed by your repo's name
 4. Add the Heroku boilerplate as a remote by running `git remote add boilerplate https://github.com/strapi/strapi-heroku-app`
 5. Pull from this new origin by running `git pull boilerplate master`
 
-## Features
-
-- **Modern Admin Panel:** Elegant, entirely customizable and fully extensible admin panel.
-- **Secure by default:** Reusable policies, CSRF, CORS, P3P, Xframe, XSS, and more.
-- **Plugins Oriented:** Install auth system, content management, custom plugins, and more, in seconds.
-- **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performances.
-- **Front-end Agnostic:** Use any front-end frameworks (React, Vue, Angular, etc.), mobile apps or even IoT.
-- **Powerful CLI:** Scaffold projects and APIs on the fly.
-- **SQL & NoSQL databases:** Work with Mongo as a main database, also supports Postgres, MySQL, etc.
-
-**[See more on our website](https://strapi.io/overview)**
-
 ## Contributing
-
-> ⚠️ We have stopped merging PRs for now to the Strapi core.<br><br>
-> The reason is that we are developing new architecture for the admin panel and for the plugins.<br>
-> This new architecture will provide stability of the Strapi core as we approach the release of Beta.<br>
-> We appreciate and welcome all your contributions, but until further notice, please do not submit a PR as it will not be merged.<br>
-> Furthermore, you will have to rewrite it based on the new architecture.
 
 Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull Request to the project.
 
@@ -128,19 +136,15 @@ For more information on the upcoming version, please take a look to our [ROADMAP
 
 #### Community support
 
-For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of this channel to ask question:
+For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask question:
 
 - [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
-- [Slack](http://slack.strapi.io) (highly recommended for faster support)
-- [GitHub](https://github.com/strapi/strapi) (Bug reports and Feature requests only)
-- [Twitter](https://twitter.com/strapijs)
-- [Facebook](https://www.facebook.com/Strapi-616063331867161).
-
-#### Professional support
-
-[Strapi Solutions](https://strapi.io), the company behind Strapi, provides a full range of solutions to get better results, faster. We're always looking for the next challenge: coaching, consulting, training, customization, etc.
-
-[Drop us an email](mailto:support@strapi.io) to see how we can help you.
+- [Slack](http://slack.strapi.io) (Highly recommended for faster support)
+- [GitHub](https://github.com/strapi/strapi) (Bug reports, contributions)
+- [ProductBoard](https://portal.productboard.com/strapi/tabs/2-under-consideration) (Roadmap, Feature requests)
+- [Twitter](https://twitter.com/strapijs) (Get news fast)
+- [Facebook](https://www.facebook.com/Strapi-616063331867161)
+- [YouTube Channel](https://www.youtube.com/strapi) (Learn from Video Tutorials)
 
 ## Migration
 
@@ -148,7 +152,7 @@ Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki
 
 ## Roadmap
 
-Check out our [roadmap](https://portal.productboard.com/strapi) to get informed by the latest feature released and the upcoming ones. You can also give us insights and vote for a specific feature.
+Check out our [roadmap](https://portal.productboard.com/strapi) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
 
 ## Sponsors
 

@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
-import Button from 'components/Button';
+import { Button } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 

@@ -6,8 +6,6 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-const fs = require('fs');
-const path = require('path');
 const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
@@ -136,11 +134,18 @@ const schemaBuilder = {
 
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
-      const models = Object.keys(strapi.models).filter(model => model !== 'core_store');
+      const models = Object.keys(strapi.models).filter(
+        model => model !== 'core_store'
+      );
 
       const modelCruds = Resolvers.buildShadowCRUD(models);
       shadowCRUD = Object.keys(strapi.plugins).reduce((acc, plugin) => {
-        const { definition, query, mutation, resolver } = Resolvers.buildShadowCRUD(
+        const {
+          definition,
+          query,
+          mutation,
+          resolver,
+        } = Resolvers.buildShadowCRUD(
           Object.keys(strapi.plugins[plugin].models),
           plugin
         );
@@ -165,14 +170,17 @@ const schemaBuilder = {
     } = strapi.plugins.graphql.config._schema.graphql;
 
     // Polymorphic.
-    const { polymorphicDef, polymorphicResolver } = Types.addPolymorphicUnionType(
-      definition,
-      shadowCRUD.definition
-    );
+    const {
+      polymorphicDef,
+      polymorphicResolver,
+    } = Types.addPolymorphicUnionType(definition, shadowCRUD.definition);
 
     // Build resolvers.
     const resolvers =
-      _.omitBy(_.merge(shadowCRUD.resolver, resolver, polymorphicResolver), _.isEmpty) || {};
+      _.omitBy(
+        _.merge(shadowCRUD.resolver, resolver, polymorphicResolver),
+        _.isEmpty
+      ) || {};
 
     // Transform object to only contain function.
     Object.keys(resolvers).reduce((acc, type) => {
@@ -188,8 +196,13 @@ const schemaBuilder = {
           acc[type][resolver] = acc[type][resolver].resolver;
         }
 
-        if (_.isString(acc[type][resolver]) || _.isPlainObject(acc[type][resolver])) {
-          const { plugin = '' } = _.isPlainObject(acc[type][resolver]) ? acc[type][resolver] : {};
+        if (
+          _.isString(acc[type][resolver]) ||
+          _.isPlainObject(acc[type][resolver])
+        ) {
+          const { plugin = '' } = _.isPlainObject(acc[type][resolver])
+            ? acc[type][resolver]
+            : {};
 
           switch (type) {
             case 'Mutation':
@@ -226,22 +239,32 @@ const schemaBuilder = {
       ${definition}
       ${shadowCRUD.definition}
       type Query {${shadowCRUD.query &&
-        this.formatGQL(shadowCRUD.query, resolver.Query, null, 'query')}${query}}
+        this.formatGQL(
+          shadowCRUD.query,
+          resolver.Query,
+          null,
+          'query'
+        )}${query}}
       type Mutation {${shadowCRUD.mutation &&
-        this.formatGQL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation')}${mutation}}
+        this.formatGQL(
+          shadowCRUD.mutation,
+          resolver.Mutation,
+          null,
+          'mutation'
+        )}${mutation}}
       ${Types.addCustomScalar(resolvers)}
       ${Types.addInput()}
       ${polymorphicDef}
     `;
 
-    // Build schema.
-    const schema = makeExecutableSchema({
-      typeDefs,
-      resolvers,
-    });
-
+    // // Build schema.
     if (!strapi.config.currentEnvironment.server.production) {
       // Write schema.
+      const schema = makeExecutableSchema({
+        typeDefs,
+        resolvers,
+      });
+
       this.writeGenerateSchema(graphql.printSchema(schema));
     }
 
@@ -261,26 +284,7 @@ const schemaBuilder = {
    */
 
   writeGenerateSchema: schema => {
-    const generatedFolder = path.resolve(
-      strapi.config.appPath,
-      'plugins',
-      'graphql',
-      'config',
-      'generated'
-    );
-
-    // Create folder if necessary.
-    try {
-      fs.accessSync(generatedFolder, fs.constants.R_OK | fs.constants.W_OK);
-    } catch (err) {
-      if (err && err.code === 'ENOENT') {
-        fs.mkdirSync(generatedFolder);
-      } else {
-        strapi.log.error(err);
-      }
-    }
-
-    fs.writeFileSync(path.join(generatedFolder, 'schema.graphql'), schema);
+    return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
   },
 };
 

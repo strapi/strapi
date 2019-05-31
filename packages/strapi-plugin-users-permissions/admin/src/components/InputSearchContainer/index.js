@@ -1,8 +1,8 @@
 /**
-*
-* InputSearchContainer
-*
-*/
+ *
+ * InputSearchContainer
+ *
+ */
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -10,12 +10,13 @@ import { findIndex, has, includes, isEmpty, map, toLower } from 'lodash';
 import cn from 'classnames';
 import PropTypes from 'prop-types';
 
-import Label from 'components/Label';
+import { Label } from 'strapi-helper-plugin';
 import InputSearchLi from '../InputSearchLi';
 
 import styles from './styles.scss';
 
-class InputSearchContainer extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputSearchContainer extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = {
     errors: [],
     filteredUsers: this.props.values,
@@ -27,11 +28,17 @@ class InputSearchContainer extends React.Component { // eslint-disable-line reac
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.didDeleteUser !== this.props.didDeleteUser) {
-      this.setState({ users: nextProps.values, filteredUsers: nextProps.values });
+      this.setState({
+        users: nextProps.values,
+        filteredUsers: nextProps.values,
+      });
     }
 
     if (nextProps.didGetUsers !== this.props.didGetUsers) {
-      this.setState({ users: nextProps.values, filteredUsers: nextProps.values });
+      this.setState({
+        users: nextProps.values,
+        filteredUsers: nextProps.values,
+      });
     }
 
     if (nextProps.didFetchUsers !== this.props.didFetchUsers) {
@@ -42,24 +49,31 @@ class InputSearchContainer extends React.Component { // eslint-disable-line reac
   handleBlur = () => this.setState({ isFocused: !this.state.isFocused });
 
   handleChange = ({ target }) => {
-    const filteredUsers = isEmpty(target.value) ?
-      this.state.users
-      : this.state.users.filter((user) => includes(toLower(user.name), toLower(target.value)));
+    const filteredUsers = isEmpty(target.value)
+      ? this.state.users
+      : this.state.users.filter(user =>
+        includes(toLower(user.name), toLower(target.value)),
+      );
 
     if (isEmpty(filteredUsers) && !isEmpty(target.value)) {
       this.props.getUser(target.value);
     }
 
     if (isEmpty(target.value)) {
-      return this.setState({ value: target.value, isAdding: false, users: this.props.values, filteredUsers: this.props.values });
+      return this.setState({
+        value: target.value,
+        isAdding: false,
+        users: this.props.values,
+        filteredUsers: this.props.values,
+      });
     }
 
     this.setState({ value: target.value, filteredUsers });
-  }
+  };
 
   handleFocus = () => this.setState({ isFocused: !this.state.isFocused });
 
-  handleClick = (item) => {
+  handleClick = item => {
     if (this.state.isAdding) {
       const id = has(item, '_id') ? '_id' : 'id';
       const users = this.props.values;
@@ -72,22 +86,36 @@ class InputSearchContainer extends React.Component { // eslint-disable-line reac
       // Reset the input focus
       this.searchInput.focus();
       // Empty the input and display users
-      this.setState({ value: '', isAdding: false, users, filteredUsers: users });
+      this.setState({
+        value: '',
+        isAdding: false,
+        users,
+        filteredUsers: users,
+      });
     } else {
       this.props.onClickDelete(item);
     }
-  }
+  };
 
   render() {
     return (
       <div className={cn(styles.inputSearch, 'col-md-6')}>
         <Label htmlFor={this.props.name} message={this.props.label} />
         <div className={cn('input-group')}>
-          <span className={cn('input-group-addon', styles.addon, this.state.isFocused && styles.addonFocus,)} />
+          <span
+            className={cn(
+              'input-group-addon',
+              styles.addon,
+              this.state.isFocused && styles.addonFocus,
+            )}
+          />
           <FormattedMessage id="users-permissions.InputSearch.placeholder">
-            {(message) => (
+            {message => (
               <input
-                className={cn('form-control', !isEmpty(this.state.errors) ? 'is-invalid': '')}
+                className={cn(
+                  'form-control',
+                  !isEmpty(this.state.errors) ? 'is-invalid' : '',
+                )}
                 id={this.props.name}
                 name={this.props.name}
                 onBlur={this.handleBlur}
@@ -96,14 +124,21 @@ class InputSearchContainer extends React.Component { // eslint-disable-line reac
                 value={this.state.value}
                 placeholder={message}
                 type="text"
-                ref={(input) => { this.searchInput = input; }}
+                ref={input => {
+                  this.searchInput = input;
+                }}
               />
             )}
           </FormattedMessage>
         </div>
-        <div className={cn(styles.ulContainer, this.state.isFocused && styles.ulFocused)}>
+        <div
+          className={cn(
+            styles.ulContainer,
+            this.state.isFocused && styles.ulFocused,
+          )}
+        >
           <ul>
-            {map(this.state.filteredUsers, (user) => (
+            {map(this.state.filteredUsers, user => (
               <InputSearchLi
                 key={user.id || user._id}
                 item={user}

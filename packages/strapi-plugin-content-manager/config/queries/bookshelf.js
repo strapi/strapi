@@ -1,165 +1,211 @@
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
-module.exports = {
-  find: async function(params, populate, raw = false) {
-    const model = this;
-
+module.exports = ({ model }) => ({
+  find(params, populate, raw = false) {
     const filters = convertRestQueryParams(params);
 
-    return this.query(buildQuery({ model, filters }))
+    return model
+      .query(buildQuery({ model, filters }))
       .fetchAll({
-        withRelated: populate || this.associations.map(x => x.alias),
+        withRelated: populate || model.associations.map(x => x.alias),
       })
       .then(data => (raw ? data.toJSON() : data));
   },
 
-  count: async function(params = {}) {
-    const model = this;
-
+  count(params = {}) {
     const { where } = convertRestQueryParams(params);
 
-    return this.query(buildQuery({ model, filters: { where } })).count();
+    return model.query(buildQuery({ model, filters: { where } })).count();
   },
 
-  search: async function(params, populate, raw = false) {
-    const associations = this.associations.map(x => x.alias);
-    const searchText = Object.keys(this._attributes)
-      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['string', 'text'].includes(this._attributes[attribute].type));
-
-    const searchInt = Object.keys(this._attributes)
-      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+  search(params, populate, raw = false) {
+    const associations = model.associations.map(x => x.alias);
+    const searchText = Object.keys(model._attributes)
+      .filter(
+        attribute =>
+          attribute !== model.primaryKey && !associations.includes(attribute)
+      )
       .filter(attribute =>
-        ['integer', 'biginteger', 'decimal', 'float'].includes(this._attributes[attribute].type)
+        ['string', 'text'].includes(model._attributes[attribute].type)
       );
 
-    const searchBool = Object.keys(this._attributes)
-      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['boolean'].includes(this._attributes[attribute].type));
+    const searchInt = Object.keys(model._attributes)
+      .filter(
+        attribute =>
+          attribute !== model.primaryKey && !associations.includes(attribute)
+      )
+      .filter(attribute =>
+        ['integer', 'biginteger', 'decimal', 'float'].includes(
+          model._attributes[attribute].type
+        )
+      );
+
+    const searchBool = Object.keys(model._attributes)
+      .filter(
+        attribute =>
+          attribute !== model.primaryKey && !associations.includes(attribute)
+      )
+      .filter(attribute =>
+        ['boolean'].includes(model._attributes[attribute].type)
+      );
 
     const query = (params.search || '').replace(/[^a-zA-Z0-9.-\s]+/g, '');
 
-    return this.query(qb => {
-      if (!_.isNaN(_.toNumber(query))) {
-        searchInt.forEach(attribute => {
-          qb.orWhereRaw(`${attribute} = ${_.toNumber(query)}`);
-        });
-      }
-
-      if (query === 'true' || query === 'false') {
-        searchBool.forEach(attribute => {
-          qb.orWhereRaw(`${attribute} = ${_.toNumber(query === 'true')}`);
-        });
-      }
-
-      // Search in columns with text using index.
-      switch (this.client) {
-        case 'mysql':
-          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
-          break;
-        case 'pg': {
-          const searchQuery = searchText.map(attribute =>
-            _.toLower(attribute) === attribute
-              ? `to_tsvector(${attribute})`
-              : `to_tsvector('${attribute}')`
-          );
-
-          qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
-          break;
-        }
-        case 'sqlite3':
-          searchText.map(attribute => {
-            qb.orWhere(`${attribute}`, 'LIKE', `%${query}%`);
+    return model
+      .query(qb => {
+        if (!_.isNaN(_.toNumber(query))) {
+          searchInt.forEach(attribute => {
+            qb.orWhereRaw(`${attribute} = ${_.toNumber(query)}`);
           });
-      }
+        }
 
-      if (params.sort) {
-        qb.orderBy(params.sort.key, params.sort.order);
-      }
+        if (query === 'true' || query === 'false') {
+          searchBool.forEach(attribute => {
+            qb.orWhereRaw(`${attribute} = ${_.toNumber(query === 'true')}`);
+          });
+        }
 
-      if (params.skip) {
-        qb.offset(_.toNumber(params.skip));
-      }
+        // Search in columns with text using index.
+        switch (model.client) {
+          case 'mysql':
+            qb.orWhereRaw(
+              `MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`,
+              `*${query}*`
+            );
+            break;
+          case 'pg': {
+            const searchQuery = searchText.map(attribute =>
+              _.toLower(attribute) === attribute
+                ? `to_tsvector(${attribute})`
+                : `to_tsvector('${attribute}')`
+            );
 
-      if (params.limit) {
-        qb.limit(_.toNumber(params.limit));
-      }
-    })
+            qb.orWhereRaw(
+              `${searchQuery.join(' || ')} @@ to_tsquery(?)`,
+              query
+            );
+            break;
+          }
+          case 'sqlite3':
+            searchText.map(attribute => {
+              qb.orWhere(`${attribute}`, 'LIKE', `%${query}%`);
+            });
+        }
+
+        if (params.sort) {
+          qb.orderBy(params.sort.key, params.sort.order);
+        }
+
+        if (params.skip) {
+          qb.offset(_.toNumber(params.skip));
+        }
+
+        if (params.limit) {
+          qb.limit(_.toNumber(params.limit));
+        }
+      })
       .fetchAll({
         withRelated: populate || associations,
       })
       .then(data => (raw ? data.toJSON() : data));
   },
 
-  countSearch: async function(params = {}) {
-    const associations = this.associations.map(x => x.alias);
-    const searchText = Object.keys(this._attributes)
-      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['string', 'text'].includes(this._attributes[attribute].type));
-
-    const searchInt = Object.keys(this._attributes)
-      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
+  countSearch(params = {}) {
+    const associations = model.associations.map(x => x.alias);
+    const searchText = Object.keys(model._attributes)
+      .filter(
+        attribute =>
+          attribute !== model.primaryKey && !associations.includes(attribute)
+      )
       .filter(attribute =>
-        ['integer', 'biginteger', 'decimal', 'float'].includes(this._attributes[attribute].type)
+        ['string', 'text'].includes(model._attributes[attribute].type)
       );
 
-    const searchBool = Object.keys(this._attributes)
-      .filter(attribute => attribute !== this.primaryKey && !associations.includes(attribute))
-      .filter(attribute => ['boolean'].includes(this._attributes[attribute].type));
+    const searchInt = Object.keys(model._attributes)
+      .filter(
+        attribute =>
+          attribute !== model.primaryKey && !associations.includes(attribute)
+      )
+      .filter(attribute =>
+        ['integer', 'biginteger', 'decimal', 'float'].includes(
+          model._attributes[attribute].type
+        )
+      );
+
+    const searchBool = Object.keys(model._attributes)
+      .filter(
+        attribute =>
+          attribute !== model.primaryKey && !associations.includes(attribute)
+      )
+      .filter(attribute =>
+        ['boolean'].includes(model._attributes[attribute].type)
+      );
 
     const query = (params.search || '').replace(/[^a-zA-Z0-9.-\s]+/g, '');
 
-    return this.query(qb => {
-      if (!_.isNaN(_.toNumber(query))) {
-        searchInt.forEach(attribute => {
-          qb.orWhereRaw(`${attribute} = ${_.toNumber(query)}`);
-        });
-      }
-
-      if (query === 'true' || query === 'false') {
-        searchBool.forEach(attribute => {
-          qb.orWhereRaw(`${attribute} = ${_.toNumber(query === 'true')}`);
-        });
-      }
-
-      // Search in columns with text using index.
-      switch (this.client) {
-        case 'pg': {
-          const searchQuery = searchText.map(attribute =>
-            _.toLower(attribute) === attribute
-              ? `to_tsvector(${attribute})`
-              : `to_tsvector('${attribute}')`
-          );
-
-          qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
-          break;
+    return model
+      .query(qb => {
+        if (!_.isNaN(_.toNumber(query))) {
+          searchInt.forEach(attribute => {
+            qb.orWhereRaw(`${attribute} = ${_.toNumber(query)}`);
+          });
         }
-        case 'mysql':
-          qb.orWhereRaw(`MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`, `*${query}*`);
-          break;
-      }
-    }).count();
+
+        if (query === 'true' || query === 'false') {
+          searchBool.forEach(attribute => {
+            qb.orWhereRaw(`${attribute} = ${_.toNumber(query === 'true')}`);
+          });
+        }
+
+        // Search in columns with text using index.
+        switch (model.client) {
+          case 'pg': {
+            const searchQuery = searchText.map(attribute =>
+              _.toLower(attribute) === attribute
+                ? `to_tsvector(${attribute})`
+                : `to_tsvector('${attribute}')`
+            );
+
+            qb.orWhereRaw(
+              `${searchQuery.join(' || ')} @@ to_tsquery(?)`,
+              query
+            );
+            break;
+          }
+          case 'mysql':
+            qb.orWhereRaw(
+              `MATCH(${searchText.join(',')}) AGAINST(? IN BOOLEAN MODE)`,
+              `*${query}*`
+            );
+            break;
+        }
+      })
+      .count();
   },
 
   findOne: async function(params, populate) {
-    const record = await this.forge({
-      [this.primaryKey]: params[this.primaryKey],
-    }).fetch({
-      withRelated: populate || this.associations.map(x => x.alias),
-    });
+    const record = await model
+      .forge({
+        [model.primaryKey]: params[model.primaryKey],
+      })
+      .fetch({
+        withRelated: populate || model.associations.map(x => x.alias),
+      });
 
     const data = _.get(record, 'toJSON()', record);
 
     // Retrieve data manually.
     if (_.isEmpty(populate)) {
-      const arrayOfPromises = this.associations
-        .filter(association => ['manyMorphToOne', 'manyMorphToMany'].includes(association.nature))
+      const arrayOfPromises = model.associations
+        .filter(association =>
+          ['manyMorphToOne', 'manyMorphToMany'].includes(association.nature)
+        )
         .map(() => {
-          return this.morph
+          return model.morph
             .forge()
             .where({
-              [`${this.collectionName}_id`]: params[this.primaryKey],
+              [`${model.collectionName}_id`]: params[model.primaryKey],
             })
             .fetchAll();
         });
@@ -167,7 +213,7 @@ module.exports = {
       const related = await Promise.all(arrayOfPromises);
 
       related.forEach((value, index) => {
-        data[this.associations[index].alias] = value ? value.toJSON() : value;
+        data[model.associations[index].alias] = value ? value.toJSON() : value;
       });
     }
 
@@ -177,14 +223,15 @@ module.exports = {
   create: async function(params) {
     // Exclude relationships.
     const values = Object.keys(params.values).reduce((acc, current) => {
-      if (this._attributes[current] && this._attributes[current].type) {
+      if (model._attributes[current] && model._attributes[current].type) {
         acc[current] = params.values[current];
       }
 
       return acc;
     }, {});
 
-    const request = await this.forge(values)
+    const request = await model
+      .forge(values)
       .save()
       .catch(err => {
         if (err.detail) {
@@ -197,37 +244,41 @@ module.exports = {
 
     const entry = request.toJSON ? request.toJSON() : request;
 
-    const relations = this.associations.reduce((acc, association) => {
+    const relations = model.associations.reduce((acc, association) => {
       acc[association.alias] = params.values[association.alias];
       return acc;
     }, {});
 
-    return module.exports.update.call(this, {
-      [this.primaryKey]: entry[this.primaryKey],
+    return this.update({
+      [model.primaryKey]: entry[model.primaryKey],
       values: _.assign(
         {
-          id: entry[this.primaryKey],
+          id: entry[model.primaryKey],
         },
         relations
       ),
     });
   },
 
-  update: async function(params) {
+  update(params) {
     // Call the business logic located in the hook.
     // This function updates no-relational and relational data.
-    return this.updateRelations(params);
+    return model.updateRelations(params);
   },
 
   delete: async function(params) {
-    return await this.forge({
-      [this.primaryKey]: params.id,
-    }).destroy();
+    return await model
+      .forge({
+        [model.primaryKey]: params.id,
+      })
+      .destroy();
   },
 
   deleteMany: async function(params) {
-    return await this.query(function(qb) {
-      return qb.whereIn('id', params.id);
-    }).destroy();
+    return await model
+      .query(function(qb) {
+        return qb.whereIn('id', params.id);
+      })
+      .destroy();
   },
-};
+});

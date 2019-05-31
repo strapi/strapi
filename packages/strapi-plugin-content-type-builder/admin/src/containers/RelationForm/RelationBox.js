@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import InputText from 'components/InputsIndex';
+import { InputTextWithErrors as InputText } from 'strapi-helper-plugin';
 
 import InlineBlock from './InlineBlock';
 import ModelPicker from './ModelPicker';
@@ -32,10 +32,19 @@ const RelationBox = ({
             <p>
               <i className="fa fa-caret-square-o-right" />
               {modelName}
-              {!!source && <span style={{ fontStyle: 'italic', fontWeight: '500' }}>&nbsp;({source})</span>}
+              {!!source && (
+                <span style={{ fontStyle: 'italic', fontWeight: '500' }}>
+                  &nbsp;({source})
+                </span>
+              )}
             </p>
           ) : (
-            <ModelPicker models={models} onClick={onClick} plugin={plugin} selectedModel={selectedModel} />
+            <ModelPicker
+              models={models}
+              onClick={onClick}
+              plugin={plugin}
+              selectedModel={selectedModel}
+            />
           )}
         </div>
         <div className={styles.relationBoxBody}>

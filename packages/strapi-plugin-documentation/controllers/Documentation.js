@@ -10,7 +10,7 @@
 const path = require('path');
 
 // Public dependencies.
-const fs = require('fs');
+const fs = require('fs-extra');
 const cheerio = require('cheerio');
 const _ = require('lodash');
 
@@ -21,32 +21,31 @@ module.exports = {
       const service = strapi.plugins.documentation.services.documentation;
       const docVersions = service.retrieveDocumentationVersions();
       const form = await service.retrieveFrontForm();
-      
+
       ctx.send({ docVersions, currentVersion: service.getDocumentationVersion(), prefix: `/${prefix}`.replace('//', '/'), form });
     } catch(err) {
       ctx.badRequest(null, err.message);
     }
   },
 
-  index: async (ctx, next) => {
+  async index(ctx, next) {
     // Read layout file.
-    const layoutPath = path.join(strapi.config.appPath, 'plugins', 'documentation', 'public', 'index.html');
 
     try {
-      const layout = fs.readFileSync(layoutPath, 'utf8');
+      const layout = fs.readFileSync(path.resolve(__dirname, '..', 'public', 'index.html'), 'utf8');
       const $ = cheerio.load(layout);
-      
+
       /**
        * We don't expose the specs using koa-static or something else due to security reasons.
        * That's why, we need to read the file localy and send the specs through it when we serve the Swagger UI.
        */
       const { major, minor, patch } = ctx.params;
       const version = major && minor && patch ? `${major}.${minor}.${patch}` : strapi.plugins.documentation.config.info.version;
-      const openAPISpecsPath = path.join(strapi.config.appPath, 'plugins', 'documentation', 'documentation', version , 'full_documentation.json'); 
-      
-      try {  
+      const openAPISpecsPath = path.join(strapi.config.appPath, 'extensions', 'documentation', 'documentation', version , 'full_documentation.json');
+
+      try {
         const documentation = fs.readFileSync(openAPISpecsPath, 'utf8');
-        
+
         // Remove previous Swagger configuration.
         $('.custom-swagger-ui').remove();
         // Set new Swagger configuration
@@ -75,68 +74,75 @@ module.exports = {
             }
           </script>
         `);
-          
+
         try {
           // Write the layout with the new Swagger configuration.
-          fs.writeFileSync(layoutPath, $.html());
+          // fs.writeFileSync(layoutPath, $.html());
+          const layoutPath = path.resolve(strapi.config.appPath, 'extensions', 'documentation', 'public', 'index.html');
+          await fs.ensureFile(layoutPath);
+          await fs.writeFile(layoutPath, $.html());
 
           // Serve the file.
           ctx.url = path.basename(`${ctx.url}/index.html`);
 
           try {
-            return await strapi.koaMiddlewares.static(`./plugins/documentation/public`)(ctx, next);
+            const staticFolder = path.resolve(strapi.config.appPath, 'extensions', 'documentation', 'public');
+            return await strapi.koaMiddlewares.static(staticFolder)(ctx, next);
           } catch (e) {
-            console.error(e);
+            strapi.log.error(e);
           }
         } catch (e){
-          strapi.log.error(`Impossible to write the layout file at ${layoutPath}`);
-          strapi.log.warn('This file needs to be writable to keep the documentation up-to-date.');
-          console.error(e);
+          strapi.log.error(e);
         }
       } catch (e) {
-        strapi.log.error(`Impossible to read OpenAPI specs at ${openAPISpecsPath}`);
-        strapi.log.warn('This file is required to serve the documentation.');
-        console.error(e);
+        strapi.log.error(e);
       }
     } catch (e) {
-      strapi.log.error(`Impossible to read the layout file at ${layoutPath}`);
-      strapi.log.warn('This file is required to serve the documentation.');
-      console.error(e);
+      strapi.log.error(e);
     }
   },
 
-  loginView: async (ctx, next) => {
+  async loginView(ctx, next) {
     const { error } = ctx.query;
-    const layoutPath = path.join(strapi.config.appPath, 'plugins', 'documentation', 'public', 'login.html');
 
     try {
-      const layout = fs.readFileSync(layoutPath, 'utf8');
+      const layout = fs.readFileSync(path.join(__dirname, '..', 'public', 'login.html'));
       const $ = cheerio.load(layout);
 
       $('form').attr('action', `${strapi.plugins.documentation.config['x-strapi-config'].path}/login`);
       $('.error').text(_.isEmpty(error) ? '' : 'Wrong password...');
 
       try {
-        fs.writeFileSync(layoutPath, $.html());
+        const layoutPath = path.resolve(strapi.config.appPath, 'extensions', 'documentation', 'public', 'login.html');
+        await fs.ensureFile(layoutPath);
+        await fs.writeFile(layoutPath, $.html());
 
         ctx.url = path.basename(`${ctx.url}/login.html`);
-        return await strapi.koaMiddlewares.static(`./plugins/documentation/public`)(ctx, next);
+
+        try {
+          const staticFolder = path.resolve(strapi.config.appPath, 'extensions', 'documentation', 'public');
+          return await strapi.koaMiddlewares.static(staticFolder)(ctx, next);
+        } catch (e) {
+          strapi.log.error(e);
+        }
       } catch (e) {
-        console.log(e);
+        strapi.log.error(e);
       }
     } catch (e) {
-      console.log(e);
+      strapi.log.error(e);
     }
   },
 
-  login: async (ctx) => {
+  async login (ctx) {
     const { body: { password } } = ctx.request;
+
     const { password: storedPassword } = await strapi.store({
       environment: '',
       type: 'plugin',
       name: 'documentation',
       key: 'config',
     }).get();
+
     const isValid = strapi.plugins['users-permissions'].services.user.validatePassword(password, storedPassword);
     let querystring = '?error=password';
 
@@ -147,7 +153,7 @@ module.exports = {
 
     ctx.redirect(`${strapi.plugins.documentation.config['x-strapi-config'].path}${querystring}`);
   },
-  
+
   regenerateDoc: async (ctx) => {
     const service = strapi.plugins.documentation.services.documentation;
     const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
@@ -224,10 +230,10 @@ module.exports = {
     if (isNewPassword) {
       prevConfig.password = await usersPermService.user.hashPassword({ password });
     }
-    
-    
+
+
     _.set(prevConfig, 'restrictedAccess', restrictedAccess);
-    
+
     await pluginStore.set({ key: 'config', value: prevConfig });
 
     return ctx.send({ ok: true });

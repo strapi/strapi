@@ -92,7 +92,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "打开下面的文件并启用该特性。",
   "components.AutoReloadBlocker.header": "这个插件需要重新加载特性。",
   "components.ErrorBoundary.title": "哪里出问题了…",
   "components.Input.error.attribute.key.taken": "此值已经存在",

@@ -11,14 +11,14 @@ import { Switch, Route } from 'react-router-dom';
 import pluginId from '../../pluginId';
 // Containers
 import HomePage from '../HomePage';
-import NotFoundPage from '../NotFoundPage';
+import { NotFound } from 'strapi-helper-plugin';
 
 function App() {
   return (
     <div className={pluginId}>
       <Switch>
         <Route path={`/plugins/${pluginId}`} component={HomePage} exact />
-        <Route component={NotFoundPage} />
+        <Route component={NotFound} />
       </Switch>
     </div>
   );

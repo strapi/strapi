@@ -7,6 +7,7 @@
 // Public node modules.
 const _ = require('lodash');
 const path = require('path');
+const swaggerUi = require('swagger-ui-dist')
 
 // Variables.
 const initialRoutes = [];
@@ -19,7 +20,7 @@ module.exports = strapi => {
 
       initialRoutes.push(..._.cloneDeep(strapi.plugins.documentation.config.routes));
     },
-    
+
     initialize: function(cb) {
       // Find the plugins routes.
       strapi.plugins.documentation.config.routes = strapi.plugins.documentation.config.routes
@@ -31,7 +32,7 @@ module.exports = strapi => {
           if (route.handler === 'Documentation.index' || route.path === '/login') {
             route.config.policies = initialRoutes[index].config.policies;
           }
-          
+
           // Set prefix to empty to be able to customise it.
           if (_.get(strapi.plugins, ['documentation', 'config', 'x-strapi-config', 'path'])) {
             route.config.prefix = '';
@@ -48,7 +49,7 @@ module.exports = strapi => {
           async (ctx, next) => {
             ctx.url = path.basename(ctx.url);
 
-            return await strapi.koaMiddlewares.static(`./plugins/documentation/node_modules/swagger-ui-dist`, {
+            return await strapi.koaMiddlewares.static(swaggerUi.getAbsoluteFSPath(), {
               maxage: strapi.config.middleware.settings.public.maxAge,
               defer: true
             })(ctx, next);

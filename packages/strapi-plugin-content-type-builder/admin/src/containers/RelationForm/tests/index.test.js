@@ -54,7 +54,10 @@ describe('<RelationForm />', () => {
 
     wrapper = renderComponent(props);
     const compo = wrapper.find(RelationForm);
-    const spyOnRenderAdvancedSettings = jest.spyOn(compo.instance(), 'renderAdvancedSettings');
+    const spyOnRenderAdvancedSettings = jest.spyOn(
+      compo.instance(),
+      'renderAdvancedSettings',
+    );
     compo.instance().forceUpdate();
 
     expect(spyOnRenderAdvancedSettings).toHaveBeenCalled();
@@ -131,7 +134,11 @@ describe('<RelationForm />', () => {
 
         handleClick('strapi');
 
-        expect(props.onChangeRelationTarget).toHaveBeenLastCalledWith('strapi', 'test', false);
+        expect(props.onChangeRelationTarget).toHaveBeenLastCalledWith(
+          'strapi',
+          'test',
+          false,
+        );
       });
 
       it('should call the onChangeRelationTarget with the correct data (editing)', () => {
@@ -143,7 +150,11 @@ describe('<RelationForm />', () => {
 
         handleClick('strapi');
 
-        expect(props.onChangeRelationTarget).toHaveBeenLastCalledWith('strapi', 'test', true);
+        expect(props.onChangeRelationTarget).toHaveBeenLastCalledWith(
+          'strapi',
+          'test',
+          true,
+        );
       });
     });
   });
@@ -169,9 +180,12 @@ describe('<RelationForm />', () => {
       handleGoTo('advanced');
 
       expect(props.push).toHaveBeenCalledWith({
-        search: 'modalType=attributeForm&attributeType=relation&settingType=advanced&actionType=create',
+        search:
+          'modalType=attributeForm&attributeType=relation&settingType=advanced&actionType=create',
       });
-      expect(context.emitEvent).toHaveBeenCalledWith('didSelectContentTypeFieldSettings');
+      expect(context.emitEvent).toHaveBeenCalledWith(
+        'didSelectContentTypeFieldSettings',
+      );
     });
 
     it('should add the keep the attribute name if the action is edit', () => {
@@ -187,7 +201,9 @@ describe('<RelationForm />', () => {
         search:
           'modalType=attributeForm&attributeType=relation&settingType=advanced&actionType=edit&attributeName=test',
       });
-      expect(context.emitEvent).toHaveBeenCalledWith('didSelectContentTypeFieldSettings');
+      expect(context.emitEvent).toHaveBeenCalledWith(
+        'didSelectContentTypeFieldSettings',
+      );
     });
 
     it('should not emit the event if the tab is base', () => {
@@ -199,7 +215,8 @@ describe('<RelationForm />', () => {
       handleGoTo('base');
 
       expect(props.push).toHaveBeenCalledWith({
-        search: 'modalType=attributeForm&attributeType=relation&settingType=base&actionType=create',
+        search:
+          'modalType=attributeForm&attributeType=relation&settingType=base&actionType=create',
       });
       expect(context.emitEvent).not.toHaveBeenCalled();
     });
@@ -209,7 +226,7 @@ describe('<RelationForm />', () => {
     it('should update the state and call the onCancel prop', () => {
       wrapper = renderComponent(props);
       const compo = wrapper.find(RelationForm);
-      compo.setState({ showForm: true, formErrors: { name: {} } });
+      compo.setState({ showForm: true, formErrors: { name: [] } });
 
       expect(compo.state('showForm')).toBeTruthy();
 
@@ -236,7 +253,13 @@ describe('<RelationForm />', () => {
       handleOnOpened();
 
       expect(compo.state('showForm')).toBeTruthy();
-      expect(props.initData).toHaveBeenCalledWith('test', false, 'test', '', false);
+      expect(props.initData).toHaveBeenCalledWith(
+        'test',
+        false,
+        'test',
+        '',
+        false,
+      );
     });
 
     it('should update the state and call the onCancel prop', () => {
@@ -254,7 +277,13 @@ describe('<RelationForm />', () => {
       handleOnOpened();
 
       expect(compo.state('showForm')).toBeTruthy();
-      expect(props.initData).toHaveBeenCalledWith('strapi', false, undefined, 'test', true);
+      expect(props.initData).toHaveBeenCalledWith(
+        'strapi',
+        false,
+        undefined,
+        'test',
+        true,
+      );
     });
   });
 

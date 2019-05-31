@@ -1,19 +1,18 @@
 /*
-*
-* Row
-*
-*/
+ *
+ * Row
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
+import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { includes, isEmpty } from 'lodash';
 
 // Design
-import IcoContainer from 'components/IcoContainer';
-import ListRow from 'components/ListRow';
-import PopUpWarning from 'components/PopUpWarning';
+import { IcoContainer, ListRow, PopUpWarning } from 'strapi-helper-plugin';
 
 import styles from './styles.scss';
 
@@ -28,44 +27,54 @@ class Row extends React.Component {
     }
   }
 
-  handleClick = (e) => {
+  handleClick = e => {
     this.setState({ showModal: !this.state.showModal });
     this.props.onDeleteClick(e);
-  }
+  };
 
   render() {
-    // const uploadPath = `/plugins/upload/configurations/${this.context.currentEnvironment}`;
     // Make sure to match the ctm config URI instead of content-type view URI
-    const settingsPath = this.props.name === 'content-manager' ? '/plugins/content-manager/ctm-configurations' : `/plugins/${this.props.name}/configurations/${this.context.currentEnvironment}`; 
-    // const icons = this.props.name === 'upload' || this.props.name === 'email' ? [
-    const icons = includes(PLUGINS_WITH_CONFIG, this.props.name) ? [
-      {
+    const {
+      history: { push },
+      name,
+      plugin: { required },
+    } = this.props;
+    const { currentEnvironment } = this.context;
+
+    const settingsPath =
+      name === 'content-manager'
+        ? '/plugins/content-manager/ctm-configurations'
+        : `/plugins/${name}/configurations/${currentEnvironment}`;
+
+    const icons = [];
+
+    if (PLUGINS_WITH_CONFIG.includes(name)) {
+      icons.push({
         icoType: 'cog',
-        onClick: (e) => {
+        onClick: e => {
           e.preventDefault();
           e.stopPropagation();
-          this.context.router.history.push(settingsPath);
+          push(settingsPath);
         },
-      },
-      {
+      });
+    }
+
+    if (!required && currentEnvironment === 'development') {
+      icons.push({
         icoType: 'trash',
-        id: this.props.name,
+        id: name,
         onClick: this.handleClick,
-      },
-    ] : [
-      {
-        icoType: 'trash',
-        id: this.props.name,
-        onClick: this.handleClick,
-      },
-    ];
+      });
+    }
 
     return (
       <ListRow>
-        <div className={cn("col-md-11", styles.nameWrapper)}>
+        <div className={cn('col-md-11', styles.nameWrapper)}>
           <div className={styles.icoContainer} style={{ marginRight: '14px' }}>
-            {!isEmpty(this.props.plugin.logo) && <img src={`${this.props.plugin.logo}`} alt="icon" />}
-            { isEmpty(this.props.plugin.logo) && (
+            {!isEmpty(this.props.plugin.logo) && (
+              <img src={`${this.props.plugin.logo}`} alt="icon" />
+            )}
+            {isEmpty(this.props.plugin.logo) && (
               <div className={styles.icoWrapper}>
                 <i className={`fa fa-${this.props.plugin.icon}`} />
               </div>
@@ -73,7 +82,10 @@ class Row extends React.Component {
           </div>
           <div className={styles.pluginContent}>
             <span>{this.props.plugin.name} —&nbsp;</span>
-            <FormattedMessage id={`${this.props.plugin.description}.short`} defaultMessage={this.props.plugin.description} />
+            <FormattedMessage
+              id={`${this.props.plugin.description}.short`}
+              defaultMessage={this.props.plugin.description}
+            />
           </div>
         </div>
         <div className="col-md-1">
@@ -83,7 +95,9 @@ class Row extends React.Component {
         </div>
         <PopUpWarning
           isOpen={this.state.showModal}
-          toggleModal={() => this.setState({ showModal: !this.state.showModal })}
+          toggleModal={() =>
+            this.setState({ showModal: !this.state.showModal })
+          }
           popUpWarningType="danger"
           onConfirm={this.props.onDeleteConfirm}
         />
@@ -94,7 +108,6 @@ class Row extends React.Component {
 
 Row.contextTypes = {
   currentEnvironment: PropTypes.string,
-  router: PropTypes.object,
 };
 
 Row.propTypes = {
@@ -105,4 +118,4 @@ Row.propTypes = {
   pluginActionSucceeded: PropTypes.bool.isRequired,
 };
 
-export default Row;
+export default withRouter(Row);

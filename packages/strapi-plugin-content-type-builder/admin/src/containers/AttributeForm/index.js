@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
-import Input from 'components/InputsIndex';
+import { InputsIndex as Input } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
@@ -38,7 +38,11 @@ class AttributeForm extends React.Component {
   };
 
   getFormErrors = () => {
-    const { alreadyTakenAttributes, attributeToEditName, modifiedData } = this.props;
+    const {
+      alreadyTakenAttributes,
+      attributeToEditName,
+      modifiedData,
+    } = this.props;
 
     let formErrors = {};
     const formValidations = this.getFormValidations();
@@ -85,7 +89,10 @@ class AttributeForm extends React.Component {
       return {
         ...acc,
         ...form[current].items.reduce((acc2, curr) => {
-          acc2[curr.name] = { validations: curr.validations, custom: curr.custom };
+          acc2[curr.name] = {
+            validations: curr.validations,
+            custom: curr.custom,
+          };
 
           return acc2;
         }, {}),
@@ -102,7 +109,8 @@ class AttributeForm extends React.Component {
   handleGoTo = to => {
     const { emitEvent } = this.context;
     const { actionType, attributeToEditName, attributeType, push } = this.props;
-    const attributeName = actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
+    const attributeName =
+      actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
 
     if (to === 'advanced') {
       emitEvent('didSelectContentTypeFieldSettings');
@@ -202,10 +210,16 @@ class AttributeForm extends React.Component {
   };
 
   render() {
-    const { actionType, attributeToEditName, attributeType, isOpen } = this.props;
+    const {
+      actionType,
+      attributeToEditName,
+      attributeType,
+      isOpen,
+    } = this.props;
     const { showForm } = this.state;
     const currentForm = this.getCurrentForm();
-    const titleContent = actionType === 'create' ? attributeType : attributeToEditName;
+    const titleContent =
+      actionType === 'create' ? attributeType : attributeToEditName;
 
     return (
       <WrapperModal
@@ -216,19 +230,32 @@ class AttributeForm extends React.Component {
       >
         <HeaderModal>
           <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
-            <FormattedMessage id={`${pluginId}.popUpForm.${actionType || 'create'}`} />
+            <FormattedMessage
+              id={`${pluginId}.popUpForm.${actionType || 'create'}`}
+            />
             &nbsp;
-            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>{titleContent}</span>
+            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>
+              {titleContent}
+            </span>
             &nbsp;
             <FormattedMessage id={`${pluginId}.popUpForm.field`} />
           </div>
-          <HeaderModalNavContainer>{NAVLINKS.map(this.renderNavLink)}</HeaderModalNavContainer>
+          <HeaderModalNavContainer>
+            {NAVLINKS.map(this.renderNavLink)}
+          </HeaderModalNavContainer>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
           <BodyModal>{showForm && currentForm.map(this.renderInput)}</BodyModal>
           <FooterModal>
-            <ButtonModalSecondary message={`${pluginId}.form.button.cancel`} onClick={this.handleCancel} />
-            <ButtonModalPrimary message={`${pluginId}.form.button.continue`} type="submit" add />
+            <ButtonModalSecondary
+              message={`${pluginId}.form.button.cancel`}
+              onClick={this.handleCancel}
+            />
+            <ButtonModalPrimary
+              message={`${pluginId}.form.button.continue`}
+              type="submit"
+              add
+            />
             <ButtonModalPrimary
               message={`${pluginId}.form.button.save`}
               type="button"

@@ -13,8 +13,8 @@
   },
   "main": "./lib",
   "dependencies": {
-    "cloudinary": "^1.11.0",
-    "into-stream": "^3.1.0"
+    "cloudinary": "^1.14.0",
+    "into-stream": "^5.1.0"
   },
   "strapi": {
     "isProvider": true
@@ -39,11 +39,12 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 10.0.0",
+    "node": "^10.0.0",
     "npm": ">= 6.0.0"
   },
   "license": "MIT",
   "scripts": {
     "test": "echo \"no tests yet\""
-  }
+  },
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

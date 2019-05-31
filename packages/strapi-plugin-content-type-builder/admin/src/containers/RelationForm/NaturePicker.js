@@ -9,20 +9,44 @@ import pluginId from '../../pluginId';
 import styles from './styles.scss';
 
 import InlineBlock from './InlineBlock';
+import oneWay from '../../assets/images/one_way.svg';
+import oneWaySelected from '../../assets/images/one_way_selected.svg';
+import oneToOne from '../../assets/images/one_to_one.svg';
+import oneToOneSelected from '../../assets/images/one_to_one_selected.svg';
+import oneToMany from '../../assets/images/one_to_many.svg';
+import oneToManySelected from '../../assets/images/one_to_many_selected.svg';
+import manyToOne from '../../assets/images/many_to_one.svg';
+import manyToOneSelected from '../../assets/images/many_to_one_selected.svg';
+import manyToMany from '../../assets/images/many_to_many.svg';
+import manyToManySelected from '../../assets/images/many_to_many_selected.svg';
 
-const assets = ['one_way', 'one_to_one', 'one_to_many', 'many_to_one', 'many_to_many']
-  .map(name => {
-    return {
-      name: camelCase(name),
-      icon: require(`../../assets/images/${name}.svg`),
-      iconSelected: require(`../../assets/images/${name}_selected.svg`),
-    };
-  })
-  .reduce((acc, current) => {
-    acc[current.name] = current;
-
-    return acc;
-  }, {});
+const assets = {
+  oneWay: {
+    name: 'oneWay',
+    icon: oneWay,
+    iconSelected: oneWaySelected,
+  },
+  oneToOne: {
+    name: 'oneToOne',
+    icon: oneToOne,
+    iconSelected: oneToOneSelected,
+  },
+  oneToMany: {
+    name: 'oneToMany',
+    icon: oneToMany,
+    iconSelected: oneToManySelected,
+  },
+  manyToOne: {
+    name: 'manyToOne',
+    icon: manyToOne,
+    iconSelected: manyToOneSelected,
+  },
+  manyToMany: {
+    name: 'manyToMany',
+    icon: manyToMany,
+    iconSelected: manyToManySelected,
+  },
+};
 
 const availableRelations = ['manyToMany', 'oneToMany', 'oneToOne', 'oneWay'];
 
@@ -31,20 +55,38 @@ const NaturePicker = ({ modelName, onClick, nature, target }) => {
   const { leftName, rightName } = availableRelations.includes(nature)
     ? {
         leftName: pluralize(modelName, nature === 'manyToMany' ? 2 : 1),
-        rightName: pluralize(target, ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1),
+        rightName: pluralize(
+          target,
+          ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1,
+        ),
       }
     : {
         leftName: target,
-        rightName: pluralize(modelName, ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1),
+        rightName: pluralize(
+          modelName,
+          ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1,
+        ),
       };
 
   return (
-    <InlineBlock style={{ width: '100%', paddingTop: '70px', cursor: 'pointer' }}>
+    <InlineBlock
+      style={{ width: '100%', paddingTop: '70px', cursor: 'pointer' }}
+    >
       <div className={styles.relationNatureWrapper}>
         {Object.keys(assets).map(iconName => {
-          const src = iconName === nature ? assets[iconName].iconSelected : assets[iconName].icon;
+          const src =
+            iconName === nature
+              ? assets[iconName].iconSelected
+              : assets[iconName].icon;
 
-          return <img key={iconName} onClick={() => onClick(iconName, modelName)} src={src} alt={iconName} />;
+          return (
+            <img
+              key={iconName}
+              onClick={() => onClick(iconName, modelName)}
+              src={src}
+              alt={iconName}
+            />
+          );
         })}
       </div>
       <div className={styles.infoContainer}>

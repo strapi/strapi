@@ -95,7 +95,6 @@
   "app.utils.SelectOption.defaultMessage": " ",
   "app.utils.defaultMessage": " ",
   "app.utils.placeholder.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "Open het volgende bestand en ze deze feature aan.",
   "components.AutoReloadBlocker.header": "De herlaad feature is nodig voor deze extensie",
   "components.ErrorBoundary.title": "Er is iets fout gegaan...",
   "components.Input.error.attribute.key.taken": "Deze waarde bestaat al.",

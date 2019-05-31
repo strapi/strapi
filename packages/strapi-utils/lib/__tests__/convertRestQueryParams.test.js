@@ -42,7 +42,9 @@ describe('convertRestQueryParams', () => {
       expect(() => convertRestQueryParams({ _sort: {} })).toThrow();
       expect(() => convertRestQueryParams({ _sort: 'id,,test' })).toThrow();
       expect(() => convertRestQueryParams({ _sort: 'id,test,' })).toThrow();
-      expect(() => convertRestQueryParams({ _sort: 'id:asc,test:dasc' })).toThrow();
+      expect(() =>
+        convertRestQueryParams({ _sort: 'id:asc,test:dasc' })
+      ).toThrow();
       expect(() => convertRestQueryParams({ _sort: 'id:asc,:asc' })).toThrow();
     });
 
@@ -52,9 +54,18 @@ describe('convertRestQueryParams', () => {
       ['id:ASC', [{ field: 'id', order: 'asc' }]],
       ['id:DESC', [{ field: 'id', order: 'desc' }]],
       ['id:asc', [{ field: 'id', order: 'asc' }]],
-      ['id,price', [{ field: 'id', order: 'asc' }, { field: 'price', order: 'asc' }]],
-      ['id:desc,price', [{ field: 'id', order: 'desc' }, { field: 'price', order: 'asc' }]],
-      ['id:desc,price:desc', [{ field: 'id', order: 'desc' }, { field: 'price', order: 'desc' }]],
+      [
+        'id,price',
+        [{ field: 'id', order: 'asc' }, { field: 'price', order: 'asc' }],
+      ],
+      [
+        'id:desc,price',
+        [{ field: 'id', order: 'desc' }, { field: 'price', order: 'asc' }],
+      ],
+      [
+        'id:desc,price:desc',
+        [{ field: 'id', order: 'desc' }, { field: 'price', order: 'desc' }],
+      ],
       [
         'id:asc,price,date:desc',
         [
@@ -72,7 +83,9 @@ describe('convertRestQueryParams', () => {
         ],
       ],
     ])('Converts sort query "%s" correctly', (input, expected) => {
-      expect(convertRestQueryParams({ _sort: input })).toMatchObject({ sort: expected });
+      expect(convertRestQueryParams({ _sort: input })).toMatchObject({
+        sort: expected,
+      });
     });
   });
 
@@ -86,7 +99,7 @@ describe('convertRestQueryParams', () => {
       expect(() => convertRestQueryParams({ _start: 'Infinity' })).toThrow();
       expect(() => convertRestQueryParams({ _start: Infinity })).toThrow();
       expect(() => convertRestQueryParams({ _start: -Infinity })).toThrow();
-      expect(() => convertRestQueryParams({ _start: Nan })).toThrow();
+      expect(() => convertRestQueryParams({ _start: NaN })).toThrow();
       expect(() => convertRestQueryParams({ _start: 1.2 })).toThrow();
       expect(() => convertRestQueryParams({ _start: -10 })).toThrow();
       expect(() => convertRestQueryParams({ _start: {} })).toThrow();
@@ -95,7 +108,9 @@ describe('convertRestQueryParams', () => {
     test.each([['1', 1], ['12', 12], ['0', 0]])(
       'Converts start query "%s" correctly',
       (input, expected) => {
-        expect(convertRestQueryParams({ _start: input })).toMatchObject({ start: expected });
+        expect(convertRestQueryParams({ _start: input })).toMatchObject({
+          start: expected,
+        });
       }
     );
   });
@@ -110,7 +125,7 @@ describe('convertRestQueryParams', () => {
       expect(() => convertRestQueryParams({ _limit: 'Infinity' })).toThrow();
       expect(() => convertRestQueryParams({ _limit: Infinity })).toThrow();
       expect(() => convertRestQueryParams({ _limit: -Infinity })).toThrow();
-      expect(() => convertRestQueryParams({ _limit: Nan })).toThrow();
+      expect(() => convertRestQueryParams({ _limit: NaN })).toThrow();
       expect(() => convertRestQueryParams({ _limit: 1.2 })).toThrow();
       expect(() => convertRestQueryParams({ _limit: -10 })).toThrow();
       expect(() => convertRestQueryParams({ _limit: {} })).toThrow();
@@ -119,7 +134,9 @@ describe('convertRestQueryParams', () => {
     test.each([['1', 1], ['12', 12], ['0', 0]])(
       'Converts start query "%s" correctly',
       (input, expected) => {
-        expect(convertRestQueryParams({ _start: input })).toMatchObject({ start: expected });
+        expect(convertRestQueryParams({ _start: input })).toMatchObject({
+          start: expected,
+        });
       }
     );
   });
@@ -130,7 +147,9 @@ describe('convertRestQueryParams', () => {
 
   describe('Filters', () => {
     test('Can combine filters', () => {
-      expect(convertRestQueryParams({ id: '1', test_ne: 'text', test_: 'content' })).toMatchObject({
+      expect(
+        convertRestQueryParams({ id: '1', test_ne: 'text', test_: 'content' })
+      ).toMatchObject({
         where: [
           {
             field: 'id',
@@ -167,7 +186,9 @@ describe('convertRestQueryParams', () => {
         ],
       });
 
-      expect(convertRestQueryParams({ id_eq: '1', test_eq: 'text' })).toMatchObject({
+      expect(
+        convertRestQueryParams({ id_eq: '1', test_eq: 'text' })
+      ).toMatchObject({
         where: [
           {
             field: 'id',
@@ -182,7 +203,9 @@ describe('convertRestQueryParams', () => {
         ],
       });
 
-      expect(convertRestQueryParams({ published_at: '2019-01-01:00:00:00' })).toMatchObject({
+      expect(
+        convertRestQueryParams({ published_at: '2019-01-01:00:00:00' })
+      ).toMatchObject({
         where: [
           {
             field: 'published_at',
@@ -302,7 +325,9 @@ describe('convertRestQueryParams', () => {
     });
 
     test('Not Contains', () => {
-      expect(convertRestQueryParams({ sub_title_ncontains: 'text' })).toMatchObject({
+      expect(
+        convertRestQueryParams({ sub_title_ncontains: 'text' })
+      ).toMatchObject({
         where: [
           {
             field: 'sub_title',
@@ -314,7 +339,9 @@ describe('convertRestQueryParams', () => {
     });
 
     test('Not Contains sensitive', () => {
-      expect(convertRestQueryParams({ content_text_ncontainss: 'test' })).toMatchObject({
+      expect(
+        convertRestQueryParams({ content_text_ncontainss: 'test' })
+      ).toMatchObject({
         where: [
           {
             field: 'content_text',
@@ -326,7 +353,9 @@ describe('convertRestQueryParams', () => {
     });
 
     test('Not Contains sensitive', () => {
-      expect(convertRestQueryParams({ 'content.text_ncontainss': 'test' })).toMatchObject({
+      expect(
+        convertRestQueryParams({ 'content.text_ncontainss': 'test' })
+      ).toMatchObject({
         where: [
           {
             field: 'content.text',

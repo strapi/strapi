@@ -4,7 +4,7 @@ node_modules
 stats.json
 config/layout.json
 package-lock.json
-yarn.lock
+
 
 # Cruft
 .DS_Store

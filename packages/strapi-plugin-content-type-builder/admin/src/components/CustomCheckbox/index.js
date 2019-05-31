@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
-import InputNumber from 'components/InputNumberWithErrors';
+import { InputNumberWithErrors as InputNumber } from 'strapi-helper-plugin';
 
 class CustomCheckbox extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
@@ -43,7 +43,7 @@ class CustomCheckbox extends React.Component {
 
     // TODO: remove inline after migrating to Buffet
     return (
-      <div className='col-md-12' style={{ marginTop: -4, marginBottom: 9 }}>
+      <div className="col-md-12" style={{ marginTop: -4, marginBottom: 9 }}>
         <FormattedMessage id={label.id}>
           {msg => (
             <label
@@ -56,7 +56,7 @@ class CustomCheckbox extends React.Component {
                 name={name}
                 id={name}
                 onChange={this.handleChange}
-                type='checkbox'
+                type="checkbox"
               />
               {msg}
             </label>

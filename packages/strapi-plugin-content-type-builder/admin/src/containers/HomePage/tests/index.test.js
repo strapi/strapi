@@ -18,6 +18,7 @@ describe('CTB <HomePage />', () => {
       canOpenModal: true,
       createTempContentType: jest.fn(),
       deleteModel: jest.fn(),
+      deleteTemporaryModel: jest.fn(),
       models: [
         {
           icon: 'fa-cube',
@@ -94,7 +95,9 @@ describe('CTB <HomePage />', () => {
       const table = wrapper.find(TableList);
 
       expect(table).toHaveLength(1);
-      expect(table.prop('title')).toEqual(`${pluginId}.table.contentType.title.plural`);
+      expect(table.prop('title')).toEqual(
+        `${pluginId}.table.contentType.title.plural`,
+      );
     });
 
     it('the tableList should have a singular title if there is more less 2 model', () => {
@@ -114,7 +117,9 @@ describe('CTB <HomePage />', () => {
       const table = wrapper.find(TableList);
 
       expect(table).toHaveLength(1);
-      expect(table.prop('title')).toEqual(`${pluginId}.table.contentType.title.singular`);
+      expect(table.prop('title')).toEqual(
+        `${pluginId}.table.contentType.title.singular`,
+      );
     });
   });
 

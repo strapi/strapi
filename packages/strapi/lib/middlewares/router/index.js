@@ -47,6 +47,7 @@ module.exports = strapi => {
       }
 
       if (strapi.plugins) {
+
         // Parse each plugin's routes.
         _.forEach(strapi.plugins, (plugin, name) => {
           const router = strapi.koaMiddlewares.routerJoi();

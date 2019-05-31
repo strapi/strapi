@@ -96,7 +96,6 @@
   "app.utils.delete": "削除",
   "app.utils.placeholder.defaultMessage": " ",
   "app.utils.SelectOption.defaultMessage": " ",
-  "components.AutoReloadBlocker.description": "以下のファイルを開いて、有効化してください",
   "components.AutoReloadBlocker.header": "プラグインを有効化するにはリロードが必要です",
   "components.ErrorBoundary.title": "なにかが間違っています...",
   "components.Input.error.attribute.key.taken": "この値はすでに存在しています",
