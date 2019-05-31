@@ -77,7 +77,11 @@ module.exports = {
     // Execute upload function of the provider for all files.
     return Promise.all(
       files.map(async file => {
-        await actions.upload(file);
+        
+        // This should host the provider configuration
+        const options = {};
+
+        await actions.upload(file, options);
 
         // Remove buffer to don't save it.
         delete file.buffer;
