@@ -21,7 +21,7 @@ To help us to merge your PR please follow these bullet points:
 
 
 <!--
-Replace [ ] by [x] to check these checkboxs!
+Replace [ ] by [x] to check these checkboxes!
 -->
 
 #### My PR is a:
