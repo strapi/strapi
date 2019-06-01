@@ -3,7 +3,7 @@
 Strapi gives you the option to choose the most appropriate database for your project. It currently supports **PostgreSQL**, **MongoDB**, **SQLite**, **MySQL** and
 **MariaDB**. The following documentation covers how to install these databases locally (for development purposes) and on various hosted or cloud server solutions (for staging or production purposes).
 
-(Deploying **Strapi** itself is covered in the [Deployment Guide](/3.x.x/guides/deployment.html).)
+(Deploying **Strapi** itself is covered in the [Deployment Guide](/3.0.0-alpha.x/guides/deployment.html).)
 
 **Table of contents:**
 
@@ -15,7 +15,7 @@ Strapi gives you the option to choose the most appropriate database for your pro
 
 ## SQLite Installation
 
-SQLite is the default ([Quick Start](/3.x.x/getting-started/quick-start.html)) and recommended database to quickly create an app locally.
+SQLite is the default ([Quick Start](/3.0.0-alpha.x/getting-started/quick-start.html)) and recommended database to quickly create an app locally.
 
 ### Install SQLite locally
 
@@ -25,7 +25,7 @@ Simply use the `strapi new my-project --quickstart` command.
 strapi new my-project --quickstart
 ```
 
-This will create a new project and launch it in the browser. (The [Quick Start Guide](/3.x.x/getting-started/quick-start.html) is a complete step-by-step tutorial.)
+This will create a new project and launch it in the browser. (The [Quick Start Guide](/3.0.0-alpha.x/getting-started/quick-start.html) is a complete step-by-step tutorial.)
 
 ## MongoDB Installation
 
@@ -33,7 +33,7 @@ This will create a new project and launch it in the browser. (The [Quick Start G
 
 In order to use Strapi with [MongoDB](https://www.mongodb.com/) in production, you must have and use MongoDB on your local development environment. These instructions show how to start using Strapi with a MongoDB database.
 
-  - You must have [Strapi installed globally](/3.x.x/getting-started/quick-start-tutorial.html#_1-install-strapi-globally).
+  - You must have [Strapi installed globally](/3.0.0-alpha.x/getting-started/quick-start-tutorial.html#_1-install-strapi-globally).
 
 ### 1. Install MongoDB on your development environment
 
@@ -148,7 +148,7 @@ You have now installed MongoDB for _Linux_. You are now ready to [install Strapi
 
 ### 2. Install Strapi locally with MongoDB
 
-Follow these steps to create a Strapi project locally using the MongoDB database. 
+Follow these steps to create a Strapi project locally using the MongoDB database.
 
 **Note:** MongoDB must already be running in the background.
 
@@ -163,21 +163,21 @@ strapi new my-project
 - Use your `down arrow` key and select `Custom (manual settings)` and press `enter`:
 
 ```bash
-? Choose your installation type 
-  Quickstart (recommended) 
-❯ Custom (manual settings) 
+? Choose your installation type
+  Quickstart (recommended)
+❯ Custom (manual settings)
 ```
 
 - Select `MongoDB` and press `enter`:
 
 ```bash
 ? Choose your installation type Custom (manual settings)
-? Choose your main database: 
-  SQLite 
-❯ MongoDB 
-  MySQL 
-  Postgres 
-``` 
+? Choose your main database:
+  SQLite
+❯ MongoDB
+  MySQL
+  Postgres
+```
 
 - Press `enter` to select the remaining default options. It will look something like this:
 
@@ -189,9 +189,9 @@ strapi new my-project
 ? Host: 127.0.0.1
 ? +srv connection: false
 ? Port (It will be ignored if you enable +srv): 27017
-? Username: 
-? Password: 
-? Authentication database (Maybe "admin" or blank): 
+? Username:
+? Password:
+? Authentication database (Maybe "admin" or blank):
 ? Enable SSL connection: false
 
 ⏳ Testing database connection...
@@ -217,7 +217,7 @@ $ strapi start
 
 ```
 
-You have successfully installed Strapi with MongoDB on your local development environment. You are now ready to [create your first user](/3.x.x/getting-started/quick-start.html#_3-create-an-admin-user). 
+You have successfully installed Strapi with MongoDB on your local development environment. You are now ready to [create your first user](/3.0.0-alpha.x/getting-started/quick-start.html#_3-create-an-admin-user).
 
 ---
 
@@ -225,24 +225,24 @@ You have successfully installed Strapi with MongoDB on your local development en
 
 Follow these steps to configure a local Strapi project to use a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) free 512 MB account in production. (Please see [MongoDB Atlas Documentation](https://docs.atlas.mongodb.com/getting-started/) if you have any questions.)
 
-- You must have already [created your Strapi project using MongoDB](/3.x.x/guides/databases.html#install-strapi-locally-with-mongodb).
+- You must have already [created your Strapi project using MongoDB](/3.0.0-alpha.x/guides/databases.html#install-strapi-locally-with-mongodb).
 - You must have already created a [free MongoDB Atlas account](https://www.mongodb.com/cloud/atlas).
 
 1. Log in to your account to create a **Project** and a **Cluster**
   - First you need to `Create a new Project`.
-  - Then click `Build a Cluster`, from the options page:  
-    - Choose **AWS** as your **Cloud Provider & Region**. 
+  - Then click `Build a Cluster`, from the options page:
+    - Choose **AWS** as your **Cloud Provider & Region**.
     - Select a **Region**. (Note: some **Regions** do not have a _free tier_.)
     - In **Cluster Tier**, select **Shared Sandbox**, _Tier_ `MO`.
     - In **Cluster Name**, name your cluster.
   - Click the green `Create Cluster` button. You will get a message that says, "*Your cluster is being created...*"
 
 2. Next, click on the `Security` tab (next to `Overview`):
-  - Click the green `+ ADD NEW USER` button: 
+  - Click the green `+ ADD NEW USER` button:
     - Enter a `username`.
     - Enter a `password`.
     - Under `User Privileges` ensure **`Read and write to any database`** is selected. Then click `Add User` to save.
-  
+
 3. Then `whitelist` your IP address. Under `Security`, click to `IP Whitelist`
   - Click the green `+ ADD IP ADDRESS`
     - Next click `ALLOW ACCESS FROM ANYWHERE`. **Note:** In permanent projects you would configure this with the appropriate IP addresses.
@@ -254,7 +254,7 @@ MongoDB Atlas automatically exposes the database credentials into a single envir
   - Under the `Overview` tab, click `CONNECT` and then `Connect Your Application`.
   - Under `1. Choose your driver version`, select **DRIVER** as `Node.js` and **VERSION** as `2.2.12 or later`.
   - This should show a **Connection String Only** similar to this:
-  
+
   `mongodb://paulbocuse:<password>@strapi-heroku-shard-00-00-o777o.mongodb.net:27017,strapi-heroku-shard-00-01-o606o.mongodb.net:27017,strapi-heroku-shard-00-02-o606o.mongodb.net:27017/test?ssl=true&replicaSet=Strapi-Heroku-shard-0&authSource=admin&retryWrites=true`
 
   - You are interested in everything **AFTER** the **@** symbol. This is your **Database Host** variable. So in this case,
@@ -263,7 +263,7 @@ MongoDB Atlas automatically exposes the database credentials into a single envir
 
   - You created earlier a `cluster name`, `username` and `password`. These are the other variables needed to configure your project to connect to MongoDB Atlas.
 
-  Keep these five MongoDB Atlas database variables from your MongoDB Atlas account ready and available.  
+  Keep these five MongoDB Atlas database variables from your MongoDB Atlas account ready and available.
 
 5. Update your database config file
 
