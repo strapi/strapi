@@ -195,6 +195,8 @@ One of our main objectives for the `beta` is to make it easier and quicker to up
 
 [Read more](https://strapi.io/documentation/3.0.0-beta.x/concepts/concepts.html#files-structure)
 
+Let's start by creating a new folder called `./extensions`. This folder needs to exist even if it's empty. You may use a `.gitkeep` file to ensure the folder isn't deleted from the repository (if it's empty) when cloning. [More details](https://davidwalsh.name/git-empty-directory).
+
 ### Migrating non customized plugin
 
 If you installed a plugin but never modified any files inside `./plugins/pluginName/**/*`, you can remove the `./plugins/pluginName` folder.
@@ -663,15 +665,12 @@ If you only used the `administrator` role to give access to the admin panel to c
 
 If you haven't created any relation with the `User` model in your `Content Types` and don't use those users in your application business logic; you can remove every user you have migrated to the `strapi_administrator` collection.
 
-
 Finally, if you have chosen to migrate your previous admin users in the new `strapi_administrator` collection but your `User` model has at least one relation with another model, then you may need to keep both the `strapi_administrator` and `users-pemrissions_user` collection manually in sync.
-
 
 **Example**: Some of your application users can edit their profile and access the admin panel. If they change their email you need to make sure their `administrator` entity also changes email.
 ::: warning
 We really recommend separating you users from your administrators to avoid this situation which is not a good practice.
 :::
-
 
 ## Running your migrated project
 
