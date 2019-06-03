@@ -507,6 +507,10 @@ module.exports = {
     return [trimmedNotConfigurableAttributes, errors];
   },
 
+  getConnections() {
+    return _.keys(strapi.config.currentEnvironment.database.connections);
+  },
+
   clearRelations(model, source, force) {
     const errors = [];
 

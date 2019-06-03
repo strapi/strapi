@@ -28,6 +28,14 @@
       "model": "file",
       "via": "related",
       "plugin": "upload"
+    },
+    "ingredients": {
+      "type": "group",
+      "groups": ["ingredients"],
+      "required": true,
+      "repeatable": true,
+      "min": 2,
+      "max": 3
     }
   }
 }

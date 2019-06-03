@@ -41,6 +41,16 @@ module.exports = function(strapi) {
   // Initialize main router to use it in middlewares.
   strapi.router = routerJoi();
 
+  Object.keys(strapi.groups).forEach(key => {
+    const group = strapi.groups[key];
+    return Object.assign(group, {
+      globalId: group.globalId || _.upperFirst(_.camelCase(`group_${key}`)),
+      collectionName:
+        group.collectionName || `group_${key}`.toLocaleLowerCase(),
+      connection: group.connection || defaultConnection,
+    });
+  });
+
   // Set models.
   strapi.models = Object.keys(strapi.api || []).reduce((acc, key) => {
     for (let index in strapi.api[key].models) {

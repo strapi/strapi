@@ -9,10 +9,17 @@ module.exports = async ({
   connection,
   model,
 }) => {
+  const { hasTimestamps } = loadedModel;
+
+  let [createAtCol, updatedAtCol] = ['created_at', 'updated_at'];
+  if (Array.isArray(hasTimestamps)) {
+    [createAtCol, updatedAtCol] = hasTimestamps;
+  }
+
   const quote = definition.client === 'pg' ? '"' : '`';
 
   // Equilize database tables
-  const handler = async (table, attributes) => {
+  const createOrUpdateTable = async (table, attributes) => {
     const tableExists = await ORM.knex.schema.hasTable(table);
 
     // Apply field type of attributes definition
@@ -98,13 +105,13 @@ module.exports = async ({
     };
 
     const createTable = async table => {
-      const defaultAttributeDifinitions = {
+      const defaultAttributeDefinitions = {
         mysql: ['id INT AUTO_INCREMENT NOT NULL PRIMARY KEY'],
         pg: ['id SERIAL NOT NULL PRIMARY KEY'],
         sqlite3: ['id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL'],
       };
 
-      let idAttributeBuilder = defaultAttributeDifinitions[definition.client];
+      let idAttributeBuilder = defaultAttributeDefinitions[definition.client];
 
       if (definition.primaryKeyType === 'uuid' && definition.client === 'pg') {
         idAttributeBuilder = [
@@ -132,144 +139,137 @@ module.exports = async ({
       await createTable(table);
       await generateIndexes(table, attributes);
       await storeTable(table, attributes);
-    } else {
-      const columns = Object.keys(attributes);
+      return;
+    }
 
-      // Fetch existing column
-      const columnsExist = await Promise.all(
-        columns.map(attribute => ORM.knex.schema.hasColumn(table, attribute))
-      );
+    const columns = Object.keys(attributes);
 
-      const columnsToAdd = {};
+    // Fetch existing column
+    const columnsExist = await Promise.all(
+      columns.map(attribute => ORM.knex.schema.hasColumn(table, attribute))
+    );
 
-      // Get columns to add
-      columnsExist.forEach((columnExist, index) => {
-        const attribute = attributes[columns[index]];
+    const columnsToAdd = {};
 
-        if (!columnExist) {
-          columnsToAdd[columns[index]] = attribute;
-        }
+    // Get columns to add
+    columnsExist.forEach((columnExist, index) => {
+      const attribute = attributes[columns[index]];
+
+      if (!columnExist) {
+        columnsToAdd[columns[index]] = attribute;
+      }
+    });
+
+    // Generate indexes for new attributes.
+    await generateIndexes(table, columnsToAdd);
+
+    // Generate and execute query to add missing column
+    if (Object.keys(columnsToAdd).length > 0) {
+      await ORM.knex.schema.table(table, tbl => {
+        Object.keys(columnsToAdd).forEach(key => {
+          const attribute = columnsToAdd[key];
+          const type = getType({
+            definition,
+            attribute,
+            name: key,
+            tableExists,
+          });
+
+          if (type) {
+            const col = tbl.specificType(key, type);
+            if (attribute.required && definition.client !== 'sqlite3') {
+              col.notNullable();
+            }
+          }
+        });
       });
+    }
 
-      // Generate indexes for new attributes.
-      await generateIndexes(table, columnsToAdd);
+    let previousAttributes;
+    try {
+      previousAttributes = JSON.parse(
+        (await StrapiConfigs.forge({
+          key: `db_model_${table}`,
+        }).fetch()).toJSON().value
+      );
+    } catch (err) {
+      await storeTable(table, attributes);
+      previousAttributes = JSON.parse(
+        (await StrapiConfigs.forge({
+          key: `db_model_${table}`,
+        }).fetch()).toJSON().value
+      );
+    }
 
-      // Generate and execute query to add missing column
-      if (Object.keys(columnsToAdd).length > 0) {
-        await ORM.knex.schema.table(table, tbl => {
-          Object.keys(columnsToAdd).forEach(key => {
-            const attribute = columnsToAdd[key];
-            const type = getType({
-              definition,
-              attribute,
-              name: key,
-              tableExists,
-            });
+    if (JSON.stringify(previousAttributes) === JSON.stringify(attributes))
+      return;
 
-            if (type) {
-              const col = tbl.specificType(key, type);
-              if (attribute.required && definition.client !== 'sqlite3') {
-                col.notNullable();
-              }
-            }
-          });
-        });
-      }
+    if (definition.client === 'sqlite3') {
+      const tmpTable = `tmp_${table}`;
+      await createTable(tmpTable);
 
-      let previousAttributes;
       try {
-        previousAttributes = JSON.parse(
-          (await StrapiConfigs.forge({
-            key: `db_model_${table}`,
-          }).fetch()).toJSON().value
+        const attrs = Object.keys(attributes).filter(attribute =>
+          getType({
+            definition,
+            attribute: attributes[attribute],
+            name: attribute,
+          })
         );
+
+        await ORM.knex.raw(`INSERT INTO ?? (${attrs.join(', ')}) ??`, [
+          tmpTable,
+          ORM.knex.select(attrs).from(table),
+        ]);
       } catch (err) {
-        await storeTable(table, attributes);
-        previousAttributes = JSON.parse(
-          (await StrapiConfigs.forge({
-            key: `db_model_${table}`,
-          }).fetch()).toJSON().value
-        );
+        strapi.log.error('Migration failed');
+        strapi.log.error(err);
+
+        await ORM.knex.schema.dropTableIfExists(tmpTable);
+        return false;
       }
 
-      if (JSON.stringify(previousAttributes) === JSON.stringify(attributes))
-        return;
+      await ORM.knex.schema.dropTableIfExists(table);
+      await ORM.knex.schema.renameTable(tmpTable, table);
 
-      if (definition.client === 'sqlite3') {
-        const tmpTable = `tmp_${table}`;
-        await createTable(tmpTable);
+      await generateIndexes(table, attributes);
+    } else {
+      await ORM.knex.schema.alterTable(table, tbl => {
+        columns.forEach(key => {
+          if (
+            JSON.stringify(previousAttributes[key]) ===
+            JSON.stringify(attributes[key])
+          )
+            return;
 
-        try {
-          const attrs = Object.keys(attributes).filter(attribute =>
-            getType({
-              definition,
-              attribute: attributes[attribute],
-              name: attribute,
-            })
-          );
-
-          await ORM.knex.raw(`INSERT INTO ?? (${attrs.join(', ')}) ??`, [
-            tmpTable,
-            ORM.knex.select(attrs).from(table),
-          ]);
-        } catch (err) {
-          strapi.log.error('Migration failed');
-          strapi.log.error(err);
-
-          await ORM.knex.schema.dropTableIfExists(tmpTable);
-          return false;
-        }
-
-        await ORM.knex.schema.dropTableIfExists(table);
-        await ORM.knex.schema.renameTable(tmpTable, table);
-
-        await generateIndexes(table, attributes);
-      } else {
-        await ORM.knex.schema.alterTable(table, tbl => {
-          columns.forEach(key => {
-            if (
-              JSON.stringify(previousAttributes[key]) ===
-              JSON.stringify(attributes[key])
-            )
-              return;
-
-            const attribute = attributes[key];
-            const type = getType({
-              definition,
-              attribute,
-              name: key,
-              tableExists,
-            });
-
-            if (type) {
-              let col = tbl.specificType(key, type);
-              if (attribute.required) {
-                col = col.notNullable();
-              }
-              col.alter();
-            }
+          const attribute = attributes[key];
+          const type = getType({
+            definition,
+            attribute,
+            name: key,
+            tableExists,
           });
+
+          if (type) {
+            let col = tbl.specificType(key, type);
+            if (attribute.required) {
+              col = col.notNullable();
+            }
+            col.alter();
+          }
         });
-      }
+      });
 
       await storeTable(table, attributes);
     }
   };
 
   // Add created_at and updated_at field if timestamp option is true
-  if (loadedModel.hasTimestamps) {
-    definition.attributes[
-      _.isString(loadedModel.hasTimestamps[0])
-        ? loadedModel.hasTimestamps[0]
-        : 'created_at'
-    ] = {
+  if (hasTimestamps) {
+    definition.attributes[createAtCol] = {
       type: 'timestamp',
     };
-    definition.attributes[
-      _.isString(loadedModel.hasTimestamps[1])
-        ? loadedModel.hasTimestamps[1]
-        : 'updated_at'
-    ] = {
+    definition.attributes[updatedAtCol] = {
       type: 'timestampUpdate',
     };
   }
@@ -279,7 +279,7 @@ module.exports = async ({
 
   // Equilize tables
   if (connection.options && connection.options.autoMigration !== false) {
-    await handler(loadedModel.tableName, definition.attributes);
+    await createOrUpdateTable(loadedModel.tableName, definition.attributes);
   }
 
   // Equilize polymorphic releations
@@ -304,7 +304,7 @@ module.exports = async ({
     };
 
     if (connection.options && connection.options.autoMigration !== false) {
-      await handler(`${loadedModel.tableName}_morph`, attributes);
+      await createOrUpdateTable(`${loadedModel.tableName}_morph`, attributes);
     }
   }
 
@@ -339,22 +339,14 @@ module.exports = async ({
           manyRelation
         );
 
-      await handler(table, attributes);
+      await createOrUpdateTable(table, attributes);
     }
   }
 
   // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
-  if (loadedModel.hasTimestamps) {
-    delete definition.attributes[
-      _.isString(loadedModel.hasTimestamps[0])
-        ? loadedModel.hasTimestamps[0]
-        : 'created_at'
-    ];
-    delete definition.attributes[
-      _.isString(loadedModel.hasTimestamps[1])
-        ? loadedModel.hasTimestamps[1]
-        : 'updated_at'
-    ];
+  if (hasTimestamps) {
+    delete definition.attributes[createAtCol];
+    delete definition.attributes[updatedAtCol];
   }
 };
 
@@ -412,6 +404,9 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
         case 'pg':
           return 'timestamp with time zone';
         case 'sqlite3':
+          if (tableExists) {
+            return 'timestamp DEFAULT NULL';
+          }
           return 'timestamp DEFAULT CURRENT_TIMESTAMP';
         default:
           return 'timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP';

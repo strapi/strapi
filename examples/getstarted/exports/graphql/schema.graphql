@@ -5,6 +5,7 @@ type Articles {
   content2: String
   title: String
   image: UploadFile
+  ingredients: String!
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
 }
 
@@ -13,6 +14,7 @@ input ArticlesInput {
   posts: [ID]
   title: String
   image: ID
+  ingredients: String!
 }
 
 input createArticlesInput {
@@ -89,6 +91,7 @@ input editArticlesInput {
   posts: [ID]
   title: String
   image: ID
+  ingredients: String
 }
 
 input editFileInput {
