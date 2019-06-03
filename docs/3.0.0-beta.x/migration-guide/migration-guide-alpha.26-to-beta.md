@@ -195,7 +195,7 @@ One of our main objectives for the `beta` is to make it easier and quicker to up
 
 [Read more](https://strapi.io/documentation/3.0.0-beta.x/concepts/concepts.html#files-structure)
 
-Let's start by creating a new folder called `./extensions`. This folder needs to exists even if empty. You can use a `.gitkeep` file to make sure the folder is versionned into your repository.
+Let's start by creating a new folder called `./extensions`. This folder needs to exist even if it's empty. You may use a `.gitkeep` file to ensure the folder isn't deleted from the repository (if it's empty) when cloning. [More details](https://davidwalsh.name/git-empty-directory).
 
 ### Migrating non customized plugin
 
