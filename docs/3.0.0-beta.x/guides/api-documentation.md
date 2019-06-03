@@ -116,7 +116,7 @@ Here are the file that needs to be created in order to change the documentation 
   ],
   "externalDocs": {
     "description": "Find out more",
-    "url": "https://strapi.io/documentation/3.x.x/"
+    "url": "https://strapi.io/documentation/3.0.0-alpha.x/"
   },
   "security": [
     {

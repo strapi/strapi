@@ -36,7 +36,7 @@
   ],
   "externalDocs": {
     "description": "Find out more",
-    "url": "https://strapi.io/documentation/3.x.x/"
+    "url": "https://strapi.io/documentation/3.0.0-beta.x/"
   },
   "security": [
     {

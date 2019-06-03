@@ -86,7 +86,7 @@ class PluginCard extends React.Component {
 
     if (!autoReload) {
       this.setState({ showModalAutoReload: true });
-    } else if (currentEnvironment === 'development') {
+    } else if (currentEnvironment !== 'development') {
       this.setState({ showModalEnv: true });
     } else if (!isAlreadyInstalled) {
       downloadPlugin(e);
@@ -105,7 +105,7 @@ class PluginCard extends React.Component {
 
     // Display settings link for a selection of plugins.
     const settingsComponent = PLUGINS_WITH_CONFIG.includes(
-      this.props.plugin.id,
+      this.props.plugin.id
     ) && (
       <div className={styles.settings} onClick={this.handleClickSettings}>
         <i className="fa fa-cog" />
@@ -151,7 +151,7 @@ class PluginCard extends React.Component {
                     `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${
                       this.props.plugin.id
                     }`,
-                    '_blank',
+                    '_blank'
                   )
                 }
               />
@@ -205,7 +205,7 @@ class PluginCard extends React.Component {
             replace(
               this.props.history.location.hash.split('::')[0],
               '#',
-              '',
+              ''
             ) === this.props.plugin.id
           }
           plugin={this.props.plugin}
