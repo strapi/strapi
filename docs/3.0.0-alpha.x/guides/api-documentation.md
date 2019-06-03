@@ -174,7 +174,7 @@ You can add all the entries listed in the [specification](https://swagger.io/spe
   ],
   "externalDocs": {
     "description": "Find out more",
-    "url": "https://strapi.io/documentation/3.x.x/"
+    "url": "https://strapi.io/documentation/3.0.0-alpha.x/"
   },
   "security": [ // This field is important to add your jwt token in the SWAGGER UI
     {

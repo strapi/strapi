@@ -53,7 +53,7 @@ The core team will review your pull request and will either merge it, request ch
 
 To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.x.x/getting-started/install-requirements.html)
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/3.0.0-beta.x/getting-started/install-requirements.html)
 
 Then, please follow the instructions below:
 
