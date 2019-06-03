@@ -66,7 +66,7 @@ If you want to host the administration on another server than the API, [please t
 
 ## Digital Ocean
 
-This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](/3.x.x/getting-started/quick-start.html).
+This is a step-by-step guide for deploying a Strapi project to [Digital Ocean](https://www.digitalocean.com/). Databases can be on a [Digital Ocean Droplet](https://www.digitalocean.com/docs/droplets/) or hosted externally as a service. Prior to starting this guide, you should have created a [Strapi project](/3.0.0-beta.x/getting-started/quick-start.html).
 
 ### Digital Ocean Install Requirements
 
@@ -298,7 +298,7 @@ NODE_ENV=production npm run start
 
 ```
 
-Minimumly, [create an admin user](http://localhost:8080/documentation/3.x.x/getting-started/quick-start.html#_3-create-an-admin-user).
+Minimumly, [create an admin user](http://localhost:8080/documentation/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user).
 
 You will next need to [install and configure PM2 Runtime](#install-and-configure-pm2-runtime).
 
