@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.2",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -73,8 +73,8 @@
     "sanitize.css": "^4.1.0",
     "sass-loader": "^7.1.0",
     "shelljs": "^0.7.8",
-    "strapi-helper-plugin": "3.0.0-beta.1",
-    "strapi-utils": "3.0.0-beta.1",
+    "strapi-helper-plugin": "3.0.0-beta.2",
+    "strapi-utils": "3.0.0-beta.2",
     "style-loader": "^0.23.1",
     "styled-components": "^4.2.0",
     "terser-webpack-plugin": "^1.2.3",
