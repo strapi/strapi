@@ -438,14 +438,14 @@ Navigate to your **Strapi Project folder** and use the following command to star
 `Path: ./my-project/`
 
 ```bash
-pm2 start --name="strapi" server.js --watch -i max
+pm2 start --name="strapi" server.js
 ```
 
-Your Strapi project should now be available on `http://your-ip-address:1337/`.
+Your Strapi project should now be available on `http://your-ip-address:1337/`. **NOTE:** Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
 
-======================================================================
+6. Configure **PM2 Runtime** to launch project on system startup.
 
-Follow the steps below to have your app launch on system startup. (**NOTE:** These steps are based on the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).)
+Follow the steps below to have your app launch on system startup. (**NOTE:** These steps are based on the [PM2 Runtime Startup Hook Guide](https://pm2.io/doc/en/runtime/guide/startup-hook/).)
 
 - Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:
 
@@ -478,7 +478,7 @@ Platform systemd
    $ pm2 unstartup systemd
 ```
 
-- Next, `Save` the new PM2 process list and environment. Then `Start` the service with `systemctl`:
+- Next, `Save` the new PM2 process list and environment.
 
 ```bash
 pm2 save
@@ -488,13 +488,152 @@ pm2 save
 
 ```
 
-- **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
+- **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-ubuntu` to verify everything is working.
 
-Your `Strapi` project is now accessible at: `http://your-ip-address:1337/admin`, in the sections to follow, are a few recommended additional actions to make developing your project more efficient and to set-up a few additional aspects of your server.
+### Set up a webhook
 
-`pm2` is now set-up to watch for any file changes in your project, and will restart the service.
+Providing that your project is set-up on GitHub, you will need to configure your **Strapi Project Repository** with a webhook. The following articles provide additional information to the steps below: [GitHub Creating Webhooks Guide](https://developer.github.com/webhooks/creating/) and [AWS : Use Webhooks to Start a Pipeline](https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-webhooks.html).
 
-==============================================================================
+- You will need to access the `Settings` tab for your `Strapi Project Repository`:
+
+  1. Navigate and click to `Settings` for your repository.
+  2. Click on `Webhooks`, then click `Add Webhook`.
+  3. The fields are filled out like this:
+     - Payload URL: Enter `http://your-ip-address:8080`
+     - Content type: Select `application/json`
+     - Which events would you like to trigger this webhook: Select `Just the push event`
+     - Secret: Enter `YourSecret`
+     - Active: Select the checkbox
+  4. Review the fields and click `Add Webhook`.
+
+- Next, you need to create a `Webhook Script` on your server. These commands create a new file called `webhook.js` which will hold two variables:
+
+```bash
+cd ~
+mkdir NodeWebHooks
+cd NodeWebHooks
+sudo nano webhook.js
+```
+
+- In the `nano` editor, copy/paste the following script, but make sure to replace `your_secret_key` and `repo` with the values that correspond to your project, then save and exit. **NOTE:** Earlier in this guide, there is a optional [recommended step](#the-ecosystem-config-js-file) to create an `ecosystem.config.js` file to manage your application restarting function. Below, use the correct version of the command as seen in the comments.
+
+(This script creates a variable called `PM2_CMD` which is used after pulling from GitHub to update your project. The script first changes to the home directory and then runs the variable `PM2_CMD` as `pm2 restart strapi`. If the project uses the `ecosystem.config.js` keep your `ecosystem.config.js` as the point of starting your application and use the alternative below. **PLEASE SEE COMMENTS IN THE CODE**.)
+
+```js
+var secret = 'your_secret_key';
+var repo = '~/path-to-your-repo/';
+
+const http = require('http');
+const crypto = require('crypto');
+const exec = require('child_process').exec;
+
+// Use this command if you DID NOT create the ecosystem.config.js file
+const PM2_CMD = 'pm2 restart strapi';
+// Use this command if you DID create the ecosystem.config.js file and comment out/delete the above line.
+// const PM2_CMD = 'cd ~ && pm2 startOrRestart ecosystem.config.js';
+
+http
+  .createServer(function(req, res) {
+    req.on('data', function(chunk) {
+      let sig =
+        'sha1=' +
+        crypto
+          .createHmac('sha1', secret)
+          .update(chunk.toString())
+          .digest('hex');
+
+      if (req.headers['x-hub-signature'] == sig) {
+        exec(
+          `cd ${repo} && git pull && ${PM2_CMD}`,
+          (error, stdout, stderr) => {
+            if (error) {
+              console.error(`exec error: ${error}`);
+              return;
+            }
+            console.log(`stdout: ${stdout}`);
+            console.log(`stderr: ${stderr}`);
+          },
+        );
+      }
+    });
+
+    res.end();
+  })
+  .listen(8080);
+```
+
+- Allow the port to communicate with outside web traffic for `port 8080`:
+  - Within your **AWS EC2** dashboard:
+    - In the left hand menu, click on `Security Groups`,
+    - Select with the checkbox, the correct `Group Name`, e.g. `strapi`,
+    - At the bottom of the screen, click `Edit`, and then `Add Rule`:
+      - Type: `Custom TCP`
+      - Protocol: `TCP`
+      - Port Range: `8080`
+      - Source: `Custom` `0.0.0.0/0, ::/0`
+    - Then `Save`
+
+Earlier you setup `pm2` to start the services (your **Strapi project**) whenever the **EC2 instance** reboots or is started. You will now do the same for the `webhook` script.
+
+- Install the webhook as a `Systemd` service
+
+  - Run `echo $PATH` and copy the output for use in the next step.
+
+```
+cd ~
+echo $PATH
+
+/home/your-name/.npm-global/bin:/home/your-name/bin:/home/your-name/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+```
+
+- Create a `webhook.service` file:
+
+```bash
+sudo nano /etc/systemd/system/webhook.service
+```
+
+- In the `nano` editor, copy/paste the following script, but make sure to replace `your-name` **in two places** with `Ubuntu`, and the `path from above` then save and exit:
+
+```bash
+[Unit]
+Description=Github webhook
+After=network.target
+
+[Service]
+Environment=PATH=/PASTE-PATH_HERE
+Type=simple
+User=your-name
+ExecStart=/usr/bin/nodejs /home/your-name/NodeWebHooks/webhook.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+- Enable and start the new service so it starts when the system boots:
+
+```bash
+sudo systemctl enable webhook.service
+sudo systemctl start webhook
+```
+
+- Check the status of the webhook:
+
+```bash
+sudo systemctl status webhook
+```
+
+- You may test your **webhook** by following the instructions [here](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync#step-4-testing-the-webhook).
+
+### Further steps to take
+
+- You can **add a domain name** or **use a subdomain name** for your Strapi project, you will need to [install NGINX](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/) and [configure it](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/nodejs-platform-proxy.html).
+  - **NOTE:** After setting up **NGINX**, for security purposes, you need to disable port access on `Port 1337`. You may do this easily from your **EC2 Dashboard**. In `Security Groups` (lefthand menu), click the checkbox of the group, eg. `strapi`, and below in the `inbound` tab, click `Edit`, and delete the rule for `Port Range` : `1337` by click the `x`.
+- To **install SSL**, you will need to [install and run Certbot by Let's Encrypt](https://certbot.eff.org/docs/using.html).
+
+- Set-up [Nginx with HTTP/2 Support](https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-with-http-2-support-on-ubuntu-18-04) for Ubuntu 18.04.
+
+Your `Strapi` project has been installed on an **AWS EC2 instance** using **Ubuntu 18.04**.
 
 ## Digital Ocean
 
@@ -585,7 +724,7 @@ git --version
 
 2. **OPTIONAL:** Install Git. **NOTE:** Only do if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04).
 
-3. Complete the global **username** and **email** settings: [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
+3. Complete the global **username** and **GitHub** settings: [Setting up Git](https://www.digitalocean.com/community/tutorials/how-to-install-git-on-ubuntu-18-04#setting-up-git)
 
 After installing and configuring Git on your Droplet. Please continue to the next step, [installing a database](#install-the-database-for-your-project).
 
