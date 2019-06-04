@@ -20,7 +20,10 @@ First, let's clean your project's dependencies and update its `package.json` fil
 
 ### Clean your `node_modules`
 
+Start by deleting the `package-lock.json` or `yarn.lock` file. Then remove all your current `node_modules`:
+
 ```bash
+rm package-lock.json # OR rm yarn.lock
 rm -rf node_modules
 ```
 
