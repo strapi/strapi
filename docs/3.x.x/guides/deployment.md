@@ -88,18 +88,22 @@ If you want to host the administration on another server than the API, [please t
 
 ## Amazon AWS
 
-This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect to an [Amazon AWS S3](https://aws.amazon.com/s3/) for hosting and serving the images within your project. Prior to starting this guide, you should have created a [Strapi project](/3.x.x/getting-started/quick-start.html).
+This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](/3.x.x/getting-started/quick-start.html), to use for deploying on AWS.
 
 ### Amazon AWS Install Requirement and creating an IAM non-root user
 
 - You must have a free [Amazon AWS](aws.amazon.com/free) before doing these steps.
 
-Best practices for using **AWS Amazon** services indicate not using your root account user and using instead the [IAM (AWS Identity and Access Management) service](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html). Your root user is only used for a very [few select tasks](https://docs.aws.amazon.com/general/latest/gr/aws_tasks-that-require-root.html). You create an **Administrator user and Group** for such things as billing. And other tasks are done with a **regular IAM User**. You will find your unique **IAM users sign-in link** located at the top of the [IAM Console](https://console.aws.amazon.com/iam/home).
+Best practices for using **AWS Amazon** services indicate not using your root account user and using instead the [IAM (AWS Identity and Access Management) service](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html). Your root user is only used for a very [few select tasks](https://docs.aws.amazon.com/general/latest/gr/aws_tasks-that-require-root.html). For example, for **Billing**, you create an **Administrator user and Group** for such things. And other, more routine tasks are done with a **regular IAM User**.
 
 1. Follow these instructions for [creating your Administrator IAM Admin User and Group](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html).
+
+- Login as **root**.
+- Create **Administrator** role.
+
 2. Next, create a **regular user** for the creation and management of your Strapi project.
 
-- Log out of your **root user** and log in to your **administrator** user you just created.
+- Copy your **IAM USers sign-in link** found here: [IAM Console](https://console.aws.amazon.com/iam/home) and then log out of your **root user** and log in to your **administrator** user you just created.
 - Return to the IAM Console by `searching for IAM` and clicking or going here: [IAM Console](https://console.aws.amazon.com/iam/home).
 - Click on `Users`, in the left hand menu, and then click `Add User`:
   1. In the **Set user details** screen:
@@ -114,7 +118,7 @@ Best practices for using **AWS Amazon** services indicate not using your root ac
     - search for `RDS` and check `AmazonRDSFullAccess`
     - search for `s3` and check `AmazonS3FullAccess`
     - Click `Create group`
-  - Ensure your user is part of this new `Developers` group, by clicking to `Add user to group` and check the `Developers` group.
+  - Click to `Add user to group` and check the `Developers` group, to add the new user.
   - Click `Next: Tags`.
   3. **Add tags** (optional)
   - This step is **optional** and based on your workflow and project scope.
@@ -145,7 +149,8 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
 
 - `Find Services`, seach for `ec2` and click on `EC2, Virtual Servers in the Cloud`
 
-2. Click on the blue `Launch Instance` button.
+2. **Select Appropriate Region**. In the top menu, near your IAM Account User name, select from the dropdown, the most appropriate region to host your Strapi instance. For example, `US East (N.Virginia)` or `Asia Pacific (Hong Kong)`. You will want to remember this region for configuring other services on AWS and locating these services in the same region.
+3. Click on the blue `Launch Instance` button.
 
 - New trial users, click `free tier only` in the left menu
 - `Select` **Ubuntu Server 18.04 LTS (HVM), SSD Volume Type**
@@ -155,28 +160,30 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
 - In the **Step 5: Add Tags**, add tags to suit your project or leave blank, then click `Next: Configure Security Group`.
 - In the **Step 6: Configure Security Group**, configure the `security settings` as follows:
   - **Assign a security group:** Check as `Create a new security group`
-  - **Security group name:** Name it, e.g. `Strapi`
-  - **Description:** Write a short description, e.g. `Strapi instance security settings`
+  - **Security group name:** Name it, e.g. `strapi`
+  - **Description:** Write a short description, e.g. `strapi instance security settings`
   - You should have a rule: **Type:** `SSH`, **Protocol:** `TCP`, **Port Range** `22`, **Source:** `0.0.0.0/0` (all IP addresses). If not, add it.
   - Click the grey `Add rule` to add each of these rules:
     - **Type:** `SSH`, **Protocol:** `TCP`, **Port Range** `22`, **Source:** `::/0`
     - **Type:** `HTTP`, **Protocol:** `TCP`, **Port Range** `80`, **Source:** `0.0.0.0/0, ::/0`
     - **Type:** `HTTPS`, **Protocol:** `TCP`, **Port Range** `443`, **Source:** `0.0.0.0/0, ::/0`
-    - **Type:** `Custom TCP IP Rule`, **Protocol:** `TCP`, **Port Range** `1337`, **Source:** `0.0.0.0/0` **Description:** `Strapi Default Port`
-      (These rules are basic configuration and security rules. You may want to tighten and limit these rules based on your own project and organization policies. Note: After setting up youir Nginx rules and domain name with the proper aliases, you will need to delete the rule regarding port 1337 as this is for testing and setting up the project - not for production.)
+    - **Type:** `Custom TCP Rule`, **Protocol:** `TCP`, **Port Range** `1337`, **Source:** `0.0.0.0/0` **Description:** `Strapi for Testing Port`
+      (These rules are basic configuration and security rules. You may want to tighten and limit these rules based on your own project and organization policies. **Note:** After setting up your Nginx rules and domain name with the proper aliases, you will need to delete the rule regarding port 1337 as this is for testing and setting up the project - **not for production**.)
 - Click the blue `Review and Launch` button.
 - Review the details, in the **Step 7: Review Instance Launch**, then click the blue `Launch` button. Now, you need to **select an existing key pair** or **create a new key pair**. To create a new key pair, do the following:
   - Select the dropdown option `Create a new key pair`.
   - Name your the key pair name, e.g. `ec2-strapi-key-pair`
-  - **IMPORTANT** Download the **private key file** (.pem file).
+  - **IMPORTANT** Download the **private key file** (.pem file). This file is needed so note where it was downloaded.
   - After downloading the file, click the blue `Launch Instances` button.
 
 Your instances are now running. Continue to the next steps.
 
 ### Install a PostgreSQL database on AWS RDS
 
+Amazon calls their database hosting services **RDS**. Multiple database options exist and are available. In this guide, **PostgreSQL** is used as the example, and the steps are similar for each of the other database that are supported by Strapi. (MySQL, MondoDB, PostgreSQL, MariaDB, SQLite). You will set-up an **RDS instance** to host your `postgresql` database. **NOTE:** RDS does **NOT** have a completely free evaluation tier.
+
 1. Navigate to the `AWS RDS Service`. In the top menu, click on `Services` and do a search for `rds`, click on `RDS, Managed Relational Database Service`.
-2. In the top menu bar, select the region that is the same as the EC2 instance. e.g. `EU (Paris)` or `US East (N. Virgina)`.
+2. In the top menu bar, select the region that is the same as the EC2 instance, e.g. `EU (Paris)` or `US East (N. Virgina)`.
 
 3. Click the orange `Create database` button. Follow these steps to complete installation of a `PostgreSQL` database:
 
@@ -186,16 +193,196 @@ Your instances are now running. Continue to the next steps.
   - **DB instance identifier** Give a name to your database, e.g. `strapi-database`
   - **Credential Settings**: This is your `psql` database _username_ and _password_.
     - **Master username:** Keep as `postgres`, or change (optional)
-    - `Uncheck` _Auto generate a password_, type in a secret password.
-- **Network & Security** Set `Public Accessibility` to `Yes`.
+    - `Uncheck` _Auto generate a password_, and then type in a new secret password.
+- **Connectivity**, and **Additional connectivity configuration**: Set `Publicly accessible` to `Yes`.
 - **OPTIONAL:** Review any further options (**DB Instance size**, **Storage**, **Connectivity**), and modify to your project needs.
 - You need to give you Database a name. Under **Additional configuration**:
-  - **Initial database name:** Give your database a name, e.g. `strapi`.
+  - **Additional configuration**, and then **Initial database name:** Give your database a name, e.g. `strapi`.
 - Review the rest of the options and click the orange, `Create database` button.
 
 After a few minutes, you may refresh your page and see that your database has been successfully created.
 
-###
+### Configure S3 for image hosting
+
+Amazon calls cloud storage services **S3**. You create a **bucket**, which holds the files, images, folders, etc... which then can be accessed and served by your application. This guide will show you have to use **s3** to host the images for your project.
+
+1. Navigate to the `Amazon S3`. In the top menu, click on `Services` and do a search for `s3`, click on `Scalable storage in the cloud`.
+2. Click on the blue `Create bucket` button:
+
+- Give you bucket a unqiue name, under **Bucket name**, e.g. `my-project-name-images`.
+- Select the most appropriate region, under **Region**, e.g. `EU (Paris)` or `US East (N. Virgina)`.
+- Click `Next`.
+- Configure any appropriate options for your project in the **Configure Options** page, and click `next`.
+- Under **Block public access**:
+  - Uncheck `Block all public access` and set the permissions as follows:
+    - `Uncheck` Block new public ACLs and uploading public objects (Recommended)
+    - `Uncheck` Block public access to buckets and objects granted through any access control lists (ACLs)
+    - `Check` Block public access to buckets and objects granted through new public bucket policies
+    - `Check` Block public and cross-account access to buckets and objects through any public bucket policies
+  - Select `Do not grant Amazon S3 Log Delivery group write access to this bucket`.
+- Click `Next`.
+- **Review** and click `Create bucket`.
+
+### Configure EC2 as a Node.js server
+
+You will set-up your EC2 server as a Node.js server. Including basic configuration and Git.
+
+**Requirements:**
+You will need your **EC2** ip address:
+
+- In the `AWS Console`, navigate to the `AWS EC2`. In the top menu, click on `Services` and do a search for `ec2`, click on `Virtual Servers in the cloud`.
+- Click on `1 Running Instance` and note the `IPv4 Public OP` address. E.g. `34.182.83.134`.
+
+**On your local computer:**
+
+1. You downloaded, in a previous step, your `User` .pem file. e.g. `ec2-strapi-key-pair.pem`. This needs to be included in each attempt to `SSH` into your `EC2 server`. Move your `.pem` file to `~/.ssh/`, follow these steps:
+
+- On your local machine, navigate to the folder that contains your .pem file. e.g. `downloads`
+- Move the .pem file to `~/.ssh/` and set file permissions:
+  `Path:./path-to/.pem-file/`
+
+```bash
+mv ec2-strapi-key-pair.pem ~/.ssh/
+chmod 400 ~/.ssh/ec2-strapi-key-pair.pem
+```
+
+2. Log in to your server as the default `ubuntu` user:
+
+**NOTE:** In the future, each time you log into your `EC2` server, you will need to add the path to the .pem file, e.g. `ssh -i ~/.ssh/ec2-strapi-key-pair.pem ubuntu@12.123.123.11`.
+
+```bash
+ssh -i ~/.ssh/ec2-strapi-key-pair.pem ubuntu@12.123.123.11
+
+Welcome to Ubuntu 18.04.2 LTS (GNU/Linux 4.15.0-1032-aws x86_64)
+
+...
+
+To run a command as administrator (user "root"), use "sudo <command>".
+See "man sudo_root" for details.
+
+ubuntu@ip-12.123.123.11:~$
+
+```
+
+3. Install **Node.js** with **npm**:
+
+Strapi currently supports `Node.js v10.x.x`. The following steps will install Node.js onto your EC2 server.
+
+```bash
+cd ~
+curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+...
+sudo apt-get install nodejs
+...
+node -v && npm -v
+```
+
+The last command `node -v && npm -v` should output two versions numbers, eg. `v10.x.x, 6.x.x`.
+
+4.
+
+5. Install and configure **PM2** Runtime
+
+[PM2 Runtime](https://pm2.io/doc/en/runtime/overview/?utm_source=pm2&utm_medium=website&utm_campaign=rebranding) allows you to keep your Strapi project alive and to reload it without downtime.
+
+Ensure you are logged in as a **non-root** user. You will install **PM2** globally:
+
+```bash
+npm install pm2@latest -g
+```
+
+Navigate to your **Strapi Project folder** and use the following command to set the environment variable to production and start `pm2`:
+
+`Path: ./my-project/`
+
+```bash
+NODE_ENV=production pm2 start --name="strapi" server.js --watch -i max
+```
+
+Follow the steps below to have your app launch on system startup. (**NOTE:** These steps are based on the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).)
+
+- Generate and configure a startup script to launch PM2, it will generate a Startup Script to copy/paste, do so:
+
+```bash
+$ cd ~
+$ pm2 startup systemd
+
+[PM2] Init System found: systemd
+[PM2] To setup the Startup Script, copy/paste the following command:
+sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
+```
+
+- Copy/paste the generated command:
+
+```bash
+$ sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u your-name --hp /home/your-name
+
+[PM2] Init System found: systemd
+Platform systemd
+
+. . .
+
+
+[PM2] [v] Command successfully executed.
++---------------------------------------+
+[PM2] Freeze a process list on reboot via:
+   $ pm2 save
+
+[PM2] Remove init script via:
+   $ pm2 unstartup systemd
+```
+
+- Next, `Save` the new PM2 process list and environment. Then `Start` the service with `systemctl`:
+
+```bash
+pm2 save
+
+[PM2] Saving current process list...
+[PM2] Successfully saved in /home/your-name/.pm2/dump.pm2
+
+```
+
+- **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
+
+Your `Strapi` project is now accessible at: `http://your-ip-address:1337/admin`, in the sections to follow, are a few recommended additional actions to make developing your project more efficient and to set-up a few additional aspects of your server.
+
+- Lastly, you will need to configure a `ecosystem.config.js` file. It will establish a `watch` for `pm2` and restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+
+  - You will need to open your `nano` editor and then `copy/paste` the following:
+
+```bash
+cd ~
+pm2 init
+sudo nano ecosystem.config.js
+```
+
+- Next, replace the boilerplate content in the file, with the following:
+
+```js
+module.exports = {
+  apps: [
+    {
+      name: 'your-app-name',
+      script: '.path-to/your-strapi-app/server.js',
+      watch: './strapi-project-root/',
+      ignore_watch: ['node_modules', 'public'],
+      watch_delay: 1000,
+    },
+  ],
+};
+```
+
+`pm2` is now set-up to watch for any file changes in your project, and will restart the service.
+
+### Prepare and clone Strapi project to server
+
+These instructions assume that you have already created a **Strapi** project, and have it in a **GitHub** repository.
+
+**On your local computer:**
+
+You will need to update the `database.json` file to configure Strapi to connect to the `RDS` database. And you will need to install an npm package called `pg` locally on your dev server.
+
+1. You will need to have the following information
 
 ## Digital Ocean
 
