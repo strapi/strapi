@@ -72,7 +72,7 @@ Strapi is a free and open-source Headless CMS delivering your content anywhere y
 #### ⏳ Installation
 
 ```bash
-npm install strapi@beta -g
+npm install strapi@alpha -g
 ```
 
 **We recommend always using the latest version of Strapi to start your new projects**.
