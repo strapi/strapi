@@ -94,7 +94,7 @@ This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](
 
 - You must have a free [Amazon AWS](aws.amazon.com/free) before doing these steps.
 
-Best practices for using **AWS Amazon** services indicate not using your root account user and using instead the [IAM (AWS Identity and Access Management) service](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html). Your root user is only used for a very [few select tasks](https://docs.aws.amazon.com/general/latest/gr/aws_tasks-that-require-root.html). For example, for **Billing**, you create an **Administrator user and Group** for such things. And other, more routine tasks are done with a **regular IAM User**.
+Best practices for using **AWS Amazon** services state to not use your root account user and to use instead the [IAM (AWS Identity and Access Management) service](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html). Your root user is therefore only used for a very few [select tasks](https://docs.aws.amazon.com/general/latest/gr/aws_tasks-that-require-root.html). For example, for **billing**, you create an **Administrator user and Group** for such things. And other, more routine tasks are done with a **regular IAM User**.
 
 1. Follow these instructions for [creating your Administrator IAM Admin User and Group](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started_create-admin-group.html).
 
@@ -103,7 +103,7 @@ Best practices for using **AWS Amazon** services indicate not using your root ac
 
 2. Next, create a **regular user** for the creation and management of your Strapi project.
 
-- Copy your **IAM USers sign-in link** found here: [IAM Console](https://console.aws.amazon.com/iam/home) and then log out of your **root user** and log in to your **administrator** user you just created.
+- Copy your **IAM Users sign-in link** found here: [IAM Console](https://console.aws.amazon.com/iam/home) and then log out of your **root user** and log in to your **administrator** user you just created.
 - Return to the IAM Console by `searching for IAM` and clicking or going here: [IAM Console](https://console.aws.amazon.com/iam/home).
 - Click on `Users`, in the left hand menu, and then click `Add User`:
   1. In the **Set user details** screen:
@@ -149,10 +149,10 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
 
 - `Find Services`, seach for `ec2` and click on `EC2, Virtual Servers in the Cloud`
 
-2. **Select Appropriate Region**. In the top menu, near your IAM Account User name, select from the dropdown, the most appropriate region to host your Strapi instance. For example, `US East (N.Virginia)` or `Asia Pacific (Hong Kong)`. You will want to remember this region for configuring other services on AWS and locating these services in the same region.
+2. **Select Appropriate Region**. In the top menu, near your IAM Account User name, select, from the dropdown, the most appropriate region to host your Strapi project. For example, `US East (N.Virginia)` or `Asia Pacific (Hong Kong)`. You will want to remember this region for configuring other services on AWS and serving these services from the same region.
 3. Click on the blue `Launch Instance` button.
 
-- New trial users, click `free tier only` in the left menu
+- \*\*New trial users, click `free tier only` in the left menu
 - `Select` **Ubuntu Server 18.04 LTS (HVM), SSD Volume Type**
 - Ensure `General purpose` + `t2.micro, Free tier eligible` is `checked`.
 - Click the grey `Next: Configure Instance Details` and `Next: Add Storage`
@@ -168,19 +168,21 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
     - **Type:** `HTTP`, **Protocol:** `TCP`, **Port Range** `80`, **Source:** `0.0.0.0/0, ::/0`
     - **Type:** `HTTPS`, **Protocol:** `TCP`, **Port Range** `443`, **Source:** `0.0.0.0/0, ::/0`
     - **Type:** `Custom TCP Rule`, **Protocol:** `TCP`, **Port Range** `1337`, **Source:** `0.0.0.0/0` **Description:** `Strapi for Testing Port`
-      (These rules are basic configuration and security rules. You may want to tighten and limit these rules based on your own project and organization policies. **Note:** After setting up your Nginx rules and domain name with the proper aliases, you will need to delete the rule regarding port 1337 as this is for testing and setting up the project - **not for production**.)
+      (These rules are basic configuration and security rules. You may want to tighten and limit these rules based on your own project and organizational policies. **Note:** After setting up your Nginx rules and domain name with the proper aliases, you will need to delete the rule regarding port 1337 as this is for testing and setting up the project - **not for production**.)
 - Click the blue `Review and Launch` button.
 - Review the details, in the **Step 7: Review Instance Launch**, then click the blue `Launch` button. Now, you need to **select an existing key pair** or **create a new key pair**. To create a new key pair, do the following:
   - Select the dropdown option `Create a new key pair`.
   - Name your the key pair name, e.g. `ec2-strapi-key-pair`
-  - **IMPORTANT** Download the **private key file** (.pem file). This file is needed so note where it was downloaded.
+  - **IMPORTANT** Download the **private key file** (.pem file). This file is needed, so note where it was downloaded.
   - After downloading the file, click the blue `Launch Instances` button.
 
-Your instances are now running. Continue to the next steps.
+Your instance is now running. Continue to the next steps.
 
 ### Install a PostgreSQL database on AWS RDS
 
-Amazon calls their database hosting services **RDS**. Multiple database options exist and are available. In this guide, **PostgreSQL** is used as the example, and the steps are similar for each of the other database that are supported by Strapi. (MySQL, MondoDB, PostgreSQL, MariaDB, SQLite). You will set-up an **RDS instance** to host your `postgresql` database. **NOTE:** RDS does **NOT** have a completely free evaluation tier.
+Amazon calls their database hosting services **RDS**. Multiple database options exist and are available. In this guide, **PostgreSQL** is used as the example, and the steps are similar for each of the other database that are supported by Strapi. (**MySQL**, **MondoDB**, **PostgreSQL**, **MariaDB**, **SQLite**). You will set-up an **RDS instance** to host your `postgresql` database.
+
+**NOTE:** **Amazon RDS** does **NOT** have a completely free evaluation tier. After finishing this guide, if you are only testing, please remember to [delete the database](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_DeleteInstance.html). Otherwise, you will incur charges.
 
 1. Navigate to the `AWS RDS Service`. In the top menu, click on `Services` and do a search for `rds`, click on `RDS, Managed Relational Database Service`.
 2. In the top menu bar, select the region that is the same as the EC2 instance, e.g. `EU (Paris)` or `US East (N. Virgina)`.
@@ -204,7 +206,7 @@ After a few minutes, you may refresh your page and see that your database has be
 
 ### Configure S3 for image hosting
 
-Amazon calls cloud storage services **S3**. You create a **bucket**, which holds the files, images, folders, etc... which then can be accessed and served by your application. This guide will show you have to use **s3** to host the images for your project.
+Amazon calls cloud storage services **S3**. You create a **bucket**, which holds the files, images, folders, etc... which then can be accessed and served by your application. This guide will show you have to use **Amazon S3** to host the images for your project.
 
 1. Navigate to the `Amazon S3`. In the top menu, click on `Services` and do a search for `s3`, click on `Scalable storage in the cloud`.
 2. Click on the blue `Create bucket` button:
@@ -295,9 +297,10 @@ npm config set prefix '~/.npm-global'
 sudo nano ~/.profile
 ```
 
-Add this line.
+Add these lines at the bottom of the `~/.profile` file.
 
 ```ini
+# set PATH so global node modules install without permission issues
 export PATH=~/.npm-global/bin:$PATH
 ```
 
@@ -323,7 +326,7 @@ git --version
 
 2. **OPTIONAL:** Install Git. **NOTE:** Only do if _not installed_, as above. Please follow these directions on [how to install Git on Ubuntu 18.04](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
-3. Complete the global **username** and **email** settings: [Setting up Git - Your Identity](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
+3. Configure the global **username** and **email** settings: [Setting up Git - Your Identity](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 
 After installing and configuring Git on your EC2 instance. Please continue to the next step.
 
@@ -407,7 +410,7 @@ Ensure you are logged in as a **non-root** user. You will install **PM2** global
 npm install pm2@latest -g
 ```
 
-Now, you will need to configure a `ecosystem.config.js` file. This file will set `env` variables that connect Strapi to your database. It will also establish a `watch` for `pm2` and restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+Now, you will need to configure a `ecosystem.config.js` file. This file will set `env` variables that connect Strapi to your database. It will also be used to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrived from Github).You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
 
 - You will need to open your `nano` editor and then `copy/paste` the following:
 
@@ -421,15 +424,19 @@ sudo nano ecosystem.config.js
 
 ```js
 module.exports = {
-  apps: [
-    {
-      name: 'your-pm2-app-name',
-      script: '.path-to/your-strapi-app/server.js',
-      watch: './strapi-project-root/',
-      ignore_watch: ['node_modules', 'public'],
-      watch_delay: 1000,
+  apps : [{
+    name: 'strapi',
+    cwd: '/home/path-to/your-strapi-root-folder'
+    script: 'server.js',
+    env: {
+      NODE_ENV: 'production',
+      DATABASE_HOST: 'your-unique-url.rds.amazonaws.com', // database Endpoint under 'Connectivity & Security' tab
+      DATABASE_PORT: '5432',
+      DATABASE_NAME: 'strapi',  // DB name under 'Configuration' tab
+      DATABASE_USERNAME: 'postgres', // default username
+      DATABASE_PASSWORD: 'Password',
     },
-  ],
+  }],
 };
 ```
 
@@ -492,7 +499,7 @@ pm2 save
 
 ### Set up a webhook
 
-Providing that your project is set-up on GitHub, you will need to configure your **Strapi Project Repository** with a webhook. The following articles provide additional information to the steps below: [GitHub Creating Webhooks Guide](https://developer.github.com/webhooks/creating/) and [AWS : Use Webhooks to Start a Pipeline](https://docs.aws.amazon.com/codepipeline/latest/userguide/pipelines-webhooks.html).
+Providing that your project is set-up on GitHub, you will need to configure your **Strapi Project Repository** with a webhook. The following article provides additional information to the steps below: [GitHub Creating Webhooks Guide](https://developer.github.com/webhooks/creating/).
 
 - You will need to access the `Settings` tab for your `Strapi Project Repository`:
 
@@ -520,8 +527,8 @@ sudo nano webhook.js
 (This script creates a variable called `PM2_CMD` which is used after pulling from GitHub to update your project. The script first changes to the home directory and then runs the variable `PM2_CMD` as `pm2 restart strapi`. If the project uses the `ecosystem.config.js` keep your `ecosystem.config.js` as the point of starting your application and use the alternative below. **PLEASE SEE COMMENTS IN THE CODE**.)
 
 ```js
-var secret = 'your_secret_key';
-var repo = '~/path-to-your-repo/';
+var secret = 'your_secret_key'; // Your secret key from Settings in GitHub
+var repo = '~/path-to-strapi-root-folder/'; // path to the root of your Strapi project on server
 
 const http = require('http');
 const crypto = require('crypto');
@@ -600,10 +607,10 @@ Description=Github webhook
 After=network.target
 
 [Service]
-Environment=PATH=/PASTE-PATH_HERE
+Environment=PATH=/PASTE-PATH_HERE #path from echo $PATH (as above)
 Type=simple
-User=your-name
-ExecStart=/usr/bin/nodejs /home/your-name/NodeWebHooks/webhook.js
+User=your-name #replace your-name
+ExecStart=/usr/bin/nodejs /home/your-name/NodeWebHooks/webhook.js #replace your-name
 Restart=on-failure
 
 [Install]
@@ -945,7 +952,8 @@ In the sections to follow, are a few recommended additional actions to make deve
 
 ### The ecosystem.config.js file
 
->>>>>>> 7d63600e21dfe35f34e62832cbaa47af5a77639b:docs/3.0.0-alpha.x/guides/deployment.md
+> > > > > > > 7d63600e21dfe35f34e62832cbaa47af5a77639b:docs/3.0.0-alpha.x/guides/deployment.md
+
 - You will need to configure an `ecosystem.config.js` file. It will be used by `pm2` to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
 
   - You will need to open your `nano` editor and then `copy/paste` the following:
