@@ -131,9 +131,8 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
 2. **Select Appropriate Region**. In the top menu, near your IAM Account User name, select, from the dropdown, the most appropriate region to host your Strapi project. For example, `US East (N.Virginia)` or `Asia Pacific (Hong Kong)`. You will want to remember this region for configuring other services on AWS and serving these services from the same region.
 3. Click on the blue `Launch Instance` button.
 
-- **New trial** users, click `free tier only` in the left menu
 - `Select` **Ubuntu Server 18.04 LTS (HVM), SSD Volume Type**
-- Ensure `General purpose` + `t2.micro, Free tier eligible` is `checked`.
+- Ensure `General purpose` + `t2.small` is `checked`. **NOTE:** `t2.small` is the smallest instance type in which Strapi runs. `t2.nano` and `t2.micro` **DO NOT** work.
 - Click the grey `Next: Configure Instance Details` and `Next: Add Storage`
 - In the **Step 4: Add Storage** verify the `General Purpose SSD (gb2)`, then click `Next: Add tags`.
 - In the **Step 5: Add Tags**, add tags to suit your project or leave blank, then click `Next: Configure Security Group`.
@@ -390,7 +389,7 @@ Ensure you are logged in as a **non-root** user. You will install **PM2** global
 npm install pm2@latest -g
 ```
 
-Now, you will need to configure a `ecosystem.config.js` file. This file will set `env` variables that connect Strapi to your database. It will also be used to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrived from Github).You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+Now, you will need to configure a `ecosystem.config.js` file. This file will set `env` variables that connect Strapi to your database. It will also be used to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrived from Github). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
 
 - You will need to open your `nano` editor and then `copy/paste` the following:
 
@@ -426,7 +425,7 @@ Navigate to your **Strapi Project folder** and use the following command to star
 `Path: ./my-project/`
 
 ```bash
-pm2 start --name="strapi" server.js
+pm2 start --name="strapi" npm -- start
 ```
 
 Your Strapi project should now be available on `http://your-ip-address:1337/`. **NOTE:** Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
@@ -577,7 +576,7 @@ echo $PATH
 sudo nano /etc/systemd/system/webhook.service
 ```
 
-- In the `nano` editor, copy/paste the following script, but make sure to replace `your-name` **in two places** with `Ubuntu`, and the `path from above` then save and exit:
+- In the `nano` editor, copy/paste the following script, but make sure to replace `ubuntu` **in two places** if you changed the default `ubuntu` user, and `paste the $PATH` from above. **DELETE THE #COMMENTS BEFORE SAVING**, then save and exit:
 
 ```bash
 [Unit]
@@ -587,8 +586,8 @@ After=network.target
 [Service]
 Environment=PATH=/PASTE-PATH_HERE #path from echo $PATH (as above)
 Type=simple
-User=your-name #replace your-name
-ExecStart=/usr/bin/nodejs /home/your-name/NodeWebHooks/webhook.js #replace your-name
+User=ubuntu #replace with your name, if changed from default ubuntu user
+ExecStart=/usr/bin/nodejs /home/ubuntu/NodeWebHooks/webhook.js #replace with your name, if changed from default ubuntu user
 Restart=on-failure
 
 [Install]
