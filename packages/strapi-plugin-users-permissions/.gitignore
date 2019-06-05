@@ -2,6 +2,8 @@
 coverage
 build
 node_modules
+
+# writable files
 jwt.json
 config/layout.json
 actions.json

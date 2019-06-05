@@ -23,7 +23,7 @@ module.exports = {
   targets: {
 
     // Call the `admin` generator.
-    '.': ['admin'],
+    // '.': ['admin'],
 
     // Main package.
     'package.json': {
@@ -60,9 +60,17 @@ module.exports = {
       folder: {}
     },
 
+    'api/.gitkeep': {
+      copy: 'gitkeep'
+    },
+
     // Empty plugins directory.
-    'plugins': {
+    'extensions': {
       folder: {}
+    },
+    
+    'extensions/.gitkeep': {
+      copy: 'gitkeep'
     },
 
     // Empty public directory.

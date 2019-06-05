@@ -40,7 +40,7 @@
   "form.attribute.item.enumeration.graphql": "Nadpisanie nazwy dla GraphQL",
   "form.attribute.item.enumeration.graphql.description": "Pozwalaj na nadpisanie domyślnie wygenerowanej nazwy dla GraphQL.",
   "form.attribute.item.enumeration.name": "Nazwa",
-  "form.attribute.item.enumeration.placeholder": "Przykład: rano,południe,wieczór",
+  "form.attribute.item.enumeration.placeholder": "Przykład:\nrano\npołudnie\nwieczór",
   "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "Nazwa",
   "form.attribute.item.maximum": "Maksymalna wartość",

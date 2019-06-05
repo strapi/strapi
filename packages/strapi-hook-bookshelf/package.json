@@ -1,6 +1,6 @@
 {
   "name": "strapi-hook-bookshelf",
-  "version": "3.0.0-alpha.26.2",
+  "version": "3.0.0-beta.2",
   "description": "Bookshelf hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -16,13 +16,13 @@
   },
   "main": "./lib",
   "dependencies": {
-    "bookshelf": "^0.12.1",
-    "inquirer": "^6.2.1",
-    "lodash": "^4.17.5",
-    "pluralize": "^6.0.0",
-    "rimraf": "^2.6.2",
-    "strapi-hook-knex": "3.0.0-alpha.26.2",
-    "strapi-utils": "3.0.0-alpha.26.2"
+    "bookshelf": "^0.14.2",
+    "inquirer": "^6.3.1",
+    "lodash": "^4.17.11",
+    "pluralize": "^7.0.0",
+    "rimraf": "^2.6.3",
+    "strapi-hook-knex": "3.0.0-beta.2",
+    "strapi-utils": "3.0.0-beta.2"
   },
   "strapi": {
     "dependencies": [
@@ -30,8 +30,7 @@
     ]
   },
   "scripts": {
-    "test": "echo \"no tests yet\"",
-    "prepublishOnly": "npm prune"
+    "test": "echo \"no tests yet\""
   },
   "author": {
     "email": "hi@strapi.io",
@@ -53,8 +52,9 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 10.0.0",
+    "node": "^10.0.0",
     "npm": ">= 6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

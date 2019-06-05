@@ -15,14 +15,14 @@ module.exports = {
           {
             slug: 'application',
             name: 'menu.item.application',
-            icon: 'globe'
+            icon: 'globe',
           },
           {
             slug: 'languages',
             name: 'menu.item.languages',
-            icon: 'language'
-          }
-        ]
+            icon: 'language',
+          },
+        ],
       },
       {
         name: 'menu.section.environments',
@@ -30,39 +30,41 @@ module.exports = {
           {
             slug: 'databases',
             name: 'menu.item.database',
-            icon: 'database'
+            icon: 'database',
           },
           {
             slug: 'request',
             name: 'menu.item.request',
-            icon: 'compress'
+            icon: 'compress',
           },
           {
             slug: 'response',
             name: 'menu.item.response',
-            icon: 'upload'
+            icon: 'upload',
           },
           {
             slug: 'security',
             name: 'menu.item.security',
-            icon: 'shield'
+            icon: 'shield',
           },
           {
             slug: 'server',
             name: 'menu.item.server',
-            icon: 'server'
-          }
-        ]
-      }
-    ]
+            icon: 'server',
+          },
+        ],
+      },
+    ],
   },
 
   application: async () => {
-    const application = await strapi.store({
-      environment: '',
-      type: 'core',
-      key: 'application'
-    }).get();
+    const application = await strapi
+      .store({
+        environment: '',
+        type: 'core',
+        key: 'application',
+      })
+      .get();
 
     return {
       name: 'form.application.name',
@@ -77,10 +79,10 @@ module.exports = {
               source: 'db',
               type: 'string',
               value: _.get(application, 'name', null),
-              validations : {
+              validations: {
                 maxLength: 255,
-                required: true
-              }
+                required: true,
+              },
             },
             {
               name: 'form.application.item.description',
@@ -88,24 +90,24 @@ module.exports = {
               source: 'db',
               type: 'string',
               value: _.get(application, 'description', null),
-              validations : {
+              validations: {
                 maxLength: 255,
-                required: true
-              }
+                required: true,
+              },
             },
             {
               name: 'form.application.item.version',
               target: 'package.version',
               type: 'string',
               value: _.get(strapi.config, 'info.version', null),
-              validations : {
+              validations: {
                 regex: '^(\\d+\\.)?(\\d+\\.)?(\\*|\\d+)$',
-                required: true
-              }
-            }
-          ]
-        }
-      ]
+                required: true,
+              },
+            },
+          ],
+        },
+      ],
     };
   },
 
@@ -120,30 +122,42 @@ module.exports = {
             name: 'form.request.item.logger.level',
             target: 'request.logger.level',
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.request.logger.level`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.request.logger.level`,
+              null
+            ),
             validations: {
-              required: true
-            }
+              required: true,
+            },
           },
           {
             name: 'form.request.item.logger.exposeInContext',
             target: 'request.logger.exposeInContext',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.request.logger.exposeInContext`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.request.logger.exposeInContext`,
+              null
+            ),
             validations: {
-              required: true
-            }
+              required: true,
+            },
           },
           {
             name: 'form.request.item.logger.requests',
             target: 'request.logger.requests',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.request.logger.requests`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.request.logger.requests`,
+              null
+            ),
             validations: {
-              required: true
-            }
-          }
-        ]
+              required: true,
+            },
+          },
+        ],
       },
       {
         name: 'form.request.item.parser',
@@ -152,20 +166,28 @@ module.exports = {
             name: 'form.request.item.parser.enabled',
             target: 'request.parser.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.request.parser.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.request.parser.enabled`,
+              null
+            ),
             items: [
               {
                 name: 'form.request.item.parser.multipart',
                 target: 'request.parser.multipart',
                 type: 'boolean',
-                value: _.get(strapi.config, `environments.${env}.request.parser.multipart`, null),
-                validations : {
-                  required: true
-                }
-              }
-            ]
-          }
-        ]
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.request.parser.multipart`,
+                  null
+                ),
+                validations: {
+                  required: true,
+                },
+              },
+            ],
+          },
+        ],
       },
       {
         name: 'form.request.item.router',
@@ -174,14 +196,18 @@ module.exports = {
             name: 'form.request.item.router.prefix',
             target: 'request.router.prefix',
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.request.router.prefix`, null),
-            validations : {
-              required: true
-            }
-          }
-        ]
-      }
-    ]
+            value: _.get(
+              strapi.config,
+              `environments.${env}.request.router.prefix`,
+              null
+            ),
+            validations: {
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
   }),
 
   response: env => ({
@@ -195,12 +221,16 @@ module.exports = {
             name: 'form.response.item.gzip.enabled',
             target: 'response.gzip.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.response.gzip.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.response.gzip.enabled`,
+              null
+            ),
             validations: {
-              required: true
-            }
-          }
-        ]
+              required: true,
+            },
+          },
+        ],
       },
       {
         name: '',
@@ -209,12 +239,16 @@ module.exports = {
             name: 'form.response.item.responseTime.enabled',
             target: 'response.responseTime.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.response.responseTime.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.response.responseTime.enabled`,
+              null
+            ),
             validations: {
-              required: true
-            }
-          }
-        ]
+              required: true,
+            },
+          },
+        ],
       },
       {
         name: '',
@@ -223,22 +257,30 @@ module.exports = {
             name: 'form.response.item.poweredBy.enabled',
             target: 'response.poweredBy.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.response.poweredBy.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.response.poweredBy.enabled`,
+              null
+            ),
             items: [
               {
                 name: 'form.response.item.poweredBy.value',
                 target: 'response.poweredBy.value',
                 type: 'string',
-                value: _.get(strapi.config, `environments.${env}.response.poweredBy.value`, null),
-                validations : {
-                  required: true
-                }
-              }
-            ]
-          }
-        ]
-      }
-    ]
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.response.poweredBy.value`,
+                  null
+                ),
+                validations: {
+                  required: true,
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
   }),
 
   security: env => ({
@@ -252,42 +294,62 @@ module.exports = {
             name: 'form.security.item.csrf.enabled',
             target: 'security.csrf.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.security.csrf.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.security.csrf.enabled`,
+              null
+            ),
             items: [
               {
                 name: 'form.security.item.csrf.key',
                 target: 'security.csrf.key',
                 type: 'string',
-                value: _.get(strapi.config, `environments.${env}.security.csrf.key`, null),
-                validations: {}
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.csrf.key`,
+                  null
+                ),
+                validations: {},
               },
               {
                 name: 'form.security.item.csrf.secret',
                 target: 'security.csrf.secret',
                 type: 'string',
-                value: _.get(strapi.config, `environments.${env}.security.csrf.secret`, null),
-                validations: {}
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.csrf.secret`,
+                  null
+                ),
+                validations: {},
               },
               {
                 name: 'form.security.item.csrf.cookie',
                 target: 'security.csrf.cookie',
                 type: 'string',
-                value: _.get(strapi.config, `environments.${env}.security.csrf.cookie`, null),
-                validations: {}
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.csrf.cookie`,
+                  null
+                ),
+                validations: {},
               },
               {
                 name: 'form.security.item.csrf.angular',
                 target: 'security.csrf.angular',
                 type: 'boolean',
-                value: _.get(strapi.config, `environments.${env}.security.csrf.angular`, null),
-                validations: {}
-              }
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.csrf.angular`,
+                  null
+                ),
+                validations: {},
+              },
             ],
             validations: {
-              required: true
-            }
-          }
-        ]
+              required: true,
+            },
+          },
+        ],
       },
       {
         name: 'form.security.item.p3p',
@@ -296,23 +358,31 @@ module.exports = {
             name: 'form.security.item.p3p.enabled',
             target: 'security.p3p.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.security.p3p.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.security.p3p.enabled`,
+              null
+            ),
             items: [
               {
                 name: 'form.security.item.p3p.value',
                 target: 'security.p3p.value',
                 type: 'string',
-                value: _.get(strapi.config, `environments.${env}.security.p3p.value`, null),
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.p3p.value`,
+                  null
+                ),
                 validations: {
-                  required: true
-                }
-              }
+                  required: true,
+                },
+              },
             ],
             validations: {
-              required: true
-            }
-          }
-        ]
+              required: true,
+            },
+          },
+        ],
       },
       {
         name: 'form.security.item.hsts',
@@ -321,37 +391,53 @@ module.exports = {
             name: 'form.security.item.hsts.enabled',
             target: 'security.hsts.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.security.hsts.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.security.hsts.enabled`,
+              null
+            ),
             items: [
               {
                 name: 'form.security.item.hsts.maxAge',
                 target: 'security.hsts.maxAge',
                 type: 'number',
-                value: _.get(strapi.config, `environments.${env}.security.hsts.maxAge`, null),
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.hsts.maxAge`,
+                  null
+                ),
                 validations: {
-                  required: true
-                }
+                  required: true,
+                },
               },
               {
                 name: 'form.security.item.hsts.includeSubDomains',
                 target: 'security.hsts.includeSubDomains',
                 type: 'boolean',
-                value: _.get(strapi.config, `environments.${env}.security.hsts.includeSubDomains`, null),
-                validations: {}
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.hsts.includeSubDomains`,
+                  null
+                ),
+                validations: {},
               },
               {
                 name: 'form.security.item.hsts.preload',
                 target: 'security.hsts.preload',
                 type: 'boolean',
-                value: _.get(strapi.config, `environments.${env}.security.hsts.preload`, null),
-                validations: {}
-              }
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.hsts.preload`,
+                  null
+                ),
+                validations: {},
+              },
             ],
             validations: {
-              required: true
-            }
-          }
-        ]
+              required: true,
+            },
+          },
+        ],
       },
       {
         name: 'form.security.item.xframe',
@@ -360,13 +446,21 @@ module.exports = {
             name: 'form.security.item.xframe.enabled',
             target: 'security.xframe.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.security.xframe.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.security.xframe.enabled`,
+              null
+            ),
             items: [
               {
                 name: 'form.security.item.xframe.value',
                 target: 'security.xframe.value',
                 type: 'enum',
-                value: _.get(strapi.config, `environments.${env}.security.xframe.value`, null),
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.xframe.value`,
+                  null
+                ),
                 items: [
                   {
                     name: 'form.security.item.xframe.deny',
@@ -379,27 +473,29 @@ module.exports = {
                   {
                     name: 'form.security.item.xframe.allow-from',
                     value: 'ALLOW-FROM',
-                    items: [{
-                      name: '',
-                      target: 'security.xframe.value.nested',
-                      type: 'string',
-                      value: '',
-                      validations: {
-                        required: true
-                      }
-                    }]
-                  }
+                    items: [
+                      {
+                        name: '',
+                        target: 'security.xframe.value.nested',
+                        type: 'string',
+                        value: '',
+                        validations: {
+                          required: true,
+                        },
+                      },
+                    ],
+                  },
                 ],
                 validations: {
-                  required: true
-                }
-              }
+                  required: true,
+                },
+              },
             ],
             validations: {
-              required: true
-            }
-          }
-        ]
+              required: true,
+            },
+          },
+        ],
       },
       {
         name: 'form.security.item.xssProtection',
@@ -408,21 +504,29 @@ module.exports = {
             name: 'form.security.item.xssProtection.enabled',
             target: 'security.xssProtection.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.security.xssProtection.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.security.xssProtection.enabled`,
+              null
+            ),
             items: [
               {
                 name: 'form.security.item.xssProtection.mode',
                 target: 'security.xssProtection.mode',
                 type: 'string',
-                value: _.get(strapi.config, `environments.${env}.security.xssProtection.mode`, null),
-                validations: {}
-              }
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.xssProtection.mode`,
+                  null
+                ),
+                validations: {},
+              },
             ],
             validations: {
-              required: true
-            }
-          }
-        ]
+              required: true,
+            },
+          },
+        ],
       },
       {
         name: 'form.security.item.cors',
@@ -431,25 +535,33 @@ module.exports = {
             name: 'form.security.item.cors.enabled',
             target: 'security.cors.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.security.cors.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.security.cors.enabled`,
+              null
+            ),
             items: [
               {
                 name: 'form.security.item.cors.origin',
                 target: 'security.cors.origin',
                 type: 'string',
-                value: _.get(strapi.config, `environments.${env}.security.cors.origin`, null),
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.security.cors.origin`,
+                  null
+                ),
                 validations: {
-                  required: true
-                }
-              }
+                  required: true,
+                },
+              },
             ],
             validations: {
-              required: true
-            }
-          }
-        ]
-      }
-    ]
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
   }),
 
   server: env => ({
@@ -463,23 +575,35 @@ module.exports = {
             name: 'form.server.item.host',
             target: 'server.host',
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.server.host`, null),
-            validations: {}
+            value: _.get(
+              strapi.config,
+              `environments.${env}.server.host`,
+              null
+            ),
+            validations: {},
           },
           {
             name: 'form.server.item.port',
             target: 'server.port',
             type: 'number',
-            value: _.get(strapi.config, `environments.${env}.server.port`, null),
-            validations: {}
+            value: _.get(
+              strapi.config,
+              `environments.${env}.server.port`,
+              null
+            ),
+            validations: {},
           },
           {
             name: 'form.server.item.cron',
             target: 'server.cron.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.server.cron.enabled`, null)
-          }
-        ]
+            value: _.get(
+              strapi.config,
+              `environments.${env}.server.cron.enabled`,
+              null
+            ),
+          },
+        ],
       },
       {
         name: 'form.server.item.proxy',
@@ -488,38 +612,54 @@ module.exports = {
             name: 'form.server.item.proxy.enable',
             target: 'server.proxy.enabled',
             type: 'boolean',
-            value: _.get(strapi.config, `environments.${env}.server.proxy.enabled`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.server.proxy.enabled`,
+              null
+            ),
             items: [
               {
                 name: 'form.server.item.proxy.host',
                 target: 'server.proxy.host',
                 type: 'string',
-                value: _.get(strapi.config, `environments.${env}.server.proxy.host`, null),
-                validations: {}
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.server.proxy.host`,
+                  null
+                ),
+                validations: {},
               },
               {
                 name: 'form.server.item.proxy.port',
                 target: 'server.proxy.port',
                 type: 'number',
-                value: _.get(strapi.config, `environments.${env}.server.proxy.port`, null),
-                validations: {}
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.server.proxy.port`,
+                  null
+                ),
+                validations: {},
               },
               {
                 name: 'form.server.item.proxy.ssl',
                 target: 'server.proxy.ssl',
                 type: 'boolean',
-                value: _.get(strapi.config, `environments.${env}.server.proxy.ssl`, null),
-                validations: {}
-              }
+                value: _.get(
+                  strapi.config,
+                  `environments.${env}.server.proxy.ssl`,
+                  null
+                ),
+                validations: {},
+              },
             ],
-            validations: {}
-          }
-        ]
-      }
-    ]
+            validations: {},
+          },
+        ],
+      },
+    ],
   }),
 
-  i18n: env => ({
+  i18n: () => ({
     name: 'form.language.name',
     description: 'form.language.description',
     sections: [
@@ -530,11 +670,11 @@ module.exports = {
             name: 'form.language.choose',
             target: 'language.defaultLocale',
             type: 'select',
-            items: strapi.plugins['settings-manager'].services.languages
-          }
-        ]
-      }
-    ]
+            items: strapi.plugins['settings-manager'].services.languages,
+          },
+        ],
+      },
+    ],
   }),
 
   databases: (name, env) => ({
@@ -550,105 +690,143 @@ module.exports = {
             type: 'string',
             value: name,
             validations: {
-              required: true
-            }
+              required: true,
+            },
           },
           {
             name: 'form.database.item.connector',
             target: `database.connections.${name}.connector`,
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.connector`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.database.connections.${name}.connector`,
+              null
+            ),
             validations: {
-              required: true
-            }
+              required: true,
+            },
           },
           {
             name: 'form.database.item.client',
             target: `database.connections.${name}.settings.client`,
             type: 'select',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.client`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.database.connections.${name}.settings.client`,
+              null
+            ),
             items: [
               {
                 name: 'form.database.item.provider.mongo',
                 value: 'mongo',
-                port: 27017
+                port: 27017,
               },
               {
                 name: 'form.database.item.provider.postgres',
                 value: 'postgres',
-                port: 5432
+                port: 5432,
               },
               {
                 name: 'form.database.item.provider.mysql',
                 value: 'mysql',
-                port: 3306
+                port: 3306,
               },
               {
                 name: 'form.database.item.provider.redis',
                 value: 'redis',
-                port: 6379
-              }
+                port: 6379,
+              },
             ],
             validations: {
-              required: true
-            }
+              required: true,
+            },
           },
           {
             name: 'form.database.item.host',
             target: `database.connections.${name}.settings.host`,
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.host`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.database.connections.${name}.settings.host`,
+              null
+            ),
             validations: {
-              required: true
-            }
+              required: true,
+            },
           },
           {
             name: 'form.database.item.port',
             target: `database.connections.${name}.settings.port`,
             type: 'number',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.port`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.database.connections.${name}.settings.port`,
+              null
+            ),
             validations: {
-              required: true
-            }
+              required: true,
+            },
           },
           {
             name: 'form.database.item.database',
             target: `database.connections.${name}.settings.database`,
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.database`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.database.connections.${name}.settings.database`,
+              null
+            ),
             validations: {
-              required: true
-            }
+              required: true,
+            },
           },
           {
             name: 'form.database.item.username',
             target: `database.connections.${name}.settings.username`,
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.username`, null),
-            validations: {}
+            value: _.get(
+              strapi.config,
+              `environments.${env}.database.connections.${name}.settings.username`,
+              null
+            ),
+            validations: {},
           },
           {
             name: 'form.database.item.password',
             target: `database.connections.${name}.settings.password`,
             type: 'password',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.settings.password`, null),
-            validations: {}
+            value: _.get(
+              strapi.config,
+              `environments.${env}.database.connections.${name}.settings.password`,
+              null
+            ),
+            validations: {},
           },
           {
             name: 'form.database.item.authenticationDatabase',
             target: `database.connections.${name}.options.authenticationDatabase`,
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.database.connections.${name}.options.authenticationDatabase`, null),
-            validations: {}
+            value: _.get(
+              strapi.config,
+              `environments.${env}.database.connections.${name}.options.authenticationDatabase`,
+              null
+            ),
+            validations: {},
           },
           {
             name: 'form.database.item.ssl',
             target: `database.connections.${name}.options.ssl`,
             type: 'boolean',
-            value: [true, 'true'].includes(_.get(strapi.config, `environments.${env}.database.connections.${name}.options.ssl`, false)),
-            validations: {}
+            value: [true, 'true'].includes(
+              _.get(
+                strapi.config,
+                `environments.${env}.database.connections.${name}.options.ssl`,
+                false
+              )
+            ),
+            validations: {},
           },
-        ]
+        ],
       },
       {
         name: '',
@@ -657,21 +835,25 @@ module.exports = {
             name: 'form.database.item.default',
             target: 'database.defaultConnection',
             type: 'string',
-            value: _.get(strapi.config, `environments.${env}.database.defaultConnection`, null),
+            value: _.get(
+              strapi.config,
+              `environments.${env}.database.defaultConnection`,
+              null
+            ),
             validations: {
-              required: true
-            }
-          }
-        ]
-      }
-    ]
+              required: true,
+            },
+          },
+        ],
+      },
+    ],
   }),
 
   getEnvironments: () => {
     return _.map(_.keys(strapi.config.environments), environment => {
       return {
         name: environment,
-        active: (strapi.config.environment === environment)
+        active: strapi.config.environment === environment,
       };
     });
   },
@@ -680,7 +862,7 @@ module.exports = {
     return _.map(strapi.config.language.locales, language => {
       return {
         name: language,
-        active: (strapi.config.language.defaultLocale === language)
+        active: strapi.config.language.defaultLocale === language,
       };
     });
   },
@@ -693,16 +875,32 @@ module.exports = {
       databasesUsed.push(model.connection);
     });
 
-    _.forEach(strapi.config.environments[env].database.connections, (connection, name) =>  databases.push({
-      connector: _.get(connection, 'connector'),
-      letter: strapi.plugins['settings-manager'].services.settingsmanager.getClientLetter(_.get(connection, 'settings.client')),
-      color: strapi.plugins['settings-manager'].services.settingsmanager.getClientColor(_.get(connection, 'settings.client')),
-      name,
-      host: _.get(connection, 'settings.host'),
-      database: _.get(connection, 'settings.database'),
-      active: (_.get(strapi.config, `environments.${env}.database.defaultConnection`) === name),
-      isUsed: _.includes(databasesUsed, name)
-    }));
+    _.forEach(
+      strapi.config.environments[env].database.connections,
+      (connection, name) =>
+        databases.push({
+          connector: _.get(connection, 'connector'),
+          letter: strapi.plugins[
+            'settings-manager'
+          ].services.settingsmanager.getClientLetter(
+            _.get(connection, 'settings.client')
+          ),
+          color: strapi.plugins[
+            'settings-manager'
+          ].services.settingsmanager.getClientColor(
+            _.get(connection, 'settings.client')
+          ),
+          name,
+          host: _.get(connection, 'settings.host'),
+          database: _.get(connection, 'settings.database'),
+          active:
+            _.get(
+              strapi.config,
+              `environments.${env}.database.defaultConnection`
+            ) === name,
+          isUsed: _.includes(databasesUsed, name),
+        })
+    );
 
     return databases;
   },
@@ -713,8 +911,10 @@ module.exports = {
     const redisClients = ['redis'];
 
     let connector;
-    if (_.indexOf(bookshelfClients, client) !== -1) connector = 'strapi-hook-bookshelf';
-    if (_.indexOf(mongooseClients, client) !== -1) connector = 'strapi-hook-mongoose';
+    if (_.indexOf(bookshelfClients, client) !== -1)
+      connector = 'strapi-hook-bookshelf';
+    if (_.indexOf(mongooseClients, client) !== -1)
+      connector = 'strapi-hook-mongoose';
     if (_.indexOf(redisClients, client) !== -1) connector = 'strapi-hook-redis';
 
     return connector;
@@ -724,16 +924,16 @@ module.exports = {
     switch (client) {
       case 'postgres':
         return '#ffb500';
-        break;
+
       case 'mysql':
         return '#4479a1';
-        break;
+
       case 'redis':
         return '#ff5d00';
-        break;
+
       case 'mongo':
         return '#43b121';
-        break;
+
       default:
         return '#000000';
     }
@@ -743,75 +943,97 @@ module.exports = {
     switch (client) {
       case 'postgres':
         return 'PG';
-        break;
+
       case 'mysql':
         return 'MY';
-        break;
+
       default:
         return _.upperCase(_.head(client));
     }
   },
 
   getItems: model => {
-    return _.flatten(_.map(model.sections, section => {
-      let items = section.items;
+    return _.flatten(
+      _.map(model.sections, section => {
+        let items = section.items;
 
-      _.forEach(items, item => { if (item.type === 'boolean' && _.has(item, 'items')) items = _.concat(items, item.items) });
+        _.forEach(items, item => {
+          if (item.type === 'boolean' && _.has(item, 'items'))
+            items = _.concat(items, item.items);
+        });
 
-      return items
-    }));
+        return items;
+      })
+    );
   },
 
   cleanParams: (params, items) => {
     const cleanParams = {};
 
-    _.forEach(items, ({ target }) => _.has(params, target) ? _.set(cleanParams, target, _.get(params, target)) : '');
+    _.forEach(items, ({ target }) =>
+      _.has(params, target)
+        ? _.set(cleanParams, target, _.get(params, target))
+        : ''
+    );
 
     return cleanParams;
   },
 
-  formatErrors: errors => _.map(_.groupBy(errors, 'target'), (errs, target) => {
-    return {
-      target,
-      messages: _.map(errs, err => {
-        return {
-          id: err.message,
-          params: _.get(err, 'params', undefined)
-        };
-      })
-    };
-  }),
+  formatErrors: errors =>
+    _.map(_.groupBy(errors, 'target'), (errs, target) => {
+      return {
+        target,
+        messages: _.map(errs, err => {
+          return {
+            id: err.message,
+            params: _.get(err, 'params', undefined),
+          };
+        }),
+      };
+    }),
 
   paramsValidation: (params, items) => {
     let errors = [];
 
     const reformat = (value, format) => {
-      if (format === 'number') try { return parseFloat(number) } catch (e) { return null };
+      if (format === 'number')
+        try {
+          return parseFloat(value);
+        } catch (e) {
+          return null;
+        }
       if (format === 'boolean') return value === 'true';
 
       return value;
     };
 
     const checkType = (input, { type, target, items }) => {
-      if ((type === 'string' || type === 'text' || type === 'password') && !_.isString(input)) return errors.push({
-        target: target,
-        message: 'request.error.type.string'
-      });
+      if (
+        (type === 'string' || type === 'text' || type === 'password') &&
+        !_.isString(input)
+      )
+        return errors.push({
+          target: target,
+          message: 'request.error.type.string',
+        });
 
-      if (type === 'number' && !_.isNumber(input)) return errors.push({
-        target: target,
-        message: 'request.error.type.number'
-      });
+      if (type === 'number' && !_.isNumber(input))
+        return errors.push({
+          target: target,
+          message: 'request.error.type.number',
+        });
 
-      if (type === 'boolean' && !_.isBoolean(input)) return errors.push({
-        target: target,
-        message: 'request.error.type.boolean'
-      });
+      if (type === 'boolean' && !_.isBoolean(input))
+        return errors.push({
+          target: target,
+          message: 'request.error.type.boolean',
+        });
 
-      if (type === 'select' && !_.find(items, { value: input })) return errors.push({
-        target: target,
-        message: 'request.error.type.select'
-      });
+      if (type === 'select' && !_.find(items, { value: input }))
+        return errors.push({
+          target: target,
+          message: 'request.error.type.select',
+        });
 
       if (type === 'enum' && !_.find(items, { value: input })) {
         const key = input.split('.')[0];
@@ -819,10 +1041,11 @@ module.exports = {
 
         const item = _.find(items, { value: key });
 
-        if (!item) return errors.push({
-          target: target,
-          message: 'request.error.type.enum'
-        });
+        if (!item)
+          return errors.push({
+            target: target,
+            message: 'request.error.type.enum',
+          });
 
         input = reformat(input, item.type);
         params[target] = input;
@@ -841,35 +1064,46 @@ module.exports = {
 
     const checkValidations = (input, item) => {
       _.forEach(item.validations, (value, key) => {
-        if (key === 'required' && (_.isNull(input) || (_.isString(input) && _.isEmpty(input)) || _.isUndefined(input))) errors.push({
-          target: item.target,
-          message: 'request.error.validation.required'
-        });
+        if (
+          key === 'required' &&
+          (_.isNull(input) ||
+            (_.isString(input) && _.isEmpty(input)) ||
+            _.isUndefined(input))
+        )
+          errors.push({
+            target: item.target,
+            message: 'request.error.validation.required',
+          });
 
-        if (key === 'regex' && !new RegExp(value).test(input)) errors.push({
-          target: item.target,
-          message: 'request.error.validation.regex'
-        });
+        if (key === 'regex' && !new RegExp(value).test(input))
+          errors.push({
+            target: item.target,
+            message: 'request.error.validation.regex',
+          });
 
-        if (key === 'max' && parseInt(input) > value) errors.push({
-          target: item.target,
-          message: 'request.error.validation.max'
-        });
+        if (key === 'max' && parseInt(input) > value)
+          errors.push({
+            target: item.target,
+            message: 'request.error.validation.max',
+          });
 
-        if (key === 'min' && parseInt(input) < value) errors.push({
-          target: item.target,
-          message: 'request.error.validation.min'
-        });
+        if (key === 'min' && parseInt(input) < value)
+          errors.push({
+            target: item.target,
+            message: 'request.error.validation.min',
+          });
 
-        if (key === 'maxLength' && input.length > value) errors.push({
-          target: item.target,
-          message: 'request.error.validation.maxLength'
-        });
+        if (key === 'maxLength' && input.length > value)
+          errors.push({
+            target: item.target,
+            message: 'request.error.validation.maxLength',
+          });
 
-        if (key === 'minLength' && input.length  < value) errors.push({
-          target: item.target,
-          message: 'request.error.validation.minLength'
-        });
+        if (key === 'minLength' && input.length < value)
+          errors.push({
+            target: item.target,
+            message: 'request.error.validation.minLength',
+          });
       });
     };
 
@@ -904,21 +1138,30 @@ module.exports = {
           const store = strapi.store({
             environment: env,
             type: 'core',
-            key: file
+            key: file,
           });
 
           const data = await store.get();
 
           _.set(data, objPath, input);
 
-          await store.set({value: data});
+          await store.set({ value: data });
 
           return;
         }
 
-        if (target === 'language.defaultLocale') input = _.lowerCase(input).replace(/ /g, '_');
+        if (target === 'language.defaultLocale')
+          input = _.lowerCase(input).replace(/ /g, '_');
 
-        const filePath = (file === 'package') ? path.join(appPath, 'package.json') : path.join(appPath, 'config', `${env ? `environments/${env}` : ''}`, `${_.replace(file, '.', '/')}.json`);
+        const filePath =
+          file === 'package'
+            ? path.join(appPath, 'package.json')
+            : path.join(
+                appPath,
+                'config',
+                `${env ? `environments/${env}` : ''}`,
+                `${_.replace(file, '.', '/')}.json`
+              );
 
         try {
           const fileContent = require(filePath);
@@ -926,14 +1169,18 @@ module.exports = {
           _.set(fileContent, objPath, input);
 
           try {
-            fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+            fs.writeFileSync(
+              filePath,
+              JSON.stringify(fileContent, null, 2),
+              'utf8'
+            );
           } catch (e) {
             errors.push({
               target,
               message: 'request.error.config',
               params: {
-                filePath: filePath
-              }
+                filePath: filePath,
+              },
             });
           }
         } catch (e) {
@@ -941,8 +1188,8 @@ module.exports = {
             target,
             message: 'request.error.config',
             params: {
-              filePath: filePath
-            }
+              filePath: filePath,
+            },
           });
         }
       }
@@ -954,32 +1201,44 @@ module.exports = {
   installDependency: (params, name) => {
     const clientsDependencies = {
       postgres: 'pg',
-      mysql: 'mysql'
+      mysql: 'mysql',
     };
 
-    const client = _.get(clientsDependencies, _.get(params, `database.connections.${name}.settings.client`));
-    const installedClient = _.indexOf(_.keys(strapi.config.info.dependencies), client) !== -1;
+    const client = _.get(
+      clientsDependencies,
+      _.get(params, `database.connections.${name}.settings.client`)
+    );
+    const installedClient =
+      _.indexOf(_.keys(strapi.config.info.dependencies), client) !== -1;
     const connector = _.get(params, `database.connections.${name}.connector`);
-    const installedConnector = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
+    const installedConnector =
+      _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
 
     if (connector && !installedConnector) {
       strapi.log.info(`Installing ${connector} dependency ...`);
-      shell.exec(`npm install ${connector}@${strapi.config.info.strapi}`, {silent: true});
+      shell.exec(`npm install ${connector}@${strapi.config.info.strapi}`, {
+        silent: true,
+      });
     }
 
     if (client && !installedClient) {
       strapi.log.info(`Installing ${client} dependency ...`);
-      shell.exec(`npm install ${client}`, {silent: true});
+      shell.exec(`npm install ${client}`, { silent: true });
     }
   },
 
   cleanDependency: (env, config) => {
-    const availableConnectors = ['strapi-hook-mongoose', 'strapi-hook-bookshelf', 'strapi-hook-redis'];
+    const availableConnectors = [
+      'strapi-hook-mongoose',
+      'strapi-hook-bookshelf',
+      'strapi-hook-redis',
+    ];
     let usedConnectors = [];
     const errors = [];
 
     _.forEach(_.keys(strapi.config.environments), environment => {
-      let connections = strapi.config.environments[environment].database.connections;
+      let connections =
+        strapi.config.environments[environment].database.connections;
 
       if (environment === env) {
         connections = config.database.connections;
@@ -995,7 +1254,8 @@ module.exports = {
     usedConnectors = _.uniq(usedConnectors);
 
     _.forEach(availableConnectors, connector => {
-      const installed = _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
+      const installed =
+        _.indexOf(_.keys(strapi.config.info.dependencies), connector) !== -1;
       const used = _.indexOf(usedConnectors, connector) !== -1;
 
       if (installed && !used) {
@@ -1007,23 +1267,27 @@ module.exports = {
           _.set(fileContent, `dependencies.${connector}`, undefined);
 
           try {
-            fs.writeFileSync(filePath, JSON.stringify(fileContent, null, 2), 'utf8');
+            fs.writeFileSync(
+              filePath,
+              JSON.stringify(fileContent, null, 2),
+              'utf8'
+            );
           } catch (e) {
             errors.push({
-              target,
+              target: connector,
               message: 'request.error.config',
               params: {
-                filePath: filePath
-              }
+                filePath: filePath,
+              },
             });
           }
         } catch (e) {
           errors.push({
-            target,
+            target: connector,
             message: 'request.error.config',
             params: {
-              filePath: filePath
-            }
+              filePath: filePath,
+            },
           });
         }
       }
@@ -1049,15 +1313,19 @@ module.exports = {
         try {
           models = fs.readdirSync(modelsPath);
 
-          const modelIndex = _.indexOf(_.map(models, model => _.toLower(model)), searchFileName);
+          const modelIndex = _.indexOf(
+            _.map(models, model => _.toLower(model)),
+            searchFileName
+          );
 
-          if (modelIndex !== -1) searchFilePath = `${modelsPath}/${models[modelIndex]}`;
+          if (modelIndex !== -1)
+            searchFilePath = `${modelsPath}/${models[modelIndex]}`;
         } catch (e) {
           errors.push({
             id: 'request.error.folder.read',
             params: {
-              folderPath: modelsPath
-            }
+              folderPath: modelsPath,
+            },
           });
         }
       });
@@ -1065,11 +1333,11 @@ module.exports = {
       errors.push({
         id: 'request.error.folder.read',
         params: {
-          folderPath: apiPath
-        }
+          folderPath: apiPath,
+        },
       });
     }
 
     return [searchFilePath, errors];
-  }
+  },
 };

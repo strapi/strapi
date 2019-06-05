@@ -1,17 +1,8 @@
 import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
-import request from 'utils/request';
-import {
-  getSettingsSucceeded,
-  submitSucceeded,
-} from './actions';
-import {
-  GET_SETTINGS,
-  SUBMIT,
-} from './constants';
-import {
-  makeSelectEnv,
-  makeSelectModifiedData,
-} from './selectors';
+import { request } from 'strapi-helper-plugin';
+import { getSettingsSucceeded, submitSucceeded } from './actions';
+import { GET_SETTINGS, SUBMIT } from './constants';
+import { makeSelectEnv, makeSelectModifiedData } from './selectors';
 
 export function* settingsGet(action) {
   try {
@@ -22,7 +13,7 @@ export function* settingsGet(action) {
     ]);
 
     yield put(getSettingsSucceeded(response[0], response[1].environments));
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('notification.error');
   }
 }
@@ -45,7 +36,7 @@ export function* submit() {
     // Update reducer with optimisticResponse
     strapi.notification.success('upload.notification.config.success');
     yield put(submitSucceeded(body));
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('notification.error');
     // TODO handle error PUT
   }

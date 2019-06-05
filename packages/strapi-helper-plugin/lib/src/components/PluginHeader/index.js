@@ -40,7 +40,10 @@ function PluginHeader({
         <PluginHeaderActions actions={subActions} />
       </div>
       <div className="col-lg-3 justify-content">
-        <PluginHeaderActions actions={actions} overrideRendering={overrideRendering} />
+        <PluginHeaderActions
+          actions={actions}
+          overrideRendering={overrideRendering}
+        />
       </div>
     </div>
   );

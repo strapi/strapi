@@ -40,7 +40,7 @@
   "form.attribute.item.enumeration.graphql": "GraphQL에서 사용할 이름",
   "form.attribute.item.enumeration.graphql.description": "기본 생성된 이름을 GraphQL에서 사용합니다.",
   "form.attribute.item.enumeration.name": "이름",
-  "form.attribute.item.enumeration.placeholder": "Ex: morning,noon,evening",
+  "form.attribute.item.enumeration.placeholder": "Ex:\nmorning\nnoon\nevening",
   "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "이름",
   "form.attribute.item.maximum": "최대 값",

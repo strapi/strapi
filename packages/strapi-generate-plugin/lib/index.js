@@ -20,28 +20,42 @@ module.exports = {
   before: require('./before'),
   targets: {
     'plugins/:humanizeId/.gitignore': {
-      copy: 'gitignore'
+      copy: 'gitignore',
     },
 
     // Use the default `controller` file as a template for
     // every generated controller.
     'plugins/:humanizeId/controllers/:filename': {
-      template: 'controller.template'
+      template: 'controller.template',
     },
 
     // every generated controller.
     'plugins/:humanizeId/services/:filename': {
-      template: 'service.template'
+      template: 'service.template',
     },
 
     // Generate routes.
     'plugins/:humanizeId/config/routes.json': {
-      jsonfile: routesJSON
+      jsonfile: routesJSON,
     },
 
     // Main package.
     'plugins/:humanizeId/package.json': {
-      jsonfile: packageJSON
+      jsonfile: packageJSON,
     },
-  }
+
+    // Copy dot files.
+    'plugins/:humanizeId/.editorconfig': {
+      copy: 'editorconfig',
+    },
+
+    'plugins/:humanizeId/.gitattributes': {
+      copy: 'gitattributes',
+    },
+
+    // Copy Markdown files with some information.
+    'plugins/:humanizeId/README.md': {
+      template: 'README.md',
+    },
+  },
 };

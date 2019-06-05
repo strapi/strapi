@@ -1,13 +1,12 @@
 /**
- * 
+ *
  * SelectManyDraggedItem
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import styles from 'components/SelectMany/styles.scss';
+import styles from '../SelectMany/styles.scss';
 import Content from './Content';
-
 
 function SelectManyDraggedItem(props) {
   if (props.withLiWrapper) {

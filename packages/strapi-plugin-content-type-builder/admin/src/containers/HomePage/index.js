@@ -8,11 +8,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 
-import PluginHeader from 'components/PluginHeader';
-
-import getQueryParameters from 'utils/getQueryParameters';
-
-import { routerPropTypes } from 'commonPropTypes';
+import {
+  PluginHeader,
+  getQueryParameters,
+  routerPropTypes,
+} from 'strapi-helper-plugin';
 
 import EmptyContentTypeView from '../../components/EmptyContentTypeView';
 import TableList from '../../components/TableList';
@@ -38,7 +38,9 @@ class HomePage extends React.Component {
         search: 'modalType=model&settingType=base&actionType=create',
       });
     } else {
-      strapi.notification.info(`${pluginId}.notification.info.contentType.creating.notSaved`);
+      strapi.notification.info(
+        `${pluginId}.notification.info.contentType.creating.notSaved`,
+      );
     }
   };
 
@@ -58,7 +60,9 @@ class HomePage extends React.Component {
       onChangeNewContentTypeMainInfos,
     } = this.props;
     const availableNumber = models.length;
-    const title = `${pluginId}.table.contentType.title.${availableNumber > 1 ? 'plural' : 'singular'}`;
+    const title = `${pluginId}.table.contentType.title.${
+      availableNumber > 1 ? 'plural' : 'singular'
+    }`;
     const renderViewContent =
       availableNumber === 0 ? (
         <EmptyContentTypeView handleButtonClick={this.handleClick} /> // eslint-disable-line react/jsx-handler-names

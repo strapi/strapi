@@ -6,7 +6,7 @@
 
 const _ = require('lodash');
 
-module.exports = () => {
+module.exports = (strapi) => {
   return {
     /**
      * Initialize the hook

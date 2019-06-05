@@ -13,22 +13,14 @@ import { findIndex, get, isEmpty } from 'lodash';
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
-import ContainerFluid from 'components/ContainerFluid';
-import HeaderNav from 'components/HeaderNav';
-import PluginHeader from 'components/PluginHeader';
+import { ContainerFluid, HeaderNav, PluginHeader } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
 // Plugin's components
 import EditForm from '../../components/EditForm';
 
-import {
-  getSettings,
-  onCancel,
-  onChange,
-  setErrors,
-  submit,
-} from './actions';
+import { getSettings, onCancel, onChange, setErrors, submit } from './actions';
 
 import reducer from './reducer';
 import saga from './saga';
@@ -47,35 +39,55 @@ class ConfigPage extends React.Component {
 
     // Redirect the user to the email list after modifying is provider
     if (prevProps.submitSuccess !== this.props.submitSuccess) {
-      this.props.history.push(`/plugins/email/configurations/${this.props.match.params.env}`);
+      this.props.history.push(
+        `/plugins/email/configurations/${this.props.match.params.env}`,
+      );
     }
   }
 
-  getSelectedProviderIndex = () => findIndex(this.props.settings.providers, ['provider', get(this.props.modifiedData, 'provider')]);
+  getSelectedProviderIndex = () =>
+    findIndex(this.props.settings.providers, [
+      'provider',
+      get(this.props.modifiedData, 'provider'),
+    ]);
 
   /**
    * Get Settings depending on the props
    * @param  {Object} props
    * @return {Func}       calls the saga that gets the current settings
    */
-  getSettings = (props) => {
-    const { match: { params: { env} } } = props;
+  getSettings = props => {
+    const {
+      match: {
+        params: { env },
+      },
+    } = props;
     this.props.getSettings(env);
-  }
+  };
 
   generateLinks = () => {
-    const headerNavLinks = this.props.appEnvironments.reduce((acc, current) => {
-      const link = Object.assign(current, { to: `/plugins/email/configurations/${current.name}` });
-      acc.push(link);
-      return acc;
-    }, []).sort(link => link.name === 'production');
+    const headerNavLinks = this.props.appEnvironments
+      .reduce((acc, current) => {
+        const link = Object.assign(current, {
+          to: `/plugins/email/configurations/${current.name}`,
+        });
+        acc.push(link);
+        return acc;
+      }, [])
+      .sort(link => link.name === 'production');
 
     return headerNavLinks;
-  }
+  };
 
-  handleSubmit = (e) => {
+  handleSubmit = e => {
     e.preventDefault();
-    const formErrors = Object.keys(get(this.props.settings, ['providers', this.getSelectedProviderIndex(), 'auth'], {})).reduce((acc, current) => {
+    const formErrors = Object.keys(
+      get(
+        this.props.settings,
+        ['providers', this.getSelectedProviderIndex(), 'auth'],
+        {},
+      ),
+    ).reduce((acc, current) => {
       if (isEmpty(get(this.props.modifiedData, current, ''))) {
         acc.push({
           name: current,
@@ -90,7 +102,7 @@ class ConfigPage extends React.Component {
     }
 
     return this.props.submit();
-  }
+  };
 
   pluginHeaderActions = [
     {
@@ -115,7 +127,7 @@ class ConfigPage extends React.Component {
             <PluginHeader
               actions={this.pluginHeaderActions}
               description={{ id: 'email.ConfigPage.description' }}
-              title={{ id: 'email.ConfigPage.title'}}
+              title={{ id: 'email.ConfigPage.title' }}
             />
             <HeaderNav links={this.generateLinks()} />
             <EditForm
@@ -174,9 +186,16 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectConfigPage();
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
 
-const withReducer = strapi.injectReducer({ key: 'configPage', reducer, pluginId });
+const withReducer = strapi.injectReducer({
+  key: 'configPage',
+  reducer,
+  pluginId,
+});
 const withSaga = strapi.injectSaga({ key: 'configPage', saga, pluginId });
 
 export default compose(
