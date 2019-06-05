@@ -88,7 +88,7 @@ If you want to host the administration on another server than the API, [please t
 
 ## Amazon AWS
 
-This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](/3.x.x/getting-started/quick-start.html), to use for deploying on AWS.
+This is a step-by-step guide for deploying a Strapi project to [Amazon AWS EC2](https://aws.amazon.com/ec2/). This guide will connect to an [Amazon AWS RDS](https://aws.amazon.com/rds/) for managing and hosting the database. Optionally, this guide will show you how to connect host and serve images on [Amazon AWS S3](https://aws.amazon.com/s3/). Prior to starting this guide, you should have created a [Strapi project](/3.0.0-alpha.x/getting-started/quick-start.html), to use for deploying on AWS.
 
 ### Amazon AWS Install Requirement and creating an IAM non-root user
 
@@ -943,16 +943,9 @@ pm2 save
 
 - **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
 
-In the sections to follow, are a few recommended additional actions to make developing your project more efficient
-<<<<<<< HEAD:docs/3.x.x/guides/deployment.md
+In the sections to follow, are a few recommended additional actions to make developing your project more efficient.
 
 ### The ecosystem.config.js file
-
-=======
-
-### The ecosystem.config.js file
-
-> > > > > > > 7d63600e21dfe35f34e62832cbaa47af5a77639b:docs/3.0.0-alpha.x/guides/deployment.md
 
 - You will need to configure an `ecosystem.config.js` file. It will be used by `pm2` to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
 
@@ -1008,9 +1001,9 @@ cd NodeWebHooks
 sudo nano webhook.js
 ```
 
-- In the `nano` editor, copy/paste the following script, but make sure to replace `your_secret_key` and `repo` with the values that correspond to your project, then save and exit. **NOTE:** Earlier in this guide, there is a optional [recommended step](#the-ecosystem-config-js-file) to create an `ecosystem.config.js` file to manage your application restarting function.
+- In the `nano` editor, copy/paste the following script, but make sure to replace `your_secret_key` and `repo` with the values that correspond to your project, then save and exit.
 
-(This script creates a variable called `PM2_CMD` which is used after pulling from GitHub to update your project. The script first changes to the home directory and then runs the variable `PM2_CMD` as `pm2 restart strapi`. If the project uses the `ecosystem.config.js` keep your `ecosystem.config.js` as the point of starting your application and use the alternative below. **PLEASE SEE COMMENTS IN THE CODE**.)
+(This script creates a variable called `PM2_CMD` which is used after pulling from GitHub to update your project. The script first changes to the home directory and then runs the variable `PM2_CMD` as `pm2 restart strapi`.
 
 ```js
 var secret = 'your_secret_key';
@@ -1020,10 +1013,7 @@ const http = require('http');
 const crypto = require('crypto');
 const exec = require('child_process').exec;
 
-// Use this command if you DID NOT create the ecosystem.config.js file
-const PM2_CMD = 'pm2 restart strapi';
-// Use this command if you DID create the ecosystem.config.js file and comment out/delete the above line.
-// const PM2_CMD = 'cd ~ && pm2 startOrRestart ecosystem.config.js';
+const PM2_CMD = 'cd ~ && pm2 startOrRestart ecosystem.config.js';
 
 http
   .createServer(function(req, res) {
