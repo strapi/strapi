@@ -202,7 +202,9 @@ Let's start by creating a new folder called `./extensions`. This folder needs to
 
 ### Migrating non customized plugin
 
-If you installed a plugin but never modified any files inside `./plugins/pluginName/**/*`, you can remove the `./plugins/pluginName` folder.
+If you installed a plugin but never modified any files inside `./plugins/pluginName/**/*`, you can remove the `./plugins/pluginName` folder. You may also remove the default installed plugins. This may mean that there are no plugins inside the `./plugins` folder, so you can delete the `./plugins` folder.
+
+**Note:** If you have created a **custom plugin** leave the plugin in the `./plugins` folder. Newly created **custom plugins** are placed in the `./plugins` folder.
 
 ### Migrating customized plugin
 
@@ -644,9 +646,12 @@ module.exports = {
 
 ## Migrating `admin`
 
-Customizing the admin is as simple as creating a file in the `./admin` folder of your app. You need to make sure the file you want to customize is at the same location in your `./admin` folder as it is in the `strapi-admin` package. For a reference you can look at the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin).
+Numerous changes have been made to the admin with the release of beta:
 
-For the beta there are quite a lot of changes made to the admin. If you previously customized things you will have to verify if the file still exists in the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin) or find its new location.
+- If you have not customized anything in `./admin` folder, then simply delete the `./admin` folder and it's contents.
+- If you have customized any part of the `./admin` folder, then keep only those modified files, locate their new location in the directory structure ([source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin)), and then move the files to their new locations.
+
+Customizing the admin is as simple as creating a file in the `./admin` folder of your app. You need to make sure the file you want to customize is at the same location in your `./admin` folder as it is in the `strapi-admin` package. For a reference you can look at the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin).
 
 ### Example
 
@@ -654,9 +659,18 @@ You can modify the logo of the app by creating a file `./admin/src/assets/images
 
 You can do the same with any file found in the [source code](https://github.com/strapi/strapi/tree/master/packages/strapi-admin/admin) of the admin panel
 
+## Running your migrated project
+
+To run your migrated project you will now need to run `strapi develop` or `npm run develop` to run the project in watch mode (e.g auto reloading on content-type creation).
+
+If you haven't run `strapi develop` or `npm run develop` (as above) and would like to run strapi without watch mode then you need to first run `strapi build` or `npm run build` as a first step, and then run `strapi start` or `npm run start`.
+
+Finally, if you want to run your project in different environments use `NODE_ENV=env npm run start`, eg. `NODE_ENV=production npm run start` or `NODE_ENV=development npm run start`.
+
 ## Migrating your database
 
 The beta introduces a new `Administrator` model created solely to allow user access to the Strapi administration panel (at this time this model is not editable). In this way, the `Administrator` model replaces the previous `User` model from the `users-permissions` plugin.
+
 With this new model, you now have a clear distinction between the people that are allowed to access the administration panel, and the users of the application you built with Strapi.
 
 More practically, it means that a new `strapi_administrator` collection will be created automatically in your database.
@@ -664,7 +678,7 @@ On startup, the `strapi_administrator` table is empty, therefore when migrating 
 
 ### Cleaning up the `users-permissions.users` collection
 
-If you only used the `administrator` role to give access to the admin panel to certain users, and never used this role for your application business logic; you can delete the role.
+If you only used the `administrator` role to give access to the admin panel to certain users, and never used this role for your application business logic, you can delete the role from within the admin panel.
 
 If you haven't created any relation with the `User` model in your `Content Types` and don't use those users in your application business logic; you can remove every user you have migrated to the `strapi_administrator` collection.
 
@@ -674,14 +688,6 @@ Finally, if you have chosen to migrate your previous admin users in the new `str
 ::: warning
 We really recommend separating you users from your administrators to avoid this situation which is not a good practice.
 :::
-
-## Running your migrated project
-
-To run your migrated project you will now need to run `strapi develop` or `npm run develop` to run the project in watch mode (e.g auto reloading on content-type creation).
-
-To run strapi without watch mode then run `strapi start` or `npm run start`.
-
-Finally, if you want to run your project in different environments use `NODE_ENV=env npm run start`, eg. `NODE_ENV=production npm run start` or `NODE_ENV=development npm run start`.
 
 ## Updating Deployments
 
