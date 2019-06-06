@@ -559,7 +559,7 @@ http
             }
             console.log(`stdout: ${stdout}`);
             console.log(`stderr: ${stderr}`);
-          },
+          }
         );
       }
     });
@@ -599,7 +599,7 @@ echo $PATH
 sudo nano /etc/systemd/system/webhook.service
 ```
 
-- In the `nano` editor, copy/paste the following script, but make sure to replace `your-name` **in two places** with `Ubuntu`, and the `path from above` then save and exit:
+- In the `nano` editor, copy/paste the following script, but make sure to replace `your-name` **in two places** with `Ubuntu`, and the `path from above` then save and exit (**delete the #comments**)
 
 ```bash
 [Unit]
@@ -706,6 +706,7 @@ sudo nano ~/.profile
 Add this line.
 
 ```ini
+# set PATH so global node modules install without permission issues
 export PATH=~/.npm-global/bin:$PATH
 ```
 
@@ -793,11 +794,11 @@ In your code editor, you will need to edit a file called `database.json`. Replac
       "connector": "strapi-hook-bookshelf",
       "settings": {
         "client": "postgres",
-        "host": "localhost",
-        "port": 5432,
-        "username": "your-name",
-        "password": "password",
-        "database": "strapi"
+        "host": "${process.env.DATABASE_HOST || '127.0.0.1'}",
+        "port": "${process.env.DATABASE_PORT || 27017}",
+        "database": "${process.env.DATABASE_NAME || 'strapi'}",
+        "username": "${process.env.DATABASE_USERNAME || ''}",
+        "password": "${process.env.DATABASE_PASSWORD || ''}"
       },
       "options": {}
     }
@@ -839,7 +840,7 @@ cd ./my-project/
 npm install
 ```
 
-Strapi uses `Port: 1337` by default. You will need to configure your `ufw firewall` to allow access to this port:
+Strapi uses `Port: 1337` by default. You will need to configure your `ufw firewall` to allow access to this port, for testing and installation purposes. After you have installed and [configured NGINX](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04), you need to `sudo ufw deny 1337`, to close the port to outside traffic.
 
 ```bash
 cd ~
@@ -850,33 +851,7 @@ Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
 Firewall is active and enabled on system startup
 ```
 
-Your Strapi project is now installed on your **Droplet**.
-
-**OPTIONAL:** You may see your project and set-up your first administrator user, by doing the following:
-
-- Navigate to the Strapi project folder. `Path: ./my-project/`. Run the following command from within the Strapi project root:
-
-`Path: ./my-project/`
-
-```bash
-NODE_ENV=production npm run start
-
-> my-project@0.1.0 start /home/path-to-your-project-folder/my-project
-> node server.js
-
-[2019-05-20T14:06:01.553Z] info Time: Mon May 20 2019 14:06:01 GMT+0000 (Coordinated Universal Time)
-[2019-05-20T14:06:01.555Z] info Launched in: 2623 ms
-[2019-05-20T14:06:01.555Z] info Environment: production
-[2019-05-20T14:06:01.555Z] info Process PID: 7286
-[2019-05-20T14:06:01.556Z] info Version: 3.0.0-alpha.25.2 (node v10.15.3)
-[2019-05-20T14:06:01.556Z] info To shut down your server, press <CTRL> + C at any time
-
-[2019-05-20T14:06:01.557Z] info ☄️  Admin panel: http://localhost:1337/admin
-[2019-05-20T14:06:01.557Z] info ⚡️ Server: http://localhost:1337
-
-```
-
-Minimumly, [create an admin user](http://localhost:8080/documentation/3.0.0-alpha.x/getting-started/quick-start.html#_3-create-an-admin-user).
+Your Strapi project is now installed on your **Droplet**. You have a few more steps prior to being able to access Strapi and [create your first user](http://localhost:8080/documentation/3.0.0-alpha.x/getting-started/quick-start.html#_3-create-an-admin-user).
 
 You will next need to [install and configure PM2 Runtime](#install-and-configure-pm2-runtime).
 
@@ -961,22 +936,29 @@ sudo nano ecosystem.config.js
 
 ```js
 module.exports = {
-  apps: [
-    {
-      name: 'your-app-name',
-      cwd: '/home/your-name/my-strapi-project/my-project',
-      script: 'server.js',
-      env: {
-        NODE_ENV: 'production',
-      },
+  apps : [{
+    name: 'strapi',
+    cwd: '/home/path-to/strapi-project-folder'
+    script: 'server.js',
+    env: {
+      NODE_ENV: 'production',
+      DATABASE_HOST: 'localhost', // database endpoint
+      DATABASE_PORT: '5432',
+      DATABASE_NAME: 'strapi',  // DB name
+      DATABASE_USERNAME: 'your-name', // your username for psql
+      DATABASE_PASSWORD: 'password', // your password for psql
     },
-  ],
+  }],
 };
 ```
 
-`pm2` is now set-up to use an `econsystem.config.js` to manage restarting your application upon changes. This is a recommended best practice. Continue below to configure the `webhook`.
+`pm2` is now set-up to use an `ecosystem.config.js` to manage restarting your application upon changes. This is a recommended best practice.
 
-### Set up a webhook
+**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](http://localhost:8080/documentation/3.0.0-alpha.x/getting-started/quick-start.html#_3-create-an-admin-user).
+
+Continue below to configure the `webhook`.
+
+### Set up a webhook on Digital Ocean / GitHub
 
 Providing that your project is set-up on GitHub, you will need to configure your **Strapi Project Repository** with a webhook. The following articles provide additional information to the steps below: [GitHub Creating Webhooks Guide](https://developer.github.com/webhooks/creating/) and [Digital Ocean Guide to GitHub WebHooks](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync).
 
@@ -1007,13 +989,13 @@ sudo nano webhook.js
 
 ```js
 var secret = 'your_secret_key';
-var repo = '~/path-to-your-repo/';
+var repo = '~/path-to/my-project/';
 
 const http = require('http');
 const crypto = require('crypto');
 const exec = require('child_process').exec;
 
-const PM2_CMD = 'cd ~ && pm2 startOrRestart ecosystem.config.js';
+const PM2_CMD = 'pm2 restart strapi';
 
 http
   .createServer(function(req, res) {
@@ -1035,7 +1017,7 @@ http
             }
             console.log(`stdout: ${stdout}`);
             console.log(`stderr: ${stderr}`);
-          },
+          }
         );
       }
     });
@@ -1108,9 +1090,16 @@ sudo systemctl status webhook
 
 - You may test your **webhook** by following the instructions [here](https://www.digitalocean.com/community/tutorials/how-to-use-node-js-and-github-webhooks-to-keep-remote-projects-in-sync#step-4-testing-the-webhook).
 
-### Further steps to take
+### Further steps to take on your Droplet
 
 - You can **add a domain name** or **use a subdomain name** for your Strapi project, you will need to [install NGINX and configure it](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04).
+- Deny traffic to Port 1337. You have set-up a proxy using Nginx, you now need to block access by running the following command:
+
+```
+cd ~
+sudo ufw deny 1337
+```
+
 - To **install SSL**, you will need to [install and run Certbot by Let's Encrypt](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-18-04).
 - Set-up [Nginx with HTTP/2 Support](https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-with-http-2-support-on-ubuntu-18-04) for Ubuntu 18.04.
 
