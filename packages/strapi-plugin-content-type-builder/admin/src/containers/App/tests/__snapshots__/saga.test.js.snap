@@ -81,6 +81,19 @@ Object {
         "fn": [Function],
       },
     },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/content-type-builder/groups",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
   ],
 }
 `;
@@ -107,6 +120,19 @@ Object {
       "CALL": Object {
         "args": Array [
           "/content-type-builder/connections",
+          Object {
+            "method": "GET",
+          },
+        ],
+        "context": null,
+        "fn": [Function],
+      },
+    },
+    Object {
+      "@@redux-saga/IO": true,
+      "CALL": Object {
+        "args": Array [
+          "/content-type-builder/groups",
           Object {
             "method": "GET",
           },

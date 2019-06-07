@@ -68,6 +68,7 @@ export class App extends React.Component {
   /* istanbul ignore next */
   componentDidUpdate(prevProps) {
     if (prevProps.shouldRefetchData !== this.props.shouldRefetchData) {
+      console.log('fetch');
       this.props.getData();
     }
   }
@@ -167,13 +168,13 @@ export function mapDispatchToProps(dispatch) {
       setTemporaryAttributeRelation,
       updateTempContentType,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = strapi.injectReducer({ key: 'app', reducer, pluginId });
 const withSaga = strapi.injectSaga({ key: 'app', saga, pluginId });
@@ -181,5 +182,5 @@ const withSaga = strapi.injectSaga({ key: 'app', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(App);

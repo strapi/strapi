@@ -39,7 +39,7 @@ class HomePage extends React.Component {
       });
     } else {
       strapi.notification.info(
-        `${pluginId}.notification.info.contentType.creating.notSaved`,
+        `${pluginId}.notification.info.contentType.creating.notSaved`
       );
     }
   };

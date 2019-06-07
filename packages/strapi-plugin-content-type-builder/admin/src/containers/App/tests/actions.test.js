@@ -129,9 +129,18 @@ describe('Content Type Builder Action utils', () => {
   describe('formatModelAttributes', () => {
     it('should generate an array of object', () => {
       const expected = [
-        { name: 'action', params: { type: 'string', required: true, configurable: false } },
-        { name: 'controller', params: { type: 'string', required: true, configurable: false } },
-        { name: 'enabled', params: { type: 'boolean', required: true, configurable: false } },
+        {
+          name: 'action',
+          params: { type: 'string', required: true, configurable: false },
+        },
+        {
+          name: 'controller',
+          params: { type: 'string', required: true, configurable: false },
+        },
+        {
+          name: 'enabled',
+          params: { type: 'boolean', required: true, configurable: false },
+        },
         { name: 'policy', params: { type: 'boolean', configurable: false } },
         {
           name: 'role',
@@ -157,7 +166,10 @@ describe('Content Type Builder Action utils', () => {
             targetColumnName: 'test',
           },
         },
-        { name: 'type', params: { type: 'string', required: true, configurable: true } },
+        {
+          name: 'type',
+          params: { type: 'string', required: true, configurable: true },
+        },
         {
           name: 'price',
           params: {
@@ -243,7 +255,9 @@ describe('App actions', () => {
         modelName,
       };
 
-      expect(addAttributeRelation(isModelTemporary, modelName)).toEqual(expected);
+      expect(addAttributeRelation(isModelTemporary, modelName)).toEqual(
+        expected
+      );
     });
   });
 
@@ -257,7 +271,9 @@ describe('App actions', () => {
         contentTypeName,
       };
 
-      expect(addAttributeToExistingContentType(contentTypeName, attributeType)).toEqual(expected);
+      expect(
+        addAttributeToExistingContentType(contentTypeName, attributeType)
+      ).toEqual(expected);
     });
   });
 
@@ -397,6 +413,38 @@ describe('App actions', () => {
           ],
         },
       ];
+      const groups = {
+        data: [
+          {
+            uid: 'ingredients',
+            name: 'Ingredients',
+            source: null,
+            schema: {
+              connection: 'default',
+              collectionName: 'ingredients',
+              description: 'Little description',
+              attributes: {
+                name: {
+                  type: 'string',
+                  required: true,
+                },
+                quantity: {
+                  type: 'float',
+                  required: true,
+                },
+                // A discuter du nouveau format pour les relations avec vous
+                picture: {
+                  model: 'file',
+                  via: 'related',
+                  plugin: 'upload',
+                },
+              },
+            },
+          },
+          //...
+        ],
+        error: {}, // to be defined I don't know yet | null when no error
+      };
       const initialData = {
         permission: {
           collectionName: 'users-permissions_permission',
@@ -416,7 +464,7 @@ describe('App actions', () => {
                 required: true,
                 configurable: false,
               },
-            }),
+            })
           ),
         },
       };
@@ -426,9 +474,22 @@ describe('App actions', () => {
         models,
         initialData,
         connections,
+        groups: [
+          {
+            description: 'Little description',
+            fields: 3,
+            icon: 'fa-cube',
+            isTemporary: false,
+            name: 'Ingredients',
+            source: null,
+            uid: 'ingredients',
+          },
+        ],
       };
 
-      expect(getDataSucceeded({ models, allModels }, connections)).toEqual(expected);
+      expect(
+        getDataSucceeded({ models, allModels }, connections, groups)
+      ).toEqual(expected);
     });
   });
 
@@ -588,7 +649,9 @@ describe('App actions', () => {
         modelName,
       };
 
-      expect(saveEditedAttribute(attributeName, isModelTemporary, modelName)).toEqual(expected);
+      expect(
+        saveEditedAttribute(attributeName, isModelTemporary, modelName)
+      ).toEqual(expected);
     });
   });
 
@@ -604,7 +667,9 @@ describe('App actions', () => {
         modelName,
       };
 
-      expect(setTemporaryAttribute(attributeName, isModelTemporary, modelName)).toEqual(expected);
+      expect(
+        setTemporaryAttribute(attributeName, isModelTemporary, modelName)
+      ).toEqual(expected);
     });
   });
 
@@ -638,7 +703,9 @@ describe('App actions', () => {
         contentTypeName,
       };
 
-      expect(resetExistingContentTypeMainInfos(contentTypeName)).toEqual(expected);
+      expect(resetExistingContentTypeMainInfos(contentTypeName)).toEqual(
+        expected
+      );
     });
   });
 
@@ -674,7 +741,9 @@ describe('App actions', () => {
         modelName,
       };
 
-      expect(saveEditedAttributeRelation(attributeName, isModelTemporary, modelName)).toEqual(expected);
+      expect(
+        saveEditedAttributeRelation(attributeName, isModelTemporary, modelName)
+      ).toEqual(expected);
     });
   });
 
@@ -693,9 +762,15 @@ describe('App actions', () => {
         target,
       };
 
-      expect(setTemporaryAttributeRelation(target, isModelTemporary, source, attributeName, false)).toEqual(
-        expected,
-      );
+      expect(
+        setTemporaryAttributeRelation(
+          target,
+          isModelTemporary,
+          source,
+          attributeName,
+          false
+        )
+      ).toEqual(expected);
     });
   });
 
@@ -749,9 +824,18 @@ describe('App actions', () => {
         mainField: '',
         name: 'permission',
         attributes: [
-          { name: 'action', params: { type: 'string', required: true, configurable: false } },
-          { name: 'controller', params: { type: 'string', required: true, configurable: false } },
-          { name: 'enabled', params: { type: 'boolean', required: true, configurable: false } },
+          {
+            name: 'action',
+            params: { type: 'string', required: true, configurable: false },
+          },
+          {
+            name: 'controller',
+            params: { type: 'string', required: true, configurable: false },
+          },
+          {
+            name: 'enabled',
+            params: { type: 'boolean', required: true, configurable: false },
+          },
           { name: 'policy', params: { type: 'boolean', configurable: false } },
           {
             name: 'role',
@@ -764,7 +848,10 @@ describe('App actions', () => {
               target: 'role',
             },
           },
-          { name: 'type', params: { type: 'string', required: true, configurable: false } },
+          {
+            name: 'type',
+            params: { type: 'string', required: true, configurable: false },
+          },
         ],
       };
       const context = {};
@@ -776,7 +863,9 @@ describe('App actions', () => {
         context,
       };
 
-      expect(submitContentType('permission', data, context, null)).toEqual(expected);
+      expect(submitContentType('permission', data, context, null)).toEqual(
+        expected
+      );
     });
   });
 
@@ -840,9 +929,18 @@ describe('App actions', () => {
         mainField: '',
         name: 'permission',
         attributes: [
-          { name: 'action', params: { type: 'string', required: true, configurable: false } },
-          { name: 'controller', params: { type: 'string', required: true, configurable: false } },
-          { name: 'enabled', params: { type: 'boolean', required: true, configurable: false } },
+          {
+            name: 'action',
+            params: { type: 'string', required: true, configurable: false },
+          },
+          {
+            name: 'controller',
+            params: { type: 'string', required: true, configurable: false },
+          },
+          {
+            name: 'enabled',
+            params: { type: 'boolean', required: true, configurable: false },
+          },
           { name: 'policy', params: { type: 'boolean', configurable: false } },
           {
             name: 'role',
@@ -855,7 +953,10 @@ describe('App actions', () => {
               target: 'role',
             },
           },
-          { name: 'type', params: { type: 'string', required: true, configurable: false } },
+          {
+            name: 'type',
+            params: { type: 'string', required: true, configurable: false },
+          },
         ],
       };
       const context = {};
