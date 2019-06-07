@@ -152,6 +152,6 @@
   "table.contentType.head.description": "Opis",
   "table.contentType.head.fields": "Atrybuty",
   "table.contentType.head.name": "Nazwa",
-  "table.contentType.title.plural": "Modeli jest dostępnych",
-  "table.contentType.title.singular": "Model jest dostępny"
+  "table.contentType.title.plural": "{number} Modeli jest dostępnych",
+  "table.contentType.title.singular": "{number} Model jest dostępny"
 }

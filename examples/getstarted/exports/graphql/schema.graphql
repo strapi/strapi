@@ -1,3 +1,4 @@
+"""Super description"""
 type Articles {
   id: ID!
   created_at: DateTime!

@@ -152,6 +152,6 @@
   "table.contentType.head.description": "Beschrijving",
   "table.contentType.head.fields": "Velden",
   "table.contentType.head.name": "Naam",
-  "table.contentType.title.plural": "Content Types zijn beschikbaar",
-  "table.contentType.title.singular": "Content Type is beschikbaar"
+  "table.contentType.title.plural": "{number} Content Types zijn beschikbaar",
+  "table.contentType.title.singular": "{number} Content Type is beschikbaar"
 }

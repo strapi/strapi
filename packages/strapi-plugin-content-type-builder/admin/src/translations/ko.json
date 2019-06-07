@@ -152,6 +152,6 @@
   "table.contentType.head.description": "설명",
   "table.contentType.head.fields": "필드",
   "table.contentType.head.name": "이름",
-  "table.contentType.title.plural": "개의 콘텐츠 타입이 있습니다.",
-  "table.contentType.title.singular": "개의 콘텐츠 타입이 있습니다."
+  "table.contentType.title.plural": "{number} 개의 콘텐츠 타입이 있습니다.",
+  "table.contentType.title.singular": "{number} 개의 콘텐츠 타입이 있습니다."
 }

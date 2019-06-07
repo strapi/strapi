@@ -152,6 +152,6 @@
   "table.contentType.head.description": "Descrizione",
   "table.contentType.head.fields": "Campi",
   "table.contentType.head.name": "Nome",
-  "table.contentType.title.plural": "I Tipi di contenuto sono disponibili",
-  "table.contentType.title.singular": "Il Tipo di contenuto è disponibile"
+  "table.contentType.title.plural": "{number} I Tipi di contenuto sono disponibili",
+  "table.contentType.title.singular": "{number} Il Tipo di contenuto è disponibile"
 }

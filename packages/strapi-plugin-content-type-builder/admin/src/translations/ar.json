@@ -152,6 +152,6 @@
   "table.contentType.head.description": "وصف",
   "table.contentType.head.fields": "حقول",
   "table.contentType.head.name": "اسم",
-  "table.contentType.title.plural": "أنواع المحتوى متاحة",
-  "table.contentType.title.singular": "نوع المحتوى متاح"
+  "table.contentType.title.plural": "أنواع المحتوى متاحة {number}",
+  "table.contentType.title.singular": "نوع المحتوى متاح {number}"
 }

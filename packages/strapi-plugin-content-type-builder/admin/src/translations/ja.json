@@ -151,6 +151,6 @@
   "table.contentType.head.description": "説明文",
   "table.contentType.head.fields": "フィールド",
   "table.contentType.head.name": "名前",
-  "table.contentType.title.plural": "個のコンテンツタイプが利用できます。",
-  "table.contentType.title.singular": "コンテンツタイプは利用可能です"
+  "table.contentType.title.plural": "{number} 個のコンテンツタイプが利用できます。",
+  "table.contentType.title.singular": "{number} コンテンツタイプは利用可能です"
 }

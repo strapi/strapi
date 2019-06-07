@@ -152,6 +152,6 @@
   "table.contentType.head.description": "Описание",
   "table.contentType.head.fields": "Поля",
   "table.contentType.head.name": "Название",
-  "table.contentType.title.plural": "Типов Контента доступны",
-  "table.contentType.title.singular": "Тип Контента доступен"
+  "table.contentType.title.plural": "{number} Типов Контента доступны",
+  "table.contentType.title.singular": "{number} Тип Контента доступен"
 }

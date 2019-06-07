@@ -64,6 +64,7 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "^5.0.0",
+    "styled-components": "^4.3.1",
     "whatwg-fetch": "^2.0.3"
   },
   "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"

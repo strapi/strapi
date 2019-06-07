@@ -150,6 +150,6 @@
   "table.contentType.head.description": "描述",
   "table.contentType.head.fields": "字段",
   "table.contentType.head.name": "名称",
-  "table.contentType.title.plural": "Content Types 是可用的",
-  "table.contentType.title.singular": "Content Type 是可用的"
+  "table.contentType.title.plural": "{number} Content Types 是可用的",
+  "table.contentType.title.singular": "{number} Content Type 是可用的"
 }

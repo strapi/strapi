@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get, snakeCase, isEmpty, map, sortBy } from 'lodash';
+import { get, snakeCase, isEmpty, map, sortBy, startsWith } from 'lodash';
 
 import LeftMenuLink from '../LeftMenuLink';
 
@@ -29,7 +29,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
                 : plugins[current].id;
 
               return link;
-            }),
+            })
           ),
         };
       }
@@ -64,12 +64,13 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
   const pluginsLinks = !isEmpty(plugins) ? (
     map(sortBy(plugins, 'name'), plugin => {
       if (plugin.id !== 'email' && plugin.id !== 'settings-manager') {
-        const basePath = `/plugins/${get(plugin, 'id')}`;
-        // NOTE: this should be dynamic
-        const destination =
-          plugin.id === 'content-manager'
-            ? `${basePath}/ctm-configurations`
-            : basePath;
+        const pluginSuffixUrl = startsWith(plugin.suffixUrl, '/')
+          ? plugin.suffixUrl
+          : `/${plugin.suffixUrl}`;
+
+        const destination = plugin.suffixUrl
+          ? `/plugins/${get(plugin, 'id')}${pluginSuffixUrl}`
+          : `/plugins/${get(plugin, 'id')}`;
 
         return (
           <LeftMenuLink

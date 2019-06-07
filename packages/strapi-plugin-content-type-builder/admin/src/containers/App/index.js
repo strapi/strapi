@@ -51,8 +51,9 @@ import styles from './styles.scss';
 const ROUTES = [
   {
     component: HomePage,
-    to: `/plugins/${pluginId}`,
+    to: `/plugins/${pluginId}/:type`,
   },
+
   {
     component: ModelPage,
     to: `/plugins/${pluginId}/models/:modelName`,

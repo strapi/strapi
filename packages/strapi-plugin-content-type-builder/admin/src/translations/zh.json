@@ -152,6 +152,6 @@
   "table.contentType.head.description": "說明",
   "table.contentType.head.fields": "欄位",
   "table.contentType.head.name": "名稱",
-  "table.contentType.title.plural": "筆資料結構",
-  "table.contentType.title.singular": "筆資料結構"
+  "table.contentType.title.plural": "{number} 筆資料結構",
+  "table.contentType.title.singular": "{number} 筆資料結構"
 }

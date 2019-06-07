@@ -152,6 +152,6 @@
   "table.contentType.head.description": "Açıklama",
   "table.contentType.head.fields": "Alanlar",
   "table.contentType.head.name": "İsim",
-  "table.contentType.title.plural": "İçerik Türleri kullanılabilir",
-  "table.contentType.title.singular": "İçerik Türü kullanılabilir"
+  "table.contentType.title.plural": "{number} İçerik Türleri kullanılabilir",
+  "table.contentType.title.singular": "{number} İçerik Türü kullanılabilir"
 }

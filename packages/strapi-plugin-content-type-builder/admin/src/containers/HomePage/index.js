@@ -9,6 +9,10 @@ import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 
 import {
+  HeaderNav,
+  ListWrapper,
+  ListHeader,
+  List,
   PluginHeader,
   getQueryParameters,
   routerPropTypes,
@@ -16,15 +20,28 @@ import {
 
 import EmptyContentTypeView from '../../components/EmptyContentTypeView';
 import TableList from '../../components/TableList';
-
 import pluginId from '../../pluginId';
-
 import ModelForm from '../ModelForm';
-
+import Row from './Row';
 import styles from './styles.scss';
+
+const getUrl = to => `/plugins/${pluginId}${to}`;
+const getNavTrad = trad =>
+  `${pluginId}.home.contentTypeBuilder.headerNav.link.${trad}`;
 
 class HomePage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  headerNavLinks = [
+    {
+      name: getNavTrad('models'),
+      to: getUrl('/models'),
+    },
+    {
+      name: getNavTrad('groups'),
+      to: getUrl('/groups'),
+    },
+  ];
+
   handleClick = () => {
     const {
       canOpenModal,
@@ -52,15 +69,20 @@ class HomePage extends React.Component {
       createTempContentType,
       deleteModel,
       deleteTemporaryModel,
+      groups,
       history: { push },
       location: { pathname, search },
+      match: {
+        params: { type },
+      },
       models,
       modifiedData,
       newContentType,
       onChangeNewContentTypeMainInfos,
     } = this.props;
-    const availableNumber = models.length;
-    const title = `${pluginId}.table.contentType.title.${
+    const availableNumber = type === 'groups' ? groups.length : models.length;
+    const titleType = type === 'groups' ? type : 'contentType';
+    const title = `${pluginId}.table.${titleType}.title.${
       availableNumber > 1 ? 'plural' : 'singular'
     }`;
     const renderViewContent =
@@ -91,7 +113,44 @@ class HomePage extends React.Component {
           }}
           actions={[]}
         />
-        {renderViewContent}
+        <HeaderNav links={this.headerNavLinks} />
+
+        <ListWrapper>
+          <ListHeader
+            title={title}
+            titleValues={{ number: availableNumber }}
+            button={{
+              kind: 'secondaryHotlineAdd',
+              label: `${pluginId}.button.contentType.add`,
+              onClick: this.handleClick,
+            }}
+          />
+          <List>
+            <table>
+              <tbody>
+                {models.map(model => (
+                  <Row key={model.name}>
+                    <td>
+                      <p>{model.name}</p>
+                    </td>
+                    <td>
+                      <p>{model.description}</p>
+                    </td>
+                    <td>
+                      <button type="button">
+                        <i className="fa fa-pencil link-icon" />
+                      </button>
+                      <button type="button">
+                        <i className="fa fa-trash link-icon" />
+                      </button>
+                    </td>
+                  </Row>
+                ))}
+              </tbody>
+            </table>
+          </List>
+        </ListWrapper>
+
         <ModelForm
           actionType="create"
           activeTab={getQueryParameters(search, 'settingType')}

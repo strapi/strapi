@@ -28,6 +28,7 @@ const plugin = {
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
   preventComponentRendering: false,
+  suffixUrl: '/ctm-configurations',
   trads,
 };
 
