@@ -10,7 +10,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize() {
       strapi.app.use(async (ctx, next) => {
         const start = Date.now();
 
@@ -20,8 +20,6 @@ module.exports = strapi => {
 
         ctx.set('X-Response-Time', delta + 'ms'); // eslint-disable-line prefer-template
       });
-
-      cb();
-    }
+    },
   };
 };

@@ -8,7 +8,6 @@
   - [.config](#strapi-config)
   - [.controllers](#strapi-controllers)
   - [.hook](#strapi-hook)
-  - [.koaMiddlewares](#strapi-koaMiddlewares)
   - [.load()](#strapi-load)
   - [.log](#strapi-log)
   - [.middleware](#strapi-middleware)
@@ -59,10 +58,6 @@ This object doesn't include the admin's controllers and plugin's controllers.
 ## strapi.hook
 
 Returns an object of the hooks available in the project. Every folder that follows this pattern `strapi-*` and located in the `./node_modules` or `/hooks` folder will be mounted into the `strapi.hook` object.
-
-## strapi.koaMiddlewares
-
-Returns an object of the Koa middlewares found in the `./node_modules` folder of the project. This reference is very useful for the Strapi's core.
 
 ## strapi.load
 
