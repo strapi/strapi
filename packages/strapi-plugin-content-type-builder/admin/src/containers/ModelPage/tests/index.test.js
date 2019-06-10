@@ -13,6 +13,7 @@ import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
 
 import LeftMenu from '../../LeftMenu';
+import MenuContext from '../../MenuContext';
 import Block from '../../../components/Block';
 
 import { clearTemporaryAttribute, onChangeAttribute } from '../../App/actions';
@@ -24,14 +25,23 @@ import initialData from './initialData.json';
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 
 const context = { emitEvent: jest.fn() };
-const renderComponent = (props = {}) =>
-  mountWithIntl(
+const renderComponent = (props = {}) => {
+  const menucontext = {
+    canOpenModal: true,
+    groups: [],
+    models: [],
+    push: jest.fn(),
+  };
+  return mountWithIntl(
     <BrowserRouter>
-      <ModelPage {...props} />
+      <MenuContext.Provider value={menucontext}>
+        <ModelPage {...props} />
+      </MenuContext.Provider>
     </BrowserRouter>,
     messages,
     context
   );
+};
 
 // @soupette
 // TODO update the test when switching to react testing lib
@@ -321,14 +331,14 @@ describe('<ModelPage />', () => {
       });
     });
 
-    // describe('RenderLeftMenu', () => {
-    //   it('should render a LeftMenu', () => {
-    //     const wrapper = shallow(<ModelPage {...props} />);
-    //     const leftMenu = wrapper.find(LeftMenu);
+    describe('RenderLeftMenu', () => {
+      it('should render a LeftMenu', () => {
+        const wrapper = shallow(<ModelPage {...props} />);
+        const leftMenu = wrapper.find(LeftMenu);
 
-    //     expect(leftMenu).toHaveLength(1);
-    //   });
-    // });
+        expect(leftMenu).toHaveLength(1);
+      });
+    });
 
     // describe('GetSectionTitle', () => {
     //   it('should return a singular string for the product', () => {
@@ -490,222 +500,222 @@ describe('<ModelPage /> lifecycle', () => {
     topCompo.unmount();
   });
 
-  // describe('HandleClickEditAttribute', () => {
-  //   it('should emit the event editFieldOfContentType', async () => {
-  //     topCompo = renderComponent(props);
-  //     const wrapper = topCompo.find(ModelPage);
+  describe('HandleClickEditAttribute', () => {
+    it('should emit the event editFieldOfContentType', async () => {
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
 
-  //     const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
-  //     const { handleClickEditAttribute } = wrapper.instance();
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const { handleClickEditAttribute } = wrapper.instance();
 
-  //     handleClickEditAttribute('username', 'string');
+      handleClickEditAttribute('username', 'string');
 
-  //     expect(spyOnWait).toHaveBeenCalled();
+      expect(spyOnWait).toHaveBeenCalled();
 
-  //     await wait();
+      await wait();
 
-  //     expect(context.emitEvent).toHaveBeenCalledWith(
-  //       'willEditFieldOfContentType'
-  //     );
-  //     expect(props.history.push).toHaveBeenCalledWith({
-  //       search:
-  //         'modalType=attributeForm&attributeType=string&settingType=base&actionType=edit&attributeName=username',
-  //     });
-  //   });
+      expect(context.emitEvent).toHaveBeenCalledWith(
+        'willEditFieldOfContentType'
+      );
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=attributeForm&attributeType=string&settingType=base&actionType=edit&attributeName=username',
+      });
+    });
 
-  //   it('should handle the <number> type correctly', async () => {
-  //     topCompo = renderComponent(props);
-  //     const wrapper = topCompo.find(ModelPage);
+    it('should handle the <number> type correctly', async () => {
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
 
-  //     const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
-  //     const { handleClickEditAttribute } = wrapper.instance();
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const { handleClickEditAttribute } = wrapper.instance();
 
-  //     handleClickEditAttribute('username', 'float');
+      handleClickEditAttribute('username', 'float');
 
-  //     expect(spyOnWait).toHaveBeenCalled();
+      expect(spyOnWait).toHaveBeenCalled();
 
-  //     await wait();
+      await wait();
 
-  //     expect(context.emitEvent).toHaveBeenCalledWith(
-  //       'willEditFieldOfContentType'
-  //     );
-  //     expect(props.history.push).toHaveBeenCalledWith({
-  //       search:
-  //         'modalType=attributeForm&attributeType=number&settingType=base&actionType=edit&attributeName=username',
-  //     });
-  //   });
-  // });
+      expect(context.emitEvent).toHaveBeenCalledWith(
+        'willEditFieldOfContentType'
+      );
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=attributeForm&attributeType=number&settingType=base&actionType=edit&attributeName=username',
+      });
+    });
+  });
 
-  // describe('HandleClickEditModelMainInfos', () => {
-  //   it('should display a notification if thee modal cannot be opened', async () => {
-  //     props.canOpenModal = false;
+  describe('HandleClickEditModelMainInfos', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
+      props.canOpenModal = false;
 
-  //     topCompo = renderComponent(props);
-  //     const wrapper = topCompo.find(ModelPage);
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
 
-  //     const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
-  //     const spyOnDisplayNotification = jest.spyOn(
-  //       wrapper.instance(),
-  //       'displayNotificationCTNotSaved'
-  //     );
-  //     const { handleClickEditModelMainInfos } = wrapper.instance();
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const spyOnDisplayNotification = jest.spyOn(
+        wrapper.instance(),
+        'displayNotificationCTNotSaved'
+      );
+      const { handleClickEditModelMainInfos } = wrapper.instance();
 
-  //     handleClickEditModelMainInfos();
+      handleClickEditModelMainInfos();
 
-  //     expect(spyOnWait).toHaveBeenCalled();
+      expect(spyOnWait).toHaveBeenCalled();
 
-  //     await wait();
+      await wait();
 
-  //     expect(context.emitEvent).not.toHaveBeenCalledWith(
-  //       'willEditNameOfContentType'
-  //     );
-  //     expect(props.history.push).not.toHaveBeenCalled();
-  //     expect(spyOnDisplayNotification).toHaveBeenCalled();
-  //   });
+      expect(context.emitEvent).not.toHaveBeenCalledWith(
+        'willEditNameOfContentType'
+      );
+      expect(props.history.push).not.toHaveBeenCalled();
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
 
-  //   it('should emit the event editFieldOfContentType', async () => {
-  //     props.canOpenModal = true;
-  //     topCompo = renderComponent(props);
-  //     const wrapper = topCompo.find(ModelPage);
+    it('should emit the event editFieldOfContentType', async () => {
+      props.canOpenModal = true;
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
 
-  //     const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
-  //     const { handleClickEditModelMainInfos } = wrapper.instance();
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const { handleClickEditModelMainInfos } = wrapper.instance();
 
-  //     handleClickEditModelMainInfos();
+      handleClickEditModelMainInfos();
 
-  //     expect(spyOnWait).toHaveBeenCalled();
+      expect(spyOnWait).toHaveBeenCalled();
 
-  //     await wait();
+      await wait();
 
-  //     expect(context.emitEvent).toHaveBeenCalledWith(
-  //       'willEditNameOfContentType'
-  //     );
-  //     expect(props.history.push).toHaveBeenCalledWith({
-  //       search:
-  //         'modalType=model&settingType=base&actionType=edit&modelName=product',
-  //     });
-  //   });
-  // });
+      expect(context.emitEvent).toHaveBeenCalledWith(
+        'willEditNameOfContentType'
+      );
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=model&settingType=base&actionType=edit&modelName=product',
+      });
+    });
+  });
 
-  // describe('HandleClickOpenModalChooseAttributes', () => {
-  //   it('should display a notification if thee modal cannot be opened', async () => {
-  //     props.canOpenModal = false;
+  describe('HandleClickOpenModalChooseAttributes', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
+      props.canOpenModal = false;
 
-  //     topCompo = renderComponent(props);
-  //     const wrapper = topCompo.find(ModelPage);
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
 
-  //     const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
-  //     const spyOnDisplayNotification = jest.spyOn(
-  //       wrapper.instance(),
-  //       'displayNotificationCTNotSaved'
-  //     );
-  //     const { handleClickOpenModalChooseAttributes } = wrapper.instance();
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const spyOnDisplayNotification = jest.spyOn(
+        wrapper.instance(),
+        'displayNotificationCTNotSaved'
+      );
+      const { handleClickOpenModalChooseAttributes } = wrapper.instance();
 
-  //     handleClickOpenModalChooseAttributes();
+      handleClickOpenModalChooseAttributes();
 
-  //     expect(spyOnWait).toHaveBeenCalled();
+      expect(spyOnWait).toHaveBeenCalled();
 
-  //     await wait();
+      await wait();
 
-  //     expect(props.history.push).not.toHaveBeenCalled();
-  //     expect(spyOnDisplayNotification).toHaveBeenCalled();
-  //   });
+      expect(props.history.push).not.toHaveBeenCalled();
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
 
-  //   it('should emit the event editFieldOfContentType', async () => {
-  //     props.canOpenModal = true;
-  //     topCompo = renderComponent(props);
-  //     const wrapper = topCompo.find(ModelPage);
+    it('should emit the event editFieldOfContentType', async () => {
+      props.canOpenModal = true;
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(ModelPage);
 
-  //     const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
-  //     const { handleClickOpenModalChooseAttributes } = wrapper.instance();
+      const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
+      const { handleClickOpenModalChooseAttributes } = wrapper.instance();
 
-  //     handleClickOpenModalChooseAttributes();
+      handleClickOpenModalChooseAttributes();
 
-  //     expect(spyOnWait).toHaveBeenCalled();
+      expect(spyOnWait).toHaveBeenCalled();
 
-  //     await wait();
+      await wait();
 
-  //     expect(context.emitEvent).toHaveBeenCalledWith(
-  //       'willEditNameOfContentType'
-  //     );
-  //     expect(props.history.push).toHaveBeenCalledWith({
-  //       search: 'modalType=chooseAttributes',
-  //     });
-  //   });
-  // });
+      expect(context.emitEvent).toHaveBeenCalledWith(
+        'willEditNameOfContentType'
+      );
+      expect(props.history.push).toHaveBeenCalledWith({
+        search: 'modalType=chooseAttributes',
+      });
+    });
+  });
 
-  // describe('handleClickOpenModalCreateCT', () => {
-  //   it('should display a notification if thee modal cannot be opened', async () => {
-  //     props.canOpenModal = false;
-  //     topCompo = renderComponent(props);
+  describe('handleClickOpenModalCreateCT', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
+      props.canOpenModal = false;
+      topCompo = renderComponent(props);
 
-  //     const wrapper = topCompo.find(ModelPage);
-  //     const spyOnDisplayNotification = jest.spyOn(
-  //       wrapper.instance(),
-  //       'displayNotificationCTNotSaved'
-  //     );
-  //     const { handleClickOpenModalCreateCT } = wrapper.instance();
+      const wrapper = topCompo.find(ModelPage);
+      const spyOnDisplayNotification = jest.spyOn(
+        wrapper.instance(),
+        'displayNotificationCTNotSaved'
+      );
+      const { handleClickOpenModalCreateCT } = wrapper.instance();
 
-  //     handleClickOpenModalCreateCT();
+      handleClickOpenModalCreateCT();
 
-  //     expect(props.history.push).not.toHaveBeenCalled();
-  //     expect(spyOnDisplayNotification).toHaveBeenCalled();
-  //   });
+      expect(props.history.push).not.toHaveBeenCalled();
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
 
-  //   it('should emit the event editFieldOfContentType', async () => {
-  //     props.canOpenModal = true;
-  //     topCompo = renderComponent(props);
+    it('should emit the event editFieldOfContentType', async () => {
+      props.canOpenModal = true;
+      topCompo = renderComponent(props);
 
-  //     const wrapper = topCompo.find(ModelPage);
-  //     const { handleClickOpenModalCreateCT } = wrapper.instance();
+      const wrapper = topCompo.find(ModelPage);
+      const { handleClickOpenModalCreateCT } = wrapper.instance();
 
-  //     handleClickOpenModalCreateCT();
+      handleClickOpenModalCreateCT();
 
-  //     expect(props.history.push).toHaveBeenCalledWith({
-  //       search: 'modalType=model&settingType=base&actionType=create',
-  //     });
-  //   });
-  // });
+      expect(props.history.push).toHaveBeenCalledWith({
+        search: 'modalType=model&settingType=base&actionType=create',
+      });
+    });
+  });
 
-  // describe('HandleClickOnTrashIcon', () => {
-  //   it('should display a notification if thee modal cannot be opened', async () => {
-  //     props.canOpenModal = false;
-  //     topCompo = renderComponent(props);
+  describe('HandleClickOnTrashIcon', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
+      props.canOpenModal = false;
+      topCompo = renderComponent(props);
 
-  //     const wrapper = topCompo.find(ModelPage);
-  //     const spyOnDisplayNotification = jest.spyOn(
-  //       wrapper.instance(),
-  //       'displayNotificationCTNotSaved'
-  //     );
-  //     const { handleClickOnTrashIcon } = wrapper.instance();
+      const wrapper = topCompo.find(ModelPage);
+      const spyOnDisplayNotification = jest.spyOn(
+        wrapper.instance(),
+        'displayNotificationCTNotSaved'
+      );
+      const { handleClickOnTrashIcon } = wrapper.instance();
 
-  //     handleClickOnTrashIcon('username');
+      handleClickOnTrashIcon('username');
 
-  //     expect(context.emitEvent).not.toHaveBeenCalledWith(
-  //       'willDeleteFieldOfContentType'
-  //     );
-  //     expect(spyOnDisplayNotification).toHaveBeenCalled();
-  //   });
+      expect(context.emitEvent).not.toHaveBeenCalledWith(
+        'willDeleteFieldOfContentType'
+      );
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
 
-  //   it('should emit the event willDeleteFieldOfContentType', async () => {
-  //     props.canOpenModal = true;
-  //     topCompo = renderComponent(props);
+    it('should emit the event willDeleteFieldOfContentType', async () => {
+      props.canOpenModal = true;
+      topCompo = renderComponent(props);
 
-  //     const wrapper = topCompo.find(ModelPage);
-  //     const { handleClickOnTrashIcon } = wrapper.instance();
+      const wrapper = topCompo.find(ModelPage);
+      const { handleClickOnTrashIcon } = wrapper.instance();
 
-  //     handleClickOnTrashIcon('username');
+      handleClickOnTrashIcon('username');
 
-  //     expect(wrapper.state()).toEqual({
-  //       showWarning: true,
-  //       removePrompt: false,
-  //       attrToDelete: 'username',
-  //     });
-  //     expect(context.emitEvent).toHaveBeenCalledWith(
-  //       'willDeleteFieldOfContentType'
-  //     );
-  //   });
-  // });
+      expect(wrapper.state()).toEqual({
+        showWarning: true,
+        removePrompt: false,
+        attrToDelete: 'username',
+      });
+      expect(context.emitEvent).toHaveBeenCalledWith(
+        'willDeleteFieldOfContentType'
+      );
+    });
+  });
 });
 
 describe('CTB <ModelPage />, mapDispatchToProps', () => {
