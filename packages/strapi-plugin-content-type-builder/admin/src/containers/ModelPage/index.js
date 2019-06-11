@@ -484,28 +484,6 @@ export class ModelPage extends React.Component {
       `${pluginId}.notification.info.contentType.creating.notSaved`
     );
 
-  renderLinks = () => {
-    const { models } = this.props;
-    const links = models.map(model => {
-      const { isTemporary, name, source } = model;
-      const base = `/plugins/${pluginId}/models/${name}`;
-      const to = source ? `${base}&source=${source}` : base;
-
-      return (
-        <LeftMenuLink
-          key={name}
-          icon="fa fa-caret-square-o-right"
-          isTemporary={isTemporary}
-          name={name}
-          source={source}
-          to={to}
-        />
-      );
-    });
-
-    return links;
-  };
-
   renderLi = attribute => {
     const attributeInfos = get(this.getModelAttributes(), attribute, {});
 
