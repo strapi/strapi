@@ -13,7 +13,7 @@ module.exports = async ({
 
   // Equilize database tables
   const handler = async (table, attributes) => {
-    const tableExist = await ORM.knex.schema.hasTable(table);
+    const tableExists = await ORM.knex.schema.hasTable(table);
 
     // Apply field type of attributes definition
     const generateColumns = (attrs, start, tableExists = false) => {
@@ -128,7 +128,7 @@ module.exports = async ({
       await ORM.knex.raw(`CREATE TABLE ${quote}${table}${quote} (${columns})`);
     };
 
-    if (!tableExist) {
+    if (!tableExists) {
       await createTable(table);
       await generateIndexes(table, attributes);
       await storeTable(table, attributes);
@@ -163,7 +163,7 @@ module.exports = async ({
               definition,
               attribute,
               name: key,
-              tableExist,
+              tableExists,
             });
 
             if (type) {
@@ -238,7 +238,7 @@ module.exports = async ({
               definition,
               attribute,
               name: key,
-              tableExist,
+              tableExists,
             });
 
             if (type) {
