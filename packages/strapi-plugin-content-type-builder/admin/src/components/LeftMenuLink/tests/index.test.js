@@ -5,12 +5,16 @@ import { FormattedMessage } from 'react-intl';
 import LeftMenuLink from '../index';
 
 describe('<LeftMenuLink />', () => {
+  const props = {
+    to: '/',
+    name: 'link',
+  };
   it('should not crash', () => {
-    shallow(<LeftMenuLink to="/" />);
+    shallow(<LeftMenuLink {...props} />);
   });
   it('should add a span containing from:<source /> if a source prop is given', () => {
     const renderedComponent = shallow(
-      <LeftMenuLink to="" name="test" source="source" />
+      <LeftMenuLink {...props} source="source" />
     );
     const sourceInfo = renderedComponent.find(FormattedMessage).first();
 
@@ -22,9 +26,7 @@ describe('<LeftMenuLink />', () => {
   });
 
   it('should add a not saved span if the isTemporary prop is true', () => {
-    const renderedComponent = shallow(
-      <LeftMenuLink to="" name="test" isTemporary />
-    );
+    const renderedComponent = shallow(<LeftMenuLink {...props} isTemporary />);
     const isTemporaryInfo = renderedComponent.find(FormattedMessage).first();
 
     expect(isTemporaryInfo.exists()).toBe(true);

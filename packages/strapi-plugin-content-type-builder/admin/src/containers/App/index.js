@@ -74,7 +74,6 @@ export class App extends React.Component {
   /* istanbul ignore next */
   componentDidUpdate(prevProps) {
     if (prevProps.shouldRefetchData !== this.props.shouldRefetchData) {
-      console.log('fetch');
       this.props.getData();
     }
   }
