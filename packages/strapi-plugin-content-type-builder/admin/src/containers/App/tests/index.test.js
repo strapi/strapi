@@ -17,6 +17,7 @@ describe('<App />', () => {
       getData: jest.fn(),
       initialData: {},
       isLoading: true,
+      groups: [],
       models: [
         {
           icon: 'fa-cube',
@@ -42,7 +43,13 @@ describe('<App />', () => {
           source: 'users-permissions',
           isTemporary: false,
         },
-        { icon: 'fa-cube', name: 'product', description: 'super api', fields: 6, isTemporary: false },
+        {
+          icon: 'fa-cube',
+          name: 'product',
+          description: 'super api',
+          fields: 6,
+          isTemporary: false,
+        },
       ],
       modifiedData: {},
       onChangeExistingContentTypeMainInfos: jest.fn(),

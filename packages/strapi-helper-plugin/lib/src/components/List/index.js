@@ -55,13 +55,16 @@ const List = styled.div`
         color: transparent;
         background-color: transparent;
         position: absolute;
-        left: ${sizes.margin * 2}px;
-        width: calc(100% - ${sizes.margin * 4}px);
+        left: ${sizes.margin * 3}px;
+        width: calc(100% - ${sizes.margin * 6}px);
         height: 1px;
         margin-top: -${sizes.margin * 0.1}px;
       }
       &:not(:first-of-type)::before {
         background-color: rgba(14, 22, 34, 0.04);
+      }
+      &:first-of-type::before {
+        height: 0;
       }
     }
     td {
@@ -71,7 +74,6 @@ const List = styled.div`
       line-height: 1.8rem;
       &:first-of-type {
         padding-left: calc(3rem + 0.75em);
-        padding-left: ${sizes.margin * 2.8}px;
       }
       &:last-of-type {
         padding-right: calc(3rem + 0.75em);

@@ -19,7 +19,6 @@ import {
 } from 'strapi-helper-plugin';
 
 import EmptyContentTypeView from '../../components/EmptyContentTypeView';
-import TableList from '../../components/TableList';
 import pluginId from '../../pluginId';
 import ModelForm from '../ModelForm';
 import Row from './Row';
@@ -61,13 +60,41 @@ class HomePage extends React.Component {
     }
   };
 
+  handleDelete = isTemporary => {
+    const { canOpenModal } = this.props;
+
+    if (canOpenModal || isTemporary) {
+      this.setState({});
+    }
+  };
+
+  handleGoTo = (to, source, shouldEdit = false) => {
+    const {
+      history: { push },
+      match: {
+        params: { type },
+      },
+    } = this.props;
+    const modalType = type === 'models' ? 'model' : 'group';
+    const search = shouldEdit
+      ? `?modalType=${modalType}&settingType=base&actionType=edit&modelName=${to}`
+      : '';
+    push(
+      `/plugins/${pluginId}/${type}/${to.toLowerCase()}${
+        source ? `&source=${source}` : ''
+      }${search}`
+    );
+  };
+
   render() {
     const {
       cancelNewContentType,
       canOpenModal,
       connections,
       createTempContentType,
+      deleteGroup,
       deleteModel,
+      deleteTemporaryGroup,
       deleteTemporaryModel,
       groups,
       history: { push },
@@ -80,27 +107,12 @@ class HomePage extends React.Component {
       newContentType,
       onChangeNewContentTypeMainInfos,
     } = this.props;
+    const displayedData = type === 'groups' ? groups : models;
     const availableNumber = type === 'groups' ? groups.length : models.length;
     const titleType = type === 'groups' ? type : 'contentType';
     const title = `${pluginId}.table.${titleType}.title.${
       availableNumber > 1 ? 'plural' : 'singular'
     }`;
-    const renderViewContent =
-      availableNumber === 0 ? (
-        <EmptyContentTypeView handleButtonClick={this.handleClick} /> // eslint-disable-line react/jsx-handler-names
-      ) : (
-        <TableList
-          canOpenModalAddContentType={canOpenModal}
-          availableNumber={availableNumber}
-          title={title}
-          buttonLabel={`${pluginId}.button.contentType.add`}
-          onButtonClick={this.handleClick}
-          onDelete={deleteModel}
-          deleteTemporaryModel={deleteTemporaryModel}
-          rowItems={this.props.models}
-          push={push}
-        />
-      );
 
     return (
       <div className={styles.homePage}>
@@ -115,41 +127,44 @@ class HomePage extends React.Component {
         />
         <HeaderNav links={this.headerNavLinks} />
 
-        <ListWrapper>
-          <ListHeader
-            title={title}
-            titleValues={{ number: availableNumber }}
-            button={{
-              kind: 'secondaryHotlineAdd',
-              label: `${pluginId}.button.contentType.add`,
-              onClick: this.handleClick,
-            }}
+        {availableNumber === 0 ? (
+          <EmptyContentTypeView
+            handleButtonClick={this.handleClick}
+            type={type}
           />
-          <List>
-            <table>
-              <tbody>
-                {models.map(model => (
-                  <Row key={model.name}>
-                    <td>
-                      <p>{model.name}</p>
-                    </td>
-                    <td>
-                      <p>{model.description}</p>
-                    </td>
-                    <td>
-                      <button type="button">
-                        <i className="fa fa-pencil link-icon" />
-                      </button>
-                      <button type="button">
-                        <i className="fa fa-trash link-icon" />
-                      </button>
-                    </td>
-                  </Row>
-                ))}
-              </tbody>
-            </table>
-          </List>
-        </ListWrapper>
+        ) : (
+          <ListWrapper>
+            <ListHeader
+              title={title}
+              titleValues={{ number: availableNumber }}
+              button={{
+                kind: 'secondaryHotlineAdd',
+                label: `${pluginId}.button.${type}.create`,
+                onClick: this.handleClick,
+              }}
+            />
+            <List>
+              <table>
+                <tbody>
+                  {displayedData.map(data => (
+                    <Row
+                      key={data.name}
+                      canOpenModal={canOpenModal}
+                      context={this.context}
+                      deleteGroup={deleteGroup}
+                      deleteModel={deleteModel}
+                      deleteTemporaryGroup={deleteTemporaryGroup}
+                      deleteTemporaryModel={deleteTemporaryModel}
+                      onClickGoTo={this.handleGoTo}
+                      {...data}
+                      viewType={type}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </List>
+          </ListWrapper>
+        )}
 
         <ModelForm
           actionType="create"
@@ -171,6 +186,8 @@ class HomePage extends React.Component {
 
 HomePage.contextTypes = {
   emitEvent: PropTypes.func.isRequired,
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
 };
 
 HomePage.defaultProps = {
@@ -185,7 +202,9 @@ HomePage.propTypes = {
   canOpenModal: PropTypes.bool,
   connections: PropTypes.array,
   createTempContentType: PropTypes.func.isRequired,
+  deleteGroup: PropTypes.func.isRequired,
   deleteModel: PropTypes.func.isRequired,
+  deleteTemporaryGroup: PropTypes.func.isRequired,
   models: PropTypes.array,
   modifiedData: PropTypes.object,
   newContentType: PropTypes.shape({

@@ -14,8 +14,10 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
+  DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
+  DELETE_TEMPORARY_GROUP,
   DELETE_TEMPORARY_MODEL,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
@@ -222,6 +224,11 @@ function appReducer(state = initialState, action) {
           )
         )
         .update('newContentTypeClone', () => state.get('newContentType'));
+    case DELETE_GROUP_SUCCEEDED:
+      return state.removeIn([
+        'groups',
+        state.get('groups').findIndex(group => group.get('uid') === action.uid),
+      ]);
     case DELETE_MODEL_ATTRIBUTE: {
       const pathToModelName = action.keys
         .slice()
@@ -255,6 +262,13 @@ function appReducer(state = initialState, action) {
         ])
         .removeIn(['initialData', action.modelName])
         .removeIn(['modifiedData', action.modelName]);
+    case DELETE_TEMPORARY_GROUP:
+      return state.removeIn([
+        'groups',
+        state
+          .get('groups')
+          .findIndex(group => group.get('isTemporary') === true),
+      ]);
     case DELETE_TEMPORARY_MODEL:
       return state
         .removeIn([

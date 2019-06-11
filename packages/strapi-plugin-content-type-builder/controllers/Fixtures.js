@@ -30,6 +30,22 @@ module.exports = {
             },
           },
         },
+        {
+          uid: 'cars',
+          name: 'Cars',
+          source: null,
+          schema: {
+            connection: 'default',
+            collectionName: 'cars',
+            description: 'Little description',
+            attributes: {
+              name: {
+                type: 'string',
+                required: true,
+              },
+            },
+          },
+        },
         //...
       ],
       error: {}, // to be defined I don't know yet | null when no error

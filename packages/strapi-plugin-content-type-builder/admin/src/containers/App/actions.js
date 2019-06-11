@@ -13,9 +13,12 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
+  DELETE_GROUP,
+  DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL,
   DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
+  DELETE_TEMPORARY_GROUP,
   DELETE_TEMPORARY_MODEL,
   GET_DATA,
   GET_DATA_SUCCEEDED,
@@ -91,6 +94,20 @@ export function createTempContentType() {
   };
 }
 
+export function deleteGroup(uid) {
+  return {
+    type: DELETE_GROUP,
+    uid,
+  };
+}
+
+export function deleteGroupSucceeded(uid) {
+  return {
+    type: DELETE_GROUP_SUCCEEDED,
+    uid,
+  };
+}
+
 export function deleteModel(modelName, context) {
   return {
     type: DELETE_MODEL,
@@ -110,6 +127,12 @@ export function deleteModelSucceeded(modelName) {
   return {
     type: DELETE_MODEL_SUCCEEDED,
     modelName,
+  };
+}
+
+export function deleteTemporaryGroup() {
+  return {
+    type: DELETE_TEMPORARY_GROUP,
   };
 }
 
@@ -139,7 +162,7 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
 
     return acc;
   }, {});
-  const groups = data.reduce((acc, current) => {
+  const groups = data.reduce((acc, current, i) => {
     const {
       name,
       schema: { attributes, description },

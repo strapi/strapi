@@ -24,7 +24,9 @@ import {
   cancelNewContentType,
   clearTemporaryAttributeRelation,
   createTempContentType,
+  deleteGroup,
   deleteModel,
+  deleteTemporaryGroup,
   deleteTemporaryModel,
   getData,
   onChangeExistingContentTypeMainInfos,
@@ -69,7 +71,6 @@ export class App extends React.Component {
   /* istanbul ignore next */
   componentDidUpdate(prevProps) {
     if (prevProps.shouldRefetchData !== this.props.shouldRefetchData) {
-      console.log('fetch');
       this.props.getData();
     }
   }
@@ -79,9 +80,12 @@ export class App extends React.Component {
   }
 
   canOpenModal = () => {
-    const { models } = this.props;
+    const { groups, models } = this.props;
 
-    return models.every(model => model.isTemporary === false);
+    return (
+      models.every(model => model.isTemporary === false) &&
+      groups.every(group => group.isTemporary === false)
+    );
   };
 
   renderRoute = route => {
@@ -132,6 +136,7 @@ App.propTypes = {
   deleteModel: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  groups: PropTypes.array.isRequired,
   models: PropTypes.array.isRequired,
   onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
@@ -152,7 +157,9 @@ export function mapDispatchToProps(dispatch) {
       cancelNewContentType,
       clearTemporaryAttributeRelation,
       createTempContentType,
+      deleteGroup,
       deleteModel,
+      deleteTemporaryGroup,
       deleteTemporaryModel,
       getData,
       onChangeExistingContentTypeMainInfos,
