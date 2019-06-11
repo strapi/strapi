@@ -79,6 +79,7 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
             icon={get(plugin, 'icon') || 'plug'}
             label={get(plugin, 'name')}
             destination={destination}
+            pluginSuffixUrl={pluginSuffixUrl}
           />
         );
       }
