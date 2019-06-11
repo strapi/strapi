@@ -33,6 +33,7 @@ function LeftMenu() {
   const { canOpenModal, groups, models, push } = useContext(MenuContext);
 
   const handleClickOpenModalCreateCT = type => {
+    console.log('YOUYOUY');
     if (canOpenModal) {
       push({
         search: `modalType=${type}&settingType=base&actionType=create`,

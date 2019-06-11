@@ -16,6 +16,7 @@ import pluginId from '../../pluginId';
 import BodyModal from '../../components/BodyModal';
 import ButtonModalPrimary from '../../components/ButtonModalPrimary';
 import ButtonModalSecondary from '../../components/ButtonModalSecondary';
+import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
@@ -85,7 +86,7 @@ class ModelForm extends React.Component {
       updateTempContentType,
     } = this.props;
     const alreadyTakenContentTypeNames = Object.keys(currentData).filter(
-      name => name !== modelToEditName,
+      name => name !== modelToEditName
     );
     let formErrors = {};
 
@@ -216,14 +217,16 @@ class ModelForm extends React.Component {
         <form onSubmit={this.handleSubmit}>
           <BodyModal>{currentForm.items.map(this.renderInput)}</BodyModal>
           <FooterModal>
-            <ButtonModalSecondary
-              message={`${pluginId}.form.button.cancel`}
-              onClick={this.handleCancel}
-            />
-            <ButtonModalPrimary
-              message={`${pluginId}.form.button.save`}
-              type="submit"
-            />
+            <section>
+              <ButtonModalSecondary
+                message={`${pluginId}.form.button.cancel`}
+                onClick={this.handleCancel}
+              />
+              <ButtonModalSuccess
+                message={`${pluginId}.form.button.done`}
+                type="submit"
+              />
+            </section>
           </FooterModal>
         </form>
       </WrapperModal>

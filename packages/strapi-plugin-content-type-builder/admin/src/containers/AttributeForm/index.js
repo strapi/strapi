@@ -16,6 +16,7 @@ import pluginId from '../../pluginId';
 import BodyModal from '../../components/BodyModal';
 import ButtonModalPrimary from '../../components/ButtonModalPrimary';
 import ButtonModalSecondary from '../../components/ButtonModalSecondary';
+import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
@@ -47,7 +48,7 @@ class AttributeForm extends React.Component {
     let formErrors = {};
     const formValidations = this.getFormValidations();
     const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(
-      attribute => attribute !== attributeToEditName,
+      attribute => attribute !== attributeToEditName
     );
 
     if (isEmpty(modifiedData.name)) {
@@ -247,20 +248,24 @@ class AttributeForm extends React.Component {
         <form onSubmit={this.handleSubmitAndContinue}>
           <BodyModal>{showForm && currentForm.map(this.renderInput)}</BodyModal>
           <FooterModal>
-            <ButtonModalSecondary
-              message={`${pluginId}.form.button.cancel`}
-              onClick={this.handleCancel}
-            />
-            <ButtonModalPrimary
-              message={`${pluginId}.form.button.continue`}
-              type="submit"
-              add
-            />
-            <ButtonModalPrimary
-              message={`${pluginId}.form.button.save`}
-              type="button"
-              onClick={this.handleSubmit}
-            />
+            <section>
+              <ButtonModalPrimary
+                message={`${pluginId}.form.button.add`}
+                type="submit"
+                add
+              />
+            </section>
+            <section>
+              <ButtonModalSecondary
+                message={`${pluginId}.form.button.cancel`}
+                onClick={this.handleCancel}
+              />
+              <ButtonModalSuccess
+                message={`${pluginId}.form.button.done`}
+                type="button"
+                onClick={this.handleSubmit}
+              />
+            </section>
           </FooterModal>
         </form>
       </WrapperModal>
@@ -295,7 +300,7 @@ AttributeForm.propTypes = {
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)
   onCancel: PropTypes.func,
   onChange: PropTypes.func,
-  onSubmit: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
   onSubmitEdit: PropTypes.func.isRequired,
   push: PropTypes.func,
 };

@@ -400,7 +400,7 @@ export class ModelPage extends React.Component {
     push({ search: nextSearch });
   };
 
-  handleSubmitEdit = () => {
+  handleSubmitEdit = (shouldContinue = false) => {
     const {
       history: { push },
       saveEditedAttribute,
@@ -422,7 +422,9 @@ export class ModelPage extends React.Component {
       );
     }
 
-    push({ search: '' });
+    const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
+
+    push({ search: nextSearch });
   };
 
   hasModelBeenModified = () => {
