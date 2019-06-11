@@ -286,14 +286,17 @@ module.exports = {
         Object.defineProperties(ctx, {
           query: {
             value: {
-              ...this.convertToParams(_.omit(opts, 'where'), model.primaryKey),
+              ...this.convertToParams(
+                _.omit(opts, 'where'),
+                model ? model.primaryKey : 'id'
+              ),
               ...this.convertToQuery(opts.where),
             },
             writable: true,
             configurable: true,
           },
           params: {
-            value: this.convertToParams(opts, model.primaryKey),
+            value: this.convertToParams(opts, model ? model.primaryKey : 'id'),
             writable: true,
             configurable: true,
           },
