@@ -1,6 +1,7 @@
 ---
 name: 💬 Discussion
 about: Create a discussion topic.
+labels: 'note: to discuss'
 ---
 
 <!--
