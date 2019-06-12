@@ -1,7 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import CustomLink from '../CustomLink';
+import CustomLink from '../index';
 
 describe('<CustomLink />', () => {
   it('should not crash', () => {
@@ -13,9 +13,9 @@ describe('<CustomLink />', () => {
   it('should call the onClick prop if needed', () => {
     const onClick = jest.fn();
     const wrapper = shallow(<CustomLink onClick={onClick} />);
-    const div = wrapper.find('div').first();
+    const button = wrapper.find('button');
 
-    div.simulate('click');
+    button.simulate('click');
 
     expect(onClick).toHaveBeenCalled();
   });

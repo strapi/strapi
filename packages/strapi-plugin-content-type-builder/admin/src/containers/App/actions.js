@@ -49,7 +49,10 @@ export function addAttributeRelation(isModelTemporary, modelName) {
   };
 }
 
-export function addAttributeToExistingContentType(contentTypeName, attributeType) {
+export function addAttributeToExistingContentType(
+  contentTypeName,
+  attributeType
+) {
   return {
     type: ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
     attributeType,
@@ -122,25 +125,55 @@ export function getData() {
   };
 }
 
-export function getDataSucceeded({ allModels, models }, connections) {
+export function getDataSucceeded({ allModels, models }, connections, { data }) {
   const initialData = allModels.reduce((acc, current) => {
-    acc[current.name] = pick(current, ['name', 'collectionName', 'connection', 'description', 'mainField']);
+    acc[current.name] = pick(current, [
+      'name',
+      'collectionName',
+      'connection',
+      'description',
+      'mainField',
+    ]);
     const attributes = OrderedMap(buildModelAttributes(current.attributes));
     set(acc, [current.name, 'attributes'], attributes);
 
     return acc;
   }, {});
+  const groups = data.reduce((acc, current) => {
+    const {
+      name,
+      schema: { attributes, description },
+      source,
+      uid,
+    } = current;
+
+    acc.push({
+      description,
+      fields: Object.keys(attributes).length,
+      icon: 'fa-cube',
+      isTemporary: false,
+      name,
+      source,
+      uid,
+    });
+
+    return acc;
+  }, []);
 
   return {
     type: GET_DATA_SUCCEEDED,
     initialData,
     models,
     connections,
+    groups,
   };
 }
 
 export function onChangeExistingContentTypeMainInfos({ target }) {
-  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value;
+  const value =
+    target.name === 'name'
+      ? camelCase(target.value.trim()).toLowerCase()
+      : target.value;
 
   return {
     type: ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
@@ -150,7 +183,10 @@ export function onChangeExistingContentTypeMainInfos({ target }) {
 }
 
 export function onChangeNewContentTypeMainInfos({ target }) {
-  const value = target.name === 'name' ? camelCase(target.value.trim()).toLowerCase() : target.value;
+  const value =
+    target.name === 'name'
+      ? camelCase(target.value.trim()).toLowerCase()
+      : target.value;
 
   return {
     type: ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
@@ -160,7 +196,9 @@ export function onChangeNewContentTypeMainInfos({ target }) {
 }
 
 export function onChangeAttribute({ target }) {
-  const value = target.name.includes('name') ? target.value.split(' ').join('') : target.value;
+  const value = target.name.includes('name')
+    ? target.value.split(' ').join('')
+    : target.value;
 
   return {
     type: ON_CHANGE_ATTRIBUTE,
@@ -170,7 +208,8 @@ export function onChangeAttribute({ target }) {
 }
 
 export function onChangeRelation({ target }) {
-  const value = target.name === 'unique' ? target.value : target.value.split(' ').join('');
+  const value =
+    target.name === 'unique' ? target.value : target.value.split(' ').join('');
 
   return {
     type: ON_CHANGE_RELATION,
@@ -228,7 +267,11 @@ export function resetProps() {
   };
 }
 
-export function saveEditedAttribute(attributeName, isModelTemporary, modelName) {
+export function saveEditedAttribute(
+  attributeName,
+  isModelTemporary,
+  modelName
+) {
   return {
     type: SAVE_EDITED_ATTRIBUTE,
     attributeName,
@@ -237,7 +280,11 @@ export function saveEditedAttribute(attributeName, isModelTemporary, modelName) 
   };
 }
 
-export function saveEditedAttributeRelation(attributeName, isModelTemporary, modelName) {
+export function saveEditedAttributeRelation(
+  attributeName,
+  isModelTemporary,
+  modelName
+) {
   return {
     type: SAVE_EDITED_ATTRIBUTE_RELATION,
     attributeName,
@@ -246,7 +293,11 @@ export function saveEditedAttributeRelation(attributeName, isModelTemporary, mod
   };
 }
 
-export function setTemporaryAttribute(attributeName, isModelTemporary, modelName) {
+export function setTemporaryAttribute(
+  attributeName,
+  isModelTemporary,
+  modelName
+) {
   return {
     type: SET_TEMPORARY_ATTRIBUTE,
     attributeName,
@@ -255,7 +306,13 @@ export function setTemporaryAttribute(attributeName, isModelTemporary, modelName
   };
 }
 
-export function setTemporaryAttributeRelation(target, isModelTemporary, source, attributeName, isEditing) {
+export function setTemporaryAttributeRelation(
+  target,
+  isModelTemporary,
+  source,
+  attributeName,
+  isEditing
+) {
   return {
     type: SET_TEMPORARY_ATTRIBUTE_RELATION,
     attributeName,
@@ -312,7 +369,9 @@ export function updateTempContentType() {
 export const buildModelAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
     if (current.params.type === 'enumeration') {
-      acc[current.name] = Object.assign(current.params, { enum: current.params.enum.join('\n') });
+      acc[current.name] = Object.assign(current.params, {
+        enum: current.params.enum.join('\n'),
+      });
     } else if (current.params.nature === 'oneWay') {
       acc[current.name] = Object.assign(current.params, { key: '-' });
     } else {
@@ -356,7 +415,7 @@ export const formatModelAttributes = attributes =>
 
         return acc2;
       },
-      { name: current, params: {} },
+      { name: current, params: {} }
     );
 
     return acc.concat(attribute);

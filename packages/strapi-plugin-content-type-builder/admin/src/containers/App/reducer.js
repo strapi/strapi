@@ -40,6 +40,7 @@ import {
 
 export const initialState = fromJS({
   connections: List([]),
+  groups: List([]),
   initialData: {},
   isLoading: true,
   models: List([]),
@@ -86,18 +87,26 @@ export const initialState = fromJS({
   shouldRefetchData: false,
 });
 
-export const shouldPluralizeKey = nature => ['manyToMany', 'manyToOne'].includes(nature);
-export const shouldPluralizeName = nature => ['manyToMany', 'oneToMany'].includes(nature);
+export const shouldPluralizeKey = nature =>
+  ['manyToMany', 'manyToOne'].includes(nature);
+export const shouldPluralizeName = nature =>
+  ['manyToMany', 'oneToMany'].includes(nature);
 
 function appReducer(state = initialState, action) {
   switch (action.type) {
     case ADD_ATTRIBUTE_RELATION: {
       const { isModelTemporary, modelName } = action;
-      const basePath = isModelTemporary ? ['newContentType'] : ['modifiedData', modelName];
-      const { key, name, nature, target } = state.get('temporaryAttributeRelation').toJS();
+      const basePath = isModelTemporary
+        ? ['newContentType']
+        : ['modifiedData', modelName];
+      const { key, name, nature, target } = state
+        .get('temporaryAttributeRelation')
+        .toJS();
 
       let newState = state.updateIn([...basePath, 'attributes', name], () => {
-        const newAttribute = state.get('temporaryAttributeRelation').remove('name');
+        const newAttribute = state
+          .get('temporaryAttributeRelation')
+          .remove('name');
 
         return newAttribute;
       });
@@ -128,45 +137,77 @@ function appReducer(state = initialState, action) {
     case ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE: {
       return state
         .updateIn(
-          ['modifiedData', action.contentTypeName, 'attributes', state.getIn(['temporaryAttribute', 'name'])],
+          [
+            'modifiedData',
+            action.contentTypeName,
+            'attributes',
+            state.getIn(['temporaryAttribute', 'name']),
+          ],
           () => {
-            const temporaryAttributeType = state.getIn(['temporaryAttribute', 'type']);
-            const type = action.attributeType === 'number' ? temporaryAttributeType : action.attributeType;
+            const temporaryAttributeType = state.getIn([
+              'temporaryAttribute',
+              'type',
+            ]);
+            const type =
+              action.attributeType === 'number'
+                ? temporaryAttributeType
+                : action.attributeType;
             const newAttribute = state
               .get('temporaryAttribute')
               .remove('name')
               .setIn(['type'], type);
 
             return newAttribute;
-          },
+          }
         )
         .update('temporaryAttribute', () => Map({}));
     }
     case ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE: {
       return state
-        .updateIn(['newContentType', 'attributes', state.getIn(['temporaryAttribute', 'name'])], () => {
-          const temporaryAttributeType = state.getIn(['temporaryAttribute', 'type']);
-          const type = action.attributeType === 'number' ? temporaryAttributeType : action.attributeType;
-          const newAttribute = state
-            .get('temporaryAttribute')
-            .remove('name')
-            .setIn(['type'], type);
+        .updateIn(
+          [
+            'newContentType',
+            'attributes',
+            state.getIn(['temporaryAttribute', 'name']),
+          ],
+          () => {
+            const temporaryAttributeType = state.getIn([
+              'temporaryAttribute',
+              'type',
+            ]);
+            const type =
+              action.attributeType === 'number'
+                ? temporaryAttributeType
+                : action.attributeType;
+            const newAttribute = state
+              .get('temporaryAttribute')
+              .remove('name')
+              .setIn(['type'], type);
 
-          return newAttribute;
-        })
+            return newAttribute;
+          }
+        )
         .update('temporaryAttribute', () => Map({}));
     }
     case CANCEL_NEW_CONTENT_TYPE:
       return state.update('newContentType', () =>
-        Map(initialState.get('newContentType').set('connection', state.getIn(['connections', 0]))),
+        Map(
+          initialState
+            .get('newContentType')
+            .set('connection', state.getIn(['connections', 0]))
+        )
       );
     case CLEAR_TEMPORARY_ATTRIBUTE:
       return state.update('temporaryAttribute', () => Map({}));
     case CLEAR_TEMPORARY_ATTRIBUTE_RELATION:
       return state
         .update('temporaryAttribute', () => Map({}))
-        .update('temporaryAttributeRelation', () => initialState.get('temporaryAttributeRelation'))
-        .update('initialTemporaryAttributeRelation', () => initialState.get('temporaryAttributeRelation'));
+        .update('temporaryAttributeRelation', () =>
+          initialState.get('temporaryAttributeRelation')
+        )
+        .update('initialTemporaryAttributeRelation', () =>
+          initialState.get('temporaryAttributeRelation')
+        );
     case CREATE_TEMP_CONTENT_TYPE:
       return state
         .update('models', list =>
@@ -177,8 +218,8 @@ function appReducer(state = initialState, action) {
               description: state.getIn(['newContentType', 'description']),
               fields: 0,
               isTemporary: true,
-            }),
-          ),
+            })
+          )
         )
         .update('newContentTypeClone', () => state.get('newContentType'));
     case DELETE_MODEL_ATTRIBUTE: {
@@ -190,17 +231,28 @@ function appReducer(state = initialState, action) {
       const attributeToDelete = state.getIn(action.keys);
       const modelName = state.getIn([...pathToModelName, 'name']);
 
-      if (attributeToDelete.get('target') === modelName && attributeToDelete.get('nature') !== 'oneWay') {
+      if (
+        attributeToDelete.get('target') === modelName &&
+        attributeToDelete.get('nature') !== 'oneWay'
+      ) {
         return state
           .removeIn(action.keys)
-          .removeIn([...action.keys.slice(0, action.keys.length - 1), attributeToDelete.get('key')]);
+          .removeIn([
+            ...action.keys.slice(0, action.keys.length - 1),
+            attributeToDelete.get('key'),
+          ]);
       }
 
       return state.removeIn(action.keys);
     }
     case DELETE_MODEL_SUCCEEDED:
       return state
-        .removeIn(['models', state.get('models').findIndex(model => model.get('name') === action.modelName)])
+        .removeIn([
+          'models',
+          state
+            .get('models')
+            .findIndex(model => model.get('name') === action.modelName),
+        ])
         .removeIn(['initialData', action.modelName])
         .removeIn(['modifiedData', action.modelName]);
     case DELETE_TEMPORARY_MODEL:
@@ -209,10 +261,17 @@ function appReducer(state = initialState, action) {
           'models',
           state
             .get('models')
-            .findIndex(model => model.get('name') === state.getIn(['newContentType', 'name'])),
+            .findIndex(
+              model =>
+                model.get('name') === state.getIn(['newContentType', 'name'])
+            ),
         ])
-        .update('newContentType', () => fromJS(initialState.get('newContentType')))
-        .update('newContentTypeClone', () => fromJS(initialState.get('newContentType')));
+        .update('newContentType', () =>
+          fromJS(initialState.get('newContentType'))
+        )
+        .update('newContentTypeClone', () =>
+          fromJS(initialState.get('newContentType'))
+        );
     case GET_DATA_SUCCEEDED:
       return state
         .update('connections', () => List(action.connections))
@@ -220,15 +279,34 @@ function appReducer(state = initialState, action) {
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.initialData))
         .updateIn(['newContentType', 'connection'], () => action.connections[0])
-        .update('models', () => List(fromJS(action.models)).sortBy(model => model.get('name')));
+        .update('models', () =>
+          List(fromJS(action.models)).sortBy(model => model.get('name'))
+        )
+        .update('groups', () =>
+          List(fromJS(action.groups)).sortBy(group =>
+            group.get('name').toLowerCase()
+          )
+        );
     case ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS:
-      return state.updateIn(['modifiedData', ...action.keys], () => action.value);
+      return state.updateIn(
+        ['modifiedData', ...action.keys],
+        () => action.value
+      );
     case ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS:
-      return state.updateIn(['newContentType', ...action.keys], () => action.value);
+      return state.updateIn(
+        ['newContentType', ...action.keys],
+        () => action.value
+      );
     case ON_CHANGE_ATTRIBUTE:
-      return state.updateIn(['temporaryAttribute', ...action.keys], () => action.value);
+      return state.updateIn(
+        ['temporaryAttribute', ...action.keys],
+        () => action.value
+      );
     case ON_CHANGE_RELATION:
-      return state.updateIn(['temporaryAttributeRelation', ...action.keys], () => action.value);
+      return state.updateIn(
+        ['temporaryAttributeRelation', ...action.keys],
+        () => action.value
+      );
     case ON_CHANGE_RELATION_NATURE: {
       const { currentModel, nature } = action;
 
@@ -244,7 +322,8 @@ function appReducer(state = initialState, action) {
         })
         .updateIn(['temporaryAttributeRelation', 'key'], key => {
           const number = shouldPluralizeKey(nature) ? 2 : 1;
-          const newKey = nature !== 'oneWay' && key === '-' ? currentModel : key;
+          const newKey =
+            nature !== 'oneWay' && key === '-' ? currentModel : key;
 
           if (nature === 'oneWay') {
             return '-';
@@ -258,15 +337,22 @@ function appReducer(state = initialState, action) {
         model: { source },
       } = action;
       const nature = state.getIn(['temporaryAttributeRelation', 'nature']);
-      const name = shouldPluralizeName(nature) ? pluralize(action.model.name) : action.model.name;
-      let key = shouldPluralizeKey(nature) ? pluralize(action.currentModel) : action.currentModel;
+      const name = shouldPluralizeName(nature)
+        ? pluralize(action.model.name)
+        : action.model.name;
+      let key = shouldPluralizeKey(nature)
+        ? pluralize(action.currentModel)
+        : action.currentModel;
 
       if (nature === 'oneWay') {
         key = '-';
       }
 
       return state
-        .updateIn(['temporaryAttributeRelation', 'target'], () => action.model.name)
+        .updateIn(
+          ['temporaryAttributeRelation', 'target'],
+          () => action.model.name
+        )
         .updateIn(['temporaryAttributeRelation', 'plugin'], () => source || '')
         .updateIn(['temporaryAttributeRelation', 'name'], () => name)
         .updateIn(['temporaryAttributeRelation', 'key'], () => key);
@@ -275,7 +361,7 @@ function appReducer(state = initialState, action) {
       return state
         .update('temporaryAttribute', () => Map({}))
         .updateIn(['modifiedData', action.contentTypeName], () =>
-          state.getIn(['initialData', action.contentTypeName]),
+          state.getIn(['initialData', action.contentTypeName])
         );
     case RESET_EDIT_TEMP_CONTENT_TYPE:
       return state.updateIn(['newContentType', 'attributes'], () => Map({}));
@@ -283,7 +369,10 @@ function appReducer(state = initialState, action) {
       return state.updateIn(['modifiedData', action.contentTypeName], () => {
         const initialContentType = state
           .getIn(['initialData', action.contentTypeName])
-          .set('attributes', state.getIn(['modifiedData', action.contentTypeName, 'attributes']));
+          .set(
+            'attributes',
+            state.getIn(['modifiedData', action.contentTypeName, 'attributes'])
+          );
 
         return initialContentType;
       });
@@ -298,7 +387,9 @@ function appReducer(state = initialState, action) {
     case RESET_PROPS:
       return initialState;
     case SAVE_EDITED_ATTRIBUTE: {
-      const basePath = action.isModelTemporary ? ['newContentType'] : ['modifiedData', action.modelName];
+      const basePath = action.isModelTemporary
+        ? ['newContentType']
+        : ['modifiedData', action.modelName];
 
       return state
         .updateIn([...basePath, 'attributes'], attributes => {
@@ -315,7 +406,9 @@ function appReducer(state = initialState, action) {
             .keySeq()
             .reduce((acc, current) => {
               const name =
-                current === action.attributeName ? state.getIn(['temporaryAttribute', 'name']) : current;
+                current === action.attributeName
+                  ? state.getIn(['temporaryAttribute', 'name'])
+                  : current;
 
               acc[name] = obj.getIn(['attributes', current]);
 
@@ -326,7 +419,9 @@ function appReducer(state = initialState, action) {
         });
     }
     case SAVE_EDITED_ATTRIBUTE_RELATION: {
-      const basePath = action.isModelTemporary ? ['newContentType'] : ['modifiedData', action.modelName];
+      const basePath = action.isModelTemporary
+        ? ['newContentType']
+        : ['modifiedData', action.modelName];
 
       const initialAttribute = state.get('initialTemporaryAttributeRelation');
       const initialRelationNature = initialAttribute.get('nature');
@@ -337,25 +432,35 @@ function appReducer(state = initialState, action) {
       //   'initialTemporaryAttributeRelation',
       //   'target',
       // ]);
-      const temporaryAttributeRelation = state.get('temporaryAttributeRelation');
-      const hasInternalRelation = temporaryAttributeRelation.get('target') === action.modelName;
+      const temporaryAttributeRelation = state.get(
+        'temporaryAttributeRelation'
+      );
+      const hasInternalRelation =
+        temporaryAttributeRelation.get('target') === action.modelName;
       const updatedRelationNature = temporaryAttributeRelation.get('nature');
       const updatedRelationTarget = temporaryAttributeRelation.get('target');
 
       const shouldAddComplementaryAttribute =
-        initialRelationNature === 'oneWay' && updatedRelationNature !== 'oneWay';
+        initialRelationNature === 'oneWay' &&
+        updatedRelationNature !== 'oneWay';
       const shouldRemoveComplementaryAttribute =
-        (initialRelationNature !== 'oneWay' && updatedRelationNature === 'oneWay') ||
+        (initialRelationNature !== 'oneWay' &&
+          updatedRelationNature === 'oneWay') ||
         initialAttributeRelationTarget !== updatedRelationTarget;
       const shouldUpdateComplementaryAttribute =
-        initialRelationNature !== 'oneWay' && updatedRelationNature !== 'oneWay';
+        initialRelationNature !== 'oneWay' &&
+        updatedRelationNature !== 'oneWay';
 
       let newState = state;
 
       if (shouldRemoveComplementaryAttribute) {
         const attributeToRemove = initialAttribute.get('key');
 
-        newState = newState.removeIn([...basePath, 'attributes', attributeToRemove]);
+        newState = newState.removeIn([
+          ...basePath,
+          'attributes',
+          attributeToRemove,
+        ]);
       }
 
       const key = state.getIn(['temporaryAttributeRelation', 'key']);
@@ -375,7 +480,10 @@ function appReducer(state = initialState, action) {
         .remove('name');
 
       if (hasInternalRelation && shouldAddComplementaryAttribute) {
-        newState = newState.updateIn([...basePath, 'attributes', key], () => otherNewAttribute);
+        newState = newState.updateIn(
+          [...basePath, 'attributes', key],
+          () => otherNewAttribute
+        );
       }
 
       if (
@@ -383,7 +491,10 @@ function appReducer(state = initialState, action) {
         updatedRelationNature !== 'oneWay' &&
         initialAttributeRelationTarget !== updatedRelationTarget
       ) {
-        newState = newState.updateIn([...basePath, 'attributes', key], () => otherNewAttribute);
+        newState = newState.updateIn(
+          [...basePath, 'attributes', key],
+          () => otherNewAttribute
+        );
       }
 
       return newState.updateIn([...basePath], obj => {
@@ -392,7 +503,9 @@ function appReducer(state = initialState, action) {
           .keySeq()
           .reduce((acc, current) => {
             if (current === initialAttributeName) {
-              acc[temporaryAttributeRelation.get('name')] = temporaryAttributeRelation.remove('name');
+              acc[
+                temporaryAttributeRelation.get('name')
+              ] = temporaryAttributeRelation.remove('name');
             } else if (
               hasInternalRelation &&
               shouldUpdateComplementaryAttribute &&
@@ -411,7 +524,9 @@ function appReducer(state = initialState, action) {
     }
     case SET_TEMPORARY_ATTRIBUTE:
       return state.update('temporaryAttribute', () => {
-        const basePath = action.isModelTemporary ? ['newContentType'] : ['modifiedData', action.modelName];
+        const basePath = action.isModelTemporary
+          ? ['newContentType']
+          : ['modifiedData', action.modelName];
         const attribute = state
           .getIn([...basePath, 'attributes', action.attributeName])
           .set('name', action.attributeName);
@@ -421,36 +536,53 @@ function appReducer(state = initialState, action) {
 
     case SET_TEMPORARY_ATTRIBUTE_RELATION: {
       if (action.isEditing) {
-        const basePath = action.isModelTemporary ? ['newContentType'] : ['modifiedData', action.target];
+        const basePath = action.isModelTemporary
+          ? ['newContentType']
+          : ['modifiedData', action.target];
 
         return state
           .update('temporaryAttributeRelation', () =>
-            state.getIn([...basePath, 'attributes', action.attributeName]).set('name', action.attributeName),
+            state
+              .getIn([...basePath, 'attributes', action.attributeName])
+              .set('name', action.attributeName)
           )
           .update('initialTemporaryAttributeRelation', () =>
-            state.getIn([...basePath, 'attributes', action.attributeName]).set('name', action.attributeName),
+            state
+              .getIn([...basePath, 'attributes', action.attributeName])
+              .set('name', action.attributeName)
           );
       }
 
       return state
         .updateIn(['temporaryAttributeRelation', 'target'], () => action.target)
         .updateIn(['temporaryAttributeRelation', 'name'], () => action.target)
-        .updateIn(['temporaryAttributeRelation', 'plugin'], () => action.source || '');
+        .updateIn(
+          ['temporaryAttributeRelation', 'plugin'],
+          () => action.source || ''
+        );
     }
     case SUBMIT_CONTENT_TYPE_SUCCEEDED: {
-      return state.update('isLoading', () => true).update('shouldRefetchData', v => !v);
+      return state
+        .update('isLoading', () => true)
+        .update('shouldRefetchData', v => !v);
     }
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state
         .update('isLoading', () => true)
         .update('newContentType', () => Map(initialState.get('newContentType')))
-        .update('newContentTypeClone', () => Map(initialState.get('newContentType')))
+        .update('newContentTypeClone', () =>
+          Map(initialState.get('newContentType'))
+        )
         .update('shouldRefetchData', v => !v);
     case UPDATE_TEMP_CONTENT_TYPE:
       return state
         .updateIn(
-          ['models', state.get('models').findIndex(model => model.isTemporary === true), 'name'],
-          () => state.getIn(['newContentType', 'name']),
+          [
+            'models',
+            state.get('models').findIndex(model => model.isTemporary === true),
+            'name',
+          ],
+          () => state.getIn(['newContentType', 'name'])
         )
         .update('newContentTypeClone', () => state.get('newContentType'));
     default:

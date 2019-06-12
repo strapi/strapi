@@ -17,15 +17,17 @@ import {
   SUBMIT_TEMP_CONTENT_TYPE,
 } from './constants';
 
+const getRequestUrl = path => `/${pluginId}/${path}`;
+
 export function* getData() {
   try {
-    const requestURL = `/${pluginId}/models`;
-    const [data, { connections }] = yield all([
-      call(request, requestURL, { method: 'GET' }),
-      call(request, '/content-type-builder/connections', { method: 'GET' }),
+    const [data, { connections }, groups] = yield all([
+      call(request, getRequestUrl('models'), { method: 'GET' }),
+      call(request, getRequestUrl('connections'), { method: 'GET' }),
+      call(request, getRequestUrl('fixtures/groups'), { method: 'GET' }),
     ]);
 
-    yield put(getDataSucceeded(data, connections));
+    yield put(getDataSucceeded(data, connections, groups));
   } catch (err) {
     strapi.notification.error('notification.error');
   }
@@ -36,17 +38,16 @@ export function* deleteModel({
   modelName,
 }) {
   try {
-    const requestURL = `/${pluginId}/models/${modelName}`;
     const response = yield call(
       request,
-      requestURL,
+      getRequestUrl(`models/${modelName}`),
       { method: 'DELETE' },
-      true,
+      true
     );
 
     if (response.ok === true) {
       strapi.notification.success(
-        `${pluginId}.notification.success.contentTypeDeleted`,
+        `${pluginId}.notification.success.contentTypeDeleted`
       );
       yield put(deleteModelSucceeded(modelName));
 
@@ -54,10 +55,10 @@ export function* deleteModel({
       const appMenu = get(
         appPlugins,
         ['content-manager', 'leftMenuSections'],
-        [{ links: [] }],
+        [{ links: [] }]
       );
       const updatedMenu = appMenu[0].links.filter(
-        el => el.destination !== modelName,
+        el => el.destination !== modelName
       );
       appMenu[0].links = sortBy(updatedMenu, 'label');
       updatePlugin('content-manager', 'leftMenuSections', appMenu);
@@ -74,7 +75,6 @@ export function* submitCT({
   context: { emitEvent, plugins, history, updatePlugin },
 }) {
   try {
-    const requestURL = `/${pluginId}/models/${oldContentTypeName}`;
     const { name } = body;
 
     if (source) {
@@ -85,7 +85,12 @@ export function* submitCT({
 
     const opts = { method: 'PUT', body };
 
-    yield call(request, requestURL, opts, true);
+    yield call(
+      request,
+      getRequestUrl(`models/${oldContentTypeName}`),
+      opts,
+      true
+    );
     emitEvent('didSaveContentType');
     yield put(submitContentTypeSucceeded());
     history.push(`/plugins/${pluginId}/models/${name}`);
@@ -97,10 +102,10 @@ export function* submitCT({
       const appMenu = get(
         appPlugins,
         ['content-manager', 'leftMenuSections'],
-        [],
+        []
       );
       const oldContentTypeNameIndex = appMenu[0].links.findIndex(
-        el => el.destination === oldContentTypeName,
+        el => el.destination === oldContentTypeName
       );
       const updatedLink = {
         destination: name.toLowerCase(),
@@ -114,7 +119,7 @@ export function* submitCT({
     const errorMessage = get(
       error,
       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-      'notification.error',
+      'notification.error'
     );
     strapi.notification.error(errorMessage);
   }
@@ -128,10 +133,9 @@ export function* submitTempCT({
   try {
     emitEvent('willSaveContentType');
 
-    const requestURL = `/${pluginId}/models`;
     const opts = { method: 'POST', body };
 
-    yield call(request, requestURL, opts, true);
+    yield call(request, getRequestUrl('models'), opts, true);
 
     emitEvent('didSaveContentType');
     yield put(submitTempContentTypeSucceeded());
@@ -141,7 +145,7 @@ export function* submitTempCT({
     const appMenu = get(
       appPlugins,
       ['content-manager', 'leftMenuSections'],
-      [],
+      []
     );
     const newLink = {
       destination: name.toLowerCase(),
@@ -155,7 +159,7 @@ export function* submitTempCT({
     const errorMessage = get(
       error,
       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-      'notification.error',
+      'notification.error'
     );
     strapi.notification.error(errorMessage);
   }

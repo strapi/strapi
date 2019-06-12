@@ -16,6 +16,8 @@ import pluginId from '../../pluginId';
 
 import HomePage from '../HomePage';
 import ModelPage from '../ModelPage';
+import MenuContext from '../MenuContext';
+import GroupPage from '../GroupPage';
 
 import Loader from './Loader';
 
@@ -56,6 +58,10 @@ const ROUTES = [
   {
     component: ModelPage,
     to: `/plugins/${pluginId}/models/:modelName`,
+  },
+  {
+    component: GroupPage,
+    to: `/plugins/${pluginId}/groups/:groupName`,
   },
 ];
 
@@ -103,19 +109,33 @@ export class App extends React.Component {
   };
 
   render() {
-    const { isLoading } = this.props;
+    const {
+      groups,
+      history: { push },
+      isLoading,
+      models,
+    } = this.props;
 
     if (isLoading) {
       return <Loader />;
     }
 
     return (
-      <div className={styles.app}>
-        <Switch>
-          {ROUTES.map(this.renderRoute)}
-          <Route component={NotFound} />
-        </Switch>
-      </div>
+      <MenuContext.Provider
+        value={{
+          canOpenModal: this.canOpenModal(),
+          groups,
+          models,
+          push,
+        }}
+      >
+        <div className={styles.app}>
+          <Switch>
+            {ROUTES.map(this.renderRoute)}
+            <Route component={NotFound} />
+          </Switch>
+        </div>
+      </MenuContext.Provider>
     );
   }
 }
@@ -131,6 +151,7 @@ App.propTypes = {
   getData: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
   models: PropTypes.array.isRequired,
+  groups: PropTypes.array.isRequired,
   onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
@@ -167,13 +188,13 @@ export function mapDispatchToProps(dispatch) {
       setTemporaryAttributeRelation,
       updateTempContentType,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = strapi.injectReducer({ key: 'app', reducer, pluginId });
 const withSaga = strapi.injectSaga({ key: 'app', saga, pluginId });
@@ -181,5 +202,5 @@ const withSaga = strapi.injectSaga({ key: 'app', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(App);
