@@ -65,6 +65,20 @@ module.exports = async function() {
     });
   };
 
+  /**
+   * Run init functions
+   */
+
+  // Run beforeInitialize of every middleware
+  await Promise.all(
+    enabledMiddlewares.map(key => {
+      const { beforeInitialize } = this.middleware[key].load;
+      if (typeof beforeInitialize === 'function') {
+        return beforeInitialize();
+      }
+    })
+  );
+
   // run the initialization of an array of middlewares sequentially
   const initMiddlewaresSeq = async middlewareArr => {
     for (let key of uniq(middlewareArr)) {
@@ -89,20 +103,6 @@ module.exports = async function() {
     middlewaresBefore,
     middlewaresOrder,
     middlewaresAfter
-  );
-
-  /**
-   * Run init functions
-   */
-
-  // Run beforeInitialize of every middleware
-  await Promise.all(
-    enabledMiddlewares.map(key => {
-      const { beforeInitialize } = this.middleware[key].load;
-      if (typeof beforeInitialize === 'function') {
-        return beforeInitialize();
-      }
-    })
   );
 
   // before
