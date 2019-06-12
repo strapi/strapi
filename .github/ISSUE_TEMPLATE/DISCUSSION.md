@@ -15,9 +15,6 @@ https://guides.github.com/features/mastering-markdown/
 **Describe the topic**
 A clear and concise description of what the topic is.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
-
 **Your suggestions for this topic**
 Clear and simple suggestions for how you think this should be handled.
 
