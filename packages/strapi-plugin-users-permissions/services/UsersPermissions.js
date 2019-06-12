@@ -13,7 +13,7 @@ module.exports = {
   createRole: async params => {
     if (!strapi.plugins['content-manager']) {
       return new Error(
-        'This feature requires to install the Content Manager plugin',
+        'This feature requires to install the Content Manager plugin'
       );
     }
 
@@ -21,7 +21,8 @@ module.exports = {
       params.type = _.snakeCase(_.deburr(_.toLower(params.name)));
     }
 
-    const role = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
+    const role = await strapi.plugins['users-permissions']
+      .queries('role', 'users-permissions')
       .create(_.omit(params, ['users', 'permissions']));
 
     const arrayOfPromises = Object.keys(params.permissions).reduce(
@@ -29,24 +30,26 @@ module.exports = {
         Object.keys(params.permissions[type].controllers).forEach(
           controller => {
             Object.keys(
-              params.permissions[type].controllers[controller],
+              params.permissions[type].controllers[controller]
             ).forEach(action => {
               acc.push(
-                strapi.plugins['users-permissions'].queries('permission', 'users-permissions').addPermission({
-                  role: role._id || role.id,
-                  type,
-                  controller,
-                  action: action.toLowerCase(),
-                  ...params.permissions[type].controllers[controller][action],
-                }),
+                strapi.plugins['users-permissions']
+                  .queries('permission', 'users-permissions')
+                  .addPermission({
+                    role: role._id || role.id,
+                    type,
+                    controller,
+                    action: action.toLowerCase(),
+                    ...params.permissions[type].controllers[controller][action],
+                  })
               );
             });
-          },
+          }
         );
 
         return acc;
       },
-      [],
+      []
     );
 
     // Use Content Manager business logic to handle relation.
@@ -59,15 +62,16 @@ module.exports = {
         {
           users: params.users,
         },
-        'users-permissions',
-      ),
+        'users-permissions'
+      )
     );
 
     return await Promise.all(arrayOfPromises);
   },
 
   deleteRole: async (roleID, publicRoleID) => {
-    const role = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
+    const role = await strapi.plugins['users-permissions']
+      .queries('role', 'users-permissions')
       .findOne({ id: roleID }, ['users', 'permissions']);
 
     if (!role) {
@@ -77,14 +81,16 @@ module.exports = {
     // Move users to guest role.
     const arrayOfPromises = role.users.reduce((acc, user) => {
       acc.push(
-        strapi.plugins['users-permissions'].queries('user', 'users-permissions').update(
-          {
-            id: user._id || user.id,
-          },
-          {
-            role: publicRoleID,
-          },
-        ),
+        strapi.plugins['users-permissions']
+          .queries('user', 'users-permissions')
+          .update(
+            {
+              id: user._id || user.id,
+            },
+            {
+              role: publicRoleID,
+            }
+          )
       );
 
       return acc;
@@ -93,17 +99,21 @@ module.exports = {
     // Remove permissions related to this role.
     role.permissions.forEach(permission => {
       arrayOfPromises.push(
-        strapi.plugins['users-permissions'].queries('permission', 'users-permissions').delete({
-          id: permission._id || permission.id,
-        }),
+        strapi.plugins['users-permissions']
+          .queries('permission', 'users-permissions')
+          .delete({
+            id: permission._id || permission.id,
+          })
       );
     });
 
     // Delete the role.
     arrayOfPromises.push(
-      strapi.plugins['users-permissions'].queries('role', 'users-permissions').delete({
-        id: roleID,
-      }),
+      strapi.plugins['users-permissions']
+        .queries('role', 'users-permissions')
+        .delete({
+          id: roleID,
+        })
     );
 
     return await Promise.all(arrayOfPromises);
@@ -120,12 +130,12 @@ module.exports = {
           },
         },
         (err, response, body) => {
-          if (err) {
+          if (response.statusCode !== 200 || err) {
             return resolve([]);
           }
 
           resolve(body);
-        },
+        }
       );
     });
   },
@@ -146,13 +156,13 @@ module.exports = {
         (acc, key) => {
           Object.keys(strapi.api[key].controllers).forEach(controller => {
             acc.controllers[controller] = generateActions(
-              strapi.api[key].controllers[controller],
+              strapi.api[key].controllers[controller]
             );
           });
 
           return acc;
         },
-        { controllers: {} },
+        { controllers: {} }
       );
 
     const pluginsPermissions = Object.keys(strapi.plugins).reduce(
@@ -169,17 +179,17 @@ module.exports = {
         acc[key] = Object.keys(strapi.plugins[key].controllers).reduce(
           (obj, k) => {
             obj.controllers[k] = generateActions(
-              strapi.plugins[key].controllers[k],
+              strapi.plugins[key].controllers[k]
             );
 
             return obj;
           },
-          initialState,
+          initialState
         );
 
         return acc;
       },
-      {},
+      {}
     );
 
     const permissions = {
@@ -192,7 +202,8 @@ module.exports = {
   },
 
   getRole: async (roleID, plugins) => {
-    const role = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
+    const role = await strapi.plugins['users-permissions']
+      .queries('role', 'users-permissions')
       .findOne({ id: roleID }, ['users', 'permissions']);
 
     if (!role) {
@@ -209,7 +220,7 @@ module.exports = {
         {
           enabled: _.toNumber(permission.enabled) == true,
           policy: permission.policy,
-        },
+        }
       );
 
       if (
@@ -227,13 +238,15 @@ module.exports = {
   },
 
   getRoles: async () => {
-    const roles = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
+    const roles = await strapi.plugins['users-permissions']
+      .queries('role', 'users-permissions')
       .find({ _sort: 'name' }, []);
 
     for (let i = 0; i < roles.length; ++i) {
       roles[i].id = roles[i].id || roles[i]._id;
 
-      roles[i].nb_users = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
+      roles[i].nb_users = await strapi.plugins['users-permissions']
+        .queries('user', 'users-permissions')
         .count({ role: roles[i].id });
     }
 
@@ -250,7 +263,7 @@ module.exports = {
         const routes = _.get(
           clonedPlugins,
           [current, 'config', 'routes'],
-          [],
+          []
         ).reduce((acc, curr) => {
           const prefix = curr.config.prefix;
           const path =
@@ -266,7 +279,7 @@ module.exports = {
 
         return acc;
       },
-      {},
+      {}
     );
 
     return _.merge({ application: routes }, pluginsRoutes);
@@ -274,11 +287,12 @@ module.exports = {
 
   async updatePermissions() {
     // fetch all the current permissions from the database, and format them into an array of actions.
-    const databasePermissions = await strapi.plugins['users-permissions'].queries('permission', 'users-permissions')
+    const databasePermissions = await strapi.plugins['users-permissions']
+      .queries('permission', 'users-permissions')
       .find({ _limit: -1 });
     const actions = databasePermissions.map(
       permission =>
-        `${permission.type}.${permission.controller}.${permission.action}`,
+        `${permission.type}.${permission.controller}.${permission.action}`
     );
 
     // Aggregate first level actions.
@@ -287,12 +301,12 @@ module.exports = {
         controller => {
           const actions = Object.keys(strapi.api[api].controllers[controller])
             .filter(action =>
-              _.isFunction(strapi.api[api].controllers[controller][action]),
+              _.isFunction(strapi.api[api].controllers[controller][action])
             )
             .map(action => `application.${controller}.${action.toLowerCase()}`);
 
           acc = acc.concat(actions);
-        },
+        }
       );
 
       return acc;
@@ -302,12 +316,10 @@ module.exports = {
     const pluginsActions = Object.keys(strapi.plugins).reduce((acc, plugin) => {
       Object.keys(strapi.plugins[plugin].controllers).forEach(controller => {
         const actions = Object.keys(
-          strapi.plugins[plugin].controllers[controller],
+          strapi.plugins[plugin].controllers[controller]
         )
           .filter(action =>
-            _.isFunction(
-              strapi.plugins[plugin].controllers[controller][action],
-            ),
+            _.isFunction(strapi.plugins[plugin].controllers[controller][action])
           )
           .map(action => `${plugin}.${controller}.${action.toLowerCase()}`);
 
@@ -394,7 +406,9 @@ module.exports = {
       };
 
       // Retrieve roles
-      const roles = await strapi.plugins['users-permissions'].queries('role', 'users-permissions').find();
+      const roles = await strapi.plugins['users-permissions']
+        .queries('role', 'users-permissions')
+        .find();
 
       // We have to know the difference to add or remove
       // the permissions entries in the database.
@@ -412,31 +426,36 @@ module.exports = {
               toAdd
                 .map(action => defaultPolicy(action, role))
                 .map(action =>
-                  strapi.plugins['users-permissions'].queries('permission', 'users-permissions')
+                  strapi.plugins['users-permissions']
+                    .queries('permission', 'users-permissions')
                     .addPermission(
-                      Object.assign(action, { role: role.id || role._id }),
-                    ),
-                ),
-            ),
+                      Object.assign(action, { role: role.id || role._id })
+                    )
+                )
+            )
           )
           .concat([
             Promise.all(
               toRemove.map(action =>
-                strapi.plugins['users-permissions'].queries('permission', 'users-permissions')
-                  .removePermission(action),
-              ),
+                strapi.plugins['users-permissions']
+                  .queries('permission', 'users-permissions')
+                  .removePermission(action)
+              )
             ),
-          ]),
+          ])
       );
     }
   },
 
   removeDuplicate: async function() {
-    const primaryKey = strapi.plugins['users-permissions'].queries('permission', 'users-permissions')
-      .primaryKey;
+    const primaryKey = strapi.plugins['users-permissions'].queries(
+      'permission',
+      'users-permissions'
+    ).primaryKey;
 
     // Retrieve permissions by creation date (ID or ObjectID).
-    const permissions = await strapi.plugins['users-permissions'].queries('permission', 'users-permissions')
+    const permissions = await strapi.plugins['users-permissions']
+      .queries('permission', 'users-permissions')
       .find({
         _sort: `${primaryKey}`,
         _limit: -1,
@@ -449,14 +468,14 @@ module.exports = {
             element ===
             `${permission.type}.controllers.${permission.controller}.${
               permission.action
-            }.${permission.role[primaryKey]}`,
+            }.${permission.role[primaryKey]}`
         );
 
         if (index === -1) {
           acc.toKeep.push(
             `${permission.type}.controllers.${permission.controller}.${
               permission.action
-            }.${permission.role[primaryKey]}`,
+            }.${permission.role[primaryKey]}`
           );
         } else {
           acc.toRemove.push(permission[primaryKey]);
@@ -467,16 +486,20 @@ module.exports = {
       {
         toKeep: [],
         toRemove: [],
-      },
+      }
     );
 
-    return strapi.plugins['users-permissions'].queries('permission', 'users-permissions').deleteMany({
-      [primaryKey]: value.toRemove,
-    });
+    return strapi.plugins['users-permissions']
+      .queries('permission', 'users-permissions')
+      .deleteMany({
+        [primaryKey]: value.toRemove,
+      });
   },
 
   async initialize(cb) {
-    const roleCount = await strapi.plugins['users-permissions'].queries('role', 'users-permissions').count();
+    const roleCount = await strapi.plugins['users-permissions']
+      .queries('role', 'users-permissions')
+      .count();
 
     // It has already been initialized.
     if (roleCount > 0) {
@@ -491,26 +514,30 @@ module.exports = {
 
     // Create two first default roles.
     await Promise.all([
-      strapi.plugins['users-permissions'].queries('role', 'users-permissions').create({
-        name: 'Authenticated',
-        description: 'Default role given to authenticated user.',
-        type: 'authenticated',
-      }),
-      strapi.plugins['users-permissions'].queries('role', 'users-permissions').create({
-        name: 'Public',
-        description: 'Default role given to unauthenticated user.',
-        type: 'public',
-      }),
+      strapi.plugins['users-permissions']
+        .queries('role', 'users-permissions')
+        .create({
+          name: 'Authenticated',
+          description: 'Default role given to authenticated user.',
+          type: 'authenticated',
+        }),
+      strapi.plugins['users-permissions']
+        .queries('role', 'users-permissions')
+        .create({
+          name: 'Public',
+          description: 'Default role given to unauthenticated user.',
+          type: 'public',
+        }),
     ]);
 
-    
     this.updatePermissions().then(() => cb(), err => cb(err));
   },
 
   updateRole: async function(roleID, body) {
     const [role, authenticated] = await Promise.all([
       this.getRole(roleID, []),
-      strapi.plugins['users-permissions'].queries('role', 'users-permissions')
+      strapi.plugins['users-permissions']
+        .queries('role', 'users-permissions')
         .findOne({ type: 'authenticated' }, []),
     ]);
 
@@ -524,38 +551,42 @@ module.exports = {
               const currentAction = _.get(
                 role.permissions,
                 `${type}.controllers.${controller}.${action}`,
-                {},
+                {}
               );
 
               if (_.differenceWith([bodyAction], [currentAction]).length > 0) {
                 acc.push(
-                  strapi.plugins['users-permissions'].queries('permission', 'users-permissions').update(
-                    {
-                      role: roleID,
-                      type,
-                      controller,
-                      action: action.toLowerCase(),
-                    },
-                    bodyAction,
-                  ),
+                  strapi.plugins['users-permissions']
+                    .queries('permission', 'users-permissions')
+                    .update(
+                      {
+                        role: roleID,
+                        type,
+                        controller,
+                        action: action.toLowerCase(),
+                      },
+                      bodyAction
+                    )
                 );
               }
-            },
+            }
           );
         });
 
         return acc;
       },
-      [],
+      []
     );
 
     arrayOfPromises.push(
-      strapi.plugins['users-permissions'].queries('role', 'users-permissions').update(
-        {
-          id: roleID,
-        },
-        _.pick(body, ['name', 'description']),
-      ),
+      strapi.plugins['users-permissions']
+        .queries('role', 'users-permissions')
+        .update(
+          {
+            id: roleID,
+          },
+          _.pick(body, ['name', 'description'])
+        )
     );
 
     // stringify mongoDB _id for add/remove matching
@@ -572,30 +603,32 @@ module.exports = {
     _.differenceBy(body.users, role.users, role._id ? '_id' : 'id').forEach(
       user => {
         arrayOfPromises.push(this.updateUserRole(user, roleID));
-      },
+      }
     );
 
     // Remove user to this role and link him to authenticated.
     _.differenceBy(role.users, body.users, role._id ? '_id' : 'id').forEach(
       user => {
         arrayOfPromises.push(
-          this.updateUserRole(user, authenticated._id || authenticated.id),
+          this.updateUserRole(user, authenticated._id || authenticated.id)
         );
-      },
+      }
     );
 
     return Promise.all(arrayOfPromises);
   },
 
   updateUserRole: async (user, role) => {
-    return strapi.plugins['users-permissions'].queries('user', 'users-permissions').update(
-      {
-        id: user._id || user.id,
-      },
-      {
-        role: role.toString(),
-      },
-    );
+    return strapi.plugins['users-permissions']
+      .queries('user', 'users-permissions')
+      .update(
+        {
+          id: user._id || user.id,
+        },
+        {
+          role: role.toString(),
+        }
+      );
   },
 
   template: (layout, data) => {
