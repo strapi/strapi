@@ -21,7 +21,6 @@ module.exports = {
                 type: 'float',
                 required: true,
               },
-              // A discuter du nouveau format pour les relations avec vous
               picture: {
                 model: 'file',
                 via: 'related',
@@ -47,7 +46,6 @@ module.exports = {
                 type: 'float',
                 required: true,
               },
-              // A discuter du nouveau format pour les relations avec vous
               picture: {
                 model: 'file',
                 via: 'related',
@@ -81,7 +79,6 @@ module.exports = {
               type: 'float',
               required: true,
             },
-            // A discuter du nouveau format pour les relations avec vous
             picture: {
               model: 'file',
               via: 'related',

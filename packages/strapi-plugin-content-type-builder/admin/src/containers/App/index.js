@@ -61,7 +61,7 @@ const ROUTES = [
   },
   {
     component: GroupPage,
-    to: `/plugins/${pluginId}/groups/:modelName`,
+    to: `/plugins/${pluginId}/groups/:groupName`,
   },
 ];
 

@@ -26,7 +26,7 @@ const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 
 const context = { emitEvent: jest.fn() };
 const renderComponent = (props = {}) => {
-  const menucontext = {
+  const menuContext = {
     canOpenModal: true,
     groups: [],
     models: [],
@@ -34,7 +34,7 @@ const renderComponent = (props = {}) => {
   };
   return mountWithIntl(
     <BrowserRouter>
-      <MenuContext.Provider value={menucontext}>
+      <MenuContext.Provider value={menuContext}>
         <ModelPage {...props} />
       </MenuContext.Provider>
     </BrowserRouter>,
