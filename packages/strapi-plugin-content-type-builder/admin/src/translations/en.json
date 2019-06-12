@@ -1,4 +1,6 @@
 {
+  "model": "Content Type",
+  "group": "Group",
   "attribute.WYSIWYG": "Text (WYSIWYG)",
   "attribute.boolean": "Boolean",
   "attribute.date": "Date",
@@ -74,11 +76,13 @@
   "form.button.save": "Save",
   "form.contentType.item.collectionName": "Collection Name",
   "form.contentType.item.collectionName.inputDescription": "Useful when the name of your Content Type and your table name differ",
+  "form.modelForm.item.collectionName.inputDescription": "Useful when the name of your {featureType} and your table name differ",
   "form.contentType.item.connections": "Connection",
   "form.contentType.item.description": "Description",
   "form.contentType.item.description.placeholder": "Write your little description here...",
   "form.contentType.item.name": "Name",
   "form.contentType.item.name.description": "Content Type names should be singular: {link}",
+  "form.modelForm.item.name.description.featureType": "The name of a {featureType} should be singular: {link}",
   "form.contentType.item.name.link.description": "Check out our documentation",
   "from": "from",
   "home.contentTypeBuilder.description": "Create and update both your content types & groups.",
@@ -150,6 +154,10 @@
   "popUpForm.create": "Add New",
   "popUpForm.create.contentType.header.title": "New Content Type",
   "popUpForm.create.contentType.header.subtitle": "Name your Content Type",
+  "popUpForm.create.model.header.title": "Create a Content Type",
+  "popUpForm.create.group.header.title": "Create a Group",
+  "popUpForm.create.model.header.subTitle": "Content Type's Settings",
+  "popUpForm.create.group.header.subTitle": "Group's Settings",
   "popUpForm.edit": "Edit",
   "popUpForm.edit.contentType.header.title": "Edit Content Type",
   "popUpForm.field": "Field",
@@ -177,4 +185,5 @@
   "table.groups.title.plural": "{number} Groups are available",
   "table.groups.title.singular": "{number} Group is available",
   "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost."
+
 }

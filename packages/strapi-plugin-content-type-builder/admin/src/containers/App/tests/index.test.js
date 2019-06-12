@@ -17,62 +17,31 @@ describe('<App />', () => {
       history: {
         push: jest.fn(),
       },
+      location: {
+        pathname: '',
+        search: '',
+      },
       getData: jest.fn(),
       groups: [
         {
           uid: 'ingredients',
           name: 'Ingredients',
           source: null,
-          schema: {
-            connection: 'default',
-            collectionName: 'ingredients',
-            description: 'Little description',
-            attributes: {
-              name: {
-                type: 'string',
-                required: true,
-              },
-              quantity: {
-                type: 'float',
-                required: true,
-              },
-              picture: {
-                model: 'file',
-                via: 'related',
-                plugin: 'upload',
-              },
-            },
-          },
+          description: 'Little description',
+          fields: 0,
+          isTemporary: false,
         },
         {
           uid: 'fruits',
           name: 'Fruits',
           source: null,
-          schema: {
-            connection: 'default',
-            collectionName: 'ingredients',
-            description: 'Little description',
-            attributes: {
-              name: {
-                type: 'string',
-                required: true,
-              },
-              quantity: {
-                type: 'float',
-                required: true,
-              },
-              picture: {
-                model: 'file',
-                via: 'related',
-                plugin: 'upload',
-              },
-            },
-          },
+          description: 'Little description',
+          fields: 0,
+          isTemporary: false,
         },
       ],
       initialData: {},
       isLoading: true,
-      groups: [],
       models: [
         {
           icon: 'fa-cube',
@@ -144,7 +113,7 @@ describe('<App />', () => {
 
   describe('<App />, instances', () => {
     describe('CanOpenModal', () => {
-      it('should return true if all models have isTemporary to false', () => {
+      it('should return true if all models and groups have isTemporary to false', () => {
         const wrapper = shallow(<App {...props} />);
         const { canOpenModal } = wrapper.instance();
 
@@ -163,6 +132,36 @@ describe('<App />', () => {
         const { canOpenModal } = wrapper.instance();
 
         expect(canOpenModal()).toBeFalsy();
+      });
+
+      it('should return false if at least group has isTemporary set to true', () => {
+        props.groups.push({
+          name: 'test',
+          description: 'super group',
+          fields: 6,
+          isTemporary: true,
+        });
+        const wrapper = shallow(<App {...props} />);
+        const { canOpenModal } = wrapper.instance();
+
+        expect(canOpenModal()).toBeFalsy();
+      });
+    });
+
+    describe('GetAllGroupsAndModelsNames', () => {
+      it('Should return an array of all groups and models names', () => {
+        const wrapper = shallow(<App {...props} />);
+        const { getAllGroupsAndModelsNames } = wrapper.instance();
+
+        const expected = [
+          'permission',
+          'user',
+          'role',
+          'product',
+          'ingredients',
+          'fruits',
+        ];
+        expect(getAllGroupsAndModelsNames()).toEqual(expected);
       });
     });
 

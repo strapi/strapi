@@ -41,22 +41,29 @@ class HomePage extends React.Component {
     },
   ];
 
+  displayNotification = () =>
+    strapi.notification.info(`${pluginId}.notification.info.work.notSaved`);
+
   handleClick = () => {
     const {
       canOpenModal,
       history: { push },
+      match: {
+        params: { type },
+      },
     } = this.props;
     const { emitEvent } = this.context;
 
     if (canOpenModal) {
-      emitEvent('willCreateContentType');
+      const event =
+        type === 'models' ? 'willCreateContentType' : 'willCreateGroup';
+      const modalType = type === 'models' ? 'model' : 'group';
+      emitEvent(event);
       push({
-        search: 'modalType=model&settingType=base&actionType=create',
+        search: `modalType=${modalType}&settingType=base&actionType=create`,
       });
     } else {
-      strapi.notification.info(
-        `${pluginId}.notification.info.contentType.creating.notSaved`
-      );
+      this.displayNotification();
     }
   };
 
@@ -70,15 +77,18 @@ class HomePage extends React.Component {
 
   handleGoTo = (to, source, shouldEdit = false) => {
     const {
+      canOpenModal,
       history: { push },
       match: {
         params: { type },
       },
     } = this.props;
+
     const modalType = type === 'models' ? 'model' : 'group';
-    const search = shouldEdit
-      ? `?modalType=${modalType}&settingType=base&actionType=edit&modelName=${to}`
-      : '';
+    const search =
+      shouldEdit && canOpenModal
+        ? `?modalType=${modalType}&settingType=base&actionType=edit&modelName=${to}`
+        : '';
     push(
       `/plugins/${pluginId}/${type}/${to.toLowerCase()}${
         source ? `&source=${source}` : ''
@@ -88,6 +98,7 @@ class HomePage extends React.Component {
 
   render() {
     const {
+      allGroupsAndModelsName,
       cancelNewContentType,
       canOpenModal,
       connections,
@@ -166,19 +177,21 @@ class HomePage extends React.Component {
           </ListWrapper>
         )}
 
-        <ModelForm
+        {/* <ModelForm
           actionType="create"
           activeTab={getQueryParameters(search, 'settingType')}
+          allTakenNames={allGroupsAndModelsName}
           cancelNewContentType={cancelNewContentType}
           connections={connections}
           createTempContentType={createTempContentType}
           currentData={modifiedData}
+          featureType={type}
           modifiedData={newContentType}
           onChangeNewContentTypeMainInfos={onChangeNewContentTypeMainInfos}
           isOpen={!isEmpty(search)}
           pathname={pathname}
           push={push}
-        />
+        /> */}
       </div>
     );
   }

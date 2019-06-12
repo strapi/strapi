@@ -24,6 +24,7 @@ import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperModal from '../../components/WrapperModal';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
+import IconGroup from '../../assets/icons/icon_type_groups.png';
 
 import forms from './forms.json';
 
@@ -77,16 +78,17 @@ class ModelForm extends React.Component {
     e.preventDefault();
 
     const {
-      currentData,
-      isUpdatingTemporaryContentType,
-      modifiedData,
+      allTakenNames,
       actionType,
       createTempContentType,
+      featureType,
+      isUpdatingTemporaryContentType,
       modelToEditName,
+      modifiedData,
       push,
       updateTempContentType,
     } = this.props;
-    const alreadyTakenContentTypeNames = Object.keys(currentData).filter(
+    const alreadyTakenContentTypeNames = allTakenNames.filter(
       name => name !== modelToEditName
     );
     let formErrors = {};
@@ -105,7 +107,9 @@ class ModelForm extends React.Component {
       formErrors,
       didCheckErrors: !prevState.didCheckErrors,
     }));
-    const pathname = `/plugins/${pluginId}/models/${modifiedData.name}`;
+    const pathname = `/plugins/${pluginId}/${featureType}s/${
+      modifiedData.name
+    }`;
 
     if (isEmpty(formErrors)) {
       if (actionType === 'create') {
@@ -123,11 +127,18 @@ class ModelForm extends React.Component {
     }
   };
 
+  getIcon = () => {
+    const { featureType } = this.props;
+
+    return featureType === 'model' ? Icon : IconGroup;
+  };
+
   renderInput = input => {
     const {
       actionType,
       connections,
       isUpdatingTemporaryContentType,
+      featureType,
       modelToEditName,
       modifiedData,
       onChangeExistingContentTypeMainInfos,
@@ -153,6 +164,7 @@ class ModelForm extends React.Component {
               )}
             </FormattedMessage>
           ),
+          featureType: <FormattedMessage id={`${pluginId}.${featureType}`} />,
         },
       };
     }
@@ -196,7 +208,7 @@ class ModelForm extends React.Component {
   };
 
   render() {
-    const { actionType, activeTab, isOpen } = this.props;
+    const { actionType, activeTab, featureType, isOpen } = this.props;
     const currentForm = get(forms, activeTab, forms.base);
 
     return (
@@ -209,10 +221,10 @@ class ModelForm extends React.Component {
         <HeaderModal>
           <section>
             <HeaderModalTitle>
-              <img src={Icon} alt="ct" />
+              <img src={this.getIcon()} alt="ct" />
               <FormattedMessage
                 id={`${pluginId}.popUpForm.${actionType ||
-                  'create'}.contentType.header.title`}
+                  'create'}.${featureType}.header.title`}
               />
             </HeaderModalTitle>
           </section>
@@ -220,7 +232,7 @@ class ModelForm extends React.Component {
             <HeaderModalTitle>
               <FormattedMessage
                 id={`${pluginId}.popUpForm.${actionType ||
-                  'create'}.contentType.header.subtitle`}
+                  'create'}.${featureType}.header.subTitle`}
               />
             </HeaderModalTitle>
             <div className="settings-tabs">
@@ -261,9 +273,9 @@ ModelForm.defaultProps = {
   cancelNewContentType: () => {},
   connections: ['default'],
   createTempContentType: () => {},
-  currentData: {},
   isOpen: false,
   isUpdatingTemporaryContentType: false,
+  featureType: 'model',
   modelToEditName: '',
   modifiedData: {},
   onChangeExistingContentTypeMainInfos: () => {},
@@ -278,12 +290,13 @@ ModelForm.defaultProps = {
 ModelForm.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
+  allTakenNames: PropTypes.arrayOf(PropTypes.string).isRequired,
   cancelNewContentType: PropTypes.func,
   connections: PropTypes.arrayOf(PropTypes.string),
   createTempContentType: PropTypes.func,
-  currentData: PropTypes.object,
   isOpen: PropTypes.bool,
   isUpdatingTemporaryContentType: PropTypes.bool,
+  featureType: PropTypes.string,
   modelToEditName: PropTypes.string,
   modifiedData: PropTypes.object,
   onChangeExistingContentTypeMainInfos: PropTypes.func,

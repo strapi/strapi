@@ -55,6 +55,7 @@ describe('<ModelPage />', () => {
       addAttributeRelation: jest.fn(),
       addAttributeToExistingContentType: jest.fn(),
       addAttributeToTempContentType: jest.fn(),
+
       cancelNewContentType: jest.fn(),
       clearTemporaryAttribute: jest.fn(),
       clearTemporaryAttributeRelation: jest.fn(),
@@ -354,6 +355,7 @@ describe('<ModelPage /> lifecycle', () => {
       addAttributeRelation: jest.fn(),
       addAttributeToExistingContentType: jest.fn(),
       addAttributeToTempContentType: jest.fn(),
+
       cancelNewContentType: jest.fn(),
       canOpenModal: true,
       clearTemporaryAttribute: jest.fn(),

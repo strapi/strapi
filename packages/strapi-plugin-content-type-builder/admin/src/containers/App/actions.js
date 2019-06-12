@@ -23,6 +23,7 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
+  ON_CHANGE_NEW_GROUP_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
   ON_CHANGE_RELATION,
   ON_CHANGE_RELATION_NATURE,
@@ -213,6 +214,19 @@ export function onChangeNewContentTypeMainInfos({ target }) {
 
   return {
     type: ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
+    keys: target.name.split('.'),
+    value,
+  };
+}
+
+export function onChangeNewGroupMainInfos({ target }) {
+  const value =
+    target.name === 'name'
+      ? camelCase(target.value.trim()).toLowerCase()
+      : target.value;
+
+  return {
+    type: ON_CHANGE_NEW_GROUP_MAIN_INFOS,
     keys: target.name.split('.'),
     value,
   };

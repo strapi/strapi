@@ -21,6 +21,7 @@ import {
   DELETE_TEMPORARY_MODEL,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+  ON_CHANGE_NEW_GROUP_MAIN_INFOS,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
   ON_CHANGE_RELATION,
@@ -87,6 +88,22 @@ export const initialState = fromJS({
     unique: false,
   },
   shouldRefetchData: false,
+
+  //// GROUP RELATED DATA ////
+  newGroup: {
+    collectionName: '',
+    connection: '',
+    description: '',
+    name: '',
+    attributes: [],
+  },
+  newGroupClone: {
+    collectionName: '',
+    connection: '',
+    description: '',
+    name: '',
+    attributes: [],
+  },
 });
 
 export const shouldPluralizeKey = nature =>
@@ -311,6 +328,8 @@ function appReducer(state = initialState, action) {
         ['newContentType', ...action.keys],
         () => action.value
       );
+    case ON_CHANGE_NEW_GROUP_MAIN_INFOS:
+      return state.updateIn(['newGroup', ...action.keys], () => action.value);
     case ON_CHANGE_ATTRIBUTE:
       return state.updateIn(
         ['temporaryAttribute', ...action.keys],

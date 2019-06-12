@@ -23,10 +23,10 @@ describe('<ModelForm />', () => {
     props = {
       actionType: 'create',
       activeTab: 'base',
+      allTakenNames: [],
       cancelNewContentType: jest.fn(),
       connections: ['default'],
       createTempContentType: jest.fn(),
-      currentData: {},
       isOpen: true,
       isUpdatingTemporaryContentType: false,
       modelToEditName: '',
@@ -201,7 +201,7 @@ describe('<ModelForm />', () => {
         handleGoTo('advanced');
 
         expect(context.emitEvent).toHaveBeenCalledWith(
-          'didSelectContentTypeSettings',
+          'didSelectContentTypeSettings'
         );
         expect(props.push).toHaveBeenCalledWith({
           search: 'modalType=model&settingType=advanced&actionType=create',
@@ -269,7 +269,7 @@ describe('<ModelForm />', () => {
       });
 
       it('should not submit if the name of the CT is already taken', () => {
-        props.currentData = { test: {} };
+        props.allTakenNames = ['test'];
         props.modifiedData.name = 'test';
         props.modelToEditName = '';
         props.actionType = 'create';
@@ -304,9 +304,9 @@ describe('<ModelForm />', () => {
 
       it('should submit if the form is not empty and the user is editing a temporary CT', () => {
         props.modifiedData.name = 'test';
+        props.allTakenNames = ['test'];
         props.actionType = 'edit';
         props.isUpdatingTemporaryContentType = true;
-        props.currentData = { test: {} };
         props.modelToEditName = 'test';
         wrapper = renderComponent(props);
 
@@ -327,7 +327,7 @@ describe('<ModelForm />', () => {
         props.modifiedData.name = 'test';
         props.actionType = 'edit';
         props.isUpdatingTemporaryContentType = false;
-        props.currentData = { test: {} };
+        props.allTakenNames = ['test'];
         props.modelToEditName = 'test';
         wrapper = renderComponent(props);
 

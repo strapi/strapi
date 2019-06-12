@@ -642,9 +642,10 @@ export class ModelPage extends React.Component {
           onSubmitEdit={this.handleSubmitEdit}
           push={push}
         />
-        <ModelForm
+        {/* <ModelForm
           actionType={actionType}
           activeTab={settingType}
+          allTakenNames={allGroupsAndModelsName}
           cancelNewContentType={cancelNewContentType}
           connections={connections}
           createTempContentType={createTempContentType}
@@ -662,7 +663,7 @@ export class ModelPage extends React.Component {
           resetExistingContentTypeMainInfos={resetExistingContentTypeMainInfos}
           resetNewContentTypeMainInfos={resetNewContentTypeMainInfos}
           updateTempContentType={updateTempContentType}
-        />
+        /> */}
         <PopUpWarning
           isOpen={showWarning}
           toggleModal={this.toggleModalWarning}
