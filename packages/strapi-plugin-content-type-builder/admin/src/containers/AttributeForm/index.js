@@ -20,9 +20,12 @@ import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
+import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperModal from '../../components/WrapperModal';
+
+import Icon from '../../assets/icons/icon_type_ct.png';
 
 import supportedAttributes from './supportedAttributes.json';
 
@@ -230,6 +233,27 @@ class AttributeForm extends React.Component {
         onToggle={this.handleToggle}
       >
         <HeaderModal>
+          <section>
+            <HeaderModalTitle>
+              <img src={Icon} alt="ct" />
+              <span>{titleContent}</span>
+            </HeaderModalTitle>
+          </section>
+          <section>
+            <HeaderModalTitle>
+              <FormattedMessage
+                id={`${pluginId}.popUpForm.${actionType || 'create'}`}
+              />
+            </HeaderModalTitle>
+            <div className="settings-tabs">
+              <HeaderModalNavContainer>
+                {NAVLINKS.map(this.renderNavLink)}
+              </HeaderModalNavContainer>
+            </div>
+          </section>
+        </HeaderModal>
+
+        {/* <HeaderModal>
           <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
             <FormattedMessage
               id={`${pluginId}.popUpForm.${actionType || 'create'}`}
@@ -244,7 +268,7 @@ class AttributeForm extends React.Component {
           <HeaderModalNavContainer>
             {NAVLINKS.map(this.renderNavLink)}
           </HeaderModalNavContainer>
-        </HeaderModal>
+        </HeaderModal> */}
         <form onSubmit={this.handleSubmitAndContinue}>
           <BodyModal>{showForm && currentForm.map(this.renderInput)}</BodyModal>
           <FooterModal>

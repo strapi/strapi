@@ -135,6 +135,7 @@
   "popUpForm.attributes.text.description": "Descriptions, paragraphes texte, articles ",
   "popUpForm.attributes.text.name": "Texte",
   "popUpForm.choose.attributes.header.title": "Ajouter un Nouveau Champ",
+  "popUpForm.choose.attributes.header.subtitle": "Selectionner un champ pour ce modèle",
   "popUpForm.create": "Ajouter un Nouveau",
   "popUpForm.create.contentType.header.title": "Ajouter un Nouveau Modèle",
   "popUpForm.edit": "Modifer",

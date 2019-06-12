@@ -6,26 +6,16 @@
 
 import styled from 'styled-components';
 
-// Prepare for theming
-const sizes = {
-  modal: {
-    footer: {
-      height: '6rem',
-    },
-  },
-  margin: 10,
-};
-
-const colors = {
-  beige: '#eff3f6',
-};
+import colors from '../../assets/styles/colors';
+import sizes from '../../assets/styles/sizes';
 
 const FooterModal = styled.div`
+  padding-top: ${sizes.margin * 0.9}px;
   section {
     padding: 0 ${sizes.margin * 3}px;
     display: flex;
     height: 72px;
-    &:not(last-of-type) {
+    &:not(:last-of-type) {
       justify-content: flex-end;
     }
     &:last-of-type {
