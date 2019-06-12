@@ -13,7 +13,6 @@ const List = styled.div`
   position: relative;
   overflow-x: scroll;
   border-radius: 3px;
-  box-shadow: 0 2px 4px #e3e9f3;
   background: white;
   i {
     display: inline-block;
