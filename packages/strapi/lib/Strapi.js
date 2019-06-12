@@ -229,7 +229,7 @@ class Strapi extends EventEmitter {
       api,
       admin,
       plugins,
-      { middlewares, koaMiddlewares },
+      middlewares,
       hook,
       extensions,
     ] = await Promise.all([
@@ -248,7 +248,6 @@ class Strapi extends EventEmitter {
     this.admin = admin;
     this.plugins = plugins;
     this.middleware = middlewares;
-    this.koaMiddlewares = koaMiddlewares;
     this.hook = hook;
 
     /**
@@ -280,7 +279,10 @@ class Strapi extends EventEmitter {
     await Promise.all([
       initializeMiddlewares.call(this),
       initializeHooks.call(this),
-    ]);
+    ]).catch(err => {
+      console.error(err);
+      throw err;
+    });
   }
 
   reload() {

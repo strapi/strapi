@@ -22,7 +22,8 @@
     "graphql-type-json": "^0.3.0",
     "graphql-type-long": "^0.1.1",
     "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.0-beta.3"
+    "strapi-utils": "3.0.0-beta.3",
+    "koa-compose": "^4.0.0"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
