@@ -3,31 +3,36 @@
 }
 
 .modal {
-  padding-top: 2px;
+  background-color: white;
   > div {
-    width: 74.5rem;
+    width: 92.1rem;
     padding-left: 0;
     padding-right: 0;
-    border:none;
+    border: none;
     border-radius: 2px;
   }
 }
 
 .headerModalWrapper {
-  margin: 0 2.9rem;
-  padding: 1.4rem 0 2.8rem 0;
-  border-bottom: 1px solid #F6F6F6;
-  position: relative;
+  width: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 999;
+  border: 0;
+  padding: 0;
   > button {
-    margin-right: -2.5rem;
-    color: #C3C5C8;
+    color: #c3c5c8;
     opacity: 1;
-    font-size: 1.8rem;
+    font-size: 1.2rem;
     font-weight: 100;
-    &:hover, &:focus {
-      color: #C3C5C8;
+    margin: 0;
+    padding: 20px;
+    &:hover,
+    &:focus {
+      color: #c3c5c8;
       opacity: 1;
-      outline: 0!important;
+      outline: 0 !important;
       cursor: pointer;
     }
     > span {
@@ -39,8 +44,6 @@
       font-family: 'FontAwesome';
       font-weight: 400;
       font-size: 1.2rem;
-      margin-right: 10px;
     }
-    z-index: 999;
   }
 }

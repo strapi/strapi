@@ -14,14 +14,16 @@ import { InputsIndex as Input } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 
 import BodyModal from '../../components/BodyModal';
-import ButtonModalPrimary from '../../components/ButtonModalPrimary';
 import ButtonModalSecondary from '../../components/ButtonModalSecondary';
+import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperModal from '../../components/WrapperModal';
+
+import Icon from '../../assets/icons/icon_type_ct.png';
 
 import forms from './forms.json';
 
@@ -85,7 +87,7 @@ class ModelForm extends React.Component {
       updateTempContentType,
     } = this.props;
     const alreadyTakenContentTypeNames = Object.keys(currentData).filter(
-      name => name !== modelToEditName,
+      name => name !== modelToEditName
     );
     let formErrors = {};
 
@@ -205,25 +207,43 @@ class ModelForm extends React.Component {
         onToggle={this.handleCancel}
       >
         <HeaderModal>
-          <HeaderModalTitle
-            title={`${pluginId}.popUpForm.${actionType ||
-              'create'}.contentType.header.title`}
-          />
-          <HeaderModalNavContainer>
-            {NAVLINKS.map(this.renderNavLinks)}
-          </HeaderModalNavContainer>
+          <section>
+            <HeaderModalTitle>
+              <img src={Icon} alt="ct" />
+              <FormattedMessage
+                id={`${pluginId}.popUpForm.${actionType ||
+                  'create'}.contentType.header.title`}
+              />
+            </HeaderModalTitle>
+          </section>
+          <section>
+            <HeaderModalTitle>
+              <FormattedMessage
+                id={`${pluginId}.popUpForm.${actionType ||
+                  'create'}.contentType.header.subtitle`}
+              />
+            </HeaderModalTitle>
+            <div className="settings-tabs">
+              <HeaderModalNavContainer>
+                {NAVLINKS.map(this.renderNavLinks)}
+              </HeaderModalNavContainer>
+            </div>
+            <hr />
+          </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmit}>
           <BodyModal>{currentForm.items.map(this.renderInput)}</BodyModal>
           <FooterModal>
-            <ButtonModalSecondary
-              message={`${pluginId}.form.button.cancel`}
-              onClick={this.handleCancel}
-            />
-            <ButtonModalPrimary
-              message={`${pluginId}.form.button.save`}
-              type="submit"
-            />
+            <section>
+              <ButtonModalSecondary
+                message={`${pluginId}.form.button.cancel`}
+                onClick={this.handleCancel}
+              />
+              <ButtonModalSuccess
+                message={`${pluginId}.form.button.done`}
+                type="submit"
+              />
+            </section>
           </FooterModal>
         </form>
       </WrapperModal>

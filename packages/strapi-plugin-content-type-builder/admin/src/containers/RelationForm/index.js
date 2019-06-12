@@ -16,6 +16,7 @@ import pluginId from '../../pluginId';
 import BodyModal from '../../components/BodyModal';
 import ButtonModalPrimary from '../../components/ButtonModalPrimary';
 import ButtonModalSecondary from '../../components/ButtonModalSecondary';
+import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
@@ -58,7 +59,7 @@ class RelationForm extends React.Component {
         }
 
         return attribute !== attributeToEditName;
-      },
+      }
     );
 
     let formErrors = {};
@@ -141,7 +142,7 @@ class RelationForm extends React.Component {
       isUpdatingTemporaryContentType,
       source,
       attributeToEditName,
-      actionType === 'edit',
+      actionType === 'edit'
     );
     this.setState({ showForm: true });
   };
@@ -296,20 +297,24 @@ class RelationForm extends React.Component {
         <form onSubmit={this.handleSubmitAndContinue}>
           <BodyModal>{showForm && content}</BodyModal>
           <FooterModal>
-            <ButtonModalSecondary
-              message={`${pluginId}.form.button.cancel`}
-              onClick={this.handleCancel}
-            />
-            <ButtonModalPrimary
-              message={`${pluginId}.form.button.continue`}
-              type="submit"
-              add
-            />
-            <ButtonModalPrimary
-              message={`${pluginId}.form.button.save`}
-              type="button"
-              onClick={this.handleSubmit}
-            />
+            <section>
+              <ButtonModalPrimary
+                message={`${pluginId}.form.button.add`}
+                type="submit"
+                add
+              />
+            </section>
+            <section>
+              <ButtonModalSecondary
+                message={`${pluginId}.form.button.cancel`}
+                onClick={this.handleCancel}
+              />
+              <ButtonModalSuccess
+                message={`${pluginId}.form.button.done`}
+                type="button"
+                onClick={this.handleSubmit}
+              />
+            </section>
           </FooterModal>
         </form>
       </WrapperModal>
