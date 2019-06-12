@@ -14,7 +14,62 @@ describe('<App />', () => {
       addAttributeRelation: jest.fn(),
       cancelNewContentType: jest.fn(),
       deleteModel: jest.fn(),
+      history: {
+        push: jest.fn(),
+      },
       getData: jest.fn(),
+      groups: [
+        {
+          uid: 'ingredients',
+          name: 'Ingredients',
+          source: null,
+          schema: {
+            connection: 'default',
+            collectionName: 'ingredients',
+            description: 'Little description',
+            attributes: {
+              name: {
+                type: 'string',
+                required: true,
+              },
+              quantity: {
+                type: 'float',
+                required: true,
+              },
+              picture: {
+                model: 'file',
+                via: 'related',
+                plugin: 'upload',
+              },
+            },
+          },
+        },
+        {
+          uid: 'fruits',
+          name: 'Fruits',
+          source: null,
+          schema: {
+            connection: 'default',
+            collectionName: 'ingredients',
+            description: 'Little description',
+            attributes: {
+              name: {
+                type: 'string',
+                required: true,
+              },
+              quantity: {
+                type: 'float',
+                required: true,
+              },
+              picture: {
+                model: 'file',
+                via: 'related',
+                plugin: 'upload',
+              },
+            },
+          },
+        },
+      ],
       initialData: {},
       isLoading: true,
       groups: [],

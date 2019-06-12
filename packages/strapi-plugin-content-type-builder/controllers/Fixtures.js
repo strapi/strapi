@@ -21,7 +21,31 @@ module.exports = {
                 type: 'float',
                 required: true,
               },
-              // A discuter du nouveau format pour les relations avec vous
+              picture: {
+                model: 'file',
+                via: 'related',
+                plugin: 'upload',
+              },
+            },
+          },
+        },
+        {
+          uid: 'fruits',
+          name: 'Fruits',
+          source: null,
+          schema: {
+            connection: 'default',
+            collectionName: 'ingredients',
+            description: 'Little description',
+            attributes: {
+              name: {
+                type: 'string',
+                required: true,
+              },
+              quantity: {
+                type: 'float',
+                required: true,
+              },
               picture: {
                 model: 'file',
                 via: 'related',
@@ -71,7 +95,6 @@ module.exports = {
               type: 'float',
               required: true,
             },
-            // A discuter du nouveau format pour les relations avec vous
             picture: {
               model: 'file',
               via: 'related',
