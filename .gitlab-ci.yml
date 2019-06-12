@@ -1,4 +1,5 @@
 deploy:
+  stage: deploy
   variables:
     COMMIT: $CI_COMMIT_SHA
   trigger: strapi/strapi-testing-deployer
