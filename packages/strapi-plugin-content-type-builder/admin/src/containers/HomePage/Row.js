@@ -69,7 +69,7 @@ function Row({
                 e.stopPropagation();
 
                 const to = uid || name;
-                onClickGoTo(to, source, isTemporary);
+                onClickGoTo(to, source, canOpenModal || isTemporary);
               }}
             >
               <i className="fa fa-pencil link-icon" />

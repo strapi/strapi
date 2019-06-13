@@ -19,11 +19,13 @@ function ButtonModalSuccess({ message, onClick, type }) {
 }
 
 ButtonModalSuccess.defaultProps = {
+  onClick: () => {},
   type: 'button',
 };
 
 ButtonModalSuccess.propTypes = {
   message: PropTypes.string.isRequired,
+  onClick: PropTypes.func,
   type: PropTypes.string,
 };
 

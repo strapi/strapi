@@ -159,7 +159,11 @@ class ModelForm extends React.Component {
           link: (
             <FormattedMessage id={input.inputDescriptionParams.id}>
               {msg => (
-                <a href={input.inputDescriptionParams.href} target="_blank">
+                <a
+                  href={input.inputDescriptionParams.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {msg}
                 </a>
               )}

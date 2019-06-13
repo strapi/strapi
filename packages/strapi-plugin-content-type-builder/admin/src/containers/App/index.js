@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
-import { get, isEmpty } from 'lodash';
+import { get } from 'lodash';
 
 import { NotFound, getQueryParameters } from 'strapi-helper-plugin';
 
@@ -184,7 +184,6 @@ export class App extends React.Component {
       location: { pathname, search },
       isLoading,
       models,
-      newContentType,
       newGroup,
       onChangeExistingContentTypeMainInfos,
       onChangeNewContentTypeMainInfos,
@@ -271,12 +270,19 @@ App.defaultProps = {
 App.propTypes = {
   addAttributeRelation: PropTypes.func.isRequired,
   cancelNewContentType: PropTypes.func.isRequired,
+  connections: PropTypes.array.isRequired,
+  createTempContentType: PropTypes.func.isRequired,
+  createTempGroup: PropTypes.func.isRequired,
   deleteModel: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool.isRequired,
   groups: PropTypes.array.isRequired,
   history: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  location: PropTypes.object.isRequired,
   models: PropTypes.array.isRequired,
+  modifiedData: PropTypes.object.isRequired,
+  newContentType: PropTypes.object.isRequired,
+  newGroup: PropTypes.object.isRequired,
   onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeNewGroupMainInfos: PropTypes.func.isRequired,
@@ -285,7 +291,10 @@ App.propTypes = {
   saveEditedAttributeRelation: PropTypes.func.isRequired,
   setTemporaryAttribute: PropTypes.func.isRequired,
   setTemporaryAttributeRelation: PropTypes.func.isRequired,
+  resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
+  resetNewContentTypeMainInfos: PropTypes.func.isRequired,
   shouldRefetchData: PropTypes.bool,
+  updateTempContentType: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectApp();

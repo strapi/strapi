@@ -32,7 +32,6 @@ import Ul from '../../components/Ul';
 
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
-import ModelForm from '../ModelForm';
 import RelationForm from '../RelationForm';
 import LeftMenu from '../LeftMenu';
 
@@ -101,18 +100,18 @@ export class ModelPage extends React.Component {
   getAttributeType = () =>
     getQueryParameters(this.getSearch(), 'attributeType');
 
-  getFormData = () => {
-    const { modifiedData, newContentType } = this.props;
+  // getFormData = () => {
+  //   const { modifiedData, newContentType } = this.props;
 
-    if (
-      this.getActionType() === 'create' ||
-      this.isUpdatingTemporaryContentType()
-    ) {
-      return newContentType;
-    }
+  //   if (
+  //     this.getActionType() === 'create' ||
+  //     this.isUpdatingTemporaryContentType()
+  //   ) {
+  //     return newContentType;
+  //   }
 
-    return get(modifiedData, this.getModelName());
-  };
+  //   return get(modifiedData, this.getModelName());
+  // };
 
   getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
 
@@ -503,27 +502,18 @@ export class ModelPage extends React.Component {
   render() {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
     const {
-      cancelNewContentType,
-      connections,
       clearTemporaryAttribute,
       clearTemporaryAttributeRelation,
-      createTempContentType,
       history: { push },
-      location: { pathname, search },
+      location: { search },
       models,
-      modifiedData,
       onChangeAttribute,
-      onChangeExistingContentTypeMainInfos,
-      onChangeNewContentTypeMainInfos,
       onChangeRelation,
       onChangeRelationNature,
       onChangeRelationTarget,
-      resetExistingContentTypeMainInfos,
-      resetNewContentTypeMainInfos,
       setTemporaryAttributeRelation,
       temporaryAttribute,
       temporaryAttributeRelation,
-      updateTempContentType,
     } = this.props;
     const { showWarning, removePrompt } = this.state;
 
@@ -642,28 +632,6 @@ export class ModelPage extends React.Component {
           onSubmitEdit={this.handleSubmitEdit}
           push={push}
         />
-        {/* <ModelForm
-          actionType={actionType}
-          activeTab={settingType}
-          allTakenNames={allGroupsAndModelsName}
-          cancelNewContentType={cancelNewContentType}
-          connections={connections}
-          createTempContentType={createTempContentType}
-          currentData={modifiedData}
-          modifiedData={this.getFormData()}
-          modelToEditName={getQueryParameters(search, 'modelName')}
-          onChangeExistingContentTypeMainInfos={
-            onChangeExistingContentTypeMainInfos
-          }
-          onChangeNewContentTypeMainInfos={onChangeNewContentTypeMainInfos}
-          isOpen={modalType === 'model'}
-          isUpdatingTemporaryContentType={this.isUpdatingTemporaryContentType()}
-          pathname={pathname}
-          push={push}
-          resetExistingContentTypeMainInfos={resetExistingContentTypeMainInfos}
-          resetNewContentTypeMainInfos={resetNewContentTypeMainInfos}
-          updateTempContentType={updateTempContentType}
-        /> */}
         <PopUpWarning
           isOpen={showWarning}
           toggleModal={this.toggleModalWarning}
@@ -726,15 +694,11 @@ ModelPage.propTypes = {
   modifiedData: PropTypes.object.isRequired,
   newContentType: PropTypes.object.isRequired,
   onChangeAttribute: PropTypes.func.isRequired,
-  onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
-  onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeRelation: PropTypes.func.isRequired,
   onChangeRelationNature: PropTypes.func.isRequired,
   onChangeRelationTarget: PropTypes.func.isRequired,
   resetEditExistingContentType: PropTypes.func.isRequired,
   resetEditTempContentType: PropTypes.func.isRequired,
-  resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
-  resetNewContentTypeMainInfos: PropTypes.func.isRequired,
   saveEditedAttribute: PropTypes.func.isRequired,
   saveEditedAttributeRelation: PropTypes.func.isRequired,
   setTemporaryAttribute: PropTypes.func.isRequired,
@@ -743,7 +707,6 @@ ModelPage.propTypes = {
   submitTempContentType: PropTypes.func.isRequired,
   temporaryAttribute: PropTypes.object.isRequired,
   temporaryAttributeRelation: PropTypes.object.isRequired,
-  updateTempContentType: PropTypes.func.isRequired,
   ...routerPropTypes({ params: PropTypes.string }).isRequired,
 };
 

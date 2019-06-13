@@ -126,16 +126,13 @@ describe('<ModelPage />', () => {
         name: '',
         attributes: {},
       },
-      onChangeExistingContentTypeMainInfos: jest.fn(),
-      onChangeNewContentTypeMainInfos: jest.fn(),
       onChangeAttribute: jest.fn(),
       onChangeRelation: jest.fn(),
       onChangeRelationNature: jest.fn(),
       onChangeRelationTarget: jest.fn(),
       resetEditExistingContentType: jest.fn(),
       resetEditTempContentType: jest.fn(),
-      resetExistingContentTypeMainInfos: jest.fn(),
-      resetNewContentTypeMainInfos: jest.fn(),
+
       saveEditedAttribute: jest.fn(),
       saveEditedAttributeRelation: jest.fn(),
       setTemporaryAttribute: jest.fn(),
@@ -154,7 +151,6 @@ describe('<ModelPage />', () => {
         target: '',
         unique: false,
       },
-      updateTempContentType: jest.fn(),
     };
   });
 
@@ -427,16 +423,12 @@ describe('<ModelPage /> lifecycle', () => {
         name: '',
         attributes: {},
       },
-      onChangeExistingContentTypeMainInfos: jest.fn(),
-      onChangeNewContentTypeMainInfos: jest.fn(),
       onChangeAttribute: jest.fn(),
       onChangeRelation: jest.fn(),
       onChangeRelationNature: jest.fn(),
       onChangeRelationTarget: jest.fn(),
       resetEditExistingContentType: jest.fn(),
       resetEditTempContentType: jest.fn(),
-      resetExistingContentTypeMainInfos: jest.fn(),
-      resetNewContentTypeMainInfos: jest.fn(),
       saveEditedAttribute: jest.fn(),
       saveEditedAttributeRelation: jest.fn(),
       setTemporaryAttribute: jest.fn(),
@@ -455,7 +447,6 @@ describe('<ModelPage /> lifecycle', () => {
         target: '',
         unique: false,
       },
-      updateTempContentType: jest.fn(),
     };
   });
 

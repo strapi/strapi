@@ -6,21 +6,17 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
-
 import {
   HeaderNav,
   ListWrapper,
   ListHeader,
   List,
   PluginHeader,
-  getQueryParameters,
   routerPropTypes,
 } from 'strapi-helper-plugin';
 
 import EmptyContentTypeView from '../../components/EmptyContentTypeView';
 import pluginId from '../../pluginId';
-import ModelForm from '../ModelForm';
 import Row from './Row';
 import styles from './styles.scss';
 
@@ -77,7 +73,6 @@ class HomePage extends React.Component {
 
   handleGoTo = (to, source, shouldEdit = false) => {
     const {
-      canOpenModal,
       history: { push },
       match: {
         params: { type },
@@ -85,10 +80,9 @@ class HomePage extends React.Component {
     } = this.props;
 
     const modalType = type === 'models' ? 'model' : 'group';
-    const search =
-      shouldEdit || canOpenModal
-        ? `?modalType=${modalType}&settingType=base&actionType=edit&modelName=${to}`
-        : '';
+    const search = shouldEdit
+      ? `?modalType=${modalType}&settingType=base&actionType=edit&modelName=${to}`
+      : '';
     push(
       `/plugins/${pluginId}/${type}/${to.toLowerCase()}${
         source ? `&source=${source}` : ''
@@ -98,25 +92,16 @@ class HomePage extends React.Component {
 
   render() {
     const {
-      allGroupsAndModelsName,
-      cancelNewContentType,
       canOpenModal,
-      connections,
-      createTempContentType,
       deleteGroup,
       deleteModel,
       deleteTemporaryGroup,
       deleteTemporaryModel,
       groups,
-      history: { push },
-      location: { pathname, search },
       match: {
         params: { type },
       },
       models,
-      modifiedData,
-      newContentType,
-      onChangeNewContentTypeMainInfos,
     } = this.props;
     const displayedData = type === 'groups' ? groups : models;
     const availableNumber = type === 'groups' ? groups.length : models.length;
@@ -176,22 +161,6 @@ class HomePage extends React.Component {
             </List>
           </ListWrapper>
         )}
-
-        {/* <ModelForm
-          actionType="create"
-          activeTab={getQueryParameters(search, 'settingType')}
-          allTakenNames={allGroupsAndModelsName}
-          cancelNewContentType={cancelNewContentType}
-          connections={connections}
-          createTempContentType={createTempContentType}
-          currentData={modifiedData}
-          featureType={type}
-          modifiedData={newContentType}
-          onChangeNewContentTypeMainInfos={onChangeNewContentTypeMainInfos}
-          isOpen={!isEmpty(search)}
-          pathname={pathname}
-          push={push}
-        /> */}
       </div>
     );
   }
