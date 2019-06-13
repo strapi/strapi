@@ -22,12 +22,20 @@ module.exports = strapi => {
 
     initialize() {
       _.forEach(strapi.config.routes, value => {
+        const configPrefix = _.get(
+          strapi.config,
+          'currentEnvironment.request.router.prefix',
+          null
+        );
+        const routePrefix = _.get(value, 'config.prefix', null);
+        if (routePrefix) {
+          value.path = routePrefix + value.path;
+        } else if (configPrefix) {
+          value.path = configPrefix + value.path;
+        }
+
         composeEndpoint(value, null, strapi.router);
       });
-
-      strapi.router.prefix(
-        _.get(strapi.config, 'currentEnvironment.request.router.prefix', '')
-      );
 
       if (!_.isEmpty(_.get(strapi.admin, 'config.routes', false))) {
         // Create router for admin.
