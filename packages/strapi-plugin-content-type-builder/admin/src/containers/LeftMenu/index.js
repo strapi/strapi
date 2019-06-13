@@ -44,8 +44,8 @@ function LeftMenu() {
 
   const renderLinks = (param, items) => {
     const links = items.map(item => {
-      const { isTemporary, name, source } = item;
-      const base = `/plugins/${pluginId}/${param}/${name}`;
+      const { isTemporary, name, source, uid } = item;
+      const base = `/plugins/${pluginId}/${param}/${uid || name}`;
       const to = source ? `${base}&source=${source}` : base;
 
       return (

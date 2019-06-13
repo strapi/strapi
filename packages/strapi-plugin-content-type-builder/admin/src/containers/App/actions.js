@@ -163,6 +163,7 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
 
     return acc;
   }, {});
+
   const groups = data.reduce((acc, current, i) => {
     const {
       name,

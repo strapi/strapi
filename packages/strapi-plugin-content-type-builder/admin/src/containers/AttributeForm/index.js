@@ -252,23 +252,6 @@ class AttributeForm extends React.Component {
             </div>
           </section>
         </HeaderModal>
-
-        {/* <HeaderModal>
-          <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
-            <FormattedMessage
-              id={`${pluginId}.popUpForm.${actionType || 'create'}`}
-            />
-            &nbsp;
-            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>
-              {titleContent}
-            </span>
-            &nbsp;
-            <FormattedMessage id={`${pluginId}.popUpForm.field`} />
-          </div>
-          <HeaderModalNavContainer>
-            {NAVLINKS.map(this.renderNavLink)}
-          </HeaderModalNavContainer>
-        </HeaderModal> */}
         <form onSubmit={this.handleSubmitAndContinue}>
           <BodyModal>{showForm && currentForm.map(this.renderInput)}</BodyModal>
           <FooterModal>

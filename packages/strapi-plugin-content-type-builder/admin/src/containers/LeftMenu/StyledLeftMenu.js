@@ -6,14 +6,9 @@
 
 import styled from 'styled-components';
 
-// Prepare for theming
-const sizes = {
-  header: {
-    height: '6rem',
-  },
-  margin: 10,
-};
+import sizes from '../../assets/styles/sizes';
 
+// Specific colors for left menu
 const colors = {
   black: '#2D3138',
   grey: '#666B74',

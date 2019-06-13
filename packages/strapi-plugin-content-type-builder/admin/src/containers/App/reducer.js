@@ -48,6 +48,7 @@ export const initialState = fromJS({
   isLoading: true,
   models: List([]),
   modifiedData: {},
+  modifiedDataGroups: {},
   newContentType: {
     collectionName: '',
     connection: '',
@@ -307,9 +308,12 @@ function appReducer(state = initialState, action) {
       return state
         .update('connections', () => List(action.connections))
         .update('initialData', () => fromJS(action.initialData))
+        .update('initialDataGroup', () => fromJS(action.groups))
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.initialData))
+        .update('modifiedDataGroups', () => fromJS(action.groups))
         .updateIn(['newContentType', 'connection'], () => action.connections[0])
+        .updateIn(['newGroup', 'connection'], () => action.connections[0])
         .update('models', () =>
           List(fromJS(action.models)).sortBy(model => model.get('name'))
         )
