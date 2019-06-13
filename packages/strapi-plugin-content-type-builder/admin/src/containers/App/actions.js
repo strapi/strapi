@@ -170,7 +170,6 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
 
     return acc;
   }, {});
-<<<<<<< HEAD
 
   const initialDataGroup = data.reduce((acc, current, i) => {
     const {
@@ -187,10 +186,7 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
     return acc;
   }, {});
 
-  const groups = data.reduce((acc, current, i) => {
-=======
   const groups = data.reduce((acc, current) => {
->>>>>>> 28c9339ace187ee1b88de0002851d3598f8e9def
     const {
       name,
       schema: { attributes, description },
