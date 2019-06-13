@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
-import { isEmpty } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 import { NotFound, getQueryParameters } from 'strapi-helper-plugin';
 
@@ -28,6 +28,7 @@ import {
   cancelNewContentType,
   clearTemporaryAttributeRelation,
   createTempContentType,
+  createTempGroup,
   deleteGroup,
   deleteModel,
   deleteTemporaryGroup,
@@ -113,6 +114,45 @@ export class App extends React.Component {
 
   getFeatureType = () => getQueryParameters(this.getSearch(), 'modalType');
 
+  getFormDataForModel = () => {
+    const { modifiedData, newContentType } = this.props;
+
+    if (this.isUpdatingTemporaryModel()) {
+      return newContentType;
+    }
+
+    return get(modifiedData, this.getFeatureNameFromSearch(), {});
+  };
+
+  getFeatureNameFromSearch = () =>
+    getQueryParameters(this.getSearch(), 'modelName');
+
+  isUpdatingTemporaryModel = (modelName = this.getFeatureNameFromSearch()) => {
+    const { models } = this.props;
+
+    const currentModel = models.find(model => model.name === modelName) || {
+      isTemporary: true,
+    };
+
+    const { isTemporary } = currentModel;
+
+    return isTemporary;
+  };
+
+  isUpdatingTemporaryFeature = (
+    groupName = this.getFeatureNameFromSearch()
+  ) => {
+    const { groups } = this.props;
+
+    const currentGroup = groups.find(group => group.uid === groupName) || {
+      isTemporary: true,
+    };
+
+    const { isTemporary } = currentGroup;
+
+    return isTemporary;
+  };
+
   renderRoute = route => {
     const { component: Component, to } = route;
 
@@ -135,7 +175,10 @@ export class App extends React.Component {
 
   render() {
     const {
+      cancelNewContentType,
       connections,
+      createTempContentType,
+      createTempGroup,
       groups,
       history: { push },
       location: { pathname, search },
@@ -143,13 +186,60 @@ export class App extends React.Component {
       models,
       newContentType,
       newGroup,
+      onChangeExistingContentTypeMainInfos,
       onChangeNewContentTypeMainInfos,
       onChangeNewGroupMainInfos,
+      resetExistingContentTypeMainInfos,
+      resetNewContentTypeMainInfos,
+      updateTempContentType,
     } = this.props;
 
     if (isLoading) {
       return <Loader />;
     }
+
+    const featureForms = [
+      {
+        actionType: this.getActionType(),
+        activeTab: getQueryParameters(search, 'settingType'),
+        allTakenNames: this.getAllGroupsAndModelsNames(),
+        cancelNewFeatureType: cancelNewContentType,
+        connections,
+        createTempFeatureType: createTempContentType,
+        featureToEditName: this.getFeatureNameFromSearch(),
+        featureType: 'model',
+        isOpen: getQueryParameters(search, 'modalType') === 'model',
+        isUpdatingTemporaryFeatureType: this.isUpdatingTemporaryModel(),
+        modifiedData: this.getFormDataForModel(),
+        onChangeExistingFeatureTypeMainInfos: onChangeExistingContentTypeMainInfos,
+        onChangeNewFeatureTypeMainInfos: onChangeNewContentTypeMainInfos,
+        pathname,
+        push,
+        resetExistingFeatureTypeMainInfos: resetExistingContentTypeMainInfos,
+        resetNewFeatureTypeMainInfos: resetNewContentTypeMainInfos,
+        updateTempFeatureType: updateTempContentType,
+      },
+      {
+        actionType: this.getActionType(),
+        activeTab: getQueryParameters(search, 'settingType'),
+        allTakenNames: this.getAllGroupsAndModelsNames(),
+        cancelNewFeatureType: () => {},
+        connections,
+        createTempFeatureType: createTempGroup,
+        featureToEditName: this.getFeatureNameFromSearch(),
+        featureType: 'group',
+        isOpen: getQueryParameters(search, 'modalType') === 'group',
+        isUpdatingTemporaryFeatureType: this.isUpdatingTemporaryFeature(),
+        modifiedData: newGroup,
+        onChangeExistingFeatureTypeMainInfos: () => {},
+        onChangeNewFeatureTypeMainInfos: onChangeNewGroupMainInfos,
+        pathname,
+        push,
+        resetExistingFeatureTypeMainInfos: () => {},
+        resetNewFeatureTypeMainInfos: () => {},
+        updateTempFeatureType: () => {},
+      },
+    ];
 
     return (
       <MenuContext.Provider
@@ -166,29 +256,9 @@ export class App extends React.Component {
             <Route component={NotFound} />
           </Switch>
         </div>
-        <ModelForm
-          actionType={this.getActionType()}
-          activeTab={getQueryParameters(search, 'settingType')}
-          allTakenNames={this.getAllGroupsAndModelsNames()}
-          cancelNewContentType={() => {}}
-          connections={connections}
-          createTempContentType={() => {}}
-          featureType={this.getFeatureType()}
-          modifiedData={
-            this.getFeatureType() === 'model' ? newContentType : newGroup
-          }
-          onChangeNewContentTypeMainInfos={
-            this.getFeatureType() === 'model'
-              ? onChangeNewContentTypeMainInfos
-              : onChangeNewGroupMainInfos
-          }
-          // onChangeNewContentTypeMainInfos={
-          //   this.props.onChangeNewContentTypeMainInfos
-          // }
-          isOpen={!isEmpty(search)}
-          pathname={pathname}
-          push={push}
-        />
+        {featureForms.map(feature => (
+          <ModelForm key={feature.featureType} {...feature} />
+        ))}
       </MenuContext.Provider>
     );
   }
@@ -227,6 +297,7 @@ export function mapDispatchToProps(dispatch) {
       cancelNewContentType,
       clearTemporaryAttributeRelation,
       createTempContentType,
+      createTempGroup,
       deleteGroup,
       deleteModel,
       deleteTemporaryGroup,

@@ -24,12 +24,12 @@ describe('<ModelForm />', () => {
       actionType: 'create',
       activeTab: 'base',
       allTakenNames: [],
-      cancelNewContentType: jest.fn(),
+      cancelNewFeatureType: jest.fn(),
       connections: ['default'],
-      createTempContentType: jest.fn(),
+      createTempFeatureType: jest.fn(),
       isOpen: true,
-      isUpdatingTemporaryContentType: false,
-      modelToEditName: '',
+      isUpdatingTemporaryFeatureType: false,
+      featureToEditName: '',
       modifiedData: {
         collectionName: '',
         connection: '',
@@ -38,13 +38,13 @@ describe('<ModelForm />', () => {
         name: '',
         attributes: {},
       },
-      onChangeExistingContentTypeMainInfos: jest.fn(),
-      onChangeNewContentTypeMainInfos: jest.fn(),
+      onChangeExistingFeatureTypeMainInfos: jest.fn(),
+      onChangeNewFeatureTypeMainInfos: jest.fn(),
       onSubmit: jest.fn(),
       push: jest.fn(),
-      resetExistingContentTypeMainInfos: jest.fn(),
-      resetNewContentTypeMainInfos: jest.fn(),
-      updateTempContentType: jest.fn(),
+      resetExistingFeatureTypeMainInfos: jest.fn(),
+      resetNewFeatureTypeMainInfos: jest.fn(),
+      updateTempFeatureType: jest.fn(),
     };
   });
 
@@ -57,44 +57,42 @@ describe('<ModelForm />', () => {
   });
 
   it('should use the defaultProps', () => {
-    delete props.cancelNewContentType;
-    delete props.createTempContentType;
-    delete props.onChangeExistingContentTypeMainInfos;
+    delete props.cancelNewFeatureType;
+    delete props.createTempFeatureType;
+    delete props.onChangeExistingFeatureTypeMainInfos;
     delete props.onSubmit;
-    delete props.resetExistingContentTypeMainInfos;
-    delete props.resetNewContentTypeMainInfos;
-    delete props.resetNewContentTypeMainInfos;
-    delete props.resetNewContentTypeMainInfos;
-    delete props.updateTempContentType;
+    delete props.resetExistingFeatureTypeMainInfos;
+    delete props.resetNewFeatureTypeMainInfos;
+    delete props.updateTempFeatureType;
 
     wrapper = renderComponent(props);
 
     const {
       defaultProps: {
-        cancelNewContentType,
-        createTempContentType,
-        onChangeExistingContentTypeMainInfos,
+        cancelNewFeatureType,
+        createTempFeatureType,
+        onChangeExistingFeatureTypeMainInfos,
         onSubmit,
-        resetExistingContentTypeMainInfos,
-        resetNewContentTypeMainInfos,
-        updateTempContentType,
+        resetExistingFeatureTypeMainInfos,
+        resetNewFeatureTypeMainInfos,
+        updateTempFeatureType,
       },
     } = ModelForm;
 
-    expect(cancelNewContentType).toBeDefined();
-    expect(cancelNewContentType()).toBe(undefined);
-    expect(createTempContentType).toBeDefined();
-    expect(createTempContentType()).toBe(undefined);
-    expect(onChangeExistingContentTypeMainInfos).toBeDefined();
-    expect(onChangeExistingContentTypeMainInfos()).toBe(undefined);
+    expect(cancelNewFeatureType).toBeDefined();
+    expect(cancelNewFeatureType()).toBe(undefined);
+    expect(createTempFeatureType).toBeDefined();
+    expect(createTempFeatureType()).toBe(undefined);
+    expect(onChangeExistingFeatureTypeMainInfos).toBeDefined();
+    expect(onChangeExistingFeatureTypeMainInfos()).toBe(undefined);
     expect(onSubmit).toBeDefined();
     expect(onSubmit({ preventDefault: jest.fn() })).toBe(undefined);
-    expect(resetExistingContentTypeMainInfos).toBeDefined();
-    expect(resetExistingContentTypeMainInfos()).toBe(undefined);
-    expect(resetNewContentTypeMainInfos).toBeDefined();
-    expect(resetNewContentTypeMainInfos()).toBe(undefined);
-    expect(updateTempContentType).toBeDefined();
-    expect(updateTempContentType()).toBe(undefined);
+    expect(resetExistingFeatureTypeMainInfos).toBeDefined();
+    expect(resetExistingFeatureTypeMainInfos()).toBe(undefined);
+    expect(resetNewFeatureTypeMainInfos).toBeDefined();
+    expect(resetNewFeatureTypeMainInfos()).toBe(undefined);
+    expect(updateTempFeatureType).toBeDefined();
+    expect(updateTempFeatureType()).toBe(undefined);
   });
 
   it('should not show the inputs until the modal is fully opened', () => {
@@ -116,7 +114,7 @@ describe('<ModelForm />', () => {
 
   it('should handle the edition of a temporary CT correctly for the inputs settings', () => {
     props.actionType = 'edit';
-    props.isUpdatingTemporaryContentType = true;
+    props.isUpdatingTemporaryFeatureType = true;
 
     wrapper = renderComponent(props);
     wrapper.setState({ isVisible: true });
@@ -128,13 +126,13 @@ describe('<ModelForm />', () => {
 
     input.simulate('change');
 
-    expect(props.onChangeNewContentTypeMainInfos).toHaveBeenCalled();
+    expect(props.onChangeNewFeatureTypeMainInfos).toHaveBeenCalled();
   });
 
   it('should handle the edition of a saved CT correctly for the inputs settings', () => {
     props.actionType = 'edit';
-    props.isUpdatingTemporaryContentType = false;
-    props.modelToEditName = 'test';
+    props.isUpdatingTemporaryFeatureType = false;
+    props.featureToEditName = 'test';
 
     wrapper = renderComponent(props);
     wrapper.setState({ isVisible: true });
@@ -146,7 +144,7 @@ describe('<ModelForm />', () => {
 
     input.simulate('change');
 
-    expect(props.onChangeExistingContentTypeMainInfos).toHaveBeenCalled();
+    expect(props.onChangeExistingFeatureTypeMainInfos).toHaveBeenCalled();
   });
 
   describe('Instances', () => {
@@ -178,7 +176,7 @@ describe('<ModelForm />', () => {
     describe('HandleGoTo', () => {
       it('should add the modelName when navvigating if the user is editing a model', () => {
         props.actionType = 'edit';
-        props.modelToEditName = 'test';
+        props.featureToEditName = 'test';
         wrapper = renderComponent(props);
 
         const { handleGoTo } = wrapper.instance();
@@ -210,46 +208,46 @@ describe('<ModelForm />', () => {
     });
 
     describe('HandleCancel', () => {
-      it('should call only the cancelNewContentType if the actionType is create', () => {
+      it('should call only the cancelNewFeatureType if the actionType is create', () => {
         wrapper = renderComponent(props);
 
         const { handleCancel } = wrapper.instance();
 
         handleCancel();
 
-        expect(props.cancelNewContentType).toHaveBeenCalled();
-        expect(props.resetNewContentTypeMainInfos).not.toHaveBeenCalled();
-        expect(props.resetExistingContentTypeMainInfos).not.toHaveBeenCalled();
+        expect(props.cancelNewFeatureType).toHaveBeenCalled();
+        expect(props.resetNewFeatureTypeMainInfos).not.toHaveBeenCalled();
+        expect(props.resetExistingFeatureTypeMainInfos).not.toHaveBeenCalled();
         expect(props.push).toHaveBeenCalledWith({ search: '' });
       });
 
-      it('should call only the resetNewContentTypeMainInfos if the actionType is edit and if the user is editing a temporary ct', () => {
+      it('should call only the resetNewFeatureTypeMainInfos if the actionType is edit and if the user is editing a temporary ct', () => {
         props.actionType = 'edit';
-        props.isUpdatingTemporaryContentType = true;
+        props.isUpdatingTemporaryFeatureType = true;
         wrapper = renderComponent(props);
 
         const { handleCancel } = wrapper.instance();
 
         handleCancel();
 
-        expect(props.cancelNewContentType).not.toHaveBeenCalled();
-        expect(props.resetNewContentTypeMainInfos).toHaveBeenCalled();
-        expect(props.resetExistingContentTypeMainInfos).not.toHaveBeenCalled();
+        expect(props.cancelNewFeatureType).not.toHaveBeenCalled();
+        expect(props.resetNewFeatureTypeMainInfos).toHaveBeenCalled();
+        expect(props.resetExistingFeatureTypeMainInfos).not.toHaveBeenCalled();
         expect(props.push).toHaveBeenCalledWith({ search: '' });
       });
 
-      it('should call only the resetExistingContentTypeMainInfos if the actionType is edit and if the user is not editing a temporary ct', () => {
+      it('should call only the resetExistingFeatureTypeMainInfos if the actionType is edit and if the user is not editing a temporary ct', () => {
         props.actionType = 'edit';
-        props.isUpdatingTemporaryContentType = false;
+        props.isUpdatingTemporaryFeatureType = false;
         wrapper = renderComponent(props);
 
         const { handleCancel } = wrapper.instance();
 
         handleCancel();
 
-        expect(props.cancelNewContentType).not.toHaveBeenCalled();
-        expect(props.resetNewContentTypeMainInfos).not.toHaveBeenCalled();
-        expect(props.resetExistingContentTypeMainInfos).toHaveBeenCalled();
+        expect(props.cancelNewFeatureType).not.toHaveBeenCalled();
+        expect(props.resetNewFeatureTypeMainInfos).not.toHaveBeenCalled();
+        expect(props.resetExistingFeatureTypeMainInfos).toHaveBeenCalled();
         expect(props.push).toHaveBeenCalledWith({ search: '' });
       });
     });
@@ -271,7 +269,7 @@ describe('<ModelForm />', () => {
       it('should not submit if the name of the CT is already taken', () => {
         props.allTakenNames = ['test'];
         props.modifiedData.name = 'test';
-        props.modelToEditName = '';
+        props.featureToEditName = '';
         props.actionType = 'create';
         wrapper = renderComponent(props);
 
@@ -298,16 +296,16 @@ describe('<ModelForm />', () => {
           pathname: `/plugins/${pluginId}/models/test`,
           search: 'modalType=chooseAttributes',
         });
-        expect(props.createTempContentType).toHaveBeenCalled();
-        expect(props.updateTempContentType).not.toHaveBeenCalled();
+        expect(props.createTempFeatureType).toHaveBeenCalled();
+        expect(props.updateTempFeatureType).not.toHaveBeenCalled();
       });
 
       it('should submit if the form is not empty and the user is editing a temporary CT', () => {
         props.modifiedData.name = 'test';
         props.allTakenNames = ['test'];
         props.actionType = 'edit';
-        props.isUpdatingTemporaryContentType = true;
-        props.modelToEditName = 'test';
+        props.isUpdatingTemporaryFeatureType = true;
+        props.featureToEditName = 'test';
         wrapper = renderComponent(props);
 
         const { handleSubmit } = wrapper.instance();
@@ -319,16 +317,16 @@ describe('<ModelForm />', () => {
           pathname: '/plugins/content-type-builder/models/test',
           search: '',
         });
-        expect(props.createTempContentType).not.toHaveBeenCalled();
-        expect(props.updateTempContentType).toHaveBeenCalled();
+        expect(props.createTempFeatureType).not.toHaveBeenCalled();
+        expect(props.updateTempFeatureType).toHaveBeenCalled();
       });
 
       it('should submit if the form is not empty and the user is editing a saved CT', () => {
         props.modifiedData.name = 'test';
         props.actionType = 'edit';
-        props.isUpdatingTemporaryContentType = false;
+        props.isUpdatingTemporaryFeatureType = false;
         props.allTakenNames = ['test'];
-        props.modelToEditName = 'test';
+        props.featureToEditName = 'test';
         wrapper = renderComponent(props);
 
         const { handleSubmit } = wrapper.instance();
@@ -339,8 +337,8 @@ describe('<ModelForm />', () => {
         expect(props.push).toHaveBeenCalledWith({
           search: '',
         });
-        expect(props.updateTempContentType).not.toHaveBeenCalled();
-        expect(props.createTempContentType).not.toHaveBeenCalled();
+        expect(props.updateTempFeatureType).not.toHaveBeenCalled();
+        expect(props.createTempFeatureType).not.toHaveBeenCalled();
       });
     });
   });

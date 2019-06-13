@@ -78,6 +78,7 @@ describe('<App />', () => {
       modifiedData: {},
       onChangeExistingContentTypeMainInfos: jest.fn(),
       onChangeNewContentTypeMainInfos: jest.fn(),
+      onChangeNewGroupMainInfos: jest.fn(),
       saveEditedAttribute: jest.fn(),
       saveEditedAttributeRelation: jest.fn(),
       setTemporaryAttribute: jest.fn(),

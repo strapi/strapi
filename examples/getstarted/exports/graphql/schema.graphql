@@ -1,5 +1,5 @@
 """Super description"""
-type Articles {
+type Article {
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
@@ -9,19 +9,19 @@ type Articles {
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
 }
 
-input ArticlesInput {
+input ArticleInput {
   content2: String
   posts: [ID]
   title: String
   image: ID
 }
 
-input createArticlesInput {
-  data: ArticlesInput
+input createArticleInput {
+  data: ArticleInput
 }
 
-type createArticlesPayload {
-  article: Articles
+type createArticlePayload {
+  article: Article
 }
 
 input createPostInput {
@@ -48,17 +48,25 @@ type createUserPayload {
   user: UsersPermissionsUser
 }
 
+input createZobInput {
+  data: ZobInput
+}
+
+type createZobPayload {
+  zob: Zob
+}
+
 """
 The `DateTime` scalar represents a date and time following the ISO 8601 standard
 """
 scalar DateTime
 
-input deleteArticlesInput {
+input deleteArticleInput {
   where: InputID
 }
 
-type deleteArticlesPayload {
-  article: Articles
+type deleteArticlePayload {
+  article: Article
 }
 
 input deletePostInput {
@@ -85,7 +93,15 @@ type deleteUserPayload {
   user: UsersPermissionsUser
 }
 
-input editArticlesInput {
+input deleteZobInput {
+  where: InputID
+}
+
+type deleteZobPayload {
+  zob: Zob
+}
+
+input editArticleInput {
   content2: String
   posts: [ID]
   title: String
@@ -132,6 +148,10 @@ input editUserInput {
   role: ID
 }
 
+input editZobInput {
+  name: String
+}
+
 input FileInput {
   name: String!
   hash: String!
@@ -154,15 +174,18 @@ scalar JSON
 """The `Long` scalar type represents 52-bit integers"""
 scalar Long
 
-union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Articles | createArticlesPayload | updateArticlesPayload | deleteArticlesPayload | Post | createPostPayload | updatePostPayload | deletePostPayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
+union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Article | createArticlePayload | updateArticlePayload | deleteArticlePayload | Post | createPostPayload | updatePostPayload | deletePostPayload | Zob | createZobPayload | updateZobPayload | deleteZobPayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
 
 type Mutation {
-  createArticles(input: createArticlesInput): createArticlesPayload
-  updateArticles(input: updateArticlesInput): updateArticlesPayload
-  deleteArticles(input: deleteArticlesInput): deleteArticlesPayload
+  createArticle(input: createArticleInput): createArticlePayload
+  updateArticle(input: updateArticleInput): updateArticlePayload
+  deleteArticle(input: deleteArticleInput): deleteArticlePayload
   createPost(input: createPostInput): createPostPayload
   updatePost(input: updatePostInput): updatePostPayload
   deletePost(input: deletePostInput): deletePostPayload
+  createZob(input: createZobInput): createZobPayload
+  updateZob(input: updateZobInput): updateZobPayload
+  deleteZob(input: deleteZobInput): deleteZobPayload
 
   """Create a new role"""
   createRole(input: createRoleInput): createRolePayload
@@ -193,7 +216,7 @@ type Post {
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
-  articles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+  articles(sort: String, limit: Int, start: Int, where: JSON): [Article]
 }
 
 input PostInput {
@@ -201,10 +224,12 @@ input PostInput {
 }
 
 type Query {
-  article(id: ID!): Articles
-  articles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+  article(id: ID!): Article
+  articles(sort: String, limit: Int, start: Int, where: JSON): [Article]
   post(id: ID!): Post
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
+  zob(id: ID!): Zob
+  zobs(sort: String, limit: Int, start: Int, where: JSON): [Zob]
   files(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
   role(id: ID!): UsersPermissionsRole
 
@@ -231,13 +256,13 @@ input TestInput {
   type: String!
 }
 
-input updateArticlesInput {
+input updateArticleInput {
   where: InputID
-  data: editArticlesInput
+  data: editArticleInput
 }
 
-type updateArticlesPayload {
-  article: Articles
+type updateArticlePayload {
+  article: Article
 }
 
 input updatePostInput {
@@ -265,6 +290,15 @@ input updateUserInput {
 
 type updateUserPayload {
   user: UsersPermissionsUser
+}
+
+input updateZobInput {
+  where: InputID
+  data: editZobInput
+}
+
+type updateZobPayload {
+  zob: Zob
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -342,4 +376,15 @@ type UsersPermissionsUser {
   confirmed: Boolean
   blocked: Boolean
   role: UsersPermissionsRole
+}
+
+type Zob {
+  id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
+  name: String
+}
+
+input ZobInput {
+  name: String
 }

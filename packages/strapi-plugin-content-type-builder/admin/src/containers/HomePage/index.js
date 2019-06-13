@@ -86,7 +86,7 @@ class HomePage extends React.Component {
 
     const modalType = type === 'models' ? 'model' : 'group';
     const search =
-      shouldEdit && canOpenModal
+      shouldEdit || canOpenModal
         ? `?modalType=${modalType}&settingType=base&actionType=edit&modelName=${to}`
         : '';
     push(

@@ -5,7 +5,7 @@ module.exports = {
     const groups = {
       data: [
         {
-          uid: 'ingredients',
+          uid: 'ingredientes',
           name: 'Ingredients',
           source: null,
           schema: {

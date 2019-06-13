@@ -2,7 +2,7 @@
   "connection": "default",
   "collectionName": "articles",
   "info": {
-    "name": "articles",
+    "name": "article",
     "description": "Super description"
   },
   "options": {

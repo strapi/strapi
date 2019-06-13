@@ -14,6 +14,7 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
+  CREATE_TEMP_GROUP,
   DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
@@ -241,7 +242,27 @@ function appReducer(state = initialState, action) {
           )
         )
         .update('newContentTypeClone', () => state.get('newContentType'));
+    case CREATE_TEMP_GROUP:
+      return state
+        .update('groups', list =>
+          list.push(
+            fromJS({
+              icon: 'fa-cube',
+              name: state.getIn(['newGroup', 'name']),
+              description: state.getIn(['newGroup', 'description']),
+              fields: 0,
+              isTemporary: true,
+            })
+          )
+        )
+        .update('newGroupClone', () => state.get('newGroup'));
     case DELETE_GROUP_SUCCEEDED:
+      console.log({
+        st: state
+          .get('groups')
+          .findIndex(group => group.get('uid') === action.uid),
+        action,
+      });
       return state.removeIn([
         'groups',
         state.get('groups').findIndex(group => group.get('uid') === action.uid),

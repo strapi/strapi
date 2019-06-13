@@ -147,6 +147,21 @@ describe('appReducer', () => {
         unique: false,
       },
       shouldRefetchData: false,
+
+      newGroup: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        name: '',
+        attributes: [],
+      },
+      newGroupClone: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        name: '',
+        attributes: [],
+      },
     });
   });
 
@@ -1025,6 +1040,20 @@ describe('appReducer', () => {
         unique: false,
       },
       shouldRefetchData: false,
+      newGroup: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        name: '',
+        attributes: [],
+      },
+      newGroupClone: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        name: '',
+        attributes: [],
+      },
     });
 
     expect(appReducer(state, resetProps())).toEqual(expected);
@@ -1174,6 +1203,20 @@ describe('SavedEditedAttributeRelation with a temporary model', () => {
         unique: false,
       },
       shouldRefetchData: false,
+      newGroup: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        name: '',
+        attributes: [],
+      },
+      newGroupClone: {
+        collectionName: '',
+        connection: '',
+        description: '',
+        name: '',
+        attributes: [],
+      },
     });
   });
 

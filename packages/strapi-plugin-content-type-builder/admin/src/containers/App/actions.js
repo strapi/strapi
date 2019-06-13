@@ -13,6 +13,7 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
+  CREATE_TEMP_GROUP,
   DELETE_GROUP,
   DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL,
@@ -92,6 +93,12 @@ export function clearTemporaryAttributeRelation() {
 export function createTempContentType() {
   return {
     type: CREATE_TEMP_CONTENT_TYPE,
+  };
+}
+
+export function createTempGroup() {
+  return {
+    type: CREATE_TEMP_GROUP,
   };
 }
 

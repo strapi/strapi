@@ -10,7 +10,7 @@
   },
   "attributes": {
     "articles": {
-      "collection": "articles",
+      "collection": "article",
       "dominant": true,
       "via": "posts"
     }
