@@ -13,6 +13,9 @@ describe('<App />', () => {
     props = {
       addAttributeRelation: jest.fn(),
       cancelNewContentType: jest.fn(),
+      connections: [],
+      createTempContentType: jest.fn(),
+      createTempGroup: jest.fn(),
       deleteModel: jest.fn(),
       history: {
         push: jest.fn(),
@@ -76,6 +79,8 @@ describe('<App />', () => {
         },
       ],
       modifiedData: {},
+      newContentType: {},
+      newGroup: {},
       onChangeExistingContentTypeMainInfos: jest.fn(),
       onChangeNewContentTypeMainInfos: jest.fn(),
       onChangeNewGroupMainInfos: jest.fn(),
@@ -84,6 +89,9 @@ describe('<App />', () => {
       setTemporaryAttribute: jest.fn(),
       setTemporaryAttributeRelation: jest.fn(),
       resetProps: jest.fn(),
+      resetExistingContentTypeMainInfos: jest.fn(),
+      resetNewContentTypeMainInfos: jest.fn(),
+      updateTempContentType: jest.fn(),
     };
   });
 

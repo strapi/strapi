@@ -294,6 +294,7 @@ AttributeForm.defaultProps = {
   modifiedData: {},
   onCancel: () => {},
   onChange: () => {},
+  onSubmit: () => {},
   push: () => {},
 };
 
@@ -307,7 +308,7 @@ AttributeForm.propTypes = {
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)
   onCancel: PropTypes.func,
   onChange: PropTypes.func,
-  onChange: PropTypes.func,
+  onSubmit: PropTypes.func,
   onSubmitEdit: PropTypes.func.isRequired,
   push: PropTypes.func,
 };

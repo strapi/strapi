@@ -2,10 +2,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import pluginId from '../../../pluginId';
-
+import { ListHeader } from 'strapi-helper-plugin';
 import EmptyContentTypeView from '../../../components/EmptyContentTypeView';
-import TableList from '../../../components/TableList';
-import ModelForm from '../../ModelForm';
 
 import HomePage from '../index';
 
@@ -71,7 +69,7 @@ describe('CTB <HomePage />', () => {
       },
       location: {
         search: '',
-        pathname: `/plugins/${pluginId}`,
+        pathname: `/plugins/${pluginId}/models`,
       },
     };
   });
@@ -82,93 +80,171 @@ describe('CTB <HomePage />', () => {
     shallow(<HomePage {...props} />, { context });
   });
 
-  // describe('render', () => {
-  //   it('should display the EmptyContentTypeView if there is no model in the application', () => {
-  //     props.models = [];
+  describe('render', () => {
+    it('should display the EmptyContentTypeView if there is no model in the application', () => {
+      props.models = [];
 
-  //     const context = { emitEvent: jest.fn() };
-  //     const wrapper = shallow(<HomePage {...props} />, { context });
-  //     const emptyView = wrapper.find(EmptyContentTypeView);
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+      const emptyView = wrapper.find(EmptyContentTypeView);
 
-  //     expect(emptyView).toHaveLength(1);
-  //   });
+      expect(emptyView).toHaveLength(1);
+    });
 
-  //   it('the tableList should have a plural title if there is more than 1 model', () => {
-  //     const context = { emitEvent: jest.fn() };
-  //     const wrapper = shallow(<HomePage {...props} />, { context });
-  //     const table = wrapper.find(TableList);
+    it('should display the EmptyContentTypeView if there is no model in the application', () => {
+      props.match.params.type = 'groups';
 
-  //     expect(table).toHaveLength(1);
-  //     expect(table.prop('title')).toEqual(
-  //       `${pluginId}.table.contentType.title.plural`,
-  //     );
-  //   });
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+      const emptyView = wrapper.find(EmptyContentTypeView);
 
-  //   it('the tableList should have a singular title if there is more less 2 model', () => {
-  //     props.models = [
-  //       {
-  //         icon: 'fa-cube',
-  //         name: 'permission',
-  //         description: '',
-  //         fields: 6,
-  //         source: 'users-permissions',
-  //         isTemporary: false,
-  //       },
-  //     ];
+      expect(emptyView).toHaveLength(1);
+    });
 
-  //     const context = { emitEvent: jest.fn() };
-  //     const wrapper = shallow(<HomePage {...props} />, { context });
-  //     const table = wrapper.find(TableList);
+    it('Should handle the listheader title correctly if there is more than 1 model', () => {
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+      const list = wrapper.find(ListHeader);
 
-  //     expect(table).toHaveLength(1);
-  //     expect(table.prop('title')).toEqual(
-  //       `${pluginId}.table.contentType.title.singular`,
-  //     );
-  //   });
-  // });
+      expect(list).toHaveLength(1);
+      expect(list.prop('title')).toBe(
+        `${pluginId}.table.contentType.title.plural`
+      );
+    });
 
-  // describe('workflow', () => {
-  //   it('should open the modelForm if there is no saved content type', () => {
-  //     props.canOpenModal = true;
-  //     props.history.push = jest.fn(({ search }) => {
-  //       props.location.search = `?${search}`;
-  //     });
-  //     const context = { emitEvent: jest.fn() };
-  //     const wrapper = shallow(<HomePage {...props} />, { context });
-  //     const spyOnClick = jest.spyOn(wrapper.instance(), 'handleClick');
+    it('Should handle the listheader title correctly if there is more than 1 group', () => {
+      props.groups = props.models;
+      props.match.params.type = 'groups';
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+      const list = wrapper.find(ListHeader);
 
-  //     wrapper.instance().forceUpdate();
-  //     // Simulate the click on button
-  //     wrapper.find(TableList).prop('onButtonClick')();
-  //     wrapper.instance().forceUpdate();
+      expect(list).toHaveLength(1);
+      expect(list.prop('title')).toBe(`${pluginId}.table.groups.title.plural`);
+    });
 
-  //     const form = wrapper.find(ModelForm).first();
+    it('Should handle the listheader title correctly if there is less than 2 groups', () => {
+      props.groups = [
+        {
+          icon: 'fa-cube',
+          name: 'user',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+      ];
+      props.match.params.type = 'groups';
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+      const list = wrapper.find(ListHeader);
 
-  //     expect(spyOnClick).toHaveBeenCalled();
-  //     expect(context.emitEvent).toHaveBeenCalledWith('willCreateContentType');
-  //     expect(props.history.push).toHaveBeenCalledWith({
-  //       search: 'modalType=model&settingType=base&actionType=create',
-  //     });
-  //     expect(form.prop('isOpen')).toBe(true);
-  //   });
+      expect(list).toHaveLength(1);
+      expect(list.prop('title')).toBe(
+        `${pluginId}.table.groups.title.singular`
+      );
+    });
 
-  //   it('should not open the modal if the is one or more not saved content type and display a notification', () => {
-  //     props.canOpenModal = false;
-  //     const context = { emitEvent: jest.fn() };
-  //     const wrapper = shallow(<HomePage {...props} />, { context });
+    it('Should handle the listheader title correctly if there is less than 2 models', () => {
+      props.models = [
+        {
+          icon: 'fa-cube',
+          name: 'user',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+      ];
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+      const list = wrapper.find(ListHeader);
 
-  //     wrapper.find(TableList).prop('onButtonClick')();
-  //     wrapper.instance().forceUpdate();
+      expect(list).toHaveLength(1);
+      expect(list.prop('title')).toBe(
+        `${pluginId}.table.contentType.title.singular`
+      );
+    });
+  });
 
-  //     const form = wrapper.find(ModelForm).first();
+  describe('workflow', () => {
+    it('should open the modelForm for the model if there is no saved content type', () => {
+      props.canOpenModal = true;
+      props.history.push = jest.fn(({ search }) => {
+        props.location.search = `?${search}`;
+      });
 
-  //     expect(context.emitEvent).not.toHaveBeenCalled();
-  //     expect(props.history.push).not.toHaveBeenCalled();
-  //     expect(strapi.notification.info).toHaveBeenCalled();
-  //     expect(strapi.notification.info).toHaveBeenCalledWith(
-  //       `${pluginId}.notification.info.contentType.creating.notSaved`,
-  //     );
-  //     expect(form.prop('isOpen')).toBe(false);
-  //   });
-  // });
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+      const spyOnClick = jest.spyOn(wrapper.instance(), 'handleClick');
+
+      wrapper.instance().forceUpdate();
+      // Simulate the click on button
+      wrapper
+        .find(ListHeader)
+        .prop('button')
+        .onClick();
+      wrapper.instance().forceUpdate();
+
+      expect(spyOnClick).toHaveBeenCalled();
+      expect(context.emitEvent).toHaveBeenCalledWith('willCreateContentType');
+      expect(props.history.push).toHaveBeenCalledWith({
+        search: 'modalType=model&settingType=base&actionType=create',
+      });
+    });
+
+    it('should open the modelForm for groups if there is no is no saved content type', () => {
+      props.canOpenModal = true;
+      props.groups = [
+        {
+          icon: 'fa-cube',
+          name: 'user',
+          description: '',
+          fields: 6,
+          source: 'users-permissions',
+          isTemporary: false,
+        },
+      ];
+      props.location.pathname = `/plugins/${pluginId}/groups`;
+      props.history.push = jest.fn(({ search }) => {
+        props.location.search = `?${search}`;
+      });
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+      const spyOnClick = jest.spyOn(wrapper.instance(), 'handleClick');
+
+      wrapper.instance().forceUpdate();
+      // Simulate the click on button
+      wrapper
+        .find(ListHeader)
+        .prop('button')
+        .onClick();
+      wrapper.instance().forceUpdate();
+
+      expect(spyOnClick).toHaveBeenCalled();
+      expect(context.emitEvent).toHaveBeenCalledWith('willCreateContentType');
+      expect(props.history.push).toHaveBeenCalledWith({
+        search: 'modalType=model&settingType=base&actionType=create',
+      });
+    });
+
+    it('should not open the modal if there is one not saved content type and display a notification', () => {
+      props.canOpenModal = false;
+      const context = { emitEvent: jest.fn() };
+      const wrapper = shallow(<HomePage {...props} />, { context });
+
+      wrapper
+        .find(ListHeader)
+        .prop('button')
+        .onClick();
+      wrapper.instance().forceUpdate();
+
+      expect(context.emitEvent).not.toHaveBeenCalled();
+      expect(props.history.push).not.toHaveBeenCalled();
+      expect(strapi.notification.info).toHaveBeenCalled();
+      expect(strapi.notification.info).toHaveBeenCalledWith(
+        `${pluginId}.notification.info.work.notSaved`
+      );
+    });
+  });
 });
