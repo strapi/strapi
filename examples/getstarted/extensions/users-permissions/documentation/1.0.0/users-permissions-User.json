@@ -895,7 +895,7 @@
         "parameters": []
       }
     },
-    "/users/{_id}": {
+    "/users/{id}": {
       "get": {
         "deprecated": false,
         "description": "Retrieve a single user depending on his id",
@@ -947,7 +947,7 @@
         ],
         "parameters": [
           {
-            "name": "_id",
+            "name": "id",
             "in": "path",
             "description": "",
             "deprecated": false,
@@ -1009,7 +1009,7 @@
         ],
         "parameters": [
           {
-            "name": "_id",
+            "name": "id",
             "in": "path",
             "description": "",
             "deprecated": false,
@@ -1086,7 +1086,7 @@
         ],
         "parameters": [
           {
-            "name": "_id",
+            "name": "id",
             "in": "path",
             "description": "",
             "deprecated": false,

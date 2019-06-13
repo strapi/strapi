@@ -18,7 +18,7 @@
     },
     {
       "method": "GET",
-      "path": "/posts/:_id",
+      "path": "/posts/:id",
       "handler": "Post.findOne",
       "config": {
         "policies": []
@@ -34,7 +34,7 @@
     },
     {
       "method": "PUT",
-      "path": "/posts/:_id",
+      "path": "/posts/:id",
       "handler": "Post.update",
       "config": {
         "policies": []
@@ -42,7 +42,7 @@
     },
     {
       "method": "DELETE",
-      "path": "/posts/:_id",
+      "path": "/posts/:id",
       "handler": "Post.delete",
       "config": {
         "policies": []

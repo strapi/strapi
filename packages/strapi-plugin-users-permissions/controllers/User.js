@@ -17,7 +17,7 @@ module.exports = {
    */
 
   find: async (ctx, next, { populate } = {}) => {
-    let users;  
+    let users;
 
     if (_.has(ctx.query, '_q')) {
       // use core strapi query to search for users
@@ -169,7 +169,7 @@ module.exports = {
 
   destroy: async (ctx) => {
     const data = await strapi.plugins['users-permissions'].services.user.remove(ctx.params);
-    
+
     // Send 200 `ok`
     ctx.send(data);
   },
