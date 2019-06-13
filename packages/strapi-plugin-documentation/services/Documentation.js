@@ -10,7 +10,6 @@ const path = require('path');
 const _ = require('lodash');
 const moment = require('moment');
 const pathToRegexp = require('path-to-regexp');
-const settings = require('../config/settings.json');
 const defaultComponents = require('./utils/components.json');
 const form = require('./utils/forms.json');
 const parametersOptions = require('./utils/parametersOptions.json');
@@ -494,7 +493,7 @@ module.exports = {
     const apisDoc = this.retrieveDocumentationFiles(false, version);
     const pluginsDoc = this.retrieveDocumentationFiles(true, version);
     const appDoc = [...apisDoc, ...pluginsDoc];
-    const defaultSettings = _.cloneDeep(settings);
+    const defaultSettings = _.cloneDeep(strapi.plugins.documentation.config);
     _.set(defaultSettings, ['info', 'x-generation-date'], moment().format('L LTS'));
     _.set(defaultSettings, ['info', 'version'], version);
     const tags = appDoc.reduce((acc, current) => {
