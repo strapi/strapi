@@ -14,6 +14,7 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
+  CREATE_TEMP_GROUP,
   DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
@@ -48,7 +49,6 @@ export const initialState = fromJS({
   isLoading: true,
   models: List([]),
   modifiedData: {},
-  modifiedDataGroups: {},
   newContentType: {
     collectionName: '',
     connection: '',
@@ -242,7 +242,27 @@ function appReducer(state = initialState, action) {
           )
         )
         .update('newContentTypeClone', () => state.get('newContentType'));
+    case CREATE_TEMP_GROUP:
+      return state
+        .update('groups', list =>
+          list.push(
+            fromJS({
+              icon: 'fa-cube',
+              name: state.getIn(['newGroup', 'name']),
+              description: state.getIn(['newGroup', 'description']),
+              fields: 0,
+              isTemporary: true,
+            })
+          )
+        )
+        .update('newGroupClone', () => state.get('newGroup'));
     case DELETE_GROUP_SUCCEEDED:
+      console.log({
+        st: state
+          .get('groups')
+          .findIndex(group => group.get('uid') === action.uid),
+        action,
+      });
       return state.removeIn([
         'groups',
         state.get('groups').findIndex(group => group.get('uid') === action.uid),
@@ -308,12 +328,9 @@ function appReducer(state = initialState, action) {
       return state
         .update('connections', () => List(action.connections))
         .update('initialData', () => fromJS(action.initialData))
-        .update('initialDataGroup', () => fromJS(action.groups))
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.initialData))
-        .update('modifiedDataGroups', () => fromJS(action.groups))
         .updateIn(['newContentType', 'connection'], () => action.connections[0])
-        .updateIn(['newGroup', 'connection'], () => action.connections[0])
         .update('models', () =>
           List(fromJS(action.models)).sortBy(model => model.get('name'))
         )

@@ -10,7 +10,7 @@
   },
   "attributes": {
     "articles": {
-      "collection": "articles",
+      "collection": "zre",
       "dominant": true,
       "via": "posts"
     }

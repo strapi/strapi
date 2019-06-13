@@ -539,7 +539,6 @@ export class ModelPage extends React.Component {
     const attributeType = this.getAttributeType();
     const actionType = this.getActionType();
     const icon = this.getSource() ? null : 'fa fa-pencil';
-
     return (
       <div className={styles.modelpage}>
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>

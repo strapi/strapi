@@ -69,7 +69,7 @@ function Row({
                 e.stopPropagation();
 
                 const to = uid || name;
-                onClickGoTo(to, source, true);
+                onClickGoTo(to, source, canOpenModal || isTemporary);
               }}
             >
               <i className="fa fa-pencil link-icon" />
@@ -111,8 +111,9 @@ function Row({
               action();
             } else {
               const action = viewType === 'models' ? deleteModel : deleteGroup;
+              const featureName = viewType === 'models' ? name : uid;
 
-              action(name, context);
+              action(featureName, context);
             }
             setIsOpen(false);
           }}

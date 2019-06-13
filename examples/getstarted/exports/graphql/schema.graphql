@@ -1,29 +1,3 @@
-"""Super description"""
-type Articles {
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
-  content2: String
-  title: String
-  image: UploadFile
-  posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
-}
-
-input ArticlesInput {
-  content2: String
-  posts: [ID]
-  title: String
-  image: ID
-}
-
-input createArticlesInput {
-  data: ArticlesInput
-}
-
-type createArticlesPayload {
-  article: Articles
-}
-
 input createPostInput {
   data: PostInput
 }
@@ -48,18 +22,26 @@ type createUserPayload {
   user: UsersPermissionsUser
 }
 
+input createZobInput {
+  data: ZobInput
+}
+
+type createZobPayload {
+  zob: Zob
+}
+
+input createZreInput {
+  data: ZreInput
+}
+
+type createZrePayload {
+  zre: Zre
+}
+
 """
 The `DateTime` scalar represents a date and time following the ISO 8601 standard
 """
 scalar DateTime
-
-input deleteArticlesInput {
-  where: InputID
-}
-
-type deleteArticlesPayload {
-  article: Articles
-}
 
 input deletePostInput {
   where: InputID
@@ -85,11 +67,20 @@ type deleteUserPayload {
   user: UsersPermissionsUser
 }
 
-input editArticlesInput {
-  content2: String
-  posts: [ID]
-  title: String
-  image: ID
+input deleteZobInput {
+  where: InputID
+}
+
+type deleteZobPayload {
+  zob: Zob
+}
+
+input deleteZreInput {
+  where: InputID
+}
+
+type deleteZrePayload {
+  zre: Zre
 }
 
 input editFileInput {
@@ -132,6 +123,17 @@ input editUserInput {
   role: ID
 }
 
+input editZobInput {
+  name: String
+}
+
+input editZreInput {
+  content2: String
+  posts: [ID]
+  title: String
+  image: ID
+}
+
 input FileInput {
   name: String!
   hash: String!
@@ -154,15 +156,18 @@ scalar JSON
 """The `Long` scalar type represents 52-bit integers"""
 scalar Long
 
-union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Articles | createArticlesPayload | updateArticlesPayload | deleteArticlesPayload | Post | createPostPayload | updatePostPayload | deletePostPayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
+union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Post | createPostPayload | updatePostPayload | deletePostPayload | Zob | createZobPayload | updateZobPayload | deleteZobPayload | Zre | createZrePayload | updateZrePayload | deleteZrePayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
 
 type Mutation {
-  createArticles(input: createArticlesInput): createArticlesPayload
-  updateArticles(input: updateArticlesInput): updateArticlesPayload
-  deleteArticles(input: deleteArticlesInput): deleteArticlesPayload
   createPost(input: createPostInput): createPostPayload
   updatePost(input: updatePostInput): updatePostPayload
   deletePost(input: deletePostInput): deletePostPayload
+  createZob(input: createZobInput): createZobPayload
+  updateZob(input: updateZobInput): updateZobPayload
+  deleteZob(input: deleteZobInput): deleteZobPayload
+  createZre(input: createZreInput): createZrePayload
+  updateZre(input: updateZreInput): updateZrePayload
+  deleteZre(input: deleteZreInput): deleteZrePayload
 
   """Create a new role"""
   createRole(input: createRoleInput): createRolePayload
@@ -193,7 +198,7 @@ type Post {
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
-  articles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
+  articles(sort: String, limit: Int, start: Int, where: JSON): [Zre]
 }
 
 input PostInput {
@@ -201,10 +206,12 @@ input PostInput {
 }
 
 type Query {
-  article(id: ID!): Articles
-  articles(sort: String, limit: Int, start: Int, where: JSON): [Articles]
   post(id: ID!): Post
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
+  zob(id: ID!): Zob
+  zobs(sort: String, limit: Int, start: Int, where: JSON): [Zob]
+  zre(id: ID!): Zre
+  zres(sort: String, limit: Int, start: Int, where: JSON): [Zre]
   files(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
   role(id: ID!): UsersPermissionsRole
 
@@ -229,15 +236,6 @@ input RoleInput {
 
 input TestInput {
   type: String!
-}
-
-input updateArticlesInput {
-  where: InputID
-  data: editArticlesInput
-}
-
-type updateArticlesPayload {
-  article: Articles
 }
 
 input updatePostInput {
@@ -265,6 +263,24 @@ input updateUserInput {
 
 type updateUserPayload {
   user: UsersPermissionsUser
+}
+
+input updateZobInput {
+  where: InputID
+  data: editZobInput
+}
+
+type updateZobPayload {
+  zob: Zob
+}
+
+input updateZreInput {
+  where: InputID
+  data: editZreInput
+}
+
+type updateZrePayload {
+  zre: Zre
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -342,4 +358,33 @@ type UsersPermissionsUser {
   confirmed: Boolean
   blocked: Boolean
   role: UsersPermissionsRole
+}
+
+type Zob {
+  id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
+  name: String
+}
+
+input ZobInput {
+  name: String
+}
+
+"""Super description"""
+type Zre {
+  id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
+  content2: String
+  title: String
+  image: UploadFile
+  posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
+}
+
+input ZreInput {
+  content2: String
+  posts: [ID]
+  title: String
+  image: ID
 }

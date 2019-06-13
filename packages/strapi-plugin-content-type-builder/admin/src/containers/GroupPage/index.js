@@ -27,8 +27,7 @@ export class GroupPage extends React.Component {
 
     return (
       <ViewContainer
-        newContentType={this.props.newGroup}
-        initialData={this.props.groups}
+        featureData={this.props.initialDataGroups}
         modifiedData={this.props.modifiedDataGroups}
         match={this.props.match}
         featureType={this.getFeatureType()}

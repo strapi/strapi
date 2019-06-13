@@ -37,29 +37,14 @@ function ViewContainer(props) {
     const { newContentType, modifiedData } = props;
     const name = getFeatureName();
 
-    console.log(name);
-
     /* istanbul ignore if */
-    const title = isUpdatingTemporaryContentType()
+    const title = isUpdatingTempFeature()
       ? get(newContentType, 'name', null)
-      : get(modifiedData, [name, 'uid'], null);
+      : get(modifiedData, [name, 'name'], null);
 
-    return name;
+    return title;
   };
 
-  // const isUpdatingTemporaryContentType = (modelName = getFeatureName()) => {
-  //   const { initialData } = props;
-  //   /* istanbul ignore next */
-  //   const currentModel = initialData.find(
-  //     model => model.name === modelName
-  //   ) || {
-  //     isTemporary: true,
-  //   };
-
-  //   const { isTemporary } = currentModel;
-
-  //   return isTemporary;
-  // };
   const isUpdatingTempFeature = () => {
     const isGroup = featureType === 'group';
     const data = isGroup ? groups : models;
@@ -71,10 +56,8 @@ function ViewContainer(props) {
       return d.name === getFeatureName();
     });
 
-    return currentData.isTemporary;
+    return get(currentData, 'isTemporary', false);
   };
-
-  console.log({ ist: isUpdatingTempFeature() });
 
   const getSource = () => {
     const source = getQueryParameters(getFeatureName(), 'source');
@@ -85,15 +68,6 @@ function ViewContainer(props) {
 
   return (
     <StyledViewContainer>
-      {/* TODO : Add prompt */}
-      {/* <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
-        {msg => (
-          <Prompt
-            when={this.hasModelBeenModified() && !removePrompt}
-            message={msg}
-          />
-        )}
-      </FormattedMessage> */}
       <div className="container-fluid">
         <div className="row">
           <LeftMenu />

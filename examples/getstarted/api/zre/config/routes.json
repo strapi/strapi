@@ -2,48 +2,48 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/articles",
-      "handler": "Articles.find",
+      "path": "/zres",
+      "handler": "Zre.find",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/articles/count",
-      "handler": "Articles.count",
+      "path": "/zres/count",
+      "handler": "Zre.count",
       "config": {
         "policies": []
       }
     },
     {
       "method": "GET",
-      "path": "/articles/:id",
-      "handler": "Articles.findOne",
+      "path": "/zres/:id",
+      "handler": "Zre.findOne",
       "config": {
         "policies": []
       }
     },
     {
       "method": "POST",
-      "path": "/articles",
-      "handler": "Articles.create",
+      "path": "/zres",
+      "handler": "Zre.create",
       "config": {
         "policies": []
       }
     },
     {
       "method": "PUT",
-      "path": "/articles/:id",
-      "handler": "Articles.update",
+      "path": "/zres/:id",
+      "handler": "Zre.update",
       "config": {
         "policies": []
       }
     },
     {
       "method": "DELETE",
-      "path": "/articles/:id",
-      "handler": "Articles.delete",
+      "path": "/zres/:id",
+      "handler": "Zre.delete",
       "config": {
         "policies": []
       }

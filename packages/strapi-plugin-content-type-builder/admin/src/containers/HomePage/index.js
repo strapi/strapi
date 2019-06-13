@@ -85,10 +85,9 @@ class HomePage extends React.Component {
     } = this.props;
 
     const modalType = type === 'models' ? 'model' : 'group';
-    const search =
-      shouldEdit && canOpenModal
-        ? `?modalType=${modalType}&settingType=base&actionType=edit&modelName=${to}`
-        : '';
+    const search = shouldEdit
+      ? `?modalType=${modalType}&settingType=base&actionType=edit&modelName=${to}`
+      : '';
     push(
       `/plugins/${pluginId}/${type}/${to.toLowerCase()}${
         source ? `&source=${source}` : ''
