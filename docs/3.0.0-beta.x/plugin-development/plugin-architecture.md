@@ -1,6 +1,6 @@
 # Plugin Folders and Files Architecture
 
-The logic of a plugin is located at his root directory `./plugins/**`. The admin panel related parts of each plugin is contained in the `/admin` folder.
+The logic of a plugin is located at its root directory `./plugins/**`. The admin panel related parts of each plugin is contained in the `/admin` folder.
 The folders and files structure is the following:
 
 <!-- ```

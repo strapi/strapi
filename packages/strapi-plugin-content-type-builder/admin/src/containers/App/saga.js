@@ -41,12 +41,12 @@ export function* deleteModel({
       request,
       requestURL,
       { method: 'DELETE' },
-      true,
+      true
     );
 
     if (response.ok === true) {
       strapi.notification.success(
-        `${pluginId}.notification.success.contentTypeDeleted`,
+        `${pluginId}.notification.success.contentTypeDeleted`
       );
       yield put(deleteModelSucceeded(modelName));
 
@@ -54,10 +54,10 @@ export function* deleteModel({
       const appMenu = get(
         appPlugins,
         ['content-manager', 'leftMenuSections'],
-        [{ links: [] }],
+        [{ links: [] }]
       );
       const updatedMenu = appMenu[0].links.filter(
-        el => el.destination !== modelName,
+        el => el.destination !== modelName
       );
       appMenu[0].links = sortBy(updatedMenu, 'label');
       updatePlugin('content-manager', 'leftMenuSections', appMenu);
@@ -88,7 +88,8 @@ export function* submitCT({
     yield call(request, requestURL, opts, true);
     emitEvent('didSaveContentType');
     yield put(submitContentTypeSucceeded());
-    history.push(`/plugins/${pluginId}/models/${name}`);
+    const suffixUrl = source ? `&source=${source}` : '';
+    history.push(`/plugins/${pluginId}/models/${name}${suffixUrl}`);
 
     if (name !== oldContentTypeName) {
       emitEvent('didEditNameOfContentType');
@@ -97,10 +98,10 @@ export function* submitCT({
       const appMenu = get(
         appPlugins,
         ['content-manager', 'leftMenuSections'],
-        [],
+        []
       );
       const oldContentTypeNameIndex = appMenu[0].links.findIndex(
-        el => el.destination === oldContentTypeName,
+        el => el.destination === oldContentTypeName
       );
       const updatedLink = {
         destination: name.toLowerCase(),
@@ -114,7 +115,7 @@ export function* submitCT({
     const errorMessage = get(
       error,
       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-      'notification.error',
+      'notification.error'
     );
     strapi.notification.error(errorMessage);
   }
@@ -141,7 +142,7 @@ export function* submitTempCT({
     const appMenu = get(
       appPlugins,
       ['content-manager', 'leftMenuSections'],
-      [],
+      []
     );
     const newLink = {
       destination: name.toLowerCase(),
@@ -155,7 +156,7 @@ export function* submitTempCT({
     const errorMessage = get(
       error,
       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-      'notification.error',
+      'notification.error'
     );
     strapi.notification.error(errorMessage);
   }

@@ -16,21 +16,26 @@ const loadPluginsGraphqlConfig = async installedPlugins => {
     );
     _.set(root, ['plugins', pluginName], result);
   }
+
   return root;
 };
 
 const loadLocalPluginsGraphqlConfig = async appPath =>
   loadUtils.loadFiles(appPath, 'plugins/**/config/*.graphql?(.js)');
 
+const loadExtensions = async appPath =>
+  loadUtils.loadFiles(appPath, 'extensions/**/config/*.graphql?(.js)');
+
 /**
  * Loads the graphql config files
  */
 module.exports = async ({ appPath, installedPlugins }) => {
-  const [apis, plugins, localPlugins] = await Promise.all([
+  const [apis, plugins, localPlugins, extensions] = await Promise.all([
     loadApisGraphqlConfig(appPath),
     loadPluginsGraphqlConfig(installedPlugins),
     loadLocalPluginsGraphqlConfig(appPath),
+    loadExtensions(appPath),
   ]);
 
-  return _.merge({}, apis, plugins, localPlugins);
+  return _.merge({}, apis, plugins, extensions, localPlugins);
 };

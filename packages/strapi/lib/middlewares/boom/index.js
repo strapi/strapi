@@ -15,7 +15,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize() {
       this.delegator = delegate(strapi.app.context, 'response');
       this.createResponses();
 
@@ -65,12 +65,10 @@ module.exports = strapi => {
         ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
         ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
       });
-
-      cb();
     },
 
     // Custom function to avoid ctx.body repeat
-    createResponses: function() {
+    createResponses() {
       Object.keys(Boom).forEach(key => {
         strapi.app.response[key] = function(...rest) {
           const error = Boom[key](...rest) || {};
