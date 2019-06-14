@@ -47,18 +47,6 @@ module.exports = async (scope, cb) => {
     cb(err);
   }
 
-  loader.start('Building your admin UI ...');
-  try {
-    await execa('npm', ['run', 'build'], {
-      cwd: scope.rootPath,
-    });
-    loader.succeed();
-  } catch (err) {
-    loader.fail();
-    trackSuccess('didNotBuildAdminUI', scope);
-    cb(err);
-  }
-
   trackSuccess('didCreateProject', scope);
 
   console.log();
