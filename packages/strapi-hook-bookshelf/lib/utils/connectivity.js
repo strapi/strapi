@@ -23,7 +23,7 @@ module.exports = (scope, success, error) => {
   }
 
   // eslint-disable-next-line import/no-unresolved
-  knex = knex({
+  const client = knex({
     client: scope.client.module,
     connection: Object.assign({}, scope.database.settings, {
       user: scope.database.settings.username
@@ -31,15 +31,15 @@ module.exports = (scope, success, error) => {
     useNullAsDefault: true
   });
 
-  knex.raw('select 1+1 as result').then(() => {
+  client.raw('select 1+1 as result').then(() => {
     const selectQueries = {
       postgres: 'SELECT tablename FROM pg_tables WHERE schemaname=\'public\'',
       mysql: 'SELECT * FROM information_schema.tables',
       sqlite: 'select * from sqlite_master'
     };
 
-    knex.raw(selectQueries[scope.client.database]).then((tables) => {
-      knex.destroy();
+    client.raw(selectQueries[scope.client.database]).then((tables) => {
+      client.destroy();
 
       const next = () => {
         rimraf(scope.tmpPath, (err) => {

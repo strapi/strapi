@@ -61,9 +61,9 @@ const reorderList = (manager, list) => {
   return List(flattenDeep(reordered));
 };
 
-const escapeNewlines = (content, placeholder = '\n') => {
+const escapeNewlines = (content = '', placeholder = '\n') => {
   return content.replace(/[\r\n]+/g, placeholder);
-}
+};
 
 const deepTrimObject = attribute => {
   if (Array.isArray(attribute)) {

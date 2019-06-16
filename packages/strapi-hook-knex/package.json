@@ -1,6 +1,6 @@
 {
   "name": "strapi-hook-knex",
-  "version": "3.0.0-alpha.26",
+  "version": "3.0.0-beta.5",
   "description": "Knex hook for the Strapi framework",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -16,8 +16,8 @@
   },
   "main": "./lib",
   "dependencies": {
-    "knex": "^0.16.3",
-    "lodash": "^4.17.5"
+    "knex": "^0.16.5",
+    "lodash": "^4.17.11"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -39,11 +39,12 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">= 10.0.0",
+    "node": "^10.0.0",
     "npm": ">= 6.0.0"
   },
   "license": "MIT",
   "scripts": {
     "test": "echo \"no tests yet\""
-  }
+  },
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

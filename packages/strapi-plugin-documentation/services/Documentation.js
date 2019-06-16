@@ -10,7 +10,6 @@ const path = require('path');
 const _ = require('lodash');
 const moment = require('moment');
 const pathToRegexp = require('path-to-regexp');
-const settings = require('../config/settings.json');
 const defaultComponents = require('./utils/components.json');
 const form = require('./utils/forms.json');
 const parametersOptions = require('./utils/parametersOptions.json');
@@ -251,7 +250,7 @@ module.exports = {
     plugins.forEach(plugin => {
       const pluginPath = path.join(
         strapi.config.appPath,
-        'plugins',
+        'extensions',
         plugin,
         'documentation',
         version,
@@ -266,7 +265,7 @@ module.exports = {
 
     const fullDocPath = path.join(
       strapi.config.appPath,
-      'plugins',
+      'extensions',
       'documentation',
       'documentation',
       version,
@@ -494,7 +493,7 @@ module.exports = {
     const apisDoc = this.retrieveDocumentationFiles(false, version);
     const pluginsDoc = this.retrieveDocumentationFiles(true, version);
     const appDoc = [...apisDoc, ...pluginsDoc];
-    const defaultSettings = _.cloneDeep(settings);
+    const defaultSettings = _.cloneDeep(strapi.plugins.documentation.config);
     _.set(defaultSettings, ['info', 'x-generation-date'], moment().format('L LTS'));
     _.set(defaultSettings, ['info', 'version'], version);
     const tags = appDoc.reduce((acc, current) => {
@@ -599,7 +598,7 @@ module.exports = {
       } else {
         verb = current.method.toLowerCase();
       }
-      
+
       const actionType = _.get(current, ['config', 'tag', 'actionType'], '');
       let key;
       let tags;
@@ -691,7 +690,7 @@ module.exports = {
               },
             };
           }
-          
+
           if (Array.isArray(verb)) {
             verb.forEach((method) => {
               _.set(
@@ -1005,7 +1004,7 @@ module.exports = {
    */
   generateResponseDescription: function(verb, tag, endPoint) {
     const isModelRelated = strapi.models[tag] !== undefined && tag === endPoint;
-    
+
     if (Array.isArray(verb)) {
       verb = verb.map((method) => method.toLocaleLowerCase());
     }
@@ -1158,7 +1157,7 @@ module.exports = {
     if (description) {
       return description;
     }
-    
+
     if (Array.isArray(verb)) {
       const [, controllerMethod] = handler.split('.');
 
@@ -1338,7 +1337,7 @@ module.exports = {
   },
 
   getFullDocumentationPath: () => {
-    return path.join(strapi.config.appPath, 'plugins', 'documentation', 'documentation');
+    return path.join(strapi.config.appPath, 'extensions', 'documentation', 'documentation');
   },
 
   /**
@@ -1354,7 +1353,7 @@ module.exports = {
    * Retrieve the documentation plugin documentation directory
    */
   getMergedDocumentationPath: function(version = this.getDocumentationVersion()) {
-    return path.join(strapi.config.appPath, 'plugins', 'documentation', 'documentation', version);
+    return path.join(strapi.config.appPath, 'extensions', 'documentation', 'documentation', version);
   },
 
   /**
@@ -1458,7 +1457,7 @@ module.exports = {
   getPluginOverrideDocumentationPath: function(pluginName, docName) {
     const defaultPath = path.join(
       strapi.config.appPath,
-      'plugins',
+      'extensions',
       pluginName,
       'documentation',
       this.getDocumentationVersion(),
@@ -1478,7 +1477,7 @@ module.exports = {
   getPluginDocumentationPath: function(pluginName) {
     return path.join(
       strapi.config.appPath,
-      'plugins',
+      'extensions',
       pluginName,
       'documentation',
       this.getDocumentationVersion(),
@@ -1606,7 +1605,7 @@ module.exports = {
 
   retrieveDocumentation: function(name, isPlugin = false) {
     const documentationPath = isPlugin
-      ? [strapi.config.appPath, 'plugins', name, 'documentation', this.getDocumentationVersion()]
+      ? [strapi.config.appPath, 'extensions', name, 'documentation', this.getDocumentationVersion()]
       : [strapi.config.appPath, 'api', name, 'documentation', this.getDocumentationVersion()];
 
     try {
@@ -1641,7 +1640,7 @@ module.exports = {
 
     return array.reduce((acc, current) => {
       const documentationPath = isPlugin
-        ? [strapi.config.appPath, 'plugins', current, 'documentation', version]
+        ? [strapi.config.appPath, 'extensions', current, 'documentation', version]
         : [strapi.config.appPath, 'api', current, 'documentation', version];
 
       try {
@@ -1704,12 +1703,14 @@ module.exports = {
 
             acc.push(documentation);
           } catch (err) {
+            strapi.log.error(err);
             console.log(
               `Unable to access the documentation for ${[...documentationPath, el].join('/')}`,
             );
           }
         });
       } catch (err) {
+        strapi.log.error(err);
         console.log(
           `Unable to retrieve documentation for the ${isPlugin ? 'plugin' : 'api'} ${current}`,
         );

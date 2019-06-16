@@ -1,7 +1,7 @@
 # Don't check auto-generated stuff into git
 node_modules
 package-lock.json
-yarn.lock
+
 
 # Cruft
 .DS_Store

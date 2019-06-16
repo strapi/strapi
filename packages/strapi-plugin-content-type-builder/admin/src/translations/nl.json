@@ -40,7 +40,7 @@
   "form.attribute.item.enumeration.graphql": "Naam overschreven voor GraphQL",
   "form.attribute.item.enumeration.graphql.description": "Zorgt ervoor dat je de standaard gegenereerde naam voor GraphQL kan overschrijven",
   "form.attribute.item.enumeration.name": "Naam",
-  "form.attribute.item.enumeration.placeholder": "Bijv.: ochtend,middag,avond",
+  "form.attribute.item.enumeration.placeholder": "Bijv.:\nochtend\nmiddag\navond",
   "form.attribute.item.enumeration.rules": "Values (one line per value)",
   "form.attribute.item.json.name": "Naam",
   "form.attribute.item.maximum": "Maximale waarde",

@@ -1,4 +1,4 @@
-packages/strapi-generate-new/files/public/**
-packages/strapi-generate-admin/files/admin/public/**
-website/
 **/node_modules/**
+**/build/**
+**/dist/**
+testApp/**

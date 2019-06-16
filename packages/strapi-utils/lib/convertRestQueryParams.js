@@ -1,27 +1,24 @@
 /**
  * Converts the standard Strapi REST query params to a moe usable format for querying
- * You can read more here: https://strapi.io/documentation/3.x.x/guides/filters.html
+ * You can read more here: https://strapi.io/documentation/3.0.0-beta.x/guides/filters.html
  */
 
 const _ = require('lodash');
-
-const defaults = {
-  start: 0,
-  limit: 10,
-};
 
 /**
  * Global convertor
  * @param {Object} params
  */
-const convertRestQueryParams = (params = {}) => {
+const convertRestQueryParams = (params = {}, defaults = {}) => {
   if (typeof params !== 'object' || params === null) {
     throw new Error(
-      `convertRestQueryParams expected an object got ${object === null ? 'null' : typeof object}`
+      `convertRestQueryParams expected an object got ${
+        params === null ? 'null' : typeof params
+      }`
     );
   }
 
-  let finalParams = { ...defaults };
+  let finalParams = Object.assign({ start: 0, limit: 100 }, defaults);
 
   if (Object.keys(params).length === 0) {
     return finalParams;
@@ -55,7 +52,9 @@ const convertRestQueryParams = (params = {}) => {
  */
 const convertSortQueryParams = sortQuery => {
   if (typeof sortQuery !== 'string') {
-    throw new Error(`convertSortQueryParams expected a string, got ${typeof sortQuery}`);
+    throw new Error(
+      `convertSortQueryParams expected a string, got ${typeof sortQuery}`
+    );
   }
 
   const sortKeys = [];
@@ -88,7 +87,9 @@ const convertStartQueryParams = startQuery => {
   const startAsANumber = _.toNumber(startQuery);
 
   if (!_.isInteger(startAsANumber) || startAsANumber < 0) {
-    throw new Error(`convertStartQueryParams expected a positive integer got ${startAsANumber}`);
+    throw new Error(
+      `convertStartQueryParams expected a positive integer got ${startAsANumber}`
+    );
   }
 
   return {
@@ -103,8 +104,13 @@ const convertStartQueryParams = startQuery => {
 const convertLimitQueryParams = limitQuery => {
   const limitAsANumber = _.toNumber(limitQuery);
 
-  if (!_.isInteger(limitAsANumber) || (limitAsANumber !== -1 && limitAsANumber < 0)) {
-    throw new Error(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
+  if (
+    !_.isInteger(limitAsANumber) ||
+    (limitAsANumber !== -1 && limitAsANumber < 0)
+  ) {
+    throw new Error(
+      `convertLimitQueryParams expected a positive integer got ${limitAsANumber}`
+    );
   }
 
   return {

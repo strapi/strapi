@@ -10,7 +10,7 @@ import {
   call,
 } from 'redux-saga/effects';
 
-import request from 'utils/request';
+import { request } from 'strapi-helper-plugin';
 
 import {
   deleteDataSucceeded,
@@ -19,11 +19,7 @@ import {
   submitSucceeded,
 } from './actions';
 
-import {
-  DELETE_DATA,
-  FETCH_DATA,
-  SUBMIT,
-} from './constants';
+import { DELETE_DATA, FETCH_DATA, SUBMIT } from './constants';
 
 import {
   makeSelectAllData,
@@ -37,7 +33,10 @@ export function* dataDelete() {
     const allData = yield select(makeSelectAllData());
     const dataToDelete = yield select(makeSelectDataToDelete());
     const endPointAPI = yield select(makeSelectDeleteEndPoint());
-    const indexDataToDelete = findIndex(allData[endPointAPI], ['name', dataToDelete.name]);
+    const indexDataToDelete = findIndex(allData[endPointAPI], [
+      'name',
+      dataToDelete.name,
+    ]);
 
     if (indexDataToDelete !== -1) {
       const id = dataToDelete.id;
@@ -46,17 +45,23 @@ export function* dataDelete() {
 
       if (response.ok) {
         yield put(deleteDataSucceeded(indexDataToDelete));
-        strapi.notification.success('users-permissions.notification.success.delete');
+        strapi.notification.success(
+          'users-permissions.notification.success.delete',
+        );
       }
     }
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('users-permissions.notification.error.delete');
   }
 }
 
 export function* dataFetch(action) {
   try {
-    const response = yield call(request, `/users-permissions/${action.endPoint}`, { method: 'GET' });
+    const response = yield call(
+      request,
+      `/users-permissions/${action.endPoint}`,
+      { method: 'GET' },
+    );
 
     if (action.endPoint === 'advanced') {
       yield put(setForm(response));
@@ -64,7 +69,7 @@ export function* dataFetch(action) {
       const data = response[action.endPoint] || response;
       yield put(fetchDataSucceeded(data));
     }
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('users-permissions.notification.error.fetch');
   }
 }
@@ -72,7 +77,13 @@ export function* dataFetch(action) {
 export function* submitData(action) {
   try {
     const body = yield select(makeSelectModifiedData());
-    const opts = { method: 'PUT', body: (action.endPoint === 'advanced') ? get(body, ['advanced', 'settings'], {}) : body };
+    const opts = {
+      method: 'PUT',
+      body:
+        action.endPoint === 'advanced'
+          ? get(body, ['advanced', 'settings'], {})
+          : body,
+    };
 
     yield call(request, `/users-permissions/${action.endPoint}`, opts);
 
@@ -83,8 +94,10 @@ export function* submitData(action) {
     }
 
     yield put(submitSucceeded());
-    strapi.notification.success('users-permissions.notification.success.submit');
-  } catch(error) {
+    strapi.notification.success(
+      'users-permissions.notification.success.submit',
+    );
+  } catch (error) {
     strapi.notification.error('notification.error');
   }
 }

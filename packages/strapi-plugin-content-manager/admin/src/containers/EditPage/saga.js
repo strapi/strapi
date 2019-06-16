@@ -1,19 +1,16 @@
-// import { LOCATION_CHANGE } from 'react-router-redux';
-import { findIndex, get, isArray, isEmpty, includes, isNumber, isString, map } from 'lodash';
 import {
-  all,
-  call,
-  // cancel,
-  fork,
-  put,
-  select,
-  // take,
-  takeLatest,
-} from 'redux-saga/effects';
+  findIndex,
+  get,
+  isArray,
+  isEmpty,
+  includes,
+  isNumber,
+  isString,
+  map,
+} from 'lodash';
+import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
 // Utils.
-import cleanData from 'utils/cleanData';
-import request from 'utils/request';
-import templateObject from 'utils/templateObject';
+import { cleanData, request, templateObject } from 'strapi-helper-plugin';
 
 import { makeSelectSchema } from '../App/selectors';
 import {
@@ -37,12 +34,21 @@ function* dataGet(action) {
     const modelName = yield select(makeSelectModelName());
     const params = { source: action.source };
     const [response] = yield all([
-      call(request, `/content-manager/explorer/${modelName}/${action.id}`, { method: 'GET', params }),
+      call(request, `/content-manager/explorer/${modelName}/${action.id}`, {
+        method: 'GET',
+        params,
+      }),
     ]);
-    const pluginHeaderTitle = yield call(templateObject, { mainField: action.mainField }, response);
+    const pluginHeaderTitle = yield call(
+      templateObject,
+      { mainField: action.mainField },
+      response,
+    );
 
-    yield put(getDataSucceeded(action.id, response, pluginHeaderTitle.mainField));
-  } catch(err) {
+    yield put(
+      getDataSucceeded(action.id, response, pluginHeaderTitle.mainField),
+    );
+  } catch (err) {
     strapi.notification.error('content-manager.error.record.fetch');
   }
 }
@@ -63,7 +69,7 @@ function* deleteData() {
       }, 300);
     });
     yield put(submitSuccess());
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('content-manager.error.record.delete');
   }
 }
@@ -76,9 +82,13 @@ export function* submit(action) {
   const source = yield select(makeSelectSource());
   const schema = yield select(makeSelectSchema());
   let shouldAddTranslationSuffix = false;
-  
+
   // Remove the updated_at & created_at fields so it is updated correctly when using Postgres or MySQL db
-  const timestamps = get(schema, ['models', currentModelName, 'options', 'timestamps'], null);
+  const timestamps = get(
+    schema,
+    ['models', currentModelName, 'options', 'timestamps'],
+    null,
+  );
   if (timestamps) {
     delete record[timestamps[0]];
     delete record[timestamps[1]];
@@ -88,7 +98,26 @@ export function* submit(action) {
     // Show button loader
     yield put(setLoader());
     const recordCleaned = Object.keys(record).reduce((acc, current) => {
-      const attrType = source !== 'content-manager' ? get(schema, ['models', 'plugins', source, currentModelName, 'fields', current, 'type'], null) : get(schema, ['models', currentModelName, 'fields', current, 'type'], null);
+      const attrType =
+        source !== 'content-manager'
+          ? get(
+            schema,
+            [
+              'models',
+              'plugins',
+              source,
+              currentModelName,
+              'fields',
+              current,
+              'type',
+            ],
+            null,
+          )
+          : get(
+            schema,
+            ['models', currentModelName, 'fields', current, 'type'],
+            null,
+          );
       let cleanedData;
 
       switch (attrType) {
@@ -96,7 +125,10 @@ export function* submit(action) {
           cleanedData = record[current];
           break;
         case 'date':
-          cleanedData = record[current] && record[current]._isAMomentObject === true ? record[current].format('YYYY-MM-DD HH:mm:ss') : record[current];
+          cleanedData =
+            record[current] && record[current]._isAMomentObject === true
+              ? record[current].format('YYYY-MM-DD HH:mm:ss')
+              : record[current];
           break;
         default:
           cleanedData = cleanData(record[current], 'value', 'id');
@@ -106,7 +138,7 @@ export function* submit(action) {
         acc.append(current, cleanedData);
       } else if (findIndex(fileRelations, ['name', current]) !== -1) {
         // Don't stringify the file
-        map(record[current], (file) => {
+        map(record[current], file => {
           if (file instanceof File) {
             return acc.append(current, file);
           }
@@ -116,11 +148,16 @@ export function* submit(action) {
 
         if (isEmpty(record[current])) {
           // Send an empty array if relation is manyToManyMorph else an object
-          const data = get(fileRelations, [findIndex(fileRelations, ['name', current]), 'multiple']) ? [] : {};
+          const data = get(fileRelations, [
+            findIndex(fileRelations, ['name', current]),
+            'multiple',
+          ])
+            ? []
+            : {};
           acc.append(current, JSON.stringify(data));
         }
       } else {
-        acc.append(current,  JSON.stringify(cleanedData));
+        acc.append(current, JSON.stringify(cleanedData));
       }
 
       return acc;
@@ -145,46 +182,71 @@ export function* submit(action) {
     // Call our request helper (see 'utils/request')
     // Pass false and false as arguments so the request helper doesn't stringify
     // the body and doesn't watch for the server to restart
-    yield call(request, requestUrl, {
-      method: isCreating ? 'POST' : 'PUT',
-      headers,
-      body: recordCleaned,
-      params,
-    }, false, false);
+    yield call(
+      request,
+      requestUrl,
+      {
+        method: isCreating ? 'POST' : 'PUT',
+        headers,
+        body: recordCleaned,
+        params,
+      },
+      false,
+      false,
+    );
 
     action.context.emitEvent('didSaveEntry');
 
     strapi.notification.success('content-manager.success.record.save');
     // Redirect the user to the ListPage container
     yield put(submitSuccess());
-
-  } catch(err) {
+  } catch (err) {
     action.context.emitEvent('didNotSaveEntry', { error: err });
     if (isArray(get(err, 'response.payload.message'))) {
       const errors = err.response.payload.message.reduce((acc, current) => {
-        const error = current.messages.reduce((acc, current) => {
-          if (includes(current.id, 'Auth')) {
-            acc.id = `users-permissions.${current.id}`;
-            shouldAddTranslationSuffix = true;
+        const error = current.messages.reduce(
+          (acc, current) => {
+            if (includes(current.id, 'Auth')) {
+              acc.id = `users-permissions.${current.id}`;
+              shouldAddTranslationSuffix = true;
+
+              return acc;
+            }
+            acc.errorMessage = current.id;
 
             return acc;
-          }
-          acc.errorMessage = current.id;
-
-          return acc;
-        }, { id: 'components.Input.error.custom-error', errorMessage: '' });
+          },
+          { id: 'components.Input.error.custom-error', errorMessage: '' },
+        );
         acc.push(error);
 
         return acc;
       }, []);
 
-      const name = get(err.response.payload.message, ['0', 'messages', '0', 'field', '0']);
+      const name = get(err.response.payload.message, [
+        '0',
+        'messages',
+        '0',
+        'field',
+        '0',
+      ]);
 
       yield put(setFormErrors([{ name, errors }]));
     }
 
-    const notifErrorPrefix = source === 'users-permissions' && shouldAddTranslationSuffix ? 'users-permissions.' : '';
-    strapi.notification.error(`${notifErrorPrefix}${get(err.response, ['payload', 'message', '0', 'messages', '0', 'id'], isCreating ? 'content-manager.error.record.create' : 'content-manager.error.record.update')}`);
+    const notifErrorPrefix =
+      source === 'users-permissions' || 'admin' && shouldAddTranslationSuffix
+        ? 'users-permissions.'
+        : '';
+    strapi.notification.error(
+      `${notifErrorPrefix}${get(
+        err.response,
+        ['payload', 'message', '0', 'messages', '0', 'id'],
+        isCreating
+          ? 'content-manager.error.record.create'
+          : 'content-manager.error.record.update',
+      )}`,
+    );
   } finally {
     yield put(unsetLoader());
   }

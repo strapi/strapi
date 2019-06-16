@@ -5,6 +5,6 @@ import ButtonModalSecondary from '../index';
 
 describe('<ButtonModalSecondary />', () => {
   it('should not crash', () => {
-    shallow(<ButtonModalSecondary />);
+    shallow(<ButtonModalSecondary onClick={jest.fn()} message="" />);
   });
 });
