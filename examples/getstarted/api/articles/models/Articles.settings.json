@@ -31,9 +31,9 @@
     },
     "ingredients": {
       "type": "group",
-      "groups": ["ingredients"],
+      "group": "ingredients",
       "required": true,
-      "repeatable": true,
+      "repeatable": false,
       "min": 2,
       "max": 3
     }

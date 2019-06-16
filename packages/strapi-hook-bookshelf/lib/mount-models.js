@@ -110,16 +110,11 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       global[definition.globalName] = {};
     }
 
-    const hasGroups =
-      Object.values(definition.attributes).filter(({ type } = {}) => {
-        return type && type === 'group';
-      }).length > 0;
+    const groupAttributes = Object.keys(definition.attributes).filter(
+      key => definition.attributes[key].type === 'group'
+    );
 
-    if (hasGroups) {
-      const groupAttributes = Object.keys(definition.attributes).filter(
-        key => definition.attributes[key].type === 'group'
-      );
-
+    if (groupAttributes.length > 0) {
       // create group model
       const joinTable = `${definition.collectionName}_groups`;
       const joinModel = ORM.Model.extend({
@@ -127,11 +122,15 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         slice() {
           return this.morphTo(
             'slice',
-            ...groupAttributes.map(key => GLOBALS[strapi.groups[key].globalId])
+            ...groupAttributes.map(key => {
+              const groupKey = definition.attributes[key].group;
+              return GLOBALS[strapi.groups[groupKey].globalId];
+            })
           );
         },
       });
 
+      const joinColumn = `${pluralize.singular(model)}_id`;
       groupAttributes.forEach(name => {
         loadedModel[name] = function() {
           return this.hasMany(joinModel).query(qb => {
@@ -146,8 +145,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         table.integer('order').unsigned();
         table.string('slice_type');
         table.integer('slice_id').unsigned();
-        table.integer(`${pluralize.singular(model)}_id`).unsigned();
-        table.timestamps(null, true);
+        table.integer(joinColumn).unsigned();
       });
     }
 
@@ -460,6 +458,17 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
         const relations = this.relations;
 
+        groupAttributes.forEach(key => {
+          if (relations[key]) {
+            const groups = relations[key].toJSON().map(el => el.slice);
+
+            attrs[key] =
+              definition.attributes[key].repeatable === true
+                ? groups
+                : _.first(groups);
+          }
+        });
+
         // Extract association except polymorphic.
         const associations = definition.associations.filter(
           association =>
@@ -619,7 +628,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
                 return [path, ...extraAssocs];
               })
-              .reduce((acc, paths) => acc.concat(paths), []);
+              .reduce((acc, paths) => acc.concat(paths), [])
+              .concat(groupAttributes.map(key => `${key}.slice`));
+          } else {
+            options.withRelated = groupAttributes.map(key => `${key}.slice`);
           }
 
           return _.isFunction(target[model.toLowerCase()]['beforeFetchAll'])
