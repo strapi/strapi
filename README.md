@@ -8,7 +8,7 @@
 <br />
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi/alpha.svg" alt="NPM Version" />
+    <img src="https://img.shields.io/npm/v/strapi/beta.svg" alt="NPM Version" />
   </a>
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
