@@ -349,16 +349,23 @@ npm install pg
 }
 ```
 
-3. Push your local changes to your project's GitHub repository.
+3. Install the **Strapi Provider Upload AWS S3 Plugin**: `Path: ./my-project/`. This plugin will allow configurations for each active environment. **NOTE:** You can only update the settings for _production_ when your Strapi project is actually in production.
 
 ```bash
-git commit -am 'installed pg and update production/database.json file'
+npm install strapi-provider-upload-aws-s3
+```
+
+4. Push your local changes to your project's GitHub repository.
+
+```bash
+git add .
+git commit -m 'installed pg, aws-S3 provider plugin and updated the production/database.json file'
 git push
 ```
 
-4. Deploy from GitHub
+5. Deploy from GitHub
 
-You will next deploy your Strapi project to your EC2 instance by `cloning it from GitHub`.
+You will next deploy your Strapi project to your EC2 instance by **cloning it from GitHub**.
 
 From your terminal and logged into your EC2 instance as the `ubuntu` user:
 
@@ -405,7 +412,7 @@ sudo nano ecosystem.config.js
 module.exports = {
   apps : [{
     name: 'your-app-name',
-    cwd: '/home/your-name/my-strapi-project/my-project'
+    cwd: '/home/ubuntu/my-strapi-project/my-project'
     script: 'npm',
     args: 'start',
     env: {
@@ -420,12 +427,11 @@ module.exports = {
 };
 ```
 
-Navigate to your **Strapi Project folder** and use the following command to start `pm2`:
-
-`Path: ./my-project/`
+Use the following command to start `pm2`:
 
 ```bash
-pm2 start --name="strapi" npm -- start
+cd ~
+pm2 start ecosystem.config.js
 ```
 
 Your Strapi project should now be available on `http://your-ip-address:1337/`. **NOTE:** Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
@@ -476,6 +482,38 @@ pm2 save
 ```
 
 - **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-ubuntu` to verify everything is working.
+
+### Configure Strapi Provider AWS S3 plugin
+
+The next steps involve configuring Strapi to connect to the AWS S3 bucket.
+
+1. Locate your `IPv4 Public IP`:
+
+- Login as your regular user to your `EC2 Dashboard`
+- Click on `1 Running Instances`.
+- Below, in the **Description** tab, locate your **IPv4 Public IP**
+
+2. Next, create your **Administrator** user, and login to Strapi:
+
+- Go to `http://your-ip-address:1337/`
+- Complete the registration form.
+- Click `Ready to Start`
+
+3. Configure the plugin with your bucket credentials:
+
+- From the left-hand menu, click `Plugins` and then the `cog` wheel located to the right of `Files Upload`.
+- From the dropdown, under **Providers**, select `Amazon Web Service S3` and enter the configuration details:
+  **Note:** You can find the **Access API Token** and **Secret Access Token** in the **configuration.csv** file you downloaded earlier or if you saved them to your password manager.
+  - **Access API Token**: This is your _Access Key ID_
+  - **Secret Access Token**: This is your _Secret Access Key_
+    Navigate back to your **Amazon S3 Dashboard**:
+  - **Region**: Is your selected region, eg. `EU (Paris)`
+  - **Bucket**: Is your bucket name, eg. `my-project-name-images`
+  - Set your **Maximum size allowed(in MB)** to a value: eg. _10mb_
+  - Select `ON`, for **Enable File Upload**
+  - Click the `Save` button.
+
+You may now test the image upload, and you will find your images being uploaded to **Amazon AWS S3**.
 
 ### Set up a webhook
 
@@ -550,7 +588,7 @@ http
   - Within your **AWS EC2** dashboard:
     - In the left hand menu, click on `Security Groups`,
     - Select with the checkbox, the correct `Group Name`, e.g. `strapi`,
-    - At the bottom of the screen, click `Edit`, and then `Add Rule`:
+    - At the bottom of the screen, in the **Inbound** tab, click `Edit`, and then `Add Rule`:
       - Type: `Custom TCP`
       - Protocol: `TCP`
       - Port Range: `8080`
@@ -845,13 +883,51 @@ Ensure you are logged in as a **non-root** user. You will install **PM2** global
 npm install pm2@latest -g
 ```
 
-Navigate to your **Strapi Project folder** and use the following command to set the environment variable to production and start `pm2`:
+### The ecosystem.config.js file
 
-`Path: ./my-project/`
+- You will need to configure an `ecosystem.config.js` file. This file will manage the **database connection variables** Strapi needs to connect to your database. The `ecosystem.config.js` will also be used by `pm2` to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
+
+  - You will need to open your `nano` editor and then `copy/paste` the following:
 
 ```bash
-NODE_ENV=production pm2 start --name="strapi" npm -- start
+cd ~
+pm2 init
+sudo nano ecosystem.config.js
 ```
+
+- Next, replace the boilerplate content in the file, with the following:
+
+```js
+module.exports = {
+  apps: [
+    {
+      name: 'strapi',
+      cwd: '/home/your-name/my-strapi-project/my-project',
+      script: 'npm',
+      args: 'start',
+      env: {
+        NODE_ENV: 'production',
+        DATABASE_HOST: 'localhost', // database endpoint
+        DATABASE_PORT: '5432',
+        DATABASE_NAME: 'strapi', // DB name
+        DATABASE_USERNAME: 'your-name', // your username for psql
+        DATABASE_PASSWORD: 'password', // your password for psql
+      },
+    },
+  ],
+};
+```
+
+Use the following command to start `pm2`:
+
+```bash
+cd ~
+pm2 start ecosystem.config.js
+```
+
+`pm2` is now set-up to use an `ecosystem.config.js` to manage restarting your application upon changes. This is a recommended best practice.
+
+**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user). **NOTE:** Earlier, `Port 1337` was allowed access for **testing and setup** purposes. After setting up **NGINX**, the **Port 1337** needs to have access **denied**.
 
 Follow the steps below to have your app launch on system startup. (**NOTE:** These steps are modified from the Digital Ocean [documentation for setting up PM2](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04#step-3-%E2%80%94-installing-pm2).)
 
@@ -897,45 +973,6 @@ pm2 save
 ```
 
 - **OPTIONAL**: You can test to see if the script above works whenever your system reboots with the `sudo reboot` command. You will need to login again with your **non-root user** and then run `pm2 list` and `systemctl status pm2-your-name` to verify everything is working.
-
-### The ecosystem.config.js file
-
-- You will need to configure an `ecosystem.config.js` file. This file will manage the **database connection variables** Strapi needs to connect to your database. The `ecosystem.config.js` will also be used by `pm2` to restart your project whenever any changes are made to files within the Strapi file system itself (such as when an update arrives from GitHub). You can read more about this file [here](https://pm2.io/doc/en/runtime/guide/development-tools/).
-
-  - You will need to open your `nano` editor and then `copy/paste` the following:
-
-```bash
-cd ~
-pm2 init
-sudo nano ecosystem.config.js
-```
-
-- Next, replace the boilerplate content in the file, with the following:
-
-```js
-module.exports = {
-  apps: [
-    {
-      name: 'strapi',
-      cwd: '/home/your-name/my-strapi-project/my-project',
-      script: 'npm',
-      args: 'start',
-      env: {
-        NODE_ENV: 'production',
-        DATABASE_HOST: 'localhost', // database endpoint
-        DATABASE_PORT: '5432',
-        DATABASE_NAME: 'strapi', // DB name
-        DATABASE_USERNAME: 'your-name', // your username for psql
-        DATABASE_PASSWORD: 'password', // your password for psql
-      },
-    },
-  ],
-};
-```
-
-`pm2` is now set-up to use an `ecosystem.config.js` to manage restarting your application upon changes. This is a recommended best practice.
-
-**OPTIONAL:** You may see your project and set-up your first administrator user, by [creating an admin user](https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html#_3-create-an-admin-user).
 
 Continue below to configure the `webhook`.
 
