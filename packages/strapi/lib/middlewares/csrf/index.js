@@ -3,6 +3,8 @@
 /**
  * Module dependencies
  */
+const convert = require('koa-convert');
+const { csrf } = require('koa-lusca');
 
 /**
  * CSRF hook
@@ -14,21 +16,15 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
-      strapi.app.use(
-        async (ctx, next) => {
-          if (ctx.request.admin) return await next();
+    initialize() {
+      strapi.app.use(async (ctx, next) => {
+        if (ctx.request.admin) return await next();
 
-          return await strapi.koaMiddlewares.convert(
-            strapi.koaMiddlewares.lusca.csrf({
-              key: strapi.config.middleware.settings.csrf.key,
-              secret: strapi.config.middleware.settings.csrf.secret
-            })
-          )(ctx, next);
-        }
-      );
-
-      cb();
-    }
+        return await convert(csrf(strapi.config.middleware.settings.csrf))(
+          ctx,
+          next
+        );
+      });
+    },
   };
 };

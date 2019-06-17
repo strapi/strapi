@@ -4,6 +4,7 @@
 const http = require('http');
 const path = require('path');
 const { EventEmitter } = require('events');
+const fse = require('fs-extra');
 const Koa = require('koa');
 const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
@@ -100,6 +101,17 @@ class Strapi extends EventEmitter {
     };
 
     this.fs = createStrapiFs(this);
+  }
+
+  requireProjectBootstrap() {
+    const bootstrapPath = path.resolve(
+      this.dir,
+      'config/functions/bootstrap.js'
+    );
+
+    if (fse.existsSync(bootstrapPath)) {
+      require(bootstrapPath);
+    }
   }
 
   async start(cb) {
@@ -229,7 +241,7 @@ class Strapi extends EventEmitter {
       api,
       admin,
       plugins,
-      { middlewares, koaMiddlewares },
+      middlewares,
       hook,
       extensions,
     ] = await Promise.all([
@@ -248,7 +260,6 @@ class Strapi extends EventEmitter {
     this.admin = admin;
     this.plugins = plugins;
     this.middleware = middlewares;
-    this.koaMiddlewares = koaMiddlewares;
     this.hook = hook;
 
     /**
@@ -280,7 +291,10 @@ class Strapi extends EventEmitter {
     await Promise.all([
       initializeMiddlewares.call(this),
       initializeHooks.call(this),
-    ]);
+    ]).catch(err => {
+      console.error(err);
+      throw err;
+    });
   }
 
   reload() {
