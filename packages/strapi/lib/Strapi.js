@@ -4,6 +4,7 @@
 const http = require('http');
 const path = require('path');
 const { EventEmitter } = require('events');
+const fse = require('fs-extra');
 const Koa = require('koa');
 const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
@@ -100,6 +101,17 @@ class Strapi extends EventEmitter {
     };
 
     this.fs = createStrapiFs(this);
+  }
+
+  requireProjectBootstrap() {
+    const bootstrapPath = path.resolve(
+      this.dir,
+      'config/functions/bootstrap.js'
+    );
+
+    if (fse.existsSync(bootstrapPath)) {
+      require(bootstrapPath);
+    }
   }
 
   async start(cb) {

@@ -27,6 +27,10 @@ module.exports = {
       label: 'Mailgun API Key',
       type: 'text'
     },
+    mailgun_api_host: {
+      label: 'Mailgun API Host',
+      type: 'text'
+    },
     mailgun_domain: {
       label: 'Mailgun Domain',
       type: 'text'
@@ -36,6 +40,7 @@ module.exports = {
 
     const mailgun = mailgunFactory({
       apiKey: config.mailgun_api_key,
+      host: config.mailgun_api_host,
       domain: config.mailgun_domain,
       mute: false
     });
