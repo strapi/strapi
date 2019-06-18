@@ -4,8 +4,10 @@
 
 .modal {
   background-color: white;
+  max-width: 92.1rem !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
   > div {
-    width: 92.1rem;
     padding-left: 0;
     padding-right: 0;
     border: none;

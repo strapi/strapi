@@ -1,3 +1,11 @@
+input createFughInput {
+  data: FughInput
+}
+
+type createFughPayload {
+  fugh: Fugh
+}
+
 input createPostInput {
   data: PostInput
 }
@@ -42,6 +50,14 @@ type createZrePayload {
 The `DateTime` scalar represents a date and time following the ISO 8601 standard
 """
 scalar DateTime
+
+input deleteFughInput {
+  where: InputID
+}
+
+type deleteFughPayload {
+  fugh: Fugh
+}
 
 input deletePostInput {
   where: InputID
@@ -96,6 +112,10 @@ input editFileInput {
   related: [ID]
 }
 
+input editFughInput {
+  dez: String
+}
+
 input editPostInput {
   articles: [ID]
 }
@@ -147,6 +167,17 @@ input FileInput {
   related: [ID]
 }
 
+type Fugh {
+  id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
+  dez: String
+}
+
+input FughInput {
+  dez: String
+}
+
 input InputID {
   id: ID!
 }
@@ -156,9 +187,12 @@ scalar JSON
 """The `Long` scalar type represents 52-bit integers"""
 scalar Long
 
-union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Post | createPostPayload | updatePostPayload | deletePostPayload | Zob | createZobPayload | updateZobPayload | deleteZobPayload | Zre | createZrePayload | updateZrePayload | deleteZrePayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
+union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Fugh | createFughPayload | updateFughPayload | deleteFughPayload | Post | createPostPayload | updatePostPayload | deletePostPayload | Zob | createZobPayload | updateZobPayload | deleteZobPayload | Zre | createZrePayload | updateZrePayload | deleteZrePayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
 
 type Mutation {
+  createFugh(input: createFughInput): createFughPayload
+  updateFugh(input: updateFughInput): updateFughPayload
+  deleteFugh(input: deleteFughInput): deleteFughPayload
   createPost(input: createPostInput): createPostPayload
   updatePost(input: updatePostInput): updatePostPayload
   deletePost(input: deletePostInput): deletePostPayload
@@ -206,6 +240,8 @@ input PostInput {
 }
 
 type Query {
+  fugh(id: ID!): Fugh
+  fughs(sort: String, limit: Int, start: Int, where: JSON): [Fugh]
   post(id: ID!): Post
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
   zob(id: ID!): Zob
@@ -236,6 +272,15 @@ input RoleInput {
 
 input TestInput {
   type: String!
+}
+
+input updateFughInput {
+  where: InputID
+  data: editFughInput
+}
+
+type updateFughPayload {
+  fugh: Fugh
 }
 
 input updatePostInput {

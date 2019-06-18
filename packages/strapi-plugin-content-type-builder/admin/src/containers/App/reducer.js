@@ -91,6 +91,8 @@ export const initialState = fromJS({
   shouldRefetchData: false,
 
   //// GROUP RELATED DATA ////
+  initialDataGroup: {},
+  modifiedDataGroup: {},
   newGroup: {
     collectionName: '',
     connection: '',
@@ -328,8 +330,10 @@ function appReducer(state = initialState, action) {
       return state
         .update('connections', () => List(action.connections))
         .update('initialData', () => fromJS(action.initialData))
+        .update('initialDataGroup', () => fromJS(action.initialDataGroup))
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.initialData))
+        .update('modifiedDataGroup', () => fromJS(action.initialDataGroup))
         .updateIn(['newContentType', 'connection'], () => action.connections[0])
         .update('models', () =>
           List(fromJS(action.models)).sortBy(model => model.get('name'))

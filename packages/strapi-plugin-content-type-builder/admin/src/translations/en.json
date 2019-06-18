@@ -88,8 +88,10 @@
   "home.contentTypeBuilder.description": "Create and update both your content types & groups.",
   "home.contentTypeBuilder.name": "Content Types & Groups",
   "home.emptyAttributes.description": "Add your first field to your new Content Type",
-  "home.contentTypeBuilder.headerNav.link.models":"Content Types",
-  "home.contentTypeBuilder.headerNav.link.groups":"Groups",
+  "home.emptyAttributes.description.model": "Add your first field to your new Content Type",
+  "home.emptyAttributes.description.group": "Add your first field to your new Group",
+  "home.contentTypeBuilder.headerNav.link.models": "Content Types",
+  "home.contentTypeBuilder.headerNav.link.groups": "Groups",
   "home.emptyAttributes.title": "There are no fields yet",
   "home.empty.models.description": "Create your first Content Type to be able to retrieve data from your API.",
   "home.empty.groups.description": "Create your first Group.",
@@ -189,5 +191,4 @@
   "table.groups.title.plural": "{number} Groups are available",
   "table.groups.title.singular": "{number} Group is available",
   "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost."
-
 }

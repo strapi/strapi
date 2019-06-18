@@ -37,20 +37,20 @@ class ModelForm extends React.Component {
   handleCancel = () => {
     const {
       actionType,
-      cancelNewFeatureType,
-      isUpdatingTemporaryFeatureType,
+      cancelNewFeature,
+      isUpdatingTemporaryFeature,
       featureToEditName,
       push,
-      resetExistingFeatureTypeMainInfos,
-      resetNewFeatureTypeMainInfos,
+      resetExistingFeatureMainInfos,
+      resetNewFeatureMainInfos,
     } = this.props;
 
     if (actionType === 'create') {
-      cancelNewFeatureType();
-    } else if (isUpdatingTemporaryFeatureType) {
-      resetNewFeatureTypeMainInfos();
+      cancelNewFeature();
+    } else if (isUpdatingTemporaryFeature) {
+      resetNewFeatureMainInfos();
     } else {
-      resetExistingFeatureTypeMainInfos(featureToEditName);
+      resetExistingFeatureMainInfos(featureToEditName);
     }
 
     push({ search: '' });
@@ -81,13 +81,13 @@ class ModelForm extends React.Component {
     const {
       allTakenNames,
       actionType,
-      createTempFeatureType,
+      createTempFeature,
       featureType,
-      isUpdatingTemporaryFeatureType,
+      isUpdatingTemporaryFeature,
       featureToEditName,
       modifiedData,
       push,
-      updateTempFeatureType,
+      updateTempFeature,
     } = this.props;
     const alreadyTakenContentTypeNames = allTakenNames.filter(
       name => name !== featureToEditName
@@ -114,13 +114,13 @@ class ModelForm extends React.Component {
 
     if (isEmpty(formErrors)) {
       if (actionType === 'create') {
-        createTempFeatureType();
+        createTempFeature();
         push({
           pathname,
           search: 'modalType=chooseAttributes',
         });
-      } else if (isUpdatingTemporaryFeatureType) {
-        updateTempFeatureType();
+      } else if (isUpdatingTemporaryFeature) {
+        updateTempFeature();
         push({ pathname, search: '' });
       } else {
         push({ search: '' });
@@ -138,12 +138,12 @@ class ModelForm extends React.Component {
     const {
       actionType,
       connections,
-      isUpdatingTemporaryFeatureType,
+      isUpdatingTemporaryFeature,
       featureToEditName,
       featureType,
       modifiedData,
-      onChangeExistingFeatureTypeMainInfos,
-      onChangeNewFeatureTypeMainInfos,
+      onChangeExistingFeatureMainInfos,
+      onChangeNewFeatureMainInfos,
     } = this.props;
     const { didCheckErrors, formErrors, isVisible } = this.state;
 
@@ -176,11 +176,11 @@ class ModelForm extends React.Component {
 
     const errors = get(formErrors, input.name, []);
     const onChange =
-      actionType === 'create' || isUpdatingTemporaryFeatureType
-        ? onChangeNewFeatureTypeMainInfos
-        : onChangeExistingFeatureTypeMainInfos;
+      actionType === 'create' || isUpdatingTemporaryFeature
+        ? onChangeNewFeatureMainInfos
+        : onChangeExistingFeatureMainInfos;
     const name =
-      actionType === 'create' || isUpdatingTemporaryFeatureType
+      actionType === 'create' || isUpdatingTemporaryFeature
         ? input.name
         : `${featureToEditName}.${input.name}`;
 
@@ -282,42 +282,42 @@ ModelForm.contextTypes = {
 ModelForm.defaultProps = {
   actionType: 'create',
   activeTab: 'base',
-  cancelNewFeatureType: () => {},
+  cancelNewFeature: () => {},
   connections: ['default'],
-  createTempFeatureType: () => {},
+  createTempFeature: () => {},
   isOpen: false,
-  isUpdatingTemporaryFeatureType: false,
+  isUpdatingTemporaryFeature: false,
   featureType: 'model',
   featureToEditName: '',
   modifiedData: {},
-  onChangeExistingFeatureTypeMainInfos: () => {},
+  onChangeExistingFeatureMainInfos: () => {},
   onSubmit: e => {
     e.preventDefault();
   },
-  resetExistingFeatureTypeMainInfos: () => {},
-  resetNewFeatureTypeMainInfos: () => {},
-  updateTempFeatureType: () => {},
+  resetExistingFeatureMainInfos: () => {},
+  resetNewFeatureMainInfos: () => {},
+  updateTempFeature: () => {},
 };
 
 ModelForm.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
   allTakenNames: PropTypes.arrayOf(PropTypes.string).isRequired,
-  cancelNewFeatureType: PropTypes.func,
+  cancelNewFeature: PropTypes.func,
   connections: PropTypes.arrayOf(PropTypes.string),
-  createTempFeatureType: PropTypes.func,
+  createTempFeature: PropTypes.func,
   isOpen: PropTypes.bool,
-  isUpdatingTemporaryFeatureType: PropTypes.bool,
+  isUpdatingTemporaryFeature: PropTypes.bool,
   featureToEditName: PropTypes.string,
   featureType: PropTypes.string,
   modifiedData: PropTypes.object,
-  onChangeExistingFeatureTypeMainInfos: PropTypes.func,
-  onChangeNewFeatureTypeMainInfos: PropTypes.func.isRequired,
+  onChangeExistingFeatureMainInfos: PropTypes.func,
+  onChangeNewFeatureMainInfos: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
   push: PropTypes.func.isRequired,
-  resetExistingFeatureTypeMainInfos: PropTypes.func,
-  resetNewFeatureTypeMainInfos: PropTypes.func,
-  updateTempFeatureType: PropTypes.func,
+  resetExistingFeatureMainInfos: PropTypes.func,
+  resetNewFeatureMainInfos: PropTypes.func,
+  updateTempFeature: PropTypes.func,
 };
 
 export default ModelForm;
