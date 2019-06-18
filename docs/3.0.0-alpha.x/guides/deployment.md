@@ -153,7 +153,7 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
 3. Click on the blue `Launch Instance` button.
 
 - `Select` **Ubuntu Server 18.04 LTS (HVM), SSD Volume Type**
-- Ensure `General purpose` + `t2.small` is `checked`. **NOTE:** `t2.small` is the smallest instance type in which Strapi runs. `t2.nano` and `t2.micro` **DO NOT** work.
+- Ensure `General purpose` + `t2.micro` is `checked`.
 - Click the grey `Next: Configure Instance Details` and `Next: Add Storage`
 - In the **Step 4: Add Storage** verify the `General Purpose SSD (gb2)`, then click `Next: Add tags`.
 - In the **Step 5: Add Tags**, add tags to suit your project or leave blank, then click `Next: Configure Security Group`.
@@ -696,7 +696,7 @@ Digital Ocean calls a virtual private server, a [Droplet](https://www.digitaloce
 
 - Ubuntu 18.04 x64
 - STARTER `Standard`
-- Choose an appropriate pricing plan. For example, pricing: `$5/mo` _(Scroll to the left)_
+- Choose an appropriate pricing plan. For example, pricing: `$5/mo` _(Scroll to the left)_ 
 - Choose a `datacenter` region nearest your audience, for example, `New York`.
 - **OPTIONAL:** Select additional options, for example, `[x] IPv6`.
 - Add your SSH key **NOTE:** We recommend you `add your SSH key` for better security.
