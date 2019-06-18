@@ -21,7 +21,7 @@
   "components.FiltersPickWrapper.hide": "اخفاء",
   "components.LimitSelect.itemsPerPage": "عنصر بالصفحة",
   "components.Search.placeholder": "البحث عن مدخل...",
-  "components.TableDelete.delete": "حذف الكل",
+  "components.TableDelete.delete": "احذف المختار",
   "components.TableDelete.entries.plural": "{number} مدخلات محددة",
   "components.TableDelete.entries.singular": "{number} مدخل محدد",
   "components.TableEmpty.withFilters": "لا يوجد {contentType} مع المرشحات المطبق...",

@@ -21,7 +21,7 @@
   "components.FiltersPickWrapper.hide": "Gizle",
   "components.LimitSelect.itemsPerPage": "Sayfa başı",
   "components.Search.placeholder": "Kayıt aramak için...",
-  "components.TableDelete.delete": "Hepsini sil",
+  "components.TableDelete.delete": "Silme seçildi",
   "components.TableDelete.entries.plural": "{number} kayıt seçildi",
   "components.TableDelete.entries.singular": "{number} kayıt seçildi",
   "components.TableEmpty.withFilters": "Uygulanan filtrelerle {contentType} yoktur...",

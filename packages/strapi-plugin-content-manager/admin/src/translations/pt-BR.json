@@ -21,7 +21,7 @@
   "components.FiltersPickWrapper.hide": "Esconder",
   "components.LimitSelect.itemsPerPage": "Registros por página",
   "components.Search.placeholder": "Buscar registro...",
-  "components.TableDelete.delete": "Remove tudo",
+  "components.TableDelete.delete": "Excluir selecionado",
   "components.TableDelete.entries.plural": "{number} registros selecionados",
   "components.TableDelete.entries.singular": "{number} registro selecionado",
   "components.TableEmpty.withFilters": "Nenhum {contentType} com os filtros aplicados...",

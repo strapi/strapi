@@ -21,7 +21,7 @@
   "components.FiltersPickWrapper.hide": "Ukryj",
   "components.LimitSelect.itemsPerPage": "Elementów na stronę",
   "components.Search.placeholder": "Szukaj elementu...",
-  "components.TableDelete.delete": "Usuń",
+  "components.TableDelete.delete": "Usuń zaznaczone",
   "components.TableDelete.entries.plural": "{number} wybrane elementy",
   "components.TableDelete.entries.singular": "{number} wybrany element",
   "components.TableEmpty.withFilters": "Nie istnieją elementy {contentType} zgodne z zastosowanymi filtrami...",
