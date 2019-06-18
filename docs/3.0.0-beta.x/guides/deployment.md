@@ -132,7 +132,7 @@ Amazon calls a virtual private server, a **virtual server** or **Amazon EC2 inst
 3. Click on the blue `Launch Instance` button.
 
 - `Select` **Ubuntu Server 18.04 LTS (HVM), SSD Volume Type**
-- Ensure `General purpose` + `t2.small` is `checked`. **NOTE:** `t2.small` is the smallest instance type in which Strapi runs. `t2.nano` and `t2.micro` **DO NOT** work.
+- Ensure `General purpose` + `t2.small` is `checked`. **NOTE:** `t2.small` is the smallest instance type in which Strapi runs. `t2.nano` and `t2.micro` **DO NOT** work. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, **t2.small** or larger instance is needed.
 - Click the grey `Next: Configure Instance Details` and `Next: Add Storage`
 - In the **Step 4: Add Storage** verify the `General Purpose SSD (gb2)`, then click `Next: Add tags`.
 - In the **Step 5: Add Tags**, add tags to suit your project or leave blank, then click `Next: Configure Security Group`.
@@ -352,7 +352,7 @@ npm install pg
 3. Install the **Strapi Provider Upload AWS S3 Plugin**: `Path: ./my-project/`. This plugin will allow configurations for each active environment. **NOTE:** You can only update the settings for _production_ when your Strapi project is actually in production.
 
 ```bash
-npm install strapi-provider-upload-aws-s3
+npm install strapi-provider-upload-aws-s3@beta
 ```
 
 4. Push your local changes to your project's GitHub repository.
@@ -674,7 +674,7 @@ Digital Ocean calls a virtual private server, a [Droplet](https://www.digitaloce
 
 - Ubuntu 18.04 x64
 - STARTER `Standard`
-- Choose an appropriate pricing plan. For example, pricing: `$10/mo` _(Scroll to the left)_ **NOTE:** The \$5/mo plan is currently unsupported as Strapi will not build with 1G of RAM.
+- Choose an appropriate pricing plan. For example, pricing: `$10/mo` _(Scroll to the left)_ **NOTE:** The \$5/mo plan is currently unsupported as Strapi will not build with 1G of RAM. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, a minimum standard Droplet of **$10/mo** or larger instance is needed.
 - Choose a `datacenter` region nearest your audience, for example, `New York`.
 - **OPTIONAL:** Select additional options, for example, `[x] IPv6`.
 - Add your SSH key **NOTE:** We recommend you `add your SSH key` for better security.
