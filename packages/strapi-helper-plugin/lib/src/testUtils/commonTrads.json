@@ -41,7 +41,7 @@
   "app.components.HomePage.support.link": "GET YOUR T-SHIRT NOW",
   "app.components.HomePage.welcome": "Welcome on board!",
   "app.components.HomePage.welcome.again": "Welcome ",
-  "app.components.HomePage.welcomeBlock.content": "We are happy to have you as one of community member. We are constantly looking for feedback so feel free to send us DM on ",
+  "app.components.HomePage.welcomeBlock.content": "We are happy to have you as part of the community. We are constantly looking for feedback so feel free to send us DM on ",
   "app.components.HomePage.welcomeBlock.content.again": "We hope you are making progress on your project... Feel free to read the latest new about Strapi. We are giving our best to improve the product based on your feedback.",
   "app.components.HomePage.welcomeBlock.content.issues": "issues.",
   "app.components.HomePage.welcomeBlock.content.raise": " or raise ",
