@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 const glob = require('./glob');
 const _ = require('lodash');
