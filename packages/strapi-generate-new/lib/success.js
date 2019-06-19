@@ -10,16 +10,23 @@ const request = require('request');
 const { machineIdSync } = require('node-machine-id');
 
 module.exports = function trackSuccess(event, scope, error) {
-  request
-    .post('https://analytics.strapi.io/track')
-    .form({
-      event,
-      uuid: scope.uuid,
-      deviceId: machineIdSync(),
-      properties: {
-        error,
-        os: os.type()
-      }
-    })
-    .on('error', () => {});
+  try {
+    request
+      .post('https://analytics.strapi.io/track')
+      .form({
+        event,
+        uuid: scope.uuid,
+        deviceId: machineIdSync(),
+        properties: {
+         error,
+         os: os.type()
+        }
+      })
+      .on('error', () => {});
+  } catch(e) {
+    // do not fail to install if shady usage tracker is not working,
+    // perhaps because regedit rights are not available
+    // you may want to make this optional as well or skippable
+    // via a documented parameter
+  }
 };
