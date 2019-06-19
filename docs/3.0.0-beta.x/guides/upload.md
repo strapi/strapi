@@ -174,7 +174,7 @@ Let's say that you want to have a `User` model provided by the plugin `Users & P
 
 Here the request to make to associate the file (/path/to/pictures/avatar.jpg) to the user (id: 5a993616b8e66660e8baf45c) when the `User` model is provided by the `Users & Permissions` plugin.
 ```
-curl -X POST -F 'files=@/path/to/pictures/avatar.jpg&refId=5a993616b8e66660e8baf45c&ref=user&source=users-permissions&field=avatar' http://localhost:1337/upload
+curl -X POST -F 'files=@/path/to/pictures/avatar.jpg' -F 'refId=5a993616b8e66660e8baf45c' -F 'ref=user -F 'source=users-permissions' -F 'field=avatar' http://localhost:1337/upload
 ```
 
 ## Install providers

@@ -6,7 +6,7 @@ Strapi comes with a full featured Command Line Interface (CLI) which lets you sc
 
 ## strapi new
 
-Create a new project
+Create a new project.
 
 ```bash
 strapi new <name>
@@ -33,33 +33,33 @@ options: [--debug|--quickstart|--dbclient=<dbclient> --dbhost=<dbhost> --dbport=
 
 ## strapi develop|dev
 
-Start a Strapi application with autoReload activated.
+Start a Strapi application with autoReload enabled.
 
 Strapi modifies/creates files at runtime and needs to restart when new files are created. To achieve this, `strapi develop` adds a file watcher and restarts the application when necessary.
 
 ::: note
-You should never use this command to run a Strapi application in production
+You should never use this command to run a Strapi application in production.
 :::
 
 ## strapi start
 
-Start a Strapi application without autoReloading.
+Start a Strapi application with autoReload disabled.
 
 This commands is there to run a Strapi application without restarts and file writes (aimed at production usage).
-When run certain features are disabled because they require application restarts.
+Certain features are disabled in the `strapi start` mode because they require application restarts.
 
 ::: note
-You can specify a NODE_ENV to use the configurations in the `./config/envrionments` folder (e.g development|staging|production)
-By default the `development` envrionment will be used
+You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
+By default the `development` envrionment will be used.
 :::
 
 ## strapi build
 
-Builds your admin panel
+Builds your admin panel.
 
 ::: note
-You can specify a NODE_ENV to use the configurations in the `./config/envrionments` folder (e.g development|staging|production)
-By default the `development` envrionment will be used
+You can specify a NODE_ENV to use the configurations in the `./config/environments/[development|staging|production]` folder.
+By default the `development` envrionment will be used.
 :::
 
 ## strapi generate:api
@@ -96,7 +96,7 @@ The first letter of the filename will be uppercased.
 
 ## strapi generate:controller
 
-Create a new controller
+Create a new controller.
 
 ```bash
 strapi generate:controller <name>
@@ -123,7 +123,7 @@ The first letter of the filename will be uppercased.
 
 ## strapi generate:model
 
-Create a new model
+Create a new model.
 
 ```bash
 strapi generate:model <name> [<attribute:type>]
@@ -159,7 +159,7 @@ The first letter of the filename will be uppercased.
 
 ## strapi generate:service
 
-Create a new service
+Create a new service.
 
 ```bash
 strapi generate:service <name>
@@ -186,7 +186,7 @@ The first letter of the filename will be uppercased.
 
 ## strapi generate:policy
 
-Create a new policy
+Create a new policy.
 
 ```bash
 strapi generate:policy <name>

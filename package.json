@@ -1,6 +1,5 @@
 {
   "private": true,
-  "version": "3.0.0-alpha.26.2",
   "dependencies": {},
   "devDependencies": {
     "babel-eslint": "^10.0.1",

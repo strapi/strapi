@@ -8,7 +8,7 @@
 <br />
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi/alpha.svg" alt="NPM Version" />
+    <img src="https://img.shields.io/npm/v/strapi/beta.svg" alt="NPM Version" />
   </a>
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
@@ -40,7 +40,7 @@ Strapi is a free and open-source Headless CMS delivering your content anywhere y
 
 ## Getting Started
 
-<a href="https://strapi.io/documentation/3.x.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+<a href="https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
 
 #### 🖐 Requirements
 

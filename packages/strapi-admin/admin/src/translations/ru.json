@@ -40,7 +40,7 @@
   "app.components.HomePage.support.content": "Покупая футболку, вы помогаете нам продолжать работу над проектом и предоставлять вам наилучшее из возможных решений!",
   "app.components.HomePage.support.link": "ЗАКАЗАТЬ НАШУ ФУТБОЛКУ СЕЙЧАС",
   "app.components.HomePage.welcome": "Добро пожаловать!",
-  "app.components.HomePage.welcome.again": "Добро пожаловать",
+  "app.components.HomePage.welcome.again": "Добро пожаловать, ",
   "app.components.HomePage.welcomeBlock.content": "Мы рады, что вы присоединились к сообществу. Нам необходима обратная связь для развития проекта, поэтому не стесняйтесь писать нам в ",
   "app.components.HomePage.welcomeBlock.content.again": "Надеемся, что вы делаете успехи в вашем проекте... Следите за последними новостями Strapi. Мы стараемся изо всех сил, чтобы улучшить продукт, основываясь на ваших пожеланиях.",
   "app.components.HomePage.welcomeBlock.content.issues": "проблемах.",

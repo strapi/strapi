@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.0.0-beta.0",
+  "version": "3.0.0-beta.6",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Documentation",
@@ -16,6 +16,7 @@
     "fs-extra": "^8.0.1",
     "immutable": "^3.8.2",
     "invariant": "^2.2.4",
+    "koa-static": "^4.0.1",
     "lodash": "^4.17.11",
     "moment": "^2.24.0",
     "path-to-regexp": "^3.0.0",
@@ -32,7 +33,7 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-helper-plugin": "3.0.0-beta.0",
+    "strapi-helper-plugin": "3.0.0-beta.6",
     "swagger-ui-dist": "3.22.1"
   },
   "author": {
