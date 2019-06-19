@@ -15,11 +15,9 @@ const { cyan, green } = require('chalk');
 const fs = require('fs-extra');
 const inquirer = require('inquirer');
 const execa = require('execa');
-const uuid = require('uuid/v4');
-const rimraf = require('rimraf');
 
 // Logger.
-const trackSuccess = require('./success');
+const recordUsage = require('./success');
 
 function hasYarn() {
   try {
@@ -31,6 +29,40 @@ function hasYarn() {
   }
 }
 
+const databaseChoices = [
+  {
+    name: 'SQLite',
+    value: {
+      database: 'sqlite',
+      connector: 'strapi-hook-bookshelf',
+      module: 'sqlite3',
+    },
+  },
+  {
+    name: 'MongoDB',
+    value: {
+      database: 'mongo',
+      connector: 'strapi-hook-mongoose',
+    },
+  },
+  {
+    name: 'MySQL',
+    value: {
+      database: 'mysql',
+      connector: 'strapi-hook-bookshelf',
+      module: 'mysql',
+    },
+  },
+  {
+    name: 'Postgres',
+    value: {
+      database: 'postgres',
+      connector: 'strapi-hook-bookshelf',
+      module: 'pg',
+    },
+  },
+];
+
 /**
  * This `before` function is run before generating targets.
  * Validate, configure defaults, get extra dependencies, etc.
@@ -40,7 +72,7 @@ function hasYarn() {
  */
 
 /* eslint-disable no-useless-escape */
-module.exports = (scope, cb) => {
+module.exports = async scope => {
   // App info.
   const hasDatabaseConfig = !!scope.database;
 
@@ -71,20 +103,30 @@ module.exports = (scope, cb) => {
     os.tmpdir(),
     `strapi${crypto.randomBytes(6).toString('hex')}`
   );
-  scope.uuid = uuid();
 
-  trackSuccess('willCreateProject', scope);
+  await recordUsage('willCreateProject', scope);
 
-  // Ensure we aren't going to inadvertently delete any files.
-  try {
-    const files = fs.readdirSync(scope.rootPath);
-    if (files.length > 1) {
-      return console.log(
-        `⛔️ ${cyan('strapi new')} can only be called in an empty directory.`
+  // Ensure we aren't going to inadvertently delete any files
+  if (await fs.exists(scope.rootPath)) {
+    const stat = await fs.stat(scope.rootPath);
+
+    if (!stat.isDirectory()) {
+      console.log(
+        `⛔️ ${
+          scope.rootPath
+        } is not a directory. Make sure to create a Strapi application in an empty directory.`
       );
+      throw new Error('Path is not a directory');
     }
-  } catch (err) {
-    // ...
+
+    const files = await fs.readdir(scope.rootPath);
+    if (files.length > 1) {
+      console.log(
+        `⛔️ You can only create a Strapi app in an empty directory.`
+      );
+
+      throw new Error('Directory is not empty');
+    }
   }
 
   if (hasDatabaseConfig) {
@@ -94,40 +136,6 @@ module.exports = (scope, cb) => {
   }
 
   const connectionValidation = async () => {
-    const databaseChoices = [
-      {
-        name: 'SQLite',
-        value: {
-          database: 'sqlite',
-          connector: 'strapi-hook-bookshelf',
-          module: 'sqlite3',
-        },
-      },
-      {
-        name: 'MongoDB',
-        value: {
-          database: 'mongo',
-          connector: 'strapi-hook-mongoose',
-        },
-      },
-      {
-        name: 'MySQL',
-        value: {
-          database: 'mysql',
-          connector: 'strapi-hook-bookshelf',
-          module: 'mysql',
-        },
-      },
-      {
-        name: 'Postgres',
-        value: {
-          database: 'postgres',
-          connector: 'strapi-hook-bookshelf',
-          module: 'pg',
-        },
-      },
-    ];
-
     const answers = await inquirer.prompt([
       {
         when: !scope.quick && !hasDatabaseConfig,
@@ -191,7 +199,7 @@ module.exports = (scope, cb) => {
 
     scope.client = answers.client;
 
-    const connectedToTheDatabase = (withMessage = true) => {
+    const connectedToTheDatabase = async (withMessage = true) => {
       if (withMessage) {
         console.log();
         console.log(
@@ -200,55 +208,48 @@ module.exports = (scope, cb) => {
       }
 
       if (isQuick) {
-        trackSuccess('didChooseQuickstart', scope);
+        await recordUsage('didChooseQuickstart', scope);
       } else {
-        trackSuccess('didChooseCustomDatabase', scope);
+        await recordUsage('didChooseCustomDatabase', scope);
       }
 
-      trackSuccess('didConnectDatabase', scope);
-
-      cb.success();
+      await recordUsage('didConnectDatabase', scope);
     };
 
-    Promise.all([
+    await Promise.all([
       handleCustomDatabase({ scope, isQuick, hasDatabaseConfig }),
       installDatabaseTestingDep({ scope, isQuick }),
-    ])
-      .then(() => {
-        // Bypass real connection test.
-        if (isQuick) {
-          return connectedToTheDatabase(false);
-        }
+    ]);
 
-        try {
-          const connectivityFile = path.join(
-            scope.tmpPath,
-            'node_modules',
-            scope.client.connector,
-            'lib',
-            'utils',
-            'connectivity.js'
-          );
+    // Bypass real connection test.
+    if (isQuick) {
+      return connectedToTheDatabase(false);
+    }
 
-          require(connectivityFile)(
-            scope,
-            connectedToTheDatabase,
-            connectionValidation
-          );
-        } catch (err) {
-          trackSuccess('didNotConnectDatabase', scope, err);
-          console.log(err);
-          rimraf.sync(scope.tmpPath);
-          cb.error();
-        }
-      })
-      .catch(err => {
-        console.log(err);
-        cb.error(err);
-      });
+    try {
+      const connectivityFile = path.join(
+        scope.tmpPath,
+        'node_modules',
+        scope.client.connector,
+        'lib',
+        'utils',
+        'connectivity.js'
+      );
+
+      return require(connectivityFile)(
+        scope,
+        connectedToTheDatabase,
+        connectionValidation
+      );
+    } catch (err) {
+      await recordUsage('didNotConnectDatabase', scope, err);
+      console.log(err);
+      fs.removeSync(scope.tmpPath);
+      throw err;
+    }
   };
 
-  connectionValidation();
+  return connectionValidation();
 };
 
 async function handleCustomDatabase({ scope, hasDatabaseConfig, isQuick }) {
