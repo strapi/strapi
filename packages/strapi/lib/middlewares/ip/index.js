@@ -1,9 +1,6 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
+const ip = require('koa-ip');
 /**
  * IP filter hook
  */
@@ -14,15 +11,15 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize() {
+      const { whiteList, blackList } = strapi.config.middleware.settings.ip;
+
       strapi.app.use(
-        strapi.koaMiddlewares.ip({
-          whiteList: strapi.config.middleware.settings.ip.whiteList,
-          blackList: strapi.config.middleware.settings.ip.blackList
+        ip({
+          whitelist: whiteList,
+          blacklist: blackList,
         })
       );
-
-      cb();
-    }
+    },
   };
 };

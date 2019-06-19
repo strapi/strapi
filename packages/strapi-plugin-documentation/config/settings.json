@@ -26,7 +26,7 @@
     },
     {
       "url": "YOUR_STAGING_SERVER",
-      "description": "Staging server server"
+      "description": "Staging server"
     },
     {
       "url": "YOUR_PRODUCTION_SERVER",
@@ -35,7 +35,7 @@
   ],
   "externalDocs": {
     "description": "Find out more",
-    "url": "https://strapi.io/documentation/3.x.x/"
+    "url": "https://strapi.io/documentation/3.0.0-beta.x/"
   },
   "security": [
     {

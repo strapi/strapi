@@ -1,0 +1,46 @@
+[
+  {
+    "type": "string",
+    "description": "content-type-builder.popUpForm.attributes.string.description"
+  },
+  {
+    "type": "text",
+    "description": "content-type-builder.popUpForm.attributes.text.description"
+  },
+  {
+    "type": "number",
+    "description": "content-type-builder.popUpForm.attributes.number.description"
+  },
+  {
+    "type": "boolean",
+    "description": "content-type-builder.popUpForm.attributes.boolean.description"
+  },
+  {
+    "type": "date",
+    "description": "content-type-builder.popUpForm.attributes.date.description"
+  },
+  {
+    "type": "email",
+    "description": "content-type-builder.popUpForm.attributes.email.description"
+  },
+  {
+    "type": "password",
+    "description": "content-type-builder.popUpForm.attributes.password.description"
+  },
+  {
+    "type": "json",
+    "description": "content-type-builder.popUpForm.attributes.json.description"
+  },
+  {
+    "type": "media",
+    "description": "content-type-builder.popUpForm.attributes.media.description"
+  },
+  {
+    "type": "relation",
+    "description": "content-type-builder.popUpForm.attributes.relation.description"
+  },
+  {
+    "type": "enumeration",
+    "description": "content-type-builder.popUpForm.attributes.enumeration.description"
+  }
+]

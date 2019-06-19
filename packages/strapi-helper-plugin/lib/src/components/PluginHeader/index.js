@@ -16,6 +16,8 @@ import styles from './styles.scss';
 function PluginHeader({
   actions,
   description,
+  icon,
+  onClickIcon,
   overrideRendering,
   subActions,
   title,
@@ -26,6 +28,8 @@ function PluginHeader({
     <div className={cn(styles.pluginHeader, 'row')}>
       <div className="col-lg-7">
         <PluginHeaderTitle
+          icon={icon}
+          onClickIcon={onClickIcon}
           title={title}
           titleId={titleId}
           description={description}
@@ -36,7 +40,10 @@ function PluginHeader({
         <PluginHeaderActions actions={subActions} />
       </div>
       <div className="col-lg-3 justify-content">
-        <PluginHeaderActions actions={actions} overrideRendering={overrideRendering} />
+        <PluginHeaderActions
+          actions={actions}
+          overrideRendering={overrideRendering}
+        />
       </div>
     </div>
   );
@@ -45,6 +52,8 @@ function PluginHeader({
 PluginHeader.defaultProps = {
   actions: [],
   description: '',
+  icon: null,
+  onClickIcon: () => {},
   overrideRendering: false,
   subActions: [],
   title: '',
@@ -62,6 +71,8 @@ PluginHeader.propTypes = {
       values: PropTypes.object,
     }),
   ]),
+  icon: PropTypes.string,
+  onClickIcon: PropTypes.func,
   overrideRendering: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
   subActions: PropTypes.array,
   title: PropTypes.oneOfType([

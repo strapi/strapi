@@ -1,26 +1,32 @@
 const _ = require('lodash');
+const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
-module.exports = {
-  find: async function (params, populate, raw = false) {
-    const query = this
-      .find(params.where)
-      .limit(Number(params.limit))
-      .sort(params.sort)
-      .skip(Number(params.skip))
-      .populate(populate || this.associations.map(x => x.alias).join(' '));
+module.exports = ({ model }) => ({
+  find(params, populate, raw = false) {
+    const filters = convertRestQueryParams(params);
+
+    const query = buildQuery({
+      model,
+      filters,
+      populate: populate || model.associations.map(x => x.alias),
+    });
 
     return raw ? query.lean() : query;
   },
 
-  count: async function (params) {
-    return Number(await this
-      .where(params.where)
-      .countDocuments());
+  count(params) {
+    const filters = convertRestQueryParams(params);
+
+    return buildQuery({
+      model,
+      filters: { where: filters.where },
+    }).count();
   },
 
-  search: async function (params, populate) { // eslint-disable-line  no-unused-vars
-    const $or = Object.keys(this.attributes).reduce((acc, curr) => {
-      switch (this.attributes[curr].type) {
+  search(params, populate) {
+    // eslint-disable-line  no-unused-vars
+    const $or = Object.keys(model.attributes).reduce((acc, curr) => {
+      switch (model.attributes[curr].type) {
         case 'integer':
         case 'biginteger':
         case 'float':
@@ -33,7 +39,9 @@ module.exports = {
         case 'string':
         case 'text':
         case 'password':
-          return acc.concat({ [curr]: { $regex: params.search, $options: 'i' } });
+          return acc.concat({
+            [curr]: { $regex: params.search, $options: 'i' },
+          });
         case 'boolean':
           if (params.search === 'true' || params.search === 'false') {
             return acc.concat({ [curr]: params.search === 'true' });
@@ -45,18 +53,19 @@ module.exports = {
       }
     }, []);
 
-    return this
+    return model
       .find({ $or })
       .limit(Number(params.limit))
       .sort(params.sort)
       .skip(Number(params.skip))
-      .populate(populate || this.associations.map(x => x.alias).join(' '))
+      .populate(populate || model.associations.map(x => x.alias).join(' '))
       .lean();
   },
 
-  countSearch: async function (params = {}) { // eslint-disable-line  no-unused-vars
-    const $or = Object.keys(this.attributes).reduce((acc, curr) => {
-      switch (this.attributes[curr].type) {
+  countSearch(params = {}) {
+    // eslint-disable-line  no-unused-vars
+    const $or = Object.keys(model.attributes).reduce((acc, curr) => {
+      switch (model.attributes[curr].type) {
         case 'integer':
         case 'biginteger':
         case 'float':
@@ -69,7 +78,9 @@ module.exports = {
         case 'string':
         case 'text':
         case 'password':
-          return acc.concat({ [curr]: { $regex: params.search, $options: 'i' } });
+          return acc.concat({
+            [curr]: { $regex: params.search, $options: 'i' },
+          });
         case 'boolean':
           if (params.search === 'true' || params.search === 'false') {
             return acc.concat({ [curr]: params.search === 'true' });
@@ -81,46 +92,43 @@ module.exports = {
       }
     }, []);
 
-    return this
-      .find({ $or })
-      .countDocuments();
+    return model.find({ $or }).countDocuments();
   },
 
-  findOne: async function (params, populate, raw = true) {
-    const query = this
+  findOne(params, populate, raw = true) {
+    const query = model
       .findOne({
-        [this.primaryKey]: params[this.primaryKey] || params.id
+        [model.primaryKey]: params[model.primaryKey] || params.id,
       })
-      .populate(populate || this.associations.map(x => x.alias).join(' '));
+      .populate(populate || model.associations.map(x => x.alias).join(' '));
 
     return raw ? query.lean() : query;
   },
 
-  create: async function (params) {
+  async create(params) {
     // Exclude relationships.
     const values = Object.keys(params.values).reduce((acc, current) => {
-      if (this._attributes[current] && this._attributes[current].type) {
+      if (model._attributes[current] && model._attributes[current].type) {
         acc[current] = params.values[current];
       }
 
       return acc;
     }, {});
 
-    const request = await this.create(values)
-      .catch((err) => {
-        if (err.message) {
-          const message = err.message.split('index:');
-          const field = _.words(_.last(message).split('_')[0]);
-          err = { message: `This ${field} is already taken`, field };
-        }
-        throw err;
-      });
+    const request = await model.create(values).catch(err => {
+      if (err.message) {
+        const message = err.message.split('index:');
+        const field = _.words(_.last(message).split('_')[0]);
+        err = { message: `This ${field} is already taken`, field };
+      }
+      throw err;
+    });
 
     // Transform to JSON object.
     const entry = request.toJSON ? request.toJSON() : request;
 
     // Extract relations.
-    const relations = this.associations.reduce((acc, association) => {
+    const relations = model.associations.reduce((acc, association) => {
       if (params.values[association.alias]) {
         acc[association.alias] = params.values[association.alias];
       }
@@ -128,34 +136,35 @@ module.exports = {
       return acc;
     }, {});
 
-    return module.exports.update.call(this, {
-      [this.primaryKey]: entry[this.primaryKey],
-      values: _.assign({
-        id: entry[this.primaryKey]
-      }, relations)
+    return this.update({
+      [model.primaryKey]: entry[model.primaryKey],
+      values: _.assign(
+        {
+          id: entry[model.primaryKey],
+        },
+        relations
+      ),
     });
   },
 
-  update: async function (params) {
+  update(params) {
     // Call the business logic located in the hook.
     // This function updates no-relational and relational data.
-    return this.updateRelations(params);
+    return model.updateRelations(params);
   },
 
-  delete: async function (params) {
+  delete(params) {
     // Delete entry.
-    return this
-      .findOneAndDelete({
-        [this.primaryKey]: params.id,
-      });
+    return model.findOneAndDelete({
+      [model.primaryKey]: params.id,
+    });
   },
 
-  deleteMany: async function (params) {
-    return this
-      .deleteMany({
-        [this.primaryKey]: {
-          $in: params[this.primaryKey] || params.id
-        }
-      });
-  }
-};
+  deleteMany(params) {
+    return model.deleteMany({
+      [model.primaryKey]: {
+        $in: params[model.primaryKey] || params.id,
+      },
+    });
+  },
+});

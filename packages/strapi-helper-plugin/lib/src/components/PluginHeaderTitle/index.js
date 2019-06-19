@@ -13,15 +13,20 @@ import LoadingBar from '../LoadingBar';
 
 import styles from './styles.scss';
 
-function PluginHeaderTitle({ description, title, titleId, withDescriptionAnim }) {
+function PluginHeaderTitle({ description, title, titleId, withDescriptionAnim, icon, onClickIcon }) {
   const contentTitle = formatData(title);
   const contentDescription = formatData(description);
 
   return (
     <div>
-      <h1 className={styles.pluginHeaderTitleName} id={titleId}>
-        {contentTitle}&nbsp;
-      </h1>
+      <div style={{ display: 'flex' }}>
+        <h1 className={styles.pluginHeaderTitleName} id={titleId}>
+          {contentTitle}&nbsp;
+        </h1>
+        {icon && (
+          <i className={`${icon} ${styles.icon}`} id="editCTName" onClick={onClickIcon} role="button" />
+        )}
+      </div>
       {withDescriptionAnim ? (
         <LoadingBar />
       ) : (
@@ -32,7 +37,7 @@ function PluginHeaderTitle({ description, title, titleId, withDescriptionAnim })
 }
 
 const formatData = data => {
-  
+
   if (isObject(data)) {
     return isEmpty(data.id) ? null : <FormattedMessage id={data.id} defaultMessage={data.id} values={data.values} />;
   }
@@ -46,6 +51,8 @@ const formatData = data => {
 
 PluginHeaderTitle.defaultProps = {
   description: '',
+  icon: null,
+  onClickIcon: () => {},
   title: '',
   titleId: '',
   withDescriptionAnim: false,
@@ -60,6 +67,8 @@ PluginHeaderTitle.propTypes = {
       values: PropTypes.object,
     }),
   ]),
+  icon: PropTypes.string,
+  onClickIcon: PropTypes.func,
   title: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.func,

@@ -1,9 +1,14 @@
 import { takeLatest, call, put, fork, take, cancel } from 'redux-saga/effects';
 
-import request from 'utils/request';
+import { request } from 'strapi-helper-plugin';
 
 import { fetchMenuSucceeded, environmentsFetchSucceeded } from './actions';
-import { MENU_FETCH, MENU_FETCH_SUCCEEDED, ENVIRONMENTS_FETCH, ENVIRONMENTS_FETCH_SUCCEEDED } from './constants';
+import {
+  MENU_FETCH,
+  MENU_FETCH_SUCCEEDED,
+  ENVIRONMENTS_FETCH,
+  ENVIRONMENTS_FETCH_SUCCEEDED,
+} from './constants';
 
 export function* fetchMenu() {
   try {
@@ -15,8 +20,7 @@ export function* fetchMenu() {
     const data = yield call(request, requestUrl, opts);
 
     yield put(fetchMenuSucceeded(data));
-
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
@@ -28,19 +32,21 @@ export function* fetchEnvironments() {
     };
 
     const requestUrl = '/settings-manager/configurations/environments';
-    const data  = yield call(request, requestUrl, opts);
+    const data = yield call(request, requestUrl, opts);
 
     yield put(environmentsFetchSucceeded(data));
-
-  } catch(error) {
+  } catch (error) {
     strapi.notification.error('settings-manager.strapi.notification.error');
   }
 }
 
-
 function* defaultSaga() {
   const loadMenu = yield fork(takeLatest, MENU_FETCH, fetchMenu);
-  const loadEnvironments = yield fork(takeLatest, ENVIRONMENTS_FETCH, fetchEnvironments);
+  const loadEnvironments = yield fork(
+    takeLatest,
+    ENVIRONMENTS_FETCH,
+    fetchEnvironments,
+  );
   yield take(MENU_FETCH_SUCCEEDED);
   yield cancel(loadMenu);
   yield take(ENVIRONMENTS_FETCH_SUCCEEDED);

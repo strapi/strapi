@@ -1,27 +1,35 @@
-<!-- ⚠️ Your PR title will appear in the changelogs please make it short detailed and understandable for all. -->
+<!--
+Hello 👋 Thank you for submitting a pull request.
 
-<!-- Write a short description of what your PR does and link the concerned issues of your update. -->
-<!-- ⚠️ Please link issue(s) you close / fix by using GitHub keywords https://help.github.com/articles/closing-issues-using-keywords/ !-->
-#### Description:
+To help us merge your PR, make sure to follow the instructions below:
+- Create or update the documentation.
+- Create or update the tests.
+- Refer to the issue you are closing in the PR description - fix #issue
+- Specify if the PR is in WIP (work in progress) state or ready to be merged
+-->
 
+#### Description of what you did:
 
-
-<!-- Uncomment the correct contribution type. !-->
+<!--
+Replace [ ] by [x] to check these checkboxes!
+-->
 
 #### My PR is a:
+
 - [ ] 💥 Breaking change
-- [ ] 🐛 Bug fix #issueNumber
+- [ ] 🐛 Bug fix
 - [ ] 💅 Enhancement
 - [ ] 🚀 New feature
 
 #### Main update on the:
+
 - [ ] Admin
 - [ ] Documentation
 - [ ] Framework
 - [ ] Plugin
 
-<!-- Please note that all databases should be tested and confirmed to be working prior to the PR being merged. -->
 #### Manual testing done on the following databases:
+
 - [ ] Not applicable
 - [ ] MongoDB
 - [ ] MySQL

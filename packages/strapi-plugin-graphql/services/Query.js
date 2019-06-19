@@ -9,8 +9,7 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const policyUtils = require('strapi-utils').policy;
-
-const Loaders = require('./Loaders');
+const compose = require('koa-compose');
 
 module.exports = {
   /**
@@ -27,6 +26,23 @@ module.exports = {
     }, {});
   },
 
+  convertToQuery: function(params) {
+    const result = {};
+
+    _.forEach(params, (value, key) => {
+      if (_.isPlainObject(value)) {
+        const flatObject = this.convertToQuery(value);
+        _.forEach(flatObject, (_value, _key) => {
+          result[`${key}.${_key}`] = _value;
+        });
+      } else {
+        result[key] = value;
+      }
+    });
+
+    return result;
+  },
+
   /**
    * Security to avoid infinite limit.
    *
@@ -34,10 +50,16 @@ module.exports = {
    */
 
   amountLimiting: (params = {}) => {
-    if (params.limit && params.limit < 0) {
+    const { amountLimit } = strapi.plugins.graphql.config;
+
+    if (!params.limit) return params;
+
+    if (params.limit === -1) {
+      params.limit = amountLimit;
+    } else if (params.limit < 0) {
       params.limit = 0;
-    } else if (params.limit && params.limit > strapi.plugins.graphql.config.amountLimit) {
-      params.limit = strapi.plugins.graphql.config.amountLimit;
+    } else if (params.limit > amountLimit) {
+      params.limit = amountLimit;
     }
 
     return params;
@@ -79,7 +101,7 @@ module.exports = {
 
     const policiesFn = [];
 
-    // Boolean to define if the resolver is going to be a resolver or not.
+    // Boolean to define if the resolver is going to be a controller or not.
     let isController = false;
 
     // Retrieve resolver. It could be the custom resolver of the user
@@ -97,12 +119,15 @@ module.exports = {
         const [name, action] = handler.split('.');
 
         const controller = plugin
-          ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
+          ? _.get(
+              strapi.plugins,
+              `${plugin}.controllers.${_.toLower(name)}.${action}`
+            )
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
           return new Error(
-            `Cannot find the controller's action ${name}.${action}`,
+            `Cannot find the controller's action ${name}.${action}`
           );
         }
 
@@ -117,8 +142,8 @@ module.exports = {
               handler: `${name}.${action}`,
             },
             undefined,
-            plugin,
-          ),
+            plugin
+          )
         );
 
         // Return the controller.
@@ -144,7 +169,7 @@ module.exports = {
         return new Error(
           `Cannot find the controller's action ${name}.${
             isSingular ? 'findOne' : 'find'
-          }`,
+          }`
         );
       }
 
@@ -157,8 +182,8 @@ module.exports = {
             handler: `${name}.${isSingular ? 'findOne' : 'find'}`,
           },
           undefined,
-          plugin,
-        ),
+          plugin
+        )
       );
 
       // Make the query compatible with our controller by
@@ -190,12 +215,15 @@ module.exports = {
       const [name, action] = resolverOf.split('.');
 
       const controller = plugin
-        ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
+        ? _.get(
+            strapi.plugins,
+            `${plugin}.controllers.${_.toLower(name)}.${action}`
+          )
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
         return new Error(
-          `Cannot find the controller's action ${name}.${action}`,
+          `Cannot find the controller's action ${name}.${action}`
         );
       }
 
@@ -205,7 +233,7 @@ module.exports = {
           handler: `${name}.${action}`,
         },
         undefined,
-        plugin,
+        plugin
       );
     }
 
@@ -220,8 +248,8 @@ module.exports = {
         plugin,
         policiesFn,
         `GraphQL query "${queryName}"`,
-        name,
-      ),
+        name
+      )
     );
 
     return async (obj, options = {}, { context }) => {
@@ -235,7 +263,7 @@ module.exports = {
       });
 
       // Execute policies stack.
-      const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
+      const policy = await compose(policiesFn)(ctx);
 
       // Policy doesn't always return errors but they update the current context.
       if (
@@ -250,33 +278,33 @@ module.exports = {
         return policy;
       }
 
-      // Initiliase loaders for this request.
-      Loaders.initializeLoader();
-
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
         // Note: we've to used the Object.defineProperties to reset the prototype. It seems that the cloning the context
         // cause a lost of the Object prototype.
+        const opts = this.amountLimiting(_options);
+
         Object.defineProperties(ctx, {
           query: {
             value: {
-              ...this.convertToParams(_.omit(_options, 'where'), model.primaryKey),
-              ..._options.where,
-              // Avoid population.
-              _populate: model.associations.filter(a => !a.dominant && _.isEmpty(a.model)).map(a => a.alias),
+              ...this.convertToParams(
+                _.omit(opts, 'where'),
+                model ? model.primaryKey : 'id'
+              ),
+              ...this.convertToQuery(opts.where),
             },
             writable: true,
-            configurable: true
+            configurable: true,
           },
           params: {
-            value: this.convertToParams(this.amountLimiting(_options), model.primaryKey),
+            value: this.convertToParams(opts, model ? model.primaryKey : 'id'),
             writable: true,
-            configurable: true
-          }
+            configurable: true,
+          },
         });
 
         if (isController) {
-          const values = await resolver.call(null, ctx);
+          const values = await resolver.call(null, ctx, null);
 
           if (ctx.body) {
             return ctx.body;
@@ -285,7 +313,7 @@ module.exports = {
           return values && values.toJSON ? values.toJSON() : values;
         }
 
-        return resolver.call(null, obj, _options, ctx);
+        return resolver.call(null, obj, opts, ctx);
       }
 
       // Resolver can be a promise.

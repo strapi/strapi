@@ -8,7 +8,7 @@
 const _ = require('lodash');
 const request = require('request');
 
-// Purest strategies.
+// Purest strategies.<
 const Purest = require('purest');
 
 /**
@@ -45,9 +45,9 @@ exports.connect = (provider, query) => {
       }
 
       try {
-        const users = await strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', {
+        const users = await strapi.plugins['users-permissions'].queries('user', 'users-permissions').find({
           email: profile.email
-        }));
+        });
 
         const advanced = await strapi.store({
           environment: '',
@@ -71,7 +71,7 @@ exports.connect = (provider, query) => {
         }
 
         // Retrieve default role.
-        const defaultRole = await strapi.query('role', 'users-permissions').findOne({ type: advanced.default_role }, []);
+        const defaultRole = await strapi.plugins['users-permissions'].queries('role', 'users-permissions').findOne({ type: advanced.default_role }, []);
 
         // Create the new user.
         const params = _.assign(profile, {
@@ -79,7 +79,7 @@ exports.connect = (provider, query) => {
           role: defaultRole._id || defaultRole.id
         });
 
-        const createdUser = await strapi.query('user', 'users-permissions').create(params);
+        const createdUser = await strapi.plugins['users-permissions'].queries('user', 'users-permissions').create(params);
 
         return resolve([createdUser, null]);
       } catch (err) {

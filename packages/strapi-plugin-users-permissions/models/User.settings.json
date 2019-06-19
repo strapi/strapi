@@ -1,8 +1,12 @@
 {
   "connection": "default",
+  "collectionName": "users-permissions_user",
   "info": {
     "name": "user",
     "description": ""
+  },
+  "options": {
+    "timestamps": true
   },
   "attributes": {
     "username": {
@@ -49,6 +53,5 @@
       "plugin": "users-permissions",
       "configurable": false
     }
-  },
-  "collectionName": "users-permissions_user"
+  }
 }

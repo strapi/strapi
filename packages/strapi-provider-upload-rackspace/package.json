@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-upload-rackspace",
-  "version": "3.0.0-alpha.25.2",
+  "version": "3.0.0-beta.6",
   "description": "Rackspace provider for strapi upload",
   "main": "./lib",
   "keywords": [],
@@ -10,7 +10,8 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "pkgcloud": "^1.5.0",
+    "pkgcloud": "^2.0.0",
     "streamifier": "^0.1.1"
-  }
+  },
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

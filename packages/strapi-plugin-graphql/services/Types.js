@@ -11,6 +11,7 @@ const { GraphQLUpload } = require('apollo-server-koa');
 const graphql = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const GraphQLDateTime = require('graphql-type-datetime');
+const GraphQLLong = require('graphql-type-long');
 const pluralize = require('pluralize');
 /* eslint-disable no-unused-vars */
 
@@ -29,7 +30,7 @@ module.exports = {
     modelName = '',
     attributeName = '',
     rootType = 'query',
-    action = ''
+    action = '',
   }) {
     // Type
     if (definition.type) {
@@ -41,8 +42,10 @@ module.exports = {
           type = 'Boolean';
           break;
         case 'integer':
-        case 'biginteger':
           type = 'Int';
+          break;
+        case 'biginteger':
+          type = 'Long';
           break;
         case 'decimal':
           type = 'Float';
@@ -138,10 +141,11 @@ module.exports = {
     Object.assign(resolvers, {
       JSON: GraphQLJSON,
       DateTime: GraphQLDateTime,
+      Long: GraphQLLong,
       Upload: GraphQLUpload,
     });
 
-    return 'scalar JSON \n scalar DateTime \n scalar Upload';
+    return 'scalar JSON \n scalar DateTime \n scalar Long \n scalar Upload';
   },
 
   /**
@@ -151,11 +155,11 @@ module.exports = {
    */
 
   addPolymorphicUnionType: (customDefs, defs) => {
+    const def = customDefs + defs;
     const types = graphql
-      .parse(customDefs + defs)
+      .parse(def)
       .definitions.filter(
-        def =>
-          def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query',
+        def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query'
       )
       .map(def => def.name.value);
 
@@ -212,7 +216,7 @@ module.exports = {
               modelName: globalId,
               attributeName: attribute,
               rootType: 'mutation',
-              action: 'update'
+              action: 'update',
             })}`;
           })
           .join('\n')}

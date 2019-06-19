@@ -161,7 +161,7 @@ module.exports = {
   },
 
   search: async (ctx) => {
-    const data = await strapi.query('file', 'upload').search(ctx.params);
+    const data = await strapi.plugins['upload'].queries('file', 'upload').search(ctx.params);
 
     ctx.send(data);
   },

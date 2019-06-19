@@ -8,9 +8,9 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const compose = require('koa-compose');
 const policyUtils = require('strapi-utils').policy;
 const Query = require('./Query.js');
-/* eslint-disable no-unused-vars */
 
 module.exports = {
   /**
@@ -51,12 +51,15 @@ module.exports = {
         const [name, action] = handler.split('.');
 
         const controller = plugin
-          ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
+          ? _.get(
+              strapi.plugins,
+              `${plugin}.controllers.${_.toLower(name)}.${action}`
+            )
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
           return new Error(
-            `Cannot find the controller's action ${name}.${action}`,
+            `Cannot find the controller's action ${name}.${action}`
           );
         }
 
@@ -71,8 +74,8 @@ module.exports = {
               handler: `${name}.${action}`,
             },
             undefined,
-            plugin,
-          ),
+            plugin
+          )
         );
 
         // Return the controller.
@@ -90,14 +93,11 @@ module.exports = {
         : strapi.controllers;
 
       // Try to find the controller that should be related to this model.
-      const controller = _.get(
-        controllers,
-        `${name}.${action === 'delete' ? 'destroy' : action}`,
-      );
+      const controller = _.get(controllers, `${name}.${action}`);
 
       if (!controller) {
         return new Error(
-          `Cannot find the controller's action ${name}.${action}`,
+          `Cannot find the controller's action ${name}.${action}`
         );
       }
 
@@ -107,11 +107,11 @@ module.exports = {
         policyUtils.globalPolicy(
           undefined,
           {
-            handler: `${name}.${action === 'delete' ? 'destroy' : action}`,
+            handler: `${name}.${action}`,
           },
           undefined,
-          plugin,
-        ),
+          plugin
+        )
       );
 
       // Make the query compatible with our controller by
@@ -132,12 +132,15 @@ module.exports = {
       const [name, action] = resolverOf.split('.');
 
       const controller = plugin
-        ? _.get(strapi.plugins, `${plugin}.controllers.${_.toLower(name)}.${action}`)
+        ? _.get(
+            strapi.plugins,
+            `${plugin}.controllers.${_.toLower(name)}.${action}`
+          )
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
         return new Error(
-          `Cannot find the controller's action ${name}.${action}`,
+          `Cannot find the controller's action ${name}.${action}`
         );
       }
 
@@ -147,7 +150,7 @@ module.exports = {
           handler: `${name}.${action}`,
         },
         undefined,
-        plugin,
+        plugin
       );
     }
 
@@ -162,8 +165,8 @@ module.exports = {
         plugin,
         policiesFn,
         `GraphQL query "${queryName}"`,
-        name,
-      ),
+        name
+      )
     );
 
     return async (obj, options, { context }) => {
@@ -175,7 +178,7 @@ module.exports = {
       });
 
       // Execute policies stack.
-      const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
+      const policy = await compose(policiesFn)(ctx);
 
       // Policy doesn't always return errors but they update the current context.
       if (
@@ -192,7 +195,11 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        context.params = Query.convertToParams(options.input.where || {}, (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name]).primaryKey);
+        context.params = Query.convertToParams(
+          options.input.where || {},
+          (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name])
+            .primaryKey
+        );
         context.request.body = options.input.data || {};
 
         if (isController) {
