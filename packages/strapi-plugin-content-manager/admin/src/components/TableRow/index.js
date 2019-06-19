@@ -59,7 +59,7 @@ class TableRow extends React.Component {
         const date =
           value && isObject(value) && value._isAMomentObject === true
             ? value
-            : moment.utc(value);
+            : moment.utc(value).local();
 
         return date.format('YYYY-MM-DD HH:mm:ss');
       }
@@ -74,7 +74,7 @@ class TableRow extends React.Component {
   handleClick() {
     this.context.emitEvent('willEditEntry');
     this.props.history.push(
-      `${this.props.destination}${this.props.redirectUrl}`,
+      `${this.props.destination}${this.props.redirectUrl}`
     );
   }
 
@@ -104,12 +104,12 @@ class TableRow extends React.Component {
                 {this.getDisplayedValue(
                   header.type,
                   this.props.record[header.name],
-                  header.name,
+                  header.name
                 )}
               </div>
             </div>
           </td>
-        )),
+        ))
       )
       .concat([this.renderAction()]);
   };
@@ -135,7 +135,7 @@ class TableRow extends React.Component {
       <tr
         className={cn(
           styles.tableRow,
-          this.props.enableBulkActions && styles.tableRowWithBulk,
+          this.props.enableBulkActions && styles.tableRowWithBulk
         )}
         onClick={this.handleClick}
       >

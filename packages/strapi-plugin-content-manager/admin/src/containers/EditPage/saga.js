@@ -42,11 +42,11 @@ function* dataGet(action) {
     const pluginHeaderTitle = yield call(
       templateObject,
       { mainField: action.mainField },
-      response,
+      response
     );
 
     yield put(
-      getDataSucceeded(action.id, response, pluginHeaderTitle.mainField),
+      getDataSucceeded(action.id, response, pluginHeaderTitle.mainField)
     );
   } catch (err) {
     strapi.notification.error('content-manager.error.record.fetch');
@@ -87,7 +87,7 @@ export function* submit(action) {
   const timestamps = get(
     schema,
     ['models', currentModelName, 'options', 'timestamps'],
-    null,
+    null
   );
   if (timestamps) {
     delete record[timestamps[0]];
@@ -101,23 +101,23 @@ export function* submit(action) {
       const attrType =
         source !== 'content-manager'
           ? get(
-            schema,
-            [
-              'models',
-              'plugins',
-              source,
-              currentModelName,
-              'fields',
-              current,
-              'type',
-            ],
-            null,
-          )
+              schema,
+              [
+                'models',
+                'plugins',
+                source,
+                currentModelName,
+                'fields',
+                current,
+                'type',
+              ],
+              null
+            )
           : get(
-            schema,
-            ['models', currentModelName, 'fields', current, 'type'],
-            null,
-          );
+              schema,
+              ['models', currentModelName, 'fields', current, 'type'],
+              null
+            );
       let cleanedData;
 
       switch (attrType) {
@@ -127,7 +127,7 @@ export function* submit(action) {
         case 'date':
           cleanedData =
             record[current] && record[current]._isAMomentObject === true
-              ? record[current].format('YYYY-MM-DD HH:mm:ss')
+              ? record[current].utc().format('YYYY-MM-DD HH:mm:ss')
               : record[current];
           break;
         default:
@@ -192,7 +192,7 @@ export function* submit(action) {
         params,
       },
       false,
-      false,
+      false
     );
 
     action.context.emitEvent('didSaveEntry');
@@ -216,7 +216,7 @@ export function* submit(action) {
 
             return acc;
           },
-          { id: 'components.Input.error.custom-error', errorMessage: '' },
+          { id: 'components.Input.error.custom-error', errorMessage: '' }
         );
         acc.push(error);
 
@@ -235,7 +235,7 @@ export function* submit(action) {
     }
 
     const notifErrorPrefix =
-      source === 'users-permissions' || 'admin' && shouldAddTranslationSuffix
+      source === 'users-permissions' || ('admin' && shouldAddTranslationSuffix)
         ? 'users-permissions.'
         : '';
     strapi.notification.error(
@@ -244,8 +244,8 @@ export function* submit(action) {
         ['payload', 'message', '0', 'messages', '0', 'id'],
         isCreating
           ? 'content-manager.error.record.create'
-          : 'content-manager.error.record.update',
-      )}`,
+          : 'content-manager.error.record.update'
+      )}`
     );
   } finally {
     yield put(unsetLoader());

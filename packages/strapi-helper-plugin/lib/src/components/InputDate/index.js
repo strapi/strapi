@@ -18,8 +18,8 @@ import styles from './styles.scss';
 function InputDate(props) {
   const value =
     isObject(props.value) && props.value._isAMomentObject === true
-      ? props.value
-      : moment(props.value);
+      ? props.value.local()
+      : moment.utc(props.value).local();
   const formattedPlaceholder =
     props.placeholder === ''
       ? 'app.utils.placeholder.defaultMessage'
@@ -39,7 +39,7 @@ function InputDate(props) {
               'form-control',
               styles.inputDate,
               !props.deactivateErrorHighlight && props.error && 'is-invalid',
-              !isEmpty(props.className) && props.className,
+              !isEmpty(props.className) && props.className
             ),
             disabled: props.disabled,
             id: props.name,
@@ -67,7 +67,7 @@ function InputDate(props) {
           ref={props.inputRef}
           tabIndex={props.tabIndex}
           timeFormat="HH:mm:ss"
-          utc={true}
+          utc={false}
           value={value}
           style={props.style}
         />
