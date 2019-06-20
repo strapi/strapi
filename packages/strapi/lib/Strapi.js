@@ -4,6 +4,7 @@
 const http = require('http');
 const path = require('path');
 const { EventEmitter } = require('events');
+const fse = require('fs-extra');
 const Koa = require('koa');
 const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
@@ -100,6 +101,18 @@ class Strapi extends EventEmitter {
     };
 
     this.fs = createStrapiFs(this);
+    this.requireProjectBootstrap();
+  }
+
+  requireProjectBootstrap() {
+    const bootstrapPath = path.resolve(
+      this.dir,
+      'config/functions/bootstrap.js'
+    );
+
+    if (fse.existsSync(bootstrapPath)) {
+      require(bootstrapPath);
+    }
   }
 
   async start(cb) {
@@ -254,8 +267,9 @@ class Strapi extends EventEmitter {
      * Handle plugin extensions
      */
     // merge extensions config folders
-    _.mergeWith(this.plugins, extensions.merges, (objValue, srcValue) => {
-      if (_.isArray(srcValue) && _.isArray(objValue)) {
+    _.mergeWith(this.plugins, extensions.merges, (objValue, srcValue, key) => {
+      // concat routes
+      if (_.isArray(srcValue) && _.isArray(objValue) && key === 'routes') {
         return srcValue.concat(objValue);
       }
     });
