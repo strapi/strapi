@@ -9,8 +9,5 @@
  */
 
 module.exports = function(...args) {
-  return require('strapi-generate-new')(...args).catch(err => {
-    console.error(err);
-    process.exit(1);
-  });
+  return require('strapi-generate-new')(...args);
 };
