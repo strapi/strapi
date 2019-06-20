@@ -83,7 +83,7 @@ module.exports = (scope, cb) => {
       }
 
       return {
-        name: _.trim(_.deburr(_.lowerCase(parts[0]).toLowerCase())),
+        name: attribute.name,
         params: {
           type: _.trim(_.deburr(_.lowerCase(parts[1]).toLowerCase()))
         }
