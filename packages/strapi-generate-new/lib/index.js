@@ -6,11 +6,11 @@ const crypto = require('crypto');
 const chalk = require('chalk');
 const { machineIdSync } = require('node-machine-id');
 const uuid = require('uuid/v4');
-const execa = require('execa');
 
-const generateNew = require('./generate-new');
+const hasYarn = require('./utils/has-yarn');
 const { trackError, trackUsage } = require('./utils/usage');
-const stopProcess = require('./utils/stop-process');
+const parseDatabaseArguments = require('./utils/parse-db-arguments');
+const generateNew = require('./generate-new');
 
 module.exports = (projectDirectory, cliArguments) => {
   const rootPath = resolve(projectDirectory);
@@ -23,6 +23,8 @@ module.exports = (projectDirectory, cliArguments) => {
   const scope = {
     rootPath,
     name: basename(rootPath),
+    // disable quickstart run app after creation
+    runQuickstartApp: cliArguments.run === false ? false : true,
     // use pacakge version as strapiVersion (all packages have the same version);
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
@@ -59,61 +61,6 @@ module.exports = (projectDirectory, cliArguments) => {
   });
 };
 
-const dbArguments = [
-  'dbclient',
-  'dbhost',
-  'dbport',
-  'dbname',
-  'dbusername',
-  'dbpassword',
-];
-
-function parseDatabaseArguments({ scope, args }) {
-  const argKeys = Object.keys(args);
-  const matchingDbArguments = dbArguments.filter(key => argKeys.includes(key));
-
-  if (matchingDbArguments.length === 0) return;
-
-  if (
-    matchingDbArguments.length !== dbArguments.length &&
-    args.dbclient !== 'sqlite'
-  ) {
-    return stopProcess(
-      `⛔️ Some database arguments are missing. Required arguments list: ${dbArguments}`
-    );
-  }
-
-  scope.dbforce = args.dbforce !== undefined;
-
-  const database = {
-    settings: {
-      client: args.dbclient,
-      host: args.dbhost,
-      srv: args.dbsrv,
-      port: args.dbport,
-      database: args.dbname,
-      username: args.dbusername,
-      password: args.dbpassword,
-      filename: args.dbfile,
-    },
-    options: {},
-  };
-
-  if (args.dbauth !== undefined) {
-    database.options.authenticationDatabase = args.dbauth;
-  }
-
-  if (args.dbssl !== undefined) {
-    if (args.dbclient === 'mongo') {
-      database.options.ssl = args.dbssl === 'true';
-    } else {
-      database.settings.ssl = args.dbssl === 'true';
-    }
-  }
-
-  scope.database = database;
-}
-
 function initCancelCatcher(scope) {
   // Create interface for windows user to let them quit the program.
   if (process.platform === 'win32') {
@@ -134,14 +81,4 @@ function initCancelCatcher(scope) {
       process.exit();
     });
   });
-}
-
-function hasYarn() {
-  try {
-    const { code } = execa.shellSync('yarnpkg --version');
-    if (code === 0) return true;
-    return false;
-  } catch (err) {
-    return false;
-  }
 }

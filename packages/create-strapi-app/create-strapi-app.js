@@ -11,6 +11,7 @@ let projectName;
 program
   .version(packageJson.version)
   .arguments('<directory>')
+  .option('--no-run', 'Disable quickstart app start after creation')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
   .option('--dbclient <dbclient>', 'Database client')
