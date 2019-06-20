@@ -24,7 +24,7 @@ module.exports = function trackSuccess(event, scope, error) {
       })
       .on('error', () => {});
   } catch(e) {
-    // do not fail to install if shady usage tracker is not working,
+    // do not fail to install if installation tracker is not working,
     // perhaps because regedit rights are not available
     // you may want to make this optional as well or skippable
     // via a documented parameter
