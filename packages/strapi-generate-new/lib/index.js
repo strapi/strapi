@@ -8,7 +8,7 @@ const { machineIdSync } = require('node-machine-id');
 const uuid = require('uuid/v4');
 
 const hasYarn = require('./utils/has-yarn');
-const { trackError, trackUsage } = require('./utils/usage');
+const { trackError } = require('./utils/usage');
 const parseDatabaseArguments = require('./utils/parse-db-arguments');
 const generateNew = require('./generate-new');
 
@@ -61,7 +61,7 @@ module.exports = (projectDirectory, cliArguments) => {
   });
 };
 
-function initCancelCatcher(scope) {
+function initCancelCatcher() {
   // Create interface for windows user to let them quit the program.
   if (process.platform === 'win32') {
     const rl = require('readline').createInterface({
@@ -75,10 +75,6 @@ function initCancelCatcher(scope) {
   }
 
   process.on('SIGINT', () => {
-    console.log('Cancelling');
-
-    trackUsage({ event: 'didStopCreateProject', scope }).then(() => {
-      process.exit();
-    });
+    process.exit(1);
   });
 }

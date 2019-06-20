@@ -17,9 +17,9 @@
     "fs-extra": "^8.0.1",
     "inquirer": "^6.3.1",
     "lodash": "^4.17.11",
-    "ora": "^3.4.0",
     "node-fetch": "^1.7.3",
     "node-machine-id": "^1.1.10",
+    "ora": "^3.4.0",
     "uuid": "^3.3.2"
   },
   "scripts": {

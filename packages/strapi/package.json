@@ -41,7 +41,6 @@
     "minimatch": "^3.0.4",
     "node-fetch": "^1.7.3",
     "node-machine-id": "^1.1.10",
-    "uuid": "^3.3.2",
     "node-schedule": "^1.2.0",
     "opn": "^5.3.0",
     "ora": "^3.0.0",

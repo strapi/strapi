@@ -4,7 +4,9 @@ const { join } = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 const execa = require('execa');
+const ora = require('ora');
 
+const stopProcess = require('./utils/stop-process');
 const { trackUsage } = require('./utils/usage');
 const packageJSON = require('./resources/json/package.json');
 const databaseJSON = require('./resources/json/database.json.js');
@@ -13,7 +15,7 @@ module.exports = async function createProject(
   scope,
   { connection, dependencies }
 ) {
-  console.log('Creating files');
+  console.log('Creating files.');
 
   const { rootPath } = scope;
   const resources = join(__dirname, 'resources');
@@ -57,41 +59,64 @@ module.exports = async function createProject(
     throw err;
   }
 
-  console.log('Installing packages. This might take a few minutes.');
-  console.log();
+  const installPrefix = chalk.yellow('Installing dependencies:');
+  const loader = ora(installPrefix).start();
+
+  const logInstall = (chunk = '') => {
+    loader.text = `${installPrefix} ${chunk
+      .toString()
+      .split('\n')
+      .join(' ')}`;
+  };
 
   try {
-    await runInstall(scope);
+    const runner = runInstall(scope);
+
+    runner.stdout.on('data', logInstall);
+    runner.stderr.on('data', logInstall);
+
+    await runner;
+
+    loader.stop();
+    console.log(`Dependencies installed ${chalk.green('successfully')}.`);
   } catch (error) {
+    loader.stop();
     await trackUsage({
       event: 'didNotInstallProjectDependencies',
       scope,
       error,
     });
-    throw error;
+
+    stopProcess(
+      `${chalk.red(
+        'Error'
+      )} while installing dependencies:\n${error.stderr.trim()}`
+    );
   }
 
   await trackUsage({ event: 'didCreateProject', scope });
 
+  console.log();
   console.log(`Your application was created at ${chalk.green(rootPath)}.\n`);
 
   const cmd = chalk.cyan(scope.hasYarn ? 'yarn' : 'npm run');
 
   console.log('Available commands in your project:');
   console.log();
-  console.log(`\t${cmd} develop`);
-  console.log('\tStarts Strapi in watch mode');
+  console.log(`  ${cmd} develop`);
+  console.log('  Starts Strapi in watch mode.');
   console.log();
-  console.log(`\t${cmd} build`);
-  console.log('Builds Strapi admin panel.');
+  console.log(`  ${cmd} start`);
+  console.log('  Starts Strapi without watch mode.');
   console.log();
-  console.log(`\t${cmd} start`);
-  console.log('Starts Strapi without watch mode.');
+  console.log(`  ${cmd} build`);
+  console.log('  Builds Strapi admin panel.');
   console.log();
   console.log('You can start by doing:');
   console.log();
-  console.log(`\t${cmd} ${rootPath}`);
-  console.log(`\t${cmd} develop`);
+  console.log(`  ${chalk.cyan('cd')} ${rootPath}`);
+  console.log(`  ${cmd} develop`);
+  console.log();
 };
 
 const installArguments = ['install', '--production', '--no-optional'];
@@ -99,8 +124,9 @@ function runInstall({ rootPath, hasYarn }) {
   if (hasYarn) {
     return execa('yarnpkg', installArguments, {
       cwd: rootPath,
-      stdio: 'inherit',
+      stdin: 'ignore',
     });
   }
-  return execa('npm', installArguments, { cwd: rootPath, stdio: 'inherit' });
+
+  return execa('npm', installArguments, { cwd: rootPath, stdin: 'ignore' });
 }
