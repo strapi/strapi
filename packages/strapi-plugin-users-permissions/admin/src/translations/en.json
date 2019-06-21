@@ -48,6 +48,7 @@
   "BoundRoute.title": "Bound route to",
   "Controller.input.label": "{label} ",
   "Controller.selectAll": "Select all",
+  "Controller.unselectAll": "Unselect all",
   "EditForm.inputSelect.description.role": "It will attach the new authenticated user to the selected role.",
   "EditForm.inputSelect.durations.description": "Number of hours during which the user can't subscribe.",
   "EditForm.inputSelect.durations.label": "Duration",
