@@ -201,9 +201,7 @@ module.exports = {
               `environments.${env}.request.router.prefix`,
               null
             ),
-            validations: {
-              required: true,
-            },
+            validations: {},
           },
         ],
       },
