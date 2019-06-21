@@ -12,7 +12,7 @@ const finder = require('strapi-utils').finder;
 const regex = require('strapi-utils').regex;
 const joijson = require('strapi-utils').joijson;
 const policyUtils = require('strapi-utils').policy;
-const { Joi } = require('koa-router-joi');
+const { Joi } = require('koa-joi-router');
 
 module.exports = strapi =>
   function routerChecker(value, endpoint, plugin) {
@@ -20,13 +20,20 @@ module.exports = strapi =>
     const route = regex.detectRoute(endpoint);
 
     // Define controller and action names.
-    const handler = _.trim(value.handler).split('.');
-    const controller = plugin
-      ? strapi.plugins[plugin].controllers[handler[0].toLowerCase()]
-      : strapi.controllers[handler[0].toLowerCase()] ||
-        strapi.admin.controllers[handler[0].toLowerCase()];
+    const [controllerName, actionName] = _.trim(value.handler).split('.');
+    const controllerKey = _.toLower(controllerName);
 
-    const action = controller[handler[1]];
+    let controller;
+
+    if (plugin) {
+      controller = strapi.plugins[plugin].controllers[controllerKey];
+    } else {
+      controller =
+        strapi.controllers[controllerKey] ||
+        strapi.admin.controllers[controllerKey];
+    }
+
+    const action = controller[actionName];
 
     // Retrieve the API's name where the controller is located
     // to access to the right validators
