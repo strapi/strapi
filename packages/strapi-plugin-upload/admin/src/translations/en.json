@@ -23,11 +23,9 @@
   "PluginInputFile.text": "Drag & drop your files into this area or {link} from a file to upload",
   "Upload.status.empty": "Files are empty",
   "Upload.status.disabled": "File upload is disabled",
-  "Upload.status.sizeLimit": "{file} file is bigger than limit size!",
+  "Upload.status.sizeLimit": "{file} file is bigger than configured limit size!",
   "notification.config.success": "The settings has been updated",
   "notification.delete.success": "The file has been deleted",
   "notification.dropFile.success": "Your file has been uploaded",
-  "notification.dropFiles.success": "{number} files have been uploaded",
-  "Upload.status.sizeLimit": "{file} is bigger than configured limit size",
-  "Upload.status.disabled" : "File upload is disabled"
+  "notification.dropFiles.success": "{number} files have been uploaded"
 }
