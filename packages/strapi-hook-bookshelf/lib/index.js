@@ -16,7 +16,6 @@ const relations = require('./relations');
 const buildQuery = require('./buildQuery');
 const mountModels = require('./mount-models');
 const getQueryParams = require('./get-query-params');
-const createDefaults = require('./create-defaults');
 
 /**
  * Bookshelf hook

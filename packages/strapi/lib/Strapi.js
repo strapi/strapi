@@ -26,6 +26,7 @@ const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
 const defaultQueries = require('./core-api/queries');
+const createGroupManager = require('./services/groups');
 
 /**
  * Construct an Strapi instance.
@@ -101,6 +102,7 @@ class Strapi extends EventEmitter {
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
 
+    this.groupManager;
     this.fs = createStrapiFs(this);
     this.requireProjectBootstrap();
   }
@@ -285,6 +287,10 @@ class Strapi extends EventEmitter {
     // Populate AST with configurations.
 
     await bootstrap(this);
+
+    this.groupManager = createGroupManager({
+      groups,
+    });
 
     // Usage.
     await utils.usage(this.config);

@@ -55,6 +55,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/groups/:uid",
+      "handler": "Groups.getGroup",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }
