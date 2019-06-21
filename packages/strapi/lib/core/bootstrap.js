@@ -4,7 +4,7 @@ const _ = require('lodash');
 
 const { createController, createService } = require('../core-api');
 const getURLFromSegments = require('../utils/url-from-segments');
-const routerJoi = require('koa-router-joi');
+const routerJoi = require('koa-joi-router');
 
 module.exports = function(strapi) {
   // Retrieve Strapi version.
