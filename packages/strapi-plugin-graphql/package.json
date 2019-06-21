@@ -26,6 +26,7 @@
     "strapi-utils": "3.0.0-beta.6"
   },
   "devDependencies": {
+    "koa": "^2.1.0",
     "cross-env": "^5.2.0",
     "rimraf": "^2.6.3"
   },
