@@ -349,7 +349,7 @@ npm install pg
 }
 ```
 
-3. Install the **Strapi Provider Upload AWS S3 Plugin**: `Path: ./my-project/`. This plugin will allow configurations for each active environment. **NOTE:** You can only update the settings for _production_ when your Strapi project is actually in production.
+3. Install the **Strapi Provider Upload AWS S3 Plugin**: `Path: ./my-project/`. This plugin will allow configurations for each active environment. 
 
 ```bash
 npm install strapi-provider-upload-aws-s3@beta
