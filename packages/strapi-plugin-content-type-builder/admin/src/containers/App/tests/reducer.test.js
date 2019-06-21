@@ -169,8 +169,11 @@ describe('appReducer', () => {
     const expected = state
       .set('modifiedData', Map({}))
       .set('initialData', Map({}))
+      .set('modifiedDataGroup', Map({}))
+      .set('initialDataGroup', Map({}))
       .set('connections', List([]))
-      .set('models', List([]));
+      .set('models', List([]))
+      .set('groups', List([]));
 
     expect(appReducer(undefined, {})).toEqual(expected);
   });
@@ -737,6 +740,31 @@ describe('appReducer', () => {
         ),
       },
     };
+    const initialDataGroup = {
+      tests: {
+        uid: 'tests',
+        name: 'Tests',
+        source: null,
+        schema: {
+          connection: 'default',
+          collectionName: 'tests',
+          description: '',
+          attributes: [
+            {
+              name: 'name',
+              type: 'string',
+              required: true,
+            },
+            {
+              name: 'quantity',
+              type: 'float',
+              required: true,
+            },
+          ],
+        },
+        isTemporary: false,
+      },
+    };
     const connections = ['default'];
     const groupsData = {
       data: [
@@ -753,33 +781,13 @@ describe('appReducer', () => {
                 type: 'string',
                 required: true,
               },
-            },
-          },
-        },
-        {
-          uid: 'ingredients',
-          name: 'Ingredients',
-          source: null,
-          schema: {
-            connection: 'default',
-            collectionName: 'ingredients',
-            description: 'Little description',
-            attributes: {
-              name: {
-                type: 'string',
-                required: true,
-              },
               quantity: {
                 type: 'float',
                 required: true,
               },
-              picture: {
-                model: 'file',
-                via: 'related',
-                plugin: 'upload',
-              },
             },
           },
+          isTemporary: false,
         },
       ],
       error: {}, // to be defined I don't know yet | null when no error
@@ -787,23 +795,16 @@ describe('appReducer', () => {
 
     const expected = state
       .set('modifiedData', fromJS(initialData))
+      .set('modifiedDataGroup', fromJS(initialDataGroup))
       .set('initialData', fromJS(initialData))
+      .set('initialDataGroup', fromJS(initialDataGroup))
       .set(
         'groups',
         List(
           fromJS([
             {
-              description: 'Little description',
-              fields: 3,
-              icon: 'fa-cube',
-              isTemporary: false,
-              name: 'Ingredients',
-              source: null,
-              uid: 'ingredients',
-            },
-            {
               description: '',
-              fields: 1,
+              fields: 2,
               icon: 'fa-cube',
               isTemporary: false,
               name: 'Tests',
@@ -1054,9 +1055,11 @@ describe('appReducer', () => {
         name: '',
         attributes: [],
       },
+      initialDataGroup: {},
+      modifiedDataGroup: {},
     });
 
-    expect(appReducer(state, resetProps())).toEqual(expected);
+    expect(appReducer(state, resetProps()).toJS()).toEqual(expected.toJS());
   });
 
   it('should handle the saveEditedAttribute action correctly if the model is not temporary', () => {

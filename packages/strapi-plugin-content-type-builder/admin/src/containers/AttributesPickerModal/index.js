@@ -28,7 +28,6 @@ class AttributesPickerModal extends React.Component {
   componentDidMount() {
     const { isOpen } = this.props;
 
-    console.log(this.props);
     if (isOpen) {
       this.addEventListener();
     }
@@ -153,7 +152,7 @@ class AttributesPickerModal extends React.Component {
   };
 
   render() {
-    const { isOpen } = this.props;
+    const { isOpen, push } = this.props;
 
     return (
       <WrapperModal

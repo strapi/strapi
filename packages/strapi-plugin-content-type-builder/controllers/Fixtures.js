@@ -11,7 +11,7 @@ module.exports = {
           schema: {
             connection: 'default',
             collectionName: 'ingredients',
-            description: 'Little description',
+            description: 'Little description for ingredients group',
             attributes: {
               name: {
                 type: 'string',
@@ -36,7 +36,7 @@ module.exports = {
           schema: {
             connection: 'default',
             collectionName: 'ingredients',
-            description: 'Little description',
+            description: 'Little description for fruits group',
             attributes: {
               name: {
                 type: 'string',
@@ -61,7 +61,7 @@ module.exports = {
           schema: {
             connection: 'default',
             collectionName: 'cars',
-            description: 'Little description',
+            description: 'Little description for cars group',
             attributes: {
               name: {
                 type: 'string',

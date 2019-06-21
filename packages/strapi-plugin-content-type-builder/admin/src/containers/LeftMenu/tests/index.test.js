@@ -12,7 +12,6 @@ import mountWithIntl from 'testUtils/mountWithIntl';
 
 // @soupette
 // TODO update the test when switching to react testing lib
-
 const renderCompo = (context = { models: [] }) => (
   <MenuContext value={context}>
     <LeftMenu />

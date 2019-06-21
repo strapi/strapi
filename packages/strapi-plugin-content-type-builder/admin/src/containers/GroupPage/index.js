@@ -2,19 +2,40 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Prompt } from 'react-router';
-import { get, isEqual, pickBy } from 'lodash';
+import { get, isEqual, capitalize } from 'lodash';
 
 import pluginId from '../../pluginId';
 
 import ViewContainer from '../ViewContainer';
+import AttributesModalPicker from '../AttributesPickerModal';
 
 import { submitGroup, submitTempGroup } from '../App/actions';
+
+import { EmptyAttributesBlock, getQueryParameters } from 'strapi-helper-plugin';
 
 class GroupPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { attrToDelete: null, removePrompt: true, showWarning: false };
+  featureType = 'group';
 
-  getGroupName = () => {
+  getFeature = () => {
+    const { modifiedDataGroup, newGroup } = this.props;
+
+    if (this.isUpdatingTempFeature()) {
+      return newGroup;
+    }
+
+    return get(modifiedDataGroup, this.getFeatureName(), {});
+  };
+
+  getFeatureAttributes = () => {
+    return get(this.getFeature(), 'schema', 'attributes', {});
+  };
+
+  getFeatureAttributesLength = () =>
+    Object.keys(this.getFeatureAttributes()).length;
+
+  getFeatureName = () => {
     const {
       match: {
         params: { groupName },
@@ -22,6 +43,70 @@ class GroupPage extends React.Component {
     } = this.props;
 
     return groupName;
+  };
+
+  getFeatureHeaderDescription = () => {
+    const { modifiedDataGroup, newGroup } = this.props;
+    const name = this.getFeatureName();
+
+    /* istanbul ignore if */
+    const description = this.isUpdatingTempFeature()
+      ? get(newGroup, 'schema', 'description', null)
+      : get(modifiedDataGroup, [name, 'schema', 'description'], null);
+
+    return !!description
+      ? description
+      : {
+          id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+        };
+  };
+
+  getFeatureHeaderTitle = () => {
+    const { modifiedDataGroup, newGroup } = this.props;
+    const name = this.getFeatureName();
+
+    /* istanbul ignore if */
+    const title = this.isUpdatingTempFeature()
+      ? get(newGroup, 'name', null)
+      : get(modifiedDataGroup, [name, 'name'], null);
+
+    return title;
+  };
+
+  getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
+
+  getPluginHeaderActions = () => {
+    const { modifiedDataGroup, initialDataGroup } = this.props;
+    // console.log(this.getFeatureAttributesLength());
+    // console.log(this.getFeatureAttributes());
+
+    /* istanbul ignore if */
+    const shouldShowActions = this.isUpdatingTempFeature()
+      ? this.getFeatureAttributesLength() > 0
+      : !isEqual(
+          modifiedDataGroup[this.getFeatureName()],
+          initialDataGroup[this.getFeatureName()]
+        );
+
+    if (shouldShowActions) {
+      return [
+        {
+          label: `${pluginId}.form.button.cancel`,
+          onClick: () => {},
+          kind: 'secondary',
+          type: 'button',
+        },
+        {
+          label: `${pluginId}.form.button.save`,
+          onClick: () => {},
+          kind: 'primary',
+          type: 'submit',
+          id: 'saveData',
+        },
+      ];
+    }
+
+    return [];
   };
 
   getSearch = () => {
@@ -32,14 +117,51 @@ class GroupPage extends React.Component {
     return search;
   };
 
+  getSource = () => {
+    const source = getQueryParameters(getFeatureName(), 'source');
+
+    return !!source ? source : null;
+  };
+
+  handleClickIcon = async () => {
+    const {
+      canOpenModal,
+      history: { push },
+    } = this.props;
+    const { emitEvent } = this.context;
+
+    await this.wait();
+
+    if (canOpenModal || this.isUpdatingTempFeature()) {
+      push({
+        search: `modalType=${
+          this.featureType
+        }&settingType=base&actionType=edit&modelName=${this.getFeatureName()}`,
+      });
+      emitEvent(`willEditNameOf${capitalize(this.featureType)}`);
+    } else {
+      displayNotificationCTNotSaved();
+    }
+  };
+
+  handleClickOpenModalChooseAttributes = async () => {
+    const {
+      canOpenModal,
+      history: { push },
+    } = this.props;
+
+    await this.wait();
+
+    if (canOpenModal || this.isUpdatingTempFeature()) {
+      push({ search: 'modalType=chooseAttributes' });
+    } else {
+      displayNotificationCTNotSaved();
+    }
+  };
+
   hasGroupBeenModified = () => {
     const { initialDataGroup, modifiedDataGroup } = this.props;
-    const currentModel = this.getGroupName();
-
-    // console.log('!!!!!!!');
-    // console.log(modifiedDataGroup);
-    // console.log(initialDataGroup);
-    // console.log(initialDataGroup[currentModel]);
+    const currentModel = this.getFeatureName();
 
     return (
       !isEqual(
@@ -49,25 +171,26 @@ class GroupPage extends React.Component {
     );
   };
 
-  isUpdatingTemporaryGroup = (groupName = this.getGroupName()) => {
+  isUpdatingTempFeature = () => {
     const { groups } = this.props;
-    /* istanbul ignore next */
-    const currentGroup = groups.find(group => group.name === groupName) || {
-      isTemporary: true,
-    };
+    const currentData = groups.find(d => d.name === this.getFeatureName());
 
-    const { isTemporary } = currentGroup;
-
-    return isTemporary;
+    return get(currentData, 'isTemporary', false);
   };
 
   setPrompt = () => this.setState({ removePrompt: false });
 
   removePrompt = () => this.setState({ removePrompt: true });
 
+  wait = async () => {
+    this.removePrompt();
+    return new Promise(resolve => setTimeout(resolve, 100));
+  };
+
   render() {
     const {
-      initialDataGroup,
+      groups,
+      history: { push },
       modifiedDataGroup,
       newGroup,
       temporaryAttribute,
@@ -86,19 +209,41 @@ class GroupPage extends React.Component {
         </FormattedMessage>
         <ViewContainer
           {...this.props}
-          featureData={initialDataGroup}
-          featureType="group"
+          featureType={this.featureType}
+          handleClickIcon={this.handleClickIcon}
+          headerTitle={this.getFeatureHeaderTitle()}
+          headerDescription={this.getFeatureHeaderDescription()}
           modifiedData={modifiedDataGroup}
           newFeature={newGroup}
           tempData={temporaryAttribute}
-          // resetEditTempFeature={resetEditTempGroup}
-          // resetEditExistingFeature={resetEditExistingGroup()}
+          pluginHeaderActions={this.getPluginHeaderActions()}
           removePrompt={this.removePrompt}
           submitFeature={submitGroup}
           submitTempFeature={submitTempGroup}
         >
-          <p>GROUPS LIST</p>
+          {this.getFeatureAttributesLength() === 0 ? (
+            <EmptyAttributesBlock
+              description={`${pluginId}.home.emptyAttributes.description.${
+                this.featureType
+              }`}
+              id="openAddAttr"
+              label="content-type-builder.button.attributes.add"
+              onClick={this.handleClickOpenModalChooseAttributes}
+              title="content-type-builder.home.emptyAttributes.title"
+            />
+          ) : (
+            <>
+              <p>GROUPS LIST</p>
+              {groups.map(group => {
+                <p>{group.name}</p>;
+              })}
+            </>
+          )}
         </ViewContainer>
+        <AttributesModalPicker
+          isOpen={this.getModalType() === 'chooseAttributes'}
+          push={push}
+        />
       </div>
     );
   }
@@ -109,6 +254,7 @@ GroupPage.contextTypes = {
 };
 
 GroupPage.protoType = {
+  initialDataGroup: PropTypes.object.isRequired,
   resetEditTempGroup: PropTypes.func.isRequired,
 };
 

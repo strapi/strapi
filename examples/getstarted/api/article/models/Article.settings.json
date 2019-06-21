@@ -1,8 +1,8 @@
 {
   "connection": "default",
-  "collectionName": "zobs",
+  "collectionName": "articles",
   "info": {
-    "name": "zob",
+    "name": "article",
     "description": ""
   },
   "options": {
@@ -11,8 +11,11 @@
     "comment": ""
   },
   "attributes": {
-    "name": {
+    "title": {
       "type": "string"
+    },
+    "content": {
+      "type": "text"
     }
   }
 }

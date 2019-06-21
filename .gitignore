@@ -125,3 +125,6 @@ packages/strapi-generate-new/files/public/
 ############################
 
 # *.cache
+
+
+front-workspace.code-workspace

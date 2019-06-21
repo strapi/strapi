@@ -1,17 +1,22 @@
-input createFughInput {
-  data: FughInput
+type Article {
+  id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
+  title: String
+  content: String
 }
 
-type createFughPayload {
-  fugh: Fugh
+input ArticleInput {
+  title: String
+  content: String
 }
 
-input createPostInput {
-  data: PostInput
+input createArticleInput {
+  data: ArticleInput
 }
 
-type createPostPayload {
-  post: Post
+type createArticlePayload {
+  article: Article
 }
 
 input createRoleInput {
@@ -30,41 +35,17 @@ type createUserPayload {
   user: UsersPermissionsUser
 }
 
-input createZobInput {
-  data: ZobInput
-}
-
-type createZobPayload {
-  zob: Zob
-}
-
-input createZreInput {
-  data: ZreInput
-}
-
-type createZrePayload {
-  zre: Zre
-}
-
 """
 The `DateTime` scalar represents a date and time following the ISO 8601 standard
 """
 scalar DateTime
 
-input deleteFughInput {
+input deleteArticleInput {
   where: InputID
 }
 
-type deleteFughPayload {
-  fugh: Fugh
-}
-
-input deletePostInput {
-  where: InputID
-}
-
-type deletePostPayload {
-  post: Post
+type deleteArticlePayload {
+  article: Article
 }
 
 input deleteRoleInput {
@@ -83,20 +64,9 @@ type deleteUserPayload {
   user: UsersPermissionsUser
 }
 
-input deleteZobInput {
-  where: InputID
-}
-
-type deleteZobPayload {
-  zob: Zob
-}
-
-input deleteZreInput {
-  where: InputID
-}
-
-type deleteZrePayload {
-  zre: Zre
+input editArticleInput {
+  title: String
+  content: String
 }
 
 input editFileInput {
@@ -110,14 +80,6 @@ input editFileInput {
   provider: String
   public_id: String
   related: [ID]
-}
-
-input editFughInput {
-  dez: String
-}
-
-input editPostInput {
-  articles: [ID]
 }
 
 input editRoleInput {
@@ -143,17 +105,6 @@ input editUserInput {
   role: ID
 }
 
-input editZobInput {
-  name: String
-}
-
-input editZreInput {
-  content2: String
-  posts: [ID]
-  title: String
-  image: ID
-}
-
 input FileInput {
   name: String!
   hash: String!
@@ -167,17 +118,6 @@ input FileInput {
   related: [ID]
 }
 
-type Fugh {
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
-  dez: String
-}
-
-input FughInput {
-  dez: String
-}
-
 input InputID {
   id: ID!
 }
@@ -187,21 +127,12 @@ scalar JSON
 """The `Long` scalar type represents 52-bit integers"""
 scalar Long
 
-union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Fugh | createFughPayload | updateFughPayload | deleteFughPayload | Post | createPostPayload | updatePostPayload | deletePostPayload | Zob | createZobPayload | updateZobPayload | deleteZobPayload | Zre | createZrePayload | updateZrePayload | deleteZrePayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
+union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Article | createArticlePayload | updateArticlePayload | deleteArticlePayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
 
 type Mutation {
-  createFugh(input: createFughInput): createFughPayload
-  updateFugh(input: updateFughInput): updateFughPayload
-  deleteFugh(input: deleteFughInput): deleteFughPayload
-  createPost(input: createPostInput): createPostPayload
-  updatePost(input: updatePostInput): updatePostPayload
-  deletePost(input: deletePostInput): deletePostPayload
-  createZob(input: createZobInput): createZobPayload
-  updateZob(input: updateZobInput): updateZobPayload
-  deleteZob(input: deleteZobInput): deleteZobPayload
-  createZre(input: createZreInput): createZrePayload
-  updateZre(input: updateZreInput): updateZrePayload
-  deleteZre(input: deleteZreInput): deleteZrePayload
+  createArticle(input: createArticleInput): createArticlePayload
+  updateArticle(input: updateArticleInput): updateArticlePayload
+  deleteArticle(input: deleteArticleInput): deleteArticlePayload
 
   """Create a new role"""
   createRole(input: createRoleInput): createRolePayload
@@ -228,26 +159,9 @@ type MypluginTest {
   type: String!
 }
 
-type Post {
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
-  articles(sort: String, limit: Int, start: Int, where: JSON): [Zre]
-}
-
-input PostInput {
-  articles: [ID]
-}
-
 type Query {
-  fugh(id: ID!): Fugh
-  fughs(sort: String, limit: Int, start: Int, where: JSON): [Fugh]
-  post(id: ID!): Post
-  posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
-  zob(id: ID!): Zob
-  zobs(sort: String, limit: Int, start: Int, where: JSON): [Zob]
-  zre(id: ID!): Zre
-  zres(sort: String, limit: Int, start: Int, where: JSON): [Zre]
+  article(id: ID!): Article
+  articles(sort: String, limit: Int, start: Int, where: JSON): [Article]
   files(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
   role(id: ID!): UsersPermissionsRole
 
@@ -274,22 +188,13 @@ input TestInput {
   type: String!
 }
 
-input updateFughInput {
+input updateArticleInput {
   where: InputID
-  data: editFughInput
+  data: editArticleInput
 }
 
-type updateFughPayload {
-  fugh: Fugh
-}
-
-input updatePostInput {
-  where: InputID
-  data: editPostInput
-}
-
-type updatePostPayload {
-  post: Post
+type updateArticlePayload {
+  article: Article
 }
 
 input updateRoleInput {
@@ -308,24 +213,6 @@ input updateUserInput {
 
 type updateUserPayload {
   user: UsersPermissionsUser
-}
-
-input updateZobInput {
-  where: InputID
-  data: editZobInput
-}
-
-type updateZobPayload {
-  zob: Zob
-}
-
-input updateZreInput {
-  where: InputID
-  data: editZreInput
-}
-
-type updateZrePayload {
-  zre: Zre
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -403,33 +290,4 @@ type UsersPermissionsUser {
   confirmed: Boolean
   blocked: Boolean
   role: UsersPermissionsRole
-}
-
-type Zob {
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
-  name: String
-}
-
-input ZobInput {
-  name: String
-}
-
-"""Super description"""
-type Zre {
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
-  content2: String
-  title: String
-  image: UploadFile
-  posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
-}
-
-input ZreInput {
-  content2: String
-  posts: [ID]
-  title: String
-  image: ID
 }

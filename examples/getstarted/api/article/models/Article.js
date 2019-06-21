@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Lifecycle callbacks for the `Zob` model.
+ * Lifecycle callbacks for the `Article` model.
  */
 
 module.exports = {

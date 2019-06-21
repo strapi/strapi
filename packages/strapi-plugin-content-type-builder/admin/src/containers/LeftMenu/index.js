@@ -18,16 +18,16 @@ import LeftMenuLink from '../../components/LeftMenuLink';
 
 import StyledLeftMenu from './StyledLeftMenu';
 
+const displayNotificationCTNotSaved = () =>
+  strapi.notification.info(
+    `${pluginId}.notification.info.contentType.creating.notSaved`
+  );
+
 const getSectionTitle = (itemsTitle, count) => {
   const base = `${pluginId}.menu.section.${itemsTitle}.name.`;
 
   return count > 1 ? `${base}plural` : `${base}singular`;
 };
-
-const displayNotificationCTNotSaved = () =>
-  strapi.notification.info(
-    `${pluginId}.notification.info.contentType.creating.notSaved`
-  );
 
 function LeftMenu() {
   const { canOpenModal, groups, models, push } = useContext(MenuContext);

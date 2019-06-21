@@ -24,11 +24,11 @@ describe('<ModelForm />', () => {
       actionType: 'create',
       activeTab: 'base',
       allTakenNames: [],
-      cancelNewFeatureType: jest.fn(),
+      cancelNewFeature: jest.fn(),
       connections: ['default'],
-      createTempFeatureType: jest.fn(),
+      createTempFeature: jest.fn(),
       isOpen: true,
-      isUpdatingTemporaryFeatureType: false,
+      isUpdatingTemporaryFeature: false,
       featureToEditName: '',
       modifiedData: {
         collectionName: '',
@@ -38,13 +38,13 @@ describe('<ModelForm />', () => {
         name: '',
         attributes: {},
       },
-      onChangeExistingFeatureTypeMainInfos: jest.fn(),
-      onChangeNewFeatureTypeMainInfos: jest.fn(),
+      onChangeExistingFeatureMainInfos: jest.fn(),
+      onChangeNewFeatureMainInfos: jest.fn(),
       onSubmit: jest.fn(),
       push: jest.fn(),
-      resetExistingFeatureTypeMainInfos: jest.fn(),
-      resetNewFeatureTypeMainInfos: jest.fn(),
-      updateTempFeatureType: jest.fn(),
+      resetExistingFeatureMainInfos: jest.fn(),
+      resetNewFeatureMainInfos: jest.fn(),
+      updateTempFeature: jest.fn(),
     };
   });
 
@@ -57,42 +57,42 @@ describe('<ModelForm />', () => {
   });
 
   it('should use the defaultProps', () => {
-    delete props.cancelNewFeatureType;
-    delete props.createTempFeatureType;
-    delete props.onChangeExistingFeatureTypeMainInfos;
+    delete props.cancelNewFeature;
+    delete props.createTempFeature;
+    delete props.onChangeExistingFeatureMainInfos;
     delete props.onSubmit;
-    delete props.resetExistingFeatureTypeMainInfos;
-    delete props.resetNewFeatureTypeMainInfos;
-    delete props.updateTempFeatureType;
+    delete props.resetExistingFeatureMainInfos;
+    delete props.resetNewFeatureMainInfos;
+    delete props.updateTempFeature;
 
     wrapper = renderComponent(props);
 
     const {
       defaultProps: {
-        cancelNewFeatureType,
-        createTempFeatureType,
-        onChangeExistingFeatureTypeMainInfos,
+        cancelNewFeature,
+        createTempFeature,
+        onChangeExistingFeatureMainInfos,
         onSubmit,
-        resetExistingFeatureTypeMainInfos,
-        resetNewFeatureTypeMainInfos,
-        updateTempFeatureType,
+        resetExistingFeatureMainInfos,
+        resetNewFeatureMainInfos,
+        updateTempFeature,
       },
     } = ModelForm;
 
-    expect(cancelNewFeatureType).toBeDefined();
-    expect(cancelNewFeatureType()).toBe(undefined);
-    expect(createTempFeatureType).toBeDefined();
-    expect(createTempFeatureType()).toBe(undefined);
-    expect(onChangeExistingFeatureTypeMainInfos).toBeDefined();
-    expect(onChangeExistingFeatureTypeMainInfos()).toBe(undefined);
+    expect(cancelNewFeature).toBeDefined();
+    expect(cancelNewFeature()).toBe(undefined);
+    expect(createTempFeature).toBeDefined();
+    expect(createTempFeature()).toBe(undefined);
+    expect(onChangeExistingFeatureMainInfos).toBeDefined();
+    expect(onChangeExistingFeatureMainInfos()).toBe(undefined);
     expect(onSubmit).toBeDefined();
     expect(onSubmit({ preventDefault: jest.fn() })).toBe(undefined);
-    expect(resetExistingFeatureTypeMainInfos).toBeDefined();
-    expect(resetExistingFeatureTypeMainInfos()).toBe(undefined);
-    expect(resetNewFeatureTypeMainInfos).toBeDefined();
-    expect(resetNewFeatureTypeMainInfos()).toBe(undefined);
-    expect(updateTempFeatureType).toBeDefined();
-    expect(updateTempFeatureType()).toBe(undefined);
+    expect(resetExistingFeatureMainInfos).toBeDefined();
+    expect(resetExistingFeatureMainInfos()).toBe(undefined);
+    expect(resetNewFeatureMainInfos).toBeDefined();
+    expect(resetNewFeatureMainInfos()).toBe(undefined);
+    expect(updateTempFeature).toBeDefined();
+    expect(updateTempFeature()).toBe(undefined);
   });
 
   it('should not show the inputs until the modal is fully opened', () => {
@@ -114,7 +114,7 @@ describe('<ModelForm />', () => {
 
   it('should handle the edition of a temporary CT correctly for the inputs settings', () => {
     props.actionType = 'edit';
-    props.isUpdatingTemporaryFeatureType = true;
+    props.isUpdatingTemporaryFeature = true;
 
     wrapper = renderComponent(props);
     wrapper.setState({ isVisible: true });
@@ -126,12 +126,12 @@ describe('<ModelForm />', () => {
 
     input.simulate('change');
 
-    expect(props.onChangeNewFeatureTypeMainInfos).toHaveBeenCalled();
+    expect(props.onChangeNewFeatureMainInfos).toHaveBeenCalled();
   });
 
   it('should handle the edition of a saved CT correctly for the inputs settings', () => {
     props.actionType = 'edit';
-    props.isUpdatingTemporaryFeatureType = false;
+    props.isUpdatingTemporaryFeature = false;
     props.featureToEditName = 'test';
 
     wrapper = renderComponent(props);
@@ -144,7 +144,7 @@ describe('<ModelForm />', () => {
 
     input.simulate('change');
 
-    expect(props.onChangeExistingFeatureTypeMainInfos).toHaveBeenCalled();
+    expect(props.onChangeExistingFeatureMainInfos).toHaveBeenCalled();
   });
 
   describe('Instances', () => {
@@ -208,46 +208,46 @@ describe('<ModelForm />', () => {
     });
 
     describe('HandleCancel', () => {
-      it('should call only the cancelNewFeatureType if the actionType is create', () => {
+      it('should call only the cancelNewFeature if the actionType is create', () => {
         wrapper = renderComponent(props);
 
         const { handleCancel } = wrapper.instance();
 
         handleCancel();
 
-        expect(props.cancelNewFeatureType).toHaveBeenCalled();
-        expect(props.resetNewFeatureTypeMainInfos).not.toHaveBeenCalled();
-        expect(props.resetExistingFeatureTypeMainInfos).not.toHaveBeenCalled();
+        expect(props.cancelNewFeature).toHaveBeenCalled();
+        expect(props.resetNewFeatureMainInfos).not.toHaveBeenCalled();
+        expect(props.resetExistingFeatureMainInfos).not.toHaveBeenCalled();
         expect(props.push).toHaveBeenCalledWith({ search: '' });
       });
 
-      it('should call only the resetNewFeatureTypeMainInfos if the actionType is edit and if the user is editing a temporary ct', () => {
+      it('should call only the resetNewFeatureMainInfos if the actionType is edit and if the user is editing a temporary ct', () => {
         props.actionType = 'edit';
-        props.isUpdatingTemporaryFeatureType = true;
+        props.isUpdatingTemporaryFeature = true;
         wrapper = renderComponent(props);
 
         const { handleCancel } = wrapper.instance();
 
         handleCancel();
 
-        expect(props.cancelNewFeatureType).not.toHaveBeenCalled();
-        expect(props.resetNewFeatureTypeMainInfos).toHaveBeenCalled();
-        expect(props.resetExistingFeatureTypeMainInfos).not.toHaveBeenCalled();
+        expect(props.cancelNewFeature).not.toHaveBeenCalled();
+        expect(props.resetNewFeatureMainInfos).toHaveBeenCalled();
+        expect(props.resetExistingFeatureMainInfos).not.toHaveBeenCalled();
         expect(props.push).toHaveBeenCalledWith({ search: '' });
       });
 
-      it('should call only the resetExistingFeatureTypeMainInfos if the actionType is edit and if the user is not editing a temporary ct', () => {
+      it('should call only the resetExistingFeatureMainInfos if the actionType is edit and if the user is not editing a temporary ct', () => {
         props.actionType = 'edit';
-        props.isUpdatingTemporaryFeatureType = false;
+        props.isUpdatingTemporaryFeature = false;
         wrapper = renderComponent(props);
 
         const { handleCancel } = wrapper.instance();
 
         handleCancel();
 
-        expect(props.cancelNewFeatureType).not.toHaveBeenCalled();
-        expect(props.resetNewFeatureTypeMainInfos).not.toHaveBeenCalled();
-        expect(props.resetExistingFeatureTypeMainInfos).toHaveBeenCalled();
+        expect(props.cancelNewFeature).not.toHaveBeenCalled();
+        expect(props.resetNewFeatureMainInfos).not.toHaveBeenCalled();
+        expect(props.resetExistingFeatureMainInfos).toHaveBeenCalled();
         expect(props.push).toHaveBeenCalledWith({ search: '' });
       });
     });
@@ -296,15 +296,15 @@ describe('<ModelForm />', () => {
           pathname: `/plugins/${pluginId}/models/test`,
           search: 'modalType=chooseAttributes',
         });
-        expect(props.createTempFeatureType).toHaveBeenCalled();
-        expect(props.updateTempFeatureType).not.toHaveBeenCalled();
+        expect(props.createTempFeature).toHaveBeenCalled();
+        expect(props.updateTempFeature).not.toHaveBeenCalled();
       });
 
       it('should submit if the form is not empty and the user is editing a temporary CT', () => {
         props.modifiedData.name = 'test';
         props.allTakenNames = ['test'];
         props.actionType = 'edit';
-        props.isUpdatingTemporaryFeatureType = true;
+        props.isUpdatingTemporaryFeature = true;
         props.featureToEditName = 'test';
         wrapper = renderComponent(props);
 
@@ -317,14 +317,14 @@ describe('<ModelForm />', () => {
           pathname: '/plugins/content-type-builder/models/test',
           search: '',
         });
-        expect(props.createTempFeatureType).not.toHaveBeenCalled();
-        expect(props.updateTempFeatureType).toHaveBeenCalled();
+        expect(props.createTempFeature).not.toHaveBeenCalled();
+        expect(props.updateTempFeature).toHaveBeenCalled();
       });
 
       it('should submit if the form is not empty and the user is editing a saved CT', () => {
         props.modifiedData.name = 'test';
         props.actionType = 'edit';
-        props.isUpdatingTemporaryFeatureType = false;
+        props.isUpdatingTemporaryFeature = false;
         props.allTakenNames = ['test'];
         props.featureToEditName = 'test';
         wrapper = renderComponent(props);
@@ -337,8 +337,8 @@ describe('<ModelForm />', () => {
         expect(props.push).toHaveBeenCalledWith({
           search: '',
         });
-        expect(props.updateTempFeatureType).not.toHaveBeenCalled();
-        expect(props.createTempFeatureType).not.toHaveBeenCalled();
+        expect(props.updateTempFeature).not.toHaveBeenCalled();
+        expect(props.createTempFeature).not.toHaveBeenCalled();
       });
     });
   });
