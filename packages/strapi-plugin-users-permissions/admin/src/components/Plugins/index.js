@@ -1,8 +1,8 @@
 /**
-*
-* Plugins
-*
-*/
+ *
+ * Plugins
+ *
+ */
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -17,7 +17,7 @@ import styles from './styles.scss';
 class Plugins extends React.Component {
   state = { pluginSelected: '' };
 
-  changePluginSelected = (name) => this.setState({ pluginSelected: name });
+  changePluginSelected = name => this.setState({ pluginSelected: name });
 
   render() {
     return (
@@ -31,8 +31,13 @@ class Plugins extends React.Component {
               <FormattedMessage id="users-permissions.Plugins.header.description" />
             </div>
           </div>
-          <div className={cn(styles.pluginsContainer, !has(this.props.plugins, 'application') && styles.pluginsGradient)}>
-            {map(Object.keys(this.props.plugins).sort(), (plugin) => (
+          <div
+            className={cn(
+              styles.pluginsContainer,
+              !has(this.props.plugins, 'application') && styles.pluginsGradient
+            )}
+          >
+            {map(Object.keys(this.props.plugins).sort(), plugin => (
               <Plugin
                 changePluginSelected={this.changePluginSelected}
                 key={plugin}
