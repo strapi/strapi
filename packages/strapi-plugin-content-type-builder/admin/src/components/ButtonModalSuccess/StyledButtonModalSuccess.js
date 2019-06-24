@@ -2,11 +2,7 @@ import styled from 'styled-components';
 import { Button } from 'reactstrap';
 
 import img from '../../assets/icons/icon_check.png';
-
-// Prepare for theming
-const colors = {
-  green: '#27b70f',
-};
+import colors from '../../assets/styles/colors';
 
 const StyledButtonModalSuccess = styled(Button)`
   position: relative;

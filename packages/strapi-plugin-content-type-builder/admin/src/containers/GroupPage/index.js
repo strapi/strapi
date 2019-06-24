@@ -18,6 +18,11 @@ class GroupPage extends React.Component {
   state = { attrToDelete: null, removePrompt: true, showWarning: false };
   featureType = 'group';
 
+  displayNotificationCTNotSaved = () =>
+    strapi.notification.info(
+      `${pluginId}.notification.info.contentType.creating.notSaved`
+    );
+
   getFeature = () => {
     const { modifiedDataGroup, newGroup } = this.props;
 
@@ -77,8 +82,6 @@ class GroupPage extends React.Component {
 
   getPluginHeaderActions = () => {
     const { modifiedDataGroup, initialDataGroup } = this.props;
-    // console.log(this.getFeatureAttributesLength());
-    // console.log(this.getFeatureAttributes());
 
     /* istanbul ignore if */
     const shouldShowActions = this.isUpdatingTempFeature()
@@ -140,22 +143,7 @@ class GroupPage extends React.Component {
       });
       emitEvent(`willEditNameOf${capitalize(this.featureType)}`);
     } else {
-      displayNotificationCTNotSaved();
-    }
-  };
-
-  handleClickOpenModalChooseAttributes = async () => {
-    const {
-      canOpenModal,
-      history: { push },
-    } = this.props;
-
-    await this.wait();
-
-    if (canOpenModal || this.isUpdatingTempFeature()) {
-      push({ search: 'modalType=chooseAttributes' });
-    } else {
-      displayNotificationCTNotSaved();
+      this.displayNotificationCTNotSaved();
     }
   };
 
@@ -228,7 +216,7 @@ class GroupPage extends React.Component {
               }`}
               id="openAddAttr"
               label="content-type-builder.button.attributes.add"
-              onClick={this.handleClickOpenModalChooseAttributes}
+              onClick={() => {}}
               title="content-type-builder.home.emptyAttributes.title"
             />
           ) : (
