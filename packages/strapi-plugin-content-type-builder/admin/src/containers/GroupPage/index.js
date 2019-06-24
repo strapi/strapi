@@ -185,7 +185,6 @@ class GroupPage extends React.Component {
       history: { push },
       modifiedDataGroup,
       newGroup,
-      temporaryAttribute,
     } = this.props;
     const { removePrompt } = this.state;
 
@@ -207,7 +206,6 @@ class GroupPage extends React.Component {
           headerDescription={this.getFeatureHeaderDescription()}
           modifiedData={modifiedDataGroup}
           newFeature={newGroup}
-          tempData={temporaryAttribute}
           pluginHeaderActions={this.getPluginHeaderActions()}
           removePrompt={this.removePrompt}
           submitFeature={submitGroup}
@@ -251,8 +249,6 @@ GroupPage.propTypes = {
   groups: PropTypes.array.isRequired,
   modifiedDataGroup: PropTypes.object.isRequired,
   newGroup: PropTypes.object.isRequired,
-  temporaryAttribute: PropTypes.object.isRequired,
-  resetEditTempGroup: PropTypes.func.isRequired,
 };
 
 export default GroupPage;
