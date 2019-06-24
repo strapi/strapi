@@ -7,7 +7,7 @@ import pluginId from '../../pluginId';
 
 function LeftMenuLink({ isTemporary, name, source, to }) {
   return (
-    <NavLink to={to}>
+    <NavLink to={to} rel="noopener noreferrer">
       <p>
         <i className="fa fa-caret-square-o-right" />
         <span>{name}</span>

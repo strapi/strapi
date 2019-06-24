@@ -152,7 +152,7 @@ class AttributesPickerModal extends React.Component {
   };
 
   render() {
-    const { isOpen, push } = this.props;
+    const { isOpen } = this.props;
 
     return (
       <WrapperModal

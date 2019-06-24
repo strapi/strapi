@@ -13,6 +13,7 @@ import { submitGroup, submitTempGroup } from '../App/actions';
 
 import { EmptyAttributesBlock, getQueryParameters } from 'strapi-helper-plugin';
 
+/* eslint-disable no-extra-boolean-cast */
 class GroupPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { attrToDelete: null, removePrompt: true, showWarning: false };
@@ -54,11 +55,12 @@ class GroupPage extends React.Component {
     const { modifiedDataGroup, newGroup } = this.props;
     const name = this.getFeatureName();
 
-    /* istanbul ignore if */
     const description = this.isUpdatingTempFeature()
       ? get(newGroup, 'schema', 'description', null)
       : get(modifiedDataGroup, [name, 'schema', 'description'], null);
 
+    /* istanbul ignore if */
+    /* eslint-disable indent */
     return !!description
       ? description
       : {
@@ -121,8 +123,10 @@ class GroupPage extends React.Component {
   };
 
   getSource = () => {
-    const source = getQueryParameters(getFeatureName(), 'source');
+    const source = getQueryParameters(this.getFeatureName(), 'source');
 
+    /* istanbul ignore if */
+    /* eslint-disable indent */
     return !!source ? source : null;
   };
 
@@ -241,8 +245,13 @@ GroupPage.contextTypes = {
   emitEvent: PropTypes.func,
 };
 
-GroupPage.protoType = {
+GroupPage.propTypes = {
+  canOpenModal: PropTypes.bool,
   initialDataGroup: PropTypes.object.isRequired,
+  groups: PropTypes.array.isRequired,
+  modifiedDataGroup: PropTypes.object.isRequired,
+  newGroup: PropTypes.object.isRequired,
+  temporaryAttribute: PropTypes.object.isRequired,
   resetEditTempGroup: PropTypes.func.isRequired,
 };
 

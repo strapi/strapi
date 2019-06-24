@@ -175,7 +175,7 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
     return acc;
   }, {});
 
-  const initialDataGroup = data.reduce((acc, current, i) => {
+  const initialDataGroup = data.reduce((acc, current) => {
     const {
       schema: { attributes },
     } = current;
@@ -436,7 +436,7 @@ export function submitGroup(oldGroupName, data, context, source) {
 
   return {
     type: SUBMIT_GROUP,
-    oldContentTypeName,
+    oldGroupName,
     body,
     source,
     context,
