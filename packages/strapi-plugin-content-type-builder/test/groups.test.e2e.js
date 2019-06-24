@@ -23,12 +23,43 @@ describe.only('Content Type Builder - Groups', () => {
 
       res.body.data.forEach(el => {
         expect(el).toMatchObject({
-          id: expect.any(String),
+          uid: expect.any(String),
           name: expect.any(String),
-          icon: expect.any(String),
-          // later
           schema: expect.objectContaining({}),
         });
+      });
+    });
+  });
+
+  describe('GET /group/:uid', () => {
+    test('Returns 404 on not found', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/content-type-build/groups/nonexistent-group',
+      });
+
+      expect(res.statusCode).toBe(404);
+    });
+
+    test('Returns correct format', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/content-type-build/groups/existing-group',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        data: {
+          uid: 'existing-group',
+          name: 'EXISTING-GROUP',
+          schema: {
+            connection: 'default',
+            collectionName: 'existing_groups',
+            attributes: {
+              //...
+            },
+          },
+        },
       });
     });
   });

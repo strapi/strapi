@@ -63,6 +63,30 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "POST",
+      "path": "/groups",
+      "handler": "Groups.createGroup",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/groups/:uid",
+      "handler": "Groups.updateGroup",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/groups/:uid",
+      "handler": "Groups.deleteGroup",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

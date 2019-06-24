@@ -3,6 +3,7 @@ const initMap = groups => {
 
   Object.keys(groups).forEach(key => {
     const {
+      name,
       connection,
       collectionName,
       description,
@@ -11,8 +12,7 @@ const initMap = groups => {
 
     map.set(key, {
       uid: key,
-      name: key.toUpperCase(), // get the display name som
-      schema: { connection, collectionName, description, attributes },
+      schema: { name, connection, collectionName, description, attributes },
     });
   });
 

@@ -8,9 +8,10 @@
     "description": "content-type-builder.plugin.description"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "jest --verbose controllers"
   },
   "dependencies": {
+    "@sindresorhus/slugify": "^0.9.1",
     "classnames": "^2.2.6",
     "fs-extra": "^7.0.0",
     "immutable": "^3.8.2",

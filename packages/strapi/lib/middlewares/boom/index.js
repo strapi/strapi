@@ -9,6 +9,39 @@ const _ = require('lodash');
 const Boom = require('boom');
 const delegate = require('delegates');
 
+const boomMethods = [
+  'badRequest',
+  'unauthorized',
+  'paymentRequired',
+  'forbidden',
+  'notFound',
+  'methodNotAllowed',
+  'notAcceptable',
+  'proxyAuthRequired',
+  'clientTimeout',
+  'conflict',
+  'resourceGone',
+  'lengthRequired',
+  'preconditionFailed',
+  'entityTooLarge',
+  'uriTooLong',
+  'unsupportedMediaType',
+  'rangeNotSatisfiable',
+  'expectationFailed',
+  'teapot',
+  'badData',
+  'locked',
+  'failedDependency',
+  'preconditionRequired',
+  'tooManyRequests',
+  'illegal',
+  'badImplementation',
+  'notImplemented',
+  'badGateway',
+  'serverUnavailable',
+  'gatewayTimeout',
+];
+
 module.exports = strapi => {
   return {
     /**
@@ -69,19 +102,19 @@ module.exports = strapi => {
 
     // Custom function to avoid ctx.body repeat
     createResponses() {
-      Object.keys(Boom).forEach(key => {
-        strapi.app.response[key] = function(...rest) {
-          const error = Boom[key](...rest) || {};
+      boomMethods.forEach(method => {
+        strapi.app.response[method] = function(...rest) {
+          const error = Boom[method](...rest) || {};
 
           this.status = error.isBoom ? error.output.statusCode : this.status;
           this.body = error;
         };
 
-        this.delegator.method(key);
+        this.delegator.method(method);
       });
 
-      strapi.app.response.send = function(data) {
-        this.status = 200;
+      strapi.app.response.send = function(data, status = 200) {
+        this.status = status;
         this.body = data;
       };
 
