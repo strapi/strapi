@@ -27,7 +27,7 @@ module.exports = {
    * @return {Promise}
    */
   find(params, populate) {
-    return strapi.query(Product).find(params, populate);
+    return strapi.query('Product').find(params, populate);
   },
 };
 ```
@@ -43,7 +43,7 @@ module.exports = {
    */
 
   findOne(params, populate) {
-    return strapi.query(Product).findOne(params, populate);
+    return strapi.query('Product').findOne(params, populate);
   },
 };
 ```
@@ -59,7 +59,7 @@ module.exports = {
    */
 
   count(params) {
-    return strapi.query(Product).count(params);
+    return strapi.query('Product').count(params);
   },
 };
 ```
@@ -75,7 +75,7 @@ module.exports = {
    */
 
   create(values) {
-    return strapi.query(Product).create(values);
+    return strapi.query('Product').create(values);
   },
 };
 ```
@@ -91,7 +91,7 @@ module.exports = {
    */
 
   update(params, values) {
-    return strapi.query(Product).update(params, values);
+    return strapi.query('Product').update(params, values);
   },
 };
 ```
@@ -107,7 +107,7 @@ module.exports = {
    */
 
   delete(params) {
-    return strapi.query(Product).delete(params);
+    return strapi.query('Product').delete(params);
   },
 };
 ```
@@ -123,7 +123,7 @@ module.exports = {
    */
 
   search(params) {
-    return strapi.query(Product).search(params);
+    return strapi.query('Product').search(params);
   },
 };
 ```
@@ -138,7 +138,7 @@ module.exports = {
    * @return {Promise}
    */
   countSearch(params) {
-    return strapi.query(Product).countSearch(params);
+    return strapi.query('Product').countSearch(params);
   },
 };
 ```
