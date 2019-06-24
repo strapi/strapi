@@ -5,6 +5,10 @@ const slugify = require('@sindresorhus/slugify');
 
 const VALID_FIELDS = ['name', 'connection', 'collectionName', 'attributes'];
 
+/**
+ * Create a schema
+ * @param {Object} infos
+ */
 const createSchema = infos => {
   const { name, connection = 'default', collectionName } = infos;
   const uid = createGroupUID(name);
@@ -17,9 +21,18 @@ const createSchema = infos => {
   };
 };
 
-const updateSchema = (oldSchema, newSchema) =>
-  pick({ ...oldSchema, ...newSchema }, VALID_FIELDS);
+/**
+ * Update a group schema
+ * @param {Object} currentSchema - current group schema
+ * @param {Object} newSchema - new group schema
+ */
+const updateSchema = (currentSchema, newSchema) =>
+  pick({ ...currentSchema, ...newSchema }, VALID_FIELDS);
 
+/**
+ * Returns a uid from a string
+ * @param {string} str - string to slugify
+ */
 const createGroupUID = str => slugify(str, { separator: '_' });
 
 /**
@@ -52,6 +65,10 @@ async function updateGroup(group, infos) {
   return writeSchema(uid, updatedSchema);
 }
 
+/**
+ * Deletes a group
+ * @param {*} group
+ */
 async function deleteGroup(group) {
   await deleteSchema(group.uid);
   process.nextTick(() => strapi.reload());

@@ -10,6 +10,7 @@ const groupSchema = yup.object().shape({
   attributes: yup.object().required(),
 });
 
+// shorter access to the group service
 const internals = {
   get service() {
     return strapi.plugins['content-type-builder'].services.groups;
