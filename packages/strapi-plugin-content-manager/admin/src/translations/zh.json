@@ -22,6 +22,7 @@
   "components.LimitSelect.itemsPerPage": "每個頁面檔案數量",
   "components.Search.placeholder": "搜尋...",
   "components.TableDelete.delete": "刪除",
+  "components.TableDelete.deleteSelected": "删除所选",
   "components.TableDelete.entries.plural": "已選取 {number} 個項目",
   "components.TableDelete.entries.singular": "已選取 {number} 個項目",
   "components.TableEmpty.withFilters": "找不到 {contentType} 依照套用的過濾器...",

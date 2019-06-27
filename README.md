@@ -17,7 +17,7 @@
     <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
   </a>
   <a href="http://slack.strapi.io">
-    <img src="https://strapi-slack.herokuapp.com/badge.svg" alt="Strapi on Slack" />
+    <img src="https://slack.strapi.io/badge.svg" alt="Strapi on Slack" />
   </a>
 </p>
 

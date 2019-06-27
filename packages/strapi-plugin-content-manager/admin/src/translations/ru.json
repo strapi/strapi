@@ -30,6 +30,7 @@
   "containers.SettingPage.editSettings.title": "Редактирование — Настройки",
   "containers.SettingPage.relations": "Связанные поля",
   "components.TableDelete.delete": "Удалить все",
+  "components.TableDelete.deleteSelected": "Удалить выбранное",
   "components.TableDelete.entries.plural": "Выбрано {number} записей",
   "components.TableDelete.entries.singular": "Выбрана {number} запись",
   "components.TableEmpty.withFilters": "Нет {contentType} с примененными фильтрами...",
