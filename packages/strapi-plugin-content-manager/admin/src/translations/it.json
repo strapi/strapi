@@ -22,6 +22,7 @@
   "components.LimitSelect.itemsPerPage": "Elementi per pagina",
   "components.Search.placeholder": "Ricerca di una voce...",
   "components.TableDelete.delete": "Eliminare tutti",
+  "components.TableDelete.deleteSelected": "Elimina selezionato",
   "components.TableDelete.entries.plural": "{number} voci selezionate",
   "components.TableDelete.entries.singular": "{number} voce selezionata",
   "components.TableEmpty.withFilters": "Non vi è alcun {contentType} con l'applicazione di filtri...",
