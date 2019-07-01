@@ -3,11 +3,11 @@
 const yup = require('yup');
 const formatYupErrors = require('./utils/yup-formatter');
 
-const groupSchema = yup.object().shape({
-  name: yup.string().required(),
+const groupSchema = yup.object({
+  name: yup.string().required('name.required'),
   connection: yup.string(),
   collectionName: yup.string(),
-  attributes: yup.object().required(),
+  attributes: yup.object().required('attributes.required'),
 });
 
 // shorter access to the group service
@@ -25,6 +25,7 @@ module.exports = {
   /**
    * GET /groups handler
    * Returns a list of available groups
+   * @param {Object} ctx - koa context
    */
   async getGroups(ctx) {
     const data = await strapi.groupManager.all();
@@ -34,7 +35,7 @@ module.exports = {
   /**
    * GET /groups/:uid
    * Returns a specific group
-   * @param {*} ctx
+   * @param {Object} ctx - koa context
    */
   async getGroup(ctx) {
     const { uid } = ctx.params;
@@ -48,9 +49,15 @@ module.exports = {
     ctx.send({ data: group });
   },
 
+  /**
+   * POST /groups
+   * Creates a group and returns its infos
+   * @param {Object} ctx - koa context
+   */
   async createGroup(ctx) {
     const { body } = ctx.request;
 
+    await ctx.validate(groupSchema);
     try {
       await groupSchema.validate(body, {
         strict: true,
@@ -72,8 +79,9 @@ module.exports = {
   },
 
   /**
-   * Updates a group and return it
-   * @param {Object} ctx - enhanced koa context
+   * PUT /groups/:uid
+   * Updates a group and return its infos
+   * @param {Object} ctx - koa context - enhanced koa context
    */
   async updateGroup(ctx) {
     const { uid } = ctx.params;
@@ -99,6 +107,11 @@ module.exports = {
     ctx.send({ data: updatedGroup }, 200);
   },
 
+  /**
+   * DELETE /groups/:uid
+   * Deletes a groups and returns its old infos
+   * @param {Object} ctx - koa context
+   */
   async deleteGroup(ctx) {
     const { uid } = ctx.params;
 

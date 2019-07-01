@@ -13,6 +13,22 @@ const {
   deepTrimObject,
 } = require('../utils/helpers.js');
 
+function formatModelInfos(model, plugin) {
+  const data = {
+    icon: 'fa-cube',
+    name: _.get(model, 'info.name', 'model.name.missing'),
+    description: _.get(model, 'info.description', 'model.description.missing'),
+    fields: _.keys(model.attributes).length,
+    isTemporary: false,
+  };
+
+  if (plugin) {
+    data.source = plugin;
+  }
+
+  return data;
+}
+
 module.exports = {
   appearance: async (attributes, model, plugin) => {
     const pluginStore = strapi.store({
@@ -186,48 +202,18 @@ module.exports = {
    * Returns a list of user and plugins models
    */
   getModels() {
-    const models = [];
+    const models = Object.keys(strapi.models)
+      .filter(key => key !== 'core_store')
+      .map(name => formatModelInfos(strapi.models[name]));
 
-    _.forEach(strapi.models, (model, name) => {
-      if (name === 'core_store') {
-        return true;
-      }
-
-      models.push({
-        icon: 'fa-cube',
-        name: _.get(model, 'info.name', 'model.name.missing'),
-        description: _.get(
-          model,
-          'info.description',
-          'model.description.missing'
-        ),
-        fields: _.keys(model.attributes).length,
-        isTemporary: false,
-      });
-    });
-
-    const pluginModels = Object.keys(strapi.plugins).reduce((acc, current) => {
-      _.forEach(strapi.plugins[current].models, (model, name) => {
-        if (name === 'file') {
-          return true;
-        }
-
-        acc.push({
-          icon: 'fa-cube',
-          name: _.get(model, 'info.name', 'model.name.missing'),
-          description: _.get(
-            model,
-            'info.description',
-            'model.description.missing'
-          ),
-          fields: _.keys(model.attributes).length,
-          source: current,
-          isTemporary: false,
-        });
-      });
-
-      return acc;
-    }, []);
+    const pluginModels = Object.keys(strapi.plugins)
+      .map(pluginKey => {
+        const plugin = strapi.plugins[pluginKey];
+        return Object.keys(plugin.models)
+          .filter(key => key !== 'file')
+          .map(name => formatModelInfos(plugin.models[name], pluginKey));
+      })
+      .reduce((acc, models) => acc.concat(models), []);
 
     return models.concat(pluginModels);
   },

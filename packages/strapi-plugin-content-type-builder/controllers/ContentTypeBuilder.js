@@ -9,20 +9,16 @@ module.exports = {
   /**
    * Returns the list of models and there details
    */
-  getModels: async ctx => {
+  async getModels(ctx) {
     const models = Service.getModels();
-    const arrayOfPromises = [];
-    models.forEach(currentModel => {
-      const model = Service.getModel(currentModel.name, currentModel.source);
-
-      arrayOfPromises.push(model);
-    });
-    const allModels = await Promise.all(arrayOfPromises);
+    const allModels = await Promise.all(
+      models.map(({ name, source }) => Service.getModel(name, source))
+    );
 
     ctx.send({ allModels, models });
   },
 
-  getModel: async ctx => {
+  async getModel(ctx) {
     const { source } = ctx.request.query;
 
     const Service =
@@ -48,7 +44,7 @@ module.exports = {
     ctx.send({ model: modelLayout });
   },
 
-  getConnections: async ctx => {
+  async getConnections(ctx) {
     ctx.send({
       connections: _.keys(
         strapi.config.currentEnvironment.database.connections
@@ -56,7 +52,7 @@ module.exports = {
     });
   },
 
-  createModel: async ctx => {
+  async createModel(ctx) {
     const {
       name,
       description,
@@ -144,7 +140,7 @@ module.exports = {
     }
   },
 
-  updateModel: async ctx => {
+  async updateModel(ctx) {
     const { model } = ctx.params;
     const {
       name,
@@ -292,7 +288,7 @@ module.exports = {
     }
   },
 
-  deleteModel: async ctx => {
+  async deleteModel(ctx) {
     const { model } = ctx.params;
 
     if (!_.get(strapi.models, model))

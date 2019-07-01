@@ -1,6 +1,7 @@
 'use strict';
 
 const { pick } = require('lodash');
+const pluralize = require('pluralize');
 const slugify = require('@sindresorhus/slugify');
 
 const VALID_FIELDS = ['name', 'connection', 'collectionName', 'attributes'];
@@ -10,14 +11,15 @@ const VALID_FIELDS = ['name', 'connection', 'collectionName', 'attributes'];
  * @param {Object} infos
  */
 const createSchema = infos => {
-  const { name, connection = 'default', collectionName } = infos;
+  const { name, connection = 'default', collectionName, attributes } = infos;
   const uid = createGroupUID(name);
 
   return {
     name,
     connection,
-    collectionName: collectionName || uid,
-    attributes: {},
+    collectionName: collectionName || pluralize(uid),
+    // TODO: format attributes or sth
+    attributes,
   };
 };
 
@@ -109,4 +111,8 @@ module.exports = {
   createGroupUID,
   updateGroup,
   deleteGroup,
+
+  // export for testing only
+  createSchema,
+  updateSchema,
 };
