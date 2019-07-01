@@ -10,7 +10,6 @@ const renderCompo = (props = {}) => {
 const defaultProps = {
   children: null,
   featureType: 'group',
-  handleClickIcon: jest.fn(),
   headerTitle: 'Ingredients',
   headerDescription: 'description',
   match: {
@@ -18,6 +17,7 @@ const defaultProps = {
       groupName: 'ingredients',
     },
   },
+  onClickIcon: jest.fn(),
   pluginHeaderActions: [],
 };
 

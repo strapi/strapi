@@ -246,7 +246,7 @@ describe('Content Type Builder Action utils', () => {
   });
 
   describe('BuildGroupAttributes', () => {
-    it('should generate an array of object with an object', () => {
+    it('should generate an array of attribute objects given an object', () => {
       const attributes = {
         name: {
           type: 'string',

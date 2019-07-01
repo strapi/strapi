@@ -1,3 +1,7 @@
+// // Assets
+export { default as colors } from './assets/styles/colors';
+export { default as sizes } from './assets/styles/sizes';
+
 // // CommonPropTypes
 export { default as routerPropTypes } from './commonPropTypes/router';
 

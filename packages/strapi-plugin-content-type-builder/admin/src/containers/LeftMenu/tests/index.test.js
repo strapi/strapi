@@ -1,4 +1,5 @@
 import React from 'react';
+import { shallow } from 'enzyme';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 import pluginTradsEn from '../../../translations/en.json';
 import { BrowserRouter } from 'react-router-dom';
@@ -119,17 +120,25 @@ describe('CTB <LeftMenu />', () => {
   it('Should not crash', () => {
     renderCompo(context);
   });
+  describe('<LeftMenu /> lifecycle', () => {
+    let topCompo;
+    afterEach(() => {
+      topCompo.unmount();
+    });
 
-  describe('CTB <ModelPage /> render', () => {
-    it('should render 5 links in the menu', () => {
-      const wrapper = renderComponent();
-      const links = wrapper.find(LeftMenuLink);
+    describe('Render links', () => {
+      it('should render 5 links in the menu', () => {
+        topCompo = renderComponent();
+        const links = topCompo.find(LeftMenuLink);
 
-      expect(links).toHaveLength(5);
+        expect(links).toHaveLength(5);
+      });
     });
   });
 
-  it('should return a plural string for the user', () => {
-    expect(getSectionTitle('model', [])).toContain('singular');
+  describe('Retrieve section title', () => {
+    it('should return a plural string for the user', () => {
+      expect(getSectionTitle('model', [])).toContain('singular');
+    });
   });
 });
