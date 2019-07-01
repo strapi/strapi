@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const routerJoi = require('koa-router-joi');
+const routerJoi = require('koa-joi-router');
 
 /**
  * Router hook
