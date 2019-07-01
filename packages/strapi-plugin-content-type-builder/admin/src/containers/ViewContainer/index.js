@@ -12,17 +12,15 @@ import LeftMenu from '../LeftMenu';
 
 import { PluginHeader, getQueryParameters } from 'strapi-helper-plugin';
 
-function ViewContainer(props) {
-  const {
-    children,
-    featureType,
-    handleClickIcon,
-    headerTitle,
-    headerDescription,
-    pluginHeaderActions,
-    match: { params },
-  } = props;
-
+function ViewContainer({
+  children,
+  featureType,
+  handleClickIcon,
+  headerTitle,
+  headerDescription,
+  pluginHeaderActions,
+  match: { params },
+}) {
   const getFeatureName = () => {
     return params[`${featureType}Name`].split('&')[0];
   };
@@ -59,6 +57,7 @@ ViewContainer.defaultProps = {
   headerTitle: null,
   headerDescription: null,
   handleClickIcon: () => {},
+  pluginHeaderActions: [],
 };
 
 ViewContainer.propTypes = {
@@ -74,7 +73,10 @@ ViewContainer.propTypes = {
       values: PropTypes.object,
     }),
   ]),
-  pluginHeaderActions: PropTypes.array.isRequired,
+  match: PropTypes.shape({
+    params: PropTypes.object.isRequired,
+  }).isRequired,
+  pluginHeaderActions: PropTypes.array,
 };
 
 export default ViewContainer;

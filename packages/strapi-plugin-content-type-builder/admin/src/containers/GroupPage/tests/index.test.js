@@ -1,14 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import { BrowserRouter } from 'react-router-dom';
-import mountWithIntl from 'testUtils/mountWithIntl';
-import formatMessagesWithPluginId from 'testUtils/formatMessages';
-
-import pluginId from '../../../pluginId';
-import pluginTradsEn from '../../../translations/en.json';
 
 import GroupPage from '../index';
-import MenuContext from '../../MenuContext';
 
 const basePath = '/plugins/content-type-builder/groups';
 const props = {
@@ -91,37 +84,9 @@ const props = {
   },
 };
 
-const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
-const context = { emitEvent: jest.fn() };
-const renderComponent = (props = {}) => {
-  const menuContext = {
-    canOpenModal: true,
-    groups: [],
-    models: [],
-    push: jest.fn(),
-  };
-  return mountWithIntl(
-    <BrowserRouter>
-      <MenuContext.Provider value={menuContext}>
-        <GroupPage {...props} />
-      </MenuContext.Provider>
-    </BrowserRouter>,
-    messages,
-    context
-  );
-};
-
 describe('CTB <GroupPage />', () => {
   it('should not crash', () => {
     shallow(<GroupPage {...props} />);
-  });
-
-  describe('GetFeature', () => {
-    it('should return the correct feature', () => {
-      const { getFeature } = shallow(<GroupPage {...props} />).instance();
-
-      expect(getFeature()).toEqual(props.initialDataGroup.tests);
-    });
   });
 
   describe('GetFeatureHeaderDescription', () => {
@@ -139,63 +104,6 @@ describe('CTB <GroupPage />', () => {
       const { getFeatureName } = shallow(<GroupPage {...props} />).instance();
 
       expect(getFeatureName()).toEqual('tests');
-    });
-  });
-
-  describe('User interactions', () => {
-    let topCompo;
-    afterEach(() => {
-      topCompo.unmount();
-    });
-    const wait = async () => new Promise(resolve => setTimeout(resolve, 100));
-
-    describe('HandleClickIcon', () => {
-      it('should display a notification if thee modal cannot be opened', async () => {
-        props.canOpenModal = false;
-
-        topCompo = renderComponent(props);
-        const wrapper = topCompo.find(GroupPage);
-
-        const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
-        const spyOnDisplayNotification = jest.spyOn(
-          wrapper.instance(),
-          'displayNotificationCTNotSaved'
-        );
-        const { handleClickIcon } = wrapper.instance();
-
-        handleClickIcon();
-
-        expect(spyOnWait).toHaveBeenCalled();
-
-        await wait();
-
-        expect(context.emitEvent).not.toHaveBeenCalledWith(
-          'willEditNameOfGroup'
-        );
-        expect(props.history.push).not.toHaveBeenCalled();
-        expect(spyOnDisplayNotification).toHaveBeenCalled();
-      });
-
-      it('should emit the event editFieldOfGroup', async () => {
-        props.canOpenModal = true;
-        topCompo = renderComponent(props);
-        const wrapper = topCompo.find(GroupPage);
-
-        const spyOnWait = jest.spyOn(wrapper.instance(), 'wait');
-        const { handleClickIcon } = wrapper.instance();
-
-        handleClickIcon();
-
-        expect(spyOnWait).toHaveBeenCalled();
-
-        await wait();
-
-        expect(context.emitEvent).toHaveBeenCalledWith('willEditNameOfGroup');
-        expect(props.history.push).toHaveBeenCalledWith({
-          search:
-            'modalType=group&settingType=base&actionType=edit&modelName=tests',
-        });
-      });
     });
   });
 });
