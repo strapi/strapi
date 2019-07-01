@@ -33,7 +33,7 @@
       "type": "group",
       "group": "ingredients",
       "required": true,
-      "repeatable": false,
+      "repeatable": true,
       "min": 2,
       "max": 3
     }

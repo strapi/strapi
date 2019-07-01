@@ -1,5 +1,6 @@
 {
   "collectionName": "group_ingredients",
+  "connection": "default",
   "attributes": {
     "name": {
       "type": "string",

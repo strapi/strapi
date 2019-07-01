@@ -43,7 +43,7 @@ describe.only('Content Type Builder - Groups', () => {
           schema: {
             name: 'some-group',
             connection: 'default',
-            collectionName: 'some_groups',
+            collectionName: 'groups_some_groups',
             attributes: {},
           },
         },

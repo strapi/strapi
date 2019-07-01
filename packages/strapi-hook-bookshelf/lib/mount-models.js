@@ -6,6 +6,7 @@ const utilsModels = require('strapi-utils').models;
 const utils = require('./utils/');
 const relations = require('./relations');
 const buildDatabaseSchema = require('./buildDatabaseSchema');
+const genGroupRelatons = require('./generate-group-relations');
 
 const PIVOT_PREFIX = '_pivot_';
 
@@ -78,6 +79,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       definition.options
     );
 
+    const groupAttributes = Object.keys(definition.attributes).filter(
+      key => definition.attributes[key].type === 'group'
+    );
+
     if (_.isString(_.get(connection, 'options.pivot_prefix'))) {
       loadedModel.toJSON = function(options = {}) {
         const { shallow = false, omitPivot = false } = options;
@@ -110,44 +115,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       global[definition.globalName] = {};
     }
 
-    const groupAttributes = Object.keys(definition.attributes).filter(
-      key => definition.attributes[key].type === 'group'
-    );
-
-    if (groupAttributes.length > 0) {
-      // create group model
-      const joinTable = `${definition.collectionName}_groups`;
-      const joinModel = ORM.Model.extend({
-        tableName: joinTable,
-        slice() {
-          return this.morphTo(
-            'slice',
-            ...groupAttributes.map(key => {
-              const groupKey = definition.attributes[key].group;
-              return GLOBALS[strapi.groups[groupKey].globalId];
-            })
-          );
-        },
-      });
-
-      const joinColumn = `${pluralize.singular(model)}_id`;
-      groupAttributes.forEach(name => {
-        loadedModel[name] = function() {
-          return this.hasMany(joinModel).query(qb => {
-            qb.where('field', name).orderBy('order');
-          });
-        };
-      });
-
-      await ORM.knex.schema.createTableIfNotExists(joinTable, table => {
-        table.increments();
-        table.string('field');
-        table.integer('order').unsigned();
-        table.string('slice_type');
-        table.integer('slice_id').unsigned();
-        table.integer(joinColumn).unsigned();
-      });
-    }
+    await genGroupRelatons({ model: loadedModel, definition, ORM, GLOBALS });
 
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.

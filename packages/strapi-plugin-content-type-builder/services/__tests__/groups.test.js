@@ -11,7 +11,7 @@ describe('Group Service', () => {
       const expected = {
         name: 'Some name',
         connection: 'default',
-        collectionName: 'some_names',
+        collectionName: 'groups_some_names',
         attributes: {},
       };
 

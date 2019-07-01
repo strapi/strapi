@@ -17,7 +17,7 @@ const createSchema = infos => {
   return {
     name,
     connection,
-    collectionName: collectionName || pluralize(uid),
+    collectionName: collectionName || `groups_${pluralize(uid)}`,
     // TODO: format attributes or sth
     attributes,
   };

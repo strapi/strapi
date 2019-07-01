@@ -43,11 +43,15 @@ module.exports = function(strapi) {
 
   Object.keys(strapi.groups).forEach(key => {
     const group = strapi.groups[key];
+
+    if (!group.connection)
+      throw new Error(`Group ${key} is missing a connection attribute`);
+
+    if (!group.collectionName)
+      throw new Error(`Group ${key} is missing a collectionName attribute`);
+
     return Object.assign(group, {
       globalId: group.globalId || _.upperFirst(_.camelCase(`group_${key}`)),
-      collectionName:
-        group.collectionName || `group_${key}`.toLocaleLowerCase(),
-      connection: group.connection || defaultConnection,
     });
   });
 
