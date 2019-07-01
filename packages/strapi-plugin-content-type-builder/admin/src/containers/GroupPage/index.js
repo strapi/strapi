@@ -102,6 +102,9 @@ class GroupPage extends React.Component {
 
 GroupPage.propTypes = {
   groups: PropTypes.array.isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }),
   match: PropTypes.shape({
     params: PropTypes.shape({
       groupName: PropTypes.string.isRequired,

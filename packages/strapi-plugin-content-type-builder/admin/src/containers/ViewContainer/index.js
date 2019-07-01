@@ -15,19 +15,23 @@ import { PluginHeader, getQueryParameters } from 'strapi-helper-plugin';
 function ViewContainer({
   children,
   featureType,
-  handleClickIcon,
   headerTitle,
   headerDescription,
-  pluginHeaderActions,
   match: { params },
+  onClickIcon,
+  pluginHeaderActions,
 }) {
-  const getFeatureName = () => {
-    return params[`${featureType}Name`].split('&')[0];
+  const getFeatureParams = () => {
+    return params[`${featureType}Name`];
   };
 
-  const icon = getQueryParameters(getFeatureName(), 'source')
-    ? null
-    : 'fa fa-pencil';
+  const getSource = () => {
+    const source = getQueryParameters(getFeatureParams(), 'source');
+
+    return !!source ? source : null;
+  };
+
+  const icon = getSource() ? null : 'fa fa-pencil';
 
   return (
     <StyledViewContainer>
@@ -41,7 +45,7 @@ function ViewContainer({
                 icon={icon}
                 title={headerTitle}
                 actions={pluginHeaderActions}
-                onClickIcon={handleClickIcon}
+                onClickIcon={onClickIcon}
               />
               {children}
             </div>
@@ -56,14 +60,13 @@ ViewContainer.defaultProps = {
   children: null,
   headerTitle: null,
   headerDescription: null,
-  handleClickIcon: () => {},
+  onClickIcon: () => {},
   pluginHeaderActions: [],
 };
 
 ViewContainer.propTypes = {
   children: PropTypes.node,
   featureType: PropTypes.string.isRequired,
-  handleClickIcon: PropTypes.func,
   headerTitle: PropTypes.string,
   headerDescription: PropTypes.oneOfType([
     PropTypes.string,
@@ -76,6 +79,7 @@ ViewContainer.propTypes = {
   match: PropTypes.shape({
     params: PropTypes.object.isRequired,
   }).isRequired,
+  onClickIcon: PropTypes.func,
   pluginHeaderActions: PropTypes.array,
 };
 

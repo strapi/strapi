@@ -16,7 +16,6 @@ import { Prompt } from 'react-router';
 import {
   Button,
   EmptyAttributesBlock,
-  PluginHeader,
   PopUpWarning,
   routerPropTypes,
   getQueryParameters,
@@ -33,7 +32,7 @@ import Ul from '../../components/Ul';
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
 import RelationForm from '../RelationForm';
-import LeftMenu from '../LeftMenu';
+import ViewContainer from '../ViewContainer';
 
 import {
   addAttributeToExistingContentType,
@@ -54,6 +53,7 @@ import styles from './styles.scss';
 export class ModelPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { attrToDelete: null, removePrompt: false, showWarning: false };
+  featureType = 'model';
 
   componentDidMount() {
     const { setTemporaryAttribute } = this.props;
@@ -528,7 +528,7 @@ export class ModelPage extends React.Component {
     const settingType = getQueryParameters(search, 'settingType');
     const attributeType = this.getAttributeType();
     const actionType = this.getActionType();
-    const icon = this.getSource() ? null : 'fa fa-pencil';
+
     return (
       <div className={styles.modelpage}>
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
@@ -539,79 +539,72 @@ export class ModelPage extends React.Component {
             />
           )}
         </FormattedMessage>
-        <div className="container-fluid">
-          <div className="row">
-            <LeftMenu />
-            <div className="col-md-9">
-              <div className={styles.componentsContainer}>
-                <PluginHeader
-                  description={this.getModelDescription()}
-                  icon={icon}
-                  title={this.getPluginHeaderTitle()}
-                  actions={this.getPluginHeaderActions()}
-                  onClickIcon={this.handleClickEditModelMainInfos}
-                />
-                {this.getModelAttributesLength() === 0 ? (
-                  <EmptyAttributesBlock
-                    description="content-type-builder.home.emptyAttributes.description"
-                    id="openAddAttr"
-                    label="content-type-builder.button.attributes.add"
-                    onClick={this.handleClickOpenModalChooseAttributes}
-                    title="content-type-builder.home.emptyAttributes.title"
+
+        <ViewContainer
+          {...this.props}
+          featureType={this.featureType}
+          headerTitle={this.getPluginHeaderTitle()}
+          headerDescription={this.getModelDescription()}
+          pluginHeaderActions={this.getPluginHeaderActions()}
+          onClickIcon={this.handleClickEditModelMainInfos}
+        >
+          {this.getModelAttributesLength() === 0 ? (
+            <EmptyAttributesBlock
+              description="content-type-builder.home.emptyAttributes.description"
+              id="openAddAttr"
+              label="content-type-builder.button.attributes.add"
+              onClick={this.handleClickOpenModalChooseAttributes}
+              title="content-type-builder.home.emptyAttributes.title"
+            />
+          ) : (
+            <Block>
+              <Flex>
+                <ListTitle>
+                  {this.getModelAttributesLength()}
+                  &nbsp;
+                  <FormattedMessage
+                    id={`${listTitleMessageIdBasePrefix}.${
+                      this.getModelAttributesLength() > 1
+                        ? 'plural'
+                        : 'singular'
+                    }`}
                   />
-                ) : (
-                  <Block>
-                    <Flex>
-                      <ListTitle>
-                        {this.getModelAttributesLength()}
-                        &nbsp;
-                        <FormattedMessage
-                          id={`${listTitleMessageIdBasePrefix}.${
-                            this.getModelAttributesLength() > 1
-                              ? 'plural'
-                              : 'singular'
-                          }`}
-                        />
-                        {this.getModelRelationShipsLength() > 0 && (
-                          <React.Fragment>
-                            &nbsp;
-                            <FormattedMessage
-                              id={`${listTitleMessageIdBasePrefix}.including`}
-                            />
-                            &nbsp;
-                            {this.getModelRelationShipsLength()}
-                            &nbsp;
-                            <FormattedMessage
-                              id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
-                                this.getModelRelationShipsLength() > 1
-                                  ? 'plural'
-                                  : 'singular'
-                              }`}
-                            />
-                          </React.Fragment>
-                        )}
-                      </ListTitle>
-                      <div>
-                        <Button
-                          label={`${pluginId}.button.attributes.add`}
-                          onClick={this.handleClickOpenModalChooseAttributes}
-                          secondaryHotlineAdd
-                        />
-                      </div>
-                    </Flex>
-                    <div>
-                      <Ul id="attributesList">
-                        {Object.keys(this.getModelAttributes()).map(
-                          this.renderLi
-                        )}
-                      </Ul>
-                    </div>
-                  </Block>
-                )}
+                  {this.getModelRelationShipsLength() > 0 && (
+                    <React.Fragment>
+                      &nbsp;
+                      <FormattedMessage
+                        id={`${listTitleMessageIdBasePrefix}.including`}
+                      />
+                      &nbsp;
+                      {this.getModelRelationShipsLength()}
+                      &nbsp;
+                      <FormattedMessage
+                        id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
+                          this.getModelRelationShipsLength() > 1
+                            ? 'plural'
+                            : 'singular'
+                        }`}
+                      />
+                    </React.Fragment>
+                  )}
+                </ListTitle>
+                <div>
+                  <Button
+                    label={`${pluginId}.button.attributes.add`}
+                    onClick={this.handleClickOpenModalChooseAttributes}
+                    secondaryHotlineAdd
+                  />
+                </div>
+              </Flex>
+              <div>
+                <Ul id="attributesList">
+                  {Object.keys(this.getModelAttributes()).map(this.renderLi)}
+                </Ul>
               </div>
-            </div>
-          </div>
-        </div>
+            </Block>
+          )}
+        </ViewContainer>
+
         <AttributesModalPicker
           isOpen={modalType === 'chooseAttributes'}
           push={push}

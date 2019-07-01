@@ -27,14 +27,14 @@ describe('CTB <ViewContainer />', () => {
   });
 
   it('should use the defaultProps', () => {
-    delete defaultProps.handleClickIcon;
+    delete defaultProps.onClickIcon;
     renderCompo(defaultProps);
 
     const {
-      defaultProps: { handleClickIcon },
+      defaultProps: { onClickIcon },
     } = ViewContainer;
 
-    expect(handleClickIcon).toBeDefined();
-    expect(handleClickIcon()).toBe(undefined);
+    expect(onClickIcon).toBeDefined();
+    expect(onClickIcon()).toBe(undefined);
   });
 });
