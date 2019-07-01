@@ -28,6 +28,7 @@ function ViewContainer({
   const getSource = () => {
     const source = getQueryParameters(getFeatureParams(), 'source');
 
+    /* eslint-disable no-extra-boolean-cast */
     return !!source ? source : null;
   };
 

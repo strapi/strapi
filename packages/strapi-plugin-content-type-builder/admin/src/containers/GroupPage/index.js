@@ -105,6 +105,9 @@ GroupPage.propTypes = {
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }),
+  location: PropTypes.shape({
+    search: PropTypes.string.isRequired,
+  }),
   match: PropTypes.shape({
     params: PropTypes.shape({
       groupName: PropTypes.string.isRequired,
