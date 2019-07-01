@@ -10,6 +10,14 @@ const groupSchema = yup.object({
   attributes: yup.object().required('attributes.required'),
 });
 
+const validateGroupInput = async data =>
+  groupSchema
+    .validate(data, {
+      strict: true,
+      abortEarly: false,
+    })
+    .catch(error => Promise.reject(formatYupErrors(error)));
+
 // shorter access to the group service
 const internals = {
   get service() {
@@ -57,14 +65,10 @@ module.exports = {
   async createGroup(ctx) {
     const { body } = ctx.request;
 
-    await ctx.validate(groupSchema);
     try {
-      await groupSchema.validate(body, {
-        strict: true,
-        abortEarly: false,
-      });
+      await validateGroupInput(body);
     } catch (error) {
-      return ctx.send({ error: formatYupErrors(error) }, 400);
+      return ctx.send({ error }, 400);
     }
 
     const uid = internals.service.createGroupUID(body.name);
@@ -94,12 +98,9 @@ module.exports = {
     }
 
     try {
-      await groupSchema.validate(body, {
-        strict: true,
-        abortEarly: false,
-      });
+      await validateGroupInput(body);
     } catch (error) {
-      return ctx.send({ error: formatYupErrors(error) }, 400);
+      return ctx.send({ error }, 400);
     }
 
     const updatedGroup = await internals.service.updateGroup(group, body);
