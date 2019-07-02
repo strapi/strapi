@@ -26,7 +26,7 @@ strapi new my-project --quickstart
 
 Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 
-- Complete the form to create an Administrator user.
+- Complete the form to create the first Administrator user.
 - Click **Ready to start**.
 
 ## 4. Create a new Content Type
@@ -53,12 +53,12 @@ Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/
 
 - Click the **"+ Add Content Type"** button.
 - Enter `category`.
-- Click **"+ Add New Field"**
+- A window opens with fields options:
   - Click the **String** field.
   - Type `category` under the **BASE SETTINGS** tab, in the **Name** field.
   - Check `Required field` and `Unique field` under the **ADVANCED SETTINGS** tab.
   - Click **Continue**.
-- Click **"+ Add New Field"**
+- In the field options window:
   - Click the **Relation Field** field.
   - On the right side, click the **Permissions** dropdown and select, `Restaurant`.
   - In the center, select the icon the represents `many-to-many`. The text should read, `Categories has and belongs to Many Restaurants`.
@@ -76,7 +76,7 @@ You will see your restaurant listed in the entries.
 
 ## 7. Add categories to the "Category" Content Type
 
-Navigate to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/category?source=content-manager).
+Navigate to [**CONTENT TYPES** - **Categories**](http://localhost:1337/admin/plugins/content-manager/category?source=content-manager).
 
 - Click on **+ Add New Category** button. Type `Convenient` in the **Category** field. Select `Strapi Restaurant`, on the right, from **Restaurant (0)**
 - Click **Save**.
@@ -93,7 +93,7 @@ Navigate back to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/adm
 - Click on `Strapi Restaurant`
 - On the right, under **Categories(1)**, `select` the `Add an item...`, and add **Time Saving** as a category for this restaurant.
 
-**Two different ways** to use the **relation** field type to add and connect relations to other fields.
+You have now seen **two different ways** to use the **relation** field type to add and connect relations between content types.
 
 ## 8. Set roles and permissions
 
@@ -104,7 +104,7 @@ Navigate to [**PLUGINS** - **Roles & Permissions**](http://localhost:1337/admin/
 - Repeat and scroll down under **Permissions**, find **Category**. Click the checkbox next to **find** and **findone**.
 - Click **Save**.
 
-## 9. Consume the Content Type API
+## 9. Consume the Content Type's API
 
 Here we are! The list of **restaurants** is accessible at [`http://localhost:1337/restaurants`](http://localhost:1337/restaurants).
 
