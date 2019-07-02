@@ -7934,17 +7934,17 @@ graceful-fs@^4.1.10, graceful-fs@^4.1.11, graceful-fs@^4.1.15, graceful-fs@^4.1.
   resolved "https://registry.yarnpkg.com/graceful-readlink/-/graceful-readlink-1.0.1.tgz#4cafad76bc62f02fa039b2f94e9a3dd3a391a725"
   integrity sha1-TK+tdrxi8C+gObL5Tpo906ORpyU=
 
-grant-koa@^4.2.0:
-  version "4.5.2"
-  resolved "https://registry.yarnpkg.com/grant-koa/-/grant-koa-4.5.2.tgz#a02e49c5ff3e593253023f3b3115441b1d0f54c7"
-  integrity sha512-lbBE2LjQhf14nRJAlVv5P5ld1V6wQhRn107Db1R0oQ/AtLtJA5cNe0YqYJS2ofl9pDJj+x1apShYVRWK6i4k/w==
+grant-koa@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/grant-koa/-/grant-koa-4.6.0.tgz#00ae29c66d1ad3b3b284bb9742cdbf934ba25fbf"
+  integrity sha512-zzSU+94m5kPN4Yb5gmRoJk34j50OBFCIczaUaB2n+o+NV84hTLXCRESZhp5BtvBDRY4ZTbsIKsgwCzsBHozQog==
   dependencies:
-    grant "4.5.2"
+    grant "4.6.0"
 
-grant@4.5.2:
-  version "4.5.2"
-  resolved "https://registry.yarnpkg.com/grant/-/grant-4.5.2.tgz#5401f119e6f119772386e5fb2e0eccf5d0d2c8b7"
-  integrity sha512-96hyS0ouJ5CaO30YWLb9zatc2r23aLKvaM+81qnZWCpmL3l4/KTdaRoNG4X/e93vlmryyJr5jus/jrqctT6iFw==
+grant@4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/grant/-/grant-4.6.0.tgz#2704bdeb27f6f3cae03b2fbf6eecf1415bc77bc5"
+  integrity sha512-jAhKZssj5EMtC2XQSfUq/+wU0mbYYsUFWHb9cdV4XPdS6IINmEMIwI68Wj9MpLJTrUQJ48CzqfGpo4Mve11RvQ==
   dependencies:
     qs "^6.7.0"
     request-compose "^1.2.0"
