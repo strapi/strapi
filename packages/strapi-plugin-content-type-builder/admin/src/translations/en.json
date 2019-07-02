@@ -18,6 +18,7 @@
   "attribute.text": "Text",
   "button.attributes.add": "Add New Field",
   "button.contentType.add": "Add a Content Type",
+  "button.group.add": "Add a Group",
   "button.models.create": "Create a Content Type",
   "button.groups.create": "Create a Group",
   "contentType.temporaryDisplay": "(Not saved)",

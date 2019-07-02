@@ -72,7 +72,10 @@ function LeftMenu() {
         <ul className="menu-list">
           {renderLinks('models', models)}
           <li>
-            <CustomLink onClick={() => handleClickOpenModalCreateCT('model')} />
+            <CustomLink
+              featureType="contentType"
+              onClick={() => handleClickOpenModalCreateCT('model')}
+            />
           </li>
         </ul>
       </section>
@@ -83,7 +86,10 @@ function LeftMenu() {
         <ul className="menu-list">
           {renderLinks('groups', groups)}
           <li>
-            <CustomLink onClick={() => handleClickOpenModalCreateCT('group')} />
+            <CustomLink
+              featureType="group"
+              onClick={() => handleClickOpenModalCreateCT('group')}
+            />
           </li>
         </ul>
       </section>

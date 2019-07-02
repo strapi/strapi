@@ -5,18 +5,19 @@ import pluginId from '../../pluginId';
 
 import StyledCustomLink from './StyledCustomLink';
 
-const CustomLink = ({ onClick }) => (
+const CustomLink = ({ onClick, featureType }) => (
   <StyledCustomLink>
     <button onClick={onClick} role="button">
       <p>
         <i className="fa fa-plus" />
-        <FormattedMessage id={`${pluginId}.button.contentType.add`} />
+        <FormattedMessage id={`${pluginId}.button.${featureType}.add`} />
       </p>
     </button>
   </StyledCustomLink>
 );
 
 CustomLink.propTypes = {
+  featureType: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
 };
 
