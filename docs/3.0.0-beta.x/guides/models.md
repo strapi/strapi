@@ -294,7 +294,7 @@ module.exports = {
       .populate('author');
 
     // Send the list of users.
-    ctx.body = users;
+    ctx.body = articles;
   }
 }
 ```

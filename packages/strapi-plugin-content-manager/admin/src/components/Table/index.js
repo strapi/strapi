@@ -38,7 +38,7 @@ class Table extends React.Component {
             key={key}
             destination={`${this.props.route.path.replace(
               ':slug',
-              this.props.routeParams.slug,
+              this.props.routeParams.slug
             )}/${record[this.props.primaryKey]}`}
             headers={this.props.headers}
             record={record}
@@ -71,6 +71,7 @@ class Table extends React.Component {
             <TableDelete
               colspan={this.props.headers.length + 1}
               number={entriesToDeleteNumber}
+              total={this.props.records.length}
               onToggleDeleteAll={this.props.onToggleDeleteAll}
             />
           )}

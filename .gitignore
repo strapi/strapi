@@ -126,5 +126,8 @@ packages/strapi-generate-new/files/public/
 
 # *.cache
 
+############################
+# Visual Studio Code
+############################
 
 front-workspace.code-workspace

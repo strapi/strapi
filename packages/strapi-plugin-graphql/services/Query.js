@@ -9,6 +9,7 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const policyUtils = require('strapi-utils').policy;
+const compose = require('koa-compose');
 
 module.exports = {
   /**
@@ -262,7 +263,7 @@ module.exports = {
       });
 
       // Execute policies stack.
-      const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
+      const policy = await compose(policiesFn)(ctx);
 
       // Policy doesn't always return errors but they update the current context.
       if (

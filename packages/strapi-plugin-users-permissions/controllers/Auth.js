@@ -9,6 +9,7 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
+const grant = require('grant-koa');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -37,7 +38,7 @@ module.exports = {
           null,
           ctx.request.admin
             ? [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]
-            : 'Please provide your username or your e-mail.',
+            : 'Please provide your username or your e-mail.'
         );
       }
 
@@ -47,7 +48,7 @@ module.exports = {
           null,
           ctx.request.admin
             ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]
-            : 'Please provide your password.',
+            : 'Please provide your password.'
         );
       }
 
@@ -64,7 +65,8 @@ module.exports = {
       }
 
       // Check if the user exists.
-      const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
+      const user = await strapi.plugins['users-permissions']
+        .queries('user', 'users-permissions')
         .findOne(query, ['role']);
 
       if (!user) {
@@ -72,7 +74,7 @@ module.exports = {
           null,
           ctx.request.admin
             ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }]
-            : 'Identifier or password invalid.',
+            : 'Identifier or password invalid.'
         );
       }
 
@@ -84,7 +86,7 @@ module.exports = {
           null,
           ctx.request.admin
             ? [{ messages: [{ id: 'Auth.form.error.confirmed' }] }]
-            : 'Your account email is not confirmed.',
+            : 'Your account email is not confirmed.'
         );
       }
 
@@ -93,7 +95,7 @@ module.exports = {
           null,
           ctx.request.admin
             ? [{ messages: [{ id: 'Auth.form.error.blocked' }] }]
-            : 'Your account has been blocked by the administrator.',
+            : 'Your account has been blocked by the administrator.'
         );
       }
 
@@ -103,7 +105,7 @@ module.exports = {
           null,
           ctx.request.admin
             ? [{ messages: [{ id: 'Auth.form.error.password.local' }] }]
-            : 'This user never set a local password, please login thanks to the provider used during account creation.',
+            : 'This user never set a local password, please login thanks to the provider used during account creation.'
         );
       }
 
@@ -116,12 +118,12 @@ module.exports = {
           null,
           ctx.request.admin
             ? [{ messages: [{ id: 'Auth.form.error.invalid' }] }]
-            : 'Identifier or password invalid.',
+            : 'Identifier or password invalid.'
         );
       } else {
         ctx.send({
           jwt: strapi.plugins['users-permissions'].services.jwt.issue(
-            _.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']),
+            _.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])
           ),
           user: _.omit(user.toJSON ? user.toJSON() : user, [
             'password',
@@ -143,20 +145,20 @@ module.exports = {
       } catch ([user, error]) {
         return ctx.badRequest(
           null,
-          error === 'array' ? (ctx.request.admin ? error[0] : error[1]) : error,
+          error === 'array' ? (ctx.request.admin ? error[0] : error[1]) : error
         );
       }
 
       if (!user) {
         return ctx.badRequest(
           null,
-          error === 'array' ? (ctx.request.admin ? error[0] : error[1]) : error,
+          error === 'array' ? (ctx.request.admin ? error[0] : error[1]) : error
         );
       }
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(
-          _.pick(user, ['_id', 'id']),
+          _.pick(user, ['_id', 'id'])
         ),
         user: _.omit(user.toJSON ? user.toJSON() : user, [
           'password',
@@ -175,7 +177,8 @@ module.exports = {
       params.password === params.passwordConfirmation &&
       params.code
     ) {
-      const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
+      const user = await strapi.plugins['users-permissions']
+        .queries('user', 'users-permissions')
         .findOne({ resetPasswordToken: params.code });
 
       if (!user) {
@@ -183,7 +186,7 @@ module.exports = {
           null,
           ctx.request.admin
             ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }]
-            : 'Incorrect code provided.',
+            : 'Incorrect code provided.'
         );
       }
 
@@ -198,16 +201,18 @@ module.exports = {
       const data = _.omit(
         user,
         strapi.plugins['users-permissions'].models.user.associations.map(
-          ast => ast.alias,
-        ),
+          ast => ast.alias
+        )
       );
 
       // Update the user.
-      await strapi.plugins['users-permissions'].queries('user', 'users-permissions').update(data);
+      await strapi.plugins['users-permissions']
+        .queries('user', 'users-permissions')
+        .update(data);
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(
-          _.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']),
+          _.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])
         ),
         user: _.omit(user.toJSON ? user.toJSON() : user, [
           'password',
@@ -223,14 +228,14 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }]
-          : 'Passwords do not match.',
+          : 'Passwords do not match.'
       );
     } else {
       return ctx.badRequest(
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.params.provide' }] }]
-          : 'Incorrect params provided.',
+          : 'Incorrect params provided.'
       );
     }
   },
@@ -258,17 +263,15 @@ module.exports = {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
 
-    const Grant = require('grant-koa');
-    const grant = new Grant(grantConfig);
-
-    return strapi.koaMiddlewares.compose(grant.middleware)(ctx, next);
+    return grant(grantConfig)(ctx, next);
   },
 
   forgotPassword: async ctx => {
     const { email, url } = ctx.request.body;
 
     // Find the user user thanks to his email.
-    const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
+    const user = await strapi.plugins['users-permissions']
+      .queries('user', 'users-permissions')
       .findOne({ email });
 
     // User not found.
@@ -277,7 +280,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.user.not-exist' }] }]
-          : 'This email does not exist.',
+          : 'This email does not exist.'
       );
     }
 
@@ -340,12 +343,14 @@ module.exports = {
     const data = _.omit(
       user,
       strapi.plugins['users-permissions'].models.user.associations.map(
-        ast => ast.alias,
-      ),
+        ast => ast.alias
+      )
     );
 
     // Update the user.
-    await strapi.plugins['users-permissions'].queries('user', 'users-permissions').update(data);
+    await strapi.plugins['users-permissions']
+      .queries('user', 'users-permissions')
+      .update(data);
 
     ctx.send({ ok: true });
   },
@@ -366,7 +371,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.advanced.allow_register' }] }]
-          : 'Register action is currently disabled.',
+          : 'Register action is currently disabled.'
       );
     }
 
@@ -380,7 +385,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.password.provide' }] }]
-          : 'Please provide your password.',
+          : 'Please provide your password.'
       );
     }
 
@@ -388,18 +393,19 @@ module.exports = {
     // contains more than two times the symbol '$'.
     if (
       strapi.plugins['users-permissions'].services.user.isHashed(
-        params.password,
+        params.password
       )
     ) {
       return ctx.badRequest(
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.password.format' }] }]
-          : 'Your password cannot contain more than three times the symbol `$`.',
+          : 'Your password cannot contain more than three times the symbol `$`.'
       );
     }
 
-    const role = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
+    const role = await strapi.plugins['users-permissions']
+      .queries('role', 'users-permissions')
       .findOne({ type: settings.default_role }, []);
 
     if (!role) {
@@ -407,7 +413,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.role.notFound' }] }]
-          : 'Impossible to find the default role.',
+          : 'Impossible to find the default role.'
       );
     }
 
@@ -423,16 +429,18 @@ module.exports = {
       'users-permissions'
     ].services.user.hashPassword(params);
 
-    const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions').findOne({
-      email: params.email,
-    });
+    const user = await strapi.plugins['users-permissions']
+      .queries('user', 'users-permissions')
+      .findOne({
+        email: params.email,
+      });
 
     if (user && user.provider === params.provider) {
       return ctx.badRequest(
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }]
-          : 'Email is already taken.',
+          : 'Email is already taken.'
       );
     }
 
@@ -441,7 +449,7 @@ module.exports = {
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.email.taken' }] }]
-          : 'Email is already taken.',
+          : 'Email is already taken.'
       );
     }
 
@@ -450,11 +458,12 @@ module.exports = {
         params.confirmed = true;
       }
 
-      const user = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
+      const user = await strapi.plugins['users-permissions']
+        .queries('user', 'users-permissions')
         .create(params);
 
       const jwt = strapi.plugins['users-permissions'].services.jwt.issue(
-        _.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id']),
+        _.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])
       );
 
       if (settings.email_confirmation) {
@@ -472,7 +481,7 @@ module.exports = {
         ].services.userspermissions.template(settings.message, {
           URL: new URL(
             '/auth/email-confirmation',
-            strapi.config.url,
+            strapi.config.url
           ).toString(),
           USER: _.omit(user.toJSON ? user.toJSON() : user, [
             'password',
@@ -526,7 +535,7 @@ module.exports = {
 
       ctx.badRequest(
         null,
-        ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message,
+        ctx.request.admin ? [{ messages: [{ id: adminError }] }] : err.message
       );
     }
   },
@@ -535,12 +544,12 @@ module.exports = {
     const params = ctx.query;
 
     const user = await strapi.plugins['users-permissions'].services.jwt.verify(
-      params.confirmation,
+      params.confirmation
     );
 
     await strapi.plugins['users-permissions'].services.user.edit(
       _.pick(user, ['_id', 'id']),
-      { confirmed: true },
+      { confirmed: true }
     );
 
     const settings = await strapi
