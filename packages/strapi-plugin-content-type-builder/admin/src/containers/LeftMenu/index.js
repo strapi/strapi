@@ -73,7 +73,7 @@ function LeftMenu() {
           {renderLinks('models', models)}
           <li>
             <CustomLink
-              featureType="model"
+              featureType="contentType"
               onClick={() => handleClickOpenModalCreateCT('model')}
             />
           </li>
