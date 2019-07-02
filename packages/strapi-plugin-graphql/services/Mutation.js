@@ -8,9 +8,9 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const compose = require('koa-compose');
 const policyUtils = require('strapi-utils').policy;
 const Query = require('./Query.js');
-/* eslint-disable no-unused-vars */
 
 module.exports = {
   /**
@@ -178,7 +178,7 @@ module.exports = {
       });
 
       // Execute policies stack.
-      const policy = await strapi.koaMiddlewares.compose(policiesFn)(ctx);
+      const policy = await compose(policiesFn)(ctx);
 
       // Policy doesn't always return errors but they update the current context.
       if (

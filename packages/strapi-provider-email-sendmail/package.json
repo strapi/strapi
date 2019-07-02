@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-email-sendmail",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.8",
   "description": "Sendmail provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -12,6 +12,7 @@
   },
   "main": "./lib",
   "dependencies": {
+    "lodash": "^4.17.11",
     "sendmail": "^1.2.0"
   },
   "strapi": {

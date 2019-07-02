@@ -71,25 +71,25 @@ module.exports = ({ model, modelKey }) => {
     },
 
     async delete(params) {
-      params.values = {};
+      const values = {};
       model.associations.map(association => {
         switch (association.nature) {
           case 'oneWay':
           case 'oneToOne':
           case 'manyToOne':
           case 'oneToManyMorph':
-            params.values[association.alias] = null;
+            values[association.alias] = null;
             break;
           case 'oneToMany':
           case 'manyToMany':
           case 'manyToManyMorph':
-            params.values[association.alias] = [];
+            values[association.alias] = [];
             break;
           default:
         }
       });
 
-      await model.updateRelations(params);
+      await model.updateRelations({ ...params, values });
       return model.forge(params).destroy();
     },
 

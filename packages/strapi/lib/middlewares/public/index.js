@@ -6,10 +6,8 @@
 
 // Node.js core.
 const path = require('path');
-
-// Public modules
 const _ = require('lodash');
-const Koa = require('koa'); // eslint-disable-line no-unused-vars
+const koaStatic = require('koa-static');
 
 /**
  * Public assets hook
@@ -21,7 +19,9 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize() {
+      const { maxAge } = strapi.config.middleware.settings.public;
+
       const staticDir = path.resolve(
         strapi.dir,
         strapi.config.middleware.settings.public.path ||
@@ -38,8 +38,8 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static(staticDir, {
-            maxage: strapi.config.middleware.settings.public.maxAge,
+          koaStatic(staticDir, {
+            maxage: maxAge,
             defer: true,
           }),
         ],
@@ -54,13 +54,12 @@ module.exports = strapi => {
         handler: [
           async (ctx, next) => {
             const parse = path.parse(ctx.url);
-
             ctx.url = path.join(parse.dir, parse.base);
 
             await next();
           },
-          strapi.koaMiddlewares.static(staticDir, {
-            maxage: strapi.config.middleware.settings.public.maxAge,
+          koaStatic(staticDir, {
+            maxage: maxAge,
             defer: true,
           }),
         ],
@@ -85,8 +84,8 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static(buildDir, {
-            maxage: strapi.config.middleware.settings.public.maxAge,
+          koaStatic(buildDir, {
+            maxage: maxAge,
             defer: true,
           }),
         ],
@@ -106,8 +105,8 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static(buildDir, {
-            maxage: strapi.config.middleware.settings.public.maxAge,
+          koaStatic(buildDir, {
+            maxage: maxAge,
             defer: true,
           }),
         ],
@@ -123,14 +122,12 @@ module.exports = strapi => {
 
             await next();
           },
-          strapi.koaMiddlewares.static(buildDir, {
-            maxage: strapi.config.middleware.settings.public.maxAge,
+          koaStatic(buildDir, {
+            maxage: maxAge,
             defer: true,
           }),
         ],
       });
-
-      cb();
     },
   };
 };

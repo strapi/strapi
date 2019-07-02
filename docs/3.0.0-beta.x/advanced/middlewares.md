@@ -19,7 +19,8 @@ Enable the middleware in environments settings
 ```js
 module.exports = strapi => {
   return {
-    initialize: function(cb) {
+    // can also be async
+    initialize() {
       strapi.app.use(async (ctx, next) => {
         const start = Date.now();
 
@@ -30,14 +31,12 @@ module.exports = strapi => {
         // Set X-Response-Time header
         ctx.set('X-Response-Time', delta + 'ms');
       });
-
-      cb();
     },
   };
 };
 ```
 
-- `initialize` (function): Called during the server boot. The callback `cb` needs to be called. Otherwise, the middleware won't be loaded into the stack.
+- `initialize` (function): Called during the server boot.
 
 The core of Strapi embraces a small list of middlewares for performances, security and great error handling.
 

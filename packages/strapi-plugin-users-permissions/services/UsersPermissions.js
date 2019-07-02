@@ -130,7 +130,7 @@ module.exports = {
           },
         },
         (err, response, body) => {
-          if (response.statusCode !== 200 || err) {
+          if (err || response.statusCode !== 200) {
             return resolve([]);
           }
 

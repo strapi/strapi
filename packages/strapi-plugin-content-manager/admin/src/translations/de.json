@@ -22,6 +22,7 @@
   "components.LimitSelect.itemsPerPage": "Einträge pro Seite",
   "components.Search.placeholder": "Suche nach einem Eintrag....",
   "components.TableDelete.delete": "Alle löschen",
+  "components.TableDelete.deleteSelected": "Ausgewählte löschen",
   "components.TableDelete.entries.plural": "{number} ausgewählte Einträge",
   "components.TableDelete.entries.singular": "{number} ausgewählter Eintrag",
   "components.TableEmpty.withFilters": "Es gibt keinen {contentType} mit den verwendeten Filtern...",

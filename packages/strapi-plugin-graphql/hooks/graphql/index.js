@@ -23,8 +23,11 @@ module.exports = strapi => {
       strapi.config.hook.load.after.push('graphql');
       // Load core utils.
 
-      const configs = await loadConfigs({ appPath, installedPlugins });
-      _.merge(strapi, configs);
+      const { api, plugins, extensions } = await loadConfigs({
+        appPath,
+        installedPlugins,
+      });
+      _.merge(strapi, { api, plugins });
 
       /*
        * Create a merge of all the GraphQL configuration.
@@ -37,11 +40,15 @@ module.exports = strapi => {
         _.get(strapi.plugins[key], 'config.schema.graphql', {})
       );
 
+      const extensionsSchemas = Object.keys(extensions || {}).map(key =>
+        _.get(extensions[key], 'config.schema.graphql', {})
+      );
+
       // save the final schema in the plugin's config
       _.set(
         strapi,
         ['plugins', 'graphql', 'config', '_schema', 'graphql'],
-        mergeSchemas([...apisSchemas, ...pluginsSchemas])
+        mergeSchemas([...apisSchemas, ...pluginsSchemas, ...extensionsSchemas])
       );
     },
 
