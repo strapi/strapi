@@ -18,7 +18,7 @@ export default {
       ]).then(([docsearch]) => {
         docsearch = docsearch.default
         docsearch(Object.assign(this.options, {
-          debug: true,
+          debug: false,
           inputSelector: '#algolia-search-input'
         }))
       })
