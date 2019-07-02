@@ -151,12 +151,12 @@ async function askDatabaseInfos(scope) {
 }
 
 async function installDatabaseTestingDep({ scope, configuration }) {
-  let packageCmd = scope.hasYarn
+  let packageCmd = scope.useYarn
     ? `yarnpkg --cwd ${scope.tmpPath} add`
     : `npm install --prefix ${scope.tmpPath}`;
 
   // Manually create the temp directory for yarn
-  if (scope.hasYarn) {
+  if (scope.useYarn) {
     await fse.ensureDir(scope.tmpPath);
   }
 

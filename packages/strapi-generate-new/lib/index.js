@@ -20,6 +20,8 @@ module.exports = (projectDirectory, cliArguments) => {
     `strapi${crypto.randomBytes(6).toString('hex')}`
   );
 
+  const useNpm = cliArguments.useNpm !== undefined;
+
   const scope = {
     rootPath,
     name: basename(rootPath),
@@ -32,7 +34,8 @@ module.exports = (projectDirectory, cliArguments) => {
     uuid: uuid(),
     deviceId: machineIdSync(),
     tmpPath,
-    hasYarn: hasYarn(),
+    // use yarn if available and --use-npm isn't true
+    useYarn: !useNpm && hasYarn(),
     strapiDependencies: [
       'strapi',
       'strapi-admin',

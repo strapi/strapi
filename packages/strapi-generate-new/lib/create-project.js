@@ -99,7 +99,7 @@ module.exports = async function createProject(
   console.log();
   console.log(`Your application was created at ${chalk.green(rootPath)}.\n`);
 
-  const cmd = chalk.cyan(scope.hasYarn ? 'yarn' : 'npm run');
+  const cmd = chalk.cyan(scope.useYarn ? 'yarn' : 'npm run');
 
   console.log('Available commands in your project:');
   console.log();
@@ -120,8 +120,8 @@ module.exports = async function createProject(
 };
 
 const installArguments = ['install', '--production', '--no-optional'];
-function runInstall({ rootPath, hasYarn }) {
-  if (hasYarn) {
+function runInstall({ rootPath, useYarn }) {
+  if (useYarn) {
     return execa('yarnpkg', installArguments, {
       cwd: rootPath,
       stdin: 'ignore',
