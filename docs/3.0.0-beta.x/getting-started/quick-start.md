@@ -93,7 +93,7 @@ Navigate back to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/adm
 - Click on `Strapi Restaurant`
 - On the right, under **Categories(1)**, `select` the `Add an item...`, and add **Time Saving** as a category for this restaurant.
 
-**Two different ways** to use the **relation** field type to add and connect relations to other fields.
+You have now seen **two different ways** to use the **relation** field type to add and connect relations between content types.
 
 ## 8. Set roles and permissions
 
