@@ -12,7 +12,11 @@ const moment = require('moment');
 const pathToRegexp = require('path-to-regexp');
 const defaultComponents = require('./utils/components.json');
 const form = require('./utils/forms.json');
+const defaultSettings = require('../config/settings.json');
 const parametersOptions = require('./utils/parametersOptions.json');
+
+// keys to pick from the extended config
+const defaultSettingsKeys = Object.keys(defaultSettings);
 
 module.exports = {
   areObjectsEquals: (obj1, obj2) => {
@@ -20,8 +24,12 @@ module.exports = {
   },
 
   checkIfAPIDocNeedsUpdate: function(apiName) {
-    const prevDocumentation = this.createDocObject(this.retrieveDocumentation(apiName));
-    const currentDocumentation = this.createDocObject(this.createDocumentationFile(apiName, false));
+    const prevDocumentation = this.createDocObject(
+      this.retrieveDocumentation(apiName)
+    );
+    const currentDocumentation = this.createDocObject(
+      this.createDocumentationFile(apiName, false)
+    );
 
     return !this.areObjectsEquals(prevDocumentation, currentDocumentation);
   },
@@ -49,9 +57,11 @@ module.exports = {
   },
 
   checkIfPluginDocNeedsUpdate: function(pluginName) {
-    const prevDocumentation = this.createDocObject(this.retrieveDocumentation(pluginName, true));
+    const prevDocumentation = this.createDocObject(
+      this.retrieveDocumentation(pluginName, true)
+    );
     const currentDocumentation = this.createDocObject(
-      this.createPluginDocumentationFile(pluginName, false),
+      this.createPluginDocumentationFile(pluginName, false)
     );
 
     return !this.areObjectsEquals(prevDocumentation, currentDocumentation);
@@ -68,7 +78,9 @@ module.exports = {
 
   checkIfPluginDefaultDocumentFileExists: function(pluginName, docName) {
     try {
-      fs.accessSync(this.getPluginOverrideDocumentationPath(pluginName, docName));
+      fs.accessSync(
+        this.getPluginOverrideDocumentationPath(pluginName, docName)
+      );
       return true;
     } catch (err) {
       return false;
@@ -113,7 +125,7 @@ module.exports = {
         if (err.code === 'ENOENT') {
           // Throw the original parentDir error on curDir `ENOENT` failure.
           throw new Error(
-            `Impossible to create the documentation folder in '${parentDir}', please check the permissions.`,
+            `Impossible to create the documentation folder in '${parentDir}', please check the permissions.`
           );
         }
 
@@ -138,16 +150,32 @@ module.exports = {
     const apiDocumentation = this.generateApiDocumentation(apiName, apiRoutes);
 
     return Object.keys(apiDocumentation).reduce((acc, docName) => {
-      const targetFile = path.resolve(this.getDocumentationPath(apiName), `${docName}.json`);
+      const targetFile = path.resolve(
+        this.getDocumentationPath(apiName),
+        `${docName}.json`
+      );
       // Create the components object in each documentation file when we can create it
       const components =
-        strapi.models[docName] !== undefined ? this.generateResponseComponent(docName) : {};
-      const tags = docName.split('-').length > 1 ? [] : this.generateTags(apiName, docName);
-      const documentation = Object.assign(apiDocumentation[docName], components, { tags });
+        strapi.models[docName] !== undefined
+          ? this.generateResponseComponent(docName)
+          : {};
+      const tags =
+        docName.split('-').length > 1
+          ? []
+          : this.generateTags(apiName, docName);
+      const documentation = Object.assign(
+        apiDocumentation[docName],
+        components,
+        { tags }
+      );
 
       try {
         if (writeFile) {
-          return fs.writeFileSync(targetFile, JSON.stringify(documentation, null, 2), 'utf8');
+          return fs.writeFileSync(
+            targetFile,
+            JSON.stringify(documentation, null, 2),
+            'utf8'
+          );
         } else {
           return acc.concat(documentation);
         }
@@ -159,28 +187,44 @@ module.exports = {
 
   createPluginDocumentationFile: function(pluginName, writeFile = true) {
     const pluginRoutes = this.getPluginRoutesWithDescription(pluginName);
-    const pluginDocumentation = this.generatePluginDocumentation(pluginName, pluginRoutes);
+    const pluginDocumentation = this.generatePluginDocumentation(
+      pluginName,
+      pluginRoutes
+    );
 
     return Object.keys(pluginDocumentation).reduce((acc, docName) => {
       const targetFile = path.resolve(
         this.getPluginDocumentationPath(pluginName),
-        `${docName}.json`,
+        `${docName}.json`
       );
       const components =
-        _.get(strapi, this.getModelForPlugin(docName, pluginName)) !== undefined &&
-        pluginName !== 'upload'
+        _.get(strapi, this.getModelForPlugin(docName, pluginName)) !==
+          undefined && pluginName !== 'upload'
           ? this.generateResponseComponent(docName, pluginName, true)
           : {};
       const [plugin, name] = this.getModelAndNameForPlugin(docName, pluginName);
       const tags =
         docName !== 'unclassified'
-          ? this.generateTags(plugin, docName, _.upperFirst(this.formatTag(plugin, name)), true)
+          ? this.generateTags(
+              plugin,
+              docName,
+              _.upperFirst(this.formatTag(plugin, name)),
+              true
+            )
           : [];
-      const documentation = Object.assign(pluginDocumentation[docName], components, { tags });
+      const documentation = Object.assign(
+        pluginDocumentation[docName],
+        components,
+        { tags }
+      );
 
       try {
         if (writeFile) {
-          return fs.writeFileSync(targetFile, JSON.stringify(documentation, null, 2), 'utf8');
+          return fs.writeFileSync(
+            targetFile,
+            JSON.stringify(documentation, null, 2),
+            'utf8'
+          );
         } else {
           return acc.concat(documentation);
         }
@@ -194,8 +238,13 @@ module.exports = {
     return array.reduce((acc, curr) => _.merge(acc, curr), {});
   },
 
-  deleteDocumentation: async function(version = this.getDocumentationVersion()) {
-    const recursiveDeleteFiles = async (folderPath, removeCompleteFolder = true) => {
+  deleteDocumentation: async function(
+    version = this.getDocumentationVersion()
+  ) {
+    const recursiveDeleteFiles = async (
+      folderPath,
+      removeCompleteFolder = true
+    ) => {
       // Check if folderExist
       try {
         const arrayOfPromises = [];
@@ -208,9 +257,15 @@ module.exports = {
           // Check if directory
           if (fs.lstatSync(itemPath).isDirectory()) {
             if (removeCompleteFolder) {
-              return arrayOfPromises.push(recursiveDeleteFiles(itemPath), removeCompleteFolder);
+              return arrayOfPromises.push(
+                recursiveDeleteFiles(itemPath),
+                removeCompleteFolder
+              );
             } else if (!itemPath.includes('overrides')) {
-              return arrayOfPromises.push(recursiveDeleteFiles(itemPath), removeCompleteFolder);
+              return arrayOfPromises.push(
+                recursiveDeleteFiles(itemPath),
+                removeCompleteFolder
+              );
             }
           } else {
             // Delete all files
@@ -243,7 +298,13 @@ module.exports = {
     const plugins = this.getPluginsWithDocumentationNeeded();
 
     apis.forEach(api => {
-      const apiPath = path.join(strapi.config.appPath, 'api', api, 'documentation', version);
+      const apiPath = path.join(
+        strapi.config.appPath,
+        'api',
+        api,
+        'documentation',
+        version
+      );
       arrayOfPromises.push(recursiveDeleteFiles(apiPath));
     });
 
@@ -253,7 +314,7 @@ module.exports = {
         'extensions',
         plugin,
         'documentation',
-        version,
+        version
       );
 
       if (version !== '1.0.0') {
@@ -268,7 +329,7 @@ module.exports = {
       'extensions',
       'documentation',
       'documentation',
-      version,
+      version
     );
     arrayOfPromises.push(recursiveDeleteFiles(fullDocPath));
 
@@ -320,7 +381,8 @@ module.exports = {
       (acc, curr) => {
         const attribute = attributes[curr];
         const isField =
-          !attribute.hasOwnProperty('model') && !attribute.hasOwnProperty('collection');
+          !attribute.hasOwnProperty('model') &&
+          !attribute.hasOwnProperty('collection');
 
         if (attribute.required) {
           acc.required.push(curr);
@@ -332,14 +394,17 @@ module.exports = {
           const newGetter = getter.slice();
           newGetter.splice(newGetter.length - 1, 1, 'associations');
           const relationNature = _.get(strapi, newGetter).filter(
-            association => association.alias === curr,
+            association => association.alias === curr
           )[0].nature;
 
           switch (relationNature) {
             case 'manyToMany':
             case 'oneToMany':
             case 'manyToManyMorph':
-              acc.properties[curr] = { type: 'array', items: { type: 'string' } };
+              acc.properties[curr] = {
+                type: 'array',
+                items: { type: 'string' },
+              };
               break;
             default:
               acc.properties[curr] = { type: 'string' };
@@ -348,7 +413,7 @@ module.exports = {
 
         return acc;
       },
-      { required: ['id'], properties: { id: { type: 'string' } } },
+      { required: ['id'], properties: { id: { type: 'string' } } }
     );
   },
 
@@ -371,7 +436,7 @@ module.exports = {
       let verb;
 
       if (Array.isArray(current.method)) {
-        verb = current.method.map((method) => method.toLowerCase());
+        verb = current.method.map(method => method.toLowerCase());
       } else {
         verb = current.method.toLowerCase();
       }
@@ -379,7 +444,10 @@ module.exports = {
       let key;
       let tags;
 
-      if (controllerName.toLowerCase() === apiName && !_.isObject(routeTagConfig)) {
+      if (
+        controllerName.toLowerCase() === apiName &&
+        !_.isObject(routeTagConfig)
+      ) {
         key = apiName;
       } else if (routeTagConfig !== undefined) {
         if (_.isObject(routeTagConfig)) {
@@ -387,7 +455,9 @@ module.exports = {
           const referencePlugin = !_.isEmpty(plugin);
 
           key = referencePlugin ? `${plugin}-${name}` : name.toLowerCase();
-          tags = referencePlugin ? this.formatTag(plugin, name) : _.upperFirst(name);
+          tags = referencePlugin
+            ? this.formatTag(plugin, name)
+            : _.upperFirst(name);
         } else {
           key = routeTagConfig.toLowerCase();
         }
@@ -402,7 +472,7 @@ module.exports = {
           current.handler,
           key,
           endPoint.split('/')[1],
-          current.config.description,
+          current.config.description
         ),
         responses: this.generateResponses(verb, current, key),
         summary: '',
@@ -411,7 +481,7 @@ module.exports = {
 
       // Swagger is not support key with ',' symbol, for array of methods need generate documentation for each method
       if (Array.isArray(verb)) {
-        verb.forEach((method) => {
+        verb.forEach(method => {
           _.set(acc, [key, 'paths', endPoint, method], verbObject);
         });
       } else {
@@ -452,32 +522,36 @@ module.exports = {
         }
 
         if (Array.isArray(verb)) {
-          verb.forEach((method) => {
+          verb.forEach(method => {
             _.set(
               acc,
               [key, 'paths', endPoint, method, 'requestBody'],
-              requestBody,
+              requestBody
             );
           });
         } else {
           _.set(
             acc,
             [key, 'paths', endPoint, verb, 'requestBody'],
-            requestBody,
+            requestBody
           );
         }
       }
 
       // Refer to https://swagger.io/specification/#pathItemObject
-      const parameters = this.generateVerbParameters(verb, controllerMethod, current.path);
+      const parameters = this.generateVerbParameters(
+        verb,
+        controllerMethod,
+        current.path
+      );
 
       if (!verb.includes('post')) {
         if (Array.isArray(verb)) {
-          verb.forEach((method) => {
+          verb.forEach(method => {
             _.set(
               acc,
               [key, 'paths', endPoint, method, 'parameters'],
-              parameters,
+              parameters
             );
           });
         } else {
@@ -493,8 +567,14 @@ module.exports = {
     const apisDoc = this.retrieveDocumentationFiles(false, version);
     const pluginsDoc = this.retrieveDocumentationFiles(true, version);
     const appDoc = [...apisDoc, ...pluginsDoc];
-    const defaultSettings = _.cloneDeep(strapi.plugins.documentation.config);
-    _.set(defaultSettings, ['info', 'x-generation-date'], moment().format('L LTS'));
+    const defaultSettings = _.cloneDeep(
+      _.pick(strapi.plugins.documentation.config, defaultSettingsKeys)
+    );
+    _.set(
+      defaultSettings,
+      ['info', 'x-generation-date'],
+      moment().format('L LTS')
+    );
     _.set(defaultSettings, ['info', 'version'], version);
     const tags = appDoc.reduce((acc, current) => {
       const tags = current.tags.filter(el => {
@@ -507,7 +587,7 @@ module.exports = {
       appDoc.reduce((acc, current) => {
         return _.merge(acc, current);
       }, defaultSettings),
-      defaultComponents,
+      defaultComponents
       // { tags },
     );
 
@@ -543,22 +623,35 @@ module.exports = {
 
         if (attribute.model || attribute.collection) {
           const currentAssociation = associations.filter(
-            association => association.alias === current,
+            association => association.alias === current
           )[0];
           const relationNature = currentAssociation.nature;
-          const name = currentAssociation.model || currentAssociation.collection;
+          const name =
+            currentAssociation.model || currentAssociation.collection;
           const getter =
             currentAssociation.plugin !== undefined
-              ? ['plugins', currentAssociation.plugin, 'models', name, 'attributes']
+              ? [
+                  'plugins',
+                  currentAssociation.plugin,
+                  'models',
+                  name,
+                  'attributes',
+                ]
               : ['models', name.toLowerCase(), 'attributes'];
           const associationAttributes = _.get(strapi, getter);
-          const associationSchema = this.generateAssociationSchema(associationAttributes, getter);
+          const associationSchema = this.generateAssociationSchema(
+            associationAttributes,
+            getter
+          );
 
           switch (relationNature) {
             case 'manyToMany':
             case 'oneToMany':
             case 'manyToManyMorph':
-              acc.properties[current] = { type: 'array', items: associationSchema };
+              acc.properties[current] = {
+                type: 'array',
+                items: associationSchema,
+              };
               break;
             default:
               acc.properties[current] = associationSchema;
@@ -578,7 +671,7 @@ module.exports = {
 
         return acc;
       },
-      { required: ['id'], properties: { id: { type: 'string' } } },
+      { required: ['id'], properties: { id: { type: 'string' } } }
     );
   },
 
@@ -594,7 +687,7 @@ module.exports = {
       let verb;
 
       if (Array.isArray(current.method)) {
-        verb = current.method.map((method) => method.toLowerCase());
+        verb = current.method.map(method => method.toLowerCase());
       } else {
         verb = current.method.toLowerCase();
       }
@@ -613,9 +706,17 @@ module.exports = {
         tags = !_.isEmpty(tag) ? [tag] : ['Unclassified'];
       }
 
-      const hasDefaultDocumentation = this.checkIfPluginDefaultDocumentFileExists(pluginName, key);
+      const hasDefaultDocumentation = this.checkIfPluginDefaultDocumentFileExists(
+        pluginName,
+        key
+      );
       const defaultDocumentation = hasDefaultDocumentation
-        ? this.getPluginDefaultVerbDocumentation(pluginName, key, endPoint, verb)
+        ? this.getPluginDefaultVerbDocumentation(
+            pluginName,
+            key,
+            endPoint,
+            verb
+          )
         : null;
       const verbObject = {
         deprecated: false,
@@ -630,24 +731,24 @@ module.exports = {
       const parameters = this.generateVerbParameters(
         verb,
         actionType,
-        `/${pluginName}${current.path}`,
+        `/${pluginName}${current.path}`
       );
 
       if (_.isEmpty(defaultDocumentation)) {
         if (!verb.includes('post')) {
           if (Array.isArray(verb)) {
-            verb.forEach((method) => {
+            verb.forEach(method => {
               _.set(
                 acc,
                 [key, 'paths', endPoint, method, 'parameters'],
-                parameters,
+                parameters
               );
             });
           } else {
             _.set(
               acc,
               [key, 'paths', endPoint, verb, 'parameters'],
-              parameters,
+              parameters
             );
           }
         }
@@ -692,18 +793,18 @@ module.exports = {
           }
 
           if (Array.isArray(verb)) {
-            verb.forEach((method) => {
+            verb.forEach(method => {
               _.set(
                 acc,
                 [key, 'paths', endPoint, method, 'requestBody'],
-                requestBody,
+                requestBody
               );
             });
           } else {
             _.set(
               acc,
               [key, 'paths', endPoint, verb, 'requestBody'],
-              requestBody,
+              requestBody
             );
           }
         }
@@ -715,10 +816,20 @@ module.exports = {
 
   generatePluginResponseSchema: function(tag) {
     const { actionType, name, plugin } = _.isObject(tag) ? tag : { tag };
-    const getter = plugin ? ['plugins', plugin, 'models', name.toLowerCase()] : ['models', name];
+    const getter = plugin
+      ? ['plugins', plugin, 'models', name.toLowerCase()]
+      : ['models', name];
     const isModelRelated =
       _.get(strapi, getter) !== undefined &&
-      ['find', 'findOne', 'create', 'search', 'update', 'destroy', 'count'].includes(actionType);
+      [
+        'find',
+        'findOne',
+        'create',
+        'search',
+        'update',
+        'destroy',
+        'count',
+      ].includes(actionType);
     const $ref = plugin
       ? `#/components/schemas/${this.formatTag(plugin, name, true)}`
       : `#/components/schemas/${_.upperFirst(name)}`;
@@ -837,7 +948,12 @@ module.exports = {
   generateResponses: function(verb, routeObject, tag) {
     const endPoint = routeObject.path.split('/')[1];
     const description = this.generateResponseDescription(verb, tag, endPoint);
-    const schema = this.generateResponseSchema(verb, routeObject, tag, endPoint);
+    const schema = this.generateResponseSchema(
+      verb,
+      routeObject,
+      tag,
+      endPoint
+    );
 
     return {
       200: {
@@ -904,8 +1020,12 @@ module.exports = {
    */
   generateResponseComponent: function(tag, pluginName = '', isPlugin = false) {
     // The component's name have to be capitalised
-    const [plugin, name] = isPlugin ? this.getModelAndNameForPlugin(tag, pluginName) : [null, null];
-    const upperFirstTag = isPlugin ? this.formatTag(plugin, name, true) : _.upperFirst(tag);
+    const [plugin, name] = isPlugin
+      ? this.getModelAndNameForPlugin(tag, pluginName)
+      : [null, null];
+    const upperFirstTag = isPlugin
+      ? this.formatTag(plugin, name, true)
+      : _.upperFirst(tag);
     const attributesGetter = isPlugin
       ? [...this.getModelForPlugin(tag, plugin), 'attributes']
       : ['models', tag, 'attributes'];
@@ -923,7 +1043,11 @@ module.exports = {
       .map(obj => obj.alias);
 
     // We always create two nested components from the main one
-    const mainComponent = this.generateMainComponent(attributes, modelAssociations, upperFirstTag);
+    const mainComponent = this.generateMainComponent(
+      attributes,
+      modelAssociations,
+      upperFirstTag
+    );
 
     // Get Component that doesn't display the privates attributes since a mask is applied
     // Please refer https://github.com/strapi/strapi/blob/585800b7b98093f596759b296a43f89c491d4f4f/packages/strapi/lib/middlewares/mask/index.js#L92-L100
@@ -934,14 +1058,18 @@ module.exports = {
         }
         return acc;
       },
-      { required: mainComponent.required, properties: {} },
+      { required: mainComponent.required, properties: {} }
     );
 
     // Special component only for POST || PUT verbs since the upload is made with a different route
     const postComponent = Object.keys(mainComponent).reduce((acc, current) => {
       if (current === 'required') {
         const required = mainComponent.required.slice().filter(attr => {
-          return associationsWithUpload.indexOf(attr) === -1 && attr !== 'id' && attr !== '_id';
+          return (
+            associationsWithUpload.indexOf(attr) === -1 &&
+            attr !== 'id' &&
+            attr !== '_id'
+          );
         });
 
         if (required.length > 0) {
@@ -950,34 +1078,38 @@ module.exports = {
       }
 
       if (current === 'properties') {
-        const properties = Object.keys(mainComponent.properties).reduce((acc, current) => {
-          if (
-            associationsWithUpload.indexOf(current) === -1 &&
-            current !== 'id' &&
-            current !== '_id'
-          ) {
-            // The post request shouldn't include nested relations of type 2
-            // For instance if a product has many tags
-            // we expect to find an array of tags objects containing other relations in the get response
-            // and since we use to getComponent to generate this one we need to
-            // remove this object since we only send an array of tag ids.
-            if (_.find(modelAssociations, ['alias', current])) {
-              const isArrayProperty =
-                _.get(mainComponent, ['properties', current, 'type']) !== undefined;
+        const properties = Object.keys(mainComponent.properties).reduce(
+          (acc, current) => {
+            if (
+              associationsWithUpload.indexOf(current) === -1 &&
+              current !== 'id' &&
+              current !== '_id'
+            ) {
+              // The post request shouldn't include nested relations of type 2
+              // For instance if a product has many tags
+              // we expect to find an array of tags objects containing other relations in the get response
+              // and since we use to getComponent to generate this one we need to
+              // remove this object since we only send an array of tag ids.
+              if (_.find(modelAssociations, ['alias', current])) {
+                const isArrayProperty =
+                  _.get(mainComponent, ['properties', current, 'type']) !==
+                  undefined;
 
-              if (isArrayProperty) {
-                acc[current] = { type: 'array', items: { type: 'string' } };
+                if (isArrayProperty) {
+                  acc[current] = { type: 'array', items: { type: 'string' } };
+                } else {
+                  acc[current] = { type: 'string' };
+                }
               } else {
-                acc[current] = { type: 'string' };
+                // If the field is not an association we take the one from the component
+                acc[current] = mainComponent.properties[current];
               }
-            } else {
-              // If the field is not an association we take the one from the component
-              acc[current] = mainComponent.properties[current];
             }
-          }
 
-          return acc;
-        }, {});
+            return acc;
+          },
+          {}
+        );
 
         acc.properties = properties;
       }
@@ -1006,14 +1138,10 @@ module.exports = {
     const isModelRelated = strapi.models[tag] !== undefined && tag === endPoint;
 
     if (Array.isArray(verb)) {
-      verb = verb.map((method) => method.toLocaleLowerCase());
+      verb = verb.map(method => method.toLocaleLowerCase());
     }
 
-    if (
-      verb.includes('get') ||
-      verb.includes('put') ||
-      verb.includes('post')
-    ) {
+    if (verb.includes('get') || verb.includes('put') || verb.includes('post')) {
       return isModelRelated ? `Retrieve ${tag} document(s)` : 'response';
     } else if (verb.includes('delete')) {
       return isModelRelated
@@ -1051,7 +1179,8 @@ module.exports = {
     const routeReferenceTag = _.get(routeObject, ['config', 'tag']);
     let isModelRelated = false;
     const shouldCheckIfACustomEndPointReferencesAnotherModel =
-      _.isObject(routeReferenceTag) && !_.isEmpty(_.get(routeReferenceTag, 'name'));
+      _.isObject(routeReferenceTag) &&
+      !_.isEmpty(_.get(routeReferenceTag, 'name'));
 
     if (shouldCheckIfACustomEndPointReferencesAnotherModel) {
       const { actionType, name, plugin } = routeReferenceTag;
@@ -1086,7 +1215,8 @@ module.exports = {
       }
     } else {
       // Normal way there's no tag object
-      isModelRelated = strapi.models[tag] !== undefined && tag === _.lowerCase(controller);
+      isModelRelated =
+        strapi.models[tag] !== undefined && tag === _.lowerCase(controller);
     }
 
     // We create a component when we are sure that we can 'guess' what's needed to be sent
@@ -1198,11 +1328,17 @@ module.exports = {
         return '';
       }
       case 'delete':
-        return isModelRelated ? `Delete a single ${tag} record` : 'Delete a record';
+        return isModelRelated
+          ? `Delete a single ${tag} record`
+          : 'Delete a record';
       case 'post':
-        return isModelRelated ? `Create a new ${tag} record` : 'Create a new record';
+        return isModelRelated
+          ? `Create a new ${tag} record`
+          : 'Create a new record';
       case 'put':
-        return isModelRelated ? `Update a single ${tag} record` : 'Update a record';
+        return isModelRelated
+          ? `Update a single ${tag} record`
+          : 'Update a record';
       case 'patch':
         return '';
       case 'head':
@@ -1256,7 +1392,10 @@ module.exports = {
   getAPIOverrideComponentsDocumentation: function(apiName, docName) {
     try {
       const documentation = JSON.parse(
-        fs.readFileSync(this.getAPIOverrideDocumentationPath(apiName, docName), 'utf8'),
+        fs.readFileSync(
+          this.getAPIOverrideDocumentationPath(apiName, docName),
+          'utf8'
+        )
       );
 
       return _.get(documentation, 'components', null);
@@ -1268,7 +1407,10 @@ module.exports = {
   getAPIDefaultTagsDocumentation: function(name, docName) {
     try {
       const documentation = JSON.parse(
-        fs.readFileSync(this.getAPIOverrideDocumentationPath(name, docName), 'utf8'),
+        fs.readFileSync(
+          this.getAPIOverrideDocumentationPath(name, docName),
+          'utf8'
+        )
       );
 
       return _.get(documentation, 'tags', null);
@@ -1280,7 +1422,10 @@ module.exports = {
   getAPIDefaultVerbDocumentation: function(apiName, docName, routePath, verb) {
     try {
       const documentation = JSON.parse(
-        fs.readFileSync(this.getAPIOverrideDocumentationPath(apiName, docName), 'utf8'),
+        fs.readFileSync(
+          this.getAPIOverrideDocumentationPath(apiName, docName),
+          'utf8'
+        )
       );
 
       return _.get(documentation, ['paths', routePath, verb], null);
@@ -1297,7 +1442,7 @@ module.exports = {
       'documentation',
       'overrides',
       this.getDocumentationVersion(),
-      `${docName}.json`,
+      `${docName}.json`
     );
   },
 
@@ -1317,7 +1462,7 @@ module.exports = {
       apiName,
       'documentation',
       this.getDocumentationVersion(),
-      'overrides',
+      'overrides'
     );
   },
 
@@ -1332,12 +1477,17 @@ module.exports = {
       'api',
       apiName,
       'documentation',
-      this.getDocumentationVersion(),
+      this.getDocumentationVersion()
     );
   },
 
   getFullDocumentationPath: () => {
-    return path.join(strapi.config.appPath, 'extensions', 'documentation', 'documentation');
+    return path.join(
+      strapi.config.appPath,
+      'extensions',
+      'documentation',
+      'documentation'
+    );
   },
 
   /**
@@ -1352,8 +1502,16 @@ module.exports = {
   /**
    * Retrieve the documentation plugin documentation directory
    */
-  getMergedDocumentationPath: function(version = this.getDocumentationVersion()) {
-    return path.join(strapi.config.appPath, 'extensions', 'documentation', 'documentation', version);
+  getMergedDocumentationPath: function(
+    version = this.getDocumentationVersion()
+  ) {
+    return path.join(
+      strapi.config.appPath,
+      'extensions',
+      'documentation',
+      'documentation',
+      version
+    );
   },
 
   /**
@@ -1367,7 +1525,8 @@ module.exports = {
       .map(attr => {
         const attribute = modelAttributes[attr];
         const isField =
-          !attribute.hasOwnProperty('model') && !attribute.hasOwnProperty('collection');
+          !attribute.hasOwnProperty('model') &&
+          !attribute.hasOwnProperty('collection');
 
         if (!isField) {
           const name = attribute.model || attribute.collection;
@@ -1418,10 +1577,18 @@ module.exports = {
     }
   },
 
-  getPluginDefaultVerbDocumentation: function(pluginName, docName, routePath, verb) {
+  getPluginDefaultVerbDocumentation: function(
+    pluginName,
+    docName,
+    routePath,
+    verb
+  ) {
     try {
       const documentation = JSON.parse(
-        fs.readFileSync(this.getPluginOverrideDocumentationPath(pluginName, docName), 'utf8'),
+        fs.readFileSync(
+          this.getPluginOverrideDocumentationPath(pluginName, docName),
+          'utf8'
+        )
       );
 
       return _.get(documentation, ['paths', routePath, verb], null);
@@ -1433,7 +1600,10 @@ module.exports = {
   getPluginDefaultTagsDocumentation: function(pluginName, docName) {
     try {
       const documentation = JSON.parse(
-        fs.readFileSync(this.getPluginOverrideDocumentationPath(pluginName, docName), 'utf8'),
+        fs.readFileSync(
+          this.getPluginOverrideDocumentationPath(pluginName, docName),
+          'utf8'
+        )
       );
 
       return _.get(documentation, ['tags'], null);
@@ -1445,7 +1615,10 @@ module.exports = {
   getPluginOverrideComponents: function(pluginName, docName) {
     try {
       const documentation = JSON.parse(
-        fs.readFileSync(this.getPluginOverrideDocumentationPath(pluginName, docName), 'utf8'),
+        fs.readFileSync(
+          this.getPluginOverrideDocumentationPath(pluginName, docName),
+          'utf8'
+        )
       );
 
       return _.get(documentation, 'components', null);
@@ -1461,7 +1634,7 @@ module.exports = {
       pluginName,
       'documentation',
       this.getDocumentationVersion(),
-      'overrides',
+      'overrides'
     );
 
     if (docName) {
@@ -1480,7 +1653,7 @@ module.exports = {
       'extensions',
       pluginName,
       'documentation',
-      this.getDocumentationVersion(),
+      this.getDocumentationVersion()
     );
   },
 
@@ -1506,9 +1679,11 @@ module.exports = {
    * @returns {Array}
    */
   getPluginRoutesWithDescription: function(pluginName) {
-    return _.get(strapi, ['plugins', pluginName, 'config', 'routes'], []).filter(
-      route => _.get(route, ['config', 'description']) !== undefined,
-    );
+    return _.get(
+      strapi,
+      ['plugins', pluginName, 'config', 'routes'],
+      []
+    ).filter(route => _.get(route, ['config', 'description']) !== undefined);
   },
 
   /**
@@ -1539,7 +1714,9 @@ module.exports = {
    * @returns {Boolean}
    */
   isPluginDocumentationNeeded: function(pluginName) {
-    const pluginRoutesWithDescription = this.getPluginRoutesWithDescription(pluginName);
+    const pluginRoutesWithDescription = this.getPluginRoutesWithDescription(
+      pluginName
+    );
 
     return pluginRoutesWithDescription.length > 0;
   },
@@ -1551,13 +1728,22 @@ module.exports = {
    * @returns {Object}
    */
   mergeComponents: (initObj, srcObj) => {
-    const cleanedObj = Object.keys(_.get(initObj, 'schemas', {})).reduce((acc, current) => {
-      const targetObj = _.get(srcObj, ['schemas'], {}).hasOwnProperty(current) ? srcObj : initObj;
+    const cleanedObj = Object.keys(_.get(initObj, 'schemas', {})).reduce(
+      (acc, current) => {
+        const targetObj = _.get(srcObj, ['schemas'], {}).hasOwnProperty(current)
+          ? srcObj
+          : initObj;
 
-      _.set(acc, ['schemas', current], _.get(targetObj, ['schemas', current], {}));
+        _.set(
+          acc,
+          ['schemas', current],
+          _.get(targetObj, ['schemas', current], {})
+        );
 
-      return acc;
-    }, {});
+        return acc;
+      },
+      {}
+    );
 
     return _.merge(cleanedObj, srcObj);
   },
@@ -1565,15 +1751,18 @@ module.exports = {
   mergePaths: function(initObj, srcObj) {
     return Object.keys(initObj.paths).reduce((acc, current) => {
       if (_.get(srcObj, ['paths'], {}).hasOwnProperty(current)) {
-        const verbs = Object.keys(initObj.paths[current]).reduce((acc1, curr) => {
-          const verb = this.mergeVerbObject(
-            initObj.paths[current][curr],
-            _.get(srcObj, ['paths', current, curr], {}),
-          );
-          _.set(acc1, [curr], verb);
+        const verbs = Object.keys(initObj.paths[current]).reduce(
+          (acc1, curr) => {
+            const verb = this.mergeVerbObject(
+              initObj.paths[current][curr],
+              _.get(srcObj, ['paths', current, curr], {})
+            );
+            _.set(acc1, [curr], verb);
 
-          return acc1;
-        }, {});
+            return acc1;
+          },
+          {}
+        );
         _.set(acc, ['paths', current], verbs);
       } else {
         _.set(acc, ['paths', current], _.get(initObj, ['paths', current], {}));
@@ -1605,8 +1794,20 @@ module.exports = {
 
   retrieveDocumentation: function(name, isPlugin = false) {
     const documentationPath = isPlugin
-      ? [strapi.config.appPath, 'extensions', name, 'documentation', this.getDocumentationVersion()]
-      : [strapi.config.appPath, 'api', name, 'documentation', this.getDocumentationVersion()];
+      ? [
+          strapi.config.appPath,
+          'extensions',
+          name,
+          'documentation',
+          this.getDocumentationVersion(),
+        ]
+      : [
+          strapi.config.appPath,
+          'api',
+          name,
+          'documentation',
+          this.getDocumentationVersion(),
+        ];
 
     try {
       const documentationFiles = fs
@@ -1616,7 +1817,10 @@ module.exports = {
       return documentationFiles.reduce((acc, current) => {
         try {
           const doc = JSON.parse(
-            fs.readFileSync(path.resolve([...documentationPath, current].join('/')), 'utf8'),
+            fs.readFileSync(
+              path.resolve([...documentationPath, current].join('/')),
+              'utf8'
+            )
           );
           acc.push(doc);
         } catch (err) {
@@ -1635,12 +1839,23 @@ module.exports = {
    * @param {Boolean} isPlugin
    * @returns {Array}
    */
-  retrieveDocumentationFiles: function(isPlugin = false, version = this.getDocumentationVersion()) {
-    const array = isPlugin ? this.getPluginsWithDocumentationNeeded() : this.getApis();
+  retrieveDocumentationFiles: function(
+    isPlugin = false,
+    version = this.getDocumentationVersion()
+  ) {
+    const array = isPlugin
+      ? this.getPluginsWithDocumentationNeeded()
+      : this.getApis();
 
     return array.reduce((acc, current) => {
       const documentationPath = isPlugin
-        ? [strapi.config.appPath, 'extensions', current, 'documentation', version]
+        ? [
+            strapi.config.appPath,
+            'extensions',
+            current,
+            'documentation',
+            version,
+          ]
         : [strapi.config.appPath, 'api', current, 'documentation', version];
 
       try {
@@ -1651,7 +1866,10 @@ module.exports = {
         documentationFiles.forEach(el => {
           try {
             let documentation = JSON.parse(
-              fs.readFileSync(path.resolve([...documentationPath, el].join('/')), 'utf8'),
+              fs.readFileSync(
+                path.resolve([...documentationPath, el].join('/')),
+                'utf8'
+              )
             );
             /* eslint-disable indent */
             const overrideDocumentationPath = isPlugin
@@ -1662,7 +1880,7 @@ module.exports = {
                   'documentation',
                   version,
                   'overrides',
-                  el,
+                  el
                 )
               : path.resolve(
                   strapi.config.appPath,
@@ -1671,29 +1889,40 @@ module.exports = {
                   'documentation',
                   version,
                   'overrides',
-                  el,
+                  el
                 );
             /* eslint-enable indent */
             let overrideDocumentation;
 
             try {
               overrideDocumentation = JSON.parse(
-                fs.readFileSync(overrideDocumentationPath, 'utf8'),
+                fs.readFileSync(overrideDocumentationPath, 'utf8')
               );
             } catch (err) {
               overrideDocumentation = null;
             }
 
             if (!_.isEmpty(overrideDocumentation)) {
-              documentation.paths = this.mergePaths(documentation, overrideDocumentation).paths;
+              documentation.paths = this.mergePaths(
+                documentation,
+                overrideDocumentation
+              ).paths;
               documentation.tags = _.cloneDeep(
-                this.mergeTags(documentation, overrideDocumentation),
+                this.mergeTags(documentation, overrideDocumentation)
               );
-              const documentationComponents = _.get(documentation, 'components', {});
-              const overrideComponents = _.get(overrideDocumentation, 'components', {});
+              const documentationComponents = _.get(
+                documentation,
+                'components',
+                {}
+              );
+              const overrideComponents = _.get(
+                overrideDocumentation,
+                'components',
+                {}
+              );
               const mergedComponents = this.mergeComponents(
                 documentationComponents,
-                overrideComponents,
+                overrideComponents
               );
 
               if (!_.isEmpty(mergedComponents)) {
@@ -1705,14 +1934,19 @@ module.exports = {
           } catch (err) {
             strapi.log.error(err);
             console.log(
-              `Unable to access the documentation for ${[...documentationPath, el].join('/')}`,
+              `Unable to access the documentation for ${[
+                ...documentationPath,
+                el,
+              ].join('/')}`
             );
           }
         });
       } catch (err) {
         strapi.log.error(err);
         console.log(
-          `Unable to retrieve documentation for the ${isPlugin ? 'plugin' : 'api'} ${current}`,
+          `Unable to retrieve documentation for the ${
+            isPlugin ? 'plugin' : 'api'
+          } ${current}`
         );
       }
 
@@ -1727,8 +1961,12 @@ module.exports = {
         try {
           const doc = JSON.parse(
             fs.readFileSync(
-              path.resolve(this.getFullDocumentationPath(), version, 'full_documentation.json'),
-            ),
+              path.resolve(
+                this.getFullDocumentationPath(),
+                version,
+                'full_documentation.json'
+              )
+            )
           );
           const generatedDate = _.get(doc, ['info', 'x-generation-date'], null);
 

@@ -66,7 +66,11 @@ module.exports = {
       // Silent recursive parser.
       const parser = value => {
         try {
-          value = JSON.parse(value);
+          const parsed = JSON.parse(value);
+          // do not modify initial value if it is string except 'null'
+          if (_.isObject(parsed) || _.isNull(parsed)) {
+            value = parsed;
+          }
         } catch (e) {
           // Silent.
         }
@@ -118,7 +122,11 @@ module.exports = {
       // Silent recursive parser.
       const parser = value => {
         try {
-          value = JSON.parse(value);
+          const parsed = JSON.parse(value);
+          // do not modify initial value if it is string except 'null'
+          if (_.isObject(parsed) || _.isNull(parsed)) {
+            value = parsed;
+          }
         } catch (e) {
           // Silent.
         }

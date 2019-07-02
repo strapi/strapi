@@ -101,6 +101,7 @@ class Strapi extends EventEmitter {
     };
 
     this.fs = createStrapiFs(this);
+    this.requireProjectBootstrap();
   }
 
   requireProjectBootstrap() {
@@ -266,8 +267,9 @@ class Strapi extends EventEmitter {
      * Handle plugin extensions
      */
     // merge extensions config folders
-    _.mergeWith(this.plugins, extensions.merges, (objValue, srcValue) => {
-      if (_.isArray(srcValue) && _.isArray(objValue)) {
+    _.mergeWith(this.plugins, extensions.merges, (objValue, srcValue, key) => {
+      // concat routes
+      if (_.isArray(srcValue) && _.isArray(objValue) && key === 'routes') {
         return srcValue.concat(objValue);
       }
     });

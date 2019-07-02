@@ -48,7 +48,9 @@ module.exports = {
             reply_to: options.replyTo,
             subject: options.subject,
             text: options.text,
-            html: options.html
+            html: options.html,
+            templateId: options.templateId,
+            dynamic_template_data: options.dynamic_template_data,
           };
 
           sendgrid.send(msg, function (err) {

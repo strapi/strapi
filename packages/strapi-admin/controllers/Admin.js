@@ -256,7 +256,7 @@ module.exports = {
       );
     }
 
-    const data = await adminQueries.update(ctx.params, values);
+    const data = await adminQueries.update(ctx.params, user);
 
     // Send 200 `ok`
     ctx.send(data);
