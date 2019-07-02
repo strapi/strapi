@@ -1,5 +1,4 @@
 import React from 'react';
-import { shallow } from 'enzyme';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 import pluginTradsEn from '../../../translations/en.json';
 import { BrowserRouter } from 'react-router-dom';

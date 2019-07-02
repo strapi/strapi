@@ -7,7 +7,11 @@ import pluginId from '../../pluginId';
 import ViewContainer from '../ViewContainer';
 import AttributesModalPicker from '../AttributesPickerModal';
 
-import { EmptyAttributesBlock, getQueryParameters } from 'strapi-helper-plugin';
+import {
+  BackHeader,
+  EmptyAttributesBlock,
+  getQueryParameters,
+} from 'strapi-helper-plugin';
 
 /* eslint-disable no-extra-boolean-cast */
 class GroupPage extends React.Component {
@@ -62,6 +66,8 @@ class GroupPage extends React.Component {
     return search;
   };
 
+  handleGoBack = () => this.props.history.goBack();
+
   isUpdatingTempFeature = () => {
     const { groups } = this.props;
     const currentData = groups.find(d => d.name === this.getFeatureName());
@@ -76,6 +82,7 @@ class GroupPage extends React.Component {
 
     return (
       <>
+        <BackHeader onClick={this.handleGoBack} />
         <ViewContainer
           {...this.props}
           featureType={this.featureType}

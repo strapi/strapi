@@ -198,7 +198,7 @@ class ModelForm extends React.Component {
     );
   };
 
-  renderNavLinks = (link, index) => {
+  renderNavLink = (link, index) => {
     const { activeTab } = this.props;
 
     return (
@@ -249,7 +249,7 @@ class ModelForm extends React.Component {
             </HeaderModalTitle>
             <div className="settings-tabs">
               <HeaderModalNavContainer>
-                {NAVLINKS.map(this.renderNavLinks)}
+                {NAVLINKS.map(this.renderNavLink)}
               </HeaderModalNavContainer>
             </div>
             <hr />
@@ -287,8 +287,8 @@ ModelForm.defaultProps = {
   createTempFeature: () => {},
   isOpen: false,
   isUpdatingTemporaryFeature: false,
-  featureType: 'model',
   featureToEditName: '',
+  featureType: 'model',
   modifiedData: {},
   onChangeExistingFeatureMainInfos: () => {},
   onSubmit: e => {

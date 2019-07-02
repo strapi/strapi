@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty } from 'lodash';
+import { get, isEmpty, upperFirst } from 'lodash';
 
 import { InputsIndex as Input } from 'strapi-helper-plugin';
 
@@ -20,12 +20,16 @@ import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
+import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperModal from '../../components/WrapperModal';
 
 import NaturePicker from './NaturePicker';
 import RelationWrapper from './RelationWrapper';
 import RelationBox from './RelationBox';
+
+import Icon from '../../assets/icons/icon_type_ct.png';
+import IconGroup from '../../assets/icons/icon_type_groups.png';
 
 import formAdvanced from './advanced.json';
 
@@ -89,6 +93,12 @@ class RelationForm extends React.Component {
     }));
 
     return formErrors;
+  };
+
+  getIcon = () => {
+    const { featureType } = this.props;
+
+    return featureType === 'model' ? Icon : IconGroup;
   };
 
   handleClick = model => {
@@ -279,6 +289,28 @@ class RelationForm extends React.Component {
         onToggle={this.handleToggle}
       >
         <HeaderModal>
+          <section>
+            <HeaderModalTitle>
+              <img src={this.getIcon()} alt="ct" />
+              <span>{titleContent}</span>
+            </HeaderModalTitle>
+          </section>
+          <section>
+            <HeaderModalTitle>
+              <FormattedMessage
+                id={`${pluginId}.popUpForm.${actionType || 'create'}`}
+              />
+            </HeaderModalTitle>
+            <div className="settings-tabs">
+              <HeaderModalNavContainer>
+                {NAVLINKS.map(this.renderNavLink)}
+              </HeaderModalNavContainer>
+            </div>
+            <hr />
+          </section>
+        </HeaderModal>
+
+        {/* <HeaderModal>
           <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
             <FormattedMessage
               id={`${pluginId}.popUpForm.${actionType || 'create'}`}
@@ -293,7 +325,7 @@ class RelationForm extends React.Component {
           <HeaderModalNavContainer>
             {NAVLINKS.map(this.renderNavLink)}
           </HeaderModalNavContainer>
-        </HeaderModal>
+        </HeaderModal> */}
         <form onSubmit={this.handleSubmitAndContinue}>
           <BodyModal>{showForm && content}</BodyModal>
           <FooterModal>
@@ -333,6 +365,7 @@ RelationForm.defaultProps = {
   attributeToEditName: '',
   isOpen: false,
   isUpdatingTemporaryContentType: false,
+  featureType: 'model',
   models: [],
   modelToEditName: '',
   source: null,
@@ -346,6 +379,7 @@ RelationForm.propTypes = {
   initData: PropTypes.func.isRequired,
   isOpen: PropTypes.bool,
   isUpdatingTemporaryContentType: PropTypes.bool,
+  featureType: PropTypes.string,
   models: PropTypes.array,
   modelToEditName: PropTypes.string,
   modifiedData: PropTypes.object.isRequired,

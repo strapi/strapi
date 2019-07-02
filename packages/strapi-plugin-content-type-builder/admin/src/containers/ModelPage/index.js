@@ -14,6 +14,7 @@ import { get, isEqual, pickBy } from 'lodash';
 import { Prompt } from 'react-router';
 
 import {
+  BackHeader,
   Button,
   EmptyAttributesBlock,
   PopUpWarning,
@@ -372,6 +373,8 @@ export class ModelPage extends React.Component {
     this.setState({ attrToDelete: null, showWarning: false });
   };
 
+  handleGoBack = () => this.props.history.goBack();
+
   handleSubmit = (shouldContinue = false) => {
     const {
       addAttributeRelation,
@@ -531,6 +534,7 @@ export class ModelPage extends React.Component {
 
     return (
       <div className={styles.modelpage}>
+        <BackHeader onClick={this.handleGoBack} />
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
           {msg => (
             <Prompt

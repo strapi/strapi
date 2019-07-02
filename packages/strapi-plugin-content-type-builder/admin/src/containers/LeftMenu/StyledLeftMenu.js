@@ -45,6 +45,10 @@ const StyledLeftMenu = styled.div`
           position: relative;
           display: flex;
           justify-content: space-between;
+          width: 100%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
           line-height: 1.6rem;
           padding-left: ${sizes.margin * 2.2}px;
           margin-bottom: 0;
@@ -53,6 +57,10 @@ const StyledLeftMenu = styled.div`
             &:first-of-type {
               text-transform: capitalize;
               font-style: inherit;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              margin-right: 5px;
             }
           }
           i {

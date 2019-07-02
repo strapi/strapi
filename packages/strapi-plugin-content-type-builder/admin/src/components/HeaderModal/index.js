@@ -17,7 +17,7 @@ const HeaderModal = styled.div`
     &:first-of-type {
       background-color: ${colors.lightGrey};
       font-size: 1.3rem;
-      height: 61px;
+      height: 59px;
     }
     &:not(:first-of-type) {
       height: 65px;

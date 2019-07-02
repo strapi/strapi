@@ -22,7 +22,6 @@ const List = styled.div`
     font-style: initial;
     font-size: 13px;
     &.link-icon {
-      padding-left: 2.25rem;
       font-weight: 100;
     }
   }
