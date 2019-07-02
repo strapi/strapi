@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty, upperFirst } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 import { InputsIndex as Input } from 'strapi-helper-plugin';
 
