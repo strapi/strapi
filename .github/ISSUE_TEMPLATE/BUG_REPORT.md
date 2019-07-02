@@ -1,7 +1,6 @@
 ---
 name: 🐛 Bug Report
 about: Create an issue report.
-labels: 'status: have to reproduce, type: bug 🐛'
 ---
 
 <!--
