@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get, map, some } from 'lodash';
+import { get, map } from 'lodash';
 import cn from 'classnames';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
@@ -87,9 +87,7 @@ class Controller extends React.Component {
               isOpen={this.props.isOpen}
               key={actionKey}
               label={actionKey}
-              name={`${this.props.inputNamePath}.controllers.${
-                this.props.name
-              }.${actionKey}.enabled`}
+              name={`${this.props.inputNamePath}.controllers.${this.props.name}.${actionKey}.enabled`}
               setNewInputSelected={this.setNewInputSelected}
               value={get(this.props.actions[actionKey], 'enabled')}
             />

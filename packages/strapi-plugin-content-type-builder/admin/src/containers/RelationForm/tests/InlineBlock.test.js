@@ -8,12 +8,12 @@ describe('<InlineBlock />', () => {
     shallow(<InlineBlock />);
   });
 
-  it('should render his children', () => {
-    const Child = () => <div>I'm a child</div>;
+  it('should render its children', () => {
+    const Child = () => <div>I am a child</div>;
     const wrapper = shallow(
       <InlineBlock>
         <Child />
-      </InlineBlock>,
+      </InlineBlock>
     );
 
     expect(wrapper.find(Child).exists()).toBe(true);

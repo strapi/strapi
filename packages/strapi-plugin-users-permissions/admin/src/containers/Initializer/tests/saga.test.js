@@ -3,6 +3,7 @@
  */
 
 /* eslint-disable redux-saga/yield-effects */
+/* eslint-disable redux-saga/no-unhandled-errors */
 
 import { fork, put, takeLatest } from 'redux-saga/effects';
 import defaultSaga, { initialize } from '../saga';

@@ -42,7 +42,12 @@ function LeftMenuFooter({ version, ...rest }) {
       </ul>
       <div className={styles.poweredBy}>
         <FormattedMessage {...messages.poweredBy} key="poweredBy" />
-        <a key="website" href="https://strapi.io" target="_blank">
+        <a
+          key="website"
+          href="https://strapi.io"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Strapi
         </a>
         &nbsp;
@@ -50,6 +55,7 @@ function LeftMenuFooter({ version, ...rest }) {
           href={`https://github.com/strapi/strapi/releases/tag/v${version}`}
           key="github"
           target="_blank"
+          rel="noopener noreferrer"
         >
           v{version}
         </a>

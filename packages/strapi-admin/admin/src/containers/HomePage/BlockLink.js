@@ -15,13 +15,16 @@ function BlockLink({ content, isDocumentation, link, title }) {
     <a
       className={cn(
         styles.blockLink,
-        isDocumentation ? styles.blockLinkDocumentation : styles.blockLinkCode,
+        isDocumentation ? styles.blockLinkDocumentation : styles.blockLinkCode
       )}
       href={link}
       target="_blank"
+      rel="noopener noreferrer"
     >
       <FormattedMessage {...title} />
-      <FormattedMessage {...content}>{message => <p>{message}</p>}</FormattedMessage>
+      <FormattedMessage {...content}>
+        {message => <p>{message}</p>}
+      </FormattedMessage>
     </a>
   );
 }

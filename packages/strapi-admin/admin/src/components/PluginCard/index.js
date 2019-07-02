@@ -3,7 +3,7 @@
  * PluginCard
  *
  */
-
+/* eslint-disable */
 import React from 'react';
 import PropTypes from 'prop-types';
 import cn from 'classnames';
@@ -64,9 +64,7 @@ class PluginCard extends React.Component {
     const settingsPath =
       this.props.plugin.id === 'content-manager'
         ? '/plugins/content-manager/ctm-configurations'
-        : `/plugins/${this.props.plugin.id}/configurations/${
-            this.props.currentEnvironment
-          }`;
+        : `/plugins/${this.props.plugin.id}/configurations/${this.props.currentEnvironment}`;
 
     e.preventDefault();
     e.stopPropagation();
@@ -148,9 +146,7 @@ class PluginCard extends React.Component {
                 className="fa fa-external-link"
                 onClick={() =>
                   window.open(
-                    `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${
-                      this.props.plugin.id
-                    }`,
+                    `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${this.props.plugin.id}`,
                     '_blank'
                   )
                 }
