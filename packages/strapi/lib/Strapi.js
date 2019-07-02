@@ -101,6 +101,7 @@ class Strapi extends EventEmitter {
     };
 
     this.fs = createStrapiFs(this);
+    this.requireProjectBootstrap();
   }
 
   requireProjectBootstrap() {

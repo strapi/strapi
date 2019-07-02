@@ -22,6 +22,7 @@
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "components.Search.placeholder": "Rechercher une entrée...",
   "components.TableDelete.delete": "Tout supprimer",
+  "components.TableDelete.deleteSelected": "Supprimer les éléments sélectionnés",
   "components.TableDelete.entries.plural": "{number} entrées sélectionnées",
   "components.TableDelete.entries.singular": "{number} entrée sélectionnée",
   "components.TableEmpty.withFilters": "Aucun {contentType} n'a été trouvé avec ces filtres...",

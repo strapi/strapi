@@ -49,7 +49,7 @@ module.exports = scope => {
       'eslint-plugin-react': '^7.7.0'
     },
     'dependencies': Object.assign({}, {
-      'lodash': '^4.17.5',
+      'lodash': '^4.17.11',
       'strapi': getDependencyVersion(cliPkg, 'strapi'),
       'strapi-admin': getDependencyVersion(cliPkg, 'strapi'),
       'strapi-utils': getDependencyVersion(cliPkg, 'strapi'),
