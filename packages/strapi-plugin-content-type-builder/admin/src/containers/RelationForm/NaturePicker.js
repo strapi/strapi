@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { camelCase, truncate } from 'lodash';
+import { truncate } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import pluralize from 'pluralize';
 
@@ -57,14 +57,14 @@ const NaturePicker = ({ modelName, onClick, nature, target }) => {
         leftName: pluralize(modelName, nature === 'manyToMany' ? 2 : 1),
         rightName: pluralize(
           target,
-          ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1,
+          ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1
         ),
       }
     : {
         leftName: target,
         rightName: pluralize(
           modelName,
-          ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1,
+          ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1
         ),
       };
 

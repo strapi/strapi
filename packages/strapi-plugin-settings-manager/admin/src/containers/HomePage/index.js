@@ -666,6 +666,7 @@ HomePage.propTypes = {
   editSettings: PropTypes.func.isRequired,
   emptyDbModifiedData: PropTypes.func.isRequired,
   environments: PropTypes.array.isRequired,
+  history: PropTypes.object.isRequired,
   home: PropTypes.object.isRequired,
   languageDelete: PropTypes.func.isRequired,
   languagesFetch: PropTypes.func.isRequired,

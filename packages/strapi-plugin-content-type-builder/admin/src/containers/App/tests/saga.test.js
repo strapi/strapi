@@ -3,8 +3,14 @@
  */
 
 /* eslint-disable redux-saga/yield-effects */
+/* eslint-disable redux-saga/no-unhandled-errors */
 import { all, fork, takeLatest, put } from 'redux-saga/effects';
-import defaultSaga, { deleteModel, getData, submitCT, submitTempCT } from '../saga';
+import defaultSaga, {
+  deleteModel,
+  getData,
+  submitCT,
+  submitTempCT,
+} from '../saga';
 
 import { deleteModelSucceeded, getDataSucceeded } from '../actions';
 import {
@@ -71,7 +77,9 @@ describe('CTB <App /> DeleteModel saga', () => {
     const putDescriptor = deleteModelGenerator.next({ ok: true }).value;
 
     expect(putDescriptor).toEqual(
-      put(deleteModelSucceeded('test', { plugins: {}, updatePlugin: jest.fn() })),
+      put(
+        deleteModelSucceeded('test', { plugins: {}, updatePlugin: jest.fn() })
+      )
     );
     expect(strapi.notification.success).toHaveBeenCalled();
   });
@@ -121,7 +129,7 @@ describe('defaultSaga Saga', () => {
         fork(takeLatest, DELETE_MODEL, deleteModel),
         fork(takeLatest, SUBMIT_CONTENT_TYPE, submitCT),
         fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
-      ]),
+      ])
     );
   });
 });
