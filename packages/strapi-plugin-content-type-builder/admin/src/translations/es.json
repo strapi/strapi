@@ -16,7 +16,7 @@
   "attribute.text": "Texto",
   "button.attributes.add": "Añadir nuevo campo",
   "button.contentType.add": "Agregar tipo de contenido",
-  "button.contentType.create": "Crear tipo de contenido",
+  "button.models.create": "Crear tipo de contenido",
   "contentType.temporaryDisplay": "(No grabado)",
   "error.attribute.forbidden": "Este nombre de atributo está reservado",
   "error.attribute.key.taken": "Este valor ya existe",
@@ -82,6 +82,10 @@
   "home.contentTypeBuilder.name": "Tipos de contenido",
   "home.emptyAttributes.description": "Añada su primer campo a su nuevo Tipo de contenido",
   "home.emptyAttributes.title": "Todavía no hay campos",
+  "home.empty.models.description": "Cree su primer tipo de contenido para poder recuperar datos de su API.",
+  "home.empty.models.title": "No hay tipos de contenido disponibles",
+  "menu.section.contentTypeBuilder.name.plural": "Tipos de contenido",
+  "menu.section.contentTypeBuilder.name.singular": "Tipo de contenido",
   "home.emptyContentType.description": "Cree su primer tipo de contenido para poder recuperar datos de su API.",
   "home.emptyContentType.title": "No hay tipos de contenido disponibles",
   "menu.section.models.name.plural": "Tipos de contenido",
@@ -157,7 +161,6 @@
   "table.contentType.head.description": "Descripción",
   "table.contentType.head.fields": "Campos",
   "table.contentType.head.name": "Nombre",
-  "table.contentType.title.plural": "Tipos de Contenido disponibles",
-  "table.contentType.title.singular": "Tipo de Contenido disponible",
-  "prompt.content.unsaved": "¿Estás seguro de que quieres descartar este Tipo de Contenido? Todas las modificaciones se perderán."
+  "table.contentType.title.plural": "{number} Tipos de Contenido disponibles",
+  "table.contentType.title.singular": "{number} Tipo de contenido está disponible"
 }

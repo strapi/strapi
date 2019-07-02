@@ -12,7 +12,6 @@ import mountWithIntl from 'testUtils/mountWithIntl';
 
 // @soupette
 // TODO update the test when switching to react testing lib
-
 const renderCompo = (context = { models: [] }) => (
   <MenuContext value={context}>
     <LeftMenu />
@@ -120,17 +119,25 @@ describe('CTB <LeftMenu />', () => {
   it('Should not crash', () => {
     renderCompo(context);
   });
+  describe('<LeftMenu /> lifecycle', () => {
+    let topCompo;
+    afterEach(() => {
+      topCompo.unmount();
+    });
 
-  describe('CTB <ModelPage /> render', () => {
-    it('should render 5 links in the menu', () => {
-      const wrapper = renderComponent();
-      const links = wrapper.find(LeftMenuLink);
+    describe('Render links', () => {
+      it('should render 5 links in the menu', () => {
+        topCompo = renderComponent();
+        const links = topCompo.find(LeftMenuLink);
 
-      expect(links).toHaveLength(5);
+        expect(links).toHaveLength(5);
+      });
     });
   });
 
-  it('should return a plural string for the user', () => {
-    expect(getSectionTitle('model', [])).toContain('singular');
+  describe('Retrieve section title', () => {
+    it('should return a plural string for the user', () => {
+      expect(getSectionTitle('model', [])).toContain('singular');
+    });
   });
 });

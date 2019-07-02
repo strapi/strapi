@@ -6,25 +6,12 @@
 
 import styled from 'styled-components';
 
-// Prepare for theming
-const sizes = {
-  header: {
-    height: '6rem',
-  },
-  margin: 10,
-};
-
-const colors = {
-  black: '#2D3138',
-  grey: '#666B74',
-  mediumGrey: '#f2f3f4',
-  lightGrey: '#E9EAEB',
-};
+import { colors, sizes } from 'strapi-helper-plugin';
 
 const StyledLeftMenu = styled.div`
   width: 100%;
   min-height: calc(100vh - ${sizes.header.height});
-  background-color: ${colors.mediumGrey};
+  background-color: ${colors.leftMenu.mediumGrey};
   padding-top: 0.5rem;
   padding-left: 2rem;
   padding-right: 2rem;
@@ -58,6 +45,10 @@ const StyledLeftMenu = styled.div`
           position: relative;
           display: flex;
           justify-content: space-between;
+          width: 100%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
           line-height: 1.6rem;
           padding-left: ${sizes.margin * 2.2}px;
           margin-bottom: 0;
@@ -66,6 +57,10 @@ const StyledLeftMenu = styled.div`
             &:first-of-type {
               text-transform: capitalize;
               font-style: inherit;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              margin-right: 5px;
             }
           }
           i {
@@ -84,7 +79,7 @@ const StyledLeftMenu = styled.div`
         display: block;
         text-decoration: none;
         p {
-          color: ${colors.black};
+          color: ${colors.leftMenu.black};
         }
         i {
           font-size: 11px;
@@ -92,10 +87,10 @@ const StyledLeftMenu = styled.div`
           color: ${colors.grey};
         }
         &.active {
-          background-color: ${colors.lightGrey};
+          background-color: ${colors.leftMenu.lightGrey};
           font-weight: 700;
           i {
-            color: ${colors.black};
+            color: ${colors.leftMenu.black};
           }
         }
       }

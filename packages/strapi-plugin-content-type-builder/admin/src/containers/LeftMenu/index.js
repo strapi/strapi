@@ -18,16 +18,16 @@ import LeftMenuLink from '../../components/LeftMenuLink';
 
 import StyledLeftMenu from './StyledLeftMenu';
 
+const displayNotificationCTNotSaved = () =>
+  strapi.notification.info(
+    `${pluginId}.notification.info.contentType.creating.notSaved`
+  );
+
 const getSectionTitle = (itemsTitle, count) => {
   const base = `${pluginId}.menu.section.${itemsTitle}.name.`;
 
   return count > 1 ? `${base}plural` : `${base}singular`;
 };
-
-const displayNotificationCTNotSaved = () =>
-  strapi.notification.info(
-    `${pluginId}.notification.info.contentType.creating.notSaved`
-  );
 
 function LeftMenu() {
   const { canOpenModal, groups, models, push } = useContext(MenuContext);
@@ -44,8 +44,8 @@ function LeftMenu() {
 
   const renderLinks = (param, items) => {
     const links = items.map(item => {
-      const { isTemporary, name, source } = item;
-      const base = `/plugins/${pluginId}/${param}/${name}`;
+      const { isTemporary, name, source, uid } = item;
+      const base = `/plugins/${pluginId}/${param}/${uid || name}`;
       const to = source ? `${base}&source=${source}` : base;
 
       return (
@@ -72,7 +72,10 @@ function LeftMenu() {
         <ul className="menu-list">
           {renderLinks('models', models)}
           <li>
-            <CustomLink onClick={() => handleClickOpenModalCreateCT('model')} />
+            <CustomLink
+              featureType="contentType"
+              onClick={() => handleClickOpenModalCreateCT('model')}
+            />
           </li>
         </ul>
       </section>
@@ -83,7 +86,10 @@ function LeftMenu() {
         <ul className="menu-list">
           {renderLinks('groups', groups)}
           <li>
-            <CustomLink onClick={() => handleClickOpenModalCreateCT('group')} />
+            <CustomLink
+              featureType="group"
+              onClick={() => handleClickOpenModalCreateCT('group')}
+            />
           </li>
         </ul>
       </section>

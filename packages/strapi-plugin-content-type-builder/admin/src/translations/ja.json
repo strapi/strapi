@@ -15,7 +15,7 @@
   "attribute.text": "Text",
   "button.attributes.add": "新しいフィールドを追加",
   "button.contentType.add": "コンテンツタイプを追加",
-  "button.contentType.create": "コンテンツタイプの作成",
+  "button.models.create": "コンテンツタイプの作成",
   "contentType.temporaryDisplay": "(保存されません)",
   "error.attribute.forbidden": "この属性名は予約済みです",
   "error.attribute.key.taken": "この値は既に存在します",
@@ -78,6 +78,10 @@
   "home.contentTypeBuilder.name": "コンテンツタイプ",
   "home.emptyAttributes.description": "新しいコンテンツタイプに最初のフィールドを追加する",
   "home.emptyAttributes.title": "フィールドはまだありません",
+  "home.empty.models.description": "最初のコンテンツタイプを作成して、APIからデータを取得できるようにします。",
+  "home.empty.models.title": "コンテンツタイプはありません",
+  "menu.section.contentTypeBuilder.name.plural": "コンテンツタイプ",
+  "menu.section.contentTypeBuilder.name.singular": "コンテンツタイプ",
   "home.emptyContentType.description": "最初のコンテンツタイプを作成して、APIからデータを取得できるようにします。",
   "home.emptyContentType.title": "コンテンツタイプはありません",
   "menu.section.models.name.plural": "コンテンツタイプ",
@@ -153,6 +157,6 @@
   "table.contentType.head.description": "説明文",
   "table.contentType.head.fields": "フィールド",
   "table.contentType.head.name": "名前",
-  "table.contentType.title.plural": "個のコンテンツタイプが利用できます。",
-  "table.contentType.title.singular": "コンテンツタイプは利用可能です"
+  "table.contentType.title.plural": "{number} 個のコンテンツタイプが利用できます。",
+  "table.contentType.title.singular": "{number} コンテンツタイプは利用可能です"
 }

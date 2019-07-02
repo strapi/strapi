@@ -13,13 +13,18 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
+  CREATE_TEMP_GROUP,
+  DELETE_GROUP,
+  DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL,
   DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
+  DELETE_TEMPORARY_GROUP,
   DELETE_TEMPORARY_MODEL,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
+  ON_CHANGE_NEW_GROUP_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
   ON_CHANGE_RELATION,
   ON_CHANGE_RELATION_NATURE,
@@ -37,6 +42,10 @@ import {
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
+  SUBMIT_GROUP,
+  SUBMIT_GROUP_SUCCEEDED,
+  SUBMIT_TEMP_GROUP,
+  SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
 } from './constants';
@@ -91,6 +100,26 @@ export function createTempContentType() {
   };
 }
 
+export function createTempGroup() {
+  return {
+    type: CREATE_TEMP_GROUP,
+  };
+}
+
+export function deleteGroup(uid) {
+  return {
+    type: DELETE_GROUP,
+    uid,
+  };
+}
+
+export function deleteGroupSucceeded(uid) {
+  return {
+    type: DELETE_GROUP_SUCCEEDED,
+    uid,
+  };
+}
+
 export function deleteModel(modelName, context) {
   return {
     type: DELETE_MODEL,
@@ -110,6 +139,12 @@ export function deleteModelSucceeded(modelName) {
   return {
     type: DELETE_MODEL_SUCCEEDED,
     modelName,
+  };
+}
+
+export function deleteTemporaryGroup() {
+  return {
+    type: DELETE_TEMPORARY_GROUP,
   };
 }
 
@@ -139,6 +174,22 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
 
     return acc;
   }, {});
+
+  const initialDataGroup = data.reduce((acc, current) => {
+    const {
+      schema: { attributes },
+    } = current;
+
+    const group = {
+      ...current,
+      isTemporary: false,
+    };
+    set(group, ['schema', 'attributes'], buildGroupAttributes(attributes));
+    acc[current.uid] = group;
+
+    return acc;
+  }, {});
+
   const groups = data.reduce((acc, current) => {
     const {
       name,
@@ -163,6 +214,7 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
   return {
     type: GET_DATA_SUCCEEDED,
     initialData,
+    initialDataGroup,
     models,
     connections,
     groups,
@@ -190,6 +242,19 @@ export function onChangeNewContentTypeMainInfos({ target }) {
 
   return {
     type: ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
+    keys: target.name.split('.'),
+    value,
+  };
+}
+
+export function onChangeNewGroupMainInfos({ target }) {
+  const value =
+    target.name === 'name'
+      ? camelCase(target.value.trim()).toLowerCase()
+      : target.value;
+
+  return {
+    type: ON_CHANGE_NEW_GROUP_MAIN_INFOS,
     keys: target.name.split('.'),
     value,
   };
@@ -365,6 +430,42 @@ export function updateTempContentType() {
   };
 }
 
+export function submitGroup(oldGroupName, data, context, source) {
+  const attributes = formatGroupAttributes(data.attributes);
+  const body = Object.assign(cloneDeep(data), { attributes });
+
+  return {
+    type: SUBMIT_GROUP,
+    oldGroupName,
+    body,
+    source,
+    context,
+  };
+}
+
+export function submitGroupSucceeded() {
+  return {
+    type: SUBMIT_GROUP_SUCCEEDED,
+  };
+}
+
+export function submitTempGroup(data, context) {
+  const attributes = formatGroupAttributes(data.attributes);
+  const body = Object.assign(cloneDeep(data), { attributes });
+
+  return {
+    type: SUBMIT_TEMP_GROUP,
+    body,
+    context,
+  };
+}
+
+export function submitTempGroupSucceeded() {
+  return {
+    type: SUBMIT_TEMP_GROUP_SUCCEEDED,
+  };
+}
+
 // utils
 export const buildModelAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
@@ -420,3 +521,21 @@ export const formatModelAttributes = attributes =>
 
     return acc.concat(attribute);
   }, []);
+
+export const buildGroupAttributes = attributes =>
+  Object.keys(attributes).reduce((acc, current) => {
+    const attribute = { name: current, ...attributes[current] };
+
+    return acc.concat(attribute);
+  }, []);
+
+export const formatGroupAttributes = attributes => {
+  const formattedAttributes = attributes.reduce((acc, current) => {
+    acc[current.name] = current;
+    delete current['name'];
+
+    return acc;
+  }, {});
+
+  return formattedAttributes;
+};

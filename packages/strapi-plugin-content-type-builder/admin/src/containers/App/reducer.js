@@ -14,11 +14,15 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
+  CREATE_TEMP_GROUP,
+  DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
+  DELETE_TEMPORARY_GROUP,
   DELETE_TEMPORARY_MODEL,
   GET_DATA_SUCCEEDED,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+  ON_CHANGE_NEW_GROUP_MAIN_INFOS,
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
   ON_CHANGE_RELATION,
@@ -85,6 +89,24 @@ export const initialState = fromJS({
     unique: false,
   },
   shouldRefetchData: false,
+
+  //// GROUP RELATED DATA ////
+  initialDataGroup: {},
+  modifiedDataGroup: {},
+  newGroup: {
+    collectionName: '',
+    connection: '',
+    description: '',
+    name: '',
+    attributes: [],
+  },
+  newGroupClone: {
+    collectionName: '',
+    connection: '',
+    description: '',
+    name: '',
+    attributes: [],
+  },
 });
 
 export const shouldPluralizeKey = nature =>
@@ -222,6 +244,31 @@ function appReducer(state = initialState, action) {
           )
         )
         .update('newContentTypeClone', () => state.get('newContentType'));
+    case CREATE_TEMP_GROUP:
+      return state
+        .update('groups', list =>
+          list.push(
+            fromJS({
+              icon: 'fa-cube',
+              name: state.getIn(['newGroup', 'name']),
+              description: state.getIn(['newGroup', 'description']),
+              fields: 0,
+              isTemporary: true,
+            })
+          )
+        )
+        .update('newGroupClone', () => state.get('newGroup'));
+    case DELETE_GROUP_SUCCEEDED:
+      console.log({
+        st: state
+          .get('groups')
+          .findIndex(group => group.get('uid') === action.uid),
+        action,
+      });
+      return state.removeIn([
+        'groups',
+        state.get('groups').findIndex(group => group.get('uid') === action.uid),
+      ]);
     case DELETE_MODEL_ATTRIBUTE: {
       const pathToModelName = action.keys
         .slice()
@@ -255,6 +302,13 @@ function appReducer(state = initialState, action) {
         ])
         .removeIn(['initialData', action.modelName])
         .removeIn(['modifiedData', action.modelName]);
+    case DELETE_TEMPORARY_GROUP:
+      return state.removeIn([
+        'groups',
+        state
+          .get('groups')
+          .findIndex(group => group.get('isTemporary') === true),
+      ]);
     case DELETE_TEMPORARY_MODEL:
       return state
         .removeIn([
@@ -276,8 +330,10 @@ function appReducer(state = initialState, action) {
       return state
         .update('connections', () => List(action.connections))
         .update('initialData', () => fromJS(action.initialData))
+        .update('initialDataGroup', () => fromJS(action.initialDataGroup))
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.initialData))
+        .update('modifiedDataGroup', () => fromJS(action.initialDataGroup))
         .updateIn(['newContentType', 'connection'], () => action.connections[0])
         .update('models', () =>
           List(fromJS(action.models)).sortBy(model => model.get('name'))
@@ -297,6 +353,8 @@ function appReducer(state = initialState, action) {
         ['newContentType', ...action.keys],
         () => action.value
       );
+    case ON_CHANGE_NEW_GROUP_MAIN_INFOS:
+      return state.updateIn(['newGroup', ...action.keys], () => action.value);
     case ON_CHANGE_ATTRIBUTE:
       return state.updateIn(
         ['temporaryAttribute', ...action.keys],

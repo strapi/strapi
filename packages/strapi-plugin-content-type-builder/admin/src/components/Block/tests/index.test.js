@@ -9,8 +9,12 @@ describe('<Block />', () => {
   });
 
   it('should render his children', () => {
-    const Child = () => <div>I'm a child</div>;
-    const wrapper = shallow(<Block><Child /></Block>);
+    const Child = () => <div>I am a child</div>;
+    const wrapper = shallow(
+      <Block>
+        <Child />
+      </Block>
+    );
 
     expect(wrapper.find(Child).exists()).toBe(true);
   });

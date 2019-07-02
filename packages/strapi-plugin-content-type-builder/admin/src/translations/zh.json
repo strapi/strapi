@@ -79,6 +79,10 @@
   "home.contentTypeBuilder.name": "資料結構",
   "home.emptyAttributes.description": "新增您資料結構中的第一個欄位",
   "home.emptyAttributes.title": "目前沒有任何欄位",
+  "home.empty.models.description": "建立您的第一個資料結構，讓您能夠從 API 擷取資料。",
+  "home.empty.models.title": "沒有任何資料結構",
+  "menu.section.contentTypeBuilder.name.plural": "資料結構",
+  "menu.section.contentTypeBuilder.name.singular": "資料結構",
   "home.emptyContentType.description": "建立您的第一個資料結構，讓您能夠從 API 擷取資料。",
   "home.emptyContentType.title": "沒有任何資料結構",
   "menu.section.models.name.plural": "資料結構",
@@ -154,6 +158,6 @@
   "table.contentType.head.description": "說明",
   "table.contentType.head.fields": "欄位",
   "table.contentType.head.name": "名稱",
-  "table.contentType.title.plural": "筆資料結構",
-  "table.contentType.title.singular": "筆資料結構"
+  "table.contentType.title.plural": "{number} 筆資料結構",
+  "table.contentType.title.singular": "{number} 筆資料結構"
 }

@@ -1,6 +1,7 @@
 import { fromJS, OrderedMap } from 'immutable';
 import {
   addAttributeRelation,
+  buildGroupAttributes,
   buildModelAttributes,
   deleteModel,
   deleteModelSucceeded,
@@ -34,6 +35,7 @@ import {
   deleteModelAttribute,
   submitContentType,
   submitContentTypeSucceeded,
+  formatGroupAttributes,
   formatModelAttributes,
 } from '../actions';
 import {
@@ -240,6 +242,88 @@ describe('Content Type Builder Action utils', () => {
       };
 
       expect(formatModelAttributes(data)).toEqual(expected);
+    });
+  });
+
+  describe('BuildGroupAttributes', () => {
+    it('should generate an array of attribute objects given an object', () => {
+      const attributes = {
+        name: {
+          type: 'string',
+          required: true,
+        },
+        quantity: {
+          type: 'float',
+          required: true,
+        },
+        picture: {
+          model: 'picture',
+          via: 'related',
+          plugin: 'upload',
+        },
+      };
+
+      const expected = [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+        {
+          name: 'picture',
+          model: 'picture',
+          via: 'related',
+          plugin: 'upload',
+        },
+      ];
+
+      expect(buildGroupAttributes(attributes)).toEqual(expected);
+    });
+  });
+
+  describe('formatGroupAttributes', () => {
+    it('should generate an object with an attribute array', () => {
+      const attributes = [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+        {
+          name: 'picture',
+          model: 'picture',
+          via: 'related',
+          plugin: 'upload',
+        },
+      ];
+
+      const expected = {
+        name: {
+          type: 'string',
+          required: true,
+        },
+        quantity: {
+          type: 'float',
+          required: true,
+        },
+        picture: {
+          model: 'picture',
+          via: 'related',
+          plugin: 'upload',
+        },
+      };
+
+      expect(formatGroupAttributes(attributes)).toEqual(expected);
     });
   });
 });
@@ -467,11 +551,43 @@ describe('App actions', () => {
           ),
         },
       };
+      const initialDataGroup = {
+        ingredients: {
+          isTemporary: false,
+          uid: 'ingredients',
+          name: 'Ingredients',
+          source: null,
+          schema: {
+            connection: 'default',
+            collectionName: 'ingredients',
+            description: 'Little description',
+            attributes: [
+              {
+                name: 'name',
+                type: 'string',
+                required: true,
+              },
+              {
+                name: 'quantity',
+                type: 'float',
+                required: true,
+              },
+              {
+                name: 'picture',
+                model: 'file',
+                via: 'related',
+                plugin: 'upload',
+              },
+            ],
+          },
+        },
+      };
       const connections = ['default'];
       const expected = {
         type: GET_DATA_SUCCEEDED,
         models,
         initialData,
+        initialDataGroup,
         connections,
         groups: [
           {

@@ -23,6 +23,7 @@ const DocumentationSection = () => (
           <a
             href="http://strapi.io/documentation/3.0.0-beta.x/guides/models.html"
             target="_blank"
+            rel="noopener noreferrer"
           >
             {message}
           </a>

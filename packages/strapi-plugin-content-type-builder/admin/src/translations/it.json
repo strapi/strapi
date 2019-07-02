@@ -15,7 +15,7 @@
   "attribute.text": "Testo",
   "button.attributes.add": "Aggiungi Un Nuovo Campo",
   "button.contentType.add": "Aggiungi Tipo Di Contenuto",
-  "button.contentType.create": "Creare Un Tipo Di Contenuto",
+  "button.models.create": "Creare Un Tipo Di Contenuto",
   "contentType.temporaryDisplay": "(Non salvati)",
   "error.attribute.forbidden": "Questo attributo nome è riservato",
   "error.attribute.key.taken": "Questo valore esiste già",
@@ -79,6 +79,10 @@
   "home.contentTypeBuilder.name": "I Tipi Di Contenuto",
   "home.emptyAttributes.description": "Aggiungi il tuo primo campo per il nuovo Tipo di Contenuto",
   "home.emptyAttributes.title": "Non ci sono campi ancora",
+  "home.empty.models.description": "Crea il tuo primo Tipo di Contenuto per essere in grado di recuperare dati da API.",
+  "home.empty.models.title": "Non ci sono Tipi di Contenuto disponibili",
+  "menu.section.contentTypeBuilder.name.plural": "I Tipi Di Contenuto",
+  "menu.section.contentTypeBuilder.name.singular": "Tipo Di Contenuto",
   "home.emptyContentType.description": "Crea il tuo primo Tipo di Contenuto per essere in grado di recuperare dati da API.",
   "home.emptyContentType.title": "Non ci sono Tipi di Contenuto disponibili",
   "menu.section.models.name.plural": "I Tipi Di Contenuto",
@@ -154,6 +158,6 @@
   "table.contentType.head.description": "Descrizione",
   "table.contentType.head.fields": "Campi",
   "table.contentType.head.name": "Nome",
-  "table.contentType.title.plural": "I Tipi di contenuto sono disponibili",
-  "table.contentType.title.singular": "Il Tipo di contenuto è disponibile"
+  "table.contentType.title.plural": "{number} I Tipi di contenuto sono disponibili",
+  "table.contentType.title.singular": "{number} Il Tipo di contenuto è disponibile"
 }

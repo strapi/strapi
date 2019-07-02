@@ -14,9 +14,9 @@ import { get, isEqual, pickBy } from 'lodash';
 import { Prompt } from 'react-router';
 
 import {
+  BackHeader,
   Button,
   EmptyAttributesBlock,
-  PluginHeader,
   PopUpWarning,
   routerPropTypes,
   getQueryParameters,
@@ -32,9 +32,8 @@ import Ul from '../../components/Ul';
 
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
-import ModelForm from '../ModelForm';
 import RelationForm from '../RelationForm';
-import LeftMenu from '../LeftMenu';
+import ViewContainer from '../ViewContainer';
 
 import {
   addAttributeToExistingContentType,
@@ -55,6 +54,7 @@ import styles from './styles.scss';
 export class ModelPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { attrToDelete: null, removePrompt: false, showWarning: false };
+  featureType = 'model';
 
   componentDidMount() {
     const { setTemporaryAttribute } = this.props;
@@ -101,18 +101,18 @@ export class ModelPage extends React.Component {
   getAttributeType = () =>
     getQueryParameters(this.getSearch(), 'attributeType');
 
-  getFormData = () => {
-    const { modifiedData, newContentType } = this.props;
+  // getFormData = () => {
+  //   const { modifiedData, newContentType } = this.props;
 
-    if (
-      this.getActionType() === 'create' ||
-      this.isUpdatingTemporaryContentType()
-    ) {
-      return newContentType;
-    }
+  //   if (
+  //     this.getActionType() === 'create' ||
+  //     this.isUpdatingTemporaryContentType()
+  //   ) {
+  //     return newContentType;
+  //   }
 
-    return get(modifiedData, this.getModelName());
-  };
+  //   return get(modifiedData, this.getModelName());
+  // };
 
   getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
 
@@ -373,6 +373,8 @@ export class ModelPage extends React.Component {
     this.setState({ attrToDelete: null, showWarning: false });
   };
 
+  handleGoBack = () => this.props.history.goBack();
+
   handleSubmit = (shouldContinue = false) => {
     const {
       addAttributeRelation,
@@ -400,7 +402,7 @@ export class ModelPage extends React.Component {
     push({ search: nextSearch });
   };
 
-  handleSubmitEdit = () => {
+  handleSubmitEdit = (shouldContinue = false) => {
     const {
       history: { push },
       saveEditedAttribute,
@@ -422,7 +424,9 @@ export class ModelPage extends React.Component {
       );
     }
 
-    push({ search: '' });
+    const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
+
+    push({ search: nextSearch });
   };
 
   hasModelBeenModified = () => {
@@ -501,27 +505,18 @@ export class ModelPage extends React.Component {
   render() {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
     const {
-      cancelNewContentType,
-      connections,
       clearTemporaryAttribute,
       clearTemporaryAttributeRelation,
-      createTempContentType,
       history: { push },
-      location: { pathname, search },
+      location: { search },
       models,
-      modifiedData,
       onChangeAttribute,
-      onChangeExistingContentTypeMainInfos,
-      onChangeNewContentTypeMainInfos,
       onChangeRelation,
       onChangeRelationNature,
       onChangeRelationTarget,
-      resetExistingContentTypeMainInfos,
-      resetNewContentTypeMainInfos,
       setTemporaryAttributeRelation,
       temporaryAttribute,
       temporaryAttributeRelation,
-      updateTempContentType,
     } = this.props;
     const { showWarning, removePrompt } = this.state;
 
@@ -536,10 +531,10 @@ export class ModelPage extends React.Component {
     const settingType = getQueryParameters(search, 'settingType');
     const attributeType = this.getAttributeType();
     const actionType = this.getActionType();
-    const icon = this.getSource() ? null : 'fa fa-pencil';
 
     return (
       <div className={styles.modelpage}>
+        <BackHeader onClick={this.handleGoBack} />
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
           {msg => (
             <Prompt
@@ -548,79 +543,72 @@ export class ModelPage extends React.Component {
             />
           )}
         </FormattedMessage>
-        <div className="container-fluid">
-          <div className="row">
-            <LeftMenu />
-            <div className="col-md-9">
-              <div className={styles.componentsContainer}>
-                <PluginHeader
-                  description={this.getModelDescription()}
-                  icon={icon}
-                  title={this.getPluginHeaderTitle()}
-                  actions={this.getPluginHeaderActions()}
-                  onClickIcon={this.handleClickEditModelMainInfos}
-                />
-                {this.getModelAttributesLength() === 0 ? (
-                  <EmptyAttributesBlock
-                    description="content-type-builder.home.emptyAttributes.description"
-                    id="openAddAttr"
-                    label="content-type-builder.button.attributes.add"
-                    onClick={this.handleClickOpenModalChooseAttributes}
-                    title="content-type-builder.home.emptyAttributes.title"
+
+        <ViewContainer
+          {...this.props}
+          featureType={this.featureType}
+          headerTitle={this.getPluginHeaderTitle()}
+          headerDescription={this.getModelDescription()}
+          pluginHeaderActions={this.getPluginHeaderActions()}
+          onClickIcon={this.handleClickEditModelMainInfos}
+        >
+          {this.getModelAttributesLength() === 0 ? (
+            <EmptyAttributesBlock
+              description="content-type-builder.home.emptyAttributes.description"
+              id="openAddAttr"
+              label="content-type-builder.button.attributes.add"
+              onClick={this.handleClickOpenModalChooseAttributes}
+              title="content-type-builder.home.emptyAttributes.title"
+            />
+          ) : (
+            <Block>
+              <Flex>
+                <ListTitle>
+                  {this.getModelAttributesLength()}
+                  &nbsp;
+                  <FormattedMessage
+                    id={`${listTitleMessageIdBasePrefix}.${
+                      this.getModelAttributesLength() > 1
+                        ? 'plural'
+                        : 'singular'
+                    }`}
                   />
-                ) : (
-                  <Block>
-                    <Flex>
-                      <ListTitle>
-                        {this.getModelAttributesLength()}
-                        &nbsp;
-                        <FormattedMessage
-                          id={`${listTitleMessageIdBasePrefix}.${
-                            this.getModelAttributesLength() > 1
-                              ? 'plural'
-                              : 'singular'
-                          }`}
-                        />
-                        {this.getModelRelationShipsLength() > 0 && (
-                          <React.Fragment>
-                            &nbsp;
-                            <FormattedMessage
-                              id={`${listTitleMessageIdBasePrefix}.including`}
-                            />
-                            &nbsp;
-                            {this.getModelRelationShipsLength()}
-                            &nbsp;
-                            <FormattedMessage
-                              id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
-                                this.getModelRelationShipsLength() > 1
-                                  ? 'plural'
-                                  : 'singular'
-                              }`}
-                            />
-                          </React.Fragment>
-                        )}
-                      </ListTitle>
-                      <div>
-                        <Button
-                          label={`${pluginId}.button.attributes.add`}
-                          onClick={this.handleClickOpenModalChooseAttributes}
-                          secondaryHotlineAdd
-                        />
-                      </div>
-                    </Flex>
-                    <div>
-                      <Ul id="attributesList">
-                        {Object.keys(this.getModelAttributes()).map(
-                          this.renderLi
-                        )}
-                      </Ul>
-                    </div>
-                  </Block>
-                )}
+                  {this.getModelRelationShipsLength() > 0 && (
+                    <React.Fragment>
+                      &nbsp;
+                      <FormattedMessage
+                        id={`${listTitleMessageIdBasePrefix}.including`}
+                      />
+                      &nbsp;
+                      {this.getModelRelationShipsLength()}
+                      &nbsp;
+                      <FormattedMessage
+                        id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
+                          this.getModelRelationShipsLength() > 1
+                            ? 'plural'
+                            : 'singular'
+                        }`}
+                      />
+                    </React.Fragment>
+                  )}
+                </ListTitle>
+                <div>
+                  <Button
+                    label={`${pluginId}.button.attributes.add`}
+                    onClick={this.handleClickOpenModalChooseAttributes}
+                    secondaryHotlineAdd
+                  />
+                </div>
+              </Flex>
+              <div>
+                <Ul id="attributesList">
+                  {Object.keys(this.getModelAttributes()).map(this.renderLi)}
+                </Ul>
               </div>
-            </div>
-          </div>
-        </div>
+            </Block>
+          )}
+        </ViewContainer>
+
         <AttributesModalPicker
           isOpen={modalType === 'chooseAttributes'}
           push={push}
@@ -639,27 +627,6 @@ export class ModelPage extends React.Component {
           onSubmit={this.handleSubmit}
           onSubmitEdit={this.handleSubmitEdit}
           push={push}
-        />
-        <ModelForm
-          actionType={actionType}
-          activeTab={settingType}
-          cancelNewContentType={cancelNewContentType}
-          connections={connections}
-          createTempContentType={createTempContentType}
-          currentData={modifiedData}
-          modifiedData={this.getFormData()}
-          modelToEditName={getQueryParameters(search, 'modelName')}
-          onChangeExistingContentTypeMainInfos={
-            onChangeExistingContentTypeMainInfos
-          }
-          onChangeNewContentTypeMainInfos={onChangeNewContentTypeMainInfos}
-          isOpen={modalType === 'model'}
-          isUpdatingTemporaryContentType={this.isUpdatingTemporaryContentType()}
-          pathname={pathname}
-          push={push}
-          resetExistingContentTypeMainInfos={resetExistingContentTypeMainInfos}
-          resetNewContentTypeMainInfos={resetNewContentTypeMainInfos}
-          updateTempContentType={updateTempContentType}
         />
         <PopUpWarning
           isOpen={showWarning}
@@ -723,15 +690,13 @@ ModelPage.propTypes = {
   modifiedData: PropTypes.object.isRequired,
   newContentType: PropTypes.object.isRequired,
   onChangeAttribute: PropTypes.func.isRequired,
-  onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
-  onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeRelation: PropTypes.func.isRequired,
   onChangeRelationNature: PropTypes.func.isRequired,
   onChangeRelationTarget: PropTypes.func.isRequired,
   resetEditExistingContentType: PropTypes.func.isRequired,
   resetEditTempContentType: PropTypes.func.isRequired,
-  resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
-  resetNewContentTypeMainInfos: PropTypes.func.isRequired,
+  resetEditExistingContentType: PropTypes.func.isRequired,
+  resetEditTempContentType: PropTypes.func.isRequired,
   saveEditedAttribute: PropTypes.func.isRequired,
   saveEditedAttributeRelation: PropTypes.func.isRequired,
   setTemporaryAttribute: PropTypes.func.isRequired,
@@ -740,7 +705,6 @@ ModelPage.propTypes = {
   submitTempContentType: PropTypes.func.isRequired,
   temporaryAttribute: PropTypes.object.isRequired,
   temporaryAttributeRelation: PropTypes.object.isRequired,
-  updateTempContentType: PropTypes.func.isRequired,
   ...routerPropTypes({ params: PropTypes.string }).isRequired,
 };
 

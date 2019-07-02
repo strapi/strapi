@@ -79,6 +79,10 @@
   "home.contentTypeBuilder.name": "İçerik Türleri",
   "home.emptyAttributes.description": "İçerik Türünüze ilk alanınızı ekleyin",
   "home.emptyAttributes.title": "Henüz bir alan bulunmamaktadır.",
+  "home.empty.models.description": "Servisinizden veri alabilmek için ilk İçerik Türünüzü oluşturun.",
+  "home.empty.models.title": "Kullanılabilir İçerik Türü bulunmamaktadır.",
+  "menu.section.contentTypeBuilder.name.plural": "İçerik Türleri",
+  "menu.section.contentTypeBuilder.name.singular": "İçerik Türü",
   "home.emptyContentType.description": "Servisinizden veri alabilmek için ilk İçerik Türünüzü oluşturun.",
   "home.emptyContentType.title": "Kullanılabilir İçerik Türü bulunmamaktadır.",
   "menu.section.models.name.plural": "İçerik Türleri",
@@ -154,6 +158,6 @@
   "table.contentType.head.description": "Açıklama",
   "table.contentType.head.fields": "Alanlar",
   "table.contentType.head.name": "İsim",
-  "table.contentType.title.plural": "İçerik Türleri kullanılabilir",
-  "table.contentType.title.singular": "İçerik Türü kullanılabilir"
+  "table.contentType.title.plural": "{number} İçerik Türleri kullanılabilir",
+  "table.contentType.title.singular": "{number} İçerik Türü kullanılabilir"
 }

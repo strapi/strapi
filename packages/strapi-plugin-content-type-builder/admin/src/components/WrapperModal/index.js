@@ -12,7 +12,12 @@ import styles from './styles.scss';
 function WrapperModal({ children, isOpen, onToggle, ...rest }) {
   return (
     <div className={styles.wrapperModal}>
-      <Modal isOpen={isOpen} toggle={onToggle} className={styles.modal} {...rest}>
+      <Modal
+        isOpen={isOpen}
+        toggle={onToggle}
+        className={styles.modal}
+        {...rest}
+      >
         <ModalHeader className={styles.headerModalWrapper} toggle={onToggle} />
         {children}
       </Modal>

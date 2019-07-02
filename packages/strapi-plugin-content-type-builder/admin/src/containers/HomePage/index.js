@@ -6,79 +6,109 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { isEmpty } from 'lodash';
-
 import {
+  HeaderNav,
+  ListWrapper,
+  ListHeader,
+  List,
   PluginHeader,
-  getQueryParameters,
   routerPropTypes,
 } from 'strapi-helper-plugin';
 
 import EmptyContentTypeView from '../../components/EmptyContentTypeView';
-import TableList from '../../components/TableList';
-
 import pluginId from '../../pluginId';
-
-import ModelForm from '../ModelForm';
-
+import Row from './Row';
 import styles from './styles.scss';
+
+const getUrl = to => `/plugins/${pluginId}${to}`;
+const getNavTrad = trad =>
+  `${pluginId}.home.contentTypeBuilder.headerNav.link.${trad}`;
 
 class HomePage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  headerNavLinks = [
+    {
+      name: getNavTrad('models'),
+      to: getUrl('/models'),
+    },
+    {
+      name: getNavTrad('groups'),
+      to: getUrl('/groups'),
+    },
+  ];
+
+  displayNotification = () =>
+    strapi.notification.info(`${pluginId}.notification.info.work.notSaved`);
+
   handleClick = () => {
     const {
       canOpenModal,
       history: { push },
+      match: {
+        params: { type },
+      },
     } = this.props;
     const { emitEvent } = this.context;
 
     if (canOpenModal) {
-      emitEvent('willCreateContentType');
+      const event =
+        type === 'models' ? 'willCreateContentType' : 'willCreateGroup';
+      const modalType = type === 'models' ? 'model' : 'group';
+      emitEvent(event);
       push({
-        search: 'modalType=model&settingType=base&actionType=create',
+        search: `modalType=${modalType}&settingType=base&actionType=create`,
       });
     } else {
-      strapi.notification.info(
-        `${pluginId}.notification.info.contentType.creating.notSaved`
-      );
+      this.displayNotification();
     }
+  };
+
+  handleDelete = isTemporary => {
+    const { canOpenModal } = this.props;
+
+    if (canOpenModal || isTemporary) {
+      this.setState({});
+    }
+  };
+
+  handleGoTo = (to, source, shouldEdit = false) => {
+    const {
+      history: { push },
+      match: {
+        params: { type },
+      },
+    } = this.props;
+
+    const modalType = type === 'models' ? 'model' : 'group';
+    const search = shouldEdit
+      ? `?modalType=${modalType}&settingType=base&actionType=edit&modelName=${to}`
+      : '';
+    push(
+      `/plugins/${pluginId}/${type}/${to.toLowerCase()}${
+        source ? `&source=${source}` : ''
+      }${search}`
+    );
   };
 
   render() {
     const {
-      cancelNewContentType,
       canOpenModal,
-      connections,
-      createTempContentType,
+      deleteGroup,
       deleteModel,
+      deleteTemporaryGroup,
       deleteTemporaryModel,
-      history: { push },
-      location: { pathname, search },
+      groups,
+      match: {
+        params: { type },
+      },
       models,
-      modifiedData,
-      newContentType,
-      onChangeNewContentTypeMainInfos,
     } = this.props;
-    const availableNumber = models.length;
-    const title = `${pluginId}.table.contentType.title.${
+    const displayedData = type === 'groups' ? groups : models;
+    const availableNumber = type === 'groups' ? groups.length : models.length;
+    const titleType = type === 'groups' ? type : 'contentType';
+    const title = `${pluginId}.table.${titleType}.title.${
       availableNumber > 1 ? 'plural' : 'singular'
     }`;
-    const renderViewContent =
-      availableNumber === 0 ? (
-        <EmptyContentTypeView handleButtonClick={this.handleClick} /> // eslint-disable-line react/jsx-handler-names
-      ) : (
-        <TableList
-          canOpenModalAddContentType={canOpenModal}
-          availableNumber={availableNumber}
-          title={title}
-          buttonLabel={`${pluginId}.button.contentType.add`}
-          onButtonClick={this.handleClick}
-          onDelete={deleteModel}
-          deleteTemporaryModel={deleteTemporaryModel}
-          rowItems={this.props.models}
-          push={push}
-        />
-      );
 
     return (
       <div className={styles.homePage}>
@@ -91,20 +121,46 @@ class HomePage extends React.Component {
           }}
           actions={[]}
         />
-        {renderViewContent}
-        <ModelForm
-          actionType="create"
-          activeTab={getQueryParameters(search, 'settingType')}
-          cancelNewContentType={cancelNewContentType}
-          connections={connections}
-          createTempContentType={createTempContentType}
-          currentData={modifiedData}
-          modifiedData={newContentType}
-          onChangeNewContentTypeMainInfos={onChangeNewContentTypeMainInfos}
-          isOpen={!isEmpty(search)}
-          pathname={pathname}
-          push={push}
-        />
+        <HeaderNav links={this.headerNavLinks} />
+
+        {availableNumber === 0 ? (
+          <EmptyContentTypeView
+            handleButtonClick={this.handleClick}
+            type={type}
+          />
+        ) : (
+          <ListWrapper>
+            <ListHeader
+              title={title}
+              titleValues={{ number: availableNumber }}
+              button={{
+                kind: 'secondaryHotlineAdd',
+                label: `${pluginId}.button.${type}.create`,
+                onClick: this.handleClick,
+              }}
+            />
+            <List>
+              <table>
+                <tbody>
+                  {displayedData.map(data => (
+                    <Row
+                      key={data.name}
+                      canOpenModal={canOpenModal}
+                      context={this.context}
+                      deleteGroup={deleteGroup}
+                      deleteModel={deleteModel}
+                      deleteTemporaryGroup={deleteTemporaryGroup}
+                      deleteTemporaryModel={deleteTemporaryModel}
+                      onClickGoTo={this.handleGoTo}
+                      {...data}
+                      viewType={type}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </List>
+          </ListWrapper>
+        )}
       </div>
     );
   }
@@ -112,6 +168,8 @@ class HomePage extends React.Component {
 
 HomePage.contextTypes = {
   emitEvent: PropTypes.func.isRequired,
+  plugins: PropTypes.object,
+  updatePlugin: PropTypes.func,
 };
 
 HomePage.defaultProps = {
@@ -126,7 +184,9 @@ HomePage.propTypes = {
   canOpenModal: PropTypes.bool,
   connections: PropTypes.array,
   createTempContentType: PropTypes.func.isRequired,
+  deleteGroup: PropTypes.func.isRequired,
   deleteModel: PropTypes.func.isRequired,
+  deleteTemporaryGroup: PropTypes.func.isRequired,
   models: PropTypes.array,
   modifiedData: PropTypes.object,
   newContentType: PropTypes.shape({

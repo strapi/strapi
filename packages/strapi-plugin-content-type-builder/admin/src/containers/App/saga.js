@@ -9,9 +9,11 @@ import {
   deleteModelSucceeded,
   submitContentTypeSucceeded,
   submitTempContentTypeSucceeded,
+  deleteGroupSucceeded,
 } from './actions';
 import {
   GET_DATA,
+  DELETE_GROUP,
   DELETE_MODEL,
   SUBMIT_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE,
@@ -28,6 +30,14 @@ export function* getData() {
     ]);
 
     yield put(getDataSucceeded(data, connections, groups));
+  } catch (err) {
+    strapi.notification.error('notification.error');
+  }
+}
+
+export function* deleteGroup({ uid }) {
+  try {
+    yield put(deleteGroupSucceeded(uid));
   } catch (err) {
     strapi.notification.error('notification.error');
   }
@@ -57,9 +67,9 @@ export function* deleteModel({
         ['content-manager', 'leftMenuSections'],
         [{ links: [] }]
       );
-      const updatedMenu = appMenu[0].links.filter(
-        el => el.destination !== modelName
-      );
+      const updatedMenu = appMenu[0].links.filter(el => {
+        return el.destination !== modelName;
+      });
       appMenu[0].links = sortBy(updatedMenu, 'label');
       updatePlugin('content-manager', 'leftMenuSections', appMenu);
     }
@@ -168,10 +178,15 @@ export function* submitTempCT({
 
 // Individual exports for testing
 export default function* defaultSaga() {
-  yield all([
-    fork(takeLatest, GET_DATA, getData),
-    fork(takeLatest, DELETE_MODEL, deleteModel),
-    fork(takeLatest, SUBMIT_CONTENT_TYPE, submitCT),
-    fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
-  ]);
+  try {
+    yield all([
+      fork(takeLatest, GET_DATA, getData),
+      fork(takeLatest, DELETE_GROUP, deleteGroup),
+      fork(takeLatest, DELETE_MODEL, deleteModel),
+      fork(takeLatest, SUBMIT_CONTENT_TYPE, submitCT),
+      fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
+    ]);
+  } catch (err) {
+    strapi.notification.error('notification.error');
+  }
 }

@@ -12,7 +12,6 @@ import { EmptyAttributesBlock } from 'strapi-helper-plugin';
 import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
 
-import LeftMenu from '../../LeftMenu';
 import MenuContext from '../../MenuContext';
 import Block from '../../../components/Block';
 
@@ -21,6 +20,7 @@ import { clearTemporaryAttribute, onChangeAttribute } from '../../App/actions';
 import { ModelPage, mapDispatchToProps } from '../index';
 
 import initialData from './initialData.json';
+import ViewContainer from '../../ViewContainer';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
 
@@ -55,6 +55,7 @@ describe('<ModelPage />', () => {
       addAttributeRelation: jest.fn(),
       addAttributeToExistingContentType: jest.fn(),
       addAttributeToTempContentType: jest.fn(),
+
       cancelNewContentType: jest.fn(),
       clearTemporaryAttribute: jest.fn(),
       clearTemporaryAttributeRelation: jest.fn(),
@@ -125,16 +126,13 @@ describe('<ModelPage />', () => {
         name: '',
         attributes: {},
       },
-      onChangeExistingContentTypeMainInfos: jest.fn(),
-      onChangeNewContentTypeMainInfos: jest.fn(),
       onChangeAttribute: jest.fn(),
       onChangeRelation: jest.fn(),
       onChangeRelationNature: jest.fn(),
       onChangeRelationTarget: jest.fn(),
       resetEditExistingContentType: jest.fn(),
       resetEditTempContentType: jest.fn(),
-      resetExistingContentTypeMainInfos: jest.fn(),
-      resetNewContentTypeMainInfos: jest.fn(),
+
       saveEditedAttribute: jest.fn(),
       saveEditedAttributeRelation: jest.fn(),
       setTemporaryAttribute: jest.fn(),
@@ -153,7 +151,6 @@ describe('<ModelPage />', () => {
         target: '',
         unique: false,
       },
-      updateTempContentType: jest.fn(),
     };
   });
 
@@ -331,12 +328,12 @@ describe('<ModelPage />', () => {
       });
     });
 
-    describe('RenderLeftMenu', () => {
-      it('should render a LeftMenu', () => {
+    describe('RenderViewContainer', () => {
+      it('should render a ViewContainer', () => {
         const wrapper = shallow(<ModelPage {...props} />);
-        const leftMenu = wrapper.find(LeftMenu);
+        const viewContainer = wrapper.find(ViewContainer);
 
-        expect(leftMenu).toHaveLength(1);
+        expect(viewContainer).toHaveLength(1);
       });
     });
   });
@@ -354,6 +351,7 @@ describe('<ModelPage /> lifecycle', () => {
       addAttributeRelation: jest.fn(),
       addAttributeToExistingContentType: jest.fn(),
       addAttributeToTempContentType: jest.fn(),
+
       cancelNewContentType: jest.fn(),
       canOpenModal: true,
       clearTemporaryAttribute: jest.fn(),
@@ -425,16 +423,12 @@ describe('<ModelPage /> lifecycle', () => {
         name: '',
         attributes: {},
       },
-      onChangeExistingContentTypeMainInfos: jest.fn(),
-      onChangeNewContentTypeMainInfos: jest.fn(),
       onChangeAttribute: jest.fn(),
       onChangeRelation: jest.fn(),
       onChangeRelationNature: jest.fn(),
       onChangeRelationTarget: jest.fn(),
       resetEditExistingContentType: jest.fn(),
       resetEditTempContentType: jest.fn(),
-      resetExistingContentTypeMainInfos: jest.fn(),
-      resetNewContentTypeMainInfos: jest.fn(),
       saveEditedAttribute: jest.fn(),
       saveEditedAttributeRelation: jest.fn(),
       setTemporaryAttribute: jest.fn(),
@@ -453,7 +447,6 @@ describe('<ModelPage /> lifecycle', () => {
         target: '',
         unique: false,
       },
-      updateTempContentType: jest.fn(),
     };
   });
 
