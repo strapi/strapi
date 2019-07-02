@@ -30,53 +30,54 @@ const defaults = {
   host: 'localhost',
 };
 
+const isBookshelfConnection = ({ connector }) =>
+  connector === 'strapi-hook-bookshelf';
+
 module.exports = function(strapi) {
   function initialize(cb) {
+    const { connections } = strapi.config;
     const GLOBALS = {};
 
-    const connections = _.pickBy(
-      strapi.config.connections,
-      ({ connector }) => connector === 'strapi-hook-bookshelf'
-    );
+    const connectionsPromises = Object.keys(connections)
+      .filter(key => isBookshelfConnection(connections[key]))
+      .map(connectionName => {
+        const connection = connections[connectionName];
 
-    const connectionsPromises = Object.keys(connections).map(connectionName => {
-      const connection = connections[connectionName];
-      _.defaults(connection.settings, strapi.config.hook.settings.bookshelf);
+        _.defaults(connection.settings, strapi.config.hook.settings.bookshelf);
 
-      // Create Bookshelf instance for this connection.
-      const ORM = new bookshelf(strapi.connections[connectionName]);
+        // Create Bookshelf instance for this connection.
+        const ORM = new bookshelf(strapi.connections[connectionName]);
 
-      const initFunctionPath = path.resolve(
-        strapi.config.appPath,
-        'config',
-        'functions',
-        'bookshelf.js'
-      );
+        const initFunctionPath = path.resolve(
+          strapi.config.appPath,
+          'config',
+          'functions',
+          'bookshelf.js'
+        );
 
-      if (fs.existsSync(initFunctionPath)) {
-        // Require `config/functions/bookshelf.js` file to customize connection.
-        require(initFunctionPath)(ORM, connection);
-      }
+        if (fs.existsSync(initFunctionPath)) {
+          require(initFunctionPath)(ORM, connection);
+        }
 
-      // Load plugins
-      if (_.get(connection, 'options.plugins', true) !== false) {
-        ORM.plugin('visibility');
-        ORM.plugin('pagination');
-      }
+        // Load plugins
+        if (_.get(connection, 'options.plugins', true) !== false) {
+          ORM.plugin('visibility');
+          ORM.plugin('pagination');
+        }
 
-      const ctx = {
-        GLOBALS,
-        connection,
-        ORM,
-      };
+        const ctx = {
+          GLOBALS,
+          connection,
+          ORM,
+        };
 
-      return Promise.all([
-        mountGroups(connectionName, ctx),
-        mountApis(connectionName, ctx),
-        mountAdmin(connectionName, ctx),
-        mountPlugins(connectionName, ctx),
-      ]);
-    });
+        return Promise.all([
+          mountGroups(connectionName, ctx),
+          mountApis(connectionName, ctx),
+          mountAdmin(connectionName, ctx),
+          mountPlugins(connectionName, ctx),
+        ]);
+      });
 
     return Promise.all(connectionsPromises).then(() => cb(), err => cb(err));
   }
