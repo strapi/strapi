@@ -74,6 +74,7 @@ class App extends React.Component {
 App.propTypes = {
   environmentsFetch: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
+  location: PropTypes.object.isRequired,
   menuFetch: PropTypes.func.isRequired,
   sections: PropTypes.array.isRequired,
 };
@@ -84,7 +85,7 @@ export function mapDispatchToProps(dispatch) {
       menuFetch,
       environmentsFetch,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -96,7 +97,7 @@ const mapStateToProps = createStructuredSelector({
 // Wrap the component to inject dispatch and state into it
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
@@ -105,5 +106,5 @@ const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(App);

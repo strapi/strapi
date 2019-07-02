@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import cn from 'classnames';
 import { withRouter } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import { includes, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 
 // Design
 import { IcoContainer, ListRow, PopUpWarning } from 'strapi-helper-plugin';
@@ -111,6 +111,7 @@ Row.contextTypes = {
 };
 
 Row.propTypes = {
+  history: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   onDeleteClick: PropTypes.func.isRequired,
   onDeleteConfirm: PropTypes.func.isRequired,

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { request } from 'strapi-helper-plugin';
 import { all, call, fork, takeLatest, put } from 'redux-saga/effects';
 
@@ -17,7 +18,7 @@ function* getVideos() {
       },
       false,
       true,
-      { noAuth: true },
+      { noAuth: true }
     );
 
     const storedVideo = JSON.parse(localStorage.getItem('videos')) || null;
@@ -61,7 +62,11 @@ function* getVideos() {
 }
 
 function* defaultSaga() {
-  yield all([fork(takeLatest, GET_VIDEOS, getVideos)]);
+  try {
+    yield all([fork(takeLatest, GET_VIDEOS, getVideos)]);
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 export default defaultSaga;

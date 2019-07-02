@@ -1,3 +1,4 @@
+/* eslint-disable */
 // Retrieve remote and backend URLs.
 const remoteURL = (() => {
   if (window.location.port === '4000') {
