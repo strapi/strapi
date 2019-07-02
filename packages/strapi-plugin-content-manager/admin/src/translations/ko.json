@@ -20,6 +20,7 @@
   "components.LimitSelect.itemsPerPage": "항목 수 / 페이지",
   "components.Search.placeholder": "검색 중입니다...",
   "components.TableDelete.delete": "모두 삭제",
+  "components.TableDelete.deleteSelected": "선택된 것을 지워 라",
   "components.TableDelete.entries.plural": "{number}개 항목 선택 됨",
   "components.TableDelete.entries.singular": "{number}개 항목 선택 됨",
   "components.TableEmpty.withFilters": "필터 조건에 맞는 {contentType} 목록이 없습니다.",

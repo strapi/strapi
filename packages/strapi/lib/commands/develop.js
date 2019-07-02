@@ -3,7 +3,6 @@
 const path = require('path');
 const cluster = require('cluster');
 const fs = require('fs-extra');
-const { cyan } = require('chalk');
 const chokidar = require('chokidar');
 const execa = require('execa');
 
@@ -18,7 +17,6 @@ module.exports = async function({ build }) {
   const dir = process.cwd();
 
   if (build && !fs.existsSync(path.join(dir, 'build'))) {
-    console.log(`> No ${cyan('build')} dir found. Starting build`);
     try {
       execa.shellSync('npm run -s build', {
         stdio: 'inherit',

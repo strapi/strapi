@@ -30,6 +30,10 @@ module.exports = {
     amazon_ses_secret: {
       label: 'Amazon Secret access key',
       type: 'text'
+    },
+    amazon_ses_endpoint: {
+      label: 'Amazon end-point uri',
+      type: 'text'
     }
   },
 
@@ -37,7 +41,8 @@ module.exports = {
 
     var client = nodeSES.createClient({
       key: config.amazon_ses_api_key,
-      secret: config.amazon_ses_secret
+      secret: config.amazon_ses_secret,
+      amazon: config.amazon_ses_endpoint
     });
 
     return {

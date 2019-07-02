@@ -93,7 +93,8 @@ export function* submitCT({
     );
     emitEvent('didSaveContentType');
     yield put(submitContentTypeSucceeded());
-    history.push(`/plugins/${pluginId}/models/${name}`);
+    const suffixUrl = source ? `&source=${source}` : '';
+    history.push(`/plugins/${pluginId}/models/${name}${suffixUrl}`);
 
     if (name !== oldContentTypeName) {
       emitEvent('didEditNameOfContentType');
