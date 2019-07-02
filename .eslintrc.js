@@ -47,22 +47,4 @@ module.exports = {
       version: '16.5.2',
     },
   },
-  overrides: [
-    {
-      files: ['**/admin/**', '**/strapi-helper-plugin/**'],
-      rules: {
-        'redux-saga/no-unhandled-errors': 1,
-        'react/no-unescaped-entities': 1,
-        'react/prop-types': 2,
-        'react/jsx-no-target-blank': 1,
-        'react/no-direct-mutation-state': 2,
-        'react/display-name': 1,
-        'react/jsx-no-target-blank': 1,
-        'no-unused-vars': 2,
-        'no-undef': 2,
-        'no-dupe-keys': 2,
-        'no-irregular-whitespace': 1,
-      },
-    },
-  ],
 };
