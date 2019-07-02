@@ -1,9 +1,9 @@
 # Quick Start Guide
 
-Get ready to make Strapi up and running in **less than 5 minutes** 🚀
+Get ready to get Strapi up and running in **less than 5 minutes** 🚀
 
 <div class="video-container">
-   <iframe width="800" height="450" src="https://www.youtube.com/embed/nux0djdHmY8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="853" height="480"  src="https://www.youtube.com/embed/_qlLobVjd9k" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 </div>
 
 _For a step-by-step guide, please take a look at the [detailed tutorial](quick-start-tutorial.html)._
@@ -19,25 +19,26 @@ npm install strapi@beta -g
 ## 2. Create a new project
 
 ```bash
-strapi new cms --quickstart
+strapi new my-project --quickstart
 ```
 
-## 3. Create an admin user
+## 3. Create an Administrator user
 
 Navigate to [**http://localhost:1337/admin**](http://localhost:1337/admin).
 
-- Fill in the form.
+- Complete the form to create an Administrator user.
 - Click **Ready to start**.
 
-## 4. Create a Content Type
+## 4. Create a new Content Type
 
-Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder).
+Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
 
 - Click the **"+ Add Content Type"** button.
 - Enter `restaurant`.
 - Click **"+ Add New Field"**
   - Click the **String** field.
-  - Type `name` under the **BASE SETTINGS** tab, in the **Name** field.
+  - Type `restaurant` under the **BASE SETTINGS** tab, in the **Name** field.
+  - Check `Required field` and `Unique field` under the **ADVANCED SETTINGS** tab.
   - Click **Continue**.
 - Click **"+ Add New Field"**
   - Click the **Text** field.
@@ -46,24 +47,64 @@ Navigate to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin
   - Click **Continue**.
 - Click the **Save** button and wait for Strapi to restart.
 
-## 5. Manage and add data to Content Type
+## 5. Create another new Content type
+
+Navigate back to [**PLUGINS** - **Content Type Builder**](http://localhost:1337/admin/plugins/content-type-builder), in the left-hand menu.
+
+- Click the **"+ Add Content Type"** button.
+- Enter `category`.
+- Click **"+ Add New Field"**
+  - Click the **String** field.
+  - Type `category` under the **BASE SETTINGS** tab, in the **Name** field.
+  - Check `Required field` and `Unique field` under the **ADVANCED SETTINGS** tab.
+  - Click **Continue**.
+- Click **"+ Add New Field"**
+  - Click the **Relation Field** field.
+  - On the right side, click the **Permissions** dropdown and select, `Restaurant`.
+  - In the center, select the icon the represents `many-to-many`. The text should read, `Categories has and belongs to Many Restaurants`.
+  - Click **Save**.
+- Click the **Save** button and wait for Strapi to restart.
+
+## 6. Add content to "Restaurant" Content Type
 
 Navigate to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager).
 
-- Click on **+ Add New Restaurant** button. Type `Strapi Restaurant` in the **Name** field. Type `Strapi restaurant is a cosy restaurant delivering one of the very fastest and nicest dining experiences in the world, combining nods to tradition with fierce modernity, warmth with daring.` into the **Description** field.
+- Click on **+ Add New Restaurant** button. Type `Strapi Restaurant` in the **Restaurant** field. Type `Strapi restaurant is a cosy restaurant delivering one of the very fastest and nicest dining experiences in the world, combining nods to tradition with fierce modernity, warmth with daring.` into the **Description** field.
 - Click **Save**.
 
 You will see your restaurant listed in the entries.
 
-## 6. Set roles and permissions
+## 7. Add categories to the "Category" Content Type
 
-Navigate to [**PLUGINS** - **Roles & Permission**](http://localhost:1337/admin/plugins/users-permissions/roles).
+Navigate to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/category?source=content-manager).
 
-- Click the **pencil** edit icon to the right of the **Public** Role.
-- Scroll down under **Permissions**, find **Restaurant**. Click the checkbox next to **find**.
+- Click on **+ Add New Category** button. Type `Convenient` in the **Category** field. Select `Strapi Restaurant`, on the right, from **Restaurant (0)**
 - Click **Save**.
 
-## 7. Consume the Content Type API
+You will see the **Convenient** category listed in the entries.
+
+- Click on **+ Add New Category** button. Type `Time Saving` in the **Category** field. **DO NOT ADD IT HERE** to `Strapi Restaurant`.
+- Click **Save**.
+
+You will see the **Time Saving** category listed in the entries.
+
+Navigate back to [**CONTENT TYPES** - **Restaurants**](http://localhost:1337/admin/plugins/content-manager/restaurant?source=content-manager).
+
+- Click on `Strapi Restaurant`
+- On the right, under **Categories(1)**, `select` the `Add an item...`, and add **Time Saving** as a category for this restaurant.
+
+**Two different ways** to use the **relation** field type to add and connect relations to other fields.
+
+## 8. Set roles and permissions
+
+Navigate to [**PLUGINS** - **Roles & Permissions**](http://localhost:1337/admin/plugins/users-permissions/roles).
+
+- Click the **Public** Role.
+- Scroll down under **Permissions**, find **Restaurant**. Click the checkbox next to **find** and **findone**.
+- Repeat and scroll down under **Permissions**, find **Category**. Click the checkbox next to **find** and **findone**.
+- Click **Save**.
+
+## 9. Consume the Content Type API
 
 Here we are! The list of **restaurants** is accessible at [`http://localhost:1337/restaurants`](http://localhost:1337/restaurants).
 
