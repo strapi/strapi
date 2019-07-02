@@ -20,15 +20,16 @@ npx create-strapi-app my-app
 
 ### Manual install
 
+Using yarn
+
 ```
 yarn global add create-strapi-app
 create-strapi-app my-app
 ```
 
-or
+Using npm
 
 ```
 npm install -g create-strapi-app
-
 create-strapi-app my-app
 ```
