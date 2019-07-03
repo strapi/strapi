@@ -112,6 +112,9 @@ module.exports = async function createProject(
   console.log(`  ${cmd} build`);
   console.log('  Builds Strapi admin panel.');
   console.log();
+  console.log(`  ${cmd} strapi`);
+  console.log(`  Display all available commands.`);
+  console.log();
   console.log('You can start by doing:');
   console.log();
   console.log(`  ${chalk.cyan('cd')} ${rootPath}`);

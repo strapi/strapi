@@ -22,7 +22,9 @@ module.exports = function parseDatabaseArguments({ scope, args }) {
     args.dbclient !== 'sqlite'
   ) {
     return stopProcess(
-      `⛔️ Some database arguments are missing. Required arguments list: ${dbArguments}`
+      `⛔️ Some of the database arguments are missing. Required arguments: ${dbArguments.join(
+        ', '
+      )}.`
     );
   }
 

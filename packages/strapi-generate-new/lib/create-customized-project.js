@@ -40,7 +40,7 @@ async function askDbInfosAndTest(scope) {
     const configuration = {
       client,
       connection,
-      dependencies: clientDependencies({ scope, client: client }),
+      dependencies: clientDependencies({ scope, client }),
     };
 
     await testDatabaseConnection({

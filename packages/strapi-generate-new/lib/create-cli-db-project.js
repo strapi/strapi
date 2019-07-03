@@ -15,7 +15,7 @@ module.exports = async scope => {
   const configuration = {
     client,
     connection: merge({}, defaultConfigs[client] || {}, scope.database),
-    dependencies: clientDependencies({ scope, client: client }),
+    dependencies: clientDependencies({ scope, client }),
   };
   return createProject(scope, configuration);
 };

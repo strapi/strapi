@@ -17,7 +17,7 @@ module.exports = async function createQuickStartProject(scope) {
   const configuration = {
     client,
     connection: defaultConfigs[client],
-    dependencies: clientDependencies({ scope, client: client }),
+    dependencies: clientDependencies({ scope, client }),
   };
 
   await createProject(scope, configuration);
