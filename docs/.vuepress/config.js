@@ -64,6 +64,8 @@ module.exports = {
     ],
     repo: 'strapi/strapi',
     website: 'https://strapi.io',
+    slack: 'https://slack.strapi.io',
+    blog: 'https://blog.strapi.io',
     docsDir: 'docs',
     algolia: {
       apiKey: 'a93451de224096fb34471c8b8b049de7',
