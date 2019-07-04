@@ -8,7 +8,7 @@
  *
  */
 
-import didGetSecuredData from './lifecycles/didGetSecuredData';
+// import didGetSecuredData from './lifecycles/didGetSecuredData';
 import willSecure from './lifecycles/willSecure';
 
 function lifecycles() {
