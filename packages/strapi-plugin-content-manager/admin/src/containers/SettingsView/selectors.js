@@ -24,5 +24,12 @@ const makeSelectSettingView = () =>
     }
   );
 
+const makeSelectModifiedData = () =>
+  createSelector(
+    settingViewDomain(),
+    substate => {
+      return substate.get('modifiedData').toJS();
+    }
+  );
 export default makeSelectSettingView;
-export { settingViewDomain };
+export { settingViewDomain, makeSelectModifiedData };

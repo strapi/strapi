@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -8,6 +8,7 @@ import {
   InputsIndex as Input,
   LoadingIndicatorPage,
   PluginHeader,
+  PopUpWarning,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -16,7 +17,7 @@ import Container from '../../components/Container';
 import Block from '../../components/Block';
 import Row from './Row';
 
-import { getData, onChange } from './actions';
+import { getData, onChange, onReset, onSubmit } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectSettingView from './selectors';
@@ -29,10 +30,23 @@ function SettingsView({
   isLoading,
   modifiedData,
   onChange,
+  onReset,
+  onSubmit,
+  shouldToggleModalSubmit,
 }) {
   strapi.useInjectReducer({ key: 'settingsView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'settingsView', saga, pluginId });
+  const [showWarningCancel, setWarningOpen] = useState(false);
+  const [showWarningSubmit, setWarningSubmitOpen] = useState(false);
+  const toggleWarningCancel = () => setWarningOpen(prevState => !prevState);
+  const toggleWarningSubmit = () =>
+    setWarningSubmitOpen(prevState => !prevState);
 
+  useEffect(() => {
+    if (showWarningSubmit) {
+      toggleWarningSubmit();
+    }
+  }, [shouldToggleModalSubmit]);
   useEffect(() => {
     if (isEmpty(initialData)) {
       getData();
@@ -50,13 +64,13 @@ function SettingsView({
           id: 'cancelChanges',
           label: 'content-manager.popUpWarning.button.cancel',
           kind: 'secondary',
-          onClick: () => {},
+          onClick: toggleWarningCancel,
           type: 'button',
         },
         {
           kind: 'primary',
           label: 'content-manager.containers.Edit.submit',
-          onClick: () => {},
+          onClick: toggleWarningSubmit,
           type: 'submit',
         },
       ];
@@ -72,6 +86,33 @@ function SettingsView({
         title="Content Manager"
         description={{
           id: 'content-manager.containers.SettingsPage.pluginHeaderDescription',
+        }}
+      />
+      <PopUpWarning
+        isOpen={showWarningSubmit}
+        toggleModal={toggleWarningSubmit}
+        content={{
+          title: 'content-manager.popUpWarning.title',
+          message: 'content-manager.popUpWarning.warning.updateAllSettings',
+          cancel: 'content-manager.popUpWarning.button.cancel',
+          confirm: 'content-manager.popUpWarning.button.confirm',
+        }}
+        popUpWarningType="danger"
+        onConfirm={() => onSubmit()}
+      />
+      <PopUpWarning
+        isOpen={showWarningCancel}
+        toggleModal={toggleWarningCancel}
+        content={{
+          title: 'content-manager.popUpWarning.title',
+          message: 'content-manager.popUpWarning.warning.cancelAllSettings',
+          cancel: 'content-manager.popUpWarning.button.cancel',
+          confirm: 'content-manager.popUpWarning.button.confirm',
+        }}
+        popUpWarningType="danger"
+        onConfirm={() => {
+          onReset();
+          toggleWarningCancel();
         }}
       />
       <Row className="row">
@@ -103,6 +144,9 @@ SettingsView.propTypes = {
   isLoading: PropTypes.bool.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
+  onReset: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  shouldToggleModalSubmit: PropTypes.bool.isRequired,
 };
 
 const mapStateToProps = makeSelectSettingView();
@@ -112,6 +156,8 @@ export function mapDispatchToProps(dispatch) {
     {
       getData,
       onChange,
+      onReset,
+      onSubmit,
     },
     dispatch
   );

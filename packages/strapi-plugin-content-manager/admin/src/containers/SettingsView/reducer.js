@@ -4,7 +4,12 @@
  */
 
 import { fromJS, List, Map } from 'immutable';
-import { GET_DATA_SUCCEEDED, ON_CHANGE } from './constants';
+import {
+  GET_DATA_SUCCEEDED,
+  ON_CHANGE,
+  ON_RESET,
+  SUBMIT_SUCCEEDED,
+} from './constants';
 
 export const initialState = fromJS({
   initialData: Map({}),
@@ -12,6 +17,7 @@ export const initialState = fromJS({
   groups: List([]),
   models: List([]),
   isLoading: true,
+  shouldToggleModalSubmit: true,
 });
 
 function settingsViewReducer(state = initialState, action) {
@@ -25,6 +31,12 @@ function settingsViewReducer(state = initialState, action) {
         .update('isLoading', () => false);
     case ON_CHANGE:
       return state.updateIn(['modifiedData', action.name], () => action.value);
+    case ON_RESET:
+      return state.update('modifiedData', () => state.get('initialData'));
+    case SUBMIT_SUCCEEDED:
+      return state
+        .update('initialData', () => state.get('modifiedData'))
+        .update('shouldToggleModalSubmit', v => !v);
     default:
       return state;
   }

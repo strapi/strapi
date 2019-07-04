@@ -13,7 +13,7 @@ import reducer from './reducer';
 import saga from './saga';
 import makeSelectMain from './selectors';
 
-function Main({ isLoading }) {
+function Main({ isLoading, emitEvent }) {
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
   strapi.useInjectSaga({ key: 'main', saga, pluginId });
 
@@ -21,17 +21,22 @@ function Main({ isLoading }) {
     return <LoadingIndicatorPage />;
   }
 
+  const renderRoute = props => (
+    <SettingsView emitEvent={emitEvent} {...props} />
+  );
+
   return (
     <Switch>
       <Route
         path="/plugins/content-manager/ctm-configurations/:type"
-        component={SettingsView}
+        render={renderRoute}
       />
     </Switch>
   );
 }
 
 Main.propTypes = {
+  emitEvent: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
 };
 

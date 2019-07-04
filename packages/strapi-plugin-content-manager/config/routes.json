@@ -17,6 +17,14 @@
       }
     },
     {
+      "method": "PUT",
+      "path": "/fixtures/general-settings",
+      "handler": "ContentManagerFixtures.updateGeneralSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "GET",
       "path": "/fixtures/groups",
       "handler": "ContentManagerFixtures.getGroups",

@@ -47,4 +47,8 @@ module.exports = {
 
     ctx.body = { models };
   },
+
+  updateGeneralSettings: ctx => {
+    ctx.body = { ok: true };
+  },
 };
