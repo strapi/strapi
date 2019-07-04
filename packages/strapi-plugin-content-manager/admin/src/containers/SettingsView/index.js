@@ -2,10 +2,14 @@ import React, { memo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { isEqual, isEmpty } from 'lodash';
+import { isEqual, isEmpty, sortBy } from 'lodash';
 
 import {
   InputsIndex as Input,
+  HeaderNav,
+  ListHeader,
+  ListWrapper,
+  List,
   LoadingIndicatorPage,
   PluginHeader,
   PopUpWarning,
@@ -16,6 +20,7 @@ import pluginId from '../../pluginId';
 import Container from '../../components/Container';
 import Block from '../../components/Block';
 import Row from './Row';
+import Tr from './Tr';
 
 import { getData, onChange, onReset, onSubmit } from './actions';
 import reducer from './reducer';
@@ -24,10 +29,18 @@ import makeSelectSettingView from './selectors';
 
 import form from './forms.json';
 
+const getUrl = to => `/plugins/${pluginId}/ctm-configurations${to}`;
+const getNavTrad = trad => `${pluginId}.${trad}`;
+
 function SettingsView({
   getData,
   initialData,
   isLoading,
+  groups,
+  match: {
+    params: { type },
+  },
+  models,
   modifiedData,
   onChange,
   onReset,
@@ -56,6 +69,14 @@ function SettingsView({
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
+
+  const getMappedData = () => {
+    if (type === 'models') {
+      return sortBy(models, ['name']);
+    }
+
+    return sortBy(groups, 'name');
+  };
 
   const getPluginHeaderActions = () => {
     if (!isEqual(initialData, modifiedData)) {
@@ -119,6 +140,7 @@ function SettingsView({
         <Block
           description="content-manager.containers.SettingsPage.Block.generalSettings.description"
           title="content-manager.containers.SettingsPage.Block.generalSettings.title"
+          style={{ marginBottom: 7 }}
         >
           <form style={{ paddingTop: '2.6rem' }}>
             <div className="row">
@@ -133,6 +155,40 @@ function SettingsView({
             </div>
           </form>
         </Block>
+
+        <div className="col-md-12">
+          <HeaderNav
+            links={[
+              {
+                name: getNavTrad('models'),
+                to: getUrl('/models'),
+              },
+              {
+                name: getNavTrad('groups'),
+                to: getUrl('/groups'),
+              },
+            ]}
+          />
+          <ListWrapper>
+            <ListHeader
+              title={`${pluginId}.containers.SettingsView.list.title`}
+              subtitle={`${pluginId}.containers.SettingsView.list.subtitle`}
+            />
+            <List>
+              <table>
+                <tbody>
+                  {getMappedData().map(data => (
+                    <Tr key={data.name}>
+                      <td>
+                        <p>{data.name}</p>
+                      </td>
+                    </Tr>
+                  ))}
+                </tbody>
+              </table>
+            </List>
+          </ListWrapper>
+        </div>
       </Row>
     </Container>
   );
@@ -142,6 +198,9 @@ SettingsView.propTypes = {
   getData: PropTypes.func.isRequired,
   initialData: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  groups: PropTypes.array.isRequired,
+  match: PropTypes.object.isRequired,
+  models: PropTypes.array.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,

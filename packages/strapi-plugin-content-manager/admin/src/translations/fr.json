@@ -1,4 +1,6 @@
 {
+  "models": "Types de Contenus",
+  "groups": "Groupes",
   "EditRelations.title": "Données associées",
   "components.AddFilterCTA.add": "Filtres",
   "components.AddFilterCTA.hide": "Filtres",
@@ -64,7 +66,9 @@
   "containers.SettingsPage.Block.contentType.title": "Types de contenu",
   "containers.SettingsPage.Block.generalSettings.description": "Configurez les options par défault de vos modèles",
   "containers.SettingsPage.Block.generalSettings.title": "Général",
-  "containers.SettingsPage.pluginHeaderDescription": "Configurez les paramètres par défaut de vos modèles",
+  "containers.SettingsPage.pluginHeaderDescription": "Configurez les paramètres de vos modèles et groupes",
+  "containers.SettingsView.list.title": "Paramètres d'affichage",
+  "containers.SettingsView.list.subtitle": "Configurez le layout et l'affichage de vos types de contenus et groupes",
   "emptyAttributes.button": "Ouvrir le Content Type Builder",
   "emptyAttributes.description": "Ajoutez votre premier champ a votre modèle",
   "emptyAttributes.title": "Il n'y a pas encore de champs",

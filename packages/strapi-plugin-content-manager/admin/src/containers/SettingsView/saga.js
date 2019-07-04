@@ -7,13 +7,13 @@ import { getDataSucceeded, submitSucceeded } from './actions';
 import { GET_DATA, ON_SUBMIT } from './constants';
 import { makeSelectModifiedData } from './selectors';
 
-const getRequestUrl = path => `/${pluginId}/${path}`;
+const getRequestUrl = path => `/${pluginId}/fixtures/${path}`;
 
 export function* getData() {
   try {
     const [{ generalSettings }, { groups }, { models }] = yield all(
-      ['fixtures/general-settings', 'fixtures/groups', 'fixtures/models'].map(
-        endPoint => call(request, getRequestUrl(endPoint), { method: 'GET' })
+      ['general-settings', 'groups', 'models'].map(endPoint =>
+        call(request, getRequestUrl(endPoint), { method: 'GET' })
       )
     );
 
@@ -27,7 +27,7 @@ export function* submit() {
   try {
     const body = yield select(makeSelectModifiedData());
 
-    yield call(request, getRequestUrl('fixtures/general-settings'), {
+    yield call(request, getRequestUrl('general-settings'), {
       method: 'PUT',
       body,
     });

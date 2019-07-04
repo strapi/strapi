@@ -49,6 +49,7 @@ module.exports = {
   },
 
   updateGeneralSettings: ctx => {
+    // Here it should update all the other settings
     ctx.body = { ok: true };
   },
 };
