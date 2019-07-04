@@ -5,8 +5,9 @@
  */
 
 // Public node modules.
-const url = require('url');
 const path = require('path');
+const fs = require('fs');
+const url = require('url');
 const _ = require('lodash');
 const mongoose = require('mongoose');
 const Mongoose = mongoose.Mongoose;
@@ -105,16 +106,15 @@ module.exports = function(strapi) {
           return cb(errMsg);
         }
 
-        try {
-          // Require `config/functions/mongoose.js` file to customize connection.
-          require(path.resolve(
-            strapi.config.appPath,
-            'config',
-            'functions',
-            'mongoose.js'
-          ))(instance, connection);
-        } catch (err) {
-          // This is not an error if the file is not found.
+        const initFunctionPath = path.resolve(
+          strapi.config.appPath,
+          'config',
+          'functions',
+          'mongoose.js'
+        );
+
+        if (fs.existsSync(initFunctionPath)) {
+          require(initFunctionPath)(instance, connection);
         }
 
         Object.keys(options, key => instance.set(key, options[key]));
