@@ -10,6 +10,30 @@
     },
     {
       "method": "GET",
+      "path": "/fixtures/general-settings",
+      "handler": "ContentManagerFixtures.getGeneralSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/fixtures/groups",
+      "handler": "ContentManagerFixtures.getGroups",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/fixtures/models",
+      "handler": "ContentManagerFixtures.getModels",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {

@@ -24,7 +24,7 @@ function lifecycles() {
   // Set hooks for the AdminPage container.
   // Note: we don't need to specify the first argument because we already know what "willSecure" refers to.
   this.setHooks({
-    didGetSecuredData,
+    // didGetSecuredData,
     willSecure,
   });
   // Set hooks for the App container of the Content Manager.
