@@ -17,7 +17,7 @@ import styles from './styles.scss';
 function LeftMenuLink(props) {
   const isLinkActive = startsWith(
     props.location.pathname.replace('/admin', '').concat('/'),
-    props.destination.concat('/'),
+    props.destination.concat('/')
   );
 
   const plugin =
@@ -52,6 +52,7 @@ function LeftMenuLink(props) {
       className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
       href={props.destination}
       target="_blank"
+      rel="noopener noreferrer"
     >
       {icon}
       {content}

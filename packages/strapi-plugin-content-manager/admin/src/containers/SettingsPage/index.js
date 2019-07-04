@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import cn from 'classnames';
-import { get, sortBy } from 'lodash';
+import { get, isObject, sortBy } from 'lodash';
 import PropTypes from 'prop-types';
 
 import {
@@ -49,9 +49,9 @@ class SettingsPage extends React.PureComponent {
   getModels = (data = this.props.schema.models, destination = '/') => {
     const models = Object.keys(data).reduce((acc, curr) => {
       if (curr !== 'plugins') {
-        if (!data[curr].fields && _.isObject(data[curr])) {
+        if (!data[curr].fields && isObject(data[curr])) {
           return acc.concat(
-            this.getModels(data[curr], `${destination}${curr}/`),
+            this.getModels(data[curr], `${destination}${curr}/`)
           );
         }
 
@@ -91,7 +91,7 @@ class SettingsPage extends React.PureComponent {
     const value = get(
       generalSettings,
       input.name.split('.')[1],
-      input.type === 'toggle' ? false : 10,
+      input.type === 'toggle' ? false : 10
     );
 
     return input.type === 'toggle' ? value : value.toString();
@@ -231,7 +231,7 @@ const mapDispatchToProps = dispatch =>
       onReset,
       onSubmit,
     },
-    dispatch,
+    dispatch
   );
 const mapStateToProps = createStructuredSelector({
   schema: makeSelectModifiedSchema(),
@@ -239,7 +239,7 @@ const mapStateToProps = createStructuredSelector({
 });
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = strapi.injectReducer({
   key: 'settingsPage',
@@ -251,5 +251,5 @@ const withSaga = strapi.injectSaga({ key: 'settingsPage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(SettingsPage);
