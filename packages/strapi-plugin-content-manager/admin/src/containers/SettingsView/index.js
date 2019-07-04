@@ -20,7 +20,7 @@ import pluginId from '../../pluginId';
 import Container from '../../components/Container';
 import Block from '../../components/Block';
 import Row from './Row';
-import Tr from './Tr';
+import ListRow from './ListRow';
 
 import { getData, onChange, onReset, onSubmit } from './actions';
 import reducer from './reducer';
@@ -37,6 +37,7 @@ function SettingsView({
   initialData,
   isLoading,
   groups,
+  history: { push },
   match: {
     params: { type },
   },
@@ -178,11 +179,12 @@ function SettingsView({
               <table>
                 <tbody>
                   {getMappedData().map(data => (
-                    <Tr key={data.name}>
-                      <td>
-                        <p>{data.name}</p>
-                      </td>
-                    </Tr>
+                    <ListRow
+                      key={data.name}
+                      name={data.name}
+                      push={push}
+                      type={type}
+                    />
                   ))}
                 </tbody>
               </table>
@@ -199,6 +201,7 @@ SettingsView.propTypes = {
   initialData: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,
   groups: PropTypes.array.isRequired,
+  history: PropTypes.object.isRequired,
   match: PropTypes.object.isRequired,
   models: PropTypes.array.isRequired,
   modifiedData: PropTypes.object.isRequired,

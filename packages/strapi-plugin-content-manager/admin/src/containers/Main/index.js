@@ -7,6 +7,7 @@ import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
+import SettingView from '../SettingView';
 import SettingsView from '../SettingsView';
 
 import reducer from './reducer';
@@ -27,6 +28,10 @@ function Main({ isLoading, emitEvent }) {
 
   return (
     <Switch>
+      <Route
+        path="/plugins/content-manager/ctm-configurations/:type/:name/:settingType?"
+        component={SettingView}
+      />
       <Route
         path="/plugins/content-manager/ctm-configurations/:type"
         render={renderRoute}
