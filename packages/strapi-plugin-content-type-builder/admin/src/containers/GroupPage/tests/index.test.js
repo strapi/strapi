@@ -136,6 +136,17 @@ describe('CTB <GroupPage />', () => {
       expect(getFeatureName()).toEqual('tests');
     });
   });
+
+  describe('HandleGoBack', () => {
+    it("should return the model's name field", () => {
+      const { handleGoBack } = shallow(<GroupPage {...props} />).instance();
+      handleGoBack();
+
+      expect(props.history.push).toHaveBeenCalledWith(
+        '/plugins/content-type-builder/groups'
+      );
+    });
+  });
 });
 
 describe('CTB <GroupPage />, mapDispatchToProps', () => {

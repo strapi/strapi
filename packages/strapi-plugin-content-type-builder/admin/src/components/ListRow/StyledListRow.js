@@ -6,6 +6,8 @@
 
 import styled from 'styled-components';
 
+import { colors } from 'strapi-helper-plugin';
+
 const StyedListRow = styled.tr`
   background-color: transparent;
   cursor: pointer;
@@ -15,8 +17,8 @@ const StyedListRow = styled.tr`
   img {
     width: 35px;
   }
-  &:hover {
-    background-color: #f7f8f8;
+  button {
+    cursor: pointer;
   }
   td:first-of-type {
     padding-left: 3rem;
@@ -31,8 +33,8 @@ const StyedListRow = styled.tr`
   td:last-child {
     text-align: right;
   }
-  button {
-    cursor: pointer;
+  &:hover {
+    background-color: ${colors.grey};
   }
 `;
 

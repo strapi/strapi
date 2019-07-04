@@ -373,7 +373,14 @@ export class ModelPage extends React.Component {
     this.setState({ attrToDelete: null, showWarning: false });
   };
 
-  handleGoBack = () => this.props.history.goBack();
+  handleGoBack = () => {
+    const {
+      location: { pathname },
+    } = this.props;
+    const backPathname = pathname.substr(0, pathname.lastIndexOf('/'));
+
+    this.props.history.push(backPathname);
+  };
 
   handleSubmit = (shouldContinue = false) => {
     const {

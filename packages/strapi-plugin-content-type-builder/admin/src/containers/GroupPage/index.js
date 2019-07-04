@@ -108,7 +108,14 @@ export class GroupPage extends React.Component {
     deleteGroupAttribute(keys);
   };
 
-  handleGoBack = () => this.props.history.goBack();
+  handleGoBack = () => {
+    const {
+      location: { pathname },
+    } = this.props;
+    const backPathname = pathname.substr(0, pathname.lastIndexOf('/'));
+
+    this.props.history.push(backPathname);
+  };
 
   isUpdatingTempFeature = () => {
     const { groups } = this.props;
@@ -203,6 +210,7 @@ GroupPage.propTypes = {
   }),
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
+    pathname: PropTypes.string.isRequired,
   }),
   match: PropTypes.shape({
     params: PropTypes.shape({
