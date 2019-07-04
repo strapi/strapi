@@ -15,6 +15,7 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
   CREATE_TEMP_GROUP,
+  DELETE_GROUP_ATTRIBUTE,
   DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
@@ -258,6 +259,20 @@ function appReducer(state = initialState, action) {
           )
         )
         .update('newGroupClone', () => state.get('newGroup'));
+    case DELETE_GROUP_ATTRIBUTE: {
+      const pathToAttributes = action.keys
+        .slice()
+        .reverse()
+        .splice(1)
+        .reverse();
+      const attributes = state.getIn(pathToAttributes);
+      const attributeName = action.keys.pop();
+      const attributeToDelete = attributes.findIndex(
+        attribute => attribute.get('name') === attributeName
+      );
+
+      return state.removeIn([...pathToAttributes, attributeToDelete]);
+    }
     case DELETE_GROUP_SUCCEEDED:
       console.log({
         st: state

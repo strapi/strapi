@@ -1,10 +1,14 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import GroupPage from '../index';
+import { EmptyAttributesBlock } from 'strapi-helper-plugin';
+import { GroupPage, mapDispatchToProps } from '../index';
+
+import { deleteGroupAttribute } from '../../App/actions';
 
 const basePath = '/plugins/content-type-builder/groups';
 const props = {
+  deleteGroupAttribute: jest.fn(),
   groups: [
     {
       icon: 'fa-cube',
@@ -89,6 +93,17 @@ describe('CTB <GroupPage />', () => {
     shallow(<GroupPage {...props} />);
   });
 
+  describe('CTB <ModelPage /> render', () => {
+    it("should display the EmptyAttributeBlock if the group's attributes are empty", () => {
+      props.initialDataGroup.tests.schema.attributes = {};
+      props.modifiedDataGroup.tests.schema.attributes = {};
+
+      const wrapper = shallow(<GroupPage {...props} />);
+
+      expect(wrapper.find(EmptyAttributesBlock)).toHaveLength(1);
+    });
+  });
+
   describe('GetFeatureHeaderDescription', () => {
     it("should return the model's description field", () => {
       const { getFeatureHeaderDescription } = shallow(
@@ -99,11 +114,60 @@ describe('CTB <GroupPage />', () => {
     });
   });
 
-  describe('getFeatureName', () => {
+  describe('GetFeature', () => {
+    it('should return the correct model', () => {
+      const { getFeature } = shallow(<GroupPage {...props} />).instance();
+
+      expect(getFeature()).toEqual(props.modifiedDataGroup.tests);
+    });
+    it('should return newGroup isTemporary is true', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
+
+      const { getFeature } = shallow(<GroupPage {...props} />).instance();
+
+      expect(getFeature()).toEqual(props.newGroup);
+    });
+  });
+
+  describe('GetFeatureName', () => {
     it("should return the model's name field", () => {
       const { getFeatureName } = shallow(<GroupPage {...props} />).instance();
 
       expect(getFeatureName()).toEqual('tests');
     });
+  });
+});
+
+describe('CTB <GroupPage />, mapDispatchToProps', () => {
+  describe('DeleteGroupAttribute', () => {
+    it('should be injected', () => {
+      const dispatch = jest.fn();
+      const result = mapDispatchToProps(dispatch);
+
+      expect(result.deleteGroupAttribute).toBeDefined();
+    });
+  });
+
+  it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is false', () => {
+    props.groups.find(item => item.name == 'tests').isTemporary = false;
+
+    const { handleDeleteGroupAttribute } = shallow(
+      <GroupPage {...props} />
+    ).instance();
+    handleDeleteGroupAttribute('name');
+
+    const keys = ['modifiedDataGroup', 'tests', 'schema', 'attributes', 'name'];
+    expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
+  });
+
+  it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is true', () => {
+    props.groups.find(item => item.name == 'tests').isTemporary = true;
+    const { handleDeleteGroupAttribute } = shallow(
+      <GroupPage {...props} />
+    ).instance();
+
+    handleDeleteGroupAttribute('name');
+    const keys = ['newGroup', 'schema', 'attributes', 'name'];
+    expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
   });
 });

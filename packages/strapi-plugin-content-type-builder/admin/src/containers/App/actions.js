@@ -15,6 +15,7 @@ import {
   CREATE_TEMP_CONTENT_TYPE,
   CREATE_TEMP_GROUP,
   DELETE_GROUP,
+  DELETE_GROUP_ATTRIBUTE,
   DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL,
   DELETE_MODEL_ATTRIBUTE,
@@ -110,6 +111,13 @@ export function deleteGroup(uid) {
   return {
     type: DELETE_GROUP,
     uid,
+  };
+}
+
+export function deleteGroupAttribute(keys) {
+  return {
+    type: DELETE_GROUP_ATTRIBUTE,
+    keys,
   };
 }
 

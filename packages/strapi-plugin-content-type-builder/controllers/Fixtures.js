@@ -25,6 +25,7 @@ module.exports = {
                 model: 'file',
                 via: 'related',
                 plugin: 'upload',
+                type: 'media',
               },
             },
           },
@@ -50,6 +51,23 @@ module.exports = {
                 model: 'file',
                 via: 'related',
                 plugin: 'upload',
+                type: 'media',
+              },
+            },
+          },
+        },
+        {
+          uid: 'cats',
+          name: 'Cats',
+          source: null,
+          schema: {
+            connection: 'default',
+            collectionName: 'cats',
+            description: 'Little description for cats group',
+            attributes: {
+              name: {
+                type: 'string',
+                required: true,
               },
             },
           },
@@ -62,12 +80,7 @@ module.exports = {
             connection: 'default',
             collectionName: 'cars',
             description: 'Little description for cars group',
-            attributes: {
-              name: {
-                type: 'string',
-                required: true,
-              },
-            },
+            attributes: {},
           },
         },
         //...
