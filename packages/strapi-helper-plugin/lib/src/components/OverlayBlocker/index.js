@@ -1,8 +1,8 @@
 /*
-*
-* OverlayBlocker
-*
-*/
+ *
+ * OverlayBlocker
+ *
+ */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -49,18 +49,20 @@ class OverlayBlocker extends React.Component {
       return;
     }
 
-    this.setState(prevState => ({ elapsed: (Math.round(Date.now() - prevState.start) / 1000) }));
-  }
+    this.setState(prevState => ({
+      elapsed: Math.round(Date.now() - prevState.start) / 1000,
+    }));
+  };
 
   startTimer = () => {
     this.setState({ start: Date.now() });
     this.timer = setInterval(this.tick, DELAY);
-  }
+  };
 
   stopTimer = () => {
     this.setState({ elapsed: 0 });
     clearInterval(this.timer);
-  }
+  };
 
   render() {
     let { title, description, icon } = this.props;
@@ -68,7 +70,14 @@ class OverlayBlocker extends React.Component {
 
     let button = (
       <div className={styles.buttonContainer}>
-        <a className={cn(styles.primary, 'btn')} href="https://strapi.io/documentation/configurations/configurations.html#server" target="_blank">Read the documentation</a>
+        <a
+          className={cn(styles.primary, 'btn')}
+          href="https://strapi.io/documentation/configurations/configurations.html#server"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Read the documentation
+        </a>
       </div>
     );
 
@@ -101,9 +110,7 @@ class OverlayBlocker extends React.Component {
     if (this.props.isOpen) {
       return ReactDOM.createPortal(
         <div className={styles.overlay}>
-          <div>
-            {content}
-          </div>
+          <div>{content}</div>
         </div>,
         this.overlayContainer
       );

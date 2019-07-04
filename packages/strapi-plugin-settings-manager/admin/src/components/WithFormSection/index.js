@@ -30,6 +30,8 @@ import styles from './styles.scss';
 /* eslint-disable react/require-default-props  */
 const WithFormSection = InnerComponent =>
   class extends React.Component {
+    static displayName = 'withFormSection';
+
     static propTypes = {
       addRequiredInputDesign: PropTypes.bool,
       cancelAction: PropTypes.bool,

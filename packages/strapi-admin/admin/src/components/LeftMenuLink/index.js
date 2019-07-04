@@ -52,6 +52,7 @@ function LeftMenuLink(props) {
       className={`${styles.link} ${isLinkActive ? styles.linkActive : ''}`}
       href={props.destination}
       target="_blank"
+      rel="noopener noreferrer"
     >
       {icon}
       {content}

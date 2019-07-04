@@ -108,9 +108,7 @@ class ModelForm extends React.Component {
       formErrors,
       didCheckErrors: !prevState.didCheckErrors,
     }));
-    const pathname = `/plugins/${pluginId}/${featureType}s/${
-      modifiedData.name
-    }`;
+    const pathname = `/plugins/${pluginId}/${featureType}s/${modifiedData.name}`;
 
     if (isEmpty(formErrors)) {
       if (actionType === 'create') {
