@@ -119,7 +119,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.
-    _.forEach(definition.attributes, (details, name) => {
+    Object.keys(definition.attributes).forEach(name => {
+      const details = definition.attributes[name];
       if (details.type !== undefined) {
         return;
       }
@@ -433,7 +434,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             attrs[key] =
               definition.attributes[key].repeatable === true
                 ? groups
-                : _.first(groups);
+                : _.first(groups) || null;
           }
         });
 

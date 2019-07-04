@@ -43,6 +43,7 @@ module.exports = function(strapi) {
       .map(async connectionName => {
         const connection = connections[connectionName];
         const instance = new Mongoose();
+
         _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
         const {
@@ -65,9 +66,6 @@ module.exports = function(strapi) {
 
         // Connect to mongo database
         const connectOptions = {};
-        const options = {
-          useFindAndModify: false,
-        };
 
         if (!_.isEmpty(username)) {
           connectOptions.user = username;
@@ -85,8 +83,6 @@ module.exports = function(strapi) {
         connectOptions.useNewUrlParser = true;
         connectOptions.dbName = database;
         connectOptions.useCreateIndex = true;
-
-        options.debug = debug === true || debug === 'true';
 
         try {
           /* FIXME: for now, mongoose doesn't support srv auth except the way including user/pass in URI.
@@ -117,7 +113,8 @@ module.exports = function(strapi) {
           require(initFunctionPath)(instance, connection);
         }
 
-        Object.keys(options, key => instance.set(key, options[key]));
+        instance.set('debug', debug === true || debug === 'true');
+        instance.set('useFindAndModify', false);
 
         const ctx = {
           instance,
