@@ -90,9 +90,7 @@ class GroupPage extends React.Component {
           headerDescription={this.getFeatureHeaderDescription()}
         >
           <EmptyAttributesBlock
-            description={`${pluginId}.home.emptyAttributes.description.${
-              this.featureType
-            }`}
+            description={`${pluginId}.home.emptyAttributes.description.${this.featureType}`}
             id="openAddAttr"
             label="content-type-builder.button.attributes.add"
             title="content-type-builder.home.emptyAttributes.title"
@@ -110,6 +108,7 @@ class GroupPage extends React.Component {
 GroupPage.propTypes = {
   groups: PropTypes.array.isRequired,
   history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
     push: PropTypes.func.isRequired,
   }),
   location: PropTypes.shape({
