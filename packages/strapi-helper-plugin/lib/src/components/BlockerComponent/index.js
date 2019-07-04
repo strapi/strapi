@@ -54,14 +54,10 @@ const renderIde = () => (
   <div className={styles.ide}>
     <div>
       <pre style={{ whiteSpace: 'pre-wrap' }}>
-        <code>
-          strapi develop
-        </code>
+        <code>strapi develop</code>
       </pre>
       <pre style={{ whiteSpace: 'pre-wrap' }}>
-        <code>
-          npm run develop
-        </code>
+        <code>npm run develop</code>
       </pre>
     </div>
   </div>
@@ -73,6 +69,7 @@ const renderButton = () => (
       className={cn(styles.primary, 'btn')}
       href="http://strapi.io"
       target="_blank"
+      rel="noopener noreferrer"
     >
       Read the documentation
     </a>

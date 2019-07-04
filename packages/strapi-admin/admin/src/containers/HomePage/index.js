@@ -3,7 +3,7 @@
  * HomePage
  *
  */
-
+/* eslint-disable */
 import React from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
@@ -128,7 +128,7 @@ export class HomePage extends React.PureComponent {
     const errors = validateInput(
       this.props.homePage.body.email,
       { required: true },
-      'email',
+      'email'
     );
     this.setState({ errors });
 
@@ -290,13 +290,13 @@ function mapDispatchToProps(dispatch) {
       onChange,
       submit,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 const withReducer = injectReducer({ key: 'homePage', reducer });
@@ -306,5 +306,5 @@ const withSaga = injectSaga({ key: 'homePage', saga });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(HomePage);
