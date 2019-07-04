@@ -3,6 +3,7 @@
  */
 
 /* eslint-disable redux-saga/yield-effects */
+/* eslint-disable redux-saga/no-unhandled-errors */
 import { all, fork, put, takeLatest } from 'redux-saga/effects';
 import defaultSaga, { emitter, getData, getSecuredData } from '../saga';
 
@@ -48,8 +49,8 @@ describe('getData Saga', () => {
           strapiVersion,
           currentEnvironment,
           layout,
-        }),
-      ),
+        })
+      )
     );
   });
 
@@ -72,7 +73,7 @@ describe('defaultSaga Saga', () => {
         fork(takeLatest, EMIT_EVENT, emitter),
         fork(takeLatest, GET_INIT_DATA, getData),
         fork(takeLatest, GET_SECURED_DATA, getSecuredData),
-      ]),
+      ])
     );
   });
 });

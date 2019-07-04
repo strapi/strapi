@@ -85,7 +85,7 @@ class ModelForm extends React.Component {
       updateTempContentType,
     } = this.props;
     const alreadyTakenContentTypeNames = Object.keys(currentData).filter(
-      name => name !== modelToEditName,
+      name => name !== modelToEditName
     );
     let formErrors = {};
 
@@ -145,7 +145,11 @@ class ModelForm extends React.Component {
           link: (
             <FormattedMessage id={input.inputDescriptionParams.id}>
               {msg => (
-                <a href={input.inputDescriptionParams.href} target="_blank">
+                <a
+                  href={input.inputDescriptionParams.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {msg}
                 </a>
               )}

@@ -35,10 +35,11 @@ function Sub({ bordered, content, link, name, style, title, underline }) {
       className={cn(
         styles.subWrapper,
         bordered && styles.subBordered,
-        styles.link,
+        styles.link
       )}
       href={`https://blog.strapi.io/${link}`}
       target="_blank"
+      rel="noopener noreferrer"
     >
       <span>{title}</span>
       {title === '' && <LoadingBar />}

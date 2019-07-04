@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { all, fork, call, put, select, takeLatest } from 'redux-saga/effects';
 import { request } from 'strapi-helper-plugin';
 
@@ -21,7 +22,7 @@ export function* emitter(action) {
           headers: {
             'Content-Type': 'application/json',
           },
-        },
+        }
       );
     }
   } catch (err) {
@@ -44,8 +45,8 @@ export function* getData() {
       { layout },
     ] = yield all(
       endPoints.map(endPoint =>
-        call(request, `/admin/${endPoint}`, { method: 'GET' }),
-      ),
+        call(request, `/admin/${endPoint}`, { method: 'GET' })
+      )
     );
 
     yield put(
@@ -55,7 +56,7 @@ export function* getData() {
         strapiVersion,
         currentEnvironment,
         layout,
-      }),
+      })
     );
   } catch (err) {
     strapi.notification.error('notification.error');
