@@ -4,8 +4,6 @@ import { shallow } from 'enzyme';
 import { EmptyAttributesBlock } from 'strapi-helper-plugin';
 import { GroupPage, mapDispatchToProps } from '../index';
 
-import { deleteGroupAttribute } from '../../App/actions';
-
 const basePath = '/plugins/content-type-builder/groups';
 const props = {
   deleteGroupAttribute: jest.fn(),

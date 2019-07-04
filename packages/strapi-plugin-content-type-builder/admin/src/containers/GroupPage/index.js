@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { get, pickBy } from 'lodash';
+import { get } from 'lodash';
 
 import pluginId from '../../pluginId';
 
@@ -181,7 +181,6 @@ export class GroupPage extends React.Component {
                         {...attribute}
                         type={attribute.type}
                         isTemporary={false}
-                        onClickGoTo={() => {}}
                       />
                     ))}
                   </tbody>
@@ -202,7 +201,12 @@ export class GroupPage extends React.Component {
   }
 }
 
+GroupPage.defaultProps = {
+  canOpenModal: true,
+};
+
 GroupPage.propTypes = {
+  canOpenModal: PropTypes.bool,
   deleteGroupAttribute: PropTypes.func.isRequired,
   groups: PropTypes.array.isRequired,
   history: PropTypes.shape({

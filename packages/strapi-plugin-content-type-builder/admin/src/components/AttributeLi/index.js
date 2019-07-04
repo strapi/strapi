@@ -8,11 +8,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { capitalize } from 'lodash';
-import { IcoContainer } from 'strapi-helper-plugin';
+import { attributeIcons, IcoContainer } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
-import assets from './assets';
 import styles from './styles.scss';
 
 function AttributeLi({
@@ -24,7 +23,8 @@ function AttributeLi({
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
-  const src = target ? assets.relation : assets[ico];
+
+  const src = target ? attributeIcons.relation : attributeIcons[ico];
   /* eslint-disable indent */
   /* istanbul ignore next */
   const icons =

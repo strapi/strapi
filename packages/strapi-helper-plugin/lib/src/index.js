@@ -93,6 +93,7 @@ export { default as PopUpWarning } from './components/PopUpWarning';
 
 // Utils
 export { default as auth } from './utils/auth';
+export { default as attributeIcons } from './utils/attributeIcons';
 export { default as cleanData } from './utils/cleanData';
 export { darken } from './utils/colors';
 export { default as getQueryParameters } from './utils/getQueryParameters';

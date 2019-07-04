@@ -185,7 +185,7 @@
   "table.contentType.title.singular": "{number} Type de Contenu est disponible",
   "table.group.title.plural": "{number} Groupes sont disponibles",
   "table.group.title.singular": "{number} Groupe est disponible",
-  "table.attributes.title.plural": "{number} chammps",
+  "table.attributes.title.plural": "{number} champs",
   "table.attributes.title.singular": "{number} champ",
   "prompt.content.unsaved": "Etes-vous sûr de vouloir quitter ce model? Toutes vos modifications seront perdues."
 }
