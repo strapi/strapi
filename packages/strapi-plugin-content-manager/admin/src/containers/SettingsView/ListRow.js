@@ -5,8 +5,8 @@ import Tr from './Tr';
 
 function ListRow({ name, push, type }) {
   const getUrl = to =>
-    `/plugins/${pluginId}/ctm-configurations/${type}/${name}/${to}`;
-  const to = type === 'models' ? `list-settings` : '';
+    `/plugins/${pluginId}/ctm-configurations/${type}/${name}${to}`;
+  const to = type === 'models' ? '/list-settings' : '';
 
   return (
     <Tr onClick={() => push(getUrl(to))}>
