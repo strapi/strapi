@@ -91,7 +91,7 @@ describe('CTB <GroupPage />', () => {
     shallow(<GroupPage {...props} />);
   });
 
-  describe('CTB <ModelPage /> render', () => {
+  describe('CTB <GroupPage /> render', () => {
     it("should display the EmptyAttributeBlock if the group's attributes are empty", () => {
       props.initialDataGroup.tests.schema.attributes = {};
       props.modifiedDataGroup.tests.schema.attributes = {};
@@ -103,7 +103,7 @@ describe('CTB <GroupPage />', () => {
   });
 
   describe('GetFeatureHeaderDescription', () => {
-    it("should return the model's description field", () => {
+    it("should return the group's description field", () => {
       const { getFeatureHeaderDescription } = shallow(
         <GroupPage {...props} />
       ).instance();
@@ -113,12 +113,12 @@ describe('CTB <GroupPage />', () => {
   });
 
   describe('GetFeature', () => {
-    it('should return the correct model', () => {
+    it('should return the correct group', () => {
       const { getFeature } = shallow(<GroupPage {...props} />).instance();
 
       expect(getFeature()).toEqual(props.modifiedDataGroup.tests);
     });
-    it('should return newGroup isTemporary is true', () => {
+    it('should return newGroup if isTemporary is true', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
 
       const { getFeature } = shallow(<GroupPage {...props} />).instance();
@@ -128,7 +128,7 @@ describe('CTB <GroupPage />', () => {
   });
 
   describe('GetFeatureName', () => {
-    it("should return the model's name field", () => {
+    it("should return the group's name", () => {
       const { getFeatureName } = shallow(<GroupPage {...props} />).instance();
 
       expect(getFeatureName()).toEqual('tests');
@@ -136,7 +136,7 @@ describe('CTB <GroupPage />', () => {
   });
 
   describe('HandleGoBack', () => {
-    it("should return the model's name field", () => {
+    it('should go to previous page', () => {
       const { handleGoBack } = shallow(<GroupPage {...props} />).instance();
       handleGoBack();
 
@@ -148,35 +148,41 @@ describe('CTB <GroupPage />', () => {
 });
 
 describe('CTB <GroupPage />, mapDispatchToProps', () => {
+  it('should be injected', () => {
+    const dispatch = jest.fn();
+    const result = mapDispatchToProps(dispatch);
+
+    expect(result.deleteGroupAttribute).toBeDefined();
+  });
+
   describe('DeleteGroupAttribute', () => {
-    it('should be injected', () => {
-      const dispatch = jest.fn();
-      const result = mapDispatchToProps(dispatch);
+    it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is false', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = false;
 
-      expect(result.deleteGroupAttribute).toBeDefined();
+      const { handleDeleteGroupAttribute } = shallow(
+        <GroupPage {...props} />
+      ).instance();
+      handleDeleteGroupAttribute('name');
+
+      const keys = [
+        'modifiedDataGroup',
+        'tests',
+        'schema',
+        'attributes',
+        'name',
+      ];
+      expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
     });
-  });
 
-  it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is false', () => {
-    props.groups.find(item => item.name == 'tests').isTemporary = false;
+    it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is true', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
+      const { handleDeleteGroupAttribute } = shallow(
+        <GroupPage {...props} />
+      ).instance();
 
-    const { handleDeleteGroupAttribute } = shallow(
-      <GroupPage {...props} />
-    ).instance();
-    handleDeleteGroupAttribute('name');
-
-    const keys = ['modifiedDataGroup', 'tests', 'schema', 'attributes', 'name'];
-    expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
-  });
-
-  it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is true', () => {
-    props.groups.find(item => item.name == 'tests').isTemporary = true;
-    const { handleDeleteGroupAttribute } = shallow(
-      <GroupPage {...props} />
-    ).instance();
-
-    handleDeleteGroupAttribute('name');
-    const keys = ['newGroup', 'schema', 'attributes', 'name'];
-    expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
+      handleDeleteGroupAttribute('name');
+      const keys = ['newGroup', 'schema', 'attributes', 'name'];
+      expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
+    });
   });
 });

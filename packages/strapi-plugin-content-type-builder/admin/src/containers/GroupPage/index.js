@@ -132,14 +132,14 @@ export class GroupPage extends React.Component {
 
     const attributes = this.getFeatureAttributes();
     const attributesNumber = this.getFeatureAttributesLength();
-    let listTitle = `${pluginId}.table.attributes.title.${
+    const listTitle = `${pluginId}.table.attributes.title.${
       attributesNumber > 1 ? 'plural' : 'singular'
     }`;
 
     const buttonProps = {
       kind: 'secondaryHotlineAdd',
       label: `${pluginId}.button.attributes.add`,
-      onClick: this.handleClick,
+      onClick: () => {},
     };
 
     return (
@@ -165,8 +165,6 @@ export class GroupPage extends React.Component {
               <ListHeader
                 title={listTitle}
                 titleValues={{ number: attributesNumber }}
-                relationTitle={listTitle}
-                relationTitleValues={{ number: attributesNumber }}
                 button={{ ...buttonProps }}
               />
               <List>
@@ -175,12 +173,12 @@ export class GroupPage extends React.Component {
                     {attributes.map(attribute => (
                       <ListRow
                         key={attribute.name}
+                        {...attribute}
                         canOpenModal={canOpenModal}
                         context={this.context}
                         deleteAttribute={this.handleDeleteGroupAttribute}
-                        {...attribute}
-                        type={attribute.type}
                         isTemporary={false}
+                        type={attribute.type}
                       />
                     ))}
                   </tbody>
