@@ -1,4 +1,4 @@
-import { GET_DATA, GET_DATA_SUCCEEDED } from './constants';
+import { GET_DATA, GET_DATA_SUCCEEDED, ON_CHANGE } from './constants';
 
 export function getData() {
   return {
@@ -12,5 +12,13 @@ export function getDataSucceeded(generalSettings, groups, models) {
     generalSettings,
     groups,
     models,
+  };
+}
+
+export function onChange({ target: { name, value } }) {
+  return {
+    type: ON_CHANGE,
+    name,
+    value,
   };
 }
