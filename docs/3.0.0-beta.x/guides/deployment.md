@@ -1210,7 +1210,7 @@ Even if it is usually recommended to version this file, it may create issues on 
 
 ### 5. Init a Git repository and commit your project
 
-Init the Git repository and commit yoru project.
+Init the Git repository and commit your project.
 
 `Path: ./my-project/`
 
