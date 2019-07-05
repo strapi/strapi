@@ -3,7 +3,7 @@ module.exports = {
     const generalSettings = {
       bulkable: true,
       filters: true,
-      pageEntries: 10,
+      pageSize: 20,
       search: true,
     };
 
@@ -23,7 +23,6 @@ module.exports = {
   },
 
   getLayout: ctx => {
-    console.log('ooo');
     const layouts = {
       article: {
         uid: 'article',
@@ -48,6 +47,7 @@ module.exports = {
         settings: {
           mainField: 'id',
           defaultSortBy: 'id',
+          defaultSortOrder: 'ASC',
           searchable: true,
           filterable: true,
           bulkable: false,
@@ -158,6 +158,7 @@ module.exports = {
         settings: {
           mainField: 'id',
           defaultSortBy: 'id',
+          defaultSortOrder: 'ASC',
           searchable: true,
           filterable: true,
           bulkable: false,
@@ -309,6 +310,11 @@ module.exports = {
 
   updateGeneralSettings: ctx => {
     // Here it should update all the other settings
+    ctx.body = { ok: true };
+  },
+
+  updateLayout: ctx => {
+    // Update specific layout
     ctx.body = { ok: true };
   },
 };

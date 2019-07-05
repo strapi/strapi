@@ -32,7 +32,7 @@
     "didCheckErrors": false,
     "errors": [],
     "inputDescription": { "id": "content-manager.form.Input.pageEntries.inputDescription" },
-    "name": "pageEntries",
+    "name": "pageSize",
     "selectOptions": ["10", "20", "50", "100"],
     "type": "select",
     "validations": {}

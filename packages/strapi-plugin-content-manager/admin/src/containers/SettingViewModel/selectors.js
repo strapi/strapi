@@ -24,5 +24,13 @@ const makeSelectSettingViewModel = () =>
     }
   );
 
+const makeSelectModifiedData = () =>
+  createSelector(
+    settingViewModelDomain(),
+    substate => {
+      return substate.get('modifiedData').toJS();
+    }
+  );
+
 export default makeSelectSettingViewModel;
-export { settingViewModelDomain };
+export { settingViewModelDomain, makeSelectModifiedData };
