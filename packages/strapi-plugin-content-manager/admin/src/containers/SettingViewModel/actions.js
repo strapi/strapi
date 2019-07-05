@@ -2,8 +2,10 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
+  ON_REMOVE_LIST_FIELD,
   ON_RESET,
   ON_SUBMIT,
+  RESET_PROPS,
   SUBMIT_SUCCEEDED,
 } from './constants';
 
@@ -29,6 +31,13 @@ export function onChange({ target: { name, value } }) {
   };
 }
 
+export function onRemoveListField(index) {
+  return {
+    type: ON_REMOVE_LIST_FIELD,
+    index,
+  };
+}
+
 export function onReset() {
   return {
     type: ON_RESET,
@@ -39,6 +48,12 @@ export function onSubmit(uid, emitEvent) {
     type: ON_SUBMIT,
     uid,
     emitEvent,
+  };
+}
+
+export function resetProps() {
+  return {
+    type: RESET_PROPS,
   };
 }
 

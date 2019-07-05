@@ -2,7 +2,7 @@ import React, { memo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { get, isEqual, upperFirst } from 'lodash';
+import { get, isEqual, isEmpty, upperFirst } from 'lodash';
 
 import {
   BackHeader,
@@ -10,14 +10,27 @@ import {
   InputsIndex as Input,
   PluginHeader,
   PopUpWarning,
+  LoadingIndicatorPage,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 
 import Block from '../../components/Block';
 import Container from '../../components/Container';
+import FormTitle from '../../components/FormTitle';
 import SectionTitle from '../../components/SectionTitle';
 
-import { getData, onChange, onReset, onSubmit } from './actions';
+import LayoutTitle from './LayoutTitle';
+import ListLayout from './ListLayout';
+import Separator from './Separator';
+
+import {
+  getData,
+  onChange,
+  onReset,
+  onSubmit,
+  onRemoveListField,
+  resetProps,
+} from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectSettingViewModel from './selectors';
@@ -32,13 +45,16 @@ function SettingViewModel({
   getData,
   history: { goBack },
   initialData,
+  isLoading,
   match: {
     params: { name, settingType },
   },
   modifiedData,
   onChange,
+  onRemoveListField,
   onReset,
   onSubmit,
+  resetProps,
   shouldToggleModalSubmit,
 }) {
   strapi.useInjectReducer({ key: 'settingViewModel', reducer, pluginId });
@@ -50,12 +66,21 @@ function SettingViewModel({
 
   useEffect(() => {
     getData(name);
+
+    return () => {
+      resetProps();
+    };
   }, []);
+
   useEffect(() => {
     if (showWarningSubmit) {
       toggleWarningSubmit();
     }
   }, [shouldToggleModalSubmit]);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   const getPluginHeaderActions = () => {
     if (isEqual(modifiedData, initialData)) {
@@ -80,9 +105,18 @@ function SettingViewModel({
       },
     ];
   };
+  const getListDisplayedFields = () =>
+    get(modifiedData, ['layouts', 'list'], []);
+  const getListRemainingFields = () => {
+    const metadata = get(modifiedData, ['metadata'], {});
+
+    return Object.keys(metadata).filter(
+      key => !isEmpty(get(modifiedData, ['metadata', key, 'list']))
+    );
+  };
   const getSelectOptions = input => {
     if (input.name === 'settings.defaultSortBy') {
-      return get(modifiedData, ['layouts', 'list'], []);
+      return getListDisplayedFields();
     }
 
     return input.selectOptions;
@@ -136,6 +170,31 @@ function SettingViewModel({
                   />
                 );
               })}
+              <div className="col-12">
+                <Separator />
+              </div>
+            </div>
+            <SectionTitle />
+
+            <div className="row">
+              <LayoutTitle className="col-12">
+                <FormTitle
+                  title={`${pluginId}.global.displayedFields`}
+                  description={`${pluginId}.containers.SettingPage.${
+                    settingType === 'list-settings'
+                      ? 'attributes'
+                      : 'editSettings'
+                  }.description`}
+                />
+              </LayoutTitle>
+
+              {settingType === 'list-settings' && (
+                <ListLayout
+                  displayedData={getListDisplayedFields()}
+                  availableData={getListRemainingFields()}
+                  onRemove={onRemoveListField}
+                />
+              )}
             </div>
           </Block>
         </div>
@@ -179,6 +238,7 @@ SettingViewModel.propTypes = {
     goBack: PropTypes.func,
   }).isRequired,
   initialData: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
       name: PropTypes.string,
@@ -187,8 +247,10 @@ SettingViewModel.propTypes = {
 
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
+  onRemoveListField: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  resetProps: PropTypes.func.isRequired,
   shouldToggleModalSubmit: PropTypes.bool.isRequired,
 };
 
@@ -199,8 +261,10 @@ export function mapDispatchToProps(dispatch) {
     {
       getData,
       onChange,
+      onRemoveListField,
       onReset,
       onSubmit,
+      resetProps,
     },
     dispatch
   );

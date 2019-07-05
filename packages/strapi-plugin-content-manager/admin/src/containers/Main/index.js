@@ -31,7 +31,7 @@ function Main({ isLoading, emitEvent }) {
     <Switch>
       <Route
         path="/plugins/content-manager/ctm-configurations/models/:name/:settingType"
-        component={props => renderRoute(props, SettingViewModel)}
+        render={props => renderRoute(props, SettingViewModel)}
       />
       <Route
         path="/plugins/content-manager/ctm-configurations/groups/:name"

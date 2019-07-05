@@ -42,6 +42,31 @@ module.exports = {
             content: {
               type: 'text',
             },
+            json: {
+              type: 'string',
+            },
+            number: {
+              type: 'integer',
+            },
+            date: {
+              type: 'date',
+            },
+            enum: {
+              enum: ['morning,', 'noon'],
+              type: 'enumeration',
+            },
+            pic: {
+              model: 'file',
+              via: 'related',
+              plugin: 'upload',
+            },
+            bool: {
+              type: 'boolean',
+            },
+            tags: {
+              collection: 'tag',
+              via: 'articles',
+            },
           },
         },
         settings: {
@@ -54,6 +79,14 @@ module.exports = {
           pageSize: 10,
         },
         metadata: {
+          id: {
+            edit: {},
+            list: {
+              label: 'Id',
+              searchable: true,
+              sortable: true,
+            },
+          },
           title: {
             edit: {
               label: 'title',
@@ -76,6 +109,85 @@ module.exports = {
             },
             list: {
               label: 'content',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          json: {
+            edit: {
+              label: 'json',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {},
+          },
+          number: {
+            edit: {
+              label: 'number',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'number',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          date: {
+            edit: {
+              label: 'date',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'date',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          enum: {
+            edit: {
+              label: 'enum',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'enum',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          pic: {
+            edit: {
+              label: 'pic',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {},
+          },
+          tags: {
+            edit: {
+              label: 'tags',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {},
+          },
+          bool: {
+            edit: {
+              label: 'bool',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'bool',
               searchable: true,
               sortable: true,
             },
@@ -165,6 +277,14 @@ module.exports = {
           pageSize: 10,
         },
         metadata: {
+          id: {
+            edit: {},
+            list: {
+              label: 'Id',
+              searchable: true,
+              sortable: true,
+            },
+          },
           username: {
             edit: {
               label: 'username',
@@ -236,11 +356,7 @@ module.exports = {
                 editable: true,
                 visible: true,
               },
-              list: {
-                label: 'role',
-                searchable: true,
-                sortable: true,
-              },
+              list: {},
             },
           },
           layouts: {

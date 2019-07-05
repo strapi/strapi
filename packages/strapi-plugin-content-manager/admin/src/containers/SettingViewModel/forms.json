@@ -61,5 +61,16 @@
       "validations": {}
     }
   ],
-  "edit-settings": []
+  "edit-settings": [
+    {
+      "label": { "id": "content-manager.containers.SettingPage.editSettings.entry.title"},
+      "inputDescription": { "id": "content-manager.containers.SettingPage.editSettings.entry.title.description"},
+      "type": "select",
+      "name": "settings.mainField",
+      "customBootstrapClass": "col-md-4",
+      "selectOptions": ["id"],
+      "didCheckErrors": false,
+      "validations": {}
+    }
+  ]
 }

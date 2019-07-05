@@ -125,5 +125,6 @@
   "popUpWarning.warning.cancelAllSettings": "Êtes-vous sûr de vouloir abandonner vos modifications ?",
   "popUpWarning.warning.updateAllSettings": "Cela modifiera tous vos précédents paramètres.",
   "success.record.delete": "Supprimé",
-  "success.record.save": "Sauvegardé"
+  "success.record.save": "Sauvegardé",
+  "notification.info.minimumFields": "Vous devez avoir au moins un champs d'affiché"
 }

@@ -130,5 +130,6 @@
   "popUpWarning.warning.cancelAllSettings": "Are you sure you want to cancel your modifications?",
   "popUpWarning.warning.updateAllSettings": "This will modify all your settings",
   "success.record.delete": "Deleted",
-  "success.record.save": "Saved"
+  "success.record.save": "Saved",
+  "notification.info.minimumFields": "You need to have at least one field displayed"
 }
