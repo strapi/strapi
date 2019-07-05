@@ -2,7 +2,7 @@
 
 See the [requests concepts](../concepts/concepts.md#requests) for details.
 
-The context object (`ctx`) contains all the requests related informations. They are accessible through `ctx.request`, from [controllers](controllers.md) and [policies](policies.md).
+The context object (`ctx`) contains all the requests related information. They are accessible through `ctx.request`, from [controllers](controllers.md) and [policies](policies.md).
 
 ## API Reference
 
@@ -212,7 +212,7 @@ If `app.subdomainOffset` is 3, `ctx.subdomains` is `["tobi"]`.
 ### request.is(types...)
 
 Check if the incoming request contains the "Content-Type"
-header field, and it contains any of the give mime `type`s.
+header field, and it contains any of the five mime `type`s.
 If there is no request body, `null` is returned.
 If there is no content type, or the match fails `false` is returned.
 Otherwise, it returns the matching content-type.

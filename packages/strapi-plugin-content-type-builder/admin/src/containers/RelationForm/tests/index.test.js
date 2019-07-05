@@ -49,7 +49,7 @@ describe('<RelationForm />', () => {
     wrapper = renderComponent(props);
   });
 
-  it('should render the advanced tab if the the active tab is advanced', () => {
+  it('should render the advanced tab if the active tab is advanced', () => {
     props.activeTab = 'advanced';
 
     wrapper = renderComponent(props);

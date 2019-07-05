@@ -14,7 +14,7 @@
   "Auth.form.error.email.taken": "Cet e-mail est déjà utilisé",
   "Auth.form.error.invalid": "Votre identifiant ou mot de passe est incorrect.",
   "Auth.form.error.noAdminAccess": "Vous ne pouvez pas accéder à l'administration.",
-  "Auth.form.error.params.provide": "Les informations nos incorrect.",
+  "Auth.form.error.params.provide": "Les informations sont incorrectes.",
   "Auth.form.error.password.format": "Votre mot de passe ne peut pas contenir trois fois le symbole `$`.",
   "Auth.form.error.password.local": "Ce compte n'a pas de mot de passe.",
   "Auth.form.error.password.matching": "Les mots de passe ne sont pas identique.",

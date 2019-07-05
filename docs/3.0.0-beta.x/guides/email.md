@@ -39,4 +39,4 @@ Then, visit `/admin/plugins/email/configurations/development` on your web browse
 
 ## Create providers
 
-If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier), modify the `auth` config object and customize the `send` functions.
+If you want to create your own, make sure the name starts with `strapi-provider-email-` (duplicating an existing one will be easier), modify the `auth` config object and customize the `send` function.

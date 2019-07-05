@@ -437,7 +437,7 @@ module.exports = function(strapi) {
                   strapi.stop();
                 }
 
-                // Add some informations about ORM & client connection
+                // Add some information about ORM & client connection
                 definition.orm = 'mongoose';
                 definition.client = _.get(
                   strapi.config.connections[definition.connection],
