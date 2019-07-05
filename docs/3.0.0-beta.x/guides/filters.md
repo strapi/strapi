@@ -31,6 +31,7 @@ Filters are used as a suffix of a field name:
 - `ncontains`: Doesn't contain
 - `containss`: Contains case sensitive
 - `ncontainss`: Doesn't contain case sensitive
+- `null`: Is null/Is not null
 
 #### Examples
 
