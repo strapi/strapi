@@ -1,9 +1,8 @@
 'use strict';
 const _ = require('lodash');
-const pluralize = require('pluralize');
+const { singular } = require('pluralize');
 
 const utilsModels = require('strapi-utils').models;
-const utils = require('./utils/');
 const relations = require('./relations');
 const buildDatabaseSchema = require('./buildDatabaseSchema');
 const genGroupRelatons = require('./generate-group-relations');
@@ -125,11 +124,9 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         return;
       }
 
-      const verbose =
-        _.get(
-          utilsModels.getNature(details, name, undefined, model.toLowerCase()),
-          'verbose'
-        ) || '';
+      const { nature, verbose } =
+        utilsModels.getNature(details, name, undefined, model.toLowerCase()) ||
+        {};
 
       // Build associations key
       utilsModels.defineAssociations(
@@ -211,58 +208,71 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           break;
         }
         case 'belongsToMany': {
-          const collection = details.plugin
+          const targetModel = details.plugin
             ? strapi.plugins[details.plugin].models[details.collection]
             : strapi.models[details.collection];
 
-          const collectionName =
-            _.get(details, 'collectionName') ||
-            utilsModels.getCollectionName(
-              collection.attributes[details.via],
-              details
-            );
-
-          const relationship = collection.attributes[details.via];
-
           // Force singular foreign key
-          relationship.attribute = pluralize.singular(relationship.collection);
-          details.attribute = pluralize.singular(details.collection);
+          details.attribute = singular(details.collection);
+          details.column = targetModel.primaryKey;
 
-          // Define PK column
-          details.column = utils.getPK(model, strapi.models);
-          relationship.column = utils.getPK(details.collection, strapi.models);
+          let options = [];
+          if (nature === 'manyWay') {
+            const joinTableName = `${definition.collectionName}__${_.snakeCase(
+              name
+            )}`;
 
-          // Sometimes the many-to-many relationships
-          // is on the same keys on the same models (ex: `friends` key in model `User`)
-          if (
-            `${details.attribute}_${details.column}` ===
-            `${relationship.attribute}_${relationship.column}`
-          ) {
-            relationship.attribute = pluralize.singular(details.via);
+            const foreignKey = `${singular(definition.collectionName)}_${
+              definition.primaryKey
+            }`;
+
+            const otherKey = `${details.attribute}_${details.column}`;
+
+            options = [joinTableName, foreignKey, otherKey];
+          } else {
+            const joinTableName =
+              _.get(details, 'collectionName') ||
+              utilsModels.getCollectionName(
+                targetModel.attributes[details.via],
+                details
+              );
+
+            const relationship = targetModel.attributes[details.via];
+
+            // Define PK column
+            relationship.attribute = singular(relationship.collection);
+            relationship.column = definition.primaryKey;
+
+            // Sometimes the many-to-many relationships
+            // is on the same keys on the same models (ex: `friends` key in model `User`)
+            if (
+              `${details.attribute}_${details.column}` ===
+              `${relationship.attribute}_${relationship.column}`
+            ) {
+              relationship.attribute = singular(details.via);
+            }
+
+            const foreignKey = `${relationship.attribute}_${relationship.column}`;
+            const otherKey = `${details.attribute}_${details.column}`;
+
+            options = [joinTableName, foreignKey, otherKey];
           }
 
           // Set this info to be able to see if this field is a real database's field.
           details.isVirtual = true;
 
           loadedModel[name] = function() {
-            if (
-              _.isArray(_.get(details, 'withPivot')) &&
-              !_.isEmpty(details.withPivot)
-            ) {
-              return this.belongsToMany(
-                GLOBALS[globalId],
-                collectionName,
-                `${relationship.attribute}_${relationship.column}`,
-                `${details.attribute}_${details.column}`
-              ).withPivot(details.withPivot);
+            const targetBookshelfModel = GLOBALS[globalId];
+            let collection = this.belongsToMany(
+              targetBookshelfModel,
+              ...options
+            );
+
+            if (Array.isArray(details.withPivot)) {
+              return collection.withPivot(details.withPivot);
             }
 
-            return this.belongsToMany(
-              GLOBALS[globalId],
-              collectionName,
-              `${relationship.attribute}_${relationship.column}`,
-              `${details.attribute}_${details.column}`
-            );
+            return collection;
           };
           break;
         }

@@ -17,10 +17,6 @@
     "content2": {
       "type": "text"
     },
-    "posts": {
-      "collection": "post",
-      "via": "articles"
-    },
     "title": {
       "type": "string"
     },
@@ -36,6 +32,12 @@
       "repeatable": true,
       "min": 2,
       "max": 3
+    },
+    "mainTag": {
+      "model": "tag"
+    },
+    "linkedTags": {
+      "collection": "tag"
     }
   }
 }
