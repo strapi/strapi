@@ -42,6 +42,14 @@
     },
     {
       "method": "GET",
+      "path": "/fixtures/layouts/:uid",
+      "handler": "ContentManagerFixtures.getLayout",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {

@@ -5,7 +5,7 @@ import { initialState } from './reducer';
 /**
  * Direct selector to the settingView state domain
  */
-const settingViewDomain = () => state =>
+const settingsViewDomain = () => state =>
   state.get(`${pluginId}_settingsView`) || initialState;
 
 /**
@@ -13,12 +13,12 @@ const settingViewDomain = () => state =>
  */
 
 /**
- * Default selector used by Main
+ * Default selector used by SettingsView
  */
 
-const makeSelectSettingView = () =>
+const makeSelectSettingsView = () =>
   createSelector(
-    settingViewDomain(),
+    settingsViewDomain(),
     substate => {
       return substate.toJS();
     }
@@ -26,10 +26,10 @@ const makeSelectSettingView = () =>
 
 const makeSelectModifiedData = () =>
   createSelector(
-    settingViewDomain(),
+    settingsViewDomain(),
     substate => {
       return substate.get('modifiedData').toJS();
     }
   );
-export default makeSelectSettingView;
-export { settingViewDomain, makeSelectModifiedData };
+export default makeSelectSettingsView;
+export { settingsViewDomain, makeSelectModifiedData };

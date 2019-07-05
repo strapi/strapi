@@ -22,7 +22,7 @@
     "customBootstrapClass": "col-md-4",
     "didCheckErrors": false,
     "errors": [],
-    "name": "bulkActions",
+    "name": "bulkable",
     "type": "toggle",
     "validations": {}
   },

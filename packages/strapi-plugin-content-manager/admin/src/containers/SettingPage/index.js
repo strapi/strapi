@@ -108,22 +108,22 @@ class SettingPage extends React.PureComponent {
     const prevDisplayedFields = get(
       schema,
       ['models', ...this.getPath().split('.'), 'editDisplay', 'fields'],
-      [],
+      []
     );
     const prevDisplayedRelations = get(
       schema,
       ['models', ...this.getPath().split('.'), 'editDisplay', 'relations'],
-      [],
+      []
     );
     const currentDisplayedFields = get(
       this.props.schema,
       ['models', ...this.getPath().split('.'), 'editDisplay', 'fields'],
-      [],
+      []
     );
     const currentDisplayedRelations = get(
       this.props.schema,
       ['models', ...this.getPath().split('.'), 'editDisplay', 'relations'],
-      [],
+      []
     );
 
     if (prevProps.submitSuccess !== this.props.submitSuccess) {
@@ -170,7 +170,7 @@ class SettingPage extends React.PureComponent {
     const name = get(
       this.props.schema,
       `models.${this.getPath()}.primaryKey`,
-      'id',
+      'id'
     );
     // The id attribute is not present on the schema so we need to add it manually
     const defaultAttr = {
@@ -184,7 +184,7 @@ class SettingPage extends React.PureComponent {
     };
     const attributes = Object.assign(
       get(this.props.schema, `models.${this.getPath()}.attributes`, {}),
-      defaultAttr,
+      defaultAttr
     );
 
     return Object.keys(attributes)
@@ -233,7 +233,7 @@ class SettingPage extends React.PureComponent {
       {
         fields: [],
         relations: [],
-      },
+      }
     );
   };
 
@@ -252,7 +252,7 @@ class SettingPage extends React.PureComponent {
         'editDisplay',
         'availableFields',
       ],
-      {},
+      {}
     );
 
   getEditPagePossibleEntryTitleFields = () => {
@@ -307,7 +307,7 @@ class SettingPage extends React.PureComponent {
     const attrLabel = get(
       this.props.schema,
       ['models', ...this.getPath().split('.'), 'relations', attrName, 'label'],
-      'iii',
+      'iii'
     );
 
     return attrLabel;
@@ -317,7 +317,7 @@ class SettingPage extends React.PureComponent {
     const relations = get(
       this.props.schema,
       'models.'.concat(this.getPath()).concat('.relations'),
-      {},
+      {}
     );
 
     return Object.keys(relations).filter(relation => {
@@ -373,7 +373,7 @@ class SettingPage extends React.PureComponent {
     get(
       this.props.schema,
       ['models', this.getModelName()].concat(['primaryKey']),
-      'id',
+      'id'
     );
 
   getValue = (keys, type) => {
@@ -433,7 +433,7 @@ class SettingPage extends React.PureComponent {
 
       if (enableAttrsSort.length === 0) {
         strapi.notification.info(
-          'content-manager.notification.info.SettingPage.disableSort',
+          'content-manager.notification.info.SettingPage.disableSort'
         );
       } else {
         const newDefaultSort =
@@ -458,7 +458,7 @@ class SettingPage extends React.PureComponent {
       ['models']
         .concat(this.getPath().split('.'))
         .concat(['listDisplay', index]),
-      {},
+      {}
     );
     this.props.onClickEditListItem(attrToEdit);
   };
@@ -467,7 +467,7 @@ class SettingPage extends React.PureComponent {
     const fieldToEditName = get(
       this.props.schema,
       ['models', ...this.getPath().split('.'), 'editDisplay', 'fields', index],
-      '',
+      ''
     );
     const fieldToEdit = get(
       this.props.schema,
@@ -478,7 +478,7 @@ class SettingPage extends React.PureComponent {
         'availableFields',
         fieldToEditName,
       ],
-      {},
+      {}
     );
 
     return this.props.onClickEditField(fieldToEdit);
@@ -488,7 +488,7 @@ class SettingPage extends React.PureComponent {
     const relationToEditName = get(
       this.getEditPageDisplayedRelations(),
       index,
-      '',
+      ''
     );
     const relationToEdit = get(this.props.schema, [
       'models',
@@ -535,7 +535,7 @@ class SettingPage extends React.PureComponent {
     const fieldToEditName = get(
       this.props.schema,
       ['models', ...keys.split('.'), 'fields', index],
-      '',
+      ''
     );
     this.manageRemove(index, keys, fieldToEditName, fieldToEdit, false);
   };
@@ -568,8 +568,8 @@ class SettingPage extends React.PureComponent {
           'editDisplay',
           'availableFields',
         ],
-        {},
-      ),
+        {}
+      )
     );
 
     if (
@@ -578,7 +578,7 @@ class SettingPage extends React.PureComponent {
       allFields.length === 0
     ) {
       return strapi.notification.info(
-        'content-manager.notification.error.displayedFields',
+        'content-manager.notification.error.displayedFields'
       );
     }
 
@@ -588,7 +588,7 @@ class SettingPage extends React.PureComponent {
       allRelations.length === 0
     ) {
       return strapi.notification.info(
-        'content-manager.notification.error.displayedFields',
+        'content-manager.notification.error.displayedFields'
       );
     }
 
@@ -633,7 +633,7 @@ class SettingPage extends React.PureComponent {
         if (isRelation) {
           this.props.onClickAddAttrField(
             toAdd,
-            `${this.getPath()}.editDisplay.fields`,
+            `${this.getPath()}.editDisplay.fields`
           );
           this.setState(prevState => ({
             shouldSelectField: !prevState.shouldSelectField,
@@ -641,7 +641,7 @@ class SettingPage extends React.PureComponent {
         } else {
           this.props.onClickAddAttr(
             toAdd,
-            `${this.getPath()}.editDisplay.relations`,
+            `${this.getPath()}.editDisplay.relations`
           );
           this.setState(prevState => ({
             shouldSelectRelation: !prevState.shouldSelectRelation,
@@ -694,7 +694,7 @@ class SettingPage extends React.PureComponent {
     }
 
     const index = this.getEditPageDisplayedRelations().indexOf(
-      relationToEdit.alias,
+      relationToEdit.alias
     );
 
     return index;
@@ -831,7 +831,7 @@ class SettingPage extends React.PureComponent {
         onClick={() =>
           this.props.onClickAddAttrField(
             item,
-            `${this.getPath()}.editDisplay.fields`,
+            `${this.getPath()}.editDisplay.fields`
           )
         }
       >
@@ -847,7 +847,7 @@ class SettingPage extends React.PureComponent {
         onClick={() =>
           this.props.onClickAddAttr(
             item,
-            `${this.getPath()}.editDisplay.relations`,
+            `${this.getPath()}.editDisplay.relations`
           )
         }
       >
@@ -878,7 +878,7 @@ class SettingPage extends React.PureComponent {
 
     if (isEmpty(fieldToEdit)) {
       return forms.editView.relationForm.map(
-        this.renderFormEditSettingsRelation,
+        this.renderFormEditSettingsRelation
       );
     }
 
@@ -993,7 +993,7 @@ class SettingPage extends React.PureComponent {
     const value = get(
       this.props.schema,
       ['models', ...displayedFieldPath],
-      null,
+      null
     );
 
     return (
@@ -1032,7 +1032,7 @@ class SettingPage extends React.PureComponent {
             className={cn(
               'col-md-8',
               styles.draggedDescription,
-              styles.edit_settings,
+              styles.edit_settings
             )}
           >
             <FormTitle
@@ -1045,7 +1045,7 @@ class SettingPage extends React.PureComponent {
               <CustomDragLayer />
               <div className={cn('row', styles.noPadding)}>
                 {this.getEditPageDisplayedFields().map(
-                  this.renderDraggableAttrEditSettingsField,
+                  this.renderDraggableAttrEditSettingsField
                 )}
                 <div className={cn('col-md-6')}>
                   <div
@@ -1054,7 +1054,7 @@ class SettingPage extends React.PureComponent {
                       styles.dropdownWrapper,
                       isOpenField && styles.dropdownWrapperOpen,
                       this.shouldDisplayCursorNotAllowed('fields') &&
-                        styles.dropDownNotAllowed,
+                        styles.dropDownNotAllowed
                     )}
                   >
                     <ButtonDropdown
@@ -1068,7 +1068,7 @@ class SettingPage extends React.PureComponent {
                       </DropdownToggle>
                       <DropdownMenu>
                         {this.getDropDownFieldItems().map(
-                          this.renderDropDownItemSettingField,
+                          this.renderDropDownItemSettingField
                         )}
                       </DropdownMenu>
                     </ButtonDropdown>
@@ -1084,7 +1084,7 @@ class SettingPage extends React.PureComponent {
               className={cn(
                 'col-md-4',
                 styles.draggedDescription,
-                styles.edit_settings,
+                styles.edit_settings
               )}
             >
               <FormTitle
@@ -1095,7 +1095,7 @@ class SettingPage extends React.PureComponent {
                 <div className="row">
                   {/* DRAGGABLE BLOCK */}
                   {this.getEditPageDisplayedRelations().map(
-                    this.renderDraggableAttrEditSettingsRelation,
+                    this.renderDraggableAttrEditSettingsRelation
                   )}
                   {/* DRAGGABLE BLOCK */}
                   <div
@@ -1104,7 +1104,7 @@ class SettingPage extends React.PureComponent {
                       styles.dropdownWrapper,
                       isOpenRelation && styles.dropdownWrapperOpen,
                       this.shouldDisplayCursorNotAllowed('relations') &&
-                        styles.dropDownNotAllowed,
+                        styles.dropDownNotAllowed
                     )}
                   >
                     <ButtonDropdown
@@ -1118,7 +1118,7 @@ class SettingPage extends React.PureComponent {
                       </DropdownToggle>
                       <DropdownMenu>
                         {this.getDropDownRelationsItems().map(
-                          this.renderDropDownItemEditSettingsRelation,
+                          this.renderDropDownItemEditSettingsRelation
                         )}
                       </DropdownMenu>
                     </ButtonDropdown>
@@ -1188,7 +1188,7 @@ class SettingPage extends React.PureComponent {
                 styles.dropdownWrapper,
                 isOpen && styles.dropdownWrapperOpen,
                 this.shouldDisplayCursorNotAllowed('list') &&
-                  styles.dropDownNotAllowed,
+                  styles.dropDownNotAllowed
               )}
             >
               <ButtonDropdown isOpen={isOpen} toggle={this.toggleDropdown}>
@@ -1199,7 +1199,7 @@ class SettingPage extends React.PureComponent {
                 </DropdownToggle>
                 <DropdownMenu>
                   {this.getDropDownItems().map(
-                    this.renderDropDownItemListSettings,
+                    this.renderDropDownItemListSettings
                   )}
                 </DropdownMenu>
               </ButtonDropdown>
@@ -1367,7 +1367,7 @@ const mapDispatchToProps = dispatch =>
       onSubmit,
       setLayout,
     },
-    dispatch,
+    dispatch
   );
 const mapStateToProps = createStructuredSelector({
   addedField: makeSelectAddedField(),
@@ -1382,7 +1382,7 @@ const mapStateToProps = createStructuredSelector({
 });
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = strapi.injectReducer({
   key: 'settingPage',
@@ -1394,5 +1394,5 @@ const withSaga = strapi.injectSaga({ key: 'settingPage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(DragDropContext(HTML5Backend)(SettingPage));
