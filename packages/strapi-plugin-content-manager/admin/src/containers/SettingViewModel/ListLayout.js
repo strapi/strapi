@@ -3,9 +3,17 @@ import PropTypes from 'prop-types';
 
 import pluginId from '../../pluginId';
 
+import Add from './Add';
 import ListField from './ListField';
 
-function ListLayout({ displayedData, fieldToEditIndex, onClick, onRemove }) {
+function ListLayout({
+  addField,
+  availableData,
+  displayedData,
+  fieldToEditIndex,
+  onClick,
+  onRemove,
+}) {
   const handleRemove = index => {
     if (displayedData.length > 1) {
       onRemove(index);
@@ -27,6 +35,7 @@ function ListLayout({ displayedData, fieldToEditIndex, onClick, onRemove }) {
             onRemove={handleRemove}
           />
         ))}
+        <Add data={availableData} onClick={addField} />
       </div>
       <div className="col-lg-7 col-md-12">Form</div>
     </>
@@ -34,12 +43,20 @@ function ListLayout({ displayedData, fieldToEditIndex, onClick, onRemove }) {
 }
 
 ListLayout.defaultProps = {
+  addField: () => {},
+  availableData: [],
   displayedData: [],
+  fieldToEditIndex: 0,
+  onClick: () => {},
   onRemove: () => {},
 };
 
 ListLayout.propTypes = {
+  addField: PropTypes.func,
+  availableData: PropTypes.array,
   displayedData: PropTypes.array,
+  fieldToEditIndex: PropTypes.number,
+  onClick: PropTypes.func,
   onRemove: PropTypes.func,
 };
 

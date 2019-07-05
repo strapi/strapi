@@ -1,4 +1,5 @@
 import {
+  ADD_FIELD_TO_LIST,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
@@ -9,6 +10,13 @@ import {
   SET_LIST_FIELD_TO_EDIT_INDEX,
   SUBMIT_SUCCEEDED,
 } from './constants';
+
+export function addFieldToList(field) {
+  return {
+    type: ADD_FIELD_TO_LIST,
+    field,
+  };
+}
 
 export function getData(uid) {
   return {

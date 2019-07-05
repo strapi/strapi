@@ -24,6 +24,7 @@ import ListLayout from './ListLayout';
 import Separator from './Separator';
 
 import {
+  addFieldToList,
   getData,
   onChange,
   onReset,
@@ -42,6 +43,7 @@ const getUrl = (name, to) =>
   `/plugins/${pluginId}/ctm-configurations/models/${name}/${to}`;
 
 function SettingViewModel({
+  addFieldToList,
   emitEvent,
   getData,
   history: { goBack },
@@ -113,9 +115,12 @@ function SettingViewModel({
   const getListRemainingFields = () => {
     const metadata = get(modifiedData, ['metadata'], {});
 
-    return Object.keys(metadata).filter(
-      key => !isEmpty(get(modifiedData, ['metadata', key, 'list']))
-    );
+    return Object.keys(metadata)
+      .filter(key => !isEmpty(get(modifiedData, ['metadata', key, 'list'])))
+      .filter(field => {
+        console.log(field);
+        return !getListDisplayedFields().includes(field);
+      });
   };
   const getSelectOptions = input => {
     if (input.name === 'settings.defaultSortBy') {
@@ -193,6 +198,7 @@ function SettingViewModel({
 
               {settingType === 'list-settings' && (
                 <ListLayout
+                  addField={addFieldToList}
                   displayedData={getListDisplayedFields()}
                   availableData={getListRemainingFields()}
                   fieldToEditIndex={listFieldToEditIndex}
@@ -237,6 +243,7 @@ function SettingViewModel({
 
 SettingViewModel.defaultProps = {};
 SettingViewModel.propTypes = {
+  addFieldToList: PropTypes.func.isRequired,
   emitEvent: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   history: PropTypes.shape({
@@ -244,6 +251,7 @@ SettingViewModel.propTypes = {
   }).isRequired,
   initialData: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  listFieldToEditIndex: PropTypes.number.isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
       name: PropTypes.string,
@@ -265,6 +273,7 @@ const mapStateToProps = makeSelectSettingViewModel();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addFieldToList,
       getData,
       onChange,
       onRemoveListField,

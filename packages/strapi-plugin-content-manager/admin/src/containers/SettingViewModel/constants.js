@@ -1,3 +1,5 @@
+export const ADD_FIELD_TO_LIST =
+  'ContentManager/SettingViewModel/ADD_FIELD_TO_LIST';
 export const GET_DATA = 'ContentManager/SettingViewModel/GET_DATA';
 export const GET_DATA_SUCCEEDED =
   'ContentManager/SettingViewModel/GET_DATA_SUCCEEDED';

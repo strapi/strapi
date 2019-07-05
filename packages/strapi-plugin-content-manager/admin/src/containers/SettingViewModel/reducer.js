@@ -5,6 +5,7 @@
 
 import { fromJS } from 'immutable';
 import {
+  ADD_FIELD_TO_LIST,
   GET_DATA_SUCCEEDED,
   ON_CHANGE,
   ON_REMOVE_LIST_FIELD,
@@ -24,6 +25,10 @@ export const initialState = fromJS({
 
 function settingViewModelReducer(state = initialState, action) {
   switch (action.type) {
+    case ADD_FIELD_TO_LIST:
+      return state.updateIn(['modifiedData', 'layouts', 'list'], list =>
+        list.push(action.field)
+      );
     case GET_DATA_SUCCEEDED:
       return state
         .update('initialData', () => fromJS(action.layout))
@@ -57,7 +62,9 @@ function settingViewModelReducer(state = initialState, action) {
         });
     }
     case ON_RESET:
-      return state.update('modifiedData', () => state.get('initialData'));
+      return state
+        .update('modifiedData', () => state.get('initialData'))
+        .update('listFieldToEditIndex', () => 0);
     case RESET_PROPS:
       return initialState;
     case SET_LIST_FIELD_TO_EDIT_INDEX:
