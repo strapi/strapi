@@ -118,7 +118,6 @@ function SettingViewModel({
     return Object.keys(metadata)
       .filter(key => !isEmpty(get(modifiedData, ['metadata', key, 'list'])))
       .filter(field => {
-        console.log(field);
         return !getListDisplayedFields().includes(field);
       });
   };
@@ -202,7 +201,9 @@ function SettingViewModel({
                   displayedData={getListDisplayedFields()}
                   availableData={getListRemainingFields()}
                   fieldToEditIndex={listFieldToEditIndex}
+                  modifiedData={modifiedData}
                   onClick={setListFieldToEditIndex}
+                  onChange={onChange}
                   onRemove={onRemoveListField}
                 />
               )}

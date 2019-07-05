@@ -1,6 +1,6 @@
 import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Field, Wrapper } from './components';
+import { Field, Wrapper, InfoLabel } from './components';
 
 import GrabIcon from '../../assets/images/icon_grab.svg';
 import GrabIconBlue from '../../assets/images/icon_grab_blue.svg';
@@ -8,8 +8,10 @@ import ClickOverHint from '../../components/ClickOverHint';
 import RemoveIcon from '../../components/DraggedRemovedIcon';
 import EditIcon from '../../components/VariableEditIcon';
 
-function ListField({ index, isSelected, name, onClick, onRemove }) {
+function ListField({ index, isSelected, label, name, onClick, onRemove }) {
   const [isOver, setIsOver] = useState(false);
+  const showLabel =
+    (!isOver || isSelected) && label.toLowerCase() !== name.toLowerCase();
 
   return (
     <Wrapper
@@ -23,7 +25,8 @@ function ListField({ index, isSelected, name, onClick, onRemove }) {
       <Field isSelected={isSelected}>
         <img src={isSelected ? GrabIconBlue : GrabIcon} />
         <span>{name}</span>
-        <ClickOverHint show={isOver} />
+        <ClickOverHint show={isOver && !isSelected} />
+        {showLabel && <InfoLabel>{label}</InfoLabel>}
         {isSelected && !isOver ? (
           <EditIcon />
         ) : (
@@ -41,6 +44,7 @@ function ListField({ index, isSelected, name, onClick, onRemove }) {
 }
 
 ListField.defaultProps = {
+  label: '',
   onClick: () => {},
   onRemove: () => {},
 };
@@ -48,6 +52,7 @@ ListField.defaultProps = {
 ListField.propTypes = {
   index: PropTypes.number.isRequired,
   isSelected: PropTypes.bool.isRequired,
+  label: PropTypes.string,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   onRemove: PropTypes.func,
