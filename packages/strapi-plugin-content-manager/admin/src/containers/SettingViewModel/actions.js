@@ -6,6 +6,7 @@ import {
   ON_RESET,
   ON_SUBMIT,
   RESET_PROPS,
+  SET_LIST_FIELD_TO_EDIT_INDEX,
   SUBMIT_SUCCEEDED,
 } from './constants';
 
@@ -54,6 +55,13 @@ export function onSubmit(uid, emitEvent) {
 export function resetProps() {
   return {
     type: RESET_PROPS,
+  };
+}
+
+export function setListFieldToEditIndex(index) {
+  return {
+    type: SET_LIST_FIELD_TO_EDIT_INDEX,
+    index,
   };
 }
 

@@ -30,6 +30,7 @@ import {
   onSubmit,
   onRemoveListField,
   resetProps,
+  setListFieldToEditIndex,
 } from './actions';
 import reducer from './reducer';
 import saga from './saga';
@@ -46,6 +47,7 @@ function SettingViewModel({
   history: { goBack },
   initialData,
   isLoading,
+  listFieldToEditIndex,
   match: {
     params: { name, settingType },
   },
@@ -55,6 +57,7 @@ function SettingViewModel({
   onReset,
   onSubmit,
   resetProps,
+  setListFieldToEditIndex,
   shouldToggleModalSubmit,
 }) {
   strapi.useInjectReducer({ key: 'settingViewModel', reducer, pluginId });
@@ -192,6 +195,8 @@ function SettingViewModel({
                 <ListLayout
                   displayedData={getListDisplayedFields()}
                   availableData={getListRemainingFields()}
+                  fieldToEditIndex={listFieldToEditIndex}
+                  onClick={setListFieldToEditIndex}
                   onRemove={onRemoveListField}
                 />
               )}
@@ -251,6 +256,7 @@ SettingViewModel.propTypes = {
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
+  setListFieldToEditIndex: PropTypes.func.isRequired,
   shouldToggleModalSubmit: PropTypes.bool.isRequired,
 };
 
@@ -265,6 +271,7 @@ export function mapDispatchToProps(dispatch) {
       onReset,
       onSubmit,
       resetProps,
+      setListFieldToEditIndex,
     },
     dispatch
   );

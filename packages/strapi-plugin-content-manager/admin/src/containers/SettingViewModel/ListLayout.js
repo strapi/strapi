@@ -5,7 +5,7 @@ import pluginId from '../../pluginId';
 
 import ListField from './ListField';
 
-function ListLayout({ displayedData, onRemove }) {
+function ListLayout({ displayedData, fieldToEditIndex, onClick, onRemove }) {
   const handleRemove = index => {
     if (displayedData.length > 1) {
       onRemove(index);
@@ -21,7 +21,9 @@ function ListLayout({ displayedData, onRemove }) {
           <ListField
             key={data}
             index={index}
+            isSelected={fieldToEditIndex === index}
             name={data}
+            onClick={onClick}
             onRemove={handleRemove}
           />
         ))}

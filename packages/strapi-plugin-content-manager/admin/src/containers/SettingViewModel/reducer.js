@@ -10,10 +10,12 @@ import {
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
   RESET_PROPS,
+  SET_LIST_FIELD_TO_EDIT_INDEX,
   SUBMIT_SUCCEEDED,
 } from './constants';
 
 export const initialState = fromJS({
+  listFieldToEditIndex: 0,
   initialData: fromJS({}),
   isLoading: true,
   modifiedData: fromJS({}),
@@ -35,20 +37,31 @@ function settingViewModelReducer(state = initialState, action) {
       const attrPath = ['modifiedData', 'layouts', 'list', action.index];
       const attrToBeRemoved = state.getIn(attrPath);
 
-      if (attrToBeRemoved === defaultSortBy) {
-        const firstAttr = state.getIn(['modifiedData', 'layouts', 'list', 1]);
+      const firstAttr = state.getIn(['modifiedData', 'layouts', 'list', 1]);
 
-        return state
-          .removeIn(['modifiedData', 'layouts', 'list', action.index])
-          .updateIn(defaultSortByPath, () => firstAttr);
-      }
+      return state
+        .removeIn(['modifiedData', 'layouts', 'list', action.index])
+        .update('listFieldToEditIndex', () => {
+          if (action.index === state.get('listFieldToEditIndex')) {
+            return 0;
+          }
 
-      return state.removeIn(['modifiedData', 'layouts', 'list', action.index]);
+          return state.get('listFieldToEditIndex');
+        })
+        .updateIn(defaultSortByPath, () => {
+          if (attrToBeRemoved === defaultSortBy) {
+            return firstAttr;
+          }
+
+          return defaultSortBy;
+        });
     }
     case ON_RESET:
       return state.update('modifiedData', () => state.get('initialData'));
     case RESET_PROPS:
       return initialState;
+    case SET_LIST_FIELD_TO_EDIT_INDEX:
+      return state.update('listFieldToEditIndex', () => action.index);
     case SUBMIT_SUCCEEDED:
       return state
         .update('initialData', () => state.get('modifiedData'))

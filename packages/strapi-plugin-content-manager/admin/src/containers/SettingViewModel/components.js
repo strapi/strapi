@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Wrapper = styled.div`
   display: flex;
@@ -32,6 +32,17 @@ const Field = styled.div`
     margin-right: 10px;
     margin-top: -1px;
   }
+
+  ${({ isSelected }) => {
+    if (isSelected) {
+      return css`
+        background: #e6f0fb !important;
+        border: 1px solid #aed4fb !important;
+        color: #007eff;
+        font-weight: 500;
+      `;
+    }
+  }}
 `;
 
 export { Wrapper, Field };
