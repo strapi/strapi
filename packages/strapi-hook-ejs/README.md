@@ -10,7 +10,7 @@ This built-in hook allows you to use the EJS template engine with custom options
 
 ## Configuration
 
-To configure your hook with custom options, you need to edit your `./config/hooks.json` file in your Strapi app.
+To configure your hook with custom options, you need to edit your `./config/hook.json` file in your Strapi app.
 ```javascript
 {
   ...
