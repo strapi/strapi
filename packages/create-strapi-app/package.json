@@ -16,6 +16,7 @@
     "create-strapi-app": "./index.js"
   },
   "files": [
+    "create-strapi-app.js",
     "index.js"
   ],
   "dependencies": {
