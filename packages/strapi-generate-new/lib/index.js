@@ -53,7 +53,7 @@ module.exports = (projectDirectory, cliArguments) => {
   parseDatabaseArguments({ scope, args: cliArguments });
   initCancelCatcher(scope);
 
-  console.log(`Creating a new Strapi application in ${chalk.green(rootPath)}.`);
+  console.log(`Creating a new Strapi application at ${chalk.green(rootPath)}.`);
   console.log();
 
   return generateNew(scope).catch(error => {

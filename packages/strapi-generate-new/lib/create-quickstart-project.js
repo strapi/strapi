@@ -1,7 +1,6 @@
 'use strict';
 
 const execa = require('execa');
-const chalk = require('chalk');
 
 const { trackUsage } = require('./utils/usage');
 const defaultConfigs = require('./utils/db-configs.js');
@@ -23,9 +22,7 @@ module.exports = async function createQuickStartProject(scope) {
   await createProject(scope, configuration);
 
   if (scope.runQuickstartApp === true) {
-    console.log(
-      `Running your Strapi application at ${chalk.green(scope.rootPath)}`
-    );
+    console.log(`Running your Strapi application.`);
 
     await execa('npm', ['run', 'develop'], {
       stdio: 'inherit',

@@ -24,6 +24,7 @@ module.exports = async scope => {
     );
   });
 
+  console.log();
   console.log('Creating a project with custom database options.');
   await trackUsage({ event: 'didConnectDatabase', scope });
   return createProject(scope, configuration);
@@ -68,7 +69,9 @@ async function askDbInfosAndTest(scope) {
       )
       .catch(err => {
         if (retries < MAX_RETRIES - 1) {
+          console.log();
           console.log(`⛔️ Connection test failed: ${err.message}`);
+          console.log();
 
           if (scope.debug) {
             console.log('Full error log:');

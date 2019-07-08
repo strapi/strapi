@@ -104,13 +104,13 @@ module.exports = async function createProject(
   console.log('Available commands in your project:');
   console.log();
   console.log(`  ${cmd} develop`);
-  console.log('  Starts Strapi in watch mode.');
+  console.log('  Start Strapi in watch mode.');
   console.log();
   console.log(`  ${cmd} start`);
-  console.log('  Starts Strapi without watch mode.');
+  console.log('  Start Strapi without watch mode.');
   console.log();
   console.log(`  ${cmd} build`);
-  console.log('  Builds Strapi admin panel.');
+  console.log('  Build Strapi admin panel.');
   console.log();
   console.log(`  ${cmd} strapi`);
   console.log(`  Display all available commands.`);
