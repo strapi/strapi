@@ -12,6 +12,10 @@
   "attributes": {
     "name": {
       "type": "string"
+    },
+    "linkedArticles": {
+      "collection": "articles",
+      "via": "manyTags"
     }
   }
 }

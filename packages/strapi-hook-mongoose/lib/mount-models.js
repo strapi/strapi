@@ -353,11 +353,9 @@ const createOnFetchPopulateFn = ({
 };
 
 const buildRelation = ({ definition, model, instance, attribute, name }) => {
-  const verbose =
-    _.get(
-      utilsModels.getNature(attribute, name, undefined, model.toLowerCase()),
-      'verbose'
-    ) || '';
+  const { nature, verbose } =
+    utilsModels.getNature(attribute, name, undefined, model.toLowerCase()) ||
+    {};
 
   // Build associations key
   utilsModels.defineAssociations(
@@ -441,30 +439,42 @@ const buildRelation = ({ definition, model, instance, attribute, name }) => {
       break;
     }
     case 'belongsToMany': {
-      const FK = _.find(definition.associations, {
-        alias: name,
-      });
-      const ref = attribute.plugin
-        ? strapi.plugins[attribute.plugin].models[attribute.collection].globalId
-        : strapi.models[attribute.collection].globalId;
+      const targetModel = attribute.plugin
+        ? strapi.plugins[attribute.plugin].models[attribute.collection]
+        : strapi.models[attribute.collection];
 
-      // One-side of the relationship has to be a virtual field to be bidirectional.
-      if ((FK && _.isUndefined(FK.via)) || attribute.dominant !== true) {
-        definition.loadedModel[name] = {
-          type: 'virtual',
-          ref,
-          via: FK.via,
-        };
+      const ref = targetModel.globalId;
 
-        // Set this info to be able to see if this field is a real database's field.
-        attribute.isVirtual = true;
-      } else {
+      if (nature === 'manyWay') {
         definition.loadedModel[name] = [
           {
             type: instance.Schema.Types.ObjectId,
             ref,
           },
         ];
+      } else {
+        const FK = _.find(definition.associations, {
+          alias: name,
+        });
+
+        // One-side of the relationship has to be a virtual field to be bidirectional.
+        if ((FK && _.isUndefined(FK.via)) || attribute.dominant !== true) {
+          definition.loadedModel[name] = {
+            type: 'virtual',
+            ref,
+            via: FK.via,
+          };
+
+          // Set this info to be able to see if this field is a real database's field.
+          attribute.isVirtual = true;
+        } else {
+          definition.loadedModel[name] = [
+            {
+              type: instance.Schema.Types.ObjectId,
+              ref,
+            },
+          ];
+        }
       }
       break;
     }
