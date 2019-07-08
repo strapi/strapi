@@ -17,6 +17,9 @@ import {
   BackHeader,
   Button,
   EmptyAttributesBlock,
+  List,
+  ListHeader,
+  ListWrapper,
   PopUpWarning,
   routerPropTypes,
   getQueryParameters,
@@ -539,6 +542,34 @@ export class ModelPage extends React.Component {
     const attributeType = this.getAttributeType();
     const actionType = this.getActionType();
 
+    // const attributes = this.getModelAttributes();
+    const attributesNumber = this.getModelAttributesLength();
+    const relationsNumber = this.getModelRelationShipsLength();
+
+    let title = [
+      {
+        label: `${pluginId}.table.attributes.title.${
+          attributesNumber > 1 ? 'plural' : 'singular'
+        }`,
+        values: { number: attributesNumber },
+      },
+    ];
+
+    if (relationsNumber > 0) {
+      title.push({
+        label: `${pluginId}.table.relations.title.${
+          attributesNumber > 1 ? 'plural' : 'singular'
+        }`,
+        values: { number: relationsNumber },
+      });
+    }
+
+    const buttonProps = {
+      kind: 'secondaryHotlineAdd',
+      label: `${pluginId}.button.attributes.add`,
+      onClick: () => this.handleClickOpenModalChooseAttributes(),
+    };
+
     return (
       <div className={styles.modelpage}>
         <BackHeader onClick={this.handleGoBack} />
@@ -559,7 +590,7 @@ export class ModelPage extends React.Component {
           pluginHeaderActions={this.getPluginHeaderActions()}
           onClickIcon={this.handleClickEditModelMainInfos}
         >
-          {this.getModelAttributesLength() === 0 ? (
+          {attributesNumber === 0 ? (
             <EmptyAttributesBlock
               description="content-type-builder.home.emptyAttributes.description"
               id="openAddAttr"
@@ -568,51 +599,75 @@ export class ModelPage extends React.Component {
               title="content-type-builder.home.emptyAttributes.title"
             />
           ) : (
-            <Block>
-              <Flex>
-                <ListTitle>
-                  {this.getModelAttributesLength()}
-                  &nbsp;
-                  <FormattedMessage
-                    id={`${listTitleMessageIdBasePrefix}.${
-                      this.getModelAttributesLength() > 1
-                        ? 'plural'
-                        : 'singular'
-                    }`}
-                  />
-                  {this.getModelRelationShipsLength() > 0 && (
-                    <React.Fragment>
-                      &nbsp;
-                      <FormattedMessage
-                        id={`${listTitleMessageIdBasePrefix}.including`}
+            <ListWrapper>
+              <ListHeader title={title} button={{ ...buttonProps }} />
+              {/* <List>
+                <table>
+                  <tbody>
+                    {attributes.map(attribute => (
+                      <ListRow
+                        key={attribute.name}
+                        {...attribute}
+                        canOpenModal={canOpenModal}
+                        context={this.context}
+                        deleteAttribute={this.handleDeleteGroupAttribute}
+                        isTemporary={false}
+                        type={attribute.type}
                       />
-                      &nbsp;
-                      {this.getModelRelationShipsLength()}
-                      &nbsp;
-                      <FormattedMessage
-                        id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
-                          this.getModelRelationShipsLength() > 1
-                            ? 'plural'
-                            : 'singular'
-                        }`}
-                      />
-                    </React.Fragment>
-                  )}
-                </ListTitle>
-                <div>
-                  <Button
-                    label={`${pluginId}.button.attributes.add`}
-                    onClick={this.handleClickOpenModalChooseAttributes}
-                    secondaryHotlineAdd
-                  />
-                </div>
-              </Flex>
-              <div>
-                <Ul id="attributesList">
-                  {Object.keys(this.getModelAttributes()).map(this.renderLi)}
-                </Ul>
+                    ))}
+                  </tbody>
+                </table>
+              </List> */}
+              <div className="list-button">
+                <Button {...buttonProps} />
               </div>
-            </Block>
+
+              <Block>
+                <Flex>
+                  <ListTitle>
+                    {this.getModelAttributesLength()}
+                    &nbsp;
+                    <FormattedMessage
+                      id={`${listTitleMessageIdBasePrefix}.${
+                        this.getModelAttributesLength() > 1
+                          ? 'plural'
+                          : 'singular'
+                      }`}
+                    />
+                    {this.getModelRelationShipsLength() > 0 && (
+                      <React.Fragment>
+                        &nbsp;
+                        <FormattedMessage
+                          id={`${listTitleMessageIdBasePrefix}.including`}
+                        />
+                        &nbsp;
+                        {this.getModelRelationShipsLength()}
+                        &nbsp;
+                        <FormattedMessage
+                          id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
+                            this.getModelRelationShipsLength() > 1
+                              ? 'plural'
+                              : 'singular'
+                          }`}
+                        />
+                      </React.Fragment>
+                    )}
+                  </ListTitle>
+                  <div>
+                    <Button
+                      label={`${pluginId}.button.attributes.add`}
+                      onClick={this.handleClickOpenModalChooseAttributes}
+                      secondaryHotlineAdd
+                    />
+                  </div>
+                </Flex>
+                <div>
+                  <Ul id="attributesList">
+                    {Object.keys(this.getModelAttributes()).map(this.renderLi)}
+                  </Ul>
+                </div>
+              </Block>
+            </ListWrapper>
           )}
         </ViewContainer>
 

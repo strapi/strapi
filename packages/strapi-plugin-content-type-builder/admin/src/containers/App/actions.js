@@ -43,10 +43,6 @@ import {
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
-  SUBMIT_GROUP,
-  SUBMIT_GROUP_SUCCEEDED,
-  SUBMIT_TEMP_GROUP,
-  SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
 } from './constants';
@@ -435,42 +431,6 @@ export function submitTempContentTypeSucceeded() {
 export function updateTempContentType() {
   return {
     type: UPDATE_TEMP_CONTENT_TYPE,
-  };
-}
-
-export function submitGroup(oldGroupName, data, context, source) {
-  const attributes = formatGroupAttributes(data.attributes);
-  const body = Object.assign(cloneDeep(data), { attributes });
-
-  return {
-    type: SUBMIT_GROUP,
-    oldGroupName,
-    body,
-    source,
-    context,
-  };
-}
-
-export function submitGroupSucceeded() {
-  return {
-    type: SUBMIT_GROUP_SUCCEEDED,
-  };
-}
-
-export function submitTempGroup(data, context) {
-  const attributes = formatGroupAttributes(data.attributes);
-  const body = Object.assign(cloneDeep(data), { attributes });
-
-  return {
-    type: SUBMIT_TEMP_GROUP,
-    body,
-    context,
-  };
-}
-
-export function submitTempGroupSucceeded() {
-  return {
-    type: SUBMIT_TEMP_GROUP_SUCCEEDED,
   };
 }
 

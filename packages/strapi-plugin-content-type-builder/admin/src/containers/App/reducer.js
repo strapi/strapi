@@ -259,27 +259,9 @@ function appReducer(state = initialState, action) {
           )
         )
         .update('newGroupClone', () => state.get('newGroup'));
-    case DELETE_GROUP_ATTRIBUTE: {
-      const pathToAttributes = action.keys
-        .slice()
-        .reverse()
-        .splice(1)
-        .reverse();
-      const attributes = state.getIn(pathToAttributes);
-      const attributeName = action.keys.pop();
-      const attributeToDelete = attributes.findIndex(
-        attribute => attribute.get('name') === attributeName
-      );
-
-      return state.removeIn([...pathToAttributes, attributeToDelete]);
-    }
+    case DELETE_GROUP_ATTRIBUTE:
+      return state.removeIn(action.keys);
     case DELETE_GROUP_SUCCEEDED:
-      console.log({
-        st: state
-          .get('groups')
-          .findIndex(group => group.get('uid') === action.uid),
-        action,
-      });
       return state.removeIn([
         'groups',
         state.get('groups').findIndex(group => group.get('uid') === action.uid),

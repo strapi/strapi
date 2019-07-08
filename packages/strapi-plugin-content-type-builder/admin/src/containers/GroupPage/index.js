@@ -16,9 +16,9 @@ import {
   Button,
   EmptyAttributesBlock,
   getQueryParameters,
-  ListWrapper,
-  ListHeader,
   List,
+  ListHeader,
+  ListWrapper,
 } from 'strapi-helper-plugin';
 
 import { deleteGroupAttribute } from '../App/actions';
@@ -132,9 +132,15 @@ export class GroupPage extends React.Component {
 
     const attributes = this.getFeatureAttributes();
     const attributesNumber = this.getFeatureAttributesLength();
-    const listTitle = `${pluginId}.table.attributes.title.${
-      attributesNumber > 1 ? 'plural' : 'singular'
-    }`;
+
+    const title = [
+      {
+        label: `${pluginId}.table.attributes.title.${
+          attributesNumber > 1 ? 'plural' : 'singular'
+        }`,
+        values: { number: attributesNumber },
+      },
+    ];
 
     const buttonProps = {
       kind: 'secondaryHotlineAdd',
@@ -153,26 +159,21 @@ export class GroupPage extends React.Component {
         >
           {attributesNumber === 0 ? (
             <EmptyAttributesBlock
-              description={`${pluginId}.home.emptyAttributes.description.${
-                this.featureType
-              }`}
+              description={`${pluginId}.home.emptyAttributes.description.${this.featureType}`}
               id="openAddAttr"
               label="content-type-builder.button.attributes.add"
               title="content-type-builder.home.emptyAttributes.title"
             />
           ) : (
             <ListWrapper>
-              <ListHeader
-                title={listTitle}
-                titleValues={{ number: attributesNumber }}
-                button={{ ...buttonProps }}
-              />
+              <ListHeader title={title} button={{ ...buttonProps }} />
               <List>
                 <table>
                   <tbody>
-                    {attributes.map(attribute => (
+                    {attributes.map((attribute, index) => (
                       <ListRow
                         key={attribute.name}
+                        attributeId={index}
                         {...attribute}
                         canOpenModal={canOpenModal}
                         context={this.context}

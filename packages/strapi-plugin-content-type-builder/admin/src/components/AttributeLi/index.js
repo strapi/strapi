@@ -8,8 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { capitalize } from 'lodash';
-import { attributeIcons, IcoContainer } from 'strapi-helper-plugin';
+import { IcoContainer } from 'strapi-helper-plugin';
 
+import attributeIcons from '../../utils/attributeIcons';
 import pluginId from '../../pluginId';
 
 import styles from './styles.scss';

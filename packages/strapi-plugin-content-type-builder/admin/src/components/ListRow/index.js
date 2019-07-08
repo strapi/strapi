@@ -3,12 +3,15 @@ import PropTypes from 'prop-types';
 
 import { FormattedMessage } from 'react-intl';
 
-import { attributeIcons, PopUpWarning } from 'strapi-helper-plugin';
+import { PopUpWarning } from 'strapi-helper-plugin';
+
+import attributeIcons from '../../utils/attributeIcons';
 import pluginId from '../../pluginId';
 
 import StyledListRow from './StyledListRow';
 
 function ListRow({
+  attributeId,
   canOpenModal,
   deleteAttribute,
   isTemporary,
@@ -47,9 +50,14 @@ function ListRow({
               )}
             </FormattedMessage>
           )}
-          &nbsp; &nbsp; &nbsp;
+
           {isTemporary && (
-            <FormattedMessage id={`${pluginId}.contentType.temporaryDisplay`} />
+            <FormattedMessage
+              id={`${pluginId}.contentType.temporaryDisplay`}
+              style={{
+                paddingLeft: '15px',
+              }}
+            />
           )}
         </p>
       </td>
@@ -95,7 +103,7 @@ function ListRow({
               type="danger"
               onConfirm={() => {
                 setIsOpen(false);
-                deleteAttribute(name);
+                deleteAttribute(attributeId);
               }}
             />
           </>
@@ -112,6 +120,7 @@ ListRow.defaultProps = {
 };
 
 ListRow.propTypes = {
+  attributeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   canOpenModal: PropTypes.bool,
   deleteAttribute: PropTypes.func,
   isTemporary: PropTypes.bool.isRequired,
