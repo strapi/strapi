@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components';
 
 const Wrapper = styled.div`
   display: flex;
+  width: 100%;
   > div:first-child {
     height: 30px;
     width: 20px;
@@ -9,13 +10,15 @@ const Wrapper = styled.div`
     text-align: right;
     line-height: 30px;
   }
+  > div:last-child {
+    flex-grow: 2;
+  }
 `;
 
 const Field = styled.div`
   position: relative;
   height: 30px;
   width: 100%;
-  margin-bottom: 6px;
   padding-left: 10px;
   justify-content: space-between;
   background: #fafafb;
@@ -49,7 +52,7 @@ const InfoLabel = styled.div`
   position: absolute;
   top: 0;
   right: 40px;
-  color: #858b9a;
+  // color: #858b9a;
   font-weight: 400;
   color: #007eff;
 `;

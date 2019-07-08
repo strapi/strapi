@@ -2,6 +2,7 @@ import {
   ADD_FIELD_TO_LIST,
   GET_DATA,
   GET_DATA_SUCCEEDED,
+  MOVE_FIELD_LIST,
   ON_CHANGE,
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
@@ -29,6 +30,14 @@ export function getDataSucceeded(layout) {
   return {
     type: GET_DATA_SUCCEEDED,
     layout,
+  };
+}
+
+export function moveListField(dragIndex, overIndex) {
+  return {
+    type: MOVE_FIELD_LIST,
+    dragIndex,
+    overIndex,
   };
 }
 

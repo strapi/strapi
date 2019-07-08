@@ -7,6 +7,7 @@ import { fromJS } from 'immutable';
 import {
   ADD_FIELD_TO_LIST,
   GET_DATA_SUCCEEDED,
+  MOVE_FIELD_LIST,
   ON_CHANGE,
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
@@ -34,6 +35,12 @@ function settingViewModelReducer(state = initialState, action) {
         .update('initialData', () => fromJS(action.layout))
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.layout));
+    case MOVE_FIELD_LIST:
+      return state.updateIn(['modifiedData', 'layouts', 'list'], list => {
+        return list
+          .delete(action.dragIndex)
+          .insert(action.overIndex, list.get(action.dragIndex));
+      });
     case ON_CHANGE:
       return state.updateIn(action.keys, () => action.value);
     case ON_REMOVE_LIST_FIELD: {
