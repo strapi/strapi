@@ -14,7 +14,7 @@ module.exports = async ({ model, definition, ORM, GLOBALS }) => {
     const joinTable = `${collectionName}_groups`;
     const joinColumn = `${pluralize.singular(collectionName)}_${primaryKey}`;
     const joinModel = ORM.Model.extend({
-      collectionName: joinTable,
+      tableName: joinTable,
       slice() {
         return this.morphTo(
           'slice',
