@@ -177,12 +177,18 @@ module.exports = {
         _.forIn(models, model => {
           _.forIn(model.attributes, attribute => {
             if (attribute.hasOwnProperty('via') && attribute.via === key) {
-              if (attribute.hasOwnProperty('collection')) {
+              if (
+                attribute.hasOwnProperty('collection') &&
+                attribute.collection === currentModelName
+              ) {
                 types.other = 'collection';
 
                 // Break loop
                 return false;
-              } else if (attribute.hasOwnProperty('model')) {
+              } else if (
+                attribute.hasOwnProperty('model') &&
+                attribute.model === currentModelName
+              ) {
                 types.other = 'modelD';
 
                 // Break loop
@@ -198,12 +204,18 @@ module.exports = {
         _.forIn(models, model => {
           _.forIn(model.attributes, attribute => {
             if (attribute.hasOwnProperty('via') && attribute.via === key) {
-              if (attribute.hasOwnProperty('collection')) {
+              if (
+                attribute.hasOwnProperty('collection') &&
+                attribute.collection === currentModelName
+              ) {
                 types.other = 'collection';
 
                 // Break loop
                 return false;
-              } else if (attribute.hasOwnProperty('model')) {
+              } else if (
+                attribute.hasOwnProperty('model') &&
+                attribute.model === currentModelName
+              ) {
                 types.other = 'modelD';
 
                 // Break loop

@@ -161,4 +161,29 @@ module.exports = {
     description: '',
     collectionName: '',
   },
+  articleWithTag: {
+    attributes: [
+      {
+        name: 'title',
+        params: {
+          appearance: {
+            WYSIWYG: false,
+          },
+          multiple: false,
+          type: 'string',
+        },
+      },
+      {
+        name: 'tags',
+        params: {
+          nature: 'manyWay',
+          target: 'tag',
+        },
+      },
+    ],
+    connection: 'default',
+    name: 'articleWithTag',
+    description: '',
+    collectionName: '',
+  },
 };
