@@ -25,6 +25,6 @@ module.exports = ({ scope, client }) => {
         'strapi-hook-mongoose': scope.strapiVersion,
       };
     default:
-      throw new Error(`Invalid client ${client}`);
+      throw new Error(`Invalid client "${client}"`);
   }
 };

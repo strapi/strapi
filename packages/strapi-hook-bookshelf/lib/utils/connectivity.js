@@ -3,10 +3,31 @@
 // Public node modules
 const inquirer = require('inquirer');
 
-const selectQueries = {
-  postgres: "SELECT tablename FROM pg_tables WHERE schemaname='public'",
-  mysql: 'SELECT * FROM information_schema.tables',
-  sqlite: 'select * from sqlite_master',
+const hasResults = rows => {
+  if (!rows || rows.length === 0) return true;
+  return false;
+};
+
+const checkDatabaseIsEmpty = {
+  postgres: client =>
+    client
+      .select('tablename')
+      .from('pg_tables')
+      .where('schemaname', 'public')
+      .then(hasResults),
+
+  mysql: (client, { database }) =>
+    client
+      .select()
+      .from('information_schema.tables')
+      .where('table_schema', database)
+      .then(hasResults),
+
+  sqlite: client =>
+    client
+      .select()
+      .from('sqlite_master')
+      .then(hasResults),
 };
 
 module.exports = async ({ scope, connection }) => {
@@ -34,19 +55,14 @@ module.exports = async ({ scope, connection }) => {
 
   await client.raw('select 1+1 as result').catch(destroyClientAndThrow);
 
-  return client
-    .raw(selectQueries[settings.client])
-    .then(tables => {
-      if (tables.rows && tables.rows.length === 0) {
-        return;
-      }
+  return checkDatabaseIsEmpty[settings.client](client, settings)
+    .then(isEmpty => {
+      if (isEmpty) return;
+      if (scope.dbforce) return;
 
-      if (scope.dbforce) {
-        return;
-      }
-
-      console.log(
-        '🤔 It seems that your database is not empty. Be aware that Strapi is going to automatically creates tables & columns, and might update columns which can corrupt data or cause data loss.'
+      console.log();
+      console.error(
+        'It seems that your database is not empty.\nStrapi automatically creates tables and columns which might corrupt the data already present in your database.'
       );
 
       return inquirer
@@ -54,18 +70,14 @@ module.exports = async ({ scope, connection }) => {
           {
             type: 'confirm',
             name: 'confirm',
-            message: `Are you sure you want to continue with the ${
-              settings.database
-            } database:`,
+            message: `Are you sure you want to continue with the ${settings.database} database:`,
           },
         ])
         .then(({ confirm }) => {
-          if (!confirm) {
-            // TODO: cancel somehow
-            throw new Error('Not confirmed');
-          }
+          // send restart flag to retry
+          if (!confirm) return { shouldRetry: true };
         });
     })
-    .then(() => client.destroy())
+    .then(res => client.destroy().then(() => res))
     .catch(destroyClientAndThrow);
 };

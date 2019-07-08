@@ -38,7 +38,7 @@ module.exports = async scope => {
     if (files.length > 1) {
       await trackError({ scope, error: 'Directory is not empty' });
       stopProcess(
-        `⛔️ You can only create a Strapi app in an empty directory\nMake sure ${chalk.green(
+        `⛔️ You can only create a Strapi app in an empty directory.\nMake sure ${chalk.green(
           scope.rootPath
         )} is empty.`
       );

@@ -24,7 +24,7 @@ module.exports = async scope => {
     );
   });
 
-  console.log('Creating a project with custom database options');
+  console.log('Creating a project with custom database options.');
   await trackUsage({ event: 'didConnectDatabase', scope });
   return createProject(scope, configuration);
 };
@@ -47,6 +47,17 @@ async function askDbInfosAndTest(scope) {
       scope,
       configuration,
     })
+      .then(result => {
+        if (
+          result &&
+          result.shouldRetry === true &&
+          retries < MAX_RETRIES - 1
+        ) {
+          console.log('Retrying...');
+          retries++;
+          return loop();
+        }
+      })
       .then(
         () => fse.remove(scope.tmpPath),
         err => {
