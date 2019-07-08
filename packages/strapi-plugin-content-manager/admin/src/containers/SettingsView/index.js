@@ -50,11 +50,11 @@ function SettingsView({
 }) {
   strapi.useInjectReducer({ key: 'settingsView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'settingsView', saga, pluginId });
-  const [showWarningCancel, setWarningOpen] = useState(false);
-  const [showWarningSubmit, setWarningSubmitOpen] = useState(false);
-  const toggleWarningCancel = () => setWarningOpen(prevState => !prevState);
+  const [showWarningCancel, setWarningCancel] = useState(false);
+  const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
   const toggleWarningSubmit = () =>
-    setWarningSubmitOpen(prevState => !prevState);
+    setWarningSubmit(prevState => !prevState);
 
   useEffect(() => {
     if (showWarningSubmit) {
