@@ -10,6 +10,7 @@
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-react": "^7.13.0",
+    "eslint-plugin-react-hooks": "^1.6.1",
     "eslint-plugin-redux-saga": "^1.0.0",
     "execa": "^1.0.0",
     "husky": "^2.3.0",

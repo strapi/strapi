@@ -11,16 +11,12 @@ import {
 } from './constants';
 
 export const initialState = fromJS({
-  isLoading: false,
-  layouts: fromJS({
-    article: {},
-  }),
+  layouts: fromJS({}),
 });
 
 function mainReducer(state = initialState, action) {
   switch (action.type) {
     case DELETE_LAYOUT:
-      console.log({ action });
       return state.removeIn(['layouts', action.uid]);
     case DELETE_LAYOUTS:
       return state.update('layouts', () => fromJS({}));

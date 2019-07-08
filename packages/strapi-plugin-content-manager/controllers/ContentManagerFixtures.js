@@ -24,6 +24,192 @@ module.exports = {
 
   getLayout: ctx => {
     const layouts = {
+      tag: {
+        uid: 'article',
+        schema: {
+          // good old schema
+          connection: 'default',
+          collectionName: 'articles',
+          options: {},
+          infos: {
+            name: 'article',
+            description: '',
+          },
+          attributes: {
+            title: {
+              type: 'string',
+            },
+            content: {
+              type: 'text',
+            },
+            json: {
+              type: 'string',
+            },
+            number: {
+              type: 'integer',
+            },
+            date: {
+              type: 'date',
+            },
+            enum: {
+              enum: ['morning,', 'noon'],
+              type: 'enumeration',
+            },
+            pic: {
+              model: 'file',
+              via: 'related',
+              plugin: 'upload',
+            },
+            bool: {
+              type: 'boolean',
+            },
+            tags: {
+              collection: 'tag',
+              via: 'articles',
+            },
+          },
+        },
+        settings: {
+          mainField: 'id',
+          defaultSortBy: 'id',
+          defaultSortOrder: 'ASC',
+          searchable: true,
+          filterable: true,
+          bulkable: false,
+          pageSize: 10,
+        },
+        metadata: {
+          id: {
+            edit: {},
+            list: {
+              label: 'Id',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          title: {
+            edit: {
+              label: 'title',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'title',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          content: {
+            edit: {
+              label: 'content',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'content',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          json: {
+            edit: {
+              label: 'json',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {},
+          },
+          number: {
+            edit: {
+              label: 'number',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'number',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          date: {
+            edit: {
+              label: 'date',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'date',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          enum: {
+            edit: {
+              label: 'enum',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'enum',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          pic: {
+            edit: {
+              label: 'pic',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {},
+          },
+          tags: {
+            edit: {
+              label: 'tags',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {},
+          },
+          bool: {
+            edit: {
+              label: 'bool',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {
+              label: 'bool',
+              searchable: true,
+              sortable: true,
+            },
+          },
+        },
+        layouts: {
+          list: ['id', 'title', 'content'],
+          editRelations: [],
+          edit: [
+            [
+              {
+                name: 'title',
+                size: 6,
+              },
+              {
+                name: 'content',
+                size: 6,
+              },
+            ],
+          ],
+        },
+      },
       article: {
         uid: 'article',
         schema: {
@@ -404,6 +590,11 @@ module.exports = {
         name: 'article',
         label: 'Article',
         destination: 'article',
+      },
+      {
+        name: 'tag',
+        label: 'Tag',
+        destination: 'tag',
       },
       {
         name: 'administrator',

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -12,15 +12,25 @@ import SettingViewModel from '../SettingViewModel';
 import SettingViewGroup from '../SettingViewGroup';
 import SettingsView from '../SettingsView';
 
+import { getLayout } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectMain from './selectors';
 
-function Main({ isLoading, emitEvent, layouts }) {
+function Main({ emitEvent, getLayout, layouts, location: { pathname } }) {
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
   strapi.useInjectSaga({ key: 'main', saga, pluginId });
+  const slug = pathname.split('/')[3];
+  const shouldShowLoader =
+    slug !== 'ctm-configurations' && layouts[slug] === undefined;
 
-  if (isLoading) {
+  useEffect(() => {
+    if (shouldShowLoader) {
+      getLayout(slug);
+    }
+  }, [getLayout, shouldShowLoader, slug]);
+
+  if (shouldShowLoader) {
     return <LoadingIndicatorPage />;
   }
 
@@ -52,14 +62,23 @@ function Main({ isLoading, emitEvent, layouts }) {
 
 Main.propTypes = {
   emitEvent: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool.isRequired,
+  getLayout: PropTypes.func.isRequired,
+
   layouts: PropTypes.object.isRequired,
+  location: PropTypes.shape({
+    pathname: PropTypes.string.isRequired,
+  }),
 };
 
 const mapStateToProps = makeSelectMain();
 
 export function mapDispatchToProps(dispatch) {
-  return bindActionCreators({}, dispatch);
+  return bindActionCreators(
+    {
+      getLayout,
+    },
+    dispatch
+  );
 }
 const withConnect = connect(
   mapStateToProps,
