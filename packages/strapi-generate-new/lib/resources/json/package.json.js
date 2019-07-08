@@ -55,7 +55,3 @@ module.exports = opts => {
     license: 'MIT',
   };
 };
-
-/**
- * Get dependencies version
- */

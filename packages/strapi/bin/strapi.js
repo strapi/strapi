@@ -80,7 +80,7 @@ program
 // `$ strapi new`
 program
   .command('new <directory>')
-  .option('--no-run', 'Disable quickstart app start after creation')
+  .option('--no-run', 'Do not start the application after it is created')
   .option(
     '--use-npm',
     'Force usage of npm instead of yarn to create the project'
