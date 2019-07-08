@@ -438,6 +438,9 @@ const buildWhereClause = ({ field, operator, value }) => {
           $not: new RegExp(val),
         },
       };
+    case 'null': {
+      return value ? { [field]: { $eq: null } } : { [field]: { $ne: null } };
+    }
 
     default:
       throw new Error(`Unhandled whereClause : ${field} ${operator} ${value}`);
