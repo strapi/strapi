@@ -7,6 +7,7 @@ import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
+import ListView from '../ListView';
 import SettingViewModel from '../SettingViewModel';
 import SettingViewGroup from '../SettingViewGroup';
 import SettingsView from '../SettingsView';
@@ -15,7 +16,7 @@ import reducer from './reducer';
 import saga from './saga';
 import makeSelectMain from './selectors';
 
-function Main({ isLoading, emitEvent }) {
+function Main({ isLoading, emitEvent, layouts }) {
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
   strapi.useInjectSaga({ key: 'main', saga, pluginId });
 
@@ -24,22 +25,26 @@ function Main({ isLoading, emitEvent }) {
   }
 
   const renderRoute = (props, Component) => (
-    <Component emitEvent={emitEvent} {...props} />
+    <Component emitEvent={emitEvent} layouts={layouts} {...props} />
   );
 
   return (
     <Switch>
       <Route
-        path="/plugins/content-manager/ctm-configurations/models/:name/:settingType"
+        path={`/plugins/${pluginId}/ctm-configurations/models/:name/:settingType`}
         render={props => renderRoute(props, SettingViewModel)}
       />
       <Route
-        path="/plugins/content-manager/ctm-configurations/groups/:name"
+        path={`/plugins/${pluginId}/ctm-configurations/groups/:name`}
         component={SettingViewGroup}
       />
       <Route
-        path="/plugins/content-manager/ctm-configurations/:type"
+        path={`/plugins/${pluginId}/ctm-configurations/:type`}
         render={props => renderRoute(props, SettingsView)}
+      />
+      <Route
+        path={`/plugins/${pluginId}/:slug`}
+        render={props => renderRoute(props, ListView)}
       />
     </Switch>
   );
@@ -48,6 +53,7 @@ function Main({ isLoading, emitEvent }) {
 Main.propTypes = {
   emitEvent: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  layouts: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = makeSelectMain();
