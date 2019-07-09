@@ -3,6 +3,8 @@ import {
   DELETE_LAYOUTS,
   GET_LAYOUT,
   GET_LAYOUT_SUCCEEDED,
+  ON_CHANGE_LIST_LABELS,
+  RESET_LIST_LABELS,
 } from './constants';
 
 export function deleteLayout(uid) {
@@ -30,5 +32,20 @@ export function getLayoutSucceeded(layout, uid) {
     type: GET_LAYOUT_SUCCEEDED,
     layout,
     uid,
+  };
+}
+
+export function onChangeListLabels({ target: { name, value } }) {
+  return {
+    type: ON_CHANGE_LIST_LABELS,
+    keys: name.split('.'),
+    value,
+  };
+}
+
+export function resetListLabels(slug) {
+  return {
+    type: RESET_LIST_LABELS,
+    slug,
   };
 }

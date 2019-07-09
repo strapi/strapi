@@ -1,15 +1,29 @@
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { capitalize, get } from 'lodash';
+import { capitalize, get, isEmpty, sortBy } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 
+import {
+  ButtonDropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from 'reactstrap';
 import { PluginHeader, getQueryParameters } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
+import FilterLogo from '../../assets/images/icon_filter.png';
+
 import Container from '../../components/Container';
+import InputCheckbox from '../../components/InputCheckbox';
 import Search from '../../components/Search';
+
+import { onChangeListLabels, resetListLabels } from '../Main/actions';
+
+import { AddFilterCta, DropDownWrapper, Img, Wrapper } from './components';
 
 import { getData, resetProps } from './actions';
 import reducer from './reducer';
@@ -27,34 +41,39 @@ function ListView({
   match: {
     params: { slug },
   },
+  onChangeListLabels,
+  resetListLabels,
   resetProps,
 }) {
   strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'listView', saga, pluginId });
-
-  const getLayoutSetting = useCallback(
-    settingName => get(layouts, [slug, 'settings', settingName], ''),
-    [layouts, slug]
-  );
+  const [isLabelPickerOpen, setLabelPickerState] = useState(false);
+  const getLayoutSettingRef = useRef();
+  getLayoutSettingRef.current = settingName =>
+    get(layouts, [slug, 'settings', settingName], '');
 
   const generateSearchParams = useCallback(
     (updatedParams = {}) => {
       return {
         _limit:
-          getQueryParameters(search, '_limit') || getLayoutSetting('pageSize'),
+          getQueryParameters(search, '_limit') ||
+          getLayoutSettingRef.current('pageSize'),
         _page: getQueryParameters(search, '_page') || 1,
         _q: getQueryParameters(search, '_q') || '',
         _sort:
           getQueryParameters(search, '_sort') ||
-          `${getLayoutSetting('defaultSortBy')}:${getLayoutSetting(
-            'defaultSortOrder'
-          )}`,
+          `${getLayoutSettingRef.current(
+            'defaultSortBy'
+          )}:${getLayoutSettingRef.current('defaultSortOrder')}`,
         source: getQueryParameters(search, 'source'),
         ...updatedParams,
       };
     },
-    [getLayoutSetting, search]
+    [getLayoutSettingRef, search]
   );
+
+  const toggleLabelPickerState = () =>
+    setLabelPickerState(prevState => !prevState);
 
   useEffect(() => {
     getData(slug, generateSearchParams());
@@ -64,7 +83,6 @@ function ListView({
     };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [slug]);
-  console.log(getLayoutSetting('layouts.list'));
 
   const pluginHeaderActions = [
     {
@@ -79,6 +97,20 @@ function ListView({
       },
     },
   ];
+  const getAllLabels = () => {
+    const metadatas = get(layouts, [slug, 'metadata'], {});
+
+    return sortBy(
+      Object.keys(metadatas)
+        .filter(key => !isEmpty(get(layouts, [slug, 'metadata', key, 'list'])))
+        .map(label => ({
+          name: label,
+          value: get(layouts, [slug, 'layouts', 'list'], []).includes(label),
+        })),
+      ['label', 'name']
+    );
+  };
+
   const handleChangeParams = ({ target: { name, value } }) => {
     const updatedSearch = generateSearchParams({ [name]: value });
     const newSearch = Object.keys(updatedSearch)
@@ -88,6 +120,12 @@ function ListView({
     push({ search: newSearch });
     resetProps();
     getData(slug, updatedSearch);
+  };
+  const handleChangeListLabels = ({ name, value }) => {
+    emitEvent('didChangeDisplayedFields');
+    onChangeListLabels({
+      target: { name: `${slug}.${name}`, value: !value },
+    });
   };
 
   return (
@@ -109,7 +147,7 @@ function ListView({
           }}
           withDescriptionAnim={isLoading}
         />
-        {getLayoutSetting('searchable') && (
+        {getLayoutSettingRef.current('searchable') && (
           <Search
             changeParams={handleChangeParams}
             initValue={getQueryParameters(search, '_q') || ''}
@@ -117,6 +155,68 @@ function ListView({
             value={getQueryParameters(search, '_q') || ''}
           />
         )}
+        <Wrapper>
+          <div className="row">
+            <div className="col-10">
+              <AddFilterCta type="button">
+                <Img src={FilterLogo} alt="filter_logo" />
+                <FormattedMessage
+                  id={`${pluginId}.components.AddFilterCTA.add`}
+                />
+              </AddFilterCta>
+            </div>
+            <div className="col-2">
+              <DropDownWrapper>
+                <ButtonDropdown
+                  isOpen={isLabelPickerOpen}
+                  toggle={toggleLabelPickerState}
+                  direction="left"
+                >
+                  <DropdownToggle />
+                  <DropdownMenu>
+                    <FormattedMessage id="content-manager.containers.ListPage.displayedFields">
+                      {msg => (
+                        <DropdownItem
+                          onClick={() => {
+                            resetListLabels(slug);
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                            }}
+                          >
+                            <span>{msg}</span>
+                            <FormattedMessage id="content-manager.containers.Edit.reset" />
+                          </div>
+                        </DropdownItem>
+                      )}
+                    </FormattedMessage>
+                    {getAllLabels().map(label => {
+                      //
+                      return (
+                        <DropdownItem
+                          key={label.name}
+                          toggle={false}
+                          onClick={() => handleChangeListLabels(label)}
+                        >
+                          <div>
+                            <InputCheckbox
+                              onChange={() => handleChangeListLabels(label)}
+                              name={label.name}
+                              value={label.value}
+                            />
+                          </div>
+                        </DropdownItem>
+                      );
+                    })}
+                  </DropdownMenu>
+                </ButtonDropdown>
+              </DropDownWrapper>
+            </div>
+          </div>
+        </Wrapper>
       </Container>
     </>
   );
@@ -134,11 +234,16 @@ ListView.propTypes = {
   }),
   getData: PropTypes.func.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired,
+  }),
   match: PropTypes.shape({
     params: PropTypes.shape({
       slug: PropTypes.string.isRequired,
     }),
   }),
+  onChangeListLabels: PropTypes.func.isRequired,
+  resetListLabels: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
 };
 
@@ -148,6 +253,8 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       getData,
+      onChangeListLabels,
+      resetListLabels,
       resetProps,
     },
     dispatch

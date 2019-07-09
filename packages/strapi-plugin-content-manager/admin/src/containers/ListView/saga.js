@@ -1,4 +1,4 @@
-import { all, fork, put, call, takeLatest, select } from 'redux-saga/effects';
+import { all, fork, put, call, takeLatest } from 'redux-saga/effects';
 import { request } from 'strapi-helper-plugin';
 import { set, unset } from 'lodash';
 import pluginId from '../../pluginId';
