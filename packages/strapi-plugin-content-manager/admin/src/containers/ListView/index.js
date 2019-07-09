@@ -10,7 +10,11 @@ import {
   DropdownMenu,
   DropdownItem,
 } from 'reactstrap';
-import { PluginHeader, getQueryParameters } from 'strapi-helper-plugin';
+import {
+  PluginHeader,
+  PopUpWarning,
+  getQueryParameters,
+} from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import { ListViewProvider } from '../../contexts/ListView';
 import FilterLogo from '../../assets/images/icon_filter.png';
@@ -25,7 +29,14 @@ import {
 } from '../../utils/search';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, DropDownWrapper, Img, Wrapper } from './components';
-import { getData, resetProps } from './actions';
+import {
+  getData,
+  onChangeBulk,
+  onChangeBulkSelectall,
+  onDeleteSeveralData,
+  resetProps,
+  toggleModalDeleteAll,
+} from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectListView from './selectors';
@@ -34,6 +45,7 @@ function ListView({
   count,
   data,
   emitEvent,
+  entriesToDelete,
   location: { search },
   getData,
   layouts,
@@ -42,9 +54,15 @@ function ListView({
   match: {
     params: { slug },
   },
+  onChangeBulk,
+  onChangeBulkSelectall,
   onChangeListLabels,
+  onDeleteSeveralData,
   resetListLabels,
   resetProps,
+  shouldRefetchData,
+  showWarningDeleteAll,
+  toggleModalDeleteAll,
 }) {
   strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'listView', saga, pluginId });
@@ -83,7 +101,7 @@ function ListView({
       resetProps();
     };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [slug]);
+  }, [slug, shouldRefetchData]);
 
   const toggleLabelPickerState = () =>
     setLabelPickerState(prevState => !prevState);
@@ -190,10 +208,16 @@ function ListView({
   return (
     <>
       <ListViewProvider
+        data={data}
+        entriesToDelete={entriesToDelete}
         firstSortableElement={getFirstSortableElement()}
+        onChangeBulk={onChangeBulk}
+        onChangeBulkSelectall={onChangeBulkSelectall}
         onChangeParams={handleChangeParams}
+        onDeleteSeveralData={onDeleteSeveralData}
         searchParams={getSearchParams()}
         slug={slug}
+        toggleModalDeleteAll={toggleModalDeleteAll}
       >
         <FilterPicker
           actions={filterPickerActions}
@@ -302,6 +326,24 @@ function ListView({
             </div>
           </Wrapper>
         </Container>
+        <PopUpWarning
+          isOpen={showWarningDeleteAll}
+          toggleModal={toggleModalDeleteAll}
+          content={{
+            title: 'content-manager.popUpWarning.title',
+            // message: this.getPopUpDeleteAllMsg(),
+            cancel: 'content-manager.popUpWarning.button.cancel',
+            confirm: 'content-manager.popUpWarning.button.confirm',
+          }}
+          popUpWarningType="danger"
+          onConfirm={() => {
+            onDeleteSeveralData(
+              entriesToDelete,
+              slug,
+              getSearchParams().source
+            );
+          }}
+        />
       </ListViewProvider>
     </>
   );
@@ -314,6 +356,7 @@ ListView.propTypes = {
   count: PropTypes.number.isRequired,
   data: PropTypes.array.isRequired,
   emitEvent: PropTypes.func.isRequired,
+  entriesToDelete: PropTypes.array.isRequired,
   layouts: PropTypes.object,
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
@@ -328,9 +371,15 @@ ListView.propTypes = {
       slug: PropTypes.string.isRequired,
     }),
   }),
+  onChangeBulk: PropTypes.func.isRequired,
+  onChangeBulkSelectall: PropTypes.func.isRequired,
   onChangeListLabels: PropTypes.func.isRequired,
+  onDeleteSeveralData: PropTypes.func.isRequired,
   resetListLabels: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
+  shouldRefetchData: PropTypes.bool.isRequired,
+  showWarningDeleteAll: PropTypes.bool.isRequired,
+  toggleModalDeleteAll: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectListView();
@@ -339,9 +388,13 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       getData,
+      onChangeBulk,
+      onChangeBulkSelectall,
       onChangeListLabels,
+      onDeleteSeveralData,
       resetListLabels,
       resetProps,
+      toggleModalDeleteAll,
     },
     dispatch
   );

@@ -119,6 +119,23 @@ const Truncated = styled.div`
   white-space: nowrap;
 `;
 
+const TableDelete = styled.tr`
+  width: 100%;
+  height: 36px;
+  background: #f7f8f8;
+
+  td {
+    height: 36px;
+    line-height: 36px;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #333740;
+    text-align: left;
+    border-collapse: collapse;
+    border-top: 1px solid #f1f1f2 !important;
+  }
+`;
+
 const ActionContainer = styled.td`
   text-align: right;
 
@@ -132,11 +149,41 @@ const ActionContainer = styled.td`
     }
   }
 `;
+const DeleteSpan = styled.span`
+  font-weight: 600;
+  &:after {
+    content: '—';
+    margin: 0 7px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  -webkit-font-smoothing: antialiased;
+`;
+
+const DeletAllSpan = styled.span`
+  position: absolute;
+  color: #f64d0a;
+  font-weight: 500;
+  cursor: pointer;
+  &:after {
+    position: relative;
+    top: -1px;
+    content: '\f1f8';
+    margin-left: 7px;
+    // margin-top: -10px;
+    font-size: 13px;
+    font-family: FontAwesome;
+    -webkit-font-smoothing: antialiased;
+  }
+`;
 
 export {
   ActionContainer,
+  DeletAllSpan,
+  DeleteSpan,
   Icon,
   Table,
+  TableDelete,
   TableEmpty,
   TableRow,
   Thead,

@@ -5,10 +5,12 @@ import { FormattedMessage } from 'react-intl';
 import { useListView } from '../../contexts/ListView';
 import TableHeader from './TableHeader';
 import { Table, TableEmpty, TableRow } from './styledComponents';
+import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
 function CustomTable({ data, headers, isBulkable }) {
-  const { slug } = useListView();
+  const { entriesToDelete, slug } = useListView();
+
   const values = { contentType: slug || 'entry' };
   const id = 'withoutFilter';
   const colSpanLength = isBulkable ? headers.length + 2 : headers.length + 1;
@@ -36,7 +38,12 @@ function CustomTable({ data, headers, isBulkable }) {
   return (
     <Table className="table">
       <TableHeader headers={headers} isBulkable={isBulkable} />
-      <tbody>{content}</tbody>
+      <tbody>
+        {entriesToDelete.length > 0 && (
+          <ActionCollapse colSpan={colSpanLength} />
+        )}
+        {content}
+      </tbody>
     </Table>
   );
 }

@@ -1,5 +1,4 @@
 import React, { memo } from 'react';
-import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 
 import { useListView } from '../../contexts/ListView';
@@ -8,7 +7,10 @@ import { Icon, Thead } from './styledComponents';
 
 function TableHeader({ headers, isBulkable }) {
   const {
+    data,
+    entriesToDelete,
     firstSortableElement,
+    onChangeBulkSelectall,
     onChangeParams,
     searchParams: { _sort },
   } = useListView();
@@ -20,11 +22,14 @@ function TableHeader({ headers, isBulkable }) {
         {isBulkable && (
           <th>
             <CustomInputCheckbox
-              entriesToDelete={[]}
+              entriesToDelete={entriesToDelete}
               isAll
               name="all"
-              onChange={() => {}}
-              value
+              onChange={onChangeBulkSelectall}
+              value={
+                data.length === entriesToDelete.length &&
+                entriesToDelete.length > 0
+              }
             />
           </th>
         )}
@@ -81,4 +86,4 @@ TableHeader.propTypes = {
   isBulkable: PropTypes.bool,
 };
 
-export default withRouter(memo(TableHeader));
+export default memo(TableHeader);
