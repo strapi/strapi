@@ -10,11 +10,7 @@
   bottom: 0;
   left: 0;
   overflow-y: auto;
-  height: calc(
-    100vh - (60px + 10.2rem)
-  ); // we know we are 10.2 rems up from the bottom footer and 60px down
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
+  height: calc(100vh - (6rem + 10.2rem));
   box-sizing: border-box;
 }
 
