@@ -25,7 +25,7 @@ module.exports = opts => {
       start: 'strapi start',
       build: 'strapi build',
       strapi: 'strapi', // Allow to use `npm run strapi` CLI,
-      lint: 'eslint api/**/*.js config/**/*.js plugins/**/*.js',
+      lint: 'eslint .',
     },
     devDependencies: {
       'babel-eslint': '^10.0.0',
