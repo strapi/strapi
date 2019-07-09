@@ -10,6 +10,8 @@
 const _ = require('lodash');
 const AWS = require('aws-sdk');
 
+const trimParam = str => typeof str === "string" ? str.trim() : undefined
+
 module.exports = {
   provider: 'aws-s3',
   name: 'Amazon Web Service S3',
@@ -55,15 +57,15 @@ module.exports = {
   init: (config) => {
     // configure AWS S3 bucket connection
     AWS.config.update({
-      accessKeyId: config.public,
-      secretAccessKey: config.private,
+      accessKeyId: trimParam(config.public),
+      secretAccessKey: trimParam(config.private),
       region: config.region
     });
 
     const S3 = new AWS.S3({
       apiVersion: '2006-03-01',
       params: {
-        Bucket: config.bucket
+        Bucket: trimParam(config.bucket)
       }
     });
 

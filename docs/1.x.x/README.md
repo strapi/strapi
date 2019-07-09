@@ -1,8 +1,8 @@
 ::: intro
-# Strapi 
+# Strapi
 
-[![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi) 
-[![Slack Status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+[![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi)
+[![Slack Status](https://slack.strapi.io/badge.svg)](http://slack.strapi.io)
 
 Strapi is an open-source Node.js rich framework for building applications and services.
 :::
