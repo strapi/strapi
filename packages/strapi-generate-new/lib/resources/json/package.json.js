@@ -28,11 +28,11 @@ module.exports = opts => {
       lint: 'eslint api/**/*.js config/**/*.js plugins/**/*.js',
     },
     devDependencies: {
-      'babel-eslint': '^7.1.1',
-      eslint: '^4.19.1',
-      'eslint-config-airbnb': '^13.0.0',
-      'eslint-plugin-import': '^2.11.0',
-      'eslint-plugin-react': '^7.7.0',
+      'babel-eslint': '^10.0.0',
+      eslint: '^6.0.0',
+      'eslint-config-airbnb': '^17.1.0',
+      'eslint-plugin-import': '^2.18.0',
+      'eslint-plugin-react': '^7.14.0',
     },
     dependencies: Object.assign(
       { lodash: '^4.17.5' },
