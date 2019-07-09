@@ -91,7 +91,7 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    await Service.appearance(formatedAttributes, name);
+    await Service.appearance(formatedAttributes, _.toLower(name));
 
     const apiName = _.toLower(name);
     await Service.generateAPI(

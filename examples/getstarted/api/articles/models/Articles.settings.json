@@ -7,19 +7,12 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
     "content2": {
       "type": "text"
-    },
-    "posts": {
-      "collection": "post",
-      "via": "articles"
     },
     "title": {
       "type": "string"
@@ -29,13 +22,16 @@
       "via": "related",
       "plugin": "upload"
     },
-    "ingredients": {
-      "type": "group",
-      "group": "ingredients",
-      "required": true,
-      "repeatable": true,
-      "min": 2,
-      "max": 3
+    "mainTag": {
+      "model": "tag"
+    },
+    "linkedTags": {
+      "collection": "tag"
+    },
+    "manyTags": {
+      "dominant": true,
+      "collection": "tag",
+      "via": "linkedArticles"
     }
   }
 }

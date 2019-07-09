@@ -453,6 +453,7 @@ module.exports = {
           case 'manyToOne':
             attr.model = relation.target;
             break;
+          case 'manyWay':
           case 'manyToMany':
           case 'oneToMany':
             attr.collection = relation.target;
@@ -599,6 +600,7 @@ module.exports = {
             const attr = {};
 
             switch (params.nature) {
+              case 'manyWay':
               case 'oneWay':
                 return;
               case 'oneToOne':

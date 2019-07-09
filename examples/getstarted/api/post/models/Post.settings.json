@@ -1,18 +1,19 @@
 {
   "connection": "default",
-  "collectionName": "",
+  "collectionName": "post",
   "info": {
     "name": "post",
     "description": ""
   },
   "options": {
-    "timestamps": true
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ]
   },
   "attributes": {
-    "articles": {
-      "collection": "articles",
-      "dominant": true,
-      "via": "posts"
+    "title": {
+      "type": "string"
     }
   }
 }

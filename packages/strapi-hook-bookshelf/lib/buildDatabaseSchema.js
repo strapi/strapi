@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { models: utilsModels } = require('strapi-utils');
+const { singular } = require('pluralize');
 
 /* global StrapiConfigs */
 module.exports = async ({
@@ -309,36 +309,37 @@ module.exports = async ({
   }
 
   // Equilize many to many releations
-  const manyRelations = definition.associations.filter(association => {
-    return association.nature === 'manyToMany';
-  });
+  const manyRelations = definition.associations.filter(({ nature }) =>
+    ['manyToMany', 'manyWay'].includes(nature)
+  );
 
   for (const manyRelation of manyRelations) {
-    if (manyRelation && manyRelation.dominant) {
-      const collection = manyRelation.plugin
-        ? strapi.plugins[manyRelation.plugin].models[manyRelation.collection]
-        : strapi.models[manyRelation.collection];
+    const { plugin, collection, via, dominant, alias } = manyRelation;
+
+    if (dominant) {
+      const targetCollection = plugin
+        ? strapi.plugins[plugin].models[collection]
+        : strapi.models[collection];
+
+      const targetAttr = via
+        ? targetCollection.attributes[via]
+        : {
+            attribute: singular(definition.collectionName),
+            column: definition.primaryKey,
+          };
+
+      const defAttr = definition.attributes[alias];
 
       const attributes = {
-        [`${collection.attributes[manyRelation.via].attribute}_${
-          collection.attributes[manyRelation.via].column
-        }`]: {
-          type: collection.primaryKeyType,
+        [`${targetAttr.attribute}_${targetAttr.column}`]: {
+          type: targetCollection.primaryKeyType,
         },
-        [`${definition.attributes[manyRelation.alias].attribute}_${
-          definition.attributes[manyRelation.alias].column
-        }`]: {
+        [`${defAttr.attribute}_${defAttr.column}`]: {
           type: definition.primaryKeyType,
         },
       };
 
-      const table =
-        _.get(manyRelation, 'collectionName') ||
-        utilsModels.getCollectionName(
-          collection.attributes[manyRelation.via],
-          manyRelation
-        );
-
+      const table = manyRelation.tableCollectionName;
       await createOrUpdateTable(table, attributes);
     }
   }

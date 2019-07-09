@@ -1,0 +1,21 @@
+{
+  "connection": "default",
+  "collectionName": "tags",
+  "info": {
+    "name": "tag",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "linkedArticles": {
+      "collection": "articles",
+      "via": "manyTags"
+    }
+  }
+}
