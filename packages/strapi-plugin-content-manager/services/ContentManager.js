@@ -77,7 +77,7 @@ module.exports = {
       const parser = value => {
         try {
           const parsed = JSON.parse(value);
-          // if we parse a a value and it is still a string leave it as is
+          // if we parse a value and it is still a string leave it as is
           if (typeof parsed !== 'string') {
             value = parsed;
           }
