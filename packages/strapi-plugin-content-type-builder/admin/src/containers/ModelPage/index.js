@@ -513,7 +513,6 @@ export class ModelPage extends React.Component {
   };
 
   render() {
-    const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
     const {
       clearTemporaryAttribute,
       clearTemporaryAttributeRelation,
