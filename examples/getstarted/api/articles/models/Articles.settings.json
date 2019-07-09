@@ -11,11 +11,17 @@
     "comment": ""
   },
   "attributes": {
-    "content2": {
-      "type": "text"
-    },
     "title": {
       "type": "string"
+    },
+    "content": {
+      "type": "text"
+    },
+    "published": {
+      "type": "boolean"
+    },
+    "value": {
+      "type": "integer"
     },
     "image": {
       "model": "file",
