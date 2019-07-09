@@ -109,6 +109,7 @@ class Li extends React.Component {
           <a
             href={item.url}
             target="_blank"
+            rel="noopener noreferrer"
             style={{ display: 'none' }}
             id={item.hash}
           >
@@ -149,7 +150,7 @@ class Li extends React.Component {
                 }
 
                 return <IcoContainer key={key} icons={icons} />;
-              },
+              }
             )}
           </div>
           <PopUpWarning

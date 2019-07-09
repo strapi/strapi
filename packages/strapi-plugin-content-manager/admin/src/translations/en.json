@@ -1,4 +1,6 @@
 {
+  "models": "Content Types",
+  "groups": "Groups",
   "EditRelations.title": "Relational data",
   "components.AddFilterCTA.add": "Filters",
   "components.AddFilterCTA.hide": "Filters",
@@ -66,7 +68,9 @@
   "containers.SettingsPage.Block.contentType.title": "Content Types",
   "containers.SettingsPage.Block.generalSettings.description": "Configure the default options for your Content Types",
   "containers.SettingsPage.Block.generalSettings.title": "General",
-  "containers.SettingsPage.pluginHeaderDescription": "Configure the default settings for all your Content types",
+  "containers.SettingsPage.pluginHeaderDescription": "Configure the settings for all your Content types and Groups",
+  "containers.SettingsView.list.title": "Display configurations",
+  "containers.SettingsView.list.subtitle": "Configure the layout and display of your content types and groups",
   "emptyAttributes.button": "Go to content type builder",
   "emptyAttributes.description": "Add your first field to your Content Type",
   "emptyAttributes.title": "There are no fields yet",

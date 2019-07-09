@@ -702,8 +702,6 @@ ModelPage.propTypes = {
   onChangeRelationTarget: PropTypes.func.isRequired,
   resetEditExistingContentType: PropTypes.func.isRequired,
   resetEditTempContentType: PropTypes.func.isRequired,
-  resetEditExistingContentType: PropTypes.func.isRequired,
-  resetEditTempContentType: PropTypes.func.isRequired,
   saveEditedAttribute: PropTypes.func.isRequired,
   saveEditedAttributeRelation: PropTypes.func.isRequired,
   setTemporaryAttribute: PropTypes.func.isRequired,

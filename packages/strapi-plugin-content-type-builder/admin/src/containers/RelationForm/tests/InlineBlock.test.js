@@ -8,7 +8,7 @@ describe('<InlineBlock />', () => {
     shallow(<InlineBlock />);
   });
 
-  it('should render his children', () => {
+  it('should render its children', () => {
     const Child = () => <div>I am a child</div>;
     const wrapper = shallow(
       <InlineBlock>

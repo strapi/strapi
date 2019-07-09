@@ -4,11 +4,11 @@
  *
  */
 
+/* eslint-disable */
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
 import { get } from 'lodash';
-import PropTypes from 'prop-types';
 import {
   ButtonDropdown,
   DropdownItem,

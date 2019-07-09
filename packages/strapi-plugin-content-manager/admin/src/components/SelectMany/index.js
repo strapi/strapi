@@ -4,6 +4,7 @@
  *
  */
 
+/* eslint-disable */
 import React from 'react';
 import Select from 'react-select';
 import { FormattedMessage } from 'react-intl';
@@ -85,7 +86,7 @@ class SelectMany extends React.PureComponent {
               value: item,
               label: templateObject(
                 { mainField: this.props.relation.displayedAttribute },
-                item,
+                item
               ).mainField,
             }))
           : [
@@ -112,7 +113,7 @@ class SelectMany extends React.PureComponent {
       })
       .catch(() => {
         strapi.notification.error(
-          'content-manager.notification.error.relationship.fetch',
+          'content-manager.notification.error.relationship.fetch'
         );
       });
   };
@@ -120,7 +121,7 @@ class SelectMany extends React.PureComponent {
   handleInputChange = value => {
     const clonedOptions = this.state.options;
     const filteredValues = clonedOptions.filter(data =>
-      includes(data.label, value),
+      includes(data.label, value)
     );
 
     if (filteredValues.length === 0) {
@@ -132,9 +133,7 @@ class SelectMany extends React.PureComponent {
     // Remove new added value from available option;
     this.state.options = this.state.options.filter(
       el =>
-        !(
-          (el.value._id || el.value.id) === (value.value.id || value.value._id)
-        ),
+        !((el.value._id || el.value.id) === (value.value.id || value.value._id))
     );
 
     this.props.onAddRelationalItem({
@@ -159,7 +158,7 @@ class SelectMany extends React.PureComponent {
       value: values[index],
       label: templateObject(
         { mainField: this.props.relation.displayedAttribute },
-        values[index],
+        values[index]
       ).mainField,
     };
 
@@ -225,7 +224,7 @@ class SelectMany extends React.PureComponent {
                         get(item, 'label') ||
                         templateObject(
                           { mainField: this.props.relation.displayedAttribute },
-                          item,
+                          item
                         ).mainField ||
                         item.id,
                     };

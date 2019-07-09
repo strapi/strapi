@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import pluralize from 'pluralize';
 import { capitalize, get, sortBy } from 'lodash';
 import { all, fork, takeLatest, call, put } from 'redux-saga/effects';

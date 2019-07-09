@@ -1,3 +1,4 @@
+/* eslint-disable */
 import 'whatwg-fetch';
 import { dropRight, take } from 'lodash';
 import removeMd from 'remove-markdown';
@@ -15,7 +16,7 @@ function* getArticles() {
       const content = dropRight(
         take(removeMd(curr.markdown), 250)
           .join('')
-          .split(' '),
+          .split(' ')
       ).join(' ');
 
       acc.push({
@@ -58,7 +59,7 @@ function* defaultSaga() {
 function fetchArticles() {
   return fetch(
     'https://blog.strapi.io/ghost/api/v0.1/posts/?client_id=ghost-frontend&client_secret=1f260788b4ec&limit=2',
-    {},
+    {}
   ).then(resp => {
     return resp.json ? resp.json() : resp;
   });
