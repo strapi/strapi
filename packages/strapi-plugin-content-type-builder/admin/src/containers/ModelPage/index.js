@@ -32,6 +32,7 @@ import Block from '../../components/Block';
 import Flex from '../../components/Flex';
 import ListTitle from '../../components/ListTitle';
 import Ul from '../../components/Ul';
+import ListRow from '../../components/ListRow';
 
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
@@ -363,9 +364,8 @@ export class ModelPage extends React.Component {
     }
   };
 
-  handleDeleteAttribute = () => {
+  handleDeleteAttribute = attrToDelete => {
     const { deleteModelAttribute } = this.props;
-    const { attrToDelete } = this.state;
 
     /* istanbul ignore if */
     const keys = this.isUpdatingTemporaryContentType()
@@ -373,7 +373,6 @@ export class ModelPage extends React.Component {
       : ['modifiedData', this.getModelName(), 'attributes', attrToDelete];
 
     deleteModelAttribute(keys);
-    this.setState({ attrToDelete: null, showWarning: false });
   };
 
   handleGoBack = () => {
@@ -512,9 +511,29 @@ export class ModelPage extends React.Component {
     );
   };
 
+  renderListRow = attribute => {
+    const { canOpenModal } = this.props;
+    const attributeInfos = get(this.getModelAttributes(), attribute, {});
+
+    return (
+      <ListRow
+        key={attribute}
+        attributeId={attribute}
+        {...attributeInfos}
+        canOpenModal={canOpenModal}
+        context={this.context}
+        deleteAttribute={this.handleDeleteAttribute}
+        isTemporary={false}
+        name={attribute}
+        type={attributeInfos.type}
+      />
+    );
+  };
+
   render() {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
     const {
+      canOpenModal,
       clearTemporaryAttribute,
       clearTemporaryAttributeRelation,
       history: { push },
@@ -542,7 +561,6 @@ export class ModelPage extends React.Component {
     const attributeType = this.getAttributeType();
     const actionType = this.getActionType();
 
-    // const attributes = this.getModelAttributes();
     const attributesNumber = this.getModelAttributesLength();
     const relationsNumber = this.getModelRelationShipsLength();
 
@@ -601,23 +619,15 @@ export class ModelPage extends React.Component {
           ) : (
             <ListWrapper>
               <ListHeader title={title} button={{ ...buttonProps }} />
-              {/* <List>
+              <List>
                 <table>
                   <tbody>
-                    {attributes.map(attribute => (
-                      <ListRow
-                        key={attribute.name}
-                        {...attribute}
-                        canOpenModal={canOpenModal}
-                        context={this.context}
-                        deleteAttribute={this.handleDeleteGroupAttribute}
-                        isTemporary={false}
-                        type={attribute.type}
-                      />
-                    ))}
+                    {Object.keys(this.getModelAttributes()).map(
+                      this.renderListRow
+                    )}
                   </tbody>
                 </table>
-              </List> */}
+              </List>
               <div className="list-button">
                 <Button {...buttonProps} />
               </div>
