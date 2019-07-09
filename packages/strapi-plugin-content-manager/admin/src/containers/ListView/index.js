@@ -18,6 +18,7 @@ import pluginId from '../../pluginId';
 import FilterLogo from '../../assets/images/icon_filter.png';
 
 import Container from '../../components/Container';
+import FilterPicker from '../../components/FilterPicker';
 import InputCheckbox from '../../components/InputCheckbox';
 import Search from '../../components/Search';
 
@@ -48,6 +49,7 @@ function ListView({
   strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'listView', saga, pluginId });
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
+  const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const getLayoutSettingRef = useRef();
   getLayoutSettingRef.current = settingName =>
     get(layouts, [slug, 'settings', settingName], '');
@@ -74,6 +76,8 @@ function ListView({
 
   const toggleLabelPickerState = () =>
     setLabelPickerState(prevState => !prevState);
+  const toggleFilterPickerState = () =>
+    setFilterPickerState(prevState => !prevState);
 
   useEffect(() => {
     getData(slug, generateSearchParams());
@@ -127,26 +131,72 @@ function ListView({
       target: { name: `${slug}.${name}`, value: !value },
     });
   };
+  const filterPickerActions = [
+    {
+      label: `${pluginId}.components.FiltersPickWrapper.PluginHeader.actions.clearAll`,
+      kind: 'secondary',
+      onClick: () => {
+        toggleFilterPickerState();
+        // this.props.close();
+        // this.props.removeAllFilters();
+      },
+    },
+    {
+      label: `${pluginId}.components.FiltersPickWrapper.PluginHeader.actions.apply`,
+      kind: 'primary',
+      type: 'submit',
+      onClick: () => {
+        emitEvent('didFilterEntries');
+        toggleFilterPickerState();
+        // this.props.onSubmit(e);
+      },
+    },
+  ];
 
   return (
     <>
+      <FilterPicker
+        actions={filterPickerActions}
+        isOpen={isFilterPickerOpen}
+        name={slug}
+      />
       <Container>
-        <PluginHeader
-          actions={pluginHeaderActions}
-          description={{
-            id:
-              count > 1
-                ? `${pluginId}.containers.List.pluginHeaderDescription`
-                : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
-            values: {
-              label: count,
-            },
-          }}
-          title={{
-            id: slug || 'Content Manager',
-          }}
-          withDescriptionAnim={isLoading}
-        />
+        {!isFilterPickerOpen && (
+          <PluginHeader
+            actions={pluginHeaderActions}
+            description={{
+              id:
+                count > 1
+                  ? `${pluginId}.containers.List.pluginHeaderDescription`
+                  : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
+              values: {
+                label: count,
+              },
+            }}
+            title={{
+              id: slug || 'Content Manager',
+            }}
+            withDescriptionAnim={isLoading}
+          />
+        )}
+        {/* <StyledCollapse isOpen={!isFilterPickerOpen}>
+          <PluginHeader
+            actions={pluginHeaderActions}
+            description={{
+              id:
+                count > 1
+                  ? `${pluginId}.containers.List.pluginHeaderDescription`
+                  : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
+              values: {
+                label: count,
+              },
+            }}
+            title={{
+              id: slug || 'Content Manager',
+            }}
+            withDescriptionAnim={isLoading}
+          />
+        </StyledCollapse> */}
         {getLayoutSettingRef.current('searchable') && (
           <Search
             changeParams={handleChangeParams}
@@ -158,7 +208,7 @@ function ListView({
         <Wrapper>
           <div className="row">
             <div className="col-10">
-              <AddFilterCta type="button">
+              <AddFilterCta type="button" onClick={toggleFilterPickerState}>
                 <Img src={FilterLogo} alt="filter_logo" />
                 <FormattedMessage
                   id={`${pluginId}.components.AddFilterCTA.add`}
