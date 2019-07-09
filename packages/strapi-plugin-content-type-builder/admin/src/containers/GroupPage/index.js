@@ -150,13 +150,10 @@ export class GroupPage extends React.Component {
     this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
   renderListRow = (attribute, index) => {
-    const { canOpenModal } = this.props;
-
     return (
       <ListRow
         {...attribute}
         attributeId={index}
-        canOpenModal={canOpenModal}
         context={this.context}
         name={attribute.name}
         onClick={this.handleClickEditAttribute}
