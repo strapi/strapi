@@ -28,7 +28,7 @@ describe('Content Manager End to End', () => {
       form.category,
       form.reference,
       form.product,
-      form.articleWithTag,
+      form.articlewithtag,
     ]);
   }, 60000);
 
@@ -40,7 +40,7 @@ describe('Content Manager End to End', () => {
         'category',
         'reference',
         'product',
-        'articleWithTag',
+        'articlewithtag',
       ]),
     60000
   );

@@ -161,7 +161,7 @@ module.exports = {
     description: '',
     collectionName: '',
   },
-  articleWithTag: {
+  articlewithtag: {
     attributes: [
       {
         name: 'title',
@@ -182,7 +182,7 @@ module.exports = {
       },
     ],
     connection: 'default',
-    name: 'articleWithTag',
+    name: 'articlewithtag',
     description: '',
     collectionName: '',
   },
