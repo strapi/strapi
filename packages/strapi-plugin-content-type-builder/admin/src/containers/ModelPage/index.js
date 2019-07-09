@@ -27,11 +27,6 @@ import {
 
 import pluginId from '../../pluginId';
 
-import AttributeLi from '../../components/AttributeLi';
-import Block from '../../components/Block';
-import Flex from '../../components/Flex';
-import ListTitle from '../../components/ListTitle';
-import Ul from '../../components/Ul';
 import ListRow from '../../components/ListRow';
 
 import AttributeForm from '../AttributeForm';
@@ -497,20 +492,6 @@ export class ModelPage extends React.Component {
       `${pluginId}.notification.info.contentType.creating.notSaved`
     );
 
-  renderLi = attribute => {
-    const attributeInfos = get(this.getModelAttributes(), attribute, {});
-
-    return (
-      <AttributeLi
-        key={attribute}
-        name={attribute}
-        attributeInfos={attributeInfos}
-        onClick={this.handleClickEditAttribute}
-        onClickOnTrashIcon={this.handleClickOnTrashIcon}
-      />
-    );
-  };
-
   renderListRow = attribute => {
     const { canOpenModal } = this.props;
     const attributeInfos = get(this.getModelAttributes(), attribute, {});
@@ -631,52 +612,6 @@ export class ModelPage extends React.Component {
               <div className="list-button">
                 <Button {...buttonProps} />
               </div>
-
-              <Block>
-                <Flex>
-                  <ListTitle>
-                    {this.getModelAttributesLength()}
-                    &nbsp;
-                    <FormattedMessage
-                      id={`${listTitleMessageIdBasePrefix}.${
-                        this.getModelAttributesLength() > 1
-                          ? 'plural'
-                          : 'singular'
-                      }`}
-                    />
-                    {this.getModelRelationShipsLength() > 0 && (
-                      <React.Fragment>
-                        &nbsp;
-                        <FormattedMessage
-                          id={`${listTitleMessageIdBasePrefix}.including`}
-                        />
-                        &nbsp;
-                        {this.getModelRelationShipsLength()}
-                        &nbsp;
-                        <FormattedMessage
-                          id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
-                            this.getModelRelationShipsLength() > 1
-                              ? 'plural'
-                              : 'singular'
-                          }`}
-                        />
-                      </React.Fragment>
-                    )}
-                  </ListTitle>
-                  <div>
-                    <Button
-                      label={`${pluginId}.button.attributes.add`}
-                      onClick={this.handleClickOpenModalChooseAttributes}
-                      secondaryHotlineAdd
-                    />
-                  </div>
-                </Flex>
-                <div>
-                  <Ul id="attributesList">
-                    {Object.keys(this.getModelAttributes()).map(this.renderLi)}
-                  </Ul>
-                </div>
-              </Block>
             </ListWrapper>
           )}
         </ViewContainer>
