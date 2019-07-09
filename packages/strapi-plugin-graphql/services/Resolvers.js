@@ -22,7 +22,8 @@ const Schema = require('./Schema.js');
 
 const buildShadowCRUD = (models, plugin) => {
   // Retrieve generic service from the Content Manager plugin.
-  const resolvers = strapi.plugins['content-manager'].services['contentmanager'];
+  const resolvers =
+    strapi.plugins['content-manager'].services['contentmanager'];
 
   const initialState = {
     definition: '',
@@ -36,7 +37,9 @@ const buildShadowCRUD = (models, plugin) => {
   }
 
   return models.reduce((acc, name) => {
-    const model = plugin ? strapi.plugins[plugin].models[name] : strapi.models[name];
+    const model = plugin
+      ? strapi.plugins[plugin].models[name]
+      : strapi.models[name];
 
     // Setup initial state with default attribute that should be displayed
     // but these attributes are not properly defined in the models.
@@ -50,7 +53,9 @@ const buildShadowCRUD = (models, plugin) => {
     }
 
     const globalId = model.globalId;
-    const _schema = _.cloneDeep(_.get(strapi.plugins, 'graphql.config._schema.graphql', {}));
+    const _schema = _.cloneDeep(
+      _.get(strapi.plugins, 'graphql.config._schema.graphql', {})
+    );
 
     if (!acc.resolver[globalId]) {
       acc.resolver[globalId] = {
@@ -106,20 +111,27 @@ const buildShadowCRUD = (models, plugin) => {
     (model.associations || [])
       .filter(association => association.type === 'collection')
       .forEach(association => {
-        attributes[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
-          attributes[association.alias];
+        attributes[
+          `${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`
+        ] = attributes[association.alias];
 
         delete attributes[association.alias];
       });
 
-
     acc.definition += `${Schema.getDescription(
       type[globalId],
       model
-    )}type ${globalId} {${Schema.formatGQL(attributes, type[globalId], model)}}\n\n`;
+    )}type ${globalId} {${Schema.formatGQL(
+      attributes,
+      type[globalId],
+      model
+    )}}\n\n`;
 
     // Add definition to the schema but this type won't be "queriable" or "mutable".
-    if (type[model.globalId] === false || _.get(type, `${model.globalId}.enabled`) === false) {
+    if (
+      type[model.globalId] === false ||
+      _.get(type, `${model.globalId}.enabled`) === false
+    ) {
       return acc;
     }
 
@@ -162,9 +174,7 @@ const buildShadowCRUD = (models, plugin) => {
     if (_.isFunction(queries.plural)) {
       _.merge(acc, {
         query: {
-          [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${
-            model.globalId
-          }]`,
+          [`${pluralName}(sort: String, limit: Int, start: Int, where: JSON)`]: `[${model.globalId}]`,
         },
         resolver: {
           Query: {
@@ -202,7 +212,11 @@ const buildShadowCRUD = (models, plugin) => {
         let mutationName = `${type}${capitalizedName}`;
 
         // Generate the Input for this specific action.
-        acc.definition += Types.generateInputPayloadArguments(model, name, type);
+        acc.definition += Types.generateInputPayloadArguments(
+          model,
+          name,
+          type
+        );
 
         switch (type) {
           case 'create':
@@ -275,11 +289,16 @@ const buildShadowCRUD = (models, plugin) => {
                 false
               );
 
-              const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
+              const entry =
+                withRelated && withRelated.toJSON
+                  ? withRelated.toJSON()
+                  : withRelated;
 
               // Set the _type only when the value is defined
               if (entry[association.alias]) {
-                entry[association.alias]._type = _.upperFirst(association.model);
+                entry[association.alias]._type = _.upperFirst(
+                  association.model
+                );
               }
 
               return entry[association.alias];
@@ -311,7 +330,10 @@ const buildShadowCRUD = (models, plugin) => {
                 ),
               ]);
 
-              const entry = withRelated && withRelated.toJSON ? withRelated.toJSON() : withRelated;
+              const entry =
+                withRelated && withRelated.toJSON
+                  ? withRelated.toJSON()
+                  : withRelated;
 
               // TODO:
               // - Handle sort, limit and start (lodash or inside the query)
@@ -370,11 +392,19 @@ const buildShadowCRUD = (models, plugin) => {
               ...Query.convertToQuery(queryParams.where),
             };
 
-            if (model.orm === 'mongoose' && association.nature === 'manyToMany' && association.dominant) {
-              _.set(queryOpts, ['query', ref.primaryKey], obj[association.alias].map(val => val[ref.primaryKey] || val) || []);
+            if (
+              (association.nature === 'manyToMany' && association.dominant) ||
+              association.nature === 'manyWay'
+            ) {
+              _.set(
+                queryOpts,
+                ['query', ref.primaryKey],
+                obj[association.alias].map(val => val[ref.primaryKey] || val) ||
+                  []
+              );
+            } else {
+              _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
             }
-
-            _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
           }
 
           const loaderName = association.plugin
@@ -383,14 +413,14 @@ const buildShadowCRUD = (models, plugin) => {
 
           return association.model
             ? strapi.plugins.graphql.services.loaders.loaders[loaderName].load({
-              params,
-              options: queryOpts,
-              single: true,
-            })
+                params,
+                options: queryOpts,
+                single: true,
+              })
             : strapi.plugins.graphql.services.loaders.loaders[loaderName].load({
-              options: queryOpts,
-              association,
-            });
+                options: queryOpts,
+                association,
+              });
         },
       });
     });
