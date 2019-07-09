@@ -1,14 +1,15 @@
 import React, { memo } from 'react';
+import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { capitalize } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
 import { PluginHeader } from 'strapi-helper-plugin';
 
-import Container from '../Container';
 import pluginId from '../../pluginId';
+import Container from '../Container';
 
-function FilterPicker({ actions, isOpen, name }) {
+function FilterPicker({ actions, isOpen, name, onSubmit }) {
   const renderTitle = () => (
     <FormattedMessage
       id={`${pluginId}.components.FiltersPickWrapper.PluginHeader.title.filter`}
@@ -24,13 +25,21 @@ function FilterPicker({ actions, isOpen, name }) {
   return (
     <Collapse isOpen={isOpen}>
       <Container style={{ backgroundColor: 'white' }}>
-        <PluginHeader
-          actions={actions}
-          title={renderTitle}
-          description={{
-            id: `${pluginId}.components.FiltersPickWrapper.PluginHeader.description`,
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+
+            onSubmit();
           }}
-        />
+        >
+          <PluginHeader
+            actions={actions}
+            title={renderTitle}
+            description={{
+              id: `${pluginId}.components.FiltersPickWrapper.PluginHeader.description`,
+            }}
+          />
+        </form>
       </Container>
     </Collapse>
   );
@@ -45,7 +54,12 @@ FilterPicker.defaultProps = {
 FilterPicker.propTypes = {
   actions: PropTypes.array,
   isOpen: PropTypes.bool,
+  location: PropTypes.shape({
+    search: PropTypes.string.isRequired,
+  }),
+
   name: PropTypes.string,
+  onSubmit: PropTypes.func.isRequired,
 };
 
-export default memo(FilterPicker);
+export default withRouter(memo(FilterPicker));

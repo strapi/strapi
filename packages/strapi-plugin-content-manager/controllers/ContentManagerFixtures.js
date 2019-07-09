@@ -75,7 +75,7 @@ module.exports = {
           defaultSortOrder: 'ASC',
           searchable: true,
           filterable: true,
-          bulkable: false,
+          bulkable: true,
           pageSize: 10,
         },
         metadata: {
@@ -261,7 +261,7 @@ module.exports = {
           defaultSortOrder: 'ASC',
           searchable: true,
           filterable: true,
-          bulkable: false,
+          bulkable: true,
           pageSize: 10,
         },
         metadata: {
@@ -283,7 +283,7 @@ module.exports = {
             list: {
               label: 'title',
               searchable: true,
-              sortable: true,
+              sortable: false,
             },
           },
           content: {
@@ -459,7 +459,7 @@ module.exports = {
           defaultSortOrder: 'ASC',
           searchable: true,
           filterable: true,
-          bulkable: false,
+          bulkable: true,
           pageSize: 10,
         },
         metadata: {
@@ -545,38 +545,38 @@ module.exports = {
               list: {},
             },
           },
-          layouts: {
-            list: ['id', 'title', 'content'],
-            editRelations: ['role'],
-            edit: [
-              [
-                {
-                  name: 'username',
-                  size: 6,
-                },
-                {
-                  name: 'email',
-                  size: 6,
-                },
-                {
-                  name: 'provider',
-                  size: 6,
-                },
-                {
-                  name: 'password',
-                  size: 6,
-                },
-                {
-                  name: 'confirmed',
-                  size: 4,
-                },
-                {
-                  name: 'blocked',
-                  size: 4,
-                },
-              ],
+        },
+        layouts: {
+          list: ['id', 'username', 'email'],
+          editRelations: ['role'],
+          edit: [
+            [
+              {
+                name: 'username',
+                size: 6,
+              },
+              {
+                name: 'email',
+                size: 6,
+              },
+              {
+                name: 'provider',
+                size: 6,
+              },
+              {
+                name: 'password',
+                size: 6,
+              },
+              {
+                name: 'confirmed',
+                size: 4,
+              },
+              {
+                name: 'blocked',
+                size: 4,
+              },
             ],
-          },
+          ],
         },
       },
     };
