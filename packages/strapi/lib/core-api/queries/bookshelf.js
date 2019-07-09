@@ -44,13 +44,118 @@ module.exports = ({ model, modelKey }) => {
         values,
         model.associations.map(ast => ast.alias)
       );
-      const data = _.omit(values, model.associations.map(ast => ast.alias));
 
-      // Create entry with no-relational data.
-      const entry = await model.forge(data).save();
+      const assocKeys = model.associations.map(ast => ast.alias);
+      const groupKeys = Object.keys(model.attributes).filter(
+        key => model.attributes[key].type === 'group'
+      );
+      const data = _.omit(values, [...assocKeys, ...groupKeys]);
 
-      // Create relational data and return the entry.
-      return model.updateRelations({ id: entry.id, values: relations });
+      const co = strapi.connections[model.connection];
+
+      await co.transaction(async trx => {
+        // Create entry with no-relational data.
+        const entry = await model.forge(data).save(null, { transacting: trx });
+
+        for (let key of groupKeys) {
+          const {
+            group,
+            required = true,
+            repeatable = true,
+            min,
+            max,
+          } = model.attributes[key];
+
+          const joinModel = entry[key].joinModel;
+          const groupModel = strapi.groups[group];
+
+          if (required === true && !_.has(values, key)) {
+            const err = new Error(`Group ${key} is required`);
+            err.status = 400;
+            throw err;
+          }
+
+          if (!_.has(values, key)) return;
+
+          const groupValue = values[key];
+
+          if (repeatable === true) {
+            if (!Array.isArray(groupValue)) {
+              const err = new Error(
+                `Group ${key} is repetable. Expected an array`
+              );
+              err.status = 400;
+              throw err;
+            }
+
+            if (min && groupValue.length < min) {
+              const err = new Error(
+                `Group ${key} must contains at least ${min} items`
+              );
+              err.status = 400;
+              throw err;
+            }
+            if (max && groupValue.length > max) {
+              const err = new Error(
+                `Group ${key} must contains at most ${max} items`
+              );
+              err.status = 400;
+              throw err;
+            }
+
+            const arr = await Promise.all(
+              groupValue.map(val => {
+                return groupModel.forge(val).save(null, { transacting: trx });
+              })
+            );
+
+            for (let idx = 0; idx < arr.length; idx++) {
+              await joinModel
+                .forge({
+                  [joinModel.foreignKey]: entry.id,
+                  slice_type: groupModel.collectionName,
+                  slice_id: arr[idx].id,
+                  field: key,
+                  order: idx + 1,
+                })
+                .save(null, { transacting: trx });
+            }
+
+            return;
+          }
+
+          if (typeof groupValue !== 'object') {
+            const err = new Error(`Group ${key} should be an object`);
+            err.status = 400;
+            throw err;
+          }
+
+          if (required === true && groupValue === null) {
+            const err = new Error(`Group ${key} is required`);
+            err.status = 400;
+            throw err;
+          }
+
+          // create entity
+          const res = await groupModel
+            .forge(groupValue)
+            .save(null, { transacting: trx });
+
+          // create relation
+          await joinModel
+            .forge({
+              [joinModel.foreignKey]: entry.id,
+              slice_type: groupModel.collectionName,
+              slice_id: res.id,
+              field: key,
+              order: 1,
+            })
+            .save(null, { transacting: trx });
+        }
+
+        // Create relational data and return the entry.
+        return model.updateRelations({ id: entry.id, values: relations });
+      });
     },
 
     async update(params, values) {

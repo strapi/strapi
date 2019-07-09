@@ -26,12 +26,16 @@ module.exports = async ({ model, definition, ORM, GLOBALS }) => {
       },
     });
 
+    joinModel.foreignKey = joinColumn;
+
     groupAttributes.forEach(name => {
-      model[name] = function() {
+      model[name] = function relation() {
         return this.hasMany(joinModel).query(qb => {
           qb.where('field', name).orderBy('order');
         });
       };
+      // make the joinModel accessible from the main model to create the relations
+      model[name].joinModel = joinModel;
     });
 
     await ORM.knex.schema.createTableIfNotExists(joinTable, table => {

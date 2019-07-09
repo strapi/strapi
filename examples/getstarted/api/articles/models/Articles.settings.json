@@ -38,6 +38,24 @@
       "dominant": true,
       "collection": "tag",
       "via": "linkedArticles"
+    },
+    "fb_cta": {
+      "required": true,
+      "type": "group",
+      "group": "cta_facebook",
+      "repeatable": false
+    },
+    "mainIngredient": {
+      "type": "group",
+      "group": "ingredients",
+      "repeatable": false
+    },
+    "ingredients": {
+      "type": "group",
+      "group": "ingredients",
+      "repeatable": true,
+      "min": 5,
+      "max": 7
     }
   }
 }

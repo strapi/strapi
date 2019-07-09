@@ -5,6 +5,7 @@ const sqlite = {
     filename: '.tmp/data.db',
   },
   options: {
+    // debug: true,
     useNullAsDefault: true,
   },
 };

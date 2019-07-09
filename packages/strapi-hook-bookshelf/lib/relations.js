@@ -352,60 +352,6 @@ module.exports = {
     });
   },
 
-  addRelation: async function(params) {
-    const association = this.associations.find(
-      x => x.via === params.foreignKey && _.get(params.values, x.alias, null)
-    );
-
-    if (!association) {
-      // Resolve silently.
-      return Promise.resolve();
-    }
-
-    switch (association.nature) {
-      case 'oneToOne':
-      case 'oneToMany':
-      case 'manyToOne':
-        return module.exports.update.call(this, params);
-      case 'manyToMany':
-        return this.forge({
-          [this.primaryKey]: params[this.primaryKey],
-        })
-          [association.alias]()
-          .attach(params.values[association.alias]);
-      default:
-        // Resolve silently.
-        return Promise.resolve();
-    }
-  },
-
-  removeRelation: async function(params) {
-    const association = this.associations.find(
-      x => x.via === params.foreignKey && _.get(params.values, x.alias, null)
-    );
-
-    if (!association) {
-      // Resolve silently.
-      return Promise.resolve();
-    }
-
-    switch (association.nature) {
-      case 'oneToOne':
-      case 'oneToMany':
-      case 'manyToOne':
-        return module.exports.update.call(this, params);
-      case 'manyToMany':
-        return this.forge({
-          [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
-        })
-          [association.alias]()
-          .detach(params.values[association.alias]);
-      default:
-        // Resolve silently.
-        return Promise.resolve();
-    }
-  },
-
   addRelationMorph: async function(params) {
     const record = await this.morph
       .forge()
