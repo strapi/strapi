@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
+import { capitalize } from 'lodash';
 
 import { FormattedMessage } from 'react-intl';
-
-import { PopUpWarning } from 'strapi-helper-plugin';
 
 import attributeIcons from '../../utils/attributeIcons';
 import pluginId from '../../pluginId';
@@ -12,67 +11,59 @@ import StyledListRow from './StyledListRow';
 
 function ListRow({
   attributeId,
-  canOpenModal,
-  deleteAttribute,
-  isTemporary,
+  configurable,
   name,
-  source,
+  onClick,
+  onClickDelete,
+  plugin,
+  target,
   type,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
-
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
 
-  const src = attributeIcons[ico];
+  const src = target ? attributeIcons.relation : attributeIcons[ico];
+
+  const handleClick = () => {
+    if (configurable !== false) {
+      onClick(attributeId, type);
+    }
+  };
 
   return (
-    <StyledListRow>
+    <StyledListRow onClick={handleClick}>
       <td>
         <img src={src} alt={`icon-${ico}`} />
       </td>
       <td>
-        <p>
-          {name}
-          {source && (
+        <p>{name}</p>
+      </td>
+      <td>
+        {target ? (
+          <div>
+            <FormattedMessage
+              id={`${pluginId}.modelPage.attribute.relationWith`}
+            />
+            &nbsp;
             <FormattedMessage id={`${pluginId}.from`}>
-              {message => (
-                <span
-                  style={{
-                    fontStyle: 'italic',
-                    color: '#787E8F',
-                    fontWeight: '500',
-                  }}
-                >
-                  &nbsp;({message}: {source})
+              {msg => (
+                <span style={{ fontStyle: 'italic' }}>
+                  {capitalize(target)}
+                  &nbsp;
+                  {plugin && `(${msg}: ${plugin})`}
                 </span>
               )}
             </FormattedMessage>
-          )}
-
-          {isTemporary && (
-            <FormattedMessage
-              id={`${pluginId}.contentType.temporaryDisplay`}
-              style={{
-                paddingLeft: '15px',
-              }}
-            />
-          )}
-        </p>
+          </div>
+        ) : (
+          <FormattedMessage id={`${pluginId}.attribute.${type}`} />
+        )}
       </td>
       <td>
-        <FormattedMessage id={`${pluginId}.attribute.${type}`} />
-      </td>
-      <td>
-        {!source && (
+        {configurable ? (
           <>
-            <button
-              type="button"
-              onClick={e => {
-                e.stopPropagation();
-              }}
-            >
+            <button type="button" onClick={handleClick}>
               <i className="fa fa-pencil link-icon" />
             </button>
             <button
@@ -80,33 +71,14 @@ function ListRow({
               onClick={e => {
                 e.stopPropagation();
 
-                if (canOpenModal || isTemporary) {
-                  setIsOpen(true);
-                } else {
-                  strapi.notification.info(
-                    `${pluginId}.notification.info.work.notSaved`
-                  );
-                }
+                onClickDelete(attributeId);
               }}
             >
               <i className="fa fa-trash link-icon" />
             </button>
-
-            <PopUpWarning
-              isOpen={isOpen}
-              toggleModal={() => setIsOpen(prevState => !prevState)}
-              content={{
-                message: `${pluginId}.popUpWarning.bodyMessage.${
-                  type === 'models' ? 'contentType' : 'groups'
-                }.delete`,
-              }}
-              type="danger"
-              onConfirm={() => {
-                setIsOpen(false);
-                deleteAttribute(attributeId);
-              }}
-            />
           </>
+        ) : (
+          <i className="fa fa-lock" />
         )}
       </td>
     </StyledListRow>
@@ -114,19 +86,24 @@ function ListRow({
 }
 
 ListRow.defaultProps = {
-  canOpenModal: true,
-  deleteAttribute: () => {},
-  source: null,
+  configurable: true,
+  onClick: () => {},
+  onClickDelete: () => {},
+  plugin: null,
+  target: null,
+  type: null,
 };
 
 ListRow.propTypes = {
-  attributeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  canOpenModal: PropTypes.bool,
-  deleteAttribute: PropTypes.func,
-  isTemporary: PropTypes.bool.isRequired,
+  attributeId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+    .isRequired,
+  configurable: PropTypes.bool,
   name: PropTypes.string.isRequired,
-  source: PropTypes.string,
-  type: PropTypes.string.isRequired,
+  onClick: PropTypes.func,
+  onClickDelete: PropTypes.func,
+  plugin: PropTypes.string,
+  target: PropTypes.string,
+  type: PropTypes.string,
 };
 
 export default ListRow;

@@ -359,8 +359,9 @@ export class ModelPage extends React.Component {
     }
   };
 
-  handleDeleteAttribute = attrToDelete => {
+  handleDeleteAttribute = () => {
     const { deleteModelAttribute } = this.props;
+    const { attrToDelete } = this.state;
 
     /* istanbul ignore if */
     const keys = this.isUpdatingTemporaryContentType()
@@ -368,6 +369,7 @@ export class ModelPage extends React.Component {
       : ['modifiedData', this.getModelName(), 'attributes', attrToDelete];
 
     deleteModelAttribute(keys);
+    this.setState({ attrToDelete: null, showWarning: false });
   };
 
   handleGoBack = () => {
@@ -498,15 +500,14 @@ export class ModelPage extends React.Component {
 
     return (
       <ListRow
-        key={attribute}
-        attributeId={attribute}
         {...attributeInfos}
+        attributeId={attribute}
         canOpenModal={canOpenModal}
         context={this.context}
-        deleteAttribute={this.handleDeleteAttribute}
-        isTemporary={false}
         name={attribute}
-        type={attributeInfos.type}
+        onClick={this.handleClickEditAttribute}
+        onClickDelete={this.handleClickOnTrashIcon}
+        key={attribute}
       />
     );
   };
@@ -514,7 +515,6 @@ export class ModelPage extends React.Component {
   render() {
     const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
     const {
-      canOpenModal,
       clearTemporaryAttribute,
       clearTemporaryAttributeRelation,
       history: { push },
@@ -557,7 +557,7 @@ export class ModelPage extends React.Component {
     if (relationsNumber > 0) {
       title.push({
         label: `${pluginId}.table.relations.title.${
-          attributesNumber > 1 ? 'plural' : 'singular'
+          relationsNumber > 1 ? 'plural' : 'singular'
         }`,
         values: { number: relationsNumber },
       });
@@ -580,7 +580,6 @@ export class ModelPage extends React.Component {
             />
           )}
         </FormattedMessage>
-
         <ViewContainer
           {...this.props}
           featureType={this.featureType}

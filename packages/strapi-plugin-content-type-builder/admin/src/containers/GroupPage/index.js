@@ -19,13 +19,20 @@ import {
   List,
   ListHeader,
   ListWrapper,
+  PopUpWarning,
 } from 'strapi-helper-plugin';
 
 import { deleteGroupAttribute } from '../App/actions';
 
 /* eslint-disable no-extra-boolean-cast */
 export class GroupPage extends React.Component {
+  state = { attrToDelete: null, showWarning: false };
   featureType = 'group';
+
+  displayNotificationCTNotSaved = () =>
+    strapi.notification.info(
+      `${pluginId}.notification.info.contentType.creating.notSaved`
+    );
 
   getFeature = () => {
     const { modifiedDataGroup, newGroup } = this.props;
@@ -93,8 +100,21 @@ export class GroupPage extends React.Component {
     return search;
   };
 
-  handleDeleteGroupAttribute = attrToDelete => {
+  handleClickOnTrashIcon = attrToDelete => {
+    const { emitEvent } = this.context;
+    const { canOpenModal } = this.props;
+
+    if (canOpenModal || this.isUpdatingTempFeature()) {
+      this.setState({ showWarning: true, attrToDelete });
+      emitEvent('willDeleteFieldOfContentType');
+    } else {
+      this.displayNotificationCTNotSaved();
+    }
+  };
+
+  handleDeleteAttribute = () => {
     const { deleteGroupAttribute } = this.props;
+    const { attrToDelete } = this.state;
 
     const keys = this.isUpdatingTempFeature()
       ? ['newGroup', 'schema', 'attributes', attrToDelete]
@@ -105,7 +125,9 @@ export class GroupPage extends React.Component {
           'attributes',
           attrToDelete,
         ];
+
     deleteGroupAttribute(keys);
+    this.setState({ attrToDelete: null, showWarning: false });
   };
 
   handleGoBack = () => {
@@ -124,11 +146,32 @@ export class GroupPage extends React.Component {
     return get(currentData, 'isTemporary', false);
   };
 
+  toggleModalWarning = () =>
+    this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+
+  renderListRow = (attribute, index) => {
+    const { canOpenModal } = this.props;
+
+    return (
+      <ListRow
+        {...attribute}
+        attributeId={index}
+        canOpenModal={canOpenModal}
+        context={this.context}
+        name={attribute.name}
+        onClick={this.handleClickEditAttribute}
+        onClickDelete={this.handleClickOnTrashIcon}
+        key={attribute.name}
+      />
+    );
+  };
+
   render() {
     const {
-      canOpenModal,
       history: { push },
     } = this.props;
+
+    const { showWarning } = this.state;
 
     const attributes = this.getFeatureAttributes();
     const attributesNumber = this.getFeatureAttributesLength();
@@ -170,18 +213,9 @@ export class GroupPage extends React.Component {
               <List>
                 <table>
                   <tbody>
-                    {attributes.map((attribute, index) => (
-                      <ListRow
-                        key={attribute.name}
-                        attributeId={index}
-                        {...attribute}
-                        canOpenModal={canOpenModal}
-                        context={this.context}
-                        deleteAttribute={this.handleDeleteGroupAttribute}
-                        isTemporary={false}
-                        type={attribute.type}
-                      />
-                    ))}
+                    {attributes.map((attribute, index) =>
+                      this.renderListRow(attribute, index)
+                    )}
                   </tbody>
                 </table>
               </List>
@@ -191,14 +225,29 @@ export class GroupPage extends React.Component {
             </ListWrapper>
           )}
         </ViewContainer>
+
         <AttributesModalPicker
           isOpen={this.getModalType() === 'chooseAttributes'}
           push={push}
+        />
+
+        <PopUpWarning
+          isOpen={showWarning}
+          toggleModal={this.toggleModalWarning}
+          content={{
+            message: `${pluginId}.popUpWarning.bodyMessage.attribute.delete`,
+          }}
+          popUpWarningType="danger"
+          onConfirm={this.handleDeleteAttribute}
         />
       </>
     );
   }
 }
+
+GroupPage.contextTypes = {
+  emitEvent: PropTypes.func,
+};
 
 GroupPage.defaultProps = {
   canOpenModal: true,

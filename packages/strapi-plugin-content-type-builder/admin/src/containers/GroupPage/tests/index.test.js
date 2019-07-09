@@ -1,8 +1,39 @@
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
+import mountWithIntl from 'testUtils/mountWithIntl';
+import formatMessagesWithPluginId from 'testUtils/formatMessages';
+
 import { EmptyAttributesBlock } from 'strapi-helper-plugin';
+
+import pluginId from '../../../pluginId';
+import pluginTradsEn from '../../../translations/en.json';
+
+import MenuContext from '../../MenuContext';
+
 import { GroupPage, mapDispatchToProps } from '../index';
+
+const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
+
+const context = { emitEvent: jest.fn() };
+const renderComponent = (props = {}) => {
+  const menuContext = {
+    canOpenModal: true,
+    groups: [],
+    models: [],
+    push: jest.fn(),
+  };
+  return mountWithIntl(
+    <BrowserRouter>
+      <MenuContext.Provider value={menuContext}>
+        <GroupPage {...props} />
+      </MenuContext.Provider>
+    </BrowserRouter>,
+    messages,
+    context
+  );
+};
 
 const basePath = '/plugins/content-type-builder/groups';
 const props = {
@@ -156,33 +187,98 @@ describe('CTB <GroupPage />, mapDispatchToProps', () => {
   });
 
   describe('DeleteGroupAttribute', () => {
-    it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is false', () => {
-      props.groups.find(item => item.name == 'tests').isTemporary = false;
+    let topCompo;
 
-      const { handleDeleteGroupAttribute } = shallow(
-        <GroupPage {...props} />
-      ).instance();
-      handleDeleteGroupAttribute('name');
-
-      const keys = [
-        'modifiedDataGroup',
-        'tests',
-        'schema',
-        'attributes',
-        'name',
-      ];
-      expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
+    afterEach(() => {
+      topCompo.unmount();
     });
 
-    it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is true', () => {
-      props.groups.find(item => item.name == 'tests').isTemporary = true;
-      const { handleDeleteGroupAttribute } = shallow(
-        <GroupPage {...props} />
-      ).instance();
+    describe('ToggleModalWarning', () => {
+      topCompo = renderComponent(props);
 
-      handleDeleteGroupAttribute('name');
-      const keys = ['newGroup', 'schema', 'attributes', 'name'];
-      expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
+      const wrapper = topCompo.find(GroupPage);
+
+      expect(wrapper.state()).toEqual({
+        showWarning: false,
+        attrToDelete: null,
+      });
+
+      const { toggleModalWarning } = wrapper.instance();
+
+      toggleModalWarning();
+
+      expect(wrapper.state()).toEqual({
+        showWarning: true,
+        attrToDelete: null,
+      });
+    });
+
+    describe('DeleteGroupAttribute', () => {
+      it('should display a notification if thee modal cannot be opened', async () => {
+        props.groups.find(item => item.name == 'tests').isTemporary = false;
+        props.canOpenModal = false;
+
+        topCompo = renderComponent(props);
+
+        const wrapper = topCompo.find(GroupPage);
+        const spyOnDisplayNotification = jest.spyOn(
+          wrapper.instance(),
+          'displayNotificationCTNotSaved'
+        );
+        const { handleClickOnTrashIcon } = wrapper.instance();
+
+        handleClickOnTrashIcon(0);
+
+        expect(context.emitEvent).not.toHaveBeenCalled();
+        expect(spyOnDisplayNotification).toHaveBeenCalled();
+      });
+
+      it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is false', () => {
+        props.groups.find(item => item.name == 'tests').isTemporary = false;
+        props.canOpenModal = true;
+
+        topCompo = renderComponent(props);
+
+        const wrapper = topCompo.find(GroupPage);
+        const {
+          handleClickOnTrashIcon,
+          handleDeleteAttribute,
+        } = wrapper.instance();
+
+        handleClickOnTrashIcon(0);
+        expect(wrapper.state()).toEqual({
+          attrToDelete: 0,
+          showWarning: true,
+        });
+        handleDeleteAttribute();
+
+        const keys = ['modifiedDataGroup', 'tests', 'schema', 'attributes', 0];
+        expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
+        expect(context.emitEvent).toHaveBeenCalledWith(
+          'willDeleteFieldOfContentType'
+        );
+      });
+      it('should call deleteGroupAttribute with newGroup path when isTemporary is true', () => {
+        props.groups.find(item => item.name == 'tests').isTemporary = true;
+        props.canOpenModal = true;
+
+        topCompo = renderComponent(props);
+
+        const wrapper = topCompo.find(GroupPage);
+        const {
+          handleClickOnTrashIcon,
+          handleDeleteAttribute,
+        } = wrapper.instance();
+
+        handleClickOnTrashIcon(0);
+        handleDeleteAttribute();
+
+        const keys = ['newGroup', 'schema', 'attributes', 0];
+        expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
+        expect(context.emitEvent).toHaveBeenCalledWith(
+          'willDeleteFieldOfContentType'
+        );
+      });
     });
   });
 });
