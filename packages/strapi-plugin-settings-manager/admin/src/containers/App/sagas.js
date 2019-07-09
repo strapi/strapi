@@ -45,12 +45,17 @@ function* defaultSaga() {
   const loadEnvironments = yield fork(
     takeLatest,
     ENVIRONMENTS_FETCH,
-    fetchEnvironments,
+    fetchEnvironments
   );
-  yield take(MENU_FETCH_SUCCEEDED);
-  yield cancel(loadMenu);
-  yield take(ENVIRONMENTS_FETCH_SUCCEEDED);
-  yield cancel(loadEnvironments);
+
+  try {
+    yield take(MENU_FETCH_SUCCEEDED);
+    yield cancel(loadMenu);
+    yield take(ENVIRONMENTS_FETCH_SUCCEEDED);
+    yield cancel(loadEnvironments);
+  } catch (err) {
+    // Do nothing
+  }
 }
 
 export default defaultSaga;

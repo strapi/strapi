@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
 
 import { request } from 'strapi-helper-plugin';
@@ -36,7 +37,7 @@ export function* pluginDownload() {
       request,
       '/admin/plugins/install',
       opts,
-      overlayblockerParams,
+      overlayblockerParams
     );
 
     if (response.ok) {
@@ -51,10 +52,9 @@ export function* pluginDownload() {
 }
 
 export function* getData() {
-  // Get current locale.
-  const locale = yield select(selectLocale());
-
   try {
+    // Get current locale.
+    const locale = yield select(selectLocale());
     const opts = {
       method: 'GET',
       headers: {
@@ -72,8 +72,8 @@ export function* getData() {
     yield put(
       getAvailableAndInstalledPluginsSucceeded(
         availablePlugins,
-        Object.keys(plugins),
-      ),
+        Object.keys(plugins)
+      )
     );
   } catch (err) {
     strapi.notification.error('notification.error');
@@ -82,6 +82,10 @@ export function* getData() {
 
 // Individual exports for testing
 export default function* defaultSaga() {
-  yield fork(takeLatest, GET_AVAILABLE_AND_INSTALLED_PLUGINS, getData);
-  yield fork(takeLatest, DOWNLOAD_PLUGIN, pluginDownload);
+  try {
+    yield fork(takeLatest, GET_AVAILABLE_AND_INSTALLED_PLUGINS, getData);
+    yield fork(takeLatest, DOWNLOAD_PLUGIN, pluginDownload);
+  } catch (err) {
+    console.log(err);
+  }
 }

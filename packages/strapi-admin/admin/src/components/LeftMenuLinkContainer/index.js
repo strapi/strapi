@@ -22,14 +22,16 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
         acc[snakeCase(section.name)] = {
           name: section.name,
           links: get(acc[snakeCase(section.name)], 'links', []).concat(
-            section.links.map(link => {
-              link.source = current;
-              link.plugin = !isEmpty(plugins[link.plugin])
-                ? link.plugin
-                : plugins[current].id;
+            section.links
+              .filter(link => link.isDisplayed !== false)
+              .map(link => {
+                link.source = link.source || current;
+                link.plugin = !isEmpty(plugins[link.plugin])
+                  ? link.plugin
+                  : plugins[current].id;
 
-              return link;
-            })
+                return link;
+              })
           ),
         };
       }

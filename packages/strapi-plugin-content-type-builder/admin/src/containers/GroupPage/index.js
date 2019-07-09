@@ -258,6 +258,7 @@ GroupPage.propTypes = {
   deleteGroupAttribute: PropTypes.func.isRequired,
   groups: PropTypes.array.isRequired,
   history: PropTypes.shape({
+    goBack: PropTypes.func.isRequired,
     push: PropTypes.func.isRequired,
   }),
   location: PropTypes.shape({

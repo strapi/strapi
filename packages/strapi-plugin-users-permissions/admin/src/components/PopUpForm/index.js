@@ -90,7 +90,7 @@ class PopUpForm extends React.Component {
       const { name, type } = e.target;
       const target = Object.assign(
         { name, type },
-        { value: `/auth/${this.props.dataToEdit}/callback` },
+        { value: `/auth/${this.props.dataToEdit}/callback` }
       );
       this.props.onChange({ target });
     }
@@ -126,7 +126,7 @@ class PopUpForm extends React.Component {
 
         return acc;
       },
-      [],
+      []
     );
 
     if (settingType === 'providers') {
@@ -156,7 +156,7 @@ class PopUpForm extends React.Component {
               errors={get(
                 formErrors,
                 [findIndex(formErrors, ['name', value]), 'errors'],
-                [],
+                []
               )}
               key={value}
               label={{
@@ -210,6 +210,7 @@ class PopUpForm extends React.Component {
         <a
           href="https://github.com/strapi/strapi/blob/master/packages/strapi-plugin-users-permissions/docs/email-templates.md"
           target="_blank"
+          rel="noopener noreferrer"
         >
           <FormattedMessage id="users-permissions.PopUpForm.Email.link.documentation" />
         </a>
@@ -226,7 +227,7 @@ class PopUpForm extends React.Component {
             errors={get(
               this.props.formErrors,
               [findIndex(this.props.formErrors, ['name', value]), 'errors'],
-              [],
+              []
             )}
             label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
             name={`${settingType}.${dataToEdit}.${value}`}
@@ -248,7 +249,7 @@ class PopUpForm extends React.Component {
             errors={get(
               this.props.formErrors,
               [findIndex(this.props.formErrors, ['name', value]), 'errors'],
-              [],
+              []
             )}
             label={{ id: `users-permissions.PopUpForm.Email.${value}.label` }}
             name={`${settingType}.${dataToEdit}.${value}`}
