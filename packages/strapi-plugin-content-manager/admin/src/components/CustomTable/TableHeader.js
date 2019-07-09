@@ -1,32 +1,18 @@
 import React, { memo } from 'react';
 import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
 
-import { getQueryParameters } from 'strapi-helper-plugin';
+import { useListView } from '../../contexts/ListView';
 import CustomInputCheckbox from '../CustomInputCheckbox';
 import { Icon, Thead } from './styledComponents';
 
-function TableHeader({
-  defaultSortBy,
-  defaultSortOrder,
-  headers,
-  isBulkable,
-  onChangeParams,
-  location: { search },
-}) {
-  let sortBy = defaultSortBy;
-  let sortOrder = defaultSortOrder;
-  const searchSort = getQueryParameters(search, '_sort');
-  const firstSortableHeader = headers.filter(
-    header => header.sortable === true
-  )[0];
-
-  if (searchSort) {
-    const [sort, order] = searchSort.split(':');
-    sortBy = sort;
-    sortOrder = order;
-  }
+function TableHeader({ headers, isBulkable }) {
+  const {
+    firstSortableElement,
+    onChangeParams,
+    searchParams: { _sort },
+  } = useListView();
+  const [sortBy, sortOrder] = _sort.split(':');
 
   return (
     <Thead isBulkable={isBulkable}>
@@ -49,11 +35,13 @@ function TableHeader({
               key={header.name}
               onClick={() => {
                 if (header.sortable) {
-                  const nextOrder = sortOrder === 'ASC' ? 'DESC' : 'ASC';
+                  const isCurrentSort = header.name === sortBy;
+                  const nextOrder =
+                    isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';
                   let value = `${header.name}:${nextOrder}`;
 
-                  if (sortBy === header.name && sortOrder === 'DESC') {
-                    value = `${get(firstSortableHeader, 'name', 'id')}:ASC`;
+                  if (isCurrentSort && sortOrder === 'DESC') {
+                    value = `${firstSortableElement}:ASC`;
                   }
 
                   onChangeParams({
@@ -84,21 +72,13 @@ function TableHeader({
 }
 
 TableHeader.defaultProps = {
-  defaultSortBy: 'id',
-  defaultSortOrder: 'ASC',
   isBulkable: true,
   headers: [],
 };
 
 TableHeader.propTypes = {
-  defaultSortBy: PropTypes.string,
-  defaultSortOrder: PropTypes.string,
   headers: PropTypes.array,
   isBulkable: PropTypes.bool,
-  location: PropTypes.shape({
-    search: PropTypes.string.isRequired,
-  }),
-  onChangeParams: PropTypes.func.isRequired,
 };
 
 export default withRouter(memo(TableHeader));
