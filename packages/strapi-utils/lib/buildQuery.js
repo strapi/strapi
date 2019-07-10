@@ -66,7 +66,7 @@ const castValueToType = ({ type, value }) => {
         return false;
       }
 
-      return value;
+      return Boolean(value);
     }
     case 'integer':
     case 'biginteger':
@@ -79,6 +79,17 @@ const castValueToType = ({ type, value }) => {
   }
 };
 
+/**
+ * Cast basic values based on attribute type
+ * @param {Object} options - Options
+ * @param {string} options.type - type of the atribute
+ * @param {*} options.value - value tu cast
+ * @param {string} options.operator - name of operator
+ */
+const castValue = ({ type, value, operator}) => {
+  if (operator === 'null')  return castValueToType({ type: 'boolean', value })
+  return castValueToType({ type, value})
+}
 /**
  *
  * @param {Object} options - Options
@@ -109,8 +120,8 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
 
         // cast value or array of values
         const castedValue = Array.isArray(value)
-          ? value.map(val => castValueToType({ type, value: val }))
-          : castValueToType({ type, value: value });
+            ? value.map(val => castValue({ type, operator, value: val }))
+            : castValue({ type, operator, value: value });
 
         return { field, operator, value: castedValue };
       });

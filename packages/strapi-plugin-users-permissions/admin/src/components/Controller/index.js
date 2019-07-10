@@ -87,9 +87,7 @@ class Controller extends React.Component {
               isOpen={this.props.isOpen}
               key={actionKey}
               label={actionKey}
-              name={`${this.props.inputNamePath}.controllers.${
-                this.props.name
-              }.${actionKey}.enabled`}
+              name={`${this.props.inputNamePath}.controllers.${this.props.name}.${actionKey}.enabled`}
               setNewInputSelected={this.setNewInputSelected}
               value={get(this.props.actions[actionKey], 'enabled')}
             />

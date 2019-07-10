@@ -199,6 +199,7 @@ You can also apply different parameters to the query to make more complex querie
   - `<field>_containss`: Contains sensitive.
   - `<field>_in`: Matches any value in the array of values.
   - `<field>_nin`: Doesn't match any value in the array of values.
+  - `<field>_null`: Equals null/Not equals null
 
 Return the second decade of users which have an email that contains `@strapi.io` ordered by username.
 
@@ -694,7 +695,6 @@ module.exports = {
 ```
 
 In this example, the policy `isAuthenticated` located in the `users-permissions` plugin will be executed first. Then, the `isOwner` policy located in the `Post` API `./api/post/config/policies/isOwner.js`. Next, it will execute the `logging` policy located in `./config/policies/logging.js`. Finally, the resolver will be executed.
-
 
 ::: note
 There is no custom resolver in that case, so it will execute the default resolver (Post.find) provided by the Shadow CRUD feature.

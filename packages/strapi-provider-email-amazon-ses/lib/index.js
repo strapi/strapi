@@ -17,32 +17,31 @@ module.exports = {
   auth: {
     amazon_ses_default_from: {
       label: 'Default From',
-      type: 'text'
+      type: 'text',
     },
     amazon_ses_default_replyto: {
       label: 'Default Reply-To',
-      type: 'text'
+      type: 'text',
     },
     amazon_ses_api_key: {
       label: 'Amazon Access key ID',
-      type: 'text'
+      type: 'text',
     },
     amazon_ses_secret: {
       label: 'Amazon Secret access key',
-      type: 'text'
+      type: 'text',
     },
     amazon_ses_endpoint: {
       label: 'Amazon end-point uri',
-      type: 'text'
-    }
+      type: 'text',
+    },
   },
 
-  init: (config) => {
-
+  init: config => {
     var client = nodeSES.createClient({
       key: config.amazon_ses_api_key,
       secret: config.amazon_ses_secret,
-      amazon: config.amazon_ses_endpoint
+      amazon: config.amazon_ses_endpoint,
     });
 
     return {
@@ -51,7 +50,8 @@ module.exports = {
           // Default values.
           options = _.isObject(options) ? options : {};
           options.from = options.from || config.amazon_ses_default_from;
-          options.replyTo = options.replyTo || config.amazon_ses_default_replyto;
+          options.replyTo =
+            options.replyTo || config.amazon_ses_default_replyto;
           options.text = options.text || options.html;
           options.html = options.html || options.text;
 
@@ -61,10 +61,10 @@ module.exports = {
             replyTo: options.replyTo,
             subject: options.subject,
             altText: options.text,
-            message: options.html
+            message: options.html,
           };
 
-          client.sendEmail(msg, function (err) {
+          client.sendEmail(msg, function(err) {
             if (err) {
               reject([{ messages: [{ id: 'Auth.form.error.email.invalid' }] }]);
             } else {
@@ -72,7 +72,7 @@ module.exports = {
             }
           });
         });
-      }
+      },
     };
-  }
+  },
 };

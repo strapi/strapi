@@ -674,7 +674,7 @@ Digital Ocean calls a virtual private server, a [Droplet](https://www.digitaloce
 
 - Ubuntu 18.04 x64
 - STARTER `Standard`
-- Choose an appropriate pricing plan. For example, pricing: `$10/mo` _(Scroll to the left)_ **NOTE:** The \$5/mo plan is currently unsupported as Strapi will not build with 1G of RAM. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, a minimum standard Droplet of **$10/mo** or larger instance is needed.
+- Choose an appropriate pricing plan. For example, pricing: `$10/mo` _(Scroll to the left)_ **NOTE:** The \$5/mo plan is currently unsupported as Strapi will not build with 1G of RAM. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, a minimum standard Droplet of **\$10/mo** or larger instance is needed.
 - Choose a `datacenter` region nearest your audience, for example, `New York`.
 - **OPTIONAL:** Select additional options, for example, `[x] IPv6`.
 - Add your SSH key **NOTE:** We recommend you `add your SSH key` for better security.

@@ -1,13 +1,10 @@
 'use strict';
 
-// Public node modules
-const rimraf = require('rimraf');
-
-module.exports = (scope, success, error) => {
+module.exports = async ({ connection }) => {
   const Mongoose = require('mongoose');
 
-  const { username, password, srv } = scope.database.settings;
-  const { authenticationDatabase, ssl } = scope.database.options;
+  const { username, password, srv } = connection.settings;
+  const { authenticationDatabase, ssl } = connection.options;
 
   const connectOptions = {};
 
@@ -25,27 +22,20 @@ module.exports = (scope, success, error) => {
 
   connectOptions.ssl = ssl ? true : false;
   connectOptions.useNewUrlParser = true;
-  connectOptions.dbName = scope.database.settings.database;
+  connectOptions.dbName = connection.settings.database;
 
-  Mongoose.connect(`mongodb${srv ? '+srv' : ''}://${scope.database.settings.host}${!srv ? `:${scope.database.settings.port}` : ''}/`, connectOptions, function (err) {
-    if (err) {
-      console.log('⚠️  Database connection has failed! Make sure your database is running.');
-
-      if (scope.debug) {
-        console.log('🐛 Full error log:');
-        console.log(err);
-      }
-
-      return error();
+  return Mongoose.connect(
+    `mongodb${srv ? '+srv' : ''}://${connection.settings.host}${
+      !srv ? `:${connection.settings.port}` : ''
+    }/`,
+    connectOptions
+  ).then(
+    () => {
+      Mongoose.connection.close();
+    },
+    error => {
+      Mongoose.connection.close();
+      throw error;
     }
-
-    Mongoose.connection.close();
-
-    rimraf(scope.tmpPath, (err) => {
-      if (err) {
-        console.log(`Error removing connection test folder: ${scope.tmpPath}`);
-      }
-      success();
-    });
-  });
+  );
 };
