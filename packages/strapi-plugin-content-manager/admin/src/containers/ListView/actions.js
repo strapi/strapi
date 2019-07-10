@@ -3,9 +3,12 @@ import {
   GET_DATA_SUCCEEDED,
   ON_CHANGE_BULK,
   ON_CHANGE_BULK_SELECT_ALL,
+  ON_DELETE_DATA,
+  ON_DELETE_DATA_SUCCEEDED,
   ON_DELETE_SEVERAL_DATA,
   ON_DELETE_SEVERAL_DATA_SUCCEEDED,
   RESET_PROPS,
+  TOGGLE_MODAL_DELETE,
   TOGGLE_MODAL_DELETE_ALL,
 } from './constants';
 
@@ -39,6 +42,22 @@ export function onChangeBulkSelectall() {
   };
 }
 
+export function onDeleteData(id, uid, source, emitEvent) {
+  return {
+    type: ON_DELETE_DATA,
+    id,
+    uid,
+    source,
+    emitEvent,
+  };
+}
+
+export function onDeleteDataSucceeded() {
+  return {
+    type: ON_DELETE_DATA_SUCCEEDED,
+  };
+}
+
 export function onDeleteSeveralData(ids, slug, source) {
   return {
     type: ON_DELETE_SEVERAL_DATA,
@@ -61,5 +80,11 @@ export function resetProps() {
 export function toggleModalDeleteAll() {
   return {
     type: TOGGLE_MODAL_DELETE_ALL,
+  };
+}
+
+export function toggleModalDelete() {
+  return {
+    type: TOGGLE_MODAL_DELETE,
   };
 }

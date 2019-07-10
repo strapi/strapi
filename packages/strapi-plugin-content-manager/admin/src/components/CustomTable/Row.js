@@ -10,7 +10,7 @@ import CustomInputCheckbox from '../CustomInputCheckbox';
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
 
 function Row({ isBulkable, row, headers }) {
-  const { entriesToDelete, onChangeBulk } = useListView();
+  const { entriesToDelete, onChangeBulk, onClickDelete } = useListView();
 
   return (
     <>
@@ -44,7 +44,9 @@ function Row({ isBulkable, row, headers }) {
             {
               id: row.id,
               icoType: 'trash',
-              onClick: () => {},
+              onClick: () => {
+                onClickDelete(row.id);
+              },
             },
           ]}
         />

@@ -34,8 +34,10 @@ import {
   getData,
   onChangeBulk,
   onChangeBulkSelectall,
+  onDeleteData,
   onDeleteSeveralData,
   resetProps,
+  toggleModalDelete,
   toggleModalDeleteAll,
 } from './actions';
 import reducer from './reducer';
@@ -58,10 +60,13 @@ function ListView({
   onChangeBulk,
   onChangeBulkSelectall,
   onChangeListLabels,
+  onDeleteData,
   onDeleteSeveralData,
   resetListLabels,
   resetProps,
   shouldRefetchData,
+  showWarningDelete,
+  toggleModalDelete,
   showWarningDeleteAll,
   toggleModalDeleteAll,
 }) {
@@ -71,6 +76,7 @@ function ListView({
   const getLayoutSettingRef = useRef();
   const [isLabelPickerOpen, setLabelPickerState] = useState(false);
   const [isFilterPickerOpen, setFilterPickerState] = useState(false);
+  const [idToDelete, setIdToDelete] = useState(null);
 
   getLayoutSettingRef.current = settingName =>
     get(layouts, [slug, 'settings', settingName], '');
@@ -176,6 +182,10 @@ function ListView({
     resetProps();
     getData(slug, updatedSearch);
   };
+  const handleClickDelete = id => {
+    setIdToDelete(id);
+    toggleModalDelete();
+  };
 
   const handleSubmit = () => {
     emitEvent('didFilterEntries');
@@ -220,6 +230,7 @@ function ListView({
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}
         onChangeParams={handleChangeParams}
+        onClickDelete={handleClickDelete}
         onDeleteSeveralData={onDeleteSeveralData}
         searchParams={getSearchParams()}
         slug={slug}
@@ -334,13 +345,29 @@ function ListView({
           </Wrapper>
         </Container>
         <PopUpWarning
+          isOpen={showWarningDelete}
+          toggleModal={toggleModalDelete}
+          content={{
+            title: `${pluginId}.popUpWarning.title`,
+            message: `${pluginId}.popUpWarning.bodyMessage.contentType.delete`,
+            cancel: `${pluginId}.popUpWarning.button.cancel`,
+            confirm: `${pluginId}.popUpWarning.button.confirm`,
+          }}
+          popUpWarningType="danger"
+          onConfirm={() => {
+            onDeleteData(idToDelete, slug, getSearchParams().source, emitEvent);
+          }}
+        />
+        <PopUpWarning
           isOpen={showWarningDeleteAll}
           toggleModal={toggleModalDeleteAll}
           content={{
-            title: 'content-manager.popUpWarning.title',
-            // message: this.getPopUpDeleteAllMsg(),
-            cancel: 'content-manager.popUpWarning.button.cancel',
-            confirm: 'content-manager.popUpWarning.button.confirm',
+            title: `${pluginId}.popUpWarning.title`,
+            message: `${pluginId}.popUpWarning.bodyMessage.contentType.delete${
+              entriesToDelete.length > 1 ? '.all' : ''
+            }`,
+            cancel: `${pluginId}.popUpWarning.button.cancel`,
+            confirm: `${pluginId}.popUpWarning.button.confirm`,
           }}
           popUpWarningType="danger"
           onConfirm={() => {
@@ -381,11 +408,14 @@ ListView.propTypes = {
   onChangeBulk: PropTypes.func.isRequired,
   onChangeBulkSelectall: PropTypes.func.isRequired,
   onChangeListLabels: PropTypes.func.isRequired,
+  onDeleteData: PropTypes.func.isRequired,
   onDeleteSeveralData: PropTypes.func.isRequired,
   resetListLabels: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   shouldRefetchData: PropTypes.bool.isRequired,
+  showWarningDelete: PropTypes.bool.isRequired,
   showWarningDeleteAll: PropTypes.bool.isRequired,
+  toggleModalDelete: PropTypes.func.isRequired,
   toggleModalDeleteAll: PropTypes.func.isRequired,
 };
 
@@ -398,9 +428,11 @@ export function mapDispatchToProps(dispatch) {
       onChangeBulk,
       onChangeBulkSelectall,
       onChangeListLabels,
+      onDeleteData,
       onDeleteSeveralData,
       resetListLabels,
       resetProps,
+      toggleModalDelete,
       toggleModalDeleteAll,
     },
     dispatch

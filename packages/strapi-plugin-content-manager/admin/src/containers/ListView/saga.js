@@ -3,9 +3,12 @@ import { request } from 'strapi-helper-plugin';
 import { set, unset } from 'lodash';
 import pluginId from '../../pluginId';
 
-import { getDataSucceeded, onDeleteSeveralDataSucceeded } from './actions';
-import { GET_DATA, ON_DELETE_SEVERAL_DATA } from './constants';
-// import {} from './selectors';
+import {
+  getDataSucceeded,
+  onDeleteSeveralDataSucceeded,
+  onDeleteDataSucceeded,
+} from './actions';
+import { GET_DATA, ON_DELETE_DATA, ON_DELETE_SEVERAL_DATA } from './constants';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -34,15 +37,31 @@ export function* getData({ uid, params }) {
 
     yield put(getDataSucceeded(count, data));
   } catch (err) {
-    console.log({ err });
-    strapi.notification.error('content-manager.error.model.fetch');
+    strapi.notification.error(`${pluginId}.error.model.fetch`);
+  }
+}
+
+export function* deleteData({ id, uid, source, emitEvent }) {
+  try {
+    const params = { source };
+
+    emitEvent('willDeleteEntry');
+    yield call(request, getRequestUrl(`${uid}/${id}`), {
+      method: 'DELETE',
+      params,
+    });
+
+    strapi.notification.success(`${pluginId}.success.record.delete`);
+    yield put(onDeleteDataSucceeded());
+    emitEvent('didDeleteEntry');
+  } catch (err) {
+    strapi.notification.error(`${pluginId}.error.record.delete`);
   }
 }
 
 export function* deleteAll({ ids, slug, source }) {
   try {
     const params = Object.assign(ids, { source });
-    console.log({ params });
 
     yield call(request, getRequestUrl(`deleteAll/${slug}`), {
       method: 'DELETE',
@@ -50,10 +69,10 @@ export function* deleteAll({ ids, slug, source }) {
     });
 
     yield put(onDeleteSeveralDataSucceeded());
-    // yield call(dataGet, { currentModel: model, source });
-    strapi.notification.success('content-manager.success.record.delete');
+
+    strapi.notification.success(`${pluginId}.success.record.delete`);
   } catch (err) {
-    strapi.notification.error('content-manager.error.record.delete');
+    strapi.notification.error(`${pluginId}.error.record.delete`);
   }
 }
 
@@ -61,6 +80,7 @@ function* defaultSaga() {
   try {
     yield all([
       fork(takeLatest, GET_DATA, getData),
+      fork(takeLatest, ON_DELETE_DATA, deleteData),
       fork(takeLatest, ON_DELETE_SEVERAL_DATA, deleteAll),
     ]);
   } catch (err) {
