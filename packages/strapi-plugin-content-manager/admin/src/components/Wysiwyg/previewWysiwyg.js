@@ -156,7 +156,7 @@ class PreviewWysiwyg extends React.PureComponent {
       new Promise(resolve => {
         setTimeout(() => {
           if (nextProps.data === this.props.data && nextState.isMounted) {
-            // I use an handler here to update the state wich is fine since the condition above prevent
+            // I use an handler here to update the state which is fine since the condition above prevent
             // from entering into an infinite loop
             this.previewHTML(nextProps.data);
           }

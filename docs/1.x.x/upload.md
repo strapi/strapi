@@ -6,7 +6,7 @@ Strapi contains a set of tools to upload files.
 
 To change the upload config, edit the `./api/upload/config/settings.json` file.
 
-For the config bellow, please use refer to the `[co-busboy](https://github.com/cojs/busboy)` node module documentation.
+For the config below, please use refer to the `[co-busboy](https://github.com/cojs/busboy)` node module documentation.
 
 ```js
 {
