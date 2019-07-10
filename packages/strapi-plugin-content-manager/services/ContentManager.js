@@ -77,8 +77,8 @@ module.exports = {
       const parser = value => {
         try {
           const parsed = JSON.parse(value);
-          // do not modify initial value if it is string except 'null'
-          if (_.isObject(parsed) || _.isNull(parsed)) {
+          // if we parse a value and it is still a string leave it as is
+          if (typeof parsed !== 'string') {
             value = parsed;
           }
         } catch (e) {
@@ -140,7 +140,7 @@ module.exports = {
         try {
           const parsed = JSON.parse(value);
           // do not modify initial value if it is string except 'null'
-          if (_.isObject(parsed) || _.isNull(parsed)) {
+          if (typeof parsed !== 'string') {
             value = parsed;
           }
         } catch (e) {
