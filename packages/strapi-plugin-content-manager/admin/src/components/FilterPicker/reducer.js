@@ -1,4 +1,5 @@
 import { fromJS } from 'immutable';
+import moment from 'moment';
 
 const initialState = fromJS({
   attributes: {},
@@ -16,7 +17,12 @@ function reducer(state, action) {
       const [index, key] = action.keys;
 
       return state
-        .updateIn(['modifiedData', ...action.keys], () => action.value)
+        .updateIn(['modifiedData', ...action.keys], () => {
+          if (action.value._isAMomentObject === true) {
+            return moment(action.value, 'YYYY-MM-DD HH:mm:ss').format();
+          }
+          return action.value;
+        })
         .updateIn(['modifiedData', index, 'value'], value => {
           if (key === 'name') {
             const attributeType = state.getIn([
