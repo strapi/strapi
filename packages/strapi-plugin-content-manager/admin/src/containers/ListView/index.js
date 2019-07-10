@@ -69,7 +69,6 @@ function ListView({
   toggleModalDelete,
   showWarningDeleteAll,
   toggleModalDeleteAll,
-  ...rest
 }) {
   strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'listView', saga, pluginId });
@@ -96,7 +95,7 @@ function ListView({
             'defaultSortBy'
           )}:${getLayoutSettingRef.current('defaultSortOrder')}`,
         source: getQueryParameters(search, 'source'),
-        ...generateFiltersFromSearch(search),
+        filters: generateFiltersFromSearch(search),
         ...updatedParams,
       };
     },
@@ -224,9 +223,11 @@ function ListView({
   return (
     <>
       <ListViewProvider
+        schema={get(layouts, [slug, 'schema'], {})}
         data={data}
         count={count}
         entriesToDelete={entriesToDelete}
+        emitEvent={emitEvent}
         firstSortableElement={getFirstSortableElement()}
         onChangeBulk={onChangeBulk}
         onChangeBulkSelectall={onChangeBulkSelectall}

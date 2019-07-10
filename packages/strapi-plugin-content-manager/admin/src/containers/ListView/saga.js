@@ -24,14 +24,32 @@ export function* getData({ uid, params }) {
       unset(params, '_q');
     }
 
+    const search = Object.keys(params)
+      .reduce((acc, current) => {
+        if (current !== 'filters') {
+          acc.push(`${current}=${params[current]}`);
+        } else {
+          const filters = params[current].reduce((acc, curr) => {
+            const key =
+              curr.filter === '=' ? curr.name : `${curr.name}${curr.filter}`;
+            acc.push(`${key}=${curr.value}`);
+
+            return acc;
+          }, []);
+
+          acc.push(filters.join('&'));
+        }
+
+        return acc;
+      }, [])
+      .join('&');
+
     const [{ count }, data] = yield all([
-      call(request, getRequestUrl(`${uid}/count`), {
+      call(request, getRequestUrl(`${uid}/count?${search}`), {
         method: 'GET',
-        params,
       }),
-      call(request, getRequestUrl(`${uid}`), {
+      call(request, getRequestUrl(`${uid}?${search}`), {
         method: 'GET',
-        params,
       }),
     ]);
 

@@ -18,12 +18,13 @@ function CustomTable({
   },
   isBulkable,
 }) {
-  const { entriesToDelete, slug } = useListView();
+  const { emitEvent, entriesToDelete, slug } = useListView();
   const redirectUrl = `redirectUrl=${pathname}${search}`;
   const values = { contentType: slug || 'entry' };
   const id = 'withoutFilter';
   const colSpanLength = isBulkable ? headers.length + 2 : headers.length + 1;
   const handleGoTo = id => {
+    emitEvent('willEditEntry');
     push({
       pathname: `/plugins/${pluginId}/${slug}/${id}`,
       search: redirectUrl,
