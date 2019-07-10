@@ -69,6 +69,7 @@ function ListView({
   toggleModalDelete,
   showWarningDeleteAll,
   toggleModalDeleteAll,
+  ...rest
 }) {
   strapi.useInjectReducer({ key: 'listView', reducer, pluginId });
   strapi.useInjectSaga({ key: 'listView', saga, pluginId });

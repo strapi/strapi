@@ -7,6 +7,7 @@ import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 
+import EditView from '../EditView';
 import ListView from '../ListView';
 import SettingViewModel from '../SettingViewModel';
 import SettingViewGroup from '../SettingViewGroup';
@@ -51,6 +52,10 @@ function Main({ emitEvent, getLayout, layouts, location: { pathname } }) {
       <Route
         path={`/plugins/${pluginId}/ctm-configurations/:type`}
         render={props => renderRoute(props, SettingsView)}
+      />
+      <Route
+        path={`/plugins/${pluginId}/:slug/:id`}
+        render={props => renderRoute(props, EditView)}
       />
       <Route
         path={`/plugins/${pluginId}/:slug`}

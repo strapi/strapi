@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import { withRouter } from 'react-router';
 import PropTypes from 'prop-types';
 import { toString } from 'lodash';
 
@@ -9,13 +10,13 @@ import CustomInputCheckbox from '../CustomInputCheckbox';
 
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
 
-function Row({ isBulkable, row, headers }) {
-  const { entriesToDelete, onChangeBulk, onClickDelete } = useListView();
+function Row({ goTo, isBulkable, row, headers }) {
+  const { entriesToDelete, onChangeBulk, onClickDelete, slug } = useListView();
 
   return (
     <>
       {isBulkable && (
-        <td onClick={e => e.stopPropagation()} key="i">
+        <td key="i">
           <CustomInputCheckbox
             name={row.id}
             onChange={onChangeBulk}
@@ -40,7 +41,12 @@ function Row({ isBulkable, row, headers }) {
       <ActionContainer>
         <IcoContainer
           icons={[
-            { icoType: 'pencil', onClick: () => {} },
+            {
+              icoType: 'pencil',
+              onClick: () => {
+                goTo(row.id);
+              },
+            },
             {
               id: row.id,
               icoType: 'trash',
@@ -56,9 +62,10 @@ function Row({ isBulkable, row, headers }) {
 }
 
 Row.propTypes = {
+  goTo: PropTypes.func.isRequired,
   headers: PropTypes.array.isRequired,
   isBulkable: PropTypes.bool.isRequired,
   row: PropTypes.object.isRequired,
 };
 
-export default memo(Row);
+export default withRouter(memo(Row));

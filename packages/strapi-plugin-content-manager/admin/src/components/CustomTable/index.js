@@ -1,19 +1,34 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
-
+import pluginId from '../../pluginId';
 import { useListView } from '../../contexts/ListView';
 import TableHeader from './TableHeader';
 import { Table, TableEmpty, TableRow } from './styledComponents';
 import ActionCollapse from './ActionCollapse';
 import Row from './Row';
 
-function CustomTable({ data, headers, isBulkable }) {
+function CustomTable({
+  data,
+  headers,
+  history: {
+    location: { pathname, search },
+    push,
+  },
+  isBulkable,
+}) {
   const { entriesToDelete, slug } = useListView();
-
+  const redirectUrl = `redirectUrl=${pathname}${search}`;
   const values = { contentType: slug || 'entry' };
   const id = 'withoutFilter';
   const colSpanLength = isBulkable ? headers.length + 2 : headers.length + 1;
+  const handleGoTo = id => {
+    push({
+      pathname: `/plugins/${pluginId}/${slug}/${id}`,
+      search: redirectUrl,
+    });
+  };
   const content =
     data.length === 0 ? (
       <TableEmpty>
@@ -28,8 +43,20 @@ function CustomTable({ data, headers, isBulkable }) {
       data.map(row => {
         //
         return (
-          <TableRow key={row.id}>
-            <Row isBulkable={isBulkable} headers={headers} row={row} />
+          <TableRow
+            key={row.id}
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleGoTo(row.id);
+            }}
+          >
+            <Row
+              isBulkable={isBulkable}
+              headers={headers}
+              row={row}
+              goTo={handleGoTo}
+            />
           </TableRow>
         );
       })
@@ -58,8 +85,15 @@ CustomTable.defaultProps = {
 CustomTable.propTypes = {
   data: PropTypes.array,
   headers: PropTypes.array,
+  history: PropTypes.shape({
+    location: PropTypes.shape({
+      pathname: PropTypes.string,
+      search: PropTypes.string,
+    }),
+    push: PropTypes.func.isRequired,
+  }).isRequired,
   isBulkable: PropTypes.bool,
   slug: PropTypes.string,
 };
 
-export default memo(CustomTable);
+export default withRouter(memo(CustomTable));
