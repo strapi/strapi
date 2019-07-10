@@ -11,13 +11,19 @@ import { useListView } from '../../contexts/ListView';
 import Container from '../Container';
 
 import getFilterType from '../FilterPickerOption/utils';
-import {  Flex, Span, Wrapper } from './components';
+import { Flex, Span, Wrapper } from './components';
 import FilterPickerOption from '../FilterPickerOption';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-function FilterPicker({ actions, isOpen, name, onSubmit }) {
+function FilterPicker({
+  actions,
+  isOpen,
+  name,
+  onSubmit,
+  toggleFilterPickerState,
+}) {
   const { schema, searchParams } = useListView();
   const allowedAttributes = Object.keys(get(schema, ['attributes']), {})
     .filter(attr => {
@@ -57,8 +63,8 @@ function FilterPicker({ actions, isOpen, name, onSubmit }) {
     </FormattedMessage>
   );
 
-  // Set the filters when the collapse is opening
-  const handleEntering = () => {
+  // Generate the first filter for adding a new one or at initial state
+  const getInitialFilter = () => {
     const type = get(allowedAttributes, [0, 'type'], '');
     const [filter] = getFilterType(type);
     let value = '';
@@ -73,13 +79,26 @@ function FilterPicker({ actions, isOpen, name, onSubmit }) {
       filter: filter.value,
       value,
     };
+
+    return initFilter;
+  };
+  // Set the filters when the collapse is opening
+  const handleEntering = () => {
     const currentFilters = searchParams.filters;
     const initialFilters =
-      currentFilters.length > 0 ? currentFilters : [initFilter];
+      currentFilters.length > 0 ? currentFilters : [getInitialFilter()];
 
     dispatch({
       type: 'SET_FILTERS',
       initialFilters,
+      attributes: get(schema, 'attributes', {}),
+    });
+  };
+
+  const addFilter = () => {
+    dispatch({
+      type: 'ADD_FILTER',
+      filter: getInitialFilter(),
     });
   };
 
@@ -90,7 +109,7 @@ function FilterPicker({ actions, isOpen, name, onSubmit }) {
           onSubmit={e => {
             e.preventDefault();
 
-            onSubmit();
+            onSubmit(modifiedData);
           }}
         >
           <PluginHeader
@@ -108,13 +127,27 @@ function FilterPicker({ actions, isOpen, name, onSubmit }) {
                 index={key}
                 modifiedData={modifiedData}
                 onChange={handleChange}
+                onClickAddFilter={addFilter}
+                onRemoveFilter={index => {
+                  if (index === 0 && modifiedData.length === 1) {
+                    toggleFilterPickerState();
+
+                    return;
+                  }
+
+                  dispatch({
+                    type: 'REMOVE_FILTER',
+                    index,
+                  });
+                }}
                 type={get(schema, ['attributes', filter.name, 'type'], '')}
+                showAddButton={key === modifiedData.length - 1}
                 key={key}
               />
             ))}
           </Wrapper>
           <Flex>
-            <Span onClick={actions[0].onClick}>
+            <Span onClick={toggleFilterPickerState}>
               <FormattedMessage id="content-manager.components.FiltersPickWrapper.hide" />
               &nbsp;
             </Span>
@@ -140,6 +173,7 @@ FilterPicker.propTypes = {
 
   name: PropTypes.string,
   onSubmit: PropTypes.func.isRequired,
+  toggleFilterPickerState: PropTypes.func.isRequired,
 };
 
 export default withRouter(memo(FilterPicker));

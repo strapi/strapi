@@ -50,7 +50,7 @@ function ListView({
   data,
   emitEvent,
   entriesToDelete,
-  location: { search },
+  location: { pathname, search },
   getData,
   layouts,
   isLoading,
@@ -188,9 +188,10 @@ function ListView({
     toggleModalDelete();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (filters = []) => {
     emitEvent('didFilterEntries');
     toggleFilterPickerState();
+    handleChangeParams({ target: { name: 'filters', value: filters } });
   };
 
   const filterPickerActions = [
@@ -199,6 +200,7 @@ function ListView({
       kind: 'secondary',
       onClick: () => {
         toggleFilterPickerState();
+        handleChangeParams({ target: { name: 'filters', value: [] } });
       },
     },
     {
@@ -217,6 +219,10 @@ function ListView({
       kind: 'primaryAddShape',
       onClick: () => {
         emitEvent('willCreateEntry');
+        push({
+          pathname: `${pathname}/create`,
+          search: `redirectUrl=${pathname}${search}`,
+        });
       },
     },
   ];
@@ -243,6 +249,7 @@ function ListView({
           actions={filterPickerActions}
           isOpen={isFilterPickerOpen}
           name={slug}
+          toggleFilterPickerState={toggleFilterPickerState}
           onSubmit={handleSubmit}
         />
         <Container className="container-fluid">
@@ -417,6 +424,7 @@ ListView.propTypes = {
   entriesToDelete: PropTypes.array.isRequired,
   layouts: PropTypes.object,
   location: PropTypes.shape({
+    pathname: PropTypes.string.isRequired,
     search: PropTypes.string.isRequired,
   }),
   getData: PropTypes.func.isRequired,

@@ -29,7 +29,10 @@ function FilterPickerOption({
   modifiedData,
   index,
   onChange,
+  onClickAddFilter,
+  onRemoveFilter,
   value,
+  showAddButton,
   type,
 }) {
   const filtersOptions = getFilters(type);
@@ -37,7 +40,11 @@ function FilterPickerOption({
   return (
     <Wrapper borderLeft={!isEmpty(value)}>
       <InputWrapper>
-        <Button type="button" isRemoveButton />
+        <Button
+          type="button"
+          isRemoveButton
+          onClick={() => onRemoveFilter(index)}
+        />
         <InputSelect
           onChange={onChange}
           name={`${index}.name`}
@@ -59,7 +66,7 @@ function FilterPickerOption({
           selectOptions={['false', 'true', 'oo']}
           onChange={onChange}
         />
-        <Button type="button" />
+        {showAddButton && <Button type="button" onClick={onClickAddFilter} />}
       </InputWrapper>
     </Wrapper>
   );
@@ -70,6 +77,8 @@ FilterPickerOption.defaultProps = {
   modifiedData: [],
   index: -1,
   onChange: () => {},
+  onClickAddFilter: () => {},
+  onRemoveFilter: () => {},
   value: null,
   type: 'string',
 };
@@ -79,8 +88,11 @@ FilterPickerOption.propTypes = {
   modifiedData: PropTypes.array,
   index: PropTypes.number,
   onChange: PropTypes.func,
-  value: PropTypes.any,
+  onClickAddFilter: PropTypes.func,
+  onRemoveFilter: PropTypes.func,
+  showAddButton: PropTypes.bool.isRequired,
   type: PropTypes.string,
+  value: PropTypes.any,
 };
 
 export default FilterPickerOption;
