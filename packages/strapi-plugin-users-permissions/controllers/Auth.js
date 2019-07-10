@@ -9,7 +9,7 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
-const compose = require('koa-compose');
+const grant = require('grant-koa');
 
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -263,10 +263,7 @@ module.exports = {
       return ctx.badRequest(null, 'This provider is disabled.');
     }
 
-    const Grant = require('grant-koa');
-    const grant = new Grant(grantConfig);
-
-    return compose(grant.middleware)(ctx, next);
+    return grant(grantConfig)(ctx, next);
   },
 
   forgotPassword: async ctx => {

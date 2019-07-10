@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import pluralize from 'pluralize';
 import { capitalize, get, sortBy } from 'lodash';
 import { all, fork, takeLatest, call, put } from 'redux-saga/effects';
@@ -164,10 +165,14 @@ export function* submitTempCT({
 
 // Individual exports for testing
 export default function* defaultSaga() {
-  yield all([
-    fork(takeLatest, GET_DATA, getData),
-    fork(takeLatest, DELETE_MODEL, deleteModel),
-    fork(takeLatest, SUBMIT_CONTENT_TYPE, submitCT),
-    fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
-  ]);
+  try {
+    yield all([
+      fork(takeLatest, GET_DATA, getData),
+      fork(takeLatest, DELETE_MODEL, deleteModel),
+      fork(takeLatest, SUBMIT_CONTENT_TYPE, submitCT),
+      fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
+    ]);
+  } catch (err) {
+    console.log(err);
+  }
 }

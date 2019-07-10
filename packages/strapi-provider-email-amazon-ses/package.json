@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-email-amazon-ses",
-  "version": "3.0.0-beta.8",
+  "version": "3.0.0-beta.10",
   "description": "Amazon SES provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -14,6 +14,7 @@
   },
   "main": "./lib",
   "dependencies": {
+    "lodash": "^4.17.11",
     "node-ses": "^2.2.0"
   },
   "author": {

@@ -62,7 +62,7 @@ function* submit() {
       return yield put(
         setFormErrors({
           password: [{ id: 'components.Input.error.validation.required' }],
-        }),
+        })
       );
     }
 
@@ -95,12 +95,17 @@ function* updateDoc(action) {
 
 // Individual exports for testing
 export function* defaultSaga() {
-  yield all([
-    fork(takeLatest, GET_DOC_INFOS, getData),
-    fork(takeLatest, ON_CONFIRM_DELETE_DOC, deleteDoc),
-    fork(takeLatest, ON_SUBMIT, submit),
-    fork(takeLatest, ON_UPDATE_DOC, updateDoc),
-  ]);
+  try {
+    yield all([
+      fork(takeLatest, GET_DOC_INFOS, getData),
+      fork(takeLatest, ON_CONFIRM_DELETE_DOC, deleteDoc),
+      fork(takeLatest, ON_SUBMIT, submit),
+      fork(takeLatest, ON_UPDATE_DOC, updateDoc),
+    ]);
+  } catch (err) {
+    /* eslint-disable no-console */
+    console.log(err);
+  }
 }
 
 // All sagas to be loaded

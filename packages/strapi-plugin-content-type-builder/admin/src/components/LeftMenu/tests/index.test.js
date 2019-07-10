@@ -9,8 +9,12 @@ describe('<LeftMenu />', () => {
   });
 
   it('should render a child if given', () => {
-    const Child = () => <div>I'm a child</div>;
-    const wrapper = shallow(<LeftMenu><Child /></LeftMenu>);
+    const Child = () => <div>I am a child</div>;
+    const wrapper = shallow(
+      <LeftMenu>
+        <Child />
+      </LeftMenu>
+    );
 
     expect(wrapper.find(Child).exists()).toBe(true);
   });
