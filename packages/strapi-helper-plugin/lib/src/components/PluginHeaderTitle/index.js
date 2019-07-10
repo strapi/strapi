@@ -40,7 +40,7 @@ function PluginHeaderTitle({
         )}
       </div>
       {withDescriptionAnim ? (
-        <LoadingBar />
+        <LoadingBar style={{ marginTop: '13px' }} />
       ) : (
         <p className={styles.pluginHeaderTitleDescription}>
           {contentDescription}&nbsp;

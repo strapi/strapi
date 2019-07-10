@@ -224,7 +224,6 @@ function ListView({
   return (
     <>
       <ListViewProvider
-        schema={get(layouts, [slug, 'schema'], {})}
         data={data}
         count={count}
         entriesToDelete={entriesToDelete}
@@ -235,6 +234,7 @@ function ListView({
         onChangeParams={handleChangeParams}
         onClickDelete={handleClickDelete}
         onDeleteSeveralData={onDeleteSeveralData}
+        schema={get(layouts, [slug, 'schema'], {})}
         searchParams={getSearchParams()}
         slug={slug}
         toggleModalDeleteAll={toggleModalDeleteAll}
@@ -276,22 +276,31 @@ function ListView({
             <div className="row" style={{ marginBottom: '6px' }}>
               <div className="col-10">
                 <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-                  <AddFilterCta type="button" onClick={toggleFilterPickerState}>
-                    <Img src={FilterLogo} alt="filter_logo" />
-                    <FormattedMessage
-                      id={`${pluginId}.components.AddFilterCTA.add`}
-                    />
-                  </AddFilterCta>
-                  {getSearchParams().filters.map((filter, key) => (
-                    <Filter
-                      {...filter}
-                      changeParams={handleChangeParams}
-                      filters={getSearchParams().filters}
-                      index={key}
-                      schema={get(layouts, [slug, 'schema'], {})}
-                      key={key}
-                    />
-                  ))}
+                  {getLayoutSettingRef.current('filterable') && (
+                    <>
+                      <AddFilterCta
+                        type="button"
+                        onClick={toggleFilterPickerState}
+                      >
+                        <Img src={FilterLogo} alt="filter_logo" />
+                        <FormattedMessage
+                          id={`${pluginId}.components.AddFilterCTA.add`}
+                        />
+                      </AddFilterCta>
+                      {getSearchParams().filters.map((filter, key) => (
+                        <Filter
+                          {...filter}
+                          changeParams={handleChangeParams}
+                          filters={getSearchParams().filters}
+                          index={key}
+                          schema={get(layouts, [slug, 'schema'], {})}
+                          key={key}
+                          toggleFilterPickerState={toggleFilterPickerState}
+                          isFilterPickerOpen={isFilterPickerOpen}
+                        />
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
               <div className="col-2">

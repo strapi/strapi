@@ -74,7 +74,7 @@ module.exports = {
           defaultSortBy: 'id',
           defaultSortOrder: 'ASC',
           searchable: true,
-          filterable: true,
+          filterable: false,
           bulkable: true,
           pageSize: 10,
         },
@@ -229,7 +229,7 @@ module.exports = {
               type: 'text',
             },
             json: {
-              type: 'string',
+              type: 'json',
             },
             number: {
               type: 'integer',

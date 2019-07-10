@@ -2,6 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
+import { upperFirst } from 'lodash';
 import pluginId from '../../pluginId';
 import { useListView } from '../../contexts/ListView';
 import TableHeader from './TableHeader';
@@ -18,11 +19,16 @@ function CustomTable({
   },
   isBulkable,
 }) {
-  const { emitEvent, entriesToDelete, slug } = useListView();
+  const {
+    emitEvent,
+    entriesToDelete,
+    searchParams: { filters, _q },
+    slug,
+  } = useListView();
+
   const redirectUrl = `redirectUrl=${pathname}${search}`;
-  const values = { contentType: slug || 'entry' };
-  const id = 'withoutFilter';
   const colSpanLength = isBulkable ? headers.length + 2 : headers.length + 1;
+
   const handleGoTo = id => {
     emitEvent('willEditEntry');
     push({
@@ -30,12 +36,20 @@ function CustomTable({
       search: redirectUrl,
     });
   };
+
+  const values = { contentType: upperFirst(slug), search: _q };
+  let tableEmptyMsgId = filters.length > 0 ? 'withFilters' : 'withoutFilter';
+
+  if (_q !== '') {
+    tableEmptyMsgId = 'withSearch';
+  }
+
   const content =
     data.length === 0 ? (
       <TableEmpty>
         <td colSpan={colSpanLength}>
           <FormattedMessage
-            id={`content-manager.components.TableEmpty.${id}`}
+            id={`content-manager.components.TableEmpty.${tableEmptyMsgId}`}
             values={values}
           />
         </td>

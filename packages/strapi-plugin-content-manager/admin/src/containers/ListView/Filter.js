@@ -6,7 +6,17 @@ import moment from 'moment';
 import pluginId from '../../pluginId';
 import { FilterWrapper, Remove, Separator } from './components';
 
-function Filter({ changeParams, filter, filters, index, name, schema, value }) {
+function Filter({
+  changeParams,
+  filter,
+  filters,
+  index,
+  name,
+  schema,
+  value,
+  toggleFilterPickerState,
+  isFilterPickerOpen,
+}) {
   const type = get(schema, ['attributes', name, 'type'], 'string');
   let displayedValue = toString(value);
 
@@ -32,6 +42,9 @@ function Filter({ changeParams, filter, filters, index, name, schema, value }) {
         onClick={() => {
           const updatedFilters = filters.slice().filter((_, i) => i !== index);
 
+          if (isFilterPickerOpen) {
+            toggleFilterPickerState();
+          }
           changeParams({ target: { name: 'filters', value: updatedFilters } });
         }}
       />
@@ -49,8 +62,10 @@ Filter.propTypes = {
   filter: PropTypes.string.isRequired,
   filters: PropTypes.array.isRequired,
   index: PropTypes.number.isRequired,
+  isFilterPickerOpen: PropTypes.bool.isRequired,
   name: PropTypes.string,
   schema: PropTypes.object.isRequired,
+  toggleFilterPickerState: PropTypes.func.isRequired,
   value: PropTypes.any,
 };
 
