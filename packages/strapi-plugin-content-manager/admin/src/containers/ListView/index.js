@@ -29,6 +29,7 @@ import {
 } from '../../utils/search';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, DropDownWrapper, Img, Wrapper } from './components';
+import Footer from './Footer';
 import {
   getData,
   onChangeBulk,
@@ -167,6 +168,10 @@ function ListView({
     const updatedSearch = getSearchParams({ [name]: value });
     const newSearch = generateSearchFromFilters(updatedSearch);
 
+    if (name === '_limit') {
+      emitEvent('willChangeNumberOfEntriesPerPage');
+    }
+
     push({ search: newSearch });
     resetProps();
     getData(slug, updatedSearch);
@@ -209,6 +214,7 @@ function ListView({
     <>
       <ListViewProvider
         data={data}
+        count={count}
         entriesToDelete={entriesToDelete}
         firstSortableElement={getFirstSortableElement()}
         onChangeBulk={onChangeBulk}
@@ -322,6 +328,7 @@ function ListView({
                   onChangeParams={handleChangeParams}
                   slug={slug}
                 />
+                <Footer />
               </div>
             </div>
           </Wrapper>

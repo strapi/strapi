@@ -11,10 +11,7 @@ import { ActionContainer, Truncate, Truncated } from './styledComponents';
 
 function Row({ isBulkable, row, headers }) {
   const { entriesToDelete, onChangeBulk } = useListView();
-  console.log({
-    entriesToDelete,
-    c: entriesToDelete.filter(id => toString(id) === row.id),
-  });
+
   return (
     <>
       {isBulkable && (
