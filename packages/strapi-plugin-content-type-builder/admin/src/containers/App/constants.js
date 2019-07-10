@@ -20,6 +20,8 @@ export const CREATE_TEMP_CONTENT_TYPE =
   'ContentTypeBuilder/App/CREATE_TEMP_CONTENT_TYPE';
 export const CREATE_TEMP_GROUP = 'ContentTypeBuilder/App/CREATE_TEMP_GROUP';
 export const DELETE_GROUP = 'ContentTypeBuilder/App/DELETE_GROUP';
+export const DELETE_GROUP_ATTRIBUTE =
+  'ContentTypeBuilder/App/DELETE_GROUP_ATTRIBUTE';
 export const DELETE_GROUP_SUCCEEDED =
   'ContentTypeBuilder/App/DELETE_GROUP_SUCCEEDED';
 export const DELETE_MODEL = 'ContentTypeBuilder/App/DELETE_MODEL';
