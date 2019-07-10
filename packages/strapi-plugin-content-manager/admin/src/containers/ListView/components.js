@@ -1,6 +1,8 @@
 import styled, { css } from 'styled-components';
 import { Button } from 'strapi-helper-plugin';
 
+import RemoveIcon from '../../assets/images/icon-cross-blue.svg';
+
 const Wrapper = styled.div`
   padding-top: 18px;
 `;
@@ -210,24 +212,65 @@ const Label = styled.label`
 
 const SelectWrapper = styled.div`
   display: flex;
+`;
 
-  // > select {
-  //   width: 75px !important;
-  //   height: 3.2rem !important;
-  //   padding-top: 0rem;
-  //   padding-left: 1rem;
-  //   padding-right: 3rem;
-  //   background-position: right -1px center;
-  //   background-repeat: no-repeat;
-  //   background-image: url('../../assets/images/background_input.svg');
-  //   border: 1px solid #e3e9f3;
-  //   border-radius: 0.25rem;
-  //   line-height: 29px;
-  //   font-size: 1.3rem;
-  //   font-family: 'Lato' !important;
-  //   -moz-appearance: none;
-  //   -webkit-appearance: none;
-  // }
+const FilterWrapper = styled.div`
+  display: inline-block;
+  height: 30px;
+  margin-bottom: 6px;
+  margin-right: 10px;
+  padding: 0 10px;
+  background: rgba(0, 126, 255, 0.08);
+  border: 1px solid rgba(0, 126, 255, 0.24);
+  border-radius: 2px;
+  line-height: 28px;
+  color: #007eff;
+  font-size: 13px;
+
+  > span {
+    display: inline-block;
+    margin-top: -1px;
+  }
+
+  > span:nth-child(2) {
+    font-weight: 700;
+  }
+
+  > span:nth-child(3) {
+    cursor: pointer;
+  }
+
+  -webkit-font-smoothing: antialiased;
+  font-size: 13px;
+`;
+
+const Separator = styled.span`
+  height: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+  line-height: 30px;
+  &:after {
+    content: '';
+    height: 15px;
+    border-left: 1px solid #007eff;
+    opacity: 0.1;
+  }
+`;
+
+const Remove = styled.span`
+  height: 28px;
+  cursor: pointer;
+  vertical-align: middle;
+
+  &:after {
+    display: inline-block;
+    content: '';
+    width: 8px;
+    height: 8px;
+    margin: auto;
+    margin-top: -3px;
+    background-image: url(${RemoveIcon});
+  }
 `;
 
 export {
@@ -237,5 +280,8 @@ export {
   Img,
   Label,
   SelectWrapper,
+  FilterWrapper,
+  Separator,
+  Remove,
   Wrapper,
 };

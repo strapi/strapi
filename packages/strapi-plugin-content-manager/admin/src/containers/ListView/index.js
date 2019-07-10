@@ -29,6 +29,7 @@ import {
 } from '../../utils/search';
 import { onChangeListLabels, resetListLabels } from '../Main/actions';
 import { AddFilterCta, DropDownWrapper, Img, Wrapper } from './components';
+import Filter from './Filter';
 import Footer from './Footer';
 import {
   getData,
@@ -272,17 +273,29 @@ function ListView({
             />
           )}
           <Wrapper>
-            <div className="row">
+            <div className="row" style={{ marginBottom: '6px' }}>
               <div className="col-10">
-                <AddFilterCta type="button" onClick={toggleFilterPickerState}>
-                  <Img src={FilterLogo} alt="filter_logo" />
-                  <FormattedMessage
-                    id={`${pluginId}.components.AddFilterCTA.add`}
-                  />
-                </AddFilterCta>
+                <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
+                  <AddFilterCta type="button" onClick={toggleFilterPickerState}>
+                    <Img src={FilterLogo} alt="filter_logo" />
+                    <FormattedMessage
+                      id={`${pluginId}.components.AddFilterCTA.add`}
+                    />
+                  </AddFilterCta>
+                  {getSearchParams().filters.map((filter, key) => (
+                    <Filter
+                      {...filter}
+                      changeParams={handleChangeParams}
+                      filters={getSearchParams().filters}
+                      index={key}
+                      schema={get(layouts, [slug, 'schema'], {})}
+                      key={key}
+                    />
+                  ))}
+                </div>
               </div>
               <div className="col-2">
-                <DropDownWrapper>
+                <DropDownWrapper style={{ marginBottom: '6px' }}>
                   <ButtonDropdown
                     isOpen={isLabelPickerOpen}
                     toggle={toggleLabelPickerState}
@@ -332,7 +345,7 @@ function ListView({
                 </DropDownWrapper>
               </div>
             </div>
-            <div className="row" style={{ paddingTop: '36px' }}>
+            <div className="row" style={{ paddingTop: '25px' }}>
               <div className="col-12">
                 <CustomTable
                   data={data}
