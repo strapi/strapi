@@ -5,6 +5,7 @@ import {
   BackHeader,
   getQueryParameters,
   LoadingIndicatorPage,
+  LiLink,
   PluginHeader,
   PopUpWarning,
   request,
@@ -13,6 +14,7 @@ import {
 import pluginId from '../../pluginId';
 
 import Container from '../../components/Container';
+import { LinkWrapper } from './components';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -20,12 +22,15 @@ import reducer, { initialState } from './reducer';
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
 function EditView({
+  currentEnvironment,
+  emitEvent,
   layouts,
   location: { search },
   history: { push },
   match: {
     params: { slug, id },
   },
+  plugins,
 }) {
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
@@ -103,7 +108,50 @@ function EditView({
     ? { id: `${pluginId}.containers.Edit.pluginHeader.title.new` }
     : templateObject({ mainField: displayedFieldNameInHeader }, initialData)
         .mainField;
-  console.log(redirectURL);
+
+  /**
+   * Retrieve external links from injected components
+   * @type {Array} List of external links to display
+   */
+  const retrieveLinksContainerComponent = () => {
+    const componentToInject = Object.keys(plugins).reduce((acc, current) => {
+      // Retrieve injected compos from plugin
+      // if compo can be injected in left.links area push the compo in the array
+      const currentPlugin = plugins[current];
+      const injectedComponents = get(currentPlugin, 'injectedComponents', []);
+
+      const compos = injectedComponents
+        .filter(compo => {
+          return (
+            compo.plugin === `${pluginId}.editPage` &&
+            compo.area === 'right.links'
+          );
+        })
+        .map(compo => {
+          const Component = compo.component;
+
+          return (
+            <Component
+              currentEnvironment={currentEnvironment}
+              getModelName={() => slug}
+              getSource={() => source}
+              getContentTypeBuilderBaseUrl={() =>
+                '/plugins/content-type-builder/models/'
+              }
+              {...compo.props}
+              key={compo.key}
+              onClick={() => {
+                emitEvent('willEditContentTypeFromEditView');
+              }}
+            />
+          );
+        });
+
+      return [...acc, ...compos];
+    }, []);
+
+    return componentToInject;
+  };
   return (
     <>
       <BackHeader onClick={() => redirectToPreviousPage()} />
@@ -148,6 +196,27 @@ function EditView({
             }
             title={pluginHeaderTitle}
           />
+          <div className="row">
+            <div className="col-9"></div>
+            <div className="col-3">
+              <LinkWrapper>
+                <ul>
+                  <LiLink
+                    message={{
+                      id: `${pluginId}.containers.Edit.Link.Layout`,
+                    }}
+                    icon="layout"
+                    key={`${pluginId}.link`}
+                    url={`/plugins/${pluginId}/ctm-configurations/models/${slug}/edit-settings`}
+                    onClick={() => {
+                      emitEvent('willEditContentTypeLayoutFromEditView');
+                    }}
+                  />
+                  {retrieveLinksContainerComponent()}
+                </ul>
+              </LinkWrapper>
+            </div>
+          </div>
         </form>
         <PopUpWarning
           isOpen={showWarningCancel}
@@ -184,6 +253,8 @@ function EditView({
 }
 
 EditView.propTypes = {
+  currentEnvironment: PropTypes.string.isRequired,
+  emitEvent: PropTypes.func.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }),
@@ -197,6 +268,7 @@ EditView.propTypes = {
       slug: PropTypes.string.isRequired,
     }),
   }),
+  plugins: PropTypes.object,
 };
 
 export default memo(EditView);

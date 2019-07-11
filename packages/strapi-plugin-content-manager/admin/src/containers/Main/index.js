@@ -18,7 +18,14 @@ import reducer from './reducer';
 import saga from './saga';
 import makeSelectMain from './selectors';
 
-function Main({ emitEvent, getLayout, layouts, location: { pathname } }) {
+function Main({
+  admin: { currentEnvironment },
+  emitEvent,
+  getLayout,
+  layouts,
+  location: { pathname },
+  global: { plugins },
+}) {
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
   strapi.useInjectSaga({ key: 'main', saga, pluginId });
   const slug = pathname.split('/')[3];
@@ -36,7 +43,13 @@ function Main({ emitEvent, getLayout, layouts, location: { pathname } }) {
   }
 
   const renderRoute = (props, Component) => (
-    <Component emitEvent={emitEvent} layouts={layouts} {...props} />
+    <Component
+      currentEnvironment={currentEnvironment}
+      emitEvent={emitEvent}
+      layouts={layouts}
+      plugins={plugins}
+      {...props}
+    />
   );
   const routes = [
     {
@@ -59,9 +72,14 @@ function Main({ emitEvent, getLayout, layouts, location: { pathname } }) {
 }
 
 Main.propTypes = {
+  admin: PropTypes.shape({
+    currentEnvironment: PropTypes.string.isRequired,
+  }),
   emitEvent: PropTypes.func.isRequired,
   getLayout: PropTypes.func.isRequired,
-
+  global: PropTypes.shape({
+    plugins: PropTypes.object,
+  }),
   layouts: PropTypes.object.isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,
