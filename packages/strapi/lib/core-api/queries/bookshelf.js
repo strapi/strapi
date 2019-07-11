@@ -2,6 +2,55 @@ const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 module.exports = ({ model, modelKey }) => {
+  const assocKeys = model.associations.map(ast => ast.alias);
+  const groupKeys = Object.keys(model.attributes).filter(key => {
+    return model.attributes[key].type === 'group';
+  });
+  const excludedKeys = assocKeys.concat(groupKeys);
+
+  function excludeExernalValues(values) {
+    return _.omit(values, excludedKeys);
+  }
+
+  async function deleteGroups(entry, { transacting }) {
+    const joinModel = model.groupsJoinModel;
+    const { foreignKey } = joinModel;
+
+    for (let key of groupKeys) {
+      const attr = model.attributes[key];
+      const { group } = attr;
+
+      const groupModel = strapi.groups[group];
+
+      const ids = await joinModel
+        .forge()
+        .query({
+          where: {
+            [foreignKey]: entry.id,
+            slice_type: groupModel.collectionName,
+            field: key,
+          },
+        })
+        .fetchAll({ transacting })
+        .map(el => el.get('slice_id'));
+
+      await groupModel
+        .forge()
+        .query(qb => qb.whereIn(groupModel.primaryKey, ids))
+        .destroy({ transacting });
+      await joinModel
+        .forge()
+        .query({
+          where: {
+            [foreignKey]: entry.id,
+            slice_type: groupModel.collectionName,
+            field: key,
+          },
+        })
+        .destroy({ transacting });
+    }
+  }
+
   return {
     find(params, populate) {
       const withRelated =
@@ -45,7 +94,7 @@ module.exports = ({ model, modelKey }) => {
         model.associations.map(ast => ast.alias)
       );
 
-      const data = _.omitBy(values, excludeExernalValues(model));
+      const data = excludeExernalValues(values);
 
       const runCreate = async trx => {
         // Create entry with no-relational data.
@@ -61,13 +110,21 @@ module.exports = ({ model, modelKey }) => {
     },
 
     async update(params, values) {
+      const entry = await model.forge(params).fetch();
+
+      if (!entry) {
+        const err = new Error('entry.notFound');
+        err.status = 404;
+        throw err;
+      }
+
       // Extract values related to relational data.
       const relations = _.pick(
         values,
         model.associations.map(ast => ast.alias)
       );
 
-      const data = _.omitBy(values, excludeExernalValues(model));
+      const data = excludeExernalValues(values);
 
       const runUpdate = async trx => {
         const entry = await model
@@ -87,6 +144,14 @@ module.exports = ({ model, modelKey }) => {
     },
 
     async delete(params) {
+      const entry = await model.forge(params).fetch();
+
+      if (!entry) {
+        const err = new Error('entry.notFound');
+        err.status = 404;
+        throw err;
+      }
+
       const values = {};
       model.associations.map(association => {
         switch (association.nature) {
@@ -106,7 +171,15 @@ module.exports = ({ model, modelKey }) => {
       });
 
       await model.updateRelations({ ...params, values });
-      return model.forge(params).destroy();
+
+      const runDelete = async trx => {
+        await deleteGroups(entry, { transacting: trx });
+        await model.forge(params).destroy({ transacting: trx });
+        return entry;
+      };
+
+      const db = strapi.connections[model.connection];
+      return db.transaction(trx => runDelete(trx));
     },
 
     search(params, populate) {
@@ -233,12 +306,13 @@ async function createGroups(entry, values, { model, transacting }) {
     return model.attributes[key].type === 'group';
   });
 
+  const joinModel = model.groupsJoinModel;
+  const { foreignKey } = joinModel;
+
   for (let key of groupKeys) {
     const attr = model.attributes[key];
     const { group, required = true, repeatable = true } = attr;
 
-    const joinModel = entry[key].joinModel;
-    const { foreignKey } = joinModel;
     const groupModel = strapi.groups[group];
 
     const createGroupAndLink = async ({ value, order }) => {
@@ -288,6 +362,9 @@ async function updateGroups(entry, values, { model, transacting }) {
     return model.attributes[key].type === 'group';
   });
 
+  const joinModel = model.groupsJoinModel;
+  const { foreignKey } = joinModel;
+
   for (let key of groupKeys) {
     // if key isn't present then don't change the current group data
     if (!_.has(values, key)) continue;
@@ -295,8 +372,6 @@ async function updateGroups(entry, values, { model, transacting }) {
     const attr = model.attributes[key];
     const { group, repeatable = true } = attr;
 
-    const joinModel = entry[key].joinModel;
-    const { foreignKey } = joinModel;
     const groupModel = strapi.groups[group];
 
     const groupValue = values[key];
@@ -450,16 +525,4 @@ function validateNonRepeatableInput(value, { key, required }) {
     err.status = 400;
     throw err;
   }
-}
-
-function excludeExernalValues(model) {
-  // TODO: allow timestamps update someday
-
-  const assocKeys = model.associations.map(ast => ast.alias);
-  const groupKeys = Object.keys(model.attributes).filter(key => {
-    return model.attributes[key].type === 'group';
-  });
-
-  const excludedKeys = assocKeys.concat(groupKeys);
-  return (value, key) => excludedKeys.includes(key);
 }
