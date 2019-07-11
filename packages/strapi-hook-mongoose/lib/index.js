@@ -136,6 +136,9 @@ module.exports = function(strapi) {
               // This is not an error if the file is not found.
             }
 
+            // BUG: this is NO OP!
+            // Object.key takes a single parameter: this looks like it should be
+            // Object.keys(options).forEach( key => instance.set(key, options[key]))
             Object.keys(options, key => instance.set(key, options[key]));
 
             const mountModels = (models, target, plugin = false) => {
@@ -336,6 +339,21 @@ module.exports = function(strapi) {
                           : false,
                       );
                     }
+                    // add attribute definition for timestamp fields
+                    if (_.get(definition, 'options.timestamps')) {
+                      // either array or false
+                      definition.attributes[
+                        _.get(definition, 'options.timestamps[0]')
+                      ] = {
+                        type: 'timestamp',
+                      };
+                      definition.attributes[
+                        _.get(definition, 'options.timestamps[1]')
+                      ] = {
+                        type: 'timestampUpdate',
+                      };
+                    }
+                    
                     collection.schema.set(
                       'minimize',
                       _.get(definition, 'options.minimize', false) === true,
@@ -791,7 +809,7 @@ module.exports = function(strapi) {
             result.value = _.castArray(value);
             break;
           default:
-            result = undefined;
+            result = undefined; // BUG: result is const
         }
 
         return result;
