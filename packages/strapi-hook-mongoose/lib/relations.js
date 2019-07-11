@@ -316,14 +316,6 @@ module.exports = {
     return updatedEntity;
   },
 
-  addRelation: async function(params) {
-    return module.exports.update.call(this, params);
-  },
-
-  removeRelation: async function(params) {
-    return module.exports.update.call(this, params);
-  },
-
   addRelationMorph: async function(params) {
     /*
       TODO:
