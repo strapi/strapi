@@ -19,7 +19,7 @@
  *  - target : string
  *  - validations : object
  *
- * Optionnal
+ * Optional
  * - description : input description
  * - handleFocus : function
  * - placeholder : string if set to "" nothing will display
@@ -79,7 +79,7 @@ class InputText extends React.Component {
     return (
       size(this.props.errors) === size(nextProps.errors) &&
       this.props.errors.every(
-        (error, index) => error.id === nextProps.errors[index].id,
+        (error, index) => error.id === nextProps.errors[index].id
       )
     );
   };
@@ -174,7 +174,7 @@ class InputText extends React.Component {
     handleBlur,
     inputValue,
     placeholder,
-    marginBottom,
+    marginBottom
   ) => (
     <FormattedMessage id={`settings-manager.${placeholder}`}>
       {message => (
@@ -228,7 +228,7 @@ class InputText extends React.Component {
         handleBlur,
         inputValue,
         placeholder,
-        marginBottomInput,
+        marginBottomInput
       )
     ) : (
       <input
@@ -256,9 +256,7 @@ class InputText extends React.Component {
       marginTopSmall = '-1.2rem';
     return (
       <div
-        className={`${
-          this.props.styles.stminputText
-        } ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}
+        className={`${this.props.styles.stminputText} ${bootStrapClass} ${requiredClass} ${bootStrapClassDanger}`}
         style={spacer}
       >
         {label}

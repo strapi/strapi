@@ -36,7 +36,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     // Define local GLOBALS to expose every models in this file.
     GLOBALS[definition.globalId] = {};
 
-    // Add some informations about ORM & client connection & tableName
+    // Add some information about ORM & client connection & tableName
     definition.orm = 'bookshelf';
     definition.databaseName = getDatabaseName(connection);
     definition.client = _.get(connection.settings, 'client');
