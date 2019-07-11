@@ -63,7 +63,7 @@ function FilterPickerOption({
           type={type}
           name={`${index}.value`}
           value={get(modifiedData, [index, 'value'], '')}
-          selectOptions={['false', 'true', 'oo']}
+          selectOptions={['true', 'false']}
           onChange={onChange}
         />
         {showAddButton && <Button type="button" onClick={onClickAddFilter} />}
