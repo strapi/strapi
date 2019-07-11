@@ -4,7 +4,6 @@ const initialState = fromJS({
   initialData: {},
   isLoading: true,
   modifiedData: {},
-  isSubmitting: false,
 });
 
 function reducer(state, action) {
@@ -14,6 +13,8 @@ function reducer(state, action) {
         .update('isLoading', () => false)
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data));
+    case 'RESET_FORM':
+      return state.update('modifiedData', () => state.get('initialData'));
     default:
       return state;
   }
