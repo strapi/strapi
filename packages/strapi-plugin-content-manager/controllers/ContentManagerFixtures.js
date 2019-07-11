@@ -256,7 +256,7 @@ module.exports = {
           },
         },
         settings: {
-          mainField: 'id',
+          mainField: 'title',
           defaultSortBy: 'id',
           defaultSortOrder: 'ASC',
           searchable: true,

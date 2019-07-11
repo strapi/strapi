@@ -145,7 +145,6 @@ function ListView({
       return { ...getMetaDatas([label, 'list']), name: label };
     });
   };
-
   const handleChangeListLabels = ({ name, value }) => {
     const currentSort = getSearchParams()._sort;
 
@@ -187,7 +186,6 @@ function ListView({
     setIdToDelete(id);
     toggleModalDelete();
   };
-
   const handleSubmit = (filters = []) => {
     emitEvent('didFilterEntries');
     toggleFilterPickerState();

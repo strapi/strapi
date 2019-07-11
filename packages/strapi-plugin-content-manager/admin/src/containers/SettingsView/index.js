@@ -106,17 +106,17 @@ function SettingsView({
         actions={getPluginHeaderActions()}
         title="Content Manager"
         description={{
-          id: 'content-manager.containers.SettingsPage.pluginHeaderDescription',
+          id: `${pluginId}.containers.SettingsPage.pluginHeaderDescription`,
         }}
       />
       <PopUpWarning
         isOpen={showWarningSubmit}
         toggleModal={toggleWarningSubmit}
         content={{
-          title: 'content-manager.popUpWarning.title',
-          message: 'content-manager.popUpWarning.warning.updateAllSettings',
-          cancel: 'content-manager.popUpWarning.button.cancel',
-          confirm: 'content-manager.popUpWarning.button.confirm',
+          title: `${pluginId}.popUpWarning.title`,
+          message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
+          cancel: `${pluginId}.popUpWarning.button.cancel`,
+          confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
         onConfirm={() => onSubmit()}
@@ -125,10 +125,10 @@ function SettingsView({
         isOpen={showWarningCancel}
         toggleModal={toggleWarningCancel}
         content={{
-          title: 'content-manager.popUpWarning.title',
-          message: 'content-manager.popUpWarning.warning.cancelAllSettings',
-          cancel: 'content-manager.popUpWarning.button.cancel',
-          confirm: 'content-manager.popUpWarning.button.confirm',
+          title: `${pluginId}.popUpWarning.title`,
+          message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
+          cancel: `${pluginId}.popUpWarning.button.cancel`,
+          confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
         onConfirm={() => {
@@ -138,8 +138,8 @@ function SettingsView({
       />
       <Row className="row">
         <Block
-          description="content-manager.containers.SettingsPage.Block.generalSettings.description"
-          title="content-manager.containers.SettingsPage.Block.generalSettings.title"
+          description={`${pluginId}.containers.SettingsPage.Block.generalSettings.description`}
+          title={`${pluginId}.containers.SettingsPage.Block.generalSettings.title`}
           style={{ marginBottom: 7 }}
         >
           <form style={{ paddingTop: '2.6rem' }}>

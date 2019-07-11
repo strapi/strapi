@@ -31,6 +31,7 @@
   "components.TableEmpty.withSearch": "Aucun {contentType} n'a été trouvé avec cette recherche ({search})...",
   "components.TableEmpty.withoutFilter": "Aucun {contentType} n'a été trouvé...",
   "containers.Edit.addAnItem": "Ajouter un élément...",
+  "containers.Edit.pluginHeader.title.new": "Créer un document",
   "containers.Edit.clickToJump": "Cliquer pour voir l'entrée",
   "containers.Edit.delete": "Supprimer",
   "containers.Edit.editing": "Édition en cours...",

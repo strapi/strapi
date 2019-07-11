@@ -33,6 +33,7 @@
   "components.TableEmpty.withSearch": "There is no {contentType} corresponding to the search ({search})...",
   "components.TableEmpty.withoutFilter": "There is no {contentType}...",
   "containers.Edit.addAnItem": "Add an item...",
+  "containers.Edit.pluginHeader.title.new": "Create an Entry",
   "containers.Edit.clickToJump": "Click to jump to the entry",
   "containers.Edit.delete": "Delete",
   "containers.Edit.editing": "Editing...",

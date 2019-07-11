@@ -38,31 +38,24 @@ function Main({ emitEvent, getLayout, layouts, location: { pathname } }) {
   const renderRoute = (props, Component) => (
     <Component emitEvent={emitEvent} layouts={layouts} {...props} />
   );
+  const routes = [
+    {
+      path: 'ctm-configurations/models/:name/:settingType',
+      comp: SettingViewModel,
+    },
+    { path: 'ctm-configurations/groups/:name', comp: SettingViewGroup },
+    { path: 'ctm-configurations/:type', comp: SettingsView },
+    { path: ':slug/:id', comp: EditView },
+    { path: ':slug', comp: ListView },
+  ].map(({ path, comp }) => (
+    <Route
+      key={path}
+      path={`/plugins/${pluginId}/${path}`}
+      render={props => renderRoute(props, comp)}
+    />
+  ));
 
-  return (
-    <Switch>
-      <Route
-        path={`/plugins/${pluginId}/ctm-configurations/models/:name/:settingType`}
-        render={props => renderRoute(props, SettingViewModel)}
-      />
-      <Route
-        path={`/plugins/${pluginId}/ctm-configurations/groups/:name`}
-        component={SettingViewGroup}
-      />
-      <Route
-        path={`/plugins/${pluginId}/ctm-configurations/:type`}
-        render={props => renderRoute(props, SettingsView)}
-      />
-      <Route
-        path={`/plugins/${pluginId}/:slug/:id`}
-        render={props => renderRoute(props, EditView)}
-      />
-      <Route
-        path={`/plugins/${pluginId}/:slug`}
-        render={props => renderRoute(props, ListView)}
-      />
-    </Switch>
-  );
+  return <Switch>{routes}</Switch>;
 }
 
 Main.propTypes = {
