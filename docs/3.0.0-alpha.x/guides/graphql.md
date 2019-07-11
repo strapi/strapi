@@ -139,7 +139,7 @@ mutation {
 }
 ```
 
-You can also update relational attributes by passing an ID or an array of IDs (depending of the relationship).
+You can also update relational attributes by passing an ID or an array of IDs (depending on the relationship).
 
 ```
 mutation {
@@ -385,7 +385,7 @@ postsConnection(where: { published: true }) {
 }
 ```
 
-Gettings the average likes of published and unpublished posts
+Getting the average likes of published and unpublished posts
 
 ```
 postsConnection {
@@ -456,13 +456,13 @@ module.exports = {
 };
 ```
 
-- `definition` (string): let's you define new type, input, etc.
+- `definition` (string): lets you define new type, input, etc.
 - `query` (string): where you add custom query.
 - `mutation` (string): where you add custom mutation.
 - `type` (object): allows you to add description, deprecated field or disable the [Shadow CRUD](#shadow-crud) feature on a specific type.
 - `resolver` (object):
-  - `Query` (object): let's you define custom resolver, policies for a query.
-  - `Mutation` (object): let's you define custom resolver, policies for a mutation.
+  - `Query` (object): lets you define custom resolver, policies for a query.
+  - `Mutation` (object): lets you define custom resolver, policies for a mutation.
 
 #### Example
 
@@ -577,7 +577,7 @@ module.exports = {
     Query: {
       person: {
         description: 'Return a single person',
-        resolver: 'Person.findOne' // It will use the action `findOne` located in the `Person.js` controller*.
+        resolver: 'Person.findOne' // It will use the action `findOne` located in the `Person.js` controller.
       }
     }
   }
@@ -638,7 +638,7 @@ One of the most powerful features of GraphQL is the auto-documentation of the sc
 }
 ```
 
-It might happens that you want to add a description to a query or deprecate it. To do that, you need to use the `schema.graphql` file.
+It might happen that you want to add a description to a query or deprecate it. To do that, you need to use the `schema.graphql` file.
 
 ::: warning
 The `schema.graphql` file has to be placed into the config folder of each API `./api/*/config/schema.graphql` or plugin `./plugins/*/config/schema.graphql`.
@@ -702,7 +702,7 @@ There is no custom resolver in that case, so it will execute the default resolve
 
 ### Link a query or mutation to a controller action
 
-By default, the plugin will execute the actions located in the controllers that has been generated via the Content-Type Builder plugin or the CLI. For example, the query `posts` is going to execute the logic inside the `find` action in the `Post.js` controller. It might happens that you want to execute another action or a custom logic for one of your query.
+By default, the plugin will execute the actions located in the controllers that has been generated via the Content-Type Builder plugin or the CLI. For example, the query `posts` is going to execute the logic inside the `find` action in the `Post.js` controller. It might happen that you want to execute another action or a custom logic for one of your query.
 
 ```js
 module.exports = {
@@ -774,7 +774,7 @@ You can also execute a custom logic like above. However, the roles and permissio
 
 ### Apply permissions on a query
 
-It might happens that you want apply our permissions layer on a query. That's why, we created the `resolverOf` attribute. This attribute defines which are the permissions that should be applied to this resolver. By targeting an action it means that you're able to edit permissions for this resolver directly from the administration panel.
+It might happen that you want apply our permissions layer on a query. That's why, we created the `resolverOf` attribute. This attribute defines which are the permissions that should be applied to this resolver. By targeting an action it means that you're able to edit permissions for this resolver directly from the administration panel.
 
 ```js
 module.exports = {
@@ -838,7 +838,7 @@ The type name is the global ID of the model. You can find the global ID of a mod
 
 **Where should I put the field description and deprecated reason?**
 
-We recommend to put the field description and deprecated reason in the model. Right now, the GraphQL plugin is the only which uses these fields. Another plugin could use this description in the future as well. However, sometimes you don't have the choice, especially when you're defining a custom type.
+We recommend putting the field description and deprecated reason in the model. Right now, the GraphQL plugin is the only which uses these fields. Another plugin could use this description in the future as well. However, sometimes you don't have the choice, especially when you're defining a custom type.
 
 ::: note
 It's not a bad practice to put the description and deprecated attribute in the `schema.graphql`, though.

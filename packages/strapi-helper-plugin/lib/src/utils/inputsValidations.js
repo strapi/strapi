@@ -3,7 +3,7 @@ import { includes, mapKeys, reject } from 'lodash';
  * [validateInput description]
  * @param  {String || Number} value  Input's value
  * @param  {Object} inputValidations
- * @param  {String} [type='text']    Optionnal: the input's type only for email
+ * @param  {String} [type='text']    Optional: the input's type only for email
  * @return {Array}                  Array of errors to be displayed
  */
 

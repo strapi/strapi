@@ -18,7 +18,7 @@
  *  - value : string
  *  - validations : object
  *
- * Optionnal
+ * Optional
  * - description : input description
  * - handleFocus : function
  * - placeholder : string if set to "" nothing will display

@@ -1,6 +1,6 @@
 {
   "name": "strapi-utils",
-  "version": "3.0.0-beta.9",
+  "version": "3.0.0-beta.11",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -46,7 +46,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": "^10.0.0",
+    "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
   "license": "MIT",

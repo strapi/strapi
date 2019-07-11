@@ -57,7 +57,7 @@ export function* pluginsGet() {
     let availablePlugins;
 
     try {
-      // Fetch plugins informations.
+      // Fetch plugins information.
       availablePlugins = yield call(
         request,
         'https://marketplace.strapi.io/plugins',
