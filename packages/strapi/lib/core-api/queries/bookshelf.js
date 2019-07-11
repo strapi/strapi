@@ -47,20 +47,17 @@ module.exports = ({ model, modelKey }) => {
 
       const data = _.omitBy(values, excludeExernalValues(model));
 
-      const db = strapi.connections[model.connection];
-      return db
-        .transaction(async trx => {
-          // Create entry with no-relational data.
-          const entry = await model
-            .forge(data)
-            .save(null, { transacting: trx });
+      const runCreate = async trx => {
+        // Create entry with no-relational data.
+        const entry = await model.forge(data).save(null, { transacting: trx });
+        await createGroups(entry, values, { model, transacting: trx });
+        return entry;
+      };
 
-          await createGroups(entry, values, { model, transacting: trx });
-          return entry;
-        })
-        .then(entry => {
-          return model.updateRelations({ id: entry.id, values: relations });
-        });
+      const db = strapi.connections[model.connection];
+      const entry = await db.transaction(trx => runCreate(trx));
+
+      return model.updateRelations({ id: entry.id, values: relations });
     },
 
     async update(params, values) {
@@ -72,19 +69,19 @@ module.exports = ({ model, modelKey }) => {
 
       const data = _.omitBy(values, excludeExernalValues(model));
 
+      const runUpdate = async trx => {
+        const entry = await model
+          .forge(params)
+          .save(data, { transacting: trx });
+        await updateGroups(entry, values, { model, transacting: trx });
+      };
+
       const db = strapi.connections[model.connection];
-      return db
-        .transaction(async trx => {
-          const entry = await model
-            .forge(params)
-            .save(data, { transacting: trx });
-          await updateGroups(entry, values, { model, transacting: trx });
-        })
-        .then(() => {
-          return model.updateRelations(
-            Object.assign(params, { values: relations })
-          );
-        });
+      await db.transaction(trx => runUpdate(trx));
+
+      return model.updateRelations(
+        Object.assign(params, { values: relations })
+      );
 
       // Create relational data and return the entry.
     },
@@ -246,18 +243,19 @@ async function createGroups(entry, values, { model, transacting }) {
 
     const createGroupAndLink = async ({ value, order }) => {
       return groupModel
-        .forge(value)
-        .save(null, { transacting })
+        .forge()
+        .save(value, { transacting })
         .then(group => {
-          return joinModel
-            .forge({
+          return joinModel.forge().save(
+            {
               [foreignKey]: entry.id,
               slice_type: groupModel.collectionName,
               slice_id: group.id,
               field: key,
               order,
-            })
-            .save(null, { transacting });
+            },
+            { transacting }
+          );
         });
     };
 
@@ -305,41 +303,76 @@ async function updateGroups(entry, values, { model, transacting }) {
 
     const updateOreateGroupAndLink = async ({ value, order }) => {
       // check if value has an id then update else create
-
-      return groupModel
-        .forge(value)
-        .save(null, { transacting })
-        .then(group => {
-          return joinModel
-            .forge({
-              [foreignKey]: entry.id,
-              slice_type: groupModel.collectionName,
-              slice_id: group.id,
-              field: key,
-              order,
-            })
-            .save(null, { transacting });
-        });
+      if (_.has(value, groupModel.primaryKey)) {
+        return groupModel
+          .forge(value)
+          .save(value, { transacting, patch: true, require: false })
+          .then(group => {
+            return joinModel
+              .forge()
+              .query({
+                where: {
+                  [foreignKey]: entry.id,
+                  slice_type: groupModel.collectionName,
+                  slice_id: group.id,
+                  field: key,
+                },
+              })
+              .save(
+                {
+                  order,
+                },
+                { transacting, patch: true, require: false }
+              );
+          });
+      } else {
+        return groupModel
+          .forge()
+          .save(value, { transacting })
+          .then(group => {
+            return joinModel.forge().save(
+              {
+                [foreignKey]: entry.id,
+                slice_type: groupModel.collectionName,
+                slice_id: group.id,
+                field: key,
+                order,
+              },
+              { transacting }
+            );
+          });
+      }
     };
 
     if (repeatable === true) {
       validateRepeatableInput(groupValue, { key, ...attr });
 
       // TODO: delete the ones not kept and their links
-      // const idsToDelete = groupValue
-      //   .filter(el => _.has(el, 'id'))
-      //   .map(el => el.id);
+      const idsToKeep = groupValue
+        .filter(el => _.has(el, groupModel.primaryKey))
+        .map(el => el[groupModel.primaryKey]);
 
-      // await groupModel
-      //   .forge()
-      //   .whereIn('id', idsToDelete)
-      //   .destroy();
+      const idsToDelete = await joinModel
+        .forge()
+        .query(qb => {
+          qb.where(foreignKey, entry.id)
+            .andWhere('field', key)
+            .whereNotIn('slice_id', idsToKeep);
+        })
+        .fetchAll({ transacting })
+        .map(el => el.get('slice_id'));
 
-      // await joinModel
-      //   .forge()
-      //   .where('slice_type', groupModel.collectionName)
-      //   .whereIn('slice_id', idsToDelete)
-      //   .destroy();
+      if (idsToDelete > 0) {
+        await joinModel
+          .forge()
+          .query(qb => qb.whereIn('slice_id', idsToDelete))
+          .destroy({ transacting, require: false });
+
+        await groupModel
+          .forge()
+          .query(qb => qb.whereIn(groupModel.primaryKey, idsToDelete))
+          .destroy({ transacting, require: false });
+      }
 
       await Promise.all(
         groupValue.map((value, idx) => {
@@ -352,14 +385,13 @@ async function updateGroups(entry, values, { model, transacting }) {
       // TODO: if the value has an id => update
       // else delete and create
 
-      await updateOreateGroupAndLink({ value: groupValue, order: 1 });
+      // await updateOreateGroupAndLink({ value: groupValue, order: 1 });
     }
   }
   return;
 }
 
 function validateRepeatableInput(value, { key, min, max }) {
-  console.log('validateRepeatableInput', key, value);
   if (!Array.isArray(value)) {
     const err = new Error(`Group ${key} is repetable. Expected an array`);
     err.status = 400;
@@ -393,6 +425,8 @@ function validateNonRepeatableInput(value, { key, required }) {
 }
 
 function excludeExernalValues(model) {
+  // TODO: allow timestamps update someday
+
   const assocKeys = model.associations.map(ast => ast.alias);
   const groupKeys = Object.keys(model.attributes).filter(key => {
     return model.attributes[key].type === 'group';
