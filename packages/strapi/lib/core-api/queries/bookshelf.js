@@ -347,32 +347,12 @@ async function updateGroups(entry, values, { model, transacting }) {
     if (repeatable === true) {
       validateRepeatableInput(groupValue, { key, ...attr });
 
-      // TODO: delete the ones not kept and their links
-      const idsToKeep = groupValue
-        .filter(el => _.has(el, groupModel.primaryKey))
-        .map(el => el[groupModel.primaryKey]);
-
-      const idsToDelete = await joinModel
-        .forge()
-        .query(qb => {
-          qb.where(foreignKey, entry.id)
-            .andWhere('field', key)
-            .whereNotIn('slice_id', idsToKeep);
-        })
-        .fetchAll({ transacting })
-        .map(el => el.get('slice_id'));
-
-      if (idsToDelete > 0) {
-        await joinModel
-          .forge()
-          .query(qb => qb.whereIn('slice_id', idsToDelete))
-          .destroy({ transacting, require: false });
-
-        await groupModel
-          .forge()
-          .query(qb => qb.whereIn(groupModel.primaryKey, idsToDelete))
-          .destroy({ transacting, require: false });
-      }
+      await deleteOldGroups(entry, groupValue, {
+        key,
+        joinModel,
+        groupModel,
+        transacting,
+      });
 
       await Promise.all(
         groupValue.map((value, idx) => {
@@ -382,13 +362,61 @@ async function updateGroups(entry, values, { model, transacting }) {
     } else {
       validateNonRepeatableInput(groupValue, { key, ...attr });
 
-      // TODO: if the value has an id => update
-      // else delete and create
+      await deleteOldGroups(entry, groupValue, {
+        key,
+        joinModel,
+        groupModel,
+        transacting,
+      });
 
-      // await updateOreateGroupAndLink({ value: groupValue, order: 1 });
+      await updateOreateGroupAndLink({ value: groupValue, order: 1 });
     }
   }
   return;
+}
+
+async function deleteOldGroups(
+  entry,
+  groupValue,
+  { key, joinModel, groupModel, transacting }
+) {
+  const groupArr = Array.isArray(groupValue) ? groupValue : [groupValue];
+
+  const idsToKeep = groupArr
+    .filter(el => _.has(el, groupModel.primaryKey))
+    .map(el => el[groupModel.primaryKey]);
+
+  const allIds = await joinModel
+    .forge()
+    .query(qb => {
+      qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
+    })
+    .fetchAll({ transacting })
+    .map(el => el.get('slice_id'));
+
+  // verify the provided ids are realted to this entity.
+  idsToKeep.forEach(id => {
+    if (!allIds.includes(id)) {
+      const err = new Error(
+        `Some of the provided groups in ${key} are not related to the entity`
+      );
+      err.status = 400;
+      throw err;
+    }
+  });
+
+  const idsToDelete = _.difference(allIds, idsToKeep);
+  if (idsToDelete > 0) {
+    await joinModel
+      .forge()
+      .query(qb => qb.whereIn('slice_id', idsToDelete))
+      .destroy({ transacting, require: false });
+
+    await groupModel
+      .forge()
+      .query(qb => qb.whereIn(groupModel.primaryKey, idsToDelete))
+      .destroy({ transacting, require: false });
+  }
 }
 
 function validateRepeatableInput(value, { key, min, max }) {
