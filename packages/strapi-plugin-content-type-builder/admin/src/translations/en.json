@@ -191,5 +191,9 @@
   "table.contentType.title.singular": "{number} Content Type is available",
   "table.groups.title.plural": "{number} Groups are available",
   "table.groups.title.singular": "{number} Group is available",
+  "table.attributes.title.plural": "{number} fields",
+  "table.attributes.title.singular": "{number} field",
+  "table.relations.title.plural": "including {number} relationships",
+  "table.relations.title.singular": "including {number} relationship",
   "prompt.content.unsaved": "Are you sure you want to leave this content type? All your modifications will be lost."
 }

@@ -17,6 +17,9 @@ import {
   BackHeader,
   Button,
   EmptyAttributesBlock,
+  List,
+  ListHeader,
+  ListWrapper,
   PopUpWarning,
   routerPropTypes,
   getQueryParameters,
@@ -24,11 +27,7 @@ import {
 
 import pluginId from '../../pluginId';
 
-import AttributeLi from '../../components/AttributeLi';
-import Block from '../../components/Block';
-import Flex from '../../components/Flex';
-import ListTitle from '../../components/ListTitle';
-import Ul from '../../components/Ul';
+import ListRow from '../../components/ListRow';
 
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
@@ -373,7 +372,14 @@ export class ModelPage extends React.Component {
     this.setState({ attrToDelete: null, showWarning: false });
   };
 
-  handleGoBack = () => this.props.history.goBack();
+  handleGoBack = () => {
+    const {
+      location: { pathname },
+    } = this.props;
+    const backPathname = pathname.substr(0, pathname.lastIndexOf('/'));
+
+    this.props.history.push(backPathname);
+  };
 
   handleSubmit = (shouldContinue = false) => {
     const {
@@ -488,22 +494,25 @@ export class ModelPage extends React.Component {
       `${pluginId}.notification.info.contentType.creating.notSaved`
     );
 
-  renderLi = attribute => {
+  renderListRow = attribute => {
+    const { canOpenModal } = this.props;
     const attributeInfos = get(this.getModelAttributes(), attribute, {});
 
     return (
-      <AttributeLi
-        key={attribute}
+      <ListRow
+        {...attributeInfos}
+        attributeId={attribute}
+        canOpenModal={canOpenModal}
+        context={this.context}
         name={attribute}
-        attributeInfos={attributeInfos}
         onClick={this.handleClickEditAttribute}
-        onClickOnTrashIcon={this.handleClickOnTrashIcon}
+        onClickDelete={this.handleClickOnTrashIcon}
+        key={attribute}
       />
     );
   };
 
   render() {
-    const listTitleMessageIdBasePrefix = `${pluginId}.modelPage.contentType.list.title`;
     const {
       clearTemporaryAttribute,
       clearTemporaryAttributeRelation,
@@ -532,6 +541,33 @@ export class ModelPage extends React.Component {
     const attributeType = this.getAttributeType();
     const actionType = this.getActionType();
 
+    const attributesNumber = this.getModelAttributesLength();
+    const relationsNumber = this.getModelRelationShipsLength();
+
+    let title = [
+      {
+        label: `${pluginId}.table.attributes.title.${
+          attributesNumber > 1 ? 'plural' : 'singular'
+        }`,
+        values: { number: attributesNumber },
+      },
+    ];
+
+    if (relationsNumber > 0) {
+      title.push({
+        label: `${pluginId}.table.relations.title.${
+          relationsNumber > 1 ? 'plural' : 'singular'
+        }`,
+        values: { number: relationsNumber },
+      });
+    }
+
+    const buttonProps = {
+      kind: 'secondaryHotlineAdd',
+      label: `${pluginId}.button.attributes.add`,
+      onClick: () => this.handleClickOpenModalChooseAttributes(),
+    };
+
     return (
       <div className={styles.modelpage}>
         <BackHeader onClick={this.handleGoBack} />
@@ -543,7 +579,6 @@ export class ModelPage extends React.Component {
             />
           )}
         </FormattedMessage>
-
         <ViewContainer
           {...this.props}
           featureType={this.featureType}
@@ -552,7 +587,7 @@ export class ModelPage extends React.Component {
           pluginHeaderActions={this.getPluginHeaderActions()}
           onClickIcon={this.handleClickEditModelMainInfos}
         >
-          {this.getModelAttributesLength() === 0 ? (
+          {attributesNumber === 0 ? (
             <EmptyAttributesBlock
               description="content-type-builder.home.emptyAttributes.description"
               id="openAddAttr"
@@ -561,51 +596,21 @@ export class ModelPage extends React.Component {
               title="content-type-builder.home.emptyAttributes.title"
             />
           ) : (
-            <Block>
-              <Flex>
-                <ListTitle>
-                  {this.getModelAttributesLength()}
-                  &nbsp;
-                  <FormattedMessage
-                    id={`${listTitleMessageIdBasePrefix}.${
-                      this.getModelAttributesLength() > 1
-                        ? 'plural'
-                        : 'singular'
-                    }`}
-                  />
-                  {this.getModelRelationShipsLength() > 0 && (
-                    <React.Fragment>
-                      &nbsp;
-                      <FormattedMessage
-                        id={`${listTitleMessageIdBasePrefix}.including`}
-                      />
-                      &nbsp;
-                      {this.getModelRelationShipsLength()}
-                      &nbsp;
-                      <FormattedMessage
-                        id={`${pluginId}.modelPage.contentType.list.relationShipTitle.${
-                          this.getModelRelationShipsLength() > 1
-                            ? 'plural'
-                            : 'singular'
-                        }`}
-                      />
-                    </React.Fragment>
-                  )}
-                </ListTitle>
-                <div>
-                  <Button
-                    label={`${pluginId}.button.attributes.add`}
-                    onClick={this.handleClickOpenModalChooseAttributes}
-                    secondaryHotlineAdd
-                  />
-                </div>
-              </Flex>
-              <div>
-                <Ul id="attributesList">
-                  {Object.keys(this.getModelAttributes()).map(this.renderLi)}
-                </Ul>
+            <ListWrapper>
+              <ListHeader title={title} button={{ ...buttonProps }} />
+              <List>
+                <table>
+                  <tbody>
+                    {Object.keys(this.getModelAttributes()).map(
+                      this.renderListRow
+                    )}
+                  </tbody>
+                </table>
+              </List>
+              <div className="list-button">
+                <Button {...buttonProps} />
               </div>
-            </Block>
+            </ListWrapper>
           )}
         </ViewContainer>
 

@@ -15,6 +15,7 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
   CREATE_TEMP_GROUP,
+  DELETE_GROUP_ATTRIBUTE,
   DELETE_GROUP_SUCCEEDED,
   DELETE_MODEL_ATTRIBUTE,
   DELETE_MODEL_SUCCEEDED,
@@ -258,13 +259,9 @@ function appReducer(state = initialState, action) {
           )
         )
         .update('newGroupClone', () => state.get('newGroup'));
+    case DELETE_GROUP_ATTRIBUTE:
+      return state.removeIn(action.keys);
     case DELETE_GROUP_SUCCEEDED:
-      console.log({
-        st: state
-          .get('groups')
-          .findIndex(group => group.get('uid') === action.uid),
-        action,
-      });
       return state.removeIn([
         'groups',
         state.get('groups').findIndex(group => group.get('uid') === action.uid),
