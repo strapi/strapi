@@ -25,7 +25,7 @@ import ListRow from './ListRow';
 import { getData, onChange, onReset, onSubmit } from './actions';
 import reducer from './reducer';
 import saga from './saga';
-import makeSelectSettingView from './selectors';
+import makeSelectSettingsView from './selectors';
 
 import form from './forms.json';
 
@@ -211,7 +211,7 @@ SettingsView.propTypes = {
   shouldToggleModalSubmit: PropTypes.bool.isRequired,
 };
 
-const mapStateToProps = makeSelectSettingView();
+const mapStateToProps = makeSelectSettingsView();
 
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(

@@ -23,15 +23,15 @@ function Main({ isLoading, emitEvent }) {
     return <LoadingIndicatorPage />;
   }
 
-  const renderRoute = props => (
-    <SettingsView emitEvent={emitEvent} {...props} />
+  const renderRoute = (props, Component) => (
+    <Component emitEvent={emitEvent} {...props} />
   );
 
   return (
     <Switch>
       <Route
         path="/plugins/content-manager/ctm-configurations/models/:name/:settingType"
-        component={SettingViewModel}
+        render={props => renderRoute(props, SettingViewModel)}
       />
       <Route
         path="/plugins/content-manager/ctm-configurations/groups/:name"
@@ -39,7 +39,7 @@ function Main({ isLoading, emitEvent }) {
       />
       <Route
         path="/plugins/content-manager/ctm-configurations/:type"
-        render={renderRoute}
+        render={props => renderRoute(props, SettingsView)}
       />
     </Switch>
   );
