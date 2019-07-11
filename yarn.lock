@@ -2208,11 +2208,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/geojson@^1.0.0":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-1.0.6.tgz#3e02972728c69248c2af08d60a48cbb8680fffdf"
-  integrity sha512-Xqg/lIZMrUd0VRmSRbCAewtwGZiAk3mEUDvV4op1tGl+LvyPcb/MIOSxTl9z+9+J+R4/vpjiCAT4xeKzH9ji1w==
-
 "@types/glob@^7.1.1":
   version "7.1.1"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.1.1.tgz#aa59a1c6e3fbc421e07ccd31a944c30eba521575"
@@ -2850,7 +2845,7 @@ any-promise@^0.1.0:
   resolved "https://registry.yarnpkg.com/any-promise/-/any-promise-0.1.0.tgz#830b680aa7e56f33451d4b049f3bd8044498ee27"
   integrity sha1-gwtoCqflbzNFHUsEnzvYBESY7ic=
 
-any-promise@^1.0.0, any-promise@^1.1.0:
+any-promise@^1.0.0, any-promise@^1.1.0, any-promise@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/any-promise/-/any-promise-1.3.0.tgz#abc6afeedcea52e809cdc0376aed3ce39635d17f"
   integrity sha1-q8av7tzqUugJzcA3au0845Y10X8=
@@ -3656,7 +3651,7 @@ bluebird@^2.9.30:
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-2.11.0.tgz#534b9033c022c9579c56ba3b3e5a5caafbb650e1"
   integrity sha1-U0uQM8AiyVecVro7Plpcqvu2UOE=
 
-bluebird@^3.1.1, bluebird@^3.4.3, bluebird@^3.4.6, bluebird@^3.5.0, bluebird@^3.5.1, bluebird@^3.5.3, bluebird@^3.5.4, bluebird@^3.5.5:
+bluebird@^3.1.1, bluebird@^3.4.3, bluebird@^3.5.0, bluebird@^3.5.1, bluebird@^3.5.3, bluebird@^3.5.4, bluebird@^3.5.5:
   version "3.5.5"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.5.tgz#a8d0afd73251effbbd5fe384a77d73003c17a71f"
   integrity sha512-5am6HnnfN+urzt4yfg7IgTbotDjIT/u8AJpEt0sIU9FtXfVeezXAPKswrG+xKUCOYAINpSdgZVDU6QFh+cuH3w==
@@ -5802,7 +5797,7 @@ denque@^1.1.0:
   resolved "https://registry.yarnpkg.com/denque/-/denque-1.4.1.tgz#6744ff7641c148c3f8a69c307e51235c1f4a37cf"
   integrity sha512-OfzPuSZKGcgr96rf1oODnfjqBFmr1DVoc/TrItj3Ohe0Ah1C5WX5Baquw/9U9KovnQ88EqmJbD66rKYUQYN1tQ==
 
-depd@^1.1.0, depd@^1.1.2, depd@~1.1.2:
+depd@^1.1.2, depd@~1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/depd/-/depd-1.1.2.tgz#9bcd52e14c097763e749b274c4346ed2e560b5a9"
   integrity sha1-m81S4UwJd2PnSbJ0xDRu0uVgtak=
@@ -6044,6 +6039,11 @@ dottie@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/dottie/-/dottie-2.0.1.tgz#697ad9d72004db7574d21f892466a3c285893659"
   integrity sha512-ch5OQgvGDK2u8pSZeSYAQaV/lczImd7pMJ7BcEPXmnFVjy4yJIzP6CsODJUTH8mg1tyH1Z2abOiuJO3DjZ/GBw==
+
+double-ended-queue@^2.1.0-0:
+  version "2.1.0-0"
+  resolved "https://registry.yarnpkg.com/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz#103d3527fd31528f40188130c841efdd78264e5c"
+  integrity sha1-ED01J/0xUo9AGIEwyEHv3XgmTlw=
 
 download@^6.2.2:
   version "6.2.5"
@@ -7502,11 +7502,6 @@ generic-names@^1.0.3:
   integrity sha1-LXhqEhruUIh2eWk56OO/+DbCCRc=
   dependencies:
     loader-utils "^0.2.16"
-
-generic-pool@3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/generic-pool/-/generic-pool-3.5.0.tgz#acac4fd743a175ff20574f380910036464cb61f7"
-  integrity sha512-dEkxmX+egB2o4NR80c/q+xzLLzLX+k68/K8xv81XprD+Sk7ZtP14VugeCz+fUwv5FzpWq40pPtAkzPRqT8ka9w==
 
 genfun@^5.0.0:
   version "5.0.0"
@@ -10514,13 +10509,14 @@ koa-views@^6.2.0:
     mz "^2.4.0"
     pretty "^2.0.0"
 
-koa2-ratelimit@^0.6.1:
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/koa2-ratelimit/-/koa2-ratelimit-0.6.3.tgz#cfb6c1a6acd3b55cd64bccd1cce13e07d4584b9b"
-  integrity sha512-B8zrOoG2fJFW7DBgU0BqyquAP8CJknoXxN58BJ34qhLsAe7wmHRJ0fEgYwv1/FI4GEyfa3Ki6xT+x2OlnmqSIw==
+koa2-ratelimit@^0.9.0:
+  version "0.9.0"
+  resolved "https://registry.yarnpkg.com/koa2-ratelimit/-/koa2-ratelimit-0.9.0.tgz#94bb20f05edab3fba7f4cf99956c3be138554a5c"
+  integrity sha512-gCjHnjm5Xgc+Qzx3Xr8qb0Iatd9Xw4YC2ZemIpdbkFTpNjfJcoI1Df5lS/H0K+NeSxggxYN0K23ToPS/SPN/Gg==
   dependencies:
-    mongoose "^5.0.7"
-    sequelize "^4.28.1"
+    mongoose "^5.5.13"
+    promise-redis "0.0.5"
+    sequelize "^5.8.7"
 
 koa@2.7.0, koa@^2.1.0:
   version "2.7.0"
@@ -11028,7 +11024,7 @@ lodash@4.17.10:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
   integrity sha512-UejweD1pDoXu+AD825lWwp4ZGtSwgnpZxb3JDViD7StjQz+Nb/6l093lx4OQ0foGWNRoc19mWy7BzL+UAK2iVg==
 
-lodash@4.17.11, lodash@^4, lodash@^4.0.0, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.1, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.3, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.1, lodash@~4.17.10:
+lodash@4.17.11, lodash@^4, lodash@^4.0.0, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.3, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.1, lodash@~4.17.10:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
@@ -11654,7 +11650,7 @@ modify-values@^1.0.0:
   resolved "https://registry.yarnpkg.com/modify-values/-/modify-values-1.0.1.tgz#b3939fa605546474e3e3e3c63d64bd43b4ee6022"
   integrity sha512-xV2bxeN6F7oYjZWTe/YPAy6MN2M+sL4u/Rlm2AHCIVGfo2p1yGmBHQ6vHehl4bRTZBdHu3TSkWdYgkwpYzAGSw==
 
-moment-timezone@^0.5.14, moment-timezone@^0.5.25:
+moment-timezone@^0.5.21, moment-timezone@^0.5.25:
   version "0.5.26"
   resolved "https://registry.yarnpkg.com/moment-timezone/-/moment-timezone-0.5.26.tgz#c0267ca09ae84631aa3dc33f65bedbe6e8e0d772"
   integrity sha512-sFP4cgEKTCymBBKgoxZjYzlSovC20Y6J7y3nanDc5RoBIXKlZhoYwBoZGe3flwU6A372AcRwScH8KiwV6zjy1g==
@@ -11666,7 +11662,7 @@ moment@2.22.2:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
   integrity sha1-PCV/mDn8DpP/UxSWMiOeuQeD/2Y=
 
-"moment@>= 2.9.0", moment@^2.16.0, moment@^2.20.0, moment@^2.22.2, moment@^2.24.0:
+"moment@>= 2.9.0", moment@^2.16.0, moment@^2.22.2, moment@^2.24.0:
   version "2.24.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
@@ -11700,7 +11696,7 @@ mongoose-legacy-pluralize@1.0.2:
   resolved "https://registry.yarnpkg.com/mongoose-legacy-pluralize/-/mongoose-legacy-pluralize-1.0.2.tgz#3ba9f91fa507b5186d399fb40854bff18fb563e4"
   integrity sha512-Yo/7qQU4/EyIS8YDFSeenIvXxZN+ld7YdV9LqFVQJzTLye8unujAWPZ4NWKfFA+RNjh+wvTWKY9Z3E5XM6ZZiQ==
 
-mongoose@^5.0.7, mongoose@^5.5.9:
+mongoose@^5.5.13, mongoose@^5.5.9:
   version "5.6.4"
   resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-5.6.4.tgz#049ca8ad5ac16a528c23a20301579f7ac92fdb0e"
   integrity sha512-mwMpa82uGvxSmkwTbxCmXb8/Nn9+2e+X61DiGFV9ZeenTsJKcdjc0QMGwDyDEkLcnYwQ5VrQbiB9548RZbFgVw==
@@ -14288,6 +14284,14 @@ promise-inflight@^1.0.1:
   resolved "https://registry.yarnpkg.com/promise-inflight/-/promise-inflight-1.0.1.tgz#98472870bf228132fcbdd868129bad12c3c029e3"
   integrity sha1-mEcocL8igTL8vdhoEputEsPAKeM=
 
+promise-redis@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/promise-redis/-/promise-redis-0.0.5.tgz#3e3ce2aad912e927c96a6eced8d1b0f982666609"
+  integrity sha1-PjziqtkS6SfJam7O2NGw+YJmZgk=
+  dependencies:
+    redis "*"
+    redis-commands "*"
+
 promise-retry@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/promise-retry/-/promise-retry-1.1.1.tgz#6739e968e3051da20ce6497fb2b50f6911df3d6d"
@@ -15119,7 +15123,7 @@ redent@^2.0.0:
     indent-string "^3.0.0"
     strip-indent "^2.0.0"
 
-redis-commands@1.5.0:
+redis-commands@*, redis-commands@1.5.0, redis-commands@^1.2.0:
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/redis-commands/-/redis-commands-1.5.0.tgz#80d2e20698fe688f227127ff9e5164a7dd17e785"
   integrity sha512-6KxamqpZ468MeQC3bkWmCB1fp56XL64D4Kf0zJSwDZbVLLm7KFkoIcHrgRvQ+sk8dnhySs7+yBg94yIkAK7aJg==
@@ -15129,12 +15133,26 @@ redis-errors@^1.0.0, redis-errors@^1.2.0:
   resolved "https://registry.yarnpkg.com/redis-errors/-/redis-errors-1.2.0.tgz#eb62d2adb15e4eaf4610c04afe1529384250abad"
   integrity sha1-62LSrbFeTq9GEMBK/hUpOEJQq60=
 
+redis-parser@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/redis-parser/-/redis-parser-2.6.0.tgz#52ed09dacac108f1a631c07e9b69941e7a19504b"
+  integrity sha1-Uu0J2srBCPGmMcB+m2mUHnoZUEs=
+
 redis-parser@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/redis-parser/-/redis-parser-3.0.0.tgz#b66d828cdcafe6b4b8a428a7def4c6bcac31c8b4"
   integrity sha1-tm2CjNyv5rS4pCin3vTGvKwxyLQ=
   dependencies:
     redis-errors "^1.0.0"
+
+redis@*:
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-2.8.0.tgz#202288e3f58c49f6079d97af7a10e1303ae14b02"
+  integrity sha512-M1OkonEQwtRmZv4tEWF2VgpG0JWJ8Fv1PhlgT5+B+uNq2cA3Rt1Yt/ryoR+vQNOQcIEgdCdfH0jr3bDpihAw1A==
+  dependencies:
+    double-ended-queue "^2.1.0-0"
+    redis-commands "^1.2.0"
+    redis-parser "^2.6.0"
 
 redux-immutable@^4.0.0:
   version "4.0.0"
@@ -15584,13 +15602,12 @@ ret@~0.1.10:
   resolved "https://registry.yarnpkg.com/ret/-/ret-0.1.15.tgz#b8a4825d5bdb1fc3f6f53c2bc33f81388681c7bc"
   integrity sha512-TTlYpa+OL+vMMNG24xSlQGEJ3B/RzEfUlLct7b5G/ytav+wPrplCpVMFuwzXbkecJrb6IYo1iFb0S9v37754mg==
 
-retry-as-promised@^2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/retry-as-promised/-/retry-as-promised-2.3.2.tgz#cd974ee4fd9b5fe03cbf31871ee48221c07737b7"
-  integrity sha1-zZdO5P2bX+A8vzGHHuSCIcB3N7c=
+retry-as-promised@^3.1.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/retry-as-promised/-/retry-as-promised-3.2.0.tgz#769f63d536bec4783549db0777cb56dadd9d8543"
+  integrity sha512-CybGs60B7oYU/qSQ6kuaFmRd9sTZ6oXSc0toqePvV74Ac6/IFZSI1ReFQmtCN+uvW1Mtqdwpvt/LGOiCBAY2Mg==
   dependencies:
-    bluebird "^3.4.6"
-    debug "^2.6.9"
+    any-promise "^1.3.0"
 
 retry-request@^4.0.0:
   version "4.1.1"
@@ -16019,28 +16036,31 @@ sendmail@^1.2.0:
     dkim-signer "0.2.2"
     mailcomposer "3.12.0"
 
-sequelize@^4.28.1:
-  version "4.44.2"
-  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-4.44.2.tgz#2dcd1b1e436d2cbb97c909e35e7ecf7cbc9ec6f1"
-  integrity sha512-XYHpjlq9zNNvQNR1g2aSrMs6OWv9ira6iXAeyyaCvlO/W1zhDc6BT/KaphJ49Z+0ss7zHTK6Nso1v13bNf2pOA==
+sequelize-pool@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/sequelize-pool/-/sequelize-pool-2.3.0.tgz#64f1fe8744228172c474f530604b6133be64993d"
+  integrity sha512-Ibz08vnXvkZ8LJTiUOxRcj1Ckdn7qafNZ2t59jYHMX1VIebTAOYefWdRYFt6z6+hy52WGthAHAoLc9hvk3onqA==
+
+sequelize@^5.8.7:
+  version "5.10.0"
+  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-5.10.0.tgz#ffa72622d11fee87e002c6e7cfa68c1674755dd3"
+  integrity sha512-hceVQKM9WmdB1aM+F+Ach8aZrU7RMyPeXFol7de0HRo+GkAqSl054WB4a00CRVnZ/73/EdpXRJMKNLIjraSmOg==
   dependencies:
     bluebird "^3.5.0"
     cls-bluebird "^2.1.0"
-    debug "^3.1.0"
-    depd "^1.1.0"
+    debug "^4.1.1"
     dottie "^2.0.0"
-    generic-pool "3.5.0"
     inflection "1.12.0"
-    lodash "^4.17.1"
-    moment "^2.20.0"
-    moment-timezone "^0.5.14"
-    retry-as-promised "^2.3.2"
-    semver "^5.5.0"
-    terraformer-wkt-parser "^1.1.2"
+    lodash "^4.17.11"
+    moment "^2.24.0"
+    moment-timezone "^0.5.21"
+    retry-as-promised "^3.1.0"
+    semver "^6.1.1"
+    sequelize-pool "^2.3.0"
     toposort-class "^1.0.1"
     uuid "^3.2.1"
-    validator "^10.4.0"
-    wkx "^0.4.1"
+    validator "^10.11.0"
+    wkx "^0.4.6"
 
 serialize-javascript@^1.6.1, serialize-javascript@^1.7.0:
   version "1.7.0"
@@ -17411,21 +17431,6 @@ term-size@^2.1.0:
   resolved "https://registry.yarnpkg.com/term-size/-/term-size-2.1.0.tgz#3aec444c07a7cf936e157c1dc224b590c3c7eef2"
   integrity sha512-I42EWhJ+2aeNQawGx1VtpO0DFI9YcfuvAMNIdKyf/6sRbHJ4P+ZQ/zIT87tE+ln1ymAGcCJds4dolfSAS0AcNg==
 
-terraformer-wkt-parser@^1.1.2:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/terraformer-wkt-parser/-/terraformer-wkt-parser-1.2.0.tgz#c9d6ac3dff25f4c0bd344e961f42694961834c34"
-  integrity sha512-QU3iA54St5lF8Za1jg1oj4NYc8sn5tCZ08aNSWDeGzrsaV48eZk1iAVWasxhNspYBoCqdHuoot1pUTUrE1AJ4w==
-  dependencies:
-    "@types/geojson" "^1.0.0"
-    terraformer "~1.0.5"
-
-terraformer@~1.0.5:
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/terraformer/-/terraformer-1.0.9.tgz#77851fef4a49c90b345dc53cf26809fdf29dcda6"
-  integrity sha512-YlmQ1fsMWTkKGDGibCRWgmLzrpDRUr63Q025LJ/taYQ6j1Yb8q9McKF7NBi6ACAyUXO6F/bl9w6v4MY307y5Ag==
-  optionalDependencies:
-    "@types/geojson" "^1.0.0"
-
 terser-webpack-plugin@^1.1.0, terser-webpack-plugin@^1.2.3:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/terser-webpack-plugin/-/terser-webpack-plugin-1.3.0.tgz#69aa22426299f4b5b3775cbed8cb2c5d419aa1d4"
@@ -18190,7 +18195,7 @@ validate-npm-package-name@^3.0.0:
   dependencies:
     builtins "^1.0.3"
 
-validator@^10.4.0:
+validator@^10.11.0:
   version "10.11.0"
   resolved "https://registry.yarnpkg.com/validator/-/validator-10.11.0.tgz#003108ea6e9a9874d31ccc9e5006856ccd76b228"
   integrity sha512-X/p3UZerAIsbBfN/IwahhYaBbY68EN/UQBWHtsbXGT5bfrH/p4NQzUCG1kF/rtKaNpnJ7jAu6NGTdSNtyNIXMw==
@@ -18542,7 +18547,7 @@ with-callback@^1.0.2:
   resolved "https://registry.yarnpkg.com/with-callback/-/with-callback-1.0.2.tgz#a09629b9a920028d721404fb435bdcff5c91bc21"
   integrity sha1-oJYpuakgAo1yFAT7Q1vc/1yRvCE=
 
-wkx@^0.4.1:
+wkx@^0.4.6:
   version "0.4.7"
   resolved "https://registry.yarnpkg.com/wkx/-/wkx-0.4.7.tgz#ba0e4f9e785e95c9975856c1834f19a95c65cfb5"
   integrity sha512-pHf546L96TK8RradLt1cWaIffstgv/zXZ14CGz5KnBs1AxBX0wm+IDphjJw0qrEqRv8P9W9CdTt8Z1unMRZ19A==
