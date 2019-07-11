@@ -6,23 +6,13 @@ import SubTitle from './SubTitle';
 import Title from './Title';
 import Wrapper from './Wrapper';
 
-function ListHeader({ button, subtitle, subtitleValues, title }) {
+function ListHeader({ button, subtitle, subtitleValues, title, titleValues }) {
   return (
     <Wrapper>
       {button && <Button {...button} />}
-      <div>
-        {title.map(item => {
-          return (
-            <FormattedMessage
-              key={item.label}
-              id={item.label}
-              values={item.values}
-            >
-              {msg => <Title>{msg}&nbsp;</Title>}
-            </FormattedMessage>
-          );
-        })}
-      </div>
+      <FormattedMessage id={title} values={titleValues}>
+        {msg => <Title>{msg}</Title>}
+      </FormattedMessage>
       <FormattedMessage id={subtitle} values={subtitleValues}>
         {msg => <SubTitle>{msg}</SubTitle>}
       </FormattedMessage>
@@ -34,19 +24,16 @@ ListHeader.defaultProps = {
   button: null,
   subtitle: 'app.utils.defaultMessage',
   subtitleValues: {},
-  title: null,
+  title: 'app.utils.defaultMessage',
+  titleValues: {},
 };
 
 ListHeader.propTypes = {
   button: PropTypes.object,
   subtitle: PropTypes.string,
   subtitleValues: PropTypes.object,
-  title: PropTypes.arrayOf(
-    PropTypes.shape({
-      label: PropTypes.string,
-      values: PropTypes.object,
-    })
-  ),
+  title: PropTypes.string,
+  titleValues: PropTypes.object,
 };
 
 export default ListHeader;

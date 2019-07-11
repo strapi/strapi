@@ -140,7 +140,7 @@ function SettingsView({
         <Block
           description={`${pluginId}.containers.SettingsPage.Block.generalSettings.description`}
           title={`${pluginId}.containers.SettingsPage.Block.generalSettings.title`}
-          style={{ marginBottom: 7 }}
+          style={{ marginBottom: 12 }}
         >
           <form style={{ paddingTop: '2.6rem' }}>
             <div className="row">
