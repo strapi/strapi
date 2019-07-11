@@ -42,6 +42,18 @@ const List = styled.div`
       }
     }
   }
+  td {
+    padding: 0.75em;
+    vertical-align: middle;
+    font-size: 1.3rem;
+    line-height: 1.8rem;
+    &:first-of-type {
+      padding-left: calc(3rem + 0.75em);
+    }
+    &:last-of-type {
+      padding-right: calc(3rem + 0.75em);
+    }
+  }
   tbody {
     color: ${colors.blueTxt};
     tr {
@@ -63,18 +75,6 @@ const List = styled.div`
       }
       &:first-of-type::before {
         height: 0;
-      }
-    }
-    td {
-      padding: 0.75em;
-      vertical-align: middle;
-      font-size: 1.3rem;
-      line-height: 1.8rem;
-      &:first-of-type {
-        padding-left: calc(3rem + 0.75em);
-      }
-      &:last-of-type {
-        padding-right: calc(3rem + 0.75em);
       }
     }
   }

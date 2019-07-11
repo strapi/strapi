@@ -84,7 +84,7 @@ const StyledLeftMenu = styled.div`
         i {
           font-size: 11px;
           top: calc(50% - ${sizes.margin * 0.5}px);
-          color: ${colors.grey};
+          color: ${colors.leftMenu.grey};
         }
         &.active {
           background-color: ${colors.leftMenu.lightGrey};

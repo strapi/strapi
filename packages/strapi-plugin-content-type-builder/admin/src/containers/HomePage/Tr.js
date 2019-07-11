@@ -24,6 +24,9 @@ const Tr = styled.tr`
   button {
     cursor: pointer;
   }
+  p {
+    margin-bottom: 0;
+  }
 `;
 
 export default Tr;
