@@ -76,7 +76,7 @@ module.exports = {
     const response = await module.exports.findOne.call(this, params);
 
     // Only update fields which are on this document.
-    const values = params.parseRelationships === false ? params.values : Object.keys(removeUndefinedKeys(params.values)).reduce((acc, current) => {
+    const values = params.parseRelationships === false ? params.values : await Object.keys(removeUndefinedKeys(params.values)).reduce(async (acc, current) => {
       const property = params.values[current];
       const association = this.associations.filter(x => x.alias === current)[0];
       const details = this._attributes[current];
@@ -103,8 +103,8 @@ module.exports = {
           }
 
 
-          // set old relations to null
-          const updateLink = this.where({ [current]: property })
+          // set old relations to null - await is needed
+          await this.where({ [current]: property })
             .save({ [current]: null }, {method: 'update', patch: true, require: false})
             .then(() => {
               return assocModel
@@ -112,8 +112,7 @@ module.exports = {
                 .save({ [details.via] : primaryKeyValue}, {method: 'update', patch: true, require: false});
             });
 
-          // set new relation
-          relationUpdates.push(updateLink);
+
           return _.set(acc, current, property);
         }
         case 'oneToMany': {
