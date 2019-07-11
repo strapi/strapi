@@ -12,6 +12,12 @@ const ListWrapper = styled.div`
     width: 100%;
     overflow-x: scroll;
   }
+  .list-button {
+    padding: 1.3rem 3rem 2.5rem 3rem;
+    button {
+      width: 100%;
+    }
+  }
   @media (min-width: ${sizes.tablet}) {
     .table-wrapper {
       width: 100%;
