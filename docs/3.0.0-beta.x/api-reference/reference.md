@@ -49,7 +49,7 @@ Returns an object that represents the configurations of the project. Every JavaS
 
 ## strapi.controllers
 
-Returns an object of the controllers wich is available in the project. Every JavaScript file located in the `./api/**/controllers` folder will be parsed into the `strapi.controllers` object. Thanks to this object, you can access to every controller's actions everywhere in the project.
+Returns an object of the controllers which is available in the project. Every JavaScript file located in the `./api/**/controllers` folder will be parsed into the `strapi.controllers` object. Thanks to this object, you can access to every controller's actions everywhere in the project.
 
 ::: note
 This object doesn't include the admin's controllers and plugin's controllers.
@@ -81,7 +81,7 @@ Returns an object of plugins available within the project. Each plugin object co
 
 ## strapi.query
 
-This utility function allows to bind models with query functions specific to each ORM (e.g: `mongoose` or `booksehlf`).
+This utility function allows to bind models with query functions specific to each ORM (e.g: `mongoose` or `bookshelf`).
 For more details, see the [Queries section](../guides/queries.md).
 
 ## strapi.reload

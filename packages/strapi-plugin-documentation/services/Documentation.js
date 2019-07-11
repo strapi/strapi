@@ -418,7 +418,7 @@ module.exports = {
   },
 
   /**
-   * Creates the paths object with all the needed informations
+   * Creates the paths object with all the needed information
    * The object has the following structure { apiName: { paths: {} }, knownTag1: { paths: {} }, unclassified: { paths: {} } }
    * Each key will create a documentation.json file
    *

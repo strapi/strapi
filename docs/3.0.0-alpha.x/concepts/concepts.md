@@ -89,7 +89,7 @@ In this example, any time a web browser is pointed to the `/hello` URL on your a
 The controllers are defined in each `./api/**/controllers/` folders. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (include the first one) is capitalized `User.js`, `LegalEntity.js`.
 
 ::: note
-Please refer to the [controllers' guide](../guides/controllers.md) for more informations.
+Please refer to the [controllers' guide](../guides/controllers.md) for more information.
 :::
 
 ***
@@ -99,7 +99,7 @@ Please refer to the [controllers' guide](../guides/controllers.md) for more info
 Filters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /users?_limit=30&name=John`).
 
 ::: note
-Please refer to the [filters' guide](../guides/filters.md) for more informations.
+Please refer to the [filters' guide](../guides/filters.md) for more information.
 :::
 
 ***
@@ -159,14 +159,14 @@ The models are defined in each `./api/**/models/` folder. Every JavaScript or JS
 A model must contain a list of attributes, and each of these attributes must have a type.
 
 ::: note
-Please refer to the [models' guide for more informations about the attributes](../guides/models.md#define-the-attributes).
+Please refer to the [models' guide for more information about the attributes](../guides/models.md#define-the-attributes).
 :::
 
 ### Relations
 
 #### Many-to-many
 
-Many-to-many associations allow to link an entry to many entry.
+Many-to-many associations allow to link an entry to many entries.
 
 ::: note
 Please refer to the [many-to-many guide](../guides/models.md#many-to-many)
@@ -221,7 +221,7 @@ Please refer to the [internationalization's guide](../guides/i18n.md).
 A plugin is like a fully independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also contain an UI integrated into the admin panel to use it easily. It allows to develop or plugin features in a project in a short time span.
 
 ::: note
-Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.
+Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more information.
 :::
 
 ***
@@ -231,7 +231,7 @@ Please refer to the [plugins documentation](../plugin-development/quick-start.md
 The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top of solid conventions and reusable CSS classes. It is also using [PostCSS](https://github.com/postcss/postcss) and [PostCSS SCSS](https://github.com/postcss/postcss-scss) to keep the code maintainable.
 
 ::: note
-Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styling) for detailed informations.
+Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styling) for detailed information.
 :::
 
 ***
@@ -282,17 +282,17 @@ Please refer to the [plugin policy guide](../guides/policies.md#plugins).
 Public assets are static files such as images, video, css, etc that you want to make accessible to the outside world. Every new project includes by default, a folder named `./public`.
 
 ::: note
-Please refer to the [public configuration](../configurations/configurations.md#Application) for more informations.
+Please refer to the [public configuration](../configurations/configurations.md#Application) for more information.
 :::
 
 ***
 
 ## Requests
 
-The context object (`ctx`) contains all the request's related informations.
+The context object (`ctx`) contains all the request's related information.
 
 ::: note
-Please refer to the [requests guide](../guides/requests.md) for more informations.
+Please refer to the [requests guide](../guides/requests.md) for more information.
 :::
 
 ***
@@ -302,7 +302,7 @@ Please refer to the [requests guide](../guides/requests.md) for more information
 The context object (`ctx`) contains a list of values and functions useful to manage server responses.
 
 ::: note
-Please refer to the [responses guide](../guides/responses.md) for more informations.
+Please refer to the [responses guide](../guides/responses.md) for more information.
 :::
 
 ***
@@ -312,7 +312,7 @@ Please refer to the [responses guide](../guides/responses.md) for more informati
 `./api/**/config/routes.json` files define all available routes for the clients.
 
 ::: note
-Please refer to the [routing guide](../guides/routing.md) for more informations.
+Please refer to the [routing guide](../guides/routing.md) for more information.
 :::
 
 ***
@@ -322,7 +322,7 @@ Please refer to the [routing guide](../guides/routing.md) for more informations.
 Services are a set of reusable functions. They are particularly useful to respect the DRY (don’t repeat yourself) programming concept and to simplify [controllers](#controllers) logic.
 
 ::: note
-Please refer to the [services guide](../guides/services.md) for more informations.
+Please refer to the [services guide](../guides/services.md) for more information.
 :::
 
 ***

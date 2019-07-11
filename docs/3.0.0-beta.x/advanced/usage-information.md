@@ -1,17 +1,17 @@
 # Collected Usage Information
 
-## Committment to our users & data collection
+## Commitment to our users & data collection
 
 We are committed to providing a solution, with Strapi, that exceeds the expectations of the users and community. We are also committed to continuing to develop and make Strapi even better than it is today. To that end, Strapi contains a feature in which anonymous and otherwise non-sensitive data is collected. This data is collectively aggregated for all our users, which when taken together give us a better global understanding of how users are interacting and using Strapi.
 
 ### Why?
 
-The number of developers using Strapi is growing signficantly. As mentioned earlier, we are committed to providing the best experience to our users. We will always continue to do hands-on UI/UX testing, surveys, issue tracking, roadmap votes, etc... and otherwise talk with the Strapi Community while striving to understand and deliver what is being asked for and what is needed, by any means available.
+The number of developers using Strapi is growing significantly. As mentioned earlier, we are committed to providing the best experience to our users. We will always continue to do hands-on UI/UX testing, surveys, issue tracking, roadmap votes, etc... and otherwise talk with the Strapi Community while striving to understand and deliver what is being asked for and what is needed, by any means available.
 
 However, these above actions alone are often insufficient to maintain an overall picture of some aspects of the global usage of Strapi and its features. Globally aggregated data helps us answer and make choices around questions like these:
 
-- Are our users using a particular feature or not? For those who are using it, what do they use it for? Is it activated and used along side another plugin? Which specific plugin? Or something else, like, only in development/production?
-- How long does setting up a project take? If the global install time increases, does it means that users are encountering issues or the process is simply too complicated?
+- Are our users using a particular feature or not? For those who are using it, what do they use it for? Is it activated and used alongside another plugin? Which specific plugin? Or something else, like, only in development/production?
+- How long does setting up a project take? If the global install time increases, does it mean that users are encountering issues or the process is simply too complicated?
 - What type of errors our users are facing?
 - What are the most used plugins?
 - Should we focus our efforts to being compatible with Node 12? Maybe our community uses version 12, in greater percentages than the global Node.js community?

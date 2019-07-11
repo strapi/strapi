@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-email-sendmail",
-  "version": "3.0.0-beta.10",
+  "version": "3.0.0-beta.11",
   "description": "Sendmail provider for strapi email",
   "homepage": "http://strapi.io",
   "keywords": [
@@ -38,7 +38,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": "^10.0.0",
+    "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
   "license": "MIT",

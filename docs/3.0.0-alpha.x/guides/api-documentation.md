@@ -76,7 +76,7 @@ This plugin follows the OpenApi Specifications ([0AS.3.0.2](https://swagger.io/s
 |   |
 |   └─── package.json
 |   |
-|   └─── README.md // Contains some informations
+|   └─── README.md // Contains some information
 ```
 
 ### Generated files
@@ -91,7 +91,7 @@ When you start your server with this plugin installed it will automatically crea
          └─── Foo
              └── documentation // Folder added to your model
                  └── 1.0.0
-                     └── foo.json // File containing all the paths where the responses can be infered
+                     └── foo.json // File containing all the paths where the responses can be inferred
                      └── unclassified.json // File containing the manually added route of your `routes.json` file
                      |
                      └── overrides // Folder to override the generated documentation
@@ -127,7 +127,7 @@ The OpenAPI object (here the `full_documentation.json`) has the following struct
 }
 ```
 
-The `openapi`, `info`, `x-strapi-config`, `servers`, `externalDocs` and `security` fields are located in the `./plugins/documentation/config/settings.json` file. Here you can specify all your environment variables, licences, external documentation and so one...
+The `openapi`, `info`, `x-strapi-config`, `servers`, `externalDocs` and `security` fields are located in the `./plugins/documentation/config/settings.json` file. Here you can specify all your environment variables, licenses, external documentation and so one...
 You can add all the entries listed in the [specification](https://swagger.io/specification/).
 
 #### Usage of the `settings.json` File
@@ -189,7 +189,7 @@ You can add all the entries listed in the [specification](https://swagger.io/spe
 
 Currently the plugin writes a json file for each API.
 
-In order to customize the responses or to add informations to a path you need to create a file in the associated `overrides/<file-name>.json` (the name of the file matters so make sure they are similar). Then you just need to identify the path you want to modify.
+In order to customize the responses or to add information to a path you need to create a file in the associated `overrides/<file-name>.json` (the name of the file matters so make sure they are similar). Then you just need to identify the path you want to modify.
 You can modify the default generated tags by adding a new one at the end of the file, it works the same way for the components.
 
 **_NOTE 1_**
@@ -279,7 +279,7 @@ When we can't know by the controller name the type of the returned response (lik
   "config": {
     "policies": [],
     "prefix": "",
-    "description": "Retrieve the logged in user informations",
+    "description": "Retrieve the logged in user information",
     "tag": {
       "plugin": "users-permissions",
       "name": "User",

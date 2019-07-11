@@ -22,6 +22,19 @@ const postgres = {
   options: {},
 };
 
+const mysql = {
+  connector: 'strapi-hook-bookshelf',
+  settings: {
+    client: 'mysql',
+    database: 'strapi',
+    username: 'strapi',
+    password: 'strapi',
+    port: 3306,
+    host: 'localhost',
+  },
+  options: {},
+};
+
 const mongo = {
   connector: 'strapi-hook-mongoose',
   settings: {
@@ -35,6 +48,7 @@ const mongo = {
 };
 
 const db = {
+  mysql,
   sqlite,
   postgres,
   mongo,

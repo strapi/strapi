@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.0.0-beta.10",
+  "version": "3.0.0-beta.11",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "Files Upload",
@@ -23,9 +23,9 @@
     "react-router-dom": "^5.0.0",
     "react-transition-group": "^2.5.0",
     "reactstrap": "^5.0.0",
-    "strapi-helper-plugin": "3.0.0-beta.10",
-    "strapi-provider-upload-local": "3.0.0-beta.10",
-    "strapi-utils": "3.0.0-beta.10",
+    "strapi-helper-plugin": "3.0.0-beta.11",
+    "strapi-provider-upload-local": "3.0.0-beta.11",
+    "strapi-utils": "3.0.0-beta.11",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },
@@ -42,7 +42,7 @@
     }
   ],
   "engines": {
-    "node": "^10.0.0",
+    "node": ">= 10.0.0",
     "npm": ">= 6.0.0"
   },
   "license": "MIT",
