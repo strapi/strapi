@@ -93,7 +93,7 @@ function ListLayout({
       <div className="col-lg-5 col-md-12" ref={ref}>
         {displayedData.map((data, index) => (
           <Fragment key={data}>
-            <Wrapper style={{ display: 'flex' }}>
+            <Wrapper>
               <div>{index + 1}.</div>
               <ListField
                 findField={findField}

@@ -107,9 +107,12 @@ describe('CTB <HomePage />', () => {
       const list = wrapper.find(ListHeader);
 
       expect(list).toHaveLength(1);
-      expect(list.prop('title')).toBe(
-        `${pluginId}.table.contentType.title.plural`
-      );
+      expect(list.prop('title')).toMatchObject([
+        {
+          label: `${pluginId}.table.contentType.title.plural`,
+          values: { number: 4 },
+        },
+      ]);
     });
 
     it('Should handle the listheader title correctly if there is more than 1 group', () => {
@@ -120,7 +123,12 @@ describe('CTB <HomePage />', () => {
       const list = wrapper.find(ListHeader);
 
       expect(list).toHaveLength(1);
-      expect(list.prop('title')).toBe(`${pluginId}.table.groups.title.plural`);
+      expect(list.prop('title')).toMatchObject([
+        {
+          label: `${pluginId}.table.groups.title.plural`,
+          values: { number: 4 },
+        },
+      ]);
     });
 
     it('Should handle the listheader title correctly if there is less than 2 groups', () => {
@@ -140,9 +148,12 @@ describe('CTB <HomePage />', () => {
       const list = wrapper.find(ListHeader);
 
       expect(list).toHaveLength(1);
-      expect(list.prop('title')).toBe(
-        `${pluginId}.table.groups.title.singular`
-      );
+      expect(list.prop('title')).toMatchObject([
+        {
+          label: `${pluginId}.table.groups.title.singular`,
+          values: { number: 1 },
+        },
+      ]);
     });
 
     it('Should handle the listheader title correctly if there is less than 2 models', () => {
@@ -161,9 +172,12 @@ describe('CTB <HomePage />', () => {
       const list = wrapper.find(ListHeader);
 
       expect(list).toHaveLength(1);
-      expect(list.prop('title')).toBe(
-        `${pluginId}.table.contentType.title.singular`
-      );
+      expect(list.prop('title')).toMatchObject([
+        {
+          label: `${pluginId}.table.contentType.title.singular`,
+          values: { number: 1 },
+        },
+      ]);
     });
   });
 

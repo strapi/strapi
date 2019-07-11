@@ -1,19 +1,21 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
-import { FormattedMessage } from 'react-intl';
 import { Redirect, BrowserRouter } from 'react-router-dom';
 
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
-import { EmptyAttributesBlock } from 'strapi-helper-plugin';
+import {
+  EmptyAttributesBlock,
+  ListHeader,
+  ListWrapper,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
 
 import MenuContext from '../../MenuContext';
-import Block from '../../../components/Block';
 
 import { clearTemporaryAttribute, onChangeAttribute } from '../../App/actions';
 
@@ -176,21 +178,19 @@ describe('<ModelPage />', () => {
       expect(wrapper.find(EmptyAttributesBlock)).toHaveLength(1);
     });
 
-    it("should display the Block if the model's attributes are not empty", () => {
+    it("should display the ListWrapper if the model's attributes are not empty", () => {
       const wrapper = shallow(<ModelPage {...props} />);
 
-      expect(wrapper.find(Block)).toHaveLength(1);
+      expect(wrapper.find(ListWrapper)).toHaveLength(1);
     });
 
     it("should display a singular text if the model's attributes relationship is one", () => {
       const wrapper = shallow(<ModelPage {...props} />);
 
-      expect(
-        wrapper
-          .find(FormattedMessage)
-          .last()
-          .prop('id')
-      ).toContain('singular');
+      const { title } = wrapper.find(ListHeader).props();
+      const { label } = title[1];
+
+      expect(label).toContain('relations.title.singular');
     });
 
     it("should display a plural text if the model's attributes relationships is more than one", () => {
@@ -198,12 +198,10 @@ describe('<ModelPage />', () => {
       props.match.path = `${basePath}/role&source=users-permissions`;
       const wrapper = shallow(<ModelPage {...props} />);
 
-      expect(
-        wrapper
-          .find(FormattedMessage)
-          .last()
-          .prop('id')
-      ).toContain('plural');
+      const { title } = wrapper.find(ListHeader).props();
+      const { label } = title[1];
+
+      expect(label).toContain('relations.title.plural');
     });
 
     it('should call the handleClickOpenModalChooseAttributes when clicking on the EmptyAttributesBlock', () => {
@@ -633,7 +631,9 @@ describe('<ModelPage /> lifecycle', () => {
 
   describe('HandleClickOnTrashIcon', () => {
     it('should display a notification if thee modal cannot be opened', async () => {
+      props.models.find(item => item.name == 'product').isTemporary = false;
       props.canOpenModal = false;
+
       topCompo = renderComponent(props);
 
       const wrapper = topCompo.find(ModelPage);
@@ -645,10 +645,10 @@ describe('<ModelPage /> lifecycle', () => {
 
       handleClickOnTrashIcon('username');
 
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
       expect(context.emitEvent).not.toHaveBeenCalledWith(
         'willDeleteFieldOfContentType'
       );
-      expect(spyOnDisplayNotification).toHaveBeenCalled();
     });
 
     it('should emit the event willDeleteFieldOfContentType', async () => {
@@ -668,6 +668,68 @@ describe('<ModelPage /> lifecycle', () => {
       expect(context.emitEvent).toHaveBeenCalledWith(
         'willDeleteFieldOfContentType'
       );
+    });
+  });
+
+  describe('deleteModelAttribute', () => {
+    it('should call deleteModelAttribute with modifiedDataGroup path when isTemporary is false', () => {
+      props.models.find(item => item.name == 'product').isTemporary = false;
+      props.canOpenModal = true;
+
+      topCompo = renderComponent(props);
+
+      const wrapper = topCompo.find(ModelPage);
+      const {
+        handleClickOnTrashIcon,
+        handleDeleteAttribute,
+      } = wrapper.instance();
+
+      handleClickOnTrashIcon('username');
+      handleDeleteAttribute();
+
+      const keys = ['modifiedData', 'product', 'attributes', 'username'];
+      expect(props.deleteModelAttribute).toHaveBeenCalledWith(keys);
+    });
+
+    it('should call deleteModelAttribute with newGroup path when isTemporary is true', () => {
+      props.models.find(item => item.name == 'product').isTemporary = true;
+      props.canOpenModal = true;
+
+      topCompo = renderComponent(props);
+
+      const wrapper = topCompo.find(ModelPage);
+      const {
+        handleClickOnTrashIcon,
+        handleDeleteAttribute,
+      } = wrapper.instance();
+
+      handleClickOnTrashIcon('username');
+      handleDeleteAttribute();
+      const keys = ['newContentType', 'attributes', 'username'];
+      expect(props.deleteModelAttribute).toHaveBeenCalledWith(keys);
+    });
+  });
+
+  describe('ToggleModalWarning', () => {
+    it('should change the showWarning on modal toggle', () => {
+      topCompo = renderComponent(props);
+
+      const wrapper = topCompo.find(ModelPage);
+      expect(wrapper.state()).toEqual({
+        attrToDelete: null,
+        showWarning: false,
+        removePrompt: false,
+      });
+
+      const { toggleModalWarning } = wrapper.instance();
+
+      toggleModalWarning();
+
+      expect(wrapper.state()).toEqual({
+        attrToDelete: null,
+        showWarning: true,
+        removePrompt: false,
+      });
     });
   });
 });

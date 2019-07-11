@@ -134,124 +134,119 @@ function SettingViewModel({
   };
 
   return (
-    <>
-      <DndProvider backend={HTML5Backend}>
-        <BackHeader onClick={() => goBack()} />
-        <Container className="container-fluid">
-          <PluginHeader
-            actions={getPluginHeaderActions()}
-            title={{
-              id: `${pluginId}.containers.SettingViewModel.pluginHeader.title`,
-              values: { name: upperFirst(name) },
+    <DndProvider backend={HTML5Backend}>
+      <BackHeader onClick={() => goBack()} />
+      <Container className="container-fluid">
+        <PluginHeader
+          actions={getPluginHeaderActions()}
+          title={{
+            id: `${pluginId}.containers.SettingViewModel.pluginHeader.title`,
+            values: { name: upperFirst(name) },
+          }}
+          description={{
+            id:
+              'content-manager.containers.SettingPage.pluginHeaderDescription',
+          }}
+        />
+        <HeaderNav
+          links={[
+            {
+              name: 'content-manager.containers.SettingPage.listSettings.title',
+              to: getUrl(name, 'list-settings'),
+            },
+            {
+              name: 'content-manager.containers.SettingPage.editSettings.title',
+              to: getUrl(name, 'edit-settings'),
+            },
+          ]}
+        />
+        <div className="row">
+          <Block
+            style={{
+              marginBottom: '13px',
+              paddingBottom: '30px',
+              paddingTop: '30px',
             }}
-            description={{
-              id:
-                'content-manager.containers.SettingPage.pluginHeaderDescription',
-            }}
-          />
-          <HeaderNav
-            links={[
-              {
-                name:
-                  'content-manager.containers.SettingPage.listSettings.title',
-                to: getUrl(name, 'list-settings'),
-              },
-              {
-                name:
-                  'content-manager.containers.SettingPage.editSettings.title',
-                to: getUrl(name, 'edit-settings'),
-              },
-            ]}
-          />
-          <div className="row">
-            <Block
-              style={{
-                marginBottom: '13px',
-                paddingBottom: '30px',
-                paddingTop: '30px',
-              }}
-            >
-              <SectionTitle isSettings />
-              <div className="row">
-                {forms[settingType].map(input => {
-                  return (
-                    <Input
-                      key={input.name}
-                      {...input}
-                      onChange={onChange}
-                      selectOptions={getSelectOptions(input)}
-                      value={get(modifiedData, input.name)}
-                    />
-                  );
-                })}
-                <div className="col-12">
-                  <Separator />
-                </div>
-              </div>
-              <SectionTitle />
-
-              <div className="row">
-                <LayoutTitle className="col-12">
-                  <FormTitle
-                    title={`${pluginId}.global.displayedFields`}
-                    description={`${pluginId}.containers.SettingPage.${
-                      settingType === 'list-settings'
-                        ? 'attributes'
-                        : 'editSettings'
-                    }.description`}
-                  />
-                </LayoutTitle>
-
-                {settingType === 'list-settings' && (
-                  <ListLayout
-                    addField={addFieldToList}
-                    displayedData={getListDisplayedFields()}
-                    availableData={getListRemainingFields()}
-                    fieldToEditIndex={listFieldToEditIndex}
-                    modifiedData={modifiedData}
-                    moveListField={moveListField}
-                    onClick={setListFieldToEditIndex}
+          >
+            <SectionTitle isSettings />
+            <div className="row">
+              {forms[settingType].map(input => {
+                return (
+                  <Input
+                    key={input.name}
+                    {...input}
                     onChange={onChange}
-                    onRemove={onRemoveListField}
+                    selectOptions={getSelectOptions(input)}
+                    value={get(modifiedData, input.name)}
                   />
-                )}
+                );
+              })}
+              <div className="col-12">
+                <Separator />
               </div>
-            </Block>
-          </div>
-        </Container>
-        <PopUpWarning
-          isOpen={showWarningCancel}
-          toggleModal={toggleWarningCancel}
-          content={{
-            title: 'content-manager.popUpWarning.title',
-            message: 'content-manager.popUpWarning.warning.cancelAllSettings',
-            cancel: 'content-manager.popUpWarning.button.cancel',
-            confirm: 'content-manager.popUpWarning.button.confirm',
-          }}
-          popUpWarningType="danger"
-          onConfirm={() => {
-            onReset();
-            toggleWarningCancel();
-          }}
-        />
-        <PopUpWarning
-          isOpen={showWarningSubmit}
-          toggleModal={toggleWarningSubmit}
-          content={{
-            title: 'content-manager.popUpWarning.title',
-            message: 'content-manager.popUpWarning.warning.updateAllSettings',
-            cancel: 'content-manager.popUpWarning.button.cancel',
-            confirm: 'content-manager.popUpWarning.button.confirm',
-          }}
-          popUpWarningType="danger"
-          onConfirm={() => onSubmit(name, emitEvent)}
-        />
-      </DndProvider>
-    </>
+            </div>
+            <SectionTitle />
+
+            <div className="row">
+              <LayoutTitle className="col-12">
+                <FormTitle
+                  title={`${pluginId}.global.displayedFields`}
+                  description={`${pluginId}.containers.SettingPage.${
+                    settingType === 'list-settings'
+                      ? 'attributes'
+                      : 'editSettings'
+                  }.description`}
+                />
+              </LayoutTitle>
+
+              {settingType === 'list-settings' && (
+                <ListLayout
+                  addField={addFieldToList}
+                  displayedData={getListDisplayedFields()}
+                  availableData={getListRemainingFields()}
+                  fieldToEditIndex={listFieldToEditIndex}
+                  modifiedData={modifiedData}
+                  moveListField={moveListField}
+                  onClick={setListFieldToEditIndex}
+                  onChange={onChange}
+                  onRemove={onRemoveListField}
+                />
+              )}
+            </div>
+          </Block>
+        </div>
+      </Container>
+      <PopUpWarning
+        isOpen={showWarningCancel}
+        toggleModal={toggleWarningCancel}
+        content={{
+          title: 'content-manager.popUpWarning.title',
+          message: 'content-manager.popUpWarning.warning.cancelAllSettings',
+          cancel: 'content-manager.popUpWarning.button.cancel',
+          confirm: 'content-manager.popUpWarning.button.confirm',
+        }}
+        popUpWarningType="danger"
+        onConfirm={() => {
+          onReset();
+          toggleWarningCancel();
+        }}
+      />
+      <PopUpWarning
+        isOpen={showWarningSubmit}
+        toggleModal={toggleWarningSubmit}
+        content={{
+          title: 'content-manager.popUpWarning.title',
+          message: 'content-manager.popUpWarning.warning.updateAllSettings',
+          cancel: 'content-manager.popUpWarning.button.cancel',
+          confirm: 'content-manager.popUpWarning.button.confirm',
+        }}
+        popUpWarningType="danger"
+        onConfirm={() => onSubmit(name, emitEvent)}
+      />
+    </DndProvider>
   );
 }
 
-SettingViewModel.defaultProps = {};
 SettingViewModel.propTypes = {
   addFieldToList: PropTypes.func.isRequired,
   emitEvent: PropTypes.func.isRequired,

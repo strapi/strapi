@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Field, InfoLabel } from './components';
 import { DragSource, DropTarget } from 'react-dnd';
 
 import GrabIcon from '../../assets/images/icon_grab.svg';
@@ -8,6 +7,7 @@ import GrabIconBlue from '../../assets/images/icon_grab_blue.svg';
 import ClickOverHint from '../../components/ClickOverHint';
 import RemoveIcon from '../../components/DraggedRemovedIcon';
 import EditIcon from '../../components/VariableEditIcon';
+import { Field, InfoLabel } from './components';
 
 import ItemTypes from './itemsTypes';
 
@@ -33,34 +33,32 @@ function ListField({
   connectDropTarget(ref);
 
   return (
-    <>
-      <Field
-        onMouseEnter={() => setIsOver(true)}
-        onMouseLeave={() => setIsOver(false)}
-        onClick={() => {
-          onClick(index);
-        }}
-        ref={ref}
-        isSelected={isSelected}
-        style={{ opacity }}
-      >
-        <img src={isSelected ? GrabIconBlue : GrabIcon} />
-        <span>{name}</span>
-        <ClickOverHint show={isOver && !isSelected} />
-        {showLabel && <InfoLabel>{label}</InfoLabel>}
-        {isSelected && !isOver ? (
-          <EditIcon />
-        ) : (
-          <RemoveIcon
-            isDragging={isSelected && isOver}
-            onRemove={e => {
-              e.stopPropagation();
-              onRemove(index);
-            }}
-          />
-        )}
-      </Field>
-    </>
+    <Field
+      onMouseEnter={() => setIsOver(true)}
+      onMouseLeave={() => setIsOver(false)}
+      onClick={() => {
+        onClick(index);
+      }}
+      ref={ref}
+      isSelected={isSelected}
+      style={{ opacity }}
+    >
+      <img src={isSelected ? GrabIconBlue : GrabIcon} />
+      <span>{name}</span>
+      <ClickOverHint show={isOver && !isSelected} />
+      {showLabel && <InfoLabel>{label}</InfoLabel>}
+      {isSelected && !isOver ? (
+        <EditIcon />
+      ) : (
+        <RemoveIcon
+          isDragging={isSelected && isOver}
+          onRemove={e => {
+            e.stopPropagation();
+            onRemove(index);
+          }}
+        />
+      )}
+    </Field>
   );
 }
 
