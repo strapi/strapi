@@ -82,6 +82,7 @@ function ListLayout({
 
       moveListField(index, atIndex);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [displayedData]
   );
 

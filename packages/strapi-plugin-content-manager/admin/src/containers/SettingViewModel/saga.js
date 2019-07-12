@@ -2,6 +2,7 @@ import { all, fork, put, call, takeLatest, select } from 'redux-saga/effects';
 import { request } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import { deleteLayout } from '../Main/actions';
 import { getDataSucceeded, submitSucceeded } from './actions';
 import { GET_DATA, ON_SUBMIT } from './constants';
 import { makeSelectModifiedData } from './selectors';
@@ -29,6 +30,7 @@ export function* submit({ emitEvent, uid }) {
       body,
     });
     emitEvent('didSaveContentTypeLayout');
+    yield put(deleteLayout(uid));
     yield put(submitSucceeded());
   } catch (err) {
     strapi.notification.error('notification.error');

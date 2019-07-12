@@ -1,8 +1,8 @@
 /*
-*
-* Search
-*
-*/
+ *
+ * Search
+ *
+ */
 
 import React from 'react';
 import { isEmpty, upperFirst } from 'lodash';
@@ -20,7 +20,10 @@ class Search extends React.Component {
   componentDidUpdate(prevProps) {
     const { model, value } = this.props;
 
-    if (prevProps.model !== model || !isEmpty(prevProps.value) && isEmpty(value)) {
+    if (
+      prevProps.model !== model ||
+      (!isEmpty(prevProps.value) && isEmpty(value))
+    ) {
       this.resetState();
     }
   }
@@ -33,21 +36,20 @@ class Search extends React.Component {
     clearTimeout(this.timer);
     this.setState({ value: target.value });
     this.timer = setTimeout(() => this.triggerChange(target.value), WAIT);
-  }
+  };
 
   handleClick = () => {
     this.setState({ value: '' });
     this.triggerChange('');
-  }
+  };
 
-  triggerChange = (value) => (
+  triggerChange = value =>
     this.props.changeParams({
       target: {
-        name: 'params._q',
+        name: '_q',
         value,
       },
-    })
-  );
+    });
 
   render() {
     const { model } = this.props;
@@ -57,7 +59,7 @@ class Search extends React.Component {
       <div className={styles.search}>
         <div>
           <FormattedMessage id="content-manager.components.Search.placeholder">
-            {(message) => (
+            {message => (
               <input
                 onChange={this.handleChange}
                 placeholder={message}
@@ -66,7 +68,9 @@ class Search extends React.Component {
               />
             )}
           </FormattedMessage>
-          {value !== '' && <div className={styles.clearable} onClick={this.handleClick} />}
+          {value !== '' && (
+            <div className={styles.clearable} onClick={this.handleClick} />
+          )}
         </div>
         <div className={styles.searchLabel}>
           <img src={Logo} alt="filter_logo" />

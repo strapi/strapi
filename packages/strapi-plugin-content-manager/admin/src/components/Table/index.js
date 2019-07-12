@@ -90,6 +90,8 @@ Table.defaultProps = {
   enableBulkActions: true,
   entriesToDelete: [],
   handleDelete: () => {},
+  records: [],
+  routeParams: {},
   search: '',
   showLoader: false,
 };

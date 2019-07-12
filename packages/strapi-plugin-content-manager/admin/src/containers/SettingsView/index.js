@@ -53,19 +53,18 @@ function SettingsView({
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
-  const toggleWarningSubmit = () =>
-    setWarningSubmit(prevState => !prevState);
+  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
 
   useEffect(() => {
     if (showWarningSubmit) {
       toggleWarningSubmit();
     }
-  }, [shouldToggleModalSubmit]);
+  }, [shouldToggleModalSubmit, showWarningSubmit]);
   useEffect(() => {
     if (isEmpty(initialData)) {
       getData();
     }
-  }, [initialData]);
+  }, [getData, initialData]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
