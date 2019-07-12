@@ -35,7 +35,7 @@ The panel will be available through [http://localhost:1337/dashboard](http://loc
 
 ### Styles
 
-Admin part can be easily found in `./node_modules/strapi-admin/src/`.
+The AdminUI package source can be easily found in `./node_modules/strapi-admin/src/`.
 
 For example, to change the top-left displayed admin panel's color, `./node_modules/strapi-admin/admin/src/components/LeftMenuHeader/styles.scss` should be overriden by `./admin/src/components/LeftMenuHeader/styles.scss` with your own styles.
 
