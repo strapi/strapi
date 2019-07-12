@@ -19,14 +19,6 @@ module.exports = ({ model, modelKey }) => {
     return _.omit(values, excludedKeys);
   };
 
-  /**
-   *
-   * @param {Object} entry - the entity the groups are linked ot
-   * @param {Object} values - Input values
-   * @param {Object} options
-   * @param {Object} options.model - the ref model
-   * @param {Object} options.transacting - transaction option
-   */
   async function createGroups(entry, values, { transacting }) {
     if (groupKeys.length === 0) return;
 

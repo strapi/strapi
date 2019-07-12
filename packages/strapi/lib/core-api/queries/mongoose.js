@@ -157,6 +157,22 @@ module.exports = ({ model, modelKey, strapi }) => {
     }
   }
 
+  async function deleteGroups(entry) {
+    if (groupKeys.length === 0) return;
+
+    for (let key of groupKeys) {
+      const attr = model.attributes[key];
+      const { group } = attr;
+      const groupModel = strapi.groups[group];
+
+      if (Array.isArray(entry[key]) && entry[key].length > 0) {
+        await groupModel.deleteMany({
+          [model.primaryKey]: { $in: entry[key].map(el => el.ref) },
+        });
+      }
+    }
+  }
+
   // public api
   return {
     find(params, populate) {
@@ -199,11 +215,14 @@ module.exports = ({ model, modelKey, strapi }) => {
       await createGroups(entry, values);
 
       // Create relational data and return the entry.
-      return model.updateRelations({ _id: entry.id, values: relations });
+      return model.updateRelations({
+        [model.primaryKey]: getPK(entry),
+        values: relations,
+      });
     },
 
     async update(params, values) {
-      const entry = await model.findOne({ _id: params.id });
+      const entry = await model.findOne({ [model.primaryKey]: getPK(params) });
 
       if (!entry) {
         const err = new Error('entry.notFound');
@@ -226,43 +245,51 @@ module.exports = ({ model, modelKey, strapi }) => {
     },
 
     async delete(params) {
-      const data = await model
-        .findOneAndRemove(params, {})
+      const entry = await model
+        .findOneAndRemove({ [model.primaryKey]: getPK(params) })
         .populate(defaultPopulate);
 
-      if (!data) {
-        return data;
+      if (!entry) {
+        const err = new Error('entry.notFound');
+        err.status = 404;
+        throw err;
       }
+
+      await deleteGroups(entry);
 
       await Promise.all(
         model.associations.map(async association => {
-          if (!association.via || !data._id || association.dominant) {
+          if (
+            !association.via ||
+            !entry[model.primaryKey] ||
+            association.dominant
+          ) {
             return true;
           }
 
           const search =
             _.endsWith(association.nature, 'One') ||
             association.nature === 'oneToMany'
-              ? { [association.via]: data._id }
-              : { [association.via]: { $in: [data._id] } };
+              ? { [association.via]: entry[model.primaryKey] }
+              : { [association.via]: { $in: [entry[model.primaryKey]] } };
           const update =
             _.endsWith(association.nature, 'One') ||
             association.nature === 'oneToMany'
               ? { [association.via]: null }
-              : { $pull: { [association.via]: data._id } };
+              : { $pull: { [association.via]: entry[model.primaryKey] } };
 
           // Retrieve model.
-          const model = association.plugin
+          const assocModel = association.plugin
             ? strapi.plugins[association.plugin].models[
                 association.model || association.collection
               ]
             : strapi.models[association.model || association.collection];
 
-          return model.update(search, update, { multi: true });
+          return assocModel.update(search, update, { multi: true });
         })
       );
 
-      return data;
+      return entry;
     },
 
     search(params, populate) {
