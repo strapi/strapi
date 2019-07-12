@@ -86,6 +86,7 @@ class InputJSON extends React.Component {
 
         return this.codeMirror.setValue(stringify(value, null, 2));
       } catch (err) {
+        console.log(err);
         return this.setState({ error: true });
       }
     }
@@ -115,7 +116,7 @@ class InputJSON extends React.Component {
     const markedText = this.codeMirror.markText(
       { line, ch: chStart },
       { line, ch: chEnd },
-      { className: styles.colored },
+      { className: styles.colored }
     );
     this.setState({ markedText });
   };
@@ -170,7 +171,7 @@ class InputJSON extends React.Component {
     clearTimeout(this.timer);
     this.timer = setTimeout(
       () => this.testJSON(this.codeMirror.getValue()),
-      WAIT,
+      WAIT
     );
   };
 

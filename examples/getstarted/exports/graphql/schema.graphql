@@ -2,7 +2,7 @@ type Article {
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
-  title: String
+  title: String!
   content: String
   number: Int
   date: DateTime
@@ -11,10 +11,11 @@ type Article {
   bool: Boolean
   json: JSON
   tags(sort: String, limit: Int, start: Int, where: JSON): [Tag]
+  pics(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
 }
 
 input ArticleInput {
-  title: String
+  title: String!
   content: String
   number: Int
   date: DateTime
@@ -23,6 +24,7 @@ input ArticleInput {
   bool: Boolean
   tags: [ID]
   json: JSON
+  pics: [ID]
 }
 
 input createArticleInput {
@@ -120,6 +122,7 @@ input editArticleInput {
   bool: Boolean
   tags: [ID]
   json: JSON
+  pics: [ID]
 }
 
 input editFileInput {

@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 
 import {
   BackHeader,
@@ -17,6 +17,7 @@ import pluginId from '../../pluginId';
 import Container from '../../components/Container';
 
 import { LinkWrapper, MainWrapper, SubWrapper } from './components';
+import Inputs from './Inputs';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -34,15 +35,18 @@ function EditView({
   },
   plugins,
 }) {
+  const layout = get(layouts, [slug], {});
+  const isCreatingEntry = id === 'create';
+
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState)
+    init(initialState, layout, isCreatingEntry)
   );
+  const state = reducerState.toJS();
+  const { initialData, modifiedData, isLoading } = state;
 
-  const layout = get(layouts, [slug], {});
-  const isCreatingEntry = id === 'create';
   const source = getQueryParameters(search, 'source');
   const shouldShowLoader = !isCreatingEntry && isLoading;
 
@@ -71,9 +75,6 @@ function EditView({
   if (shouldShowLoader) {
     return <LoadingIndicatorPage />;
   }
-
-  const state = reducerState.toJS();
-  const { initialData, isLoading } = state;
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
   const toggleWarningDelete = () => setWarningDelete(prevState => !prevState);
@@ -112,7 +113,7 @@ function EditView({
         .mainField;
   const hasRelations = get(layout, ['layouts', 'editRelations'], []).length > 0;
   const fields = get(layout, ['layouts', 'edit'], []);
-  console.log({ fields });
+
   /**
    * Retrieve external links from injected components
    * @type {Array} List of external links to display
@@ -209,12 +210,55 @@ function EditView({
 
                   return (
                     <div key={key} className="row">
-                      {fieldsRow.map(field => {
-                        // cons
+                      {fieldsRow.map(({ name }) => {
+                        const attribute = get(
+                          layout,
+                          ['schema', 'attributes', name],
+                          {}
+                        );
+                        const { model, collection } = attribute;
+                        const isMedia =
+                          get(attribute, 'plugin', '') === 'upload' &&
+                          (model || collection) === 'file';
+                        const multiple = collection == 'file';
+                        const metadata = get(
+                          layout,
+                          ['metadata', name, 'edit'],
+                          {}
+                        );
+                        const type = isMedia
+                          ? 'file'
+                          : get(attribute, 'type', null);
+                        const inputStyle =
+                          type === 'text' ? { height: '196px' } : {};
+                        const validations = omit(attribute, [
+                          'type',
+                          'model',
+                          'via',
+                          'collection',
+                          'default',
+                          'plugin',
+                          'enum',
+                        ]);
+                        const value = get(modifiedData, name);
+
+                        if (type === 'group') {
+                          return null;
+                        }
+
                         return (
-                          <div key={field.name} className={`col-${field.size}`}>
-                            {field.name}
-                          </div>
+                          <Inputs
+                            {...metadata}
+                            inputStyle={inputStyle}
+                            key={name}
+                            multiple={multiple}
+                            name={name}
+                            onChange={() => {}}
+                            selectOptions={get(attribute, 'enum', [])}
+                            type={type}
+                            validations={validations}
+                            value={value}
+                          />
                         );
                       })}
                     </div>

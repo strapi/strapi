@@ -142,10 +142,12 @@ module.exports = {
           list: ['title'],
           editRelations: [],
           edit: [
-            {
-              name: 'title',
-              size: 6,
-            },
+            [
+              {
+                name: 'title',
+                size: 6,
+              },
+            ],
             [
               {
                 name: 'ingredients',
@@ -246,6 +248,9 @@ module.exports = {
           attributes: {
             title: {
               type: 'string',
+              default: 'soupette',
+              required: true,
+              unique: true,
             },
             content: {
               type: 'text',
@@ -262,6 +267,7 @@ module.exports = {
             enum: {
               enum: ['morning,', 'noon'],
               type: 'enumeration',
+              default: 'noon',
             },
             pic: {
               model: 'file',
@@ -274,6 +280,11 @@ module.exports = {
             tags: {
               type: 'relation',
               relationType: 'manyToMany',
+            },
+            pics: {
+              collection: 'file',
+              via: 'related',
+              plugin: 'upload',
             },
           },
         },
@@ -378,6 +389,15 @@ module.exports = {
             },
             list: {},
           },
+          pics: {
+            edit: {
+              label: 'pics',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+            list: {},
+          },
           tags: {
             edit: {
               label: 'tags',
@@ -416,10 +436,10 @@ module.exports = {
                 size: 6,
               },
             ],
-            [{ name: 'json', size: 12 }],
+            [{ name: 'pics', size: 6 }, { name: 'pic', size: 6 }],
             [{ name: 'number', size: 6 }, { name: 'date', size: 4 }],
-            [{ name: 'enum', size: 6 }, { name: 'pic', size: 6 }],
-            [{ name: 'bool', size: 4 }],
+            [{ name: 'bool', size: 4 }, { name: 'enum', size: 6 }],
+            [{ name: 'json', size: 12 }],
           ],
         },
       },

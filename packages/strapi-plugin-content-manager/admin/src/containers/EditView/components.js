@@ -7,6 +7,10 @@ const SubWrapper = styled.div`
 `;
 
 const MainWrapper = styled(SubWrapper)`
+  > div {
+    margin-right: 0;
+    margin-left: 0;
+  }
   padding: 22px 10px;
 `;
 

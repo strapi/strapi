@@ -15,7 +15,10 @@
   },
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "default": "soupette",
+      "required": true,
+      "unique": true
     },
     "content": {
       "type": "text"
@@ -28,10 +31,11 @@
     },
     "enum": {
       "enum": [
-        "morning,",
+        "morning",
         "noon"
       ],
-      "type": "enumeration"
+      "type": "enumeration",
+      "default": "noon"
     },
     "pic": {
       "model": "file",
@@ -47,6 +51,11 @@
     },
     "json": {
       "type": "json"
+    },
+    "pics": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
     }
   }
 }
