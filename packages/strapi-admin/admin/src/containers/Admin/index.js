@@ -18,9 +18,7 @@ import {
   OverlayBlocker,
   injectHooks,
 } from 'strapi-helper-plugin';
-// import OverlayBlocker from 'components/OverlayBlocker';
-
-// import injectHooks from 'utils/injectHooks';
+import { SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
@@ -160,7 +158,7 @@ export class Admin extends React.Component {
     } = props;
 
     return !Object.keys(plugins).every(
-      plugin => plugins[plugin].isReady === true,
+      plugin => plugins[plugin].isReady === true
     );
   };
 
@@ -208,7 +206,7 @@ export class Admin extends React.Component {
       const key = plugins[current].id;
 
       acc.push(
-        <InitializerComponent key={key} {...this.props} {...this.helpers} />,
+        <InitializerComponent key={key} {...this.props} {...this.helpers} />
       );
 
       return acc;
@@ -281,7 +279,7 @@ export class Admin extends React.Component {
           isOpen={blockApp && showGlobalAppBlocker}
           {...overlayBlockerData}
         />
-        {showLogoutComponent && <Onboarding />}
+        {showLogoutComponent && SHOW_TUTORIALS && <Onboarding />}
       </div>
     );
   }
@@ -360,13 +358,13 @@ export function mapDispatchToProps(dispatch) {
       unsetAppSecured,
       updatePlugin,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
@@ -381,5 +379,5 @@ export default compose(
   withLocaleToggleReducer,
   withSaga,
   withConnect,
-  withHooks,
+  withHooks
 )(Admin);
