@@ -79,13 +79,13 @@ function SettingViewModel({
     return () => {
       resetProps();
     };
-  }, []);
+  }, [getData, name, resetProps]);
 
   useEffect(() => {
     if (showWarningSubmit) {
       toggleWarningSubmit();
     }
-  }, [shouldToggleModalSubmit]);
+  }, [shouldToggleModalSubmit, showWarningSubmit]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
