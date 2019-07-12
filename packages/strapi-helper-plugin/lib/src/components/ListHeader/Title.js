@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import colors from '../../styles/colors';
 
 const Title = styled.p`
+  margin-bottom: 0;
   color: ${colors.blueTxt};
   font-family: 'Lato';
   font-size: 1.8rem;
