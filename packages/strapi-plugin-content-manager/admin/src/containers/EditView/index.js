@@ -17,6 +17,7 @@ import pluginId from '../../pluginId';
 import Container from '../../components/Container';
 
 import { LinkWrapper, MainWrapper, SubWrapper } from './components';
+import Group from './Group';
 import Inputs from './Inputs';
 
 import init from './init';
@@ -37,6 +38,27 @@ function EditView({
 }) {
   const layout = get(layouts, [slug], {});
   const isCreatingEntry = id === 'create';
+  const attributes = get(layout, ['schema', 'attributes'], {});
+
+  const groups = Object.keys(attributes).reduce((acc, current) => {
+    const { group, repeatable, type } = get(attributes, [current], {
+      group: '',
+      type: '',
+      repeatable,
+    });
+
+    if (type === 'group') {
+      acc.push({ key: current, group, repeatable, isOpen: !repeatable });
+    }
+
+    return acc;
+  }, []);
+  const groupLayoutsToGet = groups
+    .filter(
+      (current, index) =>
+        groups.findIndex(el => el.group === current.group) === index
+    )
+    .map(({ group }) => group);
 
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
@@ -45,10 +67,31 @@ function EditView({
     init(initialState, layout, isCreatingEntry)
   );
   const state = reducerState.toJS();
-  const { initialData, modifiedData, isLoading } = state;
+  const {
+    groupLayoutsData,
+    initialData,
+    modifiedData,
+    isLoading,
+    isLoadingForLayouts,
+  } = state;
 
   const source = getQueryParameters(search, 'source');
-  const shouldShowLoader = !isCreatingEntry && isLoading;
+  const shouldShowLoader =
+    isLoadingForLayouts || (!isCreatingEntry && isLoading);
+
+  // Keep these lines if we make the Group component collapsable
+  // useEffect(() => {
+  //   dispatch({
+  //     type: 'SET_COLLAPSES_COMPONENTS_STATE',
+  //     collapses: groups.reduce((acc, current) => {
+  //       const { key, isOpen, repeatable } = current;
+  //       acc[key] = { isOpen, repeatable };
+
+  //       return acc;
+  //     }, {}),
+  //   });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -67,9 +110,37 @@ function EditView({
       }
     };
 
+    const fetchGroupLayouts = async () => {
+      try {
+        const data = await Promise.all(
+          groupLayoutsToGet.map(uid =>
+            request(`/${pluginId}/fixtures/layouts/${uid}`, { method: 'GET' })
+          )
+        );
+
+        const groupLayouts = data.reduce((acc, current) => {
+          acc[current.layout.uid] = current.layout;
+
+          return acc;
+        }, {});
+
+        dispatch({
+          type: 'GET_GROUP_LAYOUTS_SUCCEEDED',
+          groupLayouts,
+        });
+      } catch (err) {
+        console.log({ err });
+        // TODO ADD A TRAD
+        strapi.notification.error('notification.error');
+      }
+    };
+
+    fetchGroupLayouts();
+
     if (!isCreatingEntry) {
       fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isCreatingEntry, slug, source]);
 
   if (shouldShowLoader) {
@@ -203,10 +274,26 @@ function EditView({
             title={pluginHeaderTitle}
           />
           <div className="row">
-            <div className="col-md-12 col-lg-9">
+            <div className="coel-md-12 col-lg-9">
               <MainWrapper>
                 {fields.map((fieldsRow, key) => {
                   //
+                  const [{ name }] = fieldsRow;
+                  const group = get(layout, ['schema', 'attributes', name], {});
+                  const groupMeta = get(layout, ['metadata', name, 'edit'], {});
+
+                  if (fieldsRow.length === 1 && group.type === 'group') {
+                    return (
+                      <Group
+                        key={key}
+                        {...group}
+                        {...groupMeta}
+                        name={name}
+                        isRepeatable={group.repeatable}
+                        layout={get(groupLayoutsData, name, {})}
+                      />
+                    );
+                  }
 
                   return (
                     <div key={key} className="row">
@@ -241,14 +328,21 @@ function EditView({
                           'enum',
                         ]);
                         const value = get(modifiedData, name);
+                        const { description, visible } = metadata;
+
+                        // Remove the updatedAt fields
+                        if (visible === false) {
+                          return null;
+                        }
 
                         if (type === 'group') {
-                          return null;
+                          return <Group {...metadata} key={name} name={name} />;
                         }
 
                         return (
                           <Inputs
                             {...metadata}
+                            inputDescription={description}
                             inputStyle={inputStyle}
                             key={name}
                             multiple={multiple}

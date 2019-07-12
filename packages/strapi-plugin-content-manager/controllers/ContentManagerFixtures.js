@@ -103,6 +103,14 @@ module.exports = {
               min: 1,
               max: 20,
             },
+            ingredient: {
+              type: 'group',
+              group: 'ingredient',
+              required: true,
+              repeatable: false,
+              min: 1,
+              max: 20,
+            },
           },
         },
         settings: {
@@ -131,7 +139,16 @@ module.exports = {
           ingredients: {
             list: {},
             edit: {
-              label: 'ingredients',
+              label: 'Ingredients',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+          },
+          ingredient: {
+            list: {},
+            edit: {
+              label: 'Ingredient',
               description: '....',
               editable: true,
               visible: true,
@@ -151,6 +168,12 @@ module.exports = {
             [
               {
                 name: 'ingredients',
+                size: 12,
+              },
+            ],
+            [
+              {
+                name: 'ingredient',
                 size: 12,
               },
             ],

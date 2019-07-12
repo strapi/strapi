@@ -1,8 +1,11 @@
 import { fromJS } from 'immutable';
 
 const initialState = fromJS({
+  collapses: {},
+  groupLayoutsData: {},
   initialData: {},
   isLoading: true,
+  isLoadingForLayouts: true,
   modifiedData: {},
 });
 
@@ -13,6 +16,10 @@ function reducer(state, action) {
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data))
         .update('isLoading', () => false);
+    case 'GET_GROUP_LAYOUTS_SUCCEEDED':
+      return state
+        .update('groupLayoutsData', () => fromJS(action.groupLayouts))
+        .update('isLoadingForLayouts', () => false);
     case 'ON_CHANGE':
       return state.updateIn(
         ['modifiedData', ...action.keys],
@@ -20,6 +27,8 @@ function reducer(state, action) {
       );
     case 'RESET_FORM':
       return state.update('modifiedData', () => state.get('initialData'));
+    case 'SET_COLLAPSES_COMPONENTS_STATE':
+      return state.update('collapses', () => fromJS(action.collapses));
     default:
       return state;
   }
