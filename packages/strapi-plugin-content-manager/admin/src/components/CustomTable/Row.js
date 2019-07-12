@@ -71,8 +71,6 @@ function Row({ goTo, isBulkable, row, headers }) {
         </td>
       )}
       {headers.map(header => {
-        //
-
         return (
           <td key={header.name}>
             <Truncate>

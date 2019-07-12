@@ -14,10 +14,7 @@ const Table = styled.table`
     padding: 0;
   }
 
-  th {
-    padding: 0 25px;
-  }
-
+  th,
   td {
     padding: 0 25px;
   }
