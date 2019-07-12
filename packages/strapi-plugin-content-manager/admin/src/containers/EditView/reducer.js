@@ -13,6 +13,11 @@ function reducer(state, action) {
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data))
         .update('isLoading', () => false);
+    case 'ON_CHANGE':
+      return state.updateIn(
+        ['modifiedData', ...action.keys],
+        () => action.value
+      );
     case 'RESET_FORM':
       return state.update('modifiedData', () => state.get('initialData'));
     default:

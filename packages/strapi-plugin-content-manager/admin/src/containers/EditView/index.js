@@ -253,7 +253,13 @@ function EditView({
                             key={name}
                             multiple={multiple}
                             name={name}
-                            onChange={() => {}}
+                            onChange={({ target: { name, value } }) => {
+                              dispatch({
+                                type: 'ON_CHANGE',
+                                keys: name.split('.'),
+                                value,
+                              });
+                            }}
                             selectOptions={get(attribute, 'enum', [])}
                             type={type}
                             validations={validations}
