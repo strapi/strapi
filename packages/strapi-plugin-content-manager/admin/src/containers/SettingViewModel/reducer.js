@@ -36,11 +36,15 @@ function settingViewModelReducer(state = initialState, action) {
         .update('isLoading', () => false)
         .update('modifiedData', () => fromJS(action.layout));
     case MOVE_FIELD_LIST:
-      return state.updateIn(['modifiedData', 'layouts', 'list'], list => {
-        return list
-          .delete(action.dragIndex)
-          .insert(action.overIndex, list.get(action.dragIndex));
-      });
+      return state
+        .updateIn(['modifiedData', 'layouts', 'list'], list => {
+          return list
+            .delete(action.dragIndex)
+            .insert(action.overIndex, list.get(action.dragIndex));
+        })
+        .update('listFieldToEditIndex', () => {
+          return action.overIndex;
+        });
     case ON_CHANGE:
       return state.updateIn(action.keys, () => action.value);
     case ON_REMOVE_LIST_FIELD: {
