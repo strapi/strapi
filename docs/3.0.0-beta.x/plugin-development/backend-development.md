@@ -21,7 +21,10 @@ To disable the prefix, add the `prefix` attribute to each concerned route, like 
   "method": "GET",
   "path": "/my-plugin-route",
   "handler": "MyPlugin.action",
-  "prefix": false
+  "config": {
+    "policies": [],
+    "prefix": false
+  }
 }
 ```
 

@@ -329,21 +329,16 @@ module.exports = {
             {}
           );
 
+    await Promise.all(relationUpdates);
+
     delete values[this.primaryKey];
     if (!_.isEmpty(values)) {
-      relationUpdates.push(
-        this.forge({
-          [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
-        }).save(values, {
-          patch: true,
-        })
-      );
-    } else {
-      relationUpdates.push(Promise.resolve(_.assign(response, params.values)));
+      await this.forge({
+        [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
+      }).save(values, {
+        patch: true,
+      });
     }
-
-    // Update virtuals fields.
-    await Promise.all(relationUpdates);
 
     return await this.forge({
       [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
