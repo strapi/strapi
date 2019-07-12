@@ -2,12 +2,162 @@ const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 
 module.exports = ({ model, modelKey, strapi }) => {
-  const assocs = model.associations.map(ast => ast.alias);
+  const hasPK = obj => _.has(obj, model.primaryKey) || _.has(obj, 'id');
+  const getPK = obj =>
+    _.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id;
+
+  const assocKeys = model.associations.map(ast => ast.alias);
+  const groupKeys = Object.keys(model.attributes).filter(key => {
+    return model.attributes[key].type === 'group';
+  });
+  const excludedKeys = assocKeys.concat(groupKeys);
 
   const defaultPopulate = model.associations
     .filter(ast => ast.autoPopulate !== false)
     .map(ast => ast.alias);
 
+  const pickRelations = values => {
+    return _.pick(values, assocKeys);
+  };
+
+  const omitExernalValues = values => {
+    return _.omit(values, excludedKeys);
+  };
+
+  async function createGroups(entry, values) {
+    if (groupKeys.length === 0) return;
+
+    for (let key of groupKeys) {
+      const attr = model.attributes[key];
+      const { group, required = true, repeatable = true } = attr;
+
+      const groupModel = strapi.groups[group];
+
+      if (required === true && !_.has(values, key)) {
+        const err = new Error(`Group ${key} is required`);
+        err.status = 400;
+        throw err;
+      }
+
+      if (!_.has(values, key)) continue;
+
+      const groupValue = values[key];
+
+      if (repeatable === true) {
+        validateRepeatableInput(groupValue, { key, ...attr });
+        const groups = await Promise.all(
+          groupValue.map(value => groupModel.create(value))
+        );
+
+        const groupsArr = groups.map(group => ({
+          kind: groupModel.globalId,
+          ref: group,
+        }));
+
+        entry[key] = groupsArr;
+        await entry.save();
+      } else {
+        validateNonRepeatableInput(groupValue, { key, ...attr });
+        const group = await groupModel.create(groupValue);
+        entry[key] = [
+          {
+            kind: groupModel.globalId,
+            ref: group,
+          },
+        ];
+        await entry.save();
+      }
+    }
+  }
+
+  async function updateGroups(entry, values) {
+    if (groupKeys.length === 0) return;
+
+    for (let key of groupKeys) {
+      // if key isn't present then don't change the current group data
+      if (!_.has(values, key)) continue;
+
+      const attr = model.attributes[key];
+      const { group, repeatable = true } = attr;
+
+      const groupModel = strapi.groups[group];
+      const groupValue = values[key];
+
+      const updateOCreateGroup = async value => {
+        // check if value has an id then update else create
+        if (hasPK(value)) {
+          return groupModel.findOneAndUpdate(
+            {
+              [model.primaryKey]: getPK(value),
+            },
+            value,
+            { new: true }
+          );
+        }
+        return groupModel.create(value);
+      };
+
+      if (repeatable === true) {
+        validateRepeatableInput(groupValue, { key, ...attr });
+
+        await deleteOldGroups(entry, groupValue, { key, groupModel });
+
+        const groups = await Promise.all(groupValue.map(updateOCreateGroup));
+        const groupsArr = groups.map(group => ({
+          kind: groupModel.globalId,
+          ref: group,
+        }));
+
+        entry[key] = groupsArr;
+        await entry.save();
+      } else {
+        validateNonRepeatableInput(groupValue, { key, ...attr });
+
+        await deleteOldGroups(entry, groupValue, { key, groupModel });
+
+        const group = await updateOCreateGroup(groupValue);
+        entry[key] = [
+          {
+            kind: groupModel.globalId,
+            ref: group,
+          },
+        ];
+        await entry.save();
+      }
+    }
+    return;
+  }
+
+  async function deleteOldGroups(entry, groupValue, { key, groupModel }) {
+    const groupArr = Array.isArray(groupValue) ? groupValue : [groupValue];
+
+    const idsToKeep = groupArr.filter(hasPK).map(getPK);
+    const allIds = await (entry[key] || [])
+      .filter(el => el.ref)
+      .map(el => el.ref._id);
+
+    // verify the provided ids are realted to this entity.
+    idsToKeep.forEach(id => {
+      if (allIds.findIndex(currentId => currentId.toString() === id) === -1) {
+        const err = new Error(
+          `Some of the provided groups in ${key} are not related to the entity`
+        );
+        err.status = 400;
+        throw err;
+      }
+    });
+
+    const idsToDelete = allIds.reduce((acc, id) => {
+      if (idsToKeep.includes(id.toString())) return acc;
+      return acc.concat(id);
+    }, []);
+
+    if (idsToDelete.length > 0) {
+      await groupModel.deleteMany({ [model.primaryKey]: { $in: idsToDelete } });
+    }
+  }
+
+  // public api
   return {
     find(params, populate) {
       const populateOpt = populate || defaultPopulate;
@@ -25,9 +175,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       const populateOpt = populate || defaultPopulate;
 
       return model
-        .findOne({
-          [model.primaryKey]: params[model.primaryKey] || params.id,
-        })
+        .findOne({ [model.primaryKey]: getPK(params) })
         .populate(populateOpt);
     },
 
@@ -42,23 +190,34 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     async create(values) {
       // Extract values related to relational data.
-      const relations = _.pick(values, assocs);
-      const data = _.omit(values, assocs);
+      const relations = pickRelations(values);
+      const data = omitExernalValues(values);
 
       // Create entry with no-relational data.
       const entry = await model.create(data);
+
+      await createGroups(entry, values);
 
       // Create relational data and return the entry.
       return model.updateRelations({ _id: entry.id, values: relations });
     },
 
     async update(params, values) {
+      const entry = await model.findOne({ _id: params.id });
+
+      if (!entry) {
+        const err = new Error('entry.notFound');
+        err.status = 404;
+        throw err;
+      }
+
       // Extract values related to relational data.
-      const relations = _.pick(values, assocs);
-      const data = _.omit(values, assocs);
+      const relations = pickRelations(values);
+      const data = omitExernalValues(values);
 
       // Update entry with no-relational data.
-      await model.updateOne(params, data, { multi: true });
+      await entry.updateOne(params, data);
+      await updateGroups(entry, values);
 
       // Update relational data and return the entry.
       return model.updateRelations(
@@ -153,3 +312,36 @@ const buildSearchOr = (model, query) => {
     }
   }, []);
 };
+
+function validateRepeatableInput(value, { key, min, max }) {
+  if (!Array.isArray(value)) {
+    const err = new Error(`Group ${key} is repetable. Expected an array`);
+    err.status = 400;
+    throw err;
+  }
+
+  if (min && value.length < min) {
+    const err = new Error(`Group ${key} must contain at least ${min} items`);
+    err.status = 400;
+    throw err;
+  }
+  if (max && value.length > max) {
+    const err = new Error(`Group ${key} must contain at most ${max} items`);
+    err.status = 400;
+    throw err;
+  }
+}
+
+function validateNonRepeatableInput(value, { key, required }) {
+  if (typeof value !== 'object') {
+    const err = new Error(`Group ${key} should be an object`);
+    err.status = 400;
+    throw err;
+  }
+
+  if (required === true && value === null) {
+    const err = new Error(`Group ${key} is required`);
+    err.status = 400;
+    throw err;
+  }
+}
