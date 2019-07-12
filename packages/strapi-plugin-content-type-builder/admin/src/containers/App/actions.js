@@ -8,7 +8,9 @@ import { fromJS, OrderedMap } from 'immutable';
 import {
   ADD_ATTRIBUTE_RELATION,
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
+  ADD_ATTRIBUTE_TO_EXISTING_GROUP,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
+  ADD_ATTRIBUTE_TO_TEMP_GROUP,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
@@ -27,6 +29,7 @@ import {
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_NEW_GROUP_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
+  ON_CHANGE_ATTRIBUTE_GROUP,
   ON_CHANGE_RELATION,
   ON_CHANGE_RELATION_NATURE,
   ON_CHANGE_RELATION_TARGET,
@@ -66,9 +69,24 @@ export function addAttributeToExistingContentType(
   };
 }
 
+export function addAttributeToExistingGroup(groupName, attributeType) {
+  return {
+    type: ADD_ATTRIBUTE_TO_EXISTING_GROUP,
+    attributeType,
+    groupName,
+  };
+}
+
 export function addAttributeToTempContentType(attributeType) {
   return {
     type: ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
+    attributeType,
+  };
+}
+
+export function addAttributeToTempGroup(attributeType) {
+  return {
+    type: ADD_ATTRIBUTE_TO_TEMP_GROUP,
     attributeType,
   };
 }
@@ -271,6 +289,18 @@ export function onChangeAttribute({ target }) {
 
   return {
     type: ON_CHANGE_ATTRIBUTE,
+    keys: target.name.split('.'),
+    value: value,
+  };
+}
+
+export function onChangeAttributeGroup({ target }) {
+  const value = target.name.includes('name')
+    ? target.value.split(' ').join('')
+    : target.value;
+
+  return {
+    type: ON_CHANGE_ATTRIBUTE_GROUP,
     keys: target.name.split('.'),
     value: value,
   };

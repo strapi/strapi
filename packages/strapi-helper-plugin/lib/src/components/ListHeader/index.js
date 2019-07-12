@@ -34,7 +34,7 @@ ListHeader.defaultProps = {
   button: null,
   subtitle: 'app.utils.defaultMessage',
   subtitleValues: {},
-  title: null,
+  title: [],
 };
 
 ListHeader.propTypes = {

@@ -21,7 +21,7 @@ const Wrapper = styled.div`
   }
   button {
     position: absolute;
-    top: 1.9rem;
+    top: 1.7rem;
     right: 1rem;
     outline: 0;
   }

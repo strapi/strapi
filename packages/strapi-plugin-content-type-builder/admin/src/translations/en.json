@@ -71,6 +71,8 @@
   "form.attribute.settings.default": "Default value",
   "form.attribute.settings.default.checkboxLabel": "Set to true",
   "form.button.add": "Add Field To Content Type",
+  "form.button.add.model": "Add Field To Content Type",
+  "form.button.add.group": "Add Field To Group",
   "form.button.cancel": "Cancel",
   "form.button.continue": "Continue",
   "form.button.done": "Done",

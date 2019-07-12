@@ -6,10 +6,11 @@ import { get } from 'lodash';
 
 import pluginId from '../../pluginId';
 
-import ViewContainer from '../ViewContainer';
-import AttributesModalPicker from '../AttributesPickerModal';
-
 import ListRow from '../../components/ListRow';
+
+import AttributesModalPicker from '../AttributesPickerModal';
+import AttributeForm from '../AttributeForm';
+import ViewContainer from '../ViewContainer';
 
 import {
   BackHeader,
@@ -22,7 +23,12 @@ import {
   PopUpWarning,
 } from 'strapi-helper-plugin';
 
-import { deleteGroupAttribute } from '../App/actions';
+import {
+  addAttributeToTempGroup,
+  addAttributeToExistingGroup,
+  deleteGroupAttribute,
+  onChangeAttributeGroup,
+} from '../App/actions';
 
 /* eslint-disable no-extra-boolean-cast */
 export class GroupPage extends React.Component {
@@ -34,13 +40,17 @@ export class GroupPage extends React.Component {
       `${pluginId}.notification.info.contentType.creating.notSaved`
     );
 
+  getActionType = () => getQueryParameters(this.getSearch(), 'actionType');
+
+  getAttributeType = () =>
+    getQueryParameters(this.getSearch(), 'attributeType');
+
   getFeature = () => {
     const { modifiedDataGroup, newGroup } = this.props;
 
     if (this.isUpdatingTempFeature()) {
       return newGroup;
     }
-
     return get(modifiedDataGroup, this.getFeatureName(), {});
   };
 
@@ -92,6 +102,8 @@ export class GroupPage extends React.Component {
 
   getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
 
+  getSettingType = () => getQueryParameters(this.getSearch(), 'settingType');
+
   getSearch = () => {
     const {
       location: { search },
@@ -139,11 +151,44 @@ export class GroupPage extends React.Component {
     this.props.history.push(backPathname);
   };
 
+  handleSubmit = (shouldContinue = false) => {
+    const {
+      addAttributeToExistingGroup,
+      addAttributeToTempGroup,
+      history: { push },
+    } = this.props;
+
+    const attributeType = this.getAttributeType();
+
+    if (this.isUpdatingTempFeature()) {
+      addAttributeToTempGroup(attributeType);
+    } else {
+      addAttributeToExistingGroup(this.getFeatureName(), attributeType);
+    }
+
+    const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
+
+    push({ search: nextSearch });
+  };
+
   isUpdatingTempFeature = () => {
     const { groups } = this.props;
     const currentData = groups.find(d => d.name === this.getFeatureName());
 
     return get(currentData, 'isTemporary', false);
+  };
+
+  openAttributesModal = () => {
+    const {
+      canOpenModal,
+      history: { push },
+    } = this.props;
+
+    if (canOpenModal || this.isUpdatingTempFeature()) {
+      push({ search: 'modalType=chooseAttributes' });
+    } else {
+      this.displayNotificationCTNotSaved();
+    }
   };
 
   toggleModalWarning = () =>
@@ -166,6 +211,8 @@ export class GroupPage extends React.Component {
   render() {
     const {
       history: { push },
+      onChangeAttributeGroup,
+      temporaryAttributeGroup,
     } = this.props;
 
     const { showWarning } = this.state;
@@ -185,7 +232,7 @@ export class GroupPage extends React.Component {
     const buttonProps = {
       kind: 'secondaryHotlineAdd',
       label: `${pluginId}.button.attributes.add`,
-      onClick: () => {},
+      onClick: () => this.openAttributesModal(),
     };
 
     return (
@@ -202,6 +249,7 @@ export class GroupPage extends React.Component {
               description={`${pluginId}.home.emptyAttributes.description.${this.featureType}`}
               id="openAddAttr"
               label="content-type-builder.button.attributes.add"
+              onClick={this.openAttributesModal}
               title="content-type-builder.home.emptyAttributes.title"
             />
           ) : (
@@ -217,7 +265,7 @@ export class GroupPage extends React.Component {
                 </table>
               </List>
               <div className="list-button">
-                <Button {...buttonProps} />
+                <Button onClick={this.openAttributesModal} />
               </div>
             </ListWrapper>
           )}
@@ -225,6 +273,19 @@ export class GroupPage extends React.Component {
 
         <AttributesModalPicker
           isOpen={this.getModalType() === 'chooseAttributes'}
+          push={push}
+        />
+
+        <AttributeForm
+          attributeType={this.getAttributeType()}
+          getActionType={this.getActionType()}
+          featureType={this.featureType}
+          activeTab={this.getSettingType()}
+          isOpen={this.getModalType() === 'attributeForm'}
+          modifiedData={temporaryAttributeGroup}
+          onChange={onChangeAttributeGroup}
+          onSubmit={this.handleSubmit}
+          onSubmitEdit={() => {}}
           push={push}
         />
 
@@ -251,6 +312,8 @@ GroupPage.defaultProps = {
 };
 
 GroupPage.propTypes = {
+  addAttributeToExistingGroup: PropTypes.func.isRequired,
+  addAttributeToTempGroup: PropTypes.func.isRequired,
   canOpenModal: PropTypes.bool,
   deleteGroupAttribute: PropTypes.func.isRequired,
   groups: PropTypes.array.isRequired,
@@ -268,12 +331,17 @@ GroupPage.propTypes = {
   }).isRequired,
   modifiedDataGroup: PropTypes.object.isRequired,
   newGroup: PropTypes.object.isRequired,
+  onChangeAttributeGroup: PropTypes.func.isRequired,
+  temporaryAttributeGroup: PropTypes.object.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addAttributeToExistingGroup,
+      addAttributeToTempGroup,
       deleteGroupAttribute,
+      onChangeAttributeGroup,
     },
     dispatch
   );

@@ -124,6 +124,7 @@ describe('appReducer', () => {
         attributes: OrderedMap({}),
       },
       temporaryAttribute: {},
+      temporaryAttributeGroup: {},
       initialTemporaryAttributeRelation: {
         name: '',
         columnName: '',
@@ -153,14 +154,18 @@ describe('appReducer', () => {
         connection: '',
         description: '',
         name: '',
-        attributes: [],
+        schema: {
+          attributes: [],
+        },
       },
       newGroupClone: {
         collectionName: '',
         connection: '',
         description: '',
         name: '',
-        attributes: [],
+        schema: {
+          attributes: [],
+        },
       },
     });
   });
@@ -1018,6 +1023,7 @@ describe('appReducer', () => {
         attributes: OrderedMap({}),
       },
       temporaryAttribute: {},
+      temporaryAttributeGroup: {},
       initialTemporaryAttributeRelation: {
         name: '',
         columnName: '',
@@ -1046,14 +1052,18 @@ describe('appReducer', () => {
         connection: '',
         description: '',
         name: '',
-        attributes: [],
+        schema: {
+          attributes: [],
+        },
       },
       newGroupClone: {
         collectionName: '',
         connection: '',
         description: '',
         name: '',
-        attributes: [],
+        schema: {
+          attributes: [],
+        },
       },
       initialDataGroup: {},
       modifiedDataGroup: {},

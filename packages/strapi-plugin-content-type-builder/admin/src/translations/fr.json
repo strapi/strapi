@@ -69,6 +69,8 @@
   "form.attribute.settings.default": "Valeur par défault",
   "form.attribute.settings.default.checkboxLabel": "Définir à true",
   "form.button.add": "Ajouter un nouveau champ",
+  "form.button.add.model": "Ajouter un nouveau champ à un type de contenu",
+  "form.button.add.group": "Ajouter un nouveau champ à un group",
   "form.button.cancel": "Annuler",
   "form.button.continue": "Continuer",
   "form.button.save": "Sauvegarder",

@@ -5,7 +5,11 @@ import { shallow } from 'enzyme';
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
-import { EmptyAttributesBlock } from 'strapi-helper-plugin';
+import {
+  Button,
+  EmptyAttributesBlock,
+  ListWrapper,
+} from 'strapi-helper-plugin';
 
 import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
@@ -37,6 +41,8 @@ const renderComponent = (props = {}) => {
 
 const basePath = '/plugins/content-type-builder/groups';
 const props = {
+  addAttributeToExistingGroup: jest.fn(),
+  addAttributeToTempGroup: jest.fn(),
   deleteGroupAttribute: jest.fn(),
   groups: [
     {
@@ -115,22 +121,13 @@ const props = {
     name: '',
     attributes: [],
   },
+  onChangeAttributeGroup: jest.fn(),
+  temporaryAttributeGroup: {},
 };
 
 describe('CTB <GroupPage />', () => {
   it('should not crash', () => {
     shallow(<GroupPage {...props} />);
-  });
-
-  describe('CTB <GroupPage /> render', () => {
-    it("should display the EmptyAttributeBlock if the group's attributes are empty", () => {
-      props.initialDataGroup.tests.schema.attributes = {};
-      props.modifiedDataGroup.tests.schema.attributes = {};
-
-      const wrapper = shallow(<GroupPage {...props} />);
-
-      expect(wrapper.find(EmptyAttributesBlock)).toHaveLength(1);
-    });
   });
 
   describe('GetFeatureHeaderDescription', () => {
@@ -174,6 +171,30 @@ describe('CTB <GroupPage />', () => {
       expect(props.history.push).toHaveBeenCalledWith(
         '/plugins/content-type-builder/groups'
       );
+    });
+  });
+
+  it('should call the openAttributesModal when clicking on the EmptyAttributesBlock', () => {
+    props.initialDataGroup.tests.schema.attributes = {};
+    props.modifiedDataGroup.tests.schema.attributes = {};
+    const wrapper = shallow(<GroupPage {...props} />);
+    const spyOnClick = jest.spyOn(wrapper.instance(), 'openAttributesModal');
+    wrapper.instance().forceUpdate();
+
+    const onClick = wrapper.find(EmptyAttributesBlock).prop('onClick');
+    onClick();
+
+    expect(spyOnClick).toHaveBeenCalled();
+  });
+
+  describe('CTB <GroupPage /> render', () => {
+    it("should display the EmptyAttributeBlock if the group's attributes are empty", () => {
+      props.initialDataGroup.tests.schema.attributes = {};
+      props.modifiedDataGroup.tests.schema.attributes = {};
+
+      const wrapper = shallow(<GroupPage {...props} />);
+
+      expect(wrapper.find(EmptyAttributesBlock)).toHaveLength(1);
     });
   });
 });
