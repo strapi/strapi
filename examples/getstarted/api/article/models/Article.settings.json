@@ -20,9 +20,6 @@
     "content": {
       "type": "text"
     },
-    "json": {
-      "type": "string"
-    },
     "number": {
       "type": "integer"
     },
@@ -47,6 +44,9 @@
     "tags": {
       "collection": "tag",
       "via": "articles"
+    },
+    "json": {
+      "type": "json"
     }
   }
 }

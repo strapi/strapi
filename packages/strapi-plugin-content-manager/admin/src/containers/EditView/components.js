@@ -1,6 +1,16 @@
 import styled from 'styled-components';
 
-const LinkWrapper = styled.div`
+const SubWrapper = styled.div`
+  background: #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px #e3e9f3;
+`;
+
+const MainWrapper = styled(SubWrapper)`
+  padding: 22px 10px;
+`;
+
+const LinkWrapper = styled(SubWrapper)`
   background: #ffffff;
   border-radius: 2px;
   box-shadow: 0 2px 4px #e3e9f3;
@@ -17,4 +27,4 @@ const LinkWrapper = styled.div`
   }
 `;
 
-export { LinkWrapper };
+export { LinkWrapper, MainWrapper, SubWrapper };

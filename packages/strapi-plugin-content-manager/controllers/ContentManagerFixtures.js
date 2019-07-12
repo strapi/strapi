@@ -24,48 +24,156 @@ module.exports = {
 
   getLayout: ctx => {
     const layouts = {
-      tag: {
-        uid: 'article',
+      ingredient: {
+        uid: 'ingredient',
         schema: {
-          // good old schema
           connection: 'default',
-          collectionName: 'articles',
-          options: {},
-          infos: {
-            name: 'article',
+          collectionName: 'ingredients',
+          info: {
+            name: 'ingredient',
             description: '',
+          },
+          options: {
+            increments: true,
+            timestamps: true,
+            comment: '',
+          },
+          attributes: {
+            name: {
+              type: 'string',
+            },
+          },
+        },
+        settings: {
+          mainField: 'id',
+          defaultSortBy: 'id',
+          defaultSortOrder: 'ASC',
+          searchable: true,
+          filterable: false,
+          bulkable: true,
+          pageSize: 10,
+        },
+        metadata: {
+          name: {
+            list: {},
+            edit: {
+              label: 'name',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+          },
+        },
+        layouts: {
+          list: [],
+          editRelations: [],
+          edit: [
+            [
+              {
+                name: 'name',
+                size: 6,
+              },
+            ],
+          ],
+        },
+      },
+      recipe: {
+        uid: 'recipe',
+        schema: {
+          connection: 'default',
+          collectionName: 'recipes',
+          info: {
+            name: 'recipe',
+            description: '',
+          },
+          options: {
+            increments: true,
+            timestamps: true,
+            comment: '',
           },
           attributes: {
             title: {
               type: 'string',
             },
-            content: {
-              type: 'text',
+            ingredients: {
+              type: 'group',
+              group: 'ingredient',
+              required: true,
+              repeatable: true,
+              min: 1,
+              max: 20,
             },
-            json: {
+          },
+        },
+        settings: {
+          mainField: 'id',
+          defaultSortBy: 'id',
+          defaultSortOrder: 'ASC',
+          searchable: true,
+          filterable: false,
+          bulkable: true,
+          pageSize: 10,
+        },
+        metadata: {
+          title: {
+            list: {
+              label: 'Title',
+              searchable: true,
+              sortable: true,
+            },
+            edit: {
+              label: 'Title',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+          },
+          ingredients: {
+            list: {},
+            edit: {
+              label: 'ingredients',
+              description: '....',
+              editable: true,
+              visible: true,
+            },
+          },
+        },
+        layouts: {
+          list: ['title'],
+          editRelations: [],
+          edit: [
+            {
+              name: 'title',
+              size: 6,
+            },
+            [
+              {
+                name: 'ingredients',
+                size: 12,
+              },
+            ],
+          ],
+        },
+      },
+      tag: {
+        uid: 'tag',
+        schema: {
+          // good old schema
+          connection: 'default',
+          collectionName: 'tags',
+          options: {},
+          infos: {
+            name: 'tag',
+            description: '',
+          },
+          attributes: {
+            name: {
               type: 'string',
             },
-            number: {
-              type: 'integer',
-            },
-            date: {
-              type: 'date',
-            },
-            enum: {
-              enum: ['morning,', 'noon'],
-              type: 'enumeration',
-            },
-            pic: {
-              model: 'file',
-              via: 'related',
-              plugin: 'upload',
-            },
-            bool: {
-              type: 'boolean',
-            },
-            tags: {
-              collection: 'tag',
-              via: 'articles',
+
+            articles: {
+              type: 'relation',
+              relationType: 'manyToMany',
             },
           },
         },
@@ -87,123 +195,37 @@ module.exports = {
               sortable: true,
             },
           },
-          title: {
+          name: {
             edit: {
-              label: 'title',
+              label: 'name',
               description: '....',
               editable: true,
               visible: true,
             },
             list: {
-              label: 'title',
+              label: 'Name',
               searchable: true,
               sortable: true,
             },
           },
-          content: {
+          articles: {
             edit: {
-              label: 'content',
+              label: 'articles',
               description: '....',
               editable: true,
               visible: true,
-            },
-            list: {
-              label: 'content',
-              searchable: true,
-              sortable: true,
-            },
-          },
-          json: {
-            edit: {
-              label: 'json',
-              description: '....',
-              editable: true,
-              visible: true,
+              mainField: 'id',
             },
             list: {},
-          },
-          number: {
-            edit: {
-              label: 'number',
-              description: '....',
-              editable: true,
-              visible: true,
-            },
-            list: {
-              label: 'number',
-              searchable: true,
-              sortable: true,
-            },
-          },
-          date: {
-            edit: {
-              label: 'date',
-              description: '....',
-              editable: true,
-              visible: true,
-            },
-            list: {
-              label: 'date',
-              searchable: true,
-              sortable: true,
-            },
-          },
-          enum: {
-            edit: {
-              label: 'enum',
-              description: '....',
-              editable: true,
-              visible: true,
-            },
-            list: {
-              label: 'enum',
-              searchable: true,
-              sortable: true,
-            },
-          },
-          pic: {
-            edit: {
-              label: 'pic',
-              description: '....',
-              editable: true,
-              visible: true,
-            },
-            list: {},
-          },
-          tags: {
-            edit: {
-              label: 'tags',
-              description: '....',
-              editable: true,
-              visible: true,
-            },
-            list: {},
-          },
-          bool: {
-            edit: {
-              label: 'bool',
-              description: '....',
-              editable: true,
-              visible: true,
-            },
-            list: {
-              label: 'bool',
-              searchable: true,
-              sortable: true,
-            },
           },
         },
         layouts: {
-          list: ['id', 'title', 'content'],
-          editRelations: [],
+          list: ['id', 'name'],
+          editRelations: ['articles'],
           edit: [
             [
               {
-                name: 'title',
-                size: 6,
-              },
-              {
-                name: 'content',
+                name: 'name',
                 size: 6,
               },
             ],
@@ -250,8 +272,8 @@ module.exports = {
               type: 'boolean',
             },
             tags: {
-              collection: 'tag',
-              via: 'articles',
+              type: 'relation',
+              relationType: 'manyToMany',
             },
           },
         },
@@ -362,6 +384,7 @@ module.exports = {
               description: '....',
               editable: true,
               visible: true,
+              mainField: 'name',
             },
             list: {},
           },
@@ -381,7 +404,7 @@ module.exports = {
         },
         layouts: {
           list: ['id', 'title', 'content'],
-          editRelations: [],
+          editRelations: ['tags'],
           edit: [
             [
               {
@@ -393,6 +416,10 @@ module.exports = {
                 size: 6,
               },
             ],
+            [{ name: 'json', size: 12 }],
+            [{ name: 'number', size: 6 }, { name: 'date', size: 4 }],
+            [{ name: 'enum', size: 6 }, { name: 'pic', size: 6 }],
+            [{ name: 'bool', size: 4 }],
           ],
         },
       },
@@ -446,10 +473,8 @@ module.exports = {
               configurable: false,
             },
             role: {
-              model: 'role',
-              via: 'users',
-              plugin: 'users-permissions',
-              configurable: false,
+              type: 'relation',
+              relationType: 'manyToOne',
             },
           },
         },
@@ -541,6 +566,7 @@ module.exports = {
                 description: '....',
                 editable: true,
                 visible: true,
+                mainField: 'name',
               },
               list: {},
             },
@@ -590,6 +616,11 @@ module.exports = {
         name: 'article',
         label: 'Article',
         destination: 'article',
+      },
+      {
+        name: 'recipe',
+        label: 'Recipe',
+        destination: 'recipe',
       },
       {
         name: 'tag',

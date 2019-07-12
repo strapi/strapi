@@ -1,8 +1,8 @@
 {
   "connection": "default",
-  "collectionName": "tags",
+  "collectionName": "recipes",
   "info": {
-    "name": "tag",
+    "name": "recipe",
     "description": ""
   },
   "options": {
@@ -11,13 +11,8 @@
     "comment": ""
   },
   "attributes": {
-    "name": {
+    "title": {
       "type": "string"
-    },
-    "articles": {
-      "collection": "article",
-      "dominant": true,
-      "via": "tags"
     }
   }
 }

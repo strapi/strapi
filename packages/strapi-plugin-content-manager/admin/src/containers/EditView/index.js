@@ -1,6 +1,7 @@
 import React, { memo, useEffect, useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
+
 import {
   BackHeader,
   getQueryParameters,
@@ -14,7 +15,8 @@ import {
 import pluginId from '../../pluginId';
 
 import Container from '../../components/Container';
-import { LinkWrapper } from './components';
+
+import { LinkWrapper, MainWrapper, SubWrapper } from './components';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -108,7 +110,9 @@ function EditView({
     ? { id: `${pluginId}.containers.Edit.pluginHeader.title.new` }
     : templateObject({ mainField: displayedFieldNameInHeader }, initialData)
         .mainField;
-
+  const hasRelations = get(layout, ['layouts', 'editRelations'], []).length > 0;
+  const fields = get(layout, ['layouts', 'edit'], []);
+  console.log({ fields });
   /**
    * Retrieve external links from injected components
    * @type {Array} List of external links to display
@@ -155,6 +159,7 @@ function EditView({
   return (
     <>
       <BackHeader onClick={() => redirectToPreviousPage()} />
+
       <Container className="container-fluid">
         <form onSubmit={handleSubmit}>
           <PluginHeader
@@ -197,8 +202,34 @@ function EditView({
             title={pluginHeaderTitle}
           />
           <div className="row">
-            <div className="col-9"></div>
-            <div className="col-3">
+            <div className="col-md-12 col-lg-9">
+              <MainWrapper>
+                {fields.map((fieldsRow, key) => {
+                  //
+
+                  return (
+                    <div key={key} className="row">
+                      {fieldsRow.map(field => {
+                        // cons
+                        return (
+                          <div key={field.name} className={`col-${field.size}`}>
+                            {field.name}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </MainWrapper>
+            </div>
+            <div className="col-md-12 col-lg-3">
+              {hasRelations && (
+                <SubWrapper
+                  style={{ padding: '0 20px 1px', marginBottom: '28px' }}
+                >
+                  <div style={{ paddingTop: '19px' }}>Relations</div>
+                </SubWrapper>
+              )}
               <LinkWrapper>
                 <ul>
                   <LiLink
