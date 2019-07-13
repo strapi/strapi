@@ -281,15 +281,28 @@ function EditView({
                   const [{ name }] = fieldsRow;
                   const group = get(layout, ['schema', 'attributes', name], {});
                   const groupMeta = get(layout, ['metadata', name, 'edit'], {});
+                  const groupValue = get(
+                    modifiedData,
+                    [name],
+                    group.repeatable ? [] : {}
+                  );
 
                   if (fieldsRow.length === 1 && group.type === 'group') {
                     return (
                       <Group
-                        key={key}
                         {...group}
                         {...groupMeta}
-                        name={name}
+                        groupValue={groupValue}
+                        key={key}
                         isRepeatable={group.repeatable}
+                        name={name}
+                        onChange={({ target: { name, value } }) => {
+                          dispatch({
+                            type: 'ON_CHANGE',
+                            keys: name.split('.'),
+                            value,
+                          });
+                        }}
                         layout={get(groupLayoutsData, name, {})}
                       />
                     );
@@ -330,13 +343,9 @@ function EditView({
                         const value = get(modifiedData, name);
                         const { description, visible } = metadata;
 
-                        // Remove the updatedAt fields
+                        // Remove the updatedAt & createdAt fields
                         if (visible === false) {
                           return null;
-                        }
-
-                        if (type === 'group') {
-                          return <Group {...metadata} key={name} name={name} />;
                         }
 
                         return (
