@@ -8,18 +8,17 @@ module.exports = ({ model, modelKey }) => {
   });
   const excludedKeys = assocKeys.concat(groupKeys);
 
-  function excludeExernalValues(values) {
-    return _.omit(values, excludedKeys);
-  }
+  const defaultPopulate = model.associations
+    .filter(ast => ast.autoPopulate !== false)
+    .map(ast => ast.alias);
 
-  /**
-   *
-   * @param {Object} entry - the entity the groups are linked ot
-   * @param {Object} values - Input values
-   * @param {Object} options
-   * @param {Object} options.model - the ref model
-   * @param {Object} options.transacting - transaction option
-   */
+  const pickRelations = values => {
+    return _.pick(values, assocKeys);
+  };
+  const omitExernalValues = values => {
+    return _.omit(values, excludedKeys);
+  };
+
   async function createGroups(entry, values, { transacting }) {
     if (groupKeys.length === 0) return;
 
@@ -91,7 +90,7 @@ module.exports = ({ model, modelKey }) => {
 
       const groupValue = values[key];
 
-      const updateOreateGroupAndLink = async ({ value, order }) => {
+      const updateOrCreateGroupAndLink = async ({ value, order }) => {
         // check if value has an id then update else create
         if (_.has(value, groupModel.primaryKey)) {
           return groupModel
@@ -115,23 +114,23 @@ module.exports = ({ model, modelKey }) => {
                   { transacting, patch: true, require: false }
                 );
             });
-        } else {
-          return groupModel
-            .forge()
-            .save(value, { transacting })
-            .then(group => {
-              return joinModel.forge().save(
-                {
-                  [foreignKey]: entry.id,
-                  slice_type: groupModel.collectionName,
-                  slice_id: group.id,
-                  field: key,
-                  order,
-                },
-                { transacting }
-              );
-            });
         }
+        // create
+        return groupModel
+          .forge()
+          .save(value, { transacting })
+          .then(group => {
+            return joinModel.forge().save(
+              {
+                [foreignKey]: entry.id,
+                slice_type: groupModel.collectionName,
+                slice_id: group.id,
+                field: key,
+                order,
+              },
+              { transacting }
+            );
+          });
       };
 
       if (repeatable === true) {
@@ -146,7 +145,7 @@ module.exports = ({ model, modelKey }) => {
 
         await Promise.all(
           groupValue.map((value, idx) => {
-            return updateOreateGroupAndLink({ value, order: idx + 1 });
+            return updateOrCreateGroupAndLink({ value, order: idx + 1 });
           })
         );
       } else {
@@ -159,7 +158,7 @@ module.exports = ({ model, modelKey }) => {
           transacting,
         });
 
-        await updateOreateGroupAndLink({ value: groupValue, order: 1 });
+        await updateOrCreateGroupAndLink({ value: groupValue, order: 1 });
       }
     }
     return;
@@ -196,7 +195,7 @@ module.exports = ({ model, modelKey }) => {
     });
 
     const idsToDelete = _.difference(allIds, idsToKeep);
-    if (idsToDelete > 0) {
+    if (idsToDelete.length > 0) {
       await joinModel
         .forge()
         .query(qb => qb.whereIn('slice_id', idsToDelete))
@@ -252,11 +251,7 @@ module.exports = ({ model, modelKey }) => {
 
   return {
     find(params, populate) {
-      const withRelated =
-        populate ||
-        model.associations
-          .filter(ast => ast.autoPopulate !== false)
-          .map(ast => ast.alias);
+      const withRelated = populate || defaultPopulate;
 
       const filters = convertRestQueryParams(params);
 
@@ -266,11 +261,7 @@ module.exports = ({ model, modelKey }) => {
     },
 
     findOne(params, populate) {
-      const withRelated =
-        populate ||
-        model.associations
-          .filter(ast => ast.autoPopulate !== false)
-          .map(ast => ast.alias);
+      const withRelated = populate || defaultPopulate;
 
       return model
         .forge({
@@ -288,12 +279,8 @@ module.exports = ({ model, modelKey }) => {
     },
 
     async create(values) {
-      const relations = _.pick(
-        values,
-        model.associations.map(ast => ast.alias)
-      );
-
-      const data = excludeExernalValues(values);
+      const relations = pickRelations(values);
+      const data = omitExernalValues(values);
 
       const runCreate = async trx => {
         // Create entry with no-relational data.
@@ -318,12 +305,8 @@ module.exports = ({ model, modelKey }) => {
       }
 
       // Extract values related to relational data.
-      const relations = _.pick(
-        values,
-        model.associations.map(ast => ast.alias)
-      );
-
-      const data = excludeExernalValues(values);
+      const relations = pickRelations(values);
+      const data = omitExernalValues(values);
 
       const runUpdate = async trx => {
         const entry = await model
@@ -386,11 +369,7 @@ module.exports = ({ model, modelKey }) => {
       const filters = strapi.utils.models.convertParams(modelKey, params);
 
       // Select field to populate.
-      const withRelated =
-        populate ||
-        model.associations
-          .filter(ast => ast.autoPopulate !== false)
-          .map(ast => ast.alias);
+      const withRelated = populate || defaultPopulate;
 
       return model
         .query(qb => {
