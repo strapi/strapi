@@ -10,11 +10,10 @@
 const crypto = require('crypto');
 const _ = require('lodash');
 
-
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
-  callback: async ctx => {
+  async callback(ctx) {
     const params = ctx.request.body;
 
     // The identifier is required.
@@ -50,9 +49,7 @@ module.exports = {
     }
 
     // Check if the admin exists.
-    const admin = await strapi.admin
-      .queries('administrator', 'admin')
-      .findOne(query);
+    const admin = await strapi.query('administrator', 'admin').findOne(query);
 
     if (!admin) {
       return ctx.badRequest(
@@ -94,7 +91,7 @@ module.exports = {
     }
   },
 
-  register: async ctx => {
+  async register(ctx) {
     const params = ctx.request.body;
 
     // Username is required.
@@ -137,8 +134,8 @@ module.exports = {
     }
 
     // First, check if their is at least one admin
-    const admins = await strapi.admin
-      .queries('administrator', 'admin')
+    const admins = await strapi
+      .query('administrator', 'admin')
       .find({ _limit: 1 });
 
     if (admins.length > 0) {
@@ -154,7 +151,7 @@ module.exports = {
       params.password
     );
 
-    const admin = await strapi.admin.queries('administrator', 'admin').findOne({
+    const admin = await strapi.query('administrator', 'admin').findOne({
       email: params.email,
     });
 
@@ -168,9 +165,7 @@ module.exports = {
     }
 
     try {
-      const admin = await strapi.admin
-        .queries('administrator', 'admin')
-        .create(params);
+      const admin = await strapi.query('administrator', 'admin').create(params);
 
       admin.isAdmin = true;
 
@@ -195,69 +190,63 @@ module.exports = {
     }
   },
 
-  changePassword: async ctx => {
-    const params = _.assign({}, ctx.request.body, ctx.params);
+  async changePassword(ctx) {
+    const { password, passwordConfirmation, code } = {
+      ...ctx.request.body,
+      ...ctx.params,
+    };
 
-    if (
-      params.password &&
-      params.passwordConfirmation &&
-      params.password === params.passwordConfirmation &&
-      params.code
-    ) {
-      const admin = await strapi.admin
-        .queries('administrator', 'admin')
-        .findOne({ resetPasswordToken: params.code });
+    if (!password) return ctx.badRequest('Missing password');
+    if (!passwordConfirmation)
+      return ctx.badRequest('Missing passwordConfirmation');
+    if (!code) return ctx.badRequest('Missing code');
 
-      if (!admin) {
-        return ctx.badRequest(
-          null,
-          ctx.request.admin
-            ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }]
-            : 'Incorrect code provided.'
-        );
-      }
-
-      // Delete the current code
-      admin.resetPasswordToken = null;
-
-      admin.password = await strapi.admin.services.auth.hashPassword(
-        params.password
-      );
-
-      // Update the admin.
-      await strapi.admin.queries('administrator', 'admin').update(admin);
-
-      ctx.send({
-        jwt: strapi.admin.services.auth.createJwtToken(admin),
-        user: strapi.admin.services.auth.sanitizeUser(admin),
-      });
-    } else if (
-      params.password &&
-      params.passwordConfirmation &&
-      params.password !== params.passwordConfirmation
-    ) {
+    if (password !== passwordConfirmation) {
       return ctx.badRequest(
         null,
         ctx.request.admin
           ? [{ messages: [{ id: 'Auth.form.error.password.matching' }] }]
           : 'Passwords do not match.'
       );
-    } else {
+    }
+
+    const admin = await strapi
+      .query('administrator', 'admin')
+      .findOne({ resetPasswordToken: code });
+
+    if (!admin) {
       return ctx.badRequest(
         null,
         ctx.request.admin
-          ? [{ messages: [{ id: 'Auth.form.error.params.provide' }] }]
-          : 'Incorrect params provided.'
+          ? [{ messages: [{ id: 'Auth.form.error.code.provide' }] }]
+          : 'Incorrect code provided.'
       );
     }
+
+    const data = {
+      resetPasswordToken: null,
+      password: await strapi.admin.services.auth.hashPassword(password),
+    };
+
+    const updatedAdmin = await strapi
+      .query('administrator', 'admin')
+      .update({ id: admin.id }, data);
+
+    return ctx.send({
+      jwt: strapi.admin.services.auth.createJwtToken(updatedAdmin),
+      user: strapi.admin.services.auth.sanitizeUser(updatedAdmin),
+    });
   },
 
-  forgotPassword: async ctx => {
+  async forgotPassword(ctx) {
     const { email, url } = ctx.request.body;
 
+    if (!email) return ctx.badRequest('Missing email');
+    if (!url) return ctx.badRequest('Missing url');
+
     // Find the admin thanks to his email.
-    const admin = await strapi.admin
-      .queries('administrator', 'admin')
+    const admin = await strapi
+      .query('administrator', 'admin')
       .findOne({ email });
 
     // admin not found.
@@ -272,9 +261,6 @@ module.exports = {
 
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
-
-    // Set the property code.
-    admin.resetPasswordToken = resetPasswordToken;
 
     const settings = {
       from: {
@@ -310,7 +296,9 @@ module.exports = {
     }
 
     // Update the admin.
-    await strapi.admin.queries('administrator', 'admin').update(admin);
+    await strapi
+      .query('administrator', 'admin')
+      .update({ id: admin.id }, { resetPasswordToken });
 
     ctx.send({ ok: true });
   },
