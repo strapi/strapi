@@ -181,7 +181,7 @@ const getProfile = async (provider, query, callback) => {
           }
         }
       }
-      var google = new Purest({provider: 'google', config})
+      const google = new Purest({provider: 'google', config})
 
       google.query('oauth').get('tokeninfo').qs({access_token}).request((err, res, body) => {
         if (err) {
