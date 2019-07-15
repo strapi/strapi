@@ -114,10 +114,10 @@ const props = {
   newGroup: {
     collectionName: '',
     connection: '',
-    description: '',
     name: '',
     schema: {
       attributes: [],
+      description: '',
     },
   },
   onChangeAttributeGroup: jest.fn(),
@@ -220,9 +220,9 @@ describe('CTB <GroupPage />, mapDispatchToProps', () => {
 describe('CTB <GroupPage />, lifecycle', () => {
   let topCompo;
 
-  // afterEach(() => {
-  //   topCompo.unmount();
-  // });
+  afterEach(() => {
+    topCompo.unmount();
+  });
 
   describe('OpenAttributesModal', () => {
     it('should display a notification if thee modal cannot be opened', () => {
