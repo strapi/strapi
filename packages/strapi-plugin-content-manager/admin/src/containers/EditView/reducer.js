@@ -11,6 +11,14 @@ const initialState = fromJS({
 
 function reducer(state, action) {
   switch (action.type) {
+    case 'ADD_FIELD_TO_GROUP':
+      return state.updateIn(['modifiedData', ...action.keys], list => {
+        if (list) {
+          return list.push(fromJS({}));
+        }
+
+        return fromJS([{}]);
+      });
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('initialData', () => fromJS(action.data))
@@ -25,6 +33,8 @@ function reducer(state, action) {
         ['modifiedData', ...action.keys],
         () => action.value
       );
+    case 'ON_REMOVE_FIELD':
+      return state.removeIn(['modifiedData', ...action.keys]);
     case 'RESET_FORM':
       return state.update('modifiedData', () => state.get('initialData'));
     case 'SET_COLLAPSES_COMPONENTS_STATE':

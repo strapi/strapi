@@ -39,6 +39,7 @@
   "containers.Edit.returnList": "Retourner à la liste",
   "containers.Edit.seeDetails": "Détails",
   "containers.Edit.submit": "Valider",
+  "containers.EditView.Group.add.new": "AJOUTER UNE ENTREE",
   "containers.Edit.Link.Layout": "Paramétrer la vue",
   "containers.Edit.Link.Fields": "Éditer le modèle",
   "containers.Home.introduction": "Pour éditer du contenu, choisissez un type de données dans le menu de gauche.",

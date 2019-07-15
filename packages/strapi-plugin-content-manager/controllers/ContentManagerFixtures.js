@@ -171,12 +171,12 @@ module.exports = {
                 size: 12,
               },
             ],
-            [
-              {
-                name: 'ingredient',
-                size: 12,
-              },
-            ],
+            // [
+            //   {
+            //     name: 'ingredient',
+            //     size: 12,
+            //   },
+            // ],
           ],
         },
       },

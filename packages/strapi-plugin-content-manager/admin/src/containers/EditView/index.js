@@ -292,6 +292,12 @@ function EditView({
                       <Group
                         {...group}
                         {...groupMeta}
+                        addField={keys => {
+                          dispatch({
+                            type: 'ADD_FIELD_TO_GROUP',
+                            keys: keys.split('.'),
+                          });
+                        }}
                         groupValue={groupValue}
                         key={key}
                         isRepeatable={group.repeatable}
@@ -304,6 +310,12 @@ function EditView({
                           });
                         }}
                         layout={get(groupLayoutsData, name, {})}
+                        removeField={keys => {
+                          dispatch({
+                            type: 'ON_REMOVE_FIELD',
+                            keys: keys.split('.'),
+                          });
+                        }}
                       />
                     );
                   }
@@ -380,7 +392,9 @@ function EditView({
                 <SubWrapper
                   style={{ padding: '0 20px 1px', marginBottom: '28px' }}
                 >
-                  <div style={{ paddingTop: '19px' }}>Relations</div>
+                  <div style={{ paddingTop: '19px' }}>
+                    RELATIONS COMING SOON
+                  </div>
                 </SubWrapper>
               )}
               <LinkWrapper>

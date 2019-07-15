@@ -1,10 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { get, omit } from 'lodash';
+import pluginId from '../../pluginId';
 
+import { Button } from './components';
+import GroupCollapse from './GroupCollapse';
 import Inputs from './Inputs';
 
-function Group({ isRepeatable, label, layout, name, groupValue, onChange }) {
+function Group({
+  addField,
+  isRepeatable,
+  label,
+  layout,
+  // min,
+  max,
+  name,
+  groupValue,
+  onChange,
+  removeField,
+}) {
   const fields = get(layout, ['layouts', 'edit'], []);
 
   return (
@@ -27,7 +42,8 @@ function Group({ isRepeatable, label, layout, name, groupValue, onChange }) {
           marginLeft: '-10px',
           marginRight: '-10px',
           backgroundColor: '#f5f5f5',
-          padding: '20px 20px 0px 10px',
+          padding: '0 20px 10px 10px',
+          paddingTop: isRepeatable ? '13px' : '20px',
         }}
       >
         {!isRepeatable ? (
@@ -95,7 +111,41 @@ function Group({ isRepeatable, label, layout, name, groupValue, onChange }) {
             })}
           </div>
         ) : (
-          <div className="col-12">COMING SOON</div>
+          <div className="col-12">
+            <div className="row">
+              {groupValue.map((field, index) => {
+                //
+
+                return (
+                  <div className="col-12" key={index}>
+                    <GroupCollapse
+                      removeField={() => removeField(`${name}.${index}`)}
+                      groupName={name}
+                    />
+                  </div>
+                );
+              })}
+              <div className="col-12">
+                <Button
+                  onClick={() => {
+                    if (groupValue.length < max) {
+                      addField(name);
+                      return;
+                    }
+
+                    strapi.notification.info(
+                      'You have already reached the maximum'
+                    );
+                  }}
+                >
+                  <i className="fa fa-plus" />
+                  <FormattedMessage
+                    id={`${pluginId}.containers.EditView.Group.add.new`}
+                  />
+                </Button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </>
@@ -106,15 +156,20 @@ Group.defaultProps = {
   groupValue: {},
   label: '',
   layout: {},
+  max: Infinity,
   onChange: () => {},
 };
 
 Group.propTypes = {
+  addField: PropTypes.func.isRequired,
   groupValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   isRepeatable: PropTypes.bool.isRequired,
   label: PropTypes.string,
   layout: PropTypes.object,
+  max: PropTypes.number,
+  name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  removeField: PropTypes.func.isRequired,
 };
 
 export default Group;
