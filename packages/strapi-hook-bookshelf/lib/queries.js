@@ -32,8 +32,10 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   // keys to exclude to get attribute keys
   const excludedKeys = assocKeys.concat(groupKeys);
   // Returns an object without relational keys to persist in DB
-  const omitExernalValues = values => {
-    return _.omit(values, excludedKeys);
+  const selectAttributes = values => {
+    return _.pickBy(values, (value, key) => {
+      return !excludedKeys.includes(key) && _.has(model.allAttributes, key);
+    });
   };
 
   /**
@@ -78,7 +80,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
   async function create(values) {
     const relations = pickRelations(values);
-    const data = omitExernalValues(values);
+    const data = selectAttributes(values);
 
     const runCreate = async trx => {
       // Create entry with no-relational data.
@@ -104,7 +106,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     // Extract values related to relational data.
     const relations = pickRelations(values);
-    const data = omitExernalValues(values);
+    const data = selectAttributes(values);
 
     const runUpdate = async trx => {
       const entry = await model.forge(params).save(data, { transacting: trx });

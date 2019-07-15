@@ -35,8 +35,8 @@ module.exports = {
     return Promise.all(
       files.map(async stream => {
         const parts = await toArray(fs.createReadStream(stream.path));
-        const buffers = parts.map(
-          part => (_.isBuffer(part) ? part : Buffer.from(part)),
+        const buffers = parts.map(part =>
+          _.isBuffer(part) ? part : Buffer.from(part)
         );
 
         const buffer = Buffer.concat(buffers);
@@ -54,11 +54,11 @@ module.exports = {
           mime: stream.type,
           size: (stream.size / 1000).toFixed(2),
         };
-      }),
+      })
     );
   },
 
-  upload: async (files, config) => {
+  async upload(files, config) {
     // Get upload provider settings to configure the provider to use.
     const provider = _.find(strapi.plugins.upload.config.providers, {
       provider: config.provider,
@@ -66,9 +66,7 @@ module.exports = {
 
     if (!provider) {
       throw new Error(
-        `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${
-          config.provider
-        }\``,
+        `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${config.provider}\``
       );
     }
 
@@ -89,28 +87,15 @@ module.exports = {
         // Remove temp file
         fs.unlinkSync(file.tmpPath);
         return res;
-      }),
+      })
     );
   },
 
-  add: async values => {
-    // Use Content Manager business logic to handle relation.
-    if (strapi.plugins['content-manager']) {
-      return await strapi.plugins['content-manager'].services[
-        'contentmanager'
-      ].add(
-        {
-          model: 'file',
-        },
-        values,
-        'upload',
-      );
-    }
-
-    return strapi.plugins['upload'].queries('file', 'upload').create(values);
+  async add(values) {
+    return strapi.query('file', 'upload').create(values);
   },
 
-  edit: async (params, values) => {
+  async edit(params, values) {
     // Use Content Manager business logic to handle relation.
     if (strapi.plugins['content-manager']) {
       params.model = 'file';
@@ -121,25 +106,24 @@ module.exports = {
       ].edit(params, values, 'upload');
     }
 
-    return strapi.plugins['upload'].queries('file', 'upload').update(_.assign(params, values));
+    return strapi.query('file', 'upload').update(params, values);
   },
 
-  fetch: params => {
-    params.id = params._id || params.id;
-    return strapi.plugins['upload'].queries('file', 'upload')
-      .findOne(_.pick(params, ['id']));
+  fetch(params) {
+    return strapi.query('file', 'upload').findOne({
+      id: params._id || params.id,
+    });
   },
 
-  fetchAll: params => {
-    return strapi.plugins['upload'].queries('file', 'upload')
-      .find(params);
+  fetchAll(params) {
+    return strapi.query('file', 'upload').find(params);
   },
 
-  count: async () => {
-    return await strapi.plugins['upload'].queries('file', 'upload').count();
+  async count() {
+    return strapi.query('file', 'upload').count();
   },
 
-  remove: async (params, config) => {
+  async remove(params, config) {
     params.id = params._id || params.id;
 
     const file = await strapi.plugins['upload'].services.upload.fetch(params);
@@ -148,7 +132,7 @@ module.exports = {
     const provider = _.cloneDeep(
       _.find(strapi.plugins.upload.config.providers, {
         provider: config.provider,
-      }),
+      })
     );
     _.assign(provider, config);
     const actions = provider.init(config);
@@ -162,16 +146,15 @@ module.exports = {
     if (strapi.plugins['content-manager']) {
       params.model = 'file';
 
-      return await strapi.plugins['content-manager'].services['contentmanager'].delete(
-        params,
-        { source: 'upload' },
-      );
+      return await strapi.plugins['content-manager'].services[
+        'contentmanager'
+      ].delete(params, { source: 'upload' });
     }
 
-    return strapi.plugins['upload'].queries('file', 'upload').delete(params);
+    return strapi.query('file', 'upload').delete(params);
   },
 
-  uploadToEntity: async function(params, files, source) {
+  async uploadToEntity(params, files, source) {
     // Retrieve provider settings from database.
     const config = await strapi
       .store({
@@ -210,7 +193,7 @@ module.exports = {
 
         // Make upload async.
         return this.upload(enhancedFiles, config);
-      }),
+      })
     );
   },
 };
