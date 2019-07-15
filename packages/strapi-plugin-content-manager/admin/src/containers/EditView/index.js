@@ -304,6 +304,14 @@ function EditView({
                         isRepeatable={group.repeatable}
                         name={name}
                         modifiedData={modifiedData}
+                        moveGroupField={(dragIndex, overIndex, name) => {
+                          dispatch({
+                            type: 'MOVE_GROUP_FIELD',
+                            dragIndex,
+                            overIndex,
+                            keys: name.split('.'),
+                          });
+                        }}
                         onChange={({ target: { name, value } }) => {
                           dispatch({
                             type: 'ON_CHANGE',

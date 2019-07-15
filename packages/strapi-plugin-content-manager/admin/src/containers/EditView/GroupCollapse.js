@@ -7,15 +7,21 @@ import pluginId from '../../pluginId';
 import Grab from '../../assets/images/grab_icon.svg';
 import Logo from '../../assets/images/caret_top.svg';
 import { Flex, GroupCollapseWrapper, ImgWrapper } from './components';
+import { DragSource, DropTarget } from 'react-dnd';
+import ItemTypes from '../../utils/itemsTypes';
+
 import Inputs from './Inputs';
 
 function GroupCollapse({
+  connectDragSource,
+  connectDropTarget,
   isCreating,
+  isDragging,
   isOpen,
   layout,
   modifiedData,
-  onChange,
   name,
+  onChange,
   onClick,
   removeField,
 }) {
@@ -23,10 +29,15 @@ function GroupCollapse({
     ? { id: `${pluginId}.containers.Edit.pluginHeader.title.new` }
     : {};
   const fields = get(layout, ['layouts', 'edit'], []);
+  const ref = React.useRef(null);
+  const opacity = isDragging ? 0.2 : 1;
+
+  connectDragSource(ref);
+  connectDropTarget(ref);
 
   return (
     <>
-      <GroupCollapseWrapper onClick={onClick}>
+      <GroupCollapseWrapper onClick={onClick} ref={ref} style={{ opacity }}>
         <Flex style={{ fontWeight: 500 }}>
           <ImgWrapper isOpen={isOpen}>
             <img src={Logo} alt="logo" />
@@ -82,13 +93,18 @@ function GroupCollapse({
 
 GroupCollapse.defaultProps = {
   isCreating: true,
+  isDragging: false,
   isOpen: false,
   layout: {},
+  move: () => {},
   removeField: () => {},
 };
 
 GroupCollapse.propTypes = {
+  connectDragSource: PropTypes.func.isRequired,
+  connectDropTarget: PropTypes.func.isRequired,
   isCreating: PropTypes.bool,
+  isDragging: PropTypes.bool,
   isOpen: PropTypes.bool,
   layout: PropTypes.object,
   modifiedData: PropTypes.object,
@@ -98,4 +114,49 @@ GroupCollapse.propTypes = {
   removeField: PropTypes.func,
 };
 
-export default GroupCollapse;
+// export default GroupCollapse;
+export default DropTarget(
+  ItemTypes.GROUP,
+  {
+    canDrop: () => true,
+    hover(props, monitor) {
+      const { id: draggedId } = monitor.getItem();
+      const { id: overId } = props;
+
+      if (draggedId !== overId) {
+        const { index: overIndex } = props.findField(overId);
+        props.move(draggedId, overIndex, props.groupName);
+      }
+    },
+  },
+  connect => ({
+    connectDropTarget: connect.dropTarget(),
+  })
+)(
+  DragSource(
+    ItemTypes.GROUP,
+    {
+      beginDrag: props => {
+        props.collapseAll();
+
+        return {
+          id: props.id,
+          originalIndex: props.findField(props.id).index,
+        };
+      },
+
+      endDrag(props, monitor) {
+        const { id: droppedId, originalIndex } = monitor.getItem();
+        const didDrop = monitor.didDrop();
+
+        if (!didDrop) {
+          props.move(droppedId, originalIndex, props.groupName);
+        }
+      },
+    },
+    (connect, monitor) => ({
+      connectDragSource: connect.dragSource(),
+      isDragging: monitor.isDragging(),
+    })
+  )(GroupCollapse)
+);

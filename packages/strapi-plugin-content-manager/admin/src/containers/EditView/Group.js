@@ -3,6 +3,8 @@ import { fromJS } from 'immutable';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
+import { DndProvider } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
 
 import { Button } from './components';
@@ -19,6 +21,10 @@ function reducer(state, action) {
           .map(obj => obj.update('isOpen', () => false))
           .push(fromJS({ isOpen: true }));
       });
+    case 'COLLAPSE_ALL':
+      return state.update('collapses', list =>
+        list.map(obj => obj.update('isOpen', () => false))
+      );
     case 'TOGGLE_COLLAPSE':
       return state.update('collapses', list => {
         return list.map((obj, index) => {
@@ -48,6 +54,7 @@ function Group({
   // min,
   max,
   modifiedData,
+  moveGroupField,
   name,
   groupValue,
   onChange,
@@ -57,8 +64,30 @@ function Group({
   const [state, dispatch] = useReducer(reducer, initialState, init);
   const { collapses } = state.toJS();
 
+  const findField = React.useCallback(
+    id => {
+      const field = groupValue.filter(current => current._temp__id === id)[0];
+
+      return {
+        field,
+        index: groupValue.indexOf(field),
+      };
+    },
+    [groupValue]
+  );
+
+  const move = React.useCallback(
+    (id, atIndex) => {
+      const { index } = findField(id);
+
+      moveGroupField(index, atIndex, name);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [groupValue]
+  );
+
   return (
-    <>
+    <DndProvider backend={HTML5Backend}>
       <div className="row">
         <div className="col-12" style={{ paddingTop: 16, paddingBottom: 15 }}>
           <span
@@ -111,17 +140,26 @@ function Group({
             <div className="row">
               {groupValue.map((field, index) => {
                 return (
-                  <div className="col-12" key={index}>
+                  <div className="col-12" key={field._temp__id}>
                     <GroupCollapse
+                      collapseAll={() => {
+                        dispatch({
+                          type: 'COLLAPSE_ALL',
+                        });
+                      }}
                       onClick={() => {
                         dispatch({
                           type: 'TOGGLE_COLLAPSE',
                           index,
                         });
                       }}
+                      findField={findField}
+                      groupName={name}
                       isOpen={collapses[index].isOpen}
+                      id={field._temp__id}
                       layout={layout}
                       modifiedData={modifiedData}
+                      move={move}
                       name={`${name}.${index}`}
                       onChange={onChange}
                       removeField={e => {
@@ -133,11 +171,11 @@ function Group({
                         });
                         removeField(`${name}.${index}`);
                       }}
-                      groupName={name}
                     />
                   </div>
                 );
               })}
+
               <div className="col-12">
                 <Button
                   onClick={() => {
@@ -165,7 +203,7 @@ function Group({
           </div>
         )}
       </div>
-    </>
+    </DndProvider>
   );
 }
 
@@ -186,6 +224,7 @@ Group.propTypes = {
   layout: PropTypes.object,
   max: PropTypes.number,
   modifiedData: PropTypes.object,
+  moveGroupField: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   removeField: PropTypes.func.isRequired,

@@ -107,6 +107,7 @@ function ListView({
 
     return () => {
       resetProps();
+      setFilterPickerState(false);
     };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [slug, shouldRefetchData]);

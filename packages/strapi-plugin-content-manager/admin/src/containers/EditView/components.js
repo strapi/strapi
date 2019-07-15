@@ -54,6 +54,9 @@ const Button = styled.div`
 
 const Flex = styled.div`
   display: flex;
+  > button {
+    cursor: pointer;
+  }
 `;
 
 const GroupCollapseWrapper = styled(Flex)`

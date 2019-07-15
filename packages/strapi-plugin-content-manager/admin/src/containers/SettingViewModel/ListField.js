@@ -9,7 +9,7 @@ import RemoveIcon from '../../components/DraggedRemovedIcon';
 import EditIcon from '../../components/VariableEditIcon';
 import { Field, InfoLabel } from './components';
 
-import ItemTypes from './itemsTypes';
+import ItemTypes from '../../utils/itemsTypes';
 
 function ListField({
   index,

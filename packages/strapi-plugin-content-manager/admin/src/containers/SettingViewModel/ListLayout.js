@@ -12,7 +12,7 @@ import { Wrapper } from './components';
 import Add from './Add';
 import ListField from './ListField';
 
-import ItemTypes from './itemsTypes';
+import ItemTypes from '../../utils/itemsTypes';
 
 function ListLayout({
   addField,
