@@ -14,6 +14,7 @@ import {
   ADD_ATTRIBUTE_TO_TEMP_GROUP,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
+  CLEAR_TEMPORARY_ATTRIBUTE_GROUP,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
   CREATE_TEMP_GROUP,
@@ -101,19 +102,19 @@ export const initialState = fromJS({
   newGroup: {
     collectionName: '',
     connection: '',
-    description: '',
     name: '',
     schema: {
       attributes: [],
+      description: '',
     },
   },
   newGroupClone: {
     collectionName: '',
     connection: '',
-    description: '',
     name: '',
     schema: {
       attributes: [],
+      description: '',
     },
   },
 });
@@ -271,6 +272,8 @@ function appReducer(state = initialState, action) {
       );
     case CLEAR_TEMPORARY_ATTRIBUTE:
       return state.update('temporaryAttribute', () => Map({}));
+    case CLEAR_TEMPORARY_ATTRIBUTE_GROUP:
+      return state.update('temporaryAttributeGroup', () => Map({}));
     case CLEAR_TEMPORARY_ATTRIBUTE_RELATION:
       return state
         .update('temporaryAttribute', () => Map({}))

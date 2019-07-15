@@ -13,6 +13,7 @@ import {
   ADD_ATTRIBUTE_TO_TEMP_GROUP,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
+  CLEAR_TEMPORARY_ATTRIBUTE_GROUP,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
   CREATE_TEMP_GROUP,
@@ -100,6 +101,12 @@ export function cancelNewContentType() {
 export function clearTemporaryAttribute() {
   return {
     type: CLEAR_TEMPORARY_ATTRIBUTE,
+  };
+}
+
+export function clearTemporaryAttributeGroup() {
+  return {
+    type: CLEAR_TEMPORARY_ATTRIBUTE_GROUP,
   };
 }
 

@@ -6,12 +6,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import {
   HeaderNav,
   List,
   ListHeader,
-  ListTitle,
   ListWrapper,
   PluginHeader,
   routerPropTypes,

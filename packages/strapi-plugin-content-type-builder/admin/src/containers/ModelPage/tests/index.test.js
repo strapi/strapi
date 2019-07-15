@@ -10,7 +10,6 @@ import formatMessagesWithPluginId from 'testUtils/formatMessages';
 import {
   EmptyAttributesBlock,
   ListHeader,
-  ListTitle,
   ListWrapper,
 } from 'strapi-helper-plugin';
 

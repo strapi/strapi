@@ -1,7 +1,7 @@
 import React from 'react';
 
-function SettingView() {
+function EditView() {
   return <div>Coming soon</div>;
 }
 
-export default SettingView;
+export default EditView;

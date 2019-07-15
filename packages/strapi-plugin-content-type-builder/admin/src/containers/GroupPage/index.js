@@ -28,6 +28,7 @@ import {
 import {
   addAttributeToTempGroup,
   addAttributeToExistingGroup,
+  clearTemporaryAttributeGroup,
   deleteGroupAttribute,
   onChangeAttributeGroup,
 } from '../App/actions';
@@ -84,7 +85,7 @@ export class GroupPage extends React.Component {
     const name = this.getFeatureName();
 
     const description = this.isUpdatingTempFeature()
-      ? get(newGroup, 'schema', 'description', null)
+      ? get(newGroup, ['schema', 'description'], null)
       : get(modifiedDataGroup, [name, 'schema', 'description'], null);
 
     /* istanbul ignore if */
@@ -158,7 +159,7 @@ export class GroupPage extends React.Component {
 
     if (canOpenModal || this.isUpdatingTempFeature()) {
       this.setState({ showWarning: true, attrToDelete });
-      emitEvent('willDeleteFieldOfContentType');
+      emitEvent('willDeleteFieldOfGroup');
     } else {
       this.displayNotificationCTNotSaved();
     }
@@ -250,6 +251,7 @@ export class GroupPage extends React.Component {
 
   render() {
     const {
+      clearTemporaryAttributeGroup,
       history: { push },
       onChangeAttributeGroup,
       temporaryAttributeGroup,
@@ -339,7 +341,7 @@ export class GroupPage extends React.Component {
           getActionType={this.getActionType()}
           isOpen={this.getModalType() === 'attributeForm'}
           modifiedData={temporaryAttributeGroup}
-          //onCancel={clearTemporaryAttribute}
+          onCancel={clearTemporaryAttributeGroup}
           onChange={onChangeAttributeGroup}
           onSubmit={this.handleSubmit}
           onSubmitEdit={() => {}}
@@ -372,11 +374,13 @@ GroupPage.propTypes = {
   addAttributeToExistingGroup: PropTypes.func.isRequired,
   addAttributeToTempGroup: PropTypes.func.isRequired,
   canOpenModal: PropTypes.bool,
+  clearTemporaryAttributeGroup: PropTypes.func.isRequired,
   deleteGroupAttribute: PropTypes.func.isRequired,
   groups: PropTypes.array.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
   }),
+  initialDataGroup: PropTypes.object.isRequired,
   location: PropTypes.shape({
     search: PropTypes.string.isRequired,
     pathname: PropTypes.string.isRequired,
@@ -397,6 +401,7 @@ export function mapDispatchToProps(dispatch) {
     {
       addAttributeToExistingGroup,
       addAttributeToTempGroup,
+      clearTemporaryAttributeGroup,
       deleteGroupAttribute,
       onChangeAttributeGroup,
     },

@@ -25,7 +25,7 @@ import ListRow from './ListRow';
 import { getData, onChange, onReset, onSubmit } from './actions';
 import reducer from './reducer';
 import saga from './saga';
-import makeSelectSettingView from './selectors';
+import makeSelectSettingsView from './selectors';
 
 import form from './forms.json';
 
@@ -53,19 +53,18 @@ function SettingsView({
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
-  const toggleWarningSubmit = () =>
-    setWarningSubmit(prevState => !prevState);
+  const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
 
   useEffect(() => {
     if (showWarningSubmit) {
       toggleWarningSubmit();
     }
-  }, [shouldToggleModalSubmit]);
+  }, [shouldToggleModalSubmit, showWarningSubmit]);
   useEffect(() => {
     if (isEmpty(initialData)) {
       getData();
     }
-  }, [initialData]);
+  }, [getData, initialData]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -211,7 +210,7 @@ SettingsView.propTypes = {
   shouldToggleModalSubmit: PropTypes.bool.isRequired,
 };
 
-const mapStateToProps = makeSelectSettingView();
+const mapStateToProps = makeSelectSettingsView();
 
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(

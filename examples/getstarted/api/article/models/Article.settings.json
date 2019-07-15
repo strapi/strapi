@@ -7,7 +7,10 @@
   },
   "options": {
     "increments": true,
-    "timestamps": true,
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
@@ -16,6 +19,34 @@
     },
     "content": {
       "type": "text"
+    },
+    "json": {
+      "type": "string"
+    },
+    "number": {
+      "type": "integer"
+    },
+    "date": {
+      "type": "date"
+    },
+    "enum": {
+      "enum": [
+        "morning,",
+        "noon"
+      ],
+      "type": "enumeration"
+    },
+    "pic": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
+    "bool": {
+      "type": "boolean"
+    },
+    "tags": {
+      "collection": "tag",
+      "via": "articles"
     }
   }
 }

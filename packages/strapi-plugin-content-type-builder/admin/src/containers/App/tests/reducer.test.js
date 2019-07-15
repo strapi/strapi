@@ -152,19 +152,19 @@ describe('appReducer', () => {
       newGroup: {
         collectionName: '',
         connection: '',
-        description: '',
         name: '',
         schema: {
           attributes: [],
+          description: '',
         },
       },
       newGroupClone: {
         collectionName: '',
         connection: '',
-        description: '',
         name: '',
         schema: {
           attributes: [],
+          description: '',
         },
       },
     });
@@ -1050,19 +1050,19 @@ describe('appReducer', () => {
       newGroup: {
         collectionName: '',
         connection: '',
-        description: '',
         name: '',
         schema: {
           attributes: [],
+          description: '',
         },
       },
       newGroupClone: {
         collectionName: '',
         connection: '',
-        description: '',
         name: '',
         schema: {
           attributes: [],
+          description: '',
         },
       },
       initialDataGroup: {},

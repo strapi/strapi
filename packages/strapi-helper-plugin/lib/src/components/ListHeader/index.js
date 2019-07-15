@@ -47,6 +47,7 @@ ListHeader.propTypes = {
   subtitle: PropTypes.string,
   subtitleValues: PropTypes.object,
   title: PropTypes.string,
+  titleValues: PropTypes.object,
 };
 
 export default ListHeader;
