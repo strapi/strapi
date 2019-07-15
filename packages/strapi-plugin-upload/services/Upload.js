@@ -58,7 +58,7 @@ module.exports = {
     );
   },
 
-  async upload(files, config) {
+  upload(files, config) {
     // Get upload provider settings to configure the provider to use.
     const provider = _.find(strapi.plugins.upload.config.providers, {
       provider: config.provider,
@@ -72,23 +72,23 @@ module.exports = {
 
     const actions = provider.init(config);
 
+    // upload a single file
+    const uploadFile = async file => {
+      await actions.upload(file);
+
+      // Remove buffer to don't save it.
+      delete file.buffer;
+      file.provider = provider.provider;
+
+      const res = await strapi.plugins['upload'].services.upload.add(file);
+
+      // Remove temp file
+      fs.unlinkSync(file.tmpPath);
+      return res;
+    };
+
     // Execute upload function of the provider for all files.
-    return Promise.all(
-      files.map(async file => {
-        await actions.upload(file);
-
-        // Remove buffer to don't save it.
-        delete file.buffer;
-
-        file.provider = provider.provider;
-
-        const res = await strapi.plugins['upload'].services.upload.add(file);
-
-        // Remove temp file
-        fs.unlinkSync(file.tmpPath);
-        return res;
-      })
-    );
+    return Promise.all(files.map(file => uploadFile(file)));
   },
 
   add(values) {
@@ -105,7 +105,7 @@ module.exports = {
     return strapi.query('file', 'upload').find(params);
   },
 
-  async count(params) {
+  count(params) {
     return strapi.query('file', 'upload').count(params);
   },
 
@@ -150,6 +150,7 @@ module.exports = {
         const enhancedFiles = buffers.map(file => {
           const details = model.attributes[attribute];
 
+          // TODO: the polymorphic logic should be done in the queries directly
           // Add related information to be able to make
           // the relationships later.
           file[details.via] = [

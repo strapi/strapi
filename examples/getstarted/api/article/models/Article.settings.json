@@ -44,6 +44,11 @@
       "via": "related",
       "plugin": "upload"
     },
+    "pictures": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
     "mainTag": {
       "model": "tag"
     },
