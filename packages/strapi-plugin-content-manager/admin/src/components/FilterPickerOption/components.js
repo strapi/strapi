@@ -3,7 +3,7 @@ import Bckg from '../../assets/images/background_input.svg';
 
 const Wrapper = styled.div`
   min-height: 36px;
-  border-left: ${props => (props.borderLeft ? '3px solid #007EFF' : '0px')};
+  border-left: ${props => props.borderLeft && '3px solid #007EFF'};
   padding-left: ${props => (props.borderLeft ? '10px' : '13px')};
   margin-bottom: 0px !important;
 `;

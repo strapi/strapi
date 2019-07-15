@@ -34,7 +34,6 @@ function TableHeader({ headers, isBulkable }) {
           </th>
         )}
         {headers.map(header => {
-          //
           return (
             <th
               key={header.name}

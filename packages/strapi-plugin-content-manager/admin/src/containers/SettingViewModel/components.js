@@ -52,7 +52,7 @@ const InfoLabel = styled.div`
   position: absolute;
   top: 0;
   right: 40px;
-  // color: #858b9a;
+
   font-weight: 400;
   color: #007eff;
 `;

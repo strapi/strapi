@@ -163,11 +163,8 @@ const DropDownWrapper = styled.div`
           padding: 0;
         }
 
-        &:first-of-type {
-          margin-top: 2px;
-        }
-
         &:first-child {
+          margin-top: 2px;
           margin-bottom: 2px;
           font-weight: 600;
           font-size: 1.3rem;
@@ -195,9 +192,6 @@ const DropDownWrapper = styled.div`
 
 const FooterWrapper = styled.div`
   margin-top: 2.5rem;
-  // > div {
-  //   padding: 0;
-  // }
 `;
 
 const Label = styled.label`

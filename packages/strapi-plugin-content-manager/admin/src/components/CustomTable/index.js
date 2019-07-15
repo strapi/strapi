@@ -56,7 +56,6 @@ function CustomTable({
       </TableEmpty>
     ) : (
       data.map(row => {
-        //
         return (
           <TableRow
             key={row.id}
