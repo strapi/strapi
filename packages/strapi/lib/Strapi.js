@@ -484,17 +484,27 @@ class Strapi extends EventEmitter {
       associations: model.associations,
     });
 
+    // custom queries made easy
+    Object.assign(query, {
+      custom(mapping) {
+        if (!mapping[connector]) {
+          throw new Error(`Missing mapping for orm ${connector}`);
+        }
+
+        if (typeof mapping[connector] !== 'function') {
+          throw new Error(
+            `Custom queries must be functions received ${typeof mapping[
+              connector
+            ]}`
+          );
+        }
+
+        return mapping[connector].call(query, { model, modelKey });
+      },
+    });
+
     this.queryManager.set({ modelKey, plugin }, query);
     return query;
-
-    // let buildQueries = queriesMap[connector];
-    // let queries = buildQueries({ model, modelKey, strapi: this });
-
-    // return Object.assign(queries, {
-    //   orm: connector,
-    //   primaryKey: model.primaryKey,
-    //   associations: model.associations,
-    // });
   }
 }
 

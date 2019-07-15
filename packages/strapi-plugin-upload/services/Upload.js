@@ -105,15 +105,11 @@ module.exports = {
     return strapi.query('file', 'upload').find(params);
   },
 
-  async count() {
-    return strapi.query('file', 'upload').count();
+  async count(params) {
+    return strapi.query('file', 'upload').count(params);
   },
 
-  async remove(params, config) {
-    const opts = { id: params._id || params.id };
-
-    const file = await strapi.plugins['upload'].services.upload.fetch(opts);
-
+  async remove(file, config) {
     // get upload provider settings to configure the provider to use
     const provider = _.cloneDeep(
       _.find(strapi.plugins.upload.config.providers, {
@@ -128,7 +124,7 @@ module.exports = {
       await actions.delete(file);
     }
 
-    return strapi.query('file', 'upload').delete(opts);
+    return strapi.query('file', 'upload').delete({ id: file.id });
   },
 
   async uploadToEntity(params, files, source) {
