@@ -120,8 +120,7 @@ module.exports = {
     const { source } = query;
     const { model } = params;
 
-    const primaryKey = strapi.plugins['content-manager'].queries(model, source)
-      .primaryKey;
+    const primaryKey = strapi.query(model, source).primaryKey;
     const toRemove = Object.keys(query).reduce((acc, curr) => {
       if (curr !== 'source') {
         return acc.concat([query[curr]]);
@@ -131,13 +130,8 @@ module.exports = {
     }, []);
 
     const filter = { [`${primaryKey}_in`]: toRemove };
-    const entries = await strapi.plugins['content-manager']
-      .queries(model, source)
-      .find(filter, null, true);
-    const associations = strapi.plugins['content-manager'].queries(
-      model,
-      source
-    ).associations;
+    const entries = await strapi.query(model, source).find(filter, null, true);
+    const associations = strapi.query(model, source).associations;
 
     for (let i = 0; i < entries.length; ++i) {
       const entry = entries[i];
@@ -161,16 +155,17 @@ module.exports = {
         }
       });
 
-      await strapi.plugins['content-manager'].queries(model, source).update({
+      await strapi.query(model, source).update({
         [primaryKey]: entry[primaryKey],
         values: _.pick(entry, associations.map(a => a.alias)),
       });
     }
 
-    return strapi.plugins['content-manager'].queries(model, source).deleteMany({
+    return strapi.query(model, source).deleteMany({
       [primaryKey]: toRemove,
     });
   },
+
   search(params, query) {
     const { limit, skip, sort, source, _q, populate = [] } = query; // eslint-disable-line no-unused-vars
     const filters = strapi.utils.models.convertParams(params.model, query);

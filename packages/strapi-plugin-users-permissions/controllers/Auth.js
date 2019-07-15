@@ -14,7 +14,7 @@ const grant = require('grant-koa');
 const emailRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 module.exports = {
-  callback: async ctx => {
+  async callback(ctx) {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
 
@@ -65,8 +65,8 @@ module.exports = {
       }
 
       // Check if the user exists.
-      const user = await strapi.plugins['users-permissions']
-        .queries('user', 'users-permissions')
+      const user = await strapi
+        .query('user', 'users-permissions')
         .findOne(query, ['role']);
 
       if (!user) {
@@ -168,7 +168,7 @@ module.exports = {
     }
   },
 
-  changePassword: async ctx => {
+  async changePassword(ctx) {
     const params = _.assign({}, ctx.request.body, ctx.params);
 
     if (
@@ -177,8 +177,8 @@ module.exports = {
       params.password === params.passwordConfirmation &&
       params.code
     ) {
-      const user = await strapi.plugins['users-permissions']
-        .queries('user', 'users-permissions')
+      const user = await strapi
+        .query('user', 'users-permissions')
         .findOne({ resetPasswordToken: params.code });
 
       if (!user) {
@@ -206,9 +206,7 @@ module.exports = {
       );
 
       // Update the user.
-      await strapi.plugins['users-permissions']
-        .queries('user', 'users-permissions')
-        .update(data);
+      await strapi.query('user', 'users-permissions').update(data);
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(
@@ -240,7 +238,7 @@ module.exports = {
     }
   },
 
-  connect: async (ctx, next) => {
+  async connect(ctx, next) {
     const grantConfig = await strapi
       .store({
         environment: '',
@@ -266,12 +264,12 @@ module.exports = {
     return grant(grantConfig)(ctx, next);
   },
 
-  forgotPassword: async ctx => {
+  async forgotPassword(ctx) {
     const { email, url } = ctx.request.body;
 
     // Find the user user thanks to his email.
-    const user = await strapi.plugins['users-permissions']
-      .queries('user', 'users-permissions')
+    const user = await strapi
+      .query('user', 'users-permissions')
       .findOne({ email });
 
     // User not found.
@@ -348,14 +346,12 @@ module.exports = {
     );
 
     // Update the user.
-    await strapi.plugins['users-permissions']
-      .queries('user', 'users-permissions')
-      .update(data);
+    await strapi.query('user', 'users-permissions').update(data);
 
     ctx.send({ ok: true });
   },
 
-  register: async ctx => {
+  async register(ctx) {
     const pluginStore = await strapi.store({
       environment: '',
       type: 'plugin',
@@ -389,6 +385,16 @@ module.exports = {
       );
     }
 
+    // Email is required.
+    if (!params.email) {
+      return ctx.badRequest(
+        null,
+        ctx.request.admin
+          ? [{ messages: [{ id: 'Auth.form.error.email.provide' }] }]
+          : 'Please provide your email.'
+      );
+    }
+
     // Throw an error if the password selected by the user
     // contains more than two times the symbol '$'.
     if (
@@ -404,8 +410,8 @@ module.exports = {
       );
     }
 
-    const role = await strapi.plugins['users-permissions']
-      .queries('role', 'users-permissions')
+    const role = await strapi
+      .query('role', 'users-permissions')
       .findOne({ type: settings.default_role }, []);
 
     if (!role) {
@@ -429,11 +435,9 @@ module.exports = {
       'users-permissions'
     ].services.user.hashPassword(params);
 
-    const user = await strapi.plugins['users-permissions']
-      .queries('user', 'users-permissions')
-      .findOne({
-        email: params.email,
-      });
+    const user = await strapi.query('user', 'users-permissions').findOne({
+      email: params.email,
+    });
 
     if (user && user.provider === params.provider) {
       return ctx.badRequest(
@@ -458,12 +462,12 @@ module.exports = {
         params.confirmed = true;
       }
 
-      const user = await strapi.plugins['users-permissions']
-        .queries('user', 'users-permissions')
+      const user = await strapi
+        .query('user', 'users-permissions')
         .create(params);
 
       const jwt = strapi.plugins['users-permissions'].services.jwt.issue(
-        _.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])
+        _.pick(user.toJSON ? user.toJSON() : user, ['id'])
       );
 
       if (settings.email_confirmation) {
@@ -540,7 +544,7 @@ module.exports = {
     }
   },
 
-  emailConfirmation: async ctx => {
+  async emailConfirmation(ctx) {
     const params = ctx.query;
 
     const user = await strapi.plugins['users-permissions'].services.jwt.verify(

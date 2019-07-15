@@ -14,7 +14,7 @@ module.exports = {
    *
    * @return {Object}
    */
-  createRole: async ctx => {
+  async createRole(ctx) {
     if (_.isEmpty(ctx.request.body)) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
@@ -26,12 +26,12 @@ module.exports = {
 
       ctx.send({ ok: true });
     } catch (err) {
-      strapi.log.error(err)
+      strapi.log.error(err);
       ctx.badRequest(null, [{ messages: [{ id: 'An error occured' }] }]);
     }
   },
 
-  deleteProvider: async ctx => {
+  async deleteProvider(ctx) {
     const { provider } = ctx.params;
 
     if (!provider) {
@@ -42,9 +42,10 @@ module.exports = {
     ctx.send({ ok: true });
   },
 
-  deleteRole: async ctx => {
+  async deleteRole(ctx) {
     // Fetch public role.
-    const publicRole = await strapi.plugins['users-permissions'].queries('role', 'users-permissions')
+    const publicRole = await strapi
+      .query('role', 'users-permissions')
       .findOne({ type: 'public' });
 
     const publicRoleID = publicRole.id || publicRole._id;
@@ -67,12 +68,12 @@ module.exports = {
 
       ctx.send({ ok: true });
     } catch (err) {
-      strapi.log.error(err)
+      strapi.log.error(err);
       ctx.badRequest(null, [{ messages: [{ id: 'Bad request' }] }]);
     }
   },
 
-  getPermissions: async ctx => {
+  async getPermissions(ctx) {
     try {
       const { lang } = ctx.query;
       const plugins = await strapi.plugins[
@@ -88,16 +89,16 @@ module.exports = {
     }
   },
 
-  getPolicies: async ctx => {
+  async getPolicies(ctx) {
     ctx.send({
       policies: _.without(
         _.keys(strapi.plugins['users-permissions'].config.policies),
-        'permissions',
+        'permissions'
       ),
     });
   },
 
-  getRole: async ctx => {
+  async getRole(ctx) {
     const { id } = ctx.params;
     const { lang } = ctx.query;
     const plugins = await strapi.plugins[
@@ -114,7 +115,7 @@ module.exports = {
     ctx.send({ role });
   },
 
-  getRoles: async ctx => {
+  async getRoles(ctx) {
     try {
       const roles = await strapi.plugins[
         'users-permissions'
@@ -126,7 +127,7 @@ module.exports = {
     }
   },
 
-  getRoutes: async ctx => {
+  async getRoutes(ctx) {
     try {
       const routes = await strapi.plugins[
         'users-permissions'
@@ -138,29 +139,32 @@ module.exports = {
     }
   },
 
-  index: async ctx => {
-    // Add your own logic here.
-
+  async index(ctx) {
     // Send 200 `ok`
-    ctx.send({
-      message: 'ok',
-    });
+    ctx.send({ message: 'ok' });
   },
 
-  init: async ctx => {
-    const admins = await strapi.plugins['users-permissions'].queries('administrator', 'admin').find();
+  async init(ctx) {
+    const admins = await strapi
+      .query('administrator', 'admin')
+      .find({ _limit: 1 });
 
     ctx.send({ hasAdmin: admins.length > 0 });
   },
 
-  searchUsers: async ctx => {
-    const data = await strapi.plugins['users-permissions'].queries('user', 'users-permissions')
-      .search(ctx.params);
+  async searchUsers(ctx) {
+    const { id } = ctx.params;
+
+    const data = await strapi
+      .query('user', 'users-permissions')
+      .custom(searchQueries)({
+      id,
+    });
 
     ctx.send(data);
   },
 
-  updateRole: async function(ctx) {
+  async updateRole(ctx) {
     const roleID = ctx.params.role;
 
     if (_.isEmpty(ctx.request.body)) {
@@ -176,12 +180,12 @@ module.exports = {
 
       ctx.send({ ok: true });
     } catch (err) {
-      strapi.log.error(err)
+      strapi.log.error(err);
       ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
     }
   },
 
-  getEmailTemplate: async ctx => {
+  async getEmailTemplate(ctx) {
     ctx.send(
       await strapi
         .store({
@@ -190,11 +194,11 @@ module.exports = {
           name: 'users-permissions',
           key: 'email',
         })
-        .get(),
+        .get()
     );
   },
 
-  updateEmailTemplate: async ctx => {
+  async updateEmailTemplate(ctx) {
     if (_.isEmpty(ctx.request.body)) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
@@ -211,7 +215,7 @@ module.exports = {
     ctx.send({ ok: true });
   },
 
-  getAdvancedSettings: async ctx => {
+  async getAdvancedSettings(ctx) {
     ctx.send({
       settings: await strapi
         .store({
@@ -227,7 +231,7 @@ module.exports = {
     });
   },
 
-  updateAdvancedSettings: async ctx => {
+  async updateAdvancedSettings(ctx) {
     if (_.isEmpty(ctx.request.body)) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
@@ -244,20 +248,20 @@ module.exports = {
     ctx.send({ ok: true });
   },
 
-  getProviders: async ctx => {
-    ctx.send(
-      await strapi
-        .store({
-          environment: '',
-          type: 'plugin',
-          name: 'users-permissions',
-          key: 'grant',
-        })
-        .get(),
-    );
+  async getProviders(ctx) {
+    const providers = await strapi
+      .store({
+        environment: '',
+        type: 'plugin',
+        name: 'users-permissions',
+        key: 'grant',
+      })
+      .get();
+
+    ctx.send(providers);
   },
 
-  updateProviders: async ctx => {
+  async updateProviders(ctx) {
     if (_.isEmpty(ctx.request.body)) {
       return ctx.badRequest(null, [{ messages: [{ id: 'Cannot be empty' }] }]);
     }
@@ -272,5 +276,31 @@ module.exports = {
       .set({ value: ctx.request.body.providers });
 
     ctx.send({ ok: true });
+  },
+};
+
+const searchQueries = {
+  bookshelf({ model }) {
+    return ({ id }) => {
+      return model
+        .query(function(qb) {
+          qb.where('username', 'LIKE', `%${id}%`).orWhere(
+            'email',
+            'LIKE',
+            `%${id}%`
+          );
+        })
+        .fetchAll()
+        .then(results => results.toJSON());
+    };
+  },
+  mongoose({ model }) {
+    return ({ id }) => {
+      const re = new RegExp(id);
+
+      return model.find({
+        $or: [{ username: re }, { email: re }],
+      });
+    };
   },
 };
