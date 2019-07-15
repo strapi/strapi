@@ -24,7 +24,7 @@
       "type": "integer"
     },
     "json": {
-      "type": "string"
+      "type": "json"
     },
     "number": {
       "type": "integer"

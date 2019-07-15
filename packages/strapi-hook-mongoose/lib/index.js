@@ -16,6 +16,7 @@ const relations = require('./relations');
 const buildQuery = require('./buildQuery');
 const getQueryParams = require('./get-query-params');
 const mountModels = require('./mount-models');
+const queries = require('./queries');
 
 /**
  * Mongoose hook
@@ -195,6 +196,7 @@ module.exports = function(strapi) {
     initialize,
     getQueryParams,
     buildQuery,
+    queries,
     ...relations,
   };
 };

@@ -6,6 +6,20 @@ const _ = require('lodash');
  * A set of functions called "actions" for `ContentManager`
  */
 
+const parseFormInput = value => {
+  try {
+    const parsed = JSON.parse(value);
+    // do not modify initial value if it is string except 'null'
+    if (typeof parsed !== 'string') {
+      value = parsed;
+    }
+  } catch (e) {
+    // Silent.
+  }
+
+  return _.isArray(value) ? value.map(parseFormInput) : value;
+};
+
 /* eslint-disable indent */
 module.exports = {
   fetchAll: async (params, query) => {
@@ -70,29 +84,14 @@ module.exports = {
       );
   },
 
-  add: async (params, values, source) => {
+  async add(params, values, source) {
     // Multipart/form-data.
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
-      // Silent recursive parser.
-      const parser = value => {
-        try {
-          const parsed = JSON.parse(value);
-          // if we parse a value and it is still a string leave it as is
-          if (typeof parsed !== 'string') {
-            value = parsed;
-          }
-        } catch (e) {
-          // Silent.
-        }
-
-        return _.isArray(value) ? value.map(obj => parser(obj)) : value;
-      };
-
       const files = values.files;
 
       // Parse stringify JSON data.
-      values = Object.keys(values.fields).reduce((acc, current) => {
-        acc[current] = parser(values.fields[current]);
+      const data = Object.keys(values.fields).reduce((acc, current) => {
+        acc[current] = parseFormInput(values.fields[current]);
 
         return acc;
       }, {});
@@ -100,9 +99,7 @@ module.exports = {
       // Update JSON fields.
       const entry = await strapi.plugins['content-manager']
         .queries(params.model, source)
-        .create({
-          values,
-        });
+        .create(data);
 
       // Then, request plugin upload.
       if (strapi.plugins.upload && Object.keys(files).length > 0) {
@@ -117,38 +114,19 @@ module.exports = {
         );
       }
 
-      return strapi.plugins['content-manager']
-        .queries(params.model, source)
-        .findOne({
-          id: entry.id || entry._id,
-        });
+      return entry;
     }
 
     // Create an entry using `queries` system
     return await strapi.plugins['content-manager']
       .queries(params.model, source)
-      .create({
-        values,
-      });
+      .create(values);
   },
 
-  edit: async (params, values, source) => {
+  async edit(params, values, source) {
     // Multipart/form-data.
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
       // Silent recursive parser.
-      const parser = value => {
-        try {
-          const parsed = JSON.parse(value);
-          // do not modify initial value if it is string except 'null'
-          if (typeof parsed !== 'string') {
-            value = parsed;
-          }
-        } catch (e) {
-          // Silent.
-        }
-
-        return _.isArray(value) ? value.map(obj => parser(obj)) : value;
-      };
 
       const files = values.files;
 
@@ -160,19 +138,16 @@ module.exports = {
       );
 
       // Parse stringify JSON data.
-      values = Object.keys(values.fields).reduce((acc, current) => {
-        acc[current] = parser(values.fields[current]);
+      const data = Object.keys(values.fields).reduce((acc, current) => {
+        acc[current] = parseFormInput(values.fields[current]);
 
         return acc;
       }, {});
 
-      // Update JSON fields.
-      await strapi.plugins['content-manager']
+      // Update
+      const updatedEntity = await strapi.plugins['content-manager']
         .queries(params.model, source)
-        .update({
-          id: params.id,
-          values,
-        });
+        .update({ id: params.id }, data);
 
       // Then, request plugin upload.
       if (strapi.plugins.upload) {
@@ -184,20 +159,13 @@ module.exports = {
         );
       }
 
-      return strapi.plugins['content-manager']
-        .queries(params.model, source)
-        .findOne({
-          id: params.id,
-        });
+      return updatedEntity;
     }
 
     // Raw JSON.
     return strapi.plugins['content-manager']
       .queries(params.model, source)
-      .update({
-        id: params.id,
-        values,
-      });
+      .update({ id: params.id }, values);
   },
 
   delete: async (params, { source }) => {
