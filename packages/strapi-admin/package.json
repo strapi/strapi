@@ -96,8 +96,8 @@
     }
   ],
   "engines": {
-    "node": ">= 10.0.0",
-    "npm": ">= 6.0.0"
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
   },
   "license": "MIT",
   "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9",
