@@ -10,6 +10,54 @@
     },
     {
       "method": "GET",
+      "path": "/fixtures/general-settings",
+      "handler": "ContentManagerFixtures.getGeneralSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/fixtures/general-settings",
+      "handler": "ContentManagerFixtures.updateGeneralSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/fixtures/groups",
+      "handler": "ContentManagerFixtures.getGroups",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/fixtures/models",
+      "handler": "ContentManagerFixtures.getModels",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/fixtures/layouts/:uid",
+      "handler": "ContentManagerFixtures.getLayout",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/fixtures/layouts/:uid",
+      "handler": "ContentManagerFixtures.updateLayout",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
       "config": {

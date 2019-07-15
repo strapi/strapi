@@ -1,4 +1,6 @@
 {
+  "models": "Content Types",
+  "groups": "Groups",
   "EditRelations.title": "Relational data",
   "components.AddFilterCTA.add": "Filters",
   "components.AddFilterCTA.hide": "Filters",
@@ -62,11 +64,16 @@
   "containers.SettingPage.relations": "Relational fields",
   "containers.SettingPage.settings": "Settings",
   "containers.SettingPage.layout": "Layout",
+
+  "containers.SettingViewModel.pluginHeader.title": "Content Manager - {name}",
+
   "containers.SettingsPage.Block.contentType.description": "Configure the specific settings",
   "containers.SettingsPage.Block.contentType.title": "Content Types",
   "containers.SettingsPage.Block.generalSettings.description": "Configure the default options for your Content Types",
   "containers.SettingsPage.Block.generalSettings.title": "General",
-  "containers.SettingsPage.pluginHeaderDescription": "Configure the default settings for all your Content types",
+  "containers.SettingsPage.pluginHeaderDescription": "Configure the settings for all your Content types and Groups",
+  "containers.SettingsView.list.title": "Display configurations",
+  "containers.SettingsView.list.subtitle": "Configure the layout and display of your content types and groups",
   "emptyAttributes.button": "Go to content type builder",
   "emptyAttributes.description": "Add your first field to your Content Type",
   "emptyAttributes.title": "There are no fields yet",
@@ -123,5 +130,6 @@
   "popUpWarning.warning.cancelAllSettings": "Are you sure you want to cancel your modifications?",
   "popUpWarning.warning.updateAllSettings": "This will modify all your settings",
   "success.record.delete": "Deleted",
-  "success.record.save": "Saved"
+  "success.record.save": "Saved",
+  "notification.info.minimumFields": "You need to have at least one field displayed"
 }

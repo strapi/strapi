@@ -1,0 +1,41 @@
+[
+  {
+    "label": { "id": "content-manager.form.Input.search" },
+    "customBootstrapClass": "col-md-4",
+    "didCheckErrors": false,
+    "errors": [],
+    "name": "search",
+    "type": "toggle",
+    "validations": {}
+  },
+  {
+    "label": { "id": "content-manager.form.Input.filters" },
+    "customBootstrapClass": "col-md-4",
+    "didCheckErrors": false,
+    "errors": [],
+    "name": "filters",
+    "type": "toggle",
+    "validations": {}
+  },
+  {
+    "label": { "id": "content-manager.form.Input.bulkActions" },
+    "customBootstrapClass": "col-md-4",
+    "didCheckErrors": false,
+    "errors": [],
+    "name": "bulkable",
+    "type": "toggle",
+    "validations": {}
+  },
+  {
+    "label": { "id": "content-manager.form.Input.pageEntries" },
+    "customBootstrapClass": "col-md-3",
+    "didCheckErrors": false,
+    "errors": [],
+    "inputDescription": { "id": "content-manager.form.Input.pageEntries.inputDescription" },
+    "name": "pageSize",
+    "selectOptions": ["10", "20", "50", "100"],
+    "type": "select",
+    "validations": {}
+  }
+]
+

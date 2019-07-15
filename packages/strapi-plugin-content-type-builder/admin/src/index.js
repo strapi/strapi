@@ -41,6 +41,7 @@ const plugin = {
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
   preventComponentRendering: false,
+  suffixUrl: '/models',
   trads,
 };
 

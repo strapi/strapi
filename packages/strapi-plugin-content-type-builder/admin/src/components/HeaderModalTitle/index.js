@@ -1,24 +1,21 @@
 /**
-*
-* HeaderModalTitle
-*
-*/
+ *
+ * HeaderModalTitle
+ *
+ */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import styles from './styles.scss';
+import styled from 'styled-components';
 
-function HeaderModalTitle({ title }) {
-  return (
-    <div className={styles.headerModalTitle}>
-      <FormattedMessage id={title} />
-    </div>
-  );
-}
-
-HeaderModalTitle.propTypes = {
-  title: PropTypes.string.isRequired,
-};
+const HeaderModalTitle = styled.div`
+  display: flex;
+  img {
+    width: auto;
+    height: 20px;
+    margin: auto 20px auto 0;
+  }
+  span {
+    margin auto 0;
+  }
+`;
 
 export default HeaderModalTitle;

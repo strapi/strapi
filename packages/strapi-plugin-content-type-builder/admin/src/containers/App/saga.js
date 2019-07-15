@@ -10,23 +10,35 @@ import {
   deleteModelSucceeded,
   submitContentTypeSucceeded,
   submitTempContentTypeSucceeded,
+  deleteGroupSucceeded,
 } from './actions';
 import {
   GET_DATA,
+  DELETE_GROUP,
   DELETE_MODEL,
   SUBMIT_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE,
 } from './constants';
 
+const getRequestUrl = path => `/${pluginId}/${path}`;
+
 export function* getData() {
   try {
-    const requestURL = `/${pluginId}/models`;
-    const [data, { connections }] = yield all([
-      call(request, requestURL, { method: 'GET' }),
-      call(request, '/content-type-builder/connections', { method: 'GET' }),
+    const [data, { connections }, groups] = yield all([
+      call(request, getRequestUrl('models'), { method: 'GET' }),
+      call(request, getRequestUrl('connections'), { method: 'GET' }),
+      call(request, getRequestUrl('fixtures/groups'), { method: 'GET' }),
     ]);
 
-    yield put(getDataSucceeded(data, connections));
+    yield put(getDataSucceeded(data, connections, groups));
+  } catch (err) {
+    strapi.notification.error('notification.error');
+  }
+}
+
+export function* deleteGroup({ uid }) {
+  try {
+    yield put(deleteGroupSucceeded(uid));
   } catch (err) {
     strapi.notification.error('notification.error');
   }
@@ -37,10 +49,9 @@ export function* deleteModel({
   modelName,
 }) {
   try {
-    const requestURL = `/${pluginId}/models/${modelName}`;
     const response = yield call(
       request,
-      requestURL,
+      getRequestUrl(`models/${modelName}`),
       { method: 'DELETE' },
       true
     );
@@ -57,9 +68,9 @@ export function* deleteModel({
         ['content-manager', 'leftMenuSections'],
         [{ links: [] }]
       );
-      const updatedMenu = appMenu[0].links.filter(
-        el => el.destination !== modelName
-      );
+      const updatedMenu = appMenu[0].links.filter(el => {
+        return el.destination !== modelName;
+      });
       appMenu[0].links = sortBy(updatedMenu, 'label');
       updatePlugin('content-manager', 'leftMenuSections', appMenu);
     }
@@ -75,7 +86,6 @@ export function* submitCT({
   context: { emitEvent, plugins, history, updatePlugin },
 }) {
   try {
-    const requestURL = `/${pluginId}/models/${oldContentTypeName}`;
     const { name } = body;
 
     if (source) {
@@ -86,7 +96,12 @@ export function* submitCT({
 
     const opts = { method: 'PUT', body };
 
-    yield call(request, requestURL, opts, true);
+    yield call(
+      request,
+      getRequestUrl(`models/${oldContentTypeName}`),
+      opts,
+      true
+    );
     emitEvent('didSaveContentType');
     yield put(submitContentTypeSucceeded());
     const suffixUrl = source ? `&source=${source}` : '';
@@ -130,10 +145,9 @@ export function* submitTempCT({
   try {
     emitEvent('willSaveContentType');
 
-    const requestURL = `/${pluginId}/models`;
     const opts = { method: 'POST', body };
 
-    yield call(request, requestURL, opts, true);
+    yield call(request, getRequestUrl('models'), opts, true);
 
     emitEvent('didSaveContentType');
     yield put(submitTempContentTypeSucceeded());
@@ -168,11 +182,12 @@ export default function* defaultSaga() {
   try {
     yield all([
       fork(takeLatest, GET_DATA, getData),
+      fork(takeLatest, DELETE_GROUP, deleteGroup),
       fork(takeLatest, DELETE_MODEL, deleteModel),
       fork(takeLatest, SUBMIT_CONTENT_TYPE, submitCT),
       fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
     ]);
   } catch (err) {
-    console.log(err);
+    strapi.notification.error('notification.error');
   }
 }

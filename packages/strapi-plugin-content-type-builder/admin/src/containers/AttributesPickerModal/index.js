@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 
 import pluginId from '../../pluginId';
 
@@ -15,6 +16,8 @@ import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
 import WrapperModal from '../../components/WrapperModal';
+
+import Icon from '../../assets/icons/icon_type_ct.png';
 
 import attributes from './attributes.json';
 
@@ -105,9 +108,7 @@ class AttributesPickerModal extends React.Component {
         e.preventDefault();
 
         push({
-          search: `modalType=attributeForm&attributeType=${
-            attributes[nodeToFocus].type
-          }&settingType=base&actionType=create`,
+          search: `modalType=attributeForm&attributeType=${attributes[nodeToFocus].type}&settingType=base&actionType=create`,
         });
         break;
       default:
@@ -159,11 +160,24 @@ class AttributesPickerModal extends React.Component {
         onOpened={this.handleOnOpened}
       >
         <HeaderModal>
-          <HeaderModalTitle
-            title={`${pluginId}.popUpForm.choose.attributes.header.title`}
-          />
+          <section>
+            <HeaderModalTitle>
+              <img src={Icon} alt="ct" />
+              <FormattedMessage
+                id={`${pluginId}.popUpForm.choose.attributes.header.title`}
+              />
+            </HeaderModalTitle>
+          </section>
+
+          <section>
+            <HeaderModalTitle>
+              <FormattedMessage
+                id={`${pluginId}.popUpForm.choose.attributes.header.subtitle`}
+              />
+            </HeaderModalTitle>
+          </section>
         </HeaderModal>
-        <BodyModal style={{ paddingTop: '2.3rem' }}>
+        <BodyModal style={{ paddingBottom: '3rem' }}>
           {attributes.map(this.renderAttribute)}
         </BodyModal>
         <FooterModal />

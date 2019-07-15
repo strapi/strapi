@@ -1,6 +1,7 @@
 import { fromJS, OrderedMap } from 'immutable';
 import {
   addAttributeRelation,
+  buildGroupAttributes,
   buildModelAttributes,
   deleteModel,
   deleteModelSucceeded,
@@ -34,6 +35,7 @@ import {
   deleteModelAttribute,
   submitContentType,
   submitContentTypeSucceeded,
+  formatGroupAttributes,
   formatModelAttributes,
 } from '../actions';
 import {
@@ -129,9 +131,18 @@ describe('Content Type Builder Action utils', () => {
   describe('formatModelAttributes', () => {
     it('should generate an array of object', () => {
       const expected = [
-        { name: 'action', params: { type: 'string', required: true, configurable: false } },
-        { name: 'controller', params: { type: 'string', required: true, configurable: false } },
-        { name: 'enabled', params: { type: 'boolean', required: true, configurable: false } },
+        {
+          name: 'action',
+          params: { type: 'string', required: true, configurable: false },
+        },
+        {
+          name: 'controller',
+          params: { type: 'string', required: true, configurable: false },
+        },
+        {
+          name: 'enabled',
+          params: { type: 'boolean', required: true, configurable: false },
+        },
         { name: 'policy', params: { type: 'boolean', configurable: false } },
         {
           name: 'role',
@@ -157,7 +168,10 @@ describe('Content Type Builder Action utils', () => {
             targetColumnName: 'test',
           },
         },
-        { name: 'type', params: { type: 'string', required: true, configurable: true } },
+        {
+          name: 'type',
+          params: { type: 'string', required: true, configurable: true },
+        },
         {
           name: 'price',
           params: {
@@ -230,6 +244,88 @@ describe('Content Type Builder Action utils', () => {
       expect(formatModelAttributes(data)).toEqual(expected);
     });
   });
+
+  describe('BuildGroupAttributes', () => {
+    it('should generate an array of attribute objects given an object', () => {
+      const attributes = {
+        name: {
+          type: 'string',
+          required: true,
+        },
+        quantity: {
+          type: 'float',
+          required: true,
+        },
+        picture: {
+          model: 'picture',
+          via: 'related',
+          plugin: 'upload',
+        },
+      };
+
+      const expected = [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+        {
+          name: 'picture',
+          model: 'picture',
+          via: 'related',
+          plugin: 'upload',
+        },
+      ];
+
+      expect(buildGroupAttributes(attributes)).toEqual(expected);
+    });
+  });
+
+  describe('formatGroupAttributes', () => {
+    it('should generate an object with an attribute array', () => {
+      const attributes = [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+        {
+          name: 'picture',
+          model: 'picture',
+          via: 'related',
+          plugin: 'upload',
+        },
+      ];
+
+      const expected = {
+        name: {
+          type: 'string',
+          required: true,
+        },
+        quantity: {
+          type: 'float',
+          required: true,
+        },
+        picture: {
+          model: 'picture',
+          via: 'related',
+          plugin: 'upload',
+        },
+      };
+
+      expect(formatGroupAttributes(attributes)).toEqual(expected);
+    });
+  });
 });
 
 describe('App actions', () => {
@@ -243,7 +339,9 @@ describe('App actions', () => {
         modelName,
       };
 
-      expect(addAttributeRelation(isModelTemporary, modelName)).toEqual(expected);
+      expect(addAttributeRelation(isModelTemporary, modelName)).toEqual(
+        expected
+      );
     });
   });
 
@@ -257,7 +355,9 @@ describe('App actions', () => {
         contentTypeName,
       };
 
-      expect(addAttributeToExistingContentType(contentTypeName, attributeType)).toEqual(expected);
+      expect(
+        addAttributeToExistingContentType(contentTypeName, attributeType)
+      ).toEqual(expected);
     });
   });
 
@@ -397,6 +497,37 @@ describe('App actions', () => {
           ],
         },
       ];
+      const groups = {
+        data: [
+          {
+            uid: 'ingredients',
+            name: 'Ingredients',
+            source: null,
+            schema: {
+              connection: 'default',
+              collectionName: 'ingredients',
+              description: 'Little description',
+              attributes: {
+                name: {
+                  type: 'string',
+                  required: true,
+                },
+                quantity: {
+                  type: 'float',
+                  required: true,
+                },
+                picture: {
+                  model: 'file',
+                  via: 'related',
+                  plugin: 'upload',
+                },
+              },
+            },
+          },
+          //...
+        ],
+        error: {}, // to be defined I don't know yet | null when no error
+      };
       const initialData = {
         permission: {
           collectionName: 'users-permissions_permission',
@@ -416,8 +547,39 @@ describe('App actions', () => {
                 required: true,
                 configurable: false,
               },
-            }),
+            })
           ),
+        },
+      };
+      const initialDataGroup = {
+        ingredients: {
+          isTemporary: false,
+          uid: 'ingredients',
+          name: 'Ingredients',
+          source: null,
+          schema: {
+            connection: 'default',
+            collectionName: 'ingredients',
+            description: 'Little description',
+            attributes: [
+              {
+                name: 'name',
+                type: 'string',
+                required: true,
+              },
+              {
+                name: 'quantity',
+                type: 'float',
+                required: true,
+              },
+              {
+                name: 'picture',
+                model: 'file',
+                via: 'related',
+                plugin: 'upload',
+              },
+            ],
+          },
         },
       };
       const connections = ['default'];
@@ -425,10 +587,24 @@ describe('App actions', () => {
         type: GET_DATA_SUCCEEDED,
         models,
         initialData,
+        initialDataGroup,
         connections,
+        groups: [
+          {
+            description: 'Little description',
+            fields: 3,
+            icon: 'fa-cube',
+            isTemporary: false,
+            name: 'Ingredients',
+            source: null,
+            uid: 'ingredients',
+          },
+        ],
       };
 
-      expect(getDataSucceeded({ models, allModels }, connections)).toEqual(expected);
+      expect(
+        getDataSucceeded({ models, allModels }, connections, groups)
+      ).toEqual(expected);
     });
   });
 
@@ -588,7 +764,9 @@ describe('App actions', () => {
         modelName,
       };
 
-      expect(saveEditedAttribute(attributeName, isModelTemporary, modelName)).toEqual(expected);
+      expect(
+        saveEditedAttribute(attributeName, isModelTemporary, modelName)
+      ).toEqual(expected);
     });
   });
 
@@ -604,7 +782,9 @@ describe('App actions', () => {
         modelName,
       };
 
-      expect(setTemporaryAttribute(attributeName, isModelTemporary, modelName)).toEqual(expected);
+      expect(
+        setTemporaryAttribute(attributeName, isModelTemporary, modelName)
+      ).toEqual(expected);
     });
   });
 
@@ -638,7 +818,9 @@ describe('App actions', () => {
         contentTypeName,
       };
 
-      expect(resetExistingContentTypeMainInfos(contentTypeName)).toEqual(expected);
+      expect(resetExistingContentTypeMainInfos(contentTypeName)).toEqual(
+        expected
+      );
     });
   });
 
@@ -674,7 +856,9 @@ describe('App actions', () => {
         modelName,
       };
 
-      expect(saveEditedAttributeRelation(attributeName, isModelTemporary, modelName)).toEqual(expected);
+      expect(
+        saveEditedAttributeRelation(attributeName, isModelTemporary, modelName)
+      ).toEqual(expected);
     });
   });
 
@@ -693,9 +877,15 @@ describe('App actions', () => {
         target,
       };
 
-      expect(setTemporaryAttributeRelation(target, isModelTemporary, source, attributeName, false)).toEqual(
-        expected,
-      );
+      expect(
+        setTemporaryAttributeRelation(
+          target,
+          isModelTemporary,
+          source,
+          attributeName,
+          false
+        )
+      ).toEqual(expected);
     });
   });
 
@@ -749,9 +939,18 @@ describe('App actions', () => {
         mainField: '',
         name: 'permission',
         attributes: [
-          { name: 'action', params: { type: 'string', required: true, configurable: false } },
-          { name: 'controller', params: { type: 'string', required: true, configurable: false } },
-          { name: 'enabled', params: { type: 'boolean', required: true, configurable: false } },
+          {
+            name: 'action',
+            params: { type: 'string', required: true, configurable: false },
+          },
+          {
+            name: 'controller',
+            params: { type: 'string', required: true, configurable: false },
+          },
+          {
+            name: 'enabled',
+            params: { type: 'boolean', required: true, configurable: false },
+          },
           { name: 'policy', params: { type: 'boolean', configurable: false } },
           {
             name: 'role',
@@ -764,7 +963,10 @@ describe('App actions', () => {
               target: 'role',
             },
           },
-          { name: 'type', params: { type: 'string', required: true, configurable: false } },
+          {
+            name: 'type',
+            params: { type: 'string', required: true, configurable: false },
+          },
         ],
       };
       const context = {};
@@ -776,7 +978,9 @@ describe('App actions', () => {
         context,
       };
 
-      expect(submitContentType('permission', data, context, null)).toEqual(expected);
+      expect(submitContentType('permission', data, context, null)).toEqual(
+        expected
+      );
     });
   });
 
@@ -840,9 +1044,18 @@ describe('App actions', () => {
         mainField: '',
         name: 'permission',
         attributes: [
-          { name: 'action', params: { type: 'string', required: true, configurable: false } },
-          { name: 'controller', params: { type: 'string', required: true, configurable: false } },
-          { name: 'enabled', params: { type: 'boolean', required: true, configurable: false } },
+          {
+            name: 'action',
+            params: { type: 'string', required: true, configurable: false },
+          },
+          {
+            name: 'controller',
+            params: { type: 'string', required: true, configurable: false },
+          },
+          {
+            name: 'enabled',
+            params: { type: 'boolean', required: true, configurable: false },
+          },
           { name: 'policy', params: { type: 'boolean', configurable: false } },
           {
             name: 'role',
@@ -855,7 +1068,10 @@ describe('App actions', () => {
               target: 'role',
             },
           },
-          { name: 'type', params: { type: 'string', required: true, configurable: false } },
+          {
+            name: 'type',
+            params: { type: 'string', required: true, configurable: false },
+          },
         ],
       };
       const context = {};

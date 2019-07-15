@@ -103,8 +103,7 @@ export function* defaultSaga() {
       fork(takeLatest, ON_UPDATE_DOC, updateDoc),
     ]);
   } catch (err) {
-    /* eslint-disable no-console */
-    console.log(err);
+    // Do nothing
   }
 }
 
