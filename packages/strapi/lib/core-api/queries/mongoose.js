@@ -235,7 +235,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       const data = omitExernalValues(values);
 
       // Update entry with no-relational data.
-      await entry.updateOne(params, data);
+      await entry.updateOne(data);
       await updateGroups(entry, values);
 
       // Update relational data and return the entry.
