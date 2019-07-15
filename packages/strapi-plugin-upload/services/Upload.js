@@ -91,22 +91,8 @@ module.exports = {
     );
   },
 
-  async add(values) {
+  add(values) {
     return strapi.query('file', 'upload').create(values);
-  },
-
-  async edit(params, values) {
-    // Use Content Manager business logic to handle relation.
-    if (strapi.plugins['content-manager']) {
-      params.model = 'file';
-      params.id = params._id || params.id;
-
-      return await strapi.plugins['content-manager'].services[
-        'contentmanager'
-      ].edit(params, values, 'upload');
-    }
-
-    return strapi.query('file', 'upload').update(params, values);
   },
 
   fetch(params) {
@@ -124,9 +110,9 @@ module.exports = {
   },
 
   async remove(params, config) {
-    params.id = params._id || params.id;
+    const opts = { id: params._id || params.id };
 
-    const file = await strapi.plugins['upload'].services.upload.fetch(params);
+    const file = await strapi.plugins['upload'].services.upload.fetch(opts);
 
     // get upload provider settings to configure the provider to use
     const provider = _.cloneDeep(
@@ -142,16 +128,7 @@ module.exports = {
       await actions.delete(file);
     }
 
-    // Use Content Manager business logic to handle relation.
-    if (strapi.plugins['content-manager']) {
-      params.model = 'file';
-
-      return await strapi.plugins['content-manager'].services[
-        'contentmanager'
-      ].delete(params, { source: 'upload' });
-    }
-
-    return strapi.query('file', 'upload').delete(params);
+    return strapi.query('file', 'upload').delete(opts);
   },
 
   async uploadToEntity(params, files, source) {

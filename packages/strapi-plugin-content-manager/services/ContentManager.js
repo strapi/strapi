@@ -89,7 +89,7 @@ module.exports = {
         values.fields[attr] = [];
       });
 
-      const data = parseFormData(values.fileds);
+      const data = parseFormData(values.fields);
       const updatedEntity = await strapi
         .query(params.model, source)
         .update({ id: params.id }, data);
