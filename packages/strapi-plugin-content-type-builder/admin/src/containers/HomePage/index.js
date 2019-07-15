@@ -6,11 +6,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import {
   HeaderNav,
-  ListWrapper,
-  ListHeader,
   List,
+  ListHeader,
+  ListTitle,
+  ListWrapper,
   PluginHeader,
   routerPropTypes,
 } from 'strapi-helper-plugin';
@@ -106,14 +108,9 @@ class HomePage extends React.Component {
     const displayedData = type === 'groups' ? groups : models;
     const availableNumber = type === 'groups' ? groups.length : models.length;
     const titleType = type === 'groups' ? type : 'contentType';
-    const title = [
-      {
-        label: `${pluginId}.table.${titleType}.title.${
-          availableNumber > 1 ? 'plural' : 'singular'
-        }`,
-        values: { number: availableNumber },
-      },
-    ];
+    const title = `${pluginId}.table.${titleType}.title.${
+      availableNumber > 1 ? 'plural' : 'singular'
+    }`;
 
     return (
       <div className={styles.homePage}>
@@ -137,6 +134,7 @@ class HomePage extends React.Component {
           <ListWrapper>
             <ListHeader
               title={title}
+              titleValues={{ number: availableNumber }}
               button={{
                 kind: 'secondaryHotlineAdd',
                 label: `${pluginId}.button.${type}.create`,

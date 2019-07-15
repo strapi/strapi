@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 
 import pluginId from '../../pluginId';
 
@@ -19,6 +20,7 @@ import {
   getQueryParameters,
   List,
   ListHeader,
+  ListTitle,
   ListWrapper,
   PopUpWarning,
 } from 'strapi-helper-plugin';
@@ -57,6 +59,12 @@ export class GroupPage extends React.Component {
   getFeatureSchema = () => get(this.getFeature(), 'schema', {});
 
   getFeatureAttributes = () => get(this.getFeatureSchema(), 'attributes', []);
+
+  getFeatureAttributesNames = () => {
+    return this.getFeatureAttributes().map(attribute => {
+      return attribute.name;
+    });
+  };
 
   getFeatureAttributesLength = () =>
     Object.keys(this.getFeatureAttributes()).length;
@@ -101,6 +109,38 @@ export class GroupPage extends React.Component {
   };
 
   getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
+
+  getPluginHeaderActions = () => {
+    const { initialDataGroup, modifiedDataGroup } = this.props;
+    /* istanbul ignore if */
+    const shouldShowActions = this.isUpdatingTempFeature()
+      ? this.getFeatureAttributesLength() > 0
+      : !isEqual(
+          modifiedDataGroup[this.getFeatureName()],
+          initialDataGroup[this.getFeatureName()]
+        );
+
+    /* istanbul ignore if */
+    if (shouldShowActions) {
+      return [
+        {
+          label: `${pluginId}.form.button.cancel`,
+          onClick: () => {},
+          kind: 'secondary',
+          type: 'button',
+        },
+        {
+          label: `${pluginId}.form.button.save`,
+          onClick: () => {},
+          kind: 'primary',
+          type: 'submit',
+          id: 'saveData',
+        },
+      ];
+    }
+
+    return [];
+  };
 
   getSettingType = () => getQueryParameters(this.getSearch(), 'settingType');
 
@@ -243,6 +283,7 @@ export class GroupPage extends React.Component {
           featureType={this.featureType}
           headerTitle={this.getFeatureHeaderTitle()}
           headerDescription={this.getFeatureHeaderDescription()}
+          pluginHeaderActions={this.getPluginHeaderActions()}
         >
           {attributesNumber === 0 ? (
             <EmptyAttributesBlock
@@ -254,7 +295,21 @@ export class GroupPage extends React.Component {
             />
           ) : (
             <ListWrapper>
-              <ListHeader title={title} button={{ ...buttonProps }} />
+              <ListHeader button={{ ...buttonProps }}>
+                <div className="list-header-title">
+                  {title.map(item => {
+                    return (
+                      <FormattedMessage
+                        key={item.label}
+                        id={item.label}
+                        values={item.values}
+                      >
+                        {msg => <ListTitle>{msg}&nbsp;</ListTitle>}
+                      </FormattedMessage>
+                    );
+                  })}
+                </div>
+              </ListHeader>
               <List>
                 <table>
                   <tbody>
@@ -265,7 +320,7 @@ export class GroupPage extends React.Component {
                 </table>
               </List>
               <div className="list-button">
-                <Button onClick={this.openAttributesModal} />
+                <Button {...buttonProps} />
               </div>
             </ListWrapper>
           )}
@@ -277,12 +332,14 @@ export class GroupPage extends React.Component {
         />
 
         <AttributeForm
-          attributeType={this.getAttributeType()}
-          getActionType={this.getActionType()}
-          featureType={this.featureType}
           activeTab={this.getSettingType()}
+          alreadyTakenAttributes={this.getFeatureAttributesNames()}
+          attributeType={this.getAttributeType()}
+          featureType={this.featureType}
+          getActionType={this.getActionType()}
           isOpen={this.getModalType() === 'attributeForm'}
           modifiedData={temporaryAttributeGroup}
+          //onCancel={clearTemporaryAttribute}
           onChange={onChangeAttributeGroup}
           onSubmit={this.handleSubmit}
           onSubmitEdit={() => {}}
