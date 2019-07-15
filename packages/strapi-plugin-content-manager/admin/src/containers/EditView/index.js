@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { get, omit } from 'lodash';
+import { get } from 'lodash';
 
 import {
   BackHeader,
@@ -228,6 +228,7 @@ function EditView({
 
     return componentToInject;
   };
+
   return (
     <>
       <BackHeader onClick={() => redirectToPreviousPage()} />
@@ -302,6 +303,7 @@ function EditView({
                         key={key}
                         isRepeatable={group.repeatable}
                         name={name}
+                        modifiedData={modifiedData}
                         onChange={({ target: { name, value } }) => {
                           dispatch({
                             type: 'ON_CHANGE',
@@ -309,7 +311,7 @@ function EditView({
                             value,
                           });
                         }}
-                        layout={get(groupLayoutsData, name, {})}
+                        layout={get(groupLayoutsData, group.group, {})}
                         removeField={keys => {
                           dispatch({
                             type: 'ON_REMOVE_FIELD',
@@ -323,50 +325,12 @@ function EditView({
                   return (
                     <div key={key} className="row">
                       {fieldsRow.map(({ name }) => {
-                        const attribute = get(
-                          layout,
-                          ['schema', 'attributes', name],
-                          {}
-                        );
-                        const { model, collection } = attribute;
-                        const isMedia =
-                          get(attribute, 'plugin', '') === 'upload' &&
-                          (model || collection) === 'file';
-                        const multiple = collection == 'file';
-                        const metadata = get(
-                          layout,
-                          ['metadata', name, 'edit'],
-                          {}
-                        );
-                        const type = isMedia
-                          ? 'file'
-                          : get(attribute, 'type', null);
-                        const inputStyle =
-                          type === 'text' ? { height: '196px' } : {};
-                        const validations = omit(attribute, [
-                          'type',
-                          'model',
-                          'via',
-                          'collection',
-                          'default',
-                          'plugin',
-                          'enum',
-                        ]);
-                        const value = get(modifiedData, name);
-                        const { description, visible } = metadata;
-
-                        // Remove the updatedAt & createdAt fields
-                        if (visible === false) {
-                          return null;
-                        }
-
                         return (
                           <Inputs
-                            {...metadata}
-                            inputDescription={description}
-                            inputStyle={inputStyle}
                             key={name}
-                            multiple={multiple}
+                            keys={name}
+                            layout={layout}
+                            modifiedData={modifiedData}
                             name={name}
                             onChange={({ target: { name, value } }) => {
                               dispatch({
@@ -375,10 +339,6 @@ function EditView({
                                 value,
                               });
                             }}
-                            selectOptions={get(attribute, 'enum', [])}
-                            type={type}
-                            validations={validations}
-                            value={value}
                           />
                         );
                       })}

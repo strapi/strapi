@@ -64,8 +64,13 @@ const GroupCollapseWrapper = styled(Flex)`
   line-height: 34px;
   background-color: #ffffff;
   font-size: 13px;
-  button:active {
-    outline: 0;
+  button,
+  i,
+  img {
+    &:active,
+    &:focus {
+      outline: 0;
+    }
   }
 `;
 

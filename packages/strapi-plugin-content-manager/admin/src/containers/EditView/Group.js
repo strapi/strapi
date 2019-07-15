@@ -1,12 +1,44 @@
-import React from 'react';
+import React, { useReducer } from 'react';
+import { fromJS } from 'immutable';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get, omit } from 'lodash';
+import { get } from 'lodash';
 import pluginId from '../../pluginId';
 
 import { Button } from './components';
 import GroupCollapse from './GroupCollapse';
 import Inputs from './Inputs';
+
+const initialState = fromJS({ collapses: [] });
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'ADD_NEW_FIELD':
+      return state.update('collapses', list => {
+        return list
+          .map(obj => obj.update('isOpen', () => false))
+          .push(fromJS({ isOpen: true }));
+      });
+    case 'TOGGLE_COLLAPSE':
+      return state.update('collapses', list => {
+        return list.map((obj, index) => {
+          if (index === action.index) {
+            return obj.update('isOpen', v => !v);
+          }
+
+          return obj.update('isOpen', () => false);
+        });
+      });
+    case 'REMOVE_COLLAPSE':
+      return state.removeIn(['collapses', action.index]);
+    default:
+      return state;
+  }
+}
+
+function init(initialState) {
+  return initialState;
+}
 
 function Group({
   addField,
@@ -15,12 +47,15 @@ function Group({
   layout,
   // min,
   max,
+  modifiedData,
   name,
   groupValue,
   onChange,
   removeField,
 }) {
   const fields = get(layout, ['layouts', 'edit'], []);
+  const [state, dispatch] = useReducer(reducer, initialState, init);
+  const { collapses } = state.toJS();
 
   return (
     <>
@@ -52,57 +87,18 @@ function Group({
               return (
                 <div className="row" key={key}>
                   {fieldRow.map(field => {
-                    //
-                    const attribute = get(
-                      layout,
-                      ['schema', 'attributes', field.name],
-                      {}
-                    );
-                    const { model, collection } = attribute;
-                    const isMedia =
-                      get(attribute, 'plugin', '') === 'upload' &&
-                      (model || collection) === 'file';
-                    const multiple = collection == 'file';
-                    const metadata = get(
-                      layout,
-                      ['metadata', field.name, 'edit'],
-                      {}
-                    );
-                    const type = isMedia
-                      ? 'file'
-                      : get(attribute, 'type', null);
-                    const inputStyle =
-                      type === 'text' ? { height: '196px' } : {};
-                    const validations = omit(attribute, [
-                      'type',
-                      'model',
-                      'via',
-                      'collection',
-                      'default',
-                      'plugin',
-                      'enum',
-                    ]);
-                    const value = get(groupValue, field.name);
-                    const { description, visible } = metadata;
-
-                    // Remove the updatedAt fields
-                    if (visible === false) {
-                      return null;
-                    }
-
                     return (
                       <Inputs
-                        {...metadata}
-                        inputDescription={description}
-                        inputStyle={inputStyle}
-                        multiple={multiple}
                         key={`${name}.${field.name}`}
-                        name={`${name}.${field.name}`}
-                        onChange={onChange}
-                        selectOptions={get(attribute, 'enum', [])}
-                        type={type}
-                        validations={validations}
-                        value={value}
+                        layout={layout}
+                        modifiedData={modifiedData}
+                        keys={`${name}.${field.name}`}
+                        name={`${field.name}`}
+                        onChange={({ target: { value } }) => {
+                          onChange({
+                            target: { name: `${name}.${field.name}`, value },
+                          });
+                        }}
                       />
                     );
                   })}
@@ -114,12 +110,29 @@ function Group({
           <div className="col-12">
             <div className="row">
               {groupValue.map((field, index) => {
-                //
-
                 return (
                   <div className="col-12" key={index}>
                     <GroupCollapse
-                      removeField={() => removeField(`${name}.${index}`)}
+                      onClick={() => {
+                        dispatch({
+                          type: 'TOGGLE_COLLAPSE',
+                          index,
+                        });
+                      }}
+                      isOpen={collapses[index].isOpen}
+                      layout={layout}
+                      modifiedData={modifiedData}
+                      name={`${name}.${index}`}
+                      onChange={onChange}
+                      removeField={e => {
+                        e.stopPropagation();
+
+                        dispatch({
+                          type: 'REMOVE_COLLAPSE',
+                          index,
+                        });
+                        removeField(`${name}.${index}`);
+                      }}
                       groupName={name}
                     />
                   </div>
@@ -130,6 +143,10 @@ function Group({
                   onClick={() => {
                     if (groupValue.length < max) {
                       addField(name);
+
+                      dispatch({
+                        type: 'ADD_NEW_FIELD',
+                      });
                       return;
                     }
 
@@ -157,6 +174,7 @@ Group.defaultProps = {
   label: '',
   layout: {},
   max: Infinity,
+  modifiedData: {},
   onChange: () => {},
 };
 
@@ -167,6 +185,7 @@ Group.propTypes = {
   label: PropTypes.string,
   layout: PropTypes.object,
   max: PropTypes.number,
+  modifiedData: PropTypes.object,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   removeField: PropTypes.func.isRequired,

@@ -41,6 +41,7 @@ module.exports = {
           attributes: {
             name: {
               type: 'string',
+              required: true,
             },
           },
         },
@@ -171,12 +172,12 @@ module.exports = {
                 size: 12,
               },
             ],
-            // [
-            //   {
-            //     name: 'ingredient',
-            //     size: 12,
-            //   },
-            // ],
+            [
+              {
+                name: 'ingredient',
+                size: 12,
+              },
+            ],
           ],
         },
       },
