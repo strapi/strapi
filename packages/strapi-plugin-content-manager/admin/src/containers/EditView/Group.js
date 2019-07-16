@@ -2,7 +2,7 @@ import React, { useReducer } from 'react';
 import { fromJS } from 'immutable';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import { get, isArray } from 'lodash';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import pluginId from '../../pluginId';
@@ -42,8 +42,18 @@ function reducer(state, action) {
   }
 }
 
-function init(initialState) {
-  return initialState;
+function init(initialState, groupValues) {
+  return initialState.update('collapses', list => {
+    if (isArray(groupValues)) {
+      return fromJS(
+        groupValues.map((_, index) => ({
+          isOpen: index === groupValues.length - 1,
+        }))
+      );
+    }
+
+    return list;
+  });
 }
 
 function Group({
@@ -61,7 +71,9 @@ function Group({
   removeField,
 }) {
   const fields = get(layout, ['layouts', 'edit'], []);
-  const [state, dispatch] = useReducer(reducer, initialState, init);
+  const [state, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState, groupValue)
+  );
   const { collapses } = state.toJS();
 
   const findField = React.useCallback(

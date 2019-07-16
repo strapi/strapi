@@ -42,6 +42,7 @@ module.exports = {
             name: {
               type: 'string',
               required: true,
+              default: 'flour',
             },
           },
         },
@@ -95,6 +96,7 @@ module.exports = {
           attributes: {
             title: {
               type: 'string',
+              default: 'something',
             },
             ingredients: {
               type: 'group',

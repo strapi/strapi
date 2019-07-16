@@ -20,7 +20,7 @@ import { LinkWrapper, MainWrapper, SubWrapper } from './components';
 import Group from './Group';
 import Inputs from './Inputs';
 
-import init from './init';
+import init, { setDefaultForm } from './init';
 import reducer, { initialState } from './reducer';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
@@ -41,14 +41,14 @@ function EditView({
   const attributes = get(layout, ['schema', 'attributes'], {});
 
   const groups = Object.keys(attributes).reduce((acc, current) => {
-    const { group, repeatable, type } = get(attributes, [current], {
+    const { group, repeatable, type, min } = get(attributes, [current], {
       group: '',
       type: '',
       repeatable,
     });
 
     if (type === 'group') {
-      acc.push({ key: current, group, repeatable, isOpen: !repeatable });
+      acc.push({ key: current, group, repeatable, isOpen: !repeatable, min });
     }
 
     return acc;
@@ -78,6 +78,7 @@ function EditView({
   const source = getQueryParameters(search, 'source');
   const shouldShowLoader =
     isLoadingForLayouts || (!isCreatingEntry && isLoading);
+  ``;
 
   // Keep these lines if we make the Group component collapsable
   // useEffect(() => {
@@ -124,9 +125,40 @@ function EditView({
           return acc;
         }, {});
 
+        // Retrieve all the default values for the repeatables and init the form
+        const defaultGroupValues = groups.reduce((acc, current) => {
+          const defaultForm = setDefaultForm(
+            get(groupLayouts, [current.group, 'schema', 'attributes'], {})
+          );
+
+          const arr = [];
+
+          if (current.min && current.repeatable === true) {
+            for (let i = 0; i < current.min; i++) {
+              arr.push({ ...defaultForm, _temp__id: i });
+            }
+          }
+
+          acc[current.key] = {
+            toSet: arr,
+            defaultRepeatable: defaultForm,
+          };
+
+          if (current.repeatable === false) {
+            acc[current.key] = {
+              toSet: defaultForm,
+              defaultRepeatable: defaultForm,
+            };
+          }
+
+          return acc;
+        }, {});
+
         dispatch({
           type: 'GET_GROUP_LAYOUTS_SUCCEEDED',
           groupLayouts,
+          defaultGroupValues,
+          isCreatingEntry,
         });
       } catch (err) {
         console.log({ err });
