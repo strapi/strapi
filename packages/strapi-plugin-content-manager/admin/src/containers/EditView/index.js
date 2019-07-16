@@ -15,6 +15,7 @@ import {
 import pluginId from '../../pluginId';
 
 import Container from '../../components/Container';
+import SelectOne from '../../components/SelectOne';
 
 import { LinkWrapper, MainWrapper, SubWrapper } from './components';
 import Group from './Group';
@@ -29,7 +30,7 @@ function EditView({
   currentEnvironment,
   emitEvent,
   layouts,
-  location: { search },
+  location: { pathname, search },
   history: { push },
   match: {
     params: { slug, id },
@@ -181,7 +182,11 @@ function EditView({
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
   const toggleWarningDelete = () => setWarningDelete(prevState => !prevState);
-  const redirectURL = search.split('redirectUrl=')[1];
+  const redirectURL = search
+    .split('redirectUrl=')
+    .filter((_, index) => index !== 0)
+    .join('');
+
   const redirectToPreviousPage = () => push(redirectURL);
 
   const handleConfirmDelete = async () => {
@@ -214,7 +219,8 @@ function EditView({
     ? { id: `${pluginId}.containers.Edit.pluginHeader.title.new` }
     : templateObject({ mainField: displayedFieldNameInHeader }, initialData)
         .mainField;
-  const hasRelations = get(layout, ['layouts', 'editRelations'], []).length > 0;
+  const displayedRelations = get(layout, ['layouts', 'editRelations'], []);
+  const hasRelations = displayedRelations.length > 0;
   const fields = get(layout, ['layouts', 'edit'], []);
 
   /**
@@ -394,7 +400,49 @@ function EditView({
                   style={{ padding: '0 20px 1px', marginBottom: '28px' }}
                 >
                   <div style={{ paddingTop: '19px' }}>
-                    RELATIONS COMING SOON
+                    {displayedRelations.map(relationName => {
+                      //
+                      const relation = get(
+                        layout,
+                        ['schema', 'attributes', relationName],
+                        {}
+                      );
+                      const relationMetas = get(
+                        layout,
+                        ['metadata', relationName, 'edit'],
+                        {}
+                      );
+                      const value = get(modifiedData, [relationName], null);
+                      const Component = [
+                        'oneWay',
+                        'oneToOne',
+                        'manyToOne',
+                        'oneToManyMorph',
+                        'oneToOneMorph',
+                      ].includes(relation.relationType)
+                        ? SelectOne
+                        : // eslint-disable-next-line react/display-name
+                          () => <div>SelectMany</div>;
+
+                      return (
+                        <Component
+                          key={relationName}
+                          {...relation}
+                          {...relationMetas}
+                          name={relationName}
+                          onChange={({ target: { name, value } }) => {
+                            dispatch({
+                              type: 'ON_CHANGE',
+                              keys: name.split('.'),
+                              value,
+                            });
+                          }}
+                          pathname={pathname}
+                          search={search}
+                          value={value}
+                        />
+                      );
+                    })}
                   </div>
                 </SubWrapper>
               )}

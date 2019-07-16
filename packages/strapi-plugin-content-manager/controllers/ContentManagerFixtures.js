@@ -199,10 +199,10 @@ module.exports = {
               type: 'string',
             },
 
-            articles: {
+            article: {
               type: 'relation',
               targetModel: 'article',
-              relationType: 'manyToMany',
+              relationType: 'manyToOne',
             },
           },
         },
@@ -237,20 +237,20 @@ module.exports = {
               sortable: true,
             },
           },
-          articles: {
+          article: {
             edit: {
               label: 'articles',
               description: '....',
               editable: true,
               visible: true,
-              mainField: 'id',
+              mainField: 'title',
             },
             list: {},
           },
         },
         layouts: {
           list: ['id', 'name'],
-          editRelations: ['articles'],
+          editRelations: ['article'],
           edit: [
             [
               {
@@ -307,7 +307,7 @@ module.exports = {
             tags: {
               type: 'relation',
               targetModel: 'tag',
-              relationType: 'manyToMany',
+              relationType: 'oneToMany',
             },
             pics: {
               collection: 'file',
@@ -584,42 +584,42 @@ module.exports = {
               searchable: true,
               sortable: true,
             },
-            confirmed: {
-              edit: {
-                label: 'confirmed',
-                description: '....',
-                editable: true,
-                visible: true,
-              },
-              list: {
-                label: 'confirmed',
-                searchable: true,
-                sortable: true,
-              },
+          },
+          confirmed: {
+            edit: {
+              label: 'confirmed',
+              description: '....',
+              editable: true,
+              visible: true,
             },
-            blocked: {
-              edit: {
-                label: 'blocked',
-                description: '....',
-                editable: true,
-                visible: true,
-              },
-              list: {
-                label: 'blocked',
-                searchable: true,
-                sortable: true,
-              },
+            list: {
+              label: 'confirmed',
+              searchable: true,
+              sortable: true,
             },
-            role: {
-              edit: {
-                label: 'role',
-                description: '....',
-                editable: true,
-                visible: true,
-                mainField: 'name',
-              },
-              list: {},
+          },
+          blocked: {
+            edit: {
+              label: 'blocked',
+              description: '....',
+              editable: true,
+              visible: true,
             },
+            list: {
+              label: 'blocked',
+              searchable: true,
+              sortable: true,
+            },
+          },
+          role: {
+            edit: {
+              label: 'role',
+              description: '....',
+              editable: true,
+              visible: true,
+              mainField: 'name',
+            },
+            list: {},
           },
         },
         layouts: {

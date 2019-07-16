@@ -11,7 +11,7 @@ import 'sanitize.css/sanitize.css';
 // Third party css library needed
 // Currently unable to bundle them
 
-import 'react-select/dist/react-select.css';
+// import 'react-select/dist/react-select.css';
 import 'react-datetime/css/react-datetime.css';
 
 import './styles/main.scss';
@@ -90,7 +90,7 @@ Object.keys(plugins).forEach(plugin => {
 
 // TODO
 const remoteURL = (() => {
-    // Relative URL (ex: /dashboard)
+  // Relative URL (ex: /dashboard)
   if (REMOTE_URL[0] === '/') {
     return (window.location.origin + REMOTE_URL).replace(/\/$/, '');
   }

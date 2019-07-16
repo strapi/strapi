@@ -1,228 +1,136 @@
-/**
- *
- * SelectOne
- *
- */
-
-import React from 'react';
-import Select from 'react-select';
-import { FormattedMessage } from 'react-intl';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import { Link } from 'react-router-dom';
+import { get, isEmpty, isNull } from 'lodash';
+import { request } from 'strapi-helper-plugin';
+import Select from 'react-select';
 
-import {
-  cloneDeep,
-  map,
-  includes,
-  isArray,
-  isNull,
-  isUndefined,
-  isFunction,
-  get,
-  findIndex,
-} from 'lodash';
+import pluginId from '../../pluginId';
 
-import { request, templateObject } from 'strapi-helper-plugin';
+import { Nav, Wrapper } from './components';
 
-import styles from './styles.scss';
+function SelectOne({
+  description,
+  label,
+  mainField,
+  name,
+  onChange,
+  pathname,
+  search,
+  targetModel,
+  plugin,
+  value,
+}) {
+  const [state, setState] = useState({
+    _q: '',
+    _limit: 8,
+    _start: 0,
+    source: isEmpty(plugin) ? 'content-manager' : plugin,
+  });
+  const [options, setOptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const ref = useRef();
 
-class SelectOne extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  constructor(props) {
-    super(props);
+  ref.current = async (uid, params = state) => {
+    try {
+      const requestUrl = `/${pluginId}/explorer/${uid}`;
 
-    this.state = {
-      isLoading: true,
-      options: [],
-      toSkip: 0,
-    };
-  }
+      if (isEmpty(params._q)) {
+        delete params._q;
+      }
 
-  componentDidMount() {
-    this.getOptions('');
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.toSkip !== this.state.toSkip) {
-      this.getOptions('');
-    }
-  }
-
-  getOptions = query => {
-    const params = {
-      _limit: 20,
-      _start: this.state.toSkip,
-      source: this.props.relation.plugin || 'content-manager',
-    };
-
-    // Set `query` parameter if necessary
-    if (query) {
-      delete params._limit;
-      delete params._start;
-      params[`${this.props.relation.displayedAttribute}_contains`] = query;
-    }
-
-    // Request URL
-    const requestUrlSuffix =
-      query && get(this.props.record, [this.props.relation.alias])
-        ? get(this.props.record, [this.props.relation.alias])
-        : '';
-    const requestUrl = `/content-manager/explorer/${this.props.relation.model ||
-      this.props.relation.collection}/${requestUrlSuffix}`;
-
-    // Call our request helper (see 'utils/request')
-    return request(requestUrl, {
-      method: 'GET',
-      params,
-    })
-      .then(response => {
-        const options = isArray(response)
-          ? map(response, item => ({
-            value: item,
-            label: templateObject(
-              { mainField: this.props.relation.displayedAttribute },
-              item,
-            ).mainField,
-          }))
-          : [
-            {
-              value: response,
-              label: templateObject(
-                { mainField: this.props.relation.displayedAttribute },
-                response,
-              ).mainField,
-            },
-          ];
-
-        const newOptions = cloneDeep(this.state.options);
-        options.map(option => {
-          // Don't add the values when searching
-          if (
-            findIndex(newOptions, o => o.value.id === option.value.id) === -1
-          ) {
-            return newOptions.push(option);
-          }
-        });
-
-        return this.setState({
-          options: newOptions,
-          isLoading: false,
-        });
-      })
-      .catch(() => {
-        strapi.notification.error(
-          'content-manager.notification.error.relationship.fetch',
-        );
+      const data = await request(requestUrl, {
+        method: 'GET',
+        params: params,
       });
-  };
 
-  handleChange = value => {
-    const target = {
-      name: `record.${this.props.relation.alias}`,
-      value,
-      type: 'select',
-    };
+      setOptions(
+        data.map(obj => {
+          return { value: obj, label: obj[mainField] };
+        })
+      );
+      setIsLoading(false);
+    } catch (err) {
+      console.log({ err });
 
-    this.props.setRecordAttribute({ target });
-  };
-
-  handleBottomScroll = () => {
-    this.setState(prevState => {
-      return {
-        toSkip: prevState.toSkip + 1,
-      };
-    });
-  };
-
-  // Redirect to the edit page
-  handleClick = (item = {}) => {
-    this.props.onRedirect({
-      model: this.props.relation.collection || this.props.relation.model,
-      id: item.value.id || item.value._id,
-      source: this.props.relation.plugin,
-    });
-  };
-
-  handleInputChange = value => {
-    const clonedOptions = this.state.options;
-    const filteredValues = clonedOptions.filter(data =>
-      includes(data.label, value),
-    );
-
-    if (filteredValues.length === 0) {
-      return this.getOptions(value);
+      strapi.notification.error('notification.error');
     }
   };
 
-  render() {
-    const description = this.props.relation.description ? (
-      <p>{this.props.relation.description}</p>
-    ) : (
-      ''
+  useEffect(() => {
+    ref.current(targetModel);
+  }, [ref, targetModel, state._start]);
+
+  const nextSearch = `${pathname}${search}`;
+  const to = `/plugins/${pluginId}/${targetModel}/${
+    value ? value.id : null
+  }?redirectUrl=${nextSearch}`;
+  const link =
+    value === null ||
+    value === undefined ||
+    ['role', 'permission'].includes(targetModel) ? null : (
+      <Link to={to}>
+        <FormattedMessage id="content-manager.containers.Edit.seeDetails" />
+      </Link>
     );
 
-    const value = get(this.props.record, this.props.relation.alias);
-    const excludeModel = ['role', 'permission', 'file'].includes(
-      this.props.relation.model || this.props.relation.collection,
-    ); // Temporary.
-    const entryLink =
-      isNull(value) || isUndefined(value) || excludeModel ? (
-        ''
-      ) : (
-        <FormattedMessage id="content-manager.containers.Edit.clickToJump">
-          {title => (
-            <a onClick={() => this.handleClick({ value })} title={title}>
-              <FormattedMessage id="content-manager.containers.Edit.seeDetails" />
-            </a>
-          )}
-        </FormattedMessage>
-      );
+  const onInputChange = inputValue => {
+    setState(prevState => ({ ...prevState, _q: inputValue }));
 
-    /* eslint-disable jsx-a11y/label-has-for */
-    return (
-      <div className={`form-group ${styles.selectOne}`}>
-        <nav className={styles.headline}>
-          <label htmlFor={this.props.relation.alias}>
-            {this.props.relation.alias}
-          </label>
-          {entryLink}
-        </nav>
-        {description}
-        <Select
-          onChange={this.handleChange}
-          options={this.state.options}
-          id={this.props.relation.alias}
-          isLoading={this.state.isLoading}
-          onMenuScrollToBottom={this.handleBottomScroll}
-          onInputChange={this.handleInputChange}
-          onSelectResetsInput={false}
-          simpleValue
-          value={
-            isNull(value) || isUndefined(value)
-              ? null
-              : {
-                value: isFunction(value.toJS) ? value.toJS() : value,
-                label:
-                    templateObject(
-                      { mainField: this.props.relation.displayedAttribute },
-                      isFunction(value.toJS) ? value.toJS() : value,
-                    ).mainField ||
-                    (isFunction(value.toJS)
-                      ? get(value.toJS(), 'id')
-                      : get(value, 'id')),
-              }
-          }
-        />
-      </div>
-    );
-    /* eslint-disable jsx-a11y/label-has-for */
-  }
+    return inputValue;
+  };
+
+  const onMenuScrollToBottom = () => {
+    setState(prevState => ({ ...prevState, _start: prevState._start + 1 }));
+  };
+
+  return (
+    <Wrapper className="form-group">
+      <Nav>
+        <label htmlFor={name}>{label}</label>
+        {link}
+      </Nav>
+      {!isEmpty(description) && <p>{description}</p>}
+      <Select
+        id={name}
+        isLoading={isLoading}
+        isClearable
+        options={options}
+        onChange={value => {
+          onChange({ target: { name, value: value ? value.value : value } });
+        }}
+        onInputChange={onInputChange}
+        onMenuClose={() => {
+          setState(prevState => ({ ...prevState, _start: 0 }));
+        }}
+        onMenuScrollToBottom={onMenuScrollToBottom}
+        value={
+          isNull(value) ? null : { label: get(value, [mainField], ''), value }
+        }
+      />
+    </Wrapper>
+  );
 }
 
+SelectOne.defaultProps = {
+  description: '',
+  label: '',
+  plugin: '',
+  value: null,
+};
+
 SelectOne.propTypes = {
-  onRedirect: PropTypes.func.isRequired,
-  record: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]).isRequired,
-  relation: PropTypes.object.isRequired,
-  setRecordAttribute: PropTypes.func.isRequired,
+  description: PropTypes.string,
+  label: PropTypes.string,
+  mainField: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  pathname: PropTypes.string.isRequired,
+  plugin: PropTypes.string,
+  search: PropTypes.string.isRequired,
+  targetModel: PropTypes.string.isRequired,
+  value: PropTypes.object,
 };
 
 export default SelectOne;

@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/rocketshipmakers",
+      "handler": "Rocketshipmaker.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rocketshipmakers/count",
+      "handler": "Rocketshipmaker.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/rocketshipmakers/:id",
+      "handler": "Rocketshipmaker.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/rocketshipmakers",
+      "handler": "Rocketshipmaker.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/rocketshipmakers/:id",
+      "handler": "Rocketshipmaker.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/rocketshipmakers/:id",
+      "handler": "Rocketshipmaker.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

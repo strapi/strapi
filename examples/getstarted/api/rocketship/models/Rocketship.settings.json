@@ -1,8 +1,8 @@
 {
   "connection": "default",
-  "collectionName": "tags",
+  "collectionName": "rocketships",
   "info": {
-    "name": "tag",
+    "name": "rocketship",
     "description": ""
   },
   "options": {
@@ -14,9 +14,9 @@
     "name": {
       "type": "string"
     },
-    "article": {
-      "model": "article",
-      "via": "tags"
+    "rocketshipmaker": {
+      "model": "rocketshipmaker",
+      "via": "rocketships"
     }
   }
 }
