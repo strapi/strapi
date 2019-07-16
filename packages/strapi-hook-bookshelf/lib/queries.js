@@ -50,11 +50,11 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       };
     }
 
-    const record = await model.forge(params).fetch({
+    const entry = await model.forge(params).fetch({
       withRelated: populate || defaultPopulate,
     });
 
-    return record ? record.toJSON() : null;
+    return entry ? entry.toJSON() : null;
   }
 
   /**

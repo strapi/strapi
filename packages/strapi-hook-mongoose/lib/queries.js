@@ -182,8 +182,6 @@ module.exports = ({ model, modelKey, strapi }) => {
     }
   }
 
-  // public api
-
   function find(params, populate) {
     const populateOpt = populate || defaultPopulate;
 
@@ -205,10 +203,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       };
     }
 
-    return model
-      .findOne(params)
-      .populate(populate || defaultPopulate)
-      .lean();
+    return model.findOne(params).populate(populate || defaultPopulate);
   }
 
   function count(params) {
@@ -312,7 +307,7 @@ module.exports = ({ model, modelKey, strapi }) => {
             ]
           : strapi.models[association.model || association.collection];
 
-        return model.update(search, update, { multi: true });
+        return model.updateMany(search, update);
       })
     );
 
