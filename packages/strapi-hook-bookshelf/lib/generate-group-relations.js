@@ -37,7 +37,9 @@ module.exports = async ({ model, definition, ORM, GLOBALS }) => {
       };
     });
 
-    await ORM.knex.schema.createTableIfNotExists(joinTable, table => {
+    if (await ORM.knex.schema.hasTable(joinTable)) return;
+
+    await ORM.knex.schema.createTable(joinTable, table => {
       table.increments();
       table.string('field').notNullable();
       table
@@ -45,14 +47,8 @@ module.exports = async ({ model, definition, ORM, GLOBALS }) => {
         .unsigned()
         .notNullable();
       table.string('slice_type').notNullable();
-      table
-        .integer('slice_id')
-        .unsigned()
-        .notNullable();
-      table
-        .integer(joinColumn)
-        .unsigned()
-        .notNullable();
+      table.integer('slice_id').notNullable();
+      table.integer(joinColumn).notNullable();
 
       table
         .foreign(joinColumn)

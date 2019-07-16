@@ -8,12 +8,10 @@
 
 const _ = require('lodash');
 
-const sanitizeUser = user => {
-  return _.omit(user.toJSON ? user.toJSON() : user, [
-    'password',
-    'resetPasswordToken',
-  ]);
-};
+const sanitizeUser = user => _.omit(user, ['password', 'resetPasswordToken']);
+const adminError = error => [
+  { messages: [{ id: error.message, field: error.field }] },
+];
 
 module.exports = {
   /**
@@ -87,49 +85,72 @@ module.exports = {
       })
       .get();
 
-    if (advanced.unique_email && ctx.request.body.email) {
+    const { email, username, password, role } = ctx.request.body;
+
+    if (!email) return ctx.badRequest('missing.email');
+    if (!username) return ctx.badRequest('missing.username');
+    if (!password) return ctx.badRequest('missing.password');
+
+    const adminsWithSameUsername = await strapi
+      .query('user', 'users-permissions')
+      .findOne({ username });
+
+    if (adminsWithSameUsername) {
+      return ctx.badRequest(
+        null,
+        ctx.request.admin
+          ? adminError({
+              message: 'Auth.form.error.username.taken',
+              field: ['username'],
+            })
+          : 'username.alreadyTaken.'
+      );
+    }
+
+    if (advanced.unique_email) {
       const user = await strapi
         .query('user', 'users-permissions')
-        .findOne({ email: ctx.request.body.email });
+        .findOne({ email });
 
       if (user) {
         return ctx.badRequest(
           null,
           ctx.request.admin
-            ? [
-                {
-                  messages: [
-                    { id: 'Auth.form.error.email.taken', field: ['email'] },
-                  ],
-                },
-              ]
-            : 'Email is already taken.'
+            ? adminError({
+                message: 'Auth.form.error.email.taken',
+                field: ['email'],
+              })
+            : 'email.alreadyTaken'
         );
       }
     }
 
-    if (!ctx.request.body.role) {
+    const user = {
+      email,
+      username,
+      password,
+      role,
+      provider: 'local',
+    };
+
+    if (!role) {
       const defaultRole = await strapi
         .query('role', 'users-permissions')
         .findOne({ type: advanced.default_role }, []);
 
-      ctx.request.body.role = defaultRole._id || defaultRole.id;
+      user.role = defaultRole.id;
     }
-
-    ctx.request.body.provider = 'local';
 
     try {
       const data = await strapi.plugins['users-permissions'].services.user.add(
-        ctx.request.body
+        user
       );
 
       ctx.created(data);
     } catch (error) {
       ctx.badRequest(
         null,
-        ctx.request.admin
-          ? [{ messages: [{ id: error.message, field: error.field }] }]
-          : error.message
+        ctx.request.admin ? adminError(error) : error.message
       );
     }
   },
@@ -166,13 +187,10 @@ module.exports = {
           return ctx.badRequest(
             null,
             ctx.request.admin
-              ? [
-                  {
-                    messages: [
-                      { id: 'Auth.form.error.email.taken', field: ['email'] },
-                    ],
-                  },
-                ]
+              ? adminError({
+                  message: 'Auth.form.error.email.taken',
+                  field: ['email'],
+                })
               : 'Email is already taken.'
           );
         }
@@ -206,13 +224,10 @@ module.exports = {
           return ctx.badRequest(
             null,
             ctx.request.admin
-              ? [
-                  {
-                    messages: [
-                      { id: 'Auth.form.error.email.taken', field: ['email'] },
-                    ],
-                  },
-                ]
+              ? adminError({
+                  message: 'Auth.form.error.email.taken',
+                  field: ['email'],
+                })
               : 'Email is already taken.'
           );
         }

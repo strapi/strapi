@@ -108,25 +108,21 @@ module.exports = {
    */
 
   async create(ctx) {
-    const values = ctx.request.body;
+    const { email, username, password, blocked } = ctx.request.body;
 
-    if (!values.email) return ctx.badRequest('Missing email');
-    if (!values.username) return ctx.badRequest('Missing username');
-    if (!values.password) return ctx.badRequest('Missing password');
+    if (!email) return ctx.badRequest('missing.email');
+    if (!username) return ctx.badRequest('missing.username');
+    if (!password) return ctx.badRequest('missing.password');
 
     const adminsWithSameEmail = await strapi
       .query('administrator', 'admin')
-      .find({
-        email: values.email,
-      });
+      .findOne({ email });
 
     const adminsWithSameUsername = await strapi
       .query('administrator', 'admin')
-      .find({
-        username: values.username,
-      });
+      .findOne({ username });
 
-    if (adminsWithSameEmail.length > 0) {
+    if (adminsWithSameEmail) {
       return ctx.badRequest(
         null,
         ctx.request.admin
@@ -137,11 +133,11 @@ module.exports = {
                 ],
               },
             ]
-          : 'Email is already taken.'
+          : 'email.alreadyTaken'
       );
     }
 
-    if (adminsWithSameUsername.length > 0) {
+    if (adminsWithSameUsername) {
       return ctx.badRequest(
         null,
         ctx.request.admin
@@ -155,15 +151,15 @@ module.exports = {
                 ],
               },
             ]
-          : 'Username is already taken.'
+          : 'username.alreadyTaken.'
       );
     }
 
     const user = {
-      email: values.email,
-      username: values.username,
-      blocked: values.blocked === true ? true : false,
-      password: await strapi.admin.services.auth.hashPassword(values.password),
+      email: email,
+      username: username,
+      blocked: blocked === true ? true : false,
+      password: await strapi.admin.services.auth.hashPassword(password),
     };
 
     const data = await strapi.query('administrator', 'admin').create(user);
@@ -180,11 +176,11 @@ module.exports = {
 
   async update(ctx) {
     const { id } = ctx.params;
-    const values = ctx.request.body;
+    const { email, username, password, blocked } = ctx.request.body;
 
-    if (!values.email) return ctx.badRequest('Missing email');
-    if (!values.username) return ctx.badRequest('Missing username');
-    if (!values.password) return ctx.badRequest('Missing password');
+    if (!email) return ctx.badRequest('Missing email');
+    if (!username) return ctx.badRequest('Missing username');
+    if (!password) return ctx.badRequest('Missing password');
 
     const admin = await strapi
       .query('administrator', 'admin')
@@ -194,12 +190,10 @@ module.exports = {
     if (!admin) return ctx.notFound('Administrator not found');
 
     // check there are not user with requested email
-    if (values.email !== admin.email) {
+    if (email !== admin.email) {
       const adminsWithSameEmail = await strapi
         .query('administrator', 'admin')
-        .findOne({
-          email: values.email,
-        });
+        .findOne({ email });
 
       if (adminsWithSameEmail && adminsWithSameEmail.id !== admin.id) {
         return ctx.badRequest(
@@ -218,12 +212,10 @@ module.exports = {
     }
 
     // check there are not user with requested username
-    if (values.username !== admin.username) {
+    if (username !== admin.username) {
       const adminsWithSameUsername = await strapi
         .query('administrator', 'admin')
-        .findOne({
-          username: values.username,
-        });
+        .findOne({ username });
 
       if (adminsWithSameUsername && adminsWithSameUsername.id !== admin.id) {
         return ctx.badRequest(
@@ -245,15 +237,13 @@ module.exports = {
     }
 
     const user = {
-      email: values.email,
-      username: values.username,
-      blocked: values.blocked === true ? true : false,
+      email: email,
+      username: username,
+      blocked: blocked === true ? true : false,
     };
 
-    if (values.password !== admin.password) {
-      user.password = await strapi.admin.services.auth.hashPassword(
-        values.password
-      );
+    if (password !== admin.password) {
+      user.password = await strapi.admin.services.auth.hashPassword(password);
     }
 
     const data = await strapi

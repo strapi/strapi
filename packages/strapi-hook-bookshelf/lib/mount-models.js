@@ -114,8 +114,6 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       global[definition.globalName] = {};
     }
 
-    await genGroupRelatons({ model: loadedModel, definition, ORM, GLOBALS });
-
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.
     Object.keys(definition.attributes).forEach(name => {
@@ -709,13 +707,15 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       target[model]._attributes = definition.attributes;
       target[model].updateRelations = relations.update;
 
-      return buildDatabaseSchema({
+      await buildDatabaseSchema({
         ORM,
         definition,
         loadedModel,
         connection,
         model: target[model],
       });
+
+      await genGroupRelatons({ model: loadedModel, definition, ORM, GLOBALS });
     } catch (err) {
       strapi.log.error(`Impossible to register the '${model}' model.`);
       strapi.log.error(err);

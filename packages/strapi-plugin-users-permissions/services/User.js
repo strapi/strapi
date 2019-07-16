@@ -22,19 +22,6 @@ module.exports = {
       ].services.user.hashPassword(values);
     }
 
-    // Use Content Manager business logic to handle relation.
-    if (strapi.plugins['content-manager']) {
-      return await strapi.plugins['content-manager'].services[
-        'contentmanager'
-      ].add(
-        {
-          model: 'user',
-        },
-        values,
-        'users-permissions'
-      );
-    }
-
     return strapi.query('user', 'users-permissions').create(values);
   },
 
