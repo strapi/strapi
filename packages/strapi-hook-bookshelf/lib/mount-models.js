@@ -643,12 +643,31 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             },
           ];
 
-          const jsonFormatter = attributes => {
+          const formatter = attributes => {
             Object.keys(attributes).map(key => {
               const attr = definition.attributes[key] || {};
 
               if (attr.type === 'json') {
                 attributes[key] = JSON.parse(attributes[key]);
+              }
+
+              if (attr.type === 'boolean') {
+                if (typeof attributes[key] === 'boolean') {
+                  return;
+                }
+
+                const strVal =
+                  attributes[key] !== null
+                    ? attributes[key].toString()
+                    : attributes[key];
+
+                if (strVal === '1') {
+                  attributes[key] = true;
+                } else if (strVal === '0') {
+                  attributes[key] = false;
+                } else {
+                  attributes[key] = null;
+                }
               }
             });
           };
@@ -659,10 +678,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             if (event.name.indexOf('collection') !== -1) {
               fn = instance =>
                 instance.models.map(entry => {
-                  jsonFormatter(entry.attributes);
+                  formatter(entry.attributes);
                 });
             } else {
-              fn = instance => jsonFormatter(instance.attributes);
+              fn = instance => formatter(instance.attributes);
             }
 
             this.on(event.name, instance => {

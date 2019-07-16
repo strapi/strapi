@@ -6,8 +6,6 @@
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
 
-// Public dependencies.
-const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
 module.exports = {
@@ -39,19 +37,7 @@ module.exports = {
       ].services.user.hashPassword(values);
     }
 
-    // Use Content Manager business logic to handle relation.
-    if (strapi.plugins['content-manager']) {
-      params.model = 'user';
-      params.id = params._id || params.id;
-
-      return await strapi.plugins['content-manager'].services[
-        'contentmanager'
-      ].edit(params, values, 'users-permissions');
-    }
-
-    return strapi
-      .query('user', 'users-permissions')
-      .update(_.assign(params, values));
+    return strapi.query('user', 'users-permissions').update(params, values);
   },
 
   /**
@@ -59,9 +45,7 @@ module.exports = {
    * @return {Promise}
    */
   fetch(params) {
-    return strapi
-      .query('user', 'users-permissions')
-      .findOne(_.pick(params, ['_id', 'id']));
+    return strapi.query('user', 'users-permissions').findOne(params);
   },
 
   /**
