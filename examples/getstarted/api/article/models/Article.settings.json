@@ -72,10 +72,6 @@
       "repeatable": true,
       "min": 1,
       "max": 10
-    },
-    "tags": {
-      "collection": "tag",
-      "via": "articles"
     }
   }
 }
