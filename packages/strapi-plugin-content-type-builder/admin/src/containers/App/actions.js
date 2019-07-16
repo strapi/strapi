@@ -209,11 +209,13 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
 
   const initialDataGroup = data.reduce((acc, current) => {
     const {
-      schema: { attributes },
+      schema: { attributes, name },
+      uid,
     } = current;
 
     const group = {
       ...current,
+      name: name || uid,
       isTemporary: false,
     };
     set(group, ['schema', 'attributes'], buildGroupAttributes(attributes));
@@ -224,8 +226,7 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
 
   const groups = data.reduce((acc, current) => {
     const {
-      name,
-      schema: { attributes, description },
+      schema: { attributes, description, name },
       source,
       uid,
     } = current;
@@ -235,7 +236,7 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
       fields: Object.keys(attributes).length,
       icon: 'fa-cube',
       isTemporary: false,
-      name,
+      name: name || uid,
       source,
       uid,
     });

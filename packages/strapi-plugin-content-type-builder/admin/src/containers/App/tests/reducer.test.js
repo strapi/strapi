@@ -748,7 +748,7 @@ describe('appReducer', () => {
     const initialDataGroup = {
       tests: {
         uid: 'tests',
-        name: 'Tests',
+        name: 'tests',
         source: null,
         schema: {
           connection: 'default',
@@ -775,7 +775,7 @@ describe('appReducer', () => {
       data: [
         {
           uid: 'tests',
-          name: 'Tests',
+          name: 'tests',
           source: null,
           schema: {
             connection: 'default',
@@ -812,7 +812,7 @@ describe('appReducer', () => {
               fields: 2,
               icon: 'fa-cube',
               isTemporary: false,
-              name: 'Tests',
+              name: 'tests',
               source: null,
               uid: 'tests',
             },

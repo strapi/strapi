@@ -31,7 +31,6 @@ import {
   clearTemporaryAttributeGroup,
   deleteGroupAttribute,
   onChangeAttributeGroup,
-  submitGroup,
   submitTempGroup,
   resetEditTempGroup,
 } from '../App/actions';
@@ -120,7 +119,6 @@ export class GroupPage extends React.Component {
       modifiedDataGroup,
       newGroup,
       resetEditTempGroup,
-      submitGroup,
       submitTempGroup,
     } = this.props;
     /* istanbul ignore if */
@@ -131,18 +129,7 @@ export class GroupPage extends React.Component {
           initialDataGroup[this.getFeatureName()]
         );
 
-    const handleSubmit = this.isUpdatingTempFeature()
-      ? () => submitTempGroup(newGroup, this.context)
-      : () =>
-          submitGroup(
-            this.getFeatureName(),
-            get(modifiedDataGroup, this.getFeatureName()),
-            Object.assign(this.context, {
-              history: this.props.history,
-            }),
-            this.getSource()
-          );
-
+    const handleSubmit = () => submitTempGroup(newGroup, this.context);
     const handleCancel = resetEditTempGroup;
 
     /* istanbul ignore if */

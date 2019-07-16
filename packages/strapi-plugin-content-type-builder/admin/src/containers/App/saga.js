@@ -29,7 +29,7 @@ export function* getData() {
     const [data, { connections }, groups] = yield all([
       call(request, getRequestUrl('models'), { method: 'GET' }),
       call(request, getRequestUrl('connections'), { method: 'GET' }),
-      call(request, getRequestUrl('fixtures/groups'), { method: 'GET' }),
+      call(request, getRequestUrl('groups'), { method: 'GET' }),
     ]);
 
     yield put(getDataSucceeded(data, connections, groups));

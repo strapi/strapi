@@ -391,7 +391,7 @@ function appReducer(state = initialState, action) {
         )
         .update('groups', () =>
           List(fromJS(action.groups)).sortBy(group =>
-            group.get('name').toLowerCase()
+            group.get('uid').toLowerCase()
           )
         );
     case ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS:
