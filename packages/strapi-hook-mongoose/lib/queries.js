@@ -266,7 +266,14 @@ module.exports = ({ model, modelKey, strapi }) => {
     return model.updateRelations(Object.assign(params, { values: relations }));
   }
 
-  async function deleteMany(params) {}
+  async function deleteMany(params) {
+    const primaryKey = getPK(params);
+
+    if (primaryKey) return deleteOne(params);
+
+    const entries = await find(params);
+    return await Promise.all(entries.map(entry => deleteOne({ id: entry.id })));
+  }
 
   async function deleteOne(params) {
     const entry = await model
