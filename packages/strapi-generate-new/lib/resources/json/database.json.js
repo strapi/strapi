@@ -1,5 +1,4 @@
 'use strict';
-const { merge } = require('lodash');
 
 module.exports = ({ connection, env }) => {
   // Production/Staging Template
@@ -26,10 +25,11 @@ module.exports = ({ connection, env }) => {
     return {
       defaultConnection: 'default',
       connections: {
-        default: merge({
+        default: {
+          connector: connection.connector,
           settings: settingsBase,
           options: optionsBase,
-        }),
+        },
       },
     };
   }
