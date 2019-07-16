@@ -352,10 +352,11 @@ function EditView({
                           });
                         }}
                         layout={get(groupLayoutsData, group.group, {})}
-                        removeField={keys => {
+                        removeField={(keys, shouldAddEmptyField) => {
                           dispatch({
                             type: 'ON_REMOVE_FIELD',
                             keys: keys.split('.'),
+                            shouldAddEmptyField,
                           });
                         }}
                       />

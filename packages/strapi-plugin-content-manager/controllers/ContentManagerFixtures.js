@@ -201,6 +201,7 @@ module.exports = {
 
             articles: {
               type: 'relation',
+              targetModel: 'article',
               relationType: 'manyToMany',
             },
           },
@@ -305,6 +306,7 @@ module.exports = {
             },
             tags: {
               type: 'relation',
+              targetModel: 'tag',
               relationType: 'manyToMany',
             },
             pics: {
@@ -520,6 +522,8 @@ module.exports = {
             },
             role: {
               type: 'relation',
+              targetModel: 'role',
+              plugin: 'users-permissions',
               relationType: 'manyToOne',
             },
           },

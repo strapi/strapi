@@ -10,6 +10,13 @@ const initialState = fromJS({
   defaultGroupValues: {},
 });
 
+const getMax = arr => {
+  if (arr.size === 0) {
+    return -1;
+  }
+  return Math.max.apply(Math, arr.toJS().map(o => o._temp__id));
+};
+
 function reducer(state, action) {
   switch (action.type) {
     case 'ADD_FIELD_TO_GROUP':
@@ -21,12 +28,7 @@ function reducer(state, action) {
         ]);
 
         if (list) {
-          const max = Math.max.apply(
-            Math,
-            list.toJS().map(function(o) {
-              return o._temp__id;
-            })
-          );
+          const max = getMax(list);
 
           return list.push(
             fromJS(
@@ -81,7 +83,22 @@ function reducer(state, action) {
         () => action.value
       );
     case 'ON_REMOVE_FIELD':
-      return state.removeIn(['modifiedData', ...action.keys]);
+      return state
+        .removeIn(['modifiedData', ...action.keys])
+        .updateIn(['modifiedData', action.keys[0]], list => {
+          if (action.shouldAddEmptyField) {
+            const defaultAttribute = state.getIn([
+              'defaultGroupValues',
+              action.keys[0],
+              'defaultRepeatable',
+            ]);
+            const max = getMax(list);
+
+            return list.push(defaultAttribute.set('_temp__id', max + 1));
+          }
+
+          return list;
+        });
     case 'RESET_FORM':
       return state.update('modifiedData', () => state.get('initialData'));
     case 'SET_COLLAPSES_COMPONENTS_STATE':

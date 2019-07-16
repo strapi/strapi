@@ -36,7 +36,16 @@ function reducer(state, action) {
         });
       });
     case 'REMOVE_COLLAPSE':
-      return state.removeIn(['collapses', action.index]);
+      return state
+        .removeIn(['collapses', action.index])
+        .update('collapses', list => list.map(obj => obj.set('isOpen', false)))
+        .update('collapses', list => {
+          if (action.shouldAddEmptyField) {
+            return list.push(fromJS({ isOpen: true }));
+          }
+
+          return list;
+        });
     default:
       return state;
   }
@@ -61,7 +70,7 @@ function Group({
   isRepeatable,
   label,
   layout,
-  // min,
+  min,
   max,
   modifiedData,
   moveGroupField,
@@ -177,11 +186,20 @@ function Group({
                       removeField={e => {
                         e.stopPropagation();
 
+                        if (groupValue.length - 1 < min) {
+                          strapi.notification.info(
+                            'A empty field has been added to match the requirements'
+                          );
+                        }
+
+                        const shouldAddEmptyField = groupValue.length - 1 < min;
+
                         dispatch({
                           type: 'REMOVE_COLLAPSE',
                           index,
+                          shouldAddEmptyField,
                         });
-                        removeField(`${name}.${index}`);
+                        removeField(`${name}.${index}`, shouldAddEmptyField);
                       }}
                     />
                   </div>
@@ -224,6 +242,7 @@ Group.defaultProps = {
   label: '',
   layout: {},
   max: Infinity,
+  min: -Infinity,
   modifiedData: {},
   onChange: () => {},
 };
@@ -235,6 +254,7 @@ Group.propTypes = {
   label: PropTypes.string,
   layout: PropTypes.object,
   max: PropTypes.number,
+  min: PropTypes.number,
   modifiedData: PropTypes.object,
   moveGroupField: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
