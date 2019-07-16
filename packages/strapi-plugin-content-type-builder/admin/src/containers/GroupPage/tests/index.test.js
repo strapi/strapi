@@ -121,6 +121,8 @@ const props = {
     },
   },
   onChangeAttributeGroup: jest.fn(),
+  resetEditTempGroup: jest.fn(),
+  submitTempGroup: jest.fn(),
   temporaryAttributeGroup: {},
 };
 

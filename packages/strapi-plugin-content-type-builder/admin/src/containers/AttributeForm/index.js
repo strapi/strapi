@@ -243,7 +243,7 @@ class AttributeForm extends React.Component {
         <HeaderModal>
           <section>
             <HeaderModalTitle>
-              <img src={this.getIcon()} alt="ct" />
+              <img src={this.getIcon()} alt="feature" />
               <span>{titleContent}</span>
             </HeaderModalTitle>
           </section>

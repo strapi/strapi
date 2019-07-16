@@ -38,6 +38,7 @@ import {
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_TEMP_CONTENT_TYPE,
+  RESET_EDIT_TEMP_GROUP,
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
   SAVE_EDITED_ATTRIBUTE_RELATION,
@@ -47,6 +48,8 @@ import {
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
+  SUBMIT_TEMP_GROUP,
+  SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
 } from './constants';
@@ -367,6 +370,12 @@ export function resetEditTempContentType() {
   };
 }
 
+export function resetEditTempGroup() {
+  return {
+    type: RESET_EDIT_TEMP_GROUP,
+  };
+}
+
 export function resetProps() {
   return {
     type: RESET_PROPS,
@@ -465,6 +474,24 @@ export function submitTempContentTypeSucceeded() {
   };
 }
 
+export function submitTempGroup(data, context) {
+  const attributes = formatGroupAttributes(data.schema.attributes);
+  const body = Object.assign(cloneDeep(data), { attributes });
+
+  return {
+    type: SUBMIT_TEMP_GROUP,
+    body,
+    context,
+  };
+}
+
+export function submitTempGroupSucceeded() {
+  return {
+    type: SUBMIT_TEMP_GROUP_SUCCEEDED,
+  };
+}
+
+submitTempGroupSucceeded;
 export function updateTempContentType() {
   return {
     type: UPDATE_TEMP_CONTENT_TYPE,

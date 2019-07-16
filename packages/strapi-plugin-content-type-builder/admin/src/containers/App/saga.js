@@ -10,6 +10,7 @@ import {
   deleteModelSucceeded,
   submitContentTypeSucceeded,
   submitTempContentTypeSucceeded,
+  submitTempGroupSucceeded,
   deleteGroupSucceeded,
 } from './actions';
 import {
@@ -18,6 +19,7 @@ import {
   DELETE_MODEL,
   SUBMIT_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE,
+  SUBMIT_TEMP_GROUP,
 } from './constants';
 
 const getRequestUrl = path => `/${pluginId}/${path}`;
@@ -177,6 +179,27 @@ export function* submitTempCT({
   }
 }
 
+/* istanbul ignore-next */
+export function* submitTempGroup({ body, context: { emitEvent } }) {
+  try {
+    emitEvent('willSaveGroup');
+
+    const opts = { method: 'POST', body };
+
+    yield call(request, getRequestUrl('groups'), opts, true);
+
+    emitEvent('didSaveGroup');
+    yield put(submitTempGroupSucceeded());
+  } catch (error) {
+    const errorMessage = get(
+      error,
+      ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+      'notification.error'
+    );
+    strapi.notification.error(errorMessage);
+  }
+}
+
 // Individual exports for testing
 export default function* defaultSaga() {
   try {
@@ -186,6 +209,7 @@ export default function* defaultSaga() {
       fork(takeLatest, DELETE_MODEL, deleteModel),
       fork(takeLatest, SUBMIT_CONTENT_TYPE, submitCT),
       fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
+      fork(takeLatest, SUBMIT_TEMP_GROUP, submitTempGroup),
     ]);
   } catch (err) {
     strapi.notification.error('notification.error');

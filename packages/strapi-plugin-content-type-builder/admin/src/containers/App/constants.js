@@ -63,6 +63,8 @@ export const RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS =
   'ContentTypeBuilder/App/RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS';
 export const RESET_EDIT_TEMP_CONTENT_TYPE =
   'ContentTypeBuilder/App/RESET_EDIT_TEMP_CONTENT_TYPE';
+export const RESET_EDIT_TEMP_GROUP =
+  'ContentTypeBuilder/App/RESET_EDIT_TEMP_GROUP';
 export const RESET_PROPS = 'ContentTypeBuilder/App/RESET_PROPS';
 export const SAVE_EDITED_ATTRIBUTE =
   'ContentTypeBuilder/App/SAVE_EDITED_ATTRIBUTE';
@@ -79,5 +81,8 @@ export const SUBMIT_TEMP_CONTENT_TYPE =
   'ContentTypeBuilder/App/SUBMIT_TEMP_CONTENT_TYPE';
 export const SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED =
   'ContentTypeBuilder/App/SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED';
+export const SUBMIT_TEMP_GROUP = 'ContentTypeBuilder/App/SUBMIT_TEMP_GROUP';
+export const SUBMIT_TEMP_GROUP_SUCCEEDED =
+  'ContentTypeBuilder/App/SUBMIT_TEMP_GROUP_SUCCEEDED';
 export const UPDATE_TEMP_CONTENT_TYPE =
   'ContentTypeBuilder/App/UPDATE_TEMP_CONTENT_TYPE';

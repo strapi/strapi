@@ -31,6 +31,9 @@ import {
   clearTemporaryAttributeGroup,
   deleteGroupAttribute,
   onChangeAttributeGroup,
+  submitGroup,
+  submitTempGroup,
+  resetEditTempGroup,
 } from '../App/actions';
 
 /* eslint-disable no-extra-boolean-cast */
@@ -112,7 +115,14 @@ export class GroupPage extends React.Component {
   getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
 
   getPluginHeaderActions = () => {
-    const { initialDataGroup, modifiedDataGroup } = this.props;
+    const {
+      initialDataGroup,
+      modifiedDataGroup,
+      newGroup,
+      resetEditTempGroup,
+      submitGroup,
+      submitTempGroup,
+    } = this.props;
     /* istanbul ignore if */
     const shouldShowActions = this.isUpdatingTempFeature()
       ? this.getFeatureAttributesLength() > 0
@@ -121,18 +131,32 @@ export class GroupPage extends React.Component {
           initialDataGroup[this.getFeatureName()]
         );
 
+    const handleSubmit = this.isUpdatingTempFeature()
+      ? () => submitTempGroup(newGroup, this.context)
+      : () =>
+          submitGroup(
+            this.getFeatureName(),
+            get(modifiedDataGroup, this.getFeatureName()),
+            Object.assign(this.context, {
+              history: this.props.history,
+            }),
+            this.getSource()
+          );
+
+    const handleCancel = resetEditTempGroup;
+
     /* istanbul ignore if */
     if (shouldShowActions) {
       return [
         {
           label: `${pluginId}.form.button.cancel`,
-          onClick: () => {},
+          onClick: handleCancel,
           kind: 'secondary',
           type: 'button',
         },
         {
           label: `${pluginId}.form.button.save`,
-          onClick: () => {},
+          onClick: handleSubmit,
           kind: 'primary',
           type: 'submit',
           id: 'saveData',
@@ -151,6 +175,12 @@ export class GroupPage extends React.Component {
     } = this.props;
 
     return search;
+  };
+
+  getSource = () => {
+    const source = getQueryParameters(this.getFeatureName(), 'source');
+
+    return !!source ? source : null;
   };
 
   handleClickOnTrashIcon = attrToDelete => {
@@ -291,9 +321,9 @@ export class GroupPage extends React.Component {
             <EmptyAttributesBlock
               description={`${pluginId}.home.emptyAttributes.description.${this.featureType}`}
               id="openAddAttr"
-              label="content-type-builder.button.attributes.add"
+              label={`${pluginId}.button.attributes.add`}
+              title={`${pluginId}.home.emptyAttributes.title`}
               onClick={this.openAttributesModal}
-              title="content-type-builder.home.emptyAttributes.title"
             />
           ) : (
             <ListWrapper>
@@ -329,6 +359,7 @@ export class GroupPage extends React.Component {
         </ViewContainer>
 
         <AttributesModalPicker
+          featureType={this.featureType}
           isOpen={this.getModalType() === 'chooseAttributes'}
           push={push}
         />
@@ -393,6 +424,8 @@ GroupPage.propTypes = {
   modifiedDataGroup: PropTypes.object.isRequired,
   newGroup: PropTypes.object.isRequired,
   onChangeAttributeGroup: PropTypes.func.isRequired,
+  resetEditTempGroup: PropTypes.func.isRequired,
+  submitTempGroup: PropTypes.func.isRequired,
   temporaryAttributeGroup: PropTypes.object.isRequired,
 };
 
@@ -404,6 +437,8 @@ export function mapDispatchToProps(dispatch) {
       clearTemporaryAttributeGroup,
       deleteGroupAttribute,
       onChangeAttributeGroup,
+      submitTempGroup,
+      resetEditTempGroup,
     },
     dispatch
   );

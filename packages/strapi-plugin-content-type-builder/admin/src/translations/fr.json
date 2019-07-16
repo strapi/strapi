@@ -155,7 +155,9 @@
   "popUpForm.attributes.text.name": "Texte",
   "popUpForm.choose.attributes.header.title": "Ajouter un Nouveau Champ",
   "popUpForm.choose.attributes.header.subtitle": "Selectionner un champ pour ce type de contenu",
-  "popUpForm.create": "Ajouter un Nouveau",
+  "popUpForm.choose.attributes.header.subtitle.model": "Selectionner un champ pour ce type de contenu",
+  "popUpForm.choose.attributes.header.subtitle.group": "Selectionner un champ pour ce groupe",
+  "popUpForm.create": "Ajouter un nouveau champ",
   "popUpForm.create.contentType.header.title": "Ajouter un Nouveau Type de Contenu",
   "popUpForm.create.model.header.title": "Créer un Type de Contenu",
   "popUpForm.create.group.header.title": "Créer un Groupe",
@@ -189,5 +191,7 @@
   "table.group.title.singular": "{number} Groupe est disponible",
   "table.attributes.title.plural": "{number} champs",
   "table.attributes.title.singular": "{number} champ",
+  "table.relations.title.plural": "dont {number} relations",
+  "table.relations.title.singular": "dont {number} relation",
   "prompt.content.unsaved": "Etes-vous sûr de vouloir quitter ce model? Toutes vos modifications seront perdues."
 }

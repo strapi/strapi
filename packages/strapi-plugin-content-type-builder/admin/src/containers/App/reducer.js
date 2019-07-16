@@ -36,6 +36,7 @@ import {
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EDIT_TEMP_CONTENT_TYPE,
+  RESET_EDIT_TEMP_GROUP,
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
   SAVE_EDITED_ATTRIBUTE_RELATION,
@@ -43,6 +44,7 @@ import {
   SET_TEMPORARY_ATTRIBUTE_RELATION,
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
+  SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
   ON_CHANGE_RELATION_NATURE,
 } from './constants';
@@ -477,6 +479,10 @@ function appReducer(state = initialState, action) {
         );
     case RESET_EDIT_TEMP_CONTENT_TYPE:
       return state.updateIn(['newContentType', 'attributes'], () => Map({}));
+    case RESET_EDIT_TEMP_GROUP:
+      return state.updateIn(['newGroup', 'schema', 'attributes'], () =>
+        List([])
+      );
     case RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS:
       return state.updateIn(['modifiedData', action.contentTypeName], () => {
         const initialContentType = state
@@ -685,6 +691,12 @@ function appReducer(state = initialState, action) {
         .update('newContentTypeClone', () =>
           Map(initialState.get('newContentType'))
         )
+        .update('shouldRefetchData', v => !v);
+    case SUBMIT_TEMP_GROUP_SUCCEEDED:
+      return state
+        .update('isLoading', () => true)
+        .update('newGroup', () => Map(initialState.get('newGroup')))
+        .update('newGroupClone', () => Map(initialState.get('newGroup')))
         .update('shouldRefetchData', v => !v);
     case UPDATE_TEMP_CONTENT_TYPE:
       return state
