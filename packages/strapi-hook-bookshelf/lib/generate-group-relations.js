@@ -2,7 +2,7 @@
 
 const pluralize = require('pluralize');
 
-module.exports = async ({ model, definition, ORM, GLOBALS }) => {
+const createGroupModels = async ({ model, definition, ORM, GLOBALS }) => {
   const { collectionName, primaryKey } = definition;
 
   const groupAttributes = Object.keys(definition.attributes).filter(
@@ -36,6 +36,19 @@ module.exports = async ({ model, definition, ORM, GLOBALS }) => {
         });
       };
     });
+  }
+};
+
+const createGroupJoinTables = async ({ definition, ORM }) => {
+  const { collectionName, primaryKey } = definition;
+
+  const groupAttributes = Object.keys(definition.attributes).filter(
+    key => definition.attributes[key].type === 'group'
+  );
+
+  if (groupAttributes.length > 0) {
+    const joinTable = `${collectionName}_groups`;
+    const joinColumn = `${pluralize.singular(collectionName)}_${primaryKey}`;
 
     if (await ORM.knex.schema.hasTable(joinTable)) return;
 
@@ -57,4 +70,9 @@ module.exports = async ({ model, definition, ORM, GLOBALS }) => {
         .onDelete('CASCADE');
     });
   }
+};
+
+module.exports = {
+  createGroupModels,
+  createGroupJoinTables,
 };

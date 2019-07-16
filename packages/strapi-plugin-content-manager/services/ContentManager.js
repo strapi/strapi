@@ -120,50 +120,16 @@ module.exports = {
     const { source } = query;
     const { model } = params;
 
-    const primaryKey = strapi.query(model, source).primaryKey;
-    const toRemove = Object.keys(query).reduce((acc, curr) => {
-      if (curr !== 'source') {
-        return acc.concat([query[curr]]);
-      }
+    const { primaryKey } = strapi.query(model, source);
+    const toRemove = Object.values(_.omit(query, 'source'));
 
-      return acc;
-    }, []);
+    // do not allow deleting more than 100 items at once
+    const filter = { [`${primaryKey}_in`]: toRemove, _limit: 100 };
+    const entries = await strapi.query(model, source).find(filter, []);
 
-    const filter = { [`${primaryKey}_in`]: toRemove };
-    const entries = await strapi.query(model, source).find(filter, null, true);
-    const associations = strapi.query(model, source).associations;
-
-    for (let i = 0; i < entries.length; ++i) {
-      const entry = entries[i];
-
-      associations.forEach(association => {
-        if (entry[association.alias]) {
-          switch (association.nature) {
-            case 'oneWay':
-            case 'oneToOne':
-            case 'manyToOne':
-            case 'oneToManyMorph':
-              entry[association.alias] = null;
-              break;
-            case 'oneToMany':
-            case 'manyToMany':
-            case 'manyToManyMorph':
-              entry[association.alias] = [];
-              break;
-            default:
-          }
-        }
-      });
-
-      await strapi.query(model, source).update({
-        [primaryKey]: entry[primaryKey],
-        values: _.pick(entry, associations.map(a => a.alias)),
-      });
-    }
-
-    return strapi.query(model, source).deleteMany({
-      [primaryKey]: toRemove,
-    });
+    return Promise.all(
+      entries.map(entry => strapi.query(model, source).delete({ id: entry.id }))
+    );
   },
 
   search(params, query) {

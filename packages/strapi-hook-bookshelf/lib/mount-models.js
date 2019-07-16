@@ -5,7 +5,10 @@ const { singular } = require('pluralize');
 const utilsModels = require('strapi-utils').models;
 const relations = require('./relations');
 const buildDatabaseSchema = require('./buildDatabaseSchema');
-const genGroupRelatons = require('./generate-group-relations');
+const {
+  createGroupJoinTables,
+  createGroupModels,
+} = require('./generate-group-relations');
 
 const PIVOT_PREFIX = '_pivot_';
 
@@ -113,6 +116,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     if (!plugin) {
       global[definition.globalName] = {};
     }
+
+    await createGroupModels({ model: loadedModel, definition, ORM, GLOBALS });
 
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.
@@ -734,7 +739,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         model: target[model],
       });
 
-      await genGroupRelatons({ model: loadedModel, definition, ORM, GLOBALS });
+      await createGroupJoinTables({ definition, ORM });
     } catch (err) {
       strapi.log.error(`Impossible to register the '${model}' model.`);
       strapi.log.error(err);
