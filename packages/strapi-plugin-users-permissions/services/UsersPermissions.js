@@ -11,12 +11,6 @@ const request = require('request');
 
 module.exports = {
   async createRole(params) {
-    if (!strapi.plugins['content-manager']) {
-      return new Error(
-        'This feature requires to install the Content Manager plugin'
-      );
-    }
-
     if (!params.type) {
       params.type = _.snakeCase(_.deburr(_.toLower(params.name)));
     }
@@ -25,7 +19,7 @@ module.exports = {
       .query('role', 'users-permissions')
       .create(_.omit(params, ['users', 'permissions']));
 
-    const arrayOfPromises = Object.keys(params.permissions).reduce(
+    const arrayOfPromises = Object.keys(params.permissions || {}).reduce(
       (acc, type) => {
         Object.keys(params.permissions[type].controllers).forEach(
           controller => {
@@ -51,18 +45,15 @@ module.exports = {
     );
 
     // Use Content Manager business logic to handle relation.
-    arrayOfPromises.push(
-      strapi.plugins['content-manager'].services['contentmanager'].edit(
-        {
-          id: role._id || role.id,
-          model: 'role',
-        },
-        {
-          users: params.users,
-        },
-        'users-permissions'
-      )
-    );
+    if (params.users && params.users.length > 0)
+      arrayOfPromises.push(
+        strapi.query('role', 'users-permissions').update(
+          {
+            id: role.id,
+          },
+          { users: params.users }
+        )
+      );
 
     return await Promise.all(arrayOfPromises);
   },
@@ -512,8 +503,12 @@ module.exports = {
         .findOne({ type: 'authenticated' }, []),
     ]);
 
-    const arrayOfPromises = Object.keys(body.permissions).reduce(
-      (acc, type) => {
+    await strapi
+      .query('role', 'users-permissions')
+      .update({ id: roleID }, _.pick(body, ['name', 'description']));
+
+    await Promise.all(
+      Object.keys(body.permissions).reduce((acc, type) => {
         Object.keys(body.permissions[type].controllers).forEach(controller => {
           Object.keys(body.permissions[type].controllers[controller]).forEach(
             action => {
@@ -543,49 +538,23 @@ module.exports = {
         });
 
         return acc;
-      },
-      []
+      }, [])
     );
-
-    arrayOfPromises.push(
-      strapi
-        .query('role', 'users-permissions')
-        .update({ id: roleID }, _.pick(body, ['name', 'description']))
-    );
-
-    // stringify mongoDB _id for add/remove matching
-    if (role._id) {
-      role.users.reduce((acc, user) => {
-        const key = role._id ? '_id' : 'id';
-        user[key] = user[key].toString();
-        acc.push(user);
-        return acc;
-      }, []);
-    }
 
     // Add user to this role.
-    _.differenceBy(body.users, role.users, role._id ? '_id' : 'id').forEach(
-      user => {
-        arrayOfPromises.push(this.updateUserRole(user, roleID));
-      }
-    );
+    const newUsers = _.differenceBy(body.users, role.users, 'id');
+    await Promise.all(newUsers.map(user => this.updateUserRole(user, roleID)));
 
-    // Remove user to this role and link him to authenticated.
-    _.differenceBy(role.users, body.users, role._id ? '_id' : 'id').forEach(
-      user => {
-        arrayOfPromises.push(
-          this.updateUserRole(user, authenticated._id || authenticated.id)
-        );
-      }
+    const oldUsers = _.differenceBy(role.users, body.users, 'id');
+    await Promise.all(
+      oldUsers.map(user => this.updateUserRole(user, authenticated.id))
     );
-
-    return Promise.all(arrayOfPromises);
   },
 
   async updateUserRole(user, role) {
     return strapi
       .query('user', 'users-permissions')
-      .update({ id: user._id || user.id }, { role: role.toString() });
+      .update({ id: user.id }, { role });
   },
 
   template(layout, data) {

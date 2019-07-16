@@ -197,16 +197,10 @@ module.exports = {
         'users-permissions'
       ].services.user.hashPassword(params);
 
-      // Remove relations data to update user password.
-      const data = _.omit(
-        user,
-        strapi.plugins['users-permissions'].models.user.associations.map(
-          ast => ast.alias
-        )
-      );
-
       // Update the user.
-      await strapi.query('user', 'users-permissions').update(data);
+      await strapi
+        .query('user', 'users-permissions')
+        .update({ id: user.id }, user);
 
       ctx.send({
         jwt: strapi.plugins['users-permissions'].services.jwt.issue(
@@ -337,16 +331,10 @@ module.exports = {
       return ctx.badRequest(null, err);
     }
 
-    // Remove relations data to update user code.
-    const data = _.omit(
-      user,
-      strapi.plugins['users-permissions'].models.user.associations.map(
-        ast => ast.alias
-      )
-    );
-
     // Update the user.
-    await strapi.query('user', 'users-permissions').update(data);
+    await strapi
+      .query('user', 'users-permissions')
+      .update({ id: user.id }, user);
 
     ctx.send({ ok: true });
   },

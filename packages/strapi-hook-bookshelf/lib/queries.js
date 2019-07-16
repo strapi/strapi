@@ -109,14 +109,24 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const data = selectAttributes(values);
 
     const runUpdate = async trx => {
-      const entry = await model.forge(params).save(data, { transacting: trx });
-      await updateGroups(entry, values, { transacting: trx });
+      const updatedEntry =
+        Object.keys(data).length > 0
+          ? await model.forge(params).save(data, { transacting: trx })
+          : entry;
+      await updateGroups(updatedEntry, values, { transacting: trx });
+      return updatedEntry;
     };
 
     const db = strapi.connections[model.connection];
     await db.transaction(trx => runUpdate(trx));
 
-    return model.updateRelations(Object.assign(params, { values: relations }));
+    if (Object.keys(relations).length > 0) {
+      return model.updateRelations(
+        Object.assign(params, { values: relations })
+      );
+    }
+
+    return await model.forge(params).fetch();
   }
 
   async function deleteOne(params) {
