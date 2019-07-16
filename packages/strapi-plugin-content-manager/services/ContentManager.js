@@ -115,21 +115,14 @@ module.exports = {
     return strapi.query(params.model, source).delete({ id: params.id });
   },
 
-  //TODO: implement multi delete => might just be a loop
-  async deleteMany(params, query) {
+  deleteMany(params, query) {
     const { source } = query;
     const { model } = params;
 
-    const { primaryKey } = strapi.query(model, source);
     const toRemove = Object.values(_.omit(query, 'source'));
+    const filter = { [`id_in`]: toRemove, _limit: 100 };
 
-    // do not allow deleting more than 100 items at once
-    const filter = { [`${primaryKey}_in`]: toRemove, _limit: 100 };
-    const entries = await strapi.query(model, source).find(filter, []);
-
-    return Promise.all(
-      entries.map(entry => strapi.query(model, source).delete({ id: entry.id }))
-    );
+    return strapi.query(model, source).delete(filter);
   },
 
   search(params, query) {

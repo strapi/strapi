@@ -246,7 +246,6 @@ module.exports = {
       'users-permissions'
     ].services.user.removeAll(ctx.params, ctx.request.query);
 
-    // Send 200 `ok`
     ctx.send(data);
   },
 };

@@ -119,7 +119,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     return model.updateRelations(Object.assign(params, { values: relations }));
   }
 
-  async function deleteEntry(params) {
+  async function deleteOne(params) {
     const entry = await model.forge(params).fetch();
 
     if (!entry) {
@@ -156,6 +156,15 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     const db = strapi.connections[model.connection];
     return db.transaction(trx => runDelete(trx));
+  }
+
+  async function deleteMany(params) {
+    const primaryKey = params[model.primaryKey] || params.id;
+
+    if (primaryKey) return deleteOne(params);
+
+    const entries = await find(params);
+    return await Promise.all(entries.map(entry => deleteOne({ id: entry.id })));
   }
 
   function search(params, populate) {
@@ -425,7 +434,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     find,
     create,
     update,
-    delete: deleteEntry,
+    delete: deleteMany,
     count,
     search,
     countSearch,

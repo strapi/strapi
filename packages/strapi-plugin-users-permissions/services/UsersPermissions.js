@@ -465,9 +465,12 @@ module.exports = {
       }
     );
 
-    return strapi.query('permission', 'users-permissions').deleteMany({
-      [primaryKey]: value.toRemove,
-    });
+    if (value.toRemove.length > 0) {
+      return strapi.query('permission', 'users-permissions').delete({
+        ['id_in']: value.toRemove,
+      });
+    }
+    return Promise.resolve();
   },
 
   async initialize(cb) {
