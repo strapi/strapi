@@ -159,17 +159,37 @@ const getProfile = async (provider, query, callback) => {
       break;
     }
     case 'google': {
-      const google = new Purest({
-        provider: 'google'
-      });
+      const config = {
+        "google": {
+          "https://www.googleapis.com": {
+            "__domain": {
+              "auth": {
+                "auth": {"bearer": "[0]"}
+              }
+            },
+            "{endpoint}": {
+              "__path": {
+                "alias": "__default"
+              }
+            },
+            "oauth/[version]/{endpoint}": {
+              "__path": {
+                "alias": "oauth",
+                "version": "v3"
+              }
+            }
+          }
+        }
+      }
+      const google = new Purest({provider: 'google', config})
 
-      google.query('plus').get('people/me').auth(access_token).request((err, res, body) => {
+      google.query('oauth').get('tokeninfo').qs({access_token}).request((err, res, body) => {
         if (err) {
           callback(err);
         } else {
           callback(null, {
-            username: body.emails[0].value.split("@")[0],
-            email: body.emails[0].value
+            username: body.email.split("@")[0],
+            email: body.email
           });
         }
       });
