@@ -186,7 +186,7 @@ export function* submitTempGroup({ body, context: { emitEvent } }) {
 
     const opts = { method: 'POST', body };
 
-    yield call(request, getRequestUrl('groups'), opts, true);
+    // yield call(request, getRequestUrl('groups'), opts, true);
 
     emitEvent('didSaveGroup');
     yield put(submitTempGroupSucceeded());

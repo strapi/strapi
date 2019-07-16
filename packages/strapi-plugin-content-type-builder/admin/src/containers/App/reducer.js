@@ -693,11 +693,25 @@ function appReducer(state = initialState, action) {
         )
         .update('shouldRefetchData', v => !v);
     case SUBMIT_TEMP_GROUP_SUCCEEDED:
-      return state
-        .update('isLoading', () => true)
-        .update('newGroup', () => Map(initialState.get('newGroup')))
-        .update('newGroupClone', () => Map(initialState.get('newGroup')))
-        .update('shouldRefetchData', v => !v);
+      const newGroup = state
+        .get('newGroup')
+        .set('uid', state.getIn(['newGroup', 'name']))
+        .set('isTemporary', false);
+      return (
+        state
+          // .update('isLoading', () => true)
+          .update('newGroup', () => Map(initialState.get('newGroup')))
+          .update('newGroupClone', () => Map(initialState.get('newGroup')))
+          .updateIn(['groups'], list =>
+            list
+              .map(obj => obj.set('isTemporary', false))
+              .sortBy(obj => obj.get('name'))
+          )
+          .updateIn(['modifiedDataGroup', newGroup.get('name')], () => newGroup)
+          .updateIn(['initialDataGroup', newGroup.get('name')], () => newGroup)
+      );
+
+    // .update('shouldRefetchData', v => !v);
     case UPDATE_TEMP_CONTENT_TYPE:
       return state
         .updateIn(
