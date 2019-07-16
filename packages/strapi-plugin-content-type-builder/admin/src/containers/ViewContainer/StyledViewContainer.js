@@ -13,12 +13,20 @@ const StyledViewContainer = styled.div`
   background-color: ${colors.greyOpacity};
   .components-container {
     padding: 1.8rem 1.5rem 0 1.5rem;
-  }
-  .list-header-title {
-    p {
-      width: fit-content;
-      display: inline-block;
-      margin-bottom: 0;
+    div div:not(.list-button) {
+      button {
+        top: 1.8rem;
+      }
+    }
+    .list-header-title {
+      & + p {
+        margin-bottom: 0.7rem;
+      }
+      p {
+        width: fit-content;
+        display: inline-block;
+        margin-bottom: 0;
+      }
     }
   }
 `;

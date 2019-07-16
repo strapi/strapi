@@ -13,7 +13,7 @@ const ListWrapper = styled.div`
     overflow-x: scroll;
   }
   .list-button {
-    padding: 1rem 3rem 2.5rem 3rem;
+    padding: 1.4rem 3rem 2.5rem 3rem;
     button {
       width: 100%;
     }
