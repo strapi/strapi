@@ -87,7 +87,8 @@ module.exports = {
 
   async removeAll(params, query) {
     const toRemove = Object.values(_.omit(query, 'source'));
-    const filter = { [`id_in`]: toRemove, _limit: 100 };
+    const { primaryKey } = strapi.query('user', 'users-permissions');
+    const filter = { [`${primaryKey}_in`]: toRemove, _limit: 100 };
 
     return strapi.query('user', 'users-permissions').delete(filter);
   },

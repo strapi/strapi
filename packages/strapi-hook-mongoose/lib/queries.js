@@ -290,33 +290,29 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     await Promise.all(
       model.associations.map(async association => {
-        if (
-          !association.via ||
-          !entry[model.primaryKey] ||
-          association.dominant
-        ) {
+        if (!association.via || !entry._id || association.dominant) {
           return true;
         }
 
         const search =
           _.endsWith(association.nature, 'One') ||
           association.nature === 'oneToMany'
-            ? { [association.via]: entry[model.primaryKey] }
-            : { [association.via]: { $in: [entry[model.primaryKey]] } };
+            ? { [association.via]: entry._id }
+            : { [association.via]: { $in: [entry._id] } };
         const update =
           _.endsWith(association.nature, 'One') ||
           association.nature === 'oneToMany'
             ? { [association.via]: null }
-            : { $pull: { [association.via]: entry[model.primaryKey] } };
+            : { $pull: { [association.via]: entry._id } };
 
         // Retrieve model.
-        const assocModel = association.plugin
+        const model = association.plugin
           ? strapi.plugins[association.plugin].models[
               association.model || association.collection
             ]
           : strapi.models[association.model || association.collection];
 
-        return assocModel.update(search, update, { multi: true });
+        return model.update(search, update, { multi: true });
       })
     );
 

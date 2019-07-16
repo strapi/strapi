@@ -457,8 +457,9 @@ module.exports = {
     );
 
     if (value.toRemove.length > 0) {
+      const { primaryKey } = strapi.query('permission', 'users-permissions');
       return strapi.query('permission', 'users-permissions').delete({
-        ['id_in']: value.toRemove,
+        [`${primaryKey}_in`]: value.toRemove,
       });
     }
     return Promise.resolve();

@@ -120,7 +120,8 @@ module.exports = {
     const { model } = params;
 
     const toRemove = Object.values(_.omit(query, 'source'));
-    const filter = { [`id_in`]: toRemove, _limit: 100 };
+    const { primaryKey } = strapi.query(model, source);
+    const filter = { [`${primaryKey}_in`]: toRemove, _limit: 100 };
 
     return strapi.query(model, source).delete(filter);
   },
