@@ -81,16 +81,6 @@ module.exports = {
    * @return {Promise}
    */
   async remove(params) {
-    // Use Content Manager business logic to handle relation.
-    if (strapi.plugins['content-manager']) {
-      params.model = 'user';
-      params.id = params._id || params.id;
-
-      return await strapi.plugins['content-manager'].services[
-        'contentmanager'
-      ].delete(params, { source: 'users-permissions' });
-    }
-
     return strapi.query('user', 'users-permissions').delete(params);
   },
 

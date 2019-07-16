@@ -230,16 +230,14 @@ module.exports = {
 
   /**
    * Destroy a/an user record.
-   *
    * @return {Object}
    */
-
   async destroy(ctx) {
+    const { id } = ctx.params;
     const data = await strapi.plugins['users-permissions'].services.user.remove(
-      ctx.params
+      { id }
     );
 
-    // Send 200 `ok`
     ctx.send(data);
   },
 
