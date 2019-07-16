@@ -24,6 +24,17 @@ module.exports = async function createProject(
     // copy files
     await fse.copy(join(resources, 'files'), rootPath);
 
+    // copy dot files
+    const dotFiles = await fse.readdir(join(resources, 'dot-files'));
+    await Promise.all(
+      dotFiles.map(name => {
+        return fse.copy(
+          join(resources, 'dot-files', name),
+          join(rootPath, `.${name}`)
+        );
+      })
+    );
+
     // copy templates
     await fse.writeJSON(
       join(rootPath, 'package.json'),
