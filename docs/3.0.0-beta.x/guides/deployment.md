@@ -349,7 +349,7 @@ npm install pg
 }
 ```
 
-3. Install the **Strapi Provider Upload AWS S3 Plugin**: `Path: ./my-project/`. This plugin will allow configurations for each active environment. 
+3. Install the **Strapi Provider Upload AWS S3 Plugin**: `Path: ./my-project/`. This plugin will allow configurations for each active environment.
 
 ```bash
 npm install strapi-provider-upload-aws-s3@beta
@@ -674,7 +674,7 @@ Digital Ocean calls a virtual private server, a [Droplet](https://www.digitaloce
 
 - Ubuntu 18.04 x64
 - STARTER `Standard`
-- Choose an appropriate pricing plan. For example, pricing: `$10/mo` _(Scroll to the left)_ **NOTE:** The \$5/mo plan is currently unsupported as Strapi will not build with 1G of RAM. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, a minimum standard Droplet of **$10/mo** or larger instance is needed.
+- Choose an appropriate pricing plan. For example, pricing: `$10/mo` _(Scroll to the left)_ **NOTE:** The \$5/mo plan is currently unsupported as Strapi will not build with 1G of RAM. At the moment, deploying the Strapi Admin interface requires more than 1g of RAM. Therefore, a minimum standard Droplet of **\$10/mo** or larger instance is needed.
 - Choose a `datacenter` region nearest your audience, for example, `New York`.
 - **OPTIONAL:** Select additional options, for example, `[x] IPv6`.
 - Add your SSH key **NOTE:** We recommend you `add your SSH key` for better security.
@@ -1343,11 +1343,11 @@ npm install pg --save
 
 Please follow these steps the **deploy a Strapi app with MongoDB on Heroku**.
 
-You must have completed the [steps to use Strapi with MongoDB Atlas in production](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas).
+You must have completed the [steps to use Strapi with MongoDB Atlas](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas).
 
 ##### 1. Set environment variables
 
-When you [set-up your MongoDB Atlas database](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) you created and noted the five key/value pairs that correspond to your **MongoDB Atlas** database. These five keys are: `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE PORT`, and `DATABASE_HOST`.
+When you [set-up your MongoDB Atlas database](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) you created and noted the three key/value pairs that correspond to your **MongoDB Atlas** database. These three keys are: `DATABASE_USERNAME`, `DATABASE_PASSWORD`, and `DATABASE_HOST`.
 
 Strapi expects a variable for each database connection detail (host, username, etc.). So, from **MongoDB Atlas**, you have to set the environment variables in the Heroku config (for **DATABASE_HOST** you need to surround the URL with **""**, and set **DATABASE_PORT** to nothing):
 
@@ -1356,7 +1356,6 @@ heroku config:set DATABASE_USERNAME=paulbocuse
 heroku config:set DATABASE_PASSWORD=mySecretPassword
 heroku config:set DATABASE_HOST="stapi-mongo-heroku-shard-00-00-fty6c.mongodb.net:27017,strapi-mongo-heroku-shard-00-01-fty6c.mongodb.net:27017,strapi-mongo-heroku-shard-00-02-fty6c.mongodb.net:27017/test?ssl=true&replicaSet=strapi-mongo-heroku-shard-0&authSource=admin&retryWrites=true"
 heroku config:set DATABASE_PORT=
-heroku config:set DATABASE_NAME=strapi-mongo-heroku
 ```
 
 **Note:** Please replace these above values with the your actual values.
@@ -1374,10 +1373,8 @@ Replace the contents of `database.json` with the following:
     "default": {
       "connector": "strapi-hook-mongoose",
       "settings": {
-        "client": "mongo",
         "host": "${process.env.DATABASE_HOST}",
         "port": "${process.env.DATABASE_PORT}",
-        "database": "${process.env.DATABASE_NAME}",
         "username": "${process.env.DATABASE_USERNAME}",
         "password": "${process.env.DATABASE_PASSWORD}"
       },
