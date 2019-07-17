@@ -38,7 +38,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     for (let key of groupKeys) {
       const attr = model.attributes[key];
-      const { group, required = true, repeatable = true } = attr;
+      const { group, required = false, repeatable = true } = attr;
 
       const groupModel = strapi.groups[group];
 
