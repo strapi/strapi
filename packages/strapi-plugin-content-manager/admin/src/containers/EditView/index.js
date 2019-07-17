@@ -331,6 +331,13 @@ function EditView({
                       <Group
                         {...group}
                         {...groupMeta}
+                        addRelation={({ target: { name, value } }) => {
+                          dispatch({
+                            type: 'ADD_RELATION',
+                            keys: name.split('.'),
+                            value,
+                          });
+                        }}
                         addField={keys => {
                           dispatch({
                             type: 'ADD_FIELD_TO_GROUP',
@@ -359,6 +366,8 @@ function EditView({
                           });
                         }}
                         layout={get(groupLayoutsData, group.group, {})}
+                        pathname={pathname}
+                        search={search}
                         removeField={(keys, shouldAddEmptyField) => {
                           dispatch({
                             type: 'ON_REMOVE_FIELD',

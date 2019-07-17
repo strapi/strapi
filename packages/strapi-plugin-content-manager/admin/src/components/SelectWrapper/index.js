@@ -162,22 +162,25 @@ function SelectWrapper({
 }
 
 SelectWrapper.defaultProps = {
+  addRelation: () => {},
   description: '',
   label: '',
   moveRelation: () => {},
+  onChange: () => {},
+  onRemove: () => {},
   plugin: '',
   value: null,
 };
 
 SelectWrapper.propTypes = {
-  addRelation: PropTypes.func.isRequired,
+  addRelation: PropTypes.func,
   description: PropTypes.string,
   label: PropTypes.string,
   mainField: PropTypes.string.isRequired,
   moveRelation: PropTypes.func,
   name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
-  onRemove: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
+  onRemove: PropTypes.func,
   pathname: PropTypes.string.isRequired,
   plugin: PropTypes.string,
   relationType: PropTypes.string.isRequired,

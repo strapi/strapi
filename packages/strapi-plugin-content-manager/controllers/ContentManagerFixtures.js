@@ -44,6 +44,16 @@ module.exports = {
               required: true,
               default: 'flour',
             },
+            article: {
+              type: 'relation',
+              targetModel: 'article',
+              relationType: 'manyToOne',
+            },
+            articles: {
+              type: 'relation',
+              targetModel: 'article',
+              relationType: 'oneToMany',
+            },
           },
         },
         settings: {
@@ -65,6 +75,26 @@ module.exports = {
               visible: true,
             },
           },
+          article: {
+            edit: {
+              label: 'article',
+              description: '....',
+              editable: true,
+              visible: true,
+              mainField: 'title',
+            },
+            list: {},
+          },
+          articles: {
+            edit: {
+              label: 'articles',
+              description: '....',
+              editable: true,
+              visible: true,
+              mainField: 'title',
+            },
+            list: {},
+          },
         },
         layouts: {
           list: [],
@@ -75,7 +105,12 @@ module.exports = {
                 name: 'name',
                 size: 6,
               },
+              {
+                name: 'article',
+                size: 6,
+              },
             ],
+            [{ name: 'articles', size: 6 }],
           ],
         },
       },

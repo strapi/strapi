@@ -5,6 +5,7 @@ import { FormattedMessage } from 'react-intl';
 import { get, isArray } from 'lodash';
 
 import pluginId from '../../pluginId';
+import SelectWrapper from '../../components/SelectWrapper';
 
 import { Button } from './components';
 import GroupCollapse from './GroupCollapse';
@@ -66,6 +67,7 @@ function init(initialState, groupValues) {
 
 function Group({
   addField,
+  addRelation,
   isRepeatable,
   label,
   layout,
@@ -76,8 +78,11 @@ function Group({
   name,
   groupValue,
   onChange,
+  pathname,
   removeField,
+  search,
 }) {
+  console.log({ pathname, search });
   const fields = get(layout, ['layouts', 'edit'], []);
   const [state, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, groupValue)
@@ -136,6 +141,33 @@ function Group({
               return (
                 <div className="row" key={key}>
                   {fieldRow.map(field => {
+                    const currentField = get(
+                      layout,
+                      ['schema', 'attributes', field.name],
+                      ''
+                    );
+                    const currentFieldMeta = get(
+                      layout,
+                      ['metadata', field.name, 'edit'],
+                      {}
+                    );
+
+                    if (currentField.type === 'relation') {
+                      return (
+                        <div className="col-6" key={`${name}.${field.name}`}>
+                          <SelectWrapper
+                            {...currentFieldMeta}
+                            name={`${field.name}`}
+                            key={`${name}.${field.name}`}
+                            pathname={pathname}
+                            search={search}
+                            relationType={currentField.relationType}
+                            targetModel={currentField.targetModel}
+                          />
+                        </div>
+                      );
+                    }
+
                     return (
                       <Inputs
                         key={`${name}.${field.name}`}
@@ -162,6 +194,7 @@ function Group({
                 return (
                   <div className="col-12" key={field._temp__id}>
                     <GroupCollapse
+                      addRelation={addRelation}
                       collapseAll={() => {
                         dispatch({
                           type: 'COLLAPSE_ALL',
@@ -182,6 +215,8 @@ function Group({
                       move={move}
                       name={`${name}.${index}`}
                       onChange={onChange}
+                      pathname={pathname}
+                      search={search}
                       removeField={e => {
                         e.stopPropagation();
 
@@ -237,6 +272,7 @@ function Group({
 }
 
 Group.defaultProps = {
+  addRelation: () => {},
   groupValue: {},
   label: '',
   layout: {},
@@ -248,6 +284,7 @@ Group.defaultProps = {
 
 Group.propTypes = {
   addField: PropTypes.func.isRequired,
+  addRelation: PropTypes.func,
   groupValue: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   isRepeatable: PropTypes.bool.isRequired,
   label: PropTypes.string,
@@ -257,8 +294,11 @@ Group.propTypes = {
   modifiedData: PropTypes.object,
   moveGroupField: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
+  pathname: PropTypes.string.isRequired,
+
   onChange: PropTypes.func.isRequired,
   removeField: PropTypes.func.isRequired,
+  search: PropTypes.string.isRequired,
 };
 
 export default memo(Group);
