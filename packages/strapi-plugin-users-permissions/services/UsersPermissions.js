@@ -509,7 +509,7 @@ module.exports = {
       .update({ id: roleID }, _.pick(body, ['name', 'description']));
 
     await Promise.all(
-      Object.keys(body.permissions).reduce((acc, type) => {
+      Object.keys(body.permissions || {}).reduce((acc, type) => {
         Object.keys(body.permissions[type].controllers).forEach(controller => {
           Object.keys(body.permissions[type].controllers[controller]).forEach(
             action => {
