@@ -33,7 +33,7 @@ module.exports = {
     action = '',
   }) {
     // Type
-    if (definition.type) {
+    if (definition.type && definition.type !== 'group') {
       let type = 'String';
 
       switch (definition.type) {
@@ -72,6 +72,16 @@ module.exports = {
       }
 
       return type;
+    }
+
+    if (definition.type === 'group') {
+      const globalId = strapi.groups[definition.group].globalId;
+      const typeId = definition.required === true ? `${globalId}!` : globalId;
+      if (definition.repeatable === true) {
+        return `[${typeId}]!`;
+      }
+
+      return `${typeId}`;
     }
 
     const ref = definition.model || definition.collection;

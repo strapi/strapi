@@ -161,6 +161,44 @@ const schemaBuilder = {
       }, modelCruds);
     }
 
+    const groupDefs = Object.values(strapi.groups)
+      .map(group => {
+        const { globalId, attributes, primaryKey } = group;
+
+        const definition = {
+          [primaryKey]: 'ID!',
+        };
+
+        // always add an id field to make the api database agnostic
+        if (primaryKey !== 'id') {
+          definition['id'] = 'ID!';
+        }
+        // Add timestamps attributes.
+        if (_.isArray(_.get(group, 'options.timestamps'))) {
+          const [createdAtKey, updatedAtKey] = group.options.timestamps;
+          definition[createdAtKey] = 'DateTime!';
+          definition[updatedAtKey] = 'DateTime!';
+        }
+
+        const gqlAttributes = Object.keys(attributes)
+          .filter(attribute => attributes[attribute].private !== true)
+          .reduce((acc, attribute) => {
+            // Convert our type to the GraphQL type.
+            acc[attribute] = Types.convertType({
+              definition: attributes[attribute],
+              modelName: globalId,
+              attributeName: attribute,
+            });
+
+            return acc;
+          }, definition);
+
+        return `type ${globalId} {${this.formatGQL(gqlAttributes, {}, group)}}`;
+      })
+      .join('\n');
+
+    console.log(groupDefs);
+
     // Extract custom definition, query or resolver.
     const {
       definition,
@@ -238,6 +276,7 @@ const schemaBuilder = {
     let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
+      ${groupDefs}
       type Query {${shadowCRUD.query &&
         this.formatGQL(
           shadowCRUD.query,
@@ -268,7 +307,7 @@ const schemaBuilder = {
       this.writeGenerateSchema(graphql.printSchema(schema));
     }
 
-    // Remove custom scaler (like Upload);
+    // Remove custom scalar (like Upload);
     typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
 
     return {

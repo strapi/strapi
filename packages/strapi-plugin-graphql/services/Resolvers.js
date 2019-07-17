@@ -41,21 +41,17 @@ const buildShadowCRUD = (models, plugin) => {
       ? strapi.plugins[plugin].models[name]
       : strapi.models[name];
 
+    const { globalId, primaryKey } = model;
     // Setup initial state with default attribute that should be displayed
     // but these attributes are not properly defined in the models.
     const initialState = {
-      [model.primaryKey]: 'ID!',
+      [primaryKey]: 'ID!',
     };
 
-    // always add an id field  os to make the api database agnostic
-    if (model.primaryKey !== 'id') {
+    // always add an id field to make the api database agnostic
+    if (primaryKey !== 'id') {
       initialState['id'] = 'ID!';
     }
-
-    const globalId = model.globalId;
-    const _schema = _.cloneDeep(
-      _.get(strapi.plugins, 'graphql.config._schema.graphql', {})
-    );
 
     if (!acc.resolver[globalId]) {
       acc.resolver[globalId] = {
@@ -68,13 +64,15 @@ const buildShadowCRUD = (models, plugin) => {
 
     // Add timestamps attributes.
     if (_.isArray(_.get(model, 'options.timestamps'))) {
-      Object.assign(initialState, {
-        [_.get(model, ['options', 'timestamps', 0])]: 'DateTime!',
-        [_.get(model, ['options', 'timestamps', 1])]: 'DateTime!',
-      });
+      const [createdAtKey, updatedAtKey] = model.options.timestamps;
+      initialState[createdAtKey] = 'DateTime!';
+      initialState[updatedAtKey] = 'DateTime!';
     }
 
-    // Retrieve user customisation.
+    const _schema = _.cloneDeep(
+      _.get(strapi.plugins, 'graphql.config._schema.graphql', {})
+    );
+
     const { type = {}, resolver = {} } = _schema;
 
     // Convert our layer Model to the GraphQL DL.
