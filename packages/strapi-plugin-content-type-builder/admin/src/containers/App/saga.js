@@ -180,14 +180,9 @@ export function* submitTempCT({
 }
 
 /* istanbul ignore-next */
-export function* submitTempGroup({ body, context: { emitEvent } }) {
+export function* submitTempGroup({ context: { emitEvent } }) {
   try {
     emitEvent('willSaveGroup');
-
-    const opts = { method: 'POST', body };
-
-    // yield call(request, getRequestUrl('groups'), opts, true);
-
     emitEvent('didSaveGroup');
     yield put(submitTempGroupSucceeded());
   } catch (error) {
@@ -199,6 +194,26 @@ export function* submitTempGroup({ body, context: { emitEvent } }) {
     strapi.notification.error(errorMessage);
   }
 }
+
+// TODO: uncomment when backend is available
+// export function* submitTempGroup({ body, context: { emitEvent } }) {
+//   try {
+//     emitEvent('willSaveGroup');
+
+//     const opts = { method: 'POST', body };
+//     yield call(request, getRequestUrl('groups'), opts, true);
+
+//     emitEvent('didSaveGroup');
+//     yield put(submitTempGroupSucceeded());
+//   } catch (error) {
+//     const errorMessage = get(
+//       error,
+//       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+//       'notification.error'
+//     );
+//     strapi.notification.error(errorMessage);
+//   }
+// }
 
 // Individual exports for testing
 export default function* defaultSaga() {
