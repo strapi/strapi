@@ -6,27 +6,29 @@ import { isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
+import { useEditView } from '../../contexts/EditView';
 
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
-
 import { Nav, Wrapper } from './components';
 
 function SelectWrapper({
-  addRelation,
   label,
   mainField,
-  moveRelation,
   name,
-  onChange,
-  onRemove,
-  pathname,
   relationType,
-  search,
   targetModel,
   plugin,
   value,
 }) {
+  const {
+    addRelation,
+    moveRelation,
+    onChange,
+    onRemove,
+    pathname,
+    search,
+  } = useEditView();
   const [state, setState] = useState({
     _q: '',
     _limit: 8,
@@ -162,29 +164,19 @@ function SelectWrapper({
 }
 
 SelectWrapper.defaultProps = {
-  addRelation: () => {},
   description: '',
   label: '',
-  moveRelation: () => {},
-  onChange: () => {},
-  onRemove: () => {},
   plugin: '',
   value: null,
 };
 
 SelectWrapper.propTypes = {
-  addRelation: PropTypes.func,
   description: PropTypes.string,
   label: PropTypes.string,
   mainField: PropTypes.string.isRequired,
-  moveRelation: PropTypes.func,
   name: PropTypes.string.isRequired,
-  onChange: PropTypes.func,
-  onRemove: PropTypes.func,
-  pathname: PropTypes.string.isRequired,
   plugin: PropTypes.string,
   relationType: PropTypes.string.isRequired,
-  search: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };

@@ -13,16 +13,15 @@ import {
   templateObject,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
-
+import { EditViewProvider } from '../../contexts/EditView';
 import Container from '../../components/Container';
-
-import { LinkWrapper, MainWrapper, SubWrapper } from './components';
-import Group from './Group';
-import Inputs from './Inputs';
+import Group from '../../components/Group';
+import Inputs from '../../components/Inputs';
+import SelectWrapper from '../../components/SelectWrapper';
 
 import init, { setDefaultForm } from './init';
 import reducer, { initialState } from './reducer';
-import SelectWrapper from '../../components/SelectWrapper';
+import { LinkWrapper, MainWrapper, SubWrapper } from './components';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -40,7 +39,6 @@ function EditView({
   const layout = get(layouts, [slug], {});
   const isCreatingEntry = id === 'create';
   const attributes = get(layout, ['schema', 'attributes'], {});
-
   const groups = Object.keys(attributes).reduce((acc, current) => {
     const { group, repeatable, type, min } = get(attributes, [current], {
       group: '',
@@ -67,6 +65,7 @@ function EditView({
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout, isCreatingEntry)
   );
+
   const state = reducerState.toJS();
   const {
     groupLayoutsData,
@@ -79,21 +78,6 @@ function EditView({
   const source = getQueryParameters(search, 'source');
   const shouldShowLoader =
     isLoadingForLayouts || (!isCreatingEntry && isLoading);
-  ``;
-
-  // Keep these lines if we make the Group component collapsable
-  // useEffect(() => {
-  //   dispatch({
-  //     type: 'SET_COLLAPSES_COMPONENTS_STATE',
-  //     collapses: groups.reduce((acc, current) => {
-  //       const { key, isOpen, repeatable } = current;
-  //       acc[key] = { isOpen, repeatable };
-
-  //       return acc;
-  //     }, {}),
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -111,7 +95,6 @@ function EditView({
         strapi.notification.error(`${pluginId}.error.record.fetch`);
       }
     };
-
     const fetchGroupLayouts = async () => {
       try {
         const data = await Promise.all(
@@ -119,19 +102,16 @@ function EditView({
             request(`/${pluginId}/fixtures/layouts/${uid}`, { method: 'GET' })
           )
         );
-
         const groupLayouts = data.reduce((acc, current) => {
           acc[current.layout.uid] = current.layout;
 
           return acc;
         }, {});
-
         // Retrieve all the default values for the repeatables and init the form
         const defaultGroupValues = groups.reduce((acc, current) => {
           const defaultForm = setDefaultForm(
             get(groupLayouts, [current.group, 'schema', 'attributes'], {})
           );
-
           const arr = [];
 
           if (current.min && current.repeatable === true) {
@@ -188,7 +168,6 @@ function EditView({
     .join('');
 
   const redirectToPreviousPage = () => push(redirectURL);
-
   const handleConfirmDelete = async () => {
     toggleWarningDelete();
     setIsSubmitting(true);
@@ -209,7 +188,6 @@ function EditView({
   const handleSubmit = e => {
     e.preventDefault();
   };
-
   const displayedFieldNameInHeader = get(
     layout,
     ['settings', 'mainField'],
@@ -222,7 +200,6 @@ function EditView({
   const displayedRelations = get(layout, ['layouts', 'editRelations'], []);
   const hasRelations = displayedRelations.length > 0;
   const fields = get(layout, ['layouts', 'edit'], []);
-
   /**
    * Retrieve external links from injected components
    * @type {Array} List of external links to display
@@ -268,9 +245,39 @@ function EditView({
   };
 
   return (
-    <>
+    <EditViewProvider
+      addRelation={({ target: { name, value } }) => {
+        dispatch({
+          type: 'ADD_RELATION',
+          keys: name.split('.'),
+          value,
+        });
+      }}
+      moveRelation={(dragIndex, overIndex, name) => {
+        dispatch({
+          type: 'MOVE_FIELD',
+          dragIndex,
+          overIndex,
+          keys: name.split('.'),
+        });
+      }}
+      onChange={({ target: { name, value } }) => {
+        dispatch({
+          type: 'ON_CHANGE',
+          keys: name.split('.'),
+          value,
+        });
+      }}
+      onRemove={keys => {
+        dispatch({
+          type: 'REMOVE_RELATION',
+          keys,
+        });
+      }}
+      pathname={pathname}
+      search={search}
+    >
       <BackHeader onClick={() => redirectToPreviousPage()} />
-
       <Container className="container-fluid">
         <form onSubmit={handleSubmit}>
           <PluginHeader
@@ -316,7 +323,6 @@ function EditView({
             <div className="coel-md-12 col-lg-9">
               <MainWrapper>
                 {fields.map((fieldsRow, key) => {
-                  //
                   const [{ name }] = fieldsRow;
                   const group = get(layout, ['schema', 'attributes', name], {});
                   const groupMeta = get(layout, ['metadata', name, 'edit'], {});
@@ -331,13 +337,6 @@ function EditView({
                       <Group
                         {...group}
                         {...groupMeta}
-                        addRelation={({ target: { name, value } }) => {
-                          dispatch({
-                            type: 'ADD_RELATION',
-                            keys: name.split('.'),
-                            value,
-                          });
-                        }}
                         addField={keys => {
                           dispatch({
                             type: 'ADD_FIELD_TO_GROUP',
@@ -350,7 +349,6 @@ function EditView({
                         name={name}
                         modifiedData={modifiedData}
                         moveGroupField={(dragIndex, overIndex, name) => {
-                          console.log(name);
                           dispatch({
                             type: 'MOVE_FIELD',
                             dragIndex,
@@ -367,7 +365,6 @@ function EditView({
                         }}
                         layout={get(groupLayoutsData, group.group, {})}
                         pathname={pathname}
-                        search={search}
                         removeField={(keys, shouldAddEmptyField) => {
                           dispatch({
                             type: 'ON_REMOVE_FIELD',
@@ -412,7 +409,6 @@ function EditView({
                 >
                   <div style={{ paddingTop: '19px' }}>
                     {displayedRelations.map(relationName => {
-                      //
                       const relation = get(
                         layout,
                         ['schema', 'attributes', relationName],
@@ -430,38 +426,8 @@ function EditView({
                           {...relation}
                           {...relationMetas}
                           key={relationName}
-                          addRelation={({ target: { name, value } }) => {
-                            dispatch({
-                              type: 'ADD_RELATION',
-                              keys: name.split('.'),
-                              value,
-                            });
-                          }}
-                          moveRelation={(dragIndex, overIndex, name) => {
-                            dispatch({
-                              type: 'MOVE_FIELD',
-                              dragIndex,
-                              overIndex,
-                              keys: name.split('.'),
-                            });
-                          }}
                           name={relationName}
-                          onChange={({ target: { name, value } }) => {
-                            dispatch({
-                              type: 'ON_CHANGE',
-                              keys: name.split('.'),
-                              value,
-                            });
-                          }}
-                          onRemove={keys => {
-                            dispatch({
-                              type: 'REMOVE_RELATION',
-                              keys,
-                            });
-                          }}
-                          pathname={pathname}
                           relationType={relation.relationType}
-                          search={search}
                           value={value}
                         />
                       );
@@ -518,7 +484,7 @@ function EditView({
           onConfirm={handleConfirmDelete}
         />
       </Container>
-    </>
+    </EditViewProvider>
   );
 }
 

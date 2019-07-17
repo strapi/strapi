@@ -6,17 +6,15 @@ import { DragSource, DropTarget } from 'react-dnd';
 import { Collapse } from 'reactstrap';
 
 import pluginId from '../../pluginId';
-import SelectWrapper from '../../components/SelectWrapper';
 
 import ItemTypes from '../../utils/itemsTypes';
 import Grab from '../../assets/images/grab_icon.svg';
 import Logo from '../../assets/images/caret_top.svg';
 
 import { Flex, GroupCollapseWrapper, ImgWrapper } from './components';
-import Inputs from './Inputs';
+import Form from './Form';
 
 function GroupCollapse({
-  addRelation,
   connectDragSource,
   connectDropTarget,
   isCreating,
@@ -27,8 +25,6 @@ function GroupCollapse({
   name,
   onChange,
   onClick,
-  pathname,
-  search,
   removeField,
 }) {
   const id = isCreating
@@ -40,7 +36,6 @@ function GroupCollapse({
 
   connectDragSource(ref);
   connectDropTarget(ref);
-  console.log('f', { pathname, search });
 
   return (
     <>
@@ -70,52 +65,16 @@ function GroupCollapse({
             return (
               <div className="row" key={key}>
                 {fieldRow.map(field => {
-                  //
-                  const currentField = get(
-                    layout,
-                    ['schema', 'attributes', field.name],
-                    ''
-                  );
-                  const currentFieldMeta = get(
-                    layout,
-                    ['metadata', field.name, 'edit'],
-                    {}
-                  );
-
-                  if (currentField.type === 'relation') {
-                    return (
-                      <div className="col-6" key={`${name}.${field.name}`}>
-                        <SelectWrapper
-                          {...currentFieldMeta}
-                          addRelation={addRelation}
-                          name={`${name}.${field.name}`}
-                          key={`${name}.${field.name}`}
-                          onChange={onChange}
-                          pathname={pathname}
-                          search={search}
-                          relationType={currentField.relationType}
-                          targetModel={currentField.targetModel}
-                          value={get(modifiedData, `${name}.${field.name}`)}
-                        />
-                      </div>
-                    );
-                  }
+                  const keys = `${name}.${field.name}`;
 
                   return (
-                    <Inputs
-                      key={`${name}.${field.name}`}
-                      layout={layout}
+                    <Form
+                      key={keys}
                       modifiedData={modifiedData}
-                      keys={`${name}.${field.name}`}
-                      name={`${field.name}`}
-                      onChange={({ target: { value } }) => {
-                        onChange({
-                          target: {
-                            name: `${name}.${field.name}`,
-                            value,
-                          },
-                        });
-                      }}
+                      keys={keys}
+                      fieldName={field.name}
+                      layout={layout}
+                      onChange={onChange}
                     />
                   );
                 })}
@@ -139,7 +98,6 @@ GroupCollapse.defaultProps = {
 };
 
 GroupCollapse.propTypes = {
-  addRelation: PropTypes.func,
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   isCreating: PropTypes.bool,
@@ -150,9 +108,7 @@ GroupCollapse.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func.isRequired,
-  pathname: PropTypes.string.isRequired,
   removeField: PropTypes.func,
-  search: PropTypes.string.isRequired,
 };
 
 export default DropTarget(

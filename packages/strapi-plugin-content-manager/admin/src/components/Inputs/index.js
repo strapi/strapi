@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { get, omit } from 'lodash';
 
 import { InputsIndex } from 'strapi-helper-plugin';
 
-import InputJSONWithErrors from '../../components/InputJSONWithErrors';
-import WysiwygWithErrors from '../../components/WysiwygWithErrors';
+import InputJSONWithErrors from '../InputJSONWithErrors';
+import WysiwygWithErrors from '../WysiwygWithErrors';
 
 const getInputType = (type = '') => {
   switch (type.toLowerCase()) {
@@ -96,4 +96,4 @@ Inputs.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
-export default Inputs;
+export default memo(Inputs);

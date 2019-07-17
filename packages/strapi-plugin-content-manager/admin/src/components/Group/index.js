@@ -1,73 +1,18 @@
 import React, { useReducer, memo } from 'react';
-import { fromJS } from 'immutable';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get, isArray } from 'lodash';
+import { get } from 'lodash';
 
 import pluginId from '../../pluginId';
-import SelectWrapper from '../../components/SelectWrapper';
 
 import { Button } from './components';
+import Form from './Form';
 import GroupCollapse from './GroupCollapse';
-import Inputs from './Inputs';
-
-const initialState = fromJS({ collapses: [] });
-
-function reducer(state, action) {
-  switch (action.type) {
-    case 'ADD_NEW_FIELD':
-      return state.update('collapses', list => {
-        return list
-          .map(obj => obj.update('isOpen', () => false))
-          .push(fromJS({ isOpen: true }));
-      });
-    case 'COLLAPSE_ALL':
-      return state.update('collapses', list =>
-        list.map(obj => obj.update('isOpen', () => false))
-      );
-    case 'TOGGLE_COLLAPSE':
-      return state.update('collapses', list => {
-        return list.map((obj, index) => {
-          if (index === action.index) {
-            return obj.update('isOpen', v => !v);
-          }
-
-          return obj.update('isOpen', () => false);
-        });
-      });
-    case 'REMOVE_COLLAPSE':
-      return state
-        .removeIn(['collapses', action.index])
-        .update('collapses', list => list.map(obj => obj.set('isOpen', false)))
-        .update('collapses', list => {
-          if (action.shouldAddEmptyField) {
-            return list.push(fromJS({ isOpen: true }));
-          }
-
-          return list;
-        });
-    default:
-      return state;
-  }
-}
-
-function init(initialState, groupValues) {
-  return initialState.update('collapses', list => {
-    if (isArray(groupValues)) {
-      return fromJS(
-        groupValues.map((_, index) => ({
-          isOpen: index === groupValues.length - 1,
-        }))
-      );
-    }
-
-    return list;
-  });
-}
+import init from './init';
+import reducer, { initialState } from './reducer';
 
 function Group({
   addField,
-  addRelation,
   isRepeatable,
   label,
   layout,
@@ -78,11 +23,8 @@ function Group({
   name,
   groupValue,
   onChange,
-  pathname,
   removeField,
-  search,
 }) {
-  console.log({ pathname, search });
   const fields = get(layout, ['layouts', 'edit'], []);
   const [state, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, groupValue)
@@ -141,45 +83,16 @@ function Group({
               return (
                 <div className="row" key={key}>
                   {fieldRow.map(field => {
-                    const currentField = get(
-                      layout,
-                      ['schema', 'attributes', field.name],
-                      ''
-                    );
-                    const currentFieldMeta = get(
-                      layout,
-                      ['metadata', field.name, 'edit'],
-                      {}
-                    );
-
-                    if (currentField.type === 'relation') {
-                      return (
-                        <div className="col-6" key={`${name}.${field.name}`}>
-                          <SelectWrapper
-                            {...currentFieldMeta}
-                            name={`${field.name}`}
-                            key={`${name}.${field.name}`}
-                            pathname={pathname}
-                            search={search}
-                            relationType={currentField.relationType}
-                            targetModel={currentField.targetModel}
-                          />
-                        </div>
-                      );
-                    }
+                    const keys = `${name}.${field.name}`;
 
                     return (
-                      <Inputs
-                        key={`${name}.${field.name}`}
-                        layout={layout}
+                      <Form
+                        key={keys}
                         modifiedData={modifiedData}
-                        keys={`${name}.${field.name}`}
-                        name={`${field.name}`}
-                        onChange={({ target: { value } }) => {
-                          onChange({
-                            target: { name: `${name}.${field.name}`, value },
-                          });
-                        }}
+                        keys={keys}
+                        fieldName={field.name}
+                        layout={layout}
+                        onChange={onChange}
                       />
                     );
                   })}
@@ -194,7 +107,6 @@ function Group({
                 return (
                   <div className="col-12" key={field._temp__id}>
                     <GroupCollapse
-                      addRelation={addRelation}
                       collapseAll={() => {
                         dispatch({
                           type: 'COLLAPSE_ALL',
@@ -215,8 +127,6 @@ function Group({
                       move={move}
                       name={`${name}.${index}`}
                       onChange={onChange}
-                      pathname={pathname}
-                      search={search}
                       removeField={e => {
                         e.stopPropagation();
 
@@ -298,7 +208,6 @@ Group.propTypes = {
 
   onChange: PropTypes.func.isRequired,
   removeField: PropTypes.func.isRequired,
-  search: PropTypes.string.isRequired,
 };
 
 export default memo(Group);
