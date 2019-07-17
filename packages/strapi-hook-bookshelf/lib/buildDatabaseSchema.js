@@ -208,9 +208,9 @@ module.exports = async ({
           })
         );
 
-        await trx.raw(`INSERT INTO ?? (${attrs.join(', ')}) ??`, [
+        await trx.raw(`INSERT INTO ?? (id, ${attrs.join(', ')}) ??`, [
           table,
-          trx.select(attrs).from(tmpTable),
+          trx.select(['id', ...attrs]).from(tmpTable),
         ]);
 
         await trx.schema.dropTableIfExists(tmpTable);
