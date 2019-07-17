@@ -207,7 +207,7 @@ module.exports = {
     `;
   },
 
-  generateInputModel: function(model, name) {
+  generateInputModel: function(model, name, { allowIds = false } = {}) {
     const globalId = model.globalId;
     const inputName = `${_.capitalize(name)}Input`;
 
@@ -226,6 +226,7 @@ module.exports = {
       }
 
       input edit${inputName} {
+        ${allowIds ? 'id: ID' : ''}
         ${Object.keys(model.attributes)
           .map(attribute => {
             return `${attribute}: ${this.convertType({

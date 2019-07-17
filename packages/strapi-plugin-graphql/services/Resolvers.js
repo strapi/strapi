@@ -14,7 +14,7 @@ const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
 
-const buildModel = (model, plugin) => {
+const buildModel = (model, plugin, { isGroup = false } = {}) => {
   const resolvers =
     strapi.plugins['content-manager'].services['contentmanager'];
 
@@ -79,7 +79,9 @@ const buildModel = (model, plugin) => {
     model
   )}}\n\n`;
 
-  definition += Types.generateInputModel(model, globalId);
+  definition += Types.generateInputModel(model, globalId, {
+    allowIds: isGroup,
+  });
 
   const resolver = {
     [globalId]: {

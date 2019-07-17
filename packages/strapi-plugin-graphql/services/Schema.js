@@ -161,7 +161,11 @@ const schemaBuilder = {
     }
 
     let groups = Object.keys(strapi.groups)
-      .map(key => Resolvers.buildModel(strapi.groups[key]))
+      .map(key =>
+        Resolvers.buildModel(strapi.groups[key], null, {
+          isGroup: true,
+        })
+      )
       .reduce(
         (acc, group) => {
           return {
@@ -171,8 +175,6 @@ const schemaBuilder = {
         },
         { definition: '', resolver: {} }
       );
-
-    console.log(groups);
 
     // Extract custom definition, query or resolver.
     const {

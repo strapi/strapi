@@ -375,11 +375,11 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
       })
       .fetchAll({ transacting })
-      .map(el => el.get('slice_id'));
+      .map(el => el.get('slice_id').toString());
 
     // verify the provided ids are realted to this entity.
     idsToKeep.forEach(id => {
-      if (!allIds.includes(id)) {
+      if (!allIds.includes(id.toString())) {
         const err = new Error(
           `Some of the provided groups in ${key} are not related to the entity`
         );
