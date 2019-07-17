@@ -85,6 +85,10 @@ function reducer(state, action) {
           return obj;
         })
         .update('isLoadingForLayouts', () => false);
+    case 'INIT':
+      return initialState
+        .set('initialData', fromJS(action.data))
+        .set('modifiedData', fromJS(action.data));
     case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         return list

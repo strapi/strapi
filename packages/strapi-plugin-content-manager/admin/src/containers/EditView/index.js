@@ -148,13 +148,19 @@ function EditView({
       }
     };
 
-    fetchGroupLayouts();
-
     if (!isCreatingEntry) {
       fetchData();
+    } else {
+      dispatch({
+        type: 'INIT',
+        data: setDefaultForm(get(layout, ['schema', 'attributes'])),
+      });
     }
+
+    fetchGroupLayouts();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, isCreatingEntry, slug, source]);
+  }, [id, isCreatingEntry, slug, source, pathname]);
 
   if (shouldShowLoader) {
     return <LoadingIndicatorPage />;

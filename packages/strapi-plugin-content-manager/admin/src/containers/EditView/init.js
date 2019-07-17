@@ -1,4 +1,3 @@
-import { fromJS } from 'immutable';
 import { get } from 'lodash';
 
 const setDefaultForm = attributes => {
@@ -34,17 +33,7 @@ const setDefaultForm = attributes => {
   }, {});
 };
 
-function init(initialState, layout, isCreatingEntry) {
-  if (isCreatingEntry) {
-    const defaultForm = setDefaultForm(
-      get(layout, ['schema', 'attributes'], {})
-    );
-
-    return initialState
-      .update('initialData', () => fromJS(defaultForm))
-      .update('modifiedData', () => fromJS(defaultForm));
-  }
-
+function init(initialState) {
   return initialState;
 }
 
