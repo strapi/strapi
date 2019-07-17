@@ -43,7 +43,8 @@ export default {
     refreshIndex () {
       const index = resolveOpenGroupIndex(
         this.$route,
-        this.items
+        this.items,
+        this.$page.frontmatter
       )
       if (index > -1) {
         this.openGroupIndex = index
@@ -53,15 +54,15 @@ export default {
       this.openGroupIndex = index === this.openGroupIndex ? -1 : index
     },
     isActive (page) {
-      return isActive(this.$route, page.path)
+      return isActive(this.$route, page.path, $page.frontmatter)
     }
   }
 }
 
-function resolveOpenGroupIndex (route, items) {
+function resolveOpenGroupIndex (route, items, frontmatter) {
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
-    if (item.type === 'group' && item.children.some(c => isActive(route, c.path))) {
+    if (item.type === 'group' && item.children.some(c => isActive(route, c.path, frontmatter))) {
       return i
     }
   }

@@ -42,8 +42,18 @@ export function ensureExt (path) {
   return normalized + '.html' + hash
 }
 
-export function isActive (route, path) {
+export function isActive (route, path, {sidebarLink, sidebarHash} = {}) {
+  if (sidebarLink) {
+    sidebarLink = sidebarLink.replace('.md', '.html');
+    if (path.includes(sidebarLink) && !path.includes('#')) return true;
+  }
+
   const routeHash = route.hash
+
+  if (sidebarHash && sidebarLink) {
+    if (path.includes(`${sidebarLink}#${sidebarHash}`)) return true;
+  }
+
   const linkHash = getHash(path)
   if (linkHash && routeHash !== linkHash) {
     return false
