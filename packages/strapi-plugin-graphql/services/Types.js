@@ -76,12 +76,20 @@ module.exports = {
 
     if (definition.type === 'group') {
       const globalId = strapi.groups[definition.group].globalId;
-      const typeId = definition.required === true ? `${globalId}!` : globalId;
-      if (definition.repeatable === true) {
-        return `[${typeId}]!`;
+      const { required, repeatable } = definition;
+      let typeName = required === true ? `${globalId}` : globalId;
+
+      if (rootType === 'mutation') {
+        typeName =
+          action === 'update'
+            ? `edit${_.capitalize(globalId)}Input`
+            : `${_.capitalize(globalId)}Input${required ? '!' : ''}`;
       }
 
-      return `${typeId}`;
+      if (repeatable === true) {
+        return `[${typeName}]`;
+      }
+      return `${typeName}`;
     }
 
     const ref = definition.model || definition.collection;
@@ -203,8 +211,7 @@ module.exports = {
     const globalId = model.globalId;
     const inputName = `${_.capitalize(name)}Input`;
 
-    /* eslint-disable */
-    return `
+    const inputs = `
       input ${inputName} {
         ${Object.keys(model.attributes)
           .map(attribute => {
@@ -232,7 +239,8 @@ module.exports = {
           .join('\n')}
       }
     `;
-    /* eslint-enable */
+    console.log(inputs);
+    return inputs;
   },
 
   generateInputPayloadArguments: function(model, name, type, resolver) {

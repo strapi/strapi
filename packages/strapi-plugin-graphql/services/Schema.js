@@ -193,11 +193,15 @@ const schemaBuilder = {
             return acc;
           }, definition);
 
-        return `type ${globalId} {${this.formatGQL(gqlAttributes, {}, group)}}`;
+        let type = `type ${globalId} {${this.formatGQL(
+          gqlAttributes,
+          {},
+          group
+        )}}\n`;
+        type += Types.generateInputModel(group, globalId);
+        return type;
       })
       .join('\n');
-
-    console.log(groupDefs);
 
     // Extract custom definition, query or resolver.
     const {
