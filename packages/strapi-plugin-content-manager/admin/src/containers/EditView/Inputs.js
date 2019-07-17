@@ -39,7 +39,7 @@ const getInputType = (type = '') => {
   }
 };
 
-function Inputs({ keys, layout, modifiedData, name, onChange }) {
+function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
   const attribute = get(layout, ['schema', 'attributes', name], {});
   const { model, collection } = attribute;
   const isMedia =
@@ -68,6 +68,7 @@ function Inputs({ keys, layout, modifiedData, name, onChange }) {
   return (
     <InputsIndex
       {...metadata}
+      autoFocus={autoFocus}
       inputDescription={description}
       inputStyle={inputStyle}
       customInputs={{ json: InputJSONWithErrors, wysiwyg: WysiwygWithErrors }}
@@ -82,7 +83,12 @@ function Inputs({ keys, layout, modifiedData, name, onChange }) {
   );
 }
 
+Inputs.defaultProps = {
+  autoFocus: false,
+};
+
 Inputs.propTypes = {
+  autoFocus: PropTypes.bool,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,

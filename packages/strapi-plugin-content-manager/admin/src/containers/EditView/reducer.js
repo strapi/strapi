@@ -44,6 +44,20 @@ function reducer(state, action) {
             : { _temp__id: 0 },
         ]);
       });
+    case 'ADD_RELATION':
+      return state.updateIn(['modifiedData', ...action.keys], list => {
+        if (!action.value) {
+          return list;
+        }
+
+        const el = action.value[0].value;
+
+        if (list) {
+          return list.push(fromJS(el));
+        }
+
+        return fromJS([el]);
+      });
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('initialData', () => fromJS(action.data))

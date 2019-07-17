@@ -15,7 +15,6 @@ import {
 import pluginId from '../../pluginId';
 
 import Container from '../../components/Container';
-import SelectOne from '../../components/SelectOne';
 
 import { LinkWrapper, MainWrapper, SubWrapper } from './components';
 import Group from './Group';
@@ -23,6 +22,7 @@ import Inputs from './Inputs';
 
 import init, { setDefaultForm } from './init';
 import reducer, { initialState } from './reducer';
+import SelectWrapper from '../../components/SelectWrapper';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -371,9 +371,10 @@ function EditView({
 
                   return (
                     <div key={key} className="row">
-                      {fieldsRow.map(({ name }) => {
+                      {fieldsRow.map(({ name }, index) => {
                         return (
                           <Inputs
+                            autoFocus={key === 0 && index === 0}
                             key={name}
                             keys={name}
                             layout={layout}
@@ -413,22 +414,19 @@ function EditView({
                         {}
                       );
                       const value = get(modifiedData, [relationName], null);
-                      const Component = [
-                        'oneWay',
-                        'oneToOne',
-                        'manyToOne',
-                        'oneToManyMorph',
-                        'oneToOneMorph',
-                      ].includes(relation.relationType)
-                        ? SelectOne
-                        : // eslint-disable-next-line react/display-name
-                          () => <div>SelectMany</div>;
 
                       return (
-                        <Component
-                          key={relationName}
+                        <SelectWrapper
                           {...relation}
                           {...relationMetas}
+                          key={relationName}
+                          addRelation={({ target: { name, value } }) => {
+                            dispatch({
+                              type: 'ADD_RELATION',
+                              keys: name.split('.'),
+                              value,
+                            });
+                          }}
                           name={relationName}
                           onChange={({ target: { name, value } }) => {
                             dispatch({
@@ -438,6 +436,7 @@ function EditView({
                             });
                           }}
                           pathname={pathname}
+                          relationType={relation.relationType}
                           search={search}
                           value={value}
                         />
