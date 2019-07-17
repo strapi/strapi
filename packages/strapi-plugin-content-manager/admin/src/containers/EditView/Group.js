@@ -1,10 +1,9 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, memo } from 'react';
 import { fromJS } from 'immutable';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isArray } from 'lodash';
-import { DndProvider } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
+
 import pluginId from '../../pluginId';
 
 import { Button } from './components';
@@ -108,7 +107,7 @@ function Group({
   );
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <>
       <div className="row">
         <div className="col-12" style={{ paddingTop: 16, paddingBottom: 15 }}>
           <span
@@ -233,7 +232,7 @@ function Group({
           </div>
         )}
       </div>
-    </DndProvider>
+    </>
   );
 }
 
@@ -262,4 +261,4 @@ Group.propTypes = {
   removeField: PropTypes.func.isRequired,
 };
 
-export default Group;
+export default memo(Group);

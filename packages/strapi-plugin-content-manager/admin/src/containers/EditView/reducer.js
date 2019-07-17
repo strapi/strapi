@@ -85,7 +85,7 @@ function reducer(state, action) {
           return obj;
         })
         .update('isLoadingForLayouts', () => false);
-    case 'MOVE_GROUP_FIELD':
+    case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         return list
           .delete(action.dragIndex)
@@ -113,6 +113,8 @@ function reducer(state, action) {
 
           return list;
         });
+    case 'REMOVE_RELATION':
+      return state.removeIn(['modifiedData', ...action.keys.split('.')]);
     case 'RESET_FORM':
       return state.update('modifiedData', () => state.get('initialData'));
     case 'SET_COLLAPSES_COMPONENTS_STATE':

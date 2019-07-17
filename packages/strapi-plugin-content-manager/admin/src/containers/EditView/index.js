@@ -343,8 +343,9 @@ function EditView({
                         name={name}
                         modifiedData={modifiedData}
                         moveGroupField={(dragIndex, overIndex, name) => {
+                          console.log(name);
                           dispatch({
-                            type: 'MOVE_GROUP_FIELD',
+                            type: 'MOVE_FIELD',
                             dragIndex,
                             overIndex,
                             keys: name.split('.'),
@@ -427,12 +428,26 @@ function EditView({
                               value,
                             });
                           }}
+                          moveRelation={(dragIndex, overIndex, name) => {
+                            dispatch({
+                              type: 'MOVE_FIELD',
+                              dragIndex,
+                              overIndex,
+                              keys: name.split('.'),
+                            });
+                          }}
                           name={relationName}
                           onChange={({ target: { name, value } }) => {
                             dispatch({
                               type: 'ON_CHANGE',
                               keys: name.split('.'),
                               value,
+                            });
+                          }}
+                          onRemove={keys => {
+                            dispatch({
+                              type: 'REMOVE_RELATION',
+                              keys,
                             });
                           }}
                           pathname={pathname}

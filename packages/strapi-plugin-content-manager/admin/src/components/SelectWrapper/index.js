@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -16,8 +16,10 @@ function SelectWrapper({
   addRelation,
   label,
   mainField,
+  moveRelation,
   name,
   onChange,
+  onRemove,
   pathname,
   relationType,
   search,
@@ -135,7 +137,9 @@ function SelectWrapper({
         isLoading={isLoading}
         isClearable
         mainField={mainField}
+        move={moveRelation}
         name={name}
+        nextSearch={nextSearch}
         options={options}
         onChange={value => {
           onChange({ target: { name, value: value ? value.value : value } });
@@ -145,9 +149,11 @@ function SelectWrapper({
           setState(prevState => ({ ...prevState, _q: '', _start: 0 }));
         }}
         onMenuScrollToBottom={onMenuScrollToBottom}
+        onRemove={onRemove}
         placeholder={
           <FormattedMessage id={`${pluginId}.containers.Edit.addAnItem`} />
         }
+        targetModel={targetModel}
         value={value}
       />
       <div style={{ marginBottom: 26 }} />
@@ -158,6 +164,7 @@ function SelectWrapper({
 SelectWrapper.defaultProps = {
   description: '',
   label: '',
+  moveRelation: () => {},
   plugin: '',
   value: null,
 };
@@ -167,8 +174,10 @@ SelectWrapper.propTypes = {
   description: PropTypes.string,
   label: PropTypes.string,
   mainField: PropTypes.string.isRequired,
+  moveRelation: PropTypes.func,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
   pathname: PropTypes.string.isRequired,
   plugin: PropTypes.string,
   relationType: PropTypes.string.isRequired,
@@ -177,4 +186,4 @@ SelectWrapper.propTypes = {
   value: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
 };
 
-export default SelectWrapper;
+export default memo(SelectWrapper);

@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEqual, isEmpty, upperFirst } from 'lodash';
-import { DndProvider } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
 
 import {
   BackHeader,
@@ -134,7 +132,7 @@ function SettingViewModel({
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <>
       <BackHeader onClick={() => goBack()} />
       <Container className="container-fluid">
         <PluginHeader
@@ -243,7 +241,7 @@ function SettingViewModel({
         popUpWarningType="danger"
         onConfirm={() => onSubmit(name, emitEvent)}
       />
-    </DndProvider>
+    </>
   );
 }
 

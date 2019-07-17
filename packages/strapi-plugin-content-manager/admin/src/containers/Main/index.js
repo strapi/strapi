@@ -4,9 +4,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { DndProvider } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 
 import pluginId from '../../pluginId';
 
+import DragLayer from '../../components/DragLayer';
 import EditView from '../EditView';
 import ListView from '../ListView';
 import SettingViewModel from '../SettingViewModel';
@@ -68,7 +71,12 @@ function Main({
     />
   ));
 
-  return <Switch>{routes}</Switch>;
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <DragLayer />
+      <Switch>{routes}</Switch>
+    </DndProvider>
+  );
 }
 
 Main.propTypes = {

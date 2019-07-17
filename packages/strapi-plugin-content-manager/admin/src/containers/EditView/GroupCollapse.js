@@ -2,14 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
+import { DragSource, DropTarget } from 'react-dnd';
 import { Collapse } from 'reactstrap';
+
 import pluginId from '../../pluginId';
+
+import ItemTypes from '../../utils/itemsTypes';
 import Grab from '../../assets/images/grab_icon.svg';
 import Logo from '../../assets/images/caret_top.svg';
-import { Flex, GroupCollapseWrapper, ImgWrapper } from './components';
-import { DragSource, DropTarget } from 'react-dnd';
-import ItemTypes from '../../utils/itemsTypes';
 
+import { Flex, GroupCollapseWrapper, ImgWrapper } from './components';
 import Inputs from './Inputs';
 
 function GroupCollapse({
@@ -114,7 +116,6 @@ GroupCollapse.propTypes = {
   removeField: PropTypes.func,
 };
 
-// export default GroupCollapse;
 export default DropTarget(
   ItemTypes.GROUP,
   {

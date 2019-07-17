@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { get, isNull } from 'lodash';
 
@@ -51,4 +51,4 @@ SelectOne.propTypes = {
   value: PropTypes.object,
 };
 
-export default SelectOne;
+export default memo(SelectOne);
