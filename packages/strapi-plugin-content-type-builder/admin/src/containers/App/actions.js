@@ -232,7 +232,7 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
     } = current;
 
     acc.push({
-      description,
+      description: description || '',
       fields: Object.keys(attributes).length,
       icon: 'fa-cube',
       isTemporary: false,

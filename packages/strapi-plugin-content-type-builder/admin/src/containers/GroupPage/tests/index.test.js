@@ -5,12 +5,13 @@ import { shallow } from 'enzyme';
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
 
-import { EmptyAttributesBlock } from 'strapi-helper-plugin';
+import { EmptyAttributesBlock, ListHeader } from 'strapi-helper-plugin';
 
 import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
 
 import MenuContext from '../../MenuContext';
+import ViewContainer from '../../ViewContainer';
 
 import { GroupPage, mapDispatchToProps } from '../index';
 
@@ -47,7 +48,7 @@ const props = {
       name: 'tests',
       description: '',
       fields: 2,
-      source: 'users-permissions',
+      source: null,
       isTemporary: false,
     },
   ],
@@ -141,6 +142,14 @@ describe('CTB <GroupPage />', () => {
     });
   });
 
+  describe('GetFeatureName', () => {
+    it("should return the group's name", () => {
+      const { getFeatureName } = shallow(<GroupPage {...props} />).instance();
+
+      expect(getFeatureName()).toEqual('tests');
+    });
+  });
+
   describe('GetFeature', () => {
     it('should return the correct group', () => {
       const { getFeature } = shallow(<GroupPage {...props} />).instance();
@@ -156,11 +165,22 @@ describe('CTB <GroupPage />', () => {
     });
   });
 
-  describe('GetFeatureName', () => {
-    it("should return the group's name", () => {
-      const { getFeatureName } = shallow(<GroupPage {...props} />).instance();
+  describe('GetSource', () => {
+    it("should return the correct group's source if it exists", () => {
+      const source = 'users-permissions';
+      props.match.params.groupName = `tests&source=${source}`;
 
-      expect(getFeatureName()).toEqual('tests');
+      const { getSource } = shallow(<GroupPage {...props} />).instance();
+
+      expect(getSource()).toEqual(source);
+
+      props.match.params.groupName = `tests`;
+    });
+
+    it("should return null if the group's source does not exist", () => {
+      const { getSource } = shallow(<GroupPage {...props} />).instance();
+
+      expect(getSource()).toEqual(null);
     });
   });
 
@@ -285,6 +305,48 @@ describe('CTB <GroupPage />, lifecycle', () => {
     });
   });
 
+  describe('PluginHeaderActions', () => {
+    it('should call submitTempGroup with newGroup param when isTemporary is true', () => {
+      props.groups[0].isTemporary = true;
+      props.newGroup.name = 'tests';
+
+      props.newGroup.schema.attributes = [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+      ];
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const { pluginHeaderActions } = wrapper.find(ViewContainer).props();
+
+      pluginHeaderActions[1].onClick();
+
+      expect(props.submitTempGroup).toHaveBeenCalledWith(
+        props.newGroup,
+        context
+      );
+    });
+  });
+
+  describe('ListHeader button', () => {
+    it('should call openAttributesModal on list header button click', () => {
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const spyOnClick = jest.spyOn(wrapper.instance(), 'openAttributesModal');
+      wrapper.instance().forceUpdate();
+
+      expect(wrapper.find(ListHeader)).toHaveLength(1);
+
+      const button = wrapper.find(ListHeader).prop('button');
+      button.onClick();
+
+      expect(spyOnClick).toHaveBeenCalled();
+    });
+  });
+
   describe('DeleteGroupAttribute', () => {
     it('should display a notification if thee modal cannot be opened', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
@@ -334,7 +396,6 @@ describe('CTB <GroupPage />, lifecycle', () => {
       handleClickOnTrashIcon(0);
       handleDeleteAttribute();
 
-      expect(true).toBe(true);
       const keys = ['newGroup', 'schema', 'attributes', 0];
       expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
       expect(context.emitEvent).toHaveBeenCalledWith('willDeleteFieldOfGroup');
