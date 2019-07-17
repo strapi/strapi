@@ -239,7 +239,6 @@ module.exports = {
           .join('\n')}
       }
     `;
-    console.log(inputs);
     return inputs;
   },
 

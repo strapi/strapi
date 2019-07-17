@@ -134,21 +134,20 @@ const schemaBuilder = {
 
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
-      const models = Object.keys(strapi.models).filter(
-        model => model !== 'core_store'
-      );
+      // const models = Object.keys(strapi.models).filter(
+      //   model => model !== 'core_store'
+      // )
 
-      const modelCruds = Resolvers.buildShadowCRUD(models);
+      const modelCruds = Resolvers.buildShadowCRUD(
+        _.omit(strapi.models, ['core_store'])
+      );
       shadowCRUD = Object.keys(strapi.plugins).reduce((acc, plugin) => {
         const {
           definition,
           query,
           mutation,
           resolver,
-        } = Resolvers.buildShadowCRUD(
-          Object.keys(strapi.plugins[plugin].models),
-          plugin
-        );
+        } = Resolvers.buildShadowCRUD(strapi.plugins[plugin].models, plugin);
 
         // We cannot put this in the merge because it's a string.
         acc.definition += definition || '';
@@ -161,47 +160,19 @@ const schemaBuilder = {
       }, modelCruds);
     }
 
-    const groupDefs = Object.values(strapi.groups)
-      .map(group => {
-        const { globalId, attributes, primaryKey } = group;
+    let groups = Object.keys(strapi.groups)
+      .map(key => Resolvers.buildModel(strapi.groups[key]))
+      .reduce(
+        (acc, group) => {
+          return {
+            definition: acc.definition + group.definition,
+            resolver: _.merge(acc.resolver, group.resolver),
+          };
+        },
+        { definition: '', resolver: {} }
+      );
 
-        const definition = {
-          [primaryKey]: 'ID!',
-        };
-
-        // always add an id field to make the api database agnostic
-        if (primaryKey !== 'id') {
-          definition['id'] = 'ID!';
-        }
-        // Add timestamps attributes.
-        if (_.isArray(_.get(group, 'options.timestamps'))) {
-          const [createdAtKey, updatedAtKey] = group.options.timestamps;
-          definition[createdAtKey] = 'DateTime!';
-          definition[updatedAtKey] = 'DateTime!';
-        }
-
-        const gqlAttributes = Object.keys(attributes)
-          .filter(attribute => attributes[attribute].private !== true)
-          .reduce((acc, attribute) => {
-            // Convert our type to the GraphQL type.
-            acc[attribute] = Types.convertType({
-              definition: attributes[attribute],
-              modelName: globalId,
-              attributeName: attribute,
-            });
-
-            return acc;
-          }, definition);
-
-        let type = `type ${globalId} {${this.formatGQL(
-          gqlAttributes,
-          {},
-          group
-        )}}\n`;
-        type += Types.generateInputModel(group, globalId);
-        return type;
-      })
-      .join('\n');
+    console.log(groups);
 
     // Extract custom definition, query or resolver.
     const {
@@ -220,7 +191,12 @@ const schemaBuilder = {
     // Build resolvers.
     const resolvers =
       _.omitBy(
-        _.merge(shadowCRUD.resolver, resolver, polymorphicResolver),
+        _.merge(
+          shadowCRUD.resolver,
+          groups.resolver,
+          resolver,
+          polymorphicResolver
+        ),
         _.isEmpty
       ) || {};
 
@@ -280,7 +256,7 @@ const schemaBuilder = {
     let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
-      ${groupDefs}
+      ${groups.definition}
       type Query {${shadowCRUD.query &&
         this.formatGQL(
           shadowCRUD.query,

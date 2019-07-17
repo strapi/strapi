@@ -10,6 +10,10 @@
       "type": "float",
       "required": true
     },
+    "enum": {
+      "type": "enumeration",
+      "enum": ["morning,", "noon"]
+    },
     "picture": {
       "model": "file",
       "via": "related",

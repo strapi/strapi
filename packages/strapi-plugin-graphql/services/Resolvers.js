@@ -14,6 +14,232 @@ const Mutation = require('./Mutation.js');
 const Types = require('./Types.js');
 const Schema = require('./Schema.js');
 
+const buildModel = (model, plugin) => {
+  const resolvers =
+    strapi.plugins['content-manager'].services['contentmanager'];
+
+  const { globalId, primaryKey, attributes } = model;
+
+  let definition = '';
+  const type = {
+    id: 'ID!',
+    [primaryKey]: 'ID!',
+  };
+
+  if (_.isArray(_.get(model, 'options.timestamps'))) {
+    const [createdAtKey, updatedAtKey] = model.options.timestamps;
+    type[createdAtKey] = 'DateTime!';
+    type[updatedAtKey] = 'DateTime!';
+  }
+
+  const gqlAttributes = Object.keys(attributes)
+    .filter(attribute => attributes[attribute].private !== true)
+    .reduce((acc, attribute) => {
+      // Convert our type to the GraphQL type.
+      acc[attribute] = Types.convertType({
+        definition: attributes[attribute],
+        modelName: globalId,
+        attributeName: attribute,
+      });
+      return acc;
+    }, {});
+
+  definition += Object.keys(attributes)
+    .filter(attribute => attributes[attribute].type === 'enumeration')
+    .map(attribute => {
+      const definition = attributes[attribute];
+
+      return `enum ${Types.convertEnumType(
+        definition,
+        globalId,
+        attribute
+      )} { ${definition.enum.join(' \n ')} }`;
+    })
+    .join(' ');
+
+  (model.associations || [])
+    .filter(association => association.type === 'collection')
+    .forEach(association => {
+      gqlAttributes[
+        `${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`
+      ] = attributes[association.alias];
+
+      delete gqlAttributes[association.alias];
+    });
+
+  definition += `${Schema.getDescription(
+    {},
+    model
+  )}type ${globalId} {${Schema.formatGQL(
+    {
+      ...type,
+      ...gqlAttributes,
+    },
+    {},
+    model
+  )}}\n\n`;
+
+  definition += Types.generateInputModel(model, globalId);
+
+  const resolver = {
+    [globalId]: {
+      id: obj => obj[primaryKey],
+    },
+  };
+
+  (model.associations || []).forEach(association => {
+    switch (association.nature) {
+      case 'oneToManyMorph':
+        return _.merge(resolver[globalId], {
+          [association.alias]: async obj => {
+            const withRelated = await resolvers.fetch(
+              {
+                id: obj[model.primaryKey],
+                model: name,
+              },
+              plugin,
+              [association.alias],
+              false
+            );
+
+            const entry =
+              withRelated && withRelated.toJSON
+                ? withRelated.toJSON()
+                : withRelated;
+
+            // Set the _type only when the value is defined
+            if (entry[association.alias]) {
+              entry[association.alias]._type = _.upperFirst(association.model);
+            }
+
+            return entry[association.alias];
+          },
+        });
+      case 'manyMorphToOne':
+      case 'manyMorphToMany':
+      case 'manyToManyMorph':
+        return _.merge(resolver[globalId], {
+          [association.alias]: async obj => {
+            // eslint-disable-line no-unused-vars
+            const [withRelated, withoutRelated] = await Promise.all([
+              resolvers.fetch(
+                {
+                  id: obj[model.primaryKey],
+                  model: name,
+                },
+                plugin,
+                [association.alias],
+                false
+              ),
+              resolvers.fetch(
+                {
+                  id: obj[model.primaryKey],
+                  model: name,
+                },
+                plugin,
+                []
+              ),
+            ]);
+
+            const entry =
+              withRelated && withRelated.toJSON
+                ? withRelated.toJSON()
+                : withRelated;
+
+            entry[association.alias].map((entry, index) => {
+              const type =
+                _.get(withoutRelated, `${association.alias}.${index}.kind`) ||
+                _.upperFirst(
+                  _.camelCase(
+                    _.get(
+                      withoutRelated,
+                      `${association.alias}.${index}.${association.alias}_type`
+                    )
+                  )
+                ) ||
+                _.upperFirst(_.camelCase(association[association.type]));
+
+              entry._type = type;
+
+              return entry;
+            });
+
+            return entry[association.alias];
+          },
+        });
+      default:
+    }
+
+    _.merge(resolver[globalId], {
+      [association.alias]: async (obj, options) => {
+        // eslint-disable-line no-unused-vars
+        // Construct parameters object to retrieve the correct related entries.
+        const params = {
+          model: association.model || association.collection,
+        };
+
+        let queryOpts = {
+          source: association.plugin,
+        };
+
+        // Get refering model.
+        const ref = association.plugin
+          ? strapi.plugins[association.plugin].models[params.model]
+          : strapi.models[params.model];
+
+        if (association.type === 'model') {
+          params[ref.primaryKey] = _.get(
+            obj,
+            [association.alias, ref.primaryKey],
+            obj[association.alias]
+          );
+        } else {
+          const queryParams = Query.amountLimiting(options);
+          queryOpts = {
+            ...queryOpts,
+            ...Query.convertToParams(_.omit(queryParams, 'where')), // Convert filters (sort, limit and start/skip)
+            ...Query.convertToQuery(queryParams.where),
+          };
+
+          if (
+            (association.nature === 'manyToMany' && association.dominant) ||
+            association.nature === 'manyWay'
+          ) {
+            _.set(
+              queryOpts,
+              ['query', ref.primaryKey],
+              obj[association.alias].map(val => val[ref.primaryKey] || val) ||
+                []
+            );
+          } else {
+            _.set(queryOpts, ['query', association.via], obj[ref.primaryKey]);
+          }
+        }
+
+        const loaderName = association.plugin
+          ? `${association.plugin}__${params.model}`
+          : params.model;
+
+        return association.model
+          ? strapi.plugins.graphql.services.loaders.loaders[loaderName].load({
+              params,
+              options: queryOpts,
+              single: true,
+            })
+          : strapi.plugins.graphql.services.loaders.loaders[loaderName].load({
+              options: queryOpts,
+              association,
+            });
+      },
+    });
+  });
+
+  return {
+    definition,
+    resolver,
+  };
+};
+
 /**
  * Construct the GraphQL query & definition and apply the right resolvers.
  *
@@ -36,10 +262,8 @@ const buildShadowCRUD = (models, plugin) => {
     return initialState;
   }
 
-  return models.reduce((acc, name) => {
-    const model = plugin
-      ? strapi.plugins[plugin].models[name]
-      : strapi.models[name];
+  return Object.keys(models).reduce((acc, name) => {
+    const model = models[name];
 
     const { globalId, primaryKey } = model;
     // Setup initial state with default attribute that should be displayed
@@ -429,4 +653,5 @@ const buildShadowCRUD = (models, plugin) => {
 
 module.exports = {
   buildShadowCRUD,
+  buildModel,
 };
