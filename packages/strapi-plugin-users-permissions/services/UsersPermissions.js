@@ -515,7 +515,7 @@ module.exports = {
                 {}
               );
 
-              if (_.differenceWith([bodyAction], [currentAction]).length > 0) {
+              if (!_.isEqual(bodyAction, currentAction)) {
                 acc.push(
                   strapi.query('permission', 'users-permissions').update(
                     {

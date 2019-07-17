@@ -111,7 +111,11 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const runUpdate = async trx => {
       const updatedEntry =
         Object.keys(data).length > 0
-          ? await model.forge(params).save(data, { transacting: trx })
+          ? await entry.save(data, {
+              transacting: trx,
+              method: 'update',
+              patch: true,
+            })
           : entry;
       await updateGroups(updatedEntry, values, { transacting: trx });
       return updatedEntry;
