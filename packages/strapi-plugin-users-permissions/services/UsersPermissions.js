@@ -424,8 +424,7 @@ module.exports = {
   },
 
   async removeDuplicate() {
-    const primaryKey = strapi.query('permission', 'users-permissions')
-      .primaryKey;
+    const { primaryKey } = strapi.query('permission', 'users-permissions');
 
     // Retrieve permissions by creation date (ID or ObjectID).
     const permissions = await strapi
@@ -434,16 +433,12 @@ module.exports = {
 
     const value = permissions.reduce(
       (acc, permission) => {
-        const index = acc.toKeep.findIndex(
-          element =>
-            element ===
-            `${permission.type}.controllers.${permission.controller}.${permission.action}.${permission.role[primaryKey]}`
-        );
+        const key = `${permission.type}.controllers.${permission.controller}.${permission.action}.${permission.role[primaryKey]}`;
+
+        const index = acc.toKeep.findIndex(element => element === key);
 
         if (index === -1) {
-          acc.toKeep.push(
-            `${permission.type}.controllers.${permission.controller}.${permission.action}.${permission.role[primaryKey]}`
-          );
+          acc.toKeep.push(key);
         } else {
           acc.toRemove.push(permission[primaryKey]);
         }
@@ -457,7 +452,6 @@ module.exports = {
     );
 
     if (value.toRemove.length > 0) {
-      const { primaryKey } = strapi.query('permission', 'users-permissions');
       return strapi.query('permission', 'users-permissions').delete({
         [`${primaryKey}_in`]: value.toRemove,
       });
