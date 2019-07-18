@@ -13,13 +13,7 @@ import 'codemirror/addon/lint/javascript-lint';
 import 'codemirror/addon/edit/closebrackets';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/liquibyte.css';
-import 'codemirror/theme/xq-dark.css';
-import 'codemirror/theme/3024-day.css';
 import 'codemirror/theme/3024-night.css';
-import 'codemirror/theme/blackboard.css';
-import 'codemirror/theme/monokai.css';
-import 'codemirror/theme/cobalt.css';
 
 import { isEmpty, isObject, trimStart } from 'lodash';
 import jsonlint from './jsonlint';
@@ -28,16 +22,7 @@ import styles from './styles.scss';
 const WAIT = 600;
 const stringify = JSON.stringify;
 const parse = JSON.parse;
-const DEFAULT_THEME = 'monokai';
-const THEMES = [
-  'blackboard',
-  'cobalt',
-  'monokai',
-  '3024-day',
-  '3024-night',
-  'liquibyte',
-  'xq-dark',
-];
+const DEFAULT_THEME = '3024-night';
 
 class InputJSON extends React.Component {
   constructor(props) {
@@ -94,8 +79,6 @@ class InputJSON extends React.Component {
 
   setSize = () => this.codeMirror.setSize('100%', 'auto');
 
-  setTheme = theme => this.codeMirror.setOption('theme', theme);
-
   getContentAtLine = line => this.codeMirror.getLine(line);
 
   getEditorOption = opt => this.codeMirror.getOption(opt);
@@ -104,7 +87,6 @@ class InputJSON extends React.Component {
 
   markSelection = ({ message }) => {
     let line = parseInt(message.split(':')[0].split('line ')[1], 10) - 1;
-
     let content = this.getContentAtLine(line);
 
     if (content === '{') {
@@ -196,17 +178,6 @@ class InputJSON extends React.Component {
           id={this.props.name}
           defaultValue=""
         />
-        <select
-          className={styles.select}
-          onChange={({ target }) => this.setTheme(target.value)}
-          defaultValue={DEFAULT_THEME}
-        >
-          {THEMES.sort().map(theme => (
-            <option key={theme} value={theme}>
-              {theme}
-            </option>
-          ))}
-        </select>
       </div>
     );
   }

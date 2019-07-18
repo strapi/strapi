@@ -32,9 +32,9 @@ function settingViewModelReducer(state = initialState, action) {
       );
     case GET_DATA_SUCCEEDED:
       return state
-        .update('initialData', () => fromJS(action.layout))
+        .update('initialData', () => fromJS(action.layout || {}))
         .update('isLoading', () => false)
-        .update('modifiedData', () => fromJS(action.layout));
+        .update('modifiedData', () => fromJS(action.layout || {}));
     case MOVE_FIELD_LIST:
       return state
         .updateIn(['modifiedData', 'layouts', 'list'], list => {

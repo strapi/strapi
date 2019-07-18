@@ -18,7 +18,7 @@ export function getDataSucceeded(generalSettings, groups, models) {
     type: GET_DATA_SUCCEEDED,
     generalSettings,
     groups,
-    models,
+    models: models.filter(model => model.isDisplayed === true),
   };
 }
 

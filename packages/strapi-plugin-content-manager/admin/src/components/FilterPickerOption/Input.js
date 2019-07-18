@@ -37,12 +37,11 @@ function Input({ type, ...rest }) {
   const style = { width: '210px', paddingTop: '4px' };
   const styles =
     type === 'boolean' ? { minWidth: '100px', maxWidth: '200px' } : style;
-
   const wrapperStyle = type == 'boolean' ? { marginRight: '20px' } : {};
 
   return (
     <InputWrapperDate type={type || 'text'} style={wrapperStyle}>
-      <Component {...rest} style={styles} />
+      <Component {...rest} style={styles} autoComplete="off" />
     </InputWrapperDate>
   );
 }

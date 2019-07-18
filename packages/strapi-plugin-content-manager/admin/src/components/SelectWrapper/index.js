@@ -41,9 +41,9 @@ function SelectWrapper({
   const startRef = useRef();
   startRef.current = state._start;
 
-  ref.current = async (uid, params = state) => {
+  ref.current = async (signal, params = state) => {
     try {
-      const requestUrl = `/${pluginId}/explorer/${uid}`;
+      const requestUrl = `/${pluginId}/explorer/${targetModel}`;
 
       if (isEmpty(params._q)) {
         delete params._q;
@@ -52,6 +52,7 @@ function SelectWrapper({
       const data = await request(requestUrl, {
         method: 'GET',
         params: params,
+        signal,
       });
       const formattedData = data.map(obj => {
         return { value: obj, label: obj[mainField] };
@@ -84,10 +85,14 @@ function SelectWrapper({
   };
 
   useEffect(() => {
-    ref.current(targetModel);
+    const abortController = new AbortController();
+    const { signal } = abortController;
+    ref.current(signal);
 
-    return () => {};
-  }, [ref, targetModel, state._start, state._q]);
+    return () => {
+      abortController.abort();
+    };
+  }, [ref]);
 
   const onInputChange = inputValue => {
     setState(prevState => {
@@ -98,11 +103,15 @@ function SelectWrapper({
       return { ...prevState, _q: inputValue };
     });
 
+    ref.current();
+
     return inputValue;
   };
 
   const onMenuScrollToBottom = () => {
     setState(prevState => ({ ...prevState, _start: prevState._start + 1 }));
+
+    ref.current();
   };
   const isSingle = [
     'oneWay',

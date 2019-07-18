@@ -59,7 +59,7 @@ function Row({ goTo, isBulkable, row, headers }) {
   return (
     <>
       {isBulkable && (
-        <td key="i">
+        <td key="i" onClick={e => e.stopPropagation()}>
           <CustomInputCheckbox
             name={row.id}
             onChange={onChangeBulk}

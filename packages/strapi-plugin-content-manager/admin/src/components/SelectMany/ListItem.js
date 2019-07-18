@@ -49,6 +49,7 @@ function ListItem({
   }, [preview]);
 
   const opacity = isDragging ? 0.2 : 1;
+
   return (
     <Li ref={node => drag(drop(node))} style={{ opacity }}>
       <Relation mainField={mainField} onRemove={onRemove} data={data} to={to} />
