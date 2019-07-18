@@ -211,8 +211,21 @@ module.exports = {
     const globalId = model.globalId;
     const inputName = `${_.capitalize(name)}Input`;
 
+    if (_.isEmpty(model.attributes)) {
+      return `
+      input ${inputName} {
+        _: String
+      }
+
+      input edit${inputName} {
+        ${allowIds ? 'id: ID' : '_: String'}
+      }
+     `;
+    }
+
     const inputs = `
       input ${inputName} {
+        
         ${Object.keys(model.attributes)
           .map(attribute => {
             return `${attribute}: ${this.convertType({
