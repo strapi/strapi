@@ -29,7 +29,7 @@ const generateTestApp = async ({ appName, database }) => {
       options: {},
     },
     rootPath: path.resolve(appName),
-    name: 'test-app',
+    name: appName,
     // disable quickstart run app after creation
     runQuickstartApp: false,
     // use pacakge version as strapiVersion (all packages have the same version);
