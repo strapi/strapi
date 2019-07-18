@@ -22,6 +22,7 @@ import SelectWrapper from '../../components/SelectWrapper';
 import init, { setDefaultForm } from './init';
 import reducer, { initialState } from './reducer';
 import { LinkWrapper, MainWrapper, SubWrapper } from './components';
+import createYupSchema from './utils';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -68,6 +69,8 @@ function EditView({
 
   const state = reducerState.toJS();
   const {
+    didCheckErrors,
+    errors,
     groupLayoutsData,
     initialData,
     modifiedData,
@@ -210,9 +213,7 @@ function EditView({
       strapi.notification.error(`${pluginId}.error.record.delete`);
     }
   };
-  const handleSubmit = e => {
-    e.preventDefault();
-  };
+
   const displayedFieldNameInHeader = get(
     layout,
     ['settings', 'mainField'],
@@ -269,6 +270,33 @@ function EditView({
     return componentToInject;
   };
 
+  const handleSubmit = async e => {
+    e.preventDefault();
+    const schema = createYupSchema(layout, groupLayoutsData);
+
+    try {
+      await schema.validate(modifiedData, { abortEarly: false });
+    } catch (err) {
+      const errors = get(err, 'inner', []).reduce((acc, curr) => {
+        acc[
+          curr.path
+            .split('[')
+            .join('.')
+            .split(']')
+            .join('')
+        ] = [{ id: curr.message }];
+
+        return acc;
+      }, {});
+      dispatch({
+        type: 'SET_ERRORS',
+        errors,
+      });
+
+      strapi.notification.error('Please check the form');
+    }
+  };
+
   return (
     <EditViewProvider
       addRelation={({ target: { name, value } }) => {
@@ -278,6 +306,8 @@ function EditView({
           value,
         });
       }}
+      didCheckErrors={didCheckErrors}
+      errors={errors}
       moveRelation={(dragIndex, overIndex, name) => {
         dispatch({
           type: 'MOVE_FIELD',
@@ -407,6 +437,8 @@ function EditView({
                         return (
                           <Inputs
                             autoFocus={key === 0 && index === 0}
+                            didCheckErrors={didCheckErrors}
+                            errors={errors}
                             key={name}
                             keys={name}
                             layout={layout}

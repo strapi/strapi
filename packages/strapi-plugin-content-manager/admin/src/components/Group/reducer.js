@@ -1,6 +1,6 @@
 import { fromJS } from 'immutable';
 
-const initialState = fromJS({ collapses: [] });
+const initialState = fromJS({ collapses: [], collapsesToOpen: [] });
 
 function reducer(state, action) {
   switch (action.type) {
@@ -14,6 +14,18 @@ function reducer(state, action) {
       return state.update('collapses', list =>
         list.map(obj => obj.update('isOpen', () => false))
       );
+    case 'OPEN_COLLAPSES_THAT_HAVE_ERRORS':
+      return state
+        .update('collapsesToOpen', () => fromJS(action.collapsesToOpen))
+        .update('collapses', list => {
+          return list.map((obj, index) => {
+            if (action.collapsesToOpen.indexOf(index.toString()) !== -1) {
+              return obj.update('isOpen', () => true);
+            }
+
+            return obj.update('isOpen', () => false);
+          });
+        });
     case 'TOGGLE_COLLAPSE':
       return state.update('collapses', list => {
         return list.map((obj, index) => {
@@ -21,9 +33,19 @@ function reducer(state, action) {
             return obj.update('isOpen', v => !v);
           }
 
+          if (
+            state
+              .get('collapsesToOpen')
+              .toJS()
+              .indexOf(index.toString()) !== -1
+          ) {
+            return obj;
+          }
+
           return obj.update('isOpen', () => false);
         });
       });
+
     case 'REMOVE_COLLAPSE':
       return state
         .removeIn(['collapses', action.index])

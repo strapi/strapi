@@ -1,10 +1,10 @@
-import React, { useReducer, memo } from 'react';
+import React, { useEffect, useReducer, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 
 import pluginId from '../../pluginId';
-
+import { useEditView } from '../../contexts/EditView';
 import { Button } from './components';
 import Form from './Form';
 import GroupCollapse from './GroupCollapse';
@@ -25,6 +25,7 @@ function Group({
   onChange,
   removeField,
 }) {
+  const { didCheckErrors, errors } = useEditView();
   const fields = get(layout, ['layouts', 'edit'], []);
   const [state, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, groupValue)
@@ -52,6 +53,21 @@ function Group({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [groupValue]
   );
+
+  useEffect(() => {
+    const collapsesToOpen = Object.keys(errors)
+      .filter(errorPath => errorPath.split('.')[0] === name && isRepeatable)
+      .map(errorPath => errorPath.split('.')[1]);
+
+    dispatch({
+      type: 'OPEN_COLLAPSES_THAT_HAVE_ERRORS',
+      collapsesToOpen: collapsesToOpen.filter(
+        (v, index) => collapsesToOpen.indexOf(v) === index
+      ),
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [didCheckErrors]);
 
   return (
     <>

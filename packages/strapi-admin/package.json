@@ -81,7 +81,8 @@
     "url-loader": "^1.1.2",
     "video-react": "^0.13.2",
     "webpack": "^4.29.6",
-    "webpackbar": "^3.2.0"
+    "webpackbar": "^3.2.0",
+    "yup": "^0.27.0"
   },
   "author": {
     "name": "Strapi",

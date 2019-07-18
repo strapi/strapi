@@ -2,6 +2,8 @@ import { fromJS } from 'immutable';
 
 const initialState = fromJS({
   collapses: {},
+  didCheckErrors: false,
+  errors: {},
   groupLayoutsData: {},
   initialData: {},
   isLoading: true,
@@ -123,6 +125,10 @@ function reducer(state, action) {
       return state.update('modifiedData', () => state.get('initialData'));
     case 'SET_COLLAPSES_COMPONENTS_STATE':
       return state.update('collapses', () => fromJS(action.collapses));
+    case 'SET_ERRORS':
+      return state
+        .update('errors', () => fromJS(action.errors))
+        .update('didCheckErrors', v => !v);
     default:
       return state;
   }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { get, omit } from 'lodash';
 
 import { InputsIndex } from 'strapi-helper-plugin';
-
+import { useEditView } from '../../contexts/EditView';
 import InputJSONWithErrors from '../InputJSONWithErrors';
 import WysiwygWithErrors from '../WysiwygWithErrors';
 
@@ -39,7 +39,17 @@ const getInputType = (type = '') => {
   }
 };
 
-function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
+function Inputs({
+  autoFocus,
+  // didCheckErrors,
+  // errors,
+  keys,
+  layout,
+  modifiedData,
+  name,
+  onChange,
+}) {
+  const { didCheckErrors, errors } = useEditView();
   const attribute = get(layout, ['schema', 'attributes', name], {});
   const { model, collection } = attribute;
   const isMedia =
@@ -64,11 +74,14 @@ function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
   if (visible === false) {
     return null;
   }
+  const inputErrors = get(errors, keys, []);
 
   return (
     <InputsIndex
       {...metadata}
       autoFocus={autoFocus}
+      didCheckErrors={didCheckErrors}
+      errors={inputErrors}
       inputDescription={description}
       inputStyle={inputStyle}
       customInputs={{ json: InputJSONWithErrors, wysiwyg: WysiwygWithErrors }}
