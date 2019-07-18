@@ -80,11 +80,18 @@ function EditView({
     isLoadingForLayouts || (!isCreatingEntry && isLoading);
 
   useEffect(() => {
+    // Cancel requests
+    const abortControllerFetchData = new AbortController();
+    const abortControllerLayouts = new AbortController();
+    const signalFetchData = abortControllerFetchData.signal;
+    const signalFetchLayouts = abortControllerLayouts.signal;
+
     const fetchData = async () => {
       try {
         const data = await request(getRequestUrl(`${slug}/${id}`), {
           method: 'GET',
           params: { source },
+          signal: signalFetchData,
         });
 
         dispatch({
@@ -92,14 +99,19 @@ function EditView({
           data,
         });
       } catch (err) {
-        strapi.notification.error(`${pluginId}.error.record.fetch`);
+        if (err.code !== 20) {
+          strapi.notification.error(`${pluginId}.error.record.fetch`);
+        }
       }
     };
     const fetchGroupLayouts = async () => {
       try {
         const data = await Promise.all(
           groupLayoutsToGet.map(uid =>
-            request(`/${pluginId}/fixtures/layouts/${uid}`, { method: 'GET' })
+            request(`/${pluginId}/fixtures/layouts/${uid}`, {
+              method: 'GET',
+              signal: signalFetchLayouts,
+            })
           )
         );
         const groupLayouts = data.reduce((acc, current) => {
@@ -142,9 +154,11 @@ function EditView({
           isCreatingEntry,
         });
       } catch (err) {
-        console.log({ err });
         // TODO ADD A TRAD
-        strapi.notification.error('notification.error');
+
+        if (err.code !== 20) {
+          strapi.notification.error('notification.error');
+        }
       }
     };
 
@@ -158,6 +172,11 @@ function EditView({
     }
 
     fetchGroupLayouts();
+
+    return () => {
+      abortControllerFetchData.abort();
+      abortControllerLayouts.abort();
+    };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, isCreatingEntry, slug, source, pathname]);

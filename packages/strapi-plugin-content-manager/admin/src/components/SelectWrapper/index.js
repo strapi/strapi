@@ -80,7 +80,9 @@ function SelectWrapper({
       );
       setIsLoading(false);
     } catch (err) {
-      strapi.notification.error('notification.error');
+      if (err.code !== 20) {
+        strapi.notification.error('notification.error');
+      }
     }
   };
 
