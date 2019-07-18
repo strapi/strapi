@@ -108,7 +108,6 @@ module.exports = {
                 details.model || details.collection,
                 details.plugin
               );
-
               switch (association.nature) {
                 case 'oneWay': {
                   return _.set(

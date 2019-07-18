@@ -290,7 +290,9 @@ describe('Test Graphql API End to End', () => {
 
       // all expected values are in the result
       expected.forEach(expectedPost => {
-        expect(res.body.data.posts).toEqual(expect.arrayContaining([expectedPost]));
+        expect(res.body.data.posts).toEqual(
+          expect.arrayContaining([expectedPost])
+        );
       });
     });
 

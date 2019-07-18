@@ -20,9 +20,6 @@
     "published": {
       "type": "boolean"
     },
-    "value": {
-      "type": "integer"
-    },
     "json": {
       "type": "json"
     },

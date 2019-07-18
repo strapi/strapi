@@ -33,6 +33,20 @@ The panel will be available through [http://localhost:1337/dashboard](http://loc
 
 **_Currently not available_**
 
+### Styles
+
+The AdminUI package source can be easily found in `./node_modules/strapi-admin/src/`.
+
+For example, to change the top-left displayed admin panel's color, `./node_modules/strapi-admin/admin/src/components/LeftMenuHeader/styles.scss` should be overriden by `./admin/src/components/LeftMenuHeader/styles.scss` with your own styles.
+
+Thus, you are replacing the files that would normally be in `node_modules/strapi-admin/admin/src` and directing them to `admin/src/some/file/path`.
+
+To apply your changes you need to rebuild your admin panel
+
+```
+npm run build
+```
+
 ### Logo
 
 To change the top-left displayed admin panel's logo, add your custom image at `./admin/src/assets/images/logo-strapi.png`.
