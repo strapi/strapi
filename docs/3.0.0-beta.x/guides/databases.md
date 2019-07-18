@@ -269,27 +269,13 @@ MongoDB Atlas automatically exposes the database credentials into a single envir
 - Under `1. Choose your driver version`, select **DRIVER** as `Node.js` and **VERSION** as `2.2.12 or later`. **IMPORTANT:** You **must** use `Version: 2.2.12 or later`.
 - This should show a **Connection String Only** similar to this:
 
-`mongodb://paulbocuse:<password>@strapi-heroku-shard-00-00-o777o.mongodb.net:27017,strapi-heroku-shard-00-01-o606o.mongodb.net:27017,strapi-heroku-shard-00-02-o606o.mongodb.net:27017/test?ssl=true&replicaSet=Strapi-Heroku-shard-0&authSource=admin&retryWrites=true&w=majority`
+`mongodb://paulbocuse:<password>@strapi-heroku-shard-00-00-oxxxo.mongodb.net:27017,strapi-heroku-shard-00-01-oxxxo.mongodb.net:27017,strapi-heroku-shard-00-02-oxxxo.mongodb.net:27017/test?ssl=true&replicaSet=Strapi-Heroku-shard-0&authSource=admin&retryWrites=true&w=majority`
 
-- You are interested in everything **BETWEEN** the `@` symbol and `&w=majority`. This is your database **"host":** variable. So in this case:
+**IMPORTANT:** Please note the `<password>` after your `username`. In this example, after `mongodb://paulbocuse:`. You will need to replace the `<password>` with the password you created earlier for this user in your **MongoDB Atlas** account.
 
-**NOT THIS PART:** `mongodb://paulbocuse:<password>@`
+5. Update and replace your existing `/database.json` config file for the appropriate environment (development | production).
 
-**JUST THIS PART:**
-
-`strapi-heroku-shard-00-00-o777o.mongodb.net:27017,strapi-heroku-shard-00-01-o606o.mongodb.net:27017,strapi-heroku-shard-00-02-o606o.mongodb.net:27017/test?ssl=true&replicaSet=Strapi-Heroku-shard-0&authSource=admin&retryWrites=true`
-
-**NOT THIS PART:** `&w=majority`
-
-::: warning WARNING
-When you copy the URL as above, ensure to delete the `&w=majority` after `...=true`. If you leave this in the string it will **not** connect.
-:::
-
-- You created earlier a `username` and `password`, within your **MongoDB Atlas** account for connecting to databases. These are the **"username":** and **"password:"** variables needed to configure your project and connect to MongoDB Atlas.
-
-5. Update and replace your existing `/database.json` config file for the appropriate environment (development|production).
-
-Replace the contents of `/database.json` with the following AND replace the **"host":**, **"username"**: and **"password:"** with the credentials to your account:
+Replace the contents of `/database.json` with the following and replace **< password >** with the password of the user of your database you created earlier:
 
 `Path: ./config/environments/(development|production)/database.json`.
 
@@ -300,10 +286,7 @@ Replace the contents of `/database.json` with the following AND replace the **"h
     "default": {
       "connector": "strapi-hook-mongoose",
       "settings": {
-        "host": "cluster0-shard-00-00-y8imj.mongodb.net:27017,cluster0-shard-00-01-y8imj.mongodb.net:27017,cluster0-shard-00-02-y8imj.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true",
-        "port": 27017,
-        "username": "[THE USERNAME YOU CREATED ABOVE IN THE MONGODB ATLAS ACCOUNT]",
-        "password": "[THE PASSWORD YOU CREATED ABOVE IN THE MONGODB ATLAS ACCOUNT]"
+        "uri": "mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority"
       },
       "options": {
         "ssl": true
@@ -312,5 +295,17 @@ Replace the contents of `/database.json` with the following AND replace the **"h
   }
 }
 ```
+
+::: warning Note
+The above configuration will create a database called `test`, the default database for **MongoDB Atlas**. If you would like to name your database something else, add the following **key:value pair** into your **"settings":** in your `database.json` file.
+
+`"database": "my-database-name",`
+
+:::
+
+::: danger Warning
+We recommend replacing sensitive (eg. "URI string" above) information in your database.json files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [dynamic configurations](https://strapi.io/documentation/3.0.0-beta.x/configurations/configurations.html#dynamic-configurations).
+
+:::
 
 You are now ready use Strapi locally or to deploy your project to an external hosting provider and use MongoDB Atlas as your database server.
