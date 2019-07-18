@@ -1,11 +1,7 @@
 const path = require('path');
 const rimraf = require('rimraf');
 const execa = require('execa');
-
-const STRAPI_BIN = path.resolve(
-  __dirname,
-  '../../packages/strapi/bin/strapi.js'
-);
+const generateNew = require('strapi-generate-new/lib/generate-new');
 
 /**
  * Delete the testApp folder
@@ -27,23 +23,41 @@ const cleanTestApp = appName => {
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
 const generateTestApp = async ({ appName, database }) => {
-  await execa.shell(`node ${STRAPI_BIN} new ${appName} ${database}`, {
-    stdio: 'inherit',
-  });
+  const scope = {
+    database: {
+      settings: database,
+      options: {},
+    },
+    rootPath: path.resolve(appName),
+    name: 'test-app',
+    // disable quickstart run app after creation
+    runQuickstartApp: false,
+    // use pacakge version as strapiVersion (all packages have the same version);
+    strapiVersion: require('strapi/package.json').version,
+    debug: false,
+    quick: false,
+    uuid: undefined,
+    deviceId: null,
+    // use yarn if available and --use-npm isn't true
+    useYarn: true,
+    installDependencies: false,
+    strapiDependencies: [
+      'strapi',
+      'strapi-admin',
+      'strapi-utils',
+      'strapi-plugin-settings-manager',
+      'strapi-plugin-content-type-builder',
+      'strapi-plugin-content-manager',
+      'strapi-plugin-users-permissions',
+      'strapi-plugin-email',
+      'strapi-plugin-upload',
+      'strapi-plugin-graphql',
+      'strapi-plugin-documentation',
+    ],
+    additionalsDependencies: {},
+  };
 
-  await execa.shell(
-    'yarn add strapi-plugin-graphql strapi-plugin-documentation',
-    {
-      cwd: path.resolve(appName),
-    }
-  );
-
-  await execa.shell(
-    `node scripts/copy-monorepo.js ${appName} --run-once --quiet`,
-    {
-      stdio: 'inherit',
-    }
-  );
+  await generateNew(scope);
 };
 
 /**
