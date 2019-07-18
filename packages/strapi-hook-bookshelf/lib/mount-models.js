@@ -5,7 +5,10 @@ const { singular } = require('pluralize');
 const utilsModels = require('strapi-utils').models;
 const relations = require('./relations');
 const buildDatabaseSchema = require('./buildDatabaseSchema');
-const genGroupRelatons = require('./generate-group-relations');
+const {
+  createGroupJoinTables,
+  createGroupModels,
+} = require('./generate-group-relations');
 
 const PIVOT_PREFIX = '_pivot_';
 
@@ -114,7 +117,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       global[definition.globalName] = {};
     }
 
-    await genGroupRelatons({ model: loadedModel, definition, ORM, GLOBALS });
+    await createGroupModels({ model: loadedModel, definition, ORM, GLOBALS });
 
     // Add every relationships to the loaded model for Bookshelf.
     // Basic attributes don't need this-- only relations.
@@ -645,12 +648,31 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             },
           ];
 
-          const jsonFormatter = attributes => {
+          const formatter = attributes => {
             Object.keys(attributes).map(key => {
               const attr = definition.attributes[key] || {};
 
               if (attr.type === 'json') {
                 attributes[key] = JSON.parse(attributes[key]);
+              }
+
+              if (attr.type === 'boolean') {
+                if (typeof attributes[key] === 'boolean') {
+                  return;
+                }
+
+                const strVal =
+                  attributes[key] !== null
+                    ? attributes[key].toString()
+                    : attributes[key];
+
+                if (strVal === '1') {
+                  attributes[key] = true;
+                } else if (strVal === '0') {
+                  attributes[key] = false;
+                } else {
+                  attributes[key] = null;
+                }
               }
             });
           };
@@ -661,10 +683,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             if (event.name.indexOf('collection') !== -1) {
               fn = instance =>
                 instance.models.map(entry => {
-                  jsonFormatter(entry.attributes);
+                  formatter(entry.attributes);
                 });
             } else {
-              fn = instance => jsonFormatter(instance.attributes);
+              fn = instance => formatter(instance.attributes);
             }
 
             this.on(event.name, instance => {
@@ -709,13 +731,15 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       target[model]._attributes = definition.attributes;
       target[model].updateRelations = relations.update;
 
-      return buildDatabaseSchema({
+      await buildDatabaseSchema({
         ORM,
         definition,
         loadedModel,
         connection,
         model: target[model],
       });
+
+      await createGroupJoinTables({ definition, ORM });
     } catch (err) {
       strapi.log.error(`Impossible to register the '${model}' model.`);
       strapi.log.error(err);

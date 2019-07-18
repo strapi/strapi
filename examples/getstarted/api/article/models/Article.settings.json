@@ -24,7 +24,7 @@
       "type": "integer"
     },
     "json": {
-      "type": "string"
+      "type": "json"
     },
     "number": {
       "type": "integer"
@@ -41,6 +41,11 @@
     },
     "pic": {
       "model": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
+    "pictures": {
+      "collection": "file",
       "via": "related",
       "plugin": "upload"
     },

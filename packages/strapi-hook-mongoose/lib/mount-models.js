@@ -17,7 +17,6 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     definition.associations = [];
     definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
     definition.loadedModel = {};
-    definition.ObjectId = mongoose.Types.ObjectId;
     // Set the default values to model settings.
     _.defaults(definition, {
       primaryKey: '_id',

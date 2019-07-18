@@ -1,23 +1,217 @@
-const _ = require('lodash');
-const { convertRestQueryParams, buildQuery } = require('strapi-utils');
+'use strict';
+/**
+ * Implementation of model queries for bookshelf
+ */
 
-module.exports = ({ model, modelKey }) => {
+const _ = require('lodash');
+const {
+  convertRestQueryParams,
+  buildQuery,
+  models: modelUtils,
+} = require('strapi-utils');
+
+module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
+  /* Utils */
+  // association key
   const assocKeys = model.associations.map(ast => ast.alias);
+  // group keys
   const groupKeys = Object.keys(model.attributes).filter(key => {
     return model.attributes[key].type === 'group';
   });
-  const excludedKeys = assocKeys.concat(groupKeys);
 
+  // default relations to populate
   const defaultPopulate = model.associations
     .filter(ast => ast.autoPopulate !== false)
     .map(ast => ast.alias);
 
+  // Returns an object with relation keys only to create relations in DB
   const pickRelations = values => {
     return _.pick(values, assocKeys);
   };
-  const omitExernalValues = values => {
-    return _.omit(values, excludedKeys);
+
+  // keys to exclude to get attribute keys
+  const excludedKeys = assocKeys.concat(groupKeys);
+  // Returns an object without relational keys to persist in DB
+  const selectAttributes = values => {
+    return _.pickBy(values, (value, key) => {
+      return !excludedKeys.includes(key) && _.has(model.allAttributes, key);
+    });
   };
+
+  /**
+   * Find one entry based on params
+   */
+  async function findOne(params, populate) {
+    const primaryKey = params[model.primaryKey] || params.id;
+
+    if (primaryKey) {
+      params = {
+        [model.primaryKey]: primaryKey,
+      };
+    }
+
+    const entry = await model.forge(params).fetch({
+      withRelated: populate || defaultPopulate,
+    });
+
+    return entry ? entry.toJSON() : null;
+  }
+
+  /**
+   * Find multiple entries based on params
+   */
+  function find(params, populate) {
+    const filters = convertRestQueryParams(params);
+
+    return model
+      .query(buildQuery({ model, filters }))
+      .fetchAll({ withRelated: populate || defaultPopulate })
+      .then(results => results.toJSON());
+  }
+
+  /**
+   * Count entries based on filters
+   */
+  function count(params = {}) {
+    const { where } = convertRestQueryParams(params);
+
+    return model.query(buildQuery({ model, filters: { where } })).count();
+  }
+
+  async function create(values) {
+    const relations = pickRelations(values);
+    const data = selectAttributes(values);
+
+    const runCreate = async trx => {
+      // Create entry with no-relational data.
+      const entry = await model.forge(data).save(null, { transacting: trx });
+      await createGroups(entry, values, { transacting: trx });
+      return entry;
+    };
+
+    const db = strapi.connections[model.connection];
+    const entry = await db.transaction(trx => runCreate(trx));
+
+    return model.updateRelations({ id: entry.id, values: relations });
+  }
+
+  async function update(params, values) {
+    const entry = await model.forge(params).fetch();
+
+    if (!entry) {
+      const err = new Error('entry.notFound');
+      err.status = 404;
+      throw err;
+    }
+
+    // Extract values related to relational data.
+    const relations = pickRelations(values);
+    const data = selectAttributes(values);
+
+    const runUpdate = async trx => {
+      const updatedEntry =
+        Object.keys(data).length > 0
+          ? await entry.save(data, {
+              transacting: trx,
+              method: 'update',
+              patch: true,
+            })
+          : entry;
+      await updateGroups(updatedEntry, values, { transacting: trx });
+      return updatedEntry;
+    };
+
+    const db = strapi.connections[model.connection];
+    await db.transaction(trx => runUpdate(trx));
+
+    if (Object.keys(relations).length > 0) {
+      return model.updateRelations(
+        Object.assign(params, { values: relations })
+      );
+    }
+
+    return await model.forge(params).fetch();
+  }
+
+  async function deleteOne(params) {
+    const entry = await model.forge(params).fetch();
+
+    if (!entry) {
+      const err = new Error('entry.notFound');
+      err.status = 404;
+      throw err;
+    }
+
+    const values = {};
+    model.associations.map(association => {
+      switch (association.nature) {
+        case 'oneWay':
+        case 'oneToOne':
+        case 'manyToOne':
+        case 'oneToManyMorph':
+          values[association.alias] = null;
+          break;
+        case 'oneToMany':
+        case 'manyToMany':
+        case 'manyToManyMorph':
+          values[association.alias] = [];
+          break;
+        default:
+      }
+    });
+
+    await model.updateRelations({ ...params, values });
+
+    const runDelete = async trx => {
+      await deleteGroups(entry, { transacting: trx });
+      await model.forge(params).destroy({ transacting: trx });
+      return entry;
+    };
+
+    const db = strapi.connections[model.connection];
+    return db.transaction(trx => runDelete(trx));
+  }
+
+  async function deleteMany(params) {
+    const primaryKey = params[model.primaryKey] || params.id;
+
+    if (primaryKey) return deleteOne(params);
+
+    const entries = await find(params);
+    return await Promise.all(entries.map(entry => deleteOne({ id: entry.id })));
+  }
+
+  function search(params, populate) {
+    // Convert `params` object to filters compatible with Bookshelf.
+    const filters = modelUtils.convertParams(modelKey, params);
+
+    // Select field to populate.
+    const withRelated = populate || defaultPopulate;
+
+    return model
+      .query(qb => {
+        buildSearchQuery(qb, model, params);
+
+        if (filters.sort) {
+          qb.orderBy(filters.sort.key, filters.sort.order);
+        }
+
+        if (filters.start) {
+          qb.offset(_.toNumber(filters.start));
+        }
+
+        if (filters.limit) {
+          qb.limit(_.toNumber(filters.limit));
+        }
+      })
+      .fetchAll({
+        withRelated,
+      });
+  }
+
+  function countSearch(params) {
+    return model.query(qb => buildSearchQuery(qb, model, params)).count();
+  }
 
   async function createGroups(entry, values, { transacting }) {
     if (groupKeys.length === 0) return;
@@ -27,7 +221,7 @@ module.exports = ({ model, modelKey }) => {
 
     for (let key of groupKeys) {
       const attr = model.attributes[key];
-      const { group, required = true, repeatable = true } = attr;
+      const { group, required = false, repeatable = true } = attr;
 
       const groupModel = strapi.groups[group];
 
@@ -235,7 +429,7 @@ module.exports = ({ model, modelKey }) => {
       await groupModel
         .forge()
         .query(qb => qb.whereIn(groupModel.primaryKey, ids))
-        .destroy({ transacting });
+        .destroy({ transacting, require: false });
       await joinModel
         .forge()
         .query({
@@ -245,156 +439,19 @@ module.exports = ({ model, modelKey }) => {
             field: key,
           },
         })
-        .destroy({ transacting });
+        .destroy({ transacting, require: false });
     }
   }
 
   return {
-    find(params, populate) {
-      const withRelated = populate || defaultPopulate;
-
-      const filters = convertRestQueryParams(params);
-
-      return model
-        .query(buildQuery({ model, filters }))
-        .fetchAll({ withRelated });
-    },
-
-    findOne(params, populate) {
-      const withRelated = populate || defaultPopulate;
-
-      return model
-        .forge({
-          [model.primaryKey]: params[model.primaryKey] || params.id,
-        })
-        .fetch({
-          withRelated,
-        });
-    },
-
-    count(params = {}) {
-      const { where } = convertRestQueryParams(params);
-
-      return model.query(buildQuery({ model, filters: { where } })).count();
-    },
-
-    async create(values) {
-      const relations = pickRelations(values);
-      const data = omitExernalValues(values);
-
-      const runCreate = async trx => {
-        // Create entry with no-relational data.
-        const entry = await model.forge(data).save(null, { transacting: trx });
-        await createGroups(entry, values, { transacting: trx });
-        return entry;
-      };
-
-      const db = strapi.connections[model.connection];
-      const entry = await db.transaction(trx => runCreate(trx));
-
-      return model.updateRelations({ id: entry.id, values: relations });
-    },
-
-    async update(params, values) {
-      const entry = await model.forge(params).fetch();
-
-      if (!entry) {
-        const err = new Error('entry.notFound');
-        err.status = 404;
-        throw err;
-      }
-
-      // Extract values related to relational data.
-      const relations = pickRelations(values);
-      const data = omitExernalValues(values);
-
-      const runUpdate = async trx => {
-        const entry = await model
-          .forge(params)
-          .save(data, { transacting: trx });
-        await updateGroups(entry, values, { transacting: trx });
-      };
-
-      const db = strapi.connections[model.connection];
-      await db.transaction(trx => runUpdate(trx));
-
-      return model.updateRelations(
-        Object.assign(params, { values: relations })
-      );
-
-      // Create relational data and return the entry.
-    },
-
-    async delete(params) {
-      const entry = await model.forge(params).fetch();
-
-      if (!entry) {
-        const err = new Error('entry.notFound');
-        err.status = 404;
-        throw err;
-      }
-
-      const values = {};
-      model.associations.map(association => {
-        switch (association.nature) {
-          case 'oneWay':
-          case 'oneToOne':
-          case 'manyToOne':
-          case 'oneToManyMorph':
-            values[association.alias] = null;
-            break;
-          case 'oneToMany':
-          case 'manyToMany':
-          case 'manyToManyMorph':
-            values[association.alias] = [];
-            break;
-          default:
-        }
-      });
-
-      await model.updateRelations({ ...params, values });
-
-      const runDelete = async trx => {
-        await deleteGroups(entry, { transacting: trx });
-        await model.forge(params).destroy({ transacting: trx });
-        return entry;
-      };
-
-      const db = strapi.connections[model.connection];
-      return db.transaction(trx => runDelete(trx));
-    },
-
-    search(params, populate) {
-      // Convert `params` object to filters compatible with Bookshelf.
-      const filters = strapi.utils.models.convertParams(modelKey, params);
-
-      // Select field to populate.
-      const withRelated = populate || defaultPopulate;
-
-      return model
-        .query(qb => {
-          buildSearchQuery(qb, model, params);
-
-          if (filters.sort) {
-            qb.orderBy(filters.sort.key, filters.sort.order);
-          }
-
-          if (filters.start) {
-            qb.offset(_.toNumber(filters.start));
-          }
-
-          if (filters.limit) {
-            qb.limit(_.toNumber(filters.limit));
-          }
-        })
-        .fetchAll({
-          withRelated,
-        });
-    },
-
-    countSearch(params) {
-      return model.query(qb => buildSearchQuery(qb, model, params)).count();
-    },
+    findOne,
+    find,
+    create,
+    update,
+    delete: deleteMany,
+    count,
+    search,
+    countSearch,
   };
 };
 

@@ -65,7 +65,7 @@
     },
     {
       "method": "GET",
-      "path": "/files/:_id",
+      "path": "/files/:id",
       "handler": "Upload.findOne",
       "config": {
         "policies": [],
@@ -91,7 +91,7 @@
     },
     {
       "method": "DELETE",
-      "path": "/files/:_id",
+      "path": "/files/:id",
       "handler": "Upload.destroy",
       "config": {
         "policies": [],

@@ -2,7 +2,7 @@
 
 const pluralize = require('pluralize');
 
-module.exports = async ({ model, definition, ORM, GLOBALS }) => {
+const createGroupModels = async ({ model, definition, ORM, GLOBALS }) => {
   const { collectionName, primaryKey } = definition;
 
   const groupAttributes = Object.keys(definition.attributes).filter(
@@ -36,8 +36,23 @@ module.exports = async ({ model, definition, ORM, GLOBALS }) => {
         });
       };
     });
+  }
+};
 
-    await ORM.knex.schema.createTableIfNotExists(joinTable, table => {
+const createGroupJoinTables = async ({ definition, ORM }) => {
+  const { collectionName, primaryKey } = definition;
+
+  const groupAttributes = Object.keys(definition.attributes).filter(
+    key => definition.attributes[key].type === 'group'
+  );
+
+  if (groupAttributes.length > 0) {
+    const joinTable = `${collectionName}_groups`;
+    const joinColumn = `${pluralize.singular(collectionName)}_${primaryKey}`;
+
+    if (await ORM.knex.schema.hasTable(joinTable)) return;
+
+    await ORM.knex.schema.createTable(joinTable, table => {
       table.increments();
       table.string('field').notNullable();
       table
@@ -45,14 +60,8 @@ module.exports = async ({ model, definition, ORM, GLOBALS }) => {
         .unsigned()
         .notNullable();
       table.string('slice_type').notNullable();
-      table
-        .integer('slice_id')
-        .unsigned()
-        .notNullable();
-      table
-        .integer(joinColumn)
-        .unsigned()
-        .notNullable();
+      table.integer('slice_id').notNullable();
+      table.integer(joinColumn).notNullable();
 
       table
         .foreign(joinColumn)
@@ -61,4 +70,9 @@ module.exports = async ({ model, definition, ORM, GLOBALS }) => {
         .onDelete('CASCADE');
     });
   }
+};
+
+module.exports = {
+  createGroupModels,
+  createGroupJoinTables,
 };

@@ -16,6 +16,7 @@ const relations = require('./relations');
 const buildQuery = require('./buildQuery');
 const mountModels = require('./mount-models');
 const getQueryParams = require('./get-query-params');
+const queries = require('./queries');
 
 /**
  * Bookshelf hook
@@ -145,6 +146,7 @@ module.exports = function(strapi) {
     initialize,
     getQueryParams,
     buildQuery,
+    queries,
     ...relations,
   };
 };

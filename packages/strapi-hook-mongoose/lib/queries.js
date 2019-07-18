@@ -1,5 +1,14 @@
+'use strict';
+/**
+ * Implementation of model queries for mongo
+ */
+
 const _ = require('lodash');
-const { convertRestQueryParams, buildQuery } = require('strapi-utils');
+const {
+  convertRestQueryParams,
+  buildQuery,
+  models: modelUtils,
+} = require('strapi-utils');
 
 module.exports = ({ model, modelKey, strapi }) => {
   const hasPK = obj => _.has(obj, model.primaryKey) || _.has(obj, 'id');
@@ -29,7 +38,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     for (let key of groupKeys) {
       const attr = model.attributes[key];
-      const { group, required = true, repeatable = true } = attr;
+      const { group, required = false, repeatable = true } = attr;
 
       const groupModel = strapi.groups[group];
 
@@ -173,143 +182,166 @@ module.exports = ({ model, modelKey, strapi }) => {
     }
   }
 
-  // public api
+  function find(params, populate) {
+    const populateOpt = populate || defaultPopulate;
+
+    const filters = convertRestQueryParams(params);
+
+    return buildQuery({
+      model,
+      filters,
+      populate: populateOpt,
+    });
+  }
+
+  function findOne(params, populate) {
+    const primaryKey = getPK(params);
+
+    if (primaryKey) {
+      params = {
+        [model.primaryKey]: primaryKey,
+      };
+    }
+
+    return model.findOne(params).populate(populate || defaultPopulate);
+  }
+
+  function count(params) {
+    const filters = convertRestQueryParams(params);
+
+    return buildQuery({
+      model,
+      filters: { where: filters.where },
+    }).count();
+  }
+
+  async function create(values) {
+    // Extract values related to relational data.
+    const relations = pickRelations(values);
+    const data = omitExernalValues(values);
+
+    // Create entry with no-relational data.
+    const entry = await model.create(data);
+
+    await createGroups(entry, values);
+
+    // Create relational data and return the entry.
+    return model.updateRelations({
+      [model.primaryKey]: getPK(entry),
+      values: relations,
+    });
+  }
+
+  async function update(params, values) {
+    const primaryKey = getPK(params);
+
+    if (primaryKey) {
+      params = {
+        [model.primaryKey]: primaryKey,
+      };
+    }
+
+    const entry = await model.findOne(params);
+
+    if (!entry) {
+      const err = new Error('entry.notFound');
+      err.status = 404;
+      throw err;
+    }
+
+    // Extract values related to relational data.
+    const relations = pickRelations(values);
+    const data = omitExernalValues(values);
+
+    // Update entry with no-relational data.
+    await entry.updateOne(data);
+    await updateGroups(entry, values);
+
+    // Update relational data and return the entry.
+    return model.updateRelations(Object.assign(params, { values: relations }));
+  }
+
+  async function deleteMany(params) {
+    const primaryKey = getPK(params);
+
+    if (primaryKey) return deleteOne(params);
+
+    const entries = await find(params);
+    return await Promise.all(entries.map(entry => deleteOne({ id: entry.id })));
+  }
+
+  async function deleteOne(params) {
+    const entry = await model
+      .findOneAndRemove({ [model.primaryKey]: getPK(params) })
+      .populate(defaultPopulate);
+
+    if (!entry) {
+      const err = new Error('entry.notFound');
+      err.status = 404;
+      throw err;
+    }
+
+    await deleteGroups(entry);
+
+    await Promise.all(
+      model.associations.map(async association => {
+        if (!association.via || !entry._id || association.dominant) {
+          return true;
+        }
+
+        const search =
+          _.endsWith(association.nature, 'One') ||
+          association.nature === 'oneToMany'
+            ? { [association.via]: entry._id }
+            : { [association.via]: { $in: [entry._id] } };
+        const update =
+          _.endsWith(association.nature, 'One') ||
+          association.nature === 'oneToMany'
+            ? { [association.via]: null }
+            : { $pull: { [association.via]: entry._id } };
+
+        // Retrieve model.
+        const model = association.plugin
+          ? strapi.plugins[association.plugin].models[
+              association.model || association.collection
+            ]
+          : strapi.models[association.model || association.collection];
+
+        return model.updateMany(search, update);
+      })
+    );
+
+    return entry;
+  }
+
+  function search(params, populate) {
+    // Convert `params` object to filters compatible with Mongo.
+    const filters = modelUtils.convertParams(modelKey, params);
+
+    const $or = buildSearchOr(model, params._q);
+
+    return model
+      .find({ $or })
+      .sort(filters.sort)
+      .skip(filters.start)
+      .limit(filters.limit)
+      .populate(populate || defaultPopulate);
+  }
+
+  function countSearch(params) {
+    const $or = buildSearchOr(model, params._q);
+    return model.find({ $or }).countDocuments();
+  }
+
   return {
-    find(params, populate) {
-      const populateOpt = populate || defaultPopulate;
-
-      const filters = convertRestQueryParams(params);
-
-      return buildQuery({
-        model,
-        filters,
-        populate: populateOpt,
-      });
-    },
-
-    findOne(params, populate) {
-      const populateOpt = populate || defaultPopulate;
-
-      return model
-        .findOne({ [model.primaryKey]: getPK(params) })
-        .populate(populateOpt);
-    },
-
-    count(params) {
-      const filters = convertRestQueryParams(params);
-
-      return buildQuery({
-        model,
-        filters: { where: filters.where },
-      }).count();
-    },
-
-    async create(values) {
-      // Extract values related to relational data.
-      const relations = pickRelations(values);
-      const data = omitExernalValues(values);
-
-      // Create entry with no-relational data.
-      const entry = await model.create(data);
-
-      await createGroups(entry, values);
-
-      // Create relational data and return the entry.
-      return model.updateRelations({
-        [model.primaryKey]: getPK(entry),
-        values: relations,
-      });
-    },
-
-    async update(params, values) {
-      const entry = await model.findOne({ [model.primaryKey]: getPK(params) });
-
-      if (!entry) {
-        const err = new Error('entry.notFound');
-        err.status = 404;
-        throw err;
-      }
-
-      // Extract values related to relational data.
-      const relations = pickRelations(values);
-      const data = omitExernalValues(values);
-
-      // Update entry with no-relational data.
-      await entry.updateOne(data);
-      await updateGroups(entry, values);
-
-      // Update relational data and return the entry.
-      return model.updateRelations(
-        Object.assign(params, { values: relations })
-      );
-    },
-
-    async delete(params) {
-      const entry = await model
-        .findOneAndRemove({ [model.primaryKey]: getPK(params) })
-        .populate(defaultPopulate);
-
-      if (!entry) {
-        const err = new Error('entry.notFound');
-        err.status = 404;
-        throw err;
-      }
-
-      await deleteGroups(entry);
-
-      await Promise.all(
-        model.associations.map(async association => {
-          if (
-            !association.via ||
-            !entry[model.primaryKey] ||
-            association.dominant
-          ) {
-            return true;
-          }
-
-          const search =
-            _.endsWith(association.nature, 'One') ||
-            association.nature === 'oneToMany'
-              ? { [association.via]: entry[model.primaryKey] }
-              : { [association.via]: { $in: [entry[model.primaryKey]] } };
-          const update =
-            _.endsWith(association.nature, 'One') ||
-            association.nature === 'oneToMany'
-              ? { [association.via]: null }
-              : { $pull: { [association.via]: entry[model.primaryKey] } };
-
-          // Retrieve model.
-          const assocModel = association.plugin
-            ? strapi.plugins[association.plugin].models[
-                association.model || association.collection
-              ]
-            : strapi.models[association.model || association.collection];
-
-          return assocModel.update(search, update, { multi: true });
-        })
-      );
-
-      return entry;
-    },
-
-    search(params, populate) {
-      // Convert `params` object to filters compatible with Mongo.
-      const filters = strapi.utils.models.convertParams(modelKey, params);
-
-      const $or = buildSearchOr(model, params._q);
-
-      return model
-        .find({ $or })
-        .sort(filters.sort)
-        .skip(filters.start)
-        .limit(filters.limit)
-        .populate(populate || defaultPopulate);
-    },
-
-    countSearch(params) {
-      const $or = buildSearchOr(model, params._q);
-      return model.find({ $or }).countDocuments();
-    },
+    findOne,
+    find,
+    create,
+    update,
+    delete: deleteMany,
+    count,
+    search,
+    countSearch,
   };
 };
 

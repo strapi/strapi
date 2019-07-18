@@ -16,7 +16,7 @@
       "plugin": "upload"
     },
     "article": {
-      "model": "articles"
+      "model": "article"
     }
   }
 }

@@ -135,10 +135,6 @@ module.exports = function(strapi) {
     });
   });
 
-  strapi.admin.queries = (model, plugin) => {
-    return strapi.query(model, plugin, strapi.admin.config.queries);
-  };
-
   Object.keys(strapi.plugins).forEach(pluginName => {
     let plugin = strapi.plugins[pluginName];
     Object.assign(plugin, {
@@ -168,10 +164,6 @@ module.exports = function(strapi) {
           strapi.config.currentEnvironment.database.defaultConnection,
       });
     });
-
-    plugin.queries = (model, pluginName) => {
-      return strapi.query(model, pluginName, plugin.config.queries);
-    };
   });
 
   // Define required middlewares categories.
