@@ -215,6 +215,17 @@ describe('CTB <GroupPage />', () => {
     });
   });
 
+  describe('ComponentDidMount', () => {
+    props.location.search = `modalType=attributeForm&attributeType=string&settingType=base&actionType=edit&attributeName=0`;
+    shallow(<GroupPage {...props} />);
+
+    expect(props.setTemporaryAttributeGroup).toHaveBeenCalledWith(
+      '0',
+      false,
+      'tests'
+    );
+  });
+
   it('should call the openAttributesModal when clicking on the EmptyAttributesBlock', () => {
     props.initialDataGroup.tests.schema.attributes = [];
     props.modifiedDataGroup.tests.schema.attributes = [];
@@ -267,6 +278,55 @@ describe('CTB <GroupPage />, lifecycle', () => {
     });
   });
 
+  describe('HandleClickEditAttribute', () => {
+    it('should display a notification if thee modal cannot be opened', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = false;
+      props.canOpenModal = false;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const spyOnDisplayNotification = jest.spyOn(
+        wrapper.instance(),
+        'displayNotificationCTNotSaved'
+      );
+      const { handleClickEditAttribute } = wrapper.instance();
+      handleClickEditAttribute(0, 'string');
+
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
+
+    it('should call setTempororaryAttributeGroup if ifTemporary is true', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
+      props.canOpenModal = true;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const { handleClickEditAttribute } = wrapper.instance();
+      handleClickEditAttribute(0, 'string');
+
+      expect(props.setTemporaryAttributeGroup).toHaveBeenCalledWith(
+        0,
+        true,
+        'tests'
+      );
+    });
+
+    it('should handle the <number> type correctly', () => {
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+
+      const { handleClickEditAttribute } = wrapper.instance();
+
+      handleClickEditAttribute(0, 'float');
+
+      expect(context.emitEvent).toHaveBeenCalledWith('willEditFieldOfGroup');
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=attributeForm&attributeType=number&settingType=base&actionType=edit&attributeName=0',
+      });
+    });
+  });
+
   describe('HandleSubmit', () => {
     it('should call addAttributeToTempGroup when isTemporary is true', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
@@ -308,9 +368,90 @@ describe('CTB <GroupPage />, lifecycle', () => {
     });
   });
 
+  describe('HandleSubmitEdit', () => {
+    it('should call saveEditedAttributeGroup with right params', () => {
+      const attrIndex = '0';
+      props.location.search = `attributeName=${attrIndex}`;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const { handleSubmitEdit } = wrapper.instance();
+
+      handleSubmitEdit();
+
+      expect(props.saveEditedAttributeGroup).toHaveBeenCalledWith(
+        attrIndex,
+        false,
+        'tests'
+      );
+    });
+
+    it('should redirect to choose attribute modal if shouldContinue is true', () => {
+      const attrIndex = '0';
+      props.location.search = `attributeName=${attrIndex}`;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const { handleSubmitEdit } = wrapper.instance();
+
+      handleSubmitEdit(true);
+
+      expect(props.history.push).toHaveBeenCalledWith({
+        search: 'modalType=chooseAttributes',
+      });
+    });
+  });
+
+  describe('OpenEditFeatureModal', () => {
+    it('should display a notification if thee modal cannot be opened', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = false;
+      props.canOpenModal = false;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const spyOnDisplayNotification = jest.spyOn(
+        wrapper.instance(),
+        'displayNotificationCTNotSaved'
+      );
+      const { openEditFeatureModal } = wrapper.instance();
+      openEditFeatureModal();
+
+      expect(spyOnDisplayNotification).toHaveBeenCalled();
+    });
+
+    it('should redirect to the right url if isTemporary is true', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
+      props.canOpenModal = true;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+
+      const { openEditFeatureModal } = wrapper.instance();
+      openEditFeatureModal();
+
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=group&settingType=base&actionType=edit&groupName=tests',
+      });
+    });
+
+    it('should emit event if edit modal can be opened', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
+      props.canOpenModal = true;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+
+      const { openEditFeatureModal } = wrapper.instance();
+      openEditFeatureModal();
+
+      expect(context.emitEvent).toHaveBeenCalledWith('willEditNameOfGroup');
+    });
+  });
+
   describe('PluginHeaderActions', () => {
     it('should call submitTempGroup with newGroup param when isTemporary is true', () => {
-      props.groups[0].isTemporary = true;
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
       props.newGroup.name = 'tests';
 
       props.newGroup.schema.attributes = [
@@ -331,6 +472,43 @@ describe('CTB <GroupPage />, lifecycle', () => {
         props.newGroup,
         context
       );
+    });
+
+    it('should call submitGroup with modifiedDataGroup param when isTemporary is false', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = false;
+
+      props.initialDataGroup.tests.schema.attributes = [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+      ];
+      props.modifiedDataGroup.tests.schema.attributes = [
+        {
+          name: 'firstname',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+      ];
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const { pluginHeaderActions } = wrapper.find(ViewContainer).props();
+
+      pluginHeaderActions[1].onClick();
+
+      expect(props.submitGroup).toHaveBeenCalled();
     });
   });
 
@@ -354,6 +532,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
     it('should display a notification if thee modal cannot be opened', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
       props.canOpenModal = false;
+
       topCompo = renderComponent(props);
       const wrapper = topCompo.find(GroupPage);
       const spyOnDisplayNotification = jest.spyOn(
@@ -362,7 +541,9 @@ describe('CTB <GroupPage />, lifecycle', () => {
       );
       const { handleClickOnTrashIcon } = wrapper.instance();
       handleClickOnTrashIcon(0);
-      expect(context.emitEvent).not.toHaveBeenCalled();
+      expect(context.emitEvent).not.toHaveBeenCalledWith(
+        'willDeleteFieldOfGroup'
+      );
       expect(spyOnDisplayNotification).toHaveBeenCalled();
     });
     it('should call deleteGroupAttribute with modifiedDataGroup path when isTemporary is false', () => {

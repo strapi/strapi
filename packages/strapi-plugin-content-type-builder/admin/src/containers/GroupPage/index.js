@@ -243,6 +243,7 @@ export class GroupPage extends React.Component {
       );
 
       emitEvent('willEditFieldOfGroup');
+
       push({
         search: `modalType=attributeForm&attributeType=${attributeType}&settingType=base&actionType=edit&attributeName=${attributeIndex}`,
       });
