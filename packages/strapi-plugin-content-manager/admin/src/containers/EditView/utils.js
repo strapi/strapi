@@ -59,6 +59,18 @@ const createYupSchema = (layout, groupLayoutsData) => {
                 );
 
                 acc2[curr] = formatted;
+              } else {
+                if (groupAttribute.type === 'relation') {
+                  acc2[curr] = [
+                    'oneWay',
+                    'oneToOne',
+                    'manyToOne',
+                    'oneToManyMorph',
+                    'oneToOneMorph',
+                  ].includes(groupAttribute.relationType)
+                    ? yup.object()
+                    : yup.array();
+                }
               }
 
               return acc2;
@@ -164,6 +176,7 @@ const createYupSchemaAttribute = (type, validations) => {
           }
           break;
         default:
+          schema = schema.nullable();
       }
     }
   });

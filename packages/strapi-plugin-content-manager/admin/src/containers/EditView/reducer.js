@@ -1,4 +1,4 @@
-import { fromJS } from 'immutable';
+import { fromJS, List } from 'immutable';
 
 const initialState = fromJS({
   collapses: {},
@@ -70,9 +70,9 @@ function reducer(state, action) {
         .update('groupLayoutsData', () => fromJS(action.groupLayouts))
         .update('defaultGroupValues', () => fromJS(action.defaultGroupValues))
         .update('modifiedData', obj => {
-          if (action.isCreatingEntry === true) {
-            const { defaultGroupValues } = action;
+          const { defaultGroupValues } = action;
 
+          if (action.isCreatingEntry === true) {
             return obj.keySeq().reduce((acc, current) => {
               if (defaultGroupValues[current]) {
                 return acc.set(
@@ -82,9 +82,24 @@ function reducer(state, action) {
               }
               return acc;
             }, obj);
-          }
+          } else {
+            return obj.keySeq().reduce((acc, current) => {
+              if (
+                defaultGroupValues[current] &&
+                List.isList(obj.get(current))
+              ) {
+                const formatted = obj
+                  .get(current)
+                  .reduce((acc2, curr, index) => {
+                    return acc2.set(index, curr.set('_temp__id', index));
+                  }, List([]));
 
-          return obj;
+                return acc.set(current, formatted);
+              }
+
+              return acc;
+            }, obj);
+          }
         })
         .update('isLoadingForLayouts', () => false);
     case 'INIT':

@@ -89,24 +89,6 @@ function EditView({
     const signalFetchData = abortControllerFetchData.signal;
     const signalFetchLayouts = abortControllerLayouts.signal;
 
-    const fetchData = async () => {
-      try {
-        const data = await request(getRequestUrl(`${slug}/${id}`), {
-          method: 'GET',
-          params: { source },
-          signal: signalFetchData,
-        });
-
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      } catch (err) {
-        if (err.code !== 20) {
-          strapi.notification.error(`${pluginId}.error.record.fetch`);
-        }
-      }
-    };
     const fetchGroupLayouts = async () => {
       try {
         const data = await Promise.all(
@@ -164,6 +146,25 @@ function EditView({
         }
       }
     };
+    const fetchData = async () => {
+      try {
+        const data = await request(getRequestUrl(`${slug}/${id}`), {
+          method: 'GET',
+          params: { source },
+          signal: signalFetchData,
+        });
+
+        dispatch({
+          type: 'GET_DATA_SUCCEEDED',
+          data,
+        });
+        fetchGroupLayouts();
+      } catch (err) {
+        if (err.code !== 20) {
+          strapi.notification.error(`${pluginId}.error.record.fetch`);
+        }
+      }
+    };
 
     if (!isCreatingEntry) {
       fetchData();
@@ -172,9 +173,8 @@ function EditView({
         type: 'INIT',
         data: setDefaultForm(get(layout, ['schema', 'attributes'])),
       });
+      fetchGroupLayouts();
     }
-
-    fetchGroupLayouts();
 
     return () => {
       abortControllerFetchData.abort();
