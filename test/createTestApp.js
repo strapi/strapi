@@ -53,12 +53,21 @@ yargs
         choices: Object.keys(databases),
       });
     },
-    ({ databaseName }) => {
+    argv => {
+      const { databaseName } = argv;
       if (databaseName) {
         return main(databases[databaseName]);
       }
 
-      return main(process.argv.slice(2).join(' '));
+      return main({
+        client: argv.dbclient,
+        host: argv.dbhost,
+        port: argv.dbport,
+        database: argv.dbname,
+        username: argv.dbusername,
+        password: argv.dbpassword,
+        filename: argv.dbfile,
+      });
     }
   )
   .help().argv;
