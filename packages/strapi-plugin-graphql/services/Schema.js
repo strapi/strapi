@@ -134,13 +134,10 @@ const schemaBuilder = {
 
     // build defaults schemas if shadowCRUD is enabled
     if (strapi.plugins.graphql.config.shadowCRUD !== false) {
-      // const models = Object.keys(strapi.models).filter(
-      //   model => model !== 'core_store'
-      // )
-
       const modelCruds = Resolvers.buildShadowCRUD(
         _.omit(strapi.models, ['core_store'])
       );
+
       shadowCRUD = Object.keys(strapi.plugins).reduce((acc, plugin) => {
         const {
           definition,
@@ -162,7 +159,8 @@ const schemaBuilder = {
 
     let groups = Object.keys(strapi.groups)
       .map(key =>
-        Resolvers.buildModel(strapi.groups[key], null, {
+        Resolvers.buildModel(strapi.groups[key], key, {
+          plugin: null,
           isGroup: true,
         })
       )

@@ -333,6 +333,12 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             );
 
             if (models.length === 0) {
+              models = Object.values(strapi.groups).filter(
+                model => model.globalId === id
+              );
+            }
+
+            if (models.length === 0) {
               models = Object.keys(strapi.plugins).reduce((acc, current) => {
                 const models = Object.values(
                   strapi.plugins[current].models
@@ -576,44 +582,48 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           }
         };
 
+        const addPolymorphicRelated = path => {
+          const assoc = definition.associations.find(
+            assoc => assoc.alias === path || assoc.via === path
+          );
+
+          if (assoc && isPolymorphic({ assoc })) {
+            return formatPolymorphicPopulate({
+              assoc,
+              path,
+            });
+          }
+
+          let extraAssocs = [];
+          if (assoc) {
+            const assocModel = findModelByAssoc({ assoc });
+
+            extraAssocs = assocModel.associations
+              .filter(assoc => isPolymorphic({ assoc }))
+              .map(assoc =>
+                formatPolymorphicPopulate({
+                  assoc,
+                  path: assoc.alias,
+                  prefix: `${path}.`,
+                })
+              );
+          }
+
+          return [path, ...extraAssocs];
+        };
+
         // Update withRelated level to bypass many-to-many association for polymorphic relationshiips.
         // Apply only during fetching.
         this.on('fetching fetching:collection', (instance, attrs, options) => {
           if (_.isArray(options.withRelated)) {
             options.withRelated = options.withRelated
-              .map(path => {
-                const assoc = definition.associations.find(
-                  assoc => assoc.alias === path || assoc.via === path
-                );
-
-                if (assoc && isPolymorphic({ assoc })) {
-                  return formatPolymorphicPopulate({
-                    assoc,
-                    path,
-                  });
-                }
-
-                let extraAssocs = [];
-                if (assoc) {
-                  const assocModel = findModelByAssoc({ assoc });
-
-                  extraAssocs = assocModel.associations
-                    .filter(assoc => isPolymorphic({ assoc }))
-                    .map(assoc =>
-                      formatPolymorphicPopulate({
-                        assoc,
-                        path: assoc.alias,
-                        prefix: `${path}.`,
-                      })
-                    );
-                }
-
-                return [path, ...extraAssocs];
-              })
-              .reduce((acc, paths) => acc.concat(paths), [])
-              .concat(groupAttributes.map(key => `${key}.slice`));
+              .concat(groupAttributes.map(key => `${key}.slice`))
+              .map(addPolymorphicRelated)
+              .reduce((acc, paths) => acc.concat(paths), []);
           } else {
-            options.withRelated = groupAttributes.map(key => `${key}.slice`);
+            options.withRelated = groupAttributes
+              .map(key => `${key}.slice`)
+              .map(addPolymorphicRelated);
           }
 
           return _.isFunction(target[model.toLowerCase()]['beforeFetchAll'])

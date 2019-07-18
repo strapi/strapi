@@ -462,6 +462,7 @@ class Strapi extends EventEmitter {
         ? _.get(strapi.admin, ['models', modelKey], undefined)
         : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
           _.get(strapi, ['models', modelKey]) ||
+          _.get(strapi, ['groups', modelKey]) ||
           undefined;
 
     if (!model) {

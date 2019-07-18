@@ -12,9 +12,9 @@
     },
     "enum": {
       "type": "enumeration",
-      "enum": ["morning,", "noon"]
+      "enum": ["morning", "noon"]
     },
-    "picture": {
+    "pic": {
       "model": "file",
       "via": "related",
       "plugin": "upload"
