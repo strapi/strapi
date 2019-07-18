@@ -63,7 +63,7 @@ We will follow the most common download and installation procedure. _These instr
 1. Download the Mac O/S Installer from the [downloads page](https://nodejs.org/en/download/). We recommend the LTS (long-term support) version of Node.js.
 2. Launch the node-v10.x.x.pkg file icon. Click "Continue" for the default options and to install Node.js under the recommended and most common settings. After clicking "Continue" several times, click "Install" to install Node.js. When it is done installing, click "Close".
 3. Verify both Node.js and npm have installed correctly. Open your terminal prompt:
-   - Open you Applications folder
+   - Open your Applications folder
    - Find and open the Utilities folder
    - Find "Terminal" and click on it to open it.
    - Type the following commands in your Terminal

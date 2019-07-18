@@ -43,7 +43,7 @@ class App extends React.Component {
 
 // ...
 ```
-See the [Front-end Use Cases](./frontend-use-cases.md#handle-user-navigation) for more informations.
+See the [Front-end Use Cases](./frontend-use-cases.md#handle-user-navigation) for more information.
 
 ## Data flow
 
@@ -55,7 +55,7 @@ Data flow is controlled thanks to Redux and redux-sagas.
 
 The [Bootstrap styles](http://getbootstrap.com/) are inherited by the plugins. However, each component has its own styles, so it possible to completely customize it.
 
-**See the [plugin styles](../concepts/concepts.md#plugin-styles) for informations on its concept.**
+**See the [plugin styles](../concepts/concepts.md#plugin-styles) for information on its concept.**
 
 To style a plugin component:
  - Add a `styles.scss` file in the component directory

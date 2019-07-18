@@ -401,7 +401,7 @@ Returns a 401 Unauthorized error where:
   - an array of string values. These values will be separated by ', ' and set to the 'WWW-Authenticate' header.
 - `attributes` - an object of values to use while setting the 'WWW-Authenticate' header. This value is only used
   when `scheme` is a string, otherwise it is ignored. Every key/value pair will be included in the
-  'WWW-Authenticate' in the format of 'key="value"' as well as in the response payload under the `attributes` key.  Alternatively value can be a string which is use to set the value of the scheme, for example setting the token value for negotiate header.  If string is used message parameter must be null.
+  'WWW-Authenticate' in the format of 'key="value"' as well as in the response payload under the `attributes` key.  Alternatively value can be a string which is used to set the value of the scheme, for example setting the token value for negotiate header.  If string is used message parameter must be null.
   `null` and `undefined` will be replaced with an empty string. If `attributes` is set, `message` will be used as
   the 'error' segment of the 'WWW-Authenticate' header. If `message` is unset, the 'error' segment of the header
   will not be present and `isMissing` will be true on the error object.

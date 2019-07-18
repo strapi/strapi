@@ -25,7 +25,9 @@ Please send FormData in your request body
 
 ## Models
 
-To add a new file attribute in your models, it's like adding a new association. In the first example, you will be able to upload and attach one file to the avatar attribute. Whereas, in our second example, you can upload and attach multiple pictures to the product.
+Adding a file attribute to a model (or the model of another plugin) is like adding a new association.
+
+In the first example below, you will be able to upload and attach one file to the avatar attribute. Whereas, in our second example, you can upload and attach multiple pictures to the product.
 
 **Path —** `User.settings.json`.
 ```json

@@ -137,7 +137,7 @@ module.exports = async (ctx, next) => {
 
   // The code below will be executed after the controller's action.
   if (ctx.status === 404) {
-    ctx.body = 'We cannot find the ressource.';
+    ctx.body = 'We cannot find the resource.';
   }
 };
 ```

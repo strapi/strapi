@@ -31,6 +31,7 @@ Filters are used as a suffix of a field name:
 - `ncontains`: Doesn't contain
 - `containss`: Contains case sensitive
 - `ncontainss`: Doesn't contain case sensitive
+- `null`: Is null/Is not null
 
 #### Examples
 
@@ -50,7 +51,7 @@ or
 
 ##### Or clauses
 
-If you use the same operator (except for in and nin) the values will be use to build an `OR` query
+If you use the same operator (except for in and nin) the values will be used to build an `OR` query
 
 `GET /posts?title_contains=article&title_contains=truc`
 
@@ -117,7 +118,7 @@ Get the second page of results.
 
 ## Programmatic usage
 
-You can use `strapi-utils` to parse the query params to Strapi's standared filters programmatically if you need it.
+You can use `strapi-utils` to parse the query params to Strapi's standards filters programmatically if you need it.
 
 ### Extracting requests filters
 

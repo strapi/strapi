@@ -113,7 +113,7 @@ The cron format consists of:
 └───────────────────────── second (0 - 59, OPTIONAL)
 ```
 
-To define a CRON job, add your logic like bellow:
+To define a CRON job, add your logic like below:
 
 **Path —** `./config/functions/cron.js`.
 ```js

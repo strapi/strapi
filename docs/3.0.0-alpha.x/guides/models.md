@@ -7,7 +7,7 @@ See the [models' concepts](../concepts/concepts.md#models) for details.
 If you are just starting out it is very convenient to generate some models with the Content Type Builder, directly in the admin interface. You can then review the generated model mappings on the code level. The UI takes over a lot of validation tasks and gives you a fast feeling for available features.
 :::
 
-Use the CLI, and run the following command `strapi generate:model user firstname:string lastname:string`. Read the [CLI documentation](../cli/CLI.md) for more informations.
+Use the CLI, and run the following command `strapi generate:model user firstname:string lastname:string`. Read the [CLI documentation](../cli/CLI.md) for more information.
 
 This will create two files located at `./api/user/models`:
  - `User.settings.json`: contains the list of attributes and settings. The JSON format makes the file easily editable.
@@ -26,8 +26,8 @@ The info key on the model-json states information about the model. This informat
 ## Model options
 The options key on the model-json states.
    - `idAttribute`: This tells the model which attribute to expect as the unique identifier for each database row (typically an auto-incrementing primary key named 'id'). _Only valid for strapi-hook-bookshelf_
-   - `idAttributeType`: Data type of `idAttribute`, accepted list of value bellow. _Only valid for strapi-hook-bookshelf_
-   - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where frist element is create data and second elemtent is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
+   - `idAttributeType`: Data type of `idAttribute`, accepted list of value below. _Only valid for strapi-hook-bookshelf_
+   - `timestamps`: This tells the model which attributes to use for timestamps. Accepts either `boolean` or `Array` of strings where first element is create data and second element is update date. Default value when set to `true` for Bookshelf is `["created_at", "updated_at"]` and for MongoDB is `["createdAt", "updatedAt"]`.
 
 ## Define the attributes
 
@@ -114,11 +114,11 @@ To improve the Developer eXperience when developing or using the administration 
 
 ## Relations
 
-Refer to the [relations concept](../concepts/concepts.md#relations) for more informations about relations type.
+Refer to the [relations concept](../concepts/concepts.md#relations) for more information about relations type.
 
 ### One-way
 
-Refer to the [one-way concept](../concepts/concepts.md#one-way) for informations.
+Refer to the [one-way concept](../concepts/concepts.md#one-way) for information.
 
 #### Example
 
@@ -164,7 +164,7 @@ xhr.send(JSON.stringify({
 
 ### One-to-one
 
-Refer to the [one-to-one concept](../concepts/concepts.md#one-to-one) for informations.
+Refer to the [one-to-one concept](../concepts/concepts.md#one-to-one) for information.
 
 #### Example
 
@@ -238,7 +238,7 @@ xhr.send(JSON.stringify({
 
 ### One-to-many
 
-Refer to the [one-to-many concept](../concepts/concepts.md#one-to-many) for more informations.
+Refer to the [one-to-many concept](../concepts/concepts.md#one-to-many) for more information.
 
 #### Example
 
@@ -402,14 +402,14 @@ xhr.send(JSON.stringify({
 
 The polymorphic relationships are the solution when you don't know which kind of model will be associated to your entry. A common use case is an `Image` model that can be associated to many others kind of models (Article, Product, User, etc).
 
-Refer to the [upload plugin](./upload.md) polymorphic implementation for more informations.
+Refer to the [upload plugin](./upload.md) polymorphic implementation for more information.
 
 #### Single vs Many
 
 Let's stay with our `Image` model which might belongs to **a single `Article` or `Product` entry**.
 
 ::: note
-In other words, it means that a `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
+In other words, it means that an `Image` entry can be associated to one entry. This entry can be a `Article` or `Product` entry.
 :::
 
 **Path —** `./api/image/models/Image.settings.json`.
@@ -427,7 +427,7 @@ In other words, it means that a `Image` entry can be associated to one entry. Th
 Also, our `Image` model which might belongs to **many `Article` or `Product` entries**.
 
 ::: note
-In other words, it means that a `Article` entry can relate to the same image than a `Product` entry.
+In other words, it means that an `Article` entry can relate to the same image as a `Product` entry.
 :::
 
 **Path —** `./api/image/models/Image.settings.json`.
@@ -444,7 +444,7 @@ In other words, it means that a `Article` entry can relate to the same image tha
 
 #### Filter
 
-The `filter` attribute is optional (but we highly recommend to use every time). If it's provided it adds a new match level to retrieve the related data.
+The `filter` attribute is optional (but we highly recommend to use it every time). If it's provided it adds a new match level to retrieve the related data.
 
 For example, the `Product` model might have two attributes which are associated to the `Image` model. To distinguish which image is attached to the `cover` field and which images are attached to the `pictures` field, we need to save and provide this to the database.
 
@@ -637,7 +637,7 @@ CREATE TABLE `image` (
 ```
 
 ::: note
-If you've overrided the default table name given by Strapi by using the `collectionName` attribute. Use the value set in the `collectionName` to name the table.
+If you've overridden the default table name given by Strapi by using the `collectionName` attribute. Use the value set in the `collectionName` to name the table.
 :::
 
 The second table will allow us to associate one or many others entries to the `Image` model. The name of the table is the same as the previous one with the suffix `_morph`.
@@ -652,13 +652,13 @@ CREATE TABLE `image_morph` (
 ```
 
 - `image_id` is using the name of the first table with the suffix `_id`.
-  - **Attempted value:** It correspond to the id of an `Image` entry.
+  - **Attempted value:** It corresponds to the id of an `Image` entry.
 - `related_id` is using the attribute name where the relation happens with the suffix `_id`.
-  - **Attempted value:** It correspond to the id of an `Article` or `Product` entry.
+  - **Attempted value:** It corresponds to the id of an `Article` or `Product` entry.
 - `related_type` is using the attribute name where the relation happens with the suffix `_type`.
-  - **Attempted value:** It correspond to the table name where the `Article` or `Product` entry is stored.
+  - **Attempted value:** It corresponds to the table name where the `Article` or `Product` entry is stored.
 - `field` is using the filter property value defined in the model. If you change the filter value, you have to change the name of this column as well.
-  - **Attempted value:** It correspond to the attribute of a `Article`, `Product` with which the `Image` entry is related.
+  - **Attempted value:** It corresponds to the attribute of an `Article`, `Product` with which the `Image` entry is related.
 
 
 | id | image_id | related_id | related_type | field  |
@@ -669,7 +669,7 @@ CREATE TABLE `image_morph` (
 
 ## Lifecycle callbacks
 
-Refer to the [lifecycle callbacks concepts](../concepts/concepts.md#lifecycle-callbacks) for informations.
+Refer to the [lifecycle callbacks concepts](../concepts/concepts.md#lifecycle-callbacks) for information.
 
 The following events are available by default:
 

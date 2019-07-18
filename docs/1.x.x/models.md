@@ -317,7 +317,7 @@ Defaults to `false` if not specified.
 
 #### primaryKey
 
-Use this attribute as the the primary key for the record. Only one attribute per model can be the
+Use this attribute as the primary key for the record. Only one attribute per model can be the
 `primaryKey`. Defaults to `false` if not specified.
 
 This should never be used unless `autoPK` is set to `false`.
