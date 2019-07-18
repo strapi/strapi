@@ -11,13 +11,34 @@ const yargs = require('yargs');
 const appName = 'testApp';
 
 const databases = {
-  mongo:
-    '--dbclient=mongo --dbhost=127.0.0.1 --dbport=27017 --dbname=strapi_test --dbusername=root --dbpassword=strapi',
-  postgres:
-    '--dbclient=postgres --dbhost=127.0.0.1 --dbport=5432 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi',
-  mysql:
-    '--dbclient=mysql --dbhost=127.0.0.1 --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi',
-  sqlite: '--dbclient=sqlite --dbfile=./tmp/data.db',
+  mongo: {
+    client: 'mongo',
+    host: '127.0.0.1',
+    port: 27017,
+    database: 'strapi_test',
+    username: 'root',
+    password: 'strapi',
+  },
+  postgres: {
+    client: 'postgres',
+    host: '127.0.0.1',
+    port: 5432,
+    database: 'strapi_test',
+    username: 'strapi',
+    password: 'strapi',
+  },
+  mysql: {
+    client: 'mysql',
+    host: '127.0.0.1',
+    port: 3306,
+    database: 'strapi_test',
+    username: 'strapi',
+    password: 'strapi',
+  },
+  sqlite: {
+    client: 'sqlite',
+    filename: './tmp/data.db',
+  },
 };
 
 const test = async () => {

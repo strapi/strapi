@@ -36,6 +36,7 @@ module.exports = (projectDirectory, cliArguments) => {
     tmpPath,
     // use yarn if available and --use-npm isn't true
     useYarn: !useNpm && hasYarn(),
+    installDependencies: true,
     strapiDependencies: [
       'strapi',
       'strapi-admin',
