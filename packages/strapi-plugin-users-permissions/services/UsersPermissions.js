@@ -192,7 +192,7 @@ module.exports = {
     }
 
     // Group by `type`.
-    role.permissions = role.permissions.reduce((acc, permission) => {
+    const permissions = role.permissions.reduce((acc, permission) => {
       _.set(
         acc,
         `${permission.type}.controllers.${permission.controller}.${permission.action}`,
@@ -213,7 +213,10 @@ module.exports = {
       return acc;
     }, {});
 
-    return role;
+    return {
+      ...role,
+      permissions,
+    };
   },
 
   async getRoles() {

@@ -191,10 +191,12 @@ module.exports = ({ model, modelKey, strapi }) => {
       model,
       filters,
       populate: populateOpt,
+    }).then(results => {
+      return results.map(result => (result ? result.toObject() : null));
     });
   }
 
-  function findOne(params, populate) {
+  async function findOne(params, populate) {
     const primaryKey = getPK(params);
 
     if (primaryKey) {
@@ -203,7 +205,11 @@ module.exports = ({ model, modelKey, strapi }) => {
       };
     }
 
-    return model.findOne(params).populate(populate || defaultPopulate);
+    const entry = await model
+      .findOne(params)
+      .populate(populate || defaultPopulate);
+
+    return entry ? entry.toObject() : null;
   }
 
   function count(params) {
