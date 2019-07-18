@@ -260,9 +260,7 @@ class PopUpForm extends React.Component {
               params,
             }}
             onChange={this.props.onChange}
-            placeholder={`users-permissions.PopUpForm.Email.${
-              this.props.dataToEdit
-            }.${value}.placeholder`}
+            placeholder={`users-permissions.PopUpForm.Email.${this.props.dataToEdit}.${value}.placeholder`}
             type={includes(value, 'object') ? 'text' : 'textarea'}
             validations={{ required: true }}
             value={get(values, value)}

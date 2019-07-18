@@ -307,7 +307,7 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Retrieve the logged in user informations",
+        "description": "Retrieve the logged in user information",
         "tag": {
           "plugin": "users-permissions",
           "name": "User",

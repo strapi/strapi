@@ -105,7 +105,7 @@ module.exports = function(strapi) {
               // Define local GLOBALS to expose every models in this file.
               GLOBALS[definition.globalId] = {};
 
-              // Add some informations about ORM & client connection & tableName
+              // Add some information about ORM & client connection & tableName
               definition.orm = 'bookshelf';
               definition.databaseName = getDatabaseName(connection);
               definition.client = _.get(connection.settings, 'client');
@@ -352,9 +352,9 @@ module.exports = function(strapi) {
                         const model = findModelByAssoc({ assoc });
 
                         return {
-                          [`${prefix}${assoc.alias}.${
-                            model.collectionName
-                          }`]: function(query) {
+                          [`${prefix}${assoc.alias}.${model.collectionName}`]: function(
+                            query
+                          ) {
                             query.orderBy('created_at', 'desc');
                           },
                         };
@@ -602,9 +602,7 @@ module.exports = function(strapi) {
                     const columnName = details.plugin
                       ? _.get(
                           strapi.plugins,
-                          `${details.plugin}.models.${
-                            details.model
-                          }.attributes.${FK}.columnName`,
+                          `${details.plugin}.models.${details.model}.attributes.${FK}.columnName`,
                           FK
                         )
                       : _.get(

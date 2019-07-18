@@ -365,5 +365,33 @@ describe('convertRestQueryParams', () => {
         ],
       });
     });
+
+    test('Null', () => {
+      expect(
+        convertRestQueryParams({ 'content.text_null': true })
+      ).toMatchObject({
+        where: [
+          {
+            field: 'content.text',
+            operator: 'null',
+            value: true,
+          },
+        ],
+      });
+    });
+
+    test('Not Null', () => {
+      expect(
+        convertRestQueryParams({ 'content.text_null': false })
+      ).toMatchObject({
+        where: [
+          {
+            field: 'content.text',
+            operator: 'null',
+            value: false,
+          },
+        ],
+      });
+    });
   });
 });

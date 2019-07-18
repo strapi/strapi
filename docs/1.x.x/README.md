@@ -1,8 +1,9 @@
 ::: intro
-# Strapi 
 
-[![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi) 
-[![Slack Status](http://strapi-slack.herokuapp.com/badge.svg)](http://slack.strapi.io)
+# Strapi
+
+[![Build Status](https://travis-ci.org/wistityhq/strapi.svg?branch=master)](https://travis-ci.org/wistityhq/strapi)
+[![Slack Status](https://slack.strapi.io/badge.svg)](http://slack.strapi.io)
 
 Strapi is an open-source Node.js rich framework for building applications and services.
 :::
@@ -14,7 +15,7 @@ in a matter of hours instead of weeks.
 The framework sits on top of [Koa](http://koajs.com/). Its ensemble of small modules work
 together to provide simplicity, maintainability, and structural conventions to Node.js applications.
 
-**DISCLAIMER**: *This version is maintained for criticals issues only*.
+**DISCLAIMER**: _This version is maintained for criticals issues only_.
 
 ## Getting started in a minute
 
@@ -29,9 +30,9 @@ $ npm install strapi -g
 ### Link to the Strapi Studio
 
 > We advise you to use our Studio to build APIs. To do so, you need to create a Strapi account.
-[Go to the Strapi Studio to signup](http://studio.strapi.io).
-Studio is dedicated to developers to build applications without writing
-any single line of code thanks to its powerful set of tools.
+> [Go to the Strapi Studio to signup](http://studio.strapi.io).
+> Studio is dedicated to developers to build applications without writing
+> any single line of code thanks to its powerful set of tools.
 
 After creating an account on the Strapi Studio, you are able to link your machine to your
 Strapi Studio account to get access to all features offered by the Strapi ecosystem.
@@ -99,23 +100,23 @@ thanks to a powerful User Interface.
 Log into the Strapi Studio with your user account ([http://studio.strapi.io](http://studio.strapi.io))
 and follow the instructions to start the experience.
 
-![Strapi Studio](http://strapi.io/assets/screenshots/studio.png "Strapi Studio")
-*Simply manage your APIs and relations thanks to the Strapi Studio.*
+![Strapi Studio](http://strapi.io/assets/screenshots/studio.png 'Strapi Studio')
+_Simply manage your APIs and relations thanks to the Strapi Studio._
 
 ## Manage your data
 
 Strapi comes with a simple but yet powerful dashboard.
 
-![Strapi Dashboard](http://strapi.io/assets/screenshots/create.png "Strapi Dashboard")
-*Create, read, update and delete your data.*
+![Strapi Dashboard](http://strapi.io/assets/screenshots/create.png 'Strapi Dashboard')
+_Create, read, update and delete your data._
 
-![Strapi Dashboard](http://strapi.io/assets/screenshots/permissions.png "Strapi Dashboard")
-*Manage user settings, login, registration, groups and permissions on the fly.*
+![Strapi Dashboard](http://strapi.io/assets/screenshots/permissions.png 'Strapi Dashboard')
+_Manage user settings, login, registration, groups and permissions on the fly._
 
 ## Resources
 
-- [Contributing guide]((https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md))
-- [MIT License]((https://github.com/strapi/strapi/blob/master/LICENSE.md))
+- [Contributing guide](<(https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md)>)
+- [MIT License](<(https://github.com/strapi/strapi/blob/master/LICENSE.md)>)
 
 ## Links
 
