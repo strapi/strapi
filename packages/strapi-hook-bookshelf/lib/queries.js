@@ -39,7 +39,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   };
 
   /**
-   * Find ne entry based on params
+   * Find one entry based on params
    */
   async function findOne(params, populate) {
     const primaryKey = params[model.primaryKey] || params.id;

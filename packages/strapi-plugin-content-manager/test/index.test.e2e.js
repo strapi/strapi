@@ -495,7 +495,6 @@ describe('Content Manager End to End', () => {
     });
 
     test('Get article2 with cat2', async () => {
-      data.articles;
       let { body } = await rq({
         url: `/content-manager/explorer/article/${data.articles[1].id}?source=content-manager`,
         method: 'GET',
