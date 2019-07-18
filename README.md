@@ -89,6 +89,7 @@ This command will generate a brand new project with the default features (authen
 
 ```bash
 cd my-project
+yarn
 strapi develop
 ```
 
