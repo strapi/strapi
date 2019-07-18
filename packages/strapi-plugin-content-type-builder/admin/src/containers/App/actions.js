@@ -37,21 +37,27 @@ import {
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+  RESET_EXISTING_GROUP_MAIN_INFOS,
   RESET_EDIT_TEMP_CONTENT_TYPE,
   RESET_EDIT_TEMP_GROUP,
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
+  SAVE_EDITED_ATTRIBUTE_GROUP,
   SAVE_EDITED_ATTRIBUTE_RELATION,
   SET_TEMPORARY_ATTRIBUTE,
+  SET_TEMPORARY_ATTRIBUTE_GROUP,
   SET_TEMPORARY_ATTRIBUTE_RELATION,
   SUBMIT_CONTENT_TYPE,
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
+  SUBMIT_GROUP,
+  SUBMIT_GROUP_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_GROUP,
   SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+  ON_CHANGE_EXISTING_GROUP_MAIN_INFOS,
 } from './constants';
 
 export function addAttributeRelation(isModelTemporary, modelName) {
@@ -267,6 +273,22 @@ export function onChangeExistingContentTypeMainInfos({ target }) {
   };
 }
 
+export function onChangeExistingGroupMainInfos({ target }) {
+  const value =
+    target.name === 'name'
+      ? camelCase(target.value.trim()).toLowerCase()
+      : target.value;
+
+  const array = target.name.split('.');
+  array.splice(1, 0, 'schema');
+
+  return {
+    type: ON_CHANGE_EXISTING_GROUP_MAIN_INFOS,
+    keys: array,
+    value,
+  };
+}
+
 export function onChangeNewContentTypeMainInfos({ target }) {
   const value =
     target.name === 'name'
@@ -365,6 +387,13 @@ export function resetExistingContentTypeMainInfos(contentTypeName) {
   };
 }
 
+export function resetExistingGroupMainInfos(groupName) {
+  return {
+    type: RESET_EXISTING_GROUP_MAIN_INFOS,
+    groupName,
+  };
+}
+
 export function resetEditTempContentType() {
   return {
     type: RESET_EDIT_TEMP_CONTENT_TYPE,
@@ -396,6 +425,19 @@ export function saveEditedAttribute(
   };
 }
 
+export function saveEditedAttributeGroup(
+  attributeIndex,
+  isGroupTemporary,
+  groupName
+) {
+  return {
+    type: SAVE_EDITED_ATTRIBUTE_GROUP,
+    attributeIndex,
+    isGroupTemporary,
+    groupName,
+  };
+}
+
 export function saveEditedAttributeRelation(
   attributeName,
   isModelTemporary,
@@ -419,6 +461,19 @@ export function setTemporaryAttribute(
     attributeName,
     isModelTemporary,
     modelName,
+  };
+}
+
+export function setTemporaryAttributeGroup(
+  attributeIndex,
+  isGroupTemporary,
+  groupName
+) {
+  return {
+    type: SET_TEMPORARY_ATTRIBUTE_GROUP,
+    attributeIndex,
+    isGroupTemporary,
+    groupName,
   };
 }
 
@@ -452,6 +507,19 @@ export function submitContentType(oldContentTypeName, data, context, source) {
   };
 }
 
+export function submitGroup(oldGroupName, data, context, source) {
+  const attributes = formatGroupAttributes(data.attributes);
+  const body = Object.assign(cloneDeep(data), { attributes });
+
+  return {
+    type: SUBMIT_GROUP,
+    oldGroupName,
+    body,
+    source,
+    context,
+  };
+}
+
 export function submitContentTypeSucceeded() {
   return {
     type: SUBMIT_CONTENT_TYPE_SUCCEEDED,
@@ -466,6 +534,12 @@ export function submitTempContentType(data, context) {
     type: SUBMIT_TEMP_CONTENT_TYPE,
     body,
     context,
+  };
+}
+
+export function submitGroupSucceeded() {
+  return {
+    type: SUBMIT_GROUP_SUCCEEDED,
   };
 }
 

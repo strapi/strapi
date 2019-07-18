@@ -31,6 +31,9 @@ import {
   clearTemporaryAttributeGroup,
   deleteGroupAttribute,
   onChangeAttributeGroup,
+  saveEditedAttributeGroup,
+  setTemporaryAttributeGroup,
+  submitGroup,
   submitTempGroup,
   resetEditTempGroup,
 } from '../App/actions';
@@ -40,12 +43,48 @@ export class GroupPage extends React.Component {
   state = { attrToDelete: null, showWarning: false };
   featureType = 'group';
 
+  componentDidMount() {
+    const { setTemporaryAttributeGroup } = this.props;
+    if (
+      this.getModalType() === 'attributeForm' &&
+      this.getActionType() === 'edit' &&
+      !this.isTryingToEditAnUnknownAttribute()
+    ) {
+      setTemporaryAttributeGroup(
+        this.getAttributeIndex(),
+        this.isUpdatingTempFeature(),
+        this.getFeatureName()
+      );
+    }
+  }
+
   displayNotificationCTNotSaved = () =>
     strapi.notification.info(
       `${pluginId}.notification.info.contentType.creating.notSaved`
     );
 
+  isTryingToEditAnUnknownAttribute = () => {
+    const hasAttribute =
+      this.getFeatureAttributes().findIndex(
+        attr => attr.name === this.getAttributeName()
+      ) !== -1;
+
+    return (
+      this.getActionType() === 'edit' &&
+      this.getModalType() === 'attributeForm' &&
+      !hasAttribute
+    );
+  };
+
   getActionType = () => getQueryParameters(this.getSearch(), 'actionType');
+
+  getAttributeIndex = () => {
+    return getQueryParameters(this.getSearch(), 'attributeName');
+  };
+
+  getAttributeName = () => {
+    return get(this.getFeatureAttributesNames(), this.getAttributeIndex());
+  };
 
   getAttributeType = () =>
     getQueryParameters(this.getSearch(), 'attributeType');
@@ -106,7 +145,7 @@ export class GroupPage extends React.Component {
     /* istanbul ignore if */
     const title = this.isUpdatingTempFeature()
       ? get(newGroup, 'name', null)
-      : get(modifiedDataGroup, [name, 'name'], null);
+      : get(modifiedDataGroup, [name, 'schema', 'name'], null);
 
     return title;
   };
@@ -119,17 +158,27 @@ export class GroupPage extends React.Component {
       modifiedDataGroup,
       newGroup,
       resetEditTempGroup,
+      submitGroup,
       submitTempGroup,
     } = this.props;
+    const featureName = this.getFeatureName();
     /* istanbul ignore if */
     const shouldShowActions = this.isUpdatingTempFeature()
       ? this.getFeatureAttributesLength() > 0
-      : !isEqual(
-          modifiedDataGroup[this.getFeatureName()],
-          initialDataGroup[this.getFeatureName()]
-        );
+      : !isEqual(modifiedDataGroup[featureName], initialDataGroup[featureName]);
 
-    const handleSubmit = () => submitTempGroup(newGroup, this.context);
+    const handleSubmit = () =>
+      this.isUpdatingTempFeature()
+        ? submitTempGroup(newGroup, this.context)
+        : submitGroup(
+            featureName,
+            get(modifiedDataGroup, [featureName, 'schema']),
+            Object.assign(this.context, {
+              history: this.props.history,
+            }),
+            this.getSource()
+          );
+
     const handleCancel = resetEditTempGroup;
 
     /* istanbul ignore if */
@@ -168,6 +217,38 @@ export class GroupPage extends React.Component {
     const source = getQueryParameters(this.getFeatureName(), 'source');
 
     return !!source ? source : null;
+  };
+
+  handleClickEditAttribute = (attributeIndex, type) => {
+    const { emitEvent } = this.context;
+    const {
+      canOpenModal,
+      history: { push },
+      setTemporaryAttributeGroup,
+    } = this.props;
+    const attributeType = [
+      'integer',
+      'biginteger',
+      'float',
+      'decimal',
+    ].includes(type)
+      ? 'number'
+      : type;
+
+    if (canOpenModal || this.isUpdatingTempFeature()) {
+      setTemporaryAttributeGroup(
+        attributeIndex,
+        this.isUpdatingTempFeature(),
+        this.getFeatureName()
+      );
+
+      emitEvent('willEditFieldOfGroup');
+      push({
+        search: `modalType=attributeForm&attributeType=${attributeType}&settingType=base&actionType=edit&attributeName=${attributeIndex}`,
+      });
+    } else {
+      this.displayNotificationCTNotSaved();
+    }
   };
 
   handleClickOnTrashIcon = attrToDelete => {
@@ -229,6 +310,23 @@ export class GroupPage extends React.Component {
     push({ search: nextSearch });
   };
 
+  handleSubmitEdit = (shouldContinue = false) => {
+    const {
+      history: { push },
+      saveEditedAttributeGroup,
+    } = this.props;
+
+    saveEditedAttributeGroup(
+      this.getAttributeIndex(),
+      this.isUpdatingTempFeature(),
+      this.getFeatureName()
+    );
+
+    const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
+
+    push({ search: nextSearch });
+  };
+
   isUpdatingTempFeature = () => {
     const { groups } = this.props;
     const currentData = groups.find(d => d.name === this.getFeatureName());
@@ -244,6 +342,20 @@ export class GroupPage extends React.Component {
 
     if (canOpenModal || this.isUpdatingTempFeature()) {
       push({ search: 'modalType=chooseAttributes' });
+    } else {
+      this.displayNotificationCTNotSaved();
+    }
+  };
+
+  openEditFeatureModal = () => {
+    const { emitEvent } = this.context;
+    const { canOpenModal } = this.props;
+
+    if (canOpenModal || this.isUpdatingTempFeature()) {
+      this.props.history.push({
+        search: `modalType=group&settingType=base&actionType=edit&groupName=${this.getFeatureName()}`,
+      });
+      emitEvent('willEditNameOfGroup');
     } else {
       this.displayNotificationCTNotSaved();
     }
@@ -303,6 +415,7 @@ export class GroupPage extends React.Component {
           headerTitle={this.getFeatureHeaderTitle()}
           headerDescription={this.getFeatureHeaderDescription()}
           pluginHeaderActions={this.getPluginHeaderActions()}
+          onClickIcon={this.openEditFeatureModal}
         >
           {attributesNumber === 0 ? (
             <EmptyAttributesBlock
@@ -352,17 +465,18 @@ export class GroupPage extends React.Component {
         />
 
         <AttributeForm
+          actionType={this.getActionType()}
           activeTab={this.getSettingType()}
           alreadyTakenAttributes={this.getFeatureAttributesNames()}
           attributeType={this.getAttributeType()}
+          attributeToEditName={this.getAttributeName()}
           featureType={this.featureType}
-          getActionType={this.getActionType()}
           isOpen={this.getModalType() === 'attributeForm'}
           modifiedData={temporaryAttributeGroup}
           onCancel={clearTemporaryAttributeGroup}
           onChange={onChangeAttributeGroup}
           onSubmit={this.handleSubmit}
-          onSubmitEdit={() => {}}
+          onSubmitEdit={this.handleSubmitEdit}
           push={push}
         />
 
@@ -412,6 +526,9 @@ GroupPage.propTypes = {
   newGroup: PropTypes.object.isRequired,
   onChangeAttributeGroup: PropTypes.func.isRequired,
   resetEditTempGroup: PropTypes.func.isRequired,
+  saveEditedAttributeGroup: PropTypes.func.isRequired,
+  setTemporaryAttributeGroup: PropTypes.func.isRequired,
+  submitGroup: PropTypes.func.isRequired,
   submitTempGroup: PropTypes.func.isRequired,
   temporaryAttributeGroup: PropTypes.object.isRequired,
 };
@@ -424,6 +541,9 @@ export function mapDispatchToProps(dispatch) {
       clearTemporaryAttributeGroup,
       deleteGroupAttribute,
       onChangeAttributeGroup,
+      saveEditedAttributeGroup,
+      setTemporaryAttributeGroup,
+      submitGroup,
       submitTempGroup,
       resetEditTempGroup,
     },

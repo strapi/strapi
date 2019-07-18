@@ -163,7 +163,7 @@
   "popUpForm.create.group.header.title": "Créer un Groupe",
   "popUpForm.create.model.header.subTitle": "Paramètres du Type de Contenu",
   "popUpForm.create.group.header.subTitle": "Paramètres du Groupe",
-  "popUpForm.edit": "Modifer",
+  "popUpForm.edit": "Modifier",
   "popUpForm.edit.contentType.header.title": "Modifier un Type de Contenu",
   "popUpForm.field": "Champ",
   "popUpForm.navContainer.advanced": "Réglages avancés",

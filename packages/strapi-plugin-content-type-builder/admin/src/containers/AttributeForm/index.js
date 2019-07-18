@@ -173,10 +173,14 @@ class AttributeForm extends React.Component {
   };
 
   renderInput = (input, index) => {
-    const { modifiedData, onChange } = this.props;
+    const { featureType, modifiedData, onChange } = this.props;
     const { didCheckErrors, formErrors } = this.state;
     const { custom, defaultValue, name } = input;
-    const value = get(modifiedData, name, defaultValue);
+
+    const value =
+      featureType === 'model'
+        ? get(modifiedData, name, defaultValue)
+        : get(modifiedData, name, defaultValue);
 
     const errors = get(formErrors, name, []);
 

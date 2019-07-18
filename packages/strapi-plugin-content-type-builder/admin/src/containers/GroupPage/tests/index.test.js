@@ -123,7 +123,10 @@ const props = {
   },
   onChangeAttributeGroup: jest.fn(),
   resetEditTempGroup: jest.fn(),
+  saveEditedAttributeGroup: jest.fn(),
+  setTemporaryAttributeGroup: jest.fn(),
   submitTempGroup: jest.fn(),
+  submitGroup: jest.fn(),
   temporaryAttributeGroup: {},
 };
 
