@@ -33,7 +33,7 @@ module.exports = {
     action = '',
   }) {
     // Type
-    if (definition.type) {
+    if (definition.type && definition.type !== 'group') {
       let type = 'String';
 
       switch (definition.type) {
@@ -72,6 +72,24 @@ module.exports = {
       }
 
       return type;
+    }
+
+    if (definition.type === 'group') {
+      const globalId = strapi.groups[definition.group].globalId;
+      const { required, repeatable } = definition;
+      let typeName = required === true ? `${globalId}` : globalId;
+
+      if (rootType === 'mutation') {
+        typeName =
+          action === 'update'
+            ? `edit${_.capitalize(globalId)}Input`
+            : `${_.capitalize(globalId)}Input${required ? '!' : ''}`;
+      }
+
+      if (repeatable === true) {
+        return `[${typeName}]`;
+      }
+      return `${typeName}`;
     }
 
     const ref = definition.model || definition.collection;
@@ -189,13 +207,25 @@ module.exports = {
     `;
   },
 
-  generateInputModel: function(model, name) {
+  generateInputModel: function(model, name, { allowIds = false } = {}) {
     const globalId = model.globalId;
     const inputName = `${_.capitalize(name)}Input`;
 
-    /* eslint-disable */
-    return `
+    if (_.isEmpty(model.attributes)) {
+      return `
       input ${inputName} {
+        _: String
+      }
+
+      input edit${inputName} {
+        ${allowIds ? 'id: ID' : '_: String'}
+      }
+     `;
+    }
+
+    const inputs = `
+      input ${inputName} {
+        
         ${Object.keys(model.attributes)
           .map(attribute => {
             return `${attribute}: ${this.convertType({
@@ -209,6 +239,7 @@ module.exports = {
       }
 
       input edit${inputName} {
+        ${allowIds ? 'id: ID' : ''}
         ${Object.keys(model.attributes)
           .map(attribute => {
             return `${attribute}: ${this.convertType({
@@ -222,7 +253,7 @@ module.exports = {
           .join('\n')}
       }
     `;
-    /* eslint-enable */
+    return inputs;
   },
 
   generateInputPayloadArguments: function(model, name, type, resolver) {

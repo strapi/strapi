@@ -10,7 +10,11 @@
       "type": "float",
       "required": true
     },
-    "picture": {
+    "enum": {
+      "type": "enumeration",
+      "enum": ["morning", "noon"]
+    },
+    "pic": {
       "model": "file",
       "via": "related",
       "plugin": "upload"

@@ -7,7 +7,7 @@
   },
   "options": {
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": true,
     "comment": ""
   },
   "attributes": {
