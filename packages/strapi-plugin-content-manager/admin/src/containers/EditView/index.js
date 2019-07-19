@@ -555,6 +555,7 @@ EditView.propTypes = {
   }),
   layouts: PropTypes.object,
   location: PropTypes.shape({
+    pathname: PropTypes.string,
     search: PropTypes.string,
   }),
   match: PropTypes.shape({
