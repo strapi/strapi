@@ -159,6 +159,7 @@ module.exports = strapi => {
     },
 
     requireStore(store) {
+      // eslint-disable-next-line no-useless-catch
       try {
         return require(path.resolve(
           strapi.config.appPath,
