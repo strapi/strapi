@@ -41,7 +41,7 @@ module.exports = {
     const metadatas = await getContentTypeMetadatas(storeKey);
 
     return {
-      settings: settings,
+      settings,
       metadatas,
       layouts,
     };

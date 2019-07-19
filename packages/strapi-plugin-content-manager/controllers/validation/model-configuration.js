@@ -5,25 +5,23 @@ const yup = require('yup');
 /**
  * Creates the validation schema for content-type configurations
  */
-module.exports = contentType =>
+module.exports = model =>
   yup
     .object()
     .shape({
-      settings: createContentTypeSettingsSchema(contentType),
-      metadatas: createContentTypeMetadasSchema(contentType),
-      layouts: createContentTypeLayoutsSchema(contentType),
+      settings: createSettingsSchema(model),
+      metadatas: createMetadasSchema(model),
+      layouts: createLayoutsSchema(model),
     })
     .noUnknown();
 
 // TODO: do sth to clean the keys configurable, private etc
 
-const createContentTypeSettingsSchema = contentType => {
-  const validAttributes = Object.keys(contentType.allAttributes).filter(key => {
+const createSettingsSchema = model => {
+  const validAttributes = Object.keys(model.allAttributes).filter(key => {
     return (
-      contentType.allAttributes[key].type &&
-      !['json', 'password', 'group'].includes(
-        contentType.allAttributes[key].type
-      )
+      model.allAttributes[key].type &&
+      !['json', 'password', 'group'].includes(model.allAttributes[key].type)
     );
   });
   const attrs = ['id'].concat(validAttributes);
@@ -58,9 +56,9 @@ const createContentTypeSettingsSchema = contentType => {
     .noUnknown();
 };
 
-const createContentTypeMetadasSchema = contentType => {
+const createMetadasSchema = model => {
   return yup.object().shape(
-    ['id'].concat(Object.keys(contentType.allAttributes)).reduce((acc, key) => {
+    ['id'].concat(Object.keys(model.allAttributes)).reduce((acc, key) => {
       acc[key] = yup
         .object()
         .shape({
@@ -98,19 +96,17 @@ const ARRAY_TEST = {
   test: val => Array.isArray(val),
 };
 
-const createContentTypeLayoutsSchema = contentType => {
-  const validAttributes = Object.keys(contentType.allAttributes).filter(key => {
+const createLayoutsSchema = model => {
+  const validAttributes = Object.keys(model.allAttributes).filter(key => {
     return (
-      contentType.allAttributes[key].type &&
-      !['json', 'password', 'group'].includes(
-        contentType.allAttributes[key].type
-      )
+      model.allAttributes[key].type &&
+      !['json', 'password', 'group'].includes(model.allAttributes[key].type)
     );
   });
 
   const attrs = ['id'].concat(validAttributes);
-  const relationAttributes = Array.isArray(contentType.associations)
-    ? contentType.associations.map(assoc => assoc.alias)
+  const relationAttributes = Array.isArray(model.associations)
+    ? model.associations.map(assoc => assoc.alias)
     : [];
 
   return yup.object().shape({
@@ -123,7 +119,11 @@ const createContentTypeLayoutsSchema = contentType => {
             .shape({
               name: yup
                 .string()
-                .oneOf(Object.keys(contentType.attributes))
+                .oneOf(
+                  Object.keys(model.allAttributes).filter(
+                    key => model.allAttributes[key].type
+                  )
+                )
                 .required(),
               size: yup
                 .number()

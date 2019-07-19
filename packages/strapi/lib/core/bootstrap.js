@@ -51,6 +51,7 @@ module.exports = function(strapi) {
       throw new Error(`Group ${key} is missing a collectionName attribute`);
 
     return Object.assign(group, {
+      schema: _.clone(group),
       globalId: group.globalId || _.upperFirst(_.camelCase(`group_${key}`)),
     });
   });

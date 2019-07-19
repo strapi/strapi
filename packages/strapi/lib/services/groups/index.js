@@ -1,3 +1,7 @@
+'use strict';
+
+const _ = require('lodash');
+
 const initMap = groups => {
   const map = new Map();
 
@@ -12,7 +16,13 @@ const initMap = groups => {
 
     map.set(key, {
       uid: key,
-      schema: { name, connection, collectionName, description, attributes },
+      schema: {
+        name: _.upperFirst(name || key),
+        connection,
+        collectionName,
+        description,
+        attributes,
+      },
     });
   });
 

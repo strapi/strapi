@@ -2,7 +2,7 @@
 
 const {
   generalSettingsSchema,
-  createContentTypeConfigurationSchema,
+  createModelConfigurationSchema,
 } = require('./validation');
 
 module.exports = {
@@ -164,14 +164,11 @@ module.exports = {
 
     let input;
     try {
-      input = await createContentTypeConfigurationSchema(contentType).validate(
-        body,
-        {
-          abortEarly: false,
-          stripUnknown: true,
-          strict: true,
-        }
-      );
+      input = await createModelConfigurationSchema(contentType).validate(body, {
+        abortEarly: false,
+        stripUnknown: true,
+        strict: true,
+      });
     } catch (error) {
       return ctx.badRequest(null, {
         name: 'validationError',
