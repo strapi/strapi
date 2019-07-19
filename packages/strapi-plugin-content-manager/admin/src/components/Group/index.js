@@ -148,7 +148,7 @@ function Group({
 
                         if (groupValue.length - 1 < min) {
                           strapi.notification.info(
-                            'A empty field has been added to match the requirements'
+                            `${pluginId}.components.Group.notification.info.minimum-requirement`
                           );
                         }
 

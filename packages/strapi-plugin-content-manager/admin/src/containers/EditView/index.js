@@ -272,7 +272,7 @@ function EditView({
 
   const handleSubmit = async e => {
     e.preventDefault();
-    const schema = createYupSchema(layout, groupLayoutsData);
+    const schema = createYupSchema(layout, { groups: groupLayoutsData });
 
     try {
       await schema.validate(modifiedData, { abortEarly: false });
@@ -293,7 +293,9 @@ function EditView({
         errors,
       });
 
-      strapi.notification.error('Please check the form');
+      strapi.notification.error(
+        `${pluginId}.containers.EditView.notification.errors`
+      );
     }
   };
 

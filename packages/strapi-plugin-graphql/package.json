@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.0.0-beta.9",
+  "version": "3.0.0-beta.13",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "graphql",
@@ -23,7 +23,7 @@
     "graphql-type-long": "^0.1.1",
     "koa-compose": "^4.0.0",
     "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.0-beta.9"
+    "strapi-utils": "3.0.0-beta.13"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
@@ -43,8 +43,8 @@
     }
   ],
   "engines": {
-    "node": "^10.0.0",
-    "npm": ">= 6.0.0"
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
   },
   "license": "MIT",
   "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
