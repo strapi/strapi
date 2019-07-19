@@ -1347,7 +1347,7 @@ You must have completed the [steps to use Strapi with MongoDB Atlas](/3.0.0-beta
 
 ##### 1. Set environment variables
 
-You should haWhen you [set-up your MongoDB Atlas database](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) you noted a connection string. Similar to this:
+When you [set-up your MongoDB Atlas database](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) you noted a connection string. Similar to this:
 
 ```bash
 mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority
