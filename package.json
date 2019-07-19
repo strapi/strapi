@@ -7,7 +7,7 @@
     "cypress": "3.1.2",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
-    "eslint": "^5.16.0",
+    "eslint": "^6.0.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-react": "^7.14.0",
     "eslint-plugin-redux-saga": "^1.0.0",
