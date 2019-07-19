@@ -86,7 +86,7 @@ export class Admin extends React.Component {
 
   componentDidMount() {
     // Initialize Google Analytics
-    // Refer to ../../../doc/disable-tracking.md for more informations
+    // Refer to ../../../doc/disable-tracking.md for more information
     /* istanbul ignore next */
     ReactGA.initialize('UA-54313258-9', {
       testMode: process.env.NODE_ENV === 'test',
@@ -160,7 +160,7 @@ export class Admin extends React.Component {
     } = props;
 
     return !Object.keys(plugins).every(
-      plugin => plugins[plugin].isReady === true,
+      plugin => plugins[plugin].isReady === true
     );
   };
 
@@ -208,7 +208,7 @@ export class Admin extends React.Component {
       const key = plugins[current].id;
 
       acc.push(
-        <InitializerComponent key={key} {...this.props} {...this.helpers} />,
+        <InitializerComponent key={key} {...this.props} {...this.helpers} />
       );
 
       return acc;
@@ -360,13 +360,13 @@ export function mapDispatchToProps(dispatch) {
       unsetAppSecured,
       updatePlugin,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
@@ -381,5 +381,5 @@ export default compose(
   withLocaleToggleReducer,
   withSaga,
   withConnect,
-  withHooks,
+  withHooks
 )(Admin);

@@ -18,7 +18,6 @@ Response header object.
 
 Response header object. Alias as `response.header`.
 
-
 #### response.socket
 
 Request socket.
@@ -182,6 +181,7 @@ ctx.set('Cache-Control', 'no-cache');
 ```
 
 #### response.append(field, value)
+
 Append additional header `field` with value `val`.
 
 ```js
@@ -194,8 +194,8 @@ Set several response header `fields` with an object:
 
 ```js
 ctx.set({
-  'Etag': '1234',
-  'Last-Modified': date
+  Etag: '1234',
+  'Last-Modified': date,
 });
 ```
 
@@ -243,14 +243,14 @@ all HTML responses except for streams.
 const minify = require('html-minifier');
 
 app.use(async (ctx, next) => {
-await next();
+  await next();
 
-if (!ctx.response.is('html')) return;
+  if (!ctx.response.is('html')) return;
 
-let body = ctx.body;
-if (!body || body.pipe) return;
+  let body = ctx.body;
+  if (!body || body.pipe) return;
 
-if (Buffer.isBuffer(body)) body = body.toString();
+  if (Buffer.isBuffer(body)) body = body.toString();
   ctx.body = minify(body);
 });
 ```
@@ -309,7 +309,10 @@ Set the ETag of a response including the wrapped `"`s.
 Note that there is no corresponding `response.etag` getter.
 
 ```js
-ctx.response.etag = crypto.createHash('md5').update(ctx.body).digest('hex');
+ctx.response.etag = crypto
+  .createHash('md5')
+  .update(ctx.body)
+  .digest('hex');
 ```
 
 #### response.vary(field)
@@ -336,37 +339,37 @@ For more information, please refer to the [Boom documentation](https://github.co
 
 <!-- toc -->
 
- - [HTTP 4xx Errors](#http-4xx-errors)
-   - [`ctx.response.badRequest([message], [data])`](#ctxresponsebadrequestmessage-data)
-   - [`ctx.response.unauthorized([message], [scheme], [attributes])`](#ctxresponseunauthorizedmessage-scheme-attributes)
-   - [`ctx.response.paymentRequired([message], [data])`](#ctxresponsepaymentrequiredmessage-data)
-   - [`ctx.response.forbidden([message], [data])`](#ctxresponseforbiddenmessage-data)
-   - [`ctx.response.notFound([message], [data])`](#ctxresponsenotfoundmessage-data)
-   - [`ctx.response.methodNotAllowed([message], [data], [allow])`](#ctxresponsemethodnotallowedmessage-data-allow)
-   - [`ctx.response.notAcceptable([message], [data])`](#ctxresponsenotacceptablemessage-data)
-   - [`ctx.response.proxyAuthRequired([message], [data])`](#ctxresponseproxyauthrequiredmessage-data)
-   - [`ctx.response.clientTimeout([message], [data])`](#ctxresponseclienttimeoutmessage-data)
-   - [`ctx.response.conflict([message], [data])`](#ctxresponseconflictmessage-data)
-   - [`ctx.response.resourceGone([message], [data])`](#ctxresponseresourcegonemessage-data)
-   - [`ctx.response.lengthRequired([message], [data])`](#ctxresponselengthrequiredmessage-data)
-   - [`ctx.response.preconditionFailed([message], [data])`](#ctxresponsepreconditionfailedmessage-data)
-   - [`ctx.response.entityTooLarge([message], [data])`](#ctxresponseentitytoolargemessage-data)
-   - [`ctx.response.uriTooLong([message], [data])`](#ctxresponseuritoolongmessage-data)
-   - [`ctx.response.unsupportedMediaType([message], [data])`](#ctxresponseunsupportedmediatypemessage-data)
-   - [`ctx.response.rangeNotSatisfiable([message], [data])`](#ctxresponserangenotsatisfiablemessage-data)
-   - [`ctx.response.expectationFailed([message], [data])`](#ctxresponseexpectationfailedmessage-data)
-   - [`ctx.response.teapot([message], [data])`](#ctxresponseteapotmessage-data)
-   - [`ctx.response.badData([message], [data])`](#ctxresponsebaddatamessage-data)
-   - [`ctx.response.locked([message], [data])`](#ctxresponselockedmessage-data)
-   - [`ctx.response.preconditionRequired([message], [data])`](#ctxresponsepreconditionrequiredmessage-data)
-   - [`ctx.response.tooManyRequests([message], [data])`](#ctxresponsetoomanyrequestsmessage-data)
-   - [`ctx.response.illegal([message], [data])`](#ctxresponseillegalmessage-data)
- - [HTTP 5xx Errors](#http-5xx-errors)
-   - [`ctx.response.badImplementation([message], [data])` - (*alias: `internal`*)](#ctxresponsebadimplementationmessage-data---alias-internal)
-   - [`ctx.response.notImplemented([message], [data])`](#ctxresponsenotimplementedmessage-data)
-   - [`ctx.response.badGateway([message], [data])`](#ctxresponsebadgatewaymessage-data)
-   - [`ctx.response.serverUnavailable([message], [data])`](#ctxresponseserverunavailablemessage-data)
-   - [`ctx.response.gatewayTimeout([message], [data])`](#ctxresponsegatewaytimeoutmessage-data)
+- [HTTP 4xx Errors](#http-4xx-errors)
+  - [`ctx.response.badRequest([message], [data])`](#ctxresponsebadrequestmessage-data)
+  - [`ctx.response.unauthorized([message], [scheme], [attributes])`](#ctxresponseunauthorizedmessage-scheme-attributes)
+  - [`ctx.response.paymentRequired([message], [data])`](#ctxresponsepaymentrequiredmessage-data)
+  - [`ctx.response.forbidden([message], [data])`](#ctxresponseforbiddenmessage-data)
+  - [`ctx.response.notFound([message], [data])`](#ctxresponsenotfoundmessage-data)
+  - [`ctx.response.methodNotAllowed([message], [data], [allow])`](#ctxresponsemethodnotallowedmessage-data-allow)
+  - [`ctx.response.notAcceptable([message], [data])`](#ctxresponsenotacceptablemessage-data)
+  - [`ctx.response.proxyAuthRequired([message], [data])`](#ctxresponseproxyauthrequiredmessage-data)
+  - [`ctx.response.clientTimeout([message], [data])`](#ctxresponseclienttimeoutmessage-data)
+  - [`ctx.response.conflict([message], [data])`](#ctxresponseconflictmessage-data)
+  - [`ctx.response.resourceGone([message], [data])`](#ctxresponseresourcegonemessage-data)
+  - [`ctx.response.lengthRequired([message], [data])`](#ctxresponselengthrequiredmessage-data)
+  - [`ctx.response.preconditionFailed([message], [data])`](#ctxresponsepreconditionfailedmessage-data)
+  - [`ctx.response.entityTooLarge([message], [data])`](#ctxresponseentitytoolargemessage-data)
+  - [`ctx.response.uriTooLong([message], [data])`](#ctxresponseuritoolongmessage-data)
+  - [`ctx.response.unsupportedMediaType([message], [data])`](#ctxresponseunsupportedmediatypemessage-data)
+  - [`ctx.response.rangeNotSatisfiable([message], [data])`](#ctxresponserangenotsatisfiablemessage-data)
+  - [`ctx.response.expectationFailed([message], [data])`](#ctxresponseexpectationfailedmessage-data)
+  - [`ctx.response.teapot([message], [data])`](#ctxresponseteapotmessage-data)
+  - [`ctx.response.badData([message], [data])`](#ctxresponsebaddatamessage-data)
+  - [`ctx.response.locked([message], [data])`](#ctxresponselockedmessage-data)
+  - [`ctx.response.preconditionRequired([message], [data])`](#ctxresponsepreconditionrequiredmessage-data)
+  - [`ctx.response.tooManyRequests([message], [data])`](#ctxresponsetoomanyrequestsmessage-data)
+  - [`ctx.response.illegal([message], [data])`](#ctxresponseillegalmessage-data)
+- [HTTP 5xx Errors](#http-5xx-errors)
+  - [`ctx.response.badImplementation([message], [data])` - (_alias: `internal`_)](#ctxresponsebadimplementationmessage-data---alias-internal)
+  - [`ctx.response.notImplemented([message], [data])`](#ctxresponsenotimplementedmessage-data)
+  - [`ctx.response.badGateway([message], [data])`](#ctxresponsebadgatewaymessage-data)
+  - [`ctx.response.serverUnavailable([message], [data])`](#ctxresponseserverunavailablemessage-data)
+  - [`ctx.response.gatewayTimeout([message], [data])`](#ctxresponsegatewaytimeoutmessage-data)
 
 <!-- tocstop -->
 
@@ -375,6 +378,7 @@ For more information, please refer to the [Boom documentation](https://github.co
 #### `ctx.response.badRequest([message], [data])`
 
 Returns a 400 Bad Request error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -395,13 +399,14 @@ Generates the following response payload:
 #### `ctx.response.unauthorized([message], [scheme], [attributes])`
 
 Returns a 401 Unauthorized error where:
+
 - `message` - optional message.
 - `scheme` can be one of the following:
   - an authentication scheme name
   - an array of string values. These values will be separated by ', ' and set to the 'WWW-Authenticate' header.
 - `attributes` - an object of values to use while setting the 'WWW-Authenticate' header. This value is only used
   when `scheme` is a string, otherwise it is ignored. Every key/value pair will be included in the
-  'WWW-Authenticate' in the format of 'key="value"' as well as in the response payload under the `attributes` key.  Alternatively value can be a string which is use to set the value of the scheme, for example setting the token value for negotiate header.  If string is used message parameter must be null.
+  'WWW-Authenticate' in the format of 'key="value"' as well as in the response payload under the `attributes` key. Alternatively value can be a string which is used to set the value of the scheme, for example setting the token value for negotiate header. If string is used message parameter must be null.
   `null` and `undefined` will be replaced with an empty string. If `attributes` is set, `message` will be used as
   the 'error' segment of the 'WWW-Authenticate' header. If `message` is unset, the 'error' segment of the header
   will not be present and `isMissing` will be true on the error object.
@@ -461,7 +466,11 @@ Generates the following response:
 ```
 
 ```js
-ctx.response.unauthorized('invalid password', 'sample', { ttl: 0, cache: null, foo: 'bar' });
+ctx.response.unauthorized('invalid password', 'sample', {
+  ttl: 0,
+  cache: null,
+  foo: 'bar',
+});
 ```
 
 Generates the following response:
@@ -486,6 +495,7 @@ Generates the following response:
 #### `ctx.response.paymentRequired([message], [data])`
 
 Returns a 402 Payment Required error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -506,6 +516,7 @@ Generates the following response payload:
 #### `ctx.response.forbidden([message], [data])`
 
 Returns a 403 Forbidden error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -526,6 +537,7 @@ Generates the following response payload:
 #### `ctx.response.notFound([message], [data])`
 
 Returns a 404 Not Found error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -546,6 +558,7 @@ Generates the following response payload:
 #### `ctx.response.methodNotAllowed([message], [data], [allow])`
 
 Returns a 405 Method Not Allowed error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 - `allow` - optional string or array of strings (to be combined and separated by ', ') which is set to the 'Allow' header.
@@ -567,6 +580,7 @@ Generates the following response payload:
 #### `ctx.response.notAcceptable([message], [data])`
 
 Returns a 406 Not Acceptable error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -587,6 +601,7 @@ Generates the following response payload:
 #### `ctx.response.proxyAuthRequired([message], [data])`
 
 Returns a 407 Proxy Authentication Required error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -607,6 +622,7 @@ Generates the following response payload:
 #### `ctx.response.clientTimeout([message], [data])`
 
 Returns a 408 Request Time-out error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -627,6 +643,7 @@ Generates the following response payload:
 #### `ctx.response.conflict([message], [data])`
 
 Returns a 409 Conflict error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -647,6 +664,7 @@ Generates the following response payload:
 #### `ctx.response.resourceGone([message], [data])`
 
 Returns a 410 Gone error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -667,6 +685,7 @@ Generates the following response payload:
 #### `ctx.response.lengthRequired([message], [data])`
 
 Returns a 411 Length Required error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -687,6 +706,7 @@ Generates the following response payload:
 #### `ctx.response.preconditionFailed([message], [data])`
 
 Returns a 412 Precondition Failed error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -706,6 +726,7 @@ Generates the following response payload:
 #### `ctx.response.entityTooLarge([message], [data])`
 
 Returns a 413 Request Entity Too Large error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -726,6 +747,7 @@ Generates the following response payload:
 #### `ctx.response.uriTooLong([message], [data])`
 
 Returns a 414 Request-URI Too Large error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -746,6 +768,7 @@ Generates the following response payload:
 #### `ctx.response.unsupportedMediaType([message], [data])`
 
 Returns a 415 Unsupported Media Type error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -766,6 +789,7 @@ Generates the following response payload:
 #### `ctx.response.rangeNotSatisfiable([message], [data])`
 
 Returns a 416 Requested Range Not Satisfiable error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -785,6 +809,7 @@ Generates the following response payload:
 #### `ctx.response.expectationFailed([message], [data])`
 
 Returns a 417 Expectation Failed error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -805,6 +830,7 @@ Generates the following response payload:
 #### `ctx.response.teapot([message], [data])`
 
 Returns a 418 I'm a Teapot error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -825,6 +851,7 @@ Generates the following response payload:
 #### `ctx.response.badData([message], [data])`
 
 Returns a 422 Unprocessable Entity error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -845,6 +872,7 @@ Generates the following response payload:
 #### `ctx.response.locked([message], [data])`
 
 Returns a 423 Locked error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -865,6 +893,7 @@ Generates the following response payload:
 #### `ctx.response.preconditionRequired([message], [data])`
 
 Returns a 428 Precondition Required error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -885,6 +914,7 @@ Generates the following response payload:
 #### `ctx.response.tooManyRequests([message], [data])`
 
 Returns a 429 Too Many Requests error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -905,11 +935,14 @@ Generates the following response payload:
 #### `ctx.response.illegal([message], [data])`
 
 Returns a 451 Unavailable For Legal Reasons error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
 ```js
-ctx.response.illegal('you are not permitted to view this resource for legal reasons');
+ctx.response.illegal(
+  'you are not permitted to view this resource for legal reasons'
+);
 ```
 
 Generates the following response payload:
@@ -926,9 +959,10 @@ Generates the following response payload:
 
 All 500 errors hide your message from the end user. Your message is recorded in the server log.
 
-#### `ctx.response.badImplementation([message], [data])` - (*alias: `internal`*)
+#### `ctx.response.badImplementation([message], [data])` - (_alias: `internal`_)
 
 Returns a 500 Internal Server Error error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -949,6 +983,7 @@ Generates the following response payload:
 #### `ctx.response.notImplemented([message], [data])`
 
 Returns a 501 Not Implemented error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -969,6 +1004,7 @@ Generates the following response payload:
 #### `ctx.response.badGateway([message], [data])`
 
 Returns a 502 Bad Gateway error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -989,6 +1025,7 @@ Generates the following response payload:
 #### `ctx.response.serverUnavailable([message], [data])`
 
 Returns a 503 Service Unavailable error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 
@@ -1009,6 +1046,7 @@ Generates the following response payload:
 #### `ctx.response.gatewayTimeout([message], [data])`
 
 Returns a 504 Gateway Time-out error where:
+
 - `message` - optional message.
 - `data` - optional additional error data.
 

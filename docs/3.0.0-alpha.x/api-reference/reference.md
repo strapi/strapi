@@ -1,28 +1,27 @@
 # API Reference
 
-  - strapi
-    - [.admin](#strapi-admin)
-    - [.api](#strapi-api)
-    - [.app](#strapiapp)
-    - [.bootstrap()](#strapi-bootstrap)
-    - [.config](#strapi-config)
-    - [.controllers](#strapi-controllers)
-    - [.hook](#strapi-hook)
-    - [.koaMiddlewares](#strapi-koaMiddlewares)
-    - [.load()](#strapi-load)
-    - [.log](#strapi-log)
-    - [.middleware](#strapi-middleware)
-    - [.models](#strapi-models)
-    - [.plugins](#strapi-plugins)
-    - [.query()](#strapi-query)
-    - [.reload()](#strapi-reload)
-    - [.router](#strapi-router)
-    - [.server](#strapi-server)
-    - [.services](#strapi-services)
-    - [.start()](#strapi-start)
-    - [.stop()](#strapi-stop)
-    - [.utils](#strapi-utils)
-
+- strapi
+  - [.admin](#strapi-admin)
+  - [.api](#strapi-api)
+  - [.app](#strapiapp)
+  - [.bootstrap()](#strapi-bootstrap)
+  - [.config](#strapi-config)
+  - [.controllers](#strapi-controllers)
+  - [.hook](#strapi-hook)
+  - [.koaMiddlewares](#strapi-koaMiddlewares)
+  - [.load()](#strapi-load)
+  - [.log](#strapi-log)
+  - [.middleware](#strapi-middleware)
+  - [.models](#strapi-models)
+  - [.plugins](#strapi-plugins)
+  - [.query()](#strapi-query)
+  - [.reload()](#strapi-reload)
+  - [.router](#strapi-router)
+  - [.server](#strapi-server)
+  - [.services](#strapi-services)
+  - [.start()](#strapi-start)
+  - [.stop()](#strapi-stop)
+  - [.utils](#strapi-utils)
 
 ## strapi.admin
 
@@ -51,7 +50,7 @@ Returns an object that represents the configurations of the project. Every JavaS
 
 ## strapi.controllers
 
-Returns an object of the controllers wich is available in the project. Every JavaScript file located in the `./api/**/controllers` folder will be parsed into the `strapi.controllers` object. Thanks to this object, you can access to every controller's actions everywhere in the project.
+Returns an object of the controllers which is available in the project. Every JavaScript file located in the `./api/**/controllers` folder will be parsed into the `strapi.controllers` object. Thanks to this object, you can access to every controller's actions everywhere in the project.
 
 ::: note
 This object doesn't include the admin's controllers and plugin's controllers.

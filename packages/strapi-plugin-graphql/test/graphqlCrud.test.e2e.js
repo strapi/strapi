@@ -25,6 +25,12 @@ const postModel = {
         type: 'biginteger',
       },
     },
+    {
+      name: 'nullable',
+      params: {
+        type: 'string',
+      },
+    },
   ],
   connection: 'default',
   name: 'post',
@@ -54,8 +60,8 @@ describe('Test Graphql API End to End', () => {
 
   describe('Test CRUD', () => {
     const postsPayload = [
-      { name: 'post 1', bigint: 1316130638171 },
-      { name: 'post 2', bigint: 1416130639261 },
+      { name: 'post 1', bigint: 1316130638171, nullable: 'value' },
+      { name: 'post 2', bigint: 1416130639261, nullable: null },
     ];
     let data = {
       posts: [],
@@ -69,6 +75,7 @@ describe('Test Graphql API End to End', () => {
               post {
                 name
                 bigint
+                nullable
               }
             }
           }
@@ -100,6 +107,7 @@ describe('Test Graphql API End to End', () => {
               id
               name
               bigint
+              nullable
             }
           }
         `,
@@ -126,6 +134,7 @@ describe('Test Graphql API End to End', () => {
               id
               name
               bigint
+              nullable
             }
           }
         `,
@@ -147,6 +156,7 @@ describe('Test Graphql API End to End', () => {
               id
               name
               bigint
+              nullable
             }
           }
         `,
@@ -168,6 +178,7 @@ describe('Test Graphql API End to End', () => {
               id
               name
               bigint
+              nullable
             }
           }
         `,
@@ -229,13 +240,25 @@ describe('Test Graphql API End to End', () => {
       ],
       [
         {
-          name_in: ['post 1', 'post 2'],
+          name_in: ['post 1', 'post 2', 'post 3'],
         },
         postsPayload,
       ],
       [
         {
           name_nin: ['post 2'],
+        },
+        [postsPayload[0]],
+      ],
+      [
+        {
+          nullable_null: true,
+        },
+        [postsPayload[1]],
+      ],
+      [
+        {
+          nullable_null: false,
         },
         [postsPayload[0]],
       ],
@@ -246,6 +269,7 @@ describe('Test Graphql API End to End', () => {
             posts(where: $where) {
               name
               bigint
+              nullable
             }
           }
         `,
@@ -266,7 +290,9 @@ describe('Test Graphql API End to End', () => {
 
       // all expected values are in the result
       expected.forEach(expectedPost => {
-        expect(res.body.data.posts).toEqual(expect.arrayContaining([expectedPost]));
+        expect(res.body.data.posts).toEqual(
+          expect.arrayContaining([expectedPost])
+        );
       });
     });
 
@@ -278,6 +304,7 @@ describe('Test Graphql API End to End', () => {
               id
               name
               bigint
+              nullable
             }
           }
         `,

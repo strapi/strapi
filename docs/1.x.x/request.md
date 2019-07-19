@@ -44,7 +44,7 @@ Get request original URL.
 Get origin of URL, include `protocol` and `host`.
 
 ```js
-this.request.origin
+this.request.origin;
 // => http://example.com
 ```
 
@@ -53,7 +53,7 @@ this.request.origin
 Get full request URL, include `protocol`, `host` and `url`.
 
 ```js
-this.request.href
+this.request.href;
 // => http://example.com/foo/bar?q=1
 ```
 
@@ -105,7 +105,7 @@ const ct = this.request.type;
 Get request charset when present, or `undefined`:
 
 ```js
-this.request.charset
+this.request.charset;
 // => "utf-8"
 ```
 
@@ -196,7 +196,7 @@ If `strapi.app.subdomainOffset` is 3, this.subdomains is `["tobi"]`.
 ### request.is(types...)
 
 Check if the incoming request contains the "Content-Type"
-header field, and it contains any of the give mime `type`s.
+header field, and it contains any of the five mime `type`s.
 If there is no request body, `undefined` is returned.
 If there is no content type, or the match fails `false` is returned.
 Otherwise, it returns the matching content-type.
@@ -291,10 +291,14 @@ or use a switch:
 
 ```js
 switch (this.accepts('json', 'html', 'text')) {
-  case 'json': break;
-  case 'html': break;
-  case 'text': break;
-  default: this.throw(406, 'json, html, or text only');
+  case 'json':
+    break;
+  case 'html':
+    break;
+  case 'text':
+    break;
+  default:
+    this.throw(406, 'json, html, or text only');
 }
 ```
 

@@ -313,7 +313,7 @@ You return to the **Category** Content Type page. You see both categories listed
 
 If you want to add Categories directly from the **Restaurants** Content Type, you simply click on the Restaurant and add, edit or change **EXISTING** categories. Otherwise, you can create and add new **Categories** from the **Category Content Type** as you did above.
 
-Go ahead and add `Time Saving`, the the `Strapi Restaurant`.
+Go ahead and add `Time Saving`, the `Strapi Restaurant`.
 
 ![Select Category from Restaurant](../assets/quick-start-detailed/selectCategoryFromRestaurant.png 'Select Category from Restaurant')
 

@@ -69,7 +69,7 @@ module.exports = {
     docsDir: 'docs',
     algolia: {
       apiKey: 'a93451de224096fb34471c8b8b049de7',
-      indexName: 'strapi'
+      indexName: 'strapi',
     },
     editLinks: true,
     editLinkText: 'Improve this page',
