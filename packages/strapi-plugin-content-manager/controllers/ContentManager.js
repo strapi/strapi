@@ -118,87 +118,30 @@ module.exports = {
       );
     }
   },
-  delete() {},
-  deleteMany() {},
-};
 
-module.exports = {
-  models: async ctx => {
-    const pluginsStore = strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'content-manager',
-    });
+  /**
+   * Deletes one entity of a content type matching a query
+   */
+  async delete(ctx) {
+    const contentManagerService =
+      strapi.plugins['content-manager'].services['contentmanager'];
 
-    const models = await pluginsStore.get({ key: 'schema' });
-
-    ctx.body = {
-      models,
-    };
+    ctx.body = await contentManagerService.delete(
+      ctx.params,
+      ctx.request.query
+    );
   },
 
-  create: async ctx => {
-    const { source } = ctx.request.query;
+  /**
+   * Deletes multiple entities of a content type matching a query
+   */
+  async deleteMany(ctx) {
+    const contentManagerService =
+      strapi.plugins['content-manager'].services['contentmanager'];
 
-    try {
-      // Create an entry using `queries` system
-      ctx.body = await strapi.plugins['content-manager'].services[
-        'contentmanager'
-      ].add(ctx.params, ctx.request.body, source);
-
-      strapi.emit('didCreateFirstContentTypeEntry', ctx.params, source);
-    } catch (error) {
-      strapi.log.error(error);
-      ctx.badRequest(
-        null,
-        ctx.request.admin
-          ? [{ messages: [{ id: error.message, field: error.field }] }]
-          : error.message
-      );
-    }
-  },
-
-  update: async ctx => {
-    const { source } = ctx.request.query;
-
-    try {
-      // Return the last one which is the current model.
-      ctx.body = await strapi.plugins['content-manager'].services[
-        'contentmanager'
-      ].edit(ctx.params, ctx.request.body, source);
-    } catch (error) {
-      // TODO handle error update
-      strapi.log.error(error);
-      ctx.badRequest(
-        null,
-        ctx.request.admin
-          ? [{ messages: [{ id: error.message, field: error.field }] }]
-          : error.message
-      );
-    }
-  },
-
-  updateSettings: async ctx => {
-    const { schema } = ctx.request.body;
-    const pluginStore = strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'content-manager',
-    });
-    await pluginStore.set({ key: 'schema', value: schema });
-
-    return (ctx.body = { ok: true });
-  },
-
-  delete: async ctx => {
-    ctx.body = await strapi.plugins['content-manager'].services[
-      'contentmanager'
-    ].delete(ctx.params, ctx.request.query);
-  },
-
-  deleteAll: async ctx => {
-    ctx.body = await strapi.plugins['content-manager'].services[
-      'contentmanager'
-    ].deleteMany(ctx.params, ctx.request.query);
+    ctx.body = await contentManagerService.deleteMany(
+      ctx.params,
+      ctx.request.query
+    );
   },
 };

@@ -35,7 +35,7 @@
     {
       "method": "PUT",
       "path": "/content-types/:uid",
-      "handler": "ContentManager.updateContentType",
+      "handler": "ContentTypes.updateContentType",
       "config": {
         "policies": ["routing"]
       }
@@ -43,7 +43,7 @@
     {
       "method": "GET",
       "path": "/groups",
-      "handler": "Groups.list",
+      "handler": "Groups.listGroups",
       "config": {
         "policies": []
       }
@@ -51,7 +51,7 @@
     {
       "method": "GET",
       "path": "/groups/:uid",
-      "handler": "Groups.find",
+      "handler": "Groups.findGroup",
       "config": {
         "policies": []
       }
@@ -59,7 +59,7 @@
     {
       "method": "PUT",
       "path": "/groups/:uid",
-      "handler": "Groups.update",
+      "handler": "Groups.updateGroup",
       "config": {
         "policies": []
       }

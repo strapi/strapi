@@ -21,5 +21,5 @@ module.exports = {
    *  - content-manager settings
    *  - content-manager metadata (placeholders, description, label...)
    */
-  updatrGroup() {},
+  updateGroup() {},
 };
