@@ -13,7 +13,6 @@ import { IcoContainer, ListRow, PopUpWarning } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 
 import styles from '../TableList/styles.scss';
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/jsx-curly-brace-presence */
 /* eslint-disable indent */
 

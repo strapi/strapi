@@ -15,7 +15,6 @@ import InputSpacer from '../InputSpacer';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 class InputTextWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 

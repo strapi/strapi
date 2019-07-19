@@ -9,7 +9,6 @@ import { FormattedMessage } from 'react-intl';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/accessible-emoji */
 function CommunityContent() {
   return (
     <React.Fragment>

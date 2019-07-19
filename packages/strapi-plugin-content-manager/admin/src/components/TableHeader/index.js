@@ -54,7 +54,7 @@ class TableHeader extends React.Component {
       }
 
       return (
-        <th // eslint-disable-line jsx-a11y/no-static-element-interactions
+        <th
           key={i}
           onClick={() => {
             if (header.sortable) {

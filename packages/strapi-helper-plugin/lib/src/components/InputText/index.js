@@ -4,7 +4,6 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 import styles from './styles.scss';
 
 function InputText(props) {

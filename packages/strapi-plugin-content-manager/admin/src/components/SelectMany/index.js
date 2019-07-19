@@ -189,7 +189,6 @@ class SelectMany extends React.PureComponent {
     );
     const value = get(this.props.record, this.props.relation.alias) || [];
 
-    /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div
         className={`form-group ${styles.selectMany} ${value.length > 4 &&
@@ -243,7 +242,6 @@ class SelectMany extends React.PureComponent {
         />
       </div>
     );
-    /* eslint-disable jsx-a11y/label-has-for */
   }
 }
 

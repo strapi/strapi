@@ -177,7 +177,6 @@ class SelectOne extends React.Component {
         </FormattedMessage>
       );
 
-    /* eslint-disable jsx-a11y/label-has-for */
     return (
       <div className={`form-group ${styles.selectOne}`}>
         <nav className={styles.headline}>
@@ -214,7 +213,6 @@ class SelectOne extends React.Component {
         />
       </div>
     );
-    /* eslint-disable jsx-a11y/label-has-for */
   }
 }
 

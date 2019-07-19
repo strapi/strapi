@@ -4,7 +4,6 @@
  * Module dependencies
  */
 
-/* eslint-disable import/no-unresolved */
 /* eslint-disable prefer-template */
 // Public node modules.
 const _ = require('lodash');

@@ -4,7 +4,6 @@
  *
  */
 
-/* eslint-disable jsx-a11y/no-autofocus */
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { isEmpty } from 'lodash';

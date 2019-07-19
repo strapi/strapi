@@ -7,7 +7,6 @@
 import React from 'react';
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/label-has-for */
 const WysiwygDropUpload = (props) => {
   return (
     <label

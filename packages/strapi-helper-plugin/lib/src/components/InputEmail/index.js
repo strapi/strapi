@@ -11,7 +11,6 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/no-autofocus */
 class InputEmail extends React.Component {
   state = { isFocused: false };
 

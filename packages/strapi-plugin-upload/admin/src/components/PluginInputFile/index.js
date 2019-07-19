@@ -12,7 +12,6 @@ import cn from 'classnames';
 import styles from './styles.scss';
 
 /* eslint-disable react/no-string-refs */
-/* eslint-disable jsx-a11y/label-has-for */
 /* eslint-disable react/jsx-tag-spacing */
 class PluginInputFile extends React.PureComponent {
   state = { isDraging: false };

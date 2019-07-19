@@ -16,7 +16,6 @@ import Reddit from '../../assets/images/social_reddit.png';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/alt-text */
 function getSrc(name) {
   switch (name) {
     case 'GitHub':

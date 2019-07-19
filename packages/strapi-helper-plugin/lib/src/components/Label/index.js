@@ -6,7 +6,6 @@ import cn from 'classnames';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/label-has-for */
 function Label(props) {
   let content = props.children;
 

@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 
 import styles from './styles.scss';
 
-/* eslint-disable jsx-a11y/accessible-emoji */
 function WelcomeContent({ hasContent }) {
   return (
     <React.Fragment>
