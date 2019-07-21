@@ -108,8 +108,8 @@ module.exports = {
       }
 
       if (
-        (association.hasOwnProperty('collection') && association.collection === '*') ||
-        (association.hasOwnProperty('model') && association.model === '*')
+        (Object.prototype.hasOwnProperty.call(association, 'collection') && association.collection === '*') ||
+        (Object.prototype.hasOwnProperty.call(association, 'model') && association.model === '*')
       ) {
         if (association.model) {
           types.current = 'morphToD';
@@ -130,13 +130,13 @@ module.exports = {
         // We have to find if they are a model linked to this key
         _.forIn(allModels, model => {
           _.forIn(model.attributes, attribute => {
-            if (attribute.hasOwnProperty('via') && attribute.via === key && attribute.model === currentModelName) {
-              if (attribute.hasOwnProperty('collection')) {
+            if (Object.prototype.hasOwnProperty.call(attribute, 'via') && attribute.via === key && attribute.model === currentModelName) {
+              if (Object.prototype.hasOwnProperty.call(attribute, 'collection')) {
                 types.other = 'collection';
 
                 // Break loop
                 return false;
-              } else if (attribute.hasOwnProperty('model')) {
+              } else if (Object.prototype.hasOwnProperty.call(attribute, 'model')) {
                 types.other = 'model';
 
                 // Break loop
@@ -145,7 +145,7 @@ module.exports = {
             }
           });
         });
-      } else if (association.hasOwnProperty('via') && association.hasOwnProperty('collection')) {
+      } else if (Object.prototype.hasOwnProperty.call(association, 'via') && Object.prototype.hasOwnProperty.call(association, 'collection')) {
         const relatedAttribute = models[association.collection].attributes[association.via];
 
         if (!relatedAttribute) {
@@ -159,23 +159,23 @@ module.exports = {
         types.current = 'collection';
 
         if (
-          relatedAttribute.hasOwnProperty('collection') &&
+          Object.prototype.hasOwnProperty.call(relatedAttribute, 'collection') &&
           relatedAttribute.collection !== '*' &&
-          relatedAttribute.hasOwnProperty('via')
+          Object.prototype.hasOwnProperty.call(relatedAttribute, 'via')
         ) {
           types.other = 'collection';
         } else if (
-          relatedAttribute.hasOwnProperty('collection') &&
+          Object.prototype.hasOwnProperty.call(relatedAttribute, 'collection') &&
           relatedAttribute.collection !== '*' &&
-          !relatedAttribute.hasOwnProperty('via')
+          !Object.prototype.hasOwnProperty.call(relatedAttribute, 'via')
         ) {
           types.other = 'collectionD';
-        } else if (relatedAttribute.hasOwnProperty('model') && relatedAttribute.model !== '*') {
+        } else if (Object.prototype.hasOwnProperty.call(relatedAttribute, 'model') && relatedAttribute.model !== '*') {
           types.other = 'model';
-        } else if (relatedAttribute.hasOwnProperty('collection') || relatedAttribute.hasOwnProperty('model')) {
+        } else if (Object.prototype.hasOwnProperty.call(relatedAttribute, 'collection') || Object.prototype.hasOwnProperty.call(relatedAttribute, 'model')) {
           types.other = 'morphTo';
         }
-      } else if (association.hasOwnProperty('via') && association.hasOwnProperty('model')) {
+      } else if (Object.prototype.hasOwnProperty.call(association, 'via') && Object.prototype.hasOwnProperty.call(association, 'model')) {
         types.current = 'modelD';
 
         // We have to find if they are a model linked to this key
@@ -183,30 +183,30 @@ module.exports = {
         const attribute = model.attributes[association.via];
 
         if (
-          attribute.hasOwnProperty('via') &&
+          Object.prototype.hasOwnProperty.call(attribute, 'via') &&
           attribute.via === key &&
-          attribute.hasOwnProperty('collection') &&
+          Object.prototype.hasOwnProperty.call(attribute, 'collection') &&
           attribute.collection !== '*'
         ) {
           types.other = 'collection';
-        } else if (attribute.hasOwnProperty('model') && attribute.model !== '*') {
+        } else if (Object.prototype.hasOwnProperty.call(attribute, 'model') && attribute.model !== '*') {
           types.other = 'model';
-        } else if (attribute.hasOwnProperty('collection') || attribute.hasOwnProperty('model')) {
+        } else if (Object.prototype.hasOwnProperty.call(attribute, 'collection') || Object.prototype.hasOwnProperty.call(attribute, 'model')) {
           types.other = 'morphTo';
         }
-      } else if (association.hasOwnProperty('model')) {
+      } else if (Object.prototype.hasOwnProperty.call(association, 'model')) {
         types.current = 'model';
 
         // We have to find if they are a model linked to this key
         _.forIn(models, model => {
           _.forIn(model.attributes, attribute => {
-            if (attribute.hasOwnProperty('via') && attribute.via === key) {
-              if (attribute.hasOwnProperty('collection')) {
+            if (Object.prototype.hasOwnProperty.call(attribute, 'via') && attribute.via === key) {
+              if (Object.prototype.hasOwnProperty.call(attribute, 'collection')) {
                 types.other = 'collection';
 
                 // Break loop
                 return false;
-              } else if (attribute.hasOwnProperty('model')) {
+              } else if (Object.prototype.hasOwnProperty.call(attribute, 'model')) {
                 types.other = 'modelD';
 
                 // Break loop
@@ -215,19 +215,19 @@ module.exports = {
             }
           });
         });
-      } else if (association.hasOwnProperty('collection')) {
+      } else if (Object.prototype.hasOwnProperty.call(association, 'collection')) {
         types.current = 'collectionD';
 
         // We have to find if they are a model linked to this key
         _.forIn(models, model => {
           _.forIn(model.attributes, attribute => {
-            if (attribute.hasOwnProperty('via') && attribute.via === key) {
-              if (attribute.hasOwnProperty('collection')) {
+            if (Object.prototype.hasOwnProperty.call(attribute, 'via') && attribute.via === key) {
+              if (Object.prototype.hasOwnProperty.call(attribute, 'collection')) {
                 types.other = 'collection';
 
                 // Break loop
                 return false;
-              } else if (attribute.hasOwnProperty('model')) {
+              } else if (Object.prototype.hasOwnProperty.call(attribute, 'model')) {
                 types.other = 'modelD';
 
                 // Break loop
@@ -268,14 +268,14 @@ module.exports = {
           nature: 'oneMorphToOne',
           verbose: 'belongsToMorph',
         };
-      } else if (types.current === 'morphTo' && (types.other === 'model' || association.hasOwnProperty('model'))) {
+      } else if (types.current === 'morphTo' && (types.other === 'model' || Object.prototype.hasOwnProperty.call(association, 'model'))) {
         return {
           nature: 'manyMorphToOne',
           verbose: 'belongsToManyMorph',
         };
       } else if (
         types.current === 'morphTo' &&
-        (types.other === 'collection' || association.hasOwnProperty('collection'))
+        (types.other === 'collection' || Object.prototype.hasOwnProperty.call(association, 'collection'))
       ) {
         return {
           nature: 'manyMorphToMany',
@@ -383,7 +383,7 @@ module.exports = {
       }
 
       // Exclude non-relational attribute
-      if (!association.hasOwnProperty('collection') && !association.hasOwnProperty('model')) {
+      if (!Object.prototype.hasOwnProperty.call(association, 'collection') && !Object.prototype.hasOwnProperty.call(association, 'model')) {
         return undefined;
       }
 
@@ -399,7 +399,7 @@ module.exports = {
       }
 
       // Build associations object
-      if (association.hasOwnProperty('collection') && association.collection !== '*') {
+      if (Object.prototype.hasOwnProperty.call(association, 'collection') && association.collection !== '*') {
         const ast = {
           alias: key,
           type: 'collection',
@@ -417,7 +417,7 @@ module.exports = {
         }
 
         definition.associations.push(ast);
-      } else if (association.hasOwnProperty('model') && association.model !== '*') {
+      } else if (Object.prototype.hasOwnProperty.call(association, 'model') && association.model !== '*') {
         definition.associations.push({
           alias: key,
           type: 'model',
@@ -429,7 +429,7 @@ module.exports = {
           plugin: association.plugin || undefined,
           filter: details.filter,
         });
-      } else if (association.hasOwnProperty('collection') || association.hasOwnProperty('model')) {
+      } else if (Object.prototype.hasOwnProperty.call(association, 'collection') || Object.prototype.hasOwnProperty.call(association, 'model')) {
         const pluginsModels = Object.keys(strapi.plugins).reduce((acc, current) => {
           Object.keys(strapi.plugins[current].models).forEach(entity => {
             Object.keys(strapi.plugins[current].models[entity].attributes).forEach(attribute => {
@@ -505,7 +505,7 @@ module.exports = {
       }, {}),
     );
 
-    if (!models.hasOwnProperty(model)) {
+    if (!Object.prototype.hasOwnProperty.call(models, model)) {
       return this.log.error(`The model ${model} can't be found.`);
     }
 

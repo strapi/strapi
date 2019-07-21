@@ -480,7 +480,7 @@ module.exports = function(strapi) {
                     _.keyBy(
                       _.filter(definition.attributes, (value, key) => {
                         if (
-                          value.hasOwnProperty('columnName') &&
+                          Object.prototype.hasOwnProperty.call(value, 'columnName') &&
                           !_.isEmpty(value.columnName) &&
                           value.columnName !== key
                         ) {
@@ -576,9 +576,9 @@ module.exports = function(strapi) {
                             .attributes,
                           details => {
                             if (
-                              details.hasOwnProperty('model') &&
+                              Object.prototype.hasOwnProperty.call(details, 'model') &&
                               details.model === model &&
-                              details.hasOwnProperty('via') &&
+                              Object.prototype.hasOwnProperty.call(details, 'via') &&
                               details.via === name
                             ) {
                               return details;
@@ -589,9 +589,9 @@ module.exports = function(strapi) {
                           strapi.models[details.model].attributes,
                           details => {
                             if (
-                              details.hasOwnProperty('model') &&
+                              Object.prototype.hasOwnProperty.call(details, 'model') &&
                               details.model === model &&
-                              details.hasOwnProperty('via') &&
+                              Object.prototype.hasOwnProperty.call(details, 'via') &&
                               details.via === name
                             ) {
                               return details;

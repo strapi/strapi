@@ -258,7 +258,7 @@ module.exports = function(strapi) {
       );
       acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
-      if (!acc[current].hasOwnProperty('enabled')) {
+      if (!Object.prototype.hasOwnProperty.call(acc[current], 'enabled')) {
         strapi.log.warn(
           `(middleware:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`
         );
@@ -284,7 +284,7 @@ module.exports = function(strapi) {
 
       acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
 
-      if (!acc[current].hasOwnProperty('enabled')) {
+      if (!Object.prototype.hasOwnProperty.call(acc[current], 'enabled')) {
         strapi.log.warn(
           `(hook:${current}) wasn't loaded due to missing key \`enabled\` in the configuration`
         );

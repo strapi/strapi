@@ -49,7 +49,7 @@ class AttributesPickerModal extends React.Component {
     const appPlugins = plugins;
 
     return attributes.filter(attr => {
-      if (appPlugins.hasOwnProperty('upload')) {
+      if (Object.prototype.hasOwnProperty.call(appPlugins, 'upload')) {
         return true;
       }
 

@@ -191,8 +191,8 @@ class SettingPage extends React.PureComponent {
       .filter(attr => {
         return (
           findIndex(this.getListDisplay(), ['name', attr]) === -1 &&
-          !attributes[attr].hasOwnProperty('collection') &&
-          !attributes[attr].hasOwnProperty('model')
+          !Object.prototype.hasOwnProperty.call(attributes[attr], 'collection') &&
+          !Object.prototype.hasOwnProperty.call(attributes[attr], 'model')
         );
       })
       .map(attr => {

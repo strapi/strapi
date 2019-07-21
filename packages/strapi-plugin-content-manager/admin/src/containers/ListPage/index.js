@@ -141,8 +141,8 @@ export class ListPage extends React.Component {
 
     return Object.keys(attributes).filter(attr => {
       return (
-        !attributes[attr].hasOwnProperty('collection') &&
-        !attributes[attr].hasOwnProperty('model')
+        !Object.prototype.hasOwnProperty.call(attributes[attr], 'collection') &&
+        !Object.prototype.hasOwnProperty.call(attributes[attr], 'model')
       );
     });
   };

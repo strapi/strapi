@@ -41,7 +41,6 @@ module.exports = {
   rules: {
     'generator-star-spacing': 0,
     'no-console': 0,
-    'no-prototype-builtins': 0,
     'require-atomic-updates': 0,
   },
   settings: {

@@ -36,7 +36,7 @@ class InputWithAutoFocus extends React.Component {
     if (this.props.filterToFocus === this.props.index) {
       return new Promise(resolve => {
         setTimeout(() => {
-          if (this.inputEl.hasOwnProperty('openCalendar')) {
+          if (Object.prototype.hasOwnProperty.call(this.inputEl, 'openCalendar')) {
             this.inputEl.openCalendar();
           } else {
             this.inputEl.focus();
