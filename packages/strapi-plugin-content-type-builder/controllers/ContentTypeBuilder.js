@@ -91,8 +91,6 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    await Service.appearance(formatedAttributes, _.toLower(name));
-
     const apiName = _.toLower(name);
     await Service.generateAPI(
       apiName,
@@ -206,8 +204,6 @@ module.exports = {
         []
       );
     }
-
-    await Service.appearance(formatedAttributes, name, plugin);
 
     try {
       // const modelJSON = _.cloneDeep(require(modelFilePath));
