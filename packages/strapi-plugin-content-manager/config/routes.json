@@ -3,7 +3,7 @@
     {
       "method": "GET",
       "path": "/general-settings",
-      "handler": "ContentTypes.getGeneralSettings",
+      "handler": "GeneralSettings.getGeneralSettings",
       "config": {
         "policies": []
       }
@@ -11,7 +11,7 @@
     {
       "method": "PUT",
       "path": "/general-settings",
-      "handler": "ContentTypes.updateGeneralSettings",
+      "handler": "GeneralSettings.updateGeneralSettings",
       "config": {
         "policies": []
       }
