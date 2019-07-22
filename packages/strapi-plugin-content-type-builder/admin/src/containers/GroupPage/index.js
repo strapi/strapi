@@ -12,6 +12,7 @@ import ListRow from '../../components/ListRow';
 import AttributesModalPicker from '../AttributesPickerModal';
 import AttributeForm from '../AttributeForm';
 import ViewContainer from '../ViewContainer';
+import RelationFormGroup from '../RelationFormGroup';
 
 import {
   BackHeader,
@@ -26,13 +27,16 @@ import {
 } from 'strapi-helper-plugin';
 
 import {
+  addAttributeRelationGroup,
   addAttributeToTempGroup,
   addAttributeToExistingGroup,
   clearTemporaryAttributeGroup,
   deleteGroupAttribute,
   onChangeAttributeGroup,
+  onChangeRelationGroup,
   saveEditedAttributeGroup,
   setTemporaryAttributeGroup,
+  setTemporaryAttributeRelationGroup,
   submitGroup,
   submitTempGroup,
   resetEditTempGroup,
@@ -145,7 +149,7 @@ export class GroupPage extends React.Component {
     /* istanbul ignore if */
     const title = this.isUpdatingTempFeature()
       ? get(newGroup, 'name', null)
-      : get(modifiedDataGroup, [name, 'schema', 'name'], null);
+      : get(modifiedDataGroup, [name, 'name'], null);
 
     return title;
   };
@@ -293,6 +297,7 @@ export class GroupPage extends React.Component {
 
   handleSubmit = (shouldContinue = false) => {
     const {
+      addAttributeRelationGroup,
       addAttributeToExistingGroup,
       addAttributeToTempGroup,
       history: { push },
@@ -300,10 +305,14 @@ export class GroupPage extends React.Component {
 
     const attributeType = this.getAttributeType();
 
-    if (this.isUpdatingTempFeature()) {
-      addAttributeToTempGroup(attributeType);
+    if (this.getAttributeType() === 'relation') {
+      addAttributeRelation(this.isUpdatingTempFeature(), this.getFeatureName());
     } else {
-      addAttributeToExistingGroup(this.getFeatureName(), attributeType);
+      if (this.isUpdatingTempFeature()) {
+        addAttributeToTempGroup(attributeType);
+      } else {
+        addAttributeToExistingGroup(this.getFeatureName(), attributeType);
+      }
     }
 
     const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
@@ -382,11 +391,14 @@ export class GroupPage extends React.Component {
   render() {
     const {
       clearTemporaryAttributeGroup,
+      groups,
       history: { push },
       onChangeAttributeGroup,
+      onChangeRelationGroup,
       temporaryAttributeGroup,
+      temporaryAttributeRelationGroup,
+      setTemporaryAttributeRelationGroup,
     } = this.props;
-
     const { showWarning } = this.state;
 
     const attributes = this.getFeatureAttributes();
@@ -472,12 +484,34 @@ export class GroupPage extends React.Component {
           attributeType={this.getAttributeType()}
           attributeToEditName={this.getAttributeName()}
           featureType={this.featureType}
-          isOpen={this.getModalType() === 'attributeForm'}
+          isOpen={
+            this.getModalType() === 'attributeForm' &&
+            this.getAttributeType() !== 'relation'
+          }
           modifiedData={temporaryAttributeGroup}
           onCancel={clearTemporaryAttributeGroup}
           onChange={onChangeAttributeGroup}
           onSubmit={this.handleSubmit}
           onSubmitEdit={this.handleSubmitEdit}
+          push={push}
+        />
+
+        <RelationFormGroup
+          actionType={this.getActionType()}
+          activeTab={this.getSettingType()}
+          alreadyTakenAttributes={this.getFeatureAttributesNames()}
+          featureType={this.featureType}
+          featureName={this.getFeatureName()}
+          features={groups}
+          isOpen={
+            this.getModalType() === 'attributeForm' &&
+            this.getAttributeType() === 'relation'
+          }
+          modifiedData={temporaryAttributeRelationGroup}
+          onCancel={() => {}}
+          onChange={onChangeRelationGroup}
+          onSubmit={this.handleSubmit}
+          setTempAttribute={setTemporaryAttributeRelationGroup}
           push={push}
         />
 
@@ -504,6 +538,7 @@ GroupPage.defaultProps = {
 };
 
 GroupPage.propTypes = {
+  addAttributeRelationGroup: PropTypes.func.isRequired,
   addAttributeToExistingGroup: PropTypes.func.isRequired,
   addAttributeToTempGroup: PropTypes.func.isRequired,
   canOpenModal: PropTypes.bool,
@@ -526,24 +561,30 @@ GroupPage.propTypes = {
   modifiedDataGroup: PropTypes.object.isRequired,
   newGroup: PropTypes.object.isRequired,
   onChangeAttributeGroup: PropTypes.func.isRequired,
+  onChangeRelationGroup: PropTypes.func.isRequired,
   resetEditTempGroup: PropTypes.func.isRequired,
   saveEditedAttributeGroup: PropTypes.func.isRequired,
   setTemporaryAttributeGroup: PropTypes.func.isRequired,
+  setTemporaryAttributeRelationGroup: PropTypes.func.isRequired,
   submitGroup: PropTypes.func.isRequired,
   submitTempGroup: PropTypes.func.isRequired,
   temporaryAttributeGroup: PropTypes.object.isRequired,
+  temporaryAttributeRelationGroup: PropTypes.object.isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      addAttributeRelationGroup,
       addAttributeToExistingGroup,
       addAttributeToTempGroup,
       clearTemporaryAttributeGroup,
       deleteGroupAttribute,
       onChangeAttributeGroup,
+      onChangeRelationGroup,
       saveEditedAttributeGroup,
       setTemporaryAttributeGroup,
+      setTemporaryAttributeRelationGroup,
       submitGroup,
       submitTempGroup,
       resetEditTempGroup,

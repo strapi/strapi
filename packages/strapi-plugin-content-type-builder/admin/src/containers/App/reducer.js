@@ -8,6 +8,7 @@ import { fromJS, List, Map, OrderedMap } from 'immutable';
 import pluralize from 'pluralize';
 import {
   ADD_ATTRIBUTE_RELATION,
+  ADD_ATTRIBUTE_RELATION_GROUP,
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_EXISTING_GROUP,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
@@ -32,6 +33,7 @@ import {
   ON_CHANGE_ATTRIBUTE,
   ON_CHANGE_ATTRIBUTE_GROUP,
   ON_CHANGE_RELATION,
+  ON_CHANGE_RELATION_GROUP,
   ON_CHANGE_RELATION_TARGET,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   RESET_EXISTING_GROUP_MAIN_INFOS,
@@ -46,6 +48,7 @@ import {
   SET_TEMPORARY_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE_GROUP,
   SET_TEMPORARY_ATTRIBUTE_RELATION,
+  SET_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_GROUP_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
@@ -80,6 +83,17 @@ export const initialState = fromJS({
   temporaryAttribute: {},
   temporaryAttributeGroup: {},
   temporaryAttributeRelation: {
+    name: '',
+    columnName: '',
+    dominant: false,
+    targetColumnName: '',
+    key: '-',
+    nature: 'oneWay',
+    plugin: '',
+    target: '',
+    unique: false,
+  },
+  temporaryAttributeRelationGroup: {
     name: '',
     columnName: '',
     dominant: false,
@@ -155,6 +169,52 @@ function appReducer(state = initialState, action) {
           const newAttribute = state
             .get('temporaryAttributeRelation')
             .set('key', state.getIn(['temporaryAttributeRelation', 'name']))
+            .update('dominant', () => false)
+            .update('nature', value => {
+              if (nature === 'oneToMany') {
+                return 'manyToOne';
+              } else if (nature === 'manyToOne') {
+                return 'oneToMany';
+              } else {
+                return value;
+              }
+            })
+            .remove('name');
+
+          return newAttribute;
+        });
+      }
+
+      return newState;
+    }
+    case ADD_ATTRIBUTE_RELATION_GROUP: {
+      const { isGroupTemporary, groupName } = action;
+      const basePath = isGroupTemporary
+        ? ['newGroup']
+        : ['modifiedDataGroup', groupName];
+      const { key, name, nature, target } = state
+        .get('temporaryAttributeRelationGroup')
+        .toJS();
+
+      let newState = state.updateIn(
+        [...basePath, 'schema', 'attributes', name],
+        () => {
+          const newAttribute = state
+            .get('temporaryAttributeRelationGroup')
+            .remove('name');
+
+          return newAttribute;
+        }
+      );
+
+      if (target === groupName && nature !== 'oneWay') {
+        newState = newState.updateIn([...basePath, 'attributes', key], () => {
+          const newAttribute = state
+            .get('temporaryAttributeRelationGroup')
+            .set(
+              'key',
+              state.getIn(['temporaryAttributeRelationGroup', 'name'])
+            )
             .update('dominant', () => false)
             .update('nature', value => {
               if (nature === 'oneToMany') {
@@ -429,6 +489,11 @@ function appReducer(state = initialState, action) {
     case ON_CHANGE_RELATION:
       return state.updateIn(
         ['temporaryAttributeRelation', ...action.keys],
+        () => action.value
+      );
+    case ON_CHANGE_RELATION_GROUP:
+      return state.updateIn(
+        ['temporaryAttributeRelationGroup', ...action.keys],
         () => action.value
       );
     case ON_CHANGE_RELATION_NATURE: {
@@ -741,6 +806,49 @@ function appReducer(state = initialState, action) {
         .updateIn(['temporaryAttributeRelation', 'name'], () => action.target)
         .updateIn(
           ['temporaryAttributeRelation', 'plugin'],
+          () => action.source || ''
+        );
+    }
+    case SET_TEMPORARY_ATTRIBUTE_RELATION_GROUP: {
+      if (action.isEditing) {
+        const basePath = action.isGroupTemporary
+          ? ['newGroup']
+          : ['modifiedDataGroup', action.target];
+
+        return state
+          .update('temporaryAttributeRelationGroup', () =>
+            state
+              .getIn([
+                ...basePath,
+                'schema',
+                'attributes',
+                action.attributeName,
+              ])
+              .set('name', action.attributeName)
+          )
+          .update('initialTemporaryAttributeRelationGroup', () =>
+            state
+              .getIn([
+                ...basePath,
+                'schema',
+                'attributes',
+                action.attributeName,
+              ])
+              .set('name', action.attributeName)
+          );
+      }
+
+      return state
+        .updateIn(
+          ['temporaryAttributeRelationGroup', 'target'],
+          () => action.target
+        )
+        .updateIn(
+          ['temporaryAttributeRelationGroup', 'name'],
+          () => action.target
+        )
+        .updateIn(
+          ['temporaryAttributeRelationGroup', 'plugin'],
           () => action.source || ''
         );
     }

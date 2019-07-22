@@ -7,6 +7,7 @@ import { cloneDeep, pick, set, camelCase } from 'lodash';
 import { fromJS, OrderedMap } from 'immutable';
 import {
   ADD_ATTRIBUTE_RELATION,
+  ADD_ATTRIBUTE_RELATION_GROUP,
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_EXISTING_GROUP,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
@@ -32,6 +33,7 @@ import {
   ON_CHANGE_ATTRIBUTE,
   ON_CHANGE_ATTRIBUTE_GROUP,
   ON_CHANGE_RELATION,
+  ON_CHANGE_RELATION_GROUP,
   ON_CHANGE_RELATION_NATURE,
   ON_CHANGE_RELATION_TARGET,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
@@ -47,6 +49,7 @@ import {
   SET_TEMPORARY_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE_GROUP,
   SET_TEMPORARY_ATTRIBUTE_RELATION,
+  SET_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
   SUBMIT_CONTENT_TYPE,
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_GROUP,
@@ -65,6 +68,14 @@ export function addAttributeRelation(isModelTemporary, modelName) {
     type: ADD_ATTRIBUTE_RELATION,
     isModelTemporary,
     modelName,
+  };
+}
+
+export function addAttributeRelationGroup(isGroupTemporary, groupName) {
+  return {
+    type: ADD_ATTRIBUTE_RELATION_GROUP,
+    isGroupTemporary,
+    groupName,
   };
 }
 
@@ -350,6 +361,17 @@ export function onChangeRelation({ target }) {
   };
 }
 
+export function onChangeRelationGroup({ target }) {
+  const value =
+    target.name === 'unique' ? target.value : target.value.split(' ').join('');
+
+  return {
+    type: ON_CHANGE_RELATION_GROUP,
+    keys: target.name.split('.'),
+    value,
+  };
+}
+
 export function onChangeRelationNature(nature, currentModel) {
   return {
     type: ON_CHANGE_RELATION_NATURE,
@@ -489,6 +511,23 @@ export function setTemporaryAttributeRelation(
     attributeName,
     isEditing,
     isModelTemporary,
+    source,
+    target,
+  };
+}
+
+export function setTemporaryAttributeRelationGroup(
+  target,
+  isGroupTemporary,
+  source,
+  attributeName,
+  isEditing
+) {
+  return {
+    type: SET_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
+    attributeName,
+    isEditing,
+    isGroupTemporary,
     source,
     target,
   };

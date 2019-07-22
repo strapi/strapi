@@ -38,6 +38,7 @@ const renderComponent = (props = {}) => {
 
 const basePath = '/plugins/content-type-builder/groups';
 const props = {
+  addAttributeRelationGroup: jest.fn(),
   addAttributeToExistingGroup: jest.fn(),
   addAttributeToTempGroup: jest.fn(),
   clearTemporaryAttributeGroup: jest.fn(),
@@ -125,6 +126,7 @@ const props = {
   resetEditTempGroup: jest.fn(),
   saveEditedAttributeGroup: jest.fn(),
   setTemporaryAttributeGroup: jest.fn(),
+  setTemporaryAttributeRelationGroup: jest.fn(),
   submitTempGroup: jest.fn(),
   submitGroup: jest.fn(),
   temporaryAttributeGroup: {},

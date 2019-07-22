@@ -14,6 +14,13 @@ const colors = {
     mediumGrey: '#f2f3f4',
     lightGrey: '#E9EAEB',
   },
+
+  // Specific colors for relations
+  relations: {
+    boxBkgd: '#fcfcfc',
+    boxShadow: '#cad2df',
+    headerBkgd: 'rgba(16,22,34,.04)',
+  },
 };
 
 export default colors;
