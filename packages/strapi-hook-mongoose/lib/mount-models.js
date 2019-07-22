@@ -180,37 +180,43 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       }
     );
 
+    target[model].allAttributes = _.clone(definition.attributes);
+
     // Use provided timestamps if the elemnets in the array are string else use default.
-    if (_.isArray(_.get(definition, 'options.timestamps'))) {
-      const timestamps = {
-        createdAt: _.isString(_.get(definition, 'options.timestamps[0]'))
-          ? _.get(definition, 'options.timestamps[0]')
-          : 'createdAt',
-        updatedAt: _.isString(_.get(definition, 'options.timestamps[1]'))
-          ? _.get(definition, 'options.timestamps[1]')
-          : 'updatedAt',
+    const timestampsOption = _.get(definition, 'options.timestamps', true);
+    if (_.isArray(timestampsOption)) {
+      const [
+        createAtCol = 'createdAt',
+        updatedAtCol = 'updatedAt',
+      ] = timestampsOption;
+
+      schema.set('timestamps', {
+        createdAt: createAtCol,
+        updatedAt: updatedAtCol,
+      });
+
+      target[model].allAttributes[createAtCol] = {
+        type: 'timestamp',
       };
-      schema.set('timestamps', timestamps);
-    } else {
-      schema.set(
-        'timestamps',
-        _.get(definition, 'options.timestamps') === true
-      );
-      _.set(
-        definition,
-        'options.timestamps',
-        _.get(definition, 'options.timestamps') === true
-          ? ['createdAt', 'updatedAt']
-          : false
-      );
+      target[model].allAttributes[updatedAtCol] = {
+        type: 'timestampUpdate',
+      };
+    } else if (timestampsOption === true) {
+      schema.set('timestamps', true);
+
+      _.set(definition, 'options.timestamps', ['createdAt', 'updatedAt']);
+
+      target[model].allAttributes.createdAt = {
+        type: 'timestamp',
+      };
+      target[model].allAttributes.updatedAt = {
+        type: 'timestampUpdate',
+      };
     }
     schema.set(
       'minimize',
       _.get(definition, 'options.minimize', false) === true
     );
-
-    // Save all attributes (with timestamps)
-    target[model].allAttributes = _.clone(definition.attributes);
 
     schema.options.toObject = schema.options.toJSON = {
       virtuals: true,
