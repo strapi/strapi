@@ -25,8 +25,9 @@ module.exports = {
       strapi.plugins['content-manager'].services.contenttypes;
 
     const configurations = await storeUtils.getAllConfigurations();
+
     await Promise.all(
-      configurations.map(({ value }) => {
+      configurations.map(value => {
         const { uid, source } = value;
         const settings = {
           ...value.settings,
