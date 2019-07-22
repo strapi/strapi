@@ -18,6 +18,7 @@ import HeaderModalTitle from '../../components/HeaderModalTitle';
 import WrapperModal from '../../components/WrapperModal';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
+import IconGroup from '../../assets/icons/icon_type_groups.png';
 
 import attributes from './attributes.json';
 
@@ -58,6 +59,12 @@ class AttributesPickerModal extends React.Component {
 
       return attr.type !== 'media';
     });
+  };
+
+  getIcon = () => {
+    const { featureType } = this.props;
+
+    return featureType === 'model' ? Icon : IconGroup;
   };
 
   addEventListener = () => {
@@ -150,7 +157,7 @@ class AttributesPickerModal extends React.Component {
   };
 
   render() {
-    const { isOpen } = this.props;
+    const { featureType, isOpen } = this.props;
 
     return (
       <WrapperModal
@@ -162,7 +169,7 @@ class AttributesPickerModal extends React.Component {
         <HeaderModal>
           <section>
             <HeaderModalTitle>
-              <img src={Icon} alt="ct" />
+              <img src={this.getIcon()} alt="feature" />
               <FormattedMessage
                 id={`${pluginId}.popUpForm.choose.attributes.header.title`}
               />
@@ -172,7 +179,7 @@ class AttributesPickerModal extends React.Component {
           <section>
             <HeaderModalTitle>
               <FormattedMessage
-                id={`${pluginId}.popUpForm.choose.attributes.header.subtitle`}
+                id={`${pluginId}.popUpForm.choose.attributes.header.subtitle.${featureType}`}
               />
             </HeaderModalTitle>
           </section>
@@ -193,9 +200,11 @@ AttributesPickerModal.contextTypes = {
 
 AttributesPickerModal.defaultProps = {
   isOpen: false,
+  featureType: 'model',
 };
 
 AttributesPickerModal.propTypes = {
+  featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   push: PropTypes.func.isRequired,
 };
