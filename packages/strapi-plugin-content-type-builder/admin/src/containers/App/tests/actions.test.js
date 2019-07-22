@@ -501,7 +501,7 @@ describe('App actions', () => {
         data: [
           {
             uid: 'ingredients',
-            name: 'Ingredients',
+            name: 'ingredients',
             source: null,
             schema: {
               connection: 'default',
@@ -555,7 +555,7 @@ describe('App actions', () => {
         ingredients: {
           isTemporary: false,
           uid: 'ingredients',
-          name: 'Ingredients',
+          name: 'ingredients',
           source: null,
           schema: {
             connection: 'default',
@@ -595,7 +595,7 @@ describe('App actions', () => {
             fields: 3,
             icon: 'fa-cube',
             isTemporary: false,
-            name: 'Ingredients',
+            name: 'ingredients',
             source: null,
             uid: 'ingredients',
           },

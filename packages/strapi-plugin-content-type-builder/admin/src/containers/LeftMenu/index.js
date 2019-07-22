@@ -51,7 +51,6 @@ function LeftMenu() {
       return (
         <li key={name}>
           <LeftMenuLink
-            key={name}
             isTemporary={isTemporary}
             name={name}
             source={source}

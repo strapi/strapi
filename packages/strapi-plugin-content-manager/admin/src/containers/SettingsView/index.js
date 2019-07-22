@@ -173,6 +173,7 @@ function SettingsView({
             <ListHeader
               title={`${pluginId}.containers.SettingsView.list.title`}
               subtitle={`${pluginId}.containers.SettingsView.list.subtitle`}
+              style={{ paddingBottom: '1.3rem' }}
             />
             <List>
               <table>

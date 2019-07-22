@@ -2,17 +2,30 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import Button from '../Button';
+import Title from '../ListTitle';
+
 import SubTitle from './SubTitle';
-import Title from './Title';
 import Wrapper from './Wrapper';
 
-function ListHeader({ button, subtitle, subtitleValues, title, titleValues }) {
+function ListHeader({
+  button,
+  children,
+  subtitle,
+  subtitleValues,
+  style,
+  title,
+  titleValues,
+}) {
   return (
-    <Wrapper>
+    <Wrapper style={style}>
       {button && <Button {...button} />}
-      <FormattedMessage id={title} values={titleValues}>
-        {msg => <Title>{msg}</Title>}
-      </FormattedMessage>
+      {children ? (
+        children
+      ) : (
+        <FormattedMessage id={title} values={titleValues}>
+          {msg => <Title>{msg}</Title>}
+        </FormattedMessage>
+      )}
       <FormattedMessage id={subtitle} values={subtitleValues}>
         {msg => <SubTitle>{msg}</SubTitle>}
       </FormattedMessage>
@@ -22,6 +35,8 @@ function ListHeader({ button, subtitle, subtitleValues, title, titleValues }) {
 
 ListHeader.defaultProps = {
   button: null,
+  children: null,
+  style: {},
   subtitle: 'app.utils.defaultMessage',
   subtitleValues: {},
   title: 'app.utils.defaultMessage',
@@ -30,6 +45,8 @@ ListHeader.defaultProps = {
 
 ListHeader.propTypes = {
   button: PropTypes.object,
+  children: PropTypes.node,
+  style: PropTypes.object,
   subtitle: PropTypes.string,
   subtitleValues: PropTypes.object,
   title: PropTypes.string,

@@ -19,6 +19,7 @@ import {
   EmptyAttributesBlock,
   List,
   ListHeader,
+  ListTitle,
   ListWrapper,
   PopUpWarning,
   routerPropTypes,
@@ -597,7 +598,21 @@ export class ModelPage extends React.Component {
             />
           ) : (
             <ListWrapper>
-              <ListHeader title={title} button={{ ...buttonProps }} />
+              <ListHeader button={{ ...buttonProps }}>
+                <div className="list-header-title">
+                  {title.map(item => {
+                    return (
+                      <FormattedMessage
+                        key={item.label}
+                        id={item.label}
+                        values={item.values}
+                      >
+                        {msg => <ListTitle>{msg}&nbsp;</ListTitle>}
+                      </FormattedMessage>
+                    );
+                  })}
+                </div>
+              </ListHeader>
               <List>
                 <table>
                   <tbody>

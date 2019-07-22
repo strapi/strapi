@@ -8,9 +8,12 @@ import { fromJS, OrderedMap } from 'immutable';
 import {
   ADD_ATTRIBUTE_RELATION,
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
+  ADD_ATTRIBUTE_TO_EXISTING_GROUP,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
+  ADD_ATTRIBUTE_TO_TEMP_GROUP,
   CANCEL_NEW_CONTENT_TYPE,
   CLEAR_TEMPORARY_ATTRIBUTE,
+  CLEAR_TEMPORARY_ATTRIBUTE_GROUP,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
   CREATE_TEMP_CONTENT_TYPE,
   CREATE_TEMP_GROUP,
@@ -27,24 +30,34 @@ import {
   ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_NEW_GROUP_MAIN_INFOS,
   ON_CHANGE_ATTRIBUTE,
+  ON_CHANGE_ATTRIBUTE_GROUP,
   ON_CHANGE_RELATION,
   ON_CHANGE_RELATION_NATURE,
   ON_CHANGE_RELATION_TARGET,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+  RESET_EXISTING_GROUP_MAIN_INFOS,
   RESET_EDIT_TEMP_CONTENT_TYPE,
+  RESET_EDIT_TEMP_GROUP,
   RESET_PROPS,
   SAVE_EDITED_ATTRIBUTE,
+  SAVE_EDITED_ATTRIBUTE_GROUP,
   SAVE_EDITED_ATTRIBUTE_RELATION,
   SET_TEMPORARY_ATTRIBUTE,
+  SET_TEMPORARY_ATTRIBUTE_GROUP,
   SET_TEMPORARY_ATTRIBUTE_RELATION,
   SUBMIT_CONTENT_TYPE,
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
+  SUBMIT_GROUP,
+  SUBMIT_GROUP_SUCCEEDED,
   SUBMIT_TEMP_CONTENT_TYPE,
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
+  SUBMIT_TEMP_GROUP,
+  SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+  ON_CHANGE_EXISTING_GROUP_MAIN_INFOS,
 } from './constants';
 
 export function addAttributeRelation(isModelTemporary, modelName) {
@@ -66,9 +79,24 @@ export function addAttributeToExistingContentType(
   };
 }
 
+export function addAttributeToExistingGroup(groupName, attributeType) {
+  return {
+    type: ADD_ATTRIBUTE_TO_EXISTING_GROUP,
+    attributeType,
+    groupName,
+  };
+}
+
 export function addAttributeToTempContentType(attributeType) {
   return {
     type: ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
+    attributeType,
+  };
+}
+
+export function addAttributeToTempGroup(attributeType) {
+  return {
+    type: ADD_ATTRIBUTE_TO_TEMP_GROUP,
     attributeType,
   };
 }
@@ -82,6 +110,12 @@ export function cancelNewContentType() {
 export function clearTemporaryAttribute() {
   return {
     type: CLEAR_TEMPORARY_ATTRIBUTE,
+  };
+}
+
+export function clearTemporaryAttributeGroup() {
+  return {
+    type: CLEAR_TEMPORARY_ATTRIBUTE_GROUP,
   };
 }
 
@@ -181,11 +215,13 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
 
   const initialDataGroup = data.reduce((acc, current) => {
     const {
-      schema: { attributes },
+      schema: { attributes, name },
+      uid,
     } = current;
 
     const group = {
       ...current,
+      name: name || uid,
       isTemporary: false,
     };
     set(group, ['schema', 'attributes'], buildGroupAttributes(attributes));
@@ -196,18 +232,17 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
 
   const groups = data.reduce((acc, current) => {
     const {
-      name,
-      schema: { attributes, description },
+      schema: { attributes, description, name },
       source,
       uid,
     } = current;
 
     acc.push({
-      description,
+      description: description || '',
       fields: Object.keys(attributes).length,
       icon: 'fa-cube',
       isTemporary: false,
-      name,
+      name: name || uid,
       source,
       uid,
     });
@@ -234,6 +269,22 @@ export function onChangeExistingContentTypeMainInfos({ target }) {
   return {
     type: ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
     keys: target.name.split('.'),
+    value,
+  };
+}
+
+export function onChangeExistingGroupMainInfos({ target }) {
+  const value =
+    target.name === 'name'
+      ? camelCase(target.value.trim()).toLowerCase()
+      : target.value;
+
+  const array = target.name.split('.');
+  array.splice(1, 0, 'schema');
+
+  return {
+    type: ON_CHANGE_EXISTING_GROUP_MAIN_INFOS,
+    keys: array,
     value,
   };
 }
@@ -271,6 +322,18 @@ export function onChangeAttribute({ target }) {
 
   return {
     type: ON_CHANGE_ATTRIBUTE,
+    keys: target.name.split('.'),
+    value: value,
+  };
+}
+
+export function onChangeAttributeGroup({ target }) {
+  const value = target.name.includes('name')
+    ? target.value.split(' ').join('')
+    : target.value;
+
+  return {
+    type: ON_CHANGE_ATTRIBUTE_GROUP,
     keys: target.name.split('.'),
     value: value,
   };
@@ -324,9 +387,22 @@ export function resetExistingContentTypeMainInfos(contentTypeName) {
   };
 }
 
+export function resetExistingGroupMainInfos(groupName) {
+  return {
+    type: RESET_EXISTING_GROUP_MAIN_INFOS,
+    groupName,
+  };
+}
+
 export function resetEditTempContentType() {
   return {
     type: RESET_EDIT_TEMP_CONTENT_TYPE,
+  };
+}
+
+export function resetEditTempGroup() {
+  return {
+    type: RESET_EDIT_TEMP_GROUP,
   };
 }
 
@@ -346,6 +422,19 @@ export function saveEditedAttribute(
     attributeName,
     isModelTemporary,
     modelName,
+  };
+}
+
+export function saveEditedAttributeGroup(
+  attributeIndex,
+  isGroupTemporary,
+  groupName
+) {
+  return {
+    type: SAVE_EDITED_ATTRIBUTE_GROUP,
+    attributeIndex,
+    isGroupTemporary,
+    groupName,
   };
 }
 
@@ -372,6 +461,19 @@ export function setTemporaryAttribute(
     attributeName,
     isModelTemporary,
     modelName,
+  };
+}
+
+export function setTemporaryAttributeGroup(
+  attributeIndex,
+  isGroupTemporary,
+  groupName
+) {
+  return {
+    type: SET_TEMPORARY_ATTRIBUTE_GROUP,
+    attributeIndex,
+    isGroupTemporary,
+    groupName,
   };
 }
 
@@ -405,6 +507,19 @@ export function submitContentType(oldContentTypeName, data, context, source) {
   };
 }
 
+export function submitGroup(oldGroupName, data, context, source) {
+  const attributes = formatGroupAttributes(data.attributes);
+  const body = Object.assign(cloneDeep(data), { attributes });
+
+  return {
+    type: SUBMIT_GROUP,
+    oldGroupName,
+    body,
+    source,
+    context,
+  };
+}
+
 export function submitContentTypeSucceeded() {
   return {
     type: SUBMIT_CONTENT_TYPE_SUCCEEDED,
@@ -422,12 +537,36 @@ export function submitTempContentType(data, context) {
   };
 }
 
+export function submitGroupSucceeded() {
+  return {
+    type: SUBMIT_GROUP_SUCCEEDED,
+  };
+}
+
 export function submitTempContentTypeSucceeded() {
   return {
     type: SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   };
 }
 
+export function submitTempGroup(data, context) {
+  const attributes = formatGroupAttributes(data.schema.attributes);
+  const body = Object.assign(cloneDeep(data), { attributes });
+
+  return {
+    type: SUBMIT_TEMP_GROUP,
+    body,
+    context,
+  };
+}
+
+export function submitTempGroupSucceeded() {
+  return {
+    type: SUBMIT_TEMP_GROUP_SUCCEEDED,
+  };
+}
+
+submitTempGroupSucceeded;
 export function updateTempContentType() {
   return {
     type: UPDATE_TEMP_CONTENT_TYPE,

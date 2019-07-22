@@ -1,13 +1,13 @@
 /**
  *
- * Title
+ * ListTitle
  *
  */
 
 import styled from 'styled-components';
 import colors from '../../styles/colors';
 
-const Title = styled.p`
+const ListTitle = styled.p`
   margin-bottom: 0;
   color: ${colors.blueTxt};
   font-family: 'Lato';
@@ -16,4 +16,4 @@ const Title = styled.p`
   line-height: 2.2rem;
 `;
 
-export default Title;
+export default ListTitle;
