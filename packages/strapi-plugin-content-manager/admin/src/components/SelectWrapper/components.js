@@ -2,31 +2,101 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
+  margin-bottom: 0;
 
   label {
     font-size: 1.3rem;
     font-weight: 500;
-    margin-top: 3px;
   }
 
   nav + div {
     height: 34px;
-    margin: 3px 0 26px;
-
+    background-color: white;
+    margin-top: 5px;
     > div {
-      box-shadow: none !important;
-      border-color: #e3e9f3 !important;
+      min-height: 34px;
+      height: 100%;
+      border: 1px solid #e3e9f3;
+      border-radius: 3px;
+      box-shadow: 0 1px 1px 0 rgba(104, 118, 142, 0.05);
+      flex-wrap: initial;
+      padding: 0 10px;
 
-      > span:first-of-type {
-        > div:first-of-type {
-          color: #9ea7b8;
+      // Arrow
+      &:before {
+        content: '\f0d7';
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        font-family: 'FontAwesome';
+        font-size: 14px;
+        font-weight: 800;
+        color: #aaa;
+      }
+      > div {
+        padding: 0;
+        &:first-of-type {
+          // Placeholder
+          > div span {
+            color: #aaa;
+          }
         }
       }
-
-      > span:last-of-type {
+      div:last-of-type {
         span {
-          border-color: #b3b5b9 transparent transparent;
+          display: none;
+          & + div {
+            display: none;
+          }
         }
+        svg {
+          width: 15px;
+          margin-right: 6px;
+        }
+      }
+      span {
+        font-size: 13px;
+        line-height: 34px;
+        color: #333740;
+      }
+      :hover {
+        cursor: pointer;
+        border-color: #e3e9f3;
+        &:before {
+          color: #666;
+        }
+      }
+    }
+    span[aria-live='polite'] + div {
+      &:before {
+        transform: rotate(180deg);
+        top: 4px;
+      }
+      & + div {
+        height: fit-content;
+        padding: 0;
+        margin-top: -2px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        &:before {
+          content: '';
+        }
+        div {
+          width: 100%;
+        }
+        > div {
+          max-height: 200px;
+          height: fit-content;
+          div {
+            height: 36px;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+    & + div {
+      ul {
+        margin-bottom: -4px;
       }
     }
   }

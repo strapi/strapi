@@ -3,7 +3,6 @@ import styled from 'styled-components';
 const ListWrapper = styled.div`
   overflow: hidden;
   max-height: 116px;
-  margin-bottom: -9px;
 
   > ul {
     margin: 4px -20px 0;

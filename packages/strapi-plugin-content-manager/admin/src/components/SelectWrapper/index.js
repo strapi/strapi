@@ -169,7 +169,7 @@ function SelectWrapper({
         targetModel={targetModel}
         value={value}
       />
-      <div style={{ marginBottom: 26 }} />
+      <div style={{ marginBottom: 18 }} />
     </Wrapper>
   );
 }

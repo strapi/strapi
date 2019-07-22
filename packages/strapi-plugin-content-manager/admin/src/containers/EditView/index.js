@@ -464,7 +464,7 @@ function EditView({
                 <SubWrapper
                   style={{ padding: '0 20px 1px', marginBottom: '28px' }}
                 >
-                  <div style={{ paddingTop: '19px' }}>
+                  <div style={{ paddingTop: '22px' }}>
                     {displayedRelations.map(relationName => {
                       const relation = get(
                         layout,
