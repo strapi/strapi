@@ -92,7 +92,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       const groupModel = strapi.groups[group];
       const groupValue = values[key];
 
-      const updateOCreateGroup = async value => {
+      const updateOrCreateGroup = async value => {
         // check if value has an id then update else create
         if (hasPK(value)) {
           return groupModel.findOneAndUpdate(
@@ -111,7 +111,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
         await deleteOldGroups(entry, groupValue, { key, groupModel });
 
-        const groups = await Promise.all(groupValue.map(updateOCreateGroup));
+        const groups = await Promise.all(groupValue.map(updateOrCreateGroup));
         const groupsArr = groups.map(group => ({
           kind: groupModel.globalId,
           ref: group,
@@ -124,7 +124,7 @@ module.exports = ({ model, modelKey, strapi }) => {
 
         await deleteOldGroups(entry, groupValue, { key, groupModel });
 
-        const group = await updateOCreateGroup(groupValue);
+        const group = await updateOrCreateGroup(groupValue);
         entry[key] = [
           {
             kind: groupModel.globalId,
