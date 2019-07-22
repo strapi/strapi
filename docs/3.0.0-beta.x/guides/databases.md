@@ -297,14 +297,14 @@ Replace the contents of `/database.json` with the following and replace **< pass
 ```
 
 ::: warning Note
-The above configuration will create a database called `test`, the default database for **MongoDB Atlas**. If you would like to name your database something else, add the following **key:value pair** into your **"settings":** in your `database.json` file.
+The above configuration will create a database called `strapi`, the _default database_ Strapi sets for any **MongoDB** database. If you would like to name your database something else, add the following **key:value pair** into your **"settings":** located in your `database.json` file.
 
-`"database": "my-database-name",`
+`"database": "my-database-name"`
 
 :::
 
 ::: danger Warning
-We recommend replacing sensitive (eg. "URI string" above) information in your database.json files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [dynamic configurations](https://strapi.io/documentation/3.0.0-beta.x/configurations/configurations.html#dynamic-configurations).
+We recommend replacing sensitive (eg. "URI string" above) information in your database.json files before uploading your project to a public repository such as GitHub. For more information about using environment variables, please read [dynamic configurations](/3.0.0-beta.x/configurations/configurations.html#dynamic-configurations).
 
 :::
 
