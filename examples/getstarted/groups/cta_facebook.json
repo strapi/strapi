@@ -1,0 +1,13 @@
+{
+  "name": "CTA Facebook",
+  "connection": "default",
+  "collectionName": "cta_facebook_aa",
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    }
+  }
+}

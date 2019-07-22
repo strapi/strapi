@@ -1,12 +1,20 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs-extra');
+const fse = require('fs-extra');
 
 /**
  * create strapi fs layer
  */
 module.exports = strapi => {
+  function normalizePath(optPath) {
+    const filePath = Array.isArray(optPath) ? optPath.join('/') : optPath;
+
+    const normalizedPath = path.normalize(filePath).replace(/^(\/?\.\.?)+/, '');
+
+    return path.join(strapi.dir, normalizedPath);
+  }
+
   const strapiFS = {
     /**
      * Writes a file in a strapi app
@@ -14,15 +22,10 @@ module.exports = strapi => {
      * @param {string} data - content
      */
     writeAppFile(optPath, data) {
-      const filePath = Array.isArray(optPath) ? optPath.join('/') : optPath;
-
-      const normalizedPath = path
-        .normalize(filePath)
-        .replace(/^(\/?\.\.?)+/, '');
-
-      const writePath = path.join(strapi.dir, normalizedPath);
-
-      return fs.ensureFile(writePath).then(() => fs.writeFile(writePath, data));
+      const writePath = normalizePath(optPath);
+      return fse
+        .ensureFile(writePath)
+        .then(() => fse.writeFile(writePath, data));
     },
 
     /**
@@ -34,6 +37,14 @@ module.exports = strapi => {
     writePluginFile(plugin, optPath, data) {
       const newPath = ['extensions', plugin].concat(optPath).join('/');
       return strapiFS.writeAppFile(newPath, data);
+    },
+
+    /**
+     * Removes a file in strapi app
+     */
+    removeAppFile(optPath) {
+      const removePath = normalizePath(optPath);
+      return fse.remove(removePath);
     },
   };
 

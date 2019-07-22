@@ -8,9 +8,10 @@
     "description": "content-type-builder.plugin.description"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "jest --verbose --config=jest.config.unit.js"
   },
   "dependencies": {
+    "@sindresorhus/slugify": "^0.9.1",
     "classnames": "^2.2.6",
     "fs-extra": "^7.0.0",
     "immutable": "^3.8.2",
@@ -30,7 +31,8 @@
     "reselect": "^3.0.1",
     "strapi-generate": "3.0.0-beta.13",
     "strapi-generate-api": "3.0.0-beta.13",
-    "strapi-helper-plugin": "3.0.0-beta.13"
+    "strapi-helper-plugin": "3.0.0-beta.13",
+    "yup": "^0.27.0"
   },
   "author": {
     "name": "Strapi team",

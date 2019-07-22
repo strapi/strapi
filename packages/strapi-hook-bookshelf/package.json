@@ -30,7 +30,7 @@
     ]
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "echo not tests yet"
   },
   "author": {
     "email": "hi@strapi.io",

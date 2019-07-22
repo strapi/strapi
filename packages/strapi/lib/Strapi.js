@@ -19,12 +19,35 @@ const {
   bootstrap,
   loadExtensions,
   initCoreStore,
+  loadGroups,
 } = require('./core');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
-const defaultQueries = require('./core-api/queries');
+const createGroupManager = require('./services/groups');
+
+const createQueryManager = () => {
+  const _queries = new Map();
+
+  const toUid = (modelKey, plugin) => {
+    return plugin ? `plugins::${plugin}.${modelKey}` : modelKey;
+  };
+
+  return {
+    get({ modelKey, plugin }) {
+      return _queries.get(toUid(modelKey, plugin));
+    },
+    has({ modelKey, plugin }) {
+      return _queries.has(toUid(modelKey, plugin));
+    },
+    set({ modelKey, plugin }, query) {
+      const uid = toUid(modelKey, plugin);
+      _queries.set(uid, query);
+      return this;
+    },
+  };
+};
 
 /**
  * Construct an Strapi instance.
@@ -100,6 +123,8 @@ class Strapi extends EventEmitter {
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
 
+    this.groupManager;
+    this.queryManager = createQueryManager();
     this.fs = createStrapiFs(this);
     this.requireProjectBootstrap();
   }
@@ -245,6 +270,7 @@ class Strapi extends EventEmitter {
       middlewares,
       hook,
       extensions,
+      groups,
     ] = await Promise.all([
       loadConfig(this),
       loadApis(this),
@@ -253,12 +279,14 @@ class Strapi extends EventEmitter {
       loadMiddlewares(this),
       loadHooks(this.config),
       loadExtensions(this.config),
+      loadGroups(this),
     ]);
 
     _.merge(this.config, config);
 
     this.api = api;
     this.admin = admin;
+    this.groups = groups;
     this.plugins = plugins;
     this.middleware = middlewares;
     this.hook = hook;
@@ -281,6 +309,10 @@ class Strapi extends EventEmitter {
     // Populate AST with configurations.
 
     await bootstrap(this);
+
+    this.groupManager = createGroupManager({
+      groups,
+    });
 
     // Usage.
     await utils.usage(this.config);
@@ -412,7 +444,7 @@ class Strapi extends EventEmitter {
    * @param {string} plugin - plugin name or null
    * @param {Object} queriesMap - a map of orm to queries object factory (defaults to ./core-api/queries)
    */
-  query(entity, plugin, queriesMap = defaultQueries) {
+  query(entity, plugin) {
     if (!entity) {
       throw new Error(
         `You can't call the query method without passing the model's name as a first argument.`
@@ -421,11 +453,16 @@ class Strapi extends EventEmitter {
 
     const modelKey = entity.toLowerCase();
 
+    if (this.queryManager.has({ modelKey, plugin })) {
+      return this.queryManager.get({ modelKey, plugin });
+    }
+
     const model =
       plugin === 'admin'
         ? _.get(strapi.admin, ['models', modelKey], undefined)
         : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
           _.get(strapi, ['models', modelKey]) ||
+          _.get(strapi, ['groups', modelKey]) ||
           undefined;
 
     if (!model) {
@@ -440,14 +477,35 @@ class Strapi extends EventEmitter {
       );
     }
 
-    let buildQueries = queriesMap[connector];
-    let queries = buildQueries({ model, modelKey, strapi: this });
-
-    return Object.assign(queries, {
+    const orm = strapi.hook[model.orm];
+    const query = orm.load().queries({ model, modelKey, strapi: this });
+    Object.assign(query, {
       orm: connector,
       primaryKey: model.primaryKey,
       associations: model.associations,
     });
+
+    // custom queries made easy
+    Object.assign(query, {
+      custom(mapping) {
+        if (!mapping[connector]) {
+          throw new Error(`Missing mapping for orm ${connector}`);
+        }
+
+        if (typeof mapping[connector] !== 'function') {
+          throw new Error(
+            `Custom queries must be functions received ${typeof mapping[
+              connector
+            ]}`
+          );
+        }
+
+        return mapping[connector].call(query, { model, modelKey });
+      },
+    });
+
+    this.queryManager.set({ modelKey, plugin }, query);
+    return query;
   }
 }
 

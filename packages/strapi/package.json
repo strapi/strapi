@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "async": "^2.1.2",
-    "boom": "^5.2.0",
+    "boom": "^7.3.0",
     "chalk": "^2.4.1",
     "chokidar": "^2.1.2",
     "cross-spawn": "^6.0.5",

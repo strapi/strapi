@@ -1,15 +1,16 @@
-.emptyContentTypeView { /* stylelint-disable */
+.emptyContentTypeView {
+  /* stylelint-disable */
   position: relative;
   height: 22.1rem;
   width: 100%;
   padding-top: 6.1rem;
   background-image: url('../../assets/images/background_empty.svg');
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   background-repeat: repeat;
   text-align: center;
   font-size: 1.4rem;
   font-family: Lato;
-  box-shadow: 2px 2px 4px #E3E9F3;
+  box-shadow: 2px 2px 4px #e3e9f3;
   > img {
     position: absolute;
     top: 0;
