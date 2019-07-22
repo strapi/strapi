@@ -2,6 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import { Redirect, BrowserRouter } from 'react-router-dom';
+import { FormattedMessage } from 'react-intl';
 
 import mountWithIntl from 'testUtils/mountWithIntl';
 import formatMessagesWithPluginId from 'testUtils/formatMessages';
@@ -187,21 +188,29 @@ describe('<ModelPage />', () => {
     it("should display a singular text if the model's attributes relationship is one", () => {
       const wrapper = shallow(<ModelPage {...props} />);
 
-      const { title } = wrapper.find(ListHeader).props();
-      const { label } = title[1];
+      const { id } = wrapper
+        .find(ListHeader)
+        .find(FormattedMessage)
+        .last()
+        .props();
 
-      expect(label).toContain('relations.title.singular');
+      expect(id).toContain('relations.title.singular');
     });
 
     it("should display a plural text if the model's attributes relationships is more than one", () => {
       props.match.params.modelName = 'role&source=users-permissions';
       props.match.path = `${basePath}/role&source=users-permissions`;
       const wrapper = shallow(<ModelPage {...props} />);
+      const list = wrapper.find(ListHeader);
 
-      const { title } = wrapper.find(ListHeader).props();
-      const { label } = title[1];
+      expect(list.find(FormattedMessage)).toHaveLength(2);
 
-      expect(label).toContain('relations.title.plural');
+      const { id } = list
+        .find(FormattedMessage)
+        .last()
+        .props();
+
+      expect(id).toContain('relations.title.plural');
     });
 
     it('should call the handleClickOpenModalChooseAttributes when clicking on the EmptyAttributesBlock', () => {

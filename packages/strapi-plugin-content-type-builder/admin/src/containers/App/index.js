@@ -35,6 +35,7 @@ import {
   deleteTemporaryModel,
   getData,
   onChangeExistingContentTypeMainInfos,
+  onChangeExistingGroupMainInfos,
   onChangeNewContentTypeMainInfos,
   onChangeNewGroupMainInfos,
   onChangeRelation,
@@ -42,6 +43,7 @@ import {
   onChangeRelationTarget,
   resetExistingContentTypeMainInfos,
   resetNewContentTypeMainInfos,
+  resetExistingGroupMainInfos,
   resetProps,
   saveEditedAttribute,
   saveEditedAttributeRelation,
@@ -124,8 +126,31 @@ export class App extends React.Component {
     return get(modifiedData, this.getFeatureNameFromSearch(), {});
   };
 
+  getFormDataForGroup = () => {
+    const { modifiedDataGroup, newGroup } = this.props;
+
+    if (this.isUpdatingTemporaryFeature()) {
+      return newGroup;
+    }
+
+    return get(
+      modifiedDataGroup,
+      [this.getFeatureNameFromSearch(), 'schema'],
+      {}
+    );
+  };
+
+  // getFeatureName = () => {
+  //   const { modifiedDataGroup } = this.props;
+  //   return get(
+  //     modifiedDataGroup,
+  //     [this.getFeatureNameFromSearch(), 'schema', 'name'],
+  //     {}
+  //   );
+  // };
+
   getFeatureNameFromSearch = () =>
-    getQueryParameters(this.getSearch(), 'modelName');
+    getQueryParameters(this.getSearch(), `${this.getFeatureType()}Name`);
 
   isUpdatingTemporaryModel = (modelName = this.getFeatureNameFromSearch()) => {
     const { models } = this.props;
@@ -184,11 +209,12 @@ export class App extends React.Component {
       location: { pathname, search },
       isLoading,
       models,
-      newGroup,
       onChangeExistingContentTypeMainInfos,
+      onChangeExistingGroupMainInfos,
       onChangeNewContentTypeMainInfos,
       onChangeNewGroupMainInfos,
       resetExistingContentTypeMainInfos,
+      resetExistingGroupMainInfos,
       resetNewContentTypeMainInfos,
       updateTempContentType,
     } = this.props;
@@ -223,18 +249,17 @@ export class App extends React.Component {
         activeTab: getQueryParameters(search, 'settingType'),
         allTakenNames: this.getAllGroupsAndModelsNames(),
         cancelNewFeature: () => {},
-        connections,
         createTempFeature: createTempGroup,
         featureToEditName: this.getFeatureNameFromSearch(),
         featureType: 'group',
         isOpen: getQueryParameters(search, 'modalType') === 'group',
         isUpdatingTemporaryFeature: this.isUpdatingTemporaryFeature(),
-        modifiedData: newGroup,
-        onChangeExistingFeatureMainInfos: () => {},
+        modifiedData: this.getFormDataForGroup(),
+        onChangeExistingFeatureMainInfos: onChangeExistingGroupMainInfos,
         onChangeNewFeatureMainInfos: onChangeNewGroupMainInfos,
         pathname,
         push,
-        resetExistingFeatureMainInfos: () => {},
+        resetExistingFeatureMainInfos: resetExistingGroupMainInfos,
         resetNewFeatureMainInfos: () => {},
         updateTempFeature: () => {},
       },
@@ -281,9 +306,11 @@ App.propTypes = {
   location: PropTypes.object.isRequired,
   models: PropTypes.array.isRequired,
   modifiedData: PropTypes.object.isRequired,
+  modifiedDataGroup: PropTypes.object.isRequired,
   newContentType: PropTypes.object.isRequired,
   newGroup: PropTypes.object.isRequired,
   onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
+  onChangeExistingGroupMainInfos: PropTypes.func.isRequired,
   onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
   onChangeNewGroupMainInfos: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
@@ -292,6 +319,7 @@ App.propTypes = {
   setTemporaryAttribute: PropTypes.func.isRequired,
   setTemporaryAttributeRelation: PropTypes.func.isRequired,
   resetExistingContentTypeMainInfos: PropTypes.func.isRequired,
+  resetExistingGroupMainInfos: PropTypes.func.isRequired,
   resetNewContentTypeMainInfos: PropTypes.func.isRequired,
   shouldRefetchData: PropTypes.bool,
   updateTempContentType: PropTypes.func.isRequired,
@@ -313,6 +341,7 @@ export function mapDispatchToProps(dispatch) {
       deleteTemporaryModel,
       getData,
       onChangeExistingContentTypeMainInfos,
+      onChangeExistingGroupMainInfos,
       onChangeNewContentTypeMainInfos,
       onChangeNewGroupMainInfos,
       onChangeRelation,
@@ -320,6 +349,7 @@ export function mapDispatchToProps(dispatch) {
       onChangeRelationTarget,
       resetExistingContentTypeMainInfos,
       resetNewContentTypeMainInfos,
+      resetExistingGroupMainInfos,
       resetProps,
       saveEditedAttribute,
       saveEditedAttributeRelation,

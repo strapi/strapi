@@ -124,6 +124,7 @@ describe('appReducer', () => {
         attributes: OrderedMap({}),
       },
       temporaryAttribute: {},
+      temporaryAttributeGroup: {},
       initialTemporaryAttributeRelation: {
         name: '',
         columnName: '',
@@ -151,16 +152,20 @@ describe('appReducer', () => {
       newGroup: {
         collectionName: '',
         connection: '',
-        description: '',
         name: '',
-        attributes: [],
+        schema: {
+          attributes: [],
+          description: '',
+        },
       },
       newGroupClone: {
         collectionName: '',
         connection: '',
-        description: '',
         name: '',
-        attributes: [],
+        schema: {
+          attributes: [],
+          description: '',
+        },
       },
     });
   });
@@ -743,7 +748,7 @@ describe('appReducer', () => {
     const initialDataGroup = {
       tests: {
         uid: 'tests',
-        name: 'Tests',
+        name: 'tests',
         source: null,
         schema: {
           connection: 'default',
@@ -770,7 +775,7 @@ describe('appReducer', () => {
       data: [
         {
           uid: 'tests',
-          name: 'Tests',
+          name: 'tests',
           source: null,
           schema: {
             connection: 'default',
@@ -807,7 +812,7 @@ describe('appReducer', () => {
               fields: 2,
               icon: 'fa-cube',
               isTemporary: false,
-              name: 'Tests',
+              name: 'tests',
               source: null,
               uid: 'tests',
             },
@@ -1018,6 +1023,7 @@ describe('appReducer', () => {
         attributes: OrderedMap({}),
       },
       temporaryAttribute: {},
+      temporaryAttributeGroup: {},
       initialTemporaryAttributeRelation: {
         name: '',
         columnName: '',
@@ -1044,16 +1050,20 @@ describe('appReducer', () => {
       newGroup: {
         collectionName: '',
         connection: '',
-        description: '',
         name: '',
-        attributes: [],
+        schema: {
+          attributes: [],
+          description: '',
+        },
       },
       newGroupClone: {
         collectionName: '',
         connection: '',
-        description: '',
         name: '',
-        attributes: [],
+        schema: {
+          attributes: [],
+          description: '',
+        },
       },
       initialDataGroup: {},
       modifiedDataGroup: {},
