@@ -53,14 +53,6 @@ module.exports = {
       ? _.get(strapi.plugins, [source, 'models', name])
       : _.get(strapi.models, name);
 
-    const pluginStore = strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'content-manager',
-    });
-
-    const schema = await pluginStore.get({ key: 'schema' });
-
     const attributes = [];
     _.forEach(model.attributes, (params, attr) => {
       const relation = _.find(model.associations, { alias: attr });
@@ -88,17 +80,6 @@ module.exports = {
             ''
           );
         }
-      }
-
-      const appearance = _.get(schema, [
-        'layout',
-        name,
-        'attributes',
-        attr,
-        'appearance',
-      ]);
-      if (appearance) {
-        _.set(params, ['appearance', appearance], true);
       }
 
       attributes.push({
