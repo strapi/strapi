@@ -261,7 +261,6 @@ SettingViewModel.propTypes = {
     params: PropTypes.shape({
       settingType: PropTypes.string,
       name: PropTypes.string,
-      settingType: PropTypes.string,
     }),
   }).isRequired,
 
