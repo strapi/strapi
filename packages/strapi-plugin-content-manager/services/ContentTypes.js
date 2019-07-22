@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const pluralize = require('pluralize');
 const storeUtils = require('./utils/store');
+const { pickSchemaFields } = require('./utils/schema');
 
 const uidToStoreKey = ({ uid, source }) => {
   const sourceKey = source ? `${source}.${uid}` : uid;
@@ -52,9 +53,9 @@ module.exports = {
   },
 
   formatContentTypeSchema(contentType) {
-    const { associations, schema, allAttributes } = contentType;
+    const { associations, allAttributes } = contentType;
     return {
-      ...schema,
+      ...pickSchemaFields(contentType),
       attributes: Object.keys(allAttributes).reduce((acc, key) => {
         const attr = allAttributes[key];
         const assoc = associations.find(assoc => assoc.alias === key);

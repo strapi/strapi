@@ -51,7 +51,6 @@ module.exports = function(strapi) {
       throw new Error(`Group ${key} is missing a collectionName attribute`);
 
     return Object.assign(group, {
-      schema: _.clone(group),
       globalId: group.globalId || _.upperFirst(_.camelCase(`group_${key}`)),
     });
   });
@@ -62,7 +61,6 @@ module.exports = function(strapi) {
       let model = strapi.api[key].models[index];
 
       Object.assign(model, {
-        schema: _.clone(model),
         apiName: key,
         globalId: model.globalId || _.upperFirst(_.camelCase(index)),
         collectionName: model.collectionName || `${index}`.toLocaleLowerCase(),
@@ -129,7 +127,6 @@ module.exports = function(strapi) {
     let model = strapi.admin.models[key];
 
     Object.assign(model, {
-      schema: _.clone(model),
       identity: model.identity || _.upperFirst(key),
       globalId: model.globalId || _.upperFirst(_.camelCase(`admin-${key}`)),
       connection:
@@ -158,7 +155,6 @@ module.exports = function(strapi) {
       let model = plugin.models[key];
 
       Object.assign(model, {
-        schema: _.clone(model),
         collectionName:
           model.collectionName || `${pluginName}_${key}`.toLowerCase(),
         globalId:
