@@ -488,6 +488,10 @@ class Strapi extends EventEmitter {
     // custom queries made easy
     Object.assign(query, {
       custom(mapping) {
+        if (typeof mapping === 'function') {
+          return mapping.bind(query, { model, modelKey });
+        }
+
         if (!mapping[connector]) {
           throw new Error(`Missing mapping for orm ${connector}`);
         }

@@ -1,38 +1,24 @@
 'use strict';
 
-const keys = {
-  GROUP_SETTINGS: 'groups_settings',
-  GROUP_METADATAS: 'groups_metadatas',
-  GROUP_LAYOUTS: 'groups_layouts',
-};
-
-const getStore = () => {
-  return strapi.store({
-    environment: '',
-    type: 'plugin',
-    name: 'content_manager',
-  });
-};
+const storeUtils = require('./utils/store');
 
 module.exports = {
   async getConfiguration(uid) {
-    const settings = await getGroupSettings(uid);
-    const layouts = await getGroupLayouts(uid);
-    const metadatas = await getGroupMetadatas(uid);
-
-    return {
-      settings,
-      metadatas,
-      layouts,
-    };
+    const storeKey = groupUIDToStoreKey(uid);
+    return storeUtils.getModelConfiguration(storeKey);
   },
 
   async setConfiguration(uid, input) {
     const { settings, metadatas, layouts } = input;
 
-    if (settings) await setGroupSettings(uid, settings);
-    if (layouts) await setGroupLayouts(uid, layouts);
-    if (metadatas) await setGroupMetadatas(uid, metadatas);
+    const storeKey = groupUIDToStoreKey(uid);
+    return storeUtils.setModelConfiguration(storeKey, {
+      uid,
+      isGroup: true,
+      settings,
+      metadatas,
+      layouts,
+    });
   },
 
   formatGroupSchema(group) {
@@ -58,41 +44,4 @@ module.exports = {
   },
 };
 
-const getGroupSettings = async key => {
-  const value = await getStore().get({
-    key: `${keys.GROUP_SETTINGS}_${key}`,
-  });
-  return value || {};
-};
-
-const getGroupLayouts = async key => {
-  const value = await getStore().get({
-    key: `${keys.GROUP_LAYOUTS}_${key}`,
-  });
-  return value || {};
-};
-
-const getGroupMetadatas = async key => {
-  const value = await getStore().get({
-    key: `${keys.GROUP_METADATAS}_${key}`,
-  });
-  return value || {};
-};
-
-const setGroupSettings = (key, value) =>
-  getStore().set({
-    key: `${keys.GROUP_SETTINGS}_${key}`,
-    value,
-  });
-
-const setGroupLayouts = (key, value) =>
-  getStore().set({
-    key: `${keys.GROUP_LAYOUTS}_${key}`,
-    value,
-  });
-
-const setGroupMetadatas = (key, value) =>
-  getStore().set({
-    key: `${keys.GROUP_METADATAS}_${key}`,
-    value,
-  });
+const groupUIDToStoreKey = uid => `groups::${uid}`;

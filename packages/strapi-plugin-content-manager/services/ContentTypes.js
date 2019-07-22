@@ -2,59 +2,35 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
-
-const keys = {
-  GENERAL_SETTINGS: 'general_settings',
-  CT_SETTINGS: 'content_types_settings',
-  CT_METADATAS: 'content_types_metadatas',
-  CT_LAYOUTS: 'content_types_layouts',
-};
-
-const getStore = () => {
-  return strapi.store({
-    environment: '',
-    type: 'plugin',
-    name: 'content_manager',
-  });
-};
+const storeUtils = require('./utils/store');
 
 module.exports = {
   async getGeneralSettings() {
-    const generalSettings = await getStore().get({
-      key: keys.GENERAL_SETTINGS,
-    });
+    const generalSettings = await storeUtils.getGeneralSettings();
 
     return generalSettings || {};
   },
 
   setGeneralSettings(data) {
-    return getStore().set({
-      key: keys.GENERAL_SETTINGS,
-      value: data,
-    });
+    return storeUtils.setGeneralSettings(data);
   },
 
-  async getContentTypeConfiguration({ uid, source }) {
+  getContentTypeConfiguration({ uid, source }) {
     const storeKey = generateContentTypeCoreStoreKey({ uid, source });
-    const settings = await getContentTypeSettings(storeKey);
-    const layouts = await getContentTypeLayouts(storeKey);
-    const metadatas = await getContentTypeMetadatas(storeKey);
-
-    return {
-      settings,
-      metadatas,
-      layouts,
-    };
+    return storeUtils.getModelConfiguration(storeKey);
   },
 
-  async setContentTypeConfiguration({ uid, source }, input) {
+  setContentTypeConfiguration({ uid, source }, input) {
     const { settings, metadatas, layouts } = input;
 
     const storeKey = generateContentTypeCoreStoreKey({ uid, source });
-
-    if (settings) await setContentTypeSettings(storeKey, settings);
-    if (layouts) await setContentTypeLayouts(storeKey, layouts);
-    if (metadatas) await setContentTypeMetadatas(storeKey, metadatas);
+    return storeUtils.setModelConfiguration(storeKey, {
+      uid,
+      source,
+      settings,
+      metadatas,
+      layouts,
+    });
   },
 
   formatContentType(opts) {
@@ -104,47 +80,9 @@ module.exports = {
 };
 
 const generateContentTypeCoreStoreKey = ({ uid, source }) => {
-  return source ? `${source}::${uid}` : uid;
+  const sourceKey = source ? `${source}.${uid}` : uid;
+  return `content_types::${sourceKey}`;
 };
-
-const getContentTypeSettings = async key => {
-  const value = await getStore().get({
-    key: `${keys.CT_SETTINGS}_${key}`,
-  });
-  return value || {};
-};
-
-const getContentTypeLayouts = async key => {
-  const value = await getStore().get({
-    key: `${keys.CT_LAYOUTS}_${key}`,
-  });
-  return value || {};
-};
-
-const getContentTypeMetadatas = async key => {
-  const value = await getStore().get({
-    key: `${keys.CT_METADATAS}_${key}`,
-  });
-  return value || {};
-};
-
-const setContentTypeSettings = (key, value) =>
-  getStore().set({
-    key: `${keys.CT_SETTINGS}_${key}`,
-    value,
-  });
-
-const setContentTypeLayouts = (key, value) =>
-  getStore().set({
-    key: `${keys.CT_LAYOUTS}_${key}`,
-    value,
-  });
-
-const setContentTypeMetadatas = (key, value) =>
-  getStore().set({
-    key: `${keys.CT_METADATAS}_${key}`,
-    value,
-  });
 
 const formatContentTypeLabel = label => _.upperFirst(pluralize(label));
 

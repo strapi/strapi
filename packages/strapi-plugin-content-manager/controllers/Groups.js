@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+const pluralize = require('pluralize');
 const { createModelConfigurationSchema } = require('./validation');
 
 module.exports = {
@@ -7,7 +9,13 @@ module.exports = {
    * Returns the list of available groups
    */
   async listGroups(ctx) {
-    const data = Object.keys(strapi.groups).map(uid => ({ uid }));
+    const data = Object.keys(strapi.groups).map(uid => ({
+      uid,
+      source: null,
+      isDisplayed: true,
+      name: uid,
+      label: _.upperFirst(pluralize(uid)),
+    }));
     ctx.body = { data };
   },
   /**
