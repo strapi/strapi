@@ -56,7 +56,10 @@ async function buildDefaultSettings() {
 }
 
 const NON_SORTABLES = ['group', 'json', 'array'];
-const isSortable = attribute => {
+const isSortable = (model, name) => {
+  if (name === 'id') return true;
+
+  const attribute = model.allAttributes[name];
   if (!_.has(attribute, 'type')) {
     return false;
   }
@@ -78,7 +81,7 @@ function buildDefaultMetadata(model, name) {
     description: '',
     placeholder: '',
     visible: true, // TODO: depends on the type ?
-    editable: isEditable(attr),
+    editable: isEditable(model, name),
   };
 
   if (_.has(attr, 'model') || _.has(attr, 'collection')) {
@@ -88,7 +91,7 @@ function buildDefaultMetadata(model, name) {
   const list = {
     label: name,
     searchable: true,
-    sortable: isSortable(attr),
+    sortable: isSortable(model, name),
   };
 
   return { edit, list };
@@ -278,15 +281,21 @@ async function updateMetadatas(configuration, model) {
   // clear the invalid mainFields
   const updatedMetas = Object.keys(metasWithDefaults).reduce((acc, key) => {
     const meta = metasWithDefaults[key];
-    const { edit } = meta;
+    const { edit, list } = meta;
+
+    let updatedMeta = { edit, list };
+    // update sortable attr
+    if (list.sortable && !isSortable(model, key)) {
+      _.set(updatedMeta, ['list', 'sortable'], false);
+      _.set(acc, [key], updatedMeta);
+    }
+
     if (!_.has(edit, 'mainField')) return acc;
 
     // remove mainField if the attribute is not a relation anymore
     if (_.has(model.allAttributes[key], 'type')) {
-      acc[key] = {
-        ...meta,
-        edit: _.omit(edit, ['mainField']),
-      };
+      _.set(updatedMeta, 'edit', _.omit(edit, ['mainField']));
+      _.set(acc, [key], updatedMeta);
       return acc;
     }
 
@@ -298,15 +307,11 @@ async function updateMetadatas(configuration, model) {
     const target = strapi.getModel(attr.model || attr.collection, attr.plugin);
 
     if (!hasListableAttribute(target, meta.mainField)) {
-      acc[key] = {
-        ...meta,
-        edit: {
-          ...edit,
-          mainField: 'id',
-        },
-      };
+      _.set(updatedMeta, ['edit', 'mainField'], 'id');
+      _.set(acc, [key], updatedMeta);
       return acc;
     }
+
     return acc;
   }, {});
 
