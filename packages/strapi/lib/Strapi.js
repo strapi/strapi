@@ -441,7 +441,7 @@ class Strapi extends EventEmitter {
       });
   }
 
-  model(modelKey, plugin) {
+  getModel(modelKey, plugin) {
     return plugin === 'admin'
       ? _.get(strapi.admin, ['models', modelKey], undefined)
       : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||

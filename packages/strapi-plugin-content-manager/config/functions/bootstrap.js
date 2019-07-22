@@ -1,31 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-// const pluralize = require('pluralize');
-// const {
-//   getApis,
-//   getApisKeys,
-//   getApisUploadRelations,
-//   getEditDisplayAvailableFieldsPath,
-//   getEditDisplayDisplayedField,
-//   getEditDisplayFieldsPath,
-// } = require('./utils/getters');
-// const splitted = str => str.split('.');
-// const pickData = model =>
-//   _.pick(model, [
-//     'info',
-//     'connection',
-//     'collectionName',
-//     'attributes',
-//     'identity',
-//     'globalId',
-//     'globalName',
-//     'orm',
-//     'options',
-//     'loadedModel',
-//     'primaryKey',
-//     'associations',
-//   ]);
 
 function getContentManagerKeys({ model }, key) {
   if (model.orm === 'mongoose') {
@@ -78,8 +53,8 @@ async function updateGroups() {
     const model = strapi.groups[uid];
     return service.setConfiguration(uid, {
       settings: await updateSettings(conf, model),
-      layouts: updateLayouts(conf, model),
-      metadatas: updateMetadatas(conf, model),
+      layouts: await updateLayouts(conf, model),
+      metadatas: await updateMetadatas(conf, model),
     });
   };
 
@@ -99,21 +74,25 @@ async function buildDefaultSettings() {
   };
 }
 
-async function buildDefaultMetadata(name, attr) {
-  return {
-    edit: {
-      mainField: !_.has(attr, 'type') ? 'id' : undefined,
-      label: name,
-      description: '',
-      visible: true,
-      editable: true,
-    },
-    list: {
-      label: name,
-      searchable: true,
-      sortable: true,
-    },
+function buildDefaultMetadata(name, attr) {
+  const edit = {
+    label: name,
+    description: '',
+    visible: true,
+    editable: true,
   };
+
+  if (!_.has(attr, 'type')) {
+    edit.mainField = 'id';
+  }
+
+  const list = {
+    label: name,
+    searchable: true,
+    sortable: true,
+  };
+
+  return { edit, list };
 }
 
 async function buildDefaultMetadatas(model) {
@@ -133,11 +112,11 @@ async function buildDefaultMetadatas(model) {
   };
 }
 
-function buildDefaultLayouts(model) {
+async function buildDefaultLayouts(model) {
   return {
     list: ['id'].concat(
       Object.keys(model.allAttributes)
-        .filter(name => hasReadableAttribute(model, name))
+        .filter(name => hasListableAttribute(model, name))
         .slice(0, 3)
     ),
     editRelations: Object.keys(model.allAttributes).filter(name => {
@@ -151,8 +130,8 @@ function buildDefaultLayouts(model) {
 async function buildDefaultConfiguration(model) {
   return {
     settings: await buildDefaultSettings(),
-    metadatas: buildDefaultMetadatas(model),
-    layouts: buildDefaultLayouts(model),
+    metadatas: await buildDefaultMetadatas(model),
+    layouts: await buildDefaultLayouts(model),
   };
 }
 
@@ -182,7 +161,20 @@ async function updateContentTypesScope(models, configurations, source) {
     contentTypesToAdd.map(uid => generateNewConfiguration(uid))
   );
 
-  await Promise.all(contentTypesToUpdate.map(uid => {}));
+  const updateConfiguration = async uid => {
+    const conf = configurations.find(conf => conf.uid === uid);
+    const model = models[uid];
+    return service.setContentTypeConfiguration(
+      { uid, source },
+      {
+        settings: await updateSettings(conf, model),
+        layouts: await updateLayouts(conf, model),
+        metadatas: await updateMetadatas(conf, model),
+      }
+    );
+  };
+
+  await Promise.all(contentTypesToUpdate.map(uid => updateConfiguration(uid)));
 }
 
 async function updateContentTypes() {
@@ -214,9 +206,10 @@ async function updateContentTypes() {
   );
 }
 
-function updateMetadatas(configuration, model) {
+async function updateMetadatas(configuration, model) {
   // clear all keys that do not exist anymore
-  if (_.isEmpty(configuration.metadatas)) return buildDefaultMetadatas(model);
+  if (_.isEmpty(configuration.metadatas))
+    return await buildDefaultMetadatas(model);
 
   // remove old keys
   const metasWithValidKeys = _.pick(
@@ -225,39 +218,46 @@ function updateMetadatas(configuration, model) {
   );
 
   const metasWithDefaults = _.merge(
-    buildDefaultMetadatas(model),
+    await buildDefaultMetadatas(model),
     metasWithValidKeys
   );
 
   // clear the invalid mainFields
   const updatedMetas = Object.keys(metasWithDefaults).reduce((acc, key) => {
     const meta = metasWithDefaults[key];
-    if (!_.has(meta, 'mainField')) return acc;
+    const { edit } = meta;
+    if (!_.has(edit, 'mainField')) return acc;
 
     // remove mainField if the attribute is not a relation anymore
     if (_.has(model.allAttributes[key], 'type')) {
-      acc[key] = _.omit(meta, 'mainField');
+      acc[key] = {
+        ...meta,
+        edit: _.omit(edit, ['mainField']),
+      };
       return acc;
     }
 
     // if the mainField is id you can keep it
-    if (meta.mainField === 'id') return acc;
+    if (edit.mainField === 'id') return acc;
 
     // check the mainField in the targetModel
     const attr = model.allAttributes[key];
     const target = strapi.getModel(attr.model || attr.collection, attr.plugin);
 
-    if (!hasReadableAttribute(target, meta.mainField)) {
+    if (!hasListableAttribute(target, meta.mainField)) {
       acc[key] = {
         ...meta,
-        mainField: 'id',
+        edit: {
+          ...edit,
+          mainField: 'id',
+        },
       };
       return acc;
     }
     return acc;
   }, {});
 
-  return _.merge(metasWithDefaults, updatedMetas);
+  return _.assign(metasWithDefaults, updatedMetas);
 }
 
 async function updateSettings(configuration, model) {
@@ -267,8 +267,8 @@ async function updateSettings(configuration, model) {
 
   return {
     ...configuration.settings,
-    mainField: hasReadableAttribute(model, mainField) ? mainField : 'id',
-    defaultSortBy: hasReadableAttribute(model, defaultSortBy)
+    mainField: hasListableAttribute(model, mainField) ? mainField : 'id',
+    defaultSortBy: hasListableAttribute(model, defaultSortBy)
       ? defaultSortBy
       : 'id',
   };
@@ -276,12 +276,50 @@ async function updateSettings(configuration, model) {
 
 function updateLayouts(configuration, model) {
   if (_.isEmpty(configuration.layouts)) return buildDefaultLayouts(model);
+
+  const { layouts } = configuration;
+
+  const cleanList = layouts.list.filter(attr =>
+    hasListableAttribute(model, attr)
+  );
+
+  const cleanEditRelations = layouts.editRelations.filter(attr =>
+    hasRelationAttribute(model, attr)
+  );
+
+  const cleanEdit = layouts.edit.reduce((acc, row) => {
+    let newRow = row.filter(el => hasEditableAttribute(el.name));
+
+    if (newRow.length > 0) return acc.concat(newRow);
+  }, []);
+
   return {
-    ...configuration.layouts,
+    list: cleanList,
+    editRelations: cleanEditRelations,
+    edit: cleanEdit,
   };
 }
 
-const hasReadableAttribute = (model, attr) => {
+const hasRelationAttribute = (model, attr) => {
+  return (
+    _.has(model.allAttributes[attr], 'model') ||
+    _.has(model.allAttributes[attr], 'collection')
+  );
+};
+
+const hasEditableAttribute = (model, attr) => {
+  if (!_.has(model.allAttributes, attr)) {
+    return false;
+  }
+
+  if (!_.has(model.allAttributes[attr], 'type')) {
+    return false;
+  }
+
+  return true;
+};
+
+const hasListableAttribute = (model, attr) => {
   if (attr === 'id') return true;
 
   if (!_.has(model.allAttributes, attr)) {
