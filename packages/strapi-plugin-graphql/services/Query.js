@@ -52,15 +52,13 @@ module.exports = {
   amountLimiting: (params = {}) => {
     const { amountLimit } = strapi.plugins.graphql.config;
 
-    if (!params.limit) return params;
+    if(!amountLimit) return params; // not sure if this is needed
 
-    if (params.limit === -1) {
+    if (!params.limit || params.limit === -1 || params.limit > amountLimit) { // combined lines which return same
       params.limit = amountLimit;
     } else if (params.limit < 0) {
       params.limit = 0;
-    } else if (params.limit > amountLimit) {
-      params.limit = amountLimit;
-    }
+    } 
 
     return params;
   },
