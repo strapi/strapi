@@ -1,4 +1,5 @@
 'use strict';
+
 const _ = require('lodash');
 
 const keys = {
@@ -13,6 +14,31 @@ const getStore = () => {
     name: 'content_manager',
   });
 };
+
+function getAllConfigurationsQuery({ model }) {
+  if (model.orm === 'mongoose') {
+    return model
+      .find({
+        $regex: `plugin_content_manager_configuration.*`,
+      })
+      .then(results =>
+        results.map(({ key, value }) => ({ key, value: JSON.parse(value) }))
+      );
+  }
+
+  return model
+    .query(qb => {
+      qb.where('key', 'like', `plugin_content_manager_configuration%`);
+    })
+    .fetchAll()
+    .then(config => config && config.toJSON())
+    .then(results =>
+      results.map(({ key, value }) => ({ key, value: JSON.parse(value) }))
+    );
+}
+
+const getAllConfigurations = () =>
+  strapi.query('core_store').custom(getAllConfigurationsQuery)();
 
 /** General settings */
 
@@ -69,11 +95,35 @@ const deleteKey = key => {
     .delete({ key: `plugin_content_manager_configuration_${key}` });
 };
 
+function findByKeyQuery({ model }, key) {
+  if (model.orm === 'mongoose') {
+    return model
+      .find({
+        $regex: `${key}.*`,
+      })
+      .then(results => results.map(({ value }) => JSON.parse(value)));
+  }
+
+  return model
+    .query(qb => {
+      qb.where('key', 'like', `${key}%`);
+    })
+    .fetchAll()
+    .then(config => config && config.toJSON())
+    .then(results => results.map(({ value }) => JSON.parse(value)));
+}
+
+const findByKey = key => strapi.query('core_store').custom(findByKeyQuery)(key);
+
 module.exports = {
   getGeneralSettings,
   setGeneralSettings,
+
+  getAllConfigurations,
+  findByKey,
   getModelConfiguration,
   setModelConfiguration,
 
   deleteKey,
+  keys,
 };

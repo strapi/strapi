@@ -1,31 +1,12 @@
 'use strict';
 
 const _ = require('lodash');
-
-function getContentManagerKeys({ model }, key) {
-  if (model.orm === 'mongoose') {
-    return model
-      .find({
-        $regex: `${key}.*`,
-      })
-      .then(results => results.map(({ value }) => JSON.parse(value)));
-  }
-
-  return model
-    .query(qb => {
-      qb.where('key', 'like', `${key}%`);
-    })
-    .fetchAll()
-    .then(config => config && config.toJSON())
-    .then(results => results.map(({ value }) => JSON.parse(value)));
-}
+const storeUtils = require('../../services/utils/store');
 
 async function updateGroups() {
   const service = strapi.plugins['content-manager'].services.groups;
 
-  const configurations = await strapi
-    .query('core_store')
-    .custom(getContentManagerKeys)(
+  const configurations = await storeUtils.findByKey(
     'plugin_content_manager_configuration_groups'
   );
 
@@ -250,9 +231,7 @@ async function updateContentTypesScope(models, configurations, source) {
 }
 
 async function updateContentTypes() {
-  const configurations = await strapi
-    .query('core_store')
-    .custom(getContentManagerKeys)(
+  const configurations = await storeUtils.findByKey(
     'plugin_content_manager_configuration_content_types'
   );
 
@@ -260,6 +239,7 @@ async function updateContentTypes() {
     _.omit(strapi.models, ['core_store']),
     configurations.filter(({ source }) => !source)
   );
+
   await updateContentTypesScope(
     strapi.admin.models,
     configurations.filter(({ source }) => source === 'admin'),

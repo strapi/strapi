@@ -7,10 +7,9 @@ module.exports = {
    * Returns the general content manager settings
    */
   async getGeneralSettings(ctx) {
-    const contentTypeService =
-      strapi.plugins['content-manager'].services.contenttypes;
+    const service = strapi.plugins['content-manager'].services.generalsettings;
 
-    const generalSettings = await contentTypeService.getGeneralSettings();
+    const generalSettings = await service.getGeneralSettings();
 
     ctx.body = { data: generalSettings };
   },
@@ -21,8 +20,7 @@ module.exports = {
    */
   async updateGeneralSettings(ctx) {
     const { body = {} } = ctx.request;
-    const contentTypeService =
-      strapi.plugins['content-manager'].services.contenttypes;
+    const service = strapi.plugins['content-manager'].services.generalsettings;
 
     let data;
     try {
@@ -38,7 +36,7 @@ module.exports = {
       });
     }
 
-    await contentTypeService.setGeneralSettings(data);
+    await service.setGeneralSettings(data);
 
     ctx.body = { data };
   },
