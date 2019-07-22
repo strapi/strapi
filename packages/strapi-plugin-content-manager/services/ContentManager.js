@@ -73,12 +73,21 @@ module.exports = {
   add: async (params, values, source) => {
     // Multipart/form-data.
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
+      // get model attributes
+      const { attributes: modelAttibutes } = strapi.models[params.model];
+
       // Silent recursive parser.
-      const parser = value => {
+      const parser = (value, name) => {
+        // check if the field is defined as type "string" in the model
+        const isTypeString =
+          name &&
+          modelAttibutes[name] &&
+          modelAttibutes[name].type === 'string';
+
         try {
           const parsed = JSON.parse(value);
           // if we parse a value and it is still a string leave it as is
-          if (typeof parsed !== 'string') {
+          if (typeof parsed !== 'string' && !isTypeString) {
             value = parsed;
           }
         } catch (e) {
@@ -92,7 +101,7 @@ module.exports = {
 
       // Parse stringify JSON data.
       values = Object.keys(values.fields).reduce((acc, current) => {
-        acc[current] = parser(values.fields[current]);
+        acc[current] = parser(values.fields[current], current);
 
         return acc;
       }, {});
@@ -135,12 +144,21 @@ module.exports = {
   edit: async (params, values, source) => {
     // Multipart/form-data.
     if (values.hasOwnProperty('fields') && values.hasOwnProperty('files')) {
+      // get model attributes
+      const { attributes: modelAttibutes } = strapi.models[params.model];
+
       // Silent recursive parser.
-      const parser = value => {
+      const parser = (value, name) => {
+        // check if the field is defined as type "string" in the model
+        const isTypeString =
+          name &&
+          modelAttibutes[name] &&
+          modelAttibutes[name].type === 'string';
+
         try {
           const parsed = JSON.parse(value);
           // do not modify initial value if it is string except 'null'
-          if (typeof parsed !== 'string') {
+          if (typeof parsed !== 'string' && !isTypeString) {
             value = parsed;
           }
         } catch (e) {
@@ -161,7 +179,7 @@ module.exports = {
 
       // Parse stringify JSON data.
       values = Object.keys(values.fields).reduce((acc, current) => {
-        acc[current] = parser(values.fields[current]);
+        acc[current] = parser(values.fields[current], current);
 
         return acc;
       }, {});
