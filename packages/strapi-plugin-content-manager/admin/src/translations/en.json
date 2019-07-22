@@ -43,6 +43,8 @@
   "containers.Edit.submit": "Save",
   "containers.Edit.Link.Layout": "Configure the layout",
   "containers.Edit.Link.Fields": "Edit the fields",
+  "containers.EditView.notification.errors": "The form contains some errors",
+  "components.Group.notification.info.minimum-requirement": "A field has been added to your group to match the minimum requirement",
   "containers.Home.introduction": "To edit your entries go to the specific link in the left menu. This plugin doesn't have a proper way to edit settings and it's still under active development.",
   "containers.Home.pluginHeaderDescription": "Manage your entries through a powerful and beautiful interface.",
   "containers.Home.pluginHeaderTitle": "Content Manager",

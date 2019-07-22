@@ -21,6 +21,7 @@ Let's say that you want to create a route `/user` with params `/:id` associated 
 The declaration would be as followed :
 
 **Path —** `plugins/my-plugin/admin/src/containers/App/index.js`.
+
 ```js
 import React from 'react';
 import UserPage from 'containers/UserPage';
@@ -34,7 +35,11 @@ class App extends React.Component {
     return (
       <div className={styles.myPlugin}>
         <Switch>
-          <Route exact path="/plugins/my-plugin/user/:id" component={UserPage} />
+          <Route
+            exact
+            path="/plugins/my-plugin/user/:id"
+            component={UserPage}
+          />
         </Switch>
       </div>
     );
@@ -43,7 +48,8 @@ class App extends React.Component {
 
 // ...
 ```
-See the [Front-end Use Cases](./frontend-use-cases.md#handle-user-navigation) for more informations.
+
+See the [Front-end Use Cases](./frontend-use-cases.md#handle-user-navigation) for more information.
 
 ## Data flow
 
@@ -55,12 +61,13 @@ Data flow is controlled thanks to Redux and redux-sagas.
 
 The [Bootstrap styles](http://getbootstrap.com/) are inherited by the plugins. However, each component has its own styles, so it possible to completely customize it.
 
-**See the [plugin styles](../concepts/concepts.md#plugin-styles) for informations on its concept.**
+**See the [plugin styles](../concepts/concepts.md#plugin-styles) for information on its concept.**
 
 To style a plugin component:
- - Add a `styles.scss` file in the component directory
- - Require it from the `index.js` file (`import styles from './styles.scss';`)
- - Add some styles in the `styles.scss` file
+
+- Add a `styles.scss` file in the component directory
+- Require it from the `index.js` file (`import styles from './styles.scss';`)
+- Add some styles in the `styles.scss` file
 
 ```
 .wrapper {
@@ -84,11 +91,12 @@ import styles from './styles.scss';
 // ...
 
 return (
-  <div className={cn(styles.wrapper, styles.otherClass)}>{this.props.children}</div>
+  <div className={cn(styles.wrapper, styles.otherClass)}>
+    {this.props.children}
+  </div>
 );
 
 // ...
-
 ```
 
 ## i18n
@@ -104,6 +112,7 @@ The example below shows how to use i18n inside your plugin.
 **Define all your ids with the associated message:**
 
 **Path —** `./plugins/my-plugin/admin/src/translations/en.json`.
+
 ```json
 {
   "notification.error.message": "An error occurred"
@@ -111,6 +120,7 @@ The example below shows how to use i18n inside your plugin.
 ```
 
 **Path —** `./plugins/my-plugin/admin/src/translations/fr.json`
+
 ```json
 {
   "notification.error.message": "Une erreur est survenue"
@@ -120,16 +130,17 @@ The example below shows how to use i18n inside your plugin.
 **Usage inside a component**
 
 **Path —** `./plugins/my-plugin/admin/src/components/Foo/index.js`.
+
 ```js
 import { FormattedMessage } from 'react-intl';
 import SomeOtherComponent from 'components/SomeOtherComponent';
 
-const Foo = (props) => (
+const Foo = props => (
   <div className={styles.foo}>
     <FormattedMessage id="my-plugin.notification.error.message" />
     <SomeOtherComponent {...props} />
   </div>
-)
+);
 
 export default Foo;
 ```

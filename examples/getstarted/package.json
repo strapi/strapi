@@ -1,7 +1,7 @@
 {
   "name": "getstarted",
   "private": true,
-  "version": "3.0.0-beta.9",
+  "version": "3.0.0-beta.13",
   "description": "A Strapi application.",
   "scripts": {
     "develop": "strapi develop",
@@ -12,32 +12,33 @@
   "dependencies": {
     "knex": "^0.16.5",
     "lodash": "^4.17.5",
+    "mysql": "^2.17.1",
     "pg": "^7.10.0",
     "sqlite3": "^4.0.6",
-    "strapi": "3.0.0-beta.9",
-    "strapi-admin": "3.0.0-beta.9",
-    "strapi-hook-bookshelf": "3.0.0-beta.9",
-    "strapi-hook-knex": "3.0.0-beta.9",
-    "strapi-hook-mongoose": "3.0.0-beta.9",
-    "strapi-middleware-views": "3.0.0-beta.9",
-    "strapi-plugin-content-manager": "3.0.0-beta.9",
-    "strapi-plugin-content-type-builder": "3.0.0-beta.9",
-    "strapi-plugin-documentation": "3.0.0-beta.9",
-    "strapi-plugin-email": "3.0.0-beta.9",
-    "strapi-plugin-graphql": "3.0.0-beta.9",
-    "strapi-plugin-settings-manager": "3.0.0-beta.9",
-    "strapi-plugin-upload": "3.0.0-beta.9",
-    "strapi-plugin-users-permissions": "3.0.0-beta.9",
-    "strapi-provider-email-mailgun": "3.0.0-beta.9",
-    "strapi-provider-upload-aws-s3": "3.0.0-beta.9",
-    "strapi-utils": "3.0.0-beta.9"
+    "strapi": "3.0.0-beta.13",
+    "strapi-admin": "3.0.0-beta.13",
+    "strapi-hook-bookshelf": "3.0.0-beta.13",
+    "strapi-hook-knex": "3.0.0-beta.13",
+    "strapi-hook-mongoose": "3.0.0-beta.13",
+    "strapi-middleware-views": "3.0.0-beta.13",
+    "strapi-plugin-content-manager": "3.0.0-beta.13",
+    "strapi-plugin-content-type-builder": "3.0.0-beta.13",
+    "strapi-plugin-documentation": "3.0.0-beta.13",
+    "strapi-plugin-email": "3.0.0-beta.13",
+    "strapi-plugin-graphql": "3.0.0-beta.13",
+    "strapi-plugin-settings-manager": "3.0.0-beta.13",
+    "strapi-plugin-upload": "3.0.0-beta.13",
+    "strapi-plugin-users-permissions": "3.0.0-beta.13",
+    "strapi-provider-email-mailgun": "3.0.0-beta.13",
+    "strapi-provider-upload-aws-s3": "3.0.0-beta.13",
+    "strapi-utils": "3.0.0-beta.13"
   },
   "strapi": {
     "uuid": "getstarted"
   },
   "engines": {
-    "node": "^10.0.0",
-    "npm": ">= 6.0.0"
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
   },
   "license": "MIT"
 }

@@ -56,10 +56,8 @@ Strapi is a free and open-source Headless CMS delivering your content anywhere y
 
 **Node:**
 
-- NodeJS 10.x
+- NodeJS >= 10.x
 - NPM >= 6.x
-
-(Please note that Node 11/12 are not supported, and the current Node LTS (v10) is the officially supported version.)
 
 **Database:**
 

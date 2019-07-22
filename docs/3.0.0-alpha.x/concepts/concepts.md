@@ -1,31 +1,31 @@
 # Concepts
 
-  - Table of contents
-    - [Files structure](#files-structure)
-    - [Controllers](#controllers)
-    - [Filters](#filters)
-    - [Models](#models)
-      - [Attributes](#attributes)
-      - [Relations](#relations)
-        - [Many-to-many](#many-to-many)
-        - [One-to-many](#one-to-many)
-        - [One-to-one](#one-to-one)
-        - [One-way](#one-way)
-      - [Lifecycle callbacks](#lifecycle-callbacks)
-    - [Internationalization](#internationalization-and-localization)
-    - [Plugin](#plugin)
-    - [Plugin styles](#plugin-styles)
-    - [Policies](#policies)
-      - [Global policies](#global-policies)
-      - [Scoped policies](#scoped-policies)
-      - [Plugin policies](#plugin-policies)
-    - [Public assets](#public-assets)
-    - [Requests](#requests)
-    - [Responses](#responses)
-    - [Routing](#routing)
-    - [Services](#services)
+- Table of contents
+  - [Files structure](#files-structure)
+  - [Controllers](#controllers)
+  - [Filters](#filters)
+  - [Models](#models)
+    - [Attributes](#attributes)
+    - [Relations](#relations)
+      - [Many-to-many](#many-to-many)
+      - [One-to-many](#one-to-many)
+      - [One-to-one](#one-to-one)
+      - [One-way](#one-way)
+    - [Lifecycle callbacks](#lifecycle-callbacks)
+  - [Internationalization](#internationalization-and-localization)
+  - [Plugin](#plugin)
+  - [Plugin styles](#plugin-styles)
+  - [Policies](#policies)
+    - [Global policies](#global-policies)
+    - [Scoped policies](#scoped-policies)
+    - [Plugin policies](#plugin-policies)
+  - [Public assets](#public-assets)
+  - [Requests](#requests)
+  - [Responses](#responses)
+  - [Routing](#routing)
+  - [Services](#services)
 
-***
+---
 
 ## Files structure
 
@@ -33,11 +33,11 @@ By default, your project's structure will look like this:
 
 - [`/admin`](../advanced/customize-admin.md): contains the vast majority of the admin's front-end and back-end logic.
 - `/api`: contains the business logic of your project will be in this folder split in sub-folder per API.
-   - `**`
-      - `/config`: contains the API's configurations ([`routes`](#routing), [`policies`](#policies), etc).
-      - [`/controllers`](#controllers): contains the API's controllers.
-      - [`/models`](#models): contains the API's models.
-      - [`/services`](#services):  contains the API's services.
+  - `**`
+    - `/config`: contains the API's configurations ([`routes`](#routing), [`policies`](#policies), etc).
+    - [`/controllers`](#controllers): contains the API's controllers.
+    - [`/models`](#models): contains the API's models.
+    - [`/services`](#services): contains the API's services.
 - `/node_modules`: contains the npm's packages used by the project.
 - [`/config`](../configurations/configurations.md)
   - [`/environments`](../configurations/configurations.md#environments): contains the project's configurations per environment.
@@ -62,23 +62,22 @@ By default, your project's structure will look like this:
 - [`/plugins`](../configurations/configurations.md#plugins): contains the installed plugins in the project.
 - [`/public`](../concepts/concepts.html#public-assets): contains the file accessible to the outside world.
 
-
 ::: note
 Inside the `/config` folder, every folder will be parsed and injected into the global object `strapi.config`. Let's say, you added a folder named `credentials` with two files `stripe.json` and `paypal.json` into it. The content of these files will be accessible through `strapi.config.credentials.stripe` and `strapi.config.credentials.paypal`.
 :::
 
-***
+---
 
 ## Controllers
 
-Controllers are JavaScript files which contain a set of methods called **actions** reached by the client according to the requested route. It means that every time a client requests the route, the action performs the business logic coded and sends back the response. They represent the *C* in the *MVC* pattern. In most cases, the controllers will contain the bulk of a project's business logic.
+Controllers are JavaScript files which contain a set of methods called **actions** reached by the client according to the requested route. It means that every time a client requests the route, the action performs the business logic coded and sends back the response. They represent the _C_ in the _MVC_ pattern. In most cases, the controllers will contain the bulk of a project's business logic.
 
 ```js
 module.exports = {
   // GET /hello
-  index: async (ctx) => {
+  index: async ctx => {
     ctx.send('Hello World!');
-  }
+  },
 };
 ```
 
@@ -89,31 +88,32 @@ In this example, any time a web browser is pointed to the `/hello` URL on your a
 The controllers are defined in each `./api/**/controllers/` folders. Every JavaScript file put in these folders will be loaded as a controller. They are also available through the `strapi.controllers` and `strapi.api.**.controllers` global variables. By convention, controllers' names should be Pascal-cased, so that every word in the file (include the first one) is capitalized `User.js`, `LegalEntity.js`.
 
 ::: note
-Please refer to the [controllers' guide](../guides/controllers.md) for more informations.
+Please refer to the [controllers' guide](../guides/controllers.md) for more information.
 :::
 
-***
+---
 
 ## Filters
 
 Filters are a handy way to request data according to generic parameters. It makes filtering, sorting and paginating easy and reusable (eg. `GET /users?_limit=30&name=John`).
 
 ::: note
-Please refer to the [filters' guide](../guides/filters.md) for more informations.
+Please refer to the [filters' guide](../guides/filters.md) for more information.
 :::
 
-***
+---
 
 ## Models
 
 Models are a representation of the database's structure and lifecycle. They are split into two separate files. A JavaScript file that contains the lifecycle callbacks, and a JSON one that represents the data stored in the database and their format. The models also allow you to define the relationships between them.
 
 **Path —** `./api/user/models/User.js`.
+
 ```js
 module.exports = {
   // Before saving a value.
   // Fired before an `insert` or `update` query.
-  beforeSave: (next) => {
+  beforeSave: next => {
     // Use `this` to get your current object
     next();
   },
@@ -129,6 +129,7 @@ module.exports = {
 ```
 
 **Path —** `./api/user/models/User.settings.json`.
+
 ```json
 {
   "connection": "default",
@@ -149,7 +150,6 @@ module.exports = {
 
 In this example, there is a `User` model which contains two attributes `firstname` and `lastname`.
 
-
 ### Where are the models defined?
 
 The models are defined in each `./api/**/models/` folder. Every JavaScript or JSON file in these folders will be loaded as a model. They are also available through the `strapi.models` and `strapi.api.**.models` global variables. Usable every where in the project, they contain the ORM model object that they are refer to. By convention, models' names should be written in lowercase.
@@ -159,14 +159,14 @@ The models are defined in each `./api/**/models/` folder. Every JavaScript or JS
 A model must contain a list of attributes, and each of these attributes must have a type.
 
 ::: note
-Please refer to the [models' guide for more informations about the attributes](../guides/models.md#define-the-attributes).
+Please refer to the [models' guide for more information about the attributes](../guides/models.md#define-the-attributes).
 :::
 
 ### Relations
 
 #### Many-to-many
 
-Many-to-many associations allow to link an entry to many entry.
+Many-to-many associations allow to link an entry to many entries.
 
 ::: note
 Please refer to the [many-to-many guide](../guides/models.md#many-to-many)
@@ -204,7 +204,7 @@ Lifecycle callbacks are functions triggered at specific moments of the queries.
 Please refer to the [lifecycle callbacks guide](../guides/models.md#lifecycle-callbacks).
 :::
 
-***
+---
 
 ## Internationalization and localization
 
@@ -214,27 +214,27 @@ Internationalization and localization (i18n) allows to adapt the project to diff
 Please refer to the [internationalization's guide](../guides/i18n.md).
 :::
 
-***
+---
 
 ## Plugin
 
 A plugin is like a fully independent sub-application. It has its own business logic with dedicated models, controllers, services, middlewares or hooks. It can also contain an UI integrated into the admin panel to use it easily. It allows to develop or plugin features in a project in a short time span.
 
 ::: note
-Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more informations.
+Please refer to the [plugins documentation](../plugin-development/quick-start.md) for more information.
 :::
 
-***
+---
 
 ## Plugin styles
 
 The admin panel uses [Bootstrap](http://getbootstrap.com/) to be styled on top of solid conventions and reusable CSS classes. It is also using [PostCSS](https://github.com/postcss/postcss) and [PostCSS SCSS](https://github.com/postcss/postcss-scss) to keep the code maintainable.
 
 ::: note
-Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styling) for detailed informations.
+Please refer to the [plugin front-end development](../plugin-development/frontend-development.md#styling) for detailed information.
 :::
 
-***
+---
 
 ## Policies
 
@@ -242,8 +242,9 @@ Policies are functions which have the ability to execute specific logic on each 
 Each route of the project can be associated to an array of policies. For example, you can create a policy named `isAdmin`, which obviously checks that the request is sent by an admin user, and use it for critical routes.
 
 Policies can be:
- - `global`: so they can be used within the entire project.
- - `scoped`: used by single API or plugin.
+
+- `global`: so they can be used within the entire project.
+- `scoped`: used by single API or plugin.
 
 ### Where are the policies defined?
 
@@ -282,47 +283,47 @@ Please refer to the [plugin policy guide](../guides/policies.md#plugins).
 Public assets are static files such as images, video, css, etc that you want to make accessible to the outside world. Every new project includes by default, a folder named `./public`.
 
 ::: note
-Please refer to the [public configuration](../configurations/configurations.md#Application) for more informations.
+Please refer to the [public configuration](../configurations/configurations.md#Application) for more information.
 :::
 
-***
+---
 
 ## Requests
 
-The context object (`ctx`) contains all the request's related informations.
+The context object (`ctx`) contains all the request's related information.
 
 ::: note
-Please refer to the [requests guide](../guides/requests.md) for more informations.
+Please refer to the [requests guide](../guides/requests.md) for more information.
 :::
 
-***
+---
 
 ## Responses
 
 The context object (`ctx`) contains a list of values and functions useful to manage server responses.
 
 ::: note
-Please refer to the [responses guide](../guides/responses.md) for more informations.
+Please refer to the [responses guide](../guides/responses.md) for more information.
 :::
 
-***
+---
 
 ## Routing
 
 `./api/**/config/routes.json` files define all available routes for the clients.
 
 ::: note
-Please refer to the [routing guide](../guides/routing.md) for more informations.
+Please refer to the [routing guide](../guides/routing.md) for more information.
 :::
 
-***
+---
 
 ## Services
 
 Services are a set of reusable functions. They are particularly useful to respect the DRY (don’t repeat yourself) programming concept and to simplify [controllers](#controllers) logic.
 
 ::: note
-Please refer to the [services guide](../guides/services.md) for more informations.
+Please refer to the [services guide](../guides/services.md) for more information.
 :::
 
-***
+---

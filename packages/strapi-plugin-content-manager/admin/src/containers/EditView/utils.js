@@ -12,108 +12,69 @@ const errorsTrads = {
   required: 'components.Input.error.validation.required',
 };
 
-const createYupSchema = (layout, groupLayoutsData) => {
+const getAttributes = data => get(data, ['schema', 'attributes'], {});
+
+const createYupSchema = (model, { groups }) => {
+  const attributes = getAttributes(model);
+
   return yup.object().shape(
-    Object.keys(get(layout, ['schema', 'attributes'], {})).reduce(
-      (acc, current) => {
-        const attribute = get(layout, ['schema', 'attributes', current], {});
+    Object.keys(attributes).reduce((acc, current) => {
+      const attribute = attributes[current];
+      if (attribute.type !== 'relation' && attribute.type !== 'group') {
+        const formatted = createYupSchemaAttribute(attribute.type, attribute);
+        acc[current] = formatted;
+      }
 
-        if (attribute.type !== 'relation' && attribute.type !== 'group') {
-          const formatted = createYupSchemaAttribute(attribute.type, attribute);
+      if (attribute.type === 'relation') {
+        acc[current] = [
+          'oneWay',
+          'oneToOne',
+          'manyToOne',
+          'oneToManyMorph',
+          'oneToOneMorph',
+        ].includes(attribute.relationType)
+          ? yup.object()
+          : yup.array();
+      }
 
-          acc[current] = formatted;
-        }
-
-        if (attribute.type === 'relation') {
-          acc[current] = [
-            'oneWay',
-            'oneToOne',
-            'manyToOne',
-            'oneToManyMorph',
-            'oneToOneMorph',
-          ].includes(attribute.relationType)
-            ? yup.object()
-            : yup.array();
-        }
-
-        if (attribute.type === 'group') {
-          const getGroupSchema = (path = []) =>
-            get(
-              groupLayoutsData,
-              [attribute.group, 'schema', 'attributes', ...path],
-              {}
-            );
-          const groupAttributes = getGroupSchema();
-
-          const groupSchema = Object.keys(groupAttributes).reduce(
-            (acc2, curr) => {
-              const groupAttribute = getGroupSchema([curr]);
-
-              if (
-                groupAttribute.type !== 'relation' &&
-                groupAttribute.type !== 'group'
-              ) {
-                const formatted = createYupSchemaAttribute(
-                  groupAttribute.type,
-                  groupAttribute
-                );
-
-                acc2[curr] = formatted;
-              }
-
-              return acc2;
-            },
-            {}
-          );
-
-          let groupAttributeSchema =
-            attribute.repeatable === true
-              ? yup.array().of(yup.object().shape(groupSchema))
-              : yup.object().shape(groupSchema);
-
-          if (attribute.required === true) {
-            groupAttributeSchema = groupAttributeSchema.required();
-          }
-
-          acc[current] = groupAttributeSchema;
-        }
-
-        return acc;
-      },
-      {}
-    )
+      if (attribute.type === 'group') {
+        let groupSchema = createYupSchema(groups[attribute.group], {
+          groups,
+        });
+        groupSchema =
+          attribute.repeatable === true
+            ? yup.array().of(groupSchema)
+            : groupSchema;
+        groupSchema =
+          attribute.required === true ? groupSchema.required() : groupSchema;
+        acc[current] = groupSchema;
+      }
+      return acc;
+    }, {})
   );
 };
-
 const createYupSchemaAttribute = (type, validations) => {
   let schema = yup.mixed();
-
   if (['string', 'text', 'email', 'password', 'enumeration'].includes(type)) {
     schema = yup.string();
   }
-
   if (type === 'json') {
     schema = yup.object(errorsTrads.json).nullable();
   }
-
   if (type === 'email') {
     schema = schema.email(errorsTrads.email);
   }
-
   if (type === 'number') {
     schema = yup
       .number()
       .transform(cv => (isNaN(cv) ? undefined : cv))
       .typeError();
   }
-
   if (['date', 'datetime'].includes(type)) {
     schema = yup.date().typeError();
   }
-
   Object.keys(validations).forEach(validation => {
     const validationValue = validations[validation];
-
     if (
       !!validationValue ||
       ((!isBoolean(validationValue) &&
@@ -164,10 +125,10 @@ const createYupSchemaAttribute = (type, validations) => {
           }
           break;
         default:
+          schema = schema.nullable();
       }
     }
   });
-
   return schema;
 };
 

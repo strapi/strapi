@@ -7,6 +7,7 @@ The main configurations of the project are located in the `./config` directory. 
 Contains the main configurations relative to your project.
 
 **Path —** `./config/application.json`.
+
 ```json
 {
   "favicon": {
@@ -20,14 +21,14 @@ Contains the main configurations relative to your project.
 }
 ```
 
- - `favicon`
-   - `path` (string): Path to the favicon file. Default value: `favicon.ico`.
-   - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `86400000`.
- - `public`
-   - `path` (string): Path to the public folder. Default value: `./public`.
-   - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `60000`.
+- `favicon`
+  - `path` (string): Path to the favicon file. Default value: `favicon.ico`.
+  - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `86400000`.
+- `public`
+  - `path` (string): Path to the public folder. Default value: `./public`.
+  - `maxAge` (integer): Cache-control max-age directive in ms. Default value: `60000`.
 
-***
+---
 
 ## Custom
 
@@ -36,6 +37,7 @@ Add custom configurations to the project. The content of this file is available 
 #### Example
 
 **Path —** `./config/custom.json`.
+
 ```json
 {
   "backendURL": "http://www.strapi.io",
@@ -45,35 +47,29 @@ Add custom configurations to the project. The content of this file is available 
 
 These configurations are accessible through `strapi.config.backendURL` and `strapi.config.mainColor`.
 
-***
+---
 
 ## Language
 
 As described in the [i18n documentation](../plugin-development/frontend-development.md#i18n), Strapi includes an internationalization system. This is especially useful to translate API messages (errors, etc.).
 
 **Path —** `./config/language.json`.
+
 ```json
 {
   "enabled": true,
   "defaultLocale": "en_us",
-  "modes": [
-    "query",
-    "subdomain",
-    "cookie",
-    "header",
-    "url",
-    "tld"
-  ],
+  "modes": ["query", "subdomain", "cookie", "header", "url", "tld"],
   "cookieName": "locale"
 }
 ```
 
- - `enabled` (boolean): Enable or disable i18n. Default value: `true`.
- - `defaultLocale` (string): Default locale used by the application. Default value: `en_us`.
- - `modes` (array): Methods used to detect client language. Default value: `["query", "subdomain", "cookie", "header", "url", "tld"]`.
- - `cookieName` (string): Name of the cookie used to store the locale name. Default value: `locale`.
+- `enabled` (boolean): Enable or disable i18n. Default value: `true`.
+- `defaultLocale` (string): Default locale used by the application. Default value: `en_us`.
+- `modes` (array): Methods used to detect client language. Default value: `["query", "subdomain", "cookie", "header", "url", "tld"]`.
+- `cookieName` (string): Name of the cookie used to store the locale name. Default value: `locale`.
 
-***
+---
 
 ## Functions
 
@@ -113,12 +109,12 @@ The cron format consists of:
 └───────────────────────── second (0 - 59, OPTIONAL)
 ```
 
-To define a CRON job, add your logic like bellow:
+To define a CRON job, add your logic like below:
 
 **Path —** `./config/functions/cron.js`.
+
 ```js
 module.exports = {
-
   /**
    * Simple example.
    * Every monday at 1am.
@@ -126,7 +122,7 @@ module.exports = {
 
   '0 0 1 * * 1': () => {
     // Add your own logic here (eg. send a queue of email, create a database backup, etc.).
-  }
+  },
 };
 ```
 
@@ -140,6 +136,7 @@ When present, they are loaded to let you customize your database connection inst
 As an example, for using the `mongoose-simple-random` plugin for MongoDB, you can register it like this:
 
 **Path —** `./config/functions/mongoose.js`.
+
 ```js
 'use strict';
 
@@ -150,7 +147,7 @@ module.exports = (mongoose, connection) => {
 };
 ```
 
-***
+---
 
 ## Locales
 
@@ -161,6 +158,7 @@ Each JSON file located in the folder must have the name of its corresponding tra
 #### Example
 
 **Path —** `./config/locales/en_US.json`.
+
 ```js
 {
   "welcome": "Welcome"
@@ -169,7 +167,7 @@ Each JSON file located in the folder must have the name of its corresponding tra
 
 > Take a look at the [internationalization's guide](../guides/i18n.md) for more details.
 
-***
+---
 
 ## Environments
 
@@ -179,41 +177,42 @@ Most of the application's configurations are defined by environment. It means th
 You can access the config of the current environment through `strapi.config.currentEnvironment`.
 :::
 
-***
+---
 
 ## Database
 
 **Path —** `./config/environments/**/database.json`.
 
- - `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
- - `connections` List of all available connections.
-   - `default`
-     - `connector` (string): Connector used by the current connection. Default value: `strapi-hook-mongoose`.
-     - `settings` Useful for external session stores such as Redis.
-       - `client` (string): Database client to create the connection. Default value: `mongo`.
-       - `host` (string): Database host name. Default value: `localhost`.
-       - `port` (integer): Database port. Default value: `27017`.
-       - `database` (string): Database name. Default value: `development`.
-       - `username` (string): Username used to establish the connection.
-       - `password` (string): Password used to establish the connection.
-       - `options` (object): List of additional options used by the connector.
-       - `timezone` (string): Set the default behavior for local time (used only for a SQL database). Default value: `utc`.
-    - `options` Options used for database connection.
-      - `ssl` (boolean): For ssl database connection.
-      - `debug` (boolean): Show database exchanges and errors.
-      - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
-      - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
-        - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
-        - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
-        - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
-        - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
-        - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
-        - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
-        - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
+- `defaultConnection` (string): Connection by default for models which are not related to a specific `connection`. Default value: `default`.
+- `connections` List of all available connections.
+  - `default`
+    - `connector` (string): Connector used by the current connection. Default value: `strapi-hook-mongoose`.
+    - `settings` Useful for external session stores such as Redis.
+      - `client` (string): Database client to create the connection. Default value: `mongo`.
+      - `host` (string): Database host name. Default value: `localhost`.
+      - `port` (integer): Database port. Default value: `27017`.
+      - `database` (string): Database name. Default value: `development`.
+      - `username` (string): Username used to establish the connection.
+      - `password` (string): Password used to establish the connection.
+      - `options` (object): List of additional options used by the connector.
+      - `timezone` (string): Set the default behavior for local time (used only for a SQL database). Default value: `utc`.
+  - `options` Options used for database connection.
+    - `ssl` (boolean): For ssl database connection.
+    - `debug` (boolean): Show database exchanges and errors.
+    - `autoMigration` (boolean): To disable auto tables/columns creation for SQL database.
+    - `pool` Options used for database connection pooling. For more information look at [Knex's pool config documentation](https://knexjs.org/#Installation-pooling).
+      - `min` (integer): Minimum number of connections to keep in the pool. Default value: `0`.
+      - `max` (integer): Maximum number of connections to keep in the pool. Default value: `10`.
+      - `acquireTimeoutMillis` (integer): Maximum time in milliseconds to wait for acquiring a connection from the pool. Default value: `2000` (2 seconds).
+      - `createTimeoutMillis` (integer): Maximum time in milliseconds to wait for creating a connection to be added to the pool. Default value: `2000` (2 seconds).
+      - `idleTimeoutMillis` (integer): Number of milliseconds to wait before destroying idle connections. Default value: `30000` (30 seconds).
+      - `reapIntervalMillis` (integer): How often to check for idle connections in milliseconds. Default value: `1000` (1 second).
+      - `createRetryIntervalMillis` (integer): How long to idle after a failed create before trying again in milliseconds. Default value: `200`.
 
 #### Example
 
 **Path —** `./config/environments/**/database.json`.
+
 ```json
 {
   "defaultConnection": "default",
@@ -283,6 +282,7 @@ Please refer to the [dynamic configurations section](#dynamic-configurations) to
 #### MLab Example
 
 **Path —** `./config/environments/**/database.json`.
+
 ```json
 {
   "defaultConnection": "default",
@@ -310,110 +310,109 @@ Please refer to the [dynamic configurations section](#dynamic-configurations) to
 Please note that you must give your MLab database name as the authenticationDatabase and your password can not contain the "@" symbol.
 :::
 
-
-***
+---
 
 ## Request
 
 **Path —** `./config/environments/**/request.json`.
 
- - `session`
-   - `enabled` (boolean): Enable or disable sessions. Default value: `false`.
-   - `client` (string): Client used to persist sessions. Default value: `redis`.
-   - `settings`
-     - `host` (string): Client host name. Default value: `localhost`.
-     - `port` (integer): Client port. Default value: `6379`.
-     - `database`(integer)|String - Client database name. Default value: `10`.
-     - `password` (string): Client password. Default value: ` `.
- - `logger`
-   - `level` (string): Default log level. Default value: `debug`.
-   - `exposeInContext` (boolean): Expose logger in context so it can be used through `strapi.log.info(‘my log’)`. Default value: `true`.
-   - `requests` (boolean): Enable or disable requests logs. Default value: `false`.
- - `parser`
-   - `enabled`(boolean): Enable or disable parser. Default value: `true`.
-   - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
+- `session`
+  - `enabled` (boolean): Enable or disable sessions. Default value: `false`.
+  - `client` (string): Client used to persist sessions. Default value: `redis`.
+  - `settings`
+    - `host` (string): Client host name. Default value: `localhost`.
+    - `port` (integer): Client port. Default value: `6379`.
+    - `database`(integer)|String - Client database name. Default value: `10`.
+    - `password` (string): Client password. Default value: ``.
+- `logger`
+  - `level` (string): Default log level. Default value: `debug`.
+  - `exposeInContext` (boolean): Expose logger in context so it can be used through `strapi.log.info(‘my log’)`. Default value: `true`.
+  - `requests` (boolean): Enable or disable requests logs. Default value: `false`.
+- `parser`
+  - `enabled`(boolean): Enable or disable parser. Default value: `true`.
+  - `multipart` (boolean): Enable or disable multipart bodies parsing. Default value: `true`.
 
 ::: note
 The session doesn't work with `mongo` as a client. The package that we should use is broken for now.
 :::
 
-***
+---
 
 ## Response
 
 **Path —** `./config/environments/**/response.json`.
 
- - [`gzip`](https://en.wikipedia.org/wiki/Gzip)
-   - `enabled` (boolean): Enable or not GZIP response compression.
- - `responseTime`
-   - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
- - `poweredBy`
-   - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
-   - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
+- [`gzip`](https://en.wikipedia.org/wiki/Gzip)
+  - `enabled` (boolean): Enable or not GZIP response compression.
+- `responseTime`
+  - `enabled` (boolean): Enable or not `X-Response-Time header` to response. Default value: `false`.
+- `poweredBy`
+  - `enabled` (boolean): Enable or not `X-Powered-By` header to response. Default value: `true`.
+  - `value` (string): The value of the header. Default value: `Strapi <strapi.io>`
 
-***
+---
 
 ## Security
 
 **Path —** `./config/environments/**/security.json`.
 
- - [`csrf`](https://en.wikipedia.org/wiki/Cross-site_request_forgery)
-   - `enabled` (boolean): Enable or disable CSRF. Default value: depends on the environment.
-   - `key` (string): The name of the CSRF token added to the model. Default value: `_csrf`.
-   - `secret` (string): The key to place on the session object which maps to the server side token. Default value: `_csrfSecret`.
- - [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)
-   - `enabled` (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.
- - [`p3p`](https://en.wikipedia.org/wiki/P3P)
-   - `enabled` (boolean): Enable or disable p3p.
- - [`hsts`](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security)
-   - `enabled` (boolean): Enable or disable HSTS.
-   - `maxAge` (integer): Number of seconds HSTS is in effect. Default value: `31536000`.
-   - `includeSubDomains` (boolean): Applies HSTS to all subdomains of the host. Default value: `true`.
- - [`xframe`](https://en.wikipedia.org/wiki/Clickjacking)
-   - `enabled` (boolean): Enable or disable `X-FRAME-OPTIONS` headers in response.
-   - `value` (string): The value for the header, e.g. DENY, SAMEORIGIN or ALLOW-FROM uri. Default value: `SAMEORIGIN`.
- - [`xss`](https://en.wikipedia.org/wiki/Cross-site_scripting)
-   - `enabled` (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).
- - [`cors`](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-   - `enabled` (boolean): Enable or disable CORS to prevent your server to be requested from another domain.
-   - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `http://localhost`.
-   - `expose` (array): Configures the `Access-Control-Expose-Headers` CORS header. If not specified, no custom headers are exposed. Default value: `["WWW-Authenticate", "Server-Authorization"]`.
-   - `maxAge` (integer): Configures the `Access-Control-Max-Age` CORS header. Default value: `31536000`.
-   - `credentials` (boolean): Configures the `Access-Control-Allow-Credentials` CORS header. Default value: `true`.
-   - `methods` (array)|String - Configures the `Access-Control-Allow-Methods` CORS header. Default value: `["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]`.
-   - `headers` (array): Configures the `Access-Control-Allow-Headers` CORS header. If not specified, defaults to reflecting the headers specified in the request's Access-Control-Request-Headers header. Default value: `["Content-Type", "Authorization", "X-Frame-Options"]`.
- - `ip`
-   - `enabled` (boolean): Enable or disable IP blocker. Default value: `false`.
-   - `whiteList` (array): Whitelisted IPs. Default value: `[]`.
-   - `blackList` (array): Blacklisted IPs. Default value: `[]`.
+- [`csrf`](https://en.wikipedia.org/wiki/Cross-site_request_forgery)
+  - `enabled` (boolean): Enable or disable CSRF. Default value: depends on the environment.
+  - `key` (string): The name of the CSRF token added to the model. Default value: `_csrf`.
+  - `secret` (string): The key to place on the session object which maps to the server side token. Default value: `_csrfSecret`.
+- [`csp`](https://en.wikipedia.org/wiki/Content_Security_Policy)
+  - `enabled` (boolean): Enable or disable CSP to avoid Cross Site Scripting (XSS) and data injection attacks.
+- [`p3p`](https://en.wikipedia.org/wiki/P3P)
+  - `enabled` (boolean): Enable or disable p3p.
+- [`hsts`](https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security)
+  - `enabled` (boolean): Enable or disable HSTS.
+  - `maxAge` (integer): Number of seconds HSTS is in effect. Default value: `31536000`.
+  - `includeSubDomains` (boolean): Applies HSTS to all subdomains of the host. Default value: `true`.
+- [`xframe`](https://en.wikipedia.org/wiki/Clickjacking)
+  - `enabled` (boolean): Enable or disable `X-FRAME-OPTIONS` headers in response.
+  - `value` (string): The value for the header, e.g. DENY, SAMEORIGIN or ALLOW-FROM uri. Default value: `SAMEORIGIN`.
+- [`xss`](https://en.wikipedia.org/wiki/Cross-site_scripting)
+  - `enabled` (boolean): Enable or disable XSS to prevent Cross Site Scripting (XSS) attacks in older IE browsers (IE8).
+- [`cors`](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+  - `enabled` (boolean): Enable or disable CORS to prevent your server to be requested from another domain.
+  - `origin` (string): Allowed URLs (`http://example1.com, http://example2.com` or allows everyone `*`). Default value: `http://localhost`.
+  - `expose` (array): Configures the `Access-Control-Expose-Headers` CORS header. If not specified, no custom headers are exposed. Default value: `["WWW-Authenticate", "Server-Authorization"]`.
+  - `maxAge` (integer): Configures the `Access-Control-Max-Age` CORS header. Default value: `31536000`.
+  - `credentials` (boolean): Configures the `Access-Control-Allow-Credentials` CORS header. Default value: `true`.
+  - `methods` (array)|String - Configures the `Access-Control-Allow-Methods` CORS header. Default value: `["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]`.
+  - `headers` (array): Configures the `Access-Control-Allow-Headers` CORS header. If not specified, defaults to reflecting the headers specified in the request's Access-Control-Request-Headers header. Default value: `["Content-Type", "Authorization", "X-Frame-Options"]`.
+- `ip`
+  - `enabled` (boolean): Enable or disable IP blocker. Default value: `false`.
+  - `whiteList` (array): Whitelisted IPs. Default value: `[]`.
+  - `blackList` (array): Blacklisted IPs. Default value: `[]`.
 
-***
+---
 
 ## Server
 
 **Path —** `./config/environments/**/server.json`.
 
- - `host` (string): Host name. Default value: `localhost`.
- - `port` (integer): Port on which the server should be running. Default value: `1337`.
- - `autoReload`
-   - `enabled` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
- - `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
- - `proxy`
-   - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
-   - `ssl` (boolean): Enable proxy SSL support
-   - `host` (string): Host name your proxy service uses for Strapi.
-   - `port` (integer): Port that your proxy service accepts connections on.
- - [`cron`](https://en.wikipedia.org/wiki/Cron)
-   - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
- - `admin`
-   - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
-   - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
-   - `build`
-     - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
-     - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
-       - `plugins`
-         - `source` (string): Define the source mode (origin, host, custom).
-         - `folder` (string): Indicate what the plugins folder in `host` source mode.
+- `host` (string): Host name. Default value: `localhost`.
+- `port` (integer): Port on which the server should be running. Default value: `1337`.
+- `autoReload`
+  - `enabled` (boolean): Enable or disabled server reload on files update. Default value: depends on the environment.
+- `emitErrors` (boolean): Enable errors to be emitted to `koa` when they happen in order to attach custom logic or use error reporting services.
+- `proxy`
+  - `enabled` (boolean): Enable proxy support such as Apache or Nginx. Default value: `false`.
+  - `ssl` (boolean): Enable proxy SSL support
+  - `host` (string): Host name your proxy service uses for Strapi.
+  - `port` (integer): Port that your proxy service accepts connections on.
+- [`cron`](https://en.wikipedia.org/wiki/Cron)
+  - `enabled` (boolean): Enable or disable CRON tasks to schedule jobs at specific dates. Default value: `false`.
+- `admin`
+  - `autoOpen` (boolean): Enable or disabled administration opening on start (default: `true`)
+  - `path` (string): Allow to change the URL to access the admin (default: `/admin`).
+  - `build`
+    - `host` (string): URL to access the admin panel (default: `http://localhost:1337/admin`).
+    - `backend` (string): URL that the admin panel and plugins will request (default: `http://localhost:1337`).
+      - `plugins`
+        - `source` (string): Define the source mode (origin, host, custom).
+        - `folder` (string): Indicate what the plugins folder in `host` source mode.
 
 #### Example
 
@@ -442,7 +441,7 @@ As an example using this configuration with Nginx your server would respond to `
 }
 ```
 
-***
+---
 
 ## Dynamic configurations
 
@@ -457,6 +456,7 @@ The syntax is inspired by the [template literals ES2015 specifications](https://
 In any JSON configurations files in your project, you can inject dynamic values like this:
 
 **Path —** `./config/environments/production/database.json`.
+
 ```json
 {
   "defaultConnection": "default",
@@ -482,7 +482,7 @@ In any JSON configurations files in your project, you can inject dynamic values 
 You can't execute functions inside the curly braces. Only strings are allowed.
 :::
 
-***
+---
 
 ## Database configuration
 
@@ -504,30 +504,30 @@ Configuration files are not multi server friendly. So we create a data store for
 const pluginStore = strapi.store({
   environment: strapi.config.environment,
   type: 'plugin',
-  name: 'users-permissions'
+  name: 'users-permissions',
 });
 
-await pluginStore.get({key: 'grant'});
+await pluginStore.get({ key: 'grant' });
 ```
 
 ## Set settings:
 
- - `value` (any, required): The value you want to store.
+- `value` (any, required): The value you want to store.
 
- ```js
- // strapi.store(object).set(object);
+```js
+// strapi.store(object).set(object);
 
- // create reusable plugin store variable
- const pluginStore = strapi.store({
-   environment: strapi.config.environment,
-   type: 'plugin',
-   name: 'users-permissions'
- });
-
- await pluginStore.set({
-   key: 'grant',
-   value: {
-     ...
-   }
+// create reusable plugin store variable
+const pluginStore = strapi.store({
+  environment: strapi.config.environment,
+  type: 'plugin',
+  name: 'users-permissions'
 });
- ```
+
+await pluginStore.set({
+  key: 'grant',
+  value: {
+    ...
+  }
+});
+```
