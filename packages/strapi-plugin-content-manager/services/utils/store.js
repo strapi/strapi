@@ -52,7 +52,9 @@ const setModelConfiguration = async (key, value) => {
   const config = (await getStore().get({ key: configurationKey(key) })) || {};
 
   Object.keys(value).forEach(key => {
-    if (key) _.set(config, key, value[key]);
+    if (value[key] !== null && value[key] !== undefined) {
+      _.set(config, key, value[key]);
+    }
   });
 
   return getStore().set({
@@ -61,9 +63,17 @@ const setModelConfiguration = async (key, value) => {
   });
 };
 
+const deleteKey = key => {
+  return strapi
+    .query('core_store')
+    .delete({ key: `plugin_content_manager_configuration_${key}` });
+};
+
 module.exports = {
   getGeneralSettings,
   setGeneralSettings,
   getModelConfiguration,
   setModelConfiguration,
+
+  deleteKey,
 };

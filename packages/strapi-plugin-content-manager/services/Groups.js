@@ -2,16 +2,20 @@
 
 const storeUtils = require('./utils/store');
 
+const uidToStoreKey = uid => `groups::${uid}`;
+
 module.exports = {
-  async getConfiguration(uid) {
-    const storeKey = groupUIDToStoreKey(uid);
+  uidToStoreKey,
+
+  getConfiguration(uid) {
+    const storeKey = uidToStoreKey(uid);
     return storeUtils.getModelConfiguration(storeKey);
   },
 
-  async setConfiguration(uid, input) {
+  setConfiguration(uid, input) {
     const { settings, metadatas, layouts } = input;
 
-    const storeKey = groupUIDToStoreKey(uid);
+    const storeKey = uidToStoreKey(uid);
     return storeUtils.setModelConfiguration(storeKey, {
       uid,
       isGroup: true,
@@ -19,6 +23,11 @@ module.exports = {
       metadatas,
       layouts,
     });
+  },
+
+  deleteConfiguration(uid) {
+    const storeKey = uidToStoreKey(uid);
+    return storeUtils.deleteKey(storeKey);
   },
 
   formatGroupSchema(group) {
@@ -43,5 +52,3 @@ module.exports = {
     };
   },
 };
-
-const groupUIDToStoreKey = uid => `groups::${uid}`;

@@ -4,26 +4,27 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 const storeUtils = require('./utils/store');
 
+const uidToStoreKey = ({ uid, source }) => {
+  const sourceKey = source ? `${source}.${uid}` : uid;
+  return `content_types::${sourceKey}`;
+};
+
+const formatContentTypeLabel = label => _.upperFirst(pluralize(label));
+
+const getModelIn = source => uid => _.get(source, ['models', uid], null);
+
 module.exports = {
-  async getGeneralSettings() {
-    const generalSettings = await storeUtils.getGeneralSettings();
-
-    return generalSettings || {};
-  },
-
-  setGeneralSettings(data) {
-    return storeUtils.setGeneralSettings(data);
-  },
+  uidToStoreKey,
 
   getContentTypeConfiguration({ uid, source }) {
-    const storeKey = generateContentTypeCoreStoreKey({ uid, source });
+    const storeKey = uidToStoreKey({ uid, source });
     return storeUtils.getModelConfiguration(storeKey);
   },
 
   setContentTypeConfiguration({ uid, source }, input) {
     const { settings, metadatas, layouts } = input;
 
-    const storeKey = generateContentTypeCoreStoreKey({ uid, source });
+    const storeKey = uidToStoreKey({ uid, source });
     return storeUtils.setModelConfiguration(storeKey, {
       uid,
       source,
@@ -31,6 +32,11 @@ module.exports = {
       metadatas,
       layouts,
     });
+  },
+
+  deleteContentTypeConfiguration({ uid, source }) {
+    const storeKey = uidToStoreKey({ uid, source });
+    return storeUtils.deleteKey(storeKey);
   },
 
   formatContentType(opts) {
@@ -78,12 +84,3 @@ module.exports = {
     return getModel(uid);
   },
 };
-
-const generateContentTypeCoreStoreKey = ({ uid, source }) => {
-  const sourceKey = source ? `${source}.${uid}` : uid;
-  return `content_types::${sourceKey}`;
-};
-
-const formatContentTypeLabel = label => _.upperFirst(pluralize(label));
-
-const getModelIn = source => uid => _.get(source, ['models', uid], null);

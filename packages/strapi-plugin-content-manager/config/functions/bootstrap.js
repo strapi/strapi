@@ -1,4 +1,6 @@
-// const _ = require('lodash');
+'use strict';
+
+const _ = require('lodash');
 // const pluralize = require('pluralize');
 // const {
 //   getApis,
@@ -27,9 +29,11 @@
 
 function getContentManagerKeys({ model }, key) {
   if (model.orm === 'mongoose') {
-    return model.find({
-      $regex: `${key}.*`,
-    });
+    return model
+      .find({
+        $regex: `${key}.*`,
+      })
+      .then(results => results.map(({ value }) => JSON.parse(value)));
   }
 
   return model
@@ -37,15 +41,267 @@ function getContentManagerKeys({ model }, key) {
       qb.where('key', 'like', `${key}%`);
     })
     .fetchAll()
-    .then(config => config && config.toJSON());
+    .then(config => config && config.toJSON())
+    .then(results => results.map(({ value }) => JSON.parse(value)));
 }
 
-async function bootstrap() {
-  const getKeysLike = await strapi
-    .query('core_store')
-    .custom(getContentManagerKeys);
+async function updateGroups() {
+  const service = strapi.plugins['content-manager'].services.groups;
 
-  const configurations = getKeysLike('plugin_content_manager_configuration');
+  const configurations = await strapi
+    .query('core_store')
+    .custom(getContentManagerKeys)(
+    'plugin_content_manager_configuration_groups'
+  );
+
+  const realUIDs = Object.keys(strapi.groups);
+  const DBUIDs = configurations.map(({ uid }) => uid);
+  const groupsToUpdate = _.intersection(realUIDs, DBUIDs);
+  const groupsToAdd = _.difference(realUIDs, DBUIDs);
+  const groupsToDelete = _.difference(DBUIDs, realUIDs);
+
+  await Promise.all(
+    groupsToDelete.map(uid => service.deleteConfiguration(uid))
+  );
+
+  const generateNewConfiguration = async uid => {
+    return service.setConfiguration(
+      uid,
+      await buildDefaultConfiguration(strapi.groups[uid])
+    );
+  };
+
+  await Promise.all(groupsToAdd.map(uid => generateNewConfiguration(uid)));
+
+  const updateConfiguration = async uid => {
+    const conf = configurations.find(conf => conf.uid === uid);
+    const model = strapi.groups[uid];
+    return service.setConfiguration(uid, {
+      settings: await updateSettings(conf, model),
+      layouts: updateLayouts(conf, model),
+      metadatas: updateMetadatas(conf, model),
+    });
+  };
+
+  await Promise.all(groupsToUpdate.map(uid => updateConfiguration(uid)));
+}
+
+async function buildDefaultSettings() {
+  const generalSettings = await strapi.plugins[
+    'content-manager'
+  ].services.generalsettings.getGeneralSettings();
+
+  return {
+    ...generalSettings,
+    mainField: 'id',
+    defaultSortBy: 'id',
+    defaultSortOrder: 'ASC',
+  };
+}
+
+async function buildDefaultMetadata(name, attr) {
+  return {
+    edit: {
+      mainField: !_.has(attr, 'type') ? 'id' : undefined,
+      label: name,
+      description: '',
+      visible: true,
+      editable: true,
+    },
+    list: {
+      label: name,
+      searchable: true,
+      sortable: true,
+    },
+  };
+}
+
+async function buildDefaultMetadatas(model) {
+  return {
+    id: {
+      edit: {},
+      list: {
+        label: 'Id',
+        searchable: true,
+        sortable: true,
+      },
+    },
+    ...Object.keys(model.allAttributes).reduce((acc, name) => {
+      acc[name] = buildDefaultMetadata(name, model.allAttributes[name]);
+      return acc;
+    }, {}),
+  };
+}
+
+function buildDefaultLayouts(model) {
+  return {
+    list: ['id'].concat(
+      Object.keys(model.allAttributes)
+        .filter(name => hasReadableAttribute(model, name))
+        .slice(0, 3)
+    ),
+    editRelations: Object.keys(model.allAttributes).filter(name => {
+      const attr = model.allAttributes[name];
+      return !_.has(attr, 'type');
+    }),
+    edit: [],
+  };
+}
+
+async function buildDefaultConfiguration(model) {
+  return {
+    settings: await buildDefaultSettings(),
+    metadatas: buildDefaultMetadatas(model),
+    layouts: buildDefaultLayouts(model),
+  };
+}
+
+async function updateContentTypesScope(models, configurations, source) {
+  const service = strapi.plugins['content-manager'].services.contenttypes;
+
+  const realUIDs = Object.keys(models);
+  const DBUIDs = configurations.map(({ uid }) => uid);
+  const contentTypesToUpdate = _.intersection(realUIDs, DBUIDs);
+  const contentTypesToAdd = _.difference(realUIDs, DBUIDs);
+  const contentTypesToDelete = _.difference(DBUIDs, realUIDs);
+
+  await Promise.all(
+    contentTypesToDelete.map(uid =>
+      service.deleteContentTypeConfiguration({ uid, source })
+    )
+  );
+
+  const generateNewConfiguration = async uid => {
+    return service.setContentTypeConfiguration(
+      { uid, source },
+      await buildDefaultConfiguration(models[uid])
+    );
+  };
+
+  await Promise.all(
+    contentTypesToAdd.map(uid => generateNewConfiguration(uid))
+  );
+
+  await Promise.all(contentTypesToUpdate.map(uid => {}));
+}
+
+async function updateContentTypes() {
+  const configurations = await strapi
+    .query('core_store')
+    .custom(getContentManagerKeys)(
+    'plugin_content_manager_configuration_content_types'
+  );
+
+  await updateContentTypesScope(
+    _.omit(strapi.models, ['core_store']),
+    configurations.filter(({ source }) => !source)
+  );
+  await updateContentTypesScope(
+    strapi.admin.models,
+    configurations.filter(({ source }) => source === 'admin'),
+    'admin'
+  );
+
+  await Promise.all(
+    Object.keys(strapi.plugins).map(pluginKey => {
+      const plugin = strapi.plugins[pluginKey];
+      return updateContentTypesScope(
+        plugin.models || {},
+        configurations.filter(({ source }) => source === pluginKey),
+        pluginKey
+      );
+    })
+  );
+}
+
+function updateMetadatas(configuration, model) {
+  // clear all keys that do not exist anymore
+  if (_.isEmpty(configuration.metadatas)) return buildDefaultMetadatas(model);
+
+  // remove old keys
+  const metasWithValidKeys = _.pick(
+    configuration.metadatas,
+    ['id'].concat(Object.keys(model.allAttributes))
+  );
+
+  const metasWithDefaults = _.merge(
+    buildDefaultMetadatas(model),
+    metasWithValidKeys
+  );
+
+  // clear the invalid mainFields
+  const updatedMetas = Object.keys(metasWithDefaults).reduce((acc, key) => {
+    const meta = metasWithDefaults[key];
+    if (!_.has(meta, 'mainField')) return acc;
+
+    // remove mainField if the attribute is not a relation anymore
+    if (_.has(model.allAttributes[key], 'type')) {
+      acc[key] = _.omit(meta, 'mainField');
+      return acc;
+    }
+
+    // if the mainField is id you can keep it
+    if (meta.mainField === 'id') return acc;
+
+    // check the mainField in the targetModel
+    const attr = model.allAttributes[key];
+    const target = strapi.getModel(attr.model || attr.collection, attr.plugin);
+
+    if (!hasReadableAttribute(target, meta.mainField)) {
+      acc[key] = {
+        ...meta,
+        mainField: 'id',
+      };
+      return acc;
+    }
+    return acc;
+  }, {});
+
+  return _.merge(metasWithDefaults, updatedMetas);
+}
+
+async function updateSettings(configuration, model) {
+  if (_.isEmpty(configuration.settings)) return buildDefaultSettings(model);
+
+  const { mainField = 'id', defaultSortBy = 'id' } = configuration.settings;
+
+  return {
+    ...configuration.settings,
+    mainField: hasReadableAttribute(model, mainField) ? mainField : 'id',
+    defaultSortBy: hasReadableAttribute(model, defaultSortBy)
+      ? defaultSortBy
+      : 'id',
+  };
+}
+
+function updateLayouts(configuration, model) {
+  if (_.isEmpty(configuration.layouts)) return buildDefaultLayouts(model);
+  return {
+    ...configuration.layouts,
+  };
+}
+
+const hasReadableAttribute = (model, attr) => {
+  if (attr === 'id') return true;
+
+  if (!_.has(model.allAttributes, attr)) {
+    return false;
+  }
+
+  if (!_.has(model.allAttributes[attr], 'type')) {
+    return false;
+  }
+
+  if (['group', 'json', 'array'].includes(model.allAttributes[attr].type)) {
+    return false;
+  }
+
+  return true;
+};
+
+async function bootstrap() {
+  await updateGroups();
+  await updateContentTypes();
 }
 
 module.exports = cb => {
