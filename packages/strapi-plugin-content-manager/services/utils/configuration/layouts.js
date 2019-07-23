@@ -138,8 +138,8 @@ function syncLayouts(configuration, model) {
   layout.editRelations = _.uniq(layout.editRelations.concat(newRelations));
 
   // add new attributes to edit view
-  const newEditAttributes = newAttributes.filter(key =>
-    hasEditableAttribute(model, key)
+  const newEditAttributes = newAttributes.filter(
+    key => hasEditableAttribute(model, key) && _.has(model.attributes, key)
   );
 
   let currentRowIndex = Math.max(layout.edit.length - 1, 0);
