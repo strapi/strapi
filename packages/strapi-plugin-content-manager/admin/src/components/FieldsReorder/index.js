@@ -55,7 +55,7 @@ const FieldsReorder = () => {
             </Wrapper>
           );
         })}
-        <Wrapper>
+        <Wrapper style={{ marginBottom: 10 }}>
           <Add
             data={buttonData}
             onClick={onAddData}

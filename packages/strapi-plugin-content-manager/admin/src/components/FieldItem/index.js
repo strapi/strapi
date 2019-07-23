@@ -17,6 +17,7 @@ const FieldItem = forwardRef(
       showLeftCarret,
       showRightCarret,
       size,
+      style,
       type,
     },
     ref
@@ -29,10 +30,10 @@ const FieldItem = forwardRef(
       'group',
       'WYSIWYG',
     ].includes(type);
-    const style = withLongerHeight ? { height: '84px' } : {};
+    const carretStyle = withLongerHeight ? { height: '84px' } : {};
 
     return (
-      <div style={{ width: `${(1 / 12) * size * 100}%` }} ref={ref}>
+      <div style={{ width: `${(1 / 12) * size * 100}%`, ...style }} ref={ref}>
         <Wrapper>
           {isDragging && size === 12 ? (
             <FullWidthCarret>
@@ -40,10 +41,10 @@ const FieldItem = forwardRef(
             </FullWidthCarret>
           ) : (
             <>
-              {showLeftCarret && <Carret style={style} />}
+              {showLeftCarret && <Carret style={carretStyle} />}
               <div className="sub_wrapper">
                 <NameWrapper
-                  style={style}
+                  style={carretStyle}
                   isEditing={isEditing}
                   isHidden={isHidden}
                 >
@@ -66,7 +67,7 @@ const FieldItem = forwardRef(
                   )}
                 </NameWrapper>
               </div>
-              {showRightCarret && <Carret right style={style} />}
+              {showRightCarret && <Carret right style={carretStyle} />}
             </>
           )}
         </Wrapper>
@@ -81,6 +82,7 @@ FieldItem.defaultProps = {
   onClickRemove: () => {},
   showLeftCarret: false,
   showRightCarret: false,
+  style: {},
   type: 'string',
 };
 
@@ -92,6 +94,7 @@ FieldItem.propTypes = {
   showLeftCarret: PropTypes.bool,
   showRightCarret: PropTypes.bool,
   size: PropTypes.number.isRequired,
+  style: PropTypes.object,
   type: PropTypes.string,
 };
 

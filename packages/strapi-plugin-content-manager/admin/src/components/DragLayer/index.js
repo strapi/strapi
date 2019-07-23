@@ -58,6 +58,7 @@ const CustomDragLayer = () => {
           </Li>
         );
       case ItemTypes.EDIT_FIELD:
+      case ItemTypes.EDIT_RELATION:
         return <FieldItem name={item.name} size={12} isEditing />;
       default:
         return null;

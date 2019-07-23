@@ -5,6 +5,7 @@ import {
   GET_DATA,
   GET_DATA_SUCCEEDED,
   MOVE_FIELD_LIST,
+  MOVE_RELATION,
   MOVE_ROW,
   ON_ADD_DATA,
   ON_CHANGE,
@@ -57,6 +58,14 @@ export function moveListField(dragIndex, overIndex) {
     type: MOVE_FIELD_LIST,
     dragIndex,
     overIndex,
+  };
+}
+
+export function moveRelation(dragIndex, hoverIndex) {
+  return {
+    type: MOVE_RELATION,
+    dragIndex,
+    hoverIndex,
   };
 }
 

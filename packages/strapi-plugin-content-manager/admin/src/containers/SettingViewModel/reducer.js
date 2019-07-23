@@ -11,6 +11,7 @@ import {
   FORMAT_LAYOUT,
   GET_DATA_SUCCEEDED,
   MOVE_FIELD_LIST,
+  MOVE_RELATION,
   MOVE_ROW,
   ON_ADD_DATA,
   ON_CHANGE,
@@ -77,6 +78,15 @@ function settingViewModelReducer(state = initialState, action) {
         .update('listFieldToEditIndex', () => {
           return action.overIndex;
         });
+    case MOVE_RELATION: {
+      const relationPath = ['modifiedData', 'layouts', 'editRelations'];
+
+      return state.updateIn(relationPath, list => {
+        return list
+          .delete(dragIndex)
+          .insert(hoverIndex, state.getIn([...relationPath, dragIndex]));
+      });
+    }
     case MOVE_ROW:
       return state.updateIn(layoutPath, list => {
         return list

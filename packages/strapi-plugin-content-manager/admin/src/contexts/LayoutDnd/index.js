@@ -11,6 +11,7 @@ export function LayoutDndProvider({
   moveItem,
   moveRow,
   onAddData,
+  relationsLayout,
   removeField,
 }) {
   return (
@@ -22,6 +23,7 @@ export function LayoutDndProvider({
         moveItem,
         moveRow,
         onAddData,
+        relationsLayout,
         removeField,
       }}
     >
@@ -39,6 +41,7 @@ LayoutDndProvider.defaultProps = {
   buttonData: [],
   layout: [],
   onAddData: () => {},
+  relationsLayout: [],
 };
 
 LayoutDndProvider.propTypes = {
@@ -49,5 +52,6 @@ LayoutDndProvider.propTypes = {
   moveItem: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,
   onAddData: PropTypes.func,
+  relationsLayout: PropTypes.array,
   removeField: PropTypes.func.isRequired,
 };

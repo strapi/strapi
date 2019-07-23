@@ -21,6 +21,7 @@ import Container from '../../components/Container';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
 import SectionTitle from '../../components/SectionTitle';
+import SortableList from '../../components/SortableList';
 
 import LayoutTitle from './LayoutTitle';
 import ListLayout from './ListLayout';
@@ -32,6 +33,7 @@ import {
   getData,
   moveListField,
   moveRow,
+  moveRelation,
   onAddData,
   onChange,
   onReset,
@@ -67,6 +69,7 @@ function SettingViewModel({
   },
   modifiedData,
   moveListField,
+  moveRelation,
   moveRow,
   onAddData,
   onChange,
@@ -115,6 +118,10 @@ function SettingViewModel({
 
   const getEditLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'edit'], []);
+  }, [modifiedData]);
+
+  const getRelationsLayout = useCallback(() => {
+    return get(modifiedData, ['layouts', 'editRelations'], []);
   }, [modifiedData]);
 
   if (isLoading) {
@@ -214,6 +221,7 @@ function SettingViewModel({
       moveItem={moveItem}
       moveRow={moveRow}
       onAddData={onAddData}
+      relationsLayout={getRelationsLayout()}
       removeField={removeField}
     >
       <BackHeader onClick={() => goBack()} />
@@ -272,7 +280,11 @@ function SettingViewModel({
               <SectionTitle />
 
               <div className="row">
-                <LayoutTitle className="col-12">
+                <LayoutTitle
+                  className={
+                    settingType === 'list-settings' ? 'col-12' : 'col-8'
+                  }
+                >
                   <FormTitle
                     title={`${pluginId}.global.displayedFields`}
                     description={`${pluginId}.containers.SettingPage.${
@@ -282,6 +294,18 @@ function SettingViewModel({
                     }.description`}
                   />
                 </LayoutTitle>
+                {settingType === 'edit-settings' && (
+                  <LayoutTitle className="col-4">
+                    <FormTitle
+                      title={`${pluginId}.containers.SettingPage.relations`}
+                      description={`${pluginId}.containers.SettingPage.${
+                        settingType === 'list-settings'
+                          ? 'attributes'
+                          : 'editSettings'
+                      }.description`}
+                    />
+                  </LayoutTitle>
+                )}
 
                 {settingType === 'list-settings' && (
                   <ListLayout
@@ -299,6 +323,9 @@ function SettingViewModel({
                 )}
 
                 {settingType === 'edit-settings' && <FieldsReorder />}
+                {settingType === 'edit-settings' && (
+                  <SortableList moveRelation={moveRelation} />
+                )}
               </div>
             </Block>
           </div>
@@ -355,6 +382,7 @@ SettingViewModel.propTypes = {
   }).isRequired,
   modifiedData: PropTypes.object.isRequired,
   moveListField: PropTypes.func.isRequired,
+  moveRelation: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,
   onAddData: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
@@ -378,6 +406,7 @@ export function mapDispatchToProps(dispatch) {
       formatLayout,
       getData,
       moveListField,
+      moveRelation,
       moveRow,
       onAddData,
       onChange,
