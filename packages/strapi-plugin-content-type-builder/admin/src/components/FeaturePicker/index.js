@@ -10,9 +10,9 @@ import {
 
 import StyledFeaturePicker from './StyledFeaturePicker';
 
-const FeaturePicker = ({ features, onClick, plugin, selectFeature }) => {
+const FeaturePicker = ({ features, onClick, plugin, selectedFeature }) => {
   const [isOpen, setOpen] = React.useState(false);
-  console.log(selectFeature);
+
   return (
     <StyledFeaturePicker>
       <Dropdown
@@ -24,7 +24,7 @@ const FeaturePicker = ({ features, onClick, plugin, selectFeature }) => {
         <DropdownToggle caret>
           <p>
             <i className="fa fa-caret-square-o-right" />
-            {selectFeature}
+            {selectedFeature}
             {!!plugin && <span>&nbsp;({plugin})</span>}
           </p>
         </DropdownToggle>
@@ -54,14 +54,14 @@ FeaturePicker.defaultProps = {
   features: [],
   onClick: () => {},
   plugin: null,
-  selectFeature: '',
+  selectedFeature: '',
 };
 
 FeaturePicker.propTypes = {
   features: PropTypes.array,
   onClick: PropTypes.func,
   plugin: PropTypes.string,
-  selectFeature: PropTypes.string,
+  selectedFeature: PropTypes.string,
 };
 
 export default FeaturePicker;

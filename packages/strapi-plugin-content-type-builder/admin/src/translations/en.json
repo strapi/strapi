@@ -185,6 +185,7 @@
   "relation.attributeName.placeholder": "Ex: author, category, tag",
   "relation.manyToMany": "has and belongs to many",
   "relation.manyToOne": "has many",
+  "relation.manyWays": "has many",
   "relation.oneToMany": "belongs to many",
   "relation.oneToOne": "has and belongs to one",
   "relation.oneWay": "has one",

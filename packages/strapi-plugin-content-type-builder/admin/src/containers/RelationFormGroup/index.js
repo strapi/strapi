@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty, upperFirst } from 'lodash';
+import { get, isEmpty } from 'lodash';
 
 import pluginId from '../../pluginId';
 
@@ -20,12 +20,10 @@ import HeaderModal from '../../components/HeaderModal';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderNavLink from '../../components/HeaderNavLink';
+import RelationNaturePicker from '../../components/RelationNaturePicker';
 import RelationBox from '../../components/RelationBox';
 import RelationsWrapper from '../../components/RelationsWrapper';
 import WrapperModal from '../../components/WrapperModal';
-
-// import NaturePicker from './NaturePicker';
-// import RelationBox from './RelationBox';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
 import IconGroup from '../../assets/icons/icon_type_groups.png';
@@ -102,6 +100,16 @@ class RelationFormGroup extends React.Component {
     push({ search: '' });
   };
 
+  handleChangeRelationTarget = group => {
+    const {
+      actionType,
+      featureToEditName,
+      onChangeRelationTarget,
+    } = this.props;
+
+    onChangeRelationTarget(group, featureToEditName, actionType === 'edit');
+  };
+
   handleOnClosed = () => {
     const { onCancel } = this.props;
 
@@ -120,7 +128,6 @@ class RelationFormGroup extends React.Component {
     } = this.props;
     const [{ name, source }] = features;
     const target = actionType === 'edit' ? featureToEditName : name;
-    console.log(target);
 
     setTempAttribute(
       target,
@@ -154,6 +161,14 @@ class RelationFormGroup extends React.Component {
     });
   };
 
+  handleSubmit = e => {
+    e.preventDefault();
+
+    if (isEmpty(this.getFormErrors())) {
+      this.submit();
+    }
+  };
+
   handleSubmitAndContinue = e => {
     e.preventDefault();
 
@@ -182,13 +197,14 @@ class RelationFormGroup extends React.Component {
     if (actionType === 'edit') {
       onSubmitEdit(shouldContinue);
     } else {
+      console.log('SUUUBMIT');
       onSubmit(shouldContinue);
     }
   };
 
   renderRelationForm = () => {
     const {
-      featureName,
+      featureToEditName,
       modifiedData: { key, name, nature, plugin, target },
       features,
       onChange,
@@ -196,18 +212,24 @@ class RelationFormGroup extends React.Component {
       source,
     } = this.props;
     const { formErrors, didCheckErrors } = this.state;
-
     return (
       <RelationsWrapper>
         <RelationBox
           autoFocus
           didCheckErrors={didCheckErrors}
           errors={get(formErrors, 'name', [])}
-          featureName={featureName}
+          featureName={featureToEditName}
           main
           onChange={onChange}
           source={source}
           value={name}
+        />
+        <RelationNaturePicker
+          featureName={featureToEditName}
+          nature={nature}
+          name={name}
+          target={target}
+          onClick={onChangeRelationNature}
         />
         <RelationBox
           autoFocus
@@ -216,39 +238,12 @@ class RelationFormGroup extends React.Component {
           features={features}
           nature={nature}
           onChange={onChange}
+          onClick={this.handleChangeRelationTarget}
           plugin={plugin}
           selectedFeature={target}
           source={source}
           value={key}
         />
-        {/* <RelationBox
-          autoFocus
-          errors={get(formErrors, 'name', [])}
-          didCheckErrors={didCheckErrors}
-          main
-          modelName={groupToEditName}
-          onChange={onChange}
-          source={source}
-          value={name}
-        />
-        <NaturePicker
-          modelName={groupToEditName}
-          nature={nature}
-          name={name}
-          target={target}
-          onClick={onChangeRelationNature}
-        />
-        <RelationBox
-          errors={get(formErrors, 'key', [])}
-          didCheckErrors={didCheckErrors}
-          groups={groups}
-          nature={nature}
-          onChange={onChange}
-          onClick={this.handleClick}
-          selectedModel={target}
-          plugin={plugin}
-          value={key}
-        /> */}
       </RelationsWrapper>
     );
   };
@@ -324,11 +319,33 @@ RelationFormGroup.contextTypes = {
 };
 
 RelationFormGroup.defaultProps = {
+  actionType: 'create',
+  activeTab: 'base',
   featureType: 'model',
+  features: [],
+  featuereToEditName: '',
+  isOpen: false,
+  isUpdatingTemporary: false,
+  onChange: () => {},
+  onChangeRelationTarget: () => {},
+  onSubmit: () => {},
+  source: null,
 };
 
 RelationFormGroup.propTypes = {
+  actionType: PropTypes.string,
+  activeTab: PropTypes.string,
+  features: PropTypes.array,
   featureType: PropTypes.string,
+  featuereToEditName: PropTypes.string,
+  isOpen: PropTypes.bool,
+  isUpdatingTemporary: PropTypes.bool,
+  modifiedData: PropTypes.object.isRequired,
+  onChange: PropTypes.func,
+  onChangeRelationTarget: PropTypes.func,
+  onSubmit: PropTypes.func,
+  push: PropTypes.func.isRequired,
+  source: PropTypes.string,
 };
 
 export default RelationFormGroup;

@@ -14,9 +14,10 @@ const RelationBox = ({
   main,
   nature,
   onChange,
+  onClick,
+  plugin,
   selectedFeature,
   source,
-  plugin,
   value,
 }) => {
   return (
@@ -31,23 +32,25 @@ const RelationBox = ({
         ) : (
           <FeaturePicker
             features={features}
+            onClick={onClick}
             plugin={plugin}
             selectedFeature={selectedFeature}
           ></FeaturePicker>
         )}
       </div>
-
       <div className="box-body">
         <InputText
           autoFocus={autoFocus}
           didCheckErrors={didCheckErrors}
           errors={errors}
           label="Field Name"
-          disabled={value === '-' || nature === 'oneWay'}
+          disabled={
+            value === '-' || nature === 'oneWay' || nature === 'manyWays'
+          }
           name={main ? 'name' : 'key'}
           onChange={onChange}
           type="text"
-          value={nature === 'oneWay' ? '-' : value}
+          value={nature === 'oneWay' || nature === 'manyWays' ? '-' : value}
         />
       </div>
     </StyledRelationBox>
@@ -58,13 +61,13 @@ RelationBox.defaultProps = {
   autoFocus: false,
   didCheckErrors: false,
   errors: [],
-  main: false,
   featureName: '',
   features: [],
+  main: false,
   nature: null,
   onClick: () => {},
   plugin: null,
-  selectedModel: null,
+  selectedFeature: null,
   source: null,
 };
 
@@ -72,14 +75,14 @@ RelationBox.propTypes = {
   autoFocus: PropTypes.bool,
   didCheckErrors: PropTypes.bool,
   errors: PropTypes.array,
-  main: PropTypes.bool,
   featureName: PropTypes.string,
   features: PropTypes.array,
+  main: PropTypes.bool,
   nature: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func,
   plugin: PropTypes.string,
-  selectedModel: PropTypes.string,
+  selectedFeature: PropTypes.string,
   source: PropTypes.string,
   value: PropTypes.string.isRequired,
 };

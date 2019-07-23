@@ -24,7 +24,7 @@ const StyledFeaturePicker = styled.div`
       &:after {
         position: absolute;
         top: calc(50% - 0.1rem);
-        right: 10px;
+        right: 1.5rem;
       }
       > p {
         margin-top: -1px;

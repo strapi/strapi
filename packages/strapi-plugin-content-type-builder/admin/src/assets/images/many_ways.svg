@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="41px" height="41px" viewBox="0 0 41 41" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 55.2 (78181) - https://sketchapp.com -->
+    <title>Many ways</title>
+    <desc>Created with Sketch.</desc>
+    <g id="CTB" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="CTB-/-012----Groups-Relation" transform="translate(-798.000000, -385.000000)">
+            <g id="Many-ways" transform="translate(798.000000, 385.000000)">
+                <g id="one_to_one_selected">
+                    <g id="Rectangle-13">
+                        <g id="path-1-link" fill="#FFFFFF">
+                            <rect id="path-1" x="0" y="0" width="41" height="41" rx="2"></rect>
+                        </g>
+                        <rect id="Rectangle-path" stroke="#E3E9F3" x="0.5" y="0.5" width="40" height="40" rx="2"></rect>
+                    </g>
+                    <g id="MANYWAY" transform="translate(7.500000, 6.000000)">
+                        <rect id="Rectangle-15" stroke="#ABB3C2" x="6.5" y="15.25" width="14" height="1"></rect>
+                        <rect id="Rectangle-14" stroke="#ABB3C2" x="0" y="12.5" width="6" height="6" rx="3"></rect>
+                        <polygon id="Triangle" stroke="#A9B3C4" points="26 15.5 21 18.5 21 12.5"></polygon>
+                        <g id="Group-4" transform="translate(14.500000, 22.500000) rotate(30.000000) translate(-14.500000, -22.500000) translate(4.500000, 19.000000)">
+                            <rect id="Rectangle-15" stroke="#ABB3C2" x="0" y="3.25" width="14" height="1"></rect>
+                            <polygon id="Triangle" stroke="#A9B3C4" points="19.5 3.5 14.5 6.5 14.5 0.5"></polygon>
+                        </g>
+                        <g id="Group-4" transform="translate(14.500000, 8.500000) scale(1, -1) rotate(30.000000) translate(-14.500000, -8.500000) translate(4.500000, 5.000000)">
+                            <rect id="Rectangle-15" stroke="#ABB3C2" x="0" y="3.25" width="14" height="1"></rect>
+                            <polygon id="Triangle" stroke="#A9B3C4" points="19.5 3.5 14.5 6.5 14.5 0.5"></polygon>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -20,6 +20,7 @@ const colors = {
     boxBkgd: '#fcfcfc',
     boxShadow: '#cad2df',
     headerBkgd: 'rgba(16,22,34,.04)',
+    border: '#1c5de7',
   },
 };
 

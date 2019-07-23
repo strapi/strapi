@@ -35,7 +35,9 @@ import {
   ON_CHANGE_RELATION,
   ON_CHANGE_RELATION_GROUP,
   ON_CHANGE_RELATION_NATURE,
+  ON_CHANGE_RELATION_NATURE_GROUP,
   ON_CHANGE_RELATION_TARGET,
+  ON_CHANGE_RELATION_TARGET_GROUP,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
@@ -380,11 +382,32 @@ export function onChangeRelationNature(nature, currentModel) {
   };
 }
 
+export function onChangeRelationNatureGroup(nature, currentGroup) {
+  return {
+    type: ON_CHANGE_RELATION_NATURE_GROUP,
+    currentGroup,
+    nature,
+  };
+}
+
 export function onChangeRelationTarget(model, currentModel, isEditing = false) {
   return {
     type: ON_CHANGE_RELATION_TARGET,
     currentModel,
     model,
+    isEditing,
+  };
+}
+
+export function onChangeRelationTargetGroup(
+  group,
+  currentGroup,
+  isEditing = false
+) {
+  return {
+    type: ON_CHANGE_RELATION_TARGET_GROUP,
+    currentGroup,
+    group,
     isEditing,
   };
 }

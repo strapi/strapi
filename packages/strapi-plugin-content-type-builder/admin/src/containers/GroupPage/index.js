@@ -34,6 +34,8 @@ import {
   deleteGroupAttribute,
   onChangeAttributeGroup,
   onChangeRelationGroup,
+  onChangeRelationNatureGroup,
+  onChangeRelationTargetGroup,
   saveEditedAttributeGroup,
   setTemporaryAttributeGroup,
   setTemporaryAttributeRelationGroup,
@@ -125,6 +127,18 @@ export class GroupPage extends React.Component {
     return groupName;
   };
 
+  getFeatureDisplayName = () => {
+    const { modifiedDataGroup, newGroup } = this.props;
+    const name = this.getFeatureName();
+
+    /* istanbul ignore if */
+    const displayName = this.isUpdatingTempFeature()
+      ? get(newGroup, 'name', null)
+      : get(modifiedDataGroup, [name, 'name'], null);
+
+    return displayName;
+  };
+
   getFeatureHeaderDescription = () => {
     const { modifiedDataGroup, newGroup } = this.props;
     const name = this.getFeatureName();
@@ -140,18 +154,6 @@ export class GroupPage extends React.Component {
       : {
           id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
         };
-  };
-
-  getFeatureHeaderTitle = () => {
-    const { modifiedDataGroup, newGroup } = this.props;
-    const name = this.getFeatureName();
-
-    /* istanbul ignore if */
-    const title = this.isUpdatingTempFeature()
-      ? get(newGroup, 'name', null)
-      : get(modifiedDataGroup, [name, 'name'], null);
-
-    return title;
   };
 
   getModalType = () => getQueryParameters(this.getSearch(), 'modalType');
@@ -306,7 +308,10 @@ export class GroupPage extends React.Component {
     const attributeType = this.getAttributeType();
 
     if (this.getAttributeType() === 'relation') {
-      addAttributeRelation(this.isUpdatingTempFeature(), this.getFeatureName());
+      addAttributeRelationGroup(
+        this.isUpdatingTempFeature(),
+        this.getFeatureName()
+      );
     } else {
       if (this.isUpdatingTempFeature()) {
         addAttributeToTempGroup(attributeType);
@@ -395,6 +400,8 @@ export class GroupPage extends React.Component {
       history: { push },
       onChangeAttributeGroup,
       onChangeRelationGroup,
+      onChangeRelationNatureGroup,
+      onChangeRelationTargetGroup,
       temporaryAttributeGroup,
       temporaryAttributeRelationGroup,
       setTemporaryAttributeRelationGroup,
@@ -425,7 +432,7 @@ export class GroupPage extends React.Component {
         <ViewContainer
           {...this.props}
           featureType={this.featureType}
-          headerTitle={this.getFeatureHeaderTitle()}
+          headerTitle={this.getFeatureDisplayName()}
           headerDescription={this.getFeatureHeaderDescription()}
           pluginHeaderActions={this.getPluginHeaderActions()}
           onClickIcon={this.openEditFeatureModal}
@@ -501,7 +508,7 @@ export class GroupPage extends React.Component {
           activeTab={this.getSettingType()}
           alreadyTakenAttributes={this.getFeatureAttributesNames()}
           featureType={this.featureType}
-          featureName={this.getFeatureName()}
+          featureToEditName={this.getFeatureDisplayName()}
           features={groups}
           isOpen={
             this.getModalType() === 'attributeForm' &&
@@ -510,6 +517,8 @@ export class GroupPage extends React.Component {
           modifiedData={temporaryAttributeRelationGroup}
           onCancel={() => {}}
           onChange={onChangeRelationGroup}
+          onChangeRelationNature={onChangeRelationNatureGroup}
+          onChangeRelationTarget={onChangeRelationTargetGroup}
           onSubmit={this.handleSubmit}
           setTempAttribute={setTemporaryAttributeRelationGroup}
           push={push}
@@ -562,6 +571,8 @@ GroupPage.propTypes = {
   newGroup: PropTypes.object.isRequired,
   onChangeAttributeGroup: PropTypes.func.isRequired,
   onChangeRelationGroup: PropTypes.func.isRequired,
+  onChangeRelationNatureGroup: PropTypes.func.isRequired,
+  onChangeRelationTargetGroup: PropTypes.func.isRequired,
   resetEditTempGroup: PropTypes.func.isRequired,
   saveEditedAttributeGroup: PropTypes.func.isRequired,
   setTemporaryAttributeGroup: PropTypes.func.isRequired,
@@ -582,6 +593,8 @@ export function mapDispatchToProps(dispatch) {
       deleteGroupAttribute,
       onChangeAttributeGroup,
       onChangeRelationGroup,
+      onChangeRelationNatureGroup,
+      onChangeRelationTargetGroup,
       saveEditedAttributeGroup,
       setTemporaryAttributeGroup,
       setTemporaryAttributeRelationGroup,

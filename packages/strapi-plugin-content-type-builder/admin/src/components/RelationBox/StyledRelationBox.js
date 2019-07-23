@@ -11,11 +11,14 @@ const StyledRelationBox = styled.div`
   .box-header {
     height: 3.6rem;
     line-height: 3.6rem;
-    text-align: center;
-    font-size: 1.4rem;
-    font-weight: 700;
     text-transform: capitalize;
     background-color: ${colors.relations.headerBkgd};
+    &,
+    .dropdown-toggle p {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
     i {
       margin-right: 8px;
     }

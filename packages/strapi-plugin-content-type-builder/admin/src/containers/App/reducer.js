@@ -34,7 +34,10 @@ import {
   ON_CHANGE_ATTRIBUTE_GROUP,
   ON_CHANGE_RELATION,
   ON_CHANGE_RELATION_GROUP,
+  ON_CHANGE_RELATION_NATURE,
+  ON_CHANGE_RELATION_NATURE_GROUP,
   ON_CHANGE_RELATION_TARGET,
+  ON_CHANGE_RELATION_TARGET_GROUP,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   RESET_EXISTING_GROUP_MAIN_INFOS,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
@@ -54,7 +57,6 @@ import {
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
-  ON_CHANGE_RELATION_NATURE,
 } from './constants';
 
 export const initialState = fromJS({
@@ -192,46 +194,14 @@ function appReducer(state = initialState, action) {
       const basePath = isGroupTemporary
         ? ['newGroup']
         : ['modifiedDataGroup', groupName];
-      const { key, name, nature, target } = state
-        .get('temporaryAttributeRelationGroup')
-        .toJS();
 
-      let newState = state.updateIn(
-        [...basePath, 'schema', 'attributes', name],
-        () => {
-          const newAttribute = state
-            .get('temporaryAttributeRelationGroup')
-            .remove('name');
-
-          return newAttribute;
-        }
-      );
-
-      if (target === groupName && nature !== 'oneWay') {
-        newState = newState.updateIn([...basePath, 'attributes', key], () => {
-          const newAttribute = state
-            .get('temporaryAttributeRelationGroup')
-            .set(
-              'key',
-              state.getIn(['temporaryAttributeRelationGroup', 'name'])
-            )
-            .update('dominant', () => false)
-            .update('nature', value => {
-              if (nature === 'oneToMany') {
-                return 'manyToOne';
-              } else if (nature === 'manyToOne') {
-                return 'oneToMany';
-              } else {
-                return value;
-              }
-            })
-            .remove('name');
-
-          return newAttribute;
-        });
-      }
-
-      return newState;
+      return state
+        .updateIn([...basePath, 'schema', 'attributes'], arr =>
+          arr.push(state.get('temporaryAttributeRelationGroup'))
+        )
+        .update('temporaryAttributeRelationGroup', () =>
+          Map(initialState.get('temporaryAttributeRelationGroup'))
+        );
     }
     case ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE: {
       return state
@@ -521,6 +491,31 @@ function appReducer(state = initialState, action) {
           return pluralize(newKey, number);
         });
     }
+    case ON_CHANGE_RELATION_NATURE_GROUP: {
+      const { currentGroup, nature } = action;
+
+      return state
+        .updateIn(['temporaryAttributeRelationGroup', 'nature'], () => nature)
+        .updateIn(['temporaryAttributeRelationGroup', 'dominant'], () => {
+          return nature === 'manyWays';
+        })
+        .updateIn(['temporaryAttributeRelationGroup', 'name'], name => {
+          const number = shouldPluralizeName(nature) ? 2 : 1;
+
+          return pluralize(name, number);
+        })
+        .updateIn(['temporaryAttributeRelationGroup', 'key'], key => {
+          const number = shouldPluralizeKey(nature) ? 2 : 1;
+          const newKey =
+            nature !== 'oneWay' && key === '-' ? currentGroup : key;
+
+          if (nature === 'oneWay') {
+            return '-';
+          }
+
+          return pluralize(newKey, number);
+        });
+    }
     case ON_CHANGE_RELATION_TARGET: {
       const {
         model: { source },
@@ -545,6 +540,37 @@ function appReducer(state = initialState, action) {
         .updateIn(['temporaryAttributeRelation', 'plugin'], () => source || '')
         .updateIn(['temporaryAttributeRelation', 'name'], () => name)
         .updateIn(['temporaryAttributeRelation', 'key'], () => key);
+    }
+    case ON_CHANGE_RELATION_TARGET_GROUP: {
+      const {
+        group: { source },
+      } = action;
+
+      const nature = state.getIn(['temporaryAttributeRelationGroup', 'nature']);
+      const name = shouldPluralizeName(nature)
+        ? pluralize(action.group.name)
+        : action.group.name;
+      let key = shouldPluralizeKey(nature)
+        ? pluralize(action.currentGroup)
+        : action.currentGroup;
+
+      if (nature === 'oneWay') {
+        key = '-';
+      }
+
+      return state
+        .updateIn(
+          ['temporaryAttributeRelationGroup', 'target'],
+          () => action.group.name
+        )
+        .updateIn(
+          ['temporaryAttributeRelationGroup', 'plugin'],
+          () => source || ''
+        )
+        .updateIn(['temporaryAttributeRelationGroup', 'name'], () =>
+          name.split(' ').join('')
+        )
+        .updateIn(['temporaryAttributeRelationGroup', 'key'], () => key);
     }
     case RESET_EDIT_EXISTING_CONTENT_TYPE:
       return state
@@ -843,9 +869,8 @@ function appReducer(state = initialState, action) {
           ['temporaryAttributeRelationGroup', 'target'],
           () => action.target
         )
-        .updateIn(
-          ['temporaryAttributeRelationGroup', 'name'],
-          () => action.target
+        .updateIn(['temporaryAttributeRelationGroup', 'name'], () =>
+          action.target.split(' ').join('')
         )
         .updateIn(
           ['temporaryAttributeRelationGroup', 'plugin'],

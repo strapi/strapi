@@ -179,6 +179,7 @@
   "relation.attributeName.placeholder": "Ex : auteur, catégorie, tag",
   "relation.manyToMany": "a plusieurs",
   "relation.manyToOne": "a plusieurs",
+  "relation.manyWays": "a plusieurs",
   "relation.oneToMany": "appartient a",
   "relation.oneToOne": "a un ",
   "relation.oneWay": "a un",
