@@ -100,7 +100,7 @@ const formatAttribute = (key, attribute, { group }) => {
 
 /**
  * Creates a group schema file
- * @param {strinh} uid
+ * @param {string} uid
  * @param {Object} infos
  */
 async function createGroup(uid, infos) {
@@ -150,7 +150,6 @@ const createSchema = (uid, infos) => {
     },
     connection,
     collectionName: collectionName || `groups_${pluralize(uid)}`,
-    // TODO: format attributes or sth
     attributes: convertAttributes(attributes),
   };
 };
@@ -206,7 +205,7 @@ const createGroupUID = str => slugify(str, { separator: '_' });
 
 /**
  * Deletes a group
- * @param {*} group
+ * @param {Object} group
  */
 async function deleteGroup(group) {
   await deleteSchema(group.uid);
