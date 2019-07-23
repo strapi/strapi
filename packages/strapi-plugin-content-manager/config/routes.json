@@ -74,16 +74,16 @@
     },
     {
       "method": "GET",
-      "path": "/explorer/:model/:id",
-      "handler": "ContentManager.findOne",
+      "path": "/explorer/:model/count",
+      "handler": "ContentManager.count",
       "config": {
         "policies": ["routing"]
       }
     },
     {
       "method": "GET",
-      "path": "/explorer/:model/count",
-      "handler": "ContentManager.count",
+      "path": "/explorer/:model/:id",
+      "handler": "ContentManager.findOne",
       "config": {
         "policies": ["routing"]
       }
