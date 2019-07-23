@@ -15,6 +15,8 @@ import {
   ON_CHANGE,
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
+  REORDER_DIFF_ROW,
+  REORDER_ROW,
   RESET_PROPS,
   SET_LIST_FIELD_TO_EDIT_INDEX,
   SUBMIT_SUCCEEDED,
@@ -32,7 +34,6 @@ export const initialState = fromJS({
 function settingViewModelReducer(state = initialState, action) {
   const layoutPath = ['modifiedData', 'layouts', 'edit'];
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
-  console.log(dragIndex, hoverIndex);
 
   switch (action.type) {
     case ADD_FIELD_TO_LIST:
@@ -97,6 +98,24 @@ function settingViewModelReducer(state = initialState, action) {
       return state
         .update('modifiedData', () => state.get('initialData'))
         .update('listFieldToEditIndex', () => 0);
+    case REORDER_DIFF_ROW:
+      return state
+        .updateIn([...layoutPath, dragRowIndex, 'rowContent'], list => {
+          return list.remove(dragIndex);
+        })
+        .updateIn([...layoutPath, hoverRowIndex, 'rowContent'], list => {
+          return list.insert(
+            hoverIndex,
+            state.getIn([...layoutPath, dragRowIndex, 'rowContent', dragIndex])
+          );
+        })
+        .update('didDrop', v => !v);
+    case REORDER_ROW:
+      return state
+        .updateIn([...layoutPath, dragRowIndex, 'rowContent'], list => {
+          return list.delete(dragIndex).insert(hoverIndex, list.get(dragIndex));
+        })
+        .update('didDrop', v => !v);
     case RESET_PROPS:
       return initialState;
     case SET_LIST_FIELD_TO_EDIT_INDEX:

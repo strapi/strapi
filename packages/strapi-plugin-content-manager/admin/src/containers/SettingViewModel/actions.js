@@ -10,6 +10,8 @@ import {
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
   ON_SUBMIT,
+  REORDER_DIFF_ROW,
+  REORDER_ROW,
   RESET_PROPS,
   SET_LIST_FIELD_TO_EDIT_INDEX,
   SUBMIT_SUCCEEDED,
@@ -89,6 +91,30 @@ export function onSubmit(uid, emitEvent) {
     type: ON_SUBMIT,
     uid,
     emitEvent,
+  };
+}
+
+export function reorderDiffRow(
+  dragIndex,
+  hoverIndex,
+  dragRowIndex,
+  hoverRowIndex
+) {
+  return {
+    type: REORDER_DIFF_ROW,
+    dragIndex,
+    hoverIndex,
+    dragRowIndex,
+    hoverRowIndex,
+  };
+}
+
+export function reorderRow(dragRowIndex, dragIndex, hoverIndex) {
+  return {
+    type: REORDER_ROW,
+    dragRowIndex,
+    dragIndex,
+    hoverIndex,
   };
 }
 

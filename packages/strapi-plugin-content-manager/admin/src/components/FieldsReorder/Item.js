@@ -7,7 +7,7 @@ import FieldItem from '../FieldItem';
 
 import ItemTypes from '../../utils/itemsTypes';
 
-const Item = ({ itemIndex, moveRow, name, rowIndex, size, type }) => {
+const Item = ({ itemIndex, moveItem, moveRow, name, rowIndex, size, type }) => {
   // console.log({ rowIndex });
   const ref = useRef(null);
   const [{ clientOffset, isOver }, drop] = useDrop({
@@ -74,15 +74,51 @@ const Item = ({ itemIndex, moveRow, name, rowIndex, size, type }) => {
       if (!ref.current) {
         return;
       }
-      console.log(monitor);
-      // const dragIndex = monitor.getItem().itemIndex;
-      // const hoverIndex = itemIndex;
-      // const dragRow = monitor.getItem().rowIndex;
-      // const targetRow = rowIndex;
 
+      const dragIndex = monitor.getItem().itemIndex;
+      const hoverIndex = itemIndex;
+      const dragRow = monitor.getItem().rowIndex;
+      const targetRow = rowIndex;
+
+      // Don't reorder on drop for full size elements since it is already done in the hover
       if (item.size === 12) {
         return;
       }
+
+      // Don't replace item with themselves
+      if (dragIndex === hoverIndex && dragRow === targetRow) {
+        return;
+      }
+
+      // Determine rectangle on screen
+      const hoverBoundingRect = ref.current.getBoundingClientRect();
+
+      // Scroll window if mouse near vertical edge(100px)
+
+      // Horizontal Check --
+      if (
+        Math.abs(monitor.getClientOffset().x - hoverBoundingRect.left) >
+        hoverBoundingRect.width / 1.8
+      ) {
+        // TODO ADD NEW LINE
+        moveItem(dragIndex, hoverIndex + 1, dragRow, targetRow);
+
+        item.itemIndex = hoverIndex + 1;
+        item.rowIndex = targetRow;
+        return;
+      }
+
+      // Vertical Check |
+
+      // Time to actually perform the action
+      moveItem(dragIndex, hoverIndex, dragRow, targetRow);
+      // Note: we're mutating the monitor item here!
+      // Generally it's better to avoid mutations,
+      // but it's good here for the sake of performance
+      // to avoid expensive index searches.
+
+      item.itemIndex = hoverIndex;
+      item.rowIndex = targetRow;
 
       return;
     },
@@ -131,7 +167,7 @@ const Item = ({ itemIndex, moveRow, name, rowIndex, size, type }) => {
         hoverBoundingRect.width / 2;
 
     if (name === '_TEMP_') {
-      showLeftCarret = isOver;
+      showLeftCarret = isOver && getItem.size !== 12;
       showRightCarret = false;
     }
   }
@@ -155,6 +191,7 @@ Item.defaultProps = {
 
 Item.propTypes = {
   itemIndex: PropTypes.number.isRequired,
+  moveItem: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   rowIndex: PropTypes.number.isRequired,

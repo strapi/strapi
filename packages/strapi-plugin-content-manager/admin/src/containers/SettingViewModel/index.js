@@ -34,6 +34,8 @@ import {
   onReset,
   onSubmit,
   onRemoveListField,
+  reorderDiffRow,
+  reorderRow,
   resetProps,
   setListFieldToEditIndex,
 } from './actions';
@@ -66,6 +68,8 @@ function SettingViewModel({
   onRemoveListField,
   onReset,
   onSubmit,
+  reorderDiffRow,
+  reorderRow,
   resetProps,
   setListFieldToEditIndex,
   shouldToggleModalSubmit,
@@ -165,6 +169,15 @@ function SettingViewModel({
     return input.selectOptions;
   };
 
+  const moveItem = (dragIndex, hoverIndex, dragRowIndex, hoverRowIndex) => {
+    // Same row = just reorder
+    if (dragRowIndex === hoverRowIndex) {
+      reorderRow(dragRowIndex, dragIndex, hoverIndex);
+    } else {
+      reorderDiffRow(dragIndex, hoverIndex, dragRowIndex, hoverRowIndex);
+    }
+  };
+
   return (
     <>
       <BackHeader onClick={() => goBack()} />
@@ -253,6 +266,7 @@ function SettingViewModel({
                   <FieldsReorder
                     attributes={get(modifiedData, ['schema', 'attributes'], {})}
                     layout={get(modifiedData, ['layouts', 'edit'], [])}
+                    moveItem={moveItem}
                     moveRow={moveRow}
                   />
                 )}
@@ -317,6 +331,8 @@ SettingViewModel.propTypes = {
   onRemoveListField: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  reorderDiffRow: PropTypes.func.isRequired,
+  reorderRow: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
   setListFieldToEditIndex: PropTypes.func.isRequired,
   shouldToggleModalSubmit: PropTypes.bool.isRequired,
@@ -336,6 +352,8 @@ export function mapDispatchToProps(dispatch) {
       onRemoveListField,
       onReset,
       onSubmit,
+      reorderDiffRow,
+      reorderRow,
       resetProps,
       setListFieldToEditIndex,
     },
