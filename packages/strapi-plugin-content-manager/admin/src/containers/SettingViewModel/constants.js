@@ -1,5 +1,6 @@
 export const ADD_FIELD_TO_LIST =
   'ContentManager/SettingViewModel/ADD_FIELD_TO_LIST';
+export const ADD_RELATION = 'ContentManager/SettingViewModel/ADD_RELATION';
 export const GET_DATA = 'ContentManager/SettingViewModel/GET_DATA';
 export const FORMAT_LAYOUT = 'ContentManager/SettingViewModel/FORMAT_LAYOUT';
 export const GET_DATA_SUCCEEDED =
@@ -15,6 +16,8 @@ export const ON_REMOVE_LIST_FIELD =
 export const ON_RESET = 'ContentManager/SettingViewModel/ON_RESET';
 export const ON_SUBMIT = 'ContentManager/SettingViewModel/ON_SUBMIT';
 export const REMOVE_FIELD = 'ContentManager/SettingViewModel/REMOVE_FIELD';
+export const REMOVE_RELATION =
+  'ContentManager/SettingViewModel/REMOVE_RELATION';
 export const REORDER_ROW = 'ContentManager/SettingViewModel/REORDER_ROW';
 export const REORDER_DIFF_ROW =
   'ContentManager/SettingViewModel/REORDER_DIFF_ROW';

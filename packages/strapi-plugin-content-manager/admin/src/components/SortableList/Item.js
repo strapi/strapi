@@ -7,7 +7,7 @@ import FieldItem from '../FieldItem';
 
 import ItemTypes from '../../utils/itemsTypes';
 
-const Item = ({ index, move, name }) => {
+const Item = ({ index, move, name, removeRelation }) => {
   const ref = useRef(null);
 
   // from: https://codesandbox.io/s/github/react-dnd/react-dnd/tree/gh-pages/examples_hooks_js/04-sortable/simple?from-embed
@@ -71,6 +71,7 @@ const Item = ({ index, move, name }) => {
       size={12}
       isDragging={isDragging}
       name={name}
+      onClickRemove={() => removeRelation(index)}
       style={{ marginBottom: 6 }}
     />
   );
@@ -84,6 +85,7 @@ Item.propTypes = {
   index: PropTypes.number.isRequired,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
+  removeRelation: PropTypes.func.isRequired,
 };
 
 export default Item;

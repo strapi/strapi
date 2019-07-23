@@ -29,6 +29,7 @@ import Separator from './Separator';
 
 import {
   addFieldToList,
+  addRelation,
   formatLayout,
   getData,
   moveListField,
@@ -40,6 +41,7 @@ import {
   onSubmit,
   onRemoveListField,
   removeField,
+  removeRelation,
   reorderDiffRow,
   reorderRow,
   resetProps,
@@ -56,6 +58,7 @@ const getUrl = (name, to) =>
 
 function SettingViewModel({
   addFieldToList,
+  addRelation,
   didDrop,
   emitEvent,
   formatLayout,
@@ -77,6 +80,7 @@ function SettingViewModel({
   onReset,
   onSubmit,
   removeField,
+  removeRelation,
   reorderDiffRow,
   reorderRow,
   resetProps,
@@ -171,6 +175,14 @@ function SettingViewModel({
       .filter(attr => {
         return displayedFields.findIndex(el => el.name === attr) === -1;
       });
+  };
+  const getEditRelationsRemaingFields = () => {
+    const attributes = getAttributes();
+    const displayedFields = getRelationsLayout();
+
+    return Object.keys(attributes)
+      .filter(attr => get(attributes, [attr, 'type'], '') === 'relation')
+      .filter(attr => displayedFields.indexOf(attr) === -1);
   };
   const getListRemainingFields = () => {
     const metadata = get(modifiedData, ['metadata'], {});
@@ -324,7 +336,12 @@ function SettingViewModel({
 
                 {settingType === 'edit-settings' && <FieldsReorder />}
                 {settingType === 'edit-settings' && (
-                  <SortableList moveRelation={moveRelation} />
+                  <SortableList
+                    addRelation={addRelation}
+                    buttonData={getEditRelationsRemaingFields()}
+                    moveRelation={moveRelation}
+                    removeRelation={removeRelation}
+                  />
                 )}
               </div>
             </Block>
@@ -364,6 +381,7 @@ function SettingViewModel({
 
 SettingViewModel.propTypes = {
   addFieldToList: PropTypes.func.isRequired,
+  addRelation: PropTypes.func.isRequired,
   didDrop: PropTypes.bool.isRequired,
   emitEvent: PropTypes.func.isRequired,
   formatLayout: PropTypes.func.isRequired,
@@ -390,6 +408,7 @@ SettingViewModel.propTypes = {
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   removeField: PropTypes.func.isRequired,
+  removeRelation: PropTypes.func.isRequired,
   reorderDiffRow: PropTypes.func.isRequired,
   reorderRow: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
@@ -403,6 +422,7 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       addFieldToList,
+      addRelation,
       formatLayout,
       getData,
       moveListField,
@@ -414,6 +434,7 @@ export function mapDispatchToProps(dispatch) {
       onReset,
       onSubmit,
       removeField,
+      removeRelation,
       reorderDiffRow,
       reorderRow,
       resetProps,

@@ -1,6 +1,7 @@
 import { set } from 'lodash';
 import {
   ADD_FIELD_TO_LIST,
+  ADD_RELATION,
   FORMAT_LAYOUT,
   GET_DATA,
   GET_DATA_SUCCEEDED,
@@ -13,6 +14,7 @@ import {
   ON_RESET,
   ON_SUBMIT,
   REMOVE_FIELD,
+  REMOVE_RELATION,
   REORDER_DIFF_ROW,
   REORDER_ROW,
   RESET_PROPS,
@@ -25,6 +27,13 @@ export function addFieldToList(field) {
   return {
     type: ADD_FIELD_TO_LIST,
     field,
+  };
+}
+
+export function addRelation(name) {
+  return {
+    type: ADD_RELATION,
+    name,
   };
 }
 
@@ -117,6 +126,13 @@ export function removeField(rowIndex, fieldIndex) {
     type: REMOVE_FIELD,
     rowIndex,
     fieldIndex,
+  };
+}
+
+export function removeRelation(index) {
+  return {
+    type: REMOVE_RELATION,
+    index,
   };
 }
 

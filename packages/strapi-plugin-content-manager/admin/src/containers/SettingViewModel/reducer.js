@@ -8,6 +8,7 @@ import { formatLayout } from '../../utils/layout';
 
 import {
   ADD_FIELD_TO_LIST,
+  ADD_RELATION,
   FORMAT_LAYOUT,
   GET_DATA_SUCCEEDED,
   MOVE_FIELD_LIST,
@@ -18,6 +19,7 @@ import {
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
   REMOVE_FIELD,
+  REMOVE_RELATION,
   REORDER_DIFF_ROW,
   REORDER_ROW,
   RESET_PROPS,
@@ -57,6 +59,12 @@ function settingViewModelReducer(state = initialState, action) {
     case ADD_FIELD_TO_LIST:
       return state.updateIn(['modifiedData', 'layouts', 'list'], list =>
         list.push(action.field)
+      );
+
+    case ADD_RELATION:
+      return state.updateIn(
+        ['modifiedData', 'layouts', 'editRelations'],
+        list => list.push(action.name)
       );
     case FORMAT_LAYOUT: {
       const newList = formatLayout(state.getIn(layoutPath).toJS());
@@ -169,7 +177,11 @@ function settingViewModelReducer(state = initialState, action) {
         )
         .update('didDrop', v => !v);
     }
-
+    case REMOVE_RELATION:
+      return state.updateIn(
+        ['modifiedData', 'layouts', 'editRelations'],
+        list => list.delete(action.index)
+      );
     case REORDER_DIFF_ROW:
       return state
         .updateIn([...layoutPath, dragRowIndex, 'rowContent'], list => {
