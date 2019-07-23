@@ -1218,7 +1218,7 @@ Init the Git repository and commit your project.
 cd my-project
 git init
 git add .
-git commit -am "Initial Commit"
+git commit -m "Initial Commit"
 ```
 
 ### 6. Create a Heroku project
@@ -1343,23 +1343,26 @@ npm install pg --save
 
 Please follow these steps the **deploy a Strapi app with MongoDB on Heroku**.
 
-You must have completed the [steps to use Strapi with MongoDB Atlas in production](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas).
+You must have completed the [steps to use Strapi with MongoDB Atlas](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) - through **4. Retrieve database credentials**.
 
 ##### 1. Set environment variables
 
-When you [set-up your MongoDB Atlas database](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) you created and noted the five key/value pairs that correspond to your **MongoDB Atlas** database. These five keys are: `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE PORT`, and `DATABASE_HOST`.
-
-Strapi expects a variable for each database connection detail (host, username, etc.). So, from **MongoDB Atlas**, you have to set the environment variables in the Heroku config (for **DATABASE_HOST** you need to surround the URL with **""**, and set **DATABASE_PORT** to nothing):
+When you [set-up your MongoDB Atlas database](/3.0.0-beta.x/guides/databases.html#install-on-atlas-mongodb-atlas) you noted a connection string. Similar to this:
 
 ```bash
-heroku config:set DATABASE_USERNAME=paulbocuse
-heroku config:set DATABASE_PASSWORD=mySecretPassword
-heroku config:set DATABASE_HOST="stapi-mongo-heroku-shard-00-00-fty6c.mongodb.net:27017,strapi-mongo-heroku-shard-00-01-fty6c.mongodb.net:27017,strapi-mongo-heroku-shard-00-02-fty6c.mongodb.net:27017/test?ssl=true&replicaSet=strapi-mongo-heroku-shard-0&authSource=admin&retryWrites=true"
-heroku config:set DATABASE_PORT=
-heroku config:set DATABASE_NAME=strapi-mongo-heroku
+mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority
+
 ```
 
-**Note:** Please replace these above values with your actual values.
+So, from **MongoDB Atlas**, you have to set two environment variables in the Heroku config (for **DATABASE_URI** and **DATABASE_NAME**). Set the environment variables using the following commands:
+
+```bash
+heroku config:set DATABASE_URI="mongodb://paulbocuse:<password>@strapidatabase-shard-00-00-fxxx6c.mongodb.net:27017,strapidatabase-shard-00-01-fxxxc.mongodb.net:27017,strapidatabase-shard-00-02-fxxxc.mongodb.net:27017/test?ssl=true&replicaSet=strapidatabase-shard-0&authSource=admin&retryWrites=true&w=majority"
+heroku config:set DATABASE_NAME="my-database-name"
+```
+
+**Note:** Please replace the `<password>` and `my-database-name` values with the your actual values.
+
 
 ##### 2. Update your database config file
 
@@ -1374,12 +1377,8 @@ Replace the contents of `database.json` with the following:
     "default": {
       "connector": "strapi-hook-mongoose",
       "settings": {
-        "client": "mongo",
-        "host": "${process.env.DATABASE_HOST}",
-        "port": "${process.env.DATABASE_PORT}",
-        "database": "${process.env.DATABASE_NAME}",
-        "username": "${process.env.DATABASE_USERNAME}",
-        "password": "${process.env.DATABASE_PASSWORD}"
+        "uri": "${process.env.DATABASE_URI}",
+        "database": "${process.env.DATABASE_NAME}"
       },
       "options": {
         "ssl": true
@@ -1396,7 +1395,8 @@ Replace the contents of `database.json` with the following:
 `Path: ./my-project/`
 
 ```bash
-git commit -am "Update database config"
+git add .
+git commit -m "Update database config"
 ```
 
 ### 9. Deploy
