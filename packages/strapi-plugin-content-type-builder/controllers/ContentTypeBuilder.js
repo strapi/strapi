@@ -91,8 +91,6 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    await Service.appearance(formatedAttributes, _.toLower(name));
-
     const apiName = _.toLower(name);
     await Service.generateAPI(
       apiName,
@@ -207,8 +205,6 @@ module.exports = {
       );
     }
 
-    await Service.appearance(formatedAttributes, name, plugin);
-
     try {
       // const modelJSON = _.cloneDeep(require(modelFilePath));
       const modelData = plugin
@@ -309,18 +305,6 @@ module.exports = {
     if (!_.isEmpty(removeModelErrors)) {
       return ctx.badRequest(null, [{ messages: removeModelErrors }]);
     }
-
-    const pluginStore = strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'content-manager',
-    });
-
-    const schema = await pluginStore.get({ key: 'schema' });
-
-    delete schema.layout[model];
-
-    await pluginStore.set({ key: 'schema', value: schema });
 
     ctx.send({ ok: true });
 

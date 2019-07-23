@@ -399,6 +399,9 @@ class Strapi extends EventEmitter {
             ranBootstrapFn = true;
             clearTimeout(timer);
 
+            if (err instanceof Error) {
+              return reject(err);
+            }
             return resolve(err);
           });
         } catch (e) {
@@ -436,6 +439,15 @@ class Strapi extends EventEmitter {
       .forEach(key => {
         Object.freeze(this[key]);
       });
+  }
+
+  getModel(modelKey, plugin) {
+    return plugin === 'admin'
+      ? _.get(strapi.admin, ['models', modelKey], undefined)
+      : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
+          _.get(strapi, ['models', modelKey]) ||
+          _.get(strapi, ['groups', modelKey]) ||
+          undefined;
   }
 
   /**
@@ -488,6 +500,10 @@ class Strapi extends EventEmitter {
     // custom queries made easy
     Object.assign(query, {
       custom(mapping) {
+        if (typeof mapping === 'function') {
+          return mapping.bind(query, { model, modelKey });
+        }
+
         if (!mapping[connector]) {
           throw new Error(`Missing mapping for orm ${connector}`);
         }

@@ -1,3 +1,5 @@
+'use strict';
+
 const initMap = groups => {
   const map = new Map();
 
@@ -12,7 +14,13 @@ const initMap = groups => {
 
     map.set(key, {
       uid: key,
-      schema: { name, connection, collectionName, description, attributes },
+      schema: {
+        name: name || key,
+        connection,
+        collectionName,
+        description,
+        attributes,
+      },
     });
   });
 
