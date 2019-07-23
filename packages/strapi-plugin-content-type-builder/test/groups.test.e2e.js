@@ -18,7 +18,7 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toEqual({
         error: {
           attributes: ['attributes.required'],
           name: ['name.required'],
@@ -32,20 +32,21 @@ describe.only('Content Type Builder - Groups', () => {
         url: '/content-type-builder/groups',
         body: {
           name: 'some-group',
-          attributes: {},
+          attributes: {
+            title: {
+              type: 'string',
+            },
+            pic: {
+              type: 'media',
+            },
+          },
         },
       });
 
       expect(res.statusCode).toBe(201);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toEqual({
         data: {
           uid: 'some_group',
-          schema: {
-            name: 'some-group',
-            connection: 'default',
-            collectionName: 'groups_some_groups',
-            attributes: {},
-          },
         },
       });
 
@@ -63,7 +64,7 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toEqual({
         error: 'group.alreadyExists',
       });
     });
@@ -84,7 +85,13 @@ describe.only('Content Type Builder - Groups', () => {
       res.body.data.forEach(el => {
         expect(el).toMatchObject({
           uid: expect.any(String),
-          schema: expect.objectContaining({}),
+          schema: expect.objectContaining({
+            name: expect.any(String),
+            description: expect.any(String),
+            connection: expect.any(String),
+            collectionName: expect.any(String),
+            attributes: expect.objectContaining({}),
+          }),
         });
       });
     });
@@ -98,7 +105,7 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(res.statusCode).toBe(404);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toEqual({
         error: 'group.notFound',
       });
     });
@@ -110,15 +117,23 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toMatchObject({
         data: {
           uid: 'some_group',
           schema: {
             name: 'some-group',
+            description: '',
             connection: 'default',
             collectionName: 'groups_some_groups',
             attributes: {
-              //...
+              title: {
+                type: 'string',
+              },
+              pic: {
+                type: 'media',
+                multiple: false,
+                required: false,
+              },
             },
           },
         },
@@ -134,7 +149,7 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(res.statusCode).toBe(404);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toEqual({
         error: 'group.notFound',
       });
     });
@@ -149,7 +164,7 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toEqual({
         error: {
           name: ['name.required'],
         },
@@ -167,15 +182,9 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toEqual({
         data: {
           uid: 'new_group',
-          schema: {
-            name: 'New Group',
-            connection: 'default',
-            collectionName: 'groups_some_groups',
-            attributes: {},
-          },
         },
       });
 
@@ -191,7 +200,7 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(res.statusCode).toBe(404);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toEqual({
         error: 'group.notFound',
       });
     });
@@ -203,15 +212,9 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body).toStrictEqual({
+      expect(res.body).toEqual({
         data: {
           uid: 'new_group',
-          schema: {
-            name: 'New Group',
-            connection: 'default',
-            collectionName: 'groups_some_groups',
-            attributes: {},
-          },
         },
       });
 
@@ -223,7 +226,7 @@ describe.only('Content Type Builder - Groups', () => {
       });
 
       expect(tryGet.statusCode).toBe(404);
-      expect(tryGet.body).toStrictEqual({
+      expect(tryGet.body).toEqual({
         error: 'group.notFound',
       });
     }, 10000);

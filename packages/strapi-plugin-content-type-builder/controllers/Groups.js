@@ -3,12 +3,15 @@
 const yup = require('yup');
 const formatYupErrors = require('./utils/yup-formatter');
 
-const groupSchema = yup.object({
-  name: yup.string().required('name.required'),
-  connection: yup.string(),
-  collectionName: yup.string(),
-  attributes: yup.object().required('attributes.required'),
-});
+const groupSchema = yup
+  .object({
+    name: yup.string().required('name.required'),
+    description: yup.string(),
+    connection: yup.string(),
+    collectionName: yup.string(),
+    attributes: yup.object().required('attributes.required'),
+  })
+  .noUnknown();
 
 const validateGroupInput = async data =>
   groupSchema
@@ -17,13 +20,6 @@ const validateGroupInput = async data =>
       abortEarly: false,
     })
     .catch(error => Promise.reject(formatYupErrors(error)));
-
-// shorter access to the group service
-const internals = {
-  get service() {
-    return strapi.plugins['content-type-builder'].services.groups;
-  },
-};
 
 /**
  * Groups controller
@@ -36,7 +32,9 @@ module.exports = {
    * @param {Object} ctx - koa context
    */
   async getGroups(ctx) {
-    const data = await strapi.groupManager.all();
+    const service = strapi.plugins['content-type-builder'].services.groups;
+    const data = service.getGroups();
+
     ctx.send({ data });
   },
 
@@ -48,7 +46,8 @@ module.exports = {
   async getGroup(ctx) {
     const { uid } = ctx.params;
 
-    const group = await strapi.groupManager.get(uid);
+    const service = strapi.plugins['content-type-builder'].services.groups;
+    const group = service.getGroup(uid);
 
     if (!group) {
       return ctx.send({ error: 'group.notFound' }, 404);
@@ -71,13 +70,14 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const uid = internals.service.createGroupUID(body.name);
+    const service = strapi.plugins['content-type-builder'].services.groups;
+    const uid = service.createGroupUID(body.name);
 
-    if (strapi.groupManager.get(uid) !== undefined) {
+    if (service.getGroup(uid)) {
       return ctx.send({ error: 'group.alreadyExists' }, 400);
     }
 
-    const newGroup = await internals.service.createGroup(uid, body);
+    const newGroup = await service.createGroup(uid, body);
 
     ctx.send({ data: newGroup }, 201);
   },
@@ -91,7 +91,8 @@ module.exports = {
     const { uid } = ctx.params;
     const { body } = ctx.request;
 
-    const group = await strapi.groupManager.get(uid);
+    const service = strapi.plugins['content-type-builder'].services.groups;
+    const group = service.getGroup(uid);
 
     if (!group) {
       return ctx.send({ error: 'group.notFound' }, 404);
@@ -103,7 +104,7 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const updatedGroup = await internals.service.updateGroup(group, body);
+    const updatedGroup = await service.updateGroup(group, body);
 
     ctx.send({ data: updatedGroup }, 200);
   },
@@ -116,14 +117,15 @@ module.exports = {
   async deleteGroup(ctx) {
     const { uid } = ctx.params;
 
-    const group = await strapi.groupManager.get(uid);
+    const service = strapi.plugins['content-type-builder'].services.groups;
+    const group = service.getGroup(uid);
 
     if (!group) {
       return ctx.send({ error: 'group.notFound' }, 404);
     }
 
-    await internals.service.deleteGroup(group);
+    await service.deleteGroup(group);
 
-    ctx.send({ data: group }, 200);
+    ctx.send({ data: { uid } }, 200);
   },
 };

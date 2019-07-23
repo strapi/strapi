@@ -208,7 +208,7 @@ module.exports = async ({
           })
         );
 
-        const allAttrs = ['id', attrs];
+        const allAttrs = ['id', ...attrs];
 
         await trx.raw(`INSERT INTO ?? (${allAttrs.join(', ')}) ??`, [
           table,

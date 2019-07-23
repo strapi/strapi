@@ -1,35 +1,201 @@
 'use strict';
 
-const { pick } = require('lodash');
+const _ = require('lodash');
 const pluralize = require('pluralize');
 const slugify = require('@sindresorhus/slugify');
 
-const VALID_FIELDS = ['name', 'connection', 'collectionName', 'attributes'];
+/**
+ * Returns a list of all available groups with formatted attributes
+ */
+const getGroups = () => {
+  return Object.keys(strapi.groups).map(uid => {
+    return formatGroup(uid, strapi.groups[uid]);
+  });
+};
+
+/**
+ * Returns a group by uid
+ * @param {string} uid - group's UID
+ */
+const getGroup = uid => {
+  const group = strapi.groups[uid];
+  if (!group) return null;
+
+  return formatGroup(uid, group);
+};
+
+/**
+ * Formats a group attributes
+ * @param {string} uid - string
+ * @param {Object} group - strapi group model
+ */
+const formatGroup = (uid, group) => {
+  const { connection, collectionName, attributes, info } = group;
+
+  return {
+    uid,
+    schema: {
+      name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
+      description: _.get(info, 'description', ''),
+      connection,
+      collectionName,
+      attributes: formatAttributes(attributes, { group }),
+    },
+  };
+};
+
+/**
+ * Formats a group's attributes
+ * @param {Object} attributes - the attributes map
+ * @param {Object} context - function context
+ * @param {Object} context.group - the associated group
+ */
+const formatAttributes = (attributes, { group }) => {
+  return Object.keys(attributes).reduce((acc, key) => {
+    acc[key] = formatAttribute(key, attributes[key], { group });
+    return acc;
+  }, {});
+};
+
+/**
+ * Fromats a group attribute
+ * @param {string} key - the attribute key
+ * @param {Object} attribute - the attribute
+ * @param {Object} context - function context
+ * @param {Object} context.group - the associated group
+ */
+const formatAttribute = (key, attribute, { group }) => {
+  if (_.has(attribute, 'type')) return attribute;
+
+  // format relations
+  const relation = (group.associations || []).find(
+    assoc => assoc.alias === key
+  );
+  const { plugin } = attribute;
+  let targetEntity = attribute.model || attribute.collection;
+
+  if (plugin === 'upload' && targetEntity === 'file') {
+    return {
+      type: 'media',
+      multiple: attribute.collection ? true : false,
+      required: attribute.required ? true : false,
+    };
+  } else {
+    return {
+      nature: relation.nature,
+      target: targetEntity,
+      plugin: plugin || undefined,
+      dominant: attribute.dominant ? true : false,
+      key: attribute.via || undefined,
+      columnName: attribute.columnName || undefined,
+      targetColumnName: _.get(
+        strapi.getModel(targetEntity, plugin),
+        ['attributes', attribute.via, 'columnName'],
+        undefined
+      ),
+      unique: attribute.unique ? true : false,
+    };
+  }
+};
+
+/**
+ * Creates a group schema file
+ * @param {string} uid
+ * @param {Object} infos
+ */
+async function createGroup(uid, infos) {
+  const schema = createSchema(uid, infos);
+
+  await writeSchema(uid, schema);
+  return { uid };
+}
+
+/**
+ * Updates a group schema file
+ * @param {Object} group
+ * @param {Object} infos
+ */
+async function updateGroup(group, infos) {
+  const { uid } = group;
+
+  const newUid = createGroupUID(infos.name);
+  if (uid !== newUid) {
+    await deleteSchema(uid);
+    return createGroup(newUid, infos);
+  }
+
+  const updatedSchema = { ...group.schema, ...createSchema(uid, infos) };
+
+  await writeSchema(uid, updatedSchema);
+  return { uid };
+}
 
 /**
  * Create a schema
  * @param {Object} infos
  */
-const createSchema = infos => {
-  const { name, connection = 'default', collectionName, attributes } = infos;
-  const uid = createGroupUID(name);
+const createSchema = (uid, infos) => {
+  const {
+    name,
+    connection = 'default',
+    description = '',
+    collectionName,
+    attributes,
+  } = infos;
 
   return {
-    name,
+    info: {
+      name,
+      description,
+    },
     connection,
     collectionName: collectionName || `groups_${pluralize(uid)}`,
-    // TODO: format attributes or sth
-    attributes,
+    attributes: convertAttributes(attributes),
   };
 };
 
-/**
- * Update a group schema
- * @param {Object} currentSchema - current group schema
- * @param {Object} newSchema - new group schema
- */
-const updateSchema = (currentSchema, newSchema) =>
-  pick({ ...currentSchema, ...newSchema }, VALID_FIELDS);
+const convertAttributes = attributes => {
+  return Object.keys(attributes).reduce((acc, key) => {
+    const attribute = attributes[key];
+
+    if (_.has(attribute, 'type')) {
+      if (attribute.type === 'media') {
+        const fileModel = strapi.getModel('file', 'upload');
+        if (!fileModel) return acc;
+
+        const via = _.findKey(fileModel.attributes, { collection: '*' });
+        acc[key] = {
+          [attribute.multiple ? 'collection' : 'model']: 'file',
+          via,
+          plugin: 'upload',
+          required: attribute.required ? true : false,
+        };
+      } else {
+        acc[key] = attribute;
+      }
+
+      return acc;
+    }
+
+    if (_.has(attribute, 'target')) {
+      const { target, nature, required, unique, plugin } = attribute;
+
+      // ingore relation which aren't oneWay or manyWay (except for images)
+      if (!['oneWay', 'manyWay'].includes(nature)) {
+        return acc;
+      }
+
+      acc[key] = {
+        [nature === 'oneWay' ? 'model' : 'collection']: target,
+        plugin: plugin ? _.trim(plugin) : undefined,
+        required: required === true ? true : undefined,
+        unique: unique === true ? true : undefined,
+      };
+    }
+
+    return acc;
+  }, {});
+};
 
 /**
  * Returns a uid from a string
@@ -38,38 +204,8 @@ const updateSchema = (currentSchema, newSchema) =>
 const createGroupUID = str => slugify(str, { separator: '_' });
 
 /**
- * Creates a group schema file
- * @param {*} uid
- * @param {*} infos
- */
-async function createGroup(uid, infos) {
-  const schema = createSchema(infos);
-
-  return writeSchema(uid, schema);
-}
-
-/**
- * Updates a group schema file
- * @param {*} group
- * @param {*} infos
- */
-async function updateGroup(group, infos) {
-  const { uid } = group;
-  const updatedSchema = updateSchema(group.schema, infos);
-
-  if (infos.name !== group.schema.name) {
-    await deleteSchema(uid);
-
-    const newUid = createGroupUID(infos.name);
-    return writeSchema(newUid, updatedSchema);
-  }
-
-  return writeSchema(uid, updatedSchema);
-}
-
-/**
  * Deletes a group
- * @param {*} group
+ * @param {Object} group
  */
 async function deleteGroup(group) {
   await deleteSchema(group.uid);
@@ -89,11 +225,6 @@ async function writeSchema(uid, schema) {
 
   strapi.reload.isWatching = true;
   process.nextTick(() => strapi.reload());
-
-  return {
-    uid,
-    schema,
-  };
 }
 
 /**
@@ -107,6 +238,8 @@ async function deleteSchema(uid) {
 }
 
 module.exports = {
+  getGroups,
+  getGroup,
   createGroup,
   createGroupUID,
   updateGroup,
@@ -114,5 +247,4 @@ module.exports = {
 
   // export for testing only
   createSchema,
-  updateSchema,
 };
