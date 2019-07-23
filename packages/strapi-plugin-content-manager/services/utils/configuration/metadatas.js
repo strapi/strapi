@@ -30,7 +30,7 @@ function createDefaultMetadata(model, name) {
     label: name,
     description: '',
     placeholder: '',
-    visible: true, // TODO: depends on the type ?
+    visible: true,
     editable: isEditable(model, name),
   };
 
