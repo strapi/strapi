@@ -19,30 +19,36 @@ const Field = styled.div`
   position: relative;
   height: 30px;
   width: 100%;
-  padding-left: 10px;
-  justify-content: space-between;
-  background: #fafafb;
-  line-height: 28px;
-  color: #333740;
-  font-size: 13px;
-  border: 1px solid #e3e9f3;
-  border-radius: 2px;
-  &:hover {
-    cursor: move;
-  }
-  > img {
-    max-width: 8px;
-    margin-right: 10px;
-    margin-top: -1px;
-  }
 
-  ${({ isSelected }) => {
-    if (isSelected) {
+  ${({ isDragging }) => {
+    if (!isDragging) {
       return css`
-        background: #e6f0fb !important;
-        border: 1px solid #aed4fb !important;
-        color: #007eff;
-        font-weight: 500;
+        padding-left: 10px;
+        background: #fafafb;
+        line-height: 28px;
+        color: #333740;
+        font-size: 13px;
+        border: 1px solid #e3e9f3;
+        border-radius: 2px;
+        &:hover {
+          cursor: move;
+        }
+        > img {
+          max-width: 8px;
+          margin-right: 10px;
+          margin-top: -1px;
+        }
+
+        ${({ isSelected }) => {
+          if (isSelected) {
+            return css`
+              background: #e6f0fb !important;
+              border: 1px solid #aed4fb !important;
+              color: #007eff;
+              font-weight: 500;
+            `;
+          }
+        }}
       `;
     }
   }}
@@ -57,4 +63,19 @@ const InfoLabel = styled.div`
   color: #007eff;
 `;
 
-export { Wrapper, Field, InfoLabel };
+const FullWidthCarret = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 30px;
+  width: 100%;
+  margin-bottom: 6px;
+  border-radius: 2px;
+  > div {
+    background: #007eff;
+    height: 2px;
+    width: 100%;
+  }
+`;
+
+export { FullWidthCarret, Wrapper, Field, InfoLabel };

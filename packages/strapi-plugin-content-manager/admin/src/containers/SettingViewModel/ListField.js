@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { DragSource, DropTarget } from 'react-dnd';
 
@@ -7,9 +7,10 @@ import GrabIconBlue from '../../assets/images/icon_grab_blue.svg';
 import ClickOverHint from '../../components/ClickOverHint';
 import RemoveIcon from '../../components/DraggedRemovedIcon';
 import EditIcon from '../../components/VariableEditIcon';
-import { Field, InfoLabel } from './components';
+import { Field, InfoLabel, FullWidthCarret } from './components';
 
 import ItemTypes from '../../utils/itemsTypes';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 
 function ListField({
   index,
@@ -19,12 +20,16 @@ function ListField({
   name,
   onClick,
   onRemove,
+  connectDragPreview,
   connectDragSource,
   connectDropTarget,
 }) {
-  const opacity = isDragging ? 0.2 : 1;
-
   const ref = useRef(null);
+
+  useEffect(() => {
+    connectDragPreview(getEmptyImage());
+  }, [connectDragPreview]);
+
   const [isOver, setIsOver] = useState(false);
   const showLabel =
     (!isOver || isSelected) && label.toLowerCase() !== name.toLowerCase();
@@ -40,23 +45,33 @@ function ListField({
         onClick(index);
       }}
       ref={ref}
+      isDragging={isDragging}
       isSelected={isSelected}
-      style={{ opacity }}
     >
-      <img src={isSelected ? GrabIconBlue : GrabIcon} />
-      <span>{name}</span>
-      <ClickOverHint show={isOver && !isSelected} />
-      {showLabel && <InfoLabel>{label}</InfoLabel>}
-      {isSelected && !isOver ? (
-        <EditIcon />
+      {isDragging ? (
+        <div style={{ width: '100%', height: 30, background: 'transparent' }}>
+          <FullWidthCarret>
+            <div />
+          </FullWidthCarret>
+        </div>
       ) : (
-        <RemoveIcon
-          isDragging={isSelected && isOver}
-          onRemove={e => {
-            e.stopPropagation();
-            onRemove(index);
-          }}
-        />
+        <>
+          <img src={isSelected ? GrabIconBlue : GrabIcon} />
+          <span>{name}</span>
+          <ClickOverHint show={isOver && !isSelected} />
+          {showLabel && <InfoLabel>{label}</InfoLabel>}
+          {isSelected && !isOver ? (
+            <EditIcon />
+          ) : (
+            <RemoveIcon
+              isDragging={isSelected && isOver}
+              onRemove={e => {
+                e.stopPropagation();
+                onRemove(index);
+              }}
+            />
+          )}
+        </>
       )}
     </Field>
   );
@@ -70,6 +85,7 @@ ListField.defaultProps = {
 };
 
 ListField.propTypes = {
+  connectDragPreview: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
   index: PropTypes.number.isRequired,
@@ -120,6 +136,7 @@ export default DropTarget(
       },
     },
     (connect, monitor) => ({
+      connectDragPreview: connect.dragPreview(),
       connectDragSource: connect.dragSource(),
       isDragging: monitor.isDragging(),
     })

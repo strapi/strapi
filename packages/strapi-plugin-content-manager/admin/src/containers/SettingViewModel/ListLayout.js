@@ -1,7 +1,8 @@
-import React, { Fragment, useCallback, useRef } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { DropTarget } from 'react-dnd';
+// import { DropTarget } from 'react-dnd';
+import { useDrop } from 'react-dnd';
 
 import { InputsIndex as Input } from 'strapi-helper-plugin';
 
@@ -17,7 +18,6 @@ import ItemTypes from '../../utils/itemsTypes';
 function ListLayout({
   addField,
   availableData,
-  connectDropTarget,
   displayedData,
   fieldToEditIndex,
   modifiedData,
@@ -27,7 +27,6 @@ function ListLayout({
   onRemove,
   onSubmit,
 }) {
-  const ref = useRef(null);
   const handleRemove = index => {
     if (displayedData.length > 1) {
       onRemove(index);
@@ -87,11 +86,16 @@ function ListLayout({
     [displayedData]
   );
 
-  connectDropTarget(ref);
+  const [, drop] = useDrop({
+    accept: ItemTypes.FIELD,
+    collect: monitor => ({
+      itemType: monitor.getItemType(),
+    }),
+  });
 
   return (
     <>
-      <div className="col-lg-5 col-md-12" ref={ref}>
+      <div className="col-lg-5 col-md-12" ref={drop}>
         {displayedData.map((data, index) => (
           <Fragment key={data}>
             <Wrapper>
@@ -149,7 +153,6 @@ ListLayout.defaultProps = {
 ListLayout.propTypes = {
   addField: PropTypes.func,
   availableData: PropTypes.array,
-  connectDropTarget: PropTypes.func.isRequired,
   displayedData: PropTypes.array,
   fieldToEditIndex: PropTypes.number,
   modifiedData: PropTypes.object,
@@ -160,6 +163,8 @@ ListLayout.propTypes = {
   onSubmit: PropTypes.func,
 };
 
-export default DropTarget(ItemTypes.FIELD, {}, connect => ({
-  connectDropTarget: connect.dropTarget(),
-}))(ListLayout);
+export default ListLayout;
+
+// export default DropTarget(ItemTypes.FIELD, {}, connect => ({
+//   connectDropTarget: connect.dropTarget(),
+// }))(ListLayout);

@@ -49,6 +49,8 @@ const CustomDragLayer = () => {
 
   function renderItem() {
     switch (itemType) {
+      case ItemTypes.FIELD:
+        return <FieldItem name={item.id} size={12} isEditing />;
       case ItemTypes.RELATION:
         return (
           <Li>
