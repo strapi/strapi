@@ -6,7 +6,7 @@ module.exports = {
   },
   definition: `
     type UsersPermissionsMe {
-      _id: ID!
+      id: ID!
       username: String!
       email: String!
       confirmed: Boolean
@@ -15,7 +15,7 @@ module.exports = {
     }
 
     type UsersPermissionsMeRole {
-      _id: ID!
+      id: ID!
       name: String!
       description: String
       type: String
@@ -25,6 +25,11 @@ module.exports = {
     me: UsersPermissionsMe
   `,
   resolver: {
+    UsersPermissionsMe: {
+      id(obj) {
+        return obj.id || obj._id;
+      },
+    },
     Query: {
       me: {
         resolverOf: 'User.me',
