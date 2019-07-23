@@ -4,6 +4,7 @@
  */
 
 import { fromJS } from 'immutable';
+
 import {
   ADD_FIELD_TO_LIST,
   GET_DATA_SUCCEEDED,

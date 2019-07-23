@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const SettingFormWrapper = styled.form`
+const SettingFormWrapper = styled.div`
   min-height: 246px;
   padding: 24px 30px 0px;
   background-color: #fafafb;

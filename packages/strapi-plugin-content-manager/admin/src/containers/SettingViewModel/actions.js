@@ -1,3 +1,4 @@
+import { set } from 'lodash';
 import {
   ADD_FIELD_TO_LIST,
   GET_DATA,
@@ -11,6 +12,7 @@ import {
   SET_LIST_FIELD_TO_EDIT_INDEX,
   SUBMIT_SUCCEEDED,
 } from './constants';
+import { formatLayout, createLayout } from '../../utils/layout';
 
 export function addFieldToList(field) {
   return {
@@ -27,6 +29,11 @@ export function getData(uid) {
 }
 
 export function getDataSucceeded(layout) {
+  set(
+    layout,
+    ['layouts', 'edit'],
+    formatLayout(createLayout(layout.layouts.edit))
+  );
   return {
     type: GET_DATA_SUCCEEDED,
     layout,

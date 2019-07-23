@@ -25,6 +25,7 @@ function ListLayout({
   onChange,
   onClick,
   onRemove,
+  onSubmit,
 }) {
   const ref = useRef(null);
   const handleRemove = index => {
@@ -116,7 +117,7 @@ function ListLayout({
         <Add data={availableData} onClick={addField} />
       </div>
       <div className="col-lg-7 col-md-12">
-        <FormWrapper>
+        <FormWrapper onSubmit={onSubmit}>
           {form.map(input => {
             return (
               <Input
@@ -142,6 +143,7 @@ ListLayout.defaultProps = {
   onChange: () => {},
   onClick: () => {},
   onRemove: () => {},
+  onSubmit: () => {},
 };
 
 ListLayout.propTypes = {
@@ -155,6 +157,7 @@ ListLayout.propTypes = {
   onChange: PropTypes.func,
   onClick: PropTypes.func,
   onRemove: PropTypes.func,
+  onSubmit: PropTypes.func,
 };
 
 export default DropTarget(ItemTypes.FIELD, {}, connect => ({

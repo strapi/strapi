@@ -16,6 +16,7 @@ import pluginId from '../../pluginId';
 
 import Block from '../../components/Block';
 import Container from '../../components/Container';
+import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
 import SectionTitle from '../../components/SectionTitle';
 
@@ -83,11 +84,18 @@ function SettingViewModel({
     if (showWarningSubmit) {
       toggleWarningSubmit();
     }
-  }, [shouldToggleModalSubmit, showWarningSubmit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldToggleModalSubmit]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    toggleWarningSubmit();
+    emitEvent('willSaveContentTypeLayout');
+  };
 
   const getPluginHeaderActions = () => {
     if (isEqual(modifiedData, initialData)) {
@@ -96,17 +104,16 @@ function SettingViewModel({
 
     return [
       {
-        label: 'content-manager.popUpWarning.button.cancel',
+        label: `${pluginId}.popUpWarning.button.cancel`,
         kind: 'secondary',
         onClick: toggleWarningCancel,
         type: 'button',
       },
       {
         kind: 'primary',
-        label: 'content-manager.containers.Edit.submit',
-        onClick: () => {
-          toggleWarningSubmit();
-          emitEvent('willSaveContentTypeLayout');
+        label: `${pluginId}.containers.Edit.submit`,
+        onClick: e => {
+          handleSubmit(e);
         },
         type: 'submit',
       },
@@ -128,6 +135,21 @@ function SettingViewModel({
       return getListDisplayedFields();
     }
 
+    if (input.name === 'settings.mainField') {
+      const attributes = get(modifiedData, ['schema', 'attributes'], {});
+      const options = Object.keys(attributes).filter(attr => {
+        const type = get(attributes, [attr, 'type'], '');
+
+        return (
+          !['json', 'text', 'relation', 'group', 'boolean', 'date'].includes(
+            type
+          ) && !!type
+        );
+      });
+
+      return ['id', ...options];
+    }
+
     return input.selectOptions;
   };
 
@@ -135,84 +157,96 @@ function SettingViewModel({
     <>
       <BackHeader onClick={() => goBack()} />
       <Container className="container-fluid">
-        <PluginHeader
-          actions={getPluginHeaderActions()}
-          title={{
-            id: `${pluginId}.containers.SettingViewModel.pluginHeader.title`,
-            values: { name: upperFirst(name) },
-          }}
-          description={{
-            id:
-              'content-manager.containers.SettingPage.pluginHeaderDescription',
-          }}
-        />
-        <HeaderNav
-          links={[
-            {
-              name: 'content-manager.containers.SettingPage.listSettings.title',
-              to: getUrl(name, 'list-settings'),
-            },
-            {
-              name: 'content-manager.containers.SettingPage.editSettings.title',
-              to: getUrl(name, 'edit-settings'),
-            },
-          ]}
-        />
-        <div className="row">
-          <Block
-            style={{
-              marginBottom: '13px',
-              paddingBottom: '30px',
-              paddingTop: '30px',
+        <form onSubmit={handleSubmit}>
+          <PluginHeader
+            actions={getPluginHeaderActions()}
+            title={{
+              id: `${pluginId}.containers.SettingViewModel.pluginHeader.title`,
+              values: { name: upperFirst(name) },
             }}
-          >
-            <SectionTitle isSettings />
-            <div className="row">
-              {forms[settingType].map(input => {
-                return (
-                  <Input
-                    key={input.name}
-                    {...input}
-                    onChange={onChange}
-                    selectOptions={getSelectOptions(input)}
-                    value={get(modifiedData, input.name)}
-                  />
-                );
-              })}
-              <div className="col-12">
-                <Separator />
+            description={{
+              id:
+                'content-manager.containers.SettingPage.pluginHeaderDescription',
+            }}
+          />
+          <HeaderNav
+            links={[
+              {
+                name:
+                  'content-manager.containers.SettingPage.listSettings.title',
+                to: getUrl(name, 'list-settings'),
+              },
+              {
+                name:
+                  'content-manager.containers.SettingPage.editSettings.title',
+                to: getUrl(name, 'edit-settings'),
+              },
+            ]}
+          />
+          <div className="row">
+            <Block
+              style={{
+                marginBottom: '13px',
+                paddingBottom: '30px',
+                paddingTop: '30px',
+              }}
+            >
+              <SectionTitle isSettings />
+              <div className="row">
+                {forms[settingType].map(input => {
+                  return (
+                    <Input
+                      key={input.name}
+                      {...input}
+                      onChange={onChange}
+                      selectOptions={getSelectOptions(input)}
+                      value={get(modifiedData, input.name)}
+                    />
+                  );
+                })}
+                <div className="col-12">
+                  <Separator />
+                </div>
               </div>
-            </div>
-            <SectionTitle />
+              <SectionTitle />
 
-            <div className="row">
-              <LayoutTitle className="col-12">
-                <FormTitle
-                  title={`${pluginId}.global.displayedFields`}
-                  description={`${pluginId}.containers.SettingPage.${
-                    settingType === 'list-settings'
-                      ? 'attributes'
-                      : 'editSettings'
-                  }.description`}
-                />
-              </LayoutTitle>
+              <div className="row">
+                <LayoutTitle className="col-12">
+                  <FormTitle
+                    title={`${pluginId}.global.displayedFields`}
+                    description={`${pluginId}.containers.SettingPage.${
+                      settingType === 'list-settings'
+                        ? 'attributes'
+                        : 'editSettings'
+                    }.description`}
+                  />
+                </LayoutTitle>
 
-              {settingType === 'list-settings' && (
-                <ListLayout
-                  addField={addFieldToList}
-                  displayedData={getListDisplayedFields()}
-                  availableData={getListRemainingFields()}
-                  fieldToEditIndex={listFieldToEditIndex}
-                  modifiedData={modifiedData}
-                  moveListField={moveListField}
-                  onClick={setListFieldToEditIndex}
-                  onChange={onChange}
-                  onRemove={onRemoveListField}
-                />
-              )}
-            </div>
-          </Block>
-        </div>
+                {settingType === 'list-settings' && (
+                  <ListLayout
+                    addField={addFieldToList}
+                    displayedData={getListDisplayedFields()}
+                    availableData={getListRemainingFields()}
+                    fieldToEditIndex={listFieldToEditIndex}
+                    modifiedData={modifiedData}
+                    moveListField={moveListField}
+                    onClick={setListFieldToEditIndex}
+                    onChange={onChange}
+                    onRemove={onRemoveListField}
+                    onSubmit={handleSubmit}
+                  />
+                )}
+
+                {settingType === 'edit-settings' && (
+                  <FieldsReorder
+                    attributes={get(modifiedData, ['schema', 'attributes'], {})}
+                    layout={get(modifiedData, ['layouts', 'edit'], [])}
+                  />
+                )}
+              </div>
+            </Block>
+          </div>
+        </form>
       </Container>
       <PopUpWarning
         isOpen={showWarningCancel}

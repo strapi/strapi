@@ -1,8 +1,10 @@
 import { all, fork, put, call, takeLatest, select } from 'redux-saga/effects';
+import { set } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
 import { deleteLayout } from '../Main/actions';
+import { unformatLayout } from '../../utils/layout';
 import { getDataSucceeded, submitSucceeded } from './actions';
 import { GET_DATA, ON_SUBMIT } from './constants';
 import { makeSelectModifiedData } from './selectors';
@@ -24,6 +26,8 @@ export function* getData({ uid }) {
 export function* submit({ emitEvent, uid }) {
   try {
     const body = yield select(makeSelectModifiedData());
+    // We need to send the unformated edit layout
+    set(body, 'layouts.edit', unformatLayout(body.layouts.edit));
 
     yield call(request, getRequestUrl(`layouts/${uid}`), {
       method: 'PUT',
