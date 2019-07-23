@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import SortWrapper from '../SortWrapper';
 import Item from './Item';
 
-const FieldsReorder = ({ attributes, layout }) => {
+const FieldsReorder = ({ attributes, layout, moveRow }) => {
   const getType = attributeName => {
     const attribute = get(attributes, [attributeName], {});
 
@@ -30,6 +30,7 @@ const FieldsReorder = ({ attributes, layout }) => {
                   <Item
                     itemIndex={index}
                     key={name}
+                    moveRow={moveRow}
                     name={name}
                     rowIndex={rowIndex}
                     size={size}
@@ -54,6 +55,7 @@ FieldsReorder.defaultProps = {
 FieldsReorder.propTypes = {
   attributes: PropTypes.object,
   layout: PropTypes.array,
+  moveRow: PropTypes.func.isRequired,
 };
 
 export default memo(FieldsReorder);

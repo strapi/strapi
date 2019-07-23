@@ -44,6 +44,7 @@ const NameWrapper = styled.div`
   display: flex;
   padding-left: 10px;
   justify-content: space-between;
+
   ${({ isHidden }) => {
     if (!isHidden) {
       return css`
@@ -62,6 +63,15 @@ const NameWrapper = styled.div`
           margin-right: 10px;
           margin-top: 11px;
         }
+      `;
+    }
+  }}
+
+  ${({ isEditing }) => {
+    if (isEditing) {
+      return css`
+        background: #e6f0fb;
+        border: 1px solid #aed4fb;
       `;
     }
   }}

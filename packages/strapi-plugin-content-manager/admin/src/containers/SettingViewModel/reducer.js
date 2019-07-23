@@ -4,11 +4,14 @@
  */
 
 import { fromJS } from 'immutable';
+import { formatLayout } from '../../utils/layout';
 
 import {
   ADD_FIELD_TO_LIST,
+  FORMAT_LAYOUT,
   GET_DATA_SUCCEEDED,
   MOVE_FIELD_LIST,
+  MOVE_ROW,
   ON_CHANGE,
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
@@ -18,6 +21,7 @@ import {
 } from './constants';
 
 export const initialState = fromJS({
+  didDrop: false,
   listFieldToEditIndex: 0,
   initialData: fromJS({}),
   isLoading: true,
@@ -26,11 +30,20 @@ export const initialState = fromJS({
 });
 
 function settingViewModelReducer(state = initialState, action) {
+  const layoutPath = ['modifiedData', 'layouts', 'edit'];
+  const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
+  console.log(dragIndex, hoverIndex);
+
   switch (action.type) {
     case ADD_FIELD_TO_LIST:
       return state.updateIn(['modifiedData', 'layouts', 'list'], list =>
         list.push(action.field)
       );
+    case FORMAT_LAYOUT: {
+      const newList = formatLayout(state.getIn(layoutPath).toJS());
+
+      return state.updateIn(layoutPath, () => fromJS(newList));
+    }
     case GET_DATA_SUCCEEDED:
       return state
         .update('initialData', () => fromJS(action.layout || {}))
@@ -46,6 +59,13 @@ function settingViewModelReducer(state = initialState, action) {
         .update('listFieldToEditIndex', () => {
           return action.overIndex;
         });
+    case MOVE_ROW:
+      return state.updateIn(layoutPath, list => {
+        return list
+          .delete(dragRowIndex)
+          .insert(hoverRowIndex, state.getIn([...layoutPath, dragRowIndex]));
+      });
+
     case ON_CHANGE:
       return state.updateIn(action.keys, () => action.value);
     case ON_REMOVE_LIST_FIELD: {

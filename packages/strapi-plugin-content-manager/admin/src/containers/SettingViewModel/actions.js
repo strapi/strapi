@@ -1,9 +1,11 @@
 import { set } from 'lodash';
 import {
   ADD_FIELD_TO_LIST,
+  FORMAT_LAYOUT,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   MOVE_FIELD_LIST,
+  MOVE_ROW,
   ON_CHANGE,
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
@@ -12,12 +14,18 @@ import {
   SET_LIST_FIELD_TO_EDIT_INDEX,
   SUBMIT_SUCCEEDED,
 } from './constants';
-import { formatLayout, createLayout } from '../../utils/layout';
+import { formatLayout as updateLayout, createLayout } from '../../utils/layout';
 
 export function addFieldToList(field) {
   return {
     type: ADD_FIELD_TO_LIST,
     field,
+  };
+}
+
+export function formatLayout() {
+  return {
+    type: FORMAT_LAYOUT,
   };
 }
 
@@ -32,7 +40,7 @@ export function getDataSucceeded(layout) {
   set(
     layout,
     ['layouts', 'edit'],
-    formatLayout(createLayout(layout.layouts.edit))
+    updateLayout(createLayout(layout.layouts.edit))
   );
   return {
     type: GET_DATA_SUCCEEDED,
@@ -45,6 +53,14 @@ export function moveListField(dragIndex, overIndex) {
     type: MOVE_FIELD_LIST,
     dragIndex,
     overIndex,
+  };
+}
+
+export function moveRow(dragRowIndex, hoverRowIndex) {
+  return {
+    type: MOVE_ROW,
+    dragRowIndex,
+    hoverRowIndex,
   };
 }
 

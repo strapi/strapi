@@ -26,8 +26,10 @@ import Separator from './Separator';
 
 import {
   addFieldToList,
+  formatLayout,
   getData,
   moveListField,
+  moveRow,
   onChange,
   onReset,
   onSubmit,
@@ -46,7 +48,9 @@ const getUrl = (name, to) =>
 
 function SettingViewModel({
   addFieldToList,
+  didDrop,
   emitEvent,
+  formatLayout,
   getData,
   history: { goBack },
   initialData,
@@ -57,6 +61,7 @@ function SettingViewModel({
   },
   modifiedData,
   moveListField,
+  moveRow,
   onChange,
   onRemoveListField,
   onReset,
@@ -86,6 +91,13 @@ function SettingViewModel({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldToggleModalSubmit]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      formatLayout();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [didDrop]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -241,6 +253,7 @@ function SettingViewModel({
                   <FieldsReorder
                     attributes={get(modifiedData, ['schema', 'attributes'], {})}
                     layout={get(modifiedData, ['layouts', 'edit'], [])}
+                    moveRow={moveRow}
                   />
                 )}
               </div>
@@ -281,7 +294,9 @@ function SettingViewModel({
 
 SettingViewModel.propTypes = {
   addFieldToList: PropTypes.func.isRequired,
+  didDrop: PropTypes.bool.isRequired,
   emitEvent: PropTypes.func.isRequired,
+  formatLayout: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   history: PropTypes.shape({
     goBack: PropTypes.func,
@@ -295,9 +310,9 @@ SettingViewModel.propTypes = {
       settingType: PropTypes.string,
     }),
   }).isRequired,
-
   modifiedData: PropTypes.object.isRequired,
   moveListField: PropTypes.func.isRequired,
+  moveRow: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onRemoveListField: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
@@ -313,8 +328,10 @@ export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
       addFieldToList,
+      formatLayout,
       getData,
       moveListField,
+      moveRow,
       onChange,
       onRemoveListField,
       onReset,

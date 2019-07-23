@@ -3,6 +3,7 @@ import { useDragLayer } from 'react-dnd';
 import ItemTypes from '../../utils/itemsTypes';
 import RelationItem from '../SelectMany/Relation';
 import { Li } from '../SelectMany/components';
+import FieldItem from '../FieldItem';
 
 const layerStyles = {
   position: 'fixed',
@@ -20,7 +21,8 @@ function getItemStyles(initialOffset, currentOffset, mouseOffset) {
   }
 
   const { x, y } = mouseOffset;
-  const transform = `translate(${x - 50}px, ${y - 5}px)`;
+  // TODO adjust
+  const transform = `translate(${x}px, ${y}px)`;
 
   return {
     transform,
@@ -53,6 +55,8 @@ const CustomDragLayer = () => {
             <RelationItem data={item.data} mainField={item.mainField} />
           </Li>
         );
+      case ItemTypes.EDIT_FIELD:
+        return <FieldItem name={item.name} size={12} isEditing />;
       default:
         return null;
     }
