@@ -55,6 +55,7 @@ module.exports = (mongoose = Mongoose) => {
       case 'password':
       case 'string':
       case 'text':
+      case 'wysiwyg':
         return 'String';
       default:
         return undefined;

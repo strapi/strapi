@@ -12,11 +12,8 @@ const postModel = {
     {
       name: 'name',
       params: {
-        appearance: {
-          WYSIWYG: false,
-        },
         multiple: false,
-        type: 'string',
+        type: 'wysiwyg',
       },
     },
     {
