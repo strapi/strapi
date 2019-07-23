@@ -2,11 +2,11 @@
 
 One of Strapi's main feature is its fully extendable and customizable admin panel. This section explains how the admin panel section is structured and how to customize it.
 
-See the [Contributing Guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for informations on how to contribute to Strapi's admin interface.
+See the [Contributing Guide](https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md) for information on how to contribute to Strapi's admin interface.
 
 ## Customization
 
-The administration panel can be customised according to your needs, so you can make it reflects your identity.
+The administration panel can be customized according to your needs, so you can make it reflects your identity.
 
 ### Change access URL
 
@@ -32,6 +32,20 @@ The panel will be available through [http://localhost:1337/dashboard](http://loc
 ### Development mode
 
 **_Currently not available_**
+
+### Styles
+
+The AdminUI package source can be easily found in `./node_modules/strapi-admin/src/`.
+
+For example, to change the top-left displayed admin panel's color, `./node_modules/strapi-admin/admin/src/components/LeftMenuHeader/styles.scss` should be overriden by `./admin/src/components/LeftMenuHeader/styles.scss` with your own styles.
+
+Thus, you are replacing the files that would normally be in `node_modules/strapi-admin/admin/src` and directing them to `admin/src/some/file/path`.
+
+To apply your changes you need to rebuild your admin panel
+
+```
+npm run build
+```
 
 ### Logo
 
@@ -78,7 +92,7 @@ Let's dive into the build configurations for each case.
 
 #### Deploy the entire project on the same server.
 
-You don't need to touch anything in your configuration file. This is the default behaviour and the build configurations will be automatically set. The server will start on the defined port and the administration panel will be accessible through http://yourdomain.com:1337/dashboard.
+You don't need to touch anything in your configuration file. This is the default behavior and the build configurations will be automatically set. The server will start on the defined port and the administration panel will be accessible through http://yourdomain.com:1337/dashboard.
 
 You might want to change the path to access to the administration panel. Here the required configurations to change the path:
 
@@ -97,7 +111,7 @@ You might want to change the path to access to the administration panel. Here th
 }
 ```
 
-**You have to rebuild the administration panel to make this work.** [Build instuctions](#build).
+**You have to rebuild the administration panel to make this work.** [Build instructions](#build).
 
 #### Deploy the administration panel on another server (AWS S3, Azure, etc) than the API.
 

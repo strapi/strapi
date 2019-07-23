@@ -8,19 +8,18 @@ Strapi provides helpers so you don't have to develop again and again the same ge
 
 ### Methods
 
-| Name | Description |
-| ---- | ----------- |
-| clear(key) | Remove the data in either `localStorage` or `sessionStorage` |
-| clearAppStorage() | Remove all data from both storage |
-| clearToken() | Remove the user's `jwt Token` in the appropriate browser's storage |
-| clearUserInfo() | Remove the user's info from storage |
-| get(key) | Get the item in the browser's storage |
-| getToken() | Get the user's `jwtToken` |
-| getUserInfo() | Get the user's infos |
-| set(value, key, isLocalStorage) | Set an item in the `sessionStorage`. If `true` is passed as the 3rd parameter it sets the value in the `localStorage` |
-| setToken(value, isLocalStorage) | Set the user's `jwtToken` in the `sessionStorage`. If `true` is passed as the 2nd parameter it sets the value in the `localStorage` |
-| setUserInfo(value, isLocalStorage) | Set the user's info in the `sessionStorage`. If `true` is passed as the 2nd parameter it sets the value in the `localStorage` |
-
+| Name                               | Description                                                                                                                         |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| clear(key)                         | Remove the data in either `localStorage` or `sessionStorage`                                                                        |
+| clearAppStorage()                  | Remove all data from both storage                                                                                                   |
+| clearToken()                       | Remove the user's `jwt Token` in the appropriate browser's storage                                                                  |
+| clearUserInfo()                    | Remove the user's info from storage                                                                                                 |
+| get(key)                           | Get the item in the browser's storage                                                                                               |
+| getToken()                         | Get the user's `jwtToken`                                                                                                           |
+| getUserInfo()                      | Get the user's infos                                                                                                                |
+| set(value, key, isLocalStorage)    | Set an item in the `sessionStorage`. If `true` is passed as the 3rd parameter it sets the value in the `localStorage`               |
+| setToken(value, isLocalStorage)    | Set the user's `jwtToken` in the `sessionStorage`. If `true` is passed as the 2nd parameter it sets the value in the `localStorage` |
+| setUserInfo(value, isLocalStorage) | Set the user's info in the `sessionStorage`. If `true` is passed as the 2nd parameter it sets the value in the `localStorage`       |
 
 ```js
 import auth from 'utils/auth';
@@ -55,15 +54,14 @@ const URL = '/create?source=users-permissions';
 const source = getQueryParameters(URL, 'source');
 
 console.log(source); // users-permissions
-
 ```
-
 
 ## Request helper
 
 A request helper is available to handle all requests inside a plugin.
 
 It takes three arguments:
+
 - `requestUrl`: The url we want to fetch.
 - `options`: Please refer to this [documentation](https://github.com/github/fetch).
 - `true`: This third argument is optional. If true is passed the response will be sent only if the server has restarted check out the [example](#example-with-server-autoreload-watcher).
@@ -89,8 +87,8 @@ export function* fetchData(action) {
     const data = yield call(request, requestUrl, opts);
 
     yield put(dataFetchSucceeded(data));
-  } catch(error) {
-    yield put(dataFetchError(error))
+  } catch (error) {
+    yield put(dataFetchError(error));
   }
 }
 
@@ -111,6 +109,7 @@ Let's say that we have a container that fetches Content Type configurations depe
 Here we want to create a route `/content-type/:contentTypeName` for the `ContentTypePage` container.
 
 **Path —** `./plugins/my-plugin/admin/src/container/App/index.js`.
+
 ```js
 import React from 'react';
 import { connect } from 'react-redux';
@@ -129,7 +128,11 @@ class App extends React.Component {
     return (
       <div className={`${pluginId} ${styles.app}`}>
         <Switch>
-          <Route exact path="/plugins/my-plugin/content-type/:contentTypeName" component={ContentTypePage} />
+          <Route
+            exact
+            path="/plugins/my-plugin/content-type/:contentTypeName"
+            component={ContentTypePage}
+          />
         </Switch>
       </div>
     );
@@ -141,39 +144,41 @@ App.contextTypes = {
 };
 
 export function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {},
-    dispatch
-  );
+  return bindActionCreators({}, dispatch);
 }
 
 const mapStateToProps = createStructuredSelector({});
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 
-export default compose(
-  withConnect,
-)(App);
-
+export default compose(withConnect)(App);
 ```
-***
+
+---
 
 #### Constants declaration:
 
 Let's declare the needed constants to handle fetching data:
 
 **Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/constants.js`.
+
 ```js
 export const DATA_FETCH = 'myPlugin/ContentTypePage/DATA_FETCH';
 export const DATA_FETCH_ERROR = 'myPlugin/ContentTypePage/DATA_FETCH_ERROR';
-export const DATA_FETCH_SUCCEEDED = 'myPlugin/ContentTypePage/DATA_FETCH_SUCCEEDED';
+export const DATA_FETCH_SUCCEEDED =
+  'myPlugin/ContentTypePage/DATA_FETCH_SUCCEEDED';
 ```
-***
+
+---
 
 #### Actions declaration:
 
 Let's declare our actions.
 
 **Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/actions.js`.
+
 ```js
 import {
   DATA_FETCH,
@@ -204,19 +209,20 @@ export function dataFetchSucceeded(data) {
 }
 ```
 
-***
+---
 
 #### Reducer setup:
 
-Please refer to the [Immutable documentation](https://facebook.github.io/immutable-js/docs/#/) for informations about data structure.
+Please refer to the [Immutable documentation](https://facebook.github.io/immutable-js/docs/#/) for information about data structure.
 
 **Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/reducer.js`.
+
 ```js
 import { fromJS, Map } from 'immutable';
 import {
   DATA_FETCH,
   DATA_FETCH_ERROR,
-  DATA_FETCH_SUCCEEDED
+  DATA_FETCH_SUCCEEDED,
 } from './constants';
 
 const initialState = fromJS({
@@ -231,13 +237,9 @@ function contentTypePageReducer(state = initialState, action) {
     case DATA_FETCH:
       return state.set('contentTypeName', action.contentTypeName);
     case DATA_FETCH_ERROR:
-      return state
-        .set('error', true)
-        .set('errorMessage', action.errorMessage);
+      return state.set('error', true).set('errorMessage', action.errorMessage);
     case DATA_FETCH_SUCCEEDED:
-      return state
-        .set('error', false)
-        .set('data', Map(action.data.data));
+      return state.set('error', false).set('data', Map(action.data.data));
     default:
       return state;
   }
@@ -246,11 +248,12 @@ function contentTypePageReducer(state = initialState, action) {
 export default contentTypePageReducer;
 ```
 
-***
+---
 
 #### Selectors setup:
 
 **Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/selectors.js`.
+
 ```js
 import { createSelector } from 'reselect';
 
@@ -281,11 +284,12 @@ export default selectContentTypePage;
 export { makeSelectContentTypeName, selectContentTypePageDomain };
 ```
 
-***
+---
 
 #### Handling route change:
 
 **Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/index.js`.
+
 ```js
 import React from 'react';
 import { connect } from 'react-redux';
@@ -305,7 +309,8 @@ import saga from './sagas';
 import reducer from './reducer';
 import styles from './styles.scss';
 
-export class ContentTypePage extends React.Component { // eslint-disable-line react/prefer-stateless-function
+export class ContentTypePage extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
 
@@ -326,7 +331,10 @@ export class ContentTypePage extends React.Component { // eslint-disable-line re
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.match.params.contentTypeName !== this.props.match.params.contentTypeName) {
+    if (
+      nextProps.match.params.contentTypeName !==
+      this.props.match.params.contentTypeName
+    ) {
       this.props.dataFetch(nextProps.match.params.contentTypeName);
     }
   }
@@ -359,7 +367,7 @@ function mapDispatchToProps(dispatch) {
     {
       dataFetch,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -369,32 +377,41 @@ ContentTypePage.propTypes = {
   match: PropTypes.object.isRequired,
 };
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps
+);
 const withSaga = injectSaga({ key: 'contentTypePage', saga });
 const withReducer = injectReducer({ key: 'contentTypePage', reducer });
 
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(ContentTypePage);
 ```
 
-***
+---
 
 #### Fetching data:
 
 The `sagas.js` file is in charge of fetching data.
 
 **Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/sagas.js`.
+
 ```js
 import { LOCATION_CHANGE } from 'react-router-redux';
-import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
-import request from 'utils/request';
 import {
-  dataFetchError,
-  dataFetchSucceeded,
-} from './actions';
+  takeLatest,
+  call,
+  take,
+  put,
+  fork,
+  cancel,
+  select,
+} from 'redux-saga/effects';
+import request from 'utils/request';
+import { dataFetchError, dataFetchSucceeded } from './actions';
 import { DATA_FETCH } from './constants';
 import { makeSelectContentTypeName } from './selectors';
 
@@ -410,7 +427,7 @@ export function* fetchData() {
     // Fetching data with our request helper
     const data = yield call(request, requestUrl, opts);
     yield put(dataFetchSucceeded(data));
-  } catch(error) {
+  } catch (error) {
     yield put(dataFetchError(error.message));
   }
 }
@@ -425,21 +442,26 @@ function* defaultSaga() {
 export default defaultSaga;
 ```
 
-***
+---
 
 ### Example with server autoReload watcher
 
 Let's say that you want to develop a plugin that needs server restart on file change (like the settings-manager plugin) and you want to be aware of that to display some stuff..., you just have to send a third argument: `true` to our request helper and it will ping a dedicated route and send the response when the server has restarted.
 
-
 **Path —** `./plugins/my-plugin/admin/src/containers/**/sagas.js`.
+
 ```js
-import { takeLatest, call, take, put, fork, cancel, select } from 'redux-saga/effects';
-import request from 'utils/request';
 import {
-  submitSucceeded,
-  submitError,
-} from './actions';
+  takeLatest,
+  call,
+  take,
+  put,
+  fork,
+  cancel,
+  select,
+} from 'redux-saga/effects';
+import request from 'utils/request';
+import { submitSucceeded, submitError } from './actions';
 import { SUBMIT } from './constants';
 // Other useful imports like selectors...
 // ...
@@ -453,11 +475,11 @@ export function* postData() {
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
-      yield put(submitSucceeded());      
+      yield put(submitSucceeded());
     } else {
       yield put(submitError('An error occurred'));
     }
-  } catch(error) {
+  } catch (error) {
     yield put(submitError(error.message));
   }
 }

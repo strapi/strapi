@@ -216,6 +216,7 @@ class ModelForm extends React.Component {
       activeTab,
       featureToEditName,
       featureType,
+      modifiedData,
       isOpen,
     } = this.props;
     const currentForm = get(forms, activeTab, forms.base);
@@ -242,7 +243,9 @@ class ModelForm extends React.Component {
               <FormattedMessage
                 id={`${pluginId}.popUpForm.${actionType ||
                   'create'}.${featureType}.header.subTitle`}
-                values={{ name: upperFirst(featureToEditName) }}
+                values={{
+                  name: upperFirst(modifiedData.name || featureToEditName),
+                }}
               />
             </HeaderModalTitle>
             <div className="settings-tabs">

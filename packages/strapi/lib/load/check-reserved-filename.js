@@ -15,7 +15,6 @@ const prefixedPaths = [
   'hook',
   'middleware',
   'language',
-  'queries',
   'layout',
 ];
 

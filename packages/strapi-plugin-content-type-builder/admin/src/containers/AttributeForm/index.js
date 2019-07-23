@@ -26,6 +26,7 @@ import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperModal from '../../components/WrapperModal';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
+import IconGroup from '../../assets/icons/icon_type_groups.png';
 
 import supportedAttributes from './supportedAttributes.json';
 
@@ -39,6 +40,12 @@ class AttributeForm extends React.Component {
     const { activeTab, attributeType } = this.props;
 
     return get(supportedAttributes, [attributeType, activeTab, 'items'], []);
+  };
+
+  getIcon = () => {
+    const { featureType } = this.props;
+
+    return featureType === 'model' ? Icon : IconGroup;
   };
 
   getFormErrors = () => {
@@ -166,10 +173,14 @@ class AttributeForm extends React.Component {
   };
 
   renderInput = (input, index) => {
-    const { modifiedData, onChange } = this.props;
+    const { featureType, modifiedData, onChange } = this.props;
     const { didCheckErrors, formErrors } = this.state;
     const { custom, defaultValue, name } = input;
-    const value = get(modifiedData, name, defaultValue);
+
+    const value =
+      featureType === 'model'
+        ? get(modifiedData, name, defaultValue)
+        : get(modifiedData, name, defaultValue);
 
     const errors = get(formErrors, name, []);
 
@@ -218,6 +229,7 @@ class AttributeForm extends React.Component {
       actionType,
       attributeToEditName,
       attributeType,
+      featureType,
       isOpen,
     } = this.props;
     const { showForm } = this.state;
@@ -235,7 +247,7 @@ class AttributeForm extends React.Component {
         <HeaderModal>
           <section>
             <HeaderModalTitle>
-              <img src={Icon} alt="ct" />
+              <img src={this.getIcon()} alt="feature" />
               <span>{titleContent}</span>
             </HeaderModalTitle>
           </section>
@@ -257,7 +269,7 @@ class AttributeForm extends React.Component {
           <FooterModal>
             <section>
               <ButtonModalPrimary
-                message={`${pluginId}.form.button.add`}
+                message={`${pluginId}.form.button.add.${featureType}`}
                 type="submit"
                 add
               />
@@ -290,6 +302,7 @@ AttributeForm.defaultProps = {
   attributeToEditName: '',
   alreadyTakenAttributes: [],
   attributeType: 'string',
+  featureType: 'model',
   isOpen: false,
   modifiedData: {},
   onCancel: () => {},
@@ -304,6 +317,7 @@ AttributeForm.propTypes = {
   alreadyTakenAttributes: PropTypes.array,
   attributeToEditName: PropTypes.string,
   attributeType: PropTypes.string,
+  featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)
   onCancel: PropTypes.func,

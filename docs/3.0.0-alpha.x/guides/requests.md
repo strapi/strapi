@@ -2,7 +2,7 @@
 
 See the [requests concepts](../concepts/concepts.md#requests) for details.
 
-The context object (`ctx`) contains all the requests related informations. They are accessible through `ctx.request`, from [controllers](controllers.md) and [policies](policies.md).
+The context object (`ctx`) contains all the requests related information. They are accessible through `ctx.request`, from [controllers](controllers.md) and [policies](policies.md).
 
 ## API Reference
 
@@ -54,7 +54,7 @@ Get request original URL.
 Get origin of URL, include `protocol` and `host`.
 
 ```js
-ctx.request.origin
+ctx.request.origin;
 // => http://example.com
 ```
 
@@ -94,16 +94,16 @@ Set raw query string.
 ### request.host
 
 Get host (hostname:port) when present. Supports `X-Forwarded-Host`
-when `app.proxy` is __true__, otherwise `Host` is used.
+when `app.proxy` is **true**, otherwise `Host` is used.
 
 ### request.hostname
 
 Get hostname when present. Supports `X-Forwarded-Host`
-when `app.proxy` is __true__, otherwise `Host` is used.
+when `app.proxy` is **true**, otherwise `Host` is used.
 
 If host is IPv6, Koa delegates parsing to
 [WHATWG URL API](https://nodejs.org/dist/latest-v8.x/docs/api/url.html#url_the_whatwg_url_api),
-*Note* This may impact performance.
+_Note_ This may impact performance.
 
 ### request.URL
 
@@ -179,7 +179,7 @@ Inverse of `request.fresh`.
 ### request.protocol
 
 Return request protocol, "https" or "http". Supports `X-Forwarded-Proto`
-when `app.proxy` is __true__.
+when `app.proxy` is **true**.
 
 ### request.secure
 
@@ -189,7 +189,7 @@ issued via TLS.
 ### request.ip
 
 Request remote address. Supports `X-Forwarded-For` when `app.proxy`
-is __true__.
+is **true**.
 
 ### request.ips
 
@@ -212,7 +212,7 @@ If `app.subdomainOffset` is 3, `ctx.subdomains` is `["tobi"]`.
 ### request.is(types...)
 
 Check if the incoming request contains the "Content-Type"
-header field, and it contains any of the give mime `type`s.
+header field, and it contains any of the five mime `type`s.
 If there is no request body, `null` is returned.
 If there is no content type, or the match fails `false` is returned.
 Otherwise, it returns the matching content-type.
@@ -236,7 +236,7 @@ only images are sent to a given route:
 
 ```js
 if (ctx.is('image/*')) {
-// process
+  // process
 } else {
   ctx.throw(415, 'images only!');
 }
@@ -251,7 +251,7 @@ Koa's `request` object includes helpful content negotiation utilities powered by
 - `request.acceptsCharsets(charsets)`
 - `request.acceptsLanguages(langs)`
 
-If no types are supplied, __all__ acceptable types are returned.
+If no types are supplied, **all** acceptable types are returned.
 
 If multiple types are supplied, the best match will be returned. If no matches are found, a `false` is returned, and you should send a `406 "Not Acceptable"` response to the client.
 
@@ -300,10 +300,14 @@ or use a switch:
 
 ```js
 switch (ctx.accepts('json', 'html', 'text')) {
-  case 'json': break;
-  case 'html': break;
-  case 'text': break;
-  default: ctx.throw(406, 'json, html, or text only');
+  case 'json':
+    break;
+  case 'html':
+    break;
+  case 'text':
+    break;
+  default:
+    ctx.throw(406, 'json, html, or text only');
 }
 ```
 

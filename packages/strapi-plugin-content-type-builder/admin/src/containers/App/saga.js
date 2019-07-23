@@ -9,7 +9,9 @@ import {
   getDataSucceeded,
   deleteModelSucceeded,
   submitContentTypeSucceeded,
+  submitGroupSucceeded,
   submitTempContentTypeSucceeded,
+  submitTempGroupSucceeded,
   deleteGroupSucceeded,
 } from './actions';
 import {
@@ -17,7 +19,9 @@ import {
   DELETE_GROUP,
   DELETE_MODEL,
   SUBMIT_CONTENT_TYPE,
+  SUBMIT_GROUP,
   SUBMIT_TEMP_CONTENT_TYPE,
+  SUBMIT_TEMP_GROUP,
 } from './constants';
 
 const getRequestUrl = path => `/${pluginId}/${path}`;
@@ -27,7 +31,7 @@ export function* getData() {
     const [data, { connections }, groups] = yield all([
       call(request, getRequestUrl('models'), { method: 'GET' }),
       call(request, getRequestUrl('connections'), { method: 'GET' }),
-      call(request, getRequestUrl('fixtures/groups'), { method: 'GET' }),
+      call(request, getRequestUrl('groups'), { method: 'GET' }),
     ]);
 
     yield put(getDataSucceeded(data, connections, groups));
@@ -137,6 +141,70 @@ export function* submitCT({
   }
 }
 
+export function* submitGroup({
+  oldGroupName,
+  body,
+  source,
+  context: { emitEvent, history },
+}) {
+  try {
+    const { name } = body;
+
+    if (source) {
+      body.plugin = source;
+    }
+
+    emitEvent('willSaveGroup');
+
+    emitEvent('didSaveGroup');
+
+    yield put(submitGroupSucceeded({ oldGroupName }));
+    const suffixUrl = source ? `&source=${source}` : '';
+    history.push(`/plugins/${pluginId}/groups/${name}${suffixUrl}`);
+  } catch (error) {
+    const errorMessage = get(
+      error,
+      ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+      'notification.error'
+    );
+    strapi.notification.error(errorMessage);
+  }
+}
+
+// TODO: UNCOMMENT WHEN API IS AVAILABLE
+// export function* submitGroup({
+//   oldGroupName,
+//   body,
+//   source,
+//   context: { emitEvent, history },
+// }) {
+//   try {
+//     const { name } = body;
+
+//     if (source) {
+//       body.plugin = source;
+//     }
+
+//     emitEvent('willSaveGroup');
+
+//     const opts = { method: 'PUT', body };
+
+//     yield call(request, getRequestUrl(`groups/${oldGroupName}`), opts, true);
+//     emitEvent('didSaveGroup');
+
+//     yield put(submitGroupSucceeded());
+//     const suffixUrl = source ? `&source=${source}` : '';
+//     history.push(`/plugins/${pluginId}/groups/${name}${suffixUrl}`);
+//   } catch (error) {
+//     const errorMessage = get(
+//       error,
+//       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+//       'notification.error'
+//     );
+//     strapi.notification.error(errorMessage);
+//   }
+// }
+
 /* istanbul ignore-next */
 export function* submitTempCT({
   body,
@@ -177,6 +245,42 @@ export function* submitTempCT({
   }
 }
 
+/* istanbul ignore-next */
+export function* submitTempGroup({ context: { emitEvent } }) {
+  try {
+    emitEvent('willSaveGroup');
+    emitEvent('didSaveGroup');
+    yield put(submitTempGroupSucceeded());
+  } catch (error) {
+    const errorMessage = get(
+      error,
+      ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+      'notification.error'
+    );
+    strapi.notification.error(errorMessage);
+  }
+}
+
+// TODO: uncomment when backend is available
+// export function* submitTempGroup({ body, context: { emitEvent } }) {
+//   try {
+//     emitEvent('willSaveGroup');
+
+//     const opts = { method: 'POST', body };
+//     yield call(request, getRequestUrl('groups'), opts, true);
+
+//     emitEvent('didSaveGroup');
+//     yield put(submitTempGroupSucceeded());
+//   } catch (error) {
+//     const errorMessage = get(
+//       error,
+//       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+//       'notification.error'
+//     );
+//     strapi.notification.error(errorMessage);
+//   }
+// }
+
 // Individual exports for testing
 export default function* defaultSaga() {
   try {
@@ -185,7 +289,9 @@ export default function* defaultSaga() {
       fork(takeLatest, DELETE_GROUP, deleteGroup),
       fork(takeLatest, DELETE_MODEL, deleteModel),
       fork(takeLatest, SUBMIT_CONTENT_TYPE, submitCT),
+      fork(takeLatest, SUBMIT_GROUP, submitGroup),
       fork(takeLatest, SUBMIT_TEMP_CONTENT_TYPE, submitTempCT),
+      fork(takeLatest, SUBMIT_TEMP_GROUP, submitTempGroup),
     ]);
   } catch (err) {
     strapi.notification.error('notification.error');

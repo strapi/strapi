@@ -81,6 +81,14 @@ const productFixtures = [
     rank: 91,
     big_rank: 926372323421,
   },
+  {
+    name: 'Product 4',
+    description: 'Product description 4',
+    price: null,
+    decimal_field: 12.22,
+    rank: 99,
+    big_rank: 999999999999,
+  },
 ];
 
 async function createFixtures() {
@@ -191,6 +199,35 @@ describe('Filtering API', () => {
         expect(res.body).toEqual(
           expect.not.arrayContaining([data.products[0]])
         );
+      });
+    });
+
+    describe('Filter null', () => {
+      test('Should return only one match', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            price_null: true,
+          },
+        });
+
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(1);
+        expect(res.body[0]).toMatchObject(data.products[3]);
+      });
+
+      test('Should return three matches', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            price_null: false,
+          },
+        });
+
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body.length).toBe(3);
       });
     });
 
@@ -985,11 +1022,14 @@ describe('Filtering API', () => {
         },
       });
 
-      expect(res.body).toEqual([
+      [
+        data.products[3],
         data.products[0],
         data.products[2],
         data.products[1],
-      ]);
+      ].forEach(expectedPost => {
+        expect(res.body).toEqual(expect.arrayContaining([expectedPost]));
+      });
     });
   });
 

@@ -74,10 +74,11 @@ export {
 
 export { default as Label } from './components/Label';
 export { default as LiLink } from './components/LiLink';
+export { default as List } from './components/List';
 export { default as ListRow } from './components/ListRow';
 export { default as ListWrapper } from './components/ListWrapper';
 export { default as ListHeader } from './components/ListHeader';
-export { default as List } from './components/List';
+export { default as ListTitle } from './components/ListTitle';
 
 export { default as LoadingBar } from './components/LoadingBar';
 export { default as LoadingIndicator } from './components/LoadingIndicator';
