@@ -40,7 +40,7 @@ module.exports = {
           });
         }
 
-        return contentTypesService.setContentTypeConfiguration(
+        return contentTypesService.setConfiguration(
           { uid, source },
           { settings }
         );

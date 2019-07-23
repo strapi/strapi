@@ -7,14 +7,13 @@ module.exports = {
    * Returns the list of available content types
    */
   listContentTypes(ctx) {
-    const contentTypeService =
-      strapi.plugins['content-manager'].services.contenttypes;
+    const service = strapi.plugins['content-manager'].services.contenttypes;
 
     const userModels = Object.keys(strapi.models)
       .filter(key => key !== 'core_store')
       .map(uid => {
         const { info } = strapi.models[uid];
-        return contentTypeService.formatContentType({ uid, info });
+        return service.formatContentType({ uid, info });
       });
 
     const shouldDisplayPluginModel = uid => {
@@ -31,7 +30,7 @@ module.exports = {
         return Object.keys(plugin.models || {}).map(uid => {
           const { info } = plugin.models[uid];
 
-          return contentTypeService.formatContentType({
+          return service.formatContentType({
             uid,
             info,
             isDisplayed: shouldDisplayPluginModel(uid),
@@ -44,7 +43,7 @@ module.exports = {
     const adminModels = Object.keys(strapi.admin.models).map(uid => {
       const { info } = strapi.admin.models[uid];
 
-      return contentTypeService.formatContentType({
+      return service.formatContentType({
         uid,
         info,
         isDisplayed: false,
@@ -66,10 +65,9 @@ module.exports = {
   async findContentType(ctx) {
     const { uid } = ctx.params;
     const { source } = ctx.query;
-    const contentTypeService =
-      strapi.plugins['content-manager'].services.contenttypes;
+    const service = strapi.plugins['content-manager'].services.contenttypes;
 
-    const contentType = contentTypeService.findContentTypeModel({
+    const contentType = service.findContentTypeModel({
       uid,
       source,
     });
@@ -78,17 +76,15 @@ module.exports = {
       return ctx.notFound('contentType.notFound');
     }
 
-    const contentTypeConfigurations = await contentTypeService.getContentTypeConfiguration(
-      {
-        uid,
-        source,
-      }
-    );
+    const contentTypeConfigurations = await service.getConfiguration({
+      uid,
+      source,
+    });
 
     const data = {
       uid,
       source,
-      schema: contentTypeService.formatContentTypeSchema(contentType),
+      schema: service.formatContentTypeSchema(contentType),
       ...contentTypeConfigurations,
     };
 
@@ -106,11 +102,10 @@ module.exports = {
     const { uid } = ctx.params;
     const { source } = ctx.query;
     const { body } = ctx.request;
-    const contentTypeService =
-      strapi.plugins['content-manager'].services.contenttypes;
+    const service = strapi.plugins['content-manager'].services.contenttypes;
 
     // try to find the model
-    const contentType = contentTypeService.findContentTypeModel({
+    const contentType = service.findContentTypeModel({
       uid,
       source,
     });
@@ -133,22 +128,17 @@ module.exports = {
       });
     }
 
-    await contentTypeService.setContentTypeConfiguration(
-      { uid, source },
-      input
-    );
+    await service.setConfiguration({ uid, source }, input);
 
-    const contentTypeConfigurations = await contentTypeService.getContentTypeConfiguration(
-      {
-        uid,
-        source,
-      }
-    );
+    const contentTypeConfigurations = await service.getConfiguration({
+      uid,
+      source,
+    });
 
     const data = {
       uid,
       source,
-      schema: contentTypeService.formatContentTypeSchema(contentType),
+      schema: service.formatContentTypeSchema(contentType),
       ...contentTypeConfigurations,
     };
 

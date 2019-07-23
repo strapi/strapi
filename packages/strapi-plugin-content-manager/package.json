@@ -9,7 +9,7 @@
     "required": true
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test": "jest services"
   },
   "dependencies": {
     "classnames": "^2.2.6",

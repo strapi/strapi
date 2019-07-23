@@ -17,12 +17,12 @@ const getModelIn = source => uid => _.get(source, ['models', uid], null);
 module.exports = {
   uidToStoreKey,
 
-  getContentTypeConfiguration({ uid, source }) {
+  getConfiguration({ uid, source }) {
     const storeKey = uidToStoreKey({ uid, source });
     return storeUtils.getModelConfiguration(storeKey);
   },
 
-  setContentTypeConfiguration({ uid, source }, input) {
+  setConfiguration({ uid, source }, input) {
     const { settings, metadatas, layouts } = input;
 
     const storeKey = uidToStoreKey({ uid, source });
@@ -35,7 +35,7 @@ module.exports = {
     });
   },
 
-  deleteContentTypeConfiguration({ uid, source }) {
+  deleteConfiguration({ uid, source }) {
     const storeKey = uidToStoreKey({ uid, source });
     return storeUtils.deleteKey(storeKey);
   },
