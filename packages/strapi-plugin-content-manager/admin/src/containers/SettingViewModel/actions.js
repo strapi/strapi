@@ -6,10 +6,12 @@ import {
   GET_DATA_SUCCEEDED,
   MOVE_FIELD_LIST,
   MOVE_ROW,
+  ON_ADD_DATA,
   ON_CHANGE,
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
   ON_SUBMIT,
+  REMOVE_FIELD,
   REORDER_DIFF_ROW,
   REORDER_ROW,
   RESET_PROPS,
@@ -66,6 +68,13 @@ export function moveRow(dragRowIndex, hoverRowIndex) {
   };
 }
 
+export function onAddData(name) {
+  return {
+    type: ON_ADD_DATA,
+    name,
+  };
+}
+
 export function onChange({ target: { name, value } }) {
   return {
     type: ON_CHANGE,
@@ -91,6 +100,14 @@ export function onSubmit(uid, emitEvent) {
     type: ON_SUBMIT,
     uid,
     emitEvent,
+  };
+}
+
+export function removeField(rowIndex, fieldIndex) {
+  return {
+    type: REMOVE_FIELD,
+    rowIndex,
+    fieldIndex,
   };
 }
 

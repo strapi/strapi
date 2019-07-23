@@ -7,7 +7,16 @@ import FieldItem from '../FieldItem';
 
 import ItemTypes from '../../utils/itemsTypes';
 
-const Item = ({ itemIndex, moveItem, moveRow, name, rowIndex, size, type }) => {
+const Item = ({
+  itemIndex,
+  moveItem,
+  moveRow,
+  name,
+  removeField,
+  rowIndex,
+  size,
+  type,
+}) => {
   // console.log({ rowIndex });
   const ref = useRef(null);
   const [{ clientOffset, isOver }, drop] = useDrop({
@@ -176,6 +185,7 @@ const Item = ({ itemIndex, moveItem, moveRow, name, rowIndex, size, type }) => {
     <FieldItem
       isDragging={isDragging}
       name={name}
+      onClickRemove={() => removeField(rowIndex, itemIndex)}
       showLeftCarret={showLeftCarret}
       showRightCarret={showRightCarret}
       size={size}
@@ -194,6 +204,7 @@ Item.propTypes = {
   moveItem: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
+  removeField: PropTypes.func.isRequired,
   rowIndex: PropTypes.number.isRequired,
   size: PropTypes.number.isRequired,
   type: PropTypes.string,

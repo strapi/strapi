@@ -12,9 +12,11 @@ import {
   GET_DATA_SUCCEEDED,
   MOVE_FIELD_LIST,
   MOVE_ROW,
+  ON_ADD_DATA,
   ON_CHANGE,
   ON_REMOVE_LIST_FIELD,
   ON_RESET,
+  REMOVE_FIELD,
   REORDER_DIFF_ROW,
   REORDER_ROW,
   RESET_PROPS,
@@ -30,6 +32,21 @@ export const initialState = fromJS({
   modifiedData: fromJS({}),
   shouldToggleModalSubmit: true,
 });
+
+const getSize = type => {
+  switch (type) {
+    case 'boolean':
+    case 'date':
+    case 'datetime':
+      return 4;
+    case 'json':
+    case 'group':
+    case 'WYSIWYG':
+      return 12;
+    default:
+      return 6;
+  }
+};
 
 function settingViewModelReducer(state = initialState, action) {
   const layoutPath = ['modifiedData', 'layouts', 'edit'];
@@ -66,6 +83,32 @@ function settingViewModelReducer(state = initialState, action) {
           .delete(dragRowIndex)
           .insert(hoverRowIndex, state.getIn([...layoutPath, dragRowIndex]));
       });
+    case ON_ADD_DATA: {
+      const size = getSize(
+        state.getIn([
+          'modifiedData',
+          'schema',
+          'attributes',
+          action.name,
+          'type',
+        ])
+      );
+      const listSize = state.getIn(layoutPath).size;
+      const newList = state
+        .getIn(layoutPath)
+        .updateIn([listSize - 1, 'rowContent'], list => {
+          return list.push({
+            name: action.name,
+            size,
+          });
+        });
+      const formattedList = formatLayout(newList.toJS());
+
+      // NOTE we could use the diddrop part here but it causes an unecessary rerender...
+      // NOTE2: it would be great later to remove the didDrop key that is used to reformat the layout with the _TEMP_ divs
+
+      return state.updateIn(layoutPath, () => fromJS(formattedList));
+    }
 
     case ON_CHANGE:
       return state.updateIn(action.keys, () => action.value);
@@ -98,6 +141,25 @@ function settingViewModelReducer(state = initialState, action) {
       return state
         .update('modifiedData', () => state.get('initialData'))
         .update('listFieldToEditIndex', () => 0);
+    case REMOVE_FIELD: {
+      const row = state.getIn([...layoutPath, action.rowIndex, 'rowContent']);
+
+      // Delete the entire row if length is one or if lenght is equal to 2 and the second element is the hidden div used to make the dnd exp smoother
+      if (
+        row.size === 1 ||
+        (row.size == 2 && row.getIn([1, 'name']) === '_TEMP_')
+      ) {
+        return state
+          .updateIn(layoutPath, list => list.delete(action.rowIndex))
+          .update('didDrop', v => !v);
+      }
+      return state
+        .updateIn([...layoutPath, action.rowIndex, 'rowContent'], list =>
+          list.delete(action.fieldIndex)
+        )
+        .update('didDrop', v => !v);
+    }
+
     case REORDER_DIFF_ROW:
       return state
         .updateIn([...layoutPath, dragRowIndex, 'rowContent'], list => {

@@ -1,13 +1,4 @@
-import React from 'react';
-import { FormattedMessage } from 'react-intl';
-import PropTypes from 'prop-types';
 import styled, { css } from 'styled-components';
-import {
-  ButtonDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-} from 'reactstrap';
 
 const Wrapper = styled.div`
   margin-left: 29px;
@@ -17,10 +8,10 @@ const Wrapper = styled.div`
     justify-content: space-between;
     background: #ffffff;
     color: #333740;
-    border: 1px solid #e3e9f3;
     border-radius: 2px;
+    border: solid 1px #006ced;
+
     > button {
-      position: relative;
       cursor: pointer;
       padding-left: 10px !important;
       line-height: 30px;
@@ -40,21 +31,22 @@ const Wrapper = styled.div`
         color: #333740;
       }
       > p {
+        position: relative;
         height: 100%;
-        margin-left: 20px;
+        text-align: center;
         margin-bottom: 0;
         margin-top: -1px;
         color: #007eff !important;
         font-size: 13px !important;
-      }
-      &:before {
-        position: absolute;
-        top: 0px;
-        bottom: 0;
-        content: '\f067';
-        font-family: FontAwesome;
-        font-size: 10px;
-        color: #007eff;
+        > span {
+          &:before {
+            margin-right: 10px;
+            content: '\f067';
+            font-family: FontAwesome;
+            font-size: 10px;
+            color: #007eff;
+          }
+        }
       }
     }
     > div {
@@ -114,49 +106,4 @@ const Wrapper = styled.div`
   }}
 `;
 
-function Add({ data, onClick }) {
-  const [state, setState] = React.useState(false);
-
-  return (
-    <Wrapper isOpen={state} notAllowed={data.length === 0}>
-      <ButtonDropdown
-        isOpen={state}
-        toggle={() => {
-          if (data.length > 0) {
-            setState(prevState => !prevState);
-          }
-        }}
-      >
-        <DropdownToggle>
-          <FormattedMessage id="content-manager.containers.SettingPage.addField">
-            {msg => <p>{msg}</p>}
-          </FormattedMessage>
-        </DropdownToggle>
-        <DropdownMenu>
-          {data.map(item => (
-            <DropdownItem
-              key={item}
-              onClick={() => {
-                onClick(item);
-              }}
-            >
-              {item}
-            </DropdownItem>
-          ))}
-        </DropdownMenu>
-      </ButtonDropdown>
-    </Wrapper>
-  );
-}
-
-Add.defaultProps = {
-  data: [],
-  onClick: () => {},
-};
-
-Add.propTypes = {
-  data: PropTypes.array,
-  onClick: PropTypes.func,
-};
-
-export default Add;
+export { Wrapper };

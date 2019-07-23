@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -12,7 +12,9 @@ import {
   PopUpWarning,
   LoadingIndicatorPage,
 } from 'strapi-helper-plugin';
+
 import pluginId from '../../pluginId';
+import { LayoutDndProvider } from '../../contexts/LayoutDnd';
 
 import Block from '../../components/Block';
 import Container from '../../components/Container';
@@ -30,10 +32,12 @@ import {
   getData,
   moveListField,
   moveRow,
+  onAddData,
   onChange,
   onReset,
   onSubmit,
   onRemoveListField,
+  removeField,
   reorderDiffRow,
   reorderRow,
   resetProps,
@@ -64,10 +68,12 @@ function SettingViewModel({
   modifiedData,
   moveListField,
   moveRow,
+  onAddData,
   onChange,
   onRemoveListField,
   onReset,
   onSubmit,
+  removeField,
   reorderDiffRow,
   reorderRow,
   resetProps,
@@ -103,6 +109,14 @@ function SettingViewModel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [didDrop]);
 
+  const getAttributes = useCallback(() => {
+    return get(modifiedData, ['schema', 'attributes'], {});
+  }, [modifiedData]);
+
+  const getEditLayout = useCallback(() => {
+    return get(modifiedData, ['layouts', 'edit'], []);
+  }, [modifiedData]);
+
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
@@ -135,8 +149,22 @@ function SettingViewModel({
       },
     ];
   };
+
   const getListDisplayedFields = () =>
     get(modifiedData, ['layouts', 'list'], []);
+  const getEditRemainingFields = () => {
+    const attributes = getAttributes();
+    const displayedFields = getEditLayout().reduce(
+      (acc, curr) => [...acc, ...curr.rowContent],
+      []
+    );
+
+    return Object.keys(attributes)
+      .filter(attr => get(attributes, [attr, 'type'], '') !== 'relation')
+      .filter(attr => {
+        return displayedFields.findIndex(el => el.name === attr) === -1;
+      });
+  };
   const getListRemainingFields = () => {
     const metadata = get(modifiedData, ['metadata'], {});
 
@@ -179,7 +207,15 @@ function SettingViewModel({
   };
 
   return (
-    <>
+    <LayoutDndProvider
+      attributes={getAttributes()}
+      buttonData={getEditRemainingFields()}
+      layout={getEditLayout()}
+      moveItem={moveItem}
+      moveRow={moveRow}
+      onAddData={onAddData}
+      removeField={removeField}
+    >
       <BackHeader onClick={() => goBack()} />
       <Container className="container-fluid">
         <form onSubmit={handleSubmit}>
@@ -262,14 +298,7 @@ function SettingViewModel({
                   />
                 )}
 
-                {settingType === 'edit-settings' && (
-                  <FieldsReorder
-                    attributes={get(modifiedData, ['schema', 'attributes'], {})}
-                    layout={get(modifiedData, ['layouts', 'edit'], [])}
-                    moveItem={moveItem}
-                    moveRow={moveRow}
-                  />
-                )}
+                {settingType === 'edit-settings' && <FieldsReorder />}
               </div>
             </Block>
           </div>
@@ -302,7 +331,7 @@ function SettingViewModel({
         popUpWarningType="danger"
         onConfirm={() => onSubmit(name, emitEvent)}
       />
-    </>
+    </LayoutDndProvider>
   );
 }
 
@@ -327,10 +356,12 @@ SettingViewModel.propTypes = {
   modifiedData: PropTypes.object.isRequired,
   moveListField: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,
+  onAddData: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
   onRemoveListField: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  removeField: PropTypes.func.isRequired,
   reorderDiffRow: PropTypes.func.isRequired,
   reorderRow: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
@@ -348,10 +379,12 @@ export function mapDispatchToProps(dispatch) {
       getData,
       moveListField,
       moveRow,
+      onAddData,
       onChange,
       onRemoveListField,
       onReset,
       onSubmit,
+      removeField,
       reorderDiffRow,
       reorderRow,
       resetProps,

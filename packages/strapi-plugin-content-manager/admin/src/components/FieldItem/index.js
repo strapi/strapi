@@ -13,6 +13,7 @@ const FieldItem = forwardRef(
       isDragging,
       isEditing,
       name,
+      onClickRemove,
       showLeftCarret,
       showRightCarret,
       size,
@@ -58,6 +59,7 @@ const FieldItem = forwardRef(
                   </div>
                   {!isHidden && (
                     <RemoveIcon
+                      onClick={onClickRemove}
                       withLongerHeight={withLongerHeight}
                       isDragging={isEditing}
                     />
@@ -76,6 +78,7 @@ const FieldItem = forwardRef(
 FieldItem.defaultProps = {
   isDragging: false,
   isEditing: false,
+  onClickRemove: () => {},
   showLeftCarret: false,
   showRightCarret: false,
   type: 'string',
@@ -85,6 +88,7 @@ FieldItem.propTypes = {
   isDragging: PropTypes.bool,
   isEditing: PropTypes.bool,
   name: PropTypes.string.isRequired,
+  onClickRemove: PropTypes.func,
   showLeftCarret: PropTypes.bool,
   showRightCarret: PropTypes.bool,
   size: PropTypes.number.isRequired,

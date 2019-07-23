@@ -40,7 +40,7 @@ const NameWrapper = styled.div`
   position: relative;
   height: 30px;
   width: 100%;
-  margin-bottom: 10px;
+
   display: flex;
   padding-left: 10px;
   justify-content: space-between;

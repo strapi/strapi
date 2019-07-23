@@ -10,7 +10,7 @@ import pluginId from '../../pluginId';
 
 import FormWrapper from '../../components/SettingFormWrapper';
 import { Wrapper } from './components';
-import Add from './Add';
+import Add from '../../components/AddDropdown';
 import ListField from './ListField';
 
 import ItemTypes from '../../utils/itemsTypes';

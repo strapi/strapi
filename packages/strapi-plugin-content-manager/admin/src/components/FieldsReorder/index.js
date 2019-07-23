@@ -1,11 +1,24 @@
 import React, { memo } from 'react';
-import PropTypes from 'prop-types';
+
 import { get } from 'lodash';
 
+import { useLayoutDnd } from '../../contexts/LayoutDnd';
+
+import Add from '../AddDropdown';
 import SortWrapper from '../SortWrapper';
+import { Wrapper } from './components';
 import Item from './Item';
 
-const FieldsReorder = ({ attributes, layout, moveItem, moveRow }) => {
+const FieldsReorder = () => {
+  const {
+    attributes,
+    buttonData,
+    layout,
+    moveItem,
+    moveRow,
+    onAddData,
+    removeField,
+  } = useLayoutDnd();
   const getType = attributeName => {
     const attribute = get(attributes, [attributeName], {});
 
@@ -20,9 +33,8 @@ const FieldsReorder = ({ attributes, layout, moveItem, moveRow }) => {
     <div className="col-8">
       <SortWrapper>
         {layout.map((row, rowIndex) => {
-          //
           return (
-            <div key={row.rowId} style={{ display: 'flex' }}>
+            <Wrapper key={row.rowId} style={{}}>
               {row.rowContent.map((rowContent, index) => {
                 const { name, size } = rowContent;
 
@@ -33,31 +45,27 @@ const FieldsReorder = ({ attributes, layout, moveItem, moveRow }) => {
                     moveRow={moveRow}
                     moveItem={moveItem}
                     name={name}
+                    removeField={removeField}
                     rowIndex={rowIndex}
                     size={size}
                     type={getType(name)}
-                    //
                   />
                 );
               })}
-            </div>
+            </Wrapper>
           );
         })}
+        <Wrapper>
+          <Add
+            data={buttonData}
+            onClick={onAddData}
+            style={{ width: '100%', margin: '0 10px' }}
+            pStyle={{ marginTop: '-2px' }}
+          />
+        </Wrapper>
       </SortWrapper>
     </div>
   );
-};
-
-FieldsReorder.defaultProps = {
-  attributes: {},
-  layout: [],
-};
-
-FieldsReorder.propTypes = {
-  attributes: PropTypes.object,
-  layout: PropTypes.array,
-  moveItem: PropTypes.func.isRequired,
-  moveRow: PropTypes.func.isRequired,
 };
 
 export default memo(FieldsReorder);
