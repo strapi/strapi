@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const NON_SORTABLES = ['group', 'json', 'array'];
+const NON_SORTABLES = ['group', 'json'];
 const isSortable = (model, name) => {
   if (name === 'id') return true;
 

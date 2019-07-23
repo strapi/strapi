@@ -7,7 +7,7 @@ const {
   hasListableAttribute,
 } = require('./attributes');
 
-async function createDefaultMetadatas(model) {
+function createDefaultMetadatas(model) {
   return {
     id: {
       edit: {},
@@ -62,7 +62,7 @@ async function syncMetadatas(configuration, model) {
   // add new keys and missing fields
   const metasWithDefaults = _.merge(
     {},
-    await createDefaultMetadatas(model),
+    createDefaultMetadatas(model),
     metasWithValidKeys
   );
 
