@@ -267,7 +267,7 @@ module.exports = {
           default:
         }
 
-        if (relation.nature !== 'oneWay') {
+        if (!['manyWay', 'oneWay'].includes(relation.nature)) {
           attr.via = relation.key;
         }
         attr.dominant = relation.dominant;

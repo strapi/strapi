@@ -18,22 +18,6 @@
     },
     {
       "method": "GET",
-      "path": "/fixtures/groups",
-      "handler": "Fixtures.getGroups",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/fixtures/groups/:id",
-      "handler": "Fixtures.getGroup",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/models/:model",
       "handler": "ContentTypeBuilder.getModel",
       "config": {
