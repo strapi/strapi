@@ -25,6 +25,11 @@ module.exports = {
     me: UsersPermissionsMe
   `,
   resolver: {
+    UsersPermissionsMe: {
+      id(obj) {
+        return obj.id || obj._id;
+      },
+    },
     Query: {
       me: {
         resolverOf: 'User.me',
