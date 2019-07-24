@@ -104,7 +104,7 @@
   "form.Input.defaultSort": "Default sort attribute",
   "form.Input.description": "Description",
   "form.Input.description.placeholder": "Display name in the profile",
-  "form.Input.disabled": "Editable field",
+  "form.Input.editable": "Editable field",
   "form.Input.filters": "Enable filters",
   "form.Input.label": "Label",
   "form.Input.label.inputDescription": "This value overrides the label displayed in the table's head",

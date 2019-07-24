@@ -51,7 +51,7 @@ const FieldItem = forwardRef(
         />
       );
     };
-    const opacity = isDragging ? 0 : 1;
+    const opacity = isDragging ? 0.2 : 1;
 
     return (
       <div

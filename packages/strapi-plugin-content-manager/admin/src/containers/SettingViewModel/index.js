@@ -16,7 +16,6 @@ import {
 
 import pluginId from '../../pluginId';
 import { LayoutDndProvider } from '../../contexts/LayoutDnd';
-
 import Block from '../../components/Block';
 import Container from '../../components/Container';
 import FieldsReorder from '../../components/FieldsReorder';
@@ -25,7 +24,7 @@ import LayoutTitle from '../../components/LayoutTitle';
 import SectionTitle from '../../components/SectionTitle';
 import Separator from '../../components/Separator';
 import SortableList from '../../components/SortableList';
-
+import FieldForm from '../../components/FieldForm';
 import ListLayout from './ListLayout';
 
 import {
@@ -52,9 +51,7 @@ import {
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectSettingViewModel from './selectors';
-
 import forms from './forms.json';
-import SettingFormWrapper from '../../components/SettingFormWrapper';
 
 const getUrl = (name, to, source) =>
   `/plugins/${pluginId}/ctm-configurations/models/${name}/${to}${
@@ -111,14 +108,14 @@ function SettingViewModel({
       resetProps();
     };
   }, [getData, name, resetProps, source]);
-
   useEffect(() => {
     if (showWarningSubmit) {
       toggleWarningSubmit();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldToggleModalSubmit]);
-
+  // TODO: remove this effect and run the logic in the reducer instead
+  // it causes multiple renders
   useEffect(() => {
     if (!isLoading) {
       formatLayout();
@@ -129,14 +126,17 @@ function SettingViewModel({
   const getAttributes = useCallback(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
-
   const getEditLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'edit'], []);
   }, [modifiedData]);
-
   const getRelationsLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'editRelations'], []);
   }, [modifiedData]);
+
+  // Retrieve the metadatas for the field's form of the edit view
+  const getSelectedItemMetas = useCallback(() => {
+    return get(modifiedData, ['metadatas', itemNameToSelect, 'edit'], null);
+  }, [modifiedData, itemNameToSelect]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -362,9 +362,12 @@ function SettingViewModel({
                   />
                 )}
                 {settingType === 'edit-settings' && (
-                  <div className="col-8">
-                    <SettingFormWrapper>{itemFormType}</SettingFormWrapper>
-                  </div>
+                  <FieldForm
+                    fieldName={itemNameToSelect}
+                    formType={itemFormType}
+                    metadatas={getSelectedItemMetas()}
+                    onChange={onChange}
+                  />
                 )}
               </div>
             </Block>
