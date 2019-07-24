@@ -15,7 +15,7 @@
       "type": "string"
     },
     "content": {
-      "type": "string"
+      "type": "wysiwyg"
     },
     "published": {
       "type": "boolean"
