@@ -128,6 +128,7 @@
   "notification.info.disable": "This field is not editable for the moment...😮",
   "notification.info.optimized": "This plugin is optimized with your localStorage",
   "notification.success.contentTypeDeleted": "The Content Type has been deleted",
+  "notification.success.groupDeleted": "The Group has been deleted",
   "notification.success.message.contentType.create": "Your Content Type has been created",
   "notification.success.message.contentType.edit": "Your Content Type has been updated",
   "plugin.description.long": "Modelize the data structure of your API. Create new fields and relations in just a minute. The files are automatically created and updated in your project.",

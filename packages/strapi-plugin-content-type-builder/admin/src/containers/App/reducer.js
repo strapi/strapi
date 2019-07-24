@@ -877,30 +877,32 @@ function appReducer(state = initialState, action) {
           () => action.source || ''
         );
     }
-    case SUBMIT_CONTENT_TYPE_SUCCEEDED: {
+    case SUBMIT_CONTENT_TYPE_SUCCEEDED:
       return state
         .update('isLoading', () => true)
         .update('shouldRefetchData', v => !v);
-    }
-
-    case SUBMIT_GROUP_SUCCEEDED: {
-      let modifiedGroup = state
-        .get('modifiedDataGroup')
-        .find(
-          (group, key) => !group.equals(state.getIn(['initialDataGroup', key]))
-        );
-
-      const uid = modifiedGroup.get('uid');
-      const groupToUpdate = state.get('groups').findIndex(group => {
-        return group.get('uid') === uid;
-      });
-
+    case SUBMIT_GROUP_SUCCEEDED:
       return state
-        .updateIn(['initialDataGroup', uid], () => modifiedGroup)
-        .updateIn(['groups', groupToUpdate, 'name'], () =>
-          modifiedGroup.getIn(['schema', 'name'])
-        );
-    }
+        .update('isLoading', () => true)
+        .update('shouldRefetchData', v => !v);
+    // {
+    //   let modifiedGroup = state
+    //     .get('modifiedDataGroup')
+    //     .find(
+    //       (group, key) => !group.equals(state.getIn(['initialDataGroup', key]))
+    //     );
+
+    //   const uid = modifiedGroup.get('uid');
+    //   const groupToUpdate = state.get('groups').findIndex(group => {
+    //     return group.get('uid') === uid;
+    //   });
+
+    //   return state
+    //     .updateIn(['initialDataGroup', uid], () => modifiedGroup)
+    //     .updateIn(['groups', groupToUpdate, 'name'], () =>
+    //       modifiedGroup.getIn(['schema', 'name'])
+    //     );
+    // }
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state
         .update('isLoading', () => true)
@@ -909,23 +911,12 @@ function appReducer(state = initialState, action) {
           Map(initialState.get('newContentType'))
         )
         .update('shouldRefetchData', v => !v);
-    // case SUBMIT_TEMP_GROUP_SUCCEEDED: {
-    //   const newGroup = state
-    //     .get('newGroup')
-    //     .set('uid', state.getIn(['newGroup', 'name']))
-    //     .set('isTemporary', false);
-
-    //   return state
-    //     .update('newGroup', () => Map(initialState.get('newGroup')))
-    //     .update('newGroupClone', () => Map(initialState.get('newGroup')))
-    //     .updateIn(['groups'], list =>
-    //       list
-    //         .map(obj => obj.set('isTemporary', false))
-    //         .sortBy(obj => obj.get('name'))
-    //     )
-    //     .updateIn(['modifiedDataGroup', newGroup.get('name')], () => newGroup)
-    //     .updateIn(['initialDataGroup', newGroup.get('name')], () => newGroup);
-    // }
+    case SUBMIT_TEMP_GROUP_SUCCEEDED:
+      return state
+        .update('isLoading', () => true)
+        .update('newGroup', () => Map(initialState.get('newGroup')))
+        .update('newGroupClone', () => Map(initialState.get('newGroup')))
+        .update('shouldRefetchData', v => !v);
     case UPDATE_TEMP_CONTENT_TYPE:
       return state
         .updateIn(

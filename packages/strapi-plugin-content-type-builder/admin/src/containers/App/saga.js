@@ -42,7 +42,20 @@ export function* getData() {
 
 export function* deleteGroup({ uid }) {
   try {
-    yield put(deleteGroupSucceeded(uid));
+    const response = yield call(
+      request,
+      getRequestUrl(`groups/${uid}`),
+      { method: 'DELETE' },
+      true
+    );
+    const { data } = response;
+
+    if (data.uid === uid) {
+      strapi.notification.success(
+        `${pluginId}.notification.success.groupDeleted`
+      );
+      yield put(deleteGroupSucceeded(uid));
+    }
   } catch (err) {
     strapi.notification.error('notification.error');
   }
@@ -156,9 +169,12 @@ export function* submitGroup({
 
     emitEvent('willSaveGroup');
 
+    const opts = { method: 'PUT', body };
+
+    yield call(request, getRequestUrl(`groups/${oldGroupName}`), opts, true);
     emitEvent('didSaveGroup');
 
-    yield put(submitGroupSucceeded({ oldGroupName }));
+    yield put(submitGroupSucceeded());
     const suffixUrl = source ? `&source=${source}` : '';
     history.push(`/plugins/${pluginId}/groups/${name}${suffixUrl}`);
   } catch (error) {
@@ -170,40 +186,6 @@ export function* submitGroup({
     strapi.notification.error(errorMessage);
   }
 }
-
-// TODO: UNCOMMENT WHEN API IS AVAILABLE
-// export function* submitGroup({
-//   oldGroupName,
-//   body,
-//   source,
-//   context: { emitEvent, history },
-// }) {
-//   try {
-//     const { name } = body;
-
-//     if (source) {
-//       body.plugin = source;
-//     }
-
-//     emitEvent('willSaveGroup');
-
-//     const opts = { method: 'PUT', body };
-
-//     yield call(request, getRequestUrl(`groups/${oldGroupName}`), opts, true);
-//     emitEvent('didSaveGroup');
-
-//     yield put(submitGroupSucceeded());
-//     const suffixUrl = source ? `&source=${source}` : '';
-//     history.push(`/plugins/${pluginId}/groups/${name}${suffixUrl}`);
-//   } catch (error) {
-//     const errorMessage = get(
-//       error,
-//       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-//       'notification.error'
-//     );
-//     strapi.notification.error(errorMessage);
-//   }
-// }
 
 /* istanbul ignore-next */
 export function* submitTempCT({

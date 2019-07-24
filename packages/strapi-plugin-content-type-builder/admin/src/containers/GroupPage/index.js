@@ -139,6 +139,18 @@ export class GroupPage extends React.Component {
     return displayName;
   };
 
+  getFeatureHeaderTitle = () => {
+    const { modifiedDataGroup, newGroup } = this.props;
+    const name = this.getFeatureName();
+
+    /* istanbul ignore if */
+    const displayName = this.isUpdatingTempFeature()
+      ? get(newGroup, ['schema', 'name'], null)
+      : get(modifiedDataGroup, [name, 'schema', 'name'], null);
+
+    return displayName;
+  };
+
   getFeatureHeaderDescription = () => {
     const { modifiedDataGroup, newGroup } = this.props;
     const name = this.getFeatureName();
@@ -432,7 +444,7 @@ export class GroupPage extends React.Component {
         <ViewContainer
           {...this.props}
           featureType={this.featureType}
-          headerTitle={this.getFeatureDisplayName()}
+          headerTitle={this.getFeatureHeaderTitle()}
           headerDescription={this.getFeatureHeaderDescription()}
           pluginHeaderActions={this.getPluginHeaderActions()}
           onClickIcon={this.openEditFeatureModal}
