@@ -623,7 +623,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           } else {
             options.withRelated = groupAttributes
               .map(key => `${key}.slice`)
-              .map(addPolymorphicRelated);
+              .map(addPolymorphicRelated)
+              .reduce((acc, paths) => acc.concat(paths), []);
           }
 
           return _.isFunction(target[model.toLowerCase()]['beforeFetchAll'])
