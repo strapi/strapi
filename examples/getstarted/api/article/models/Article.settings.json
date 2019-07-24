@@ -15,7 +15,7 @@
       "type": "string"
     },
     "content": {
-      "type": "text"
+      "type": "string"
     },
     "published": {
       "type": "boolean"

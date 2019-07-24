@@ -56,25 +56,7 @@ function createDefaultEditLayout(schema) {
     hasEditableAttribute(schema, name)
   );
 
-  let layout = [[]];
-  let currentRowIndex = 0;
-  for (let key of keys) {
-    const attribute = schema.attributes[key];
-    const attributeSize = typeToSize(attribute.type);
-    let currenRowSize = rowSize(layout[currentRowIndex]);
-
-    if (currenRowSize + attributeSize > MAX_ROW_SIZE) {
-      currentRowIndex += 1;
-      layout[currentRowIndex] = [];
-    }
-
-    layout[currentRowIndex].push({
-      name: key,
-      size: attributeSize,
-    });
-  }
-
-  return layout;
+  return appendToEditLayout([], keys, schema);
 }
 
 /** Synchronisation functions */
@@ -91,16 +73,29 @@ function syncLayouts(configuration, schema) {
     hasRelationAttribute(schema, attr)
   );
 
-  const cleanEdit = edit.reduce((acc, row) => {
-    let newRow = row.filter(el => hasEditableAttribute(schema, el.name));
+  let elementsToReAppend = [];
+  let cleanEdit = [];
+  for (let row of edit) {
+    let newRow = [];
 
-    // TODO: recompute row sizes
+    for (let el of row) {
+      if (!hasEditableAttribute(schema, el.name)) continue;
+
+      // if size of the element has changes (type change)
+      if (typeToSize(schema.attributes[el.name].type) !== el.size) {
+        elementsToReAppend.push(el.name);
+        continue;
+      }
+
+      newRow.push(el);
+    }
 
     if (newRow.length > 0) {
-      acc.push(newRow);
+      cleanEdit.push(newRow);
     }
-    return acc;
-  }, []);
+  }
+
+  cleanEdit = appendToEditLayout(cleanEdit, elementsToReAppend, schema);
 
   let layout = {
     list: cleanList.length > 0 ? cleanList : createDefaultListLayout(schema),
@@ -144,25 +139,37 @@ function syncLayouts(configuration, schema) {
     key => hasEditableAttribute(schema, key) && isVisible(schema, key)
   );
 
-  let currentRowIndex = Math.max(layout.edit.length - 1, 0);
-  for (let key of newEditAttributes) {
+  layout.edit = appendToEditLayout(layout.edit, newEditAttributes, schema);
+
+  return layout;
+}
+
+const appendToEditLayout = (layout = [], keysToAppend, schema) => {
+  let currentRowIndex = Math.max(layout.length - 1, 0);
+
+  // init currentRow if necessary
+  if (!layout[currentRowIndex]) {
+    layout[currentRowIndex] = [];
+  }
+
+  for (let key of keysToAppend) {
     const attribute = schema.attributes[key];
     const attributeSize = typeToSize(attribute.type);
-    let currenRowSize = rowSize(layout.edit[currentRowIndex]);
+    let currenRowSize = rowSize(layout[currentRowIndex]);
 
     if (currenRowSize + attributeSize > MAX_ROW_SIZE) {
       currentRowIndex += 1;
-      layout.edit[currentRowIndex] = [];
+      layout[currentRowIndex] = [];
     }
 
-    layout.edit[currentRowIndex].push({
+    layout[currentRowIndex].push({
       name: key,
       size: attributeSize,
     });
   }
 
   return layout;
-}
+};
 
 const hasRelationAttribute = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
