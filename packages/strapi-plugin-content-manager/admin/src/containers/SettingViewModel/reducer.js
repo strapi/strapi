@@ -115,10 +115,14 @@ function settingViewModelReducer(state = initialState, action) {
       const newList = state
         .getIn(layoutPath)
         .updateIn([listSize - 1, 'rowContent'], list => {
-          return list.push({
-            name: action.name,
-            size,
-          });
+          if (list) {
+            return list.push({
+              name: action.name,
+              size,
+            });
+          }
+
+          return fromJS([{ name: action.name, size }]);
         });
       const formattedList = formatLayout(newList.toJS());
 

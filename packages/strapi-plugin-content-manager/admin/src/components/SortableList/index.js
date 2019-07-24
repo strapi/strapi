@@ -6,12 +6,7 @@ import Add from '../AddDropdown';
 import SortWrapper from '../SortWrapper';
 import Item from './Item';
 
-const SortableList = ({
-  addRelation,
-  buttonData,
-  moveRelation,
-  removeRelation,
-}) => {
+const SortableList = ({ addItem, buttonData, moveItem, removeItem }) => {
   const { relationsLayout } = useLayoutDnd();
 
   return (
@@ -23,15 +18,15 @@ const SortableList = ({
             <Item
               index={index}
               key={relationName}
-              move={moveRelation}
+              move={moveItem}
               name={relationName}
-              removeRelation={removeRelation}
+              removeItem={removeItem}
             />
           );
         })}
         <Add
           data={buttonData}
-          onClick={addRelation}
+          onClick={addItem}
           style={{
             marginLeft: 10,
             marginRight: 10,
@@ -49,10 +44,10 @@ SortableList.defaultProps = {
 };
 
 SortableList.propTypes = {
-  addRelation: PropTypes.func.isRequired,
+  addItem: PropTypes.func.isRequired,
   buttonData: PropTypes.array,
-  moveRelation: PropTypes.func.isRequired,
-  removeRelation: PropTypes.func.isRequired,
+  moveItem: PropTypes.func.isRequired,
+  removeItem: PropTypes.func.isRequired,
 };
 
 export default memo(SortableList);

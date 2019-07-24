@@ -20,12 +20,12 @@ import Block from '../../components/Block';
 import Container from '../../components/Container';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
+import LayoutTitle from '../../components/LayoutTitle';
 import SectionTitle from '../../components/SectionTitle';
+import Separator from '../../components/Separator';
 import SortableList from '../../components/SortableList';
 
-import LayoutTitle from './LayoutTitle';
 import ListLayout from './ListLayout';
-import Separator from './Separator';
 
 import {
   addFieldToList,
@@ -199,7 +199,7 @@ function SettingViewModel({
     }
 
     if (input.name === 'settings.mainField') {
-      const attributes = get(modifiedData, ['schema', 'attributes'], {});
+      const attributes = getAttributes();
       const options = Object.keys(attributes).filter(attr => {
         const type = get(attributes, [attr, 'type'], '');
 
@@ -246,8 +246,7 @@ function SettingViewModel({
               values: { name: upperFirst(name) },
             }}
             description={{
-              id:
-                'content-manager.containers.SettingPage.pluginHeaderDescription',
+              id: `${pluginId}.containers.SettingPage.pluginHeaderDescription`,
             }}
           />
           <HeaderNav
@@ -337,10 +336,10 @@ function SettingViewModel({
                 {settingType === 'edit-settings' && <FieldsReorder />}
                 {settingType === 'edit-settings' && (
                   <SortableList
-                    addRelation={addRelation}
+                    addItem={addRelation}
                     buttonData={getEditRelationsRemaingFields()}
-                    moveRelation={moveRelation}
-                    removeRelation={removeRelation}
+                    moveItem={moveRelation}
+                    removeItem={removeRelation}
                   />
                 )}
               </div>
@@ -352,10 +351,10 @@ function SettingViewModel({
         isOpen={showWarningCancel}
         toggleModal={toggleWarningCancel}
         content={{
-          title: 'content-manager.popUpWarning.title',
-          message: 'content-manager.popUpWarning.warning.cancelAllSettings',
-          cancel: 'content-manager.popUpWarning.button.cancel',
-          confirm: 'content-manager.popUpWarning.button.confirm',
+          title: `${pluginId}.popUpWarning.title`,
+          message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
+          cancel: `${pluginId}.popUpWarning.button.cancel`,
+          confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
         onConfirm={() => {
@@ -367,10 +366,10 @@ function SettingViewModel({
         isOpen={showWarningSubmit}
         toggleModal={toggleWarningSubmit}
         content={{
-          title: 'content-manager.popUpWarning.title',
-          message: 'content-manager.popUpWarning.warning.updateAllSettings',
-          cancel: 'content-manager.popUpWarning.button.cancel',
-          confirm: 'content-manager.popUpWarning.button.confirm',
+          title: `${pluginId}.popUpWarning.title`,
+          message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
+          cancel: `${pluginId}.popUpWarning.button.cancel`,
+          confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
         onConfirm={() => onSubmit(name, emitEvent)}

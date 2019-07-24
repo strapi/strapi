@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-
+import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
 import { useLayoutDnd } from '../../contexts/LayoutDnd';
@@ -9,7 +9,7 @@ import SortWrapper from '../SortWrapper';
 import { Wrapper } from './components';
 import Item from './Item';
 
-const FieldsReorder = () => {
+const FieldsReorder = ({ className }) => {
   const {
     attributes,
     buttonData,
@@ -30,7 +30,7 @@ const FieldsReorder = () => {
   };
 
   return (
-    <div className="col-8">
+    <div className={className}>
       <SortWrapper>
         {layout.map((row, rowIndex) => {
           return (
@@ -66,6 +66,14 @@ const FieldsReorder = () => {
       </SortWrapper>
     </div>
   );
+};
+
+FieldsReorder.defaultProps = {
+  className: 'col-8',
+};
+
+FieldsReorder.propTypes = {
+  className: PropTypes.string,
 };
 
 export default memo(FieldsReorder);
