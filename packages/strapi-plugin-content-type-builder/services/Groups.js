@@ -209,7 +209,7 @@ const createGroupUID = str => slugify(str, { separator: '_' });
  */
 async function deleteGroup(group) {
   await deleteSchema(group.uid);
-  process.nextTick(() => strapi.reload());
+  strapi.reload();
 }
 
 /**
@@ -223,11 +223,7 @@ async function writeSchema(uid, schema) {
     JSON.stringify(schema, null, 2)
   );
 
-  // Commented this part in order to make the reload watcher work in the admin...
-  // @alex
-  // strapi.reload();
-  // strapi.reload.isWatching = true;
-  // process.nextTick(() => strapi.reload());
+  strapi.reload();
 }
 
 /**
