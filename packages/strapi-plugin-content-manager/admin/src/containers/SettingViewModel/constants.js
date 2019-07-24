@@ -22,6 +22,8 @@ export const REORDER_ROW = 'ContentManager/SettingViewModel/REORDER_ROW';
 export const REORDER_DIFF_ROW =
   'ContentManager/SettingViewModel/REORDER_DIFF_ROW';
 export const RESET_PROPS = 'ContentManager/SettingViewModel/RESET_PROPS';
+export const SET_EDIT_FIELD_TO_SELECT =
+  'ContentManager/SettingViewModel/SET_EDIT_FIELD_TO_SELECT';
 export const SET_LIST_FIELD_TO_EDIT_INDEX =
   'ContentManager/SettingViewModel/SET_LIST_FIELD_TO_EDIT_INDEX';
 export const SUBMIT_SUCCEEDED =

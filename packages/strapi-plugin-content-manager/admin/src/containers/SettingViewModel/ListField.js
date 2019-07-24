@@ -6,7 +6,7 @@ import GrabIcon from '../../assets/images/icon_grab.svg';
 import GrabIconBlue from '../../assets/images/icon_grab_blue.svg';
 import ClickOverHint from '../../components/ClickOverHint';
 import RemoveIcon from '../../components/DraggedRemovedIcon';
-import EditIcon from '../../components/VariableEditIcon';
+import EditIcon from '../../components/FieldEditIcon';
 import { Field, InfoLabel, FullWidthCarret } from './components';
 
 import ItemTypes from '../../utils/itemsTypes';

@@ -77,8 +77,8 @@ const NameWrapper = styled.div`
       `;
     }
   }}
-  ${({ isEditing }) => {
-    if (isEditing) {
+  ${({ isEditing, isSelected }) => {
+    if (isEditing || isSelected) {
       return css`
         background: #e6f0fb;
         border: 1px solid #aed4fb;

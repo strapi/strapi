@@ -7,12 +7,15 @@ export function LayoutDndProvider({
   attributes,
   buttonData,
   children,
+
   layout,
   moveItem,
   moveRow,
   onAddData,
   relationsLayout,
   removeField,
+  selectedItemName,
+  setEditFieldToSelect,
 }) {
   return (
     <LayoutDndContext.Provider
@@ -25,6 +28,8 @@ export function LayoutDndProvider({
         onAddData,
         relationsLayout,
         removeField,
+        selectedItemName,
+        setEditFieldToSelect,
       }}
     >
       {children}
@@ -42,6 +47,7 @@ LayoutDndProvider.defaultProps = {
   layout: [],
   onAddData: () => {},
   relationsLayout: [],
+  setEditFieldToSelect: () => {},
 };
 
 LayoutDndProvider.propTypes = {
@@ -54,4 +60,6 @@ LayoutDndProvider.propTypes = {
   onAddData: PropTypes.func,
   relationsLayout: PropTypes.array,
   removeField: PropTypes.func.isRequired,
+  selectedItemName: PropTypes.string.isRequired,
+  setEditFieldToSelect: PropTypes.func,
 };

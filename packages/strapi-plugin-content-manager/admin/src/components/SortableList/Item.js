@@ -2,12 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { useLayoutDnd } from '../../contexts/LayoutDnd';
 
 import FieldItem from '../FieldItem';
 
 import ItemTypes from '../../utils/itemsTypes';
 
 const Item = ({ index, move, name, removeItem }) => {
+  const { selectedItemName, setEditFieldToSelect } = useLayoutDnd();
   const ref = useRef(null);
 
   // from: https://codesandbox.io/s/github/react-dnd/react-dnd/tree/gh-pages/examples_hooks_js/04-sortable/simple?from-embed
@@ -53,6 +55,9 @@ const Item = ({ index, move, name, removeItem }) => {
     },
   });
   const [{ isDragging }, drag, preview] = useDrag({
+    begin() {
+      setEditFieldToSelect(name, 'relation');
+    },
     item: { type: ItemTypes.EDIT_RELATION, id: name, name, index },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
@@ -67,11 +72,13 @@ const Item = ({ index, move, name, removeItem }) => {
 
   return (
     <FieldItem
+      isDragging={isDragging}
+      isSelected={name === selectedItemName}
+      name={name}
+      onClickEdit={() => setEditFieldToSelect(name, 'relation')}
+      onClickRemove={() => removeItem(index)}
       ref={ref}
       size={12}
-      isDragging={isDragging}
-      name={name}
-      onClickRemove={() => removeItem(index)}
       style={{ marginBottom: 6 }}
     />
   );

@@ -46,6 +46,7 @@ import {
   reorderDiffRow,
   reorderRow,
   resetProps,
+  setEditFieldToSelect,
   setListFieldToEditIndex,
 } from './actions';
 import reducer from './reducer';
@@ -53,6 +54,7 @@ import saga from './saga';
 import makeSelectSettingViewModel from './selectors';
 
 import forms from './forms.json';
+import SettingFormWrapper from '../../components/SettingFormWrapper';
 
 const getUrl = (name, to, source) =>
   `/plugins/${pluginId}/ctm-configurations/models/${name}/${to}${
@@ -69,6 +71,8 @@ function SettingViewModel({
   history: { goBack },
   initialData,
   isLoading,
+  itemFormType,
+  itemNameToSelect,
   listFieldToEditIndex,
   location: { search },
   match: {
@@ -88,6 +92,7 @@ function SettingViewModel({
   reorderDiffRow,
   reorderRow,
   resetProps,
+  setEditFieldToSelect,
   setListFieldToEditIndex,
   shouldToggleModalSubmit,
 }) {
@@ -247,6 +252,8 @@ function SettingViewModel({
       onAddData={onAddData}
       relationsLayout={getRelationsLayout()}
       removeField={removeField}
+      setEditFieldToSelect={setEditFieldToSelect}
+      selectedItemName={itemNameToSelect}
     >
       <BackHeader onClick={() => goBack()} />
       <Container className="container-fluid">
@@ -354,6 +361,11 @@ function SettingViewModel({
                     removeItem={removeRelation}
                   />
                 )}
+                {settingType === 'edit-settings' && (
+                  <div className="col-8">
+                    <SettingFormWrapper>{itemFormType}</SettingFormWrapper>
+                  </div>
+                )}
               </div>
             </Block>
           </div>
@@ -402,6 +414,8 @@ SettingViewModel.propTypes = {
   }).isRequired,
   initialData: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,
+  itemFormType: PropTypes.string.isRequired,
+  itemNameToSelect: PropTypes.string.isRequired,
   listFieldToEditIndex: PropTypes.number.isRequired,
   location: PropTypes.shape({
     search: PropTypes.string,
@@ -426,6 +440,7 @@ SettingViewModel.propTypes = {
   reorderDiffRow: PropTypes.func.isRequired,
   reorderRow: PropTypes.func.isRequired,
   resetProps: PropTypes.func.isRequired,
+  setEditFieldToSelect: PropTypes.func.isRequired,
   setListFieldToEditIndex: PropTypes.func.isRequired,
   shouldToggleModalSubmit: PropTypes.bool.isRequired,
 };
@@ -452,6 +467,7 @@ export function mapDispatchToProps(dispatch) {
       reorderDiffRow,
       reorderRow,
       resetProps,
+      setEditFieldToSelect,
       setListFieldToEditIndex,
     },
     dispatch

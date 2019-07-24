@@ -101,10 +101,11 @@ function EditView({
         );
 
         const groupLayouts = data.reduce((acc, current) => {
-          acc[current.data.uid] = current.layout;
+          acc[current.data.uid] = current.data;
 
           return acc;
         }, {});
+        // console.log()
         // Retrieve all the default values for the repeatables and init the form
         const defaultGroupValues = groups.reduce((acc, current) => {
           const defaultForm = setDefaultForm(
@@ -141,7 +142,6 @@ function EditView({
         });
       } catch (err) {
         // TODO ADD A TRAD
-        console.log({ err });
 
         if (err.code !== 20) {
           strapi.notification.error('notification.error');
@@ -379,7 +379,7 @@ function EditView({
             title={pluginHeaderTitle}
           />
           <div className="row">
-            <div className="coel-md-12 col-lg-9">
+            <div className="col-md-12 col-lg-9">
               <MainWrapper>
                 {fields.map((fieldsRow, key) => {
                   const [{ name }] = fieldsRow;

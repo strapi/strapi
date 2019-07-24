@@ -1,5 +1,5 @@
 import { all, fork, put, call, takeLatest, select } from 'redux-saga/effects';
-import { set } from 'lodash';
+import { get, set } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -23,7 +23,29 @@ export function* getData({ source, uid }) {
       }
     );
 
-    yield put(getDataSucceeded(layout));
+    const firstEditLayoutField = get(
+      layout,
+      ['layouts', 'edit', 0, 0, 'name'],
+      ''
+    );
+    const firstEditLayoutFieldType = get(
+      layout,
+      ['schema', 'attributes', firstEditLayoutField, 'type'],
+      null
+    );
+    const firstEditLayoutRelation = get(
+      layout,
+      ['layouts', 'editRelations', 0],
+      null
+    );
+
+    const formItemToSelectName =
+      firstEditLayoutField || firstEditLayoutRelation;
+    const formItemToSelectType = firstEditLayoutFieldType || 'relation';
+
+    yield put(
+      getDataSucceeded(layout, formItemToSelectName, formItemToSelectType)
+    );
   } catch (err) {
     strapi.notification.error('notification.error');
   }
@@ -36,6 +58,7 @@ export function* submit({ emitEvent, uid }) {
     set(body, 'layouts.edit', unformatLayout(body.layouts.edit));
 
     delete body.schema;
+    delete body.uid;
 
     yield call(request, getRequestUrl(`content-types/${uid}`), {
       method: 'PUT',

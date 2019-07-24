@@ -23,15 +23,18 @@ import {
   REORDER_DIFF_ROW,
   REORDER_ROW,
   RESET_PROPS,
+  SET_EDIT_FIELD_TO_SELECT,
   SET_LIST_FIELD_TO_EDIT_INDEX,
   SUBMIT_SUCCEEDED,
 } from './constants';
 
 export const initialState = fromJS({
   didDrop: false,
-  listFieldToEditIndex: 0,
   initialData: fromJS({}),
   isLoading: true,
+  itemFormType: '',
+  itemNameToSelect: '',
+  listFieldToEditIndex: 0,
   modifiedData: fromJS({}),
   shouldToggleModalSubmit: true,
 });
@@ -75,7 +78,9 @@ function settingViewModelReducer(state = initialState, action) {
       return state
         .update('initialData', () => fromJS(action.layout || {}))
         .update('isLoading', () => false)
-        .update('modifiedData', () => fromJS(action.layout || {}));
+        .update('modifiedData', () => fromJS(action.layout || {}))
+        .update('itemFormType', () => action.itemFormType)
+        .update('itemNameToSelect', () => action.itemNameToSelect);
     case MOVE_FIELD_LIST:
       return state
         .updateIn(['modifiedData', 'layouts', 'list'], list => {
@@ -206,6 +211,10 @@ function settingViewModelReducer(state = initialState, action) {
         .update('didDrop', v => !v);
     case RESET_PROPS:
       return initialState;
+    case SET_EDIT_FIELD_TO_SELECT:
+      return state
+        .update('itemNameToSelect', () => action.name)
+        .update('itemFormType', () => action.fieldType);
     case SET_LIST_FIELD_TO_EDIT_INDEX:
       return state.update('listFieldToEditIndex', () => action.index);
     case SUBMIT_SUCCEEDED:

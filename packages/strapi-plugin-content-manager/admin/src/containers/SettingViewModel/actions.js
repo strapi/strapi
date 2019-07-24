@@ -18,6 +18,7 @@ import {
   REORDER_DIFF_ROW,
   REORDER_ROW,
   RESET_PROPS,
+  SET_EDIT_FIELD_TO_SELECT,
   SET_LIST_FIELD_TO_EDIT_INDEX,
   SUBMIT_SUCCEEDED,
 } from './constants';
@@ -51,7 +52,7 @@ export function getData(uid, source) {
   };
 }
 
-export function getDataSucceeded(layout) {
+export function getDataSucceeded(layout, itemNameToSelect, itemFormType) {
   set(
     layout,
     ['layouts', 'edit'],
@@ -60,6 +61,8 @@ export function getDataSucceeded(layout) {
   return {
     type: GET_DATA_SUCCEEDED,
     layout,
+    itemFormType,
+    itemNameToSelect,
   };
 }
 
@@ -164,6 +167,14 @@ export function reorderRow(dragRowIndex, dragIndex, hoverIndex) {
 export function resetProps() {
   return {
     type: RESET_PROPS,
+  };
+}
+
+export function setEditFieldToSelect(name, fieldType) {
+  return {
+    type: SET_EDIT_FIELD_TO_SELECT,
+    name,
+    fieldType,
   };
 }
 
