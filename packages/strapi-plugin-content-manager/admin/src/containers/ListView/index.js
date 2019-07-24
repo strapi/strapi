@@ -119,7 +119,7 @@ function ListView({
 
   // Helpers
   const getMetaDatas = (path = []) =>
-    get(layouts, [slug, 'metadata', ...path], {});
+    get(layouts, [slug, 'metadatas', ...path], {});
   const getListLayout = () => get(layouts, [slug, 'layouts', 'list'], []);
   const getAllLabels = () => {
     return sortBy(

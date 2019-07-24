@@ -59,7 +59,8 @@ function SettingsView({
     if (showWarningSubmit) {
       toggleWarningSubmit();
     }
-  }, [shouldToggleModalSubmit, showWarningSubmit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldToggleModalSubmit]);
   useEffect(() => {
     if (isEmpty(initialData)) {
       getData();

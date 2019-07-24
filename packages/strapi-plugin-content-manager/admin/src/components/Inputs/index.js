@@ -56,7 +56,7 @@ function Inputs({
     get(attribute, 'plugin', '') === 'upload' &&
     (model || collection) === 'file';
   const multiple = collection == 'file';
-  const metadata = get(layout, ['metadata', name, 'edit'], {});
+  const metadatas = get(layout, ['metadatas', name, 'edit'], {});
   const type = isMedia ? 'file' : get(attribute, 'type', null);
   const inputStyle = type === 'text' ? { height: '196px' } : {};
   const validations = omit(attribute, [
@@ -68,7 +68,7 @@ function Inputs({
     'plugin',
     'enum',
   ]);
-  const { description, visible } = metadata;
+  const { description, visible } = metadatas;
   const value = get(modifiedData, keys);
 
   if (visible === false) {
@@ -78,7 +78,7 @@ function Inputs({
 
   return (
     <InputsIndex
-      {...metadata}
+      {...metadatas}
       autoFocus={autoFocus}
       didCheckErrors={didCheckErrors}
       errors={inputErrors}

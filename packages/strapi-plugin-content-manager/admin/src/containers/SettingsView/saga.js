@@ -7,16 +7,21 @@ import { getDataSucceeded, submitSucceeded } from './actions';
 import { GET_DATA, ON_SUBMIT } from './constants';
 import { makeSelectModifiedData } from './selectors';
 
-const getRequestUrl = path => `/${pluginId}/fixtures/${path}`;
+const getRequestUrl = path => `/${pluginId}/${path}`;
 
 export function* getData() {
   try {
-    const [{ generalSettings }, { groups }, { models }] = yield all(
-      ['general-settings', 'groups', 'models'].map(endPoint =>
+    const [
+      { data: generalSettings },
+      { data: groups },
+      { data: models },
+    ] = yield all(
+      // const data = yield all(
+      ['general-settings', 'groups', 'content-types'].map(endPoint =>
         call(request, getRequestUrl(endPoint), { method: 'GET' })
       )
     );
-
+    // console.log({ data });
     yield put(getDataSucceeded(generalSettings, groups, models));
   } catch (err) {
     strapi.notification.error('content-manager.error.model.fetch');

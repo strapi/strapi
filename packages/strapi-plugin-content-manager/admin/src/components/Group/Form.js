@@ -7,7 +7,7 @@ import SelectWrapper from '../SelectWrapper';
 
 const Form = ({ keys, layout, modifiedData, fieldName, onChange }) => {
   const currentField = get(layout, ['schema', 'attributes', fieldName], '');
-  const currentFieldMeta = get(layout, ['metadata', fieldName, 'edit'], {});
+  const currentFieldMeta = get(layout, ['metadatas', fieldName, 'edit'], {});
 
   if (currentField.type === 'relation') {
     return (

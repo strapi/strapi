@@ -37,7 +37,7 @@ function ListLayout({
   };
 
   const fieldName = displayedData[fieldToEditIndex];
-  const fieldPath = ['metadata', fieldName, 'list'];
+  const fieldPath = ['metadatas', fieldName, 'list'];
 
   const form = [
     {
@@ -108,7 +108,7 @@ function ListLayout({
                 name={data}
                 label={get(
                   modifiedData,
-                  ['metadata', data, 'list', 'label'],
+                  ['metadatas', data, 'list', 'label'],
                   ''
                 )}
                 onClick={onClick}

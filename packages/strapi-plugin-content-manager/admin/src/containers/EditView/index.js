@@ -382,7 +382,11 @@ function EditView({
                 {fields.map((fieldsRow, key) => {
                   const [{ name }] = fieldsRow;
                   const group = get(layout, ['schema', 'attributes', name], {});
-                  const groupMeta = get(layout, ['metadata', name, 'edit'], {});
+                  const groupMetas = get(
+                    layout,
+                    ['metadatas', name, 'edit'],
+                    {}
+                  );
                   const groupValue = get(
                     modifiedData,
                     [name],
@@ -393,7 +397,7 @@ function EditView({
                     return (
                       <Group
                         {...group}
-                        {...groupMeta}
+                        {...groupMetas}
                         addField={keys => {
                           dispatch({
                             type: 'ADD_FIELD_TO_GROUP',
@@ -475,7 +479,7 @@ function EditView({
                       );
                       const relationMetas = get(
                         layout,
-                        ['metadata', relationName, 'edit'],
+                        ['metadatas', relationName, 'edit'],
                         {}
                       );
                       const value = get(modifiedData, [relationName], null);
@@ -486,7 +490,7 @@ function EditView({
                           {...relationMetas}
                           key={relationName}
                           name={relationName}
-                          relationType={relation.relationType}
+                          relationsType={relation.relationType}
                           value={value}
                         />
                       );

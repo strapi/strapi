@@ -27,6 +27,7 @@ ListRow.propTypes = {
   name: PropTypes.string,
   push: PropTypes.func,
   type: PropTypes.string,
+  // uid: PropTypes.string,
 };
 
 export default memo(ListRow);

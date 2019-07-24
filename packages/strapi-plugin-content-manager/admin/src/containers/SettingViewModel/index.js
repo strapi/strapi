@@ -2,7 +2,7 @@ import React, { memo, useEffect, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { get, isEqual, isEmpty, upperFirst } from 'lodash';
+import { get, isEqual, upperFirst } from 'lodash';
 
 import {
   BackHeader,
@@ -165,6 +165,7 @@ function SettingViewModel({
     get(modifiedData, ['layouts', 'list'], []);
   const getEditRemainingFields = () => {
     const attributes = getAttributes();
+    const metadatas = get(modifiedData, ['metadatas'], {});
     const displayedFields = getEditLayout().reduce(
       (acc, curr) => [...acc, ...curr.rowContent],
       []
@@ -172,6 +173,7 @@ function SettingViewModel({
 
     return Object.keys(attributes)
       .filter(attr => get(attributes, [attr, 'type'], '') !== 'relation')
+      .filter(attr => get(metadatas, [attr, 'edit', 'visible'], false) === true)
       .filter(attr => {
         return displayedFields.findIndex(el => el.name === attr) === -1;
       });
@@ -185,10 +187,15 @@ function SettingViewModel({
       .filter(attr => displayedFields.indexOf(attr) === -1);
   };
   const getListRemainingFields = () => {
-    const metadata = get(modifiedData, ['metadata'], {});
+    const metadatas = get(modifiedData, ['metadatas'], {});
+    const attributes = getAttributes();
 
-    return Object.keys(metadata)
-      .filter(key => !isEmpty(get(modifiedData, ['metadata', key, 'list'])))
+    return Object.keys(metadatas)
+      .filter(key => {
+        const type = get(attributes, [key, 'type'], '');
+
+        return !['json', 'relation', 'group'].includes(type) && !!type;
+      })
       .filter(field => {
         return !getListDisplayedFields().includes(field);
       });

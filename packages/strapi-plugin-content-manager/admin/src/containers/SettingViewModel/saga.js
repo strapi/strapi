@@ -9,13 +9,17 @@ import { getDataSucceeded, submitSucceeded } from './actions';
 import { GET_DATA, ON_SUBMIT } from './constants';
 import { makeSelectModifiedData } from './selectors';
 
-const getRequestUrl = path => `/${pluginId}/fixtures/${path}`;
+const getRequestUrl = path => `/${pluginId}/${path}`;
 
 export function* getData({ uid }) {
   try {
-    const { layout } = yield call(request, getRequestUrl(`layouts/${uid}`), {
-      method: 'GET',
-    });
+    const { data: layout } = yield call(
+      request,
+      getRequestUrl(`content-types/${uid}`),
+      {
+        method: 'GET',
+      }
+    );
 
     yield put(getDataSucceeded(layout));
   } catch (err) {
@@ -29,7 +33,9 @@ export function* submit({ emitEvent, uid }) {
     // We need to send the unformated edit layout
     set(body, 'layouts.edit', unformatLayout(body.layouts.edit));
 
-    yield call(request, getRequestUrl(`layouts/${uid}`), {
+    delete body.schema;
+
+    yield call(request, getRequestUrl(`content-types/${uid}`), {
       method: 'PUT',
       body,
     });
