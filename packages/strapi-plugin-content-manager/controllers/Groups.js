@@ -1,7 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
-const pluralize = require('pluralize');
 const { createModelConfigurationSchema } = require('./validation');
 
 module.exports = {
@@ -9,13 +7,11 @@ module.exports = {
    * Returns the list of available groups
    */
   async listGroups(ctx) {
-    const data = Object.keys(strapi.groups).map(uid => ({
-      uid,
-      source: null,
-      isDisplayed: true,
-      name: uid,
-      label: _.upperFirst(pluralize(uid)),
-    }));
+    const ctService = strapi.plugins['content-manager'].services.contenttypes;
+
+    const data = Object.keys(strapi.groups).map(uid => {
+      return ctService.formatContentType(uid, strapi.groups[uid]);
+    });
     ctx.body = { data };
   },
   /**
@@ -35,12 +31,13 @@ module.exports = {
       return ctx.notFound('group.notFound');
     }
 
+    const ctService = strapi.plugins['content-manager'].services.contenttypes;
     const groupService = strapi.plugins['content-manager'].services.groups;
     const configurations = await groupService.getConfiguration(uid);
 
     const data = {
       uid,
-      schema: groupService.formatGroupSchema(group),
+      schema: ctService.formatContentTypeSchema(group),
       ...configurations,
     };
 
@@ -80,12 +77,12 @@ module.exports = {
     const groupService = strapi.plugins['content-manager'].services.groups;
     await groupService.setConfiguration(uid, input);
 
+    const ctService = strapi.plugins['content-manager'].services.contenttypes;
     const configurations = await groupService.getConfiguration(uid);
 
     const data = {
       uid,
-
-      schema: groupService.formatGroupSchema(group),
+      schema: ctService.formatContentTypeSchema(group),
       ...configurations,
     };
 

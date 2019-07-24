@@ -40,15 +40,16 @@ module.exports = {
     return storeUtils.deleteKey(storeKey);
   },
 
-  formatContentType(opts) {
-    const { uid, info, source = null, isDisplayed = true } = opts;
+  formatContentType(uid, contentType, opts = {}) {
+    const { source = null, isDisplayed = true } = opts;
 
     return {
       uid,
       name: uid,
-      label: formatContentTypeLabel(info.name || uid),
+      label: formatContentTypeLabel(_.get(contentType, ['info', 'name'], uid)),
       isDisplayed,
       source,
+      schema: this.formatContentTypeSchema(contentType),
     };
   },
 
@@ -56,21 +57,41 @@ module.exports = {
     const { associations, allAttributes } = contentType;
     return {
       ...pickSchemaFields(contentType),
-      attributes: Object.keys(allAttributes).reduce((acc, key) => {
-        const attr = allAttributes[key];
-        const assoc = associations.find(assoc => assoc.alias === key);
-        if (assoc) {
-          acc[key] = {
-            ...attr,
-            type: 'relation',
-            targetModel: attr.model || attr.collection,
-            relationType: assoc.nature,
-          };
-        } else {
-          acc[key] = attr;
-        }
-        return acc;
-      }, {}),
+      attributes: {
+        [contentType.primaryKey]: {
+          type: contentType.primaryKeyType,
+        },
+        id: {
+          type: contentType.primaryKeyType,
+        },
+        ...Object.keys(allAttributes).reduce((acc, key) => {
+          const attribute = allAttributes[key];
+          const assoc = associations.find(assoc => assoc.alias === key);
+
+          if (assoc) {
+            const { plugin } = attribute;
+            let targetEntity = attribute.model || attribute.collection;
+
+            if (plugin === 'upload' && targetEntity === 'file') {
+              acc[key] = {
+                type: 'media',
+                multiple: attribute.collection ? true : false,
+                required: attribute.required ? true : false,
+              };
+            } else {
+              acc[key] = {
+                ...attribute,
+                type: 'relation',
+                targetModel: targetEntity,
+                relationType: assoc.nature,
+              };
+            }
+          } else {
+            acc[key] = attribute;
+          }
+          return acc;
+        }, {}),
+      },
     };
   },
 
