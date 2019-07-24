@@ -5,6 +5,7 @@ const createRequest = (defaults = {}) => {
     baseUrl: 'http://localhost:1337',
     json: true,
     resolveWithFullResponse: true,
+    simple: false,
     ...defaults,
   });
 

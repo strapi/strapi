@@ -7,16 +7,15 @@
   },
   "options": {
     "increments": true,
-    "timestamps": true,
-    "comment": ""
+    "timestamps": false
   },
   "attributes": {
     "name": {
       "type": "string"
     },
-    "article": {
-      "model": "article",
-      "via": "tags"
+    "linkedArticles": {
+      "collection": "article",
+      "via": "manyTags"
     }
   }
 }

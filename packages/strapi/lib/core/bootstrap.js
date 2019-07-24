@@ -41,6 +41,20 @@ module.exports = function(strapi) {
   // Initialize main router to use it in middlewares.
   strapi.router = routerJoi();
 
+  Object.keys(strapi.groups).forEach(key => {
+    const group = strapi.groups[key];
+
+    if (!group.connection)
+      throw new Error(`Group ${key} is missing a connection attribute`);
+
+    if (!group.collectionName)
+      throw new Error(`Group ${key} is missing a collectionName attribute`);
+
+    return Object.assign(group, {
+      globalId: group.globalId || _.upperFirst(_.camelCase(`group_${key}`)),
+    });
+  });
+
   // Set models.
   strapi.models = Object.keys(strapi.api || []).reduce((acc, key) => {
     for (let index in strapi.api[key].models) {
@@ -121,10 +135,6 @@ module.exports = function(strapi) {
     });
   });
 
-  strapi.admin.queries = (model, plugin) => {
-    return strapi.query(model, plugin, strapi.admin.config.queries);
-  };
-
   Object.keys(strapi.plugins).forEach(pluginName => {
     let plugin = strapi.plugins[pluginName];
     Object.assign(plugin, {
@@ -154,10 +164,6 @@ module.exports = function(strapi) {
           strapi.config.currentEnvironment.database.defaultConnection,
       });
     });
-
-    plugin.queries = (model, pluginName) => {
-      return strapi.query(model, pluginName, plugin.config.queries);
-    };
   });
 
   // Define required middlewares categories.

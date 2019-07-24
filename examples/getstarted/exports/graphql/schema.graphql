@@ -1,30 +1,42 @@
 type Article {
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
   title: String!
   content: String
+  published: Boolean
+  json: JSON
   number: Int
   date: DateTime
   enum: ENUM_ARTICLE_ENUM
-  pic: UploadFile
   bool: Boolean
-  json: JSON
-  tags(sort: String, limit: Int, start: Int, where: JSON): [Tag]
-  pics(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
+  pic: UploadFile
+  mainTag: Tag
+  fb_cta: GroupCtaFacebook
+  mainIngredient: GroupIngredients
+  ingredients: [GroupIngredients]
+  pictures(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
+  linkedTags(sort: String, limit: Int, start: Int, where: JSON): [Tag]
+  manyTags(sort: String, limit: Int, start: Int, where: JSON): [Tag]
+  id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
 }
 
 input ArticleInput {
   title: String!
   content: String
+  published: Boolean
+  json: JSON
   number: Int
   date: DateTime
   enum: ENUM_ARTICLE_ENUM
-  pic: ID
   bool: Boolean
-  tags: [ID]
-  json: JSON
-  pics: [ID]
+  pic: ID
+  pictures: [ID]
+  mainTag: ID
+  linkedTags: [ID]
+  manyTags: [ID]
+  fb_cta: GroupctafacebookInput!
+  mainIngredient: GroupingredientsInput
+  ingredients: [GroupingredientsInput]
 }
 
 input createArticleInput {
@@ -147,14 +159,20 @@ type deleteUserPayload {
 input editArticleInput {
   title: String
   content: String
+  published: Boolean
+  json: JSON
   number: Int
   date: DateTime
   enum: ENUM_ARTICLE_ENUM
-  pic: ID
   bool: Boolean
-  tags: [ID]
-  json: JSON
-  pics: [ID]
+  pic: ID
+  pictures: [ID]
+  mainTag: ID
+  linkedTags: [ID]
+  manyTags: [ID]
+  fb_cta: editGroupctafacebookInput
+  mainIngredient: editGroupingredientsInput
+  ingredients: [editGroupingredientsInput]
 }
 
 input editFileInput {
@@ -168,6 +186,21 @@ input editFileInput {
   provider: String
   public_id: String
   related: [ID]
+}
+
+input editGroupctafacebookInput {
+  id: ID
+  title: String
+  description: String
+}
+
+input editGroupingredientsInput {
+  id: ID
+  name: String
+  quantity: Float
+  enum: ENUM_GROUPINGREDIENTS_ENUM
+  pic: ID
+  article: ID
 }
 
 input editRecipeInput {
@@ -194,7 +227,7 @@ input editRoleInput {
 
 input editTagInput {
   name: String
-  article: ID
+  linkedArticles: [ID]
 }
 
 input editTestInput {
@@ -217,6 +250,11 @@ enum ENUM_ARTICLE_ENUM {
   noon
 }
 
+enum ENUM_GROUPINGREDIENTS_ENUM {
+  morning
+  noon
+}
+
 input FileInput {
   name: String!
   hash: String!
@@ -228,6 +266,35 @@ input FileInput {
   provider: String!
   public_id: String
   related: [ID]
+}
+
+"""test"""
+type GroupCtaFacebook {
+  title: String
+  description: String
+  id: ID!
+}
+
+input GroupctafacebookInput {
+  title: String
+  description: String
+}
+
+type GroupIngredients {
+  name: String!
+  quantity: Float!
+  enum: ENUM_GROUPINGREDIENTS_ENUM
+  pic: UploadFile
+  article: Article
+  id: ID!
+}
+
+input GroupingredientsInput {
+  name: String!
+  quantity: Float!
+  enum: ENUM_GROUPINGREDIENTS_ENUM
+  pic: ID
+  article: ID
 }
 
 input InputID {
@@ -279,8 +346,8 @@ type Mutation {
 }
 
 type MypluginTest {
-  id: ID!
   type: String!
+  id: ID!
 }
 
 type Query {
@@ -310,10 +377,10 @@ type Query {
 }
 
 type Recipe {
+  title: String
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
-  title: String
 }
 
 input RecipeInput {
@@ -321,11 +388,11 @@ input RecipeInput {
 }
 
 type Rocketship {
+  name: String
+  rocketshipmaker: Rocketshipmaker
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
-  name: String
-  rocketshipmaker: Rocketshipmaker
 }
 
 input RocketshipInput {
@@ -334,11 +401,11 @@ input RocketshipInput {
 }
 
 type Rocketshipmaker {
+  name: String
+  rocketships(sort: String, limit: Int, start: Int, where: JSON): [Rocketship]
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
-  name: String
-  rocketships(sort: String, limit: Int, start: Int, where: JSON): [Rocketship]
 }
 
 input RocketshipmakerInput {
@@ -355,16 +422,14 @@ input RoleInput {
 }
 
 type Tag {
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
   name: String
-  article: Article
+  linkedArticles(sort: String, limit: Int, start: Int, where: JSON): [Article]
+  id: ID!
 }
 
 input TagInput {
   name: String
-  article: ID
+  linkedArticles: [ID]
 }
 
 input TestInput {
@@ -438,9 +503,6 @@ type updateUserPayload {
 scalar Upload
 
 type UploadFile {
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
   name: String!
   hash: String!
   sha256: String
@@ -451,6 +513,9 @@ type UploadFile {
   provider: String!
   public_id: String
   related(sort: String, limit: Int, start: Int, where: JSON): [Morph]
+  id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
 }
 
 input UserInput {
@@ -481,32 +546,32 @@ type UsersPermissionsMeRole {
 }
 
 type UsersPermissionsPermission {
-  id: ID!
   type: String!
   controller: String!
   action: String!
   enabled: Boolean!
   policy: String
   role: UsersPermissionsRole
+  id: ID!
 }
 
 type UsersPermissionsRole {
-  id: ID!
   name: String!
   description: String
   type: String
   permissions(sort: String, limit: Int, start: Int, where: JSON): [UsersPermissionsPermission]
   users(sort: String, limit: Int, start: Int, where: JSON): [UsersPermissionsUser]
+  id: ID!
 }
 
 type UsersPermissionsUser {
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
   username: String!
   email: String!
   provider: String
   confirmed: Boolean
   blocked: Boolean
   role: UsersPermissionsRole
+  id: ID!
+  created_at: DateTime!
+  updated_at: DateTime!
 }

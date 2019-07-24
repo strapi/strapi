@@ -7,10 +7,7 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": true,
     "comment": ""
   },
   "attributes": {
@@ -23,6 +20,12 @@
     "content": {
       "type": "text"
     },
+    "published": {
+      "type": "boolean"
+    },
+    "json": {
+      "type": "json"
+    },
     "number": {
       "type": "integer"
     },
@@ -30,32 +33,50 @@
       "type": "date"
     },
     "enum": {
-      "enum": [
-        "morning",
-        "noon"
-      ],
       "type": "enumeration",
-      "default": "noon"
+      "enum": ["morning,", "noon"]
+    },
+    "bool": {
+      "type": "boolean"
     },
     "pic": {
       "model": "file",
       "via": "related",
       "plugin": "upload"
     },
-    "bool": {
-      "type": "boolean"
-    },
-    "tags": {
-      "collection": "tag",
-      "via": "article"
-    },
-    "json": {
-      "type": "json"
-    },
-    "pics": {
+    "pictures": {
       "collection": "file",
       "via": "related",
       "plugin": "upload"
+    },
+    "mainTag": {
+      "model": "tag"
+    },
+    "linkedTags": {
+      "collection": "tag"
+    },
+    "manyTags": {
+      "dominant": true,
+      "collection": "tag",
+      "via": "linkedArticles"
+    },
+    "fb_cta": {
+      "required": true,
+      "type": "group",
+      "group": "cta_facebook",
+      "repeatable": false
+    },
+    "mainIngredient": {
+      "type": "group",
+      "group": "ingredients",
+      "repeatable": false
+    },
+    "ingredients": {
+      "type": "group",
+      "group": "ingredients",
+      "repeatable": true,
+      "min": 1,
+      "max": 10
     }
   }
 }

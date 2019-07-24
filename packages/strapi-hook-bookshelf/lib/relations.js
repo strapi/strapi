@@ -204,6 +204,7 @@ module.exports = {
                     _.get(property, assocModel.primaryKey, property)
                   );
                 }
+                case 'manyWay':
                 case 'manyToMany': {
                   const currentValue = transformToArrayID(
                     response[current],
@@ -327,9 +328,9 @@ module.exports = {
             {}
           );
 
-    // Update fields in other collections.
     await Promise.all(relationUpdates);
 
+    delete values[this.primaryKey];
     if (!_.isEmpty(values)) {
       await this.forge({
         [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
@@ -343,60 +344,6 @@ module.exports = {
     }).fetch({
       withRelated: this.associations.map(x => x.alias),
     });
-  },
-
-  addRelation: async function(params) {
-    const association = this.associations.find(
-      x => x.via === params.foreignKey && _.get(params.values, x.alias, null)
-    );
-
-    if (!association) {
-      // Resolve silently.
-      return Promise.resolve();
-    }
-
-    switch (association.nature) {
-      case 'oneToOne':
-      case 'oneToMany':
-      case 'manyToOne':
-        return module.exports.update.call(this, params);
-      case 'manyToMany':
-        return this.forge({
-          [this.primaryKey]: params[this.primaryKey],
-        })
-          [association.alias]()
-          .attach(params.values[association.alias]);
-      default:
-        // Resolve silently.
-        return Promise.resolve();
-    }
-  },
-
-  removeRelation: async function(params) {
-    const association = this.associations.find(
-      x => x.via === params.foreignKey && _.get(params.values, x.alias, null)
-    );
-
-    if (!association) {
-      // Resolve silently.
-      return Promise.resolve();
-    }
-
-    switch (association.nature) {
-      case 'oneToOne':
-      case 'oneToMany':
-      case 'manyToOne':
-        return module.exports.update.call(this, params);
-      case 'manyToMany':
-        return this.forge({
-          [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
-        })
-          [association.alias]()
-          .detach(params.values[association.alias]);
-      default:
-        // Resolve silently.
-        return Promise.resolve();
-    }
   },
 
   addRelationMorph: async function(params) {

@@ -31,8 +31,8 @@ install_mongo: &install_mongo
     - mkdir -p ./data/db/27000
     - ./mongodb-linux-x86_64-3.6.6/bin/mongod --fork --dbpath ./data/db/27017 --syslog --port 27017
 
-install:
-  - yarn setup
+before_script:
+  - yarn build
   - yarn global add -g wait-on
 
 jobs:
@@ -73,7 +73,6 @@ jobs:
       <<: *install_mongo
       env:
         - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
-
     # - name: 'Cypress tests'
     #   <<: *install_mongo
     #   install:

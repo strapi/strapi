@@ -48,11 +48,9 @@ exports.connect = (provider, query) => {
       }
 
       try {
-        const users = await strapi.plugins['users-permissions']
-          .queries('user', 'users-permissions')
-          .find({
-            email: profile.email,
-          });
+        const users = await strapi.query('user', 'users-permissions').find({
+          email: profile.email,
+        });
 
         const advanced = await strapi
           .store({
@@ -92,8 +90,8 @@ exports.connect = (provider, query) => {
         }
 
         // Retrieve default role.
-        const defaultRole = await strapi.plugins['users-permissions']
-          .queries('role', 'users-permissions')
+        const defaultRole = await strapi
+          .query('role', 'users-permissions')
           .findOne({ type: advanced.default_role }, []);
 
         // Create the new user.
@@ -102,8 +100,8 @@ exports.connect = (provider, query) => {
           role: defaultRole._id || defaultRole.id,
         });
 
-        const createdUser = await strapi.plugins['users-permissions']
-          .queries('user', 'users-permissions')
+        const createdUser = await strapi
+          .query('user', 'users-permissions')
           .create(params);
 
         return resolve([createdUser, null]);
