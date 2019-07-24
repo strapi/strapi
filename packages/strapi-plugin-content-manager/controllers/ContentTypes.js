@@ -12,8 +12,7 @@ module.exports = {
     const userModels = Object.keys(strapi.models)
       .filter(key => key !== 'core_store')
       .map(uid => {
-        const { info } = strapi.models[uid];
-        return service.formatContentType({ uid, info });
+        return service.formatContentType(uid, strapi.models[uid]);
       });
 
     const shouldDisplayPluginModel = uid => {
@@ -28,11 +27,8 @@ module.exports = {
         const plugin = strapi.plugins[pluginKey];
 
         return Object.keys(plugin.models || {}).map(uid => {
-          const { info } = plugin.models[uid];
-
-          return service.formatContentType({
+          return service.formatContentType(uid, plugin.models[uid], {
             uid,
-            info,
             isDisplayed: shouldDisplayPluginModel(uid),
             source: pluginKey,
           });
@@ -41,11 +37,7 @@ module.exports = {
       .reduce((acc, models) => acc.concat(models), []);
 
     const adminModels = Object.keys(strapi.admin.models).map(uid => {
-      const { info } = strapi.admin.models[uid];
-
-      return service.formatContentType({
-        uid,
-        info,
+      return service.formatContentType(uid, strapi.admin.models[uid], {
         isDisplayed: false,
         source: 'admin',
       });

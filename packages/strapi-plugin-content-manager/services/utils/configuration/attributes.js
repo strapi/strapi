@@ -2,15 +2,13 @@
 
 const _ = require('lodash');
 
-const NON_SORTABLES = ['group', 'json'];
-const isSortable = (model, name) => {
-  if (name === 'id') return true;
-
-  const attribute = model.allAttributes[name];
-  if (!_.has(attribute, 'type')) {
+const NON_SORTABLES = ['group', 'json', 'relation'];
+const isSortable = (schema, name) => {
+  if (!_.has(schema.attributes, name)) {
     return false;
   }
 
+  const attribute = schema.attributes[name];
   if (NON_SORTABLES.includes(attribute.type)) {
     return false;
   }
@@ -18,51 +16,42 @@ const isSortable = (model, name) => {
   return true;
 };
 
-// check it is in the attributes not in allAttributes
-const isEditable = (model, name) => _.has(model.attributes, name);
-
-const hasRelationAttribute = (model, attr) => {
-  return (
-    _.has(model.allAttributes[attr], 'model') ||
-    _.has(model.allAttributes[attr], 'collection')
-  );
+const isSearchable = (schema, name) => {
+  return isSortable(schema, name);
 };
 
-const hasEditableAttribute = (model, attr) => {
-  if (!_.has(model.allAttributes, attr)) {
+const isVisible = (schema, name) => {
+  if (!_.has(schema.attributes, name)) {
     return false;
   }
 
-  if (!_.has(model.allAttributes[attr], 'type')) {
+  if (isTimestamp(schema, name) || name === 'id') {
     return false;
   }
 
   return true;
 };
 
-const hasListableAttribute = (model, attr) => {
-  if (attr === 'id') return true;
-
-  if (!_.has(model.allAttributes, attr)) {
+const isTimestamp = (schema, name) => {
+  if (!_.has(schema.attributes, name)) {
     return false;
   }
 
-  if (!_.has(model.allAttributes[attr], 'type')) {
+  const timestampsOpt = _.get(schema, ['options', 'timestamps']);
+  if (!timestampsOpt || !Array.isArray(timestampsOpt)) {
     return false;
   }
 
-  if (NON_SORTABLES.includes(model.allAttributes[attr].type)) {
-    return false;
+  if (timestampsOpt.includes(name)) {
+    return true;
   }
-
-  return true;
 };
+
+const isRelation = attribute => attribute.type === 'relation';
 
 module.exports = {
   isSortable,
-  isEditable,
-
-  hasEditableAttribute,
-  hasListableAttribute,
-  hasRelationAttribute,
+  isVisible,
+  isSearchable,
+  isRelation,
 };

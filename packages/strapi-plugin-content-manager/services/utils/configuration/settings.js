@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { hasListableAttribute } = require('./attributes');
+const { isSortable } = require('./attributes');
 
 /**
  * Retunrs a configuration default settings
@@ -21,18 +21,16 @@ async function createDefaultSettings() {
 
 /** Synchronisation functions */
 
-async function syncSettings(configuration, model) {
-  if (_.isEmpty(configuration.settings)) return createDefaultSettings(model);
+async function syncSettings(configuration, schema) {
+  if (_.isEmpty(configuration.settings)) return createDefaultSettings(schema);
 
   const { mainField = 'id', defaultSortBy = 'id' } =
     configuration.settings || {};
 
   return {
     ...configuration.settings,
-    mainField: hasListableAttribute(model, mainField) ? mainField : 'id',
-    defaultSortBy: hasListableAttribute(model, defaultSortBy)
-      ? defaultSortBy
-      : 'id',
+    mainField: isSortable(schema, mainField) ? mainField : 'id',
+    defaultSortBy: isSortable(schema, defaultSortBy) ? defaultSortBy : 'id',
   };
 }
 
