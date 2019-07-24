@@ -43,10 +43,11 @@ export function formatLayout() {
   };
 }
 
-export function getData(uid) {
+export function getData(uid, source) {
   return {
     type: GET_DATA,
     uid,
+    source,
   };
 }
 

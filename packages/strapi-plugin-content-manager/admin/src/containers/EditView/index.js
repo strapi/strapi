@@ -93,14 +93,15 @@ function EditView({
       try {
         const data = await Promise.all(
           groupLayoutsToGet.map(uid =>
-            request(`/${pluginId}/fixtures/layouts/${uid}`, {
+            request(`/${pluginId}/groups/${uid}`, {
               method: 'GET',
               signal: signalFetchLayouts,
             })
           )
         );
+
         const groupLayouts = data.reduce((acc, current) => {
-          acc[current.layout.uid] = current.layout;
+          acc[current.data.uid] = current.layout;
 
           return acc;
         }, {});
@@ -140,6 +141,7 @@ function EditView({
         });
       } catch (err) {
         // TODO ADD A TRAD
+        console.log({ err });
 
         if (err.code !== 20) {
           strapi.notification.error('notification.error');

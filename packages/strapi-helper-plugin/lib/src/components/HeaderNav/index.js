@@ -21,11 +21,20 @@ function HeaderNav({ links }) {
 
   return (
     <div className={styles.headerContainer}>
-      {map(links, (link) => {
+      {map(links, link => {
         linkColor = darken(linkColor, 1.5);
 
         return (
-          <NavLink key={link.name} className={styles.headerLink} style={{ backgroundColor: linkColor}} to={link.to} activeClassName={styles.linkActive}>
+          <NavLink
+            key={link.name}
+            className={styles.headerLink}
+            style={{ backgroundColor: linkColor }}
+            to={link.to}
+            activeClassName={styles.linkActive}
+            isActive={(match, location) => {
+              return location.pathname === link.to.split('?')[0];
+            }}
+          >
             <div className={`${styles.linkText} text-center`}>
               <FormattedMessage id={link.name} defaultMessage={link.name} />
               {link.active && <div className={styles.notifPoint} />}
@@ -47,7 +56,7 @@ HeaderNav.propTypes = {
       active: PropTypes.bool,
       name: PropTypes.string,
       to: PropTypes.string,
-    }),
+    })
   ),
 };
 

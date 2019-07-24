@@ -6,13 +6,19 @@ import pluginId from '../../pluginId';
 import { getLayoutSucceeded } from './actions';
 import { GET_LAYOUT } from './constants';
 
-const getRequestUrl = path => `/${pluginId}/fixtures/${path}`;
+const getRequestUrl = path => `/${pluginId}/${path}`;
 
-function* getLayout({ uid }) {
+function* getLayout({ source, uid }) {
   try {
-    const { layout } = yield call(request, getRequestUrl(`layouts/${uid}`), {
-      method: 'GET',
-    });
+    const params = source !== 'content-manager' ? { source } : {};
+    const { data: layout } = yield call(
+      request,
+      getRequestUrl(`content-types/${uid}`),
+      {
+        method: 'GET',
+        params,
+      }
+    );
 
     yield put(getLayoutSucceeded(layout, uid));
   } catch (err) {

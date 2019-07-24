@@ -20,10 +20,11 @@ export function deleteLayouts() {
   };
 }
 
-export function getLayout(uid) {
+export function getLayout(uid, source) {
   return {
     type: GET_LAYOUT,
     uid,
+    source,
   };
 }
 

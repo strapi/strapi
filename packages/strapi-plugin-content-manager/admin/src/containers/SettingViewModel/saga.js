@@ -11,13 +11,15 @@ import { makeSelectModifiedData } from './selectors';
 
 const getRequestUrl = path => `/${pluginId}/${path}`;
 
-export function* getData({ uid }) {
+export function* getData({ source, uid }) {
   try {
+    const params = source ? { source } : {};
     const { data: layout } = yield call(
       request,
       getRequestUrl(`content-types/${uid}`),
       {
         method: 'GET',
+        params,
       }
     );
 

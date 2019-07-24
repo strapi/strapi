@@ -3,9 +3,11 @@ import PropTypes from 'prop-types';
 import pluginId from '../../pluginId';
 import Tr from './Tr';
 
-function ListRow({ name, push, type }) {
+function ListRow({ name, push, type, uid, source }) {
   const getUrl = to =>
-    `/plugins/${pluginId}/ctm-configurations/${type}/${name}${to}`;
+    `/plugins/${pluginId}/ctm-configurations/${type}/${uid}${to}${
+      source ? `?source=${source}` : ''
+    }`;
   const to = type === 'models' ? '/list-settings' : '';
 
   return (
@@ -20,14 +22,16 @@ function ListRow({ name, push, type }) {
 ListRow.defaultProps = {
   name: '',
   push: () => {},
+  source: null,
   type: 'models',
 };
 
 ListRow.propTypes = {
   name: PropTypes.string,
   push: PropTypes.func,
+  source: PropTypes.string,
   type: PropTypes.string,
-  // uid: PropTypes.string,
+  uid: PropTypes.string,
 };
 
 export default memo(ListRow);

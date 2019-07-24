@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
-import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, getQueryParameters } from 'strapi-helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
@@ -26,20 +26,22 @@ function Main({
   emitEvent,
   getLayout,
   layouts,
-  location: { pathname },
+  location: { pathname, search },
   global: { plugins },
 }) {
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
   strapi.useInjectSaga({ key: 'main', saga, pluginId });
   const slug = pathname.split('/')[3];
+  const source = getQueryParameters(search, 'source');
+
   const shouldShowLoader =
     slug !== 'ctm-configurations' && layouts[slug] === undefined;
 
   useEffect(() => {
     if (shouldShowLoader) {
-      getLayout(slug);
+      getLayout(slug, source);
     }
-  }, [getLayout, shouldShowLoader, slug]);
+  }, [getLayout, shouldShowLoader, slug, source]);
 
   if (shouldShowLoader) {
     return <LoadingIndicatorPage />;
@@ -91,6 +93,7 @@ Main.propTypes = {
   layouts: PropTypes.object.isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,
+    search: PropTypes.string,
   }),
 };
 

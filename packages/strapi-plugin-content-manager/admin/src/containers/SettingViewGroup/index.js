@@ -30,7 +30,7 @@ import Separator from '../../components/Separator';
 
 import reducer, { initialState } from './reducer';
 
-const getRequestUrl = path => `/${pluginId}/fixtures/layouts/${path}`;
+const getRequestUrl = path => `/${pluginId}/groups/${path}`;
 
 function SettingViewGroup({
   history: { goBack },
@@ -51,7 +51,7 @@ function SettingViewGroup({
 
     const fetchGroupLayout = async () => {
       try {
-        const { layout } = await request(getRequestUrl(name), {
+        const { data: layout } = await request(getRequestUrl(name), {
           method: 'GET',
           signal: signalFetchData,
         });
@@ -68,6 +68,7 @@ function SettingViewGroup({
           data: layout,
         });
       } catch (err) {
+        console.log({ err });
         if (err.code !== 20) {
           strapi.notification.error('notification.error');
         }

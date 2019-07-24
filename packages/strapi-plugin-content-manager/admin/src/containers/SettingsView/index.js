@@ -185,6 +185,8 @@ function SettingsView({
                       name={data.name}
                       push={push}
                       type={type}
+                      uid={data.uid}
+                      source={data.source}
                     />
                   ))}
                 </tbody>

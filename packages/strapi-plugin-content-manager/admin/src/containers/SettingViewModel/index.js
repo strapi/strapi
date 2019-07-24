@@ -11,6 +11,7 @@ import {
   PluginHeader,
   PopUpWarning,
   LoadingIndicatorPage,
+  getQueryParameters,
 } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -53,8 +54,10 @@ import makeSelectSettingViewModel from './selectors';
 
 import forms from './forms.json';
 
-const getUrl = (name, to) =>
-  `/plugins/${pluginId}/ctm-configurations/models/${name}/${to}`;
+const getUrl = (name, to, source) =>
+  `/plugins/${pluginId}/ctm-configurations/models/${name}/${to}${
+    source ? `?source=${source}` : ''
+  }`;
 
 function SettingViewModel({
   addFieldToList,
@@ -67,6 +70,7 @@ function SettingViewModel({
   initialData,
   isLoading,
   listFieldToEditIndex,
+  location: { search },
   match: {
     params: { name, settingType },
   },
@@ -93,14 +97,15 @@ function SettingViewModel({
   const [showWarningCancel, setWarningCancel] = useState(false);
   const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
+  const source = getQueryParameters(search, 'source');
 
   useEffect(() => {
-    getData(name);
+    getData(name, source);
 
     return () => {
       resetProps();
     };
-  }, [getData, name, resetProps]);
+  }, [getData, name, resetProps, source]);
 
   useEffect(() => {
     if (showWarningSubmit) {
@@ -261,12 +266,12 @@ function SettingViewModel({
               {
                 name:
                   'content-manager.containers.SettingPage.listSettings.title',
-                to: getUrl(name, 'list-settings'),
+                to: getUrl(name, 'list-settings', source),
               },
               {
                 name:
                   'content-manager.containers.SettingPage.editSettings.title',
-                to: getUrl(name, 'edit-settings'),
+                to: getUrl(name, 'edit-settings', source),
               },
             ]}
           />
@@ -398,6 +403,9 @@ SettingViewModel.propTypes = {
   initialData: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,
   listFieldToEditIndex: PropTypes.number.isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string,
+  }),
   match: PropTypes.shape({
     params: PropTypes.shape({
       name: PropTypes.string,
