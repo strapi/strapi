@@ -33,6 +33,10 @@ const Wrapper = styled.div`
       > p {
         position: relative;
         height: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        // width: calc(100% - 18px);
         text-align: center;
         margin-bottom: 0;
         margin-top: -1px;
@@ -69,8 +73,13 @@ const Wrapper = styled.div`
         line-height: 26px;
         cursor: pointer;
         font-size: 13px !important;
+        &:focus,
+        &:active,
+        &:hover,
         &:hover {
           background-color: #fafafb !important;
+          color: #333740;
+          outline: 0;
         }
         div {
           margin: 0;

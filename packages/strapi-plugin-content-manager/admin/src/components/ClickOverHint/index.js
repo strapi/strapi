@@ -1,9 +1,9 @@
 /**
- * 
+ *
  * ClickOverHint
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import styles from './styles.scss';
@@ -24,4 +24,4 @@ ClickOverHint.propTypes = {
   show: PropTypes.bool.isRequired,
 };
 
-export default ClickOverHint;
+export default memo(ClickOverHint);

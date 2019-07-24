@@ -56,7 +56,7 @@ const FieldItem = forwardRef(
                         style={{ marginRight: 10 }}
                       />
                     )}
-                    <span>{!isHidden && name}</span>
+                    <span className="name">{!isHidden && name}</span>
                   </div>
                   {!isHidden && (
                     <RemoveIcon

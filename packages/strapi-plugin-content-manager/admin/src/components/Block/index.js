@@ -3,7 +3,7 @@
  * Block
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Wrapper, Sub } from './components';
@@ -42,4 +42,4 @@ Block.propTypes = {
   title: PropTypes.string,
 };
 
-export default Block;
+export default memo(Block);

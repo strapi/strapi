@@ -44,6 +44,17 @@ const NameWrapper = styled.div`
   display: flex;
   padding-left: 10px;
   justify-content: space-between;
+  > div {
+    width: calc(100% - 30px);
+  }
+  .name {
+    display: inline-block;
+    vertical-align: top;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: calc(100% - 18px);
+  }
 
   ${({ isHidden }) => {
     if (!isHidden) {
@@ -58,7 +69,7 @@ const NameWrapper = styled.div`
         }
         > img {
           align-self: flex-start;
-          vertical-align: top;
+          vertical-align: tom;
           max-width: 8px;
           margin-right: 10px;
           margin-top: 11px;
@@ -66,7 +77,6 @@ const NameWrapper = styled.div`
       `;
     }
   }}
-
   ${({ isEditing }) => {
     if (isEditing) {
       return css`
@@ -74,7 +84,7 @@ const NameWrapper = styled.div`
         border: 1px solid #aed4fb;
       `;
     }
-  }}
+  }};
 `;
 
 const Wrapper = styled.div`
