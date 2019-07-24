@@ -613,6 +613,7 @@ export function submitTempContentTypeSucceeded() {
 
 export function submitTempGroup(data, context) {
   const attributes = formatGroupAttributes(data.schema.attributes);
+  delete data['schema'];
   const body = Object.assign(cloneDeep(data), { attributes });
 
   return {
@@ -628,7 +629,6 @@ export function submitTempGroupSucceeded() {
   };
 }
 
-submitTempGroupSucceeded;
 export function updateTempContentType() {
   return {
     type: UPDATE_TEMP_CONTENT_TYPE,

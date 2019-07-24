@@ -83,6 +83,7 @@ export class App extends React.Component {
   /* istanbul ignore next */
   componentDidUpdate(prevProps) {
     if (prevProps.shouldRefetchData !== this.props.shouldRefetchData) {
+      console.log('UPDATE !!');
       this.props.getData();
     }
   }
@@ -220,6 +221,7 @@ export class App extends React.Component {
     } = this.props;
 
     if (isLoading) {
+      console.log('loading');
       return <Loader />;
     }
 

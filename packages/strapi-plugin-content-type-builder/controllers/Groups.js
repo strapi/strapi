@@ -80,6 +80,9 @@ module.exports = {
     const newGroup = await service.createGroup(uid, body);
 
     ctx.send({ data: newGroup }, 201);
+
+    // Added the reload here @alex
+    strapi.reload();
   },
 
   /**
@@ -107,6 +110,8 @@ module.exports = {
     const updatedGroup = await service.updateGroup(group, body);
 
     ctx.send({ data: updatedGroup }, 200);
+    // Added the reload here @alex
+    strapi.reload();
   },
 
   /**

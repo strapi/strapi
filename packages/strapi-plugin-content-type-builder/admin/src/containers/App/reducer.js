@@ -901,7 +901,6 @@ function appReducer(state = initialState, action) {
           modifiedGroup.getIn(['schema', 'name'])
         );
     }
-
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state
         .update('isLoading', () => true)
@@ -910,23 +909,23 @@ function appReducer(state = initialState, action) {
           Map(initialState.get('newContentType'))
         )
         .update('shouldRefetchData', v => !v);
-    case SUBMIT_TEMP_GROUP_SUCCEEDED: {
-      const newGroup = state
-        .get('newGroup')
-        .set('uid', state.getIn(['newGroup', 'name']))
-        .set('isTemporary', false);
+    // case SUBMIT_TEMP_GROUP_SUCCEEDED: {
+    //   const newGroup = state
+    //     .get('newGroup')
+    //     .set('uid', state.getIn(['newGroup', 'name']))
+    //     .set('isTemporary', false);
 
-      return state
-        .update('newGroup', () => Map(initialState.get('newGroup')))
-        .update('newGroupClone', () => Map(initialState.get('newGroup')))
-        .updateIn(['groups'], list =>
-          list
-            .map(obj => obj.set('isTemporary', false))
-            .sortBy(obj => obj.get('name'))
-        )
-        .updateIn(['modifiedDataGroup', newGroup.get('name')], () => newGroup)
-        .updateIn(['initialDataGroup', newGroup.get('name')], () => newGroup);
-    }
+    //   return state
+    //     .update('newGroup', () => Map(initialState.get('newGroup')))
+    //     .update('newGroupClone', () => Map(initialState.get('newGroup')))
+    //     .updateIn(['groups'], list =>
+    //       list
+    //         .map(obj => obj.set('isTemporary', false))
+    //         .sortBy(obj => obj.get('name'))
+    //     )
+    //     .updateIn(['modifiedDataGroup', newGroup.get('name')], () => newGroup)
+    //     .updateIn(['initialDataGroup', newGroup.get('name')], () => newGroup);
+    // }
     case UPDATE_TEMP_CONTENT_TYPE:
       return state
         .updateIn(

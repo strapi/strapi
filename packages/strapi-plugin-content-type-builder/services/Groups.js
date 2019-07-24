@@ -223,8 +223,11 @@ async function writeSchema(uid, schema) {
     JSON.stringify(schema, null, 2)
   );
 
-  strapi.reload.isWatching = true;
-  process.nextTick(() => strapi.reload());
+  // Commented this part in order to make the reload watcher work in the admin...
+  // @alex
+  // strapi.reload();
+  // strapi.reload.isWatching = true;
+  // process.nextTick(() => strapi.reload());
 }
 
 /**
