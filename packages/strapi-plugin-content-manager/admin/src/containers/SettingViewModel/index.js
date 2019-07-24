@@ -259,6 +259,7 @@ SettingViewModel.propTypes = {
   listFieldToEditIndex: PropTypes.number.isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
+      settingType: PropTypes.string,
       name: PropTypes.string,
     }),
   }).isRequired,

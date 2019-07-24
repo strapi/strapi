@@ -6,7 +6,7 @@ Strapi contains a set of tools to upload files.
 
 To change the upload config, edit the `./api/upload/config/settings.json` file.
 
-For the config bellow, please use refer to the `[co-busboy](https://github.com/cojs/busboy)` node module documentation.
+For the config below, please use refer to the `[co-busboy](https://github.com/cojs/busboy)` node module documentation.
 
 ```js
 {
@@ -62,24 +62,24 @@ Response payload:
 ```js
 [
   {
-    "readable": true,
-    "domain": null,
-    "truncated": false,
-    "fieldname": "file",
-    "filename": "1445421755771-image.jpg",
-    "encoding": "7bit",
-    "transferEncoding": "7bit",
-    "mime": "image/jpeg",
-    "mimeType": "image/jpeg",
-    "originalFilenameFormatted": "image.jpg",
-    "originalFilename": "image.jpg",
-    "template": "default",
-    "lang": "en",
-    "createdAt": "2015-10-21T10:02:35.776Z",
-    "updatedAt": "2015-10-21T10:02:35.776Z",
-    "id": 2
-  }
-]
+    readable: true,
+    domain: null,
+    truncated: false,
+    fieldname: 'file',
+    filename: '1445421755771-image.jpg',
+    encoding: '7bit',
+    transferEncoding: '7bit',
+    mime: 'image/jpeg',
+    mimeType: 'image/jpeg',
+    originalFilenameFormatted: 'image.jpg',
+    originalFilename: 'image.jpg',
+    template: 'default',
+    lang: 'en',
+    createdAt: '2015-10-21T10:02:35.776Z',
+    updatedAt: '2015-10-21T10:02:35.776Z',
+    id: 2,
+  },
+];
 ```
 
 ## Upload model

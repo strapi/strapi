@@ -104,7 +104,7 @@ export class HomePage extends React.Component {
           'items',
           '0',
           'slug',
-        ]) || 'application'}`,
+        ]) || 'application'}`
       );
     }
   }
@@ -126,7 +126,7 @@ export class HomePage extends React.Component {
             'items',
             '0',
             'slug',
-          ])}`,
+          ])}`
         );
       }
     } else if (
@@ -160,7 +160,7 @@ export class HomePage extends React.Component {
     /* eslint-disable no-template-curly-in-string */
     const dbName = get(
       this.props.home.modifiedData,
-      'database.connections.${name}.name',
+      'database.connections.${name}.name'
     );
     map(this.props.home.modifiedData, (data, key) => {
       const k = replace(key, '${name}', dbName);
@@ -172,7 +172,7 @@ export class HomePage extends React.Component {
 
     const formErrors = getRequiredInputsDb(
       this.props.home.modifiedData,
-      this.props.home.formErrors,
+      this.props.home.formErrors
     );
 
     if (isEmpty(formErrors)) {
@@ -180,7 +180,7 @@ export class HomePage extends React.Component {
       this.props.newDatabasePost(
         this.props.match.params.env,
         newData,
-        this.context,
+        this.context
       );
     } else {
       this.props.setErrors(formErrors);
@@ -209,7 +209,7 @@ export class HomePage extends React.Component {
     // Find the index of the new setted language
     const activeLanguageIndex = findIndex(
       this.props.home.configsDisplay.sections,
-      ['name', target.id],
+      ['name', target.id]
     );
 
     forEach(this.props.home.configsDisplay.sections, (section, key) => {
@@ -232,7 +232,7 @@ export class HomePage extends React.Component {
     this.props.editSettings(
       { 'language.defaultLocale': join(defaultLanguageArray, '_') },
       'i18n',
-      this.context,
+      this.context
     );
   };
 
@@ -272,29 +272,27 @@ export class HomePage extends React.Component {
           value ===
           this.props.home.addDatabaseSection.sections[1].items[0].value
             ? [
-              {
-                target: name,
-                errors: [
-                  { id: 'settings-manager.request.error.database.exist' },
-                ],
-              },
-            ]
+                {
+                  target: name,
+                  errors: [
+                    { id: 'settings-manager.request.error.database.exist' },
+                  ],
+                },
+              ]
             : [];
         this.props.setErrors(formErrors);
       } else if (endsWith(name, '.settings.client')) {
         const item = find(
           this.props.home.addDatabaseSection.sections[0].items[1].items,
-          { value },
+          { value }
         );
         this.props.changeInput(
           'database.connections.${name}.settings.port',
-          item.port,
+          item.port
         );
         this.props.changeInput(
-          `database.connections.${
-            this.props.home.addDatabaseSection.sections[1].items[0].value
-          }.settings.port`,
-          item.port,
+          `database.connections.${this.props.home.addDatabaseSection.sections[1].items[0].value}.settings.port`,
+          item.port
         );
       } else {
         this.props.setErrors([]);
@@ -334,7 +332,7 @@ export class HomePage extends React.Component {
 
     if (isEmpty(body))
       return strapi.notification.info(
-        'settings-manager.strapi.notification.info.settingsEqual',
+        'settings-manager.strapi.notification.info.settingsEqual'
       );
     if (isEmpty(formErrors)) {
       this.props.editSettings(body, apiUrl, this.context);
@@ -350,13 +348,13 @@ export class HomePage extends React.Component {
     const formErrors = checkFormValidity(
       body,
       this.props.home.formValidations,
-      this.props.home.formErrors,
+      this.props.home.formErrors
     );
 
     if (isEmpty(body)) {
       this.props.closeModal();
       return strapi.notification.info(
-        'settings-manager.strapi.notification.info.settingsEqual',
+        'settings-manager.strapi.notification.info.settingsEqual'
       );
     }
 
@@ -374,12 +372,12 @@ export class HomePage extends React.Component {
   handleDatabaseDelete = dbName => {
     this.context.enableGlobalOverlayBlocker();
     strapi.notification.success(
-      'settings-manager.strapi.notification.success.databaseDelete',
+      'settings-manager.strapi.notification.success.databaseDelete'
     );
     this.props.databaseDelete(
       dbName,
       this.props.match.params.env,
-      this.context,
+      this.context
     );
   };
 
@@ -397,7 +395,7 @@ export class HomePage extends React.Component {
 
   renderListTitle = () => {
     const availableContentNumber = size(
-      this.props.home.configsDisplay.sections,
+      this.props.home.configsDisplay.sections
     );
     const title =
       availableContentNumber > 1
@@ -424,12 +422,12 @@ export class HomePage extends React.Component {
       const isActive =
         props.values[this.props.home.dbNameTarget] ===
         this.props.home.modifiedData['database.defaultConnection'] ? (
-            <div className={popUpStyles.stmrounded}>
-              <i className="fa fa-check" />
-            </div>
-          ) : (
-            ''
-          );
+          <div className={popUpStyles.stmrounded}>
+            <i className="fa fa-check" />
+          </div>
+        ) : (
+          ''
+        );
 
       if (item.name === 'form.database.item.default') {
         return (
@@ -490,7 +488,7 @@ export class HomePage extends React.Component {
   renderComponent = () => {
     // check if  settingName (params.slug) has a custom view display
     let specificComponent = findKey(this.customComponents, value =>
-      includes(value, this.props.match.params.slug),
+      includes(value, this.props.match.params.slug)
     );
 
     if (!specificComponent) {
@@ -504,12 +502,12 @@ export class HomePage extends React.Component {
     const Component = this.components[specificComponent];
     const addRequiredInputDesign = this.props.match.params.slug === 'databases';
     const listTitle = ['languages', 'databases'].includes(
-      this.props.match.params.slug,
+      this.props.match.params.slug
     )
       ? this.renderListTitle()
       : '';
     const listButtonLabel = ['languages', 'databases'].includes(
-      this.props.match.params.slug,
+      this.props.match.params.slug
     )
       ? this.renderListButtonLabel()
       : '';
@@ -646,7 +644,7 @@ function mapDispatchToProps(dispatch) {
       setErrors,
       specificDatabaseFetch,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -681,7 +679,7 @@ HomePage.propTypes = {
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 const withReducer = strapi.injectReducer({
@@ -694,5 +692,5 @@ const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(HomePage);

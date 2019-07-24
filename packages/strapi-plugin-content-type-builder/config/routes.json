@@ -18,22 +18,6 @@
     },
     {
       "method": "GET",
-      "path": "/fixtures/groups",
-      "handler": "Fixtures.getGroups",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/fixtures/groups/:id",
-      "handler": "Fixtures.getGroup",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/models/:model",
       "handler": "ContentTypeBuilder.getModel",
       "config": {
@@ -66,8 +50,40 @@
     },
     {
       "method": "GET",
-      "path": "/checkTableExists/:connection/:model",
-      "handler": "ContentTypeBuilder.checkTableExists",
+      "path": "/groups",
+      "handler": "Groups.getGroups",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/groups/:uid",
+      "handler": "Groups.getGroup",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/groups",
+      "handler": "Groups.createGroup",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/groups/:uid",
+      "handler": "Groups.updateGroup",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/groups/:uid",
+      "handler": "Groups.deleteGroup",
       "config": {
         "policies": []
       }
