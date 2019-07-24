@@ -65,18 +65,19 @@ const createMetadasSchema = model => {
           edit: yup
             .object()
             .shape({
-              label: yup.string().required(),
+              label: yup.string(),
               description: yup.string(),
-              editable: yup.boolean().required(),
-              visible: yup.boolean().required(),
-              mainField: yup.string(), // only for relations. TODO: to reset when the relation changes
+              placeholder: yup.string(),
+              editable: yup.boolean(),
+              visible: yup.boolean(),
+              mainField: yup.string(),
             })
             .noUnknown()
             .required(),
           list: yup
             .object()
             .shape({
-              label: yup.string().required(),
+              label: yup.string(),
               searchable: yup.boolean(),
               sortable: yup.boolean(),
             })

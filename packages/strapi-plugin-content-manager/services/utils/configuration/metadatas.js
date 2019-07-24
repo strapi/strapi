@@ -2,13 +2,19 @@
 
 const _ = require('lodash');
 const {
-  isEditable,
   isSortable,
-  hasListableAttribute,
+  isSearchable,
+  isVisible,
+  isRelation,
 } = require('./attributes');
+const { formatContentTypeSchema } = require('../../ContentTypes');
 
-function createDefaultMetadatas(model) {
+function createDefaultMetadatas(schema) {
   return {
+    ...Object.keys(schema.attributes).reduce((acc, name) => {
+      acc[name] = createDefaultMetadata(schema, name);
+      return acc;
+    }, {}),
     id: {
       edit: {},
       list: {
@@ -17,31 +23,26 @@ function createDefaultMetadatas(model) {
         sortable: true,
       },
     },
-    ...Object.keys(model.allAttributes).reduce((acc, name) => {
-      acc[name] = createDefaultMetadata(model, name);
-      return acc;
-    }, {}),
   };
 }
 
-function createDefaultMetadata(model, name) {
-  const attr = model.allAttributes[name];
+function createDefaultMetadata(schema, name) {
   const edit = {
-    label: name,
+    label: _.upperFirst(name),
     description: '',
     placeholder: '',
-    visible: true,
-    editable: isEditable(model, name),
+    visible: isVisible(schema, name),
+    editable: true,
   };
 
-  if (_.has(attr, 'model') || _.has(attr, 'collection')) {
+  if (isRelation(schema.attributes[name])) {
     edit.mainField = 'id';
   }
 
   const list = {
-    label: name,
-    searchable: true,
-    sortable: isSortable(model, name),
+    label: _.upperFirst(name),
+    searchable: isSearchable(schema, name),
+    sortable: isSortable(schema, name),
   };
 
   return { edit, list };
@@ -49,39 +50,44 @@ function createDefaultMetadata(model, name) {
 
 /** Synchronisation functions */
 
-async function syncMetadatas(configuration, model) {
+async function syncMetadatas(configuration, schema) {
   // clear all keys that do not exist anymore
-  if (_.isEmpty(configuration.metadatas)) return createDefaultMetadatas(model);
+  if (_.isEmpty(configuration.metadatas)) return createDefaultMetadatas(schema);
 
   // remove old keys
   const metasWithValidKeys = _.pick(
     configuration.metadatas,
-    ['id'].concat(Object.keys(model.allAttributes))
+    Object.keys(schema.attributes)
   );
 
   // add new keys and missing fields
   const metasWithDefaults = _.merge(
     {},
-    createDefaultMetadatas(model),
+    createDefaultMetadatas(schema),
     metasWithValidKeys
   );
 
   // clear the invalid mainFields
   const updatedMetas = Object.keys(metasWithDefaults).reduce((acc, key) => {
-    const meta = metasWithDefaults[key];
-    const { edit, list } = meta;
+    const { edit, list } = metasWithDefaults[key];
+    const attr = schema.attributes[key];
 
     let updatedMeta = { edit, list };
     // update sortable attr
-    if (list.sortable && !isSortable(model, key)) {
+    if (list.sortable && !isSortable(schema, key)) {
       _.set(updatedMeta, ['list', 'sortable'], false);
+      _.set(acc, [key], updatedMeta);
+    }
+
+    if (list.searchable && !isSearchable(schema, key)) {
+      _.set(updatedMeta, ['list', 'searchable'], false);
       _.set(acc, [key], updatedMeta);
     }
 
     if (!_.has(edit, 'mainField')) return acc;
 
     // remove mainField if the attribute is not a relation anymore
-    if (_.has(model.allAttributes[key], 'type')) {
+    if (!isRelation(attr)) {
       _.set(updatedMeta, 'edit', _.omit(edit, ['mainField']));
       _.set(acc, [key], updatedMeta);
       return acc;
@@ -91,10 +97,11 @@ async function syncMetadatas(configuration, model) {
     if (edit.mainField === 'id') return acc;
 
     // check the mainField in the targetModel
-    const attr = model.allAttributes[key];
-    const target = strapi.getModel(attr.model || attr.collection, attr.plugin);
+    const targetSchema = getTargetSchema(attr.targetModel, attr.plugin);
 
-    if (!hasListableAttribute(target, meta.mainField)) {
+    if (!targetSchema) return acc;
+
+    if (!isSortable(targetSchema, edit.mainField)) {
       _.set(updatedMeta, ['edit', 'mainField'], 'id');
       _.set(acc, [key], updatedMeta);
       return acc;
@@ -105,6 +112,13 @@ async function syncMetadatas(configuration, model) {
 
   return _.assign(metasWithDefaults, updatedMetas);
 }
+
+const getTargetSchema = (name, plugin) => {
+  const model = strapi.getModel(name, plugin);
+  if (!model) return null;
+
+  return formatContentTypeSchema(model);
+};
 
 module.exports = {
   createDefaultMetadatas,

@@ -1,7 +1,6 @@
 'use strict';
 
 const storeUtils = require('./utils/store');
-const { pickSchemaFields } = require('./utils/schema');
 
 const uidToStoreKey = uid => `groups::${uid}`;
 
@@ -29,27 +28,5 @@ module.exports = {
   deleteConfiguration(uid) {
     const storeKey = uidToStoreKey(uid);
     return storeUtils.deleteKey(storeKey);
-  },
-
-  formatGroupSchema(group) {
-    const { associations, allAttributes } = group;
-    return {
-      ...pickSchemaFields(group),
-      attributes: Object.keys(allAttributes).reduce((acc, key) => {
-        const attr = allAttributes[key];
-        const assoc = associations.find(assoc => assoc.alias === key);
-        if (assoc) {
-          acc[key] = {
-            ...attr,
-            type: 'relation',
-            targetModel: attr.model || attr.collection,
-            relationType: assoc.nature,
-          };
-        } else {
-          acc[key] = attr;
-        }
-        return acc;
-      }, {}),
-    };
   },
 };
