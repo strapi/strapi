@@ -1,11 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const {
-  hasListableAttribute,
-  hasRelationAttribute,
-  hasEditableAttribute,
-} = require('./attributes');
+const { isSortable, isVisible, isRelation } = require('./attributes');
 
 const DEFAULT_LIST_LENGTH = 4;
 const MAX_ROW_SIZE = 12;
@@ -31,37 +27,39 @@ const typeToSize = type => {
   }
 };
 
-async function createDefaultLayouts(model) {
+async function createDefaultLayouts(schema) {
   return {
-    list: createDefaultListLayout(model),
-    editRelations: createDefaultEditRelationsLayout(model),
-    edit: createDefaultEditLayout(model),
+    list: createDefaultListLayout(schema),
+    editRelations: createDefaultEditRelationsLayout(schema),
+    edit: createDefaultEditLayout(schema),
   };
 }
 
-function createDefaultListLayout(model) {
-  return ['id']
-    .concat(Object.keys(model.allAttributes))
-    .filter(name => hasListableAttribute(model, name))
+function createDefaultListLayout(schema) {
+  return Object.keys(schema.attributes)
+    .filter(name => isSortable(schema, name))
     .slice(0, DEFAULT_LIST_LENGTH);
 }
 
-function createDefaultEditRelationsLayout(model) {
-  return Object.keys(model.allAttributes).filter(name =>
-    hasRelationAttribute(model, name)
+function createDefaultEditRelationsLayout(schema) {
+  if (schema.modelType === 'group') return [];
+
+  return Object.keys(schema.attributes).filter(name =>
+    hasRelationAttribute(schema, name)
   );
 }
 
 const rowSize = els => els.reduce((sum, el) => sum + el.size, 0);
-function createDefaultEditLayout(model) {
-  const keys = Object.keys(model.attributes).filter(name =>
-    hasEditableAttribute(model, name)
+
+function createDefaultEditLayout(schema) {
+  const keys = Object.keys(schema.attributes).filter(name =>
+    hasEditableAttribute(schema, name)
   );
 
   let layout = [[]];
   let currentRowIndex = 0;
   for (let key of keys) {
-    const attribute = model.attributes[key];
+    const attribute = schema.attributes[key];
     const attributeSize = typeToSize(attribute.type);
     let currenRowSize = rowSize(layout[currentRowIndex]);
 
@@ -81,20 +79,22 @@ function createDefaultEditLayout(model) {
 
 /** Synchronisation functions */
 
-function syncLayouts(configuration, model) {
-  if (_.isEmpty(configuration.layouts)) return createDefaultLayouts(model);
+function syncLayouts(configuration, schema) {
+  if (_.isEmpty(configuration.layouts)) return createDefaultLayouts(schema);
 
   const { list = [], editRelations = [], edit = [] } =
     configuration.layouts || {};
 
-  const cleanList = list.filter(attr => hasListableAttribute(model, attr));
+  const cleanList = list.filter(attr => isSortable(schema, attr));
 
   const cleanEditRelations = editRelations.filter(attr =>
-    hasRelationAttribute(model, attr)
+    hasRelationAttribute(schema, attr)
   );
 
   const cleanEdit = edit.reduce((acc, row) => {
-    let newRow = row.filter(el => hasEditableAttribute(model, el.name));
+    let newRow = row.filter(el => hasEditableAttribute(schema, el.name));
+
+    // TODO: recompute row sizes
 
     if (newRow.length > 0) {
       acc.push(newRow);
@@ -103,16 +103,16 @@ function syncLayouts(configuration, model) {
   }, []);
 
   let layout = {
-    list: cleanList.length > 0 ? cleanList : createDefaultListLayout(model),
+    list: cleanList.length > 0 ? cleanList : createDefaultListLayout(schema),
     editRelations:
       cleanEditRelations.length > 0
         ? cleanEditRelations
-        : createDefaultEditRelationsLayout(model),
-    edit: cleanEdit.length > 0 ? cleanEdit : createDefaultEditLayout(model),
+        : createDefaultEditRelationsLayout(schema),
+    edit: cleanEdit.length > 0 ? cleanEdit : createDefaultEditLayout(schema),
   };
 
   const newAttributes = _.difference(
-    Object.keys(model.allAttributes),
+    Object.keys(schema.attributes),
     Object.keys(configuration.metadatas)
   );
 
@@ -125,26 +125,28 @@ function syncLayouts(configuration, model) {
     // only add valid listable attributes
     layout.list = _.uniq(
       layout.list
-        .concat(newAttributes.filter(key => hasListableAttribute(model, key)))
+        .concat(newAttributes.filter(key => isSortable(schema, key)))
         .slice(0, DEFAULT_LIST_LENGTH)
     );
   }
 
   // add new relations to layout
-  const newRelations = newAttributes.filter(key =>
-    hasRelationAttribute(model, key)
-  );
+  if (schema.type !== 'group') {
+    const newRelations = newAttributes.filter(key =>
+      hasRelationAttribute(schema, key)
+    );
 
-  layout.editRelations = _.uniq(layout.editRelations.concat(newRelations));
+    layout.editRelations = _.uniq(layout.editRelations.concat(newRelations));
+  }
 
   // add new attributes to edit view
   const newEditAttributes = newAttributes.filter(
-    key => hasEditableAttribute(model, key) && _.has(model.attributes, key)
+    key => hasEditableAttribute(schema, key) && isVisible(schema, key)
   );
 
   let currentRowIndex = Math.max(layout.edit.length - 1, 0);
   for (let key of newEditAttributes) {
-    const attribute = model.attributes[key];
+    const attribute = schema.attributes[key];
     const attributeSize = typeToSize(attribute.type);
     let currenRowSize = rowSize(layout.edit[currentRowIndex]);
 
@@ -161,6 +163,31 @@ function syncLayouts(configuration, model) {
 
   return layout;
 }
+
+const hasRelationAttribute = (schema, name) => {
+  if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  return isRelation(schema.attributes[name]);
+};
+
+const hasEditableAttribute = (schema, name) => {
+  if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  if (!isVisible(schema, name)) {
+    return false;
+  }
+
+  if (isRelation(schema.attributes[name])) {
+    if (schema.modelType === 'group') return true;
+    return false;
+  }
+
+  return true;
+};
 
 module.exports = {
   createDefaultLayouts,

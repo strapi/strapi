@@ -1,217 +1,92 @@
-const {
-  isSortable,
-  isEditable,
-  hasEditableAttribute,
-  hasListableAttribute,
-  hasRelationAttribute,
-} = require('../attributes');
+const { isSortable, isVisible } = require('../attributes');
+
+const createMockSchema = (attrs, timestamps = true) => {
+  return {
+    options: {
+      timestamps: timestamps ? ['createdAt', 'updatedAt'] : false,
+    },
+    attributes: {
+      id: {
+        type: 'integer',
+      },
+      ...attrs,
+      ...(timestamps
+        ? {
+            createdAt: {
+              type: 'timestamp',
+            },
+            updatedAt: {
+              type: 'timestampUpdate',
+            },
+          }
+        : {}),
+    },
+  };
+};
 
 describe('attributesUtils', () => {
   describe('isSortable', () => {
     test('The id attribute is always sortable', () => {
-      expect(isSortable({}, 'id')).toBe(true);
+      expect(isSortable(createMockSchema({}), 'id')).toBe(true);
+    });
+
+    test('Timestamps are sortable', () => {
+      expect(isSortable(createMockSchema({}, true), 'createdAt')).toBe(true);
+      expect(isSortable(createMockSchema({}, true), 'updatedAt')).toBe(true);
+      expect(isSortable(createMockSchema({}, false), 'createdAt')).toBe(false);
     });
 
     test('Group fields are not sortable', () => {
-      expect(
-        isSortable(
-          {
-            allAttributes: {
-              someGroup: {
-                type: 'group',
-              },
-            },
-          },
-          'someGroup'
-        )
-      ).toBe(false);
+      const schema = createMockSchema({
+        someGroup: {
+          type: 'group',
+        },
+      });
+
+      expect(isSortable(schema, 'someGroup')).toBe(false);
     });
 
     test('Json fields are not sortable', () => {
-      expect(
-        isSortable(
-          {
-            allAttributes: {
-              jsonInput: {
-                type: 'json',
-              },
-            },
-          },
-          'jsonInput'
-        )
-      ).toBe(false);
+      const schema = createMockSchema({
+        jsonInput: {
+          type: 'json',
+        },
+      });
+
+      expect(isSortable(schema, 'jsonInput')).toBe(false);
     });
 
     test('Relations are not sortable', () => {
-      expect(
-        isSortable(
-          {
-            allAttributes: {
-              oneWayRel: {
-                model: 'someModel',
-              },
-            },
-          },
-          'oneWayRel'
-        )
-      ).toBe(false);
+      const schema = createMockSchema({
+        oneWayRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+        },
+        manyWayRel: {
+          type: 'relation',
+          targetModel: 'someModel',
+        },
+      });
 
-      expect(
-        isSortable(
-          {
-            allAttributes: {
-              manyWayRel: {
-                collection: 'someModel',
-              },
-            },
-          },
-          'manyWayRel'
-        )
-      ).toBe(false);
+      expect(isSortable(schema, 'oneWayRel')).toBe(false);
+      expect(isSortable(schema, 'manyWayRel')).toBe(false);
     });
   });
 
-  describe('isEditable', () => {
+  describe('isVisible', () => {
     test('Check if the attribute is in a model attributes', () => {
       expect(
-        isEditable(
-          {
-            attributes: {
-              field: {
-                type: 'string',
-              },
+        isVisible(
+          createMockSchema({
+            field: {
+              type: 'string',
             },
-          },
+          }),
           'field'
         )
       ).toBe(true);
 
-      expect(
-        isEditable(
-          {
-            attributes: {
-              field: {
-                type: 'string',
-              },
-            },
-          },
-          'createdAt'
-        )
-      ).toBe(false);
-    });
-  });
-
-  describe('hasEditableAttribute', () => {
-    test('Check if the attribute exists and is not a relation', () => {
-      const model = {
-        allAttributes: {
-          rel1: {
-            model: 'someModel',
-          },
-          rel2: {
-            collection: 'someModel',
-          },
-          title: {
-            type: 'string',
-          },
-        },
-      };
-
-      expect(hasEditableAttribute(model, 'rel1')).toBe(false);
-      expect(hasEditableAttribute(model, 'rel2')).toBe(false);
-      expect(hasEditableAttribute(model, 'unkown')).toBe(false);
-      expect(hasEditableAttribute(model, 'title')).toBe(true);
-    });
-  });
-
-  describe('hasListableAttribute', () => {
-    test('Ids are listable', () => {
-      expect(hasListableAttribute({}, 'id')).toBe(true);
-    });
-
-    test('Unknown attributes are not listable', () => {
-      const model = {
-        allAttributes: {
-          rel1: {
-            model: 'someModel',
-          },
-          rel2: {
-            collection: 'someModel',
-          },
-          title: {
-            type: 'string',
-          },
-        },
-      };
-
-      expect(hasListableAttribute(model, 'unkown')).toBe(false);
-    });
-
-    test('Group attributes are not listable', () => {
-      const model = {
-        allAttributes: {
-          someGroup: {
-            type: 'group',
-          },
-        },
-      };
-
-      expect(hasListableAttribute(model, 'someGroup')).toBe(false);
-    });
-
-    test('JSON attributes are not listable', () => {
-      const model = {
-        allAttributes: {
-          someJson: {
-            type: 'json',
-          },
-        },
-      };
-
-      expect(hasListableAttribute(model, 'someJson')).toBe(false);
-    });
-
-    test('Relations are not listable', () => {
-      const model = {
-        allAttributes: {
-          rel1: {
-            model: 'someModel',
-          },
-          rel2: {
-            collection: 'someModel',
-          },
-          title: {
-            type: 'string',
-          },
-        },
-      };
-
-      expect(hasListableAttribute(model, 'rel1')).toBe(false);
-      expect(hasListableAttribute(model, 'rel2')).toBe(false);
-      expect(hasListableAttribute(model, 'title')).toBe(true);
-    });
-  });
-
-  describe('hasRelationAttribute', () => {
-    test('Only validate relational attributes', () => {
-      const model = {
-        allAttributes: {
-          rel1: {
-            model: 'someModel',
-          },
-          rel2: {
-            collection: 'someModel',
-          },
-          title: {
-            type: 'string',
-          },
-        },
-      };
-
-      expect(hasRelationAttribute(model, 'rel1')).toBe(true);
-      expect(hasRelationAttribute(model, 'rel2')).toBe(true);
-      expect(hasRelationAttribute(model, 'unkown')).toBe(false);
-      expect(hasRelationAttribute(model, 'title')).toBe(false);
+      expect(isVisible(createMockSchema({}), 'createdAt')).toBe(false);
     });
   });
 });
