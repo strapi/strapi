@@ -137,16 +137,16 @@ module.exports = {
     });
   },
 
-  writeModel(name, data, { api, plugin } = {}) {
-    const filepath = this.getModelPath(name, { api, plugin });
+  writeModel(name, data, { api, plugin, group } = {}) {
+    const filepath = this.getModelPath(name, { api, plugin, group });
     const content = JSON.stringify(data, null, 2);
 
     fs.ensureFileSync(filepath);
     return fs.writeFileSync(filepath, content);
   },
 
-  readModel(name, { api, plugin } = {}) {
-    const filepath = this.getModelPath(name, { api, plugin });
+  readModel(name, { api, plugin, group } = {}) {
+    const filepath = this.getModelPath(name, { api, plugin, group });
 
     if (plugin && !fs.pathExistsSync(filepath)) {
       return _.cloneDeep(
@@ -164,7 +164,7 @@ module.exports = {
     return _.cloneDeep(require(filepath));
   },
 
-  getModelPath(name, { api, plugin } = {}) {
+  getModelPath(name, { api, plugin, group } = {}) {
     const fileName = `${_.upperFirst(name)}.settings.json`;
 
     if (plugin) {
@@ -183,6 +183,8 @@ module.exports = {
         'models',
         fileName
       );
+    } else if (group) {
+      return path.resolve(strapi.config.appPath, 'groups', `${name}.json`);
     }
 
     throw new Error('Expected an api or a plugin, received none');
@@ -304,46 +306,41 @@ module.exports = {
     return _.keys(strapi.config.currentEnvironment.database.connections);
   },
 
-  clearRelations(model, source, force) {
+  // TODO: add groups
+  clearRelations(model, source) {
     const errors = [];
 
     // Method to delete the association of the models.
-    const deleteAssociations = (models, plugin) => {
+    const deleteAssociations = (models, { plugin, group = false } = {}) => {
       Object.keys(models).forEach(name => {
         const modelData = models[name];
-        const relationsToDelete = _.get(modelData, 'associations', []).filter(
-          association => {
-            if (source) {
-              return (
-                association[association.type] === model &&
-                association.plugin === source &&
-                (association.nature !== 'oneWay' || force)
-              );
-            }
+        const { associations = [] } = modelData;
 
-            return (
-              association[association.type] === model &&
-              (association.nature !== 'oneWay' || force)
-            );
+        const relationsToDelete = associations.filter(association => {
+          const target = association.model || association.collection;
+
+          if (source) {
+            return target === model && association.plugin === source;
           }
-        );
 
-        if (!_.isEmpty(relationsToDelete)) {
-          const modelJSON = this.readModel(name, {
+          return target === model;
+        });
+
+        if (relationsToDelete.length > 0) {
+          const opts = {
+            group,
             plugin,
             api: modelData.apiName,
-          });
+          };
 
-          _.forEach(relationsToDelete, relation => {
+          const modelJSON = this.readModel(name, opts);
+
+          relationsToDelete.forEach(relation => {
             modelJSON.attributes[relation.alias] = undefined;
           });
 
           try {
-            // fs.writeFileSync(pathToModel, JSON.stringify(modelJSON, null, 2), 'utf8');
-            this.writeModel(name, modelJSON, {
-              api: modelData.apiName,
-              plugin,
-            });
+            this.writeModel(name, modelJSON, opts);
           } catch (e) {
             strapi.log.error(e);
             errors.push({
@@ -354,34 +351,44 @@ module.exports = {
       });
     };
 
-    // Update `./api` models.
     deleteAssociations(strapi.models);
 
     Object.keys(strapi.plugins).forEach(name => {
-      // Update `./plugins/${name}` models.
-      deleteAssociations(strapi.plugins[name].models, name);
+      deleteAssociations(strapi.plugins[name].models, { plugin: name });
     });
+
+    // update groups
+    deleteAssociations(strapi.groups, { group: true });
 
     return errors;
   },
 
-  createRelations(model, attributes, source) {
+  createRelations(modelName, { attributes, source, oldName }) {
     const errors = [];
-    const structure = {
-      models: strapi.models,
-      plugins: Object.keys(strapi.plugins).reduce((acc, current) => {
-        acc[current] = {
-          models: strapi.plugins[current].models,
-        };
-
-        return acc;
-      }, {}),
-    };
 
     // Method to update the model
-    const update = (models, plugin) => {
+    const update = (models, { plugin, group } = {}) => {
       Object.keys(models).forEach(name => {
         const modelData = models[name];
+        const { associations = [] } = modelData;
+
+        // update oneWays and manyWays that point to the model
+        const unidirectionnalRelationsToCreate = associations.filter(
+          association => {
+            const target = association.model || association.collection;
+
+            if (!['oneWay', 'manyWay'].includes(association.nature)) {
+              return false;
+            }
+
+            if (source) {
+              return target === oldName && association.plugin === source;
+            }
+
+            return target === oldName;
+          }
+        );
+
         const relationsToCreate = attributes.filter(attribute => {
           if (plugin) {
             return (
@@ -396,13 +403,38 @@ module.exports = {
           );
         });
 
-        if (!_.isEmpty(relationsToCreate)) {
-          const modelJSON = this.readModel(name, {
-            api: modelData.apiName,
+        if (
+          relationsToCreate.length > 0 ||
+          unidirectionnalRelationsToCreate.length > 0
+        ) {
+          const opts = {
+            group,
             plugin,
+            api: modelData.apiName,
+          };
+
+          const modelJSON = this.readModel(name, opts);
+
+          unidirectionnalRelationsToCreate.forEach(association => {
+            let attr = {};
+
+            switch (association.nature) {
+              case 'manyWay':
+                attr.collection = modelName.toLowerCase();
+                break;
+              case 'oneWay':
+                attr.model = modelName.toLowerCase();
+                break;
+            }
+
+            if (_.trim(source)) {
+              attr.plugin = _.trim(source);
+            }
+
+            modelJSON.attributes[association.alias] = attr;
           });
 
-          _.forEach(relationsToCreate, ({ name, params }) => {
+          relationsToCreate.forEach(({ name, params }) => {
             const attr = {};
 
             switch (params.nature) {
@@ -411,13 +443,13 @@ module.exports = {
                 return;
               case 'oneToOne':
               case 'oneToMany':
-                attr.model = model.toLowerCase();
+                attr.model = modelName.toLowerCase();
                 break;
               case 'manyToOne':
-                attr.collection = model.toLowerCase();
+                attr.collection = modelName.toLowerCase();
                 break;
               case 'manyToMany': {
-                attr.collection = model.toLowerCase();
+                attr.collection = modelName.toLowerCase();
 
                 if (!params.dominant) {
                   attr.dominant = true;
@@ -438,10 +470,7 @@ module.exports = {
           });
 
           try {
-            this.writeModel(name, modelJSON, {
-              api: modelData.apiName,
-              plugin,
-            });
+            this.writeModel(name, modelJSON, opts);
           } catch (e) {
             strapi.log.error(e);
             errors.push({
@@ -453,12 +482,15 @@ module.exports = {
     };
 
     // Update `./api` models.
-    update(structure.models);
+    update(strapi.models);
 
-    Object.keys(structure.plugins).forEach(name => {
-      // Update `./plugins/${name}` models.
-      update(structure.plugins[name].models, name);
+    Object.keys(strapi.plugins).forEach(pluginName => {
+      // Update `./plugins/${pluginName}` models.
+      if (!strapi.plugins[pluginName].models) return;
+      update(strapi.plugins[pluginName].models, { plugin: pluginName });
     });
+
+    update(strapi.groups, { group: true });
 
     return errors;
   },

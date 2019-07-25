@@ -209,22 +209,16 @@ const createGroupUID = str => slugify(str, { separator: '_' });
  */
 async function deleteGroup(group) {
   await deleteSchema(group.uid);
-  process.nextTick(() => strapi.reload());
 }
 
 /**
  * Writes a group schema file
  */
 async function writeSchema(uid, schema) {
-  strapi.reload.isWatching = false;
-
   await strapi.fs.writeAppFile(
     `groups/${uid}.json`,
     JSON.stringify(schema, null, 2)
   );
-
-  strapi.reload.isWatching = true;
-  process.nextTick(() => strapi.reload());
 }
 
 /**
@@ -232,10 +226,106 @@ async function writeSchema(uid, schema) {
  * @param {string} ui
  */
 async function deleteSchema(uid) {
-  strapi.reload.isWatching = false;
   await strapi.fs.removeAppFile(`groups/${uid}.json`);
-  strapi.reload.isWatching = true;
 }
+
+const updateGroupInModels = (oldUID, newUID) => {
+  const contentTypeService =
+    strapi.plugins['content-type-builder'].services.contenttypebuilder;
+
+  const updateModels = (models, { plugin } = {}) => {
+    Object.keys(models).forEach(modelKey => {
+      const model = models[modelKey];
+
+      const attributesToModify = Object.keys(model.attributes).reduce(
+        (acc, key) => {
+          if (
+            model.attributes[key].type === 'group' &&
+            model.attributes[key].group === oldUID
+          ) {
+            acc.push(key);
+          }
+
+          return acc;
+        },
+        []
+      );
+
+      if (attributesToModify.length > 0) {
+        const modelJSON = contentTypeService.readModel(modelKey, {
+          plugin,
+          api: model.apiName,
+        });
+
+        attributesToModify.forEach(key => {
+          modelJSON.attributes[key].group = newUID;
+        });
+
+        contentTypeService.writeModel(modelKey, modelJSON, {
+          plugin,
+          api: model.apiName,
+        });
+      }
+    });
+  };
+
+  updateModels(strapi.models);
+
+  Object.keys(strapi.plugins).forEach(pluginKey => {
+    updateModels(strapi.plugins[pluginKey].models, { plugin: pluginKey });
+  });
+
+  // add strapi.groups or strapi.admin if necessary
+};
+
+const deleteGroupInModels = groupUID => {
+  const contentTypeService =
+    strapi.plugins['content-type-builder'].services.contenttypebuilder;
+
+  const updateModels = (models, { plugin } = {}) => {
+    Object.keys(models).forEach(modelKey => {
+      const model = models[modelKey];
+
+      const attributesToDelete = Object.keys(model.attributes).reduce(
+        (acc, key) => {
+          if (
+            model.attributes[key].type === 'group' &&
+            model.attributes[key].group === groupUID
+          ) {
+            acc.push(key);
+          }
+
+          return acc;
+        },
+        []
+      );
+
+      if (attributesToDelete.length > 0) {
+        const modelJSON = contentTypeService.readModel(modelKey, {
+          plugin,
+          api: model.apiName,
+        });
+
+        attributesToDelete.forEach(key => {
+          delete modelJSON.attributes[key];
+        });
+
+        contentTypeService.writeModel(modelKey, modelJSON, {
+          plugin,
+          api: model.apiName,
+        });
+      }
+    });
+  };
+
+  updateModels(strapi.models);
+
+  Object.keys(strapi.plugins).forEach(pluginKey => {
+    updateModels(strapi.plugins[pluginKey].models, { plugin: pluginKey });
+  });
+
+  // add strapi.groups or strapi.admin if necessary
+};
 
 module.exports = {
   getGroups,
@@ -247,4 +337,7 @@ module.exports = {
 
   // export for testing only
   createSchema,
+
+  deleteGroupInModels,
+  updateGroupInModels,
 };
