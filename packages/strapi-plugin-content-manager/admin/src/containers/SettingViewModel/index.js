@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useCallback, useState } from 'react';
+import React, { memo, useEffect, useCallback, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -65,6 +65,7 @@ function SettingViewModel({
   emitEvent,
   formatLayout,
   getData,
+  groupsAndModelsMainPossibleMainFields,
   history: { goBack },
   initialData,
   isLoading,
@@ -123,9 +124,10 @@ function SettingViewModel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [didDrop]);
 
-  const getAttributes = useCallback(() => {
+  const getAttributes = useMemo(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
+  // TODO change with useMemo
   const getEditLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'edit'], []);
   }, [modifiedData]);
@@ -134,9 +136,25 @@ function SettingViewModel({
   }, [modifiedData]);
 
   // Retrieve the metadatas for the field's form of the edit view
+  // Doesn't need to be a function
   const getSelectedItemMetas = useCallback(() => {
     return get(modifiedData, ['metadatas', itemNameToSelect, 'edit'], null);
   }, [modifiedData, itemNameToSelect]);
+  const getSelectedItemSelectOptions = useCallback(() => {
+    if (itemFormType !== 'relation' && itemFormType !== 'group') {
+      return [];
+    }
+
+    const targetKey = itemFormType === 'group' ? 'group' : 'targetModel';
+    const key = get(
+      modifiedData,
+      ['schema', 'attributes', itemNameToSelect, targetKey],
+      ''
+    );
+
+    return get(groupsAndModelsMainPossibleMainFields, [key], []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemFormType, itemNameToSelect]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -148,6 +166,7 @@ function SettingViewModel({
     emitEvent('willSaveContentTypeLayout');
   };
 
+  // TODO useCallback
   const getPluginHeaderActions = () => {
     if (isEqual(modifiedData, initialData)) {
       return [];
@@ -174,7 +193,7 @@ function SettingViewModel({
   const getListDisplayedFields = () =>
     get(modifiedData, ['layouts', 'list'], []);
   const getEditRemainingFields = () => {
-    const attributes = getAttributes();
+    const attributes = getAttributes;
     const metadatas = get(modifiedData, ['metadatas'], {});
     const displayedFields = getEditLayout().reduce(
       (acc, curr) => [...acc, ...curr.rowContent],
@@ -189,7 +208,7 @@ function SettingViewModel({
       });
   };
   const getEditRelationsRemaingFields = () => {
-    const attributes = getAttributes();
+    const attributes = getAttributes;
     const displayedFields = getRelationsLayout();
 
     return Object.keys(attributes)
@@ -198,7 +217,7 @@ function SettingViewModel({
   };
   const getListRemainingFields = () => {
     const metadatas = get(modifiedData, ['metadatas'], {});
-    const attributes = getAttributes();
+    const attributes = getAttributes;
 
     return Object.keys(metadatas)
       .filter(key => {
@@ -216,7 +235,7 @@ function SettingViewModel({
     }
 
     if (input.name === 'settings.mainField') {
-      const attributes = getAttributes();
+      const attributes = getAttributes;
       const options = Object.keys(attributes).filter(attr => {
         const type = get(attributes, [attr, 'type'], '');
 
@@ -244,7 +263,7 @@ function SettingViewModel({
 
   return (
     <LayoutDndProvider
-      attributes={getAttributes()}
+      attributes={getAttributes}
       buttonData={getEditRemainingFields()}
       layout={getEditLayout()}
       moveItem={moveItem}
@@ -367,6 +386,7 @@ function SettingViewModel({
                     formType={itemFormType}
                     metadatas={getSelectedItemMetas()}
                     onChange={onChange}
+                    selectOptions={getSelectedItemSelectOptions()}
                   />
                 )}
               </div>
@@ -412,6 +432,7 @@ SettingViewModel.propTypes = {
   emitEvent: PropTypes.func.isRequired,
   formatLayout: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
+  groupsAndModelsMainPossibleMainFields: PropTypes.object,
   history: PropTypes.shape({
     goBack: PropTypes.func,
   }).isRequired,

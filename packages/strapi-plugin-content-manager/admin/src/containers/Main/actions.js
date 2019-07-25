@@ -1,6 +1,8 @@
 import {
   DELETE_LAYOUT,
   DELETE_LAYOUTS,
+  GET_DATA,
+  GET_DATA_SUCCEEDED,
   GET_LAYOUT,
   GET_LAYOUT_SUCCEEDED,
   ON_CHANGE_LIST_LABELS,
@@ -17,6 +19,21 @@ export function deleteLayout(uid) {
 export function deleteLayouts() {
   return {
     type: DELETE_LAYOUTS,
+  };
+}
+
+export function getData() {
+  return {
+    type: GET_DATA,
+  };
+}
+
+export function getDataSucceeded(groups, models, mainFields) {
+  return {
+    type: GET_DATA_SUCCEEDED,
+    groups,
+    models: models.filter(model => model.isDisplayed === true),
+    mainFields,
   };
 }
 

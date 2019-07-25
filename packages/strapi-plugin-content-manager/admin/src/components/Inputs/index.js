@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get, omit } from 'lodash';
 
@@ -39,24 +39,28 @@ const getInputType = (type = '') => {
   }
 };
 
-function Inputs({
-  autoFocus,
-  // didCheckErrors,
-  // errors,
-  keys,
-  layout,
-  modifiedData,
-  name,
-  onChange,
-}) {
+function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
   const { didCheckErrors, errors } = useEditView();
-  const attribute = get(layout, ['schema', 'attributes', name], {});
+  const attribute = useMemo(
+    () => get(layout, ['schema', 'attributes', name], {}),
+    [layout, name]
+  );
   const { model, collection } = attribute;
-  const isMedia =
-    get(attribute, 'plugin', '') === 'upload' &&
-    (model || collection) === 'file';
+  const isMedia = useMemo(() => {
+    return (
+      get(attribute, 'plugin', '') === 'upload' &&
+      (model || collection) === 'file'
+    );
+  }, [attribute, collection, model]);
+
   const multiple = collection == 'file';
-  const metadatas = get(layout, ['metadatas', name, 'edit'], {});
+  const metadatas = useMemo(
+    () => get(layout, ['metadatas', name, 'edit'], {}),
+    [layout, name]
+  );
+  const disabled = useMemo(() => !get(metadatas, 'editable', true), [
+    metadatas,
+  ]);
   const type = isMedia ? 'file' : get(attribute, 'type', null);
   const inputStyle = type === 'text' ? { height: '196px' } : {};
   const validations = omit(attribute, [
@@ -81,6 +85,7 @@ function Inputs({
       {...metadatas}
       autoFocus={autoFocus}
       didCheckErrors={didCheckErrors}
+      disabled={disabled}
       errors={inputErrors}
       inputDescription={description}
       inputStyle={inputStyle}

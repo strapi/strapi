@@ -68,7 +68,6 @@ function SettingViewGroup({
           data: layout,
         });
       } catch (err) {
-        console.log({ err });
         if (err.code !== 20) {
           strapi.notification.error('notification.error');
         }
@@ -82,6 +81,7 @@ function SettingViewGroup({
     };
   }, [name]);
 
+  // TODO change with usememo
   const getAttributes = useCallback(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
@@ -144,7 +144,7 @@ function SettingViewGroup({
       );
     });
 
-    return ['id', ...options];
+    return options;
   };
 
   return (

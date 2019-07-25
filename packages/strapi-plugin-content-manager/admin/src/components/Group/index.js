@@ -31,7 +31,6 @@ function Group({
     init(initialState, groupValue)
   );
   const { collapses } = state.toJS();
-  console.log({ collapses });
 
   const findField = React.useCallback(
     id => {
@@ -54,7 +53,7 @@ function Group({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [groupValue]
   );
-  console.log(didCheckErrors);
+
   useEffect(() => {
     const collapsesToOpen = Object.keys(errors)
       .filter(errorPath => errorPath.split('.')[0] === name && isRepeatable)
@@ -121,7 +120,6 @@ function Group({
           <div className="col-12">
             <div className="row">
               {groupValue.map((field, index) => {
-                console.log(collapses[index].isOpen);
                 return (
                   <div className="col-12" key={field._temp__id}>
                     <GroupCollapse

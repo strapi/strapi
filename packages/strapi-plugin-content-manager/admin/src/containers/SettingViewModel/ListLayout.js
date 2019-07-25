@@ -1,13 +1,10 @@
 import React, { Fragment, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-// import { DropTarget } from 'react-dnd';
 import { useDrop } from 'react-dnd';
 
 import { InputsIndex as Input } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
-
 import FormWrapper from '../../components/SettingFormWrapper';
 import { Wrapper } from './components';
 import Add from '../../components/AddDropdown';

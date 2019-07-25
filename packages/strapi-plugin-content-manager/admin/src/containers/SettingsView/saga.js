@@ -11,18 +11,13 @@ const getRequestUrl = path => `/${pluginId}/${path}`;
 
 export function* getData() {
   try {
-    const [
-      { data: generalSettings },
-      { data: groups },
-      { data: models },
-    ] = yield all(
-      // const data = yield all(
-      ['general-settings', 'groups', 'content-types'].map(endPoint =>
+    const [{ data: generalSettings }] = yield all(
+      ['general-settings'].map(endPoint =>
         call(request, getRequestUrl(endPoint), { method: 'GET' })
       )
     );
-    // console.log({ data });
-    yield put(getDataSucceeded(generalSettings, groups, models));
+
+    yield put(getDataSucceeded(generalSettings));
   } catch (err) {
     strapi.notification.error('content-manager.error.model.fetch');
   }

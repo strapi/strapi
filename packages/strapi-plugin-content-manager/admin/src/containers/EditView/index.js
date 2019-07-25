@@ -105,7 +105,6 @@ function EditView({
 
           return acc;
         }, {});
-        // console.log()
         // Retrieve all the default values for the repeatables and init the form
         const defaultGroupValues = groups.reduce((acc, current) => {
           const defaultForm = setDefaultForm(

@@ -7,14 +7,19 @@ import { fromJS } from 'immutable';
 import {
   DELETE_LAYOUT,
   DELETE_LAYOUTS,
+  GET_DATA_SUCCEEDED,
   GET_LAYOUT_SUCCEEDED,
   ON_CHANGE_LIST_LABELS,
   RESET_LIST_LABELS,
 } from './constants';
 
 export const initialState = fromJS({
-  layouts: fromJS({}),
-  initialLayouts: fromJS({}),
+  groupsAndModelsMainPossibleMainFields: {},
+  groups: [],
+  initialLayouts: {},
+  isLoading: true,
+  layouts: {},
+  models: [],
 });
 
 function mainReducer(state = initialState, action) {
@@ -23,6 +28,14 @@ function mainReducer(state = initialState, action) {
       return state.removeIn(['layouts', action.uid]);
     case DELETE_LAYOUTS:
       return state.update('layouts', () => fromJS({}));
+    case GET_DATA_SUCCEEDED:
+      return state
+        .update('groups', () => fromJS(action.groups))
+        .update('models', () => fromJS(action.models))
+        .update('groupsAndModelsMainPossibleMainFields', () =>
+          fromJS(action.mainFields)
+        )
+        .update('isLoading', () => false);
     case GET_LAYOUT_SUCCEEDED:
       return state
         .updateIn(['layouts', action.uid], () => fromJS(action.layout))

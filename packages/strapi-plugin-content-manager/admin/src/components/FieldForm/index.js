@@ -32,7 +32,14 @@ const getInputProps = fieldName => {
   return { type, label: { id: labelId } };
 };
 
-const FieldForm = ({ className, fieldName, formType, metadatas, onChange }) => {
+const FieldForm = ({
+  className,
+  fieldName,
+  formType,
+  metadatas,
+  onChange,
+  selectOptions,
+}) => {
   return (
     <div className={className}>
       <SettingFormWrapper style={{ marginTop: '3px' }}>
@@ -57,7 +64,7 @@ const FieldForm = ({ className, fieldName, formType, metadatas, onChange }) => {
                   key={meta}
                   name={`metadatas.${fieldName}.edit.${meta}`}
                   onChange={onChange}
-                  selectOptions={['id']}
+                  selectOptions={selectOptions}
                   value={metadatas[meta]}
                   type={getInputProps(meta).type}
                 />
@@ -73,6 +80,7 @@ FieldForm.defaultProps = {
   className: 'col-8',
   metadatas: {},
   onChange: () => {},
+  selectOptions: [],
 };
 
 FieldForm.propTypes = {
@@ -81,6 +89,7 @@ FieldForm.propTypes = {
   formType: PropTypes.string.isRequired,
   metadatas: PropTypes.object,
   onChange: PropTypes.func,
+  selectOptions: PropTypes.array,
 };
 
 export default memo(FieldForm);

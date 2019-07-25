@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -16,7 +16,7 @@ import SettingViewModel from '../SettingViewModel';
 import SettingViewGroup from '../SettingViewGroup';
 import SettingsView from '../SettingsView';
 
-import { getLayout } from './actions';
+import { getData, getLayout } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectMain from './selectors';
@@ -24,26 +24,39 @@ import makeSelectMain from './selectors';
 function Main({
   admin: { currentEnvironment },
   emitEvent,
+  getData,
   getLayout,
+  groups,
+  groupsAndModelsMainPossibleMainFields,
+  isLoading,
   layouts,
   location: { pathname, search },
   global: { plugins },
+  models,
 }) {
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
   strapi.useInjectSaga({ key: 'main', saga, pluginId });
   const slug = pathname.split('/')[3];
   const source = getQueryParameters(search, 'source');
+  const getDataRef = useRef();
+  const getLayoutRef = useRef();
+
+  getDataRef.current = getData;
+  getLayoutRef.current = getLayout;
 
   const shouldShowLoader =
     slug !== 'ctm-configurations' && layouts[slug] === undefined;
 
   useEffect(() => {
+    getDataRef.current();
+  }, [getDataRef]);
+  useEffect(() => {
     if (shouldShowLoader) {
-      getLayout(slug, source);
+      getLayoutRef.current(slug, source);
     }
-  }, [getLayout, shouldShowLoader, slug, source]);
+  }, [getLayoutRef, shouldShowLoader, slug, source]);
 
-  if (shouldShowLoader) {
+  if (isLoading || shouldShowLoader) {
     return <LoadingIndicatorPage />;
   }
 
@@ -51,7 +64,12 @@ function Main({
     <Component
       currentEnvironment={currentEnvironment}
       emitEvent={emitEvent}
+      groups={groups}
+      groupsAndModelsMainPossibleMainFields={
+        groupsAndModelsMainPossibleMainFields
+      }
       layouts={layouts}
+      models={models}
       plugins={plugins}
       {...props}
     />
@@ -86,15 +104,20 @@ Main.propTypes = {
     currentEnvironment: PropTypes.string.isRequired,
   }),
   emitEvent: PropTypes.func.isRequired,
+  getData: PropTypes.func.isRequired,
   getLayout: PropTypes.func.isRequired,
   global: PropTypes.shape({
     plugins: PropTypes.object,
   }),
+  groups: PropTypes.array.isRequired,
+  groupsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
+  isLoading: PropTypes.bool,
   layouts: PropTypes.object.isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string.isRequired,
     search: PropTypes.string,
   }),
+  models: PropTypes.array.isRequired,
 };
 
 const mapStateToProps = makeSelectMain();
@@ -102,6 +125,7 @@ const mapStateToProps = makeSelectMain();
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
+      getData,
       getLayout,
     },
     dispatch

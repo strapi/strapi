@@ -13,12 +13,10 @@ export function getData() {
   };
 }
 
-export function getDataSucceeded(generalSettings, groups, models) {
+export function getDataSucceeded(generalSettings) {
   return {
     type: GET_DATA_SUCCEEDED,
     generalSettings,
-    groups,
-    models: models.filter(model => model.isDisplayed === true),
   };
 }
 
