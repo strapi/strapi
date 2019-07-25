@@ -56,17 +56,23 @@ module.exports = {
 
     const group = strapi.groups[uid];
 
+    const ctService = strapi.plugins['content-manager'].services.contenttypes;
+
     if (!group) {
       return ctx.notFound('group.notFound');
     }
 
+    const schema = ctService.formatContentTypeSchema(group);
     let input;
     try {
-      input = await createModelConfigurationSchema(group).validate(body, {
-        abortEarly: false,
-        stripUnknown: true,
-        strict: true,
-      });
+      input = await createModelConfigurationSchema(group, schema).validate(
+        body,
+        {
+          abortEarly: false,
+          stripUnknown: true,
+          strict: true,
+        }
+      );
     } catch (error) {
       return ctx.badRequest(null, {
         name: 'validationError',
@@ -77,12 +83,11 @@ module.exports = {
     const groupService = strapi.plugins['content-manager'].services.groups;
     await groupService.setConfiguration(uid, input);
 
-    const ctService = strapi.plugins['content-manager'].services.contenttypes;
     const configurations = await groupService.getConfiguration(uid);
 
     const data = {
       uid,
-      schema: ctService.formatContentTypeSchema(group),
+      schema,
       ...configurations,
     };
 

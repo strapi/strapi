@@ -106,9 +106,14 @@ module.exports = {
       return ctx.notFound('contentType.notFound');
     }
 
+    const schema = service.formatContentTypeSchema(contentType);
+
     let input;
     try {
-      input = await createModelConfigurationSchema(contentType).validate(body, {
+      input = await createModelConfigurationSchema(
+        contentType,
+        schema
+      ).validate(body, {
         abortEarly: false,
         stripUnknown: true,
         strict: true,
@@ -130,7 +135,7 @@ module.exports = {
     const data = {
       uid,
       source,
-      schema: service.formatContentTypeSchema(contentType),
+      schema,
       ...contentTypeConfigurations,
     };
 
