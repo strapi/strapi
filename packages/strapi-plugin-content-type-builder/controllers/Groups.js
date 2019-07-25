@@ -77,7 +77,11 @@ module.exports = {
       return ctx.send({ error: 'group.alreadyExists' }, 400);
     }
 
+    strapi.reload.isWatching = false;
+
     const newGroup = await service.createGroup(uid, body);
+
+    strapi.reload();
 
     ctx.send({ data: newGroup }, 201);
   },
@@ -104,7 +108,12 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
+    strapi.reload.isWatching = false;
+
     const updatedGroup = await service.updateGroup(group, body);
+    await service.updateGroupInModels(group.uid, updatedGroup.uid);
+
+    strapi.reload();
 
     ctx.send({ data: updatedGroup }, 200);
   },
@@ -124,7 +133,12 @@ module.exports = {
       return ctx.send({ error: 'group.notFound' }, 404);
     }
 
+    strapi.reload.isWatching = false;
+
     await service.deleteGroup(group);
+    await service.deleteGroupInModels(group.uid);
+
+    strapi.reload();
 
     ctx.send({ data: { uid } }, 200);
   },
