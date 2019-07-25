@@ -1,26 +1,22 @@
 /**
- * 
+ *
  * InputCheckbox
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
-import styles from './styles.scss';
+import { Div, Label } from './components';
 
 function InputCheckbox({ name, onChange, value }) {
   return (
-    <div
-      className={cn(styles.inputCheckboxCTM, 'col-md-12')}
-      onClick={(e) => {
+    <Div
+      className="col-12"
+      onClick={e => {
         e.stopPropagation();
       }}
     >
       <div className="form-check">
-        <label
-          className={cn('form-check-label', styles.inputCheckbockCTMLabel, value && styles.checked)}
-          htmlFor={name}
-        >
+        <Label className="form-check-label" htmlFor={name} value={value}>
           <input
             className="form-check-input"
             defaultChecked={value}
@@ -30,9 +26,9 @@ function InputCheckbox({ name, onChange, value }) {
             type="checkbox"
           />
           {name}
-        </label>
+        </Label>
       </div>
-    </div>
+    </Div>
   );
 }
 
@@ -47,4 +43,4 @@ InputCheckbox.propTypes = {
   value: PropTypes.bool,
 };
 
-export default InputCheckbox;
+export default memo(InputCheckbox);

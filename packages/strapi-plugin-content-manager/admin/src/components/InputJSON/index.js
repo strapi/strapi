@@ -17,7 +17,7 @@ import 'codemirror/theme/3024-night.css';
 
 import { isEmpty, isObject, trimStart } from 'lodash';
 import jsonlint from './jsonlint';
-import styles from './styles.scss';
+import Wrapper from './components';
 
 const WAIT = 600;
 const stringify = JSON.stringify;
@@ -98,7 +98,7 @@ class InputJSON extends React.Component {
     const markedText = this.codeMirror.markText(
       { line, ch: chStart },
       { line, ch: chEnd },
-      { className: styles.colored }
+      { className: 'colored' }
     );
     this.setState({ markedText });
   };
@@ -171,14 +171,14 @@ class InputJSON extends React.Component {
     }
 
     return (
-      <div className={styles.jsonWrapper}>
+      <Wrapper>
         <textarea
           ref={this.editor}
           autoComplete="off"
           id={this.props.name}
           defaultValue=""
         />
-      </div>
+      </Wrapper>
     );
   }
 }
@@ -195,7 +195,7 @@ InputJSON.propTypes = {
   name: PropTypes.string.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func,
-  value: PropTypes.object,
+  value: PropTypes.any,
 };
 
 export default InputJSON;

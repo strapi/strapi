@@ -114,7 +114,7 @@ class InputJSONWithErrors extends React.Component {
         className={cn(
           styles.containerJSON,
           customBootstrapClass,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >

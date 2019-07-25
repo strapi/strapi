@@ -1,4 +1,12 @@
-import { get, isBoolean, isNaN } from 'lodash';
+import {
+  get,
+  isBoolean,
+  isNaN,
+  isNumber,
+  isNull,
+  isArray,
+  isObject,
+} from 'lodash';
 import * as yup from 'yup';
 
 const errorsTrads = {
@@ -33,8 +41,8 @@ const createYupSchema = (model, { groups }) => {
           'oneToManyMorph',
           'oneToOneMorph',
         ].includes(attribute.relationType)
-          ? yup.object()
-          : yup.array();
+          ? yup.object().nullable()
+          : yup.array().nullable();
       }
 
       if (attribute.type === 'group') {
@@ -59,8 +67,30 @@ const createYupSchemaAttribute = (type, validations) => {
     schema = yup.string();
   }
   if (type === 'json') {
-    schema = yup.object(errorsTrads.json).nullable();
+    schema = yup
+      .mixed(errorsTrads.json)
+      .test('isJSON', errorsTrads.json, value => {
+        try {
+          if (
+            isObject(value) ||
+            isBoolean(value) ||
+            isNumber(value) ||
+            isArray(value) ||
+            isNaN(value) ||
+            isNull(value)
+          ) {
+            JSON.parse(JSON.stringify(value));
+            return true;
+          }
+
+          return false;
+        } catch (err) {
+          return false;
+        }
+      })
+      .nullable();
   }
+
   if (type === 'email') {
     schema = schema.email(errorsTrads.email);
   }
