@@ -55,23 +55,25 @@ module.exports = ({ model, modelKey, strapi }) => {
       if (repeatable === true) {
         validateRepeatableInput(groupValue, { key, ...attr });
         const groups = await Promise.all(
-          groupValue.map(value => groupModel.create(value))
+          groupValue.map(value => {
+            return strapi.query(group).create(value);
+          })
         );
 
-        const groupsArr = groups.map(group => ({
+        const groupsArr = groups.map(groupEntry => ({
           kind: groupModel.globalId,
-          ref: group,
+          ref: groupEntry,
         }));
 
         entry[key] = groupsArr;
         await entry.save();
       } else {
         validateNonRepeatableInput(groupValue, { key, ...attr });
-        const group = await groupModel.create(groupValue);
+        const groupEntry = await strapi.query(group).create(groupValue);
         entry[key] = [
           {
             kind: groupModel.globalId,
-            ref: group,
+            ref: groupEntry,
           },
         ];
         await entry.save();
@@ -95,15 +97,14 @@ module.exports = ({ model, modelKey, strapi }) => {
       const updateOrCreateGroup = async value => {
         // check if value has an id then update else create
         if (hasPK(value)) {
-          return groupModel.findOneAndUpdate(
+          return strapi.query(group).update(
             {
               [model.primaryKey]: getPK(value),
             },
-            value,
-            { new: true }
+            value
           );
         }
-        return groupModel.create(value);
+        return strapi.query(group).create(value);
       };
 
       if (repeatable === true) {
@@ -162,7 +163,9 @@ module.exports = ({ model, modelKey, strapi }) => {
     }, []);
 
     if (idsToDelete.length > 0) {
-      await groupModel.deleteMany({ [model.primaryKey]: { $in: idsToDelete } });
+      await strapi
+        .query(groupModel.uid)
+        .delete({ [`${model.primaryKey}_in`]: idsToDelete });
     }
   }
 
@@ -175,9 +178,10 @@ module.exports = ({ model, modelKey, strapi }) => {
       const groupModel = strapi.groups[group];
 
       if (Array.isArray(entry[key]) && entry[key].length > 0) {
-        await groupModel.deleteMany({
-          [model.primaryKey]: { $in: entry[key].map(el => el.ref) },
-        });
+        const idsToDelete = entry[key].map(el => el.ref);
+        await strapi
+          .query(groupModel.uid)
+          .delete({ [`${model.primaryKey}_in`]: idsToDelete });
       }
     }
   }
