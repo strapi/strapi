@@ -72,7 +72,10 @@ function Group({
   return (
     <>
       <div className="row">
-        <div className="col-12" style={{ paddingTop: 16, paddingBottom: 15 }}>
+        <div
+          className="col-12"
+          style={{ paddingTop: 0, marginTop: '-2px', paddingBottom: 15 }}
+        >
           <span
             style={{
               fontSize: 13,
@@ -88,6 +91,7 @@ function Group({
         style={{
           marginLeft: '-10px',
           marginRight: '-10px',
+          marginBottom: '18px',
           backgroundColor: '#f5f5f5',
           padding: '0 20px 10px 10px',
           paddingTop: isRepeatable ? '13px' : '20px',
