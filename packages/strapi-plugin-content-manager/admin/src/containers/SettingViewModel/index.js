@@ -52,9 +52,13 @@ import saga from './saga';
 import makeSelectSettingViewModel from './selectors';
 import forms from './forms.json';
 
-const getUrl = (name, to, source) =>
+const getUrl = (name, to, source, redirectUrl) =>
   `/plugins/${pluginId}/ctm-configurations/models/${name}/${to}${
-    source ? `?source=${source}` : ''
+    source
+      ? `?source=${source}${redirectUrl ? `&redirectUrl=${redirectUrl}` : ''}`
+      : redirectUrl
+      ? `?redirectUrl=${redirectUrl}`
+      : ''
   }`;
 
 function SettingViewModel({
@@ -98,6 +102,7 @@ function SettingViewModel({
   const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
   const source = getQueryParameters(search, 'source');
+  const redirectUrl = getQueryParameters(search, 'redirectUrl');
 
   useEffect(() => {
     getData(name, source);
@@ -263,7 +268,15 @@ function SettingViewModel({
       setEditFieldToSelect={setEditFieldToSelect}
       selectedItemName={itemNameToSelect}
     >
-      <BackHeader onClick={() => goBack()} />
+      <BackHeader
+        onClick={() => {
+          if (redirectUrl) {
+            push(redirectUrl);
+          } else {
+            goBack();
+          }
+        }}
+      />
       <Container className="container-fluid">
         <form onSubmit={handleSubmit}>
           <PluginHeader
@@ -281,12 +294,12 @@ function SettingViewModel({
               {
                 name:
                   'content-manager.containers.SettingPage.listSettings.title',
-                to: getUrl(name, 'list-settings', source),
+                to: getUrl(name, 'list-settings', source, redirectUrl),
               },
               {
                 name:
                   'content-manager.containers.SettingPage.editSettings.title',
-                to: getUrl(name, 'edit-settings', source),
+                to: getUrl(name, 'edit-settings', source, redirectUrl),
               },
             ]}
           />

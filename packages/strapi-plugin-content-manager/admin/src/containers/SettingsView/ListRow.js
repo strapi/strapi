@@ -4,9 +4,11 @@ import pluginId from '../../pluginId';
 import Tr from './Tr';
 
 function ListRow({ name, push, type, uid, source }) {
+  const redirectUrl =
+    'redirectUrl=/plugins/content-manager/ctm-configurations/models';
   const getUrl = to =>
     `/plugins/${pluginId}/ctm-configurations/${type}/${uid}${to}${
-      source ? `?source=${source}` : ''
+      source ? `?source=${source}&${redirectUrl}` : `?${redirectUrl}`
     }`;
   const to = type === 'models' ? '/list-settings' : '';
 

@@ -15,6 +15,7 @@ import {
   PopUpWarning,
   LoadingIndicatorPage,
   request,
+  getQueryParameters,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import { LayoutDndProvider } from '../../contexts/LayoutDnd';
@@ -39,7 +40,8 @@ const getRequestUrl = path => `/${pluginId}/groups/${path}`;
 
 function SettingViewGroup({
   groupsAndModelsMainPossibleMainFields,
-  history: { goBack },
+  history: { goBack, push },
+  location: { search },
   match: {
     params: { name },
   },
@@ -131,7 +133,6 @@ function SettingViewGroup({
   }, [itemFormType, itemNameToSelect]);
 
   const getEditRemaingFields = useCallback(() => {
-    console.log('run');
     const attributes = getAttributes();
     const displayedFields = getEditLayout().reduce(
       (acc, curr) => [...acc, ...curr.rowContent],
@@ -224,6 +225,7 @@ function SettingViewGroup({
 
     return options;
   };
+  const redirectUrl = getQueryParameters(search, 'redirectUrl');
 
   return (
     <LayoutDndProvider
@@ -280,7 +282,15 @@ function SettingViewGroup({
       }}
       selectedItemName={itemNameToSelect}
     >
-      <BackHeader onClick={() => goBack()} />
+      <BackHeader
+        onClick={() => {
+          if (redirectUrl) {
+            push(redirectUrl);
+          } else {
+            goBack();
+          }
+        }}
+      />
       <Container className="container-fluid">
         <form onSubmit={handleSubmit}>
           <PluginHeader
@@ -378,7 +388,11 @@ SettingViewGroup.propTypes = {
   groupsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
+    push: PropTypes.func.isRequired,
   }).isRequired,
+  location: PropTypes.shape({
+    search: PropTypes.string,
+  }),
   match: PropTypes.shape({
     params: PropTypes.shape({
       name: PropTypes.string.isRequired,

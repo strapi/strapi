@@ -75,7 +75,6 @@ const Item = ({
         return;
       }
 
-      // console.log({ item });
       moveRow(dragRow, targetRow);
 
       // Note: we're mutating the monitor item here!
