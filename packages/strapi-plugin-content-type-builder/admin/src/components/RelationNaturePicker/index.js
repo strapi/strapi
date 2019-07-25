@@ -24,21 +24,11 @@ const assets = {
   },
 };
 
-const availableRelations = ['manyWays', 'oneWay'];
-
 const RelationNaturePicker = ({ featureName, onClick, nature, target }) => {
-  const { leftName, rightName } = availableRelations.includes(nature)
-    ? {
-        leftName: pluralize(featureName, nature === 'manyWays' ? 2 : 1),
-        rightName: pluralize(target, ['manyWays'].includes(nature) ? 2 : 1),
-      }
-    : {
-        leftName: target,
-        rightName: pluralize(
-          featureName,
-          ['manyWays'].includes(nature) ? 2 : 1
-        ),
-      };
+  const { leftName, rightName } = {
+    leftName: featureName,
+    rightName: pluralize(target, ['manyWays'].includes(nature) ? 2 : 1),
+  };
 
   return (
     <StyledRelationNaturePicker>
