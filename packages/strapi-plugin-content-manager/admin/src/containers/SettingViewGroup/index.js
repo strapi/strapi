@@ -18,10 +18,15 @@ import {
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import { LayoutDndProvider } from '../../contexts/LayoutDnd';
-import { formatLayout as updateLayout, createLayout } from '../../utils/layout';
+import {
+  formatLayout as updateLayout,
+  createLayout,
+  unformatLayout,
+} from '../../utils/layout';
 
 import Block from '../../components/Block';
 import Container from '../../components/Container';
+import FieldForm from '../../components/FieldForm';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
 import LayoutTitle from '../../components/LayoutTitle';
@@ -33,6 +38,7 @@ import reducer, { initialState } from './reducer';
 const getRequestUrl = path => `/${pluginId}/groups/${path}`;
 
 function SettingViewGroup({
+  groupsAndModelsMainPossibleMainFields,
   history: { goBack },
   match: {
     params: { name },
@@ -43,7 +49,13 @@ function SettingViewGroup({
   const toggleWarningSubmit = () => setWarningSubmit(prevState => !prevState);
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { initialData, isLoading, modifiedData } = state.toJS();
+  const {
+    initialData,
+    isLoading,
+    itemNameToSelect,
+    itemFormType,
+    modifiedData,
+  } = state.toJS();
 
   useEffect(() => {
     const abortControllerFetchData = new AbortController();
@@ -55,6 +67,16 @@ function SettingViewGroup({
           method: 'GET',
           signal: signalFetchData,
         });
+        const firstEditField = get(
+          layout,
+          ['layouts', 'edit', 0, 0, 'name'],
+          ''
+        );
+        const formItemType = get(
+          layout,
+          ['schema', 'attributes', firstEditField, 'type'],
+          ''
+        );
 
         // Create the object needed for the reorder
         set(
@@ -66,6 +88,8 @@ function SettingViewGroup({
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data: layout,
+          itemFormType: formItemType,
+          itemNameToSelect: firstEditField,
         });
       } catch (err) {
         if (err.code !== 20) {
@@ -88,6 +112,25 @@ function SettingViewGroup({
   const getEditLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'edit'], []);
   }, [modifiedData]);
+  const getSelectedItemMetas = useCallback(() => {
+    return get(modifiedData, ['metadatas', itemNameToSelect, 'edit'], null);
+  }, [modifiedData, itemNameToSelect]);
+  const getSelectedItemSelectOptions = useCallback(() => {
+    if (itemFormType !== 'relation' && itemFormType !== 'group') {
+      return [];
+    }
+
+    const targetKey = itemFormType === 'group' ? 'group' : 'targetModel';
+    const key = get(
+      modifiedData,
+      ['schema', 'attributes', itemNameToSelect, targetKey],
+      ''
+    );
+
+    return get(groupsAndModelsMainPossibleMainFields, [key], []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemFormType, itemNameToSelect]);
+
   const getEditRemaingFields = () => {
     const attributes = getAttributes();
     const displayedFields = getEditLayout().reduce(
@@ -95,9 +138,43 @@ function SettingViewGroup({
       []
     );
 
-    return Object.keys(attributes).filter(attr => {
-      return displayedFields.findIndex(el => el.name === attr) === -1;
+    return Object.keys(attributes)
+      .filter(
+        attr =>
+          get(modifiedData, ['metadatas', attr, 'edit', 'visible'], false) ===
+          true
+      )
+      .filter(attr => {
+        return displayedFields.findIndex(el => el.name === attr) === -1;
+      });
+  };
+
+  const handleChange = useCallback(({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: name.split('.'),
+      value,
     });
+  }, []);
+
+  const submit = async () => {
+    const body = state.get('modifiedData').toJS();
+    const { uid } = modifiedData;
+
+    delete body.schema;
+    delete body.uid;
+    delete body.isGroup;
+
+    set(body, ['layouts', 'edit'], unformatLayout(body.layouts.edit));
+
+    try {
+      await request(getRequestUrl(uid), { method: 'PUT', body });
+    } catch (err) {
+      console.log({ err });
+      strapi.notification.error('notification.error');
+    } finally {
+      toggleWarningSubmit();
+    }
   };
 
   if (isLoading) {
@@ -152,6 +229,7 @@ function SettingViewGroup({
       attributes={getAttributes()}
       buttonData={getEditRemaingFields()}
       layout={getEditLayout()}
+      metadatas={get(modifiedData, ['metadatas'], {})}
       moveItem={(dragIndex, hoverIndex, dragRowIndex, hoverRowIndex) => {
         // Same row = just reorder
         if (dragRowIndex === hoverRowIndex) {
@@ -192,6 +270,14 @@ function SettingViewGroup({
           fieldIndex,
         });
       }}
+      setEditFieldToSelect={(name, formType) => {
+        dispatch({
+          type: 'SET_FIELD_TO_SELECT',
+          name,
+          formType,
+        });
+      }}
+      selectedItemName={itemNameToSelect}
     >
       <BackHeader onClick={() => goBack()} />
       <Container className="container-fluid">
@@ -220,13 +306,7 @@ function SettingViewGroup({
                     id: `${pluginId}.containers.SettingPage.editSettings.entry.title`,
                   }}
                   name="settings.mainField"
-                  onChange={({ target: { name, value } }) => {
-                    dispatch({
-                      type: 'ON_CHANGE_MAIN_SETTINGS',
-                      keys: name.split('.'),
-                      value,
-                    });
-                  }}
+                  onChange={handleChange}
                   selectOptions={getSelectOptions()}
                   type="select"
                   validations={{}}
@@ -245,6 +325,14 @@ function SettingViewGroup({
                   />
                 </LayoutTitle>
                 <FieldsReorder className="col-12" />
+                <FieldForm
+                  className="col-12"
+                  fieldName={itemNameToSelect}
+                  formType={itemFormType}
+                  metadatas={getSelectedItemMetas()}
+                  onChange={handleChange}
+                  selectOptions={getSelectedItemSelectOptions()}
+                />
               </div>
             </Block>
           </div>
@@ -277,8 +365,8 @@ function SettingViewGroup({
           confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
-        onConfirm={e => {
-          handleSubmit(e);
+        onConfirm={() => {
+          submit();
         }}
       />
     </LayoutDndProvider>
@@ -286,6 +374,7 @@ function SettingViewGroup({
 }
 
 SettingViewGroup.propTypes = {
+  groupsAndModelsMainPossibleMainFields: PropTypes.object.isRequired,
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,

@@ -51,7 +51,7 @@ export function* getData({ source, uid }) {
   }
 }
 
-export function* submit({ emitEvent, uid }) {
+export function* submit({ emitEvent, source, uid }) {
   try {
     const body = yield select(makeSelectModifiedData());
     // We need to send the unformated edit layout
@@ -59,10 +59,14 @@ export function* submit({ emitEvent, uid }) {
 
     delete body.schema;
     delete body.uid;
+    delete body.source;
+
+    const params = source ? { source } : {};
 
     yield call(request, getRequestUrl(`content-types/${uid}`), {
       method: 'PUT',
       body,
+      params,
     });
     emitEvent('didSaveContentTypeLayout');
     yield put(deleteLayout(uid));

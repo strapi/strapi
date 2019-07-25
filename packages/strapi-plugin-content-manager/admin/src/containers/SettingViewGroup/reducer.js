@@ -4,6 +4,8 @@ import { formatLayout } from '../../utils/layout';
 const initialState = fromJS({
   initialData: {},
   isLoading: true,
+  itemFormType: '',
+  itemNameToSelect: '',
   modifiedData: {},
 });
 
@@ -35,8 +37,10 @@ const reducer = (state, action) => {
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('initialData', () => fromJS(action.data))
-        .update('modifiedData', () => fromJS(action.data))
-        .update('isLoading', () => false);
+        .update('isLoading', () => false)
+        .update('itemNameToSelect', () => action.itemNameToSelect)
+        .update('itemFormType', () => action.itemFormType)
+        .update('modifiedData', () => fromJS(action.data));
     case 'MOVE_ROW':
       return state.updateIn(layoutPath, list => {
         return list
@@ -73,7 +77,7 @@ const reducer = (state, action) => {
 
       return state.updateIn(layoutPath, () => fromJS(formattedList));
     }
-    case 'ON_CHANGE_MAIN_SETTINGS':
+    case 'ON_CHANGE':
       return state.updateIn(
         ['modifiedData', ...action.keys],
         () => action.value
@@ -130,6 +134,10 @@ const reducer = (state, action) => {
     }
     case 'RESET':
       return state.update('modifiedData', () => state.get('initialData'));
+    case 'SET_FIELD_TO_SELECT':
+      return state
+        .update('itemNameToSelect', () => action.name)
+        .update('itemFormType', () => action.formType);
     default:
       return state;
   }

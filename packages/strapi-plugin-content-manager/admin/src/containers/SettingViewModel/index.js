@@ -66,7 +66,7 @@ function SettingViewModel({
   formatLayout,
   getData,
   groupsAndModelsMainPossibleMainFields,
-  history: { goBack },
+  history: { goBack, push },
   initialData,
   isLoading,
   itemFormType,
@@ -265,7 +265,9 @@ function SettingViewModel({
     <LayoutDndProvider
       attributes={getAttributes}
       buttonData={getEditRemainingFields()}
+      goTo={push}
       layout={getEditLayout()}
+      metadatas={get(modifiedData, ['metadatas'], {})}
       moveItem={moveItem}
       moveRow={moveRow}
       onAddData={onAddData}
@@ -419,7 +421,7 @@ function SettingViewModel({
           confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
-        onConfirm={() => onSubmit(name, emitEvent)}
+        onConfirm={() => onSubmit(name, emitEvent, source)}
       />
     </LayoutDndProvider>
   );
@@ -435,6 +437,7 @@ SettingViewModel.propTypes = {
   groupsAndModelsMainPossibleMainFields: PropTypes.object,
   history: PropTypes.shape({
     goBack: PropTypes.func,
+    push: PropTypes.func,
   }).isRequired,
   initialData: PropTypes.object.isRequired,
   isLoading: PropTypes.bool.isRequired,

@@ -117,11 +117,12 @@ export function onReset() {
     type: ON_RESET,
   };
 }
-export function onSubmit(uid, emitEvent) {
+export function onSubmit(uid, emitEvent, source) {
   return {
     type: ON_SUBMIT,
     uid,
     emitEvent,
+    source,
   };
 }
 

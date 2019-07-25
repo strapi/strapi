@@ -7,6 +7,7 @@
   "components.DraggableAttr.edit": "Cliquez pour modifier",
   "components.EmptyAttributesBlock.button": "Voir la page des configurations",
   "components.EmptyAttributesBlock.description": "Vous pouvez modifiez vos paramètres",
+  "components.FieldItem.linkToGroupLayout": "Modifier le layout du groupe",
   "components.FilterOptions.FILTER_TYPES.=": "est",
   "components.FilterOptions.FILTER_TYPES._contains": "contient",
   "components.FilterOptions.FILTER_TYPES._containss": "contient (sensible à la casse)",

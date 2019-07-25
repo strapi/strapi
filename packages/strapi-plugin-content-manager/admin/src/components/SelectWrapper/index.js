@@ -18,6 +18,7 @@ function SelectWrapper({
   name,
   relationType,
   targetModel,
+  placeholder,
   plugin,
   value,
 }) {
@@ -164,7 +165,11 @@ function SelectWrapper({
         onMenuScrollToBottom={onMenuScrollToBottom}
         onRemove={onRemove}
         placeholder={
-          <FormattedMessage id={`${pluginId}.containers.Edit.addAnItem`} />
+          isEmpty(placeholder) ? (
+            <FormattedMessage id={`${pluginId}.containers.Edit.addAnItem`} />
+          ) : (
+            placeholder
+          )
         }
         targetModel={targetModel}
         value={value}
@@ -178,6 +183,7 @@ SelectWrapper.defaultProps = {
   description: '',
   label: '',
   plugin: '',
+  placeholder: '',
   value: null,
 };
 
@@ -186,6 +192,7 @@ SelectWrapper.propTypes = {
   label: PropTypes.string,
   mainField: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
   plugin: PropTypes.string,
   relationType: PropTypes.string.isRequired,
   targetModel: PropTypes.string.isRequired,

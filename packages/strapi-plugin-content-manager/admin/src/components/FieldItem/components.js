@@ -1,5 +1,28 @@
 import styled, { css } from 'styled-components';
 
+const InfoLabel = styled.div`
+  position: absolute;
+  top: 0;
+  right: 40px;
+
+  font-weight: 400;
+  color: #007eff;
+`;
+
+const Link = styled.div`
+position: absolute;
+bottom: 0
+font-weight: 400;
+color: #007eff;
+cursor: pointer;
+&:before {
+  content: '\f013';
+  margin-right: 10px;
+  font-family: 'FontAwesome';
+  font-size: 12px;
+}
+`;
+
 const Carret = styled.div`
   position: absolute;
   ${({ right }) => {
@@ -30,9 +53,9 @@ const FullWidthCarret = styled.div`
   margin-bottom: 6px;
   border-radius: 2px;
   > div {
-    background: #007eff;
-    height: 2px;
     width: 100%;
+    height: 2px;
+    background: #007eff;
   }
 `;
 
@@ -96,4 +119,4 @@ const Wrapper = styled.div`
   }
 `;
 
-export { Carret, FullWidthCarret, NameWrapper, Wrapper };
+export { Carret, FullWidthCarret, InfoLabel, Link, NameWrapper, Wrapper };

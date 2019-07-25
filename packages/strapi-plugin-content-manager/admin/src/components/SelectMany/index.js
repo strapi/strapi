@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { useDrop } from 'react-dnd';
@@ -36,7 +36,8 @@ function SelectMany({
       index: value.indexOf(relation),
     };
   };
-  const moveRelation = React.useCallback(
+
+  const moveRelation = useCallback(
     (id, atIndex) => {
       const { index } = findRelation(id);
 

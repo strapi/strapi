@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 
 import { useLayoutDnd } from '../../contexts/LayoutDnd';
 import FieldItem from '../FieldItem';
@@ -18,7 +19,12 @@ const Item = ({
   size,
   type,
 }) => {
-  const { selectedItemName, setEditFieldToSelect } = useLayoutDnd();
+  const {
+    goTo,
+    metadatas,
+    selectedItemName,
+    setEditFieldToSelect,
+  } = useLayoutDnd();
   const ref = useRef(null);
   const [{ clientOffset, isOver }, drop] = useDrop({
     accept: ItemTypes.EDIT_FIELD,
@@ -189,9 +195,11 @@ const Item = ({
     <FieldItem
       isDragging={isDragging}
       isSelected={name === selectedItemName}
+      label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
       onClickEdit={() => setEditFieldToSelect(name, type)}
       onClickRemove={() => removeField(rowIndex, itemIndex)}
+      push={goTo}
       showLeftCarret={showLeftCarret}
       showRightCarret={showRightCarret}
       size={size}

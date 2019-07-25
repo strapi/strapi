@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
-import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { useLayoutDnd } from '../../contexts/LayoutDnd';
 
 import FieldItem from '../FieldItem';
@@ -9,7 +10,12 @@ import FieldItem from '../FieldItem';
 import ItemTypes from '../../utils/itemsTypes';
 
 const Item = ({ index, move, name, removeItem }) => {
-  const { selectedItemName, setEditFieldToSelect } = useLayoutDnd();
+  const {
+    goTo,
+    metadatas,
+    selectedItemName,
+    setEditFieldToSelect,
+  } = useLayoutDnd();
   const ref = useRef(null);
 
   // from: https://codesandbox.io/s/github/react-dnd/react-dnd/tree/gh-pages/examples_hooks_js/04-sortable/simple?from-embed
@@ -74,9 +80,11 @@ const Item = ({ index, move, name, removeItem }) => {
     <FieldItem
       isDragging={isDragging}
       isSelected={name === selectedItemName}
+      label={get(metadatas, [name, 'edit', 'label'], '')}
       name={name}
       onClickEdit={() => setEditFieldToSelect(name, 'relation')}
       onClickRemove={() => removeItem(index)}
+      push={goTo}
       ref={ref}
       size={12}
       style={{ marginBottom: 6 }}

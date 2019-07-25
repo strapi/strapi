@@ -7,6 +7,7 @@
   "components.DraggableAttr.edit": "Click to edit",
   "components.EmptyAttributesBlock.button": "Go to settings page",
   "components.EmptyAttributesBlock.description": "You can change your settings",
+  "components.FieldItem.linkToGroupLayout": "Set the group's layout",
   "components.FilterOptions.FILTER_TYPES.=": "is",
   "components.FilterOptions.FILTER_TYPES._contains": "contains",
   "components.FilterOptions.FILTER_TYPES._containss": "contains (case sensitive)",
@@ -32,6 +33,7 @@
   "components.TableEmpty.withFilters": "There is no {contentType} with the applied filters...",
   "components.TableEmpty.withSearch": "There is no {contentType} corresponding to the search ({search})...",
   "components.TableEmpty.withoutFilter": "There is no {contentType}...",
+
   "containers.Edit.addAnItem": "Add an item...",
   "containers.Edit.pluginHeader.title.new": "Create an Entry",
   "containers.Edit.clickToJump": "Click to jump to the entry",
@@ -69,7 +71,6 @@
   "containers.SettingPage.layout": "Layout",
   "containers.EditView.Group.add.new": "ADD NEW ENTRY",
   "containers.SettingViewModel.pluginHeader.title": "Content Manager - {name}",
-
   "containers.SettingsPage.Block.contentType.description": "Configure the specific settings",
   "containers.SettingsPage.Block.contentType.title": "Content Types",
   "containers.SettingsPage.Block.generalSettings.description": "Configure the default options for your Content Types",
@@ -77,6 +78,7 @@
   "containers.SettingsPage.pluginHeaderDescription": "Configure the settings for all your Content types and Groups",
   "containers.SettingsView.list.title": "Display configurations",
   "containers.SettingsView.list.subtitle": "Configure the layout and display of your content types and groups",
+
   "emptyAttributes.button": "Go to content type builder",
   "emptyAttributes.description": "Add your first field to your Content Type",
   "emptyAttributes.title": "There are no fields yet",
@@ -100,6 +102,7 @@
   "error.validation.minSupMax": "Can't be superior",
   "error.validation.regex": "The value not match the regex.",
   "error.validation.required": "This value input is required.",
+
   "form.Input.bulkActions": "Enable bulk actions",
   "form.Input.defaultSort": "Default sort attribute",
   "form.Input.description": "Description",
