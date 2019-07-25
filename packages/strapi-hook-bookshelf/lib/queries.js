@@ -237,7 +237,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     for (let key of groupKeys) {
       const attr = model.attributes[key];
-      const { group, required = false, repeatable = true } = attr;
+      const { group, required = false, repeatable = false } = attr;
 
       const groupModel = strapi.groups[group];
 
@@ -294,7 +294,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       if (!_.has(values, key)) continue;
 
       const attr = model.attributes[key];
-      const { group, repeatable = true } = attr;
+      const { group, repeatable = false } = attr;
 
       const groupModel = strapi.groups[group];
 
