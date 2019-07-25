@@ -3,7 +3,7 @@
  * InputWithAutoFocus that programatically manage the autofocus of another one
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
 import { InputWrapperDate } from './components';
@@ -50,4 +50,4 @@ Input.propTypes = {
   type: PropTypes.string.isRequired,
 };
 
-export default Input;
+export default memo(Input);

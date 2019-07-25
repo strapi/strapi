@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
@@ -91,4 +91,4 @@ Search.propTypes = {
   value: PropTypes.string,
 };
 
-export default Search;
+export default memo(Search);

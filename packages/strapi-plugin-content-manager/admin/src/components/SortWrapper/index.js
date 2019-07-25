@@ -6,9 +6,6 @@ const SortWrapper = styled.div`
   padding-top: 11px;
   border: 1px dashed #e3e9f3;
   border-radius: 2px;
-  > div {
-    // padding: 0 10px;
-  }
 `;
 
 export default SortWrapper;

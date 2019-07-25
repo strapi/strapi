@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
@@ -39,4 +39,4 @@ ActionCollapse.propTypes = {
   colSpan: PropTypes.number.isRequired,
 };
 
-export default ActionCollapse;
+export default memo(ActionCollapse);
