@@ -30,7 +30,6 @@ import ListLayout from './ListLayout';
 import {
   addFieldToList,
   addRelation,
-  formatLayout,
   getData,
   moveListField,
   moveRow,
@@ -61,9 +60,7 @@ const getUrl = (name, to, source) =>
 function SettingViewModel({
   addFieldToList,
   addRelation,
-  didDrop,
   emitEvent,
-  formatLayout,
   getData,
   groupsAndModelsMainPossibleMainFields,
   history: { goBack, push },
@@ -115,19 +112,10 @@ function SettingViewModel({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldToggleModalSubmit]);
-  // TODO: remove this effect and run the logic in the reducer instead
-  // it causes multiple renders
-  useEffect(() => {
-    if (!isLoading) {
-      formatLayout();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [didDrop]);
 
   const getAttributes = useMemo(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
-  // TODO change with useMemo
   const getEditLayout = useCallback(() => {
     return get(modifiedData, ['layouts', 'edit'], []);
   }, [modifiedData]);
@@ -166,7 +154,6 @@ function SettingViewModel({
     emitEvent('willSaveContentTypeLayout');
   };
 
-  // TODO useCallback
   const getPluginHeaderActions = () => {
     if (isEqual(modifiedData, initialData)) {
       return [];
@@ -430,9 +417,7 @@ function SettingViewModel({
 SettingViewModel.propTypes = {
   addFieldToList: PropTypes.func.isRequired,
   addRelation: PropTypes.func.isRequired,
-  didDrop: PropTypes.bool.isRequired,
   emitEvent: PropTypes.func.isRequired,
-  formatLayout: PropTypes.func.isRequired,
   getData: PropTypes.func.isRequired,
   groupsAndModelsMainPossibleMainFields: PropTypes.object,
   history: PropTypes.shape({
@@ -479,7 +464,6 @@ export function mapDispatchToProps(dispatch) {
     {
       addFieldToList,
       addRelation,
-      formatLayout,
       getData,
       moveListField,
       moveRelation,

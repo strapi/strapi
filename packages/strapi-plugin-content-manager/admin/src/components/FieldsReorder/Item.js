@@ -10,6 +10,7 @@ import FieldItem from '../FieldItem';
 import ItemTypes from '../../utils/ItemTypes';
 
 const Item = ({
+  groupUid,
   itemIndex,
   moveItem,
   moveRow,
@@ -193,6 +194,7 @@ const Item = ({
 
   return (
     <FieldItem
+      groupUid={groupUid}
       isDragging={isDragging}
       isSelected={name === selectedItemName}
       label={get(metadatas, [name, 'edit', 'label'], '')}
@@ -214,6 +216,7 @@ Item.defaultProps = {
 };
 
 Item.propTypes = {
+  groupUid: PropTypes.string,
   itemIndex: PropTypes.number.isRequired,
   moveItem: PropTypes.func.isRequired,
   moveRow: PropTypes.func.isRequired,

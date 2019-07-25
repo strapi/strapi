@@ -29,11 +29,6 @@ const reducer = (state, action) => {
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
 
   switch (action.type) {
-    case 'FORMAT_LAYOUT': {
-      const newList = formatLayout(state.getIn(layoutPath).toJS());
-
-      return state.updateIn(layoutPath, () => fromJS(newList));
-    }
     case 'GET_DATA_SUCCEEDED':
       return state
         .update('initialData', () => fromJS(action.data))

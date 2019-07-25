@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
@@ -19,15 +19,24 @@ const FieldsReorder = ({ className }) => {
     onAddData,
     removeField,
   } = useLayoutDnd();
-  const getType = attributeName => {
-    const attribute = get(attributes, [attributeName], {});
+  const getGroup = useCallback(
+    attributeName => {
+      return get(attributes, [attributeName, 'group'], '');
+    },
+    [attributes]
+  );
+  const getType = useCallback(
+    attributeName => {
+      const attribute = get(attributes, [attributeName], {});
 
-    if (attribute.plugin === 'upload') {
-      return 'file';
-    }
+      if (attribute.plugin === 'upload' || attribute.type === 'media') {
+        return 'file';
+      }
 
-    return attribute.type;
-  };
+      return attribute.type;
+    },
+    [attributes]
+  );
 
   return (
     <div className={className}>
@@ -40,6 +49,7 @@ const FieldsReorder = ({ className }) => {
 
                 return (
                   <Item
+                    groupUid={getGroup(name)}
                     itemIndex={index}
                     key={name}
                     moveRow={moveRow}

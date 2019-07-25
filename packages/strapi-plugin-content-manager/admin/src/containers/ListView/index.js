@@ -112,10 +112,16 @@ function ListView({
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [slug, shouldRefetchData]);
 
-  const toggleLabelPickerState = () =>
+  const toggleLabelPickerState = () => {
+    if (!isLabelPickerOpen) {
+      emitEvent('willChangeDisplayedFields');
+    }
+
     setLabelPickerState(prevState => !prevState);
-  const toggleFilterPickerState = () =>
+  };
+  const toggleFilterPickerState = () => {
     setFilterPickerState(prevState => !prevState);
+  };
 
   // Helpers
   const getMetaDatas = (path = []) =>

@@ -105,7 +105,6 @@ function SettingViewGroup({
     };
   }, [name]);
 
-  // TODO change with usememo
   const getAttributes = useCallback(() => {
     return get(modifiedData, ['schema', 'attributes'], {});
   }, [modifiedData]);
@@ -131,7 +130,8 @@ function SettingViewGroup({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemFormType, itemNameToSelect]);
 
-  const getEditRemaingFields = () => {
+  const getEditRemaingFields = useCallback(() => {
+    console.log('run');
     const attributes = getAttributes();
     const displayedFields = getEditLayout().reduce(
       (acc, curr) => [...acc, ...curr.rowContent],
@@ -147,7 +147,8 @@ function SettingViewGroup({
       .filter(attr => {
         return displayedFields.findIndex(el => el.name === attr) === -1;
       });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modifiedData]);
 
   const handleChange = useCallback(({ target: { name, value } }) => {
     dispatch({

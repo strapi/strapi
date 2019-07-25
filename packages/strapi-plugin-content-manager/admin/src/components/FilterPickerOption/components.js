@@ -87,7 +87,6 @@ const InputWrapperDate = styled.div`
   }}
 `;
 
-// TODO Delete if we remove the autofocus
 const Input = styled.input`
   height: 3.4rem;
   margin-top: 0.9rem;

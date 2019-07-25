@@ -20,6 +20,7 @@ import {
 const FieldItem = forwardRef(
   (
     {
+      groupUid,
       isDragging,
       isEditing,
       isSelected,
@@ -113,7 +114,7 @@ const FieldItem = forwardRef(
                         <Link
                           onClick={() =>
                             push(
-                              `/plugins/${pluginId}/ctm-configurations/groups/${name}`
+                              `/plugins/${pluginId}/ctm-configurations/groups/${groupUid}`
                             )
                           }
                         >
@@ -134,6 +135,7 @@ const FieldItem = forwardRef(
 );
 
 FieldItem.defaultProps = {
+  groupUid: '',
   isDragging: false,
   isEditing: false,
   isSelected: false,
@@ -148,6 +150,7 @@ FieldItem.defaultProps = {
 };
 
 FieldItem.propTypes = {
+  groupUid: PropTypes.string,
   isDragging: PropTypes.bool,
   isEditing: PropTypes.bool,
   isSelected: PropTypes.bool,

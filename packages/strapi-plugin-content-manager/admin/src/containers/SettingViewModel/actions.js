@@ -2,7 +2,6 @@ import { set } from 'lodash';
 import {
   ADD_FIELD_TO_LIST,
   ADD_RELATION,
-  FORMAT_LAYOUT,
   GET_DATA,
   GET_DATA_SUCCEEDED,
   MOVE_FIELD_LIST,
@@ -35,12 +34,6 @@ export function addRelation(name) {
   return {
     type: ADD_RELATION,
     name,
-  };
-}
-
-export function formatLayout() {
-  return {
-    type: FORMAT_LAYOUT,
   };
 }
 

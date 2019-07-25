@@ -9,7 +9,6 @@ import { formatLayout } from '../../utils/layout';
 import {
   ADD_FIELD_TO_LIST,
   ADD_RELATION,
-  FORMAT_LAYOUT,
   GET_DATA_SUCCEEDED,
   MOVE_FIELD_LIST,
   MOVE_RELATION,
@@ -29,7 +28,6 @@ import {
 } from './constants';
 
 export const initialState = fromJS({
-  didDrop: false,
   initialData: fromJS({}),
   isLoading: true,
   itemFormType: '',
@@ -44,6 +42,10 @@ const getSize = type => {
     case 'boolean':
     case 'date':
     case 'datetime':
+    case 'integer':
+    case 'float':
+    case 'biginteger':
+    case 'decimal':
       return 4;
     case 'json':
     case 'group':
@@ -63,17 +65,11 @@ function settingViewModelReducer(state = initialState, action) {
       return state.updateIn(['modifiedData', 'layouts', 'list'], list =>
         list.push(action.field)
       );
-
     case ADD_RELATION:
       return state.updateIn(
         ['modifiedData', 'layouts', 'editRelations'],
         list => list.push(action.name)
       );
-    case FORMAT_LAYOUT: {
-      const newList = formatLayout(state.getIn(layoutPath).toJS());
-
-      return state.updateIn(layoutPath, () => fromJS(newList));
-    }
     case GET_DATA_SUCCEEDED:
       return state
         .update('initialData', () => fromJS(action.layout || {}))
@@ -131,9 +127,6 @@ function settingViewModelReducer(state = initialState, action) {
         });
       const formattedList = formatLayout(newList.toJS());
 
-      // NOTE we could use the diddrop part here but it causes an unecessary rerender...
-      // NOTE2: it would be great later to remove the didDrop key that is used to reformat the layout with the _TEMP_ divs
-
       return state.updateIn(layoutPath, () => fromJS(formattedList));
     }
 
@@ -170,29 +163,33 @@ function settingViewModelReducer(state = initialState, action) {
         .update('listFieldToEditIndex', () => 0);
     case REMOVE_FIELD: {
       const row = state.getIn([...layoutPath, action.rowIndex, 'rowContent']);
+      let newState;
 
       // Delete the entire row if length is one or if lenght is equal to 2 and the second element is the hidden div used to make the dnd exp smoother
       if (
         row.size === 1 ||
         (row.size == 2 && row.getIn([1, 'name']) === '_TEMP_')
       ) {
-        return state
-          .updateIn(layoutPath, list => list.delete(action.rowIndex))
-          .update('didDrop', v => !v);
+        newState = state.updateIn(layoutPath, list =>
+          list.delete(action.rowIndex)
+        );
+      } else {
+        newState = state.updateIn(
+          [...layoutPath, action.rowIndex, 'rowContent'],
+          list => list.delete(action.fieldIndex)
+        );
       }
-      return state
-        .updateIn([...layoutPath, action.rowIndex, 'rowContent'], list =>
-          list.delete(action.fieldIndex)
-        )
-        .update('didDrop', v => !v);
+      const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+
+      return state.updateIn(layoutPath, () => fromJS(updatedList));
     }
     case REMOVE_RELATION:
       return state.updateIn(
         ['modifiedData', 'layouts', 'editRelations'],
         list => list.delete(action.index)
       );
-    case REORDER_DIFF_ROW:
-      return state
+    case REORDER_DIFF_ROW: {
+      const newState = state
         .updateIn([...layoutPath, dragRowIndex, 'rowContent'], list => {
           return list.remove(dragIndex);
         })
@@ -201,14 +198,24 @@ function settingViewModelReducer(state = initialState, action) {
             hoverIndex,
             state.getIn([...layoutPath, dragRowIndex, 'rowContent', dragIndex])
           );
-        })
-        .update('didDrop', v => !v);
-    case REORDER_ROW:
-      return state
-        .updateIn([...layoutPath, dragRowIndex, 'rowContent'], list => {
+        });
+
+      const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+
+      return state.updateIn(layoutPath, () => fromJS(updatedList));
+    }
+    case REORDER_ROW: {
+      const newState = state.updateIn(
+        [...layoutPath, dragRowIndex, 'rowContent'],
+        list => {
           return list.delete(dragIndex).insert(hoverIndex, list.get(dragIndex));
-        })
-        .update('didDrop', v => !v);
+        }
+      );
+
+      const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+
+      return state.updateIn(layoutPath, () => fromJS(updatedList));
+    }
     case RESET_PROPS:
       return initialState;
     case SET_EDIT_FIELD_TO_SELECT:

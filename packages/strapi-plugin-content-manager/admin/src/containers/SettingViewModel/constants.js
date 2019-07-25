@@ -2,7 +2,6 @@ export const ADD_FIELD_TO_LIST =
   'ContentManager/SettingViewModel/ADD_FIELD_TO_LIST';
 export const ADD_RELATION = 'ContentManager/SettingViewModel/ADD_RELATION';
 export const GET_DATA = 'ContentManager/SettingViewModel/GET_DATA';
-export const FORMAT_LAYOUT = 'ContentManager/SettingViewModel/FORMAT_LAYOUT';
 export const GET_DATA_SUCCEEDED =
   'ContentManager/SettingViewModel/GET_DATA_SUCCEEDED';
 export const MOVE_FIELD_LIST =
