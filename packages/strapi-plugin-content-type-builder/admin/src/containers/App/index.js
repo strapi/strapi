@@ -83,7 +83,6 @@ export class App extends React.Component {
   /* istanbul ignore next */
   componentDidUpdate(prevProps) {
     if (prevProps.shouldRefetchData !== this.props.shouldRefetchData) {
-      console.log('UPDATE !!');
       this.props.getData();
     }
   }
@@ -134,21 +133,8 @@ export class App extends React.Component {
       return newGroup;
     }
 
-    return get(
-      modifiedDataGroup,
-      [this.getFeatureNameFromSearch(), 'schema'],
-      {}
-    );
+    return get(modifiedDataGroup, this.getFeatureNameFromSearch(), {}, {});
   };
-
-  // getFeatureName = () => {
-  //   const { modifiedDataGroup } = this.props;
-  //   return get(
-  //     modifiedDataGroup,
-  //     [this.getFeatureNameFromSearch(), 'schema', 'name'],
-  //     {}
-  //   );
-  // };
 
   getFeatureNameFromSearch = () =>
     getQueryParameters(this.getSearch(), `${this.getFeatureType()}Name`);
@@ -221,7 +207,6 @@ export class App extends React.Component {
     } = this.props;
 
     if (isLoading) {
-      console.log('loading');
       return <Loader />;
     }
 

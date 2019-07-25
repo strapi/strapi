@@ -147,25 +147,31 @@ describe('appReducer', () => {
         target: '',
         unique: false,
       },
+      temporaryAttributeRelationGroup: {
+        name: '',
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: '',
+        unique: false,
+      },
       shouldRefetchData: false,
-
       newGroup: {
         collectionName: '',
         connection: '',
         name: '',
-        schema: {
-          attributes: [],
-          description: '',
-        },
+        attributes: [],
+        description: '',
       },
       newGroupClone: {
         collectionName: '',
         connection: '',
         name: '',
-        schema: {
-          attributes: [],
-          description: '',
-        },
+        attributes: [],
+        description: '',
       },
     });
   });
@@ -749,24 +755,21 @@ describe('appReducer', () => {
       tests: {
         uid: 'tests',
         name: 'tests',
-        source: null,
-        schema: {
-          connection: 'default',
-          collectionName: 'tests',
-          description: '',
-          attributes: [
-            {
-              name: 'name',
-              type: 'string',
-              required: true,
-            },
-            {
-              name: 'quantity',
-              type: 'float',
-              required: true,
-            },
-          ],
-        },
+        connection: 'default',
+        collectionName: 'tests',
+        description: '',
+        attributes: [
+          {
+            name: 'name',
+            type: 'string',
+            required: true,
+          },
+          {
+            name: 'quantity',
+            type: 'float',
+            required: true,
+          },
+        ],
         isTemporary: false,
       },
     };
@@ -776,7 +779,6 @@ describe('appReducer', () => {
         {
           uid: 'tests',
           name: 'tests',
-          source: null,
           schema: {
             connection: 'default',
             collectionName: 'tests',
@@ -1046,24 +1048,31 @@ describe('appReducer', () => {
         target: '',
         unique: false,
       },
+      temporaryAttributeRelationGroup: {
+        name: '',
+        columnName: '',
+        dominant: false,
+        targetColumnName: '',
+        key: '-',
+        nature: 'oneWay',
+        plugin: '',
+        target: '',
+        unique: false,
+      },
       shouldRefetchData: false,
       newGroup: {
         collectionName: '',
         connection: '',
         name: '',
-        schema: {
-          attributes: [],
-          description: '',
-        },
+        attributes: [],
+        description: '',
       },
       newGroupClone: {
         collectionName: '',
         connection: '',
         name: '',
-        schema: {
-          attributes: [],
-          description: '',
-        },
+        attributes: [],
+        description: '',
       },
       initialDataGroup: {},
       modifiedDataGroup: {},

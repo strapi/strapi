@@ -61,23 +61,21 @@ const props = {
       uid: 'tests',
       name: 'Tests',
       source: null,
-      schema: {
-        connection: 'default',
-        collectionName: 'tests',
-        description: 'tests description',
-        attributes: [
-          {
-            name: 'name',
-            type: 'string',
-            required: true,
-          },
-          {
-            name: 'quantity',
-            type: 'float',
-            required: true,
-          },
-        ],
-      },
+      connection: 'default',
+      collectionName: 'tests',
+      description: 'tests description',
+      attributes: [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+      ],
     },
   },
   location: {
@@ -89,23 +87,21 @@ const props = {
       uid: 'tests',
       name: 'Tests',
       source: null,
-      schema: {
-        connection: 'default',
-        collectionName: 'tests',
-        description: 'tests description',
-        attributes: [
-          {
-            name: 'name',
-            type: 'string',
-            required: true,
-          },
-          {
-            name: 'quantity',
-            type: 'float',
-            required: true,
-          },
-        ],
-      },
+      connection: 'default',
+      collectionName: 'tests',
+      description: 'tests description',
+      attributes: [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+      ],
     },
   },
   match: {
@@ -117,12 +113,13 @@ const props = {
     collectionName: '',
     connection: '',
     name: '',
-    schema: {
-      attributes: [],
-      description: '',
-    },
+    attributes: [],
+    description: '',
   },
   onChangeAttributeGroup: jest.fn(),
+  onChangeRelationGroup: jest.fn(),
+  onChangeRelationNatureGroup: jest.fn(),
+  onChangeRelationTargetGroup: jest.fn(),
   resetEditTempGroup: jest.fn(),
   saveEditedAttributeGroup: jest.fn(),
   setTemporaryAttributeGroup: jest.fn(),
@@ -130,6 +127,17 @@ const props = {
   submitTempGroup: jest.fn(),
   submitGroup: jest.fn(),
   temporaryAttributeGroup: {},
+  temporaryAttributeRelationGroup: {
+    name: '',
+    columnName: '',
+    dominant: false,
+    targetColumnName: '',
+    key: '-',
+    nature: 'oneWay',
+    plugin: '',
+    target: '',
+    unique: false,
+  },
 };
 
 describe('CTB <GroupPage />', () => {
@@ -229,9 +237,9 @@ describe('CTB <GroupPage />', () => {
   });
 
   it('should call the openAttributesModal when clicking on the EmptyAttributesBlock', () => {
-    props.initialDataGroup.tests.schema.attributes = [];
-    props.modifiedDataGroup.tests.schema.attributes = [];
-    props.newGroup.schema.attributes = [];
+    props.initialDataGroup.tests.attributes = [];
+    props.modifiedDataGroup.tests.attributes = [];
+    props.newGroup.attributes = [];
 
     const wrapper = shallow(<GroupPage {...props} />);
     const spyOnClick = jest.spyOn(wrapper.instance(), 'openAttributesModal');
@@ -456,7 +464,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
       props.newGroup.name = 'tests';
 
-      props.newGroup.schema.attributes = [
+      props.newGroup.attributes = [
         {
           name: 'name',
           type: 'string',
@@ -479,7 +487,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
     it('should call submitGroup with modifiedDataGroup param when isTemporary is false', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
 
-      props.initialDataGroup.tests.schema.attributes = [
+      props.initialDataGroup.tests.attributes = [
         {
           name: 'name',
           type: 'string',
@@ -491,7 +499,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
           required: true,
         },
       ];
-      props.modifiedDataGroup.tests.schema.attributes = [
+      props.modifiedDataGroup.tests.attributes = [
         {
           name: 'firstname',
           type: 'string',
@@ -563,7 +571,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
         showWarning: true,
       });
       handleDeleteAttribute();
-      const keys = ['modifiedDataGroup', 'tests', 'schema', 'attributes', 0];
+      const keys = ['modifiedDataGroup', 'tests', 'attributes', 0];
       expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
       expect(context.emitEvent).toHaveBeenCalledWith('willDeleteFieldOfGroup');
     });
@@ -582,7 +590,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
       handleClickOnTrashIcon(0);
       handleDeleteAttribute();
 
-      const keys = ['newGroup', 'schema', 'attributes', 0];
+      const keys = ['newGroup', 'attributes', 0];
       expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
       expect(context.emitEvent).toHaveBeenCalledWith('willDeleteFieldOfGroup');
     });

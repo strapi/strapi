@@ -104,9 +104,7 @@ export class GroupPage extends React.Component {
     return get(modifiedDataGroup, this.getFeatureName(), {});
   };
 
-  getFeatureSchema = () => get(this.getFeature(), 'schema', {});
-
-  getFeatureAttributes = () => get(this.getFeatureSchema(), 'attributes', []);
+  getFeatureAttributes = () => get(this.getFeature(), 'attributes', []);
 
   getFeatureAttributesNames = () => {
     return this.getFeatureAttributes().map(attribute => {
@@ -139,25 +137,13 @@ export class GroupPage extends React.Component {
     return displayName;
   };
 
-  getFeatureHeaderTitle = () => {
-    const { modifiedDataGroup, newGroup } = this.props;
-    const name = this.getFeatureName();
-
-    /* istanbul ignore if */
-    const displayName = this.isUpdatingTempFeature()
-      ? get(newGroup, ['schema', 'name'], null)
-      : get(modifiedDataGroup, [name, 'schema', 'name'], null);
-
-    return displayName;
-  };
-
   getFeatureHeaderDescription = () => {
     const { modifiedDataGroup, newGroup } = this.props;
     const name = this.getFeatureName();
 
     const description = this.isUpdatingTempFeature()
-      ? get(newGroup, ['schema', 'description'], null)
-      : get(modifiedDataGroup, [name, 'schema', 'description'], null);
+      ? get(newGroup, 'description', null)
+      : get(modifiedDataGroup, [name, 'description'], null);
 
     /* istanbul ignore if */
     /* eslint-disable indent */
@@ -190,7 +176,7 @@ export class GroupPage extends React.Component {
         ? submitTempGroup(newGroup, this.context)
         : submitGroup(
             featureName,
-            get(modifiedDataGroup, [featureName, 'schema']),
+            get(modifiedDataGroup, featureName),
             Object.assign(this.context, {
               history: this.props.history,
             }),
@@ -287,11 +273,10 @@ export class GroupPage extends React.Component {
     const { attrToDelete } = this.state;
 
     const keys = this.isUpdatingTempFeature()
-      ? ['newGroup', 'schema', 'attributes', attrToDelete]
+      ? ['newGroup', 'attributes', attrToDelete]
       : [
           'modifiedDataGroup',
           this.getFeatureName(),
-          'schema',
           'attributes',
           attrToDelete,
         ];
@@ -444,7 +429,7 @@ export class GroupPage extends React.Component {
         <ViewContainer
           {...this.props}
           featureType={this.featureType}
-          headerTitle={this.getFeatureHeaderTitle()}
+          headerTitle={this.getFeatureDisplayName()}
           headerDescription={this.getFeatureHeaderDescription()}
           pluginHeaderActions={this.getPluginHeaderActions()}
           onClickIcon={this.openEditFeatureModal}

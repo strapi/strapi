@@ -501,9 +501,8 @@ describe('App actions', () => {
         data: [
           {
             uid: 'ingredients',
-            name: 'ingredients',
-            source: null,
             schema: {
+              name: 'ingredients',
               connection: 'default',
               collectionName: 'ingredients',
               description: 'Little description',
@@ -556,30 +555,27 @@ describe('App actions', () => {
           isTemporary: false,
           uid: 'ingredients',
           name: 'ingredients',
-          source: null,
-          schema: {
-            connection: 'default',
-            collectionName: 'ingredients',
-            description: 'Little description',
-            attributes: [
-              {
-                name: 'name',
-                type: 'string',
-                required: true,
-              },
-              {
-                name: 'quantity',
-                type: 'float',
-                required: true,
-              },
-              {
-                name: 'picture',
-                model: 'file',
-                via: 'related',
-                plugin: 'upload',
-              },
-            ],
-          },
+          connection: 'default',
+          collectionName: 'ingredients',
+          description: 'Little description',
+          attributes: [
+            {
+              name: 'name',
+              type: 'string',
+              required: true,
+            },
+            {
+              name: 'quantity',
+              type: 'float',
+              required: true,
+            },
+            {
+              name: 'picture',
+              model: 'file',
+              via: 'related',
+              plugin: 'upload',
+            },
+          ],
         },
       };
       const connections = ['default'];
@@ -596,8 +592,8 @@ describe('App actions', () => {
             icon: 'fa-cube',
             isTemporary: false,
             name: 'ingredients',
-            source: null,
             uid: 'ingredients',
+            source: null,
           },
         ],
       };

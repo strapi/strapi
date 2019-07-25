@@ -227,18 +227,17 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
   }, {});
 
   const initialDataGroup = data.reduce((acc, current) => {
-    const {
-      schema: { attributes, name },
-      uid,
-    } = current;
+    const { schema, uid } = current;
+    const { attributes, name } = schema;
 
     const group = {
-      ...current,
+      ...schema,
+      attributes: buildGroupAttributes(attributes),
+      uid,
       name: name || uid,
       isTemporary: false,
     };
-    set(group, ['schema', 'attributes'], buildGroupAttributes(attributes));
-    acc[current.uid] = group;
+    acc[uid] = group;
 
     return acc;
   }, {});
@@ -251,13 +250,13 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
     } = current;
 
     acc.push({
+      uid,
       description: description || '',
       fields: Object.keys(attributes).length,
       icon: 'fa-cube',
       isTemporary: false,
       name: name || uid,
-      source,
-      uid,
+      source: source || null,
     });
 
     return acc;
@@ -292,12 +291,9 @@ export function onChangeExistingGroupMainInfos({ target }) {
       ? camelCase(target.value.trim()).toLowerCase()
       : target.value;
 
-  const array = target.name.split('.');
-  array.splice(1, 0, 'schema');
-
   return {
     type: ON_CHANGE_EXISTING_GROUP_MAIN_INFOS,
-    keys: array,
+    keys: target.name.split('.'),
     value,
   };
 }
@@ -571,6 +567,7 @@ export function submitContentType(oldContentTypeName, data, context, source) {
 
 export function submitGroup(oldGroupName, data, context, source) {
   const attributes = formatGroupAttributes(data.attributes);
+  delete data['isTemporary'];
   const body = Object.assign(cloneDeep(data), { attributes });
 
   return {
@@ -612,8 +609,7 @@ export function submitTempContentTypeSucceeded() {
 }
 
 export function submitTempGroup(data, context) {
-  const attributes = formatGroupAttributes(data.schema.attributes);
-  delete data['schema'];
+  const attributes = formatGroupAttributes(data.attributes);
   const body = Object.assign(cloneDeep(data), { attributes });
 
   return {
@@ -700,9 +696,11 @@ export const buildGroupAttributes = attributes =>
 
 export const formatGroupAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
-    acc[current.name] = current;
-    delete current['name'];
+    const name = current['name'];
+    let newAttribute = { ...current };
+    delete newAttribute['name'];
 
+    acc[name] = newAttribute;
     return acc;
   }, {});
 

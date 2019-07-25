@@ -123,22 +123,18 @@ export const initialState = fromJS({
   initialDataGroup: {},
   modifiedDataGroup: {},
   newGroup: {
+    attributes: [],
     collectionName: '',
     connection: '',
+    description: '',
     name: '',
-    schema: {
-      attributes: [],
-      description: '',
-    },
   },
   newGroupClone: {
+    attributes: [],
     collectionName: '',
     connection: '',
+    description: '',
     name: '',
-    schema: {
-      attributes: [],
-      description: '',
-    },
   },
 });
 
@@ -196,7 +192,7 @@ function appReducer(state = initialState, action) {
         : ['modifiedDataGroup', groupName];
 
       return state
-        .updateIn([...basePath, 'schema', 'attributes'], arr =>
+        .updateIn([...basePath, 'attributes'], arr =>
           arr.push(state.get('temporaryAttributeRelationGroup'))
         )
         .update('temporaryAttributeRelationGroup', () =>
@@ -246,9 +242,8 @@ function appReducer(state = initialState, action) {
         .setIn(['type'], type);
 
       return state
-        .updateIn(
-          ['modifiedDataGroup', action.groupName, 'schema', 'attributes'],
-          arr => arr.push(newAttribute)
+        .updateIn(['modifiedDataGroup', action.groupName, 'attributes'], arr =>
+          arr.push(newAttribute)
         )
         .update('temporaryAttributeGroup', () => Map({}));
     }
@@ -294,9 +289,7 @@ function appReducer(state = initialState, action) {
         .setIn(['type'], type);
 
       return state
-        .updateIn(['newGroup', 'schema', 'attributes'], arr =>
-          arr.push(newAttribute)
-        )
+        .updateIn(['newGroup', 'attributes'], arr => arr.push(newAttribute))
         .update('temporaryAttributeGroup', () => Map({}));
     }
     case CANCEL_NEW_CONTENT_TYPE:
@@ -581,9 +574,7 @@ function appReducer(state = initialState, action) {
     case RESET_EDIT_TEMP_CONTENT_TYPE:
       return state.updateIn(['newContentType', 'attributes'], () => Map({}));
     case RESET_EDIT_TEMP_GROUP:
-      return state.updateIn(['newGroup', 'schema', 'attributes'], () =>
-        List([])
-      );
+      return state.updateIn(['newGroup', 'attributes'], () => List([]));
     case RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS:
       return state.updateIn(['modifiedData', action.contentTypeName], () => {
         const initialContentType = state
@@ -596,24 +587,16 @@ function appReducer(state = initialState, action) {
         return initialContentType;
       });
     case RESET_EXISTING_GROUP_MAIN_INFOS: {
-      return state.updateIn(
-        ['modifiedDataGroup', action.groupName, 'schema'],
-        () => {
-          const initialGroup = state
-            .getIn(['initialDataGroup', action.groupName, 'schema'])
-            .set(
-              'attributes',
-              state.getIn([
-                'modifiedDataGroup',
-                action.groupName,
-                'schema',
-                'attributes',
-              ])
-            );
+      return state.updateIn(['modifiedDataGroup', action.groupName], () => {
+        const initialGroup = state
+          .getIn(['initialDataGroup', action.groupName])
+          .set(
+            'attributes',
+            state.getIn(['modifiedDataGroup', action.groupName, 'attributes'])
+          );
 
-          return initialGroup;
-        }
-      );
+        return initialGroup;
+      });
     }
     case RESET_NEW_CONTENT_TYPE_MAIN_INFOS:
       return state.updateIn(['newContentType'], () => {
@@ -660,8 +643,8 @@ function appReducer(state = initialState, action) {
 
     case SAVE_EDITED_ATTRIBUTE_GROUP: {
       const basePath = action.isGroupTemporary
-        ? ['newGroup', 'schema']
-        : ['modifiedDataGroup', action.groupName, 'schema'];
+        ? ['newGroup']
+        : ['modifiedDataGroup', action.groupName];
 
       const temporaryAttribute = state.get('temporaryAttributeGroup');
       state.update('temporaryAttributeGroup', () => {});
@@ -791,8 +774,8 @@ function appReducer(state = initialState, action) {
     case SET_TEMPORARY_ATTRIBUTE_GROUP:
       return state.update('temporaryAttributeGroup', () => {
         const basePath = action.isGroupTemporary
-          ? ['newGroup', 'schema']
-          : ['modifiedDataGroup', action.groupName, 'schema'];
+          ? ['newGroup']
+          : ['modifiedDataGroup', action.groupName];
 
         const attribute = state
           .getIn([...basePath, 'attributes', action.attributeIndex])
@@ -844,22 +827,12 @@ function appReducer(state = initialState, action) {
         return state
           .update('temporaryAttributeRelationGroup', () =>
             state
-              .getIn([
-                ...basePath,
-                'schema',
-                'attributes',
-                action.attributeName,
-              ])
+              .getIn([...basePath, 'attributes', action.attributeName])
               .set('name', action.attributeName)
           )
           .update('initialTemporaryAttributeRelationGroup', () =>
             state
-              .getIn([
-                ...basePath,
-                'schema',
-                'attributes',
-                action.attributeName,
-              ])
+              .getIn([...basePath, 'attributes', action.attributeName])
               .set('name', action.attributeName)
           );
       }
@@ -885,24 +858,6 @@ function appReducer(state = initialState, action) {
       return state
         .update('isLoading', () => true)
         .update('shouldRefetchData', v => !v);
-    // {
-    //   let modifiedGroup = state
-    //     .get('modifiedDataGroup')
-    //     .find(
-    //       (group, key) => !group.equals(state.getIn(['initialDataGroup', key]))
-    //     );
-
-    //   const uid = modifiedGroup.get('uid');
-    //   const groupToUpdate = state.get('groups').findIndex(group => {
-    //     return group.get('uid') === uid;
-    //   });
-
-    //   return state
-    //     .updateIn(['initialDataGroup', uid], () => modifiedGroup)
-    //     .updateIn(['groups', groupToUpdate, 'name'], () =>
-    //       modifiedGroup.getIn(['schema', 'name'])
-    //     );
-    // }
     case SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED:
       return state
         .update('isLoading', () => true)

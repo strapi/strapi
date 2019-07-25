@@ -9,6 +9,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get, isEmpty } from 'lodash';
 
+import { InputsIndex as Input } from 'strapi-helper-plugin';
+
 import pluginId from '../../pluginId';
 
 import BodyModal from '../../components/BodyModal';
@@ -27,6 +29,8 @@ import WrapperModal from '../../components/WrapperModal';
 
 import Icon from '../../assets/icons/icon_type_ct.png';
 import IconGroup from '../../assets/icons/icon_type_groups.png';
+
+import formAdvanced from './advanced.json';
 
 const NAVLINKS = [{ id: 'base', custom: 'relation' }, { id: 'advanced' }];
 
@@ -110,6 +114,21 @@ class RelationFormGroup extends React.Component {
     onChangeRelationTarget(group, featureToEditName, actionType === 'edit');
   };
 
+  handleGoTo = to => {
+    const { emitEvent } = this.context;
+    const { actionType, attributeToEditName, push } = this.props;
+    const attributeName =
+      actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
+
+    if (to === 'advanced') {
+      emitEvent('didSelectContentTypeFieldSettings');
+    }
+
+    push({
+      search: `modalType=attributeForm&attributeType=relation&settingType=${to}&actionType=${actionType}${attributeName}`,
+    });
+  };
+
   handleOnClosed = () => {
     const { onCancel } = this.props;
 
@@ -146,21 +165,6 @@ class RelationFormGroup extends React.Component {
     push({ search: '' });
   };
 
-  handleGoTo = to => {
-    const { emitEvent } = this.context;
-    const { actionType, attributeToEditName, push } = this.props;
-    const attributeName =
-      actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
-
-    if (to === 'advanced') {
-      emitEvent('didSelectContentTypeFieldSettings');
-    }
-
-    push({
-      search: `modalType=attributeForm&attributeType=relation&settingType=${to}&actionType=${actionType}${attributeName}`,
-    });
-  };
-
   handleSubmit = e => {
     e.preventDefault();
 
@@ -191,13 +195,39 @@ class RelationFormGroup extends React.Component {
     );
   };
 
+  renderAdvancedSettings = () => {
+    const { didCheckErrors } = this.state;
+    const { modifiedData, onChange } = this.props;
+
+    return (
+      <div className="relation-advanced">
+        <div className="row">
+          {formAdvanced.map((input, i) => {
+            return (
+              <React.Fragment key={input.name}>
+                <Input
+                  {...input}
+                  addon={modifiedData[input.addon]}
+                  didCheckErrors={didCheckErrors}
+                  key={input.name}
+                  onChange={onChange}
+                  value={modifiedData[input.name]}
+                />
+                {i === 0 && <hr />}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   submit = (shouldContinue = false) => {
     const { actionType, onSubmit, onSubmitEdit } = this.props;
 
     if (actionType === 'edit') {
       onSubmitEdit(shouldContinue);
     } else {
-      console.log('SUUUBMIT');
       onSubmit(shouldContinue);
     }
   };
@@ -213,7 +243,7 @@ class RelationFormGroup extends React.Component {
     } = this.props;
     const { formErrors, didCheckErrors } = this.state;
     return (
-      <RelationsWrapper>
+      <div className="relation-base">
         <RelationBox
           autoFocus
           didCheckErrors={didCheckErrors}
@@ -244,7 +274,7 @@ class RelationFormGroup extends React.Component {
           source={source}
           value={key}
         />
-      </RelationsWrapper>
+      </div>
     );
   };
 
@@ -287,7 +317,9 @@ class RelationFormGroup extends React.Component {
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
-          <BodyModal>{showForm && content}</BodyModal>
+          <BodyModal>
+            <RelationsWrapper>{showForm && content}</RelationsWrapper>
+          </BodyModal>
           <FooterModal>
             <section>
               <ButtonModalPrimary
@@ -321,30 +353,30 @@ RelationFormGroup.contextTypes = {
 RelationFormGroup.defaultProps = {
   actionType: 'create',
   activeTab: 'base',
+  alreadyTakenAttributes: [],
   featureType: 'model',
   features: [],
-  featuereToEditName: '',
+  featureToEditName: '',
   isOpen: false,
   isUpdatingTemporary: false,
-  onChange: () => {},
-  onChangeRelationTarget: () => {},
-  onSubmit: () => {},
   source: null,
 };
 
 RelationFormGroup.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
+  alreadyTakenAttributes: PropTypes.array,
   features: PropTypes.array,
   featureType: PropTypes.string,
-  featuereToEditName: PropTypes.string,
+  featureToEditName: PropTypes.string,
   isOpen: PropTypes.bool,
   isUpdatingTemporary: PropTypes.bool,
   modifiedData: PropTypes.object.isRequired,
-  onChange: PropTypes.func,
-  onChangeRelationTarget: PropTypes.func,
-  onSubmit: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
+  onChangeRelationTarget: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   push: PropTypes.func.isRequired,
+  setTempAttribute: PropTypes.func.isRequired,
   source: PropTypes.string,
 };
 
