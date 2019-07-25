@@ -567,6 +567,7 @@ export function submitContentType(oldContentTypeName, data, context, source) {
 
 export function submitGroup(oldGroupName, data, context, source) {
   const attributes = formatGroupAttributes(data.attributes);
+  delete data['uid'];
   delete data['isTemporary'];
   const body = Object.assign(cloneDeep(data), { attributes });
 
