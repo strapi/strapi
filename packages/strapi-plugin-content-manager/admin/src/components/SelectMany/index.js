@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash';
 import { useDrop } from 'react-dnd';
 
 import Select from 'react-select';
-import ItemTypes from '../../utils/itemsTypes';
+import ItemTypes from '../../utils/ItemTypes';
 
 import { ListShadow, ListWrapper } from './components';
 import ListItem from './ListItem';

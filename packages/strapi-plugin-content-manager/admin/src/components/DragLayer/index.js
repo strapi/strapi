@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDragLayer } from 'react-dnd';
-import ItemTypes from '../../utils/itemsTypes';
+import ItemTypes from '../../utils/ItemTypes';
 import RelationItem from '../SelectMany/Relation';
 import { Li } from '../SelectMany/components';
 import FieldItem from '../FieldItem';

@@ -7,7 +7,7 @@ import { get } from 'lodash';
 import { useLayoutDnd } from '../../contexts/LayoutDnd';
 import FieldItem from '../FieldItem';
 
-import ItemTypes from '../../utils/itemsTypes';
+import ItemTypes from '../../utils/ItemTypes';
 
 const Item = ({
   itemIndex,

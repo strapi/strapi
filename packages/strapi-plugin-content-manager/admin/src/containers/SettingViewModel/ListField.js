@@ -9,7 +9,7 @@ import RemoveIcon from '../../components/DraggedRemovedIcon';
 import EditIcon from '../../components/FieldEditIcon';
 import { Field, InfoLabel, FullWidthCarret } from './components';
 
-import ItemTypes from '../../utils/itemsTypes';
+import ItemTypes from '../../utils/ItemTypes';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 
 function ListField({

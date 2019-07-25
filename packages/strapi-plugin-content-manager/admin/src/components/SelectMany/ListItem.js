@@ -4,7 +4,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 
 import pluginId from '../../pluginId';
-import ItemTypes from '../../utils/itemsTypes';
+import ItemTypes from '../../utils/ItemTypes';
 
 import { Li } from './components';
 import Relation from './Relation';

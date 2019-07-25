@@ -8,9 +8,8 @@ import React from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-
+import { Wrapper, Infos, Clear } from './components';
 import Logo from '../../assets/images/icon_filter_blue.svg';
-import styles from './styles.scss';
 
 const WAIT = 400;
 
@@ -56,7 +55,7 @@ class Search extends React.Component {
     const { value } = this.state;
 
     return (
-      <div className={styles.search}>
+      <Wrapper>
         <div>
           <FormattedMessage id="content-manager.components.Search.placeholder">
             {message => (
@@ -68,15 +67,13 @@ class Search extends React.Component {
               />
             )}
           </FormattedMessage>
-          {value !== '' && (
-            <div className={styles.clearable} onClick={this.handleClick} />
-          )}
+          {value !== '' && <Clear onClick={this.handleClick} />}
         </div>
-        <div className={styles.searchLabel}>
+        <Infos>
           <img src={Logo} alt="filter_logo" />
           {upperFirst(model)}
-        </div>
-      </div>
+        </Infos>
+      </Wrapper>
     );
   }
 }

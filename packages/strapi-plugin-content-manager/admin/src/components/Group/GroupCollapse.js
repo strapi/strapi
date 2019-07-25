@@ -7,7 +7,7 @@ import { Collapse } from 'reactstrap';
 
 import pluginId from '../../pluginId';
 
-import ItemTypes from '../../utils/itemsTypes';
+import ItemTypes from '../../utils/ItemTypes';
 import Grab from '../../assets/images/grab_icon.svg';
 import Logo from '../../assets/images/caret_top.svg';
 

@@ -10,7 +10,7 @@ import { Wrapper } from './components';
 import Add from '../../components/AddDropdown';
 import ListField from './ListField';
 
-import ItemTypes from '../../utils/itemsTypes';
+import ItemTypes from '../../utils/ItemTypes';
 
 function ListLayout({
   addField,

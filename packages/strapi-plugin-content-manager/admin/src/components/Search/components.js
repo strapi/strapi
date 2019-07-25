@@ -1,4 +1,8 @@
-.search{
+import styled from 'styled-components';
+import Cross from '../../assets/images/icon-cross.svg';
+import Search from '../../assets/images/icon-search.svg';
+
+const Wrapper = styled.div`
   position: fixed;
   top: 0;
   display: flex;
@@ -7,10 +11,10 @@
   min-width: 44rem;
   height: 6rem;
   padding-right: 20px;
-  background-color: #FFFFFF;
-  border-right: 1px solid #F3F4F4;
+  background-color: #ffffff;
+  border-right: 1px solid #f3f4f4;
   z-index: 1050;
-  color: #9EA7B8;
+  color: #9ea7b8;
   line-height: 6rem;
   letter-spacing: 0;
 
@@ -18,9 +22,9 @@
     content: '';
     width: 16px;
     height: 16px;
-    background-image: url('../../assets/images/icon-search.svg');
+    background-image: url(${Search});
     margin-right: 10px;
-    color: #B3B5B9;
+    color: #b3b5b9;
     vertical-align: middle;
   }
 
@@ -30,7 +34,7 @@
     outline: 0;
 
     &::placeholder {
-      color: #9EA7B8 !important;
+      color: #9ea7b8 !important;
       font-size: 13px !important;
     }
   }
@@ -39,10 +43,9 @@
     display: flex;
     flex: 2;
   }
-}
+`;
 
-
-.searchLabel {
+const Infos = styled.div`
   position: relative;
   height: 22px;
   margin: auto;
@@ -50,11 +53,11 @@
   margin-left: 20px;
   padding-right: 10px;
   padding-left: 30px;
-  background: rgba(0,126,255,0.08);
-  border: 1px solid rgba(0,126,255,0.24);
+  background: rgba(0, 126, 255, 0.08);
+  border: 1px solid rgba(0, 126, 255, 0.24);
   border-radius: 2px;
   line-height: 22px;
-  color: #007EFF;
+  color: #007eff;
   font-size: 13px;
   font-weight: 400;
   line-height: 20px;
@@ -67,9 +70,9 @@
     left: 11px;
     height: 7px;
   }
-}
+`;
 
-.clearable {
+const Clear = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -84,6 +87,8 @@
     width: 8px;
     height: 8px;
     margin: auto;
-    background-image: url('../../assets/images/icon-cross.svg');
+    background-image: url(${Cross});
   }
-}
+`;
+
+export { Clear, Wrapper, Infos };
