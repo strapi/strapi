@@ -9,6 +9,7 @@ const groupSchema = yup
     description: yup.string(),
     connection: yup.string(),
     collectionName: yup.string(),
+    // TODO: validation of attributes format
     attributes: yup.object().required('attributes.required'),
   })
   .noUnknown();
@@ -104,7 +105,13 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
+    // disable file watcher
+
     const updatedGroup = await service.updateGroup(group, body);
+    // await service.updateContentTypes();
+
+    // re-enable file watch
+    // reload
 
     ctx.send({ data: updatedGroup }, 200);
   },
@@ -124,7 +131,13 @@ module.exports = {
       return ctx.send({ error: 'group.notFound' }, 404);
     }
 
+    // disable file watcher
+
     await service.deleteGroup(group);
+    // await service.updateContentTypes();
+
+    // re-enable file watch
+    // reload
 
     ctx.send({ data: { uid } }, 200);
   },

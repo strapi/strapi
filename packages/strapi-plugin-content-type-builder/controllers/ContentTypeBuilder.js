@@ -105,7 +105,9 @@ module.exports = {
 
       modelJSON.attributes = formatedAttributes;
 
-      const createRelationsErrors = Service.createRelations(name, attributes);
+      const createRelationsErrors = Service.createRelations(name, {
+        attributes,
+      });
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
@@ -181,7 +183,7 @@ module.exports = {
 
     const [formatedAttributes, attributesErrors] = Service.formatAttributes(
       attributes,
-      name.toLowerCase(),
+      name,
       plugin
     );
 
@@ -191,11 +193,9 @@ module.exports = {
 
     const _description = escapeNewlines(description);
 
-    // let modelFilePath = Service.getModelPath(model, plugin);
-
     strapi.reload.isWatching = false;
 
-    if (name !== model) {
+    if (name.toLowerCase() !== model.toLowerCase()) {
       await Service.generateAPI(
         name,
         _description,
@@ -206,10 +206,10 @@ module.exports = {
     }
 
     try {
-      // const modelJSON = _.cloneDeep(require(modelFilePath));
       const modelData = plugin
         ? strapi.plugins[plugin].models[model.toLowerCase()]
         : strapi.models[model.toLowerCase()];
+
       const modelJSON = _.cloneDeep(
         _.pick(modelData, [
           'connection',
@@ -232,17 +232,19 @@ module.exports = {
         modelJSON.info.mainField = mainField;
       }
 
-      const clearRelationsErrors = Service.clearRelations(model, plugin);
+      const clearRelationsErrors = Service.clearRelations(model, plugin, {
+        name,
+      });
 
       if (!_.isEmpty(clearRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
       }
 
-      const createRelationsErrors = Service.createRelations(
-        name,
+      const createRelationsErrors = Service.createRelations(name, {
         attributes,
-        plugin
-      );
+        source: plugin,
+        oldName: model,
+      });
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
@@ -254,8 +256,6 @@ module.exports = {
         if (!_.isEmpty(removeModelErrors)) {
           return ctx.badRequest(null, [{ messages: removeModelErrors }]);
         }
-
-        // modelFilePath = Service.getModelPath(name, plugin);
       }
 
       try {
@@ -294,7 +294,9 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    const clearRelationsErrors = Service.clearRelations(model, undefined, true);
+    const clearRelationsErrors = Service.clearRelations(model, undefined, {
+      force: true,
+    });
 
     if (!_.isEmpty(clearRelationsErrors)) {
       return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
