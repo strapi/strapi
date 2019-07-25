@@ -9,7 +9,6 @@ const groupSchema = yup
     description: yup.string(),
     connection: yup.string(),
     collectionName: yup.string(),
-    // TODO: validation of attributes format
     attributes: yup.object().required('attributes.required'),
   })
   .noUnknown();
@@ -109,13 +108,11 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    // disable file watcher
     strapi.reload.isWatching = false;
 
     const updatedGroup = await service.updateGroup(group, body);
     await service.updateGroupInModels(group.uid, updatedGroup.uid);
 
-    // reload
     strapi.reload();
 
     ctx.send({ data: updatedGroup }, 200);
@@ -136,13 +133,11 @@ module.exports = {
       return ctx.send({ error: 'group.notFound' }, 404);
     }
 
-    // disable file watcher
     strapi.reload.isWatching = false;
 
     await service.deleteGroup(group);
     await service.deleteGroupInModels(group.uid);
 
-    // reload
     strapi.reload();
 
     ctx.send({ data: { uid } }, 200);
