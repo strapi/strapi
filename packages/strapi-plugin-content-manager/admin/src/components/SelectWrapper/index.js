@@ -13,6 +13,7 @@ import SelectMany from '../SelectMany';
 import { Nav, Wrapper } from './components';
 
 function SelectWrapper({
+  editable,
   label,
   mainField,
   name,
@@ -148,6 +149,7 @@ function SelectWrapper({
           addRelation({ target: { name, value } });
         }}
         id={name}
+        isDisabled={!editable}
         isLoading={isLoading}
         isClearable
         mainField={mainField}
@@ -180,6 +182,7 @@ function SelectWrapper({
 }
 
 SelectWrapper.defaultProps = {
+  editable: true,
   description: '',
   label: '',
   plugin: '',
@@ -188,6 +191,7 @@ SelectWrapper.defaultProps = {
 };
 
 SelectWrapper.propTypes = {
+  editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,
   mainField: PropTypes.string.isRequired,

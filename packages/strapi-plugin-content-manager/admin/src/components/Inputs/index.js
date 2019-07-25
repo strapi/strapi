@@ -29,11 +29,15 @@ const getInputType = (type = '') => {
       return 'text';
     case 'text':
       return 'textarea';
+    case 'media':
     case 'file':
     case 'files':
       return 'file';
     case 'json':
       return 'json';
+    case 'wysiwyg':
+    case 'WYSIWYG':
+      return 'wysiwyg';
     default:
       return 'text';
   }
@@ -45,15 +49,6 @@ function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
     () => get(layout, ['schema', 'attributes', name], {}),
     [layout, name]
   );
-  const { model, collection } = attribute;
-  const isMedia = useMemo(() => {
-    return (
-      get(attribute, 'plugin', '') === 'upload' &&
-      (model || collection) === 'file'
-    );
-  }, [attribute, collection, model]);
-
-  const multiple = collection == 'file';
   const metadatas = useMemo(
     () => get(layout, ['metadatas', name, 'edit'], {}),
     [layout, name]
@@ -61,7 +56,7 @@ function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [
     metadatas,
   ]);
-  const type = isMedia ? 'file' : get(attribute, 'type', null);
+  const type = useMemo(() => get(attribute, 'type', null), [attribute]);
   const inputStyle = type === 'text' ? { height: '196px' } : {};
   const validations = omit(attribute, [
     'type',
@@ -89,8 +84,11 @@ function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
       errors={inputErrors}
       inputDescription={description}
       inputStyle={inputStyle}
-      customInputs={{ json: InputJSONWithErrors, wysiwyg: WysiwygWithErrors }}
-      multiple={multiple}
+      customInputs={{
+        json: InputJSONWithErrors,
+        wysiwyg: WysiwygWithErrors,
+      }}
+      multiple={get(attribute, 'multiple', false)}
       name={name}
       onChange={onChange}
       selectOptions={get(attribute, 'enum', [])}

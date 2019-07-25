@@ -51,6 +51,24 @@ const FieldForm = ({
                 return null;
               }
 
+              if (
+                formType === 'media' &&
+                !['label', 'description'].includes(meta)
+              ) {
+                return null;
+              }
+
+              if (
+                (formType === 'json' || formType === 'boolean') &&
+                meta === 'placeholder'
+              ) {
+                return null;
+              }
+
+              if (formType === 'wysiwyg' && meta === 'editable') {
+                return null;
+              }
+
               return (
                 <Input
                   inputDescription={

@@ -7,6 +7,7 @@ import Select from 'react-select';
 function SelectOne({
   mainField,
   name,
+  isDisabled,
   isLoading,
   onChange,
   onInputChange,
@@ -19,8 +20,9 @@ function SelectOne({
   return (
     <Select
       id={name}
-      isLoading={isLoading}
       isClearable
+      isDisabled={isDisabled}
+      isLoading={isLoading}
       options={options}
       onChange={onChange}
       onInputChange={onInputChange}
@@ -39,9 +41,10 @@ SelectOne.defaultProps = {
 };
 
 SelectOne.propTypes = {
+  isDisabled: PropTypes.bool.isRequired,
+  isLoading: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  isLoading: PropTypes.bool.isRequired,
   onChange: PropTypes.func.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,

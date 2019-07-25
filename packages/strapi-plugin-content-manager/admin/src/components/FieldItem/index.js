@@ -42,8 +42,10 @@ const FieldItem = forwardRef(
       'json',
       'text',
       'file',
+      'media',
       'group',
       'WYSIWYG',
+      'wysiwyg',
     ].includes(type);
     const carretStyle = withLongerHeight ? { height: '84px' } : {};
     const renderIcon = () => {

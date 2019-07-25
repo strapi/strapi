@@ -13,6 +13,7 @@ function SelectMany({
   addRelation,
   mainField,
   name,
+  isDisabled,
   isLoading,
   move,
   nextSearch,
@@ -50,6 +51,7 @@ function SelectMany({
   return (
     <>
       <Select
+        isDisabled={isDisabled}
         id={name}
         filterOption={el => {
           if (isEmpty(value)) {
@@ -100,6 +102,7 @@ SelectMany.defaultProps = {
 
 SelectMany.propTypes = {
   addRelation: PropTypes.func.isRequired,
+  isDisabled: PropTypes.bool.isRequired,
   mainField: PropTypes.string.isRequired,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
