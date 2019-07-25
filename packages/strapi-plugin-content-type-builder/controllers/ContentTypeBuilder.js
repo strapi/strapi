@@ -80,7 +80,7 @@ module.exports = {
 
     const [formatedAttributes, attributesErrors] = Service.formatAttributes(
       attributes,
-      name
+      name.toLowerCase()
     );
 
     if (!_.isEmpty(attributesErrors)) {
@@ -183,7 +183,7 @@ module.exports = {
 
     const [formatedAttributes, attributesErrors] = Service.formatAttributes(
       attributes,
-      name,
+      name.toLowerCase(),
       plugin
     );
 

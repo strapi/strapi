@@ -78,7 +78,11 @@ module.exports = {
       return ctx.send({ error: 'group.alreadyExists' }, 400);
     }
 
+    strapi.reload.isWatching = false;
+
     const newGroup = await service.createGroup(uid, body);
+
+    strapi.reload();
 
     ctx.send({ data: newGroup }, 201);
   },
@@ -106,12 +110,13 @@ module.exports = {
     }
 
     // disable file watcher
+    strapi.reload.isWatching = false;
 
     const updatedGroup = await service.updateGroup(group, body);
-    // await service.updateContentTypes();
+    await service.updateGroupInModels(group.uid, updatedGroup.uid);
 
-    // re-enable file watch
     // reload
+    strapi.reload();
 
     ctx.send({ data: updatedGroup }, 200);
   },
@@ -132,12 +137,13 @@ module.exports = {
     }
 
     // disable file watcher
+    strapi.reload.isWatching = false;
 
     await service.deleteGroup(group);
-    // await service.updateContentTypes();
+    await service.deleteGroupInModels(group.uid);
 
-    // re-enable file watch
     // reload
+    strapi.reload();
 
     ctx.send({ data: { uid } }, 200);
   },

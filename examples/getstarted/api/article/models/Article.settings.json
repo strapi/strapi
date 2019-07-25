@@ -31,7 +31,10 @@
     },
     "enum": {
       "type": "enumeration",
-      "enum": ["morning,", "noon"]
+      "enum": [
+        "morning,",
+        "noon"
+      ]
     },
     "bool": {
       "type": "boolean"
