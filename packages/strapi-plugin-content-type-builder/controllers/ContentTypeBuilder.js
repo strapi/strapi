@@ -294,9 +294,7 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    const clearRelationsErrors = Service.clearRelations(model, undefined, {
-      force: true,
-    });
+    const clearRelationsErrors = Service.clearRelations(model, undefined);
 
     if (!_.isEmpty(clearRelationsErrors)) {
       return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
