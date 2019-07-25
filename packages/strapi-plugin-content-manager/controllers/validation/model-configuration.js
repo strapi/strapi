@@ -1,30 +1,28 @@
 'use strict';
 
 const yup = require('yup');
-
+const {
+  isListable,
+  hasRelationAttribute,
+  hasEditableAttribute,
+} = require('../../services/utils/configuration/attributes');
 /**
  * Creates the validation schema for content-type configurations
  */
-module.exports = model =>
+module.exports = (model, schema) =>
   yup
     .object()
     .shape({
-      settings: createSettingsSchema(model),
-      metadatas: createMetadasSchema(model),
-      layouts: createLayoutsSchema(model),
+      settings: createSettingsSchema(model, schema),
+      metadatas: createMetadasSchema(model, schema),
+      layouts: createLayoutsSchema(model, schema),
     })
     .noUnknown();
 
-// TODO: do sth to clean the keys configurable, private etc
-
-const createSettingsSchema = model => {
-  const validAttributes = Object.keys(model.allAttributes).filter(key => {
-    return (
-      model.allAttributes[key].type &&
-      !['json', 'password', 'group'].includes(model.allAttributes[key].type)
-    );
-  });
-  const attrs = ['id'].concat(validAttributes);
+const createSettingsSchema = (model, schema) => {
+  const validAttributes = Object.keys(schema.attributes).filter(key =>
+    isListable(schema, key)
+  );
 
   return yup
     .object()
@@ -41,12 +39,12 @@ const createSettingsSchema = model => {
       // should be reset when the type changes
       mainField: yup
         .string()
-        .oneOf(attrs)
+        .oneOf(validAttributes)
         .default('id'),
       // should be reset when the type changes
       defaultSortBy: yup
         .string()
-        .oneOf(attrs)
+        .oneOf(validAttributes)
         .default('id'),
       defaultSortOrder: yup
         .string()
@@ -56,9 +54,9 @@ const createSettingsSchema = model => {
     .noUnknown();
 };
 
-const createMetadasSchema = model => {
+const createMetadasSchema = (model, schema) => {
   return yup.object().shape(
-    ['id'].concat(Object.keys(model.allAttributes)).reduce((acc, key) => {
+    Object.keys(schema.attributes).reduce((acc, key) => {
       acc[key] = yup
         .object()
         .shape({
@@ -97,18 +95,18 @@ const ARRAY_TEST = {
   test: val => Array.isArray(val),
 };
 
-const createLayoutsSchema = model => {
-  const validAttributes = Object.keys(model.allAttributes).filter(key => {
-    return (
-      model.allAttributes[key].type &&
-      !['json', 'password', 'group'].includes(model.allAttributes[key].type)
-    );
-  });
+const createLayoutsSchema = (model, schema) => {
+  const validAttributes = Object.keys(schema.attributes).filter(key =>
+    isListable(schema, key)
+  );
 
-  const attrs = ['id'].concat(validAttributes);
-  const relationAttributes = Array.isArray(model.associations)
-    ? model.associations.map(assoc => assoc.alias)
-    : [];
+  const editAttributes = Object.keys(schema.attributes).filter(key =>
+    hasEditableAttribute(schema, key)
+  );
+
+  const relationAttributes = Object.keys(schema.attributes).filter(key =>
+    hasRelationAttribute(schema, key)
+  );
 
   return yup.object().shape({
     edit: yup
@@ -120,11 +118,7 @@ const createLayoutsSchema = model => {
             .shape({
               name: yup
                 .string()
-                .oneOf(
-                  Object.keys(model.allAttributes).filter(
-                    key => model.allAttributes[key].type
-                  )
-                )
+                .oneOf(editAttributes)
                 .required(),
               size: yup
                 .number()
@@ -138,7 +132,7 @@ const createLayoutsSchema = model => {
       .test(ARRAY_TEST),
     list: yup
       .array()
-      .of(yup.string().oneOf(attrs))
+      .of(yup.string().oneOf(validAttributes))
       .test(ARRAY_TEST),
     editRelations: yup
       .array()

@@ -1,7 +1,12 @@
 'use strict';
 
 const _ = require('lodash');
-const { isSortable, isVisible, isRelation } = require('./attributes');
+const {
+  isListable,
+  isVisible,
+  hasEditableAttribute,
+  hasRelationAttribute,
+} = require('./attributes');
 
 const DEFAULT_LIST_LENGTH = 4;
 const MAX_ROW_SIZE = 12;
@@ -37,7 +42,7 @@ async function createDefaultLayouts(schema) {
 
 function createDefaultListLayout(schema) {
   return Object.keys(schema.attributes)
-    .filter(name => isSortable(schema, name))
+    .filter(name => isListable(schema, name))
     .slice(0, DEFAULT_LIST_LENGTH);
 }
 
@@ -67,7 +72,7 @@ function syncLayouts(configuration, schema) {
   const { list = [], editRelations = [], edit = [] } =
     configuration.layouts || {};
 
-  const cleanList = list.filter(attr => isSortable(schema, attr));
+  const cleanList = list.filter(attr => isListable(schema, attr));
 
   const cleanEditRelations = editRelations.filter(attr =>
     hasRelationAttribute(schema, attr)
@@ -120,13 +125,13 @@ function syncLayouts(configuration, schema) {
     // only add valid listable attributes
     layout.list = _.uniq(
       layout.list
-        .concat(newAttributes.filter(key => isSortable(schema, key)))
+        .concat(newAttributes.filter(key => isListable(schema, key)))
         .slice(0, DEFAULT_LIST_LENGTH)
     );
   }
 
   // add new relations to layout
-  if (schema.type !== 'group') {
+  if (schema.modelType !== 'group') {
     const newRelations = newAttributes.filter(key =>
       hasRelationAttribute(schema, key)
     );
@@ -169,31 +174,6 @@ const appendToEditLayout = (layout = [], keysToAppend, schema) => {
   }
 
   return layout;
-};
-
-const hasRelationAttribute = (schema, name) => {
-  if (!_.has(schema.attributes, name)) {
-    return false;
-  }
-
-  return isRelation(schema.attributes[name]);
-};
-
-const hasEditableAttribute = (schema, name) => {
-  if (!_.has(schema.attributes, name)) {
-    return false;
-  }
-
-  if (!isVisible(schema, name)) {
-    return false;
-  }
-
-  if (isRelation(schema.attributes[name])) {
-    if (schema.modelType === 'group') return true;
-    return false;
-  }
-
-  return true;
 };
 
 module.exports = {
