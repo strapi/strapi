@@ -137,16 +137,16 @@ module.exports = {
     });
   },
 
-  writeModel(name, data, { api, plugin } = {}) {
-    const filepath = this.getModelPath(name, { api, plugin });
+  writeModel(name, data, { api, plugin, group } = {}) {
+    const filepath = this.getModelPath(name, { api, plugin, group });
     const content = JSON.stringify(data, null, 2);
 
     fs.ensureFileSync(filepath);
     return fs.writeFileSync(filepath, content);
   },
 
-  readModel(name, { api, plugin } = {}) {
-    const filepath = this.getModelPath(name, { api, plugin });
+  readModel(name, { api, plugin, group } = {}) {
+    const filepath = this.getModelPath(name, { api, plugin, group });
 
     if (plugin && !fs.pathExistsSync(filepath)) {
       return _.cloneDeep(
@@ -164,7 +164,7 @@ module.exports = {
     return _.cloneDeep(require(filepath));
   },
 
-  getModelPath(name, { api, plugin } = {}) {
+  getModelPath(name, { api, plugin, group } = {}) {
     const fileName = `${_.upperFirst(name)}.settings.json`;
 
     if (plugin) {
@@ -183,6 +183,8 @@ module.exports = {
         'models',
         fileName
       );
+    } else if (group) {
+      return path.resolve(strapi.config.appPath, 'groups', `${name}.json`);
     }
 
     throw new Error('Expected an api or a plugin, received none');
@@ -309,7 +311,7 @@ module.exports = {
     const errors = [];
 
     // Method to delete the association of the models.
-    const deleteAssociations = (models, plugin) => {
+    const deleteAssociations = (models, { plugin, group = false } = {}) => {
       Object.keys(models).forEach(name => {
         const modelData = models[name];
         const { associations = [] } = modelData;
@@ -325,20 +327,20 @@ module.exports = {
         });
 
         if (relationsToDelete.length > 0) {
-          const modelJSON = this.readModel(name, {
+          const opts = {
+            group,
             plugin,
             api: modelData.apiName,
-          });
+          };
+
+          const modelJSON = this.readModel(name, opts);
 
           relationsToDelete.forEach(relation => {
             modelJSON.attributes[relation.alias] = undefined;
           });
 
           try {
-            this.writeModel(name, modelJSON, {
-              api: modelData.apiName,
-              plugin,
-            });
+            this.writeModel(name, modelJSON, opts);
           } catch (e) {
             strapi.log.error(e);
             errors.push({
@@ -349,13 +351,14 @@ module.exports = {
       });
     };
 
-    // Update `./api` models.
     deleteAssociations(strapi.models);
 
     Object.keys(strapi.plugins).forEach(name => {
-      // Update `./plugins/${name}` models.
-      deleteAssociations(strapi.plugins[name].models, name);
+      deleteAssociations(strapi.plugins[name].models, { plugin: name });
     });
+
+    // update groups
+    deleteAssociations(strapi.groups, { group: true });
 
     return errors;
   },
@@ -364,7 +367,7 @@ module.exports = {
     const errors = [];
 
     // Method to update the model
-    const update = (models, plugin) => {
+    const update = (models, { plugin, group } = {}) => {
       Object.keys(models).forEach(name => {
         const modelData = models[name];
         const { associations = [] } = modelData;
@@ -404,10 +407,13 @@ module.exports = {
           relationsToCreate.length > 0 ||
           unidirectionnalRelationsToCreate.length > 0
         ) {
-          const modelJSON = this.readModel(name, {
-            api: modelData.apiName,
+          const opts = {
+            group,
             plugin,
-          });
+            api: modelData.apiName,
+          };
+
+          const modelJSON = this.readModel(name, opts);
 
           unidirectionnalRelationsToCreate.forEach(association => {
             let attr = {};
@@ -464,10 +470,7 @@ module.exports = {
           });
 
           try {
-            this.writeModel(name, modelJSON, {
-              api: modelData.apiName,
-              plugin,
-            });
+            this.writeModel(name, modelJSON, opts);
           } catch (e) {
             strapi.log.error(e);
             errors.push({
@@ -484,8 +487,10 @@ module.exports = {
     Object.keys(strapi.plugins).forEach(pluginName => {
       // Update `./plugins/${pluginName}` models.
       if (!strapi.plugins[pluginName].models) return;
-      update(strapi.plugins[pluginName].models, pluginName);
+      update(strapi.plugins[pluginName].models, { plugin: pluginName });
     });
+
+    update(strapi.groups, { group: true });
 
     return errors;
   },

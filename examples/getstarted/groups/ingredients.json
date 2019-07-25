@@ -1,0 +1,29 @@
+{
+  "collectionName": "group_ingredients",
+  "connection": "default",
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "quantity": {
+      "type": "float",
+      "required": true
+    },
+    "enum": {
+      "type": "enumeration",
+      "enum": [
+        "morning",
+        "noon"
+      ]
+    },
+    "pic": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
+    "article": {
+      "model": "article"
+    }
+  }
+}
