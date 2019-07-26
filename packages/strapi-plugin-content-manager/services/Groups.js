@@ -29,4 +29,16 @@ module.exports = {
     const storeKey = uidToStoreKey(uid);
     return storeUtils.deleteKey(storeKey);
   },
+
+  async updateUID(oldUID, newUID) {
+    const oldKey = uidToStoreKey(oldUID);
+    const newKey = uidToStoreKey(newUID);
+
+    await storeUtils.setModelConfiguration(oldKey, {
+      uid: oldUID,
+      isGroup: true,
+    });
+
+    return storeUtils.moveKey(oldKey, newKey);
+  },
 };

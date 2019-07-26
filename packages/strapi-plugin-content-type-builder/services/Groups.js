@@ -116,15 +116,34 @@ async function createGroup(uid, infos) {
  * @param {Object} infos
  */
 async function updateGroup(group, infos) {
-  const { uid } = group;
+  const { uid, schema: oldSchema } = group;
 
-  const newUid = createGroupUID(infos.name);
-  if (uid !== newUid) {
+  // don't update collectionName if not provided
+  const updatedSchema = {
+    info: {
+      name: infos.name || oldSchema.name,
+      description: infos.description || oldSchema.description,
+    },
+    connection: infos.connection || oldSchema.connection,
+    collectionName: infos.collectionName || oldSchema.collectionName,
+    attributes: convertAttributes(infos.attributes),
+  };
+
+  const newUID = createGroupUID(infos.name);
+  if (uid !== newUID) {
     await deleteSchema(uid);
-    return createGroup(newUid, infos);
-  }
 
-  const updatedSchema = { ...group.schema, ...createSchema(uid, infos) };
+    if (_.has(strapi.plugins, ['content-manager', 'services', 'groups'])) {
+      await _.get(strapi.plugins, [
+        'content-manager',
+        'services',
+        'groups',
+      ]).updateUID(uid, newUID);
+    }
+
+    await writeSchema(newUID, updatedSchema);
+    return { uid: newUID };
+  }
 
   await writeSchema(uid, updatedSchema);
   return { uid };
@@ -137,7 +156,11 @@ async function updateGroup(group, infos) {
 const createSchema = (uid, infos) => {
   const {
     name,
-    connection = 'default',
+    connection = _.get(
+      strapi,
+      ['config', 'currentEnvironment', 'database', 'defaultConnection'],
+      'default'
+    ),
     description = '',
     collectionName,
     attributes,
@@ -149,7 +172,7 @@ const createSchema = (uid, infos) => {
       description,
     },
     connection,
-    collectionName: collectionName || `groups_${pluralize(uid)}`,
+    collectionName: collectionName || `groups_${pluralize(uid).toLowerCase()}`,
     attributes: convertAttributes(attributes),
   };
 };

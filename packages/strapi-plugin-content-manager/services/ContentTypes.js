@@ -105,4 +105,15 @@ module.exports = {
     );
     return getModel(uid);
   },
+
+  async updateUID({ oldUID, newUID, source }) {
+    const oldKey = uidToStoreKey({ uid: oldUID, source });
+    const newKey = uidToStoreKey({ uid: newUID, source });
+
+    await storeUtils.setModelConfiguration(oldKey, {
+      uid: oldUID,
+    });
+
+    return storeUtils.moveKey(oldKey, newKey);
+  },
 };
