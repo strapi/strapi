@@ -40,7 +40,7 @@ const FieldsReorder = ({ className }) => {
 
   return (
     <div className={className}>
-      <SortWrapper>
+      <SortWrapper style={{ paddingLeft: 5, paddingRight: 5 }}>
         {layout.map((row, rowIndex) => {
           return (
             <Wrapper key={row.rowId} style={{}}>
@@ -69,7 +69,7 @@ const FieldsReorder = ({ className }) => {
           <Add
             data={buttonData}
             onClick={onAddData}
-            style={{ width: '100%', margin: '0 10px' }}
+            style={{ width: '100%', margin: '0 5px' }}
             pStyle={{ marginTop: '-2px' }}
           />
         </Wrapper>

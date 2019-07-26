@@ -38,6 +38,7 @@ const FieldItem = forwardRef(
     ref
   ) => {
     const [isOver, setIsOver] = useState(false);
+    const [dragStart, setDragStart] = useState(false);
     const isHidden = name === '_TEMP_';
     const withLongerHeight = [
       'json',
@@ -71,13 +72,23 @@ const FieldItem = forwardRef(
     return (
       <div
         onClick={isHidden ? () => {} : onClickEdit}
+        onDrag={() => {
+          if (size === 12) {
+            setDragStart(true);
+          }
+        }}
+        onDragEnd={() => {
+          if (size === 12) {
+            setDragStart(false);
+          }
+        }}
         onMouseEnter={() => setIsOver(true)}
         onMouseLeave={() => setIsOver(false)}
         style={{ width: `${(1 / 12) * size * 100}%`, ...style }}
         ref={ref}
       >
         <Wrapper>
-          {isDragging && size === 12 ? (
+          {dragStart && size === 12 ? (
             <FullWidthCarret>
               <div />
             </FullWidthCarret>

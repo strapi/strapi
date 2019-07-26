@@ -33,7 +33,7 @@ function SelectWrapper({
   } = useEditView();
   const [state, setState] = useState({
     _q: '',
-    _limit: 8,
+    _limit: 20,
     _start: 0,
     source: isEmpty(plugin) ? 'content-manager' : plugin,
   });

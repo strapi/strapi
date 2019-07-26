@@ -28,7 +28,7 @@ const Carret = styled.div`
   ${({ right }) => {
     if (right) {
       return css`
-        right: -4px;
+        right: -5px;
       `;
     }
 
@@ -49,7 +49,7 @@ const FullWidthCarret = styled.div`
   justify-content: space-around;
   height: 30px;
   width: 100%;
-  padding: 0 10px;
+  padding: 0 5px;
   margin-bottom: 6px;
   border-radius: 2px;
   > div {
@@ -65,7 +65,7 @@ const NameWrapper = styled.div`
   width: 100%;
 
   display: flex;
-  padding-left: 10px;
+  padding-left: 5px;
   justify-content: space-between;
   > div {
     width: calc(100% - 30px);
@@ -115,7 +115,7 @@ const Wrapper = styled.div`
   position: relative;
   .sub_wrapper {
     width: 100%;
-    padding: 0 10px;
+    padding: 0 5px;
   }
 `;
 
