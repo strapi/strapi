@@ -2,7 +2,7 @@ import React, { memo, useEffect, useCallback, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { get, isEqual, upperFirst } from 'lodash';
+import { get, isEqual, isEmpty, upperFirst } from 'lodash';
 
 import {
   BackHeader,
@@ -382,15 +382,16 @@ function SettingViewModel({
                     removeItem={removeRelation}
                   />
                 )}
-                {settingType === 'edit-settings' && (
-                  <FieldForm
-                    fieldName={itemNameToSelect}
-                    formType={itemFormType}
-                    metadatas={getSelectedItemMetas()}
-                    onChange={onChange}
-                    selectOptions={getSelectedItemSelectOptions()}
-                  />
-                )}
+                {settingType === 'edit-settings' &&
+                  !isEmpty(itemNameToSelect) && (
+                    <FieldForm
+                      fieldName={itemNameToSelect}
+                      formType={itemFormType}
+                      metadatas={getSelectedItemMetas()}
+                      onChange={onChange}
+                      selectOptions={getSelectedItemSelectOptions()}
+                    />
+                  )}
               </div>
             </Block>
           </div>

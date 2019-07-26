@@ -59,7 +59,10 @@ const FieldItem = forwardRef(
         <EditIcon withLongerHeight={withLongerHeight} />
       ) : (
         <RemoveIcon
-          onClick={onClickRemove}
+          onClick={e => {
+            e.stopPropagation();
+            onClickRemove();
+          }}
           withLongerHeight={withLongerHeight}
           isDragging={isOver && isSelected}
         />

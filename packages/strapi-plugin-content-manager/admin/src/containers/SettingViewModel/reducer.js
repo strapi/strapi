@@ -59,6 +59,8 @@ const getSize = type => {
 function settingViewModelReducer(state = initialState, action) {
   const layoutPath = ['modifiedData', 'layouts', 'edit'];
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
+  const getFieldType = name =>
+    state.getIn(['modifiedData', 'schema', 'attributes', name, 'type']);
 
   switch (action.type) {
     case ADD_FIELD_TO_LIST:
@@ -66,10 +68,12 @@ function settingViewModelReducer(state = initialState, action) {
         list.push(action.field)
       );
     case ADD_RELATION:
-      return state.updateIn(
-        ['modifiedData', 'layouts', 'editRelations'],
-        list => list.push(action.name)
-      );
+      return state
+        .updateIn(['modifiedData', 'layouts', 'editRelations'], list =>
+          list.push(action.name)
+        )
+        .update('itemNameToSelect', () => action.name)
+        .update('itemFormType', () => getFieldType(action.name));
     case GET_DATA_SUCCEEDED:
       return state
         .update('initialData', () => fromJS(action.layout || {}))
@@ -112,6 +116,7 @@ function settingViewModelReducer(state = initialState, action) {
           'type',
         ])
       );
+
       const listSize = state.getIn(layoutPath).size;
       const newList = state
         .getIn(layoutPath)
@@ -127,7 +132,10 @@ function settingViewModelReducer(state = initialState, action) {
         });
       const formattedList = formatLayout(newList.toJS());
 
-      return state.updateIn(layoutPath, () => fromJS(formattedList));
+      return state
+        .updateIn(layoutPath, () => fromJS(formattedList))
+        .update('itemNameToSelect', () => action.name)
+        .update('itemFormType', () => getFieldType(action.name));
     }
 
     case ON_CHANGE:
@@ -164,22 +172,46 @@ function settingViewModelReducer(state = initialState, action) {
     case REMOVE_FIELD: {
       const row = state.getIn([...layoutPath, action.rowIndex, 'rowContent']);
       let newState;
+      let fieldName;
 
       // Delete the entire row if length is one or if lenght is equal to 2 and the second element is the hidden div used to make the dnd exp smoother
       if (
         row.size === 1 ||
         (row.size == 2 && row.getIn([1, 'name']) === '_TEMP_')
       ) {
+        fieldName = state.getIn([
+          'modifiedData',
+          'layouts',
+          'edit',
+          action.rowIndex,
+          'rowContent',
+          0,
+          'name',
+        ]);
         newState = state.updateIn(layoutPath, list =>
           list.delete(action.rowIndex)
         );
       } else {
+        fieldName = state.getIn([
+          'modifiedData',
+          'layouts',
+          'edit',
+          action.rowIndex,
+          'rowContent',
+          action.fieldIndex,
+          name,
+        ]);
         newState = state.updateIn(
           [...layoutPath, action.rowIndex, 'rowContent'],
           list => list.delete(action.fieldIndex)
         );
       }
       const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+
+      if (state.get('itemNameToSelect') === fieldName) {
+        // TODO select next item
+        return state.updateIn(layoutPath, () => fromJS(updatedList));
+      }
 
       return state.updateIn(layoutPath, () => fromJS(updatedList));
     }

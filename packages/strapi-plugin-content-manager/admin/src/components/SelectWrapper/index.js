@@ -13,6 +13,7 @@ import SelectMany from '../SelectMany';
 import { Nav, Wrapper } from './components';
 
 function SelectWrapper({
+  description,
   editable,
   label,
   mainField,
@@ -42,6 +43,7 @@ function SelectWrapper({
   const ref = useRef();
   const startRef = useRef();
   startRef.current = state._start;
+  console.log({ description });
 
   ref.current = async (signal, params = state) => {
     try {
@@ -144,6 +146,9 @@ function SelectWrapper({
         <label htmlFor={name}>{label}</label>
         {isSingle && link}
       </Nav>
+      {!isEmpty(description) && (
+        <p style={{ fontSize: 13, fontWeight: 500 }}>{description}</p>
+      )}
       <Component
         addRelation={value => {
           addRelation({ target: { name, value } });
