@@ -210,7 +210,11 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   function countSearch(params) {
-    return model.query(qb => buildSearchQuery(qb, model, params)).count();
+    return model
+      .query(qb => {
+        buildSearchQuery(qb, model, params);
+      })
+      .count();
   }
 
   async function createGroups(entry, values, { transacting }) {
@@ -497,13 +501,13 @@ const buildSearchQuery = (qb, model, params) => {
 
   if (!_.isNaN(_.toNumber(query))) {
     searchInt.forEach(attribute => {
-      qb.orWhereRaw(attribute, _.toNumber(query));
+      qb.orWhere(attribute, _.toNumber(query));
     });
   }
 
   if (query === 'true' || query === 'false') {
     searchBool.forEach(attribute => {
-      qb.orWhereRaw(attribute, _.toNumber(query === 'true'));
+      qb.orWhere(attribute, _.toNumber(query === 'true'));
     });
   }
 

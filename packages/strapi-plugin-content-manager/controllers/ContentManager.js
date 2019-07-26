@@ -11,7 +11,7 @@ module.exports = {
       strapi.plugins['content-manager'].services['contentmanager'];
 
     let entities = [];
-    if (!_.isEmpty(ctx.request.query._q)) {
+    if (_.has(ctx.request.query, '_q')) {
       entities = await contentManagerService.search(
         ctx.params,
         ctx.request.query
@@ -51,7 +51,7 @@ module.exports = {
       strapi.plugins['content-manager'].services['contentmanager'];
 
     let count;
-    if (!_.isEmpty(ctx.request.query._q)) {
+    if (_.has(ctx.request.query, '_q')) {
       count = await contentManagerService.countSearch(
         ctx.params,
         ctx.request.query
