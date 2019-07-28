@@ -8,6 +8,16 @@ describe('Group Service', () => {
         attributes: {},
       };
 
+      global.strapi = {
+        config: {
+          defaultEnvironment: {
+            database: {
+              defaultConnection: 'default',
+            },
+          },
+        },
+      };
+
       const expected = {
         info: {
           name: 'Some name',
