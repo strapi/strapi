@@ -42,5 +42,9 @@
   {
     "type": "enumeration",
     "description": "content-type-builder.popUpForm.attributes.enumeration.description"
+  },
+  {
+    "type": "group",
+    "description": "content-type-builder.popUpForm.attributes.group.description"
   }
 ]
