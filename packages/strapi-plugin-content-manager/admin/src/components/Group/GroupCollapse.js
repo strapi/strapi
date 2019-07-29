@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
@@ -17,7 +17,6 @@ import Form from './Form';
 function GroupCollapse({
   connectDragSource,
   connectDropTarget,
-  isCreating,
   isDragging,
   isOpen,
   layout,
@@ -27,9 +26,16 @@ function GroupCollapse({
   onClick,
   removeField,
 }) {
-  const id = isCreating
-    ? { id: `${pluginId}.containers.Edit.pluginHeader.title.new` }
-    : {};
+  const mainField = useMemo(
+    () => get(layout, ['settings', 'mainField'], 'id'),
+    [layout]
+  );
+  const displayedValue = get(
+    modifiedData,
+    [...name.split('.'), mainField],
+    null
+  );
+
   const fields = get(layout, ['layouts', 'edit'], []);
   const ref = React.useRef(null);
   const opacity = isDragging ? 0.2 : 1;
@@ -44,7 +50,13 @@ function GroupCollapse({
           <ImgWrapper isOpen={isOpen}>
             <img src={Logo} alt="logo" />
           </ImgWrapper>
-          <FormattedMessage {...id} />
+          <FormattedMessage
+            id={`${pluginId}.containers.Edit.pluginHeader.title.new`}
+          >
+            {msg => {
+              return <span>{displayedValue || msg}</span>;
+            }}
+          </FormattedMessage>
         </Flex>
         <Flex>
           <button
@@ -104,7 +116,6 @@ GroupCollapse.defaultProps = {
 GroupCollapse.propTypes = {
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
-  isCreating: PropTypes.bool,
   isDragging: PropTypes.bool,
   isOpen: PropTypes.bool,
   layout: PropTypes.object,

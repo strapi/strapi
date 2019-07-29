@@ -220,9 +220,15 @@ function SettingViewGroup({
       const type = get(attributes, [attr, 'type'], '');
 
       return (
-        !['json', 'text', 'relation', 'group', 'boolean', 'date'].includes(
-          type
-        ) && !!type
+        ![
+          'json',
+          'text',
+          'relation',
+          'group',
+          'boolean',
+          'date',
+          'media',
+        ].includes(type) && !!type
       );
     });
 

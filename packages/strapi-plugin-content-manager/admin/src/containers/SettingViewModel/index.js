@@ -232,9 +232,15 @@ function SettingViewModel({
         const type = get(attributes, [attr, 'type'], '');
 
         return (
-          !['json', 'text', 'relation', 'group', 'boolean', 'date'].includes(
-            type
-          ) && !!type
+          ![
+            'json',
+            'text',
+            'relation',
+            'group',
+            'boolean',
+            'date',
+            'media',
+          ].includes(type) && !!type
         );
       });
 
@@ -252,8 +258,6 @@ function SettingViewModel({
       reorderDiffRow(dragIndex, hoverIndex, dragRowIndex, hoverRowIndex);
     }
   };
-
-  console.log({ itemFormType, itemNameToSelect, modifiedData });
 
   return (
     <LayoutDndProvider

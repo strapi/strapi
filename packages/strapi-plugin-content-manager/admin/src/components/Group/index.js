@@ -141,7 +141,6 @@ function Group({
                       findField={findField}
                       groupName={name}
                       isOpen={collapses[index].isOpen}
-                      // isOpen={false}
                       id={field._temp__id}
                       layout={layout}
                       modifiedData={modifiedData}
