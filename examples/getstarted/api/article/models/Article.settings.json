@@ -59,8 +59,8 @@
       "collection": "tag"
     },
     "manyTags": {
-      "dominant": true,
       "collection": "tag",
+      "dominant": true,
       "via": "linkedArticles"
     },
     "fb_cta": {

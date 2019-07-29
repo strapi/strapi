@@ -38,6 +38,13 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     });
   };
 
+  const wrapTransaction = (fn, { transacting } = {}) => {
+    const db = strapi.connections[model.connection];
+
+    if (transacting) return fn(transacting);
+    return db.transaction(trx => fn(trx));
+  };
+
   /**
    * Find one entry based on params
    */
@@ -60,12 +67,12 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   /**
    * Find multiple entries based on params
    */
-  function find(params, populate) {
+  function find(params, populate, { transacting } = {}) {
     const filters = convertRestQueryParams(params);
 
     return model
       .query(buildQuery({ model, filters }))
-      .fetchAll({ withRelated: populate || defaultPopulate })
+      .fetchAll({ withRelated: populate || defaultPopulate, transacting })
       .then(results => results.toJSON());
   }
 
@@ -78,7 +85,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     return model.query(buildQuery({ model, filters: { where } })).count();
   }
 
-  async function create(values) {
+  async function create(values, { transacting } = {}) {
     const relations = pickRelations(values);
     const data = selectAttributes(values);
 
@@ -89,14 +96,16 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       return entry;
     };
 
-    const db = strapi.connections[model.connection];
-    const entry = await db.transaction(trx => runCreate(trx));
+    const entry = await wrapTransaction(runCreate, { transacting });
 
-    return model.updateRelations({ id: entry.id, values: relations });
+    return model.updateRelations(
+      { id: entry.id, values: relations },
+      { transacting }
+    );
   }
 
-  async function update(params, values) {
-    const entry = await model.forge(params).fetch();
+  async function update(params, values, { transacting } = {}) {
+    const entry = await model.forge(params).fetch({ transacting });
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -121,20 +130,20 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       return updatedEntry;
     };
 
-    const db = strapi.connections[model.connection];
-    await db.transaction(trx => runUpdate(trx));
+    await wrapTransaction(runUpdate, { transacting });
 
     if (Object.keys(relations).length > 0) {
       return model.updateRelations(
-        Object.assign(params, { values: relations })
+        Object.assign(params, { values: relations }),
+        { transacting }
       );
     }
 
-    return await model.forge(params).fetch();
+    return await model.forge(params).fetch({ transacting });
   }
 
-  async function deleteOne(params) {
-    const entry = await model.forge(params).fetch();
+  async function deleteOne(params, { transacting } = {}) {
+    const entry = await model.forge(params).fetch({ transacting });
 
     if (!entry) {
       const err = new Error('entry.notFound');
@@ -151,6 +160,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         case 'oneToManyMorph':
           values[association.alias] = null;
           break;
+        case 'manyWay':
         case 'oneToMany':
         case 'manyToMany':
         case 'manyToManyMorph':
@@ -160,25 +170,26 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       }
     });
 
-    await model.updateRelations({ ...params, values });
+    await model.updateRelations({ ...params, values }, { transacting });
 
     const runDelete = async trx => {
       await deleteGroups(entry, { transacting: trx });
-      await model.forge(params).destroy({ transacting: trx });
+      await model.forge(params).destroy({ transacting: trx, require: false });
       return entry;
     };
 
-    const db = strapi.connections[model.connection];
-    return db.transaction(trx => runDelete(trx));
+    return wrapTransaction(runDelete, { transacting });
   }
 
-  async function deleteMany(params) {
+  async function deleteMany(params, { transacting } = {}) {
     const primaryKey = params[model.primaryKey] || params.id;
 
-    if (primaryKey) return deleteOne(params);
+    if (primaryKey) return deleteOne(params, { transacting });
 
-    const entries = await find(params);
-    return await Promise.all(entries.map(entry => deleteOne({ id: entry.id })));
+    const entries = await find(params, null, { transacting });
+    return await Promise.all(
+      entries.map(entry => deleteOne({ id: entry.id }, { transacting }))
+    );
   }
 
   function search(params, populate) {
@@ -210,7 +221,11 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   }
 
   function countSearch(params) {
-    return model.query(qb => buildSearchQuery(qb, model, params)).count();
+    return model
+      .query(qb => {
+        buildSearchQuery(qb, model, params);
+      })
+      .count();
   }
 
   async function createGroups(entry, values, { transacting }) {
@@ -221,14 +236,14 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     for (let key of groupKeys) {
       const attr = model.attributes[key];
-      const { group, required = false, repeatable = true } = attr;
+      const { group, required = false, repeatable = false } = attr;
 
       const groupModel = strapi.groups[group];
 
       const createGroupAndLink = async ({ value, order }) => {
-        return groupModel
-          .forge()
-          .save(value, { transacting })
+        return strapi
+          .query(groupModel.uid)
+          .create(value, { transacting })
           .then(group => {
             return joinModel.forge().save(
               {
@@ -278,7 +293,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       if (!_.has(values, key)) continue;
 
       const attr = model.attributes[key];
-      const { group, repeatable = true } = attr;
+      const { group, repeatable = false } = attr;
 
       const groupModel = strapi.groups[group];
 
@@ -287,9 +302,15 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       const updateOrCreateGroupAndLink = async ({ value, order }) => {
         // check if value has an id then update else create
         if (_.has(value, groupModel.primaryKey)) {
-          return groupModel
-            .forge(value)
-            .save(value, { transacting, patch: true, require: false })
+          return strapi
+            .query(groupModel.uid)
+            .update(
+              {
+                [groupModel.primaryKey]: value[groupModel.primaryKey],
+              },
+              value,
+              { transacting }
+            )
             .then(group => {
               return joinModel
                 .forge()
@@ -310,9 +331,9 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
             });
         }
         // create
-        return groupModel
-          .forge()
-          .save(value, { transacting })
+        return strapi
+          .query(groupModel.uid)
+          .create(value, { transacting })
           .then(group => {
             return joinModel.forge().save(
               {
@@ -367,7 +388,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     const idsToKeep = groupArr
       .filter(el => _.has(el, groupModel.primaryKey))
-      .map(el => el[groupModel.primaryKey]);
+      .map(el => el[groupModel.primaryKey].toString());
 
     const allIds = await joinModel
       .forge()
@@ -379,7 +400,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     // verify the provided ids are realted to this entity.
     idsToKeep.forEach(id => {
-      if (!allIds.includes(id.toString())) {
+      if (!allIds.includes(id)) {
         const err = new Error(
           `Some of the provided groups in ${key} are not related to the entity`
         );
@@ -395,10 +416,12 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         .query(qb => qb.whereIn('slice_id', idsToDelete))
         .destroy({ transacting, require: false });
 
-      await groupModel
-        .forge()
-        .query(qb => qb.whereIn(groupModel.primaryKey, idsToDelete))
-        .destroy({ transacting, require: false });
+      await strapi
+        .query(groupModel.uid)
+        .delete(
+          { [`${groupModel.primaryKey}_in`]: idsToDelete },
+          { transacting }
+        );
     }
   }
 
@@ -426,10 +449,10 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         .fetchAll({ transacting })
         .map(el => el.get('slice_id'));
 
-      await groupModel
-        .forge()
-        .query(qb => qb.whereIn(groupModel.primaryKey, ids))
-        .destroy({ transacting, require: false });
+      await strapi
+        .query(groupModel.uid)
+        .delete({ [`${groupModel.primaryKey}_in`]: ids }, { transacting });
+
       await joinModel
         .forge()
         .query({
@@ -497,13 +520,13 @@ const buildSearchQuery = (qb, model, params) => {
 
   if (!_.isNaN(_.toNumber(query))) {
     searchInt.forEach(attribute => {
-      qb.orWhereRaw(attribute, _.toNumber(query));
+      qb.orWhere(attribute, _.toNumber(query));
     });
   }
 
   if (query === 'true' || query === 'false') {
     searchBool.forEach(attribute => {
-      qb.orWhereRaw(attribute, _.toNumber(query === 'true'));
+      qb.orWhere(attribute, _.toNumber(query === 'true'));
     });
   }
 

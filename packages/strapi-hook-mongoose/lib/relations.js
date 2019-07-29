@@ -208,17 +208,9 @@ module.exports = {
                 case 'manyMorphToOne':
                   // Update the relational array.
                   acc[current] = property.map(obj => {
-                    const globalId =
-                      obj.source && obj.source !== 'content-manager'
-                        ? strapi.plugins[obj.source].models[_.toLower(obj.ref)]
-                            .globalId
-                        : strapi.models[_.toLower(obj.ref)].globalId;
-
-                    // Define the object stored in database.
-                    // The shape is this object is defined by the strapi-hook-mongoose connector.
                     return {
                       ref: obj.refId,
-                      kind: globalId,
+                      kind: obj.ref,
                       [association.filter]: obj.field,
                     };
                   });

@@ -24,6 +24,9 @@
     },
     "article": {
       "model": "article"
+    },
+    "articles": {
+      "collection": "article"
     }
   }
 }
