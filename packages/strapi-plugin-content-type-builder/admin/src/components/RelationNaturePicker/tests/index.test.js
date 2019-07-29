@@ -48,10 +48,10 @@ describe('<RelationNaturePicker />', () => {
     expect(span1.text()).toBe('othertest');
   });
 
-  it('should handle the hint correctly for the manyWays', () => {
+  it('should handle the hint correctly for the ', () => {
     const props = {
       featureName: 'test',
-      nature: 'manyWays',
+      nature: 'manyWay',
       target: 'othertest',
     };
 

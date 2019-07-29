@@ -37,14 +37,14 @@ describe('<RelationBox />', () => {
     expect(span.text()).toContain('users-permissions');
   });
 
-  it('target value should not be value if nature is oneWay or manyWays', () => {
+  it('target value should not be value if nature is oneWay or manyWay', () => {
     props.nature = 'oneWay';
     const wrapper = shallow(<RelationBox {...props} />);
     const { value } = wrapper.find(InputText).props();
 
     expect(value).toBe('-');
 
-    props.nature = 'manyWays';
+    props.nature = 'manyWay';
     expect(value).toBe('-');
   });
 });

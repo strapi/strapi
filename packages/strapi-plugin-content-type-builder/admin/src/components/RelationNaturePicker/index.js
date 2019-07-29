@@ -8,8 +8,8 @@ import pluginId from '../../pluginId';
 
 import oneWay from '../../assets/images/one_way.svg';
 import oneWaySelected from '../../assets/images/one_way_selected.svg';
-import manyWays from '../../assets/images/many_ways.svg';
-import manyWaysSelected from '../../assets/images/many_ways_selected.svg';
+import manyWay from '../../assets/images/many_way.svg';
+import manyWaySelected from '../../assets/images/many_way_selected.svg';
 
 import StyledRelationNaturePicker from './StyledRelationNaturePicker';
 
@@ -18,16 +18,16 @@ const assets = {
     icon: oneWay,
     iconSelected: oneWaySelected,
   },
-  manyWays: {
-    icon: manyWays,
-    iconSelected: manyWaysSelected,
+  manyWay: {
+    icon: manyWay,
+    iconSelected: manyWaySelected,
   },
 };
 
 const RelationNaturePicker = ({ featureName, onClick, nature, target }) => {
   const { leftName, rightName } = {
     leftName: featureName,
-    rightName: pluralize(target, ['manyWays'].includes(nature) ? 2 : 1),
+    rightName: pluralize(target, ['manyWay'].includes(nature) ? 2 : 1),
   };
 
   return (

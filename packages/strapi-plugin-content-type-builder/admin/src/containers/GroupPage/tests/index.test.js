@@ -148,7 +148,9 @@ const props = {
   onChangeRelationNatureGroup: jest.fn(),
   onChangeRelationTargetGroup: jest.fn(),
   resetEditTempGroup: jest.fn(),
+  resetEditExistingGroup: jest.fn(),
   saveEditedAttributeGroup: jest.fn(),
+  saveEditedAttributeRelationGroup: jest.fn(),
   setTemporaryAttributeGroup: jest.fn(),
   setTemporaryAttributeRelationGroup: jest.fn(),
   submitTempGroup: jest.fn(),
@@ -346,6 +348,32 @@ describe('CTB <GroupPage />, lifecycle', () => {
         true,
         'tests'
       );
+
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=attributeForm&attributeType=string&settingType=base&actionType=edit&attributeName=0',
+      });
+    });
+
+    it('should open attribute modal with relation attributeType', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
+      props.canOpenModal = true;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const { handleClickEditAttribute } = wrapper.instance();
+      handleClickEditAttribute(1, null);
+
+      expect(props.setTemporaryAttributeGroup).toHaveBeenCalledWith(
+        1,
+        true,
+        'tests'
+      );
+
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=attributeForm&attributeType=relation&settingType=base&actionType=edit&attributeName=1',
+      });
     });
 
     it('should handle the <number> type correctly', () => {
@@ -383,6 +411,8 @@ describe('CTB <GroupPage />, lifecycle', () => {
 
     it('should call addAttributeToExistingGroup when isTemporary is false', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
+      const attrIndex = '0';
+      props.location.search = `attributeName=${attrIndex}`;
       props.canOpenModal = true;
 
       const search = 'chooseAttributes';
@@ -406,28 +436,31 @@ describe('CTB <GroupPage />, lifecycle', () => {
 
     it('should call addAttributeRelationGroup when attributeType is a relation', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
+      const attrType = 'relation';
+      const attrIndex = '1';
+      props.location.search = `attributeType=${attrType}&attributeName=${attrIndex}`;
+      props.canOpenModal = true;
 
       expect(true).toBe(true);
-      // props.canOpenModal = true;
-
-      // const search = 'chooseAttributes';
-      // props.location.search = `attributeType=${search}`;
-
       topCompo = renderComponent(props);
-      // const wrapper = topCompo.find(GroupPage);
-      // const { handleSubmit } = wrapper.instance();
+      const wrapper = topCompo.find(GroupPage);
+      const { handleSubmit } = wrapper.instance();
 
-      // handleSubmit();
+      handleSubmit();
 
-      // expect(props.addAttributeToTempGroup).toHaveBeenCalledWith(search);
+      expect(props.addAttributeRelationGroup).toHaveBeenCalledWith(
+        true,
+        'tests'
+      );
     });
   });
 
   describe('HandleSubmitEdit', () => {
     it('should call saveEditedAttributeGroup with right params', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
-      const attrIndex = '0';
-      props.location.search = `attributeName=${attrIndex}`;
+      const attrType = 'relation';
+      const attrIndex = '1';
+      props.location.search = `attributeType=${attrType}&attributeName=${attrIndex}`;
 
       topCompo = renderComponent(props);
       const wrapper = topCompo.find(GroupPage);
@@ -435,7 +468,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
 
       handleSubmitEdit();
 
-      expect(props.saveEditedAttributeGroup).toHaveBeenCalledWith(
+      expect(props.saveEditedAttributeRelationGroup).toHaveBeenCalledWith(
         attrIndex,
         false,
         'tests'

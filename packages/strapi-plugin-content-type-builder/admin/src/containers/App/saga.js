@@ -161,8 +161,6 @@ export function* submitGroup({
   context: { emitEvent, history },
 }) {
   try {
-    const { name } = body;
-
     if (source) {
       body.plugin = source;
     }
@@ -171,12 +169,20 @@ export function* submitGroup({
 
     const opts = { method: 'PUT', body };
 
-    yield call(request, getRequestUrl(`groups/${oldGroupName}`), opts, true);
+    const {
+      data: { uid },
+    } = yield call(
+      request,
+      getRequestUrl(`groups/${oldGroupName}`),
+      opts,
+      true
+    );
     emitEvent('didSaveGroup');
 
     yield put(submitGroupSucceeded());
+
     const suffixUrl = source ? `&source=${source}` : '';
-    history.push(`/plugins/${pluginId}/groups/${name}${suffixUrl}`);
+    history.push(`/plugins/${pluginId}/groups/${uid}${suffixUrl}`);
   } catch (error) {
     const errorMessage = get(
       error,

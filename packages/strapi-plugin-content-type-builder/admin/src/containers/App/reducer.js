@@ -155,7 +155,7 @@ export const initialState = fromJS({
 export const shouldPluralizeKey = nature =>
   ['manyToMany', 'manyToOne'].includes(nature);
 export const shouldPluralizeName = nature =>
-  ['manyToMany', 'oneToMany', 'manyWays'].includes(nature);
+  ['manyToMany', 'oneToMany', 'manyWay'].includes(nature);
 
 function appReducer(state = initialState, action) {
   switch (action.type) {

@@ -723,7 +723,7 @@ export const buildGroupAttributes = attributes =>
   Object.keys(attributes).reduce((acc, current) => {
     if (
       attributes[current].nature === 'oneWay' ||
-      attributes[current].nature === 'manyWays'
+      attributes[current].nature === 'manyWay'
     ) {
       const attribute = Object.assign(attributes[current], {
         key: '-',

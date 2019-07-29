@@ -45,12 +45,12 @@ const RelationBox = ({
           errors={errors}
           label="Field Name"
           disabled={
-            value === '-' || nature === 'oneWay' || nature === 'manyWays'
+            value === '-' || nature === 'oneWay' || nature === 'manyWay'
           }
           name={main ? 'name' : 'key'}
           onChange={onChange}
           type="text"
-          value={nature === 'oneWay' || nature === 'manyWays' ? '-' : value}
+          value={nature === 'oneWay' || nature === 'manyWay' ? '-' : value}
         />
       </div>
     </StyledRelationBox>
