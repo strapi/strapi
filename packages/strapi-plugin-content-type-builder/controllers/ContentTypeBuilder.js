@@ -220,8 +220,8 @@ module.exports = {
         ])
       );
 
-      modelJSON.connection = connection;
-      modelJSON.collectionName = collectionName;
+      modelJSON.connection = connection || modelJSON.connection;
+      modelJSON.collectionName = collectionName || modelJSON.collectionName;
       modelJSON.info = {
         name,
         description: _description,
@@ -255,6 +255,20 @@ module.exports = {
 
         if (!_.isEmpty(removeModelErrors)) {
           return ctx.badRequest(null, [{ messages: removeModelErrors }]);
+        }
+
+        if (
+          _.has(strapi.plugins, ['content-manager', 'services', 'contenttypes'])
+        ) {
+          await _.get(strapi.plugins, [
+            'content-manager',
+            'services',
+            'contenttypes',
+          ]).updateUID({
+            oldUID: model,
+            newUID: name.toLowerCase(),
+            source: plugin,
+          });
         }
       }
 

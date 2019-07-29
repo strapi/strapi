@@ -89,6 +89,16 @@ function findByKeyQuery({ model }, key) {
 }
 
 const findByKey = key => strapi.query('core_store').custom(findByKeyQuery)(key);
+const moveKey = (oldKey, newKey) => {
+  return strapi.query('core_store').update(
+    {
+      key: `plugin_content_manager_configuration_${oldKey}`,
+    },
+    {
+      key: `plugin_content_manager_configuration_${newKey}`,
+    }
+  );
+};
 
 const getAllConfigurations = () =>
   findByKey('plugin_content_manager_configuration');
@@ -103,5 +113,6 @@ module.exports = {
   setModelConfiguration,
 
   deleteKey,
+  moveKey,
   keys,
 };
