@@ -139,6 +139,7 @@ class RelationFormGroup extends React.Component {
   handleOnOpened = () => {
     const {
       actionType,
+      attributeToEditIndex,
       attributeToEditName,
       isUpdatingTemporary,
       features,
@@ -152,6 +153,7 @@ class RelationFormGroup extends React.Component {
       target,
       isUpdatingTemporary,
       source,
+      attributeToEditIndex,
       attributeToEditName,
       actionType === 'edit'
     );
@@ -242,6 +244,7 @@ class RelationFormGroup extends React.Component {
       source,
     } = this.props;
     const { formErrors, didCheckErrors } = this.state;
+
     return (
       <div className="relation-base">
         <RelationBox
@@ -354,6 +357,8 @@ RelationFormGroup.defaultProps = {
   actionType: 'create',
   activeTab: 'base',
   alreadyTakenAttributes: [],
+  attributeToEditIndex: null,
+  attributeToEditName: '',
   featureType: 'model',
   features: [],
   featureToEditName: '',
@@ -366,15 +371,20 @@ RelationFormGroup.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
   alreadyTakenAttributes: PropTypes.array,
+  attributeToEditName: PropTypes.string,
+  attributeToEditIndex: PropTypes.number,
   features: PropTypes.array,
   featureType: PropTypes.string,
   featureToEditName: PropTypes.string,
   isOpen: PropTypes.bool,
   isUpdatingTemporary: PropTypes.bool,
   modifiedData: PropTypes.object.isRequired,
+  onCancel: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,
+  onChangeRelationNature: PropTypes.func.isRequired,
   onChangeRelationTarget: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  onSubmitEdit: PropTypes.func.isRequired,
   push: PropTypes.func.isRequired,
   setTempAttribute: PropTypes.func.isRequired,
   source: PropTypes.string,

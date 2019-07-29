@@ -16,6 +16,7 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_GROUP,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
+  CLEAR_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
   CREATE_TEMP_CONTENT_TYPE,
   CREATE_TEMP_GROUP,
   DELETE_GROUP,
@@ -41,6 +42,7 @@ import {
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+  RESET_EDIT_EXISTING_GROUP,
   RESET_EXISTING_GROUP_MAIN_INFOS,
   RESET_EDIT_TEMP_CONTENT_TYPE,
   RESET_EDIT_TEMP_GROUP,
@@ -48,6 +50,7 @@ import {
   SAVE_EDITED_ATTRIBUTE,
   SAVE_EDITED_ATTRIBUTE_GROUP,
   SAVE_EDITED_ATTRIBUTE_RELATION,
+  SAVE_EDITED_ATTRIBUTE_RELATION_GROUP,
   SET_TEMPORARY_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE_GROUP,
   SET_TEMPORARY_ATTRIBUTE_RELATION,
@@ -135,6 +138,12 @@ export function clearTemporaryAttributeGroup() {
 export function clearTemporaryAttributeRelation() {
   return {
     type: CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
+  };
+}
+
+export function clearTemporaryAttributeRelationGroup() {
+  return {
+    type: CLEAR_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
   };
 }
 
@@ -428,6 +437,13 @@ export function resetExistingContentTypeMainInfos(contentTypeName) {
   };
 }
 
+export function resetEditExistingGroup(groupName) {
+  return {
+    type: RESET_EDIT_EXISTING_GROUP,
+    groupName,
+  };
+}
+
 export function resetExistingGroupMainInfos(groupName) {
   return {
     type: RESET_EXISTING_GROUP_MAIN_INFOS,
@@ -492,6 +508,19 @@ export function saveEditedAttributeRelation(
   };
 }
 
+export function saveEditedAttributeRelationGroup(
+  attributeIndex,
+  isGroupTemporary,
+  featureName
+) {
+  return {
+    type: SAVE_EDITED_ATTRIBUTE_RELATION_GROUP,
+    attributeIndex,
+    isGroupTemporary,
+    featureName,
+  };
+}
+
 export function setTemporaryAttribute(
   attributeName,
   isModelTemporary,
@@ -539,11 +568,13 @@ export function setTemporaryAttributeRelationGroup(
   target,
   isGroupTemporary,
   source,
+  attributeIndex,
   attributeName,
   isEditing
 ) {
   return {
     type: SET_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
+    attributeIndex,
     attributeName,
     isEditing,
     isGroupTemporary,
@@ -690,9 +721,19 @@ export const formatModelAttributes = attributes =>
 
 export const buildGroupAttributes = attributes =>
   Object.keys(attributes).reduce((acc, current) => {
-    const attribute = { name: current, ...attributes[current] };
-
-    return acc.concat(attribute);
+    if (
+      attributes[current].nature === 'oneWay' ||
+      attributes[current].nature === 'manyWays'
+    ) {
+      const attribute = Object.assign(attributes[current], {
+        key: '-',
+        name: current,
+      });
+      return acc.concat(attribute);
+    } else {
+      const attribute = { name: current, ...attributes[current] };
+      return acc.concat(attribute);
+    }
   }, []);
 
 export const formatGroupAttributes = attributes => {

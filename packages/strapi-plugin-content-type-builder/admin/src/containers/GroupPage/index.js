@@ -31,17 +31,20 @@ import {
   addAttributeToTempGroup,
   addAttributeToExistingGroup,
   clearTemporaryAttributeGroup,
+  clearTemporaryAttributeRelationGroup,
   deleteGroupAttribute,
   onChangeAttributeGroup,
   onChangeRelationGroup,
   onChangeRelationNatureGroup,
   onChangeRelationTargetGroup,
   saveEditedAttributeGroup,
+  saveEditedAttributeRelationGroup,
   setTemporaryAttributeGroup,
   setTemporaryAttributeRelationGroup,
   submitGroup,
   submitTempGroup,
   resetEditTempGroup,
+  resetEditExistingGroup,
 } from '../App/actions';
 
 /* eslint-disable no-extra-boolean-cast */
@@ -51,6 +54,7 @@ export class GroupPage extends React.Component {
 
   componentDidMount() {
     const { setTemporaryAttributeGroup } = this.props;
+
     if (
       this.getModalType() === 'attributeForm' &&
       this.getActionType() === 'edit' &&
@@ -161,6 +165,7 @@ export class GroupPage extends React.Component {
       initialDataGroup,
       modifiedDataGroup,
       newGroup,
+      resetEditExistingGroup,
       resetEditTempGroup,
       submitGroup,
       submitTempGroup,
@@ -183,7 +188,10 @@ export class GroupPage extends React.Component {
             this.getSource()
           );
 
-    const handleCancel = resetEditTempGroup;
+    /* istanbul ignore next */
+    const handleCancel = this.isUpdatingTempFeature()
+      ? resetEditTempGroup
+      : () => resetEditExistingGroup(this.getFeatureName());
 
     /* istanbul ignore if */
     if (shouldShowActions) {
@@ -249,7 +257,8 @@ export class GroupPage extends React.Component {
       emitEvent('willEditFieldOfGroup');
 
       push({
-        search: `modalType=attributeForm&attributeType=${attributeType}&settingType=base&actionType=edit&attributeName=${attributeIndex}`,
+        search: `modalType=attributeForm&attributeType=${attributeType ||
+          'relation'}&settingType=base&actionType=edit&attributeName=${attributeIndex}`,
       });
     } else {
       this.displayNotificationCTNotSaved();
@@ -326,13 +335,22 @@ export class GroupPage extends React.Component {
     const {
       history: { push },
       saveEditedAttributeGroup,
+      saveEditedAttributeRelationGroup,
     } = this.props;
 
-    saveEditedAttributeGroup(
-      this.getAttributeIndex(),
-      this.isUpdatingTempFeature(),
-      this.getFeatureName()
-    );
+    if (this.getAttributeType() === 'relation') {
+      saveEditedAttributeRelationGroup(
+        this.getAttributeIndex(),
+        this.isUpdatingTempFeature(),
+        this.getFeatureName()
+      );
+    } else {
+      saveEditedAttributeGroup(
+        this.getAttributeIndex(),
+        this.isUpdatingTempFeature(),
+        this.getFeatureName()
+      );
+    }
 
     const nextSearch = shouldContinue ? 'modalType=chooseAttributes' : '';
 
@@ -393,8 +411,9 @@ export class GroupPage extends React.Component {
   render() {
     const {
       clearTemporaryAttributeGroup,
-      groups,
+      clearTemporaryAttributeRelationGroup,
       history: { push },
+      models,
       onChangeAttributeGroup,
       onChangeRelationGroup,
       onChangeRelationNatureGroup,
@@ -504,21 +523,26 @@ export class GroupPage extends React.Component {
           actionType={this.getActionType()}
           activeTab={this.getSettingType()}
           alreadyTakenAttributes={this.getFeatureAttributesNames()}
+          attributeToEditIndex={parseInt(this.getAttributeIndex(), 10)}
+          attributeToEditName={this.getAttributeName()}
           featureType={this.featureType}
-          featureToEditName={this.getFeatureDisplayName()}
-          features={groups}
+          featureToEditName={this.getFeatureName()}
+          features={models}
           isOpen={
             this.getModalType() === 'attributeForm' &&
             this.getAttributeType() === 'relation'
           }
+          isUpdatingTemporary={this.isUpdatingTempFeature()}
           modifiedData={temporaryAttributeRelationGroup}
-          onCancel={() => {}}
+          onCancel={clearTemporaryAttributeRelationGroup}
           onChange={onChangeRelationGroup}
           onChangeRelationNature={onChangeRelationNatureGroup}
           onChangeRelationTarget={onChangeRelationTargetGroup}
           onSubmit={this.handleSubmit}
+          onSubmitEdit={this.handleSubmitEdit}
           setTempAttribute={setTemporaryAttributeRelationGroup}
           push={push}
+          source={this.getSource()}
         />
 
         <PopUpWarning
@@ -549,6 +573,7 @@ GroupPage.propTypes = {
   addAttributeToTempGroup: PropTypes.func.isRequired,
   canOpenModal: PropTypes.bool,
   clearTemporaryAttributeGroup: PropTypes.func.isRequired,
+  clearTemporaryAttributeRelationGroup: PropTypes.func.isRequired,
   deleteGroupAttribute: PropTypes.func.isRequired,
   groups: PropTypes.array.isRequired,
   history: PropTypes.shape({
@@ -564,14 +589,17 @@ GroupPage.propTypes = {
       groupName: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
+  models: PropTypes.array.isRequired,
   modifiedDataGroup: PropTypes.object.isRequired,
   newGroup: PropTypes.object.isRequired,
   onChangeAttributeGroup: PropTypes.func.isRequired,
   onChangeRelationGroup: PropTypes.func.isRequired,
   onChangeRelationNatureGroup: PropTypes.func.isRequired,
   onChangeRelationTargetGroup: PropTypes.func.isRequired,
+  resetEditExistingGroup: PropTypes.func.isRequired,
   resetEditTempGroup: PropTypes.func.isRequired,
   saveEditedAttributeGroup: PropTypes.func.isRequired,
+  saveEditedAttributeRelationGroup: PropTypes.func.isRequired,
   setTemporaryAttributeGroup: PropTypes.func.isRequired,
   setTemporaryAttributeRelationGroup: PropTypes.func.isRequired,
   submitGroup: PropTypes.func.isRequired,
@@ -587,16 +615,19 @@ export function mapDispatchToProps(dispatch) {
       addAttributeToExistingGroup,
       addAttributeToTempGroup,
       clearTemporaryAttributeGroup,
+      clearTemporaryAttributeRelationGroup,
       deleteGroupAttribute,
       onChangeAttributeGroup,
       onChangeRelationGroup,
       onChangeRelationNatureGroup,
       onChangeRelationTargetGroup,
       saveEditedAttributeGroup,
+      saveEditedAttributeRelationGroup,
       setTemporaryAttributeGroup,
       setTemporaryAttributeRelationGroup,
       submitGroup,
       submitTempGroup,
+      resetEditExistingGroup,
       resetEditTempGroup,
     },
     dispatch

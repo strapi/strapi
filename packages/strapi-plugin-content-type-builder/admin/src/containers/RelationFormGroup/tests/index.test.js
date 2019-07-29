@@ -19,7 +19,7 @@ describe('<RelationFormGroup />', () => {
       activeTab: 'base',
       alreadyTakenAttributes: [],
       attributeToEditName: '',
-      setTempAttribute: jest.fn(),
+      attributeToEditIndex: null,
       isOpen: true,
       features: [],
       featureToEditName: '',
@@ -233,8 +233,13 @@ describe('<RelationFormGroup />', () => {
     });
 
     describe('HandleOnOpened', () => {
-      it('should update the state and call the onCancel prop', () => {
-        props.features = [{ name: 'test', source: 'test' }];
+      it('should update the state and call the setTempAttribute prop on create modal open', () => {
+        props.features = [{ name: 'test' }];
+        props.featureToEditName = 'strapi';
+        props.actionType = 'create';
+        props.attributeToEditIndex = 1;
+        props.attributeToEditName = 'test';
+        props.isUpdatingTemporary = false;
         wrapper = renderComponent(props);
         const compo = wrapper.find(RelationFormGroup);
 
@@ -248,16 +253,20 @@ describe('<RelationFormGroup />', () => {
         expect(props.setTempAttribute).toHaveBeenCalledWith(
           'test',
           false,
+          undefined,
+          1,
           'test',
-          '',
           false
         );
       });
-      it('should update the state and call the onCancel prop', () => {
+      it('should update the state and call the setTempAttribute props on edit modal open', () => {
         props.features = [{ name: 'test' }];
         props.featureToEditName = 'strapi';
         props.actionType = 'edit';
+        props.attributeToEditIndex = 1;
         props.attributeToEditName = 'test';
+        props.isUpdatingTemporary = true;
+
         wrapper = renderComponent(props);
         const compo = wrapper.find(RelationFormGroup);
 
@@ -270,8 +279,9 @@ describe('<RelationFormGroup />', () => {
         expect(compo.state('showForm')).toBeTruthy();
         expect(props.setTempAttribute).toHaveBeenCalledWith(
           'strapi',
-          false,
+          true,
           undefined,
+          1,
           'test',
           true
         );

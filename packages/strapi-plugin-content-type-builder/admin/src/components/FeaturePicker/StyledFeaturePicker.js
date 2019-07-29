@@ -76,6 +76,9 @@ const StyledFeaturePicker = styled.div`
           i {
             margin-right: 10px;
           }
+          span {
+            font-style: italic;
+          }
         }
       }
     }

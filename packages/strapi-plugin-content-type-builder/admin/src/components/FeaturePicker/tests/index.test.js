@@ -42,7 +42,7 @@ describe('CTB <FeaturePicker />', () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
-    it('should display source if it exists', () => {
+    it('should display plugin if it exists', () => {
       props.main = true;
       props.plugin = 'users-permissions';
 
@@ -51,6 +51,20 @@ describe('CTB <FeaturePicker />', () => {
       const span = wrapper
         .find(DropdownToggle)
         .find('p')
+        .at(0)
+        .find('span');
+
+      expect(span.text()).toContain('users-permissions');
+    });
+
+    it('should display source if it exists', () => {
+      props.main = true;
+      props.features[0].source = 'users-permissions';
+
+      wrapper = shallow(<FeaturePicker {...props} />);
+
+      const span = wrapper
+        .find(DropdownItem)
         .at(0)
         .find('span');
 

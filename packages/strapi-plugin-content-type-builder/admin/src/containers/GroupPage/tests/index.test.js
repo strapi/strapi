@@ -42,11 +42,22 @@ const props = {
   addAttributeToExistingGroup: jest.fn(),
   addAttributeToTempGroup: jest.fn(),
   clearTemporaryAttributeGroup: jest.fn(),
+  clearTemporaryAttributeRelationGroup: jest.fn(),
   deleteGroupAttribute: jest.fn(),
   groups: [
     {
       icon: 'fa-cube',
       name: 'tests',
+      description: '',
+      fields: 3,
+      source: null,
+      isTemporary: false,
+    },
+  ],
+  models: [
+    {
+      icon: 'fa-cube',
+      name: 'model',
       description: '',
       fields: 2,
       source: null,
@@ -69,6 +80,14 @@ const props = {
           name: 'name',
           type: 'string',
           required: true,
+        },
+        {
+          name: 'modelRelation',
+          nature: 'oneWay',
+          target: 'model',
+          dominant: false,
+          unique: false,
+          key: '-',
         },
         {
           name: 'quantity',
@@ -95,6 +114,14 @@ const props = {
           name: 'name',
           type: 'string',
           required: true,
+        },
+        {
+          name: 'modelRelation',
+          nature: 'oneWay',
+          target: 'model',
+          dominant: false,
+          unique: false,
+          key: '-',
         },
         {
           name: 'quantity',
@@ -376,10 +403,29 @@ describe('CTB <GroupPage />, lifecycle', () => {
         search: 'modalType=chooseAttributes',
       });
     });
+
+    it('should call addAttributeRelationGroup when attributeType is a relation', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
+
+      expect(true).toBe(true);
+      // props.canOpenModal = true;
+
+      // const search = 'chooseAttributes';
+      // props.location.search = `attributeType=${search}`;
+
+      topCompo = renderComponent(props);
+      // const wrapper = topCompo.find(GroupPage);
+      // const { handleSubmit } = wrapper.instance();
+
+      // handleSubmit();
+
+      // expect(props.addAttributeToTempGroup).toHaveBeenCalledWith(search);
+    });
   });
 
   describe('HandleSubmitEdit', () => {
     it('should call saveEditedAttributeGroup with right params', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = false;
       const attrIndex = '0';
       props.location.search = `attributeName=${attrIndex}`;
 

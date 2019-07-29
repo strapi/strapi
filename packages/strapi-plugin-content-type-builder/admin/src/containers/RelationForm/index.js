@@ -228,7 +228,7 @@ class RelationForm extends React.Component {
 
   renderRelationForm = () => {
     const {
-      modifiedData: { key, name, nature, plugin, target },
+      modifiedData,
       models,
       modelToEditName,
       onChange,
@@ -236,6 +236,8 @@ class RelationForm extends React.Component {
       source,
     } = this.props;
     const { formErrors, didCheckErrors } = this.state;
+
+    const { key, name, nature, plugin, target } = modifiedData;
 
     return (
       <RelationWrapper>

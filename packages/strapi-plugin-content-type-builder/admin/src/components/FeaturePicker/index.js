@@ -35,11 +35,7 @@ const FeaturePicker = ({ features, onClick, plugin, selectedFeature }) => {
                 <p>
                   <i className="fa fa-caret-square-o-right" />
                   {feature.name}
-                  {!!feature.source && (
-                    <span style={{ fontStyle: 'italic' }}>
-                      &nbsp;({feature.source})
-                    </span>
-                  )}
+                  {!!feature.source && <span>&nbsp;({feature.source})</span>}
                 </p>
               </DropdownItem>
             );
