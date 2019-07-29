@@ -108,7 +108,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     const entry = await model.forge(params).fetch({ transacting });
 
     if (!entry) {
-      console.log('not found', model.globalId, params);
       const err = new Error('entry.notFound');
       err.status = 404;
       throw err;
