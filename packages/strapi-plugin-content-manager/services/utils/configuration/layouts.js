@@ -24,7 +24,7 @@ const typeToSize = type => {
       return MAX_ROW_SIZE / 3;
     case 'json':
     case 'group':
-    case 'wysiwyg':
+    case 'richtext':
       return MAX_ROW_SIZE;
 
     default:
