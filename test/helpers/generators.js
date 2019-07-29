@@ -4,9 +4,6 @@ module.exports = {
       {
         name: 'title',
         params: {
-          appearance: {
-            WYSIWYG: false,
-          },
           multiple: false,
           type: 'string',
         },
@@ -14,11 +11,8 @@ module.exports = {
       {
         name: 'content',
         params: {
-          appearance: {
-            WYSIWYG: true,
-          },
           multiple: false,
-          type: 'text',
+          type: 'richtext',
         },
       },
       {
@@ -42,9 +36,6 @@ module.exports = {
       {
         name: 'name',
         params: {
-          appearance: {
-            WYSIWYG: false,
-          },
           multiple: false,
           type: 'string',
         },
@@ -69,9 +60,6 @@ module.exports = {
       {
         name: 'name',
         params: {
-          appearance: {
-            WYSIWYG: false,
-          },
           multiple: false,
           type: 'string',
         },
@@ -95,9 +83,6 @@ module.exports = {
       {
         name: 'name',
         params: {
-          appearance: {
-            WYSIWYG: false,
-          },
           multiple: false,
           type: 'string',
         },
@@ -128,9 +113,6 @@ module.exports = {
       {
         name: 'name',
         params: {
-          appearance: {
-            WYSIWYG: false,
-          },
           multiple: false,
           type: 'string',
         },
@@ -138,19 +120,13 @@ module.exports = {
       {
         name: 'description',
         params: {
-          appearance: {
-            WYSIWYG: true,
-          },
           multiple: false,
-          type: 'text',
+          type: 'richtext',
         },
       },
       {
         name: 'published',
         params: {
-          appearance: {
-            WYSIWYG: false,
-          },
           multiple: false,
           type: 'boolean',
         },
@@ -166,9 +142,6 @@ module.exports = {
       {
         name: 'title',
         params: {
-          appearance: {
-            WYSIWYG: false,
-          },
           multiple: false,
           type: 'string',
         },

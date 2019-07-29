@@ -15,7 +15,7 @@
       "type": "string"
     },
     "content": {
-      "type": "text"
+      "type": "richtext"
     },
     "published": {
       "type": "boolean"
@@ -31,7 +31,10 @@
     },
     "enum": {
       "type": "enumeration",
-      "enum": ["morning,", "noon"]
+      "enum": [
+        "morning,",
+        "noon"
+      ]
     },
     "bool": {
       "type": "boolean"
@@ -53,8 +56,8 @@
       "collection": "tag"
     },
     "manyTags": {
-      "dominant": true,
       "collection": "tag",
+      "dominant": true,
       "via": "linkedArticles"
     },
     "fb_cta": {

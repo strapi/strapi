@@ -127,23 +127,15 @@ module.exports = {
   },
 
   search(params, query) {
-    const { limit, skip, sort, source, _q, populate = [] } = query; // eslint-disable-line no-unused-vars
-    const filters = strapi.utils.models.convertParams(params.model, query);
+    const { model } = params;
+    const { source } = query;
 
-    // Find entries using `queries` system
-    return strapi.query(params.model, source).search(
-      {
-        limit: limit || filters.limit,
-        skip: skip || filters.start || 0,
-        sort: sort || filters.sort,
-        search: _q,
-      },
-      populate
-    );
+    return strapi.query(model, source).search(query);
   },
 
   countSearch(params, query) {
+    const { model } = params;
     const { source, _q } = query;
-    return strapi.query(params.model, source).countSearch({ search: _q });
+    return strapi.query(model, source).countSearch({ _q });
   },
 };

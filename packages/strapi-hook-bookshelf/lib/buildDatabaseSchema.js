@@ -208,7 +208,7 @@ module.exports = async ({
           })
         );
 
-        const allAttrs = ['id', attrs];
+        const allAttrs = ['id', ...attrs];
 
         await trx.raw(`INSERT INTO ?? (${allAttrs.join(', ')}) ??`, [
           table,
@@ -365,6 +365,7 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
   switch (attribute.type) {
     case 'uuid':
       return client === 'pg' ? 'uuid' : 'varchar(36)';
+    case 'richtext':
     case 'text':
       return client === 'pg' ? 'text' : 'longtext';
     case 'json':

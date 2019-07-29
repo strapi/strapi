@@ -12,7 +12,10 @@
     },
     "enum": {
       "type": "enumeration",
-      "enum": ["morning", "noon"]
+      "enum": [
+        "morning",
+        "noon"
+      ]
     },
     "pic": {
       "model": "file",
@@ -21,6 +24,9 @@
     },
     "article": {
       "model": "article"
+    },
+    "articles": {
+      "collection": "article"
     }
   }
 }

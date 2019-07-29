@@ -80,7 +80,7 @@ module.exports = {
 
     const [formatedAttributes, attributesErrors] = Service.formatAttributes(
       attributes,
-      name
+      name.toLowerCase()
     );
 
     if (!_.isEmpty(attributesErrors)) {
@@ -90,8 +90,6 @@ module.exports = {
     const _description = escapeNewlines(description, '\\n');
 
     strapi.reload.isWatching = false;
-
-    await Service.appearance(formatedAttributes, _.toLower(name));
 
     const apiName = _.toLower(name);
     await Service.generateAPI(
@@ -107,7 +105,9 @@ module.exports = {
 
       modelJSON.attributes = formatedAttributes;
 
-      const createRelationsErrors = Service.createRelations(name, attributes);
+      const createRelationsErrors = Service.createRelations(name, {
+        attributes,
+      });
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
@@ -193,11 +193,9 @@ module.exports = {
 
     const _description = escapeNewlines(description);
 
-    // let modelFilePath = Service.getModelPath(model, plugin);
-
     strapi.reload.isWatching = false;
 
-    if (name !== model) {
+    if (name.toLowerCase() !== model.toLowerCase()) {
       await Service.generateAPI(
         name,
         _description,
@@ -207,13 +205,11 @@ module.exports = {
       );
     }
 
-    await Service.appearance(formatedAttributes, name, plugin);
-
     try {
-      // const modelJSON = _.cloneDeep(require(modelFilePath));
       const modelData = plugin
         ? strapi.plugins[plugin].models[model.toLowerCase()]
         : strapi.models[model.toLowerCase()];
+
       const modelJSON = _.cloneDeep(
         _.pick(modelData, [
           'connection',
@@ -224,8 +220,8 @@ module.exports = {
         ])
       );
 
-      modelJSON.connection = connection;
-      modelJSON.collectionName = collectionName;
+      modelJSON.connection = connection || modelJSON.connection;
+      modelJSON.collectionName = collectionName || modelJSON.collectionName;
       modelJSON.info = {
         name,
         description: _description,
@@ -236,17 +232,19 @@ module.exports = {
         modelJSON.info.mainField = mainField;
       }
 
-      const clearRelationsErrors = Service.clearRelations(model, plugin);
+      const clearRelationsErrors = Service.clearRelations(model, plugin, {
+        name,
+      });
 
       if (!_.isEmpty(clearRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
       }
 
-      const createRelationsErrors = Service.createRelations(
-        name,
+      const createRelationsErrors = Service.createRelations(name, {
         attributes,
-        plugin
-      );
+        source: plugin,
+        oldName: model,
+      });
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
@@ -259,7 +257,19 @@ module.exports = {
           return ctx.badRequest(null, [{ messages: removeModelErrors }]);
         }
 
-        // modelFilePath = Service.getModelPath(name, plugin);
+        if (
+          _.has(strapi.plugins, ['content-manager', 'services', 'contenttypes'])
+        ) {
+          await _.get(strapi.plugins, [
+            'content-manager',
+            'services',
+            'contenttypes',
+          ]).updateUID({
+            oldUID: model,
+            newUID: name.toLowerCase(),
+            source: plugin,
+          });
+        }
       }
 
       try {
@@ -298,7 +308,7 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    const clearRelationsErrors = Service.clearRelations(model, undefined, true);
+    const clearRelationsErrors = Service.clearRelations(model, undefined);
 
     if (!_.isEmpty(clearRelationsErrors)) {
       return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
@@ -309,18 +319,6 @@ module.exports = {
     if (!_.isEmpty(removeModelErrors)) {
       return ctx.badRequest(null, [{ messages: removeModelErrors }]);
     }
-
-    const pluginStore = strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'content-manager',
-    });
-
-    const schema = await pluginStore.get({ key: 'schema' });
-
-    delete schema.layout[model];
-
-    await pluginStore.set({ key: 'schema', value: schema });
 
     ctx.send({ ok: true });
 

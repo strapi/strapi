@@ -25,7 +25,6 @@ const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
-const createGroupManager = require('./services/groups');
 
 const createQueryManager = () => {
   const _queries = new Map();
@@ -123,7 +122,6 @@ class Strapi extends EventEmitter {
       installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
     };
 
-    this.groupManager;
     this.queryManager = createQueryManager();
     this.fs = createStrapiFs(this);
     this.requireProjectBootstrap();
@@ -310,10 +308,6 @@ class Strapi extends EventEmitter {
 
     await bootstrap(this);
 
-    this.groupManager = createGroupManager({
-      groups,
-    });
-
     // Usage.
     await utils.usage(this.config);
 
@@ -399,6 +393,9 @@ class Strapi extends EventEmitter {
             ranBootstrapFn = true;
             clearTimeout(timer);
 
+            if (err instanceof Error) {
+              return reject(err);
+            }
             return resolve(err);
           });
         } catch (e) {
@@ -436,6 +433,15 @@ class Strapi extends EventEmitter {
       .forEach(key => {
         Object.freeze(this[key]);
       });
+  }
+
+  getModel(modelKey, plugin) {
+    return plugin === 'admin'
+      ? _.get(strapi.admin, ['models', modelKey], undefined)
+      : _.get(strapi.plugins, [plugin, 'models', modelKey]) ||
+          _.get(strapi, ['models', modelKey]) ||
+          _.get(strapi, ['groups', modelKey]) ||
+          undefined;
   }
 
   /**
@@ -488,6 +494,10 @@ class Strapi extends EventEmitter {
     // custom queries made easy
     Object.assign(query, {
       custom(mapping) {
+        if (typeof mapping === 'function') {
+          return mapping.bind(query, { model, modelKey });
+        }
+
         if (!mapping[connector]) {
           throw new Error(`Missing mapping for orm ${connector}`);
         }

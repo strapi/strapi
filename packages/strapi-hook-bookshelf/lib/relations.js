@@ -46,10 +46,11 @@ const getModel = (model, plugin) => {
 const removeUndefinedKeys = obj => _.pickBy(obj, _.negate(_.isUndefined));
 
 module.exports = {
-  findOne: async function(params, populate) {
+  async findOne(params, populate, { transacting } = {}) {
     const record = await this.forge({
       [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
     }).fetch({
+      transacting,
       withRelated: populate || this.associations.map(x => x.alias),
     });
 
@@ -70,7 +71,9 @@ module.exports = {
                 this.primaryKey
               ),
             })
-            .fetchAll();
+            .fetchAll({
+              transacting,
+            });
         });
 
       const related = await Promise.all(arrayOfPromises);
@@ -83,10 +86,12 @@ module.exports = {
     return data;
   },
 
-  update: async function(params) {
+  async update(params, { transacting } = {}) {
     const relationUpdates = [];
     const primaryKeyValue = getValuePrimaryKey(params, this.primaryKey);
-    const response = await module.exports.findOne.call(this, params);
+    const response = await module.exports.findOne.call(this, params, null, {
+      transacting,
+    });
 
     // Only update fields which are on this document.
     const values =
@@ -129,7 +134,12 @@ module.exports = {
                       })
                       .save(
                         { [details.via]: null },
-                        { method: 'update', patch: true, require: false }
+                        {
+                          method: 'update',
+                          patch: true,
+                          require: false,
+                          transacting,
+                        }
                       );
 
                     relationUpdates.push(updatePromise);
@@ -140,14 +150,24 @@ module.exports = {
                   const updateLink = this.where({ [current]: property })
                     .save(
                       { [current]: null },
-                      { method: 'update', patch: true, require: false }
+                      {
+                        method: 'update',
+                        patch: true,
+                        require: false,
+                        transacting,
+                      }
                     )
                     .then(() => {
                       return assocModel
                         .where({ [this.primaryKey]: property })
                         .save(
                           { [details.via]: primaryKeyValue },
-                          { method: 'update', patch: true, require: false }
+                          {
+                            method: 'update',
+                            patch: true,
+                            require: false,
+                            transacting,
+                          }
                         );
                     });
 
@@ -179,7 +199,12 @@ module.exports = {
                     )
                     .save(
                       { [details.via]: null },
-                      { method: 'update', patch: true, require: false }
+                      {
+                        method: 'update',
+                        patch: true,
+                        require: false,
+                        transacting,
+                      }
                     )
                     .then(() => {
                       return assocModel
@@ -190,7 +215,12 @@ module.exports = {
                         )
                         .save(
                           { [details.via]: primaryKeyValue },
-                          { method: 'update', patch: true, require: false }
+                          {
+                            method: 'update',
+                            patch: true,
+                            require: false,
+                            transacting,
+                          }
                         );
                     });
 
@@ -221,9 +251,10 @@ module.exports = {
                   const collection = this.forge({
                     [this.primaryKey]: primaryKeyValue,
                   })[association.alias]();
+
                   const updatePromise = collection
-                    .detach(toRemove)
-                    .then(() => collection.attach(toAdd));
+                    .detach(toRemove, { transacting })
+                    .then(() => collection.attach(toAdd, { transacting }));
 
                   relationUpdates.push(updatePromise);
                   return acc;
@@ -242,31 +273,43 @@ module.exports = {
                     if (association.nature === 'manyMorphToOne') {
                       relationUpdates.push(
                         module.exports.removeRelationMorph
-                          .call(this, {
-                            alias: association.alias,
-                            ref: model.collectionName,
-                            refId: obj.refId,
-                            field: obj.field,
-                          })
-                          .then(() =>
-                            module.exports.addRelationMorph.call(this, {
-                              id: response[this.primaryKey],
+                          .call(
+                            this,
+                            {
                               alias: association.alias,
                               ref: model.collectionName,
                               refId: obj.refId,
                               field: obj.field,
-                            })
+                            },
+                            { transacting }
+                          )
+                          .then(() =>
+                            module.exports.addRelationMorph.call(
+                              this,
+                              {
+                                id: response[this.primaryKey],
+                                alias: association.alias,
+                                ref: model.collectionName,
+                                refId: obj.refId,
+                                field: obj.field,
+                              },
+                              { transacting }
+                            )
                           )
                       );
                     } else {
                       relationUpdates.push(
-                        module.exports.addRelationMorph.call(this, {
-                          id: response[this.primaryKey],
-                          alias: association.alias,
-                          ref: model.collectionName,
-                          refId: obj.refId,
-                          field: obj.field,
-                        })
+                        module.exports.addRelationMorph.call(
+                          this,
+                          {
+                            id: response[this.primaryKey],
+                            alias: association.alias,
+                            ref: model.collectionName,
+                            refId: obj.refId,
+                            field: obj.field,
+                          },
+                          { transacting }
+                        )
                       );
                     }
                   });
@@ -293,26 +336,34 @@ module.exports = {
 
                   toAdd.forEach(id => {
                     relationUpdates.push(
-                      module.exports.addRelationMorph.call(model, {
-                        id,
-                        alias: association.via,
-                        ref: this.collectionName,
-                        refId: response.id,
-                        field: association.alias,
-                      })
+                      module.exports.addRelationMorph.call(
+                        model,
+                        {
+                          id,
+                          alias: association.via,
+                          ref: this.collectionName,
+                          refId: response.id,
+                          field: association.alias,
+                        },
+                        { transacting }
+                      )
                     );
                   });
 
                   // Update the relational array.
                   toRemove.forEach(id => {
                     relationUpdates.push(
-                      module.exports.removeRelationMorph.call(model, {
-                        id,
-                        alias: association.via,
-                        ref: this.collectionName,
-                        refId: response.id,
-                        field: association.alias,
-                      })
+                      module.exports.removeRelationMorph.call(
+                        model,
+                        {
+                          id,
+                          alias: association.via,
+                          ref: this.collectionName,
+                          refId: response.id,
+                          field: association.alias,
+                        },
+                        { transacting }
+                      )
                     );
                   });
                   break;
@@ -336,17 +387,19 @@ module.exports = {
         [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
       }).save(values, {
         patch: true,
+        transacting,
       });
     }
 
     return await this.forge({
       [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
     }).fetch({
+      transacting,
       withRelated: this.associations.map(x => x.alias),
     });
   },
 
-  addRelationMorph: async function(params) {
+  async addRelationMorph(params, { transacting } = {}) {
     const record = await this.morph
       .forge()
       .where({
@@ -356,6 +409,7 @@ module.exports = {
         field: params.field,
       })
       .fetch({
+        transacting,
         withRelated: this.associations.map(x => x.alias),
       });
 
@@ -372,10 +426,10 @@ module.exports = {
         [`${params.alias}_type`]: params.ref,
         field: params.field,
       })
-      .save();
+      .save(null, { transacting });
   },
 
-  removeRelationMorph: async function(params) {
+  async removeRelationMorph(params, { transacting } = {}) {
     return await this.morph
       .forge()
       .where(
@@ -391,6 +445,7 @@ module.exports = {
       )
       .destroy({
         require: false,
+        transacting,
       });
   },
 };

@@ -16,21 +16,15 @@ const documentModel = {
     {
       name: 'name',
       params: {
-        appearance: {
-          WYSIWYG: false,
-        },
         multiple: false,
-        type: 'string',
+        type: 'richtext',
       },
     },
     {
       name: 'content',
       params: {
-        appearance: {
-          WYSIWYG: true,
-        },
         multiple: false,
-        type: 'text',
+        type: 'richtext',
       },
     },
   ],
@@ -45,11 +39,8 @@ const labelModel = {
     {
       name: 'name',
       params: {
-        appearance: {
-          WYSIWYG: false,
-        },
         multiple: false,
-        type: 'string',
+        type: 'richtext',
       },
     },
     {
