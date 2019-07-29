@@ -44,9 +44,10 @@ module.exports = {
                 return reject(err);
               }
               file.public_id = image.public_id;
+              file.resource_type = image.resource_type;
               file.url = image.secure_url;
               resolve();
-            },
+            }
           );
           intoStream(file.buffer).pipe(upload_stream);
         });
@@ -55,6 +56,7 @@ module.exports = {
         try {
           const response = await cloudinary.uploader.destroy(file.public_id, {
             invalidate: true,
+            resource_type: file.resource_type || 'image',
           });
           if (response.result !== 'ok') {
             throw {

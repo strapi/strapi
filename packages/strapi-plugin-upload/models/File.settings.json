@@ -50,6 +50,10 @@
       "type": "string",
       "configurable": false
     },
+    "resource_type": {
+      "type": "string",
+      "configurable": false
+    },
     "related": {
       "collection": "*",
       "filter": "field",
