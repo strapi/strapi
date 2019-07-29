@@ -27,6 +27,8 @@ const getSize = type => {
 const reducer = (state, action) => {
   const layoutPath = ['modifiedData', 'layouts', 'edit'];
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
+  const getFieldType = name =>
+    state.getIn(['modifiedData', 'schema', 'attributes', name, 'type']);
 
   switch (action.type) {
     case 'GET_DATA_SUCCEEDED':
@@ -67,10 +69,10 @@ const reducer = (state, action) => {
         });
       const formattedList = formatLayout(newList.toJS());
 
-      // NOTE we could use the diddrop part here but it causes an unecessary rerender...
-      // NOTE2: it would be great later to remove the didDrop key that is used to reformat the layout with the _TEMP_ divs
-
-      return state.updateIn(layoutPath, () => fromJS(formattedList));
+      return state
+        .updateIn(layoutPath, () => fromJS(formattedList))
+        .update('itemNameToSelect', () => action.name)
+        .update('itemFormType', () => getFieldType(action.name) || '');
     }
     case 'ON_CHANGE':
       return state.updateIn(
@@ -81,24 +83,52 @@ const reducer = (state, action) => {
     case 'REMOVE_FIELD': {
       const row = state.getIn([...layoutPath, action.rowIndex, 'rowContent']);
       let newState;
+      let fieldNameToDelete;
       // Delete the entire row if length is one or if lenght is equal to 2 and the second element is the hidden div used to make the dnd exp smoother
       if (
         row.size === 1 ||
         (row.size == 2 && row.getIn([1, 'name']) === '_TEMP_')
       ) {
-        newState = state
-          .updateIn(layoutPath, list => list.delete(action.rowIndex))
-          .update('didDrop', v => !v);
+        fieldNameToDelete = state.getIn([
+          ...layoutPath,
+          action.rowIndex,
+          'rowContent',
+          0,
+          'name',
+        ]);
+        newState = state.updateIn(layoutPath, list =>
+          list.delete(action.rowIndex)
+        );
       } else {
+        fieldNameToDelete = state.getIn([
+          ...layoutPath,
+          action.rowIndex,
+          'rowContent',
+          action.fieldIndex,
+          'name',
+        ]);
+
         newState = state.updateIn(
           [...layoutPath, action.rowIndex, 'rowContent'],
           list => list.delete(action.fieldIndex)
         );
       }
 
-      const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+      const updatedList = fromJS(
+        formatLayout(newState.getIn(layoutPath).toJS())
+      );
 
-      return state.updateIn(layoutPath, () => fromJS(updatedList));
+      if (state.get('itemNameToSelect') === fieldNameToDelete) {
+        const firstField =
+          updatedList.getIn([0, 'rowContent', 0, 'name']) || '';
+
+        return state
+          .updateIn(layoutPath, () => updatedList)
+          .update('itemNameToSelect', () => firstField)
+          .update('itemFormType', () => getFieldType(firstField) || '');
+      }
+
+      return state.updateIn(layoutPath, () => updatedList);
     }
     case 'REORDER_DIFF_ROW': {
       const newState = state

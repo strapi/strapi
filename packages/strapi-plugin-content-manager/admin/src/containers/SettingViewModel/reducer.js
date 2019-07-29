@@ -58,6 +58,7 @@ const getSize = type => {
 
 function settingViewModelReducer(state = initialState, action) {
   const layoutPath = ['modifiedData', 'layouts', 'edit'];
+  const relationPath = ['modifiedData', 'layouts', 'editRelations'];
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
   const getFieldType = name =>
     state.getIn(['modifiedData', 'schema', 'attributes', name, 'type']);
@@ -92,8 +93,6 @@ function settingViewModelReducer(state = initialState, action) {
           return action.overIndex;
         });
     case MOVE_RELATION: {
-      const relationPath = ['modifiedData', 'layouts', 'editRelations'];
-
       return state.updateIn(relationPath, list => {
         return list
           .delete(dragIndex)
@@ -199,27 +198,62 @@ function settingViewModelReducer(state = initialState, action) {
           action.rowIndex,
           'rowContent',
           action.fieldIndex,
-          name,
+          'name',
         ]);
         newState = state.updateIn(
           [...layoutPath, action.rowIndex, 'rowContent'],
           list => list.delete(action.fieldIndex)
         );
       }
-      const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+      const updatedList = fromJS(
+        formatLayout(newState.getIn(layoutPath).toJS())
+      );
 
       if (state.get('itemNameToSelect') === fieldName) {
-        // TODO select next item
-        return state.updateIn(layoutPath, () => fromJS(updatedList));
+        const firstFieldEditToSelect = updatedList.getIn([
+          0,
+          'rowContent',
+          0,
+          'name',
+        ]);
+        const firstRelationFieldToSelect = state.getIn([...relationPath, 0]);
+        const fieldToSelect =
+          firstFieldEditToSelect || firstRelationFieldToSelect || '';
+        const fieldToSelectType = getFieldType(fieldToSelect) || '';
+
+        return state
+          .updateIn(layoutPath, () => updatedList)
+          .update('itemNameToSelect', () => fieldToSelect)
+          .update('itemFormType', () => fieldToSelectType);
       }
 
-      return state.updateIn(layoutPath, () => fromJS(updatedList));
+      return state.updateIn(layoutPath, () => updatedList);
     }
-    case REMOVE_RELATION:
-      return state.updateIn(
-        ['modifiedData', 'layouts', 'editRelations'],
-        list => list.delete(action.index)
+    case REMOVE_RELATION: {
+      let newState = state.updateIn(relationPath, list =>
+        list.delete(action.index)
       );
+      const fieldToDeleteName = state.getIn([...relationPath, action.index]);
+
+      if (state.get('itemNameToSelect') === fieldToDeleteName) {
+        const firstRelation = newState.getIn([...relationPath, 0]);
+        const firstEditField = newState.getIn([
+          ...layoutPath,
+          '0',
+          'rowContent',
+          '0',
+          'name',
+        ]);
+        const fieldToSelect = firstRelation || firstEditField || '';
+        const fieldToSelectType = getFieldType(fieldToSelect) || '';
+
+        newState = newState
+          .update('itemNameToSelect', () => fieldToSelect)
+          .update('itemFormType', () => fieldToSelectType);
+      }
+
+      return newState;
+    }
     case REORDER_DIFF_ROW: {
       const newState = state
         .updateIn([...layoutPath, dragRowIndex, 'rowContent'], list => {

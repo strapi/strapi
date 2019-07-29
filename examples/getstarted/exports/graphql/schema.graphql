@@ -201,6 +201,7 @@ input editGroupingredientsInput {
   enum: ENUM_GROUPINGREDIENTS_ENUM
   pic: ID
   article: ID
+  articles: [ID]
 }
 
 input editRecipeInput {
@@ -286,6 +287,7 @@ type GroupIngredients {
   enum: ENUM_GROUPINGREDIENTS_ENUM
   pic: UploadFile
   article: Article
+  articles(sort: String, limit: Int, start: Int, where: JSON): [Article]
   id: ID!
 }
 
@@ -295,6 +297,7 @@ input GroupingredientsInput {
   enum: ENUM_GROUPINGREDIENTS_ENUM
   pic: ID
   article: ID
+  articles: [ID]
 }
 
 input InputID {

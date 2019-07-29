@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import PropTypes from 'prop-types';
-import { get, isEqual, set, upperFirst } from 'lodash';
+import { get, isEqual, isEmpty, set, upperFirst } from 'lodash';
 
 import {
   BackHeader,
@@ -336,14 +336,16 @@ function SettingViewGroup({
                   />
                 </LayoutTitle>
                 <FieldsReorder className="col-12" />
-                <FieldForm
-                  className="col-12"
-                  fieldName={itemNameToSelect}
-                  formType={itemFormType}
-                  metadatas={getSelectedItemMetas()}
-                  onChange={handleChange}
-                  selectOptions={getSelectedItemSelectOptions()}
-                />
+                {!isEmpty(itemNameToSelect) && (
+                  <FieldForm
+                    className="col-12"
+                    fieldName={itemNameToSelect}
+                    formType={itemFormType}
+                    metadatas={getSelectedItemMetas()}
+                    onChange={handleChange}
+                    selectOptions={getSelectedItemSelectOptions()}
+                  />
+                )}
               </div>
             </Block>
           </div>

@@ -43,7 +43,6 @@ function SelectWrapper({
   const ref = useRef();
   const startRef = useRef();
   startRef.current = state._start;
-  console.log({ description });
 
   ref.current = async (signal, params = state) => {
     try {
