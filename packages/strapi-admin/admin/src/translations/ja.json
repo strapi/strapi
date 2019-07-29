@@ -113,7 +113,7 @@
   "components.Input.error.validation.regex": "値が正規表現と一致しません",
   "components.Input.error.validation.required": "値は必須項目です",
   "components.ListRow.empty": "表示するデータがありません",
-  "components.OverlayBlocker.description": "サーバーのりスタートが必要な機能を使用しています。サーバーが起動するまでお待ち下さい",
+  "components.OverlayBlocker.description": "サーバーのリスタートが必要な機能を使用しています。サーバーが起動するまでお待ち下さい",
   "components.OverlayBlocker.title": "リスタートを待っています...",
   "components.PageFooter.select": "ページ毎に表示する投稿数",
   "components.ProductionBlocker.description": "このプラグインは、安全のため、他の環境では無効する必要があります",
