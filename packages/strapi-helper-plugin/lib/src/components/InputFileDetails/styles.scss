@@ -19,7 +19,7 @@
   &:before {
     content: '\F078';
     display: block;
-    color: #787E8F;
+    color: #787e8f;
     font-family: 'FontAwesome';
     font-size: 11px;
   }
@@ -30,14 +30,14 @@
   &:before {
     content: '\f054';
     display: block;
-    color: #787E8F;
+    color: #787e8f;
     font-family: 'FontAwesome';
     font-size: 11px;
   }
 }
 
 .infoContainer {
-  border-top: 1px solid #F6F6F6;
+  border-top: 1px solid #f6f6f6;
   padding-top: 7px;
 }
 
@@ -48,20 +48,20 @@
     color: #333740;
     font-weight: 500;
   }
-  >span:last-child {
-    color: rgba(51, 55, 64, 0.80);
+  > span:last-child {
+    color: rgba(51, 55, 64, 0.8);
     font-weight: 400;
   }
 }
 .inputFileDetails {
   width: 100%;
-  padding-top: 4px;
+  padding-top: 6px;
   margin-bottom: -13px;
 }
 
 .inputFileDetailsEmpty {
   width: 100%;
-  padding-top: 4px;
+  padding-top: 6px;
   margin-bottom: 23px;
 }
 
@@ -81,7 +81,7 @@
 }
 
 .removeContainer {
-  color: #FF3000;
+  color: #ff3000;
   font-size: 13px;
   font-weight: 400;
   cursor: pointer;
@@ -91,14 +91,15 @@
   color: #333740;
   text-decoration: none;
 
-  &:hover, &:active {
+  &:hover,
+  &:active {
     color: #333740;
     text-decoration: none;
   }
 
   > i {
     margin-right: 7px;
-    color: #B3B5B9;
+    color: #b3b5b9;
   }
   // margin-right: 8px;
   // &:before {

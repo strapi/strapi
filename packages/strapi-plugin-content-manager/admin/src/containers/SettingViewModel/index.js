@@ -253,6 +253,8 @@ function SettingViewModel({
     }
   };
 
+  console.log({ itemFormType, itemNameToSelect, modifiedData });
+
   return (
     <LayoutDndProvider
       attributes={getAttributes}

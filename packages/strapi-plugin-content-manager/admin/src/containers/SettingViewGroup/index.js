@@ -171,6 +171,9 @@ function SettingViewGroup({
 
     try {
       await request(getRequestUrl(uid), { method: 'PUT', body });
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
     } catch (err) {
       console.log({ err });
       strapi.notification.error('notification.error');

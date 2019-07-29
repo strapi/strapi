@@ -169,12 +169,13 @@ function SettingsView({
                 to: getUrl('/groups'),
               },
             ]}
+            style={{ marginTop: '4.4rem' }}
           />
           <ListWrapper>
             <ListHeader
               title={`${pluginId}.containers.SettingsView.list.title`}
               subtitle={`${pluginId}.containers.SettingsView.list.subtitle`}
-              style={{ paddingBottom: '1.3rem' }}
+              style={{ paddingTop: '1.8rem', paddingBottom: '.7rem' }}
             />
             <List>
               <table>

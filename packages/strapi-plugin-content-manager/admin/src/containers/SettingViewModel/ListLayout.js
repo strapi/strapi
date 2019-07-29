@@ -55,7 +55,6 @@ function ListLayout({
       didCheckErrors: false,
       errors: [],
       name: `${fieldPath.join('.')}.sortable`,
-      style: { marginTop: '18px' },
       type: 'toggle',
       validations: {},
     },
@@ -118,7 +117,7 @@ function ListLayout({
         <Add data={availableData} onClick={addField} />
       </div>
       <div className="col-lg-7 col-md-12">
-        <FormWrapper onSubmit={onSubmit}>
+        <FormWrapper onSubmit={onSubmit} style={{ minHeight: 246 }}>
           {form.map(input => {
             return (
               <Input

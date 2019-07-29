@@ -16,11 +16,11 @@ import { darken } from '../../utils/colors';
 // Styles
 import styles from './styles.scss';
 
-function HeaderNav({ links }) {
+function HeaderNav({ links, style }) {
   let linkColor = '#F5F5F5';
 
   return (
-    <div className={styles.headerContainer}>
+    <div className={styles.headerContainer} style={style}>
       {map(links, link => {
         linkColor = darken(linkColor, 1.5);
 
@@ -48,6 +48,7 @@ function HeaderNav({ links }) {
 
 HeaderNav.defaultProps = {
   links: [],
+  style: {},
 };
 
 HeaderNav.propTypes = {
@@ -58,6 +59,7 @@ HeaderNav.propTypes = {
       to: PropTypes.string,
     })
   ),
+  style: PropTypes.object,
 };
 
 export default HeaderNav;

@@ -10,7 +10,7 @@ import IconRemove from '../../assets/images/icon_remove.svg';
 const Relation = ({ data, mainField, onRemove, to }) => {
   return (
     <>
-      <div>
+      <div style={{ cursor: 'pointer' }}>
         <div className="dragHandle">
           <span />
         </div>
@@ -22,7 +22,7 @@ const Relation = ({ data, mainField, onRemove, to }) => {
           )}
         </FormattedMessage>
       </div>
-      <div>
+      <div style={{ cursor: 'pointer' }}>
         <img src={IconRemove} alt="Remove Icon" onClick={onRemove} />
       </div>
     </>

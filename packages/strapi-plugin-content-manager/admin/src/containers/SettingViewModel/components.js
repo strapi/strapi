@@ -58,6 +58,9 @@ const InfoLabel = styled.div`
   position: absolute;
   top: 0;
   right: 40px;
+  max-width: 90px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 
   font-weight: 400;
   color: #007eff;

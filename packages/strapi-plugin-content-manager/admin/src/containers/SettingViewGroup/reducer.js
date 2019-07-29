@@ -163,6 +163,8 @@ const reducer = (state, action) => {
       return state
         .update('itemNameToSelect', () => action.name)
         .update('itemFormType', () => action.formType);
+    case 'SUBMIT_SUCCEEDED':
+      return state.update('initialData', () => state.get('modifiedData'));
     default:
       return state;
   }

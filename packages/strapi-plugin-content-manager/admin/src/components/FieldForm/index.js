@@ -51,10 +51,7 @@ const FieldForm = ({
                 return null;
               }
 
-              if (
-                formType === 'media' &&
-                !['label', 'description'].includes(meta)
-              ) {
+              if (formType === 'media' && !['label'].includes(meta)) {
                 return null;
               }
 

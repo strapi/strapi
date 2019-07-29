@@ -54,8 +54,12 @@ function GroupCollapse({
           >
             <i className="fa fa-trash" />
           </button>
-          <button type="button" style={{ lineHeigth: '32px' }}>
-            <img src={Grab} alt="grab icon" />
+          <button type="button" style={{ lineHeight: '32px' }}>
+            <img
+              src={Grab}
+              alt="grab icon"
+              style={{ verticalAlign: 'unset' }}
+            />
           </button>
         </Flex>
       </GroupCollapseWrapper>

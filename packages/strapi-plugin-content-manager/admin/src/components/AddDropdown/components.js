@@ -47,7 +47,7 @@ const Wrapper = styled.div`
             margin-right: 10px;
             content: '\f067';
             font-family: FontAwesome;
-            font-size: 10px;
+            font-size: 13px;
             color: #007eff;
           }
         }

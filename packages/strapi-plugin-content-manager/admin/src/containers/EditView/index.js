@@ -469,7 +469,7 @@ function EditView({
             <div className="col-md-12 col-lg-3">
               {hasRelations && (
                 <SubWrapper
-                  style={{ padding: '0 20px 1px', marginBottom: '28px' }}
+                  style={{ padding: '0 20px 1px', marginBottom: '26px' }}
                 >
                   <div style={{ paddingTop: '22px' }}>
                     {displayedRelations.map(relationName => {

@@ -16,6 +16,7 @@ const Button = styled.div`
   line-height: 35px;
   cursor: pointer;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
   > i {
     margin-right: 10px;
   }
@@ -25,6 +26,7 @@ const Flex = styled.div`
   display: flex;
   > button {
     cursor: pointer;
+    padding-top: 0;
   }
 `;
 
@@ -36,6 +38,7 @@ const GroupCollapseWrapper = styled(Flex)`
   line-height: 34px;
   background-color: #ffffff;
   font-size: 13px;
+  border-radius: 2px;
   button,
   i,
   img {
@@ -50,7 +53,7 @@ const ImgWrapper = styled.div`
   width: 21px;
   height: 21px;
   margin: auto;
-  margin-right: 20px;
+  margin-right: 19px;
   border-radius: 50%;
   background-color: #e3e9f3;
   text-align: center;

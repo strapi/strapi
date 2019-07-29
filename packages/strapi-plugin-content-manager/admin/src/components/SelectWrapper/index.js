@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
-import { isEmpty } from 'lodash';
+import { isArray, isEmpty } from 'lodash';
 import { request } from 'strapi-helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -138,16 +138,24 @@ function SelectWrapper({
       </Link>
     );
   const Component = isSingle ? SelectOne : SelectMany;
+  const associationsLength = isArray(value) ? value.length : 0;
 
   return (
     <Wrapper className="form-group">
       <Nav>
-        <label htmlFor={name}>{label}</label>
-        {isSingle && link}
+        <div>
+          <label htmlFor={name}>
+            {label}
+            {!isSingle && (
+              <span style={{ fontWeight: 400, fontSize: 12 }}>
+                &nbsp;({associationsLength})
+              </span>
+            )}
+          </label>
+          {isSingle && link}
+        </div>
+        {!isEmpty(description) && <p className="description">{description}</p>}
       </Nav>
-      {!isEmpty(description) && (
-        <p style={{ fontSize: 13, fontWeight: 500 }}>{description}</p>
-      )}
       <Component
         addRelation={value => {
           addRelation({ target: { name, value } });

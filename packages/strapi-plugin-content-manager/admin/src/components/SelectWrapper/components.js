@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
-  margin-bottom: 0;
+  margin-bottom: 27px;
 
   label {
     font-size: 1.3rem;
@@ -103,18 +103,26 @@ const Wrapper = styled.div`
 `;
 
 const Nav = styled.nav`
-  display: flex;
-  justify-content: space-between;
+  > div {
+    display: flex;
 
-  a {
-    color: #007eff !important;
-    font-size: 1.3rem;
-    padding-top: 3px;
+    justify-content: space-between;
 
-    &:hover {
-      text-decoration: underline !important;
-      cursor: pointer;
+    a {
+      color: #007eff !important;
+      font-size: 1.3rem;
+
+      &:hover {
+        text-decoration: underline !important;
+        cursor: pointer;
+      }
     }
+  }
+  .description {
+    color: #9ea7b8;
+    font-family: 'Lato';
+    font-size: 1.2rem;
+    margin-top: -5px;
   }
 `;
 

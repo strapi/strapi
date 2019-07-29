@@ -29,10 +29,6 @@ const FieldsReorder = ({ className }) => {
     attributeName => {
       const attribute = get(attributes, [attributeName], {});
 
-      if (attribute.plugin === 'upload' || attribute.type === 'media') {
-        return 'file';
-      }
-
       return attribute.type;
     },
     [attributes]

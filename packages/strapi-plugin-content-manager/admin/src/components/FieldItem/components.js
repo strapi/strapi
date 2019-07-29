@@ -4,6 +4,9 @@ const InfoLabel = styled.div`
   position: absolute;
   top: 0;
   right: 40px;
+  max-width: 80px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 
   font-weight: 400;
   color: #007eff;
@@ -17,7 +20,7 @@ color: #007eff;
 cursor: pointer;
 &:before {
   content: '\f013';
-  margin-right: 10px;
+  margin-right: 7px;
   font-family: 'FontAwesome';
   font-size: 12px;
 }
@@ -65,7 +68,7 @@ const NameWrapper = styled.div`
   width: 100%;
 
   display: flex;
-  padding-left: 5px;
+  padding-left: 10px;
   justify-content: space-between;
   > div {
     width: calc(100% - 30px);
@@ -103,6 +106,7 @@ const NameWrapper = styled.div`
   ${({ isEditing, isSelected }) => {
     if (isEditing || isSelected) {
       return css`
+        color: #007eff;
         background: #e6f0fb;
         border: 1px solid #aed4fb;
       `;
