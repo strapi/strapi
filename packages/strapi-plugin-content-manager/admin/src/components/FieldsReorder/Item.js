@@ -77,10 +77,6 @@ const Item = ({
 
       moveRow(dragRow, targetRow);
 
-      // Note: we're mutating the monitor item here!
-      // Generally it's better to avoid mutations,
-      // but it's good here for the sake of performance
-      // to avoid expensive index searches.
       item.rowIndex = targetRow;
       item.itemIndex = hoverIndex;
 
@@ -116,7 +112,6 @@ const Item = ({
         Math.abs(monitor.getClientOffset().x - hoverBoundingRect.left) >
         hoverBoundingRect.width / 1.8
       ) {
-        // TODO ADD NEW LINE
         moveItem(dragIndex, hoverIndex + 1, dragRow, targetRow);
 
         item.itemIndex = hoverIndex + 1;
@@ -160,6 +155,8 @@ const Item = ({
     item: { type: ItemTypes.EDIT_FIELD, itemIndex, rowIndex, name, size },
   });
 
+  // Remove the default preview when the item is being dragged
+  // The preview is handled by the DragLayer
   useEffect(() => {
     preview(getEmptyImage(), { captureDraggingState: true });
   }, [preview]);

@@ -25,7 +25,7 @@ const getSize = type => {
 };
 
 const reducer = (state, action) => {
-  const layoutPath = ['modifiedData', 'layouts', 'edit'];
+  const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
   const getFieldType = name =>
     state.getIn(['modifiedData', 'schema', 'attributes', name, 'type']);
@@ -39,10 +39,13 @@ const reducer = (state, action) => {
         .update('itemFormType', () => action.itemFormType)
         .update('modifiedData', () => fromJS(action.data));
     case 'MOVE_ROW':
-      return state.updateIn(layoutPath, list => {
+      return state.updateIn(layoutPathEdit, list => {
         return list
           .delete(dragRowIndex)
-          .insert(hoverRowIndex, state.getIn([...layoutPath, dragRowIndex]));
+          .insert(
+            hoverRowIndex,
+            state.getIn([...layoutPathEdit, dragRowIndex])
+          );
       });
     case 'ON_ADD_DATA': {
       const size = getSize(
@@ -54,9 +57,9 @@ const reducer = (state, action) => {
           'type',
         ])
       );
-      const listSize = state.getIn(layoutPath).size;
+      const listSize = state.getIn(layoutPathEdit).size;
       const newList = state
-        .getIn(layoutPath)
+        .getIn(layoutPathEdit)
         .updateIn([listSize - 1, 'rowContent'], list => {
           if (list) {
             return list.push({
@@ -70,7 +73,7 @@ const reducer = (state, action) => {
       const formattedList = formatLayout(newList.toJS());
 
       return state
-        .updateIn(layoutPath, () => fromJS(formattedList))
+        .updateIn(layoutPathEdit, () => fromJS(formattedList))
         .update('itemNameToSelect', () => action.name)
         .update('itemFormType', () => getFieldType(action.name) || '');
     }
@@ -81,7 +84,11 @@ const reducer = (state, action) => {
       );
 
     case 'REMOVE_FIELD': {
-      const row = state.getIn([...layoutPath, action.rowIndex, 'rowContent']);
+      const row = state.getIn([
+        ...layoutPathEdit,
+        action.rowIndex,
+        'rowContent',
+      ]);
       let newState;
       let fieldNameToDelete;
       // Delete the entire row if length is one or if lenght is equal to 2 and the second element is the hidden div used to make the dnd exp smoother
@@ -90,18 +97,18 @@ const reducer = (state, action) => {
         (row.size == 2 && row.getIn([1, 'name']) === '_TEMP_')
       ) {
         fieldNameToDelete = state.getIn([
-          ...layoutPath,
+          ...layoutPathEdit,
           action.rowIndex,
           'rowContent',
           0,
           'name',
         ]);
-        newState = state.updateIn(layoutPath, list =>
+        newState = state.updateIn(layoutPathEdit, list =>
           list.delete(action.rowIndex)
         );
       } else {
         fieldNameToDelete = state.getIn([
-          ...layoutPath,
+          ...layoutPathEdit,
           action.rowIndex,
           'rowContent',
           action.fieldIndex,
@@ -109,13 +116,13 @@ const reducer = (state, action) => {
         ]);
 
         newState = state.updateIn(
-          [...layoutPath, action.rowIndex, 'rowContent'],
+          [...layoutPathEdit, action.rowIndex, 'rowContent'],
           list => list.delete(action.fieldIndex)
         );
       }
 
       const updatedList = fromJS(
-        formatLayout(newState.getIn(layoutPath).toJS())
+        formatLayout(newState.getIn(layoutPathEdit).toJS())
       );
 
       if (state.get('itemNameToSelect') === fieldNameToDelete) {
@@ -123,39 +130,44 @@ const reducer = (state, action) => {
           updatedList.getIn([0, 'rowContent', 0, 'name']) || '';
 
         return state
-          .updateIn(layoutPath, () => updatedList)
+          .updateIn(layoutPathEdit, () => updatedList)
           .update('itemNameToSelect', () => firstField)
           .update('itemFormType', () => getFieldType(firstField) || '');
       }
 
-      return state.updateIn(layoutPath, () => updatedList);
+      return state.updateIn(layoutPathEdit, () => updatedList);
     }
     case 'REORDER_DIFF_ROW': {
       const newState = state
-        .updateIn([...layoutPath, dragRowIndex, 'rowContent'], list => {
+        .updateIn([...layoutPathEdit, dragRowIndex, 'rowContent'], list => {
           return list.remove(dragIndex);
         })
-        .updateIn([...layoutPath, hoverRowIndex, 'rowContent'], list => {
+        .updateIn([...layoutPathEdit, hoverRowIndex, 'rowContent'], list => {
           return list.insert(
             hoverIndex,
-            state.getIn([...layoutPath, dragRowIndex, 'rowContent', dragIndex])
+            state.getIn([
+              ...layoutPathEdit,
+              dragRowIndex,
+              'rowContent',
+              dragIndex,
+            ])
           );
         });
-      const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+      const updatedList = formatLayout(newState.getIn(layoutPathEdit).toJS());
 
-      return state.updateIn(layoutPath, () => fromJS(updatedList));
+      return state.updateIn(layoutPathEdit, () => fromJS(updatedList));
     }
     case 'REORDER_ROW': {
       const newState = state.updateIn(
-        [...layoutPath, dragRowIndex, 'rowContent'],
+        [...layoutPathEdit, dragRowIndex, 'rowContent'],
         list => {
           return list.delete(dragIndex).insert(hoverIndex, list.get(dragIndex));
         }
       );
 
-      const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+      const updatedList = formatLayout(newState.getIn(layoutPathEdit).toJS());
 
-      return state.updateIn(layoutPath, () => fromJS(updatedList));
+      return state.updateIn(layoutPathEdit, () => fromJS(updatedList));
     }
     case 'RESET':
       return state.update('modifiedData', () => state.get('initialData'));

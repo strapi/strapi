@@ -9,9 +9,7 @@ import '@babel/polyfill';
 import 'sanitize.css/sanitize.css';
 
 // Third party css library needed
-// Currently unable to bundle them
 
-// import 'react-select/dist/react-select.css';
 import 'react-datetime/css/react-datetime.css';
 
 import './styles/main.scss';

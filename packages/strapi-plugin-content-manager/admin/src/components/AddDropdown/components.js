@@ -36,7 +36,6 @@ const Wrapper = styled.div`
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        // width: calc(100% - 18px);
         text-align: center;
         margin-bottom: 0;
         margin-top: -1px;

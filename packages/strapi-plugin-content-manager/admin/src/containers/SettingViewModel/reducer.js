@@ -57,8 +57,8 @@ const getSize = type => {
 };
 
 function settingViewModelReducer(state = initialState, action) {
-  const layoutPath = ['modifiedData', 'layouts', 'edit'];
-  const relationPath = ['modifiedData', 'layouts', 'editRelations'];
+  const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
+  const layoutPathRelations = ['modifiedData', 'layouts', 'editRelations'];
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
   const getFieldType = name =>
     state.getIn(['modifiedData', 'schema', 'attributes', name, 'type']);
@@ -70,9 +70,7 @@ function settingViewModelReducer(state = initialState, action) {
       );
     case ADD_RELATION:
       return state
-        .updateIn(['modifiedData', 'layouts', 'editRelations'], list =>
-          list.push(action.name)
-        )
+        .updateIn(layoutPathRelations, list => list.push(action.name))
         .update('itemNameToSelect', () => action.name)
         .update('itemFormType', () => getFieldType(action.name));
     case GET_DATA_SUCCEEDED:
@@ -93,17 +91,20 @@ function settingViewModelReducer(state = initialState, action) {
           return action.overIndex;
         });
     case MOVE_RELATION: {
-      return state.updateIn(relationPath, list => {
+      return state.updateIn(layoutPathRelations, list => {
         return list
           .delete(dragIndex)
-          .insert(hoverIndex, state.getIn([...relationPath, dragIndex]));
+          .insert(hoverIndex, state.getIn([...layoutPathRelations, dragIndex]));
       });
     }
     case MOVE_ROW:
-      return state.updateIn(layoutPath, list => {
+      return state.updateIn(layoutPathEdit, list => {
         return list
           .delete(dragRowIndex)
-          .insert(hoverRowIndex, state.getIn([...layoutPath, dragRowIndex]));
+          .insert(
+            hoverRowIndex,
+            state.getIn([...layoutPathEdit, dragRowIndex])
+          );
       });
     case ON_ADD_DATA: {
       const size = getSize(
@@ -116,9 +117,9 @@ function settingViewModelReducer(state = initialState, action) {
         ])
       );
 
-      const listSize = state.getIn(layoutPath).size;
+      const listSize = state.getIn(layoutPathEdit).size;
       const newList = state
-        .getIn(layoutPath)
+        .getIn(layoutPathEdit)
         .updateIn([listSize - 1, 'rowContent'], list => {
           if (list) {
             return list.push({
@@ -132,7 +133,7 @@ function settingViewModelReducer(state = initialState, action) {
       const formattedList = formatLayout(newList.toJS());
 
       return state
-        .updateIn(layoutPath, () => fromJS(formattedList))
+        .updateIn(layoutPathEdit, () => fromJS(formattedList))
         .update('itemNameToSelect', () => action.name)
         .update('itemFormType', () => getFieldType(action.name));
     }
@@ -169,7 +170,11 @@ function settingViewModelReducer(state = initialState, action) {
         .update('modifiedData', () => state.get('initialData'))
         .update('listFieldToEditIndex', () => 0);
     case REMOVE_FIELD: {
-      const row = state.getIn([...layoutPath, action.rowIndex, 'rowContent']);
+      const row = state.getIn([
+        ...layoutPathEdit,
+        action.rowIndex,
+        'rowContent',
+      ]);
       let newState;
       let fieldName;
 
@@ -179,34 +184,30 @@ function settingViewModelReducer(state = initialState, action) {
         (row.size == 2 && row.getIn([1, 'name']) === '_TEMP_')
       ) {
         fieldName = state.getIn([
-          'modifiedData',
-          'layouts',
-          'edit',
+          ...layoutPathEdit,
           action.rowIndex,
           'rowContent',
           0,
           'name',
         ]);
-        newState = state.updateIn(layoutPath, list =>
+        newState = state.updateIn(layoutPathEdit, list =>
           list.delete(action.rowIndex)
         );
       } else {
         fieldName = state.getIn([
-          'modifiedData',
-          'layouts',
-          'edit',
+          ...layoutPathEdit,
           action.rowIndex,
           'rowContent',
           action.fieldIndex,
           'name',
         ]);
         newState = state.updateIn(
-          [...layoutPath, action.rowIndex, 'rowContent'],
+          [...layoutPathEdit, action.rowIndex, 'rowContent'],
           list => list.delete(action.fieldIndex)
         );
       }
       const updatedList = fromJS(
-        formatLayout(newState.getIn(layoutPath).toJS())
+        formatLayout(newState.getIn(layoutPathEdit).toJS())
       );
 
       if (state.get('itemNameToSelect') === fieldName) {
@@ -216,29 +217,35 @@ function settingViewModelReducer(state = initialState, action) {
           0,
           'name',
         ]);
-        const firstRelationFieldToSelect = state.getIn([...relationPath, 0]);
+        const firstRelationFieldToSelect = state.getIn([
+          ...layoutPathRelations,
+          0,
+        ]);
         const fieldToSelect =
           firstFieldEditToSelect || firstRelationFieldToSelect || '';
         const fieldToSelectType = getFieldType(fieldToSelect) || '';
 
         return state
-          .updateIn(layoutPath, () => updatedList)
+          .updateIn(layoutPathEdit, () => updatedList)
           .update('itemNameToSelect', () => fieldToSelect)
           .update('itemFormType', () => fieldToSelectType);
       }
 
-      return state.updateIn(layoutPath, () => updatedList);
+      return state.updateIn(layoutPathEdit, () => updatedList);
     }
     case REMOVE_RELATION: {
-      let newState = state.updateIn(relationPath, list =>
+      let newState = state.updateIn(layoutPathRelations, list =>
         list.delete(action.index)
       );
-      const fieldToDeleteName = state.getIn([...relationPath, action.index]);
+      const fieldToDeleteName = state.getIn([
+        ...layoutPathRelations,
+        action.index,
+      ]);
 
       if (state.get('itemNameToSelect') === fieldToDeleteName) {
-        const firstRelation = newState.getIn([...relationPath, 0]);
+        const firstRelation = newState.getIn([...layoutPathRelations, 0]);
         const firstEditField = newState.getIn([
-          ...layoutPath,
+          ...layoutPathEdit,
           '0',
           'rowContent',
           '0',
@@ -256,31 +263,36 @@ function settingViewModelReducer(state = initialState, action) {
     }
     case REORDER_DIFF_ROW: {
       const newState = state
-        .updateIn([...layoutPath, dragRowIndex, 'rowContent'], list => {
+        .updateIn([...layoutPathEdit, dragRowIndex, 'rowContent'], list => {
           return list.remove(dragIndex);
         })
-        .updateIn([...layoutPath, hoverRowIndex, 'rowContent'], list => {
+        .updateIn([...layoutPathEdit, hoverRowIndex, 'rowContent'], list => {
           return list.insert(
             hoverIndex,
-            state.getIn([...layoutPath, dragRowIndex, 'rowContent', dragIndex])
+            state.getIn([
+              ...layoutPathEdit,
+              dragRowIndex,
+              'rowContent',
+              dragIndex,
+            ])
           );
         });
 
-      const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+      const updatedList = formatLayout(newState.getIn(layoutPathEdit).toJS());
 
-      return state.updateIn(layoutPath, () => fromJS(updatedList));
+      return state.updateIn(layoutPathEdit, () => fromJS(updatedList));
     }
     case REORDER_ROW: {
       const newState = state.updateIn(
-        [...layoutPath, dragRowIndex, 'rowContent'],
+        [...layoutPathEdit, dragRowIndex, 'rowContent'],
         list => {
           return list.delete(dragIndex).insert(hoverIndex, list.get(dragIndex));
         }
       );
 
-      const updatedList = formatLayout(newState.getIn(layoutPath).toJS());
+      const updatedList = formatLayout(newState.getIn(layoutPathEdit).toJS());
 
-      return state.updateIn(layoutPath, () => fromJS(updatedList));
+      return state.updateIn(layoutPathEdit, () => fromJS(updatedList));
     }
     case RESET_PROPS:
       return initialState;

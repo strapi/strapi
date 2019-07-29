@@ -47,11 +47,10 @@ const FieldForm = ({
           {Object.keys(metadatas)
             .filter(meta => meta !== 'visible')
             .map(meta => {
-              if (formType === 'group' && meta !== 'label') {
-                return null;
-              }
-
-              if (formType === 'media' && !['label'].includes(meta)) {
+              if (
+                (formType === 'group' || formType === 'media') &&
+                meta !== 'label'
+              ) {
                 return null;
               }
 

@@ -15,8 +15,6 @@ function reducer(state, action) {
         list.map(obj => obj.update('isOpen', () => false))
       );
     case 'OPEN_COLLAPSES_THAT_HAVE_ERRORS':
-      // TODO fix collapse open
-      // return state;
       return state
         .update('collapsesToOpen', () => fromJS(action.collapsesToOpen))
         .update('collapses', list => {

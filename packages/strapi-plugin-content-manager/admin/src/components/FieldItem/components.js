@@ -5,9 +5,9 @@ const InfoLabel = styled.div`
   top: 0;
   right: 40px;
   max-width: 80px;
+
   text-overflow: ellipsis;
   overflow: hidden;
-
   font-weight: 400;
   color: #007eff;
 `;
@@ -40,8 +40,8 @@ const Carret = styled.div`
     `;
   }}
   height: 30px;
-  margin-right: 3px;
   width: 2px;
+  margin-right: 3px;
   border-radius: 2px;
   background: #007eff;
 `;
@@ -75,11 +75,11 @@ const NameWrapper = styled.div`
   }
   .name {
     display: inline-block;
+    width: calc(100% - 18px);
     vertical-align: top;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    width: calc(100% - 18px);
   }
 
   ${({ isHidden }) => {

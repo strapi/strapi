@@ -87,7 +87,7 @@ const Item = ({ index, move, name, removeItem }) => {
       push={goTo}
       ref={ref}
       size={12}
-      style={{ marginBottom: 6 }}
+      style={{ marginBottom: 6, paddingLeft: 5, paddingRight: 5 }}
     />
   );
 };
