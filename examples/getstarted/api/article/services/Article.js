@@ -5,4 +5,13 @@
  * to customize this service
  */
 
-module.exports = {};
+module.exports = {
+  find(params) {
+    // return strapi.query('article').find(params, {
+    //   manyTags: () => {},
+    //   ['linkedTags.linkedArticles.pic']: () => {},
+    // });
+
+    return strapi.query('article').find(params, ['ingredients']);
+  },
+};

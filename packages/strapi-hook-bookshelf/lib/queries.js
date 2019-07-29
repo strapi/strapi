@@ -58,7 +58,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     }
 
     const entry = await model.forge(params).fetch({
-      withRelated: populate || defaultPopulate,
+      withRelated: _.isNil(populate) ? defaultPopulate : populate,
     });
 
     return entry ? entry.toJSON() : null;
@@ -72,7 +72,10 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     return model
       .query(buildQuery({ model, filters }))
-      .fetchAll({ withRelated: populate || defaultPopulate, transacting })
+      .fetchAll({
+        withRelated: _.isNil(populate) ? defaultPopulate : populate,
+        transacting,
+      })
       .then(results => results.toJSON());
   }
 
