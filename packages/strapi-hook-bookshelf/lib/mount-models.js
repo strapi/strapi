@@ -458,7 +458,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         groupAttributes.forEach(key => {
           const { repeatable } = definition.attributes[key];
           if (relations[key]) {
-            const groups = relations[key].toJSON().map(el => el.slice);
+            const groups = relations[key].toJSON().map(el => el.group);
 
             attrs[key] = repeatable === true ? groups : _.first(groups) || null;
           }
@@ -596,18 +596,18 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           assoc => assoc.autoPopulate === true
         );
 
-        // paths.push(`${key}.slice`);
+        // paths.push(`${key}.group`);
         assocs.forEach(assoc => {
           if (isPolymorphic({ assoc })) {
             const rel = formatPolymorphicPopulate({
               assoc,
               path: assoc.alias,
-              prefix: `${key}.slice.`,
+              prefix: `${key}.group.`,
             });
 
             paths.push(rel);
           } else {
-            paths.push(`${key}.slice.${assoc.alias}`);
+            paths.push(`${key}.group.${assoc.alias}`);
           }
         });
 
@@ -655,7 +655,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             if (isGroup(tmpModel, part)) {
               tmpModel = strapi.groups[tmpModel.attributes[part].group];
               // add group path and there relations / images
-              const path = `${prefix}${part}.slice`;
+              const path = `${prefix}${part}.group`;
 
               newKey = path;
               prefix = `${path}.`;

@@ -243,8 +243,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
             return joinModel.forge().save(
               {
                 [foreignKey]: entry.id,
-                slice_type: groupModel.collectionName,
-                slice_id: group.id,
+                group_type: groupModel.collectionName,
+                group_id: group.id,
                 field: key,
                 order,
               },
@@ -312,8 +312,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
                 .query({
                   where: {
                     [foreignKey]: entry.id,
-                    slice_type: groupModel.collectionName,
-                    slice_id: group.id,
+                    group_type: groupModel.collectionName,
+                    group_id: group.id,
                     field: key,
                   },
                 })
@@ -333,8 +333,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
             return joinModel.forge().save(
               {
                 [foreignKey]: entry.id,
-                slice_type: groupModel.collectionName,
-                slice_id: group.id,
+                group_type: groupModel.collectionName,
+                group_id: group.id,
                 field: key,
                 order,
               },
@@ -391,7 +391,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         qb.where(joinModel.foreignKey, entry.id).andWhere('field', key);
       })
       .fetchAll({ transacting })
-      .map(el => el.get('slice_id').toString());
+      .map(el => el.get('group_id').toString());
 
     // verify the provided ids are realted to this entity.
     idsToKeep.forEach(id => {
@@ -408,7 +408,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     if (idsToDelete.length > 0) {
       await joinModel
         .forge()
-        .query(qb => qb.whereIn('slice_id', idsToDelete))
+        .query(qb => qb.whereIn('group_id', idsToDelete))
         .destroy({ transacting, require: false });
 
       await strapi
@@ -437,12 +437,12 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         .query({
           where: {
             [foreignKey]: entry.id,
-            slice_type: groupModel.collectionName,
+            group_type: groupModel.collectionName,
             field: key,
           },
         })
         .fetchAll({ transacting })
-        .map(el => el.get('slice_id'));
+        .map(el => el.get('group_id'));
 
       await strapi
         .query(groupModel.uid)
@@ -453,7 +453,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         .query({
           where: {
             [foreignKey]: entry.id,
-            slice_type: groupModel.collectionName,
+            group_type: groupModel.collectionName,
             field: key,
           },
         })
