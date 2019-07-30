@@ -436,6 +436,15 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         });
       };
 
+      // Extract association except polymorphic.
+      const associations = definition.associations.filter(
+        association => association.nature.toLowerCase().indexOf('morph') === -1
+      );
+      // Extract polymorphic association.
+      const polymorphicAssociations = definition.associations.filter(
+        association => association.nature.toLowerCase().indexOf('morph') !== -1
+      );
+
       // Update serialize to reformat data for polymorphic associations.
       loadedModel.serialize = function(options) {
         const attrs = _.clone(this.attributes);
@@ -447,26 +456,13 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         const relations = this.relations;
 
         groupAttributes.forEach(key => {
+          const { repeatable } = definition.attributes[key];
           if (relations[key]) {
             const groups = relations[key].toJSON().map(el => el.slice);
 
-            attrs[key] =
-              definition.attributes[key].repeatable === true
-                ? groups
-                : _.first(groups) || null;
+            attrs[key] = repeatable === true ? groups : _.first(groups) || null;
           }
         });
-
-        // Extract association except polymorphic.
-        const associations = definition.associations.filter(
-          association =>
-            association.nature.toLowerCase().indexOf('morph') === -1
-        );
-        // Extract polymorphic association.
-        const polymorphicAssociations = definition.associations.filter(
-          association =>
-            association.nature.toLowerCase().indexOf('morph') !== -1
-        );
 
         polymorphicAssociations.map(association => {
           // Retrieve relation Bookshelf object.
@@ -489,7 +485,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
             switch (association.nature) {
               case 'oneToManyMorph':
                 attrs[association.alias] =
-                  attrs[association.alias][model.collectionName];
+                  attrs[association.alias][model.collectionName] || null;
                 break;
               case 'manyToManyMorph':
                 attrs[association.alias] = attrs[association.alias].map(
@@ -497,7 +493,8 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
                 );
                 break;
               case 'oneMorphToOne':
-                attrs[association.alias] = attrs[association.alias].related;
+                attrs[association.alias] =
+                  attrs[association.alias].related || null;
                 break;
               case 'manyMorphToOne':
               case 'manyMorphToMany':
@@ -524,6 +521,176 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         return attrs;
       };
 
+      const findModelByAssoc = ({ assoc }) => {
+        const target = assoc.collection || assoc.model;
+        return assoc.plugin === 'admin'
+          ? strapi.admin.models[target]
+          : assoc.plugin
+          ? strapi.plugins[assoc.plugin].models[target]
+          : strapi.models[target];
+      };
+
+      const isPolymorphic = ({ assoc }) => {
+        return assoc.nature.toLowerCase().indexOf('morph') !== -1;
+      };
+
+      const formatPolymorphicPopulate = ({ assoc, path, prefix = '' }) => {
+        if (_.isString(path) && path === assoc.via) {
+          return `related.${assoc.via}`;
+        } else if (_.isString(path) && path === assoc.alias) {
+          // MorphTo side.
+          if (assoc.related) {
+            return `${prefix}${assoc.alias}.related`;
+          }
+
+          // oneToMorph or manyToMorph side.
+          // Retrieve collection name because we are using it to build our hidden model.
+          const model = findModelByAssoc({ assoc });
+
+          return {
+            [`${prefix}${assoc.alias}.${model.collectionName}`]: function(
+              query
+            ) {
+              query.orderBy('created_at', 'desc');
+            },
+          };
+        }
+      };
+
+      const createAssociationPopulate = () => {
+        return definition.associations
+          .filter(ast => ast.autoPopulate !== false)
+          .map(assoc => {
+            if (isPolymorphic({ assoc })) {
+              return formatPolymorphicPopulate({
+                assoc,
+                path: assoc.alias,
+              });
+            }
+
+            let path = assoc.alias;
+            let extraAssocs = [];
+            if (assoc) {
+              const assocModel = findModelByAssoc({ assoc });
+
+              extraAssocs = assocModel.associations
+                .filter(assoc => isPolymorphic({ assoc }))
+                .map(assoc =>
+                  formatPolymorphicPopulate({
+                    assoc,
+                    path: assoc.alias,
+                    prefix: `${path}.`,
+                  })
+                );
+            }
+
+            return [assoc.alias, ...extraAssocs];
+          })
+          .reduce((acc, val) => acc.concat(val), []);
+      };
+
+      const populateGroup = key => {
+        let paths = [];
+        const group = strapi.groups[definition.attributes[key].group];
+        const assocs = (group.associations || []).filter(
+          assoc => assoc.autoPopulate === true
+        );
+
+        // paths.push(`${key}.slice`);
+        assocs.forEach(assoc => {
+          if (isPolymorphic({ assoc })) {
+            const rel = formatPolymorphicPopulate({
+              assoc,
+              path: assoc.alias,
+              prefix: `${key}.slice.`,
+            });
+
+            paths.push(rel);
+          } else {
+            paths.push(`${key}.slice.${assoc.alias}`);
+          }
+        });
+
+        return paths;
+      };
+
+      const createGroupsPopulate = () => {
+        const groupsToPopulate = groupAttributes.reduce((acc, key) => {
+          const attribute = definition.attributes[key];
+          const autoPopulate = _.get(attribute, ['autoPopulate'], true);
+
+          if (autoPopulate === true) {
+            return acc.concat(populateGroup(key));
+          }
+          return acc;
+        }, []);
+
+        return groupsToPopulate;
+      };
+
+      const isGroup = (def, key) =>
+        _.get(def, ['attributes', key, 'type']) === 'group';
+
+      const formatPopulateOptions = withRelated => {
+        if (!Array.isArray(withRelated)) withRelated = [withRelated];
+
+        const obj = withRelated.reduce((acc, key) => {
+          if (_.isString(key)) {
+            acc[key] = () => {};
+            return acc;
+          }
+
+          return _.extend(acc, key);
+        }, {});
+
+        // if groups are no
+        const finalObj = Object.keys(obj).reduce((acc, key) => {
+          // check the key path and update it if necessary nothing more
+          const parts = key.split('.');
+
+          let newKey;
+          let prefix = '';
+          let tmpModel = definition;
+          for (let part of parts) {
+            if (isGroup(tmpModel, part)) {
+              tmpModel = strapi.groups[tmpModel.attributes[part].group];
+              // add group path and there relations / images
+              const path = `${prefix}${part}.slice`;
+
+              newKey = path;
+              prefix = `${path}.`;
+              continue;
+            }
+
+            const assoc = tmpModel.associations.find(
+              association => association.alias === part
+            );
+
+            if (!assoc) return acc;
+
+            tmpModel = findModelByAssoc({ assoc });
+
+            if (isPolymorphic({ assoc })) {
+              const path = formatPolymorphicPopulate({
+                assoc,
+                path: assoc.alias,
+                prefix,
+              });
+
+              return _.extend(acc, path);
+            }
+
+            newKey = `${prefix}${part}`;
+            prefix = `${newKey}.`;
+          }
+
+          acc[newKey] = obj[key];
+          return acc;
+        }, {});
+
+        return [finalObj];
+      };
+
       // Initialize lifecycle callbacks.
       loadedModel.initialize = function() {
         const lifecycle = {
@@ -547,84 +714,19 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           }
         });
 
-        const findModelByAssoc = ({ assoc }) => {
-          return assoc.plugin
-            ? strapi.plugins[assoc.plugin].models[
-                assoc.collection || assoc.model
-              ]
-            : strapi.models[assoc.collection || assoc.model];
-        };
-
-        const isPolymorphic = ({ assoc }) => {
-          return assoc.nature.toLowerCase().indexOf('morph') !== -1;
-        };
-
-        const formatPolymorphicPopulate = ({ assoc, path, prefix = '' }) => {
-          if (_.isString(path) && path === assoc.via) {
-            return `related.${assoc.via}`;
-          } else if (_.isString(path) && path === assoc.alias) {
-            // MorphTo side.
-            if (assoc.related) {
-              return `${prefix}${assoc.alias}.related`;
-            }
-
-            // oneToMorph or manyToMorph side.
-            // Retrieve collection name because we are using it to build our hidden model.
-            const model = findModelByAssoc({ assoc });
-
-            return {
-              [`${prefix}${assoc.alias}.${model.collectionName}`]: function(
-                query
-              ) {
-                query.orderBy('created_at', 'desc');
-              },
-            };
-          }
-        };
-
-        const addPolymorphicRelated = path => {
-          const assoc = definition.associations.find(
-            assoc => assoc.alias === path || assoc.via === path
-          );
-
-          if (assoc && isPolymorphic({ assoc })) {
-            return formatPolymorphicPopulate({
-              assoc,
-              path,
-            });
-          }
-
-          let extraAssocs = [];
-          if (assoc) {
-            const assocModel = findModelByAssoc({ assoc });
-
-            extraAssocs = assocModel.associations
-              .filter(assoc => isPolymorphic({ assoc }))
-              .map(assoc =>
-                formatPolymorphicPopulate({
-                  assoc,
-                  path: assoc.alias,
-                  prefix: `${path}.`,
-                })
-              );
-          }
-
-          return [path, ...extraAssocs];
-        };
-
         // Update withRelated level to bypass many-to-many association for polymorphic relationshiips.
         // Apply only during fetching.
         this.on('fetching fetching:collection', (instance, attrs, options) => {
-          if (_.isArray(options.withRelated)) {
-            options.withRelated = options.withRelated
-              .concat(groupAttributes.map(key => `${key}.slice`))
-              .map(addPolymorphicRelated)
-              .reduce((acc, paths) => acc.concat(paths), []);
+          // do not populate anything
+          if (options.withRelated === false) return;
+          if (options.isEager === true) return;
+
+          if (_.isNil(options.withRelated)) {
+            options.withRelated = []
+              .concat(createGroupsPopulate())
+              .concat(createAssociationPopulate());
           } else {
-            options.withRelated = groupAttributes
-              .map(key => `${key}.slice`)
-              .map(addPolymorphicRelated)
-              .reduce((acc, paths) => acc.concat(paths), []);
+            options.withRelated = formatPopulateOptions(options.withRelated);
           }
 
           return _.isFunction(target[model.toLowerCase()]['beforeFetchAll'])
