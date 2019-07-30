@@ -210,12 +210,12 @@ input editRecipeInput {
 
 input editRocketshipInput {
   name: String
-  rocketshipmaker: ID
+  pic: ID
+  pictures: [ID]
 }
 
 input editRocketshipmakerInput {
   name: String
-  rocketships: [ID]
 }
 
 input editRoleInput {
@@ -392,7 +392,8 @@ input RecipeInput {
 
 type Rocketship {
   name: String
-  rocketshipmaker: Rocketshipmaker
+  pic: UploadFile
+  pictures(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
@@ -400,12 +401,12 @@ type Rocketship {
 
 input RocketshipInput {
   name: String
-  rocketshipmaker: ID
+  pic: ID
+  pictures: [ID]
 }
 
 type Rocketshipmaker {
   name: String
-  rocketships(sort: String, limit: Int, start: Int, where: JSON): [Rocketship]
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
@@ -413,7 +414,6 @@ type Rocketshipmaker {
 
 input RocketshipmakerInput {
   name: String
-  rocketships: [ID]
 }
 
 input RoleInput {

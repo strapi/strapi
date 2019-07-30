@@ -11,6 +11,7 @@ import {
   GET_LAYOUT_SUCCEEDED,
   ON_CHANGE_LIST_LABELS,
   RESET_LIST_LABELS,
+  RESET_PROPS,
 } from './constants';
 
 export const initialState = fromJS({
@@ -58,6 +59,8 @@ function mainReducer(state = initialState, action) {
       return state.updateIn(['layouts', action.slug], () =>
         state.getIn(['initialLayouts', action.slug])
       );
+    case RESET_PROPS:
+      return initialState;
     default:
       return state;
   }

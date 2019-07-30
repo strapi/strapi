@@ -13,10 +13,6 @@
   "attributes": {
     "name": {
       "type": "string"
-    },
-    "rocketships": {
-      "collection": "rocketship",
-      "via": "rocketshipmaker"
     }
   }
 }

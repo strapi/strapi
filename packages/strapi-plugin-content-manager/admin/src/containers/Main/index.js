@@ -16,7 +16,7 @@ import SettingViewModel from '../SettingViewModel';
 import SettingViewGroup from '../SettingViewGroup';
 import SettingsView from '../SettingsView';
 
-import { getData, getLayout } from './actions';
+import { getData, getLayout, resetProps } from './actions';
 import reducer from './reducer';
 import saga from './saga';
 import makeSelectMain from './selectors';
@@ -33,6 +33,7 @@ function Main({
   location: { pathname, search },
   global: { plugins },
   models,
+  resetProps,
 }) {
   strapi.useInjectReducer({ key: 'main', reducer, pluginId });
   strapi.useInjectSaga({ key: 'main', saga, pluginId });
@@ -40,15 +41,21 @@ function Main({
   const source = getQueryParameters(search, 'source');
   const getDataRef = useRef();
   const getLayoutRef = useRef();
+  const resetPropsRef = useRef();
 
   getDataRef.current = getData;
   getLayoutRef.current = getLayout;
+  resetPropsRef.current = resetProps;
 
   const shouldShowLoader =
     slug !== 'ctm-configurations' && layouts[slug] === undefined;
 
   useEffect(() => {
     getDataRef.current();
+
+    return () => {
+      resetPropsRef.current();
+    };
   }, [getDataRef]);
   useEffect(() => {
     if (shouldShowLoader) {
@@ -118,6 +125,7 @@ Main.propTypes = {
     search: PropTypes.string,
   }),
   models: PropTypes.array.isRequired,
+  resetProps: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectMain();
@@ -127,6 +135,7 @@ export function mapDispatchToProps(dispatch) {
     {
       getData,
       getLayout,
+      resetProps,
     },
     dispatch
   );

@@ -7,16 +7,25 @@
   },
   "options": {
     "increments": true,
-    "timestamps": true,
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
     "name": {
       "type": "string"
     },
-    "rocketshipmaker": {
-      "model": "rocketshipmaker",
-      "via": "rocketships"
+    "pic": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
+    },
+    "pictures": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload"
     }
   }
 }

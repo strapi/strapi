@@ -129,7 +129,6 @@ function SettingViewModel({
   }, [modifiedData]);
 
   // Retrieve the metadatas for the field's form of the edit view
-  // Doesn't need to be a function
   const getSelectedItemMetas = useCallback(() => {
     return get(modifiedData, ['metadatas', itemNameToSelect, 'edit'], null);
   }, [modifiedData, itemNameToSelect]);

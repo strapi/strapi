@@ -7,6 +7,7 @@ import {
   GET_LAYOUT_SUCCEEDED,
   ON_CHANGE_LIST_LABELS,
   RESET_LIST_LABELS,
+  RESET_PROPS,
 } from './constants';
 
 export function deleteLayout(uid) {
@@ -65,5 +66,11 @@ export function resetListLabels(slug) {
   return {
     type: RESET_LIST_LABELS,
     slug,
+  };
+}
+
+export function resetProps() {
+  return {
+    type: RESET_PROPS,
   };
 }
