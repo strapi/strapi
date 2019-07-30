@@ -186,7 +186,6 @@ class AttributeForm extends React.Component {
         const { attributeOptions } = this.props;
 
         const options = attributeOptions.map(option => {
-          console.log(option);
           return {
             name: option.name,
             value: option.uid,

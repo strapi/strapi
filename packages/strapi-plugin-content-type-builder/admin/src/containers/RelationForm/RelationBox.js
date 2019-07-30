@@ -53,11 +53,13 @@ const RelationBox = ({
             didCheckErrors={didCheckErrors}
             errors={errors}
             label="Field Name"
-            disabled={value === '-' || nature === 'oneWay'}
+            disabled={
+              value === '-' || nature === 'oneWay' || nature === 'manyWay'
+            }
             name={main ? 'name' : 'key'}
             onChange={onChange}
             type="text"
-            value={nature === 'oneWay' ? '-' : value}
+            value={nature === 'oneWay' || nature === 'manyWay' ? '-' : value}
           />
         </div>
       </div>

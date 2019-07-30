@@ -496,13 +496,13 @@ function appReducer(state = initialState, action) {
           return pluralize(name, number);
         })
         .updateIn(['temporaryAttributeRelation', 'key'], key => {
+          if (nature === 'oneWay' || nature === 'manyWay') {
+            return '-';
+          }
+
           const number = shouldPluralizeKey(nature) ? 2 : 1;
           const newKey =
             nature !== 'oneWay' && key === '-' ? currentModel : key;
-
-          if (nature === 'oneWay') {
-            return '-';
-          }
 
           return pluralize(newKey, number);
         });
@@ -685,15 +685,17 @@ function appReducer(state = initialState, action) {
       const updatedRelationTarget = temporaryAttributeRelation.get('target');
 
       const shouldAddComplementaryAttribute =
-        initialRelationNature === 'oneWay' &&
-        updatedRelationNature !== 'oneWay';
+        ['oneWay', 'manyWay'].includes(initialRelationNature) &&
+        !['oneWay', 'manyWay'].includes(updatedRelationNature);
+
       const shouldRemoveComplementaryAttribute =
-        (initialRelationNature !== 'oneWay' &&
-          updatedRelationNature === 'oneWay') ||
+        (!['oneWay', 'manyWay'].includes(initialRelationNature) &&
+          ['oneWay', 'manyWay'].includes(updatedRelationNature)) ||
         initialAttributeRelationTarget !== updatedRelationTarget;
+
       const shouldUpdateComplementaryAttribute =
-        initialRelationNature !== 'oneWay' &&
-        updatedRelationNature !== 'oneWay';
+        !['oneWay', 'manyWay'].includes(initialRelationNature) &&
+        !['oneWay', 'manyWay'].includes(updatedRelationNature);
 
       let newState = state;
 
@@ -733,6 +735,7 @@ function appReducer(state = initialState, action) {
       if (
         hasInternalRelation &&
         updatedRelationNature !== 'oneWay' &&
+        updatedRelationNature !== 'manyWay' &&
         initialAttributeRelationTarget !== updatedRelationTarget
       ) {
         newState = newState.updateIn(

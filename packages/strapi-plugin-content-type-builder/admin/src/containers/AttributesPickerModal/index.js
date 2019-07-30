@@ -141,8 +141,12 @@ class AttributesPickerModal extends React.Component {
   updateNodeToFocus = position => this.setState({ nodeToFocus: position });
 
   renderAttribute = (attribute, index) => {
+    const { featureType } = this.props;
     const { isDisplayed, nodeToFocus } = this.state;
 
+    if (attribute.type === featureType) {
+      return null;
+    }
     return (
       <AttributeOption
         autoFocus={nodeToFocus === index}

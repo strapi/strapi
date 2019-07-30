@@ -670,7 +670,10 @@ export const buildModelAttributes = attributes => {
       acc[current.name] = Object.assign(current.params, {
         enum: current.params.enum.join('\n'),
       });
-    } else if (current.params.nature === 'oneWay') {
+    } else if (
+      current.params.nature === 'oneWay' ||
+      current.params.nature === 'manyWay'
+    ) {
       acc[current.name] = Object.assign(current.params, { key: '-' });
     } else {
       acc[current.name] = current.params;

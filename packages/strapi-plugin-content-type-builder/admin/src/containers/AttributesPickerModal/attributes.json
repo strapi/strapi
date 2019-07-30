@@ -44,11 +44,11 @@
     "description": "content-type-builder.popUpForm.attributes.enumeration.description"
   },
   {
-    "type": "group",
-    "description": "content-type-builder.popUpForm.attributes.group.description"
-  },
-  {
     "type": "richtext",
     "description": "content-type-builder.popUpForm.attributes.richtext.description"
+  },
+  {
+    "type": "group",
+    "description": "content-type-builder.popUpForm.attributes.group.description"
   }
 ]
