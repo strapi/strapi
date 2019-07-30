@@ -7,11 +7,6 @@
 
 module.exports = {
   find(params) {
-    // return strapi.query('article').find(params, {
-    //   manyTags: () => {},
-    //   ['linkedTags.linkedArticles.pic']: () => {},
-    // });
-
-    return strapi.query('article').find(params, ['ingredients']);
+    return strapi.query('article').find(params);
   },
 };

@@ -19,11 +19,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     return model.attributes[key].type === 'group';
   });
 
-  // default relations to populate
-  const defaultPopulate = model.associations
-    .filter(ast => ast.autoPopulate !== false)
-    .map(ast => ast.alias);
-
   // Returns an object with relation keys only to create relations in DB
   const pickRelations = values => {
     return _.pick(values, assocKeys);
@@ -58,7 +53,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     }
 
     const entry = await model.forge(params).fetch({
-      withRelated: _.isNil(populate) ? defaultPopulate : populate,
+      withRelated: populate,
     });
 
     return entry ? entry.toJSON() : null;
@@ -73,7 +68,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     return model
       .query(buildQuery({ model, filters }))
       .fetchAll({
-        withRelated: _.isNil(populate) ? defaultPopulate : populate,
+        withRelated: populate,
         transacting,
       })
       .then(results => results.toJSON());
@@ -199,9 +194,6 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     // Convert `params` object to filters compatible with Bookshelf.
     const filters = modelUtils.convertParams(modelKey, params);
 
-    // Select field to populate.
-    const withRelated = populate || defaultPopulate;
-
     return model
       .query(qb => {
         buildSearchQuery(qb, model, params);
@@ -219,7 +211,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         }
       })
       .fetchAll({
-        withRelated,
+        withRelated: populate,
       });
   }
 
