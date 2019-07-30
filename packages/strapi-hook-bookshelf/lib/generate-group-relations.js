@@ -15,9 +15,9 @@ const createGroupModels = async ({ model, definition, ORM, GLOBALS }) => {
     const joinColumn = `${pluralize.singular(collectionName)}_${primaryKey}`;
     const joinModel = ORM.Model.extend({
       tableName: joinTable,
-      slice() {
+      group() {
         return this.morphTo(
-          'slice',
+          'group',
           ...groupAttributes.map(key => {
             const groupKey = definition.attributes[key].group;
             return GLOBALS[strapi.groups[groupKey].globalId];
@@ -59,8 +59,8 @@ const createGroupJoinTables = async ({ definition, ORM }) => {
         .integer('order')
         .unsigned()
         .notNullable();
-      table.string('slice_type').notNullable();
-      table.integer('slice_id').notNullable();
+      table.string('group_type').notNullable();
+      table.integer('group_id').notNullable();
       table.integer(joinColumn).notNullable();
 
       table

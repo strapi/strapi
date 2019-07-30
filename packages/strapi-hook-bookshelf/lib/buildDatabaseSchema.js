@@ -365,7 +365,7 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
   switch (attribute.type) {
     case 'uuid':
       return client === 'pg' ? 'uuid' : 'varchar(36)';
-    case 'wysiwyg':
+    case 'richtext':
     case 'text':
       return client === 'pg' ? 'text' : 'longtext';
     case 'json':

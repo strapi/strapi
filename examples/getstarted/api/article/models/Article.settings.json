@@ -18,7 +18,7 @@
       "unique": true
     },
     "content": {
-      "type": "wysiwyg"
+      "type": "richtext"
     },
     "published": {
       "type": "boolean"
@@ -34,10 +34,7 @@
     },
     "enum": {
       "type": "enumeration",
-      "enum": [
-        "morning,",
-        "noon"
-      ]
+      "enum": ["morning,", "noon"]
     },
     "bool": {
       "type": "boolean"
@@ -64,7 +61,6 @@
       "via": "linkedArticles"
     },
     "fb_cta": {
-      "required": true,
       "type": "group",
       "group": "cta_facebook",
       "repeatable": false
