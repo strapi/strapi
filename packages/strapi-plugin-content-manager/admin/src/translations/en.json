@@ -137,5 +137,6 @@
   "popUpWarning.warning.updateAllSettings": "This will modify all your settings",
   "success.record.delete": "Deleted",
   "success.record.save": "Saved",
-  "notification.info.minimumFields": "You need to have at least one field displayed"
+  "notification.info.minimumFields": "You need to have at least one field displayed",
+  "notification.upload.error": "An error has occured while uploading your files"
 }

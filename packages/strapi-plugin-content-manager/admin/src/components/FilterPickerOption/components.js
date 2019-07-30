@@ -54,7 +54,11 @@ const Button = styled.button`
 const InputWrapperDate = styled.div`
   margin-right: 10px;
   ${({ type }) => {
-    if (type.includes('date')) {
+    if (
+      type.includes('date') ||
+      type === 'timestampUpdate' ||
+      type === 'timestamp'
+    ) {
       return css`
         position: relative;
         &:before {

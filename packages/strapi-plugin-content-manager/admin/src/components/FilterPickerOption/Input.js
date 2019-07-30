@@ -21,6 +21,8 @@ const getInputType = attrType => {
       return InputSelect;
     case 'date':
     case 'datetime':
+    case 'timestamp':
+    case 'timestampUpdate':
       return InputDate;
     case 'integer':
     case 'biginteger':

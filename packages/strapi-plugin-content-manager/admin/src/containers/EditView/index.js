@@ -282,9 +282,14 @@ function EditView({
     const schema = createYupSchema(layout, { groups: groupLayoutsData });
 
     try {
+      // Validate the form using yup
       await schema.validate(modifiedData, { abortEarly: false });
+      // Set the loading state in the plugin header
       setIsSubmitting(true);
+      emitEvent('willSaveEntry');
+      // Create an object containing all the paths of the media fields
       const filesMap = getMediaAttributes(layout, groupLayoutsData);
+      // Create the formdata to upload all the files
       const formDatas = Object.keys(filesMap).reduce((acc, current) => {
         const keys = current.split('.');
         const isMultiple = get(filesMap, [current, 'multiple'], false);
@@ -349,6 +354,7 @@ function EditView({
       }, {});
       // Change the request helper default headers so we can pass a FormData
       const headers = { 'X-Forwarded-Host': 'strapi' };
+      // Upload the files
       const mapUploadedFiles = Object.keys(formDatas).reduce(
         async (acc, current) => {
           const collection = await acc;
@@ -369,7 +375,8 @@ function EditView({
 
             return collection;
           } catch (err) {
-            strapi.notification.error('upload error');
+            console.log('upload error', err);
+            strapi.notification.error(`${pluginId}.notification.upload.error`);
           }
         },
         Promise.resolve({})
@@ -389,14 +396,24 @@ function EditView({
       const method = isCreatingEntry ? 'POST' : 'PUT';
       const endPoint = isCreatingEntry ? slug : `${slug}/${id}`;
 
-      // Time to actually send the data
-      await request(getRequestUrl(endPoint), {
-        method,
-        params: { source },
-        body: cleanedDataWithUploadedFiles,
-        signal: submitSignal,
-      });
-      redirectToPreviousPage();
+      try {
+        // Time to actually send the data
+        await request(getRequestUrl(endPoint), {
+          method,
+          params: { source },
+          body: cleanedDataWithUploadedFiles,
+          signal: submitSignal,
+        });
+        emitEvent('didSaveEntry');
+        redirectToPreviousPage();
+      } catch (err) {
+        console.log('send data error', err);
+        emitEvent('didNotSaveEntry', { error: err });
+        // TODO handle errors from the API
+        strapi.notification.error(
+          `${pluginId}.containers.EditView.notification.errors`
+        );
+      }
     } catch (err) {
       setIsSubmitting(false);
       console.log({ err });
