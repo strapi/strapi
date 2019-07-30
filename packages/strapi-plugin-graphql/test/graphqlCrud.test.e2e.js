@@ -13,7 +13,7 @@ const postModel = {
       name: 'name',
       params: {
         multiple: false,
-        type: 'wysiwyg',
+        type: 'richtext',
       },
     },
     {

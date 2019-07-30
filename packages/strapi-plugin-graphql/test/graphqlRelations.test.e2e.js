@@ -17,14 +17,14 @@ const documentModel = {
       name: 'name',
       params: {
         multiple: false,
-        type: 'wysiwyg',
+        type: 'richtext',
       },
     },
     {
       name: 'content',
       params: {
         multiple: false,
-        type: 'wysiwyg',
+        type: 'richtext',
       },
     },
   ],
@@ -40,7 +40,7 @@ const labelModel = {
       name: 'name',
       params: {
         multiple: false,
-        type: 'wysiwyg',
+        type: 'richtext',
       },
     },
     {

@@ -12,7 +12,7 @@ module.exports = {
         name: 'content',
         params: {
           multiple: false,
-          type: 'wysiwyg',
+          type: 'richtext',
         },
       },
       {
@@ -121,7 +121,7 @@ module.exports = {
         name: 'description',
         params: {
           multiple: false,
-          type: 'wysiwyg',
+          type: 'richtext',
         },
       },
       {
