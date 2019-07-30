@@ -173,18 +173,39 @@ class AttributeForm extends React.Component {
   };
 
   renderInput = (input, index) => {
-    const { featureType, modifiedData, onChange } = this.props;
+    const { modifiedData, onChange } = this.props;
     const { didCheckErrors, formErrors } = this.state;
-    const { custom, defaultValue, name } = input;
+    const { custom, defaultValue, name, type } = input;
 
-    const value =
-      featureType === 'model'
-        ? get(modifiedData, name, defaultValue)
-        : get(modifiedData, name, defaultValue);
+    const value = get(modifiedData, name, defaultValue);
 
     const errors = get(formErrors, name, []);
 
     if (custom) {
+      if (type === 'select') {
+        const { attributeOptions } = this.props;
+
+        const options = attributeOptions.map(option => {
+          console.log(option);
+          return {
+            name: option.name,
+            value: option.uid,
+          };
+        });
+
+        return (
+          <Input
+            autoFocus={index === 0}
+            didCheckErrors={didCheckErrors}
+            errors={errors}
+            key={name}
+            {...input}
+            onChange={onChange}
+            selectOptions={options}
+            value={value}
+          />
+        );
+      }
       return (
         <CustomCheckbox
           didCheckErrors={didCheckErrors}
@@ -302,6 +323,7 @@ AttributeForm.defaultProps = {
   attributeToEditName: '',
   alreadyTakenAttributes: [],
   attributeType: 'string',
+  attributeOptions: [],
   featureType: 'model',
   isOpen: false,
   modifiedData: {},
@@ -317,6 +339,7 @@ AttributeForm.propTypes = {
   alreadyTakenAttributes: PropTypes.array,
   attributeToEditName: PropTypes.string,
   attributeType: PropTypes.string,
+  attributeOptions: PropTypes.array,
   featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)

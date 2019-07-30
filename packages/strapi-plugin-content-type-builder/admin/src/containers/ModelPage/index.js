@@ -518,6 +518,7 @@ export class ModelPage extends React.Component {
       clearTemporaryAttribute,
       clearTemporaryAttributeRelation,
       history: { push },
+      groups,
       location: { search },
       models,
       onChangeAttribute,
@@ -638,6 +639,7 @@ export class ModelPage extends React.Component {
           activeTab={settingType}
           alreadyTakenAttributes={Object.keys(this.getModelAttributes())}
           attributeType={attributeType}
+          attributeOptions={attributeType === 'group' ? groups : null}
           attributeToEditName={this.getAttributeName()}
           isContentTypeTemporary={this.isUpdatingTemporaryContentType()}
           isOpen={modalType === 'attributeForm' && attributeType !== 'relation'}

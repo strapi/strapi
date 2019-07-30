@@ -298,6 +298,91 @@
       ]
     }
   },
+  "group": {
+    "base": {
+      "items": [
+        {
+          "custom": true,
+          "label": {
+            "id": "content-type-builder.form.attribute.item.group.label.select"
+          },
+          "name": "group",
+          "type": "select",
+          "value": "",
+          "placeholder": "content-type-builder.form.attribute.item.group.placeholder.select",
+          "selectOptions": [],
+          "validations": {
+            "required": true
+          }
+        },
+        {
+          "label": {
+            "id": "content-type-builder.form.attribute.item.group.label.name"
+          },
+          "name": "name",
+          "type": "string",
+          "defaultValue": "",
+          "placeholder": "content-type-builder.form.attribute.item.group.placeholder.name",
+          "validations": {
+            "required": true
+          }
+        }
+      ]
+    },
+    "advanced": {
+      "items": [
+        {
+          "customBootstrapClass": "col-md-12",
+          "label": {
+            "id": "content-type-builder.form.attribute.item.requiredField"
+          },
+          "name": "required",
+          "type": "checkbox",
+          "value": false,
+          "validations": {},
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.item.requiredField.description"
+          }
+        },
+
+        {
+          "customBootstrapClass": "col-md-12",
+          "label": {
+            "id": "content-type-builder.form.attribute.item.repeatable"
+          },
+          "name": "repeatable",
+          "type": "checkbox",
+          "value": false,
+          "validations": {},
+          "inputDescription": {
+            "id": "content-type-builder.form.attribute.item.repeatable.description"
+          }
+        },
+        {
+          "custom": true,
+          "customBootstrapClass": "col-md-12",
+          "label": {
+            "id": "content-type-builder.form.attribute.item.minimum"
+          },
+          "name": "min",
+          "type": "checkbox",
+          "value": false,
+          "validations": { "required": true }
+        },
+        {
+          "custom": true,
+          "customBootstrapClass": "col-md-12",
+          "label": {
+            "id": "content-type-builder.form.attribute.item.maximum"
+          },
+          "name": "max",
+          "type": "checkbox",
+          "value": false,
+          "validations": { "required": true }
+        }
+      ]
+    }
+  },
   "json": {
     "base": {
       "items": [
@@ -376,8 +461,7 @@
           "name": "multiple",
           "type": "checkbox",
           "value": false,
-          "validations": {
-          }
+          "validations": {}
         }
       ]
     },
@@ -440,10 +524,22 @@
           "type": "select",
           "value": "integer",
           "selectOptions": [
-            { "name": "content-type-builder.form.attribute.item.number.type.integer", "value": "integer" },
-            { "name": "content-type-builder.form.attribute.item.number.type.biginteger", "value": "biginteger" },
-            { "name": "content-type-builder.form.attribute.item.number.type.float", "value": "float" },
-            { "name": "content-type-builder.form.attribute.item.number.type.decimal", "value": "decimal" }
+            {
+              "name": "content-type-builder.form.attribute.item.number.type.integer",
+              "value": "integer"
+            },
+            {
+              "name": "content-type-builder.form.attribute.item.number.type.biginteger",
+              "value": "biginteger"
+            },
+            {
+              "name": "content-type-builder.form.attribute.item.number.type.float",
+              "value": "float"
+            },
+            {
+              "name": "content-type-builder.form.attribute.item.number.type.decimal",
+              "value": "decimal"
+            }
           ],
           "validations": {
             "required": true
