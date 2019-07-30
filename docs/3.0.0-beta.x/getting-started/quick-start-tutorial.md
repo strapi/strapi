@@ -1,12 +1,10 @@
 # Tutorial
 
-This Tutorial is written for developers who prefer a more detailed step-by-step introduction. (A less detailed version can be found at [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html).)
+This Tutorial is written for developers who prefer a more detailed step-by-step introduction. (A less detailed version can be found at [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html).) This tutorial will take you through the beginning steps of how you could start a project like "FoodAdvisor" ([Github](https://github.com/strapi/foodadvisor/))([Demo](https://foodadvisor.strapi.io/)). You will get a good overview of many of the features that developers love about using Strapi.
 
-<div class="video-container">
-  <iframe width="800" height="450" src="https://www.youtube.com/embed/_uSZpxy7B8E" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
+**[TODO: Create NEW Video]**
 
-By following this tutorial, you will install Strapi globally on your system, and then you will create your first Strapi project.
+By following this tutorial, you will install install and create your first Strapi project.
 
 ::: tip NOTE
 
@@ -15,19 +13,170 @@ You need to have **_Node.js and npm_** installed on your system prior to followi
 
 **Table of contents:**
 
-1. [Install Strapi globally](#_1-install-strapi-globally)
-2. [Create a new project](#_2-create-a-new-project)
-3. [Create an admin user](#_3-create-an-admin-user)
-4. [Create a Content Type](#_4-create-a-content-type)
-5. [Manage and add data to Content Type](#_5-manage-and-add-data-to-content-type)
-6. [Set roles and permissions](#_6-set-roles-and-permissions)
-7. [Consume the Content Type API](#_7-consume-the-content-type-api)
+1. [Install Strapi and create project](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_1-install-strapi-and-create-project)
+2. [Create an Administrator and front-end user](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_2-create-an-adminstrator-and-front-end-user)
+3. [Create a new Content Type called, "Restaurant"](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_3-create-a-new-content-type-called-restaurant)
+4. [Create a new Content Type Called, "Category"](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_4-create-a-new-content-type-called-category)
+5. [Create a new Group and Repeatable Field called, "Hours of Operations"](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_5-create-a-new-group-and-repeatable-field-called-hours-of-operations)
+6. [Manage and add content to, "Restaurant" Content Type](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_6-manage-and-add-content-to-restaurant-content-type)
+7. [Set Roles and Permissions](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_7-set-roles-and-permissions-consume-the-content-type-api)
+8. [Consume the Content Type API](/3.0.0-beta.x/getting-started/quick-start-tutorial.html#_8-consume-the-content-type-api)
 
-## 1. Install Strapi globally
+## 1. Install Strapi and create project
+
+Navigate to your parent `Projects/` directory from your command line. Use the following command to create a new Strapi project.
+
+Path: `~/Desktop/Projects/`
+
+(Using **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
 
 ```bash
-npm install strapi@beta -g
+yarn create strapi-app my-project
 ```
+
+(Using **npm/npx** to install the Strapi project.)
+
+```bash
+npx create-strapi-app my-project
+```
+
+The command will automatically create a Strapi project `my-project/` folder within your parent `Projects/` directory.
+
+::: tip NOTE
+
+When you create a new Quick Start(`--quickstart`) project in Strapi, you will automatically download the node modules and the Strapi files needed. Using `--quickstart`, completes an additional step of building the administration panel for Strapi and starting Strapi automatically for you.
+
+Please wait for the process to complete before cancelling or trying to continue.
+
+:::
+
+::: tip NOTE
+You can replace the `my-project` name with any name you want. E.g. `strapi new my-foodadvisor-project --quickstart`, this creates a folder `./Projects/my-foodadvisor-project`.
+
+:::
+
+You will see something like this, indicating the your Strapi project is being downloaded and installed.
+
+```bash
+yarn create v1.17.3
+[1/4] 🔍  Resolving packages...
+[2/4] 🚚  Fetching packages...
+[3/4] 🔗  Linking dependencies...
+[4/4] 🔨  Building fresh packages...
+success Installed "create-strapi-app@3.0.0-beta.14" with binaries:
+      - create-strapi-app
+[#####################################################################] 71/71Creating a new Strapi application at /Users/paulbocuse/Desktop/Projects/my-project.
+
+Creating a quickstart project.
+Creating files.
+Dependencies installed successfully.
+
+Your application was created at /Users/paulbocuse/Desktop/Projects/my-project.
+
+Available commands in your project:
+
+  yarn develop
+  Start Strapi in watch mode.
+
+  yarn start
+  Start Strapi without watch mode.
+
+  yarn build
+  Build Strapi admin panel.
+
+  yarn strapi
+  Display all available commands.
+
+You can start by doing:
+
+  cd /Users/paulbocuse/Desktop/Projects/my-project
+  yarn develop
+
+Running your Strapi application.
+
+```
+
+Next, you will notice the following commands that build your Strapi administration panel and automatically start Strapi:
+
+```bash
+> my-project@0.1.0 develop /Users/paulbocuse/Desktop/Projects/my-project
+> strapi develop
+
+Building your admin UI with development configuration ...
+
+✔ Webpack
+  Compiled successfully in 52.21s
+
+[2019-07-30T15:21:17.698Z] info File created: /Users/paulbocuse/Desktop/Projects/my-project/extensions/users-permissions/config/jwt.json
+[2019-07-30T15:21:17.701Z] info The server is restarting
+
+[2019-07-30T15:21:19.037Z] info Time: Tue Jul 30 2019 17:21:19 GMT+0200 (Central European Summer Time)
+[2019-07-30T15:21:19.037Z] info Launched in: 910 ms
+[2019-07-30T15:21:19.038Z] info Environment: development
+[2019-07-30T15:21:19.038Z] info Process PID: 70615
+[2019-07-30T15:21:19.038Z] info Version: 3.0.0-beta.14 (node v10.16.0)
+[2019-07-30T15:21:19.038Z] info To shut down your server, press <CTRL> + C at any time
+
+[2019-07-30T15:21:19.038Z] info ☄️  Admin panel: http://localhost:1337/admin
+[2019-07-30T15:21:19.039Z] info ⚡️ Server: http://localhost:1337
+
+```
+
+**[TODO: Add an updated image of the new user registration page]**
+
+::: tip NOTE
+Using the `--quickstart` flag will install Strapi using a [SQLite](https://www.sqlite.org/index.html) database. You may leave off the flag, but will need to follow the configuration steps for a different database. **You will need to have your database choice installed and running locally prior to creating your project.**
+
+**Note:** An **SQLite** database is an excellent database to use for prototyping and developing Strapi projects. The reason is that it is a light way database that ports effortlessly to other relational databases that Strapi supports such as **MySQL**, **PostgreSQL** and **MariaDB**. However, if you would like to use **MongoDB** in production, you will need to [install, run and use MongoDB on your development machine](/3.0.0-beta.x/guides/databases.html#mongodb-installation).
+:::
+
+You are now ready to create a new **Administrator** and new front-end **User**.
+
+## 2. Create an Adminstrator and front-end User
+
+The first user you create is the root user for your project. This user has all administrator privileges and access rights. You will need to complete the following fields:
+
+1. **Username**, create a username for login access to your project, eg. `paulbocuse`
+2. **Password**, create a unique password for your project
+3. **Email address**, this will be used for recovery
+4. Check **Receive news**, this is optional but **recommended**
+5. Click the **Ready to Start** button
+
+**[TODO: Add a image for the completed Adminstrator registration form]**
+
+After your admin user is registered, you will see the Strapi admin panel:
+
+**[TODO: Add an image of the Strapi Adminstration Dashboard]**
+
+The next step is to create a front-end user. **Administrators** and front-end **Users** are separate roles.
+
+- An **Administrator** has access and rights to the backend of Strapi. They have the ability to add content, add plugins, upload images, etc. An **Adminstrator** does **not** author or have any relation to actual content.
+- A front-end **User** is someone who interacts with your project through the front-end. A front-end **User** is someone who authors an article, makes a purchase, has an account, leaves a review, leaves a comment, etc.
+
+At this point, you have created an **Administrator**, now you will need to create a front-end **User**.
+
+Click on `Users` located under **CONTENT TYPES** in the left-hand menu.
+
+- Click the blue **+ Add New User** button in the top right corner.
+- Next, complete the `Username`, `Email`, and `Password` fields.
+- Select `ON` for the **Confirmed** toggle field.
+- To the right, under **Role**, select `Authenticated`.
+
+**[TODO: Add an image showing entered user]**
+
+You are now ready to create your first Content Type.
+
+## 3. Create a new Content Type called, "Restaurant"
+
+## 4. Create a new Content Type Called, "Category"
+
+## 5. Create a new Group and Repeatable Field called, "Hours of Operations"
+
+## 6. Manage and add content to, "Restaurant" Content Type
+
+## 7. Set Roles and Permissions
+
+## 8. Consume the Content Type API
 
 Strapi is now installed globally on your computer. Type `strapi -h` in your command line to access available Strapi commands.
 
@@ -58,78 +207,6 @@ Commands:
   uninstall [options] [plugins...]               uninstall a Strapi plugin
   help                                           output the help
 ```
-
-## 2. Create a new project
-
-Navigate to your parent `Projects/` directory in your command line. Enter the following command to create a Strapi Quick Start project.
-
-Path: `~/Desktop/Projects/ $`
-
-```bash
-strapi new my-project --quickstart
-```
-
-The command will automatically create a Strapi project `my-project` folder within your parent `Projects/` directory.
-
-::: tip NOTE
-
-When you create a new Quick Start(`--quickstart`) project in Strapi, you will download all the node modules, the Strapi files necessary and the Strapi plugin files. **THIS STEP CAN TAKE SEVERAL MINUTES DEPENDING ON YOUR INTERNET CONNECTION SPEED**.
-
-Please wait for the process to complete before cancelling or trying to continue.
-
-:::
-
-::: tip NOTE
-You can replace the `my-project` name with any name you want. E.g. `strapi new newProjectName --quickstart`, this creates a folder `./Projects/newProjectName`.
-
-:::
-
-You will see something like this:
-
-```bash
-🚀 Creating your Strapi application.
-
-
-✅ Connected to the database
-🏗  Application generation:
-✔ Copying files ...
-✔ Installing dependencies ...
-✔ Building your admin UI ...
-
-👌 Your application was created at /Users/userName/Desktop/Projects/my-project.
-
-⚡️ Starting your application...
-
-> my-project@0.1.0 develop /Users/UserName/Desktop/Projects/my-project
-> strapi develop
-
-```
-
-This will open your default browser to the Welcome page for creating an admin user.
-
-![Strapi Welcome Page for creating admin user](../assets/quick-start-detailed/strapi-welcome-screen.png 'Strapi Welcome Page for creating admin user')
-
-::: tip NOTE
-Using the `--quickstart` flag will install Strapi using a [SQLite](https://www.sqlite.org/index.html) database. You may leave off the flag, but will need to follow the configuration steps for a different database. You will need to have your database choice already up and running prior to creating your project.
-:::
-
-## 3. Create an admin user
-
-The first user you create is the root user for your project. This user has all privileges and access rights. You will need to complete the following fields:
-
-1. **Username**, create a username for login access to your project, eg. `paulbocuse`
-2. **Password**, create a unique password for your project
-3. **Email address**, this will be used for recovery
-4. Check **Receive news**, this is optional but **recommended**
-5. Click the **Ready to Start** button
-
-![Example completed Welcome Screen with Admin User information](../assets/quick-start-detailed/welcome-screen-entered-information.png 'Example completed Welcome Screen with Admin User information')
-
----
-
-After your admin user is registered, you will see the Strapi admin panel:
-
-![Strapi Admin Panel](../assets/quick-start-detailed/AfterRegistrationScreenAdminPanel.png 'Strapi Admin Panel')
 
 ## 4. Create a new Content Type
 
