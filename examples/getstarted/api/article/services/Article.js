@@ -5,8 +5,4 @@
  * to customize this service
  */
 
-module.exports = {
-  find(params) {
-    return strapi.query('article').find(params);
-  },
-};
+module.exports = {};

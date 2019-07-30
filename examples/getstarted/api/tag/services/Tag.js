@@ -5,8 +5,4 @@
  * to customize this service
  */
 
-module.exports = {
-  find(params) {
-    return strapi.query('tag').find(params, null);
-  },
-};
+module.exports = {};
