@@ -36,10 +36,13 @@ const getDisplayedValue = (type, value, name) => {
 
       const date =
         value && isObject(value) && value._isAMomentObject === true
-          ? value
-          : moment.utc(value);
+          ? JSON.stringify(value)
+          : value;
 
-      return date.format('YYYY-MM-DD HH:mm:ss');
+      return moment
+        .parseZone(date)
+        .utc()
+        .format('YYYY-MM-DD HH:mm:ss');
     }
     case 'password':
       return '••••••••';

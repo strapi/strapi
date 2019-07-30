@@ -26,6 +26,13 @@
       "collection": "file",
       "via": "related",
       "plugin": "upload"
+    },
+    "rocketshipmaker": {
+      "model": "rocketshipmaker",
+      "via": "rocketships"
+    },
+    "date": {
+      "type": "date"
     }
   }
 }

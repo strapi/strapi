@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { cloneDeep, get, isEmpty } from 'lodash';
 
 import {
   BackHeader,
@@ -22,7 +22,11 @@ import SelectWrapper from '../../components/SelectWrapper';
 import init, { setDefaultForm } from './init';
 import reducer, { initialState } from './reducer';
 import { LinkWrapper, MainWrapper, SubWrapper } from './components';
-import createYupSchema from './utils';
+import createYupSchema, {
+  getMediaAttributes,
+  cleanData,
+  associateFilesToData,
+} from './utils';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -277,7 +281,114 @@ function EditView({
 
     try {
       await schema.validate(modifiedData, { abortEarly: false });
+      const filesMap = getMediaAttributes(layout, groupLayoutsData);
+      const formDatas = Object.keys(filesMap).reduce((acc, current) => {
+        const keys = current.split('.');
+        const isMultiple = get(filesMap, [current, 'multiple'], false);
+        const isGroup = get(filesMap, [current, 'isGroup'], false);
+        const isRepeatable = get(filesMap, [current, 'repeatable'], false);
+
+        const getFilesToUpload = path => {
+          const value = get(modifiedData, path, []) || [];
+
+          return value.filter(file => {
+            return file instanceof File;
+          });
+        };
+        const getFileToUpload = path => {
+          const file = get(modifiedData, [...path, 0], '');
+          if (file instanceof File) {
+            return [file];
+          }
+
+          return [];
+        };
+
+        if (!isRepeatable) {
+          const currentFilesToUpload = isMultiple
+            ? getFilesToUpload(keys)
+            : getFileToUpload([...keys]);
+
+          if (!isEmpty(currentFilesToUpload)) {
+            acc[current] = currentFilesToUpload.reduce((acc2, curr) => {
+              acc2.append('files', curr);
+
+              return acc2;
+            }, new FormData());
+          }
+        }
+
+        if (isGroup && isRepeatable) {
+          const [key, targetKey] = current.split('.');
+          const groupData = get(modifiedData, [key], []);
+          const groupFiles = groupData.reduce((acc1, current, index) => {
+            const files = isMultiple
+              ? getFileToUpload([key, index, targetKey])
+              : getFileToUpload([key, index, targetKey]);
+
+            if (!isEmpty(files)) {
+              const toFormData = files.reduce((acc2, curr) => {
+                acc2.append('files', curr);
+
+                return acc2;
+              }, new FormData());
+
+              acc1[`${key}.${index}.${targetKey}`] = toFormData;
+            }
+
+            return acc1;
+          }, {});
+
+          return { ...acc, ...groupFiles };
+        }
+
+        return acc;
+      }, {});
+      // Change the request helper default headers so we can pass a FormData
+      const headers = { 'X-Forwarded-Host': 'strapi' };
+      const mapUploadedFiles = Object.keys(formDatas).reduce(
+        async (acc, current) => {
+          const collection = await acc;
+          try {
+            const uploadedFiles = await request(
+              '/upload',
+              { method: 'POST', body: formDatas[current], headers },
+              false,
+              false
+            );
+
+            collection[current] = uploadedFiles;
+
+            return collection;
+          } catch (err) {
+            strapi.notification.error('upload error');
+          }
+        },
+        Promise.resolve({})
+      );
+
+      const cleanedData = cleanData(
+        cloneDeep(modifiedData),
+        layout,
+        groupLayoutsData
+      );
+      const cleanedDataWithUploadedFiles = associateFilesToData(
+        cleanedData,
+        filesMap,
+        await mapUploadedFiles
+      );
+
+      const method = isCreatingEntry ? 'POST' : 'PUT';
+      const endPoint = isCreatingEntry ? slug : `${slug}/${id}`;
+
+      // Time to actually send the data
+      await request(getRequestUrl(endPoint), {
+        method,
+        params: { source },
+        body: cleanedDataWithUploadedFiles,
+      });
     } catch (err) {
+      console.log({ err });
       const errors = get(err, 'inner', []).reduce((acc, curr) => {
         acc[
           curr.path
@@ -299,6 +410,7 @@ function EditView({
       );
     }
   };
+  console.log({ modifiedData });
 
   return (
     <EditViewProvider
