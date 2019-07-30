@@ -39,10 +39,13 @@ const getDisplayedValue = (type, value, name) => {
           ? JSON.stringify(value)
           : value;
 
-      return moment
-        .parseZone(date)
-        .utc()
-        .format('YYYY-MM-DD HH:mm:ss');
+      return (
+        moment
+          .parseZone(date)
+          .utc()
+          // .format('YYYY-MM-DD HH:mm:ss');
+          .format('dddd, MMMM Do YYYY')
+      );
     }
     case 'password':
       return '••••••••';

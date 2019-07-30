@@ -1,4 +1,4 @@
-import { getMediaAttributes } from '../utils';
+import { getMediaAttributes } from '../utils/formatData';
 
 describe('getMediasAttributes util', () => {
   let ctLayout;

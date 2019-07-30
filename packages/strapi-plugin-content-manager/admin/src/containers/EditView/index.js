@@ -1,7 +1,6 @@
 import React, { memo, useEffect, useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get, isEmpty } from 'lodash';
-
 import {
   BackHeader,
   getQueryParameters,
@@ -18,15 +17,15 @@ import Container from '../../components/Container';
 import Group from '../../components/Group';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
-
 import init, { setDefaultForm } from './init';
 import reducer, { initialState } from './reducer';
 import { LinkWrapper, MainWrapper, SubWrapper } from './components';
-import createYupSchema, {
+import createYupSchema from './utils/schema';
+import {
   getMediaAttributes,
   cleanData,
   associateFilesToData,
-} from './utils';
+} from './utils/formatData';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -44,6 +43,8 @@ function EditView({
   const layout = get(layouts, [slug], {});
   const isCreatingEntry = id === 'create';
   const attributes = get(layout, ['schema', 'attributes'], {});
+  const submitAbortController = new AbortController();
+  const submitSignal = submitAbortController.signal;
   const groups = Object.keys(attributes).reduce((acc, current) => {
     const { group, repeatable, type, min } = get(attributes, [current], {
       group: '',
@@ -184,6 +185,7 @@ function EditView({
     return () => {
       abortControllerFetchData.abort();
       abortControllerLayouts.abort();
+      submitAbortController.abort();
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -281,6 +283,7 @@ function EditView({
 
     try {
       await schema.validate(modifiedData, { abortEarly: false });
+      setIsSubmitting(true);
       const filesMap = getMediaAttributes(layout, groupLayoutsData);
       const formDatas = Object.keys(filesMap).reduce((acc, current) => {
         const keys = current.split('.');
@@ -352,7 +355,12 @@ function EditView({
           try {
             const uploadedFiles = await request(
               '/upload',
-              { method: 'POST', body: formDatas[current], headers },
+              {
+                method: 'POST',
+                body: formDatas[current],
+                headers,
+                signal: submitSignal,
+              },
               false,
               false
             );
@@ -386,8 +394,11 @@ function EditView({
         method,
         params: { source },
         body: cleanedDataWithUploadedFiles,
+        signal: submitSignal,
       });
+      redirectToPreviousPage();
     } catch (err) {
+      setIsSubmitting(false);
       console.log({ err });
       const errors = get(err, 'inner', []).reduce((acc, curr) => {
         acc[
@@ -410,7 +421,6 @@ function EditView({
       );
     }
   };
-  console.log({ modifiedData });
 
   return (
     <EditViewProvider

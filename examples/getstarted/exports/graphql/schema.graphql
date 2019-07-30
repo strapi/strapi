@@ -34,7 +34,7 @@ input ArticleInput {
   mainTag: ID
   linkedTags: [ID]
   manyTags: [ID]
-  fb_cta: GroupctafacebookInput!
+  fb_cta: GroupctafacebookInput
   mainIngredient: GroupingredientsInput
   ingredients: [GroupingredientsInput]
 }
