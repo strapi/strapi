@@ -536,11 +536,11 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       const formatPolymorphicPopulate = ({ assoc, path, prefix = '' }) => {
         if (_.isString(path) && path === assoc.via) {
-          return `related.${assoc.via}`;
+          return { [`related.${assoc.via}`]: () => {} };
         } else if (_.isString(path) && path === assoc.alias) {
           // MorphTo side.
           if (assoc.related) {
-            return `${prefix}${assoc.alias}.related`;
+            return { [`${prefix}${assoc.alias}.related`]: () => {} };
           }
 
           // oneToMorph or manyToMorph side.
