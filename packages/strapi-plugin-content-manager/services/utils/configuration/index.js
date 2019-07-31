@@ -9,7 +9,7 @@ async function createDefaultConfiguration(model) {
   const schema = formatContentTypeSchema(model);
 
   return {
-    settings: await createDefaultSettings(),
+    settings: await createDefaultSettings(schema),
     metadatas: await createDefaultMetadatas(schema),
     layouts: await createDefaultLayouts(schema),
   };

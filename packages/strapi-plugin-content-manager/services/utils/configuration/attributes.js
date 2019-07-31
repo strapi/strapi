@@ -12,6 +12,8 @@ const isSortable = (schema, name) => {
     return false;
   }
 
+  if (schema.modelType === 'group' && name === 'id') return false;
+
   const attribute = schema.attributes[name];
   if (NON_SORTABLES.includes(attribute.type)) {
     return false;
