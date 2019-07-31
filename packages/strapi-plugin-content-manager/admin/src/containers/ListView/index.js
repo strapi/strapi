@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { capitalize, get, isEmpty, sortBy } from 'lodash';
+import { capitalize, get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import {
   ButtonDropdown,
@@ -130,7 +130,12 @@ function ListView({
   const getAllLabels = () => {
     return sortBy(
       Object.keys(getMetaDatas())
-        .filter(key => !isEmpty(getMetaDatas([key, 'list'])))
+        .filter(
+          key =>
+            !['json', 'group', 'relation', 'media', 'richtext'].includes(
+              get(layouts, [slug, 'schema', 'attributes', key, 'type'], '')
+            )
+        )
         .map(label => ({
           name: label,
           value: getListLayout().includes(label),
