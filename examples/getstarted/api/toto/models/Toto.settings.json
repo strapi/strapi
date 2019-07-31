@@ -1,0 +1,44 @@
+{
+  "connection": "default",
+  "collectionName": "totos",
+  "info": {
+    "name": "toto",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
+    "comment": ""
+  },
+  "attributes": {
+    "name": {
+      "required": true,
+      "type": "string"
+    },
+    "date": {
+      "type": "date",
+      "required": true
+    },
+    "number": {
+      "type": "integer"
+    },
+    "json": {
+      "type": "json",
+      "default": {
+        "ok": true
+      }
+    },
+    "somethin": {
+      "enum": [
+        "un",
+        "deux",
+        "",
+        "trois"
+      ],
+      "type": "enumeration"
+    }
+  }
+}
