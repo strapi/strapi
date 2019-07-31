@@ -7,10 +7,7 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -27,17 +24,23 @@
       "type": "json"
     },
     "number": {
+      "type": "integer"
+    },
+    "big_number": {
       "type": "biginteger"
+    },
+    "float_number": {
+      "type": "float"
+    },
+    "decimal_number": {
+      "type": "decimal"
     },
     "date": {
       "type": "date"
     },
     "enum": {
       "type": "enumeration",
-      "enum": [
-        "morning,",
-        "noon"
-      ]
+      "enum": ["morning,", "noon"]
     },
     "bool": {
       "type": "boolean"
@@ -77,30 +80,6 @@
       "repeatable": true,
       "min": 1,
       "max": 10
-    },
-    "blabla": {
-      "enum": [
-        "one",
-        "two",
-        "three"
-      ],
-      "type": "enumeration",
-      "unique": true,
-      "enumName": "azd",
-      "default": "azd",
-      "required": true
-    },
-    "article": {
-      "columnName": "azdazd",
-      "unique": true,
-      "model": "article",
-      "via": "articlea"
-    },
-    "articlea": {
-      "columnName": "azdazd",
-      "unique": true,
-      "model": "article",
-      "via": "article"
     }
   }
 }
