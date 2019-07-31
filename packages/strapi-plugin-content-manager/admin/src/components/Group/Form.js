@@ -1,4 +1,5 @@
-import React, { memo } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
@@ -6,8 +7,14 @@ import Inputs from '../Inputs';
 import SelectWrapper from '../SelectWrapper';
 
 const Form = ({ keys, layout, modifiedData, fieldName, onChange }) => {
-  const currentField = get(layout, ['schema', 'attributes', fieldName], '');
-  const currentFieldMeta = get(layout, ['metadatas', fieldName, 'edit'], {});
+  const currentField = useMemo(() => {
+    // We are not providing any deps to the hook in purpose
+    // We don't need any recalculation there since these values are not changed in the component's lifecycle
+    return get(layout, ['schema', 'attributes', fieldName], '');
+  }, []);
+  const currentFieldMeta = useMemo(() => {
+    return get(layout, ['metadatas', fieldName, 'edit'], {});
+  }, []);
 
   if (currentField.type === 'relation') {
     return (

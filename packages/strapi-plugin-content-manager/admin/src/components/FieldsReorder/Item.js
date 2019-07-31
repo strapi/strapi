@@ -28,13 +28,15 @@ const Item = ({
   } = useLayoutDnd();
   const ref = useRef(null);
   const [{ clientOffset, isOver }, drop] = useDrop({
+    // Source code from http://react-dnd.github.io/react-dnd/examples/sortable/simple
+    // And also from https://codesandbox.io/s/6v7l7z68jk
     accept: ItemTypes.EDIT_FIELD,
     hover(item, monitor) {
-      // We use the hover only to reorder full size items
       if (!ref.current) {
         return;
       }
 
+      // We use the hover only to reorder full size items
       if (item.size !== 12) {
         return;
       }
@@ -143,6 +145,11 @@ const Item = ({
   });
   const [{ isDragging, getItem }, drag, preview] = useDrag({
     canDrag() {
+      // Each row of the layout has a max size of 12 (based on bootstrap grid system)
+      // So in order to offer a better drop zone we add the _TEMP_ div to complete the remaining substract (12 - existing)
+      // Those divs cannot be dragged
+      // If we wanted to offer the ability to create new lines in the layout (which will come later)
+      // We will need to add a 12 size _TEMP_ div to offer a drop target between each existing row.
       return name !== '_TEMP_';
     },
     begin() {

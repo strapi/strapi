@@ -4,7 +4,7 @@
  */
 
 import { fromJS } from 'immutable';
-import { formatLayout, getInputSize } from '../../utils/layout';
+import { formatLayout, getFieldType, getInputSize } from '../../utils/layout';
 
 import {
   ADD_FIELD_TO_LIST,
@@ -41,8 +41,6 @@ function settingViewModelReducer(state = initialState, action) {
   const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
   const layoutPathRelations = ['modifiedData', 'layouts', 'editRelations'];
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
-  const getFieldType = name =>
-    state.getIn(['modifiedData', 'schema', 'attributes', name, 'type']);
 
   switch (action.type) {
     case ADD_FIELD_TO_LIST:
@@ -53,7 +51,7 @@ function settingViewModelReducer(state = initialState, action) {
       return state
         .updateIn(layoutPathRelations, list => list.push(action.name))
         .update('itemNameToSelect', () => action.name)
-        .update('itemFormType', () => getFieldType(action.name));
+        .update('itemFormType', () => getFieldType(state, action.name));
     case GET_DATA_SUCCEEDED:
       return state
         .update('initialData', () => fromJS(action.layout || {}))
@@ -116,7 +114,7 @@ function settingViewModelReducer(state = initialState, action) {
       return state
         .updateIn(layoutPathEdit, () => fromJS(formattedList))
         .update('itemNameToSelect', () => action.name)
-        .update('itemFormType', () => getFieldType(action.name));
+        .update('itemFormType', () => getFieldType(state, action.name));
     }
 
     case ON_CHANGE:
@@ -204,7 +202,7 @@ function settingViewModelReducer(state = initialState, action) {
         ]);
         const fieldToSelect =
           firstFieldEditToSelect || firstRelationFieldToSelect || '';
-        const fieldToSelectType = getFieldType(fieldToSelect) || '';
+        const fieldToSelectType = getFieldType(state, fieldToSelect) || '';
 
         return state
           .updateIn(layoutPathEdit, () => updatedList)
@@ -233,7 +231,7 @@ function settingViewModelReducer(state = initialState, action) {
           'name',
         ]);
         const fieldToSelect = firstRelation || firstEditField || '';
-        const fieldToSelectType = getFieldType(fieldToSelect) || '';
+        const fieldToSelectType = getFieldType(state, fieldToSelect) || '';
 
         newState = newState
           .update('itemNameToSelect', () => fieldToSelect)

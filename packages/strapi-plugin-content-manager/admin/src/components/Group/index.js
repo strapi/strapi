@@ -59,12 +59,14 @@ function Group({
       .filter(errorPath => errorPath.split('.')[0] === name && isRepeatable)
       .map(errorPath => errorPath.split('.')[1]);
 
-    dispatch({
-      type: 'OPEN_COLLAPSES_THAT_HAVE_ERRORS',
-      collapsesToOpen: collapsesToOpen.filter(
-        (v, index) => collapsesToOpen.indexOf(v) === index
-      ),
-    });
+    if (collapsesToOpen.length > 0) {
+      dispatch({
+        type: 'OPEN_COLLAPSES_THAT_HAVE_ERRORS',
+        collapsesToOpen: collapsesToOpen.filter(
+          (v, index) => collapsesToOpen.indexOf(v) === index
+        ),
+      });
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [didCheckErrors]);
@@ -183,7 +185,7 @@ function Group({
                     }
 
                     strapi.notification.info(
-                      'You have already reached the maximum'
+                      `${pluginId}.components.Group.notification.info.maximum-requirement`
                     );
                   }}
                 >

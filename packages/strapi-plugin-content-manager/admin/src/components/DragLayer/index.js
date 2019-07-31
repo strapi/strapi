@@ -64,9 +64,11 @@ const CustomDragLayer = () => {
         return null;
     }
   }
+
   if (!isDragging) {
     return null;
   }
+
   return (
     <div style={layerStyles}>
       <div

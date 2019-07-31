@@ -1,5 +1,5 @@
 import { fromJS } from 'immutable';
-import { formatLayout, getInputSize } from '../../utils/layout';
+import { formatLayout, getFieldType, getInputSize } from '../../utils/layout';
 
 const initialState = fromJS({
   initialData: {},
@@ -12,8 +12,6 @@ const initialState = fromJS({
 const reducer = (state, action) => {
   const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
   const { dragIndex, hoverIndex, dragRowIndex, hoverRowIndex } = action;
-  const getFieldType = name =>
-    state.getIn(['modifiedData', 'schema', 'attributes', name, 'type']);
 
   switch (action.type) {
     case 'GET_DATA_SUCCEEDED':
@@ -60,7 +58,7 @@ const reducer = (state, action) => {
       return state
         .updateIn(layoutPathEdit, () => fromJS(formattedList))
         .update('itemNameToSelect', () => action.name)
-        .update('itemFormType', () => getFieldType(action.name) || '');
+        .update('itemFormType', () => getFieldType(state, action.name) || '');
     }
     case 'ON_CHANGE':
       return state.updateIn(
@@ -117,7 +115,7 @@ const reducer = (state, action) => {
         return state
           .updateIn(layoutPathEdit, () => updatedList)
           .update('itemNameToSelect', () => firstField)
-          .update('itemFormType', () => getFieldType(firstField) || '');
+          .update('itemFormType', () => getFieldType(state, firstField) || '');
       }
 
       return state.updateIn(layoutPathEdit, () => updatedList);
