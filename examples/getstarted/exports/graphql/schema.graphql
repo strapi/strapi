@@ -55,22 +55,6 @@ type createRecipePayload {
   recipe: Recipe
 }
 
-input createRocketshipInput {
-  data: RocketshipInput
-}
-
-input createRocketshipmakerInput {
-  data: RocketshipmakerInput
-}
-
-type createRocketshipmakerPayload {
-  rocketshipmaker: Rocketshipmaker
-}
-
-type createRocketshipPayload {
-  rocketship: Rocketship
-}
-
 input createRoleInput {
   data: RoleInput
 }
@@ -114,22 +98,6 @@ input deleteRecipeInput {
 
 type deleteRecipePayload {
   recipe: Recipe
-}
-
-input deleteRocketshipInput {
-  where: InputID
-}
-
-input deleteRocketshipmakerInput {
-  where: InputID
-}
-
-type deleteRocketshipmakerPayload {
-  rocketshipmaker: Rocketshipmaker
-}
-
-type deleteRocketshipPayload {
-  rocketship: Rocketship
 }
 
 input deleteRoleInput {
@@ -206,19 +174,6 @@ input editGroupingredientsInput {
 
 input editRecipeInput {
   title: String
-}
-
-input editRocketshipInput {
-  name: String
-  pic: ID
-  pictures: [ID]
-  rocketshipmaker: ID
-  date: DateTime
-}
-
-input editRocketshipmakerInput {
-  name: String
-  rocketships: [ID]
 }
 
 input editRoleInput {
@@ -312,7 +267,7 @@ scalar JSON
 """The `Long` scalar type represents 52-bit integers"""
 scalar Long
 
-union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Article | createArticlePayload | updateArticlePayload | deleteArticlePayload | Recipe | createRecipePayload | updateRecipePayload | deleteRecipePayload | Rocketship | createRocketshipPayload | updateRocketshipPayload | deleteRocketshipPayload | Rocketshipmaker | createRocketshipmakerPayload | updateRocketshipmakerPayload | deleteRocketshipmakerPayload | Tag | createTagPayload | updateTagPayload | deleteTagPayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
+union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Article | createArticlePayload | updateArticlePayload | deleteArticlePayload | Recipe | createRecipePayload | updateRecipePayload | deleteRecipePayload | Tag | createTagPayload | updateTagPayload | deleteTagPayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
 
 type Mutation {
   createArticle(input: createArticleInput): createArticlePayload
@@ -321,12 +276,6 @@ type Mutation {
   createRecipe(input: createRecipeInput): createRecipePayload
   updateRecipe(input: updateRecipeInput): updateRecipePayload
   deleteRecipe(input: deleteRecipeInput): deleteRecipePayload
-  createRocketship(input: createRocketshipInput): createRocketshipPayload
-  updateRocketship(input: updateRocketshipInput): updateRocketshipPayload
-  deleteRocketship(input: deleteRocketshipInput): deleteRocketshipPayload
-  createRocketshipmaker(input: createRocketshipmakerInput): createRocketshipmakerPayload
-  updateRocketshipmaker(input: updateRocketshipmakerInput): updateRocketshipmakerPayload
-  deleteRocketshipmaker(input: deleteRocketshipmakerInput): deleteRocketshipmakerPayload
   createTag(input: createTagInput): createTagPayload
   updateTag(input: updateTagInput): updateTagPayload
   deleteTag(input: deleteTagInput): deleteTagPayload
@@ -361,10 +310,6 @@ type Query {
   articles(sort: String, limit: Int, start: Int, where: JSON): [Article]
   recipe(id: ID!): Recipe
   recipes(sort: String, limit: Int, start: Int, where: JSON): [Recipe]
-  rocketship(id: ID!): Rocketship
-  rocketships(sort: String, limit: Int, start: Int, where: JSON): [Rocketship]
-  rocketshipmaker(id: ID!): Rocketshipmaker
-  rocketshipmakers(sort: String, limit: Int, start: Int, where: JSON): [Rocketshipmaker]
   tag(id: ID!): Tag
   tags(sort: String, limit: Int, start: Int, where: JSON): [Tag]
   files(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
@@ -391,38 +336,6 @@ type Recipe {
 
 input RecipeInput {
   title: String
-}
-
-type Rocketship {
-  name: String
-  pic: UploadFile
-  rocketshipmaker: Rocketshipmaker
-  date: DateTime
-  pictures(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
-}
-
-input RocketshipInput {
-  name: String
-  pic: ID
-  pictures: [ID]
-  rocketshipmaker: ID
-  date: DateTime
-}
-
-type Rocketshipmaker {
-  name: String
-  rocketships(sort: String, limit: Int, start: Int, where: JSON): [Rocketship]
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
-}
-
-input RocketshipmakerInput {
-  name: String
-  rocketships: [ID]
 }
 
 input RoleInput {
@@ -464,24 +377,6 @@ input updateRecipeInput {
 
 type updateRecipePayload {
   recipe: Recipe
-}
-
-input updateRocketshipInput {
-  where: InputID
-  data: editRocketshipInput
-}
-
-input updateRocketshipmakerInput {
-  where: InputID
-  data: editRocketshipmakerInput
-}
-
-type updateRocketshipmakerPayload {
-  rocketshipmaker: Rocketshipmaker
-}
-
-type updateRocketshipPayload {
-  rocketship: Rocketship
 }
 
 input updateRoleInput {
