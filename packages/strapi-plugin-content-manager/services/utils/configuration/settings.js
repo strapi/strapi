@@ -3,18 +3,32 @@
 const _ = require('lodash');
 const { isSortable } = require('./attributes');
 
+const getDefaultMainField = schema => {
+  if (schema.modelType == 'group') {
+    // find first group attribute that is sortable
+    return (
+      Object.keys(schema.attributes).find(key => isSortable(schema, key)) ||
+      'id'
+    );
+  }
+
+  return 'id';
+};
+
 /**
  * Retunrs a configuration default settings
  */
-async function createDefaultSettings() {
+async function createDefaultSettings(schema) {
   const generalSettings = await strapi.plugins[
     'content-manager'
   ].services.generalsettings.getGeneralSettings();
 
+  let defaultField = getDefaultMainField(schema);
+
   return {
     ...generalSettings,
-    mainField: 'id',
-    defaultSortBy: 'id',
+    mainField: defaultField,
+    defaultSortBy: defaultField,
     defaultSortOrder: 'ASC',
   };
 }
@@ -24,13 +38,17 @@ async function createDefaultSettings() {
 async function syncSettings(configuration, schema) {
   if (_.isEmpty(configuration.settings)) return createDefaultSettings(schema);
 
-  const { mainField = 'id', defaultSortBy = 'id' } =
+  let defaultField = getDefaultMainField(schema);
+
+  const { mainField = defaultField, defaultSortBy = defaultField } =
     configuration.settings || {};
 
   return {
     ...configuration.settings,
-    mainField: isSortable(schema, mainField) ? mainField : 'id',
-    defaultSortBy: isSortable(schema, defaultSortBy) ? defaultSortBy : 'id',
+    mainField: isSortable(schema, mainField) ? mainField : defaultField,
+    defaultSortBy: isSortable(schema, defaultSortBy)
+      ? defaultSortBy
+      : defaultField,
   };
 }
 
