@@ -73,7 +73,7 @@ export function* deleteModel({
         [{ links: [] }]
       );
       const updatedMenu = appMenu[0].links.filter(el => {
-        return el.destination !== modelName;
+        return el.uid !== modelName;
       });
       appMenu[0].links = sortBy(updatedMenu, 'label');
       updatePlugin('content-manager', 'leftMenuSections', appMenu);
