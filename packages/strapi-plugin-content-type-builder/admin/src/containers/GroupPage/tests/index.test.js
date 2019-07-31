@@ -241,6 +241,7 @@ describe('CTB <GroupPage />', () => {
     const wrapper = shallow(<GroupPage {...props} />);
     expect(wrapper.state()).toEqual({
       showWarning: false,
+      removePrompt: false,
       attrToDelete: null,
     });
 
@@ -250,6 +251,7 @@ describe('CTB <GroupPage />', () => {
 
     expect(wrapper.state()).toEqual({
       showWarning: true,
+      removePrompt: false,
       attrToDelete: null,
     });
   });
@@ -647,6 +649,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
       handleClickOnTrashIcon(0);
       expect(wrapper.state()).toEqual({
         attrToDelete: 0,
+        removePrompt: false,
         showWarning: true,
       });
       handleDeleteAttribute();
