@@ -63,6 +63,24 @@ npm run build
 
 ---
 
+### Tutorial videos
+
+To disable the information box containing the tutorial videos, create a file at `./admin/src/config.js`
+
+Add the following configuration:
+
+```js
+export const SHOW_TUTORIALS = false;
+```
+
+To apply your changes you need to rebuild your admin panel
+
+```
+npm run build
+```
+
+---
+
 ## Build
 
 To build the administration, run the following command from the root directory of your project.
