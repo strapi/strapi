@@ -83,14 +83,8 @@ const getTypeShape = obj => {
         default: yup.number().integer(),
         required: validators.required,
         unique: validators.unique,
-        min: yup
-          .number()
-          .integer()
-          .positive(),
-        max: yup
-          .number()
-          .integer()
-          .positive(),
+        min: yup.number().integer(),
+        max: yup.number().integer(),
       };
     }
     case 'float': {
@@ -98,8 +92,8 @@ const getTypeShape = obj => {
         default: yup.number(),
         required: validators.required,
         unique: validators.unique,
-        min: yup.number().positive(),
-        max: yup.number().positive(),
+        min: yup.number(),
+        max: yup.number(),
       };
     }
     case 'decimal': {
@@ -107,8 +101,8 @@ const getTypeShape = obj => {
         default: yup.number(),
         required: validators.required,
         unique: validators.unique,
-        min: yup.number().positive(),
-        max: yup.number().positive(),
+        min: yup.number(),
+        max: yup.number(),
       };
     }
     case 'date': {
