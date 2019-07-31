@@ -35,8 +35,6 @@ function ListRow({
     <StyledListRow onClick={handleClick}>
       <td>
         <img src={src} alt={`icon-${ico}`} />
-      </td>
-      <td>
         <p>{name}</p>
       </td>
       <td>

@@ -133,7 +133,7 @@ export class App extends React.Component {
       return newGroup;
     }
 
-    return get(modifiedDataGroup, this.getFeatureNameFromSearch(), {}, {});
+    return get(modifiedDataGroup, this.getFeatureNameFromSearch(), {});
   };
 
   getFeatureNameFromSearch = () =>

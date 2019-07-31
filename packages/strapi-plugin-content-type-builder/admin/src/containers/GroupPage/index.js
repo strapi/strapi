@@ -231,7 +231,7 @@ export class GroupPage extends React.Component {
     return !!source ? source : null;
   };
 
-  handleClickEditAttribute = (attributeIndex, type) => {
+  handleClickEditAttribute = (attributeName, type) => {
     const { emitEvent } = this.context;
     const {
       canOpenModal,
@@ -249,7 +249,7 @@ export class GroupPage extends React.Component {
 
     if (canOpenModal || this.isUpdatingTempFeature()) {
       setTemporaryAttributeGroup(
-        attributeIndex,
+        attributeName,
         this.isUpdatingTempFeature(),
         this.getFeatureName()
       );
@@ -258,7 +258,7 @@ export class GroupPage extends React.Component {
 
       push({
         search: `modalType=attributeForm&attributeType=${attributeType ||
-          'relation'}&settingType=base&actionType=edit&attributeName=${attributeIndex}`,
+          'relation'}&settingType=base&actionType=edit&attributeName=${attributeName}`,
       });
     } else {
       this.displayNotificationCTNotSaved();

@@ -11,14 +11,14 @@ import {
 import StyledFeaturePicker from './StyledFeaturePicker';
 
 const FeaturePicker = ({ features, onClick, plugin, selectedFeature }) => {
-  const [isOpen, setOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <StyledFeaturePicker>
       <Dropdown
         isOpen={isOpen}
         toggle={() => {
-          setOpen(!isOpen);
+          setIsOpen(!isOpen);
         }}
       >
         <DropdownToggle caret>

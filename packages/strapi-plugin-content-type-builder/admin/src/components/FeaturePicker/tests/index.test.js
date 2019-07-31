@@ -15,9 +15,10 @@ describe('CTB <FeaturePicker />', () => {
   });
   describe('<FeaturePicker /> render', () => {
     let wrapper;
-    const setOpen = jest.fn();
+    const setIsOpen = jest.fn();
     const useStateSpy = jest.spyOn(React, 'useState');
-    useStateSpy.mockImplementation(init => [init, setOpen]);
+
+    useStateSpy.mockImplementation(init => [init, setIsOpen]);
     let props = {
       features: [
         {
@@ -71,14 +72,14 @@ describe('CTB <FeaturePicker />', () => {
       expect(span.text()).toContain('users-permissions');
     });
 
-    it('should call setOpen with true param', () => {
+    it('should call setIsOpen with true param', () => {
       wrapper = shallow(<FeaturePicker {...props} />);
 
       const button = wrapper.find(Dropdown);
       const { toggle } = button.props();
 
       toggle();
-      expect(setOpen).toHaveBeenCalledWith(true);
+      expect(useStateSpy).toHaveBeenCalled();
     });
 
     it('should call onClick with true param on dropdown item click', () => {

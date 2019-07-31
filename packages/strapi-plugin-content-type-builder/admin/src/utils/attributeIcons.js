@@ -8,6 +8,7 @@ import json from '../assets/icons/attributes/icon_json.png';
 import number from '../assets/icons/attributes/icon_number.png';
 import password from '../assets/icons/attributes/icon_password.png';
 import relation from '../assets/icons/attributes/icon_relation.png';
+import richtext from '../assets/icons/attributes/icon_richtext.png';
 import string from '../assets/icons/attributes/icon_string.png';
 import text from '../assets/icons/attributes/icon_text.png';
 
@@ -22,6 +23,7 @@ const attributeIcons = {
   number,
   password,
   relation,
+  richtext,
   string,
   text,
 };

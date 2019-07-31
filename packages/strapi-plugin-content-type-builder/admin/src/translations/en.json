@@ -128,6 +128,7 @@
   "modelPage.contentType.list.title.including": "including",
   "modelPage.contentType.list.title.plural": "fields",
   "modelPage.contentType.list.title.singular": "field",
+  "modelPage.contentType.list.group.link": "Edit group",
   "noTableWarning.description": "Don't forget to create the table `{modelName}` in your database",
   "noTableWarning.infos": "More info",
   "notification.error.message": "An error occurred",

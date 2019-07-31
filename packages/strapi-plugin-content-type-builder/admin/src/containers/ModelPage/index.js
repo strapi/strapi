@@ -28,7 +28,7 @@ import {
 
 import pluginId from '../../pluginId';
 
-import ListRow from '../../components/ListRow';
+import ListRowCollapse from '../../components/ListRowCollapse';
 
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
@@ -382,6 +382,15 @@ export class ModelPage extends React.Component {
     this.props.history.push(backPathname);
   };
 
+  handleRedirectToGroup = group => {
+    const { source, uid } = group;
+
+    const base = `/plugins/${pluginId}/groups/${uid}`;
+    const to = source ? `${base}&source=${source}` : base;
+
+    this.props.history.push(to);
+  };
+
   handleSubmit = (shouldContinue = false) => {
     const {
       addAttributeRelation,
@@ -496,18 +505,19 @@ export class ModelPage extends React.Component {
     );
 
   renderListRow = attribute => {
-    const { canOpenModal } = this.props;
+    const { canOpenModal, modifiedDataGroup } = this.props;
     const attributeInfos = get(this.getModelAttributes(), attribute, {});
 
     return (
-      <ListRow
+      <ListRowCollapse
         {...attributeInfos}
         attributeId={attribute}
         canOpenModal={canOpenModal}
-        context={this.context}
+        groups={modifiedDataGroup}
         name={attribute}
         onClick={this.handleClickEditAttribute}
         onClickDelete={this.handleClickOnTrashIcon}
+        onClickGoTo={this.handleRedirectToGroup}
         key={attribute}
       />
     );

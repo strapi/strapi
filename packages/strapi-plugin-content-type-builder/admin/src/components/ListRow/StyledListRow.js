@@ -22,6 +22,18 @@ const StyedListRow = styled.tr`
   }
   td:first-of-type {
     padding-left: 3rem;
+    position: relative;
+    img {
+      width: 35px;
+      height: 20px;
+      position: absolute;
+      top: calc(50% - 10px);
+      left: 3rem;
+    }
+    img + p {
+      width: 237px;
+      padding-left: calc(3rem + 35px);
+    }
   }
   td:nth-child(2) {
     width: 25rem;

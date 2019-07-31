@@ -742,7 +742,7 @@ export const buildGroupAttributes = attributes =>
 export const formatGroupAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
     const name = current['name'];
-    let newAttribute = { ...current };
+    const newAttribute = { ...current };
     delete newAttribute['name'];
 
     acc[name] = newAttribute;

@@ -12,10 +12,15 @@ const StyledViewContainer = styled.div`
   min-height: calc(100vh - ${sizes.header.height});
   background-color: ${colors.greyOpacity};
   .components-container {
-    padding: 1.8rem 1.5rem 0 1.5rem;
+    padding: 1.8rem 1.5rem;
     div div:not(.list-button) {
       button {
         top: 1.8rem;
+      }
+    }
+    > div:last-of-type {
+      > div:first-of-type {
+        padding-bottom: 1rem;
       }
     }
     .list-header-title {

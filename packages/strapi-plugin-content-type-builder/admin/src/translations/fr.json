@@ -124,6 +124,7 @@
   "modelPage.contentType.list.title.including": "dont",
   "modelPage.contentType.list.title.plural": "champs",
   "modelPage.contentType.list.title.singular": "champ",
+  "modelPage.contentType.list.group.link": "Modifier le groupe",
   "noTableWarning.description": "N'oubliez pas de créer la table `{modelName}` dans votre database",
   "noTableWarning.infos": "Plus d'infos",
   "notification.error.message": "Une erreur est survenue",
