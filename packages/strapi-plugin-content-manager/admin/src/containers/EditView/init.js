@@ -11,12 +11,12 @@ const setDefaultForm = attributes => {
       repeatable,
     } = attribute;
 
-    if (defaultValue !== undefined) {
-      acc[current] = defaultValue;
-    }
-
     if (type === 'json') {
       acc[current] = null;
+    }
+
+    if (defaultValue !== undefined) {
+      acc[current] = defaultValue;
     }
 
     if (type === 'group') {
