@@ -185,7 +185,6 @@ const Item = ({
     showRightCarret =
       isOver &&
       getItem.size !== 12 &&
-      // lastIndexOnLine === itemIndex &&
       Math.abs(clientOffset.x - hoverBoundingRect.left) >
         hoverBoundingRect.width / 2;
 

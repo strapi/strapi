@@ -71,7 +71,6 @@ class InputJSON extends React.Component {
 
         return this.codeMirror.setValue(stringify(value, null, 2));
       } catch (err) {
-        console.log(err);
         return this.setState({ error: true });
       }
     }

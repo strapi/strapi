@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from 'react';
+import React, { forwardRef, Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
@@ -95,7 +95,7 @@ const FieldItem = forwardRef(
               <div />
             </FullWidthCarret>
           ) : (
-            <>
+            <Fragment>
               {showLeftCarret && <Carret style={carretStyle} />}
               <div className="sub_wrapper" style={{ opacity }}>
                 <NameWrapper
@@ -139,7 +139,7 @@ const FieldItem = forwardRef(
                 </NameWrapper>
               </div>
               {showRightCarret && <Carret right style={carretStyle} />}
-            </>
+            </Fragment>
           )}
         </Wrapper>
       </div>

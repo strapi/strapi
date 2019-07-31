@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
@@ -44,7 +44,7 @@ function GroupCollapse({
   connectDropTarget(ref);
 
   return (
-    <>
+    <Fragment>
       <GroupCollapseWrapper onClick={onClick} ref={ref} style={{ opacity }}>
         <Flex style={{ fontWeight: 500 }}>
           <ImgWrapper isOpen={isOpen}>
@@ -99,7 +99,7 @@ function GroupCollapse({
           })}
         </div>
       </Collapse>
-    </>
+    </Fragment>
   );
 }
 

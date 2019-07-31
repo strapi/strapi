@@ -13,7 +13,6 @@ const SortableList = ({ addItem, buttonData, moveItem, removeItem }) => {
     <div className="col-4">
       <SortWrapper>
         {relationsLayout.map((relationName, index) => {
-          //
           return (
             <Item
               index={index}
