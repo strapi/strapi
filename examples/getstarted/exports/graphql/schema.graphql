@@ -71,14 +71,6 @@ type createTagPayload {
   tag: Tag
 }
 
-input createTotoInput {
-  data: TotoInput
-}
-
-type createTotoPayload {
-  toto: Toto
-}
-
 input createUserInput {
   data: UserInput
 }
@@ -122,14 +114,6 @@ input deleteTagInput {
 
 type deleteTagPayload {
   tag: Tag
-}
-
-input deleteTotoInput {
-  where: InputID
-}
-
-type deleteTotoPayload {
-  toto: Toto
 }
 
 input deleteUserInput {
@@ -209,14 +193,6 @@ input editTestInput {
   type: String
 }
 
-input editTotoInput {
-  name: String
-  date: DateTime
-  number: Int
-  json: JSON
-  somethin: ENUM_TOTO_SOMETHIN
-}
-
 input editUserInput {
   username: String
   email: String
@@ -236,12 +212,6 @@ enum ENUM_ARTICLE_ENUM {
 enum ENUM_GROUPINGREDIENTS_ENUM {
   morning
   noon
-}
-
-enum ENUM_TOTO_SOMETHIN {
-  un
-  deux
-  trois
 }
 
 input FileInput {
@@ -297,7 +267,7 @@ scalar JSON
 """The `Long` scalar type represents 52-bit integers"""
 scalar Long
 
-union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Article | createArticlePayload | updateArticlePayload | deleteArticlePayload | Recipe | createRecipePayload | updateRecipePayload | deleteRecipePayload | Tag | createTagPayload | updateTagPayload | deleteTagPayload | Toto | createTotoPayload | updateTotoPayload | deleteTotoPayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
+union Morph = UsersPermissionsMe | UsersPermissionsMeRole | Article | createArticlePayload | updateArticlePayload | deleteArticlePayload | Recipe | createRecipePayload | updateRecipePayload | deleteRecipePayload | Tag | createTagPayload | updateTagPayload | deleteTagPayload | UploadFile | UsersPermissionsPermission | UsersPermissionsRole | createRolePayload | updateRolePayload | deleteRolePayload | UsersPermissionsUser | createUserPayload | updateUserPayload | deleteUserPayload | MypluginTest
 
 type Mutation {
   createArticle(input: createArticleInput): createArticlePayload
@@ -309,9 +279,6 @@ type Mutation {
   createTag(input: createTagInput): createTagPayload
   updateTag(input: updateTagInput): updateTagPayload
   deleteTag(input: deleteTagInput): deleteTagPayload
-  createToto(input: createTotoInput): createTotoPayload
-  updateToto(input: updateTotoInput): updateTotoPayload
-  deleteToto(input: deleteTotoInput): deleteTotoPayload
 
   """Create a new role"""
   createRole(input: createRoleInput): createRolePayload
@@ -345,8 +312,6 @@ type Query {
   recipes(sort: String, limit: Int, start: Int, where: JSON): [Recipe]
   tag(id: ID!): Tag
   tags(sort: String, limit: Int, start: Int, where: JSON): [Tag]
-  toto(id: ID!): Toto
-  totos(sort: String, limit: Int, start: Int, where: JSON): [Toto]
   files(sort: String, limit: Int, start: Int, where: JSON): [UploadFile]
   role(id: ID!): UsersPermissionsRole
 
@@ -396,25 +361,6 @@ input TestInput {
   type: String!
 }
 
-type Toto {
-  name: String!
-  date: DateTime!
-  number: Int
-  json: JSON
-  somethin: ENUM_TOTO_SOMETHIN
-  id: ID!
-  created_at: DateTime!
-  updated_at: DateTime!
-}
-
-input TotoInput {
-  name: String!
-  date: DateTime!
-  number: Int
-  json: JSON
-  somethin: ENUM_TOTO_SOMETHIN
-}
-
 input updateArticleInput {
   where: InputID
   data: editArticleInput
@@ -449,15 +395,6 @@ input updateTagInput {
 
 type updateTagPayload {
   tag: Tag
-}
-
-input updateTotoInput {
-  where: InputID
-  data: editTotoInput
-}
-
-type updateTotoPayload {
-  toto: Toto
 }
 
 input updateUserInput {
