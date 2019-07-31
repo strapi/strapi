@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEqual } from 'lodash';
+import { Prompt } from 'react-router';
 
 import pluginId from '../../pluginId';
 
@@ -49,7 +50,7 @@ import {
 
 /* eslint-disable no-extra-boolean-cast */
 export class GroupPage extends React.Component {
-  state = { attrToDelete: null, showWarning: false };
+  state = { attrToDelete: null, removePrompt: false, showWarning: false };
   featureType = 'group';
 
   componentDidMount() {
@@ -65,6 +66,16 @@ export class GroupPage extends React.Component {
         this.isUpdatingTempFeature(),
         this.getFeatureName()
       );
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    const {
+      location: { search },
+    } = prevProps;
+
+    if (search !== this.props.location.search) {
+      this.setPrompt();
     }
   }
 
@@ -298,6 +309,7 @@ export class GroupPage extends React.Component {
     const {
       location: { pathname },
     } = this.props;
+
     const backPathname = pathname.substr(0, pathname.lastIndexOf('/'));
 
     this.props.history.push(backPathname);
@@ -357,6 +369,18 @@ export class GroupPage extends React.Component {
     push({ search: nextSearch });
   };
 
+  hasFeatureBeenModified = () => {
+    const { initialDataGroup, modifiedDataGroup } = this.props;
+    const currentGroup = this.getFeatureName();
+
+    return (
+      !isEqual(
+        initialDataGroup[currentGroup],
+        modifiedDataGroup[currentGroup]
+      ) && this.getSearch() === ''
+    );
+  };
+
   isUpdatingTempFeature = () => {
     const { groups } = this.props;
     const currentData = groups.find(d => d.name === this.getFeatureName());
@@ -391,6 +415,8 @@ export class GroupPage extends React.Component {
     }
   };
 
+  setPrompt = () => this.setState({ removePrompt: false });
+
   toggleModalWarning = () =>
     this.setState(prevState => ({ showWarning: !prevState.showWarning }));
 
@@ -422,7 +448,7 @@ export class GroupPage extends React.Component {
       temporaryAttributeRelationGroup,
       setTemporaryAttributeRelationGroup,
     } = this.props;
-    const { showWarning } = this.state;
+    const { showWarning, removePrompt } = this.state;
 
     const attributes = this.getFeatureAttributes();
     const attributesNumber = this.getFeatureAttributesLength();
@@ -445,6 +471,14 @@ export class GroupPage extends React.Component {
     return (
       <>
         <BackHeader onClick={this.handleGoBack} />
+        <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
+          {msg => (
+            <Prompt
+              when={this.hasFeatureBeenModified() && !removePrompt}
+              message={msg}
+            />
+          )}
+        </FormattedMessage>
         <ViewContainer
           {...this.props}
           featureType={this.featureType}

@@ -7,10 +7,7 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -34,10 +31,7 @@
     },
     "enum": {
       "type": "enumeration",
-      "enum": [
-        "morning,",
-        "noon"
-      ]
+      "enum": ["morning,", "noon"]
     },
     "bool": {
       "type": "boolean"
@@ -66,7 +60,7 @@
     "fb_cta": {
       "required": true,
       "type": "group",
-      "group": "cta_facebook"
+      "group": "facebook_cta"
     },
     "mainIngredient": {
       "type": "group",
