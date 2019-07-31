@@ -1,5 +1,5 @@
 import { fromJS } from 'immutable';
-import { formatLayout } from '../../utils/layout';
+import { formatLayout, getInputSize } from '../../utils/layout';
 
 const initialState = fromJS({
   initialData: {},
@@ -8,21 +8,6 @@ const initialState = fromJS({
   itemNameToSelect: '',
   modifiedData: {},
 });
-
-const getSize = type => {
-  switch (type) {
-    case 'boolean':
-    case 'date':
-    case 'datetime':
-      return 4;
-    case 'json':
-    case 'group':
-    case 'WYSIWYG':
-      return 12;
-    default:
-      return 6;
-  }
-};
 
 const reducer = (state, action) => {
   const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
@@ -48,7 +33,7 @@ const reducer = (state, action) => {
           );
       });
     case 'ON_ADD_DATA': {
-      const size = getSize(
+      const size = getInputSize(
         state.getIn([
           'modifiedData',
           'schema',

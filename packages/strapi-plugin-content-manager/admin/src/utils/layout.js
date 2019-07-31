@@ -1,4 +1,4 @@
-const getSize = arr => arr.reduce((sum, value) => sum + value.size, 0);
+const getRowSize = arr => arr.reduce((sum, value) => sum + value.size, 0);
 
 const createLayout = arr => {
   return arr.reduce((acc, current, index) => {
@@ -13,7 +13,7 @@ const formatLayout = arr => {
     .reduce((acc, current) => {
       let toPush = [];
       const currentRow = current.rowContent.reduce((acc2, curr) => {
-        const acc2Size = getSize(acc2);
+        const acc2Size = getRowSize(acc2);
 
         if (curr.name === '_TEMP_') {
           return acc2;
@@ -30,7 +30,7 @@ const formatLayout = arr => {
       const rowId =
         acc.length === 0 ? 0 : Math.max.apply(Math, acc.map(o => o.rowId)) + 1;
 
-      const currentRowSize = getSize(currentRow);
+      const currentRowSize = getRowSize(currentRow);
 
       if (currentRowSize < 12) {
         currentRow.push({ name: '_TEMP_', size: 12 - currentRowSize });
@@ -39,7 +39,7 @@ const formatLayout = arr => {
       acc.push({ rowId, rowContent: currentRow });
 
       if (toPush.length > 0) {
-        const toPushSize = getSize(toPush);
+        const toPushSize = getRowSize(toPush);
 
         if (toPushSize < 12) {
           toPush.push({ name: '_TEMP_', size: 12 - toPushSize });
@@ -70,4 +70,23 @@ const unformatLayout = arr => {
   }, []);
 };
 
-export { createLayout, formatLayout, unformatLayout };
+const getInputSize = type => {
+  switch (type) {
+    case 'boolean':
+    case 'date':
+    case 'datetime':
+    case 'integer':
+    case 'float':
+    case 'biginteger':
+    case 'decimal':
+      return 4;
+    case 'json':
+    case 'group':
+    case 'richtext':
+      return 12;
+    default:
+      return 6;
+  }
+};
+
+export { createLayout, formatLayout, getInputSize, unformatLayout };

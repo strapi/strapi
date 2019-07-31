@@ -46,8 +46,7 @@ const FieldItem = forwardRef(
       'file',
       'media',
       'group',
-      'WYSIWYG',
-      'wysiwyg',
+      'richtext',
     ].includes(type);
     const carretStyle = withLongerHeight ? { height: '84px' } : {};
     const renderIcon = () => {

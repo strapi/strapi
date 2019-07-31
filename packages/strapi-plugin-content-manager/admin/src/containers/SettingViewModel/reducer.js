@@ -4,7 +4,7 @@
  */
 
 import { fromJS } from 'immutable';
-import { formatLayout } from '../../utils/layout';
+import { formatLayout, getInputSize } from '../../utils/layout';
 
 import {
   ADD_FIELD_TO_LIST,
@@ -36,25 +36,6 @@ export const initialState = fromJS({
   modifiedData: fromJS({}),
   shouldToggleModalSubmit: true,
 });
-
-const getSize = type => {
-  switch (type) {
-    case 'boolean':
-    case 'date':
-    case 'datetime':
-    case 'integer':
-    case 'float':
-    case 'biginteger':
-    case 'decimal':
-      return 4;
-    case 'json':
-    case 'group':
-    case 'WYSIWYG':
-      return 12;
-    default:
-      return 6;
-  }
-};
 
 function settingViewModelReducer(state = initialState, action) {
   const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
@@ -107,7 +88,7 @@ function settingViewModelReducer(state = initialState, action) {
           );
       });
     case ON_ADD_DATA: {
-      const size = getSize(
+      const size = getInputSize(
         state.getIn([
           'modifiedData',
           'schema',

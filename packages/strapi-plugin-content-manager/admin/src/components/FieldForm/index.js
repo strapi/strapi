@@ -61,7 +61,7 @@ const FieldForm = ({
                 return null;
               }
 
-              if (formType === 'wysiwyg' && meta === 'editable') {
+              if (formType === 'richtext' && meta === 'editable') {
                 return null;
               }
 

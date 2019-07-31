@@ -21,7 +21,7 @@ const createPossibleMainFieldsForModelsAndGroups = array => {
         'password',
         'relation',
         'text',
-        'wysiwyg',
+        'richtext',
       ].includes(get(attributes, [attr, 'type'], ''));
     });
 

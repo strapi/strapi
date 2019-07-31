@@ -9,7 +9,7 @@ describe('getMediasAttributes util', () => {
       schema: {
         attributes: {
           bool: { type: 'boolean' },
-          content: { type: 'wysiwyg' },
+          content: { type: 'richtext' },
           created_at: { type: 'timestamp' },
           date: { type: 'date' },
           enum: { type: 'enumeration', enum: Array(2) },

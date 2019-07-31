@@ -37,6 +37,7 @@ const getInputType = (type = '') => {
       return 'json';
     case 'wysiwyg':
     case 'WYSIWYG':
+    case 'richtext':
       return 'wysiwyg';
     default:
       return 'text';
