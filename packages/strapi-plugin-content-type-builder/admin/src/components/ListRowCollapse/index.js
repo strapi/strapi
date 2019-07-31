@@ -59,7 +59,12 @@ function ListRowCollapse({
   };
 
   return (
-    <StyledListRowCollapse>
+    <StyledListRowCollapse
+      className={[
+        target ? 'relation-row' : '',
+        configurable ? 'clickable' : '',
+      ]}
+    >
       <td>
         <div onClick={actionOnRowClick}>
           <table>

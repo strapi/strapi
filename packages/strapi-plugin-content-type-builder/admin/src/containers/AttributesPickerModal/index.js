@@ -143,7 +143,7 @@ class AttributesPickerModal extends React.Component {
   renderAttribute = (attribute, index) => {
     const { featureType } = this.props;
     const { isDisplayed, nodeToFocus } = this.state;
-
+    console.log(this.props);
     if (attribute.type === featureType) {
       return null;
     }
@@ -161,7 +161,7 @@ class AttributesPickerModal extends React.Component {
   };
 
   render() {
-    const { featureType, isOpen } = this.props;
+    const { featureName, isOpen } = this.props;
 
     return (
       <WrapperModal
@@ -179,12 +179,12 @@ class AttributesPickerModal extends React.Component {
               />
             </HeaderModalTitle>
           </section>
-
           <section>
             <HeaderModalTitle>
               <FormattedMessage
-                id={`${pluginId}.popUpForm.choose.attributes.header.subtitle.${featureType}`}
+                id={`${pluginId}.popUpForm.choose.attributes.header.subtitle`}
               />
+              <span>&nbsp;{featureName}</span>
             </HeaderModalTitle>
           </section>
         </HeaderModal>
@@ -204,10 +204,12 @@ AttributesPickerModal.contextTypes = {
 
 AttributesPickerModal.defaultProps = {
   isOpen: false,
+  featureName: null,
   featureType: 'model',
 };
 
 AttributesPickerModal.propTypes = {
+  featureName: PropTypes.string,
   featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   push: PropTypes.func.isRequired,

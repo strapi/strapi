@@ -282,6 +282,7 @@ class AttributeForm extends React.Component {
                 {NAVLINKS.map(this.renderNavLink)}
               </HeaderModalNavContainer>
             </div>
+            <hr />
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>

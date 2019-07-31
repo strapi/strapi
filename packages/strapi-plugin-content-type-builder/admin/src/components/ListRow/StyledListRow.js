@@ -10,7 +10,6 @@ import { colors } from 'strapi-helper-plugin';
 
 const StyedListRow = styled.tr`
   background-color: transparent;
-  cursor: pointer;
   p {
     margin-bottom: 0;
   }
@@ -45,8 +44,18 @@ const StyedListRow = styled.tr`
   td:last-child {
     text-align: right;
   }
-  &:hover {
-    background-color: ${colors.grey};
+  &.relation-row {
+    background: linear-gradient(
+      135deg,
+      rgba(28, 93, 231, 0.05),
+      rgba(239, 243, 253, 0)
+    );
+  }
+  &.clickable {
+    &:hover {
+      cursor: pointer;
+      background-color: ${colors.grey};
+    }
   }
 `;
 

@@ -32,7 +32,13 @@ function ListRow({
   };
 
   return (
-    <StyledListRow onClick={handleClick}>
+    <StyledListRow
+      onClick={handleClick}
+      className={[
+        target ? 'relation-row' : '',
+        configurable ? 'clickable' : '',
+      ]}
+    >
       <td>
         <img src={src} alt={`icon-${ico}`} />
         <p>{name}</p>

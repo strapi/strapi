@@ -641,6 +641,7 @@ export class ModelPage extends React.Component {
         </ViewContainer>
 
         <AttributesModalPicker
+          featureName={this.getModelName()}
           isOpen={modalType === 'chooseAttributes'}
           push={push}
         />

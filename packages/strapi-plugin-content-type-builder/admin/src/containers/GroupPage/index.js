@@ -530,6 +530,7 @@ export class GroupPage extends React.Component {
 
         <AttributesModalPicker
           featureType={this.featureType}
+          featureName={this.getFeatureDisplayName()}
           isOpen={this.getModalType() === 'chooseAttributes'}
           push={push}
         />
