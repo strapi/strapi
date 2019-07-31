@@ -65,6 +65,14 @@
       }
     },
     {
+      "method": "POST",
+      "path": "/explorer/upload",
+      "handler": "ContentManager.uploadFile",
+      "config": {
+        "policies": []
+      }
+    },
+    {
       "method": "GET",
       "path": "/explorer/:model",
       "handler": "ContentManager.find",
