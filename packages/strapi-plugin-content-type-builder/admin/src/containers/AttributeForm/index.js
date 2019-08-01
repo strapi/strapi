@@ -93,7 +93,7 @@ class AttributeForm extends React.Component {
         const split = value.split('\n');
 
         const hasEnumFormatError = split.filter(
-          v => !new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(v)
+          v => !new RegExp('^[_A-Za-z][_0-9A-Za-z]*$').test(v)
         );
 
         if (hasEnumFormatError.length > 0) {

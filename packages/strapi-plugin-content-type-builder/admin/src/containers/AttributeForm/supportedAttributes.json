@@ -635,15 +635,6 @@
     "advanced": {
       "items": [
         {
-          "label": {
-            "id": "content-type-builder.form.attribute.settings.default"
-          },
-          "name": "default",
-          "type": "password",
-          "value": "",
-          "validations": {}
-        },
-        {
           "title": {
             "id": "content-type-builder.form.attribute.item.settings.name"
           },
@@ -657,19 +648,6 @@
           "validations": {},
           "inputDescription": {
             "id": "content-type-builder.form.attribute.item.requiredField.description"
-          }
-        },
-        {
-          "label": {
-            "id": "content-type-builder.form.attribute.item.uniqueField"
-          },
-          "name": "unique",
-          "type": "checkbox",
-          "customBootstrapClass": "col-md-12",
-          "value": false,
-          "validations": {},
-          "inputDescription": {
-            "id": "content-type-builder.form.attribute.item.uniqueField.description"
           }
         },
         {
@@ -878,23 +856,6 @@
           "type": "textarea",
           "value": "",
           "validations": {}
-        },
-        {
-          "customBootstrapClass": "col-md-12",
-          "title": {
-            "id": "content-type-builder.form.attribute.item.appearance.name"
-          },
-          "label": {
-            "id": "content-type-builder.form.attribute.item.appearance.label"
-          },
-          "name": "appearance.WYSIWYG",
-          "type": "checkbox",
-          "value": false,
-          "validations": {},
-          "inputDescription": {
-            "id": "content-type-builder.form.attribute.item.appearance.description"
-          },
-          "inputStyle": { "fontWeight": "500" }
         },
         {
           "title": {

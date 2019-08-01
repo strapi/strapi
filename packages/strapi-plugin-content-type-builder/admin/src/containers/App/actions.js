@@ -3,7 +3,15 @@
  * App actions
  *
  */
-import { cloneDeep, pick, set, camelCase } from 'lodash';
+import {
+  cloneDeep,
+  isEmpty,
+  pick,
+  toInteger,
+  toNumber,
+  set,
+  camelCase,
+} from 'lodash';
 import { fromJS, OrderedMap } from 'immutable';
 import {
   ADD_ATTRIBUTE_RELATION,
@@ -734,16 +742,32 @@ export const buildGroupAttributes = attributes =>
       });
       return acc.concat(attribute);
     } else {
-      const attribute = { name: current, ...attributes[current] };
-      return acc.concat(attribute);
+      if (attributes[current].type === 'enumeration') {
+        return acc.concat({
+          name: current,
+          ...attributes[current],
+          enum: attributes[current].enum.join('\n'),
+        });
+      }
+      return acc.concat({ name: current, ...attributes[current] });
     }
   }, []);
 
 export const formatGroupAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
-    const name = current['name'];
-    const newAttribute = { ...current };
-    delete newAttribute['name'];
+    const { name, ...newAttribute } = current;
+    const { type } = newAttribute;
+
+    if (type === 'enumeration') {
+      newAttribute.enum = newAttribute.enum.split('\n');
+    }
+
+    if (type === 'integer' && !isEmpty(newAttribute.default)) {
+      newAttribute.default = toInteger(newAttribute.default);
+    }
+    if (['decimal', 'float'].includes(type) && !isEmpty(newAttribute.default)) {
+      newAttribute.default = toNumber(newAttribute.default);
+    }
 
     acc[name] = newAttribute;
     return acc;
