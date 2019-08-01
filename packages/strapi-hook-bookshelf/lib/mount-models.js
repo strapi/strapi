@@ -592,6 +592,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       const populateGroup = key => {
         let paths = [];
         const group = strapi.groups[definition.attributes[key].group];
+
         const assocs = (group.associations || []).filter(
           assoc => assoc.autoPopulate === true
         );
@@ -611,7 +612,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           }
         });
 
-        return paths;
+        return [`${key}.group`, ...paths];
       };
 
       const createGroupsPopulate = () => {
