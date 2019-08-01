@@ -59,6 +59,7 @@ function ListItem({
 
 ListItem.defaultProps = {
   findRelation: () => {},
+  moveRelation: () => {},
   nextSearch: '',
   onRemove: () => {},
   targetModel: '',

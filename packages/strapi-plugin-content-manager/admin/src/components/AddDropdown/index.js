@@ -12,15 +12,15 @@ import {
 import { Wrapper } from './components';
 
 function Add({ data, onClick, pStyle, style }) {
-  const [state, setState] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Wrapper isOpen={state} notAllowed={data.length === 0} style={style}>
+    <Wrapper isOpen={isOpen} notAllowed={data.length === 0} style={style}>
       <ButtonDropdown
-        isOpen={state}
+        isOpen={isOpen}
         toggle={() => {
           if (data.length > 0) {
-            setState(prevState => !prevState);
+            setIsOpen(prevState => !prevState);
           }
         }}
       >

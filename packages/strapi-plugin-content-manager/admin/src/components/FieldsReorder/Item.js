@@ -214,6 +214,7 @@ const Item = ({
 };
 
 Item.defaultProps = {
+  groupUid: '',
   type: 'string',
 };
 

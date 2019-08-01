@@ -211,7 +211,6 @@ Group.defaultProps = {
   max: Infinity,
   min: -Infinity,
   modifiedData: {},
-  onChange: () => {},
 };
 
 Group.propTypes = {
@@ -227,7 +226,6 @@ Group.propTypes = {
   moveGroupField: PropTypes.func.isRequired,
   name: PropTypes.string.isRequired,
   pathname: PropTypes.string.isRequired,
-
   onChange: PropTypes.func.isRequired,
   removeField: PropTypes.func.isRequired,
 };
