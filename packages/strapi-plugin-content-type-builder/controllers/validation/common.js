@@ -15,6 +15,7 @@ const VALID_TYPES = [
   'password',
   'email',
   'integer',
+  'biginteger',
   'float',
   'decimal',
   'date',

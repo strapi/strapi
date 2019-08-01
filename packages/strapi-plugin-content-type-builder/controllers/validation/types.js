@@ -92,6 +92,24 @@ const getTypeShape = obj => {
         max: yup.number().integer(),
       };
     }
+    case 'biginteger': {
+      return {
+        default: yup
+          .string()
+          .nullable()
+          .matches(/^\d*$/),
+        required: validators.required,
+        unique: validators.unique,
+        min: yup
+          .string()
+          .nullable()
+          .matches(/^\d*$/),
+        max: yup
+          .string()
+          .nullable()
+          .matches(/^\d*$/),
+      };
+    }
     case 'float': {
       return {
         default: yup.number(),
