@@ -86,11 +86,10 @@ module.exports = {
         });
       } else {
         // Create an entry using `queries` system
-        ctx.body = await contentManagerService.create(
-          ctx.params,
-          ctx.request.body,
-          { source, model }
-        );
+        ctx.body = await contentManagerService.create(ctx.request.body, {
+          source,
+          model,
+        });
       }
 
       strapi.emit('didCreateFirstContentTypeEntry', ctx.params, source);
