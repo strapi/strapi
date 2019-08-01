@@ -130,7 +130,7 @@ const getTypeShape = obj => {
     }
     case 'date': {
       return {
-        default: yup.date(),
+        default: yup.string(),
         required: validators.required,
         unique: validators.unique,
       };
