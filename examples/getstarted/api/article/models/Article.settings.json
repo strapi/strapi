@@ -7,7 +7,7 @@
   },
   "options": {
     "increments": true,
-    "timestamps": true,
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -25,6 +25,15 @@
     },
     "number": {
       "type": "integer"
+    },
+    "big_number": {
+      "type": "biginteger"
+    },
+    "float_number": {
+      "type": "float"
+    },
+    "decimal_number": {
+      "type": "decimal"
     },
     "date": {
       "type": "date"
@@ -54,18 +63,16 @@
     },
     "manyTags": {
       "collection": "tag",
-      "dominant": true,
-      "via": "linkedArticles"
+      "via": "linkedArticles",
+      "dominant": true
     },
     "fb_cta": {
       "type": "group",
-      "group": "cta_facebook",
-      "repeatable": false
+      "group": "cta_facebook"
     },
     "mainIngredient": {
       "type": "group",
-      "group": "ingredients",
-      "repeatable": false
+      "group": "ingredients"
     },
     "ingredients": {
       "type": "group",
