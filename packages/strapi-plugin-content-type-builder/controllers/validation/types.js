@@ -1,7 +1,12 @@
 'use strict';
 
 const yup = require('yup');
-const { validators, VALID_TYPES, isValidName } = require('./common');
+const {
+  validators,
+  VALID_TYPES,
+  isValidName,
+  isValidEnum,
+} = require('./common');
 
 module.exports = obj => {
   return {
@@ -51,7 +56,7 @@ const getTypeShape = obj => {
       return {
         enum: yup
           .array()
-          .of(yup.string().test(isValidName))
+          .of(yup.string().test(isValidEnum))
           .min(1)
           .required(),
         default: yup
