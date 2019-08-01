@@ -10,6 +10,8 @@ const _ = require('lodash');
 
 module.exports = {
   async upload(ctx) {
+    const uploadService = strapi.plugins.upload.services.upload;
+
     // Retrieve provider configuration.
     const config = await strapi
       .store({
@@ -30,8 +32,8 @@ module.exports = {
     }
 
     // Extract optional relational data.
-    const { refId, ref, source, field, path } = ctx.request.body.fields || {};
-    const { files = {} } = ctx.request.body.files || {};
+    const { refId, ref, source, field, path } = ctx.request.body || {};
+    const { files = {} } = ctx.request.files || {};
 
     if (_.isEmpty(files)) {
       return ctx.badRequest(
@@ -43,9 +45,8 @@ module.exports = {
     }
 
     // Transform stream files to buffer
-    const buffers = await strapi.plugins.upload.services.upload.bufferize(
-      ctx.request.body.files.files
-    );
+    const buffers = await uploadService.bufferize(files);
+
     const enhancedFiles = buffers.map(file => {
       if (file.size > config.sizeLimit) {
         return ctx.badRequest(
@@ -94,10 +95,7 @@ module.exports = {
       return;
     }
 
-    const uploadedFiles = await strapi.plugins.upload.services.upload.upload(
-      enhancedFiles,
-      config
-    );
+    const uploadedFiles = await uploadService.upload(enhancedFiles, config);
 
     // Send 200 `ok`
     ctx.send(
