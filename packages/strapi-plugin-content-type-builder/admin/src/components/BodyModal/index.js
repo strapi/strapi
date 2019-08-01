@@ -1,8 +1,8 @@
 /**
-*
-* BodyModal
-*
-*/
+ *
+ * BodyModal
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -14,9 +14,7 @@ function BodyModal({ children, ...rest }) {
   return (
     <ModalBody className={styles.bodyModal} {...rest}>
       <div className="container-fluid">
-        <div className="row">
-          {children}
-        </div>
+        <div className="row">{children}</div>
       </div>
     </ModalBody>
   );

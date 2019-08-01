@@ -13,7 +13,7 @@ const RelationsWrapper = styled.div`
     }
     hr {
       width: 100%;
-      margin: 1.3rem 1.5rem 2.1rem 1.5rem;
+      margin: 1.4rem 1.5rem 2.1rem 1.5rem;
       height: 1px;
       background-color: rgba(14, 22, 34, 0.04);
       border: 0;

@@ -143,7 +143,7 @@ class AttributesPickerModal extends React.Component {
   renderAttribute = (attribute, index) => {
     const { featureType } = this.props;
     const { isDisplayed, nodeToFocus } = this.state;
-    console.log(this.props);
+
     if (attribute.type === featureType) {
       return null;
     }

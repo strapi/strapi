@@ -18,6 +18,7 @@ import ButtonModalPrimary from '../../components/ButtonModalPrimary';
 import ButtonModalSecondary from '../../components/ButtonModalSecondary';
 import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import FooterModal from '../../components/FooterModal';
+import FormModal from '../../components/FormModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
@@ -320,9 +321,11 @@ class RelationFormGroup extends React.Component {
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
-          <BodyModal>
-            <RelationsWrapper>{showForm && content}</RelationsWrapper>
-          </BodyModal>
+          <FormModal>
+            <BodyModal>
+              <RelationsWrapper>{showForm && content}</RelationsWrapper>
+            </BodyModal>
+          </FormModal>
           <FooterModal>
             <section>
               <ButtonModalPrimary

@@ -10,6 +10,8 @@ import { FormattedMessage } from 'react-intl';
 
 import { InputNumberWithErrors as InputNumber } from 'strapi-helper-plugin';
 
+import StyledCustomCheckbox from './StyledCustomCheckbox';
+
 class CustomCheckbox extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = {
@@ -43,22 +45,18 @@ class CustomCheckbox extends React.Component {
 
     // TODO: remove inline after migrating to Buffet
     return (
-      <div className="col-md-12" style={{ marginTop: -4, marginBottom: 9 }}>
+      <StyledCustomCheckbox>
         <FormattedMessage id={label.id}>
           {msg => (
-            <label
-              htmlFor={name}
-              style={{ fontWeight: '500', fontSize: 12, cursor: 'pointer' }}
-            >
+            <label htmlFor={name}>
               <input
-                style={{ marginLeft: 0, marginRight: 13 }}
                 checked={isChecked}
                 name={name}
                 id={name}
                 onChange={this.handleChange}
                 type="checkbox"
               />
-              {msg}
+              <span>{msg}</span>
             </label>
           )}
         </FormattedMessage>
@@ -69,10 +67,9 @@ class CustomCheckbox extends React.Component {
             name={name}
             onChange={this.handleInputNumberChange}
             value={value || ''}
-            style={{ marginTop: -15 }}
           />
         )}
-      </div>
+      </StyledCustomCheckbox>
     );
   }
 }

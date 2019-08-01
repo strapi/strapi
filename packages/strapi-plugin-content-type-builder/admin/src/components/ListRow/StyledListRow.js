@@ -1,6 +1,6 @@
 /**
  *
- * StyedListRow
+ * StyledListRow
  *
  */
 
@@ -8,7 +8,7 @@ import styled from 'styled-components';
 
 import { colors } from 'strapi-helper-plugin';
 
-const StyedListRow = styled.tr`
+const StyledListRow = styled.tr`
   background-color: transparent;
   p {
     margin-bottom: 0;
@@ -59,4 +59,4 @@ const StyedListRow = styled.tr`
   }
 `;
 
-export default StyedListRow;
+export default StyledListRow;

@@ -19,6 +19,7 @@ import ButtonModalSecondary from '../../components/ButtonModalSecondary';
 import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import FooterModal from '../../components/FooterModal';
+import FormModal from '../../components/FormModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
@@ -286,7 +287,11 @@ class AttributeForm extends React.Component {
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
-          <BodyModal>{showForm && currentForm.map(this.renderInput)}</BodyModal>
+          <FormModal>
+            <BodyModal>
+              {showForm && currentForm.map(this.renderInput)}
+            </BodyModal>
+          </FormModal>
           <FooterModal>
             <section>
               <ButtonModalPrimary
