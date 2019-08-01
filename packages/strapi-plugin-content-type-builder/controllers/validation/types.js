@@ -36,12 +36,19 @@ const getTypeShape = obj => {
      * scalar types
      */
     case 'string':
-    case 'text':
-    case 'richtext': {
+    case 'text': {
       return {
         default: yup.string(),
         required: validators.required,
         unique: validators.unique,
+        minLength: validators.minLength,
+        maxLength: validators.maxLength,
+      };
+    }
+    case 'richtext': {
+      return {
+        default: yup.string(),
+        required: validators.required,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
       };
