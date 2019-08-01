@@ -310,11 +310,6 @@ function EditView({
         });
       });
 
-      // Helper to visualize the formdata
-      // for (let pair of formData.entries()) {
-      //   console.log(pair[0] + ', ' + pair[1]);
-      // }
-
       // Change the request helper default headers so we can pass a FormData
       const headers = { 'X-Forwarded-Host': 'strapi' };
       const method = isCreatingEntry ? 'POST' : 'PUT';

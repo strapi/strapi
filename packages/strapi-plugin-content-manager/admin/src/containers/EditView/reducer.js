@@ -65,43 +65,47 @@ function reducer(state, action) {
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data))
         .update('isLoading', () => false);
-    case 'GET_GROUP_LAYOUTS_SUCCEEDED':
+    case 'GET_GROUP_LAYOUTS_SUCCEEDED': {
+      const addTempIdToGroupData = obj => {
+        const { defaultGroupValues } = action;
+
+        if (action.isCreatingEntry === true) {
+          return obj.keySeq().reduce((acc, current) => {
+            if (defaultGroupValues[current]) {
+              return acc.set(
+                current,
+                fromJS(defaultGroupValues[current].toSet)
+              );
+            }
+            return acc;
+          }, obj);
+        } else {
+          return obj.keySeq().reduce((acc, current) => {
+            if (defaultGroupValues[current] && List.isList(obj.get(current))) {
+              const formatted = obj.get(current).reduce((acc2, curr, index) => {
+                return acc2.set(index, curr.set('_temp__id', index));
+              }, List([]));
+
+              return acc.set(current, formatted);
+            }
+
+            return acc;
+          }, obj);
+        }
+      };
+
       return state
         .update('groupLayoutsData', () => fromJS(action.groupLayouts))
         .update('defaultGroupValues', () => fromJS(action.defaultGroupValues))
         .update('modifiedData', obj => {
-          const { defaultGroupValues } = action;
-
-          if (action.isCreatingEntry === true) {
-            return obj.keySeq().reduce((acc, current) => {
-              if (defaultGroupValues[current]) {
-                return acc.set(
-                  current,
-                  fromJS(defaultGroupValues[current].toSet)
-                );
-              }
-              return acc;
-            }, obj);
-          } else {
-            return obj.keySeq().reduce((acc, current) => {
-              if (
-                defaultGroupValues[current] &&
-                List.isList(obj.get(current))
-              ) {
-                const formatted = obj
-                  .get(current)
-                  .reduce((acc2, curr, index) => {
-                    return acc2.set(index, curr.set('_temp__id', index));
-                  }, List([]));
-
-                return acc.set(current, formatted);
-              }
-
-              return acc;
-            }, obj);
-          }
+          return addTempIdToGroupData(obj);
+        })
+        .update('initialData', obj => {
+          return addTempIdToGroupData(obj);
         })
         .update('isLoadingForLayouts', () => false);
+    }
+
     case 'INIT':
       return initialState
         .set('initialData', fromJS(action.data))
