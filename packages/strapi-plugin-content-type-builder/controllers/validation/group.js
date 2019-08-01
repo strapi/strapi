@@ -28,8 +28,8 @@ const groupSchema = yup
     connection: yup.string(),
     collectionName: yup
       .string()
-      .test(isValidName)
-      .allow(''),
+      .nullable()
+      .test(isValidName),
     attributes: yup.lazy(obj => {
       return yup
         .object()
