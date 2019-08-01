@@ -42,8 +42,8 @@ const getTypeShape = obj => {
         default: yup.string(),
         required: validators.required,
         unique: validators.unique,
-        min: validators.minLength,
-        max: validators.maxLength,
+        minLength: validators.minLength,
+        maxLength: validators.maxLength,
       };
     }
     case 'json': {
@@ -70,8 +70,8 @@ const getTypeShape = obj => {
     case 'password': {
       return {
         required: validators.required,
-        min: validators.minLength,
-        max: validators.maxLength,
+        minLength: validators.minLength,
+        maxLength: validators.maxLength,
       };
     }
     case 'email': {
@@ -79,8 +79,8 @@ const getTypeShape = obj => {
         default: yup.string().email(),
         required: validators.required,
         unique: validators.unique,
-        min: validators.minLength,
-        max: validators.maxLength,
+        minLength: validators.minLength,
+        maxLength: validators.maxLength,
       };
     }
     case 'integer': {
