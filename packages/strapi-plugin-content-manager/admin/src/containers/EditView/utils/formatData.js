@@ -1,4 +1,75 @@
-import { cloneDeep, get, isArray, isObject, set, unset } from 'lodash';
+import { get, isArray, isEmpty, isObject } from 'lodash';
+
+export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
+  const getType = (schema, attrName) =>
+    get(schema, ['attributes', attrName, 'type'], '');
+  const getOtherInfos = (schema, arr) =>
+    get(schema, ['attributes', ...arr], '');
+
+  const recursiveCleanData = (data, layout) => {
+    return Object.keys(data).reduce((acc, current) => {
+      const attrType = getType(layout.schema, current);
+      const value = get(data, current);
+      const group = getOtherInfos(layout.schema, [current, 'group']);
+      const isRepeatable = getOtherInfos(layout.schema, [
+        current,
+        'repeatable',
+      ]);
+      let cleanedData;
+
+      switch (attrType) {
+        case 'json':
+          cleanedData = value;
+          break;
+        case 'date':
+          cleanedData =
+            value && value._isAMomentObject === true
+              ? value.toISOString()
+              : value;
+          break;
+        case 'media':
+          if (getOtherInfos(layout.schema, [current, 'multiple']) === true) {
+            // const valueWithoutFile =
+            cleanedData = value
+              ? helperCleanData(
+                  value.filter(file => !(file instanceof File)),
+                  'id'
+                )
+              : null;
+          } else {
+            cleanedData =
+              get(value, 0) instanceof File ? null : get(value, 'id', null);
+          }
+          break;
+        case 'group':
+          if (isRepeatable) {
+            cleanedData = value
+              ? value.map(data => {
+                  delete data._temp__id;
+                  const subCleanedData = recursiveCleanData(
+                    data,
+                    groupLayouts[group]
+                  );
+
+                  return subCleanedData;
+                })
+              : value;
+          } else {
+            cleanedData = recursiveCleanData(value, groupLayouts[group]);
+          }
+          break;
+        default:
+          cleanedData = helperCleanData(value, 'id');
+      }
+
+      acc[current] = cleanedData;
+
+      return acc;
+    }, {});
+  };
+
+  return recursiveCleanData(retrievedData, ctLayout);
+};
 
 export const getMediaAttributes = (ctLayout, groupLayouts) => {
   const getMedia = (
@@ -37,23 +108,7 @@ export const getMediaAttributes = (ctLayout, groupLayouts) => {
   return getMedia(ctLayout);
 };
 
-export const getFilesToUpload = (data, prefix = '') => {
-  return Object.keys(data).reduce((acc, current) => {
-    if (isObject(data[current]) && !isArray(data[current])) {
-      return getFilesToUpload(data[current], current);
-    }
-
-    if (get(data, [current]) instanceof File) {
-      const path = prefix !== '' ? `${prefix}.${current}` : current;
-
-      acc[path] = data[current];
-    }
-
-    return acc;
-  }, {});
-};
-
-const helperCleanData = (value, key) => {
+export const helperCleanData = (value, key) => {
   if (isArray(value)) {
     return value.map(obj => (obj[key] ? obj[key] : obj));
   } else if (isObject(value)) {
@@ -63,95 +118,57 @@ const helperCleanData = (value, key) => {
   }
 };
 
-export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
-  const getType = (schema, attrName) =>
-    get(schema, ['attributes', attrName, 'type'], '');
-  const getOtherInfos = (schema, arr) =>
-    get(schema, ['attributes', ...arr], '');
+export const mapDataKeysToFilesToUpload = (filesMap, data) => {
+  return Object.keys(filesMap).reduce((acc, current) => {
+    const keys = current.split('.');
+    const isMultiple = get(filesMap, [current, 'multiple'], false);
+    const isGroup = get(filesMap, [current, 'isGroup'], false);
+    const isRepeatable = get(filesMap, [current, 'repeatable'], false);
 
-  const recursiveCleanData = (data, layout) => {
-    return Object.keys(data).reduce((acc, current) => {
-      const attrType = getType(layout.schema, current);
-      const value = get(data, current);
-      const group = getOtherInfos(layout.schema, [current, 'group']);
-      const isRepeatable = getOtherInfos(layout.schema, [
-        current,
-        'repeatable',
-      ]);
-      let cleanedData;
+    const getFilesToUpload = path => {
+      const value = get(data, path, []) || [];
 
-      switch (attrType) {
-        case 'json':
-          cleanedData = value;
-          break;
-        case 'date':
-          cleanedData =
-            value && value._isAMomentObject === true
-              ? value.toISOString()
-              : value;
-          break;
-        case 'media':
-          if (getOtherInfos(layout.schema, [current, 'multiple'])) {
-            cleanedData = value
-              ? value.filter(file => !(file instanceof File))
-              : null;
-          } else {
-            cleanedData =
-              get(value, 0) instanceof File ? '' : get(value, 'id', null);
-          }
-          break;
-        case 'group':
-          if (isRepeatable) {
-            cleanedData = value
-              ? value.map(data => {
-                  delete data._temp__id;
-                  const subCleanedData = recursiveCleanData(
-                    data,
-                    groupLayouts[group]
-                  );
-
-                  return subCleanedData;
-                })
-              : value;
-          } else {
-            cleanedData = recursiveCleanData(value, groupLayouts[group]);
-          }
-          break;
-        default:
-          cleanedData = helperCleanData(value, 'id');
+      return value.filter(file => {
+        return file instanceof File;
+      });
+    };
+    const getFileToUpload = path => {
+      const file = get(data, [...path, 0], '');
+      if (file instanceof File) {
+        return [file];
       }
 
-      acc[current] = cleanedData;
+      return [];
+    };
 
-      return acc;
-    }, {});
-  };
+    if (!isRepeatable) {
+      const currentFilesToUpload = isMultiple
+        ? getFilesToUpload(keys)
+        : getFileToUpload([...keys]);
 
-  return recursiveCleanData(retrievedData, ctLayout);
-};
-
-export const associateFilesToData = (data, filesMap, uploadedFiles) => {
-  const ret = cloneDeep(data);
-
-  Object.keys(uploadedFiles).forEach(key => {
-    const keys = key.split('.');
-    const filesMapKey =
-      keys.length > 2
-        ? [keys[0], keys[2]]
-        : [keys[0], keys[1]].filter(k => !!k);
-    const isMultiple = get(filesMap, [...filesMapKey, 'multiple'], false);
-    const cleanedValue = get(uploadedFiles, key, []).map(v =>
-      helperCleanData(v, 'id')
-    );
-
-    if (isMultiple) {
-      const previousFiles = get(data, key, []);
-      set(ret, key, [...previousFiles, ...cleanedValue]);
-    } else {
-      unset(ret, key);
-      set(ret, key, cleanedValue[0] || null);
+      if (!isEmpty(currentFilesToUpload)) {
+        acc[current] = currentFilesToUpload;
+      }
     }
-  });
 
-  return ret;
+    if (isGroup && isRepeatable) {
+      const [key, targetKey] = current.split('.');
+      const groupData = get(data, [key], []);
+      const groupFiles = groupData.reduce((acc1, current, index) => {
+        const files = isMultiple
+          ? getFileToUpload([key, index, targetKey])
+          : getFileToUpload([key, index, targetKey]);
+
+        if (!isEmpty(files)) {
+          acc1[`${key}.${index}.${targetKey}`] = files;
+        }
+
+        return acc1;
+      }, {});
+
+      return { ...acc, ...groupFiles };
+    }
+
+    return acc;
+  }, {});
 };

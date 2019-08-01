@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useState, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { cloneDeep, get, isEmpty } from 'lodash';
+import { cloneDeep, get } from 'lodash';
 import {
   BackHeader,
   getQueryParameters,
@@ -24,7 +24,7 @@ import createYupSchema from './utils/schema';
 import {
   getMediaAttributes,
   cleanData,
-  associateFilesToData,
+  mapDataKeysToFilesToUpload,
 } from './utils/formatData';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
@@ -289,121 +289,51 @@ function EditView({
       emitEvent('willSaveEntry');
       // Create an object containing all the paths of the media fields
       const filesMap = getMediaAttributes(layout, groupLayoutsData);
-      // Create the formdata to upload all the files
-      const formDatas = Object.keys(filesMap).reduce((acc, current) => {
-        const keys = current.split('.');
-        const isMultiple = get(filesMap, [current, 'multiple'], false);
-        const isGroup = get(filesMap, [current, 'isGroup'], false);
-        const isRepeatable = get(filesMap, [current, 'repeatable'], false);
-
-        const getFilesToUpload = path => {
-          const value = get(modifiedData, path, []) || [];
-
-          return value.filter(file => {
-            return file instanceof File;
-          });
-        };
-        const getFileToUpload = path => {
-          const file = get(modifiedData, [...path, 0], '');
-          if (file instanceof File) {
-            return [file];
-          }
-
-          return [];
-        };
-
-        if (!isRepeatable) {
-          const currentFilesToUpload = isMultiple
-            ? getFilesToUpload(keys)
-            : getFileToUpload([...keys]);
-
-          if (!isEmpty(currentFilesToUpload)) {
-            acc[current] = currentFilesToUpload.reduce((acc2, curr) => {
-              acc2.append('files', curr);
-
-              return acc2;
-            }, new FormData());
-          }
-        }
-
-        if (isGroup && isRepeatable) {
-          const [key, targetKey] = current.split('.');
-          const groupData = get(modifiedData, [key], []);
-          const groupFiles = groupData.reduce((acc1, current, index) => {
-            const files = isMultiple
-              ? getFileToUpload([key, index, targetKey])
-              : getFileToUpload([key, index, targetKey]);
-
-            if (!isEmpty(files)) {
-              const toFormData = files.reduce((acc2, curr) => {
-                acc2.append('files', curr);
-
-                return acc2;
-              }, new FormData());
-
-              acc1[`${key}.${index}.${targetKey}`] = toFormData;
-            }
-
-            return acc1;
-          }, {});
-
-          return { ...acc, ...groupFiles };
-        }
-
-        return acc;
-      }, {});
-      // Change the request helper default headers so we can pass a FormData
-      const headers = { 'X-Forwarded-Host': 'strapi' };
-      // Upload the files
-      const mapUploadedFiles = Object.keys(formDatas).reduce(
-        async (acc, current) => {
-          const collection = await acc;
-          try {
-            const uploadedFiles = await request(
-              '/upload',
-              {
-                method: 'POST',
-                body: formDatas[current],
-                headers,
-                signal: submitSignal,
-              },
-              false,
-              false
-            );
-
-            collection[current] = uploadedFiles;
-
-            return collection;
-          } catch (err) {
-            console.log('upload error', err);
-            strapi.notification.error(`${pluginId}.notification.upload.error`);
-          }
-        },
-        Promise.resolve({})
-      );
+      // Create an object that maps the keys with the related files to upload
+      const filesToUpload = mapDataKeysToFilesToUpload(filesMap, modifiedData);
 
       const cleanedData = cleanData(
         cloneDeep(modifiedData),
         layout,
         groupLayoutsData
       );
-      const cleanedDataWithUploadedFiles = associateFilesToData(
-        cleanedData,
-        filesMap,
-        await mapUploadedFiles
-      );
 
+      const formData = new FormData();
+
+      formData.append('data', JSON.stringify(cleanedData));
+
+      Object.keys(filesToUpload).forEach(key => {
+        const files = filesToUpload[key];
+
+        files.forEach(file => {
+          formData.append(`files.${key}`, file);
+        });
+      });
+
+      // Helper to visualize the formdata
+      // for (let pair of formData.entries()) {
+      //   console.log(pair[0] + ', ' + pair[1]);
+      // }
+
+      // Change the request helper default headers so we can pass a FormData
+      const headers = { 'X-Forwarded-Host': 'strapi' };
       const method = isCreatingEntry ? 'POST' : 'PUT';
       const endPoint = isCreatingEntry ? slug : `${slug}/${id}`;
 
       try {
         // Time to actually send the data
-        await request(getRequestUrl(endPoint), {
-          method,
-          params: { source },
-          body: cleanedDataWithUploadedFiles,
-          signal: submitSignal,
-        });
+        await request(
+          getRequestUrl(endPoint),
+          {
+            method,
+            headers,
+            params: { source },
+            body: formData,
+            signal: submitSignal,
+          },
+          false,
+          false
+        );
         emitEvent('didSaveEntry');
         redirectToPreviousPage();
       } catch (err) {
@@ -546,7 +476,7 @@ function EditView({
                         }}
                         groupValue={groupValue}
                         key={key}
-                        isRepeatable={group.repeatable}
+                        isRepeatable={group.repeatable || false}
                         name={name}
                         modifiedData={modifiedData}
                         moveGroupField={(dragIndex, overIndex, name) => {

@@ -112,11 +112,24 @@ function reducer(state, action) {
           .delete(action.dragIndex)
           .insert(action.overIndex, list.get(action.dragIndex));
       });
-    case 'ON_CHANGE':
-      return state.updateIn(
+    case 'ON_CHANGE': {
+      let newState = state;
+      const [nonRepeatableGroupKey] = action.keys;
+
+      if (
+        action.keys.length === 2 &&
+        state.getIn(['modifiedData', nonRepeatableGroupKey]) === null
+      ) {
+        newState = state.updateIn(['modifiedData', nonRepeatableGroupKey], () =>
+          fromJS({})
+        );
+      }
+
+      return newState.updateIn(
         ['modifiedData', ...action.keys],
         () => action.value
       );
+    }
     case 'ON_REMOVE_FIELD':
       return state
         .removeIn(['modifiedData', ...action.keys])
