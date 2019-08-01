@@ -31,7 +31,10 @@ module.exports = () => {
       .string()
       .oneOf(VALID_NATURES)
       .required(),
-    plugin: yup.string().oneOf(Object.keys(strapi.plugins)),
+    plugin: yup
+      .string()
+      .nullable()
+      .oneOf(Object.keys(strapi.plugins)),
     unique: validators.unique,
 
     // TODO: remove once front-end stop sending them even if useless
