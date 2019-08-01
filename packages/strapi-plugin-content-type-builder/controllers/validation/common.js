@@ -50,7 +50,7 @@ const isValidKey = key => ({
 });
 
 const isValidEnum = {
-  name: 'isValidName',
+  name: 'isValidEnum',
   message:
     '${path} must match the following regex: /^[_A-Za-z][_0-9A-Za-z]*$/^',
   test: val => val === '' || ENUM_REGEX.test(val),
