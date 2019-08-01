@@ -1,23 +1,20 @@
-import React, { Fragment, useCallback, useRef } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { DropTarget } from 'react-dnd';
+import { useDrop } from 'react-dnd';
 
 import { InputsIndex as Input } from 'strapi-helper-plugin';
-
 import pluginId from '../../pluginId';
-
 import FormWrapper from '../../components/SettingFormWrapper';
 import { Wrapper } from './components';
-import Add from './Add';
+import Add from '../../components/AddDropdown';
 import ListField from './ListField';
 
-import ItemTypes from './itemsTypes';
+import ItemTypes from '../../utils/ItemTypes';
 
 function ListLayout({
   addField,
   availableData,
-  connectDropTarget,
   displayedData,
   fieldToEditIndex,
   modifiedData,
@@ -25,8 +22,8 @@ function ListLayout({
   onChange,
   onClick,
   onRemove,
+  onSubmit,
 }) {
-  const ref = useRef(null);
   const handleRemove = index => {
     if (displayedData.length > 1) {
       onRemove(index);
@@ -37,7 +34,7 @@ function ListLayout({
   };
 
   const fieldName = displayedData[fieldToEditIndex];
-  const fieldPath = ['metadata', fieldName, 'list'];
+  const fieldPath = ['metadatas', fieldName, 'list'];
 
   const form = [
     {
@@ -58,7 +55,6 @@ function ListLayout({
       didCheckErrors: false,
       errors: [],
       name: `${fieldPath.join('.')}.sortable`,
-      style: { marginTop: '18px' },
       type: 'toggle',
       validations: {},
     },
@@ -86,11 +82,16 @@ function ListLayout({
     [displayedData]
   );
 
-  connectDropTarget(ref);
+  const [, drop] = useDrop({
+    accept: ItemTypes.FIELD,
+    collect: monitor => ({
+      itemType: monitor.getItemType(),
+    }),
+  });
 
   return (
     <>
-      <div className="col-lg-5 col-md-12" ref={ref}>
+      <div className="col-lg-5 col-md-12" ref={drop}>
         {displayedData.map((data, index) => (
           <Fragment key={data}>
             <Wrapper>
@@ -103,7 +104,7 @@ function ListLayout({
                 name={data}
                 label={get(
                   modifiedData,
-                  ['metadata', data, 'list', 'label'],
+                  ['metadatas', data, 'list', 'label'],
                   ''
                 )}
                 onClick={onClick}
@@ -116,7 +117,7 @@ function ListLayout({
         <Add data={availableData} onClick={addField} />
       </div>
       <div className="col-lg-7 col-md-12">
-        <FormWrapper>
+        <FormWrapper onSubmit={onSubmit} style={{ minHeight: 246 }}>
           {form.map(input => {
             return (
               <Input
@@ -142,12 +143,12 @@ ListLayout.defaultProps = {
   onChange: () => {},
   onClick: () => {},
   onRemove: () => {},
+  onSubmit: () => {},
 };
 
 ListLayout.propTypes = {
   addField: PropTypes.func,
   availableData: PropTypes.array,
-  connectDropTarget: PropTypes.func.isRequired,
   displayedData: PropTypes.array,
   fieldToEditIndex: PropTypes.number,
   modifiedData: PropTypes.object,
@@ -155,8 +156,11 @@ ListLayout.propTypes = {
   onChange: PropTypes.func,
   onClick: PropTypes.func,
   onRemove: PropTypes.func,
+  onSubmit: PropTypes.func,
 };
 
-export default DropTarget(ItemTypes.FIELD, {}, connect => ({
-  connectDropTarget: connect.dropTarget(),
-}))(ListLayout);
+export default ListLayout;
+
+// export default DropTarget(ItemTypes.FIELD, {}, connect => ({
+//   connectDropTarget: connect.dropTarget(),
+// }))(ListLayout);

@@ -12,11 +12,12 @@ function ListHeader({
   children,
   subtitle,
   subtitleValues,
+  style,
   title,
   titleValues,
 }) {
   return (
-    <Wrapper>
+    <Wrapper style={style}>
       {button && <Button {...button} />}
       {children ? (
         children
@@ -35,6 +36,7 @@ function ListHeader({
 ListHeader.defaultProps = {
   button: null,
   children: null,
+  style: {},
   subtitle: 'app.utils.defaultMessage',
   subtitleValues: {},
   title: 'app.utils.defaultMessage',
@@ -44,6 +46,7 @@ ListHeader.defaultProps = {
 ListHeader.propTypes = {
   button: PropTypes.object,
   children: PropTypes.node,
+  style: PropTypes.object,
   subtitle: PropTypes.string,
   subtitleValues: PropTypes.object,
   title: PropTypes.string,

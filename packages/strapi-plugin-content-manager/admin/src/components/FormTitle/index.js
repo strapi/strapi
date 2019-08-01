@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
@@ -23,4 +23,4 @@ FormTitle.defaultProps = {
   title: null,
 };
 
-export default FormTitle;
+export default memo(FormTitle);

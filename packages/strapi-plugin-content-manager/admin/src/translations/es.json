@@ -94,7 +94,7 @@
   "form.Input.defaultSort": "Atributo para ordenar por defecto",
   "form.Input.description": "Descripción",
   "form.Input.description.placeholder": "Mostrar nombre en el perfíl",
-  "form.Input.disabled": "Campo editable",
+  "form.Input.editable": "Campo editable",
   "form.Input.filters": "Habilitar filtros",
   "form.Input.label": "Etiqueta",
   "form.Input.label.inputDescription": "Este valor sobrescribe la etiqueta mostrada en la cabecera de la tabla",

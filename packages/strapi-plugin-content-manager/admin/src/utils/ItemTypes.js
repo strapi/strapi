@@ -1,5 +1,7 @@
 export default {
-  NORMAL: 'normalAttr',
-  SORTABLEITEM: 'sortableItem',
-  VARIABLE: 'variableAttr',
+  EDIT_FIELD: 'editField',
+  EDIT_RELATION: 'editRelation',
+  FIELD: 'field',
+  GROUP: 'group',
+  RELATION: 'relation',
 };

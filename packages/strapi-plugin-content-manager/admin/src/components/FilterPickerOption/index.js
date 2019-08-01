@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { get, isEmpty } from 'lodash';
-import { InputSelect } from 'strapi-helper-plugin';
 import PropTypes from 'prop-types';
+
+import { InputSelect } from 'strapi-helper-plugin';
 import { Button, InputWrapper, Wrapper } from './components';
-import getFilters from './utils';
 import Input from './Input';
+import getFilters from './utils';
 
 const styles = {
   select: {
@@ -95,4 +96,4 @@ FilterPickerOption.propTypes = {
   value: PropTypes.any,
 };
 
-export default FilterPickerOption;
+export default memo(FilterPickerOption);

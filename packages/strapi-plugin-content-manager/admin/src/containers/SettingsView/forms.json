@@ -4,7 +4,7 @@
     "customBootstrapClass": "col-md-4",
     "didCheckErrors": false,
     "errors": [],
-    "name": "search",
+    "name": "searchable",
     "type": "toggle",
     "validations": {}
   },
@@ -13,7 +13,7 @@
     "customBootstrapClass": "col-md-4",
     "didCheckErrors": false,
     "errors": [],
-    "name": "filters",
+    "name": "filterable",
     "type": "toggle",
     "validations": {}
   },
@@ -33,7 +33,7 @@
     "errors": [],
     "inputDescription": { "id": "content-manager.form.Input.pageEntries.inputDescription" },
     "name": "pageSize",
-    "selectOptions": ["10", "20", "50", "100"],
+    "selectOptions": [10, 20, 50, 100],
     "type": "select",
     "validations": {}
   }

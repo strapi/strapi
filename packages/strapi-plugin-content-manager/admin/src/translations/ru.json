@@ -86,7 +86,7 @@
   "form.Input.defaultSort": "Сортировка по умолчанию",
   "form.Input.description": "Описание",
   "form.Input.description.placeholder": "Имя, отображаемое в профиле",
-  "form.Input.disabled": "Редактируемое поле",
+  "form.Input.editable": "Редактируемое поле",
   "form.Input.filters": "Включить фильтры",
   "form.Input.label": "Подпись",
   "form.Input.label.inputDescription": "Это значение переопределяет название, отображаемое в заголовке таблицы",

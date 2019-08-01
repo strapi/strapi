@@ -13,6 +13,7 @@ const Sub = styled.div`
   padding-top: 0px;
   line-height: 18px;
   > p:first-child {
+    margin-bottom: 1px;
     font-weight: 700;
     color: #333740;
     font-size: 1.8rem;

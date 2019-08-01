@@ -34,7 +34,7 @@
       "errors": [],
       "inputDescription": { "id": "content-manager.form.Input.pageEntries.inputDescription" },
       "name": "settings.pageSize",
-      "selectOptions": ["10", "20", "50", "100"],
+      "selectOptions": [10, 20, 50, 100],
       "type": "select",
       "validations": {}
     },

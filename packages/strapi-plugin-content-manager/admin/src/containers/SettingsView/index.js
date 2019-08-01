@@ -59,7 +59,8 @@ function SettingsView({
     if (showWarningSubmit) {
       toggleWarningSubmit();
     }
-  }, [shouldToggleModalSubmit, showWarningSubmit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldToggleModalSubmit]);
   useEffect(() => {
     if (isEmpty(initialData)) {
       getData();
@@ -106,17 +107,17 @@ function SettingsView({
         actions={getPluginHeaderActions()}
         title="Content Manager"
         description={{
-          id: 'content-manager.containers.SettingsPage.pluginHeaderDescription',
+          id: `${pluginId}.containers.SettingsPage.pluginHeaderDescription`,
         }}
       />
       <PopUpWarning
         isOpen={showWarningSubmit}
         toggleModal={toggleWarningSubmit}
         content={{
-          title: 'content-manager.popUpWarning.title',
-          message: 'content-manager.popUpWarning.warning.updateAllSettings',
-          cancel: 'content-manager.popUpWarning.button.cancel',
-          confirm: 'content-manager.popUpWarning.button.confirm',
+          title: `${pluginId}.popUpWarning.title`,
+          message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
+          cancel: `${pluginId}.popUpWarning.button.cancel`,
+          confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
         onConfirm={() => onSubmit()}
@@ -125,10 +126,10 @@ function SettingsView({
         isOpen={showWarningCancel}
         toggleModal={toggleWarningCancel}
         content={{
-          title: 'content-manager.popUpWarning.title',
-          message: 'content-manager.popUpWarning.warning.cancelAllSettings',
-          cancel: 'content-manager.popUpWarning.button.cancel',
-          confirm: 'content-manager.popUpWarning.button.confirm',
+          title: `${pluginId}.popUpWarning.title`,
+          message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
+          cancel: `${pluginId}.popUpWarning.button.cancel`,
+          confirm: `${pluginId}.popUpWarning.button.confirm`,
         }}
         popUpWarningType="danger"
         onConfirm={() => {
@@ -138,9 +139,9 @@ function SettingsView({
       />
       <Row className="row">
         <Block
-          description="content-manager.containers.SettingsPage.Block.generalSettings.description"
-          title="content-manager.containers.SettingsPage.Block.generalSettings.title"
-          style={{ marginBottom: 7 }}
+          description={`${pluginId}.containers.SettingsPage.Block.generalSettings.description`}
+          title={`${pluginId}.containers.SettingsPage.Block.generalSettings.title`}
+          style={{ marginBottom: 12 }}
         >
           <form style={{ paddingTop: '2.6rem' }}>
             <div className="row">
@@ -168,11 +169,13 @@ function SettingsView({
                 to: getUrl('/groups'),
               },
             ]}
+            style={{ marginTop: '4.4rem' }}
           />
           <ListWrapper>
             <ListHeader
               title={`${pluginId}.containers.SettingsView.list.title`}
               subtitle={`${pluginId}.containers.SettingsView.list.subtitle`}
+              style={{ paddingTop: '1.8rem', paddingBottom: '.7rem' }}
             />
             <List>
               <table>
@@ -183,6 +186,8 @@ function SettingsView({
                       name={data.name}
                       push={push}
                       type={type}
+                      uid={data.uid}
+                      source={data.source}
                     />
                   ))}
                 </tbody>

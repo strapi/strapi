@@ -86,7 +86,7 @@
   "form.Input.defaultSort": "デフォルトのソート属性",
   "form.Input.description": "説明文",
   "form.Input.description.placeholder": "プロフィールの表示名",
-  "form.Input.disabled": "編集可能なフィールド",
+  "form.Input.editable": "編集可能なフィールド",
   "form.Input.filters": "フィルタを有効にする",
   "form.Input.label": "Label",
   "form.Input.label.inputDescription": "この値は、テーブルの先頭に表示されるラベル",

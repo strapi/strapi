@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import { GlobalPagination, InputSelect } from 'strapi-helper-plugin';
@@ -45,4 +45,4 @@ function Footer() {
   );
 }
 
-export default Footer;
+export default memo(Footer);

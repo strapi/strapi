@@ -52,6 +52,8 @@ const getFilters = type => {
     case 'float':
     case 'decimal':
     case 'date':
+    case 'timestamp':
+    case 'timestampUpdate':
       return [
         {
           id: 'content-manager.components.FilterOptions.FILTER_TYPES.=',
