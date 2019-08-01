@@ -2,6 +2,22 @@
 
 const _ = require('lodash');
 
+const parseMultipartBody = ({ body, files }) => {
+  const data = JSON.parse(body.data);
+
+  const filesToUpload = Object.keys(files).reduce((acc, key) => {
+    // remove files prefix
+    const path = _.tail(_.toPath(key));
+    acc[path.join('.')] = files[key];
+    return acc;
+  }, {});
+
+  return {
+    data,
+    files: filesToUpload,
+  };
+};
+
 module.exports = {
   /**
    * Returns a list of entities of a content-type matching the query parameters
@@ -69,17 +85,28 @@ module.exports = {
    * Creates an entity of a content type
    */
   async create(ctx) {
+    const { model } = ctx.params;
     const { source } = ctx.request.query;
+
     const contentManagerService =
       strapi.plugins['content-manager'].services['contentmanager'];
 
     try {
-      // Create an entry using `queries` system
-      ctx.body = await contentManagerService.add(
-        ctx.params,
-        ctx.request.body,
-        source
-      );
+      if (ctx.is('multipart')) {
+        const { data, files } = parseMultipartBody(ctx.request);
+        ctx.body = await contentManagerService.createMultipart(data, {
+          files,
+          model,
+          source,
+        });
+      } else {
+        // Create an entry using `queries` system
+        ctx.body = await contentManagerService.add(
+          ctx.params,
+          ctx.request.body,
+          source
+        );
+      }
 
       strapi.emit('didCreateFirstContentTypeEntry', ctx.params, source);
     } catch (error) {
@@ -97,17 +124,27 @@ module.exports = {
    * Updates an entity of a content type
    */
   async update(ctx) {
+    const { model } = ctx.params;
     const { source } = ctx.request.query;
     const contentManagerService =
       strapi.plugins['content-manager'].services['contentmanager'];
 
     try {
-      // Return the last one which is the current model.
-      ctx.body = await contentManagerService.edit(
-        ctx.params,
-        ctx.request.body,
-        source
-      );
+      if (ctx.is('multipart')) {
+        const { data, files } = parseMultipartBody(ctx.request);
+        ctx.body = await contentManagerService.editMultipart(ctx.params, data, {
+          files,
+          model,
+          source,
+        });
+      } else {
+        // Return the last one which is the current model.
+        ctx.body = await contentManagerService.edit(
+          ctx.params,
+          ctx.request.body,
+          source
+        );
+      }
     } catch (error) {
       strapi.log.error(error);
       ctx.badRequest(
@@ -143,16 +180,5 @@ module.exports = {
       ctx.params,
       ctx.request.query
     );
-  },
-
-  /**
-   * Handle uploads in the explorer
-   */
-  async uploadFile(ctx) {
-    if (!strapi.plugins.upload) {
-      ctx.send({ error: 'uploadPlugin.notInstalled' }, 400);
-    }
-
-    return strapi.plugins.upload.controllers.upload.upload(ctx);
   },
 };

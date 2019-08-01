@@ -26,7 +26,10 @@ const groupSchema = yup
       .required('name.required'),
     description: yup.string(),
     connection: yup.string(),
-    collectionName: yup.string().test(isValidName),
+    collectionName: yup
+      .string()
+      .nullable()
+      .test(isValidName),
     attributes: yup.lazy(obj => {
       return yup
         .object()

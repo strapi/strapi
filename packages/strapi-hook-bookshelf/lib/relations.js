@@ -263,10 +263,12 @@ module.exports = {
                 case 'manyMorphToOne':
                   // Update the relational array.
                   params.values[current].forEach(obj => {
-                    const model =
+                    const model = strapi.getModel(
+                      obj.ref,
                       obj.source && obj.source !== 'content-manager'
-                        ? strapi.plugins[obj.source].models[obj.ref]
-                        : strapi.models[obj.ref];
+                        ? obj.source
+                        : null
+                    );
 
                     // Remove existing relationship because only one file
                     // can be related to this field.
@@ -369,8 +371,9 @@ module.exports = {
                   break;
                 }
                 case 'oneMorphToOne':
-                case 'oneMorphToMany':
+                case 'oneMorphToMany': {
                   break;
+                }
                 default:
               }
 
@@ -391,11 +394,13 @@ module.exports = {
       });
     }
 
-    return await this.forge({
+    const result = await this.forge({
       [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
     }).fetch({
       transacting,
     });
+
+    return result && result.toJSON ? result.toJSON() : result;
   },
 
   async addRelationMorph(params, { transacting } = {}) {
