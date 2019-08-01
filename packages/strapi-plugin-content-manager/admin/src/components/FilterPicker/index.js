@@ -17,6 +17,8 @@ import FilterPickerOption from '../FilterPickerOption';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
+const NOT_ALLOWED_FILTERS = ['json', 'group', 'relation', 'media', 'richtext'];
+
 function FilterPicker({
   actions,
   isOpen,
@@ -29,7 +31,10 @@ function FilterPicker({
     .filter(attr => {
       const current = get(schema, ['attributes', attr], {});
 
-      return current.type !== 'json' && current.type !== undefined;
+      return (
+        !NOT_ALLOWED_FILTERS.includes(current.type) &&
+        current.type !== undefined
+      );
     })
     .sort()
     .map(attr => {

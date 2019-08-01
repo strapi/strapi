@@ -73,7 +73,7 @@ export function* deleteModel({
         [{ links: [] }]
       );
       const updatedMenu = appMenu[0].links.filter(el => {
-        return el.destination !== modelName;
+        return el.uid !== modelName;
       });
       appMenu[0].links = sortBy(updatedMenu, 'label');
       updatePlugin('content-manager', 'leftMenuSections', appMenu);
@@ -121,10 +121,10 @@ export function* submitCT({
         []
       );
       const oldContentTypeNameIndex = appMenu[0].links.findIndex(
-        el => el.destination === oldContentTypeName
+        el => el.uid === oldContentTypeName
       );
       const updatedLink = {
-        destination: name.toLowerCase(),
+        uid: name.toLowerCase(),
         label: capitalize(pluralize(name)),
       };
       appMenu[0].links.splice(oldContentTypeNameIndex, 1, updatedLink);
@@ -228,7 +228,7 @@ export function* submitTempCT({
       []
     );
     const newLink = {
-      destination: name.toLowerCase(),
+      uid: name.toLowerCase(),
       label: capitalize(pluralize(name)),
     };
     appMenu[0].links.push(newLink);

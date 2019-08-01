@@ -14,6 +14,7 @@ const ListWrapper = styled.div`
   }
   .list-button {
     padding: 1.4rem 3rem 2.5rem 3rem;
+
     button {
       width: 100%;
     }

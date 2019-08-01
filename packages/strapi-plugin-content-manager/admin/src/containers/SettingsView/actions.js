@@ -13,12 +13,10 @@ export function getData() {
   };
 }
 
-export function getDataSucceeded(generalSettings, groups, models) {
+export function getDataSucceeded(generalSettings) {
   return {
     type: GET_DATA_SUCCEEDED,
     generalSettings,
-    groups,
-    models,
   };
 }
 
@@ -26,7 +24,7 @@ export function onChange({ target: { name, value } }) {
   return {
     type: ON_CHANGE,
     name,
-    value,
+    value: name === 'pageSize' ? parseInt(value, 10) : value,
   };
 }
 

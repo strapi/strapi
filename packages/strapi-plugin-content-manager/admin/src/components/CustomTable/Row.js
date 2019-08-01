@@ -36,10 +36,13 @@ const getDisplayedValue = (type, value, name) => {
 
       const date =
         value && isObject(value) && value._isAMomentObject === true
-          ? value
-          : moment.utc(value);
+          ? JSON.stringify(value)
+          : value;
 
-      return date.format('YYYY-MM-DD HH:mm:ss');
+      return moment
+        .parseZone(date)
+        .utc()
+        .format('dddd, MMMM Do YYYY');
     }
     case 'password':
       return '••••••••';
@@ -59,7 +62,7 @@ function Row({ goTo, isBulkable, row, headers }) {
   return (
     <>
       {isBulkable && (
-        <td key="i">
+        <td key="i" onClick={e => e.stopPropagation()}>
           <CustomInputCheckbox
             name={row.id}
             onChange={onChangeBulk}

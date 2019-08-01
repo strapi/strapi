@@ -86,7 +86,7 @@
   "form.Input.defaultSort": "Standaard sorteer attribuut",
   "form.Input.description": "Beschrijving",
   "form.Input.description.placeholder": "Naam in het profiel tonen",
-  "form.Input.disabled": "Bewerkbaar veld",
+  "form.Input.editable": "Bewerkbaar veld",
   "form.Input.filters": "Filters inschakelen",
   "form.Input.label": "Label",
   "form.Input.label.inputDescription": "Deze waarde overschrijft het label welke weergegeven wordt in het tabel hoofd",

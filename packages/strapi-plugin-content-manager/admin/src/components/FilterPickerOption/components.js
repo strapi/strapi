@@ -54,7 +54,11 @@ const Button = styled.button`
 const InputWrapperDate = styled.div`
   margin-right: 10px;
   ${({ type }) => {
-    if (type.includes('date')) {
+    if (
+      type.includes('date') ||
+      type === 'timestampUpdate' ||
+      type === 'timestamp'
+    ) {
       return css`
         position: relative;
         &:before {
@@ -87,7 +91,6 @@ const InputWrapperDate = styled.div`
   }}
 `;
 
-// TODO Delete if we remove the autofocus
 const Input = styled.input`
   height: 3.4rem;
   margin-top: 0.9rem;

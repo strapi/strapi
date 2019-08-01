@@ -1,29 +1,23 @@
 /**
- * 
+ *
  * DraggedRemovedIcon
- * 
+ *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import styles from './styles.scss';
+import Span from './components';
 
-function DraggedRemovedIcon({ isDragging, onRemove, withLongerHeight, ...rest }) {
-  let className;
-
-  if (isDragging && withLongerHeight) {
-    className = styles.removeIconLongerDragged;
-  } else if (withLongerHeight) {
-    className = styles.removeIconLonger;
-  } else if (isDragging) {
-    className = styles.removeIconDragged;
-  } else {
-    className = styles.removeIcon;
-  }
-
+function DraggedRemovedIcon({
+  isDragging,
+  onRemove,
+  withLongerHeight,
+  ...rest
+}) {
   return (
-    <span
-      className={className}
+    <Span
+      isDragging={isDragging}
+      withLongerHeight={withLongerHeight}
       onClick={onRemove}
       {...rest}
     />
@@ -42,4 +36,4 @@ DraggedRemovedIcon.propTypes = {
   withLongerHeight: PropTypes.bool,
 };
 
-export default DraggedRemovedIcon;
+export default memo(DraggedRemovedIcon);

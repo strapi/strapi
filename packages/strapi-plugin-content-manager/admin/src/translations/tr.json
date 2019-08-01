@@ -86,7 +86,7 @@
   "form.Input.defaultSort": "Varsayılan sıralama özelliği",
   "form.Input.description": "Açıklama",
   "form.Input.description.placeholder": "Profildeki görünen ad",
-  "form.Input.disabled": "Düzenlenebilir alan",
+  "form.Input.editable": "Düzenlenebilir alan",
   "form.Input.filters": "Filtreleri etkinleştir",
   "form.Input.label": "Etiket",
   "form.Input.label.inputDescription": "Bu değer, tablonun başında görüntülenen etiketi geçersiz kılar",

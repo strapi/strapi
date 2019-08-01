@@ -53,7 +53,8 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
               key={`${i}-${link.label}`}
               icon={link.icon || 'caret-right'}
               label={link.label}
-              destination={`/plugins/${link.plugin}/${link.destination}`}
+              destination={`/plugins/${link.plugin}/${link.destination ||
+                link.uid}`}
               source={link.source}
             />
           ))}

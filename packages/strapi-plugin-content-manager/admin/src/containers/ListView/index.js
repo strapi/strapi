@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { capitalize, get, isEmpty, sortBy } from 'lodash';
+import { capitalize, get, sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import {
   ButtonDropdown,
@@ -107,23 +107,35 @@ function ListView({
 
     return () => {
       resetProps();
+      setFilterPickerState(false);
     };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [slug, shouldRefetchData]);
 
-  const toggleLabelPickerState = () =>
+  const toggleLabelPickerState = () => {
+    if (!isLabelPickerOpen) {
+      emitEvent('willChangeDisplayedFields');
+    }
+
     setLabelPickerState(prevState => !prevState);
-  const toggleFilterPickerState = () =>
+  };
+  const toggleFilterPickerState = () => {
     setFilterPickerState(prevState => !prevState);
+  };
 
   // Helpers
   const getMetaDatas = (path = []) =>
-    get(layouts, [slug, 'metadata', ...path], {});
+    get(layouts, [slug, 'metadatas', ...path], {});
   const getListLayout = () => get(layouts, [slug, 'layouts', 'list'], []);
   const getAllLabels = () => {
     return sortBy(
       Object.keys(getMetaDatas())
-        .filter(key => !isEmpty(getMetaDatas([key, 'list'])))
+        .filter(
+          key =>
+            !['json', 'group', 'relation', 'media', 'richtext'].includes(
+              get(layouts, [slug, 'schema', 'attributes', key, 'type'], '')
+            )
+        )
         .map(label => ({
           name: label,
           value: getListLayout().includes(label),
@@ -145,7 +157,6 @@ function ListView({
       return { ...getMetaDatas([label, 'list']), name: label };
     });
   };
-
   const handleChangeListLabels = ({ name, value }) => {
     const currentSort = getSearchParams()._sort;
 
@@ -187,7 +198,6 @@ function ListView({
     setIdToDelete(id);
     toggleModalDelete();
   };
-
   const handleSubmit = (filters = []) => {
     emitEvent('didFilterEntries');
     toggleFilterPickerState();

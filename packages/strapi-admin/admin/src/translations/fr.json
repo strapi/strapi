@@ -124,6 +124,7 @@
   "components.Input.error.validation.minSupMax": "Ne peut pas être plus grand.",
   "components.Input.error.validation.regex": "La valeur ne correspond pas au format attendu.",
   "components.Input.error.validation.required": "Ce champ est obligatoire.",
+  "components.InputSelect.option.placeholder": "Choisissez ici",
   "components.ListRow.empty": "Il n'y a pas de données à afficher.",
   "components.OverlayBlocker.description": "Vous utilisez une fonctionnalité qui nécessite le redémarrage du server. Merci d'attendre que celui-ci ait redémarré.",
   "components.OverlayBlocker.description.serverError": "Le serveur aurait déjà du redémarrer, vous devriez regarder les messages dans le terminal.",
