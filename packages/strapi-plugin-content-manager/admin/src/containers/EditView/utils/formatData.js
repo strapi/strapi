@@ -29,7 +29,6 @@ export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
           break;
         case 'media':
           if (getOtherInfos(layout.schema, [current, 'multiple']) === true) {
-            // const valueWithoutFile =
             cleanedData = value
               ? helperCleanData(
                   value.filter(file => !(file instanceof File)),
