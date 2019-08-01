@@ -18,9 +18,7 @@ import {
   OverlayBlocker,
   injectHooks,
 } from 'strapi-helper-plugin';
-// import OverlayBlocker from 'components/OverlayBlocker';
-
-// import injectHooks from 'utils/injectHooks';
+import { SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
@@ -281,7 +279,7 @@ export class Admin extends React.Component {
           isOpen={blockApp && showGlobalAppBlocker}
           {...overlayBlockerData}
         />
-        {showLogoutComponent && <Onboarding />}
+        {showLogoutComponent && SHOW_TUTORIALS && <Onboarding />}
       </div>
     );
   }

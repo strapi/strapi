@@ -5,18 +5,15 @@ import pluginId from '../pluginId';
 
 async function didGetSecuredData() {
   const { updatePlugin } = this.props;
-  const requestURL = `/${pluginId}/fixtures/models`;
+  const requestURL = `/${pluginId}/content-types`;
 
   try {
-    const { models } = await request(requestURL, { method: 'GET' });
+    const { data } = await request(requestURL, { method: 'GET' });
+
     const menu = [
       {
         name: 'Content Types',
-        links: models,
-        // links: map(omit(models, 'plugins'), (model, key) => ({
-        //   label: model.labelPlural || model.label || key,
-        //   destination: key,
-        // })),
+        links: data,
       },
     ];
 

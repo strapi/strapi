@@ -3,24 +3,30 @@
  * CustomInputCheckbox
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
+import { Label } from './components';
 
-import styles from './styles.scss';
+function CustomInputCheckbox({
+  entriesToDelete,
+  isAll,
+  name,
+  onChange,
+  value,
+}) {
+  const shouldDisplaySomeChecked =
+    isAll && entriesToDelete.length > 0 && !value;
 
-function CustomInputCheckbox({ entriesToDelete, isAll, name, onChange, value }) {
+  const shouldDisplayAllChecked = isAll && value;
+
   return (
-    <span className={cn('form-check', styles.customSpan)}>
-      <label
-        className={cn(
-          'form-check-label',
-          styles.customLabel,
-          isAll ? styles.customLabelHeader : styles.customLabelRow,
-          isAll && entriesToDelete.length > 0 && !value && styles.customLabelUnCheckedHeader,
-          value && isAll && styles.customLabelCheckedHeader,
-          value && !isAll && styles.customLabelCheckedRow,
-        )}
+    <span className="form-check" styles={{ marginLeft: '-15px' }}>
+      <Label
+        className="form-check-label"
+        isAll={isAll}
+        shouldDisplaySomeChecked={shouldDisplaySomeChecked}
+        shouldDisplayAllChecked={shouldDisplayAllChecked}
+        isChecked={value && !isAll}
         htmlFor={name}
       >
         <input
@@ -31,7 +37,7 @@ function CustomInputCheckbox({ entriesToDelete, isAll, name, onChange, value }) 
           onChange={onChange}
           type="checkbox"
         />
-      </label>
+      </Label>
     </span>
   );
 }
@@ -46,12 +52,9 @@ CustomInputCheckbox.defaultProps = {
 CustomInputCheckbox.propTypes = {
   entriesToDelete: PropTypes.array,
   isAll: PropTypes.bool,
-  name: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string,
-  ]),
+  name: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onChange: PropTypes.func.isRequired,
   value: PropTypes.bool,
 };
 
-export default CustomInputCheckbox;
+export default memo(CustomInputCheckbox);

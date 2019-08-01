@@ -12,7 +12,10 @@
   },
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "default": "soupette",
+      "required": true,
+      "unique": true
     },
     "content": {
       "type": "richtext"

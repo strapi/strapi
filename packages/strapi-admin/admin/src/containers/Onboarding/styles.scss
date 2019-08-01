@@ -31,6 +31,7 @@
   }
   &.visible {
     opacity: 1;
+    z-index: 10;
   }
   &.hidden {
     opacity: 0;
@@ -81,7 +82,6 @@
     }
   }
 }
-
 
 @keyframes fadeIn {
   0% {

@@ -27,6 +27,7 @@ const alias = [
   'remove-markdown',
   'reselect',
   'styled-components',
+  'yup',
 ];
 
 module.exports = alias.reduce((acc, curr) => {

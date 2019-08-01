@@ -33,11 +33,12 @@ export function* getData({ uid, params }) {
             const key =
               curr.filter === '=' ? curr.name : `${curr.name}${curr.filter}`;
             acc.push(`${key}=${curr.value}`);
-
             return acc;
           }, []);
 
-          acc.push(filters.join('&'));
+          if (filters.length > 0) {
+            acc.push(filters.join('&'));
+          }
         }
 
         return acc;

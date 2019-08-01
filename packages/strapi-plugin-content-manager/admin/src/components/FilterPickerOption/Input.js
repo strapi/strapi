@@ -3,7 +3,7 @@
  * InputWithAutoFocus that programatically manage the autofocus of another one
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
 import { InputWrapperDate } from './components';
@@ -21,6 +21,8 @@ const getInputType = attrType => {
       return InputSelect;
     case 'date':
     case 'datetime':
+    case 'timestamp':
+    case 'timestampUpdate':
       return InputDate;
     case 'integer':
     case 'biginteger':
@@ -37,10 +39,11 @@ function Input({ type, ...rest }) {
   const style = { width: '210px', paddingTop: '4px' };
   const styles =
     type === 'boolean' ? { minWidth: '100px', maxWidth: '200px' } : style;
+  const wrapperStyle = type == 'boolean' ? { marginRight: '20px' } : {};
 
   return (
-    <InputWrapperDate type={type || 'text'}>
-      <Component {...rest} style={styles} />
+    <InputWrapperDate type={type || 'text'} style={wrapperStyle}>
+      <Component {...rest} style={styles} autoComplete="off" />
     </InputWrapperDate>
   );
 }
@@ -49,4 +52,4 @@ Input.propTypes = {
   type: PropTypes.string.isRequired,
 };
 
-export default Input;
+export default memo(Input);

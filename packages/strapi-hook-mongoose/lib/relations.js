@@ -24,7 +24,7 @@ const removeUndefinedKeys = obj => _.pickBy(obj, _.negate(_.isUndefined));
 module.exports = {
   update: async function(params) {
     const relationUpdates = [];
-    const populate = this.associations.map(x => x.alias).join(' ');
+    const populate = this.associations.map(x => x.alias);
     const primaryKeyValue = getValuePrimaryKey(params, this.primaryKey);
 
     const response = await this.findOne({ [this.primaryKey]: primaryKeyValue })
@@ -205,16 +205,18 @@ module.exports = {
                   return acc;
                 }
                 case 'manyMorphToMany':
-                case 'manyMorphToOne':
+                case 'manyMorphToOne': {
                   // Update the relational array.
                   acc[current] = property.map(obj => {
+                    const refModel = strapi.getModel(obj.ref, obj.source);
                     return {
-                      ref: obj.refId,
-                      kind: obj.ref,
+                      ref: new mongoose.Types.ObjectId(obj.refId),
+                      kind: refModel.globalId,
                       [association.filter]: obj.field,
                     };
                   });
                   break;
+                }
                 case 'oneToManyMorph':
                 case 'manyToManyMorph': {
                   const transformToArrayID = array => {
@@ -305,16 +307,12 @@ module.exports = {
       [this.primaryKey]: primaryKeyValue,
     }).populate(populate);
 
-    return updatedEntity;
+    return updatedEntity && updatedEntity.toObject
+      ? updatedEntity.toObject()
+      : updatedEntity;
   },
 
   addRelationMorph: async function(params) {
-    /*
-      TODO:
-      Test this part because it has been coded during the development of the upload feature.
-      However the upload doesn't need this method. It only uses the `removeRelationMorph`.
-    */
-
     let entry = await this.findOne({
       [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
     });

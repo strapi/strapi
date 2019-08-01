@@ -114,7 +114,7 @@ class InputJSONWithErrors extends React.Component {
         className={cn(
           styles.containerJSON,
           customBootstrapClass,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >
@@ -222,7 +222,11 @@ InputJSONWithErrors.propTypes = {
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.object,
+  value: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
+    PropTypes.bool,
+  ]),
 };
 
 export default InputJSONWithErrors;

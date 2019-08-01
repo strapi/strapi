@@ -38,13 +38,13 @@ const NAME_REGEX = new RegExp('^[A-Za-z][_0-9A-Za-z]*$');
 
 const isValidName = {
   name: 'isValidName',
-  message: '${path} must match the following regex: /^[_A-Za-z][_0-9A-Za-z]*/^',
+  message: '${path} must match the following regex: /^[A-Za-z][_0-9A-Za-z]*$/^',
   test: val => NAME_REGEX.test(val),
 };
 
 const isValidKey = key => ({
   name: 'isValidKey',
-  message: `Attribute name '${key}' must match the following regex: /^[_A-Za-z][_0-9A-Za-z]*/^`,
+  message: `Attribute name '${key}' must match the following regex: /^[A-Za-z][_0-9A-Za-z]*$/^`,
   test: () => NAME_REGEX.test(key),
 });
 

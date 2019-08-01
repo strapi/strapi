@@ -86,7 +86,7 @@
   "form.Input.defaultSort": "Standard-Sortierattribut",
   "form.Input.description": "Beschreibung",
   "form.Input.description.placeholder": "Zeige den Namen im Profil",
-  "form.Input.disabled": "Editierbares Feld",
+  "form.Input.editable": "Editierbares Feld",
   "form.Input.filters": "Filter aktivieren",
   "form.Input.label": "Label",
   "form.Input.label.inputDescription": "Dieser Wert überschreibt das im Kopf der Tabelle angezeigte Label.",

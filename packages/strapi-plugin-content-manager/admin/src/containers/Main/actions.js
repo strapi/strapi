@@ -1,10 +1,13 @@
 import {
   DELETE_LAYOUT,
   DELETE_LAYOUTS,
+  GET_DATA,
+  GET_DATA_SUCCEEDED,
   GET_LAYOUT,
   GET_LAYOUT_SUCCEEDED,
   ON_CHANGE_LIST_LABELS,
   RESET_LIST_LABELS,
+  RESET_PROPS,
 } from './constants';
 
 export function deleteLayout(uid) {
@@ -20,10 +23,26 @@ export function deleteLayouts() {
   };
 }
 
-export function getLayout(uid) {
+export function getData() {
+  return {
+    type: GET_DATA,
+  };
+}
+
+export function getDataSucceeded(groups, models, mainFields) {
+  return {
+    type: GET_DATA_SUCCEEDED,
+    groups,
+    models: models.filter(model => model.isDisplayed === true),
+    mainFields,
+  };
+}
+
+export function getLayout(uid, source) {
   return {
     type: GET_LAYOUT,
     uid,
+    source,
   };
 }
 
@@ -47,5 +66,11 @@ export function resetListLabels(slug) {
   return {
     type: RESET_LIST_LABELS,
     slug,
+  };
+}
+
+export function resetProps() {
+  return {
+    type: RESET_PROPS,
   };
 }

@@ -43,7 +43,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   /**
    * Find one entry based on params
    */
-  async function findOne(params, populate) {
+  async function findOne(params, populate, { transacting } = {}) {
     const primaryKey = params[model.primaryKey] || params.id;
 
     if (primaryKey) {
@@ -54,6 +54,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
 
     const entry = await model.forge(params).fetch({
       withRelated: populate,
+      transacting,
     });
 
     return entry ? entry.toJSON() : null;
@@ -137,7 +138,7 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
       );
     }
 
-    return await model.forge(params).fetch({ transacting });
+    return this.findOne(params, null, { transacting });
   }
 
   async function deleteOne(params, { transacting } = {}) {
