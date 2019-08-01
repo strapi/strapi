@@ -35,6 +35,7 @@ module.exports = () => {
     unique: validators.unique,
 
     // TODO: remove once front-end stop sending them even if useless
+    dominant: yup.boolean(),
     columnName: yup.string(),
     key: yup.string(),
     targetColumnName: yup.string(),
