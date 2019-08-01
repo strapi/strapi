@@ -15,6 +15,7 @@ const VALID_TYPES = [
   'password',
   'email',
   'integer',
+  'biginteger',
   'float',
   'decimal',
   'date',
@@ -35,6 +36,7 @@ const validators = {
 };
 
 const NAME_REGEX = new RegExp('^[A-Za-z][_0-9A-Za-z]*$');
+const ENUM_REGEX = new RegExp('^[_A-Za-z][_0-9A-Za-z]*$');
 
 const isValidName = {
   name: 'isValidName',
@@ -48,11 +50,19 @@ const isValidKey = key => ({
   test: () => NAME_REGEX.test(key),
 });
 
+const isValidEnum = {
+  name: 'isValidEnum',
+  message:
+    '${path} must match the following regex: /^[_A-Za-z][_0-9A-Za-z]*$/^',
+  test: val => val === '' || ENUM_REGEX.test(val),
+};
+
 module.exports = {
   validators,
 
   isValidName,
   isValidKey,
+  isValidEnum,
 
   VALID_TYPES,
 };
