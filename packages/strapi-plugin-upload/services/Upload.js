@@ -31,31 +31,31 @@ module.exports = {
     // files is always an array to map on
     files = _.isArray(files) ? files : [files];
 
+    const createBuffer = async stream => {
+      const parts = await toArray(fs.createReadStream(stream.path));
+      const buffers = parts.map(part =>
+        _.isBuffer(part) ? part : Buffer.from(part)
+      );
+
+      const buffer = Buffer.concat(buffers);
+
+      return {
+        tmpPath: stream.path,
+        name: stream.name,
+        sha256: niceHash(buffer),
+        hash: uuid().replace(/-/g, ''),
+        ext:
+          stream.name.split('.').length > 1
+            ? `.${_.last(stream.name.split('.'))}`
+            : '',
+        buffer,
+        mime: stream.type,
+        size: (stream.size / 1000).toFixed(2),
+      };
+    };
+
     // transform all files in buffer
-    return Promise.all(
-      files.map(async stream => {
-        const parts = await toArray(fs.createReadStream(stream.path));
-        const buffers = parts.map(part =>
-          _.isBuffer(part) ? part : Buffer.from(part)
-        );
-
-        const buffer = Buffer.concat(buffers);
-
-        return {
-          tmpPath: stream.path,
-          name: stream.name,
-          sha256: niceHash(buffer),
-          hash: uuid().replace(/-/g, ''),
-          ext:
-            stream.name.split('.').length > 1
-              ? `.${_.last(stream.name.split('.'))}`
-              : '',
-          buffer,
-          mime: stream.type,
-          size: (stream.size / 1000).toFixed(2),
-        };
-      })
-    );
+    return Promise.all(files.map(stream => createBuffer(stream)));
   },
 
   upload(files, config) {
@@ -137,20 +137,16 @@ module.exports = {
       })
       .get({ key: 'provider' });
 
-    const model =
-      source && source !== 'content-manager'
-        ? strapi.plugins[source].models[params.model]
-        : strapi.models[params.model];
+    const model = strapi.getModel(params.model, source);
 
     // Asynchronous upload.
-    await Promise.all(
+    return await Promise.all(
       Object.keys(files).map(async attribute => {
         // Bufferize files per attribute.
         const buffers = await this.bufferize(files[attribute]);
         const enhancedFiles = buffers.map(file => {
           const details = model.attributes[attribute];
 
-          // TODO: the polymorphic logic should be done in the queries directly
           // Add related information to be able to make
           // the relationships later.
           file[details.via] = [
