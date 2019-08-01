@@ -144,15 +144,4 @@ module.exports = {
       ctx.request.query
     );
   },
-
-  /**
-   * Handle uploads in the explorer
-   */
-  async uploadFile(ctx) {
-    if (!strapi.plugins.upload) {
-      ctx.send({ error: 'uploadPlugin.notInstalled' }, 400);
-    }
-
-    return strapi.plugins.upload.controllers.upload.upload(ctx);
-  },
 };
