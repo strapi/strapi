@@ -1,5 +1,7 @@
 'use strict';
 
+const uploadFiles = require('./utils/upload-files');
+
 /**
  * default service
  *
@@ -7,6 +9,10 @@
 
 module.exports = ({ model, strapi }) => {
   return {
+    /**
+     * expose some utils so the end users can use them
+     */
+    uploadFiles,
     /**
      * Promise to fetch all records
      *
@@ -42,8 +48,15 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
 
-    create(values) {
-      return strapi.query(model).create(values);
+    async create(data, { files } = {}) {
+      const entry = await strapi.query(model).create(data);
+
+      if (files) {
+        await this.uploadFiles(entry, files, { model });
+        return this.findOne({ id: entry.id });
+      }
+
+      return entry;
     },
 
     /**
@@ -52,8 +65,15 @@ module.exports = ({ model, strapi }) => {
      * @return {Promise}
      */
 
-    update(params, values) {
-      return strapi.query(model).update(params, values);
+    async update(params, data, { files } = {}) {
+      const entry = await strapi.query(model).update(params, data);
+
+      if (files) {
+        await this.uploadFiles(entry, files, { model });
+        return this.findOne({ id: entry.id });
+      }
+
+      return entry;
     },
 
     /**
