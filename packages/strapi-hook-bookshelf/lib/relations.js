@@ -51,7 +51,7 @@ module.exports = {
       [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
     }).fetch({
       transacting,
-      withRelated: populate || this.associations.map(x => x.alias),
+      withRelated: populate,
     });
 
     const data = record ? record.toJSON() : record;
@@ -395,7 +395,6 @@ module.exports = {
       [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey),
     }).fetch({
       transacting,
-      withRelated: this.associations.map(x => x.alias),
     });
   },
 
@@ -410,7 +409,6 @@ module.exports = {
       })
       .fetch({
         transacting,
-        withRelated: this.associations.map(x => x.alias),
       });
 
     const entry = record ? record.toJSON() : record;

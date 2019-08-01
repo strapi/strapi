@@ -31,7 +31,7 @@ describe.only('Content Type Builder - Groups', () => {
         method: 'POST',
         url: '/content-type-builder/groups',
         body: {
-          name: 'some-group',
+          name: 'SomeGroup',
           attributes: {
             title: {
               type: 'string',
@@ -58,7 +58,7 @@ describe.only('Content Type Builder - Groups', () => {
         method: 'POST',
         url: '/content-type-builder/groups',
         body: {
-          name: 'some-group',
+          name: 'someGroup',
           attributes: {},
         },
       });
@@ -121,7 +121,7 @@ describe.only('Content Type Builder - Groups', () => {
         data: {
           uid: 'some_group',
           schema: {
-            name: 'some-group',
+            name: 'SomeGroup',
             description: '',
             connection: 'default',
             collectionName: 'groups_some_groups',
@@ -176,7 +176,7 @@ describe.only('Content Type Builder - Groups', () => {
         method: 'PUT',
         url: '/content-type-builder/groups/some_group',
         body: {
-          name: 'New Group',
+          name: 'NewGroup',
           attributes: {},
         },
       });

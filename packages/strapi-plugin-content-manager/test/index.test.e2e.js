@@ -57,7 +57,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/tag/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag1',
         },
       });
@@ -73,7 +73,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/tag/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag2',
         },
       });
@@ -89,7 +89,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/tag/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag3',
         },
       });
@@ -110,7 +110,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/article/?source=content-manager',
         method: 'POST',
-        formData: entry,
+        body: entry,
       });
 
       data.articles.push(body);
@@ -132,7 +132,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/article/?source=content-manager',
         method: 'POST',
-        formData: entry,
+        body: entry,
       });
 
       data.articles.push(body);
@@ -155,7 +155,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
         method: 'PUT',
-        formData: entry,
+        body: entry,
       });
 
       data.articles[0] = body;
@@ -178,7 +178,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
         method: 'PUT',
-        formData: entry,
+        body: entry,
       });
 
       data.articles[0] = body;
@@ -199,7 +199,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
         method: 'PUT',
-        formData: entry,
+        body: entry,
       });
 
       data.articles[0] = body;
@@ -221,7 +221,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
         method: 'PUT',
-        formData: entry,
+        body: entry,
       });
 
       data.articles[0] = body;
@@ -237,7 +237,7 @@ describe('Content Manager End to End', () => {
       const { body: createdTag } = await rq({
         url: '/content-manager/explorer/tag/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag11',
         },
       });
@@ -245,7 +245,7 @@ describe('Content Manager End to End', () => {
       const { body: article12 } = await rq({
         url: '/content-manager/explorer/article/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           title: 'article12',
           content: 'Content',
           tags: [createdTag],
@@ -260,7 +260,7 @@ describe('Content Manager End to End', () => {
       const { body: article13 } = await rq({
         url: '/content-manager/explorer/article/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           title: 'article13',
           content: 'Content',
           tags: [updatedTag],
@@ -308,7 +308,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/articlewithtag/?source=content-manager',
         method: 'POST',
-        formData: entry,
+        body: entry,
       });
 
       expect(body.id);
@@ -330,7 +330,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/category/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'cat1',
         },
       });
@@ -346,7 +346,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/category/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'cat2',
         },
       });
@@ -368,7 +368,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/article/?source=content-manager',
         method: 'POST',
-        formData: entry,
+        body: entry,
       });
 
       data.articles.push(body);
@@ -390,7 +390,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
         method: 'PUT',
-        formData: entry,
+        body: entry,
       });
 
       data.articles[0] = body;
@@ -411,7 +411,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/article?source=content-manager',
         method: 'POST',
-        formData: entry,
+        body: entry,
       });
 
       data.articles.push(body);
@@ -432,7 +432,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
         method: 'PUT',
-        formData: entry,
+        body: entry,
       });
 
       data.articles[1] = body;
@@ -453,7 +453,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: `/content-manager/explorer/category/${entry.id}?source=content-manager`,
         method: 'PUT',
-        formData: entry,
+        body: entry,
       });
 
       data.categories[0] = body;
@@ -473,7 +473,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/category/?source=content-manager',
         method: 'POST',
-        formData: entry,
+        body: entry,
       });
 
       data.categories.push(body);
@@ -549,7 +549,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/reference/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'ref1',
         },
       });
@@ -569,7 +569,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/article?source=content-manager',
         method: 'POST',
-        formData: entry,
+        body: entry,
       });
 
       data.articles.push(body);
@@ -589,7 +589,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: `/content-manager/explorer/article/${entry.id}?source=content-manager`,
         method: 'PUT',
-        formData: entry,
+        body: entry,
       });
 
       data.articles[0] = body;
@@ -610,7 +610,7 @@ describe('Content Manager End to End', () => {
       let { body } = await rq({
         url: '/content-manager/explorer/article?source=content-manager',
         method: 'POST',
-        formData: entry,
+        body: entry,
       });
 
       data.articles.push(body);
@@ -627,7 +627,7 @@ describe('Content Manager End to End', () => {
       const { body: tagToCreate } = await rq({
         url: '/content-manager/explorer/tag/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag111',
         },
       });
@@ -635,7 +635,7 @@ describe('Content Manager End to End', () => {
       const { body: referenceToCreate } = await rq({
         url: '/content-manager/explorer/reference/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'cat111',
           tag: tagToCreate,
         },
@@ -648,7 +648,7 @@ describe('Content Manager End to End', () => {
       const { body: tagToCreate } = await rq({
         url: '/content-manager/explorer/tag/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag111',
         },
       });
@@ -656,7 +656,7 @@ describe('Content Manager End to End', () => {
       const { body: referenceToCreate } = await rq({
         url: '/content-manager/explorer/reference/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'cat111',
           tag: tagToCreate,
         },
@@ -667,7 +667,7 @@ describe('Content Manager End to End', () => {
       const { body: referenceToUpdate } = await rq({
         url: `/content-manager/explorer/reference/${referenceToCreate.id}?source=content-manager`,
         method: 'PUT',
-        formData: {
+        body: {
           tag: null,
         },
       });
@@ -679,7 +679,7 @@ describe('Content Manager End to End', () => {
       const { body: tagToCreate } = await rq({
         url: '/content-manager/explorer/tag/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'tag111',
         },
       });
@@ -687,7 +687,7 @@ describe('Content Manager End to End', () => {
       const { body: referenceToCreate } = await rq({
         url: '/content-manager/explorer/reference/?source=content-manager',
         method: 'POST',
-        formData: {
+        body: {
           name: 'cat111',
           tag: tagToCreate,
         },

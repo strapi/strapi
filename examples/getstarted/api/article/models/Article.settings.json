@@ -26,6 +26,15 @@
     "number": {
       "type": "integer"
     },
+    "big_number": {
+      "type": "biginteger"
+    },
+    "float_number": {
+      "type": "float"
+    },
+    "decimal_number": {
+      "type": "decimal"
+    },
     "date": {
       "type": "date"
     },
@@ -58,7 +67,6 @@
       "dominant": true
     },
     "fb_cta": {
-      "required": true,
       "type": "group",
       "group": "facebook_cta"
     },

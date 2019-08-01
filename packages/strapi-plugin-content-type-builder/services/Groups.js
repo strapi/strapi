@@ -201,9 +201,9 @@ const convertAttributes = attributes => {
     }
 
     if (_.has(attribute, 'target')) {
-      const { target, nature, required, unique, plugin } = attribute;
+      const { target, nature, unique, plugin } = attribute;
 
-      // ingore relation which aren't oneWay or manyWay (except for images)
+      // ingore relation which aren't oneWay or manyWay
       if (!['oneWay', 'manyWay'].includes(nature)) {
         return acc;
       }
@@ -211,7 +211,6 @@ const convertAttributes = attributes => {
       acc[key] = {
         [nature === 'oneWay' ? 'model' : 'collection']: target,
         plugin: plugin ? _.trim(plugin) : undefined,
-        required: required === true ? true : undefined,
         unique: unique === true ? true : undefined,
       };
     }

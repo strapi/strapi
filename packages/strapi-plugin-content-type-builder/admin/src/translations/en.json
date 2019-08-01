@@ -35,6 +35,8 @@
   "error.validation.minLength": "The value is too short.",
   "error.validation.minSupMax": "Can't be superior",
   "error.validation.regex": "The value does not match the regex.",
+  "error.validation.regex.name": "The name should not start with a number or a special character.",
+  "error.validation.regex.values": "Values should not start with a number or a special character.",
   "error.validation.required": "This value input is required.",
   "form.attribute.info.no-space-allowed": "No space is allowed for the name of the attribute",
   "form.attribute.item.appearance.description": "Otherwise, the value will be editable through a basic textarea field",

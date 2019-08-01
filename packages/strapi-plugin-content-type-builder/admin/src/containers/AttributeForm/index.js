@@ -82,6 +82,25 @@ class AttributeForm extends React.Component {
         acc[current] = [{ id: `${pluginId}.error.validation.required` }];
       }
 
+      if (
+        current === 'name' &&
+        !new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(value)
+      ) {
+        acc[current] = [{ id: `${pluginId}.error.validation.regex.name` }];
+      }
+
+      if (current === 'enum' && !!value) {
+        const split = value.split('\n');
+
+        const hasEnumFormatError = split.filter(
+          v => !new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(v)
+        );
+
+        if (hasEnumFormatError.length > 0) {
+          acc[current] = [{ id: `${pluginId}.error.validation.regex.values` }];
+        }
+      }
+
       return acc;
     }, formErrors);
 
