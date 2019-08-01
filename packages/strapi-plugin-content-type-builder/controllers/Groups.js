@@ -1,26 +1,6 @@
 'use strict';
 
-const yup = require('yup');
-const formatYupErrors = require('./utils/yup-formatter');
-
-const groupSchema = yup
-  .object({
-    name: yup.string().required('name.required'),
-    description: yup.string(),
-    connection: yup.string(),
-    collectionName: yup.string(),
-    attributes: yup.object().required('attributes.required'),
-  })
-  .noUnknown();
-
-const validateGroupInput = async data =>
-  groupSchema
-    .validate(data, {
-      strict: true,
-      abortEarly: false,
-    })
-    .catch(error => Promise.reject(formatYupErrors(error)));
-
+const validateGroupInput = require('./validation/group');
 /**
  * Groups controller
  */
