@@ -400,7 +400,7 @@ module.exports = {
       transacting,
     });
 
-    return result.toJSON ? result.toJSON() : result;
+    return result && result.toJSON ? result.toJSON() : result;
   },
 
   async addRelationMorph(params, { transacting } = {}) {

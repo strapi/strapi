@@ -307,7 +307,9 @@ module.exports = {
       [this.primaryKey]: primaryKeyValue,
     }).populate(populate);
 
-    return updatedEntity.toObject ? updatedEntity.toObject() : updatedEntity;
+    return updatedEntity && updatedEntity.toObject
+      ? updatedEntity.toObject()
+      : updatedEntity;
   },
 
   addRelationMorph: async function(params) {
