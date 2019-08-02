@@ -551,6 +551,7 @@ export class GroupPage extends React.Component {
           activeTab={this.getSettingType()}
           alreadyTakenAttributes={this.getFeatureAttributesNames()}
           attributeType={this.getAttributeType()}
+          attributeToEditIndex={this.getAttributeIndex()}
           attributeToEditName={this.getAttributeName()}
           featureType={this.featureType}
           isOpen={

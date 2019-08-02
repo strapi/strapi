@@ -59,7 +59,9 @@ class AttributeForm extends React.Component {
     let formErrors = {};
     const formValidations = this.getFormValidations();
     const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(
-      attribute => attribute !== attributeToEditName
+      attribute => {
+        return attribute !== attributeToEditName;
+      }
     );
 
     if (isEmpty(modifiedData.name)) {
@@ -139,9 +141,17 @@ class AttributeForm extends React.Component {
 
   handleGoTo = to => {
     const { emitEvent } = this.context;
-    const { actionType, attributeToEditName, attributeType, push } = this.props;
+    const {
+      actionType,
+      attributeToEditIndex,
+      attributeToEditName,
+      attributeType,
+      push,
+    } = this.props;
     const attributeName =
-      actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
+      actionType === 'edit'
+        ? `&attributeName=${attributeToEditIndex || attributeToEditName}`
+        : '';
 
     if (to === 'advanced') {
       emitEvent('didSelectContentTypeFieldSettings');
@@ -344,6 +354,7 @@ AttributeForm.contextTypes = {
 AttributeForm.defaultProps = {
   actionType: 'create',
   activeTab: 'base',
+  attributeToEditIndex: null,
   attributeToEditName: '',
   alreadyTakenAttributes: [],
   attributeType: 'string',
@@ -361,6 +372,7 @@ AttributeForm.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
   alreadyTakenAttributes: PropTypes.array,
+  attributeToEditIndex: PropTypes.string,
   attributeToEditName: PropTypes.string,
   attributeType: PropTypes.string,
   attributeOptions: PropTypes.array,
