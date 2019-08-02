@@ -29,7 +29,6 @@ import {
   submitContentTypeSucceeded,
   submitTempContentTypeSucceeded,
   updateTempContentType,
-  updateTempGroup,
   setTemporaryAttributeRelation,
 } from '../actions';
 import appReducer, {

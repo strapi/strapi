@@ -652,6 +652,7 @@ export class ModelPage extends React.Component {
           attributeType={attributeType}
           attributeOptions={attributeType === 'group' ? groups : null}
           attributeToEditName={this.getAttributeName()}
+          featureName={this.getModelName()}
           isContentTypeTemporary={this.isUpdatingTemporaryContentType()}
           isOpen={modalType === 'attributeForm' && attributeType !== 'relation'}
           modifiedData={temporaryAttribute}
@@ -675,6 +676,7 @@ export class ModelPage extends React.Component {
           activeTab={settingType}
           alreadyTakenAttributes={Object.keys(this.getModelAttributes())}
           attributeToEditName={this.getAttributeName()}
+          featureName={this.getModelName()}
           initData={setTemporaryAttributeRelation}
           isOpen={modalType === 'attributeForm' && attributeType === 'relation'}
           isUpdatingTemporaryContentType={this.isUpdatingTemporaryContentType()}

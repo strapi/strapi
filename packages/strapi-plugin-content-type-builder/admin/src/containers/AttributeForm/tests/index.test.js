@@ -11,6 +11,7 @@ import pluginId from '../../../pluginId';
 import pluginTradsEn from '../../../translations/en.json';
 
 import CustomCheckbox from '../../../components/CustomCheckbox';
+import HeaderModalTitle from '../../../components/HeaderModalTitle';
 import AttributeForm from '../index';
 
 const messages = formatMessagesWithPluginId(pluginId, pluginTradsEn);
@@ -66,21 +67,27 @@ describe('<AttributeForm />', () => {
   it('should handle the title correctly with the activeTab', () => {
     props.actionType = null;
     props.isOpen = true;
+    props.attributeToEditName = 'test';
 
     wrapper = renderComponent(props);
-
-    const title = wrapper.find(FormattedMessage).at(0);
-
-    expect(title.prop('id')).toContain('create');
-
     wrapper.setProps({ actionType: 'edit' });
+
+    const title = wrapper
+      .find(HeaderModalTitle)
+      .last()
+      .find('span')
+      .last();
+
+    expect(title.text()).toContain('test');
+
+    wrapper.setProps({ actionType: 'create' });
 
     expect(
       wrapper
         .find(FormattedMessage)
         .at(0)
         .prop('id')
-    ).toContain('edit');
+    ).toContain('create');
   });
 
   it('should use the defaultProps', () => {

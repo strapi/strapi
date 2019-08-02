@@ -55,6 +55,11 @@ const StyledListRow = styled.tr`
     &:hover {
       cursor: pointer;
       background-color: ${colors.grey};
+      & + tr {
+        &::before {
+          background-color: transparent;
+        }
+      }
     }
   }
 `;

@@ -283,10 +283,14 @@ class RelationFormGroup extends React.Component {
   };
 
   render() {
-    const { actionType, activeTab, attributeToEditName, isOpen } = this.props;
+    const {
+      actionType,
+      activeTab,
+      attributeToEditName,
+      featureName,
+      isOpen,
+    } = this.props;
     const { showForm } = this.state;
-    const titleContent =
-      actionType === 'create' ? 'relation' : attributeToEditName;
     const content =
       activeTab === 'base' || !activeTab
         ? this.renderRelationForm()
@@ -303,14 +307,22 @@ class RelationFormGroup extends React.Component {
           <section>
             <HeaderModalTitle>
               <img src={this.getIcon()} alt="ct" />
-              <span>{titleContent}</span>
+              <span>{featureName}</span>
             </HeaderModalTitle>
           </section>
           <section>
             <HeaderModalTitle>
-              <FormattedMessage
-                id={`${pluginId}.popUpForm.${actionType || 'create'}`}
-              />
+              {actionType === 'create' ? (
+                <>
+                  <FormattedMessage id={`${pluginId}.popUpForm.create`} />
+                  &nbsp;
+                  <FormattedMessage
+                    id={`${pluginId}.popUpForm.attributes.relation.name`}
+                  />
+                </>
+              ) : (
+                <span>{attributeToEditName}</span>
+              )}
             </HeaderModalTitle>
             <div className="settings-tabs">
               <HeaderModalNavContainer>
@@ -362,6 +374,7 @@ RelationFormGroup.defaultProps = {
   alreadyTakenAttributes: [],
   attributeToEditIndex: null,
   attributeToEditName: '',
+  featureName: null,
   featureType: 'model',
   features: [],
   featureToEditName: '',
@@ -377,6 +390,7 @@ RelationFormGroup.propTypes = {
   attributeToEditName: PropTypes.string,
   attributeToEditIndex: PropTypes.number,
   features: PropTypes.array,
+  featureName: PropTypes.string,
   featureType: PropTypes.string,
   featureToEditName: PropTypes.string,
   isOpen: PropTypes.bool,

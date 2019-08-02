@@ -279,13 +279,12 @@ class AttributeForm extends React.Component {
       actionType,
       attributeToEditName,
       attributeType,
+      featureName,
       featureType,
       isOpen,
     } = this.props;
     const { showForm } = this.state;
     const currentForm = this.getCurrentForm();
-    const titleContent =
-      actionType === 'create' ? attributeType : attributeToEditName;
 
     return (
       <WrapperModal
@@ -298,14 +297,22 @@ class AttributeForm extends React.Component {
           <section>
             <HeaderModalTitle>
               <img src={this.getIcon()} alt="feature" />
-              <span>{titleContent}</span>
+              <span>{featureName}</span>
             </HeaderModalTitle>
           </section>
           <section>
             <HeaderModalTitle>
-              <FormattedMessage
-                id={`${pluginId}.popUpForm.${actionType || 'create'}`}
-              />
+              {actionType === 'create' ? (
+                <>
+                  <FormattedMessage id={`${pluginId}.popUpForm.create`} />
+                  &nbsp;
+                  <FormattedMessage
+                    id={`${pluginId}.popUpForm.attributes.${attributeType}.name`}
+                  />
+                </>
+              ) : (
+                <span>{attributeToEditName}</span>
+              )}
             </HeaderModalTitle>
             <div className="settings-tabs">
               <HeaderModalNavContainer>
@@ -359,6 +366,7 @@ AttributeForm.defaultProps = {
   alreadyTakenAttributes: [],
   attributeType: 'string',
   attributeOptions: [],
+  featureName: null,
   featureType: 'model',
   isOpen: false,
   modifiedData: {},
@@ -376,6 +384,7 @@ AttributeForm.propTypes = {
   attributeToEditName: PropTypes.string,
   attributeType: PropTypes.string,
   attributeOptions: PropTypes.array,
+  featureName: PropTypes.string,
   featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)

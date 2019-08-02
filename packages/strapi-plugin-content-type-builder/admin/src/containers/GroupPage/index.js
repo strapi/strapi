@@ -553,6 +553,7 @@ export class GroupPage extends React.Component {
           attributeType={this.getAttributeType()}
           attributeToEditIndex={this.getAttributeIndex()}
           attributeToEditName={this.getAttributeName()}
+          featureName={this.getFeatureDisplayName()}
           featureType={this.featureType}
           isOpen={
             this.getModalType() === 'attributeForm' &&
@@ -572,6 +573,7 @@ export class GroupPage extends React.Component {
           alreadyTakenAttributes={this.getFeatureAttributesNames()}
           attributeToEditIndex={parseInt(this.getAttributeIndex(), 10)}
           attributeToEditName={this.getAttributeName()}
+          featureName={this.getFeatureDisplayName()}
           featureType={this.featureType}
           featureToEditName={this.getFeatureName()}
           features={models}

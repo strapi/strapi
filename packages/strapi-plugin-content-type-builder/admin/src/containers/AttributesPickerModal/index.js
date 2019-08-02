@@ -161,7 +161,7 @@ class AttributesPickerModal extends React.Component {
   };
 
   render() {
-    const { featureName, isOpen } = this.props;
+    const { featureName, featureType, isOpen } = this.props;
 
     return (
       <WrapperModal
@@ -174,17 +174,14 @@ class AttributesPickerModal extends React.Component {
           <section>
             <HeaderModalTitle>
               <img src={this.getIcon()} alt="feature" />
-              <FormattedMessage
-                id={`${pluginId}.popUpForm.choose.attributes.header.title`}
-              />
+              <span>&nbsp;{featureName}</span>
             </HeaderModalTitle>
           </section>
           <section>
             <HeaderModalTitle>
               <FormattedMessage
-                id={`${pluginId}.popUpForm.choose.attributes.header.subtitle`}
+                id={`${pluginId}.popUpForm.choose.attributes.header.subtitle.${featureType}`}
               />
-              <span>&nbsp;{featureName}</span>
             </HeaderModalTitle>
           </section>
         </HeaderModal>

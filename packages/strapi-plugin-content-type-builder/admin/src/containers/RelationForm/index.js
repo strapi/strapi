@@ -275,10 +275,14 @@ class RelationForm extends React.Component {
   };
 
   render() {
-    const { actionType, activeTab, attributeToEditName, isOpen } = this.props;
+    const {
+      actionType,
+      activeTab,
+      attributeToEditName,
+      featureName,
+      isOpen,
+    } = this.props;
     const { showForm } = this.state;
-    const titleContent =
-      actionType === 'create' ? 'relation' : attributeToEditName;
     const content =
       activeTab === 'base' || !activeTab
         ? this.renderRelationForm()
@@ -295,14 +299,22 @@ class RelationForm extends React.Component {
           <section>
             <HeaderModalTitle>
               <img src={this.getIcon()} alt="ct" />
-              <span>{titleContent}</span>
+              <span>{featureName}</span>
             </HeaderModalTitle>
           </section>
           <section>
             <HeaderModalTitle>
-              <FormattedMessage
-                id={`${pluginId}.popUpForm.${actionType || 'create'}`}
-              />
+              {actionType === 'create' ? (
+                <>
+                  <FormattedMessage id={`${pluginId}.popUpForm.create`} />
+                  &nbsp;
+                  <FormattedMessage
+                    id={`${pluginId}.popUpForm.attributes.relation.name`}
+                  />
+                </>
+              ) : (
+                <span>{attributeToEditName}</span>
+              )}
             </HeaderModalTitle>
             <div className="settings-tabs">
               <HeaderModalNavContainer>
@@ -351,6 +363,7 @@ RelationForm.defaultProps = {
   activeTab: 'base',
   alreadyTakenAttributes: [],
   attributeToEditName: '',
+  featureName: null,
   featureType: 'model',
   isOpen: false,
   isUpdatingTemporaryContentType: false,
@@ -364,6 +377,7 @@ RelationForm.propTypes = {
   activeTab: PropTypes.string,
   alreadyTakenAttributes: PropTypes.array,
   attributeToEditName: PropTypes.string,
+  featureName: PropTypes.string,
   featureType: PropTypes.string,
   initData: PropTypes.func.isRequired,
   isOpen: PropTypes.bool,
