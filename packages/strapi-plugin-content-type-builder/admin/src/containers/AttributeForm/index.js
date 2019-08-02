@@ -74,19 +74,19 @@ class AttributeForm extends React.Component {
       const { custom, validations } = formValidations[current];
       const value = modifiedData[current];
 
+      if (
+        current === 'name' &&
+        !new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(value)
+      ) {
+        acc[current] = [{ id: `${pluginId}.error.validation.regex.name` }];
+      }
+
       if (!value && validations.required === true && custom !== true) {
         acc[current] = [{ id: `${pluginId}.error.validation.required` }];
       }
 
       if (custom === true && validations.required === true && value === '') {
         acc[current] = [{ id: `${pluginId}.error.validation.required` }];
-      }
-
-      if (
-        current === 'name' &&
-        !new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(value)
-      ) {
-        acc[current] = [{ id: `${pluginId}.error.validation.regex.name` }];
       }
 
       if (current === 'enum' && !!value) {

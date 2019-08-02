@@ -79,7 +79,7 @@ describe('<AttributeForm />', () => {
       wrapper
         .find(FormattedMessage)
         .at(0)
-        .prop('id'),
+        .prop('id')
     ).toContain('edit');
   });
 
@@ -101,7 +101,7 @@ describe('<AttributeForm />', () => {
 
   describe('instances', () => {
     describe('GetFormErrors', () => {
-      it('should return an empty object if there is not field that contain the created field\'s name', () => {
+      it("should return an empty object if there is not field that contain the created field's name", () => {
         props.modifiedData = { name: 'test' };
 
         wrapper = renderComponent(props);
@@ -111,13 +111,25 @@ describe('<AttributeForm />', () => {
         expect(getFormErrors()).toEqual({});
       });
 
-      it('should return an object with the input\'s name and an array of error if the name is empty', () => {
+      it("should return an object with the input's name and an array of error if the name is empty", () => {
         wrapper = renderComponent(props);
 
         const { getFormErrors } = wrapper.instance();
 
         expect(getFormErrors()).toEqual({
           name: [{ id: `${pluginId}.error.validation.required` }],
+        });
+      });
+
+      it('should return a unique error if the name begins with a special character', () => {
+        props.modifiedData = { name: '_test' };
+
+        wrapper = renderComponent(props);
+
+        const { getFormErrors } = wrapper.instance();
+
+        expect(getFormErrors()).toEqual({
+          name: [{ id: `${pluginId}.error.validation.regex.name` }],
         });
       });
 
@@ -200,7 +212,7 @@ describe('<AttributeForm />', () => {
             'modalType=attributeForm&attributeType=string&settingType=advanced&actionType=create',
         });
         expect(context.emitEvent).toHaveBeenCalledWith(
-          'didSelectContentTypeFieldSettings',
+          'didSelectContentTypeFieldSettings'
         );
       });
     });
@@ -292,7 +304,7 @@ describe('<AttributeForm />', () => {
 
         expect(props.onSubmitEdit).toHaveBeenCalledWith(true);
         expect(context.emitEvent).toHaveBeenCalledWith(
-          'willAddMoreFieldToContentType',
+          'willAddMoreFieldToContentType'
         );
       });
 

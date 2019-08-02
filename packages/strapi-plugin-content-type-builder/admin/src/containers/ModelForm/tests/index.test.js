@@ -254,6 +254,8 @@ describe('<ModelForm />', () => {
 
     describe('HandleSubmit', () => {
       it('should not submit if the form is empty', () => {
+        props.modifiedData.name = '';
+
         wrapper = renderComponent(props);
 
         const { handleSubmit } = wrapper.instance();
@@ -262,6 +264,21 @@ describe('<ModelForm />', () => {
 
         expect(wrapper.state('formErrors')).toEqual({
           name: [{ id: `${pluginId}.error.validation.required` }],
+        });
+        expect(wrapper.prop('push')).not.toHaveBeenCalled();
+      });
+
+      it('should not submit if the name of the CT begins with a special character', () => {
+        props.modifiedData.name = '_test';
+
+        wrapper = renderComponent(props);
+
+        const { handleSubmit } = wrapper.instance();
+
+        handleSubmit({ preventDefault: jest.fn() });
+
+        expect(wrapper.state('formErrors')).toEqual({
+          name: [{ id: `${pluginId}.error.validation.regex.name` }],
         });
         expect(wrapper.prop('push')).not.toHaveBeenCalled();
       });

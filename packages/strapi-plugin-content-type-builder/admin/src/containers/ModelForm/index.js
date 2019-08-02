@@ -100,14 +100,14 @@ class ModelForm extends React.Component {
       };
     }
 
-    if (modifiedData.name === '') {
-      formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
-    }
-
     if (!new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(modifiedData.name)) {
       formErrors = {
         name: [{ id: `${pluginId}.error.validation.regex.name` }],
       };
+    }
+
+    if (modifiedData.name === '') {
+      formErrors = { name: [{ id: `${pluginId}.error.validation.required` }] };
     }
 
     this.setState(prevState => ({
