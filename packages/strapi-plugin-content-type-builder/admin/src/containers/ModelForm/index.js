@@ -60,7 +60,7 @@ class ModelForm extends React.Component {
     const { emitEvent } = this.context;
     const { actionType, featureType, featureToEditName, push } = this.props;
     const model =
-      actionType === 'edit' ? `&modelName=${featureToEditName}` : '';
+      actionType === 'edit' ? `&${featureType}Name=${featureToEditName}` : '';
 
     if (to === 'advanced') {
       emitEvent('didSelectContentTypeSettings');
