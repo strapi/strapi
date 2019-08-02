@@ -25,7 +25,7 @@ module.exports = strapi => {
     initialize: cb => {
       // Write your code here.
 
-      // this.defaults['your_config'] to access to your configs.
+      // this().defaults['your_config'] to access to your configs.
 
       cb();
     }
