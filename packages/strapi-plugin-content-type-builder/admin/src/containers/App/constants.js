@@ -113,3 +113,4 @@ export const SUBMIT_TEMP_GROUP_SUCCEEDED =
   'ContentTypeBuilder/App/SUBMIT_TEMP_GROUP_SUCCEEDED';
 export const UPDATE_TEMP_CONTENT_TYPE =
   'ContentTypeBuilder/App/UPDATE_TEMP_CONTENT_TYPE';
+export const UPDATE_TEMP_GROUP = 'ContentTypeBuilder/App/UPDATE_TEMP_GROUP';

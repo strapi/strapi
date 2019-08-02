@@ -7,7 +7,10 @@
   },
   "options": {
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
@@ -43,7 +46,10 @@
     },
     "enum": {
       "type": "enumeration",
-      "enum": ["morning,", "noon"]
+      "enum": [
+        "morning,",
+        "noon"
+      ]
     },
     "bool": {
       "type": "boolean"

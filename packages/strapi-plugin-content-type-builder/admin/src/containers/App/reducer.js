@@ -60,6 +60,7 @@ import {
   SUBMIT_TEMP_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
+  UPDATE_TEMP_GROUP,
 } from './constants';
 
 export const initialState = fromJS({
@@ -909,6 +910,17 @@ function appReducer(state = initialState, action) {
           () => state.getIn(['newContentType', 'name'])
         )
         .update('newContentTypeClone', () => state.get('newContentType'));
+    case UPDATE_TEMP_GROUP:
+      return state
+        .updateIn(
+          [
+            'groups',
+            state.get('groups').findIndex(group => group.isTemporary === true),
+            'name',
+          ],
+          () => state.getIn(['newGroup', 'name'])
+        )
+        .update('newGroupClone', () => state.get('newGroup'));
     default:
       return state;
   }

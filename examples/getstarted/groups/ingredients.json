@@ -1,6 +1,10 @@
 {
-  "collectionName": "group_ingredients",
+  "info": {
+    "name": "Ingredients",
+    "description": ""
+  },
   "connection": "default",
+  "collectionName": "group_ingredients",
   "attributes": {
     "name": {
       "type": "string",
@@ -20,7 +24,8 @@
     "pic": {
       "model": "file",
       "via": "related",
-      "plugin": "upload"
+      "plugin": "upload",
+      "required": false
     },
     "article": {
       "model": "article"

@@ -169,6 +169,8 @@ const props = {
   },
 };
 
+const wait = async () => new Promise(resolve => setTimeout(resolve, 100));
+
 describe('CTB <GroupPage />', () => {
   it('should not crash', () => {
     shallow(<GroupPage {...props} />);
@@ -302,7 +304,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
   });
 
   describe('OpenAttributesModal', () => {
-    it('should display a notification if thee modal cannot be opened', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
       props.canOpenModal = false;
 
@@ -314,6 +316,8 @@ describe('CTB <GroupPage />, lifecycle', () => {
       );
       const { openAttributesModal } = wrapper.instance();
       openAttributesModal();
+
+      await wait();
 
       expect(spyOnDisplayNotification).toHaveBeenCalled();
     });
@@ -336,7 +340,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
       expect(spyOnDisplayNotification).toHaveBeenCalled();
     });
 
-    it('should call setTempororaryAttributeGroup if ifTemporary is true', () => {
+    it('should call setTempororaryAttributeGroup if ifTemporary is true', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
       props.canOpenModal = true;
 
@@ -351,13 +355,15 @@ describe('CTB <GroupPage />, lifecycle', () => {
         'tests'
       );
 
+      await wait();
+
       expect(props.history.push).toHaveBeenCalledWith({
         search:
           'modalType=attributeForm&attributeType=string&settingType=base&actionType=edit&attributeName=0',
       });
     });
 
-    it('should open attribute modal with relation attributeType', () => {
+    it('should open attribute modal with relation attributeType', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
       props.canOpenModal = true;
 
@@ -372,19 +378,23 @@ describe('CTB <GroupPage />, lifecycle', () => {
         'tests'
       );
 
+      await wait();
+
       expect(props.history.push).toHaveBeenCalledWith({
         search:
           'modalType=attributeForm&attributeType=relation&settingType=base&actionType=edit&attributeName=1',
       });
     });
 
-    it('should handle the <number> type correctly', () => {
+    it('should handle the <number> type correctly', async () => {
       topCompo = renderComponent(props);
       const wrapper = topCompo.find(GroupPage);
 
       const { handleClickEditAttribute } = wrapper.instance();
 
       handleClickEditAttribute(0, 'float');
+
+      await wait();
 
       expect(context.emitEvent).toHaveBeenCalledWith('willEditFieldOfGroup');
       expect(props.history.push).toHaveBeenCalledWith({
@@ -407,7 +417,6 @@ describe('CTB <GroupPage />, lifecycle', () => {
       const { handleSubmit } = wrapper.instance();
 
       handleSubmit();
-
       expect(props.addAttributeToTempGroup).toHaveBeenCalledWith(search);
     });
 
@@ -494,7 +503,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
   });
 
   describe('OpenEditFeatureModal', () => {
-    it('should display a notification if thee modal cannot be opened', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
       props.canOpenModal = false;
 
@@ -507,10 +516,12 @@ describe('CTB <GroupPage />, lifecycle', () => {
       const { openEditFeatureModal } = wrapper.instance();
       openEditFeatureModal();
 
+      await wait();
+
       expect(spyOnDisplayNotification).toHaveBeenCalled();
     });
 
-    it('should redirect to the right url if isTemporary is true', () => {
+    it('should redirect to the right url if isTemporary is true', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
       props.canOpenModal = true;
 
@@ -519,6 +530,8 @@ describe('CTB <GroupPage />, lifecycle', () => {
 
       const { openEditFeatureModal } = wrapper.instance();
       openEditFeatureModal();
+
+      await wait();
 
       expect(props.history.push).toHaveBeenCalledWith({
         search:

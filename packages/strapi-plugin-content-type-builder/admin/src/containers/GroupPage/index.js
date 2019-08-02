@@ -242,7 +242,7 @@ export class GroupPage extends React.Component {
     return !!source ? source : null;
   };
 
-  handleClickEditAttribute = (attributeName, type) => {
+  handleClickEditAttribute = async (attributeName, type) => {
     const { emitEvent } = this.context;
     const {
       canOpenModal,
@@ -264,6 +264,8 @@ export class GroupPage extends React.Component {
         this.isUpdatingTempFeature(),
         this.getFeatureName()
       );
+
+      await this.wait();
 
       emitEvent('willEditFieldOfGroup');
 
@@ -388,11 +390,13 @@ export class GroupPage extends React.Component {
     return get(currentData, 'isTemporary', false);
   };
 
-  openAttributesModal = () => {
+  openAttributesModal = async () => {
     const {
       canOpenModal,
       history: { push },
     } = this.props;
+
+    await this.wait();
 
     if (canOpenModal || this.isUpdatingTempFeature()) {
       push({ search: 'modalType=chooseAttributes' });
@@ -401,9 +405,11 @@ export class GroupPage extends React.Component {
     }
   };
 
-  openEditFeatureModal = () => {
+  openEditFeatureModal = async () => {
     const { emitEvent } = this.context;
     const { canOpenModal } = this.props;
+
+    await this.wait();
 
     if (canOpenModal || this.isUpdatingTempFeature()) {
       this.props.history.push({
@@ -419,6 +425,11 @@ export class GroupPage extends React.Component {
 
   toggleModalWarning = () =>
     this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+
+  wait = async () => {
+    this.setState({ removePrompt: true });
+    return new Promise(resolve => setTimeout(resolve, 100));
+  };
 
   renderListRow = (attribute, index) => {
     return (

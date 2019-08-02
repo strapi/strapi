@@ -95,6 +95,7 @@ describe('<App />', () => {
       resetExistingGroupMainInfos: jest.fn(),
       resetNewContentTypeMainInfos: jest.fn(),
       updateTempContentType: jest.fn(),
+      updateTempGroup: jest.fn(),
     };
   });
 

@@ -72,6 +72,7 @@ import {
   SUBMIT_TEMP_GROUP,
   SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
+  UPDATE_TEMP_GROUP,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_EXISTING_GROUP_MAIN_INFOS,
 } from './constants';
@@ -668,6 +669,12 @@ export function submitTempGroupSucceeded() {
 export function updateTempContentType() {
   return {
     type: UPDATE_TEMP_CONTENT_TYPE,
+  };
+}
+
+export function updateTempGroup() {
+  return {
+    type: UPDATE_TEMP_GROUP,
   };
 }
 
