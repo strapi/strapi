@@ -159,7 +159,6 @@ module.exports = {
               'Contributing guide',
             ],
             '/3.0.0-beta.x/migration-guide/',
-            '/3.0.0-beta.x/articles/',
           ],
         },
       ],

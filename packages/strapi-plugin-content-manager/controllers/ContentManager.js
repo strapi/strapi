@@ -1,22 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-
-const parseMultipartBody = ({ body, files }) => {
-  const data = JSON.parse(body.data);
-
-  const filesToUpload = Object.keys(files).reduce((acc, key) => {
-    // remove files prefix
-    const path = _.tail(_.toPath(key));
-    acc[path.join('.')] = files[key];
-    return acc;
-  }, {});
-
-  return {
-    data,
-    files: filesToUpload,
-  };
-};
+const parseMultipartBody = require('../utils/parse-multipart');
 
 module.exports = {
   /**
@@ -93,19 +78,18 @@ module.exports = {
 
     try {
       if (ctx.is('multipart')) {
-        const { data, files } = parseMultipartBody(ctx.request);
-        ctx.body = await contentManagerService.createMultipart(data, {
+        const { data, files } = parseMultipartBody(ctx);
+        ctx.body = await contentManagerService.create(data, {
           files,
           model,
           source,
         });
       } else {
         // Create an entry using `queries` system
-        ctx.body = await contentManagerService.add(
-          ctx.params,
-          ctx.request.body,
-          source
-        );
+        ctx.body = await contentManagerService.create(ctx.request.body, {
+          source,
+          model,
+        });
       }
 
       strapi.emit('didCreateFirstContentTypeEntry', ctx.params, source);
@@ -131,8 +115,8 @@ module.exports = {
 
     try {
       if (ctx.is('multipart')) {
-        const { data, files } = parseMultipartBody(ctx.request);
-        ctx.body = await contentManagerService.editMultipart(ctx.params, data, {
+        const { data, files } = parseMultipartBody(ctx);
+        ctx.body = await contentManagerService.edit(ctx.params, data, {
           files,
           model,
           source,
@@ -142,7 +126,7 @@ module.exports = {
         ctx.body = await contentManagerService.edit(
           ctx.params,
           ctx.request.body,
-          source
+          { source, model }
         );
       }
     } catch (error) {
