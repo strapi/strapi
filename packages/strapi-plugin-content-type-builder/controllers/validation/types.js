@@ -1,7 +1,12 @@
 'use strict';
 
 const yup = require('yup');
-const { validators, VALID_TYPES, isValidName } = require('./common');
+const {
+  validators,
+  VALID_TYPES,
+  isValidName,
+  isValidEnum,
+} = require('./common');
 
 module.exports = obj => {
   return {
@@ -31,14 +36,21 @@ const getTypeShape = obj => {
      * scalar types
      */
     case 'string':
-    case 'text':
-    case 'richtext': {
+    case 'text': {
       return {
         default: yup.string(),
         required: validators.required,
         unique: validators.unique,
-        min: validators.minLength,
-        max: validators.maxLength,
+        minLength: validators.minLength,
+        maxLength: validators.maxLength,
+      };
+    }
+    case 'richtext': {
+      return {
+        default: yup.string(),
+        required: validators.required,
+        minLength: validators.minLength,
+        maxLength: validators.maxLength,
       };
     }
     case 'json': {
@@ -51,7 +63,7 @@ const getTypeShape = obj => {
       return {
         enum: yup
           .array()
-          .of(yup.string().test(isValidName))
+          .of(yup.string().test(isValidEnum))
           .min(1)
           .required(),
         default: yup
@@ -65,8 +77,8 @@ const getTypeShape = obj => {
     case 'password': {
       return {
         required: validators.required,
-        min: validators.minLength,
-        max: validators.maxLength,
+        minLength: validators.minLength,
+        maxLength: validators.maxLength,
       };
     }
     case 'email': {
@@ -74,8 +86,8 @@ const getTypeShape = obj => {
         default: yup.string().email(),
         required: validators.required,
         unique: validators.unique,
-        min: validators.minLength,
-        max: validators.maxLength,
+        minLength: validators.minLength,
+        maxLength: validators.maxLength,
       };
     }
     case 'integer': {
@@ -85,6 +97,24 @@ const getTypeShape = obj => {
         unique: validators.unique,
         min: yup.number().integer(),
         max: yup.number().integer(),
+      };
+    }
+    case 'biginteger': {
+      return {
+        default: yup
+          .string()
+          .nullable()
+          .matches(/^\d*$/),
+        required: validators.required,
+        unique: validators.unique,
+        min: yup
+          .string()
+          .nullable()
+          .matches(/^\d*$/),
+        max: yup
+          .string()
+          .nullable()
+          .matches(/^\d*$/),
       };
     }
     case 'float': {
@@ -107,7 +137,7 @@ const getTypeShape = obj => {
     }
     case 'date': {
       return {
-        default: yup.date(),
+        default: yup.string(),
         required: validators.required,
         unique: validators.unique,
       };
