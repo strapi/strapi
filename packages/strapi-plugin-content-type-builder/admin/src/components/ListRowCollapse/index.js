@@ -63,6 +63,7 @@ function ListRowCollapse({
       className={[
         target ? 'relation-row' : '',
         configurable ? 'clickable' : '',
+        isOpen ? 'is-open' : '',
       ]}
     >
       <td>

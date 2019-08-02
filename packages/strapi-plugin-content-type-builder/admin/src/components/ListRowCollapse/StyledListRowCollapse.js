@@ -9,7 +9,9 @@ import styled from 'styled-components';
 import { colors } from 'strapi-helper-plugin';
 
 const StyedListRowCollapse = styled.tr`
-  background-color: transparent;
+  &:not(:first-of-type)::before {
+    opacity: 0;
+  }
   p {
     margin-bottom: 0;
   }
@@ -33,51 +35,58 @@ const StyedListRowCollapse = styled.tr`
       padding-right: 0;
     }
     table {
-      tr {
-        td {
-          &:first-of-type {
-            width: 35rem;
-            padding-left: 3rem;
-            img {
-              width: 35px;
-              height: 20px;
-              position: absolute;
-              top: calc(50% - 10px);
-              left: 3rem;
-            }
-            p {
-              font-weight: 500;
-              text-transform: capitalize;
-            }
-            img + p {
-              width: 30rem;
-              padding-left: calc(3rem + 35px);
-            }
+      tbody {
+        tr,
+        tr:first-of-type {
+          ::before {
+            height: 1px;
+            background-color: rgba(14, 22, 34, 0.04);
           }
-          &:last-of-type {
-            padding-right: 120px;
-            button {
-              outline: 0;
-            }
-            .type-wrapper {
-              display: flex;
-              justify-content: space-between;
-              button {
-                padding: 0;
-                span {
-                  color: #007eff;
-                }
+          td {
+            &:first-of-type {
+              width: 35rem;
+              padding-left: 3rem;
+              img {
+                width: 35px;
+                height: 20px;
+                position: absolute;
+                top: calc(50% - 10px);
+                left: 3rem;
+              }
+              p {
+                font-weight: 500;
+                text-transform: capitalize;
+              }
+              img + p {
+                width: 30rem;
+                padding-left: calc(3rem + 35px);
               }
             }
-            .btn-wrapper {
-              display: flex;
-              position: absolute;
-              right: 0;
-              top: 0;
-              height: 100%;
-              padding-right: 30px;
-              i {
-                margin: auto;
+            &:last-of-type {
+              padding-right: 120px;
+              button {
+                outline: 0;
+              }
+              .type-wrapper {
+                display: flex;
+                justify-content: space-between;
+                button {
+                  padding: 0;
+                  span {
+                    color: #007eff;
+                  }
+                }
+              }
+              .btn-wrapper {
+                display: flex;
+                position: absolute;
+                right: 0;
+                top: 0;
+                height: 100%;
+                padding-right: 30px;
+                i {
+                  margin: auto;
+                }
               }
             }
           }
@@ -110,6 +119,11 @@ const StyedListRowCollapse = styled.tr`
           &:hover {
             background-color: transparent;
           }
+          &:first-of-type {
+            :before {
+              background-color: transparent;
+            }
+          }
           &:before {
             width: calc(100% - 30px);
           }
@@ -118,9 +132,27 @@ const StyedListRowCollapse = styled.tr`
     }
   }
   &.clickable {
-    table tr:hover {
-      cursor: pointer;
-      background-color: ${colors.grey};
+    &.is-open,
+    &:hover {
+      & + tr {
+        div:not(.collapse-body) {
+          table tr {
+            &:before {
+              background-color: transparent;
+            }
+          }
+        }
+      }
+    }
+    &:hover {
+      div:not(.collapse-body) {
+        table tr {
+          cursor: pointer;
+          background-color: ${colors.grey};
+          &:before {
+          }
+        }
+      }
     }
   }
   &.relation-row {
