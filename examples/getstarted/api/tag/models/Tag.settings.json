@@ -16,6 +16,9 @@
     "linkedArticles": {
       "collection": "article",
       "via": "manyTags"
+    },
+    "date": {
+      "type": "date"
     }
   }
 }

@@ -9,6 +9,18 @@ module.exports = {
         },
       },
       {
+        name: 'date',
+        params: {
+          type: 'date',
+        },
+      },
+      {
+        name: 'jsonField',
+        params: {
+          type: 'json',
+        },
+      },
+      {
         name: 'content',
         params: {
           multiple: false,

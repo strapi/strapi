@@ -105,6 +105,7 @@ describe('Content Manager End to End', () => {
       const entry = {
         title: 'Article 1',
         content: 'My super content 1',
+        date: '2019-08-13T00:00:00.000Z',
       };
 
       let { body } = await rq({
