@@ -57,17 +57,15 @@ module.exports = {
       const isEmail = emailRegExp.test(params.identifier);
 
       // Set the identifier to the appropriate query field.
-      let key = "email";
       if (isEmail) {
         query.email = params.identifier.toLowerCase();
       } else {
         query.username = params.identifier;
-        key = "username";
       }
 
       const user = await strapi.plugins["users-permissions"]
         .queries("user", "users-permissions")
-        .findOne(_.pick(query, [key, key]));
+        .findOne(query);
 
       if (!user) {
         return ctx.badRequest(
