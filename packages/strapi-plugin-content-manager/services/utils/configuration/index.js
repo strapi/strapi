@@ -1,3 +1,5 @@
+'use strict';
+
 const { createDefaultSettings, syncSettings } = require('./settings');
 const { createDefaultMetadatas, syncMetadatas } = require('./metadatas');
 const { createDefaultLayouts, syncLayouts } = require('./layouts');
@@ -7,6 +9,7 @@ async function createDefaultConfiguration(model) {
   // convert model to schema
 
   const schema = formatContentTypeSchema(model);
+  schema.config = model.config || {};
 
   return {
     settings: await createDefaultSettings(schema),
@@ -19,6 +22,7 @@ async function syncConfiguration(conf, model) {
   // convert model to schema
 
   const schema = formatContentTypeSchema(model);
+  schema.config = model.config || {};
 
   return {
     settings: await syncSettings(conf, schema),

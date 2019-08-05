@@ -33,6 +33,13 @@ function createDefaultMetadata(schema, name) {
     placeholder: '',
     visible: isVisible(schema, name),
     editable: true,
+    ..._.pick(_.get(schema, ['config', 'metadatas', name, 'edit'], {}), [
+      'label',
+      'description',
+      'placeholder',
+      'visible',
+      'editable',
+    ]),
   };
 
   if (isRelation(schema.attributes[name])) {
@@ -43,6 +50,11 @@ function createDefaultMetadata(schema, name) {
     label: _.upperFirst(name),
     searchable: isSearchable(schema, name),
     sortable: isSortable(schema, name),
+    ..._.pick(_.get(schema, ['config', 'metadatas', name, 'list'], {}), [
+      'label',
+      'searchable',
+      'sortable',
+    ]),
   };
 
   return { edit, list };
