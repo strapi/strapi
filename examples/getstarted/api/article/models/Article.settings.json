@@ -13,12 +13,12 @@
   "attributes": {
     "title": {
       "type": "string",
-      "default": "soupette",
       "required": true,
       "unique": true
     },
     "content": {
-      "type": "richtext"
+      "type": "richtext",
+      "default": "content"
     },
     "published": {
       "type": "boolean"
