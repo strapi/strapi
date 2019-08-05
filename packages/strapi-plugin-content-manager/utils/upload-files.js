@@ -46,8 +46,9 @@ module.exports = async (entry, files, { model, source }) => {
     const { model, source } = findModelFromUploadPath(path);
 
     if (model) {
+      const id = _.get(entry, path.concat('id'));
       return uploadService.uploadToEntity(
-        { id: _.get(entry, path.concat('id')), model: model },
+        { id, model: model },
         { [field]: files },
         source
       );

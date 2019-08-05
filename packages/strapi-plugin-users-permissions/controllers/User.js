@@ -217,7 +217,7 @@ module.exports = {
     };
 
     if (password === user.password) {
-      delete ctx.request.body.password;
+      delete updateData.password;
     }
 
     const data = await strapi.plugins['users-permissions'].services.user.edit(
