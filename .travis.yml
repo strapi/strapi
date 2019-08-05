@@ -2,6 +2,13 @@ services:
   - postgresql
   - mysql
 
+addons:
+  postgresql: '10'
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+
 sudo: required
 dist: trusty
 

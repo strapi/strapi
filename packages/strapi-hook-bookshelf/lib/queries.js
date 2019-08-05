@@ -19,6 +19,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
     return model.attributes[key].type === 'group';
   });
 
+  const timestamps = _.get(model, ['options', 'timestamps'], []);
+
   // Returns an object with relation keys only to create relations in DB
   const pickRelations = values => {
     return _.pick(values, assocKeys);
@@ -29,6 +31,10 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
   // Returns an object without relational keys to persist in DB
   const selectAttributes = values => {
     return _.pickBy(values, (value, key) => {
+      if (Array.isArray(timestamps) && timestamps.includes(key)) {
+        return false;
+      }
+
       return !excludedKeys.includes(key) && _.has(model.allAttributes, key);
     });
   };
