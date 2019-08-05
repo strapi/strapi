@@ -46,12 +46,8 @@
       "configurable": false,
       "required": true
     },
-    "public_id": {
-      "type": "string",
-      "configurable": false
-    },
-    "resource_type": {
-      "type": "string",
+    "provider_metadata": {
+      "type": "json",
       "configurable": false
     },
     "related": {

@@ -106,7 +106,7 @@ input editFileInput {
   size: String
   url: String
   provider: String
-  public_id: String
+  provider_metadata: JSON
   related: [ID]
 }
 
@@ -146,7 +146,7 @@ input FileInput {
   size: String!
   url: String!
   provider: String!
-  public_id: String
+  provider_metadata: JSON
   related: [ID]
 }
 
@@ -288,7 +288,7 @@ type UploadFile {
   size: String!
   url: String!
   provider: String!
-  public_id: String
+  provider_metadata: JSON
   related(sort: String, limit: Int, start: Int, where: JSON): [Morph]
 }
 
