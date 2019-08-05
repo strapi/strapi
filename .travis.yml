@@ -10,6 +10,13 @@ language: node_js
 node_js:
   - '10'
 
+addons:
+  postgresql: '10'
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+
 cache:
   yarn: true
   directories:
@@ -54,7 +61,7 @@ jobs:
       before_install:
         - psql -c 'create database strapi_test;' -U postgres
       env:
-        - DB_STRING='--dbclient=postgres --dbhost=localhost --dbport=5432 --dbname=strapi_test --dbusername=postgres --dbpassword='
+        - DB_STRING='--dbclient=postgres --dbhost=localhost --dbport=5433 --dbname=strapi_test --dbusername=postgres --dbpassword='
 
     - <<: *e2e_tests
       name: 'E2E Mysql'
@@ -73,7 +80,6 @@ jobs:
       <<: *install_mongo
       env:
         - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
-
     # - name: 'Cypress tests'
     #   <<: *install_mongo
     #   install:
