@@ -695,7 +695,7 @@ We really recommend separating you users from your administrators to avoid this 
 
 If you are deploying your Strapi project with the Admin panel together, you will have to make sure the `build` script runs before running the project. (e.g `npm run build`)
 
-Depending on your deployment environment you might have to run the `build` script with `NODE_ENV=production npm run build` if the envrionment doesn't include it by default.
+Depending on your deployment environment you might have to run the `build` script with `NODE_ENV=production npm run build` if the environment doesn't include it by default.
 
 For example, `Heroku` will run the build script for you and set `NODE_ENV=production` before running the scripts so you won't have to think about it.
 

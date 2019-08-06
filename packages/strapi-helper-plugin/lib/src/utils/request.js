@@ -91,7 +91,10 @@ function serverRestartWatcher(response) {
         'Keep-Alive': false,
       },
     })
-      .then(() => {
+      .then(res => {
+        if (res.status >= 400) {
+          throw new Error('not available');
+        }
         // Hide the global OverlayBlocker
         strapi.unlockApp();
         resolve(response);

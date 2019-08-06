@@ -8,7 +8,7 @@
 <br />
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi/alpha.svg" alt="NPM Version" />
+    <img src="https://img.shields.io/npm/v/strapi/beta.svg" alt="NPM Version" />
   </a>
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
@@ -17,7 +17,7 @@
     <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
   </a>
   <a href="http://slack.strapi.io">
-    <img src="https://strapi-slack.herokuapp.com/badge.svg" alt="Strapi on Slack" />
+    <img src="https://slack.strapi.io/badge.svg" alt="Strapi on Slack" />
   </a>
 </p>
 
@@ -56,10 +56,8 @@ Strapi is a free and open-source Headless CMS delivering your content anywhere y
 
 **Node:**
 
-- NodeJS 10.x
+- NodeJS >= 10.x
 - NPM >= 6.x
-
-(Please note that Node 11/12 are not supported, and the current Node LTS (v10) is the officially supported version.)
 
 **Database:**
 

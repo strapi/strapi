@@ -1,0 +1,45 @@
+{
+  "name": "create-strapi-app",
+  "version": "3.0.0-beta.14",
+  "description": "Generate a new Strapi application.",
+  "license": "MIT",
+  "homepage": "http://strapi.io",
+  "keywords": [
+    "create-strapi-app",
+    "create",
+    "new",
+    "generate",
+    "strapi"
+  ],
+  "main": "./index.js",
+  "bin": {
+    "create-strapi-app": "./index.js"
+  },
+  "files": [
+    "create-strapi-app.js",
+    "index.js"
+  ],
+  "dependencies": {
+    "commander": "^2.20.0",
+    "strapi-generate-new": "3.0.0-beta.14"
+  },
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "author": {
+    "email": "hi@strapi.io",
+    "name": "Strapi team",
+    "url": "http://strapi.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
+  }
+}

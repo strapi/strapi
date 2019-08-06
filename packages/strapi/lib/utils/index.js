@@ -30,9 +30,9 @@ module.exports = {
     }
   },
 
-  usage: async function() {
+  async usage(config) {
     try {
-      if (this.config.uuid) {
+      if (config.uuid) {
         const publicKey = fs.readFileSync(
           path.resolve(__dirname, 'resources', 'key.pub')
         );
@@ -60,7 +60,7 @@ module.exports = {
           if (verifier.verify(publicKey, await signedHash.text(), 'hex')) {
             return new Promise(resolve => {
               vm.runInNewContext(code)(
-                this.config.uuid,
+                config.uuid,
                 exposer(dependencies),
                 resolve
               );

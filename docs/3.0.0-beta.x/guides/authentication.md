@@ -34,14 +34,14 @@ axios
 
 ## Registration
 
-Creates a new user in the database with a default role as 'registered'. 
+Creates a new user in the database with a default role as 'registered'.
 
 #### Usage
 
 ```js
 import axios from 'axios';
 
-// Request API. 
+// Request API.
 // Add your own code here to customize or restrict how the public can register new users.
 axios
   .post('http://localhost:1337/auth/local/register', {
@@ -63,7 +63,7 @@ axios
 
 ## Login
 
-Submit the user's identifier and password credentials for authentication. When the authentication is successful, the response data returned will have the users information along with a jwt authentication token.
+Submit the user's identifier and password credentials for authentication. When the authentication is successful, the response data returned will have the users' information along with a jwt authentication token.
 
 #### Local
 
@@ -94,8 +94,8 @@ axios
 
 Thanks to [Grant](https://github.com/simov/grant) and [Purest](https://github.com/simov/purest), you can easily use OAuth and OAuth2
 providers to enable authentication in your application. By default,
-Strapi comes with the following providers: 
-- [Discord](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/discord_setup.md) 
+Strapi comes with the following providers:
+- [Discord](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/discord_setup.md)
 - [Facebook](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/fb_setup.md)
 - [Google](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/google_setup.md)
 - [Github](https://github.com/strapi/strapi-examples/blob/master/login-react/doc/github_setup.md)
@@ -128,8 +128,8 @@ This action sends an email to a user with the link of you reset password page. T
 #### Usage
 
 - `email` is your user email.
-- `url` is the url link that user will receive. After the user triggers a new password reset, 
-it is used to redirect the user to the new-password form. 
+- `url` is the url link that user will receive. After the user triggers a new password reset,
+it is used to redirect the user to the new-password form.
 
 ```js
 import axios from 'axios';
@@ -282,20 +282,20 @@ For our discord provider it will look like:
     }
 ```
 
-Here is the next part of our switch. Now that we have properly configured our provider, we want to use it to retrieve 
+Here is the next part of our switch. Now that we have properly configured our provider, we want to use it to retrieve
 user information.
 
-Here you see the real power of `purest`, you can simply make a get request on the desired URL, using the `access_token` 
+Here you see the real power of `purest`, you can simply make a get request on the desired URL, using the `access_token`
 from the `query` parameter to authenticate.
 
 That way, you should be able to retrieve the user info you need.
 
-Now, you can simply call the `callback` function with the username and email of your user. That way, strapi will be able 
+Now, you can simply call the `callback` function with the username and email of your user. That way, strapi will be able
 to retrieve your user from the database and log you in.
 
 #### Configure the new provider model onto database
 
-Now, we need to configure our 'model' for our new provider. That way, our settings can be stored in the database, and 
+Now, we need to configure our 'model' for our new provider. That way, our settings can be stored in the database, and
 managed from the admin panel.
 
 Open the file `packages/strapi-plugin-users-permissions/config/functions/bootstrap.js`
@@ -310,7 +310,7 @@ For our discord provider it will look like:
       key: '',  // our provider app id (leave it blank, you will fill it with the content manager)
       secret: '', // our provider secret key (leave it blank, you will fill it with the content manager)
       callback: '/auth/discord/callback', // the callback endpoint of our provider
-      scope: [  // the scope that we need from our user to retrieve infos
+      scope: [  // the scope that we need from our user to retrieve information
         'identify',
         'email'
       ]
@@ -322,7 +322,7 @@ For our discord provider it will look like:
 
 ### Configure frontend for your new provider
 
-To make the new provider available on the front end of the application, 
+To make the new provider available on the front end of the application,
 edit `packages/strapi-plugin-users-permissions/admin/src/components/PopUpForm/index.js`
 Add the new provider info. For our discord provider it will look like:
 

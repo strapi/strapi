@@ -7,23 +7,6 @@ const _ = require('lodash');
 const glob = require('../load/glob');
 const findPackagePath = require('../load/package-path');
 
-const requiredMiddlewares = {
-  kcors: 'kcors',
-  body: 'koa-body',
-  compose: 'koa-compose',
-  compress: 'koa-compress',
-  convert: 'koa-convert',
-  favicon: 'koa-favicon',
-  i18n: 'koa-i18n',
-  ip: 'koa-ip',
-  locale: 'koa-locale',
-  lusca: 'koa-lusca',
-  routerJoi: 'koa-router-joi',
-  session: 'koa-session',
-  static: 'koa-static',
-  qs: 'koa-qs',
-};
-
 /**
  * Load middlewares
  */
@@ -31,15 +14,6 @@ module.exports = async function(strapi) {
   const { installedMiddlewares, installedPlugins, appPath } = strapi.config;
 
   let middlewares = {};
-  let koaMiddlewares = {};
-
-  Object.keys(requiredMiddlewares).forEach(key => {
-    Object.defineProperty(koaMiddlewares, key, {
-      configurable: false,
-      enumerable: true,
-      get: () => require(requiredMiddlewares[key]),
-    });
-  });
 
   const loaders = createLoaders(strapi);
 
@@ -56,10 +30,7 @@ module.exports = async function(strapi) {
     loaders.loadLocalPluginsMiddlewares(appPath, middlewares),
   ]);
 
-  return {
-    middlewares,
-    koaMiddlewares,
-  };
+  return middlewares;
 };
 
 /**

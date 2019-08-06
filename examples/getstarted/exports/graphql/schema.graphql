@@ -2,16 +2,20 @@ type Articles {
   id: ID!
   created_at: DateTime!
   updated_at: DateTime!
-  content2: String
   title: String
+  content: String
+  published: Boolean
+  value: Int
   image: UploadFile
   posts(sort: String, limit: Int, start: Int, where: JSON): [Post]
 }
 
 input ArticlesInput {
-  content2: String
-  posts: [ID]
   title: String
+  content: String
+  published: Boolean
+  value: Int
+  posts: [ID]
   image: ID
 }
 
@@ -85,9 +89,11 @@ type deleteUserPayload {
 }
 
 input editArticlesInput {
-  content2: String
-  posts: [ID]
   title: String
+  content: String
+  published: Boolean
+  value: Int
+  posts: [ID]
   image: ID
 }
 
@@ -216,6 +222,7 @@ type Query {
   test(id: ID!): MypluginTest
   tests(sort: String, limit: Int, start: Int, where: JSON): [MypluginTest]
   me: UsersPermissionsMe
+  userCustomRoute: String
 }
 
 input RoleInput {

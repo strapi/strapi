@@ -22,6 +22,7 @@
   "components.LimitSelect.itemsPerPage": "Items per pagina",
   "components.Search.placeholder": "Zoek naar een item...",
   "components.TableDelete.delete": "Alles verwijderen",
+  "components.TableDelete.deleteSelected": "Verwijder geselecteerde",
   "components.TableDelete.entries.plural": "{number} items geselecteerd",
   "components.TableDelete.entries.singular": "{number} item geselecteerd",
   "components.TableEmpty.withFilters": "Er is geen {contentType} met de gekozen filters...",

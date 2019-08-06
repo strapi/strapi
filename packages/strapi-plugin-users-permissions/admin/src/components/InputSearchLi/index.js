@@ -1,8 +1,8 @@
 /**
-*
-* InputSearchLi
-*
-*/
+ *
+ * InputSearchLi
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -19,12 +19,12 @@ function InputSearchLi({ onClick, isAdding, item }) {
       <div>
         <div className={styles.container}>
           {item.username}
-          <a href={`${path}`} target="_blank">
+          <a href={`${path}`} target="_blank" rel="noopener noreferrer">
             <i className="fa fa-external-link" />
           </a>
         </div>
         <div
-          onClick={(e) => {
+          onClick={e => {
             e.stopPropagation();
             e.preventDefault();
             onClick(item);

@@ -22,6 +22,7 @@
   "components.LimitSelect.itemsPerPage": "ページあたりのアイテム数",
   "components.Search.placeholder": "エントリを検索する...",
   "components.TableDelete.delete": "すべて削除",
+  "components.TableDelete.deleteSelected": "選択を削除します",
   "components.TableDelete.entries.plural": "{number} 個のエントリが選択されました",
   "components.TableDelete.entries.singular": "{number} 個のエントリが選択されました",
   "components.TableEmpty.withFilters": "適用されたフィルタには{contentType}はありません...",

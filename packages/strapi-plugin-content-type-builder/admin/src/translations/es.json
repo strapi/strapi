@@ -7,6 +7,7 @@
   "attribute.enumeration": "Enumeración",
   "attribute.float": "Número flotante",
   "attribute.integer": "Número entero",
+  "attribute.biginteger": "Entero grande",
   "attribute.json": "JSON",
   "attribute.media": "Multimedia",
   "attribute.password": "Contraseña",
@@ -29,6 +30,7 @@
   "error.validation.minSupMax": "No puede ser superior",
   "error.validation.regex": "El valor no coincide con el valor de regex.",
   "error.validation.required": "Es requerido un valor para este registro.",
+  "form.attribute.info.no-space-allowed": "El nombre del atributo no puede contener espacios",
   "form.attribute.item.appearance.description": "Si no, el valor será editable a través de un campo textarea básico",
   "form.attribute.item.appearance.label": "Mostrar como WYSIWYG",
   "form.attribute.item.appearance.name": "Apariencia",
@@ -54,6 +56,7 @@
   "form.attribute.item.number.type.decimal": "decimal (ex: 2.22)",
   "form.attribute.item.number.type.float": "flotante (ex: 3.3333333333)",
   "form.attribute.item.number.type.integer": "entero (ej: 10)",
+  "form.attribute.item.number.type.biginteger": "entero grande (ej: 123456789)",
   "form.attribute.item.requiredField": "Campo obligatorio",
   "form.attribute.item.requiredField.description": "No podrá crear un registro si este campo está vacío",
   "form.attribute.item.settings.name": "Ajustes",
@@ -153,5 +156,6 @@
   "table.contentType.head.fields": "Campos",
   "table.contentType.head.name": "Nombre",
   "table.contentType.title.plural": "Tipos de Contenido disponibles",
-  "table.contentType.title.singular": "Tipo de contenido está disponible"
+  "table.contentType.title.singular": "Tipo de Contenido disponible",
+  "prompt.content.unsaved": "¿Estás seguro de que quieres descartar este Tipo de Contenido? Todas las modificaciones se perderán."
 }

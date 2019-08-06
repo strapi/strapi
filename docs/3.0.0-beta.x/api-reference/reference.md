@@ -8,7 +8,6 @@
   - [.config](#strapi-config)
   - [.controllers](#strapi-controllers)
   - [.hook](#strapi-hook)
-  - [.koaMiddlewares](#strapi-koaMiddlewares)
   - [.load()](#strapi-load)
   - [.log](#strapi-log)
   - [.middleware](#strapi-middleware)
@@ -50,7 +49,7 @@ Returns an object that represents the configurations of the project. Every JavaS
 
 ## strapi.controllers
 
-Returns an object of the controllers wich is available in the project. Every JavaScript file located in the `./api/**/controllers` folder will be parsed into the `strapi.controllers` object. Thanks to this object, you can access to every controller's actions everywhere in the project.
+Returns an object of the controllers which is available in the project. Every JavaScript file located in the `./api/**/controllers` folder will be parsed into the `strapi.controllers` object. Thanks to this object, you can access to every controller's actions everywhere in the project.
 
 ::: note
 This object doesn't include the admin's controllers and plugin's controllers.
@@ -59,10 +58,6 @@ This object doesn't include the admin's controllers and plugin's controllers.
 ## strapi.hook
 
 Returns an object of the hooks available in the project. Every folder that follows this pattern `strapi-*` and located in the `./node_modules` or `/hooks` folder will be mounted into the `strapi.hook` object.
-
-## strapi.koaMiddlewares
-
-Returns an object of the Koa middlewares found in the `./node_modules` folder of the project. This reference is very useful for the Strapi's core.
 
 ## strapi.load
 
@@ -86,7 +81,7 @@ Returns an object of plugins available within the project. Each plugin object co
 
 ## strapi.query
 
-This utility function allows to bind models with query functions specific to each ORM (e.g: `mongoose` or `booksehlf`).
+This utility function allows to bind models with query functions specific to each ORM (e.g: `mongoose` or `bookshelf`).
 For more details, see the [Queries section](../guides/queries.md).
 
 ## strapi.reload

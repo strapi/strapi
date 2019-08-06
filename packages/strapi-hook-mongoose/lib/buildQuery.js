@@ -438,6 +438,9 @@ const buildWhereClause = ({ field, operator, value }) => {
           $not: new RegExp(val),
         },
       };
+    case 'null': {
+      return value ? { [field]: { $eq: null } } : { [field]: { $ne: null } };
+    }
 
     default:
       throw new Error(`Unhandled whereClause : ${field} ${operator} ${value}`);
@@ -531,7 +534,7 @@ const hydrateModel = ({ model: rootModel, populatedModels }) => async obj => {
 };
 
 /**
- * Returns a model from a realtion path and a root model
+ * Returns a model from a relation path and a root model
  * @param {Object} options - Options
  * @param {Object} options.rootModel - Mongoose model
  * @param {string} options.path - Relation path

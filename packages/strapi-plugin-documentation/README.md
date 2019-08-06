@@ -17,7 +17,7 @@ The documentation plugin is not release on npm yet, Here's how to install it.
 
 ### Config
 
-The plugin comes with a `settings.json` file located in `my-app/plugins/documentation/config` folder where you can specify all your environment variables, licences, external documentation and so one...
+The plugin comes with a `settings.json` file located in `./my-project/plugins/documentation/config` folder where you can specify all your environment variables, licenses, external documentation and so one...
 You can add all the entries listed in the [specification](https://swagger.io/specification/).
 
 _NOTE_ if you need to add a custom key you can do it by prefixing your key by `x-{something}`
@@ -75,7 +75,7 @@ It has the following structure
 
 Currently the plugin writes a json file for each API.
 
-In order to customize the responses or to add informations to a path you need to create a file in the associated `overrides/<file-name>.json` (the name of the file matters so make sure they are similar). Then you just need to identify the path you want to modify.
+In order to customize the responses or to add information to a path you need to create a file in the associated `overrides/<file-name>.json` (the name of the file matters so make sure they are similar). Then you just need to identify the path you want to modify.
 You can modify the default generated tags by adding a new one at the end of the file. Same for the components.
 
 **_NOTE 1_**

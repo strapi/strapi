@@ -307,7 +307,7 @@
       "config": {
         "policies": [],
         "prefix": "",
-        "description": "Retrieve the logged in user informations",
+        "description": "Retrieve the logged in user information",
         "tag": {
           "plugin": "users-permissions",
           "name": "User",
@@ -317,7 +317,7 @@
     },
     {
       "method": "GET",
-      "path": "/users/:_id",
+      "path": "/users/:id",
       "handler": "User.findOne",
       "config": {
         "policies": [],
@@ -341,7 +341,7 @@
     },
     {
       "method": "PUT",
-      "path": "/users/:_id",
+      "path": "/users/:id",
       "handler": "User.update",
       "config": {
         "policies": [],
@@ -356,7 +356,7 @@
     },
     {
       "method": "DELETE",
-      "path": "/users/:_id",
+      "path": "/users/:id",
       "handler": "User.destroy",
       "config": {
         "policies": [],

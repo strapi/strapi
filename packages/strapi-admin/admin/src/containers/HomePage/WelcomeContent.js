@@ -20,7 +20,12 @@ function WelcomeContent({ hasContent }) {
           {message => (
             <p className={styles.welcomeContentP}>
               {message}
-              <a className={styles.welcomeContentA} href="https://slack.strapi.io/" target="_blank">
+              <a
+                className={styles.welcomeContentA}
+                href="https://slack.strapi.io/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Slack
               </a>
               <FormattedMessage id="app.components.HomePage.welcomeBlock.content.raise" />
@@ -30,6 +35,7 @@ function WelcomeContent({ hasContent }) {
                     className={styles.welcomeContentA}
                     href="https://github.com/strapi/strapi/issues/new/choose"
                     target="_blank"
+                    rel="noopener noreferrer"
                   >
                     {message}
                   </a>
@@ -41,9 +47,7 @@ function WelcomeContent({ hasContent }) {
       )}
       {hasContent && (
         <FormattedMessage id="app.components.HomePage.welcomeBlock.content.again">
-          {message => (
-            <p className={styles.welcomeContentP}>{message}</p>
-          )}
+          {message => <p className={styles.welcomeContentP}>{message}</p>}
         </FormattedMessage>
       )}
     </React.Fragment>

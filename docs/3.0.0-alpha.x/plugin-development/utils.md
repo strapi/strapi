@@ -208,7 +208,7 @@ export function dataFetchSucceeded(data) {
 
 #### Reducer setup:
 
-Please refer to the [Immutable documentation](https://facebook.github.io/immutable-js/docs/#/) for informations about data structure.
+Please refer to the [Immutable documentation](https://facebook.github.io/immutable-js/docs/#/) for information about data structure.
 
 **Path —** `./plugins/my-plugin/admin/src/containers/ContentTypePage/reducer.js`.
 ```js
@@ -453,7 +453,7 @@ export function* postData() {
     const response = yield call(request, requestUrl, opts, true);
 
     if (response.ok) {
-      yield put(submitSucceeded());      
+      yield put(submitSucceeded());
     } else {
       yield put(submitError('An error occurred'));
     }

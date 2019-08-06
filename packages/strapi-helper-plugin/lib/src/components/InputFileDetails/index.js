@@ -21,14 +21,21 @@ function InputFileDetails(props) {
     return <div className={styles.inputFileDetailsEmpty} />;
   }
 
-  const url = startsWith(props.file.url, '/') ? `${strapi.backendURL}${props.file.url}` : props.file.url;
+  const url = startsWith(props.file.url, '/')
+    ? `${strapi.backendURL}${props.file.url}`
+    : props.file.url;
 
   return (
     <div className={styles.inputFileDetails}>
       <div className={styles.detailBanner}>
         <div>
           {props.file.url && (
-            <a href={url} className={styles.externalLink} target="_blank">
+            <a
+              href={url}
+              className={styles.externalLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <i className="fa fa-external-link-square" />
               <FormattedMessage id="app.components.InputFileDetails.open" />
             </a>
@@ -50,10 +57,7 @@ InputFileDetails.defaultProps = {
 };
 
 InputFileDetails.propTypes = {
-  file: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.array,
-  ]),
+  file: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   multiple: PropTypes.bool,
   number: PropTypes.number,
   onFileDelete: PropTypes.func,

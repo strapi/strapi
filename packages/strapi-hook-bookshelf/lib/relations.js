@@ -240,22 +240,18 @@ module.exports = {
       return acc;
     }, {});
 
-    if (!_.isEmpty(values)) {
-      relationUpdates.push(
-        this
-          .forge({
-            [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey)
-          })
-          .save(values, {
-            patch: true
-          })
-      );
-    } else {
-      relationUpdates.push(Promise.resolve(_.assign(response, params.values)));
-    }
-
-    // Update virtuals fields.
+    // Update fields in other collections.
     await Promise.all(relationUpdates);
+
+    if (!_.isEmpty(values)) {
+      await this
+        .forge({
+          [this.primaryKey]: getValuePrimaryKey(params, this.primaryKey)
+        })
+        .save(values, {
+          patch: true
+        });
+    }
 
     return await this
       .forge({
