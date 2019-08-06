@@ -67,7 +67,7 @@ module.exports = {
       // Check if the user exists.
       const user = await strapi.plugins['users-permissions']
         .queries('user', 'users-permissions')
-        .findOne(query, ['role']);
+        .findOne(query);
 
       if (!user) {
         return ctx.badRequest(
