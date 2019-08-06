@@ -197,7 +197,7 @@ module.exports = {
       if (_.isFunction(resolver)) {
         context.params = Query.convertToParams(
           options.input.where || {},
-          (action && (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name])
+          (action && (plugin ? strapi.plugins[plugin].models[_.toLower(name)] : strapi.models[_.toLower(name)])
             .primaryKey)
         );
 
