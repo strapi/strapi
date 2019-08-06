@@ -33,18 +33,23 @@ function createDefaultMetadata(schema, name) {
     placeholder: '',
     visible: isVisible(schema, name),
     editable: true,
-    ..._.pick(_.get(schema, ['config', 'metadatas', name, 'edit'], {}), [
-      'label',
-      'description',
-      'placeholder',
-      'visible',
-      'editable',
-    ]),
   };
 
   if (isRelation(schema.attributes[name])) {
     edit.mainField = 'id';
   }
+
+  _.assign(
+    edit,
+    _.pick(_.get(schema, ['config', 'metadatas', name, 'edit'], {}), [
+      'label',
+      'description',
+      'placeholder',
+      'visible',
+      'editable',
+      'mainField',
+    ])
+  );
 
   const list = {
     label: _.upperFirst(name),
