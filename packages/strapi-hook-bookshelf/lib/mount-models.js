@@ -890,7 +890,9 @@ const castValueFromType = (type, value) => {
 
       date.setTime(value);
       if (!dateFns.isValid(date)) {
-        throw new Error(`Invalid ${type} format, expected a `);
+        throw new Error(
+          `Invalid ${type} format, expected a timestamp or an ISO date`
+        );
       }
 
       return date;
