@@ -19,11 +19,11 @@ module.exports = {
    * @return Promise or Error.
    */
 
-  composeMutationResolver: function(_schema, plugin, name, action) {
+  composeMutationResolver: function (_schema, plugin, name, action) {
     // Extract custom resolver or type description.
-    const { resolver: handler = {} } = _schema;
+    const {resolver: handler = {}} = _schema;
 
-    const queryName = `${action}${_.capitalize(name)}`;
+    const queryName = action ? `${action}${_.capitalize(name)}` : `${name}`;
 
     // Retrieve policies.
     const policies = _.get(handler, `Mutation.${queryName}.policies`, []);
@@ -43,7 +43,7 @@ module.exports = {
       const resolver = _.get(handler, `Mutation.${queryName}.resolver`);
 
       if (_.isString(resolver) || _.isPlainObject(resolver)) {
-        const { handler = resolver } = _.isPlainObject(resolver)
+        const {handler = resolver} = _.isPlainObject(resolver)
           ? resolver
           : {};
 
@@ -52,9 +52,9 @@ module.exports = {
 
         const controller = plugin
           ? _.get(
-              strapi.plugins,
-              `${plugin}.controllers.${_.toLower(name)}.${action}`
-            )
+            strapi.plugins,
+            `${plugin}.controllers.${_.toLower(name)}.${action}`
+          )
           : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
         if (!controller) {
@@ -133,9 +133,9 @@ module.exports = {
 
       const controller = plugin
         ? _.get(
-            strapi.plugins,
-            `${plugin}.controllers.${_.toLower(name)}.${action}`
-          )
+          strapi.plugins,
+          `${plugin}.controllers.${_.toLower(name)}.${action}`
+        )
         : _.get(strapi.controllers, `${_.toLower(name)}.${action}`);
 
       if (!controller) {
@@ -169,7 +169,7 @@ module.exports = {
       )
     );
 
-    return async (obj, options, { context }) => {
+    return async (obj, options, {context}) => {
       // Hack to be able to handle permissions for each query.
       const ctx = Object.assign(_.clone(context), {
         request: Object.assign(_.clone(context.request), {
@@ -197,9 +197,10 @@ module.exports = {
       if (_.isFunction(resolver)) {
         context.params = Query.convertToParams(
           options.input.where || {},
-          (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name])
-            .primaryKey
+          (action && (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name])
+            .primaryKey)
         );
+
         context.request.body = options.input.data || {};
 
         if (isController) {
@@ -213,9 +214,11 @@ module.exports = {
 
           const body = values && values.toJSON ? values.toJSON() : values;
 
-          return {
-            [pluralize.singular(name)]: body,
-          };
+          return action
+            ? {
+              [pluralize.singular(name)]: body
+            }
+            : body;
         }
 
         return resolver.call(null, obj, options, context);
