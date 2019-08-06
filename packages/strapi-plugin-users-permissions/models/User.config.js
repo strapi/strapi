@@ -5,5 +5,15 @@ module.exports = {
         visible: false,
       },
     },
+    provider: {
+      edit: {
+        visible: false,
+      },
+    },
+    role: {
+      edit: {
+        mainField: 'name',
+      },
+    },
   },
 };

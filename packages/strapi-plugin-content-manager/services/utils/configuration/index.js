@@ -15,7 +15,7 @@ async function validateCustomConfig(model, schema) {
     }).validate(model.config);
   } catch (error) {
     throw new Error(
-      `Invalid Model configuration for model ${model.uid} Verify your Model.config.js(on) file:\n  - ${error.message}\n`
+      `Invalid Model configuration for model ${model.uid}. Verify your {{modelName}}.config.js(on) file:\n  - ${error.message}\n`
     );
   }
 }
