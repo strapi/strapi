@@ -195,9 +195,11 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
+        name = _.toLower(name);
+
         context.params = Query.convertToParams(
           options.input.where || {},
-          (action && (plugin ? strapi.plugins[plugin].models[_.toLower(name)] : strapi.models[_.toLower(name)])
+          (action && (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name])
             .primaryKey)
         );
 
@@ -208,7 +210,7 @@ module.exports = {
 
           if (ctx.body) {
             return {
-              [pluralize.singular(_.toLower(name))]: ctx.body,
+              [pluralize.singular(name)]: ctx.body,
             };
           }
 
@@ -216,7 +218,7 @@ module.exports = {
 
           return action
             ? {
-              [pluralize.singular(_.toLower(name))]: body
+              [pluralize.singular(name)]: body
             }
             : body;
         }
