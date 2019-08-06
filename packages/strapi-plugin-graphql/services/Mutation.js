@@ -48,7 +48,7 @@ module.exports = {
           : {};
 
         // Retrieve the controller's action to be executed.
-        const [name, action] = handler.split('.');
+        [name, action] = handler.split('.');
 
         const controller = plugin
           ? _.get(
@@ -129,7 +129,7 @@ module.exports = {
     // Force policies of another action on a custom resolver.
     if (_.isString(resolverOf) && !_.isEmpty(resolverOf)) {
       // Retrieve the controller's action to be executed.
-      const [name, action] = resolverOf.split('.');
+      [name, action] = resolverOf.split('.');
 
       const controller = plugin
         ? _.get(
@@ -208,7 +208,7 @@ module.exports = {
 
           if (ctx.body) {
             return {
-              [pluralize.singular(name)]: ctx.body,
+              [pluralize.singular(_.toLower(name))]: ctx.body,
             };
           }
 
@@ -216,7 +216,7 @@ module.exports = {
 
           return action
             ? {
-              [pluralize.singular(name)]: body
+              [pluralize.singular(_.toLower(name))]: body
             }
             : body;
         }
