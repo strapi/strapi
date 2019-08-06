@@ -383,6 +383,7 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
       return client === 'pg' ? 'double precision' : 'double';
     case 'decimal':
       return 'decimal(10,2)';
+    // TODO: split time types as they should be different
     case 'date':
     case 'time':
     case 'datetime':
