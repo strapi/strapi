@@ -23,7 +23,7 @@ module.exports = {
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
-    const queryName = action ? `${action}${_.capitalize(name)}` : `${name}`;
+    const queryName = `${action}${_.capitalize(name)}`;
 
     // Retrieve policies.
     const policies = _.get(handler, `Mutation.${queryName}.policies`, []);
@@ -196,12 +196,14 @@ module.exports = {
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
         const normalizedName = _.toLower(name);
-        const primaryKey =
-          action &&
-          (plugin
-            ? strapi.plugins[plugin].models[normalizedName]
-            : strapi.models[normalizedName]
-          ).primaryKey;
+
+        let primaryKey;
+
+        if (plugin) {
+          primaryKey = strapi.plugins[plugin].models[normalizedName].primaryKey;
+        } else {
+          primaryKey = strapi.models[normalizedName].primaryKey;
+        }
 
         context.params = Query.convertToParams(
           options.input.where || {},
