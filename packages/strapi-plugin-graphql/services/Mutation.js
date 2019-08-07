@@ -223,11 +223,9 @@ module.exports = {
 
           const body = values && values.toJSON ? values.toJSON() : values;
 
-          return action
-            ? {
-                [pluralize.singular(normalizedName)]: body,
-              }
-            : body;
+          return {
+            [pluralize.singular(normalizedName)]: body,
+          };
         }
 
         return resolver.call(null, obj, options, context);
