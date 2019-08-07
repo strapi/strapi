@@ -827,11 +827,86 @@ describe('Types', () => {
   });
 
   describe('Test type json', () => {
-    test.todo('Create entry with valid value');
+    beforeAll(async () => {
+      await createModelWithType('withjson', 'json');
+    }, 60000);
 
-    test.todo('Reading entry, returns correct value');
+    afterAll(async () => {
+      await deleteModel('withjson');
+    }, 60000);
 
-    test.todo('Updating entry sets the right value and format');
+    test('Create entry with value input JSON', async () => {
+      const inputValue = {
+        key: 'value',
+      };
+      const res = await rq.post('/content-manager/explorer/withjson', {
+        body: {
+          field: inputValue,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: inputValue,
+      });
+    });
+
+    test('Create entry with value input Formdata', async () => {
+      const inputValue = {
+        number: '12',
+      };
+      const res = await rq.post('/content-manager/explorer/withjson', {
+        formData: {
+          data: JSON.stringify({ field: inputValue }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: inputValue,
+      });
+    });
+
+    test('Reading entry, returns correct value', async () => {
+      const res = await rq.get('/content-manager/explorer/withjson');
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      res.body.forEach(entry => {
+        expect(entry.field).toBeDefined();
+        expect(entry.field).not.toBeNull();
+        expect(typeof entry.field).toBe('object');
+      });
+    });
+
+    test.todo('Throw when input is not a nested object');
+
+    test('Updating entry sets the right value and format', async () => {
+      const res = await rq.post('/content-manager/explorer/withjson', {
+        body: {
+          field: {
+            key: 'value',
+          },
+        },
+      });
+
+      const updateRes = await rq.put(
+        `/content-manager/explorer/withjson/${res.body.id}`,
+        {
+          body: {
+            field: {
+              newKey: 'newVal',
+            },
+          },
+        }
+      );
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body).toMatchObject({
+        id: res.body.id,
+        field: { newKey: 'newVal' },
+      });
+    });
   });
 
   describe('Test type boolean', () => {
