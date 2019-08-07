@@ -39,10 +39,27 @@ function createDefaultMetadata(schema, name) {
     edit.mainField = 'id';
   }
 
+  _.assign(
+    edit,
+    _.pick(_.get(schema, ['config', 'metadatas', name, 'edit'], {}), [
+      'label',
+      'description',
+      'placeholder',
+      'visible',
+      'editable',
+      'mainField',
+    ])
+  );
+
   const list = {
     label: _.upperFirst(name),
     searchable: isSearchable(schema, name),
     sortable: isSortable(schema, name),
+    ..._.pick(_.get(schema, ['config', 'metadatas', name, 'list'], {}), [
+      'label',
+      'searchable',
+      'sortable',
+    ]),
   };
 
   return { edit, list };

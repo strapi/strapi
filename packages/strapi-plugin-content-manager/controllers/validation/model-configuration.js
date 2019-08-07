@@ -9,13 +9,19 @@ const {
 /**
  * Creates the validation schema for content-type configurations
  */
-module.exports = (model, schema) =>
+module.exports = (model, schema, opts = {}) =>
   yup
     .object()
     .shape({
-      settings: createSettingsSchema(model, schema),
-      metadatas: createMetadasSchema(model, schema),
-      layouts: createLayoutsSchema(model, schema),
+      settings: createSettingsSchema(model, schema)
+        .default(null)
+        .nullable(),
+      metadatas: createMetadasSchema(model, schema)
+        .default(null)
+        .nullable(),
+      layouts: createLayoutsSchema(model, schema, opts)
+        .default(null)
+        .nullable(),
     })
     .noUnknown();
 
@@ -89,13 +95,14 @@ const createMetadasSchema = (model, schema) => {
   );
 };
 
-const ARRAY_TEST = {
+const createArrayTest = ({ allowUndefined = false } = {}) => ({
   name: 'isArray',
   message: '${path} is required and must be an array',
-  test: val => Array.isArray(val),
-};
+  test: val =>
+    allowUndefined === true && val === undefined ? true : Array.isArray(val),
+});
 
-const createLayoutsSchema = (model, schema) => {
+const createLayoutsSchema = (model, schema, opts = {}) => {
   const validAttributes = Object.keys(schema.attributes).filter(key =>
     isListable(schema, key)
   );
@@ -129,14 +136,14 @@ const createLayoutsSchema = (model, schema) => {
             .noUnknown()
         )
       )
-      .test(ARRAY_TEST),
+      .test(createArrayTest(opts)),
     list: yup
       .array()
       .of(yup.string().oneOf(validAttributes))
-      .test(ARRAY_TEST),
+      .test(createArrayTest(opts)),
     editRelations: yup
       .array()
       .of(yup.string().oneOf(relationAttributes))
-      .test(ARRAY_TEST),
+      .test(createArrayTest(opts)),
   });
 };

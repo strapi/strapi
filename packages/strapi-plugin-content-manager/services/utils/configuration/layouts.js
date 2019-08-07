@@ -3,7 +3,6 @@
 const _ = require('lodash');
 const {
   isListable,
-  isVisible,
   hasEditableAttribute,
   hasRelationAttribute,
 } = require('./attributes');
@@ -37,6 +36,11 @@ async function createDefaultLayouts(schema) {
     list: createDefaultListLayout(schema),
     editRelations: createDefaultEditRelationsLayout(schema),
     edit: createDefaultEditLayout(schema),
+    ..._.pick(_.get(schema, ['config', 'layouts'], {}), [
+      'list',
+      'edit',
+      'editRelations',
+    ]),
   };
 }
 
@@ -86,7 +90,7 @@ function syncLayouts(configuration, schema) {
     for (let el of row) {
       if (!hasEditableAttribute(schema, el.name)) continue;
 
-      // if size of the element has changes (type change)
+      // if size of the element has changed (type changes)
       if (typeToSize(schema.attributes[el.name].type) !== el.size) {
         elementsToReAppend.push(el.name);
         continue;
@@ -140,8 +144,8 @@ function syncLayouts(configuration, schema) {
   }
 
   // add new attributes to edit view
-  const newEditAttributes = newAttributes.filter(
-    key => hasEditableAttribute(schema, key) && isVisible(schema, key)
+  const newEditAttributes = newAttributes.filter(key =>
+    hasEditableAttribute(schema, key)
   );
 
   layout.edit = appendToEditLayout(layout.edit, newEditAttributes, schema);

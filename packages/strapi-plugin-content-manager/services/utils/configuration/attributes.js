@@ -4,8 +4,9 @@ const _ = require('lodash');
 
 const NON_SORTABLES = ['group', 'json', 'relation'];
 
-const isListable = (schema, name) =>
-  isSortable(schema, name) && schema.attributes[name].type != 'password';
+const isListable = (schema, name) => {
+  return isSortable(schema, name) && schema.attributes[name].type != 'password';
+};
 
 const isSortable = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
@@ -57,6 +58,10 @@ const isRelation = attribute => attribute.type === 'relation';
 
 const hasRelationAttribute = (schema, name) => {
   if (!_.has(schema.attributes, name)) {
+    return false;
+  }
+
+  if (!isVisible(schema, name)) {
     return false;
   }
 
