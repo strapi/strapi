@@ -205,14 +205,18 @@ const schemaBuilder = {
             : {};
 
           switch (type) {
-            case 'Mutation':
+            case 'Mutation': {
               // TODO: Verify this...
+              const [name, action] = acc[type][resolver].split('.');
+
               acc[type][resolver] = Mutation.composeMutationResolver(
                 strapi.plugins.graphql.config._schema.graphql,
                 plugin,
-                resolver
+                name,
+                action
               );
               break;
+            }
             case 'Query':
             default:
               acc[type][resolver] = Query.composeQueryResolver(

@@ -48,7 +48,7 @@ module.exports = {
           : {};
 
         // Retrieve the controller's action to be executed.
-        [name, action] = handler.split('.');
+        const [name, action] = handler.split('.');
 
         const controller = plugin
           ? _.get(
@@ -129,7 +129,7 @@ module.exports = {
     // Force policies of another action on a custom resolver.
     if (_.isString(resolverOf) && !_.isEmpty(resolverOf)) {
       // Retrieve the controller's action to be executed.
-      [name, action] = resolverOf.split('.');
+      const [name, action] = resolverOf.split('.');
 
       const controller = plugin
         ? _.get(
@@ -195,13 +195,17 @@ module.exports = {
 
       // Resolver can be a function. Be also a native resolver or a controller's action.
       if (_.isFunction(resolver)) {
-        name = _.toLower(name);
+        const normalizedName = _.toLower(name);
+        const primaryKey =
+          action &&
+          (plugin
+            ? strapi.plugins[plugin].models[normalizedName]
+            : strapi.models[normalizedName]
+          ).primaryKey;
 
         context.params = Query.convertToParams(
           options.input.where || {},
-          action &&
-            (plugin ? strapi.plugins[plugin].models[name] : strapi.models[name])
-              .primaryKey
+          primaryKey
         );
 
         context.request.body = options.input.data || {};
@@ -211,7 +215,7 @@ module.exports = {
 
           if (ctx.body) {
             return {
-              [pluralize.singular(name)]: ctx.body,
+              [pluralize.singular(normalizedName)]: ctx.body,
             };
           }
 
@@ -219,7 +223,7 @@ module.exports = {
 
           return action
             ? {
-                [pluralize.singular(name)]: body,
+                [pluralize.singular(normalizedName)]: body,
               }
             : body;
         }
