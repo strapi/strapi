@@ -70,15 +70,17 @@ module.exports = [
     children: ['/3.0.0-beta.x/api-reference/reference'],
   },
   {
-    collapsable: false,
-    title: '📚 Resources',
+    collapsable: true,
+    title: '👑 Contribution Guide',
     children: [
-      [
-        'https://github.com/strapi/strapi/blob/master/CONTRIBUTING.md',
-        'Contributing guide',
-      ],
-      '/3.0.0-beta.x/migration-guide/',
-      '/3.0.0-beta.x/articles/',
+      '/3.0.0-beta.x/community/contributing-guide.md',
+      '/3.0.0-beta.x/community/code-of-conduct.md',
+      '/3.0.0-beta.x/community/contribute-with-docs.md',
     ],
   },
-]
+  {
+    collapsable: false,
+    title: '📚 Resources',
+    children: ['/3.0.0-beta.x/migration-guide/', '/3.0.0-beta.x/articles/'],
+  },
+];
