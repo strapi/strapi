@@ -378,7 +378,9 @@ const getType = ({ definition, attribute, name, tableExists = false }) => {
     case 'integer':
       return client === 'pg' ? 'integer' : 'int';
     case 'biginteger':
-      return client === 'pg' ? 'bigint' : 'bigint(53)';
+      if (client === 'pg') return 'bigint';
+      if (client === 'sqlite3') return 'blob';
+      return 'bigint(53)';
     case 'float':
       return client === 'pg' ? 'double precision' : 'double';
     case 'decimal':

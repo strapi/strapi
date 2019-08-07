@@ -2,35 +2,30 @@ const { registerAndLogin } = require('../../../test/helpers/auth');
 const createModelsUtils = require('../../../test/helpers/models');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
-const models = {
-  withString: {
-    attributes: [
-      {
-        name: 'field',
-        params: {
-          type: 'string',
-        },
-      },
-    ],
-    connection: 'default',
-    name: 'withString',
-  },
-  withText: {
-    attributes: [
-      {
-        name: 'field',
-        params: {
-          type: 'text',
-        },
-      },
-    ],
-    connection: 'default',
-    name: 'withText',
-  },
-};
-
 let modelsUtils;
 let rq;
+
+function createModelWithType(name, type, opts = {}) {
+  return modelsUtils.createModels([
+    {
+      connection: 'default',
+      name,
+      attributes: [
+        {
+          name: 'field',
+          params: {
+            type,
+            ...opts,
+          },
+        },
+      ],
+    },
+  ]);
+}
+
+function deleteModel(name) {
+  return modelsUtils.deleteModels([name]);
+}
 
 describe('Types', () => {
   beforeAll(async () => {
@@ -42,11 +37,11 @@ describe('Types', () => {
 
   describe('Test type string', () => {
     beforeAll(async () => {
-      await modelsUtils.createModels([models.withString]);
+      await createModelWithType('withstring', 'string');
     }, 60000);
 
     afterAll(async () => {
-      await modelsUtils.deleteModels(['withString']);
+      await deleteModel('withstring');
     }, 60000);
 
     test('Creates an entry with JSON', async () => {
@@ -132,11 +127,11 @@ describe('Types', () => {
 
   describe('Test type text', () => {
     beforeAll(async () => {
-      await modelsUtils.createModels([models.withText]);
+      await createModelWithType('withtext', 'text');
     }, 60000);
 
     afterAll(async () => {
-      await modelsUtils.deleteModels(['withText']);
+      await deleteModel('withtext');
     }, 60000);
 
     test('Creates an entry with JSON', async () => {
@@ -221,43 +216,430 @@ describe('Types', () => {
   });
 
   describe('Test type richtext', () => {
-    test.todo('Create entry with value input');
+    beforeAll(async () => {
+      await createModelWithType('withrichtext', 'richtext');
+    }, 60000);
 
-    test.todo('Reading entry, returns correct value');
+    afterAll(async () => {
+      await deleteModel('withrichtext');
+    }, 60000);
 
-    test.todo('Updating entry sets the right value and format');
+    test('Creates an entry with JSON', async () => {
+      const res = await rq.post('/content-manager/explorer/withrichtext', {
+        body: {
+          field: 'Some\ntext',
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: 'Some\ntext',
+      });
+    });
+
+    test('Creates an entry with formData', async () => {
+      const res = await rq.post('/content-manager/explorer/withrichtext', {
+        formData: {
+          data: JSON.stringify({ field: '"Some \ntext"' }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: '"Some \ntext"',
+      });
+    });
+
+    test('Reading entry, returns correct value', async () => {
+      const res = await rq.get('/content-manager/explorer/withrichtext');
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            field: expect.any(String),
+          }),
+        ])
+      );
+    });
+
+    test('Updating entry with JSON sets the right value and format', async () => {
+      const res = await rq.post('/content-manager/explorer/withrichtext', {
+        body: { field: 'Some \ntext' },
+      });
+
+      const updateRes = await rq.put(
+        `/content-manager/explorer/withrichtext/${res.body.id}`,
+        {
+          body: { field: 'Updated \nstring' },
+        }
+      );
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body).toMatchObject({
+        id: res.body.id,
+        field: 'Updated \nstring',
+      });
+    });
+
+    test('Updating entry with Formdata sets the right value and format', async () => {
+      const res = await rq.post('/content-manager/explorer/withrichtext', {
+        formData: {
+          data: JSON.stringify({ field: 'Some string' }),
+        },
+      });
+
+      const updateRes = await rq.put(
+        `/content-manager/explorer/withrichtext/${res.body.id}`,
+        {
+          formData: {
+            data: JSON.stringify({ field: 'Updated \nstring' }),
+          },
+        }
+      );
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body).toMatchObject({
+        id: res.body.id,
+        field: 'Updated \nstring',
+      });
+    });
   });
 
   describe('Test type date', () => {
-    test.todo('Create entry with valid value');
+    beforeAll(async () => {
+      await createModelWithType('withdate', 'date');
+    }, 60000);
 
-    test.todo('Reading entry, returns correct value');
+    afterAll(async () => {
+      await deleteModel('withdate');
+    }, 60000);
 
-    test.todo('Updating entry sets the right value and format');
+    test('Create entry with valid value JSON', async () => {
+      const now = new Date();
+
+      const res = await rq.post('/content-manager/explorer/withdate', {
+        body: {
+          field: now,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: now.toISOString(),
+      });
+    });
+
+    test('Create entry with valid value FormData', async () => {
+      const now = new Date();
+
+      const res = await rq.post('/content-manager/explorer/withdate', {
+        formData: {
+          data: JSON.stringify({ field: now }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: now.toISOString(),
+      });
+    });
+
+    test('Create entry with timestamp value should be converted to ISO', async () => {
+      const now = new Date();
+
+      const res = await rq.post('/content-manager/explorer/withdate', {
+        body: {
+          field: now.getTime(),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: now.toISOString(),
+      });
+    });
+
+    test('Throws on invalid date format', async () => {
+      const now = new Date();
+
+      const res = await rq.post('/content-manager/explorer/withdate', {
+        body: {
+          field: `${now.getTime()}`,
+        },
+      });
+
+      expect(res.statusCode).toBe(400);
+    });
+
+    test('Reading entry, returns correct value', async () => {
+      const res = await rq.get('/content-manager/explorer/withdate');
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      res.body.forEach(entry => {
+        expect(new Date(entry.field).toISOString()).toBe(entry.field);
+      });
+    });
+
+    test('Updating entry sets the right value and format JSON', async () => {
+      const now = new Date();
+
+      const res = await rq.post('/content-manager/explorer/withdate', {
+        body: {
+          field: now.getTime(),
+        },
+      });
+
+      const newDate = new Date();
+      const updateRes = await rq.put(
+        `/content-manager/explorer/withdate/${res.body.id}`,
+        {
+          body: {
+            field: newDate,
+          },
+        }
+      );
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body).toMatchObject({
+        id: res.body.id,
+        field: newDate.toISOString(),
+      });
+    });
   });
 
   describe('Test type enumeration', () => {
-    test.todo('Create entry value enumeration input');
+    beforeAll(async () => {
+      await createModelWithType('withenumeration', 'enumeration', {
+        enum: ['one', 'two'],
+      });
+    }, 60000);
 
-    test.todo('Reading entry, returns correct value');
+    afterAll(async () => {
+      await deleteModel('withenumeration');
+    }, 60000);
 
-    test.todo('Updating entry sets the right value and format');
+    test('Create entry value enumeration input JSON', async () => {
+      const res = await rq.post('/content-manager/explorer/withenumeration', {
+        body: {
+          field: 'one',
+        },
+      });
+
+      expect(res.statusCode).toBe(200); // should return 201
+      expect(res.body).toMatchObject({
+        field: 'one',
+      });
+    });
+
+    test('Create entry value enumeration input Formdata', async () => {
+      const res = await rq.post('/content-manager/explorer/withenumeration', {
+        formData: {
+          data: JSON.stringify({ field: 'two' }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200); // should return 201
+      expect(res.body).toMatchObject({
+        field: 'two',
+      });
+    });
+
+    test('Reading entry, returns correct value', async () => {
+      const res = await rq.get('/content-manager/explorer/withenumeration');
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      res.body.forEach(entry => {
+        expect(['one', 'two'].includes(entry.field)).toBe(true);
+      });
+    });
+
+    test('Updating entry sets the right value and format', async () => {
+      const res = await rq.post('/content-manager/explorer/withenumeration', {
+        body: {
+          field: 'two',
+        },
+      });
+
+      const updateRes = await rq.put(
+        `/content-manager/explorer/withenumeration/${res.body.id}`,
+        {
+          body: {
+            field: 'one',
+          },
+        }
+      );
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body).toMatchObject({
+        id: res.body.id,
+        field: 'one',
+      });
+    });
+
+    /*
+     * Waiting validation of input to work
+     */
+    test.todo(
+      'Throws an error when the enumeration value is not in the options'
+    );
   });
 
   describe('Test type integer', () => {
-    test.todo('Create entry with value input');
+    beforeAll(async () => {
+      await createModelWithType('withinteger', 'integer');
+    }, 60000);
 
-    test.todo('Reading entry, returns correct value');
+    afterAll(async () => {
+      await deleteModel('withinteger');
+    }, 60000);
 
-    test.todo('Updating entry sets the right value and format');
+    test('Create entry with value input JSON', async () => {
+      const res = await rq.post('/content-manager/explorer/withinteger', {
+        body: {
+          field: 123456,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: 123456,
+      });
+    });
+
+    test('Create entry with value input Fromdata', async () => {
+      const res = await rq.post('/content-manager/explorer/withinteger', {
+        formData: {
+          data: JSON.stringify({ field: 123456 }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: 123456,
+      });
+    });
+
+    // I don't think it will work everywhere ...
+    test('Create entry with a string should cast the value', async () => {
+      const res = await rq.post('/content-manager/explorer/withinteger', {
+        body: {
+          field: '123456',
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: 123456,
+      });
+    });
+
+    test('Reading entry, returns correct value', async () => {
+      const res = await rq.get('/content-manager/explorer/withinteger');
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      res.body.forEach(entry => {
+        expect(Number.isInteger(entry.field)).toBe(true);
+      });
+    });
+
+    test('Updating entry sets the right value and format', async () => {
+      const res = await rq.post('/content-manager/explorer/withinteger', {
+        body: {
+          field: 123,
+        },
+      });
+
+      const updatedRes = await rq.put(
+        `/content-manager/explorer/withinteger/${res.body.id}`,
+        {
+          body: {
+            field: 543,
+          },
+        }
+      );
+
+      expect(updatedRes.statusCode).toBe(200);
+      expect(updatedRes.body).toMatchObject({
+        id: res.body.id,
+        field: 543,
+      });
+    });
   });
 
   describe('Test type biginteger', () => {
-    test.todo('Create entry with value input');
+    beforeAll(async () => {
+      await createModelWithType('withbiginteger', 'biginteger');
+    }, 60000);
 
-    test.todo('Reading entry, returns correct value');
+    afterAll(async () => {
+      await deleteModel('withbiginteger');
+    }, 60000);
 
-    test.todo('Updating entry sets the right value and format');
+    test('Create entry with value input JSON', async () => {
+      const inputValue = '1223372036854775807';
+      const res = await rq.post('/content-manager/explorer/withbiginteger', {
+        body: {
+          field: inputValue,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: inputValue,
+      });
+    });
+
+    test('Create entry with value input Formdata', async () => {
+      const inputValue = '1223372036854775807';
+      const res = await rq.post('/content-manager/explorer/withbiginteger', {
+        formData: {
+          data: JSON.stringify({ field: inputValue }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: inputValue,
+      });
+    });
+
+    test('Reading entry, returns correct value', async () => {
+      const res = await rq.get('/content-manager/explorer/withbiginteger');
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      res.body.forEach(entry => {
+        expect(entry.field).toEqual(expect.any(String));
+      });
+    });
+
+    test('Updating entry sets the right value and format', async () => {
+      const inputValue = '1223372036854775807';
+      const res = await rq.post('/content-manager/explorer/withbiginteger', {
+        body: {
+          field: inputValue,
+        },
+      });
+
+      const newVal = '9882823782712112';
+      const updateRes = await rq.put(
+        `/content-manager/explorer/withbiginteger/${res.body.id}`,
+        {
+          body: {
+            field: newVal,
+          },
+        }
+      );
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body).toMatchObject({
+        id: res.body.id,
+        field: newVal,
+      });
+    });
   });
 
   describe('Test type decimal', () => {

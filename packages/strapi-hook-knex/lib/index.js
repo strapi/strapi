@@ -176,6 +176,8 @@ module.exports = strapi => {
 
           switch (options.client) {
             case 'mysql':
+              options.connection.supportBigNumbers = true;
+              options.connection.bigNumberStrings = true;
               options.connection.typeCast = (field, next) => {
                 if (field.type == 'TINY' && field.length == 1) {
                   let value = field.string();
