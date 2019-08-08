@@ -1,6 +1,22 @@
 const waitRestart = require('./waitRestart');
 
 module.exports = ({ rq }) => {
+  function createModelWithType(name, type, opts = {}) {
+    return createModel({
+      connection: 'default',
+      name,
+      attributes: [
+        {
+          name: 'field',
+          params: {
+            type,
+            ...opts,
+          },
+        },
+      ],
+    });
+  }
+
   async function createModel(data) {
     await rq({
       url: '/content-type-builder/models',
@@ -34,6 +50,9 @@ module.exports = ({ rq }) => {
 
   return {
     createModels,
+    createModel,
+    createModelWithType,
+    deleteModel,
     deleteModels,
   };
 };
