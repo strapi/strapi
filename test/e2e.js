@@ -41,8 +41,8 @@ const databases = {
   },
 };
 
-const test = async () => {
-  return execa.shell('npm run -s test:e2e', {
+const test = async args => {
+  return execa.shell(`yarn -s test:e2e ${args}`, {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {
@@ -52,7 +52,7 @@ const test = async () => {
   });
 };
 
-const main = async database => {
+const main = async (database, args) => {
   try {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
@@ -60,7 +60,7 @@ const main = async database => {
 
     await waitOn({ resources: ['http://localhost:1337'] });
 
-    await test().catch(() => {
+    await test(args).catch(() => {
       testAppProcess.kill();
       process.stdout.write('Tests failed\n', () => {
         process.exit(1);
@@ -79,14 +79,20 @@ const main = async database => {
 
 yargs
   .command(
-    '$0 [databaseName]',
+    '$0',
     'run end to end tests',
     yargs => {
-      yargs.positional('databaseName', {
-        default: 'sqlite',
+      yargs.option('database', {
+        alias: 'db',
+        describe: 'choose a database',
         choices: Object.keys(databases),
+        default: 'sqlite',
       });
     },
-    ({ databaseName }) => main(databases[databaseName])
+    argv => {
+      const { database, _: args } = argv;
+
+      main(databases[database], args.join(' '));
+    }
   )
   .help().argv;

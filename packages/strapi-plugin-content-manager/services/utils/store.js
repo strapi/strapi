@@ -29,7 +29,7 @@ const setGeneralSettings = value =>
   });
 
 /** Model configuration */
-const EMPTY_CONIG = {
+const EMPTY_CONFIG = {
   settings: {},
   metadatas: {},
   layouts: {},
@@ -41,7 +41,7 @@ const getModelConfiguration = async key => {
   const config = await getStore().get({ key: configurationKey(key) });
   return _.merge(
     {},
-    EMPTY_CONIG,
+    EMPTY_CONFIG,
     {
       settings: await getGeneralSettings(),
     },

@@ -123,10 +123,10 @@ The administration panel is available at http://localhost:4000/admin
 You can run the test suites using different databases:
 
 ```bash
-$ node test/e2e.js sqlite
-$ node test/e2e.js mongo
-$ node test/e2e.js postgres
-$ node test/e2e.js mysql
+$ node test/e2e.js --db=sqlite
+$ node test/e2e.js --db=mongo
+$ node test/e2e.js --db=postgres
+$ node test/e2e.js --db=mysql
 ```
 
 ---

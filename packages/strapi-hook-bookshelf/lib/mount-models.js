@@ -1,6 +1,7 @@
 'use strict';
 const _ = require('lodash');
 const { singular } = require('pluralize');
+const dateFns = require('date-fns');
 
 const utilsModels = require('strapi-utils').models;
 const relations = require('./relations');
@@ -420,10 +421,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
         if (definition.client === 'mysql' || definition.client === 'sqlite3') {
           Object.keys(params).map(key => {
             const attr = definition.attributes[key] || {};
-
-            if (attr.type === 'json') {
-              params[key] = JSON.stringify(params[key]);
-            }
+            params[key] = castValueFromType(attr.type, params[key]);
           });
         }
 
@@ -694,6 +692,9 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       // Initialize lifecycle callbacks.
       loadedModel.initialize = function() {
+        // Load bookshelf plugin arguments from model options
+        this.constructor.__super__.initialize.apply(this, arguments);
+
         const lifecycle = {
           creating: 'beforeCreate',
           created: 'afterCreate',
@@ -788,6 +789,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
                   attributes[key] = null;
                 }
               }
+
+              if (attr.type === 'date' && definition.client == 'sqlite3') {
+                attributes[key] = dateFns.parse(attributes[key]);
+              }
             });
           };
 
@@ -862,4 +867,40 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
   });
 
   return Promise.all(updates);
+};
+
+const castValueFromType = (type, value) => {
+  switch (type) {
+    case 'json': {
+      return JSON.stringify(value);
+    }
+    // TODO: handle real date format 1970-01-01
+    case 'date':
+    case 'datetime': {
+      const date = dateFns.parse(value);
+
+      if (!dateFns.isValid(date)) {
+        throw new Error(`Invalid ${type} format, expected a `);
+      }
+
+      return date;
+    }
+    // TODO: handle real time format 12:00:00
+    case 'time':
+    case 'timestamp': {
+      const date = dateFns.parse(value);
+      if (dateFns.isValid(date)) return date;
+
+      date.setTime(value);
+      if (!dateFns.isValid(date)) {
+        throw new Error(
+          `Invalid ${type} format, expected a timestamp or an ISO date`
+        );
+      }
+
+      return date;
+    }
+    default:
+      return value;
+  }
 };

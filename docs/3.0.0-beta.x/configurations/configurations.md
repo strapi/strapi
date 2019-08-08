@@ -147,6 +147,18 @@ module.exports = (mongoose, connection) => {
 };
 ```
 
+Another example would be using the `bookshelf-uuid` plugin for MySQL, you can register it like this:
+
+**Path —** `./config/functions/bookshelf.js`.
+
+```js
+'use strict';
+
+module.exports = (bookshelf, connection) => {
+  bookshelf.plugin(require('bookshelf-uuid'));
+};
+```
+
 ---
 
 ## Locales

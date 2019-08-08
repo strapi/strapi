@@ -64,6 +64,7 @@ module.exports = function(strapi) {
 
       Object.assign(model, {
         modelType: 'contentType',
+        uid: `app::${key}.${index}`,
         apiName: key,
         globalId: model.globalId || _.upperFirst(_.camelCase(index)),
         collectionName: model.collectionName || `${index}`.toLocaleLowerCase(),
@@ -131,6 +132,7 @@ module.exports = function(strapi) {
 
     Object.assign(model, {
       modelType: 'contentType',
+      uid: `strapi::admin.${key}`,
       identity: model.identity || _.upperFirst(key),
       globalId: model.globalId || _.upperFirst(_.camelCase(`admin-${key}`)),
       connection:
@@ -160,6 +162,7 @@ module.exports = function(strapi) {
 
       Object.assign(model, {
         modelType: 'contentType',
+        uid: `plugins::${pluginName}.${key}`,
         plugin: pluginName,
         collectionName:
           model.collectionName || `${pluginName}_${key}`.toLowerCase(),

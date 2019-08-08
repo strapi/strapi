@@ -30,6 +30,15 @@ async function createDefaultSettings(schema) {
     mainField: defaultField,
     defaultSortBy: defaultField,
     defaultSortOrder: 'ASC',
+    ..._.pick(_.get(schema, ['config', 'settings'], {}), [
+      'searchable',
+      'filterable',
+      'bulkable',
+      'pageSize',
+      'mainField',
+      'defaultSortBy',
+      'defaultSortOrder',
+    ]),
   };
 }
 

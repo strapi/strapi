@@ -41,7 +41,8 @@ const loadOverwrites = async extensionsDir => {
     cwd: extensionsDir,
   });
 
-  return files.map(file => {
+  const overwrites = {};
+  files.forEach(file => {
     const absolutePath = path.resolve(extensionsDir, file);
 
     // load module
@@ -49,10 +50,17 @@ const loadOverwrites = async extensionsDir => {
     const mod = require(absolutePath);
 
     const propPath = filePathToPath(file);
+    const strPath = propPath.join('.');
 
-    return {
-      path: propPath,
-      mod,
-    };
+    if (overwrites[strPath]) {
+      _.merge(overwrites[strPath], mod);
+    } else {
+      overwrites[strPath] = mod;
+    }
   });
+
+  return Object.keys(overwrites).map(strPath => ({
+    path: strPath.split('.'),
+    mod: overwrites[strPath],
+  }));
 };

@@ -300,9 +300,9 @@ class Strapi extends EventEmitter {
       }
     });
     // overwrite plugins with extensions overwrites
-    extensions.overwrites.forEach(({ path, mod }) =>
-      _.set(this.plugins, path, mod)
-    );
+    extensions.overwrites.forEach(({ path, mod }) => {
+      _.assign(_.get(this.plugins, path), mod);
+    });
 
     // Populate AST with configurations.
 
