@@ -32,6 +32,8 @@ describe('Test type password', () => {
     });
   });
 
+  test.todo('Should be private by default');
+
   test('Create entry with value input Formdata', async () => {
     const res = await rq.post('/content-manager/explorer/withpassword', {
       body: {
