@@ -125,7 +125,9 @@ class Li extends React.Component {
                 if (value === 'updatedAt') {
                   return (
                     <div key={key} className={styles.truncate}>
-                      {moment(item[value]).format('YYYY/MM/DD - HH:mm')}
+                      {moment(item.updatedAt || item.updated_at).format(
+                        'YYYY/MM/DD - HH:mm'
+                      )}
                     </div>
                   );
                 }
