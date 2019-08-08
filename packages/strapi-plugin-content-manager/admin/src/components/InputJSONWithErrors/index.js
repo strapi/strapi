@@ -141,7 +141,7 @@ class InputJSONWithErrors extends React.Component {
         <InputDescription
           className={inputDescriptionClassName}
           message={inputDescription}
-          style={{ marginTop: '3.2rem' }}
+          style={{ marginTop: '2.9rem' }}
         />
         <InputErrors
           className={errorsClassName}

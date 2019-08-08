@@ -1,6 +1,6 @@
 .controlsContainer {
   display: flex;
-  background-color: #F3F4F4;
+  background-color: #f3f4f4;
 
   select {
     min-height: 31px !important;
@@ -8,18 +8,19 @@
     font-weight: 600;
     outline: none;
 
-    &:focus, &:active{
-      border: 1px solid #E3E9F3;
+    &:focus,
+    &:active {
+      border: 1px solid #e3e9f3;
     }
   }
 }
 
 .editorWrapper {
   min-height: 320px;
-  margin-top: .9rem;
-  border: 1px solid #F3F4F4;
+  margin-top: 0.9rem;
+  border: 1px solid #f3f4f4;
   border-radius: 0.25rem;
-  line-height: 18px!important;
+  line-height: 18px !important;
   font-size: 13px;
   box-shadow: 0px 1px 1px rgba(104, 118, 142, 0.05);
   background-color: #fff;
@@ -27,7 +28,7 @@
 }
 
 .editor {
-  min-height: 303px;
+  min-height: 294px;
   max-height: 555px;
   padding: 20px 20px 0 20px;
   font-size: 16px;
@@ -36,7 +37,12 @@
   cursor: text;
   overflow: auto;
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin: 0;
     line-height: 18px !important;
   }
@@ -54,7 +60,8 @@
   li {
     margin-top: 0;
   }
-  ul, ol {
+  ul,
+  ol {
     margin-bottom: 18px;
   }
 }
@@ -77,12 +84,11 @@
 }
 
 .editorCodeBlock {
-  margin-bottom: 0!important;
+  margin-bottom: 0 !important;
   padding: 5px;
   background-color: rgba(0, 0, 0, 0.05);
   font-family: Lato;
 }
-
 
 .fullscreenOverlay {
   position: fixed;

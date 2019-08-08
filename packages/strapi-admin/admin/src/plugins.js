@@ -30,8 +30,8 @@ module.exports = {
   //   .default,
   // 'strapi-plugin-settings-manager': require('../../../strapi-plugin-settings-manager/admin/src')
   //   .default,
-  'strapi-plugin-email': require('../../../strapi-plugin-email/admin/src')
-    .default,
+  // 'strapi-plugin-email': require('../../../strapi-plugin-email/admin/src')
+  //   .default,
   'strapi-plugin-upload': require('../../../strapi-plugin-upload/admin/src')
     .default,
 };

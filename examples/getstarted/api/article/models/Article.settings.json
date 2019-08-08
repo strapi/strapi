@@ -16,12 +16,10 @@
   "attributes": {
     "title": {
       "type": "string",
-      "required": true,
-      "unique": true
+      "required": true
     },
-    "content": {
-      "type": "richtext",
-      "default": "content"
+    "shortdescription": {
+      "type": "text"
     },
     "published": {
       "type": "boolean"
@@ -29,73 +27,18 @@
     "json": {
       "type": "json"
     },
-    "number": {
-      "type": "integer"
-    },
-    "big_number": {
-      "type": "biginteger"
-    },
-    "float_number": {
-      "type": "float"
-    },
-    "decimal_number": {
-      "type": "decimal"
-    },
-    "date": {
-      "type": "date"
-    },
-    "enum": {
-      "type": "enumeration",
-      "enum": [
-        "morning,",
-        "noon"
-      ]
-    },
-    "bool": {
-      "type": "boolean"
-    },
-    "pic": {
+    "cover": {
       "model": "file",
       "via": "related",
       "plugin": "upload"
     },
-    "pictures": {
-      "collection": "file",
+    "preview": {
+      "model": "file",
       "via": "related",
       "plugin": "upload"
     },
-    "mainTag": {
-      "model": "tag"
-    },
-    "linkedTags": {
-      "collection": "tag"
-    },
-    "manyTags": {
-      "collection": "tag",
-      "via": "linkedArticles",
-      "dominant": true
-    },
-    "fb_cta": {
-      "type": "group",
-      "group": "facebook_cta"
-    },
-    "mainIngredient": {
-      "type": "group",
-      "group": "ingredients"
-    },
-    "ingredients": {
-      "type": "group",
-      "group": "ingredients",
-      "repeatable": true,
-      "min": 1,
-      "max": 10
-    },
-    "yoyo": {
-      "group": "ingredients",
-      "required": true,
-      "repeatable": true,
-      "min": 1,
-      "type": "group"
+    "content": {
+      "type": "richtext"
     }
   }
 }

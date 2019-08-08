@@ -22,6 +22,9 @@ const Tr = styled.tr`
     text-align: right;
   }
   button {
+    &:focus {
+      outline: 0;
+    }
     cursor: pointer;
   }
   p {

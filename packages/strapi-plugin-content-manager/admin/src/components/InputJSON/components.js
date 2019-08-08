@@ -10,7 +10,7 @@ const Wrapper = styled.div`
     border-radius: 3px;
 
     > div:last-of-type {
-      min-height: 320px;
+      min-height: 315px;
       max-height: 635px;
       font-weight: 500;
       font-size: 1.3rem !important;
