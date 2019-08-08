@@ -20,7 +20,7 @@ describe('Test type biginteger', () => {
   }, 60000);
 
   test('Create entry with value input JSON', async () => {
-    const inputValue = '1223372036854775807';
+    const inputValue = '1223372036854775';
     const res = await rq.post('/content-manager/explorer/withbiginteger', {
       body: {
         field: inputValue,
@@ -34,7 +34,7 @@ describe('Test type biginteger', () => {
   });
 
   test('Create entry with value input Formdata', async () => {
-    const inputValue = '1223372036854775807';
+    const inputValue = '1223372036854775';
     const res = await rq.post('/content-manager/explorer/withbiginteger', {
       formData: {
         data: JSON.stringify({ field: inputValue }),
@@ -72,7 +72,7 @@ describe('Test type biginteger', () => {
   });
 
   test('Updating entry sets the right value and format', async () => {
-    const inputValue = '1223372036854775807';
+    const inputValue = '1223372036854775';
     const res = await rq.post('/content-manager/explorer/withbiginteger', {
       body: {
         field: inputValue,

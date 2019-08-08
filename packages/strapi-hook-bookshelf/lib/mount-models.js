@@ -762,8 +762,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           ];
 
           const formatter = attributes => {
-            Object.keys(attributes).map(key => {
+            Object.keys(attributes).forEach(key => {
               const attr = definition.attributes[key] || {};
+
+              if (attributes[key] === null) return;
 
               if (attr.type === 'json') {
                 attributes[key] = JSON.parse(attributes[key]);
@@ -774,11 +776,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
                   return;
                 }
 
-                const strVal =
-                  attributes[key] !== null
-                    ? attributes[key].toString()
-                    : attributes[key];
-
+                const strVal = attributes[key].toString();
                 if (strVal === '1') {
                   attributes[key] = true;
                 } else if (strVal === '0') {
@@ -788,8 +786,15 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
                 }
               }
 
-              if (attr.type === 'date' && definition.client == 'sqlite3') {
+              if (attr.type === 'date' && definition.client === 'sqlite3') {
                 attributes[key] = dateFns.parse(attributes[key]);
+              }
+
+              if (
+                attr.type === 'biginteger' &&
+                definition.client === 'sqlite3'
+              ) {
+                attributes[key] = attributes[key].toString();
               }
             });
           };
@@ -868,6 +873,9 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 };
 
 const castValueFromType = (type, value, definition) => {
+  // do not cast null values
+  if (value === null) return null;
+
   switch (type) {
     case 'json': {
       if (definition.client === 'mysql' || definition.client === 'sqlite3') {
