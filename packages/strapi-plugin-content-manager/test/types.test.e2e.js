@@ -910,11 +910,108 @@ describe('Types', () => {
   });
 
   describe('Test type boolean', () => {
-    test.todo('Create entry with value input');
+    beforeAll(async () => {
+      await createModelWithType('withboolean', 'boolean');
+    }, 60000);
 
-    test.todo('Reading entry, returns correct value');
+    afterAll(async () => {
+      await deleteModel('withboolean');
+    }, 60000);
 
-    test.todo('Updating entry sets the right value and format');
+    test('Create entry with value input JSON', async () => {
+      const res = await rq.post('/content-manager/explorer/withboolean', {
+        body: {
+          field: true,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: true,
+      });
+    });
+
+    test('Create entry with value input FromData', async () => {
+      const res = await rq.post('/content-manager/explorer/withboolean', {
+        formData: {
+          data: JSON.stringify({ field: true }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: true,
+      });
+    });
+
+    test('Set null on invalid boolean value', async () => {
+      const res = await rq.post('/content-manager/explorer/withboolean', {
+        formData: {
+          data: JSON.stringify({ field: 'random' }),
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: null,
+      });
+    });
+
+    test('Convert integer to boolean value', async () => {
+      let res = await rq.post('/content-manager/explorer/withboolean', {
+        body: { field: 1 },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: true,
+      });
+
+      res = await rq.post('/content-manager/explorer/withboolean', {
+        body: { field: 0 },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        field: false,
+      });
+    });
+
+    test('Reading entry, returns correct value', async () => {
+      const res = await rq.get('/content-manager/explorer/withboolean');
+
+      expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            field: expect.any(Boolean),
+          }),
+        ])
+      );
+    });
+
+    test('Updating entry sets the right value and format', async () => {
+      const res = await rq.post('/content-manager/explorer/withboolean', {
+        body: {
+          field: true,
+        },
+      });
+
+      const updateRes = await rq.put(
+        `/content-manager/explorer/withboolean/${res.body.id}`,
+        {
+          body: {
+            field: false,
+          },
+        }
+      );
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body).toMatchObject({
+        field: false,
+      });
+    });
   });
 
   describe('Test type password', () => {
