@@ -22,9 +22,9 @@ describe('Test type groups', () => {
     });
   }, 60000);
 
-  // afterAll(async () => {
-  //   await modelsUtils.deleteGroup('somegroup');
-  // });
+  afterAll(async () => {
+    await modelsUtils.deleteGroup('somegroup');
+  });
 
   describe('Non repeatable and Non required group', () => {
     beforeAll(async () => {
@@ -35,9 +35,9 @@ describe('Test type groups', () => {
       });
     }, 60000);
 
-    // afterAll(async () => {
-    //   await modelsUtils.deleteModel('withgroup');
-    // }, 60000);
+    afterAll(async () => {
+      await modelsUtils.deleteModel('withgroup');
+    }, 60000);
 
     describe('POST new entry', () => {
       test('Creating entry with JSON works', async () => {
