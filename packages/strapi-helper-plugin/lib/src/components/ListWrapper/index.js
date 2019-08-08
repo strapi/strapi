@@ -4,7 +4,6 @@ import colors from '../../styles/colors';
 import sizes from '../../styles/sizes';
 
 const ListWrapper = styled.div`
-  background: white;
   font-family: 'Lato';
   box-shadow: 0 2px 4px ${colors.lightGrey};
   position: relative;
@@ -13,8 +12,8 @@ const ListWrapper = styled.div`
     overflow-x: scroll;
   }
   .list-button {
-    padding: 1.4rem 3rem 2.5rem 3rem;
-
+    padding: 1.4rem 3rem 3rem 3rem;
+    background-color: white;
     button {
       width: 100%;
     }

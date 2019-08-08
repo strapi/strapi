@@ -2,16 +2,18 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { FormattedMessage } from 'react-intl';
 
-import LeftMenuLink from '../index';
+import { LeftMenuLink } from '../index';
+
+const props = {
+  to: '/',
+  name: 'link',
+};
 
 describe('<LeftMenuLink />', () => {
-  const props = {
-    to: '/',
-    name: 'link',
-  };
   it('should not crash', () => {
     shallow(<LeftMenuLink {...props} />);
   });
+
   it('should add a span containing from:<source /> if a source prop is given', () => {
     const renderedComponent = shallow(
       <LeftMenuLink {...props} source="source" />

@@ -19,6 +19,8 @@ import manyToOne from '../../assets/images/many_to_one.svg';
 import manyToOneSelected from '../../assets/images/many_to_one_selected.svg';
 import manyToMany from '../../assets/images/many_to_many.svg';
 import manyToManySelected from '../../assets/images/many_to_many_selected.svg';
+import manyWay from '../../assets/images/many_way.svg';
+import manyWaySelected from '../../assets/images/many_way_selected.svg';
 
 const assets = {
   oneWay: {
@@ -46,9 +48,20 @@ const assets = {
     icon: manyToMany,
     iconSelected: manyToManySelected,
   },
+  manyWay: {
+    name: 'manyWay',
+    icon: manyWay,
+    iconSelected: manyWaySelected,
+  },
 };
 
-const availableRelations = ['manyToMany', 'oneToMany', 'oneToOne', 'oneWay'];
+const availableRelations = [
+  'manyToMany',
+  'oneToMany',
+  'oneToOne',
+  'oneWay',
+  'manyWay',
+];
 
 /* eslint-disable indent */
 const NaturePicker = ({ modelName, onClick, nature, target }) => {
@@ -57,7 +70,9 @@ const NaturePicker = ({ modelName, onClick, nature, target }) => {
         leftName: pluralize(modelName, nature === 'manyToMany' ? 2 : 1),
         rightName: pluralize(
           target,
-          ['manyToMany', 'oneToMany', 'manyToOne'].includes(nature) ? 2 : 1
+          ['manyToMany', 'oneToMany', 'manyToOne', 'manyWay'].includes(nature)
+            ? 2
+            : 1
         ),
       }
     : {

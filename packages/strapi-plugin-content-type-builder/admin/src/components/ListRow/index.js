@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { capitalize } from 'lodash';
 
@@ -22,7 +22,6 @@ function ListRow({
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
-
   const src = target ? attributeIcons.relation : attributeIcons[ico];
 
   const handleClick = () => {
@@ -32,11 +31,15 @@ function ListRow({
   };
 
   return (
-    <StyledListRow onClick={handleClick}>
+    <StyledListRow
+      onClick={handleClick}
+      className={[
+        target ? 'relation-row' : '',
+        configurable ? 'clickable' : '',
+      ]}
+    >
       <td>
         <img src={src} alt={`icon-${ico}`} />
-      </td>
-      <td>
         <p>{name}</p>
       </td>
       <td>
@@ -106,4 +109,5 @@ ListRow.propTypes = {
   type: PropTypes.string,
 };
 
-export default ListRow;
+export default memo(ListRow);
+export { ListRow };

@@ -1,0 +1,24 @@
+{
+  "info": {
+    "name": "Facebook CTA",
+    "description": "test"
+  },
+  "connection": "default",
+  "collectionName": "cta_facebook_aa",
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "wysiwyg": {
+      "required": true,
+      "maxLength": 5,
+      "type": "richtext"
+    },
+    "newwysiwyg": {
+      "type": "richtext"
+    }
+  }
+}

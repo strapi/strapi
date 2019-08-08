@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import pluginId from '../../pluginId';
@@ -25,4 +25,5 @@ CustomLink.propTypes = {
   onClick: PropTypes.func.isRequired,
 };
 
-export default CustomLink;
+export default memo(CustomLink);
+export { CustomLink };

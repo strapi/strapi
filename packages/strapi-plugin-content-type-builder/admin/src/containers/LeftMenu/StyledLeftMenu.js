@@ -41,6 +41,7 @@ const StyledLeftMenu = styled.div`
       a {
         padding: 0.9rem 1rem;
         width: 100%;
+        outline: none;
         p {
           position: relative;
           display: flex;

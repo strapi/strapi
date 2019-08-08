@@ -141,8 +141,12 @@ class AttributesPickerModal extends React.Component {
   updateNodeToFocus = position => this.setState({ nodeToFocus: position });
 
   renderAttribute = (attribute, index) => {
+    const { featureType } = this.props;
     const { isDisplayed, nodeToFocus } = this.state;
 
+    if (attribute.type === featureType) {
+      return null;
+    }
     return (
       <AttributeOption
         autoFocus={nodeToFocus === index}
@@ -157,7 +161,7 @@ class AttributesPickerModal extends React.Component {
   };
 
   render() {
-    const { featureType, isOpen } = this.props;
+    const { featureName, featureType, isOpen } = this.props;
 
     return (
       <WrapperModal
@@ -170,12 +174,9 @@ class AttributesPickerModal extends React.Component {
           <section>
             <HeaderModalTitle>
               <img src={this.getIcon()} alt="feature" />
-              <FormattedMessage
-                id={`${pluginId}.popUpForm.choose.attributes.header.title`}
-              />
+              <span>&nbsp;{featureName}</span>
             </HeaderModalTitle>
           </section>
-
           <section>
             <HeaderModalTitle>
               <FormattedMessage
@@ -200,10 +201,12 @@ AttributesPickerModal.contextTypes = {
 
 AttributesPickerModal.defaultProps = {
   isOpen: false,
+  featureName: null,
   featureType: 'model',
 };
 
 AttributesPickerModal.propTypes = {
+  featureName: PropTypes.string,
   featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   push: PropTypes.func.isRequired,

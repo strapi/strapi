@@ -13,4 +13,9 @@
       }
     }
   }
+  > div:last-of-type {
+    > div {
+      padding-bottom: 1rem;
+    }
+  }
 }

@@ -28,7 +28,7 @@ import {
 
 import pluginId from '../../pluginId';
 
-import ListRow from '../../components/ListRow';
+import ListRowCollapse from '../../components/ListRowCollapse';
 
 import AttributeForm from '../AttributeForm';
 import AttributesModalPicker from '../AttributesPickerModal';
@@ -382,6 +382,15 @@ export class ModelPage extends React.Component {
     this.props.history.push(backPathname);
   };
 
+  handleRedirectToGroup = group => {
+    const { source, uid } = group;
+
+    const base = `/plugins/${pluginId}/groups/${uid}`;
+    const to = source ? `${base}&source=${source}` : base;
+
+    this.props.history.push(to);
+  };
+
   handleSubmit = (shouldContinue = false) => {
     const {
       addAttributeRelation,
@@ -496,18 +505,19 @@ export class ModelPage extends React.Component {
     );
 
   renderListRow = attribute => {
-    const { canOpenModal } = this.props;
+    const { canOpenModal, modifiedDataGroup } = this.props;
     const attributeInfos = get(this.getModelAttributes(), attribute, {});
 
     return (
-      <ListRow
+      <ListRowCollapse
         {...attributeInfos}
         attributeId={attribute}
         canOpenModal={canOpenModal}
-        context={this.context}
+        groups={modifiedDataGroup}
         name={attribute}
         onClick={this.handleClickEditAttribute}
         onClickDelete={this.handleClickOnTrashIcon}
+        onClickGoTo={this.handleRedirectToGroup}
         key={attribute}
       />
     );
@@ -518,6 +528,7 @@ export class ModelPage extends React.Component {
       clearTemporaryAttribute,
       clearTemporaryAttributeRelation,
       history: { push },
+      groups,
       location: { search },
       models,
       onChangeAttribute,
@@ -630,6 +641,7 @@ export class ModelPage extends React.Component {
         </ViewContainer>
 
         <AttributesModalPicker
+          featureName={this.getModelName()}
           isOpen={modalType === 'chooseAttributes'}
           push={push}
         />
@@ -638,7 +650,9 @@ export class ModelPage extends React.Component {
           activeTab={settingType}
           alreadyTakenAttributes={Object.keys(this.getModelAttributes())}
           attributeType={attributeType}
+          attributeOptions={attributeType === 'group' ? groups : null}
           attributeToEditName={this.getAttributeName()}
+          featureName={this.getModelName()}
           isContentTypeTemporary={this.isUpdatingTemporaryContentType()}
           isOpen={modalType === 'attributeForm' && attributeType !== 'relation'}
           modifiedData={temporaryAttribute}
@@ -662,6 +676,7 @@ export class ModelPage extends React.Component {
           activeTab={settingType}
           alreadyTakenAttributes={Object.keys(this.getModelAttributes())}
           attributeToEditName={this.getAttributeName()}
+          featureName={this.getModelName()}
           initData={setTemporaryAttributeRelation}
           isOpen={modalType === 'attributeForm' && attributeType === 'relation'}
           isUpdatingTemporaryContentType={this.isUpdatingTemporaryContentType()}

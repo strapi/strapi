@@ -42,7 +42,20 @@ export function* getData() {
 
 export function* deleteGroup({ uid }) {
   try {
-    yield put(deleteGroupSucceeded(uid));
+    const response = yield call(
+      request,
+      getRequestUrl(`groups/${uid}`),
+      { method: 'DELETE' },
+      true
+    );
+    const { data } = response;
+
+    if (data.uid === uid) {
+      strapi.notification.success(
+        `${pluginId}.notification.success.groupDeleted`
+      );
+      yield put(deleteGroupSucceeded(uid));
+    }
   } catch (err) {
     strapi.notification.error('notification.error');
   }
@@ -148,19 +161,28 @@ export function* submitGroup({
   context: { emitEvent, history },
 }) {
   try {
-    const { name } = body;
-
     if (source) {
       body.plugin = source;
     }
 
     emitEvent('willSaveGroup');
 
+    const opts = { method: 'PUT', body };
+
+    const {
+      data: { uid },
+    } = yield call(
+      request,
+      getRequestUrl(`groups/${oldGroupName}`),
+      opts,
+      true
+    );
     emitEvent('didSaveGroup');
 
-    yield put(submitGroupSucceeded({ oldGroupName }));
+    yield put(submitGroupSucceeded());
+
     const suffixUrl = source ? `&source=${source}` : '';
-    history.push(`/plugins/${pluginId}/groups/${name}${suffixUrl}`);
+    history.push(`/plugins/${pluginId}/groups/${uid}${suffixUrl}`);
   } catch (error) {
     const errorMessage = get(
       error,
@@ -170,40 +192,6 @@ export function* submitGroup({
     strapi.notification.error(errorMessage);
   }
 }
-
-// TODO: UNCOMMENT WHEN API IS AVAILABLE
-// export function* submitGroup({
-//   oldGroupName,
-//   body,
-//   source,
-//   context: { emitEvent, history },
-// }) {
-//   try {
-//     const { name } = body;
-
-//     if (source) {
-//       body.plugin = source;
-//     }
-
-//     emitEvent('willSaveGroup');
-
-//     const opts = { method: 'PUT', body };
-
-//     yield call(request, getRequestUrl(`groups/${oldGroupName}`), opts, true);
-//     emitEvent('didSaveGroup');
-
-//     yield put(submitGroupSucceeded());
-//     const suffixUrl = source ? `&source=${source}` : '';
-//     history.push(`/plugins/${pluginId}/groups/${name}${suffixUrl}`);
-//   } catch (error) {
-//     const errorMessage = get(
-//       error,
-//       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-//       'notification.error'
-//     );
-//     strapi.notification.error(errorMessage);
-//   }
-// }
 
 /* istanbul ignore-next */
 export function* submitTempCT({
@@ -246,9 +234,14 @@ export function* submitTempCT({
 }
 
 /* istanbul ignore-next */
-export function* submitTempGroup({ context: { emitEvent } }) {
+export function* submitTempGroup({ body, context: { emitEvent } }) {
   try {
     emitEvent('willSaveGroup');
+
+    const opts = { method: 'POST', body };
+
+    yield call(request, getRequestUrl('groups'), opts, true);
+
     emitEvent('didSaveGroup');
     yield put(submitTempGroupSucceeded());
   } catch (error) {
@@ -260,26 +253,6 @@ export function* submitTempGroup({ context: { emitEvent } }) {
     strapi.notification.error(errorMessage);
   }
 }
-
-// TODO: uncomment when backend is available
-// export function* submitTempGroup({ body, context: { emitEvent } }) {
-//   try {
-//     emitEvent('willSaveGroup');
-
-//     const opts = { method: 'POST', body };
-//     yield call(request, getRequestUrl('groups'), opts, true);
-
-//     emitEvent('didSaveGroup');
-//     yield put(submitTempGroupSucceeded());
-//   } catch (error) {
-//     const errorMessage = get(
-//       error,
-//       ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-//       'notification.error'
-//     );
-//     strapi.notification.error(errorMessage);
-//   }
-// }
 
 // Individual exports for testing
 export default function* defaultSaga() {

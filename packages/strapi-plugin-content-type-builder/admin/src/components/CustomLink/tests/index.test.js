@@ -1,7 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import CustomLink from '../index';
+import { CustomLink } from '../index';
 
 describe('<CustomLink />', () => {
   it('should not crash', () => {

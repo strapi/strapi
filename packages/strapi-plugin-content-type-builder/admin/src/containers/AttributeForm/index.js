@@ -19,6 +19,7 @@ import ButtonModalSecondary from '../../components/ButtonModalSecondary';
 import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import FooterModal from '../../components/FooterModal';
+import FormModal from '../../components/FormModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
@@ -58,7 +59,9 @@ class AttributeForm extends React.Component {
     let formErrors = {};
     const formValidations = this.getFormValidations();
     const alreadyTakenAttributesUpdated = alreadyTakenAttributes.filter(
-      attribute => attribute !== attributeToEditName
+      attribute => {
+        return attribute !== attributeToEditName;
+      }
     );
 
     if (isEmpty(modifiedData.name)) {
@@ -69,9 +72,22 @@ class AttributeForm extends React.Component {
       formErrors = { name: [{ id: `${pluginId}.error.attribute.taken` }] };
     }
 
+    if (get(modifiedData, 'name', '') === 'id') {
+      formErrors = {
+        name: [{ id: `${pluginId}.error.attribute.forbidden` }],
+      };
+    }
+
     formErrors = Object.keys(formValidations).reduce((acc, current) => {
       const { custom, validations } = formValidations[current];
       const value = modifiedData[current];
+
+      if (
+        current === 'name' &&
+        !new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(value)
+      ) {
+        acc[current] = [{ id: `${pluginId}.error.validation.regex.name` }];
+      }
 
       if (!value && validations.required === true && custom !== true) {
         acc[current] = [{ id: `${pluginId}.error.validation.required` }];
@@ -79,6 +95,18 @@ class AttributeForm extends React.Component {
 
       if (custom === true && validations.required === true && value === '') {
         acc[current] = [{ id: `${pluginId}.error.validation.required` }];
+      }
+
+      if (current === 'enum' && !!value) {
+        const split = value.split('\n');
+
+        const hasEnumFormatError = split.filter(
+          v => !new RegExp('^[_A-Za-z][_0-9A-Za-z]*$').test(v)
+        );
+
+        if (hasEnumFormatError.length > 0) {
+          acc[current] = [{ id: `${pluginId}.error.validation.regex.values` }];
+        }
       }
 
       return acc;
@@ -119,9 +147,17 @@ class AttributeForm extends React.Component {
 
   handleGoTo = to => {
     const { emitEvent } = this.context;
-    const { actionType, attributeToEditName, attributeType, push } = this.props;
+    const {
+      actionType,
+      attributeToEditIndex,
+      attributeToEditName,
+      attributeType,
+      push,
+    } = this.props;
     const attributeName =
-      actionType === 'edit' ? `&attributeName=${attributeToEditName}` : '';
+      actionType === 'edit'
+        ? `&attributeName=${attributeToEditIndex || attributeToEditName}`
+        : '';
 
     if (to === 'advanced') {
       emitEvent('didSelectContentTypeFieldSettings');
@@ -173,18 +209,38 @@ class AttributeForm extends React.Component {
   };
 
   renderInput = (input, index) => {
-    const { featureType, modifiedData, onChange } = this.props;
+    const { modifiedData, onChange } = this.props;
     const { didCheckErrors, formErrors } = this.state;
-    const { custom, defaultValue, name } = input;
+    const { custom, defaultValue, name, type } = input;
 
-    const value =
-      featureType === 'model'
-        ? get(modifiedData, name, defaultValue)
-        : get(modifiedData, name, defaultValue);
+    const value = get(modifiedData, name, defaultValue);
 
     const errors = get(formErrors, name, []);
 
     if (custom) {
+      if (type === 'select') {
+        const { attributeOptions } = this.props;
+
+        const options = attributeOptions.map(option => {
+          return {
+            name: option.name,
+            value: option.uid,
+          };
+        });
+
+        return (
+          <Input
+            autoFocus={index === 0}
+            didCheckErrors={didCheckErrors}
+            errors={errors}
+            key={name}
+            {...input}
+            onChange={onChange}
+            selectOptions={options}
+            value={value}
+          />
+        );
+      }
       return (
         <CustomCheckbox
           didCheckErrors={didCheckErrors}
@@ -229,13 +285,12 @@ class AttributeForm extends React.Component {
       actionType,
       attributeToEditName,
       attributeType,
+      featureName,
       featureType,
       isOpen,
     } = this.props;
     const { showForm } = this.state;
     const currentForm = this.getCurrentForm();
-    const titleContent =
-      actionType === 'create' ? attributeType : attributeToEditName;
 
     return (
       <WrapperModal
@@ -248,24 +303,37 @@ class AttributeForm extends React.Component {
           <section>
             <HeaderModalTitle>
               <img src={this.getIcon()} alt="feature" />
-              <span>{titleContent}</span>
+              <span>{featureName}</span>
             </HeaderModalTitle>
           </section>
           <section>
             <HeaderModalTitle>
-              <FormattedMessage
-                id={`${pluginId}.popUpForm.${actionType || 'create'}`}
-              />
+              {actionType === 'create' ? (
+                <>
+                  <FormattedMessage id={`${pluginId}.popUpForm.create`} />
+                  &nbsp;
+                  <FormattedMessage
+                    id={`${pluginId}.popUpForm.attributes.${attributeType}.name`}
+                  />
+                </>
+              ) : (
+                <span>{attributeToEditName}</span>
+              )}
             </HeaderModalTitle>
             <div className="settings-tabs">
               <HeaderModalNavContainer>
                 {NAVLINKS.map(this.renderNavLink)}
               </HeaderModalNavContainer>
             </div>
+            <hr />
           </section>
         </HeaderModal>
         <form onSubmit={this.handleSubmitAndContinue}>
-          <BodyModal>{showForm && currentForm.map(this.renderInput)}</BodyModal>
+          <FormModal>
+            <BodyModal>
+              {showForm && currentForm.map(this.renderInput)}
+            </BodyModal>
+          </FormModal>
           <FooterModal>
             <section>
               <ButtonModalPrimary
@@ -299,9 +367,12 @@ AttributeForm.contextTypes = {
 AttributeForm.defaultProps = {
   actionType: 'create',
   activeTab: 'base',
+  attributeToEditIndex: null,
   attributeToEditName: '',
   alreadyTakenAttributes: [],
   attributeType: 'string',
+  attributeOptions: [],
+  featureName: null,
   featureType: 'model',
   isOpen: false,
   modifiedData: {},
@@ -315,8 +386,11 @@ AttributeForm.propTypes = {
   actionType: PropTypes.string,
   activeTab: PropTypes.string,
   alreadyTakenAttributes: PropTypes.array,
+  attributeToEditIndex: PropTypes.string,
   attributeToEditName: PropTypes.string,
   attributeType: PropTypes.string,
+  attributeOptions: PropTypes.array,
+  featureName: PropTypes.string,
   featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   modifiedData: PropTypes.object, // TODO: Clearly define this object (It's working without it though)

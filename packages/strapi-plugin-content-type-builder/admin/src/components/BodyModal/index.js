@@ -1,10 +1,10 @@
 /**
-*
-* BodyModal
-*
-*/
+ *
+ * BodyModal
+ *
+ */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { ModalBody } from 'reactstrap';
 
@@ -14,9 +14,7 @@ function BodyModal({ children, ...rest }) {
   return (
     <ModalBody className={styles.bodyModal} {...rest}>
       <div className="container-fluid">
-        <div className="row">
-          {children}
-        </div>
+        <div className="row">{children}</div>
       </div>
     </ModalBody>
   );
@@ -31,4 +29,5 @@ BodyModal.propTypes = {
   children: PropTypes.node,
 };
 
-export default BodyModal;
+export default memo(BodyModal);
+export { BodyModal };

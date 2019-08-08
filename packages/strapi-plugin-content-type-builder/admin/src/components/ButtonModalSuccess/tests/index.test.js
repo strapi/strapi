@@ -1,10 +1,10 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import ButtonModalSecondary from '../index';
+import { ButtonModalSuccess } from '../index';
 
-describe('<ButtonModalSecondary />', () => {
+describe('<ButtonModalSuccess />', () => {
   it('should not crash', () => {
-    shallow(<ButtonModalSecondary onClick={jest.fn()} message="" />);
+    shallow(<ButtonModalSuccess onClick={jest.fn()} message="" />);
   });
 });

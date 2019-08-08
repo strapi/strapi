@@ -41,6 +41,7 @@ function Row({
               {message => (
                 <span
                   style={{
+                    textTransform: 'initial',
                     fontStyle: 'italic',
                     color: '#787E8F',
                     fontWeight: '500',

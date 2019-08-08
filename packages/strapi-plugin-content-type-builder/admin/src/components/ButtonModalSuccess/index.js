@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
@@ -29,4 +29,5 @@ ButtonModalSuccess.propTypes = {
   type: PropTypes.string,
 };
 
-export default ButtonModalSuccess;
+export default memo(ButtonModalSuccess);
+export { ButtonModalSuccess };

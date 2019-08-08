@@ -1,7 +1,7 @@
 .relationWrapper {
   width: 100%;
   display: flex;
-  padding: 2.7rem 15px;
+  padding: 2.7rem 15px 3.3rem 15px;
   .relationNatureWrapper {
     position: relative;
     display: flex;
@@ -12,7 +12,7 @@
       z-index: 2;
     }
     &:before {
-      content: "";
+      content: '';
       position: absolute;
       top: 20px;
       left: 0;
@@ -35,8 +35,8 @@
   .relationBoxHeader {
     height: 3.6rem;
     width: 100%;
-    padding-top: .1rem;
-    background-color: rgba(16,22,34,.04);
+    padding-top: 0.1rem;
+    background-color: rgba(16, 22, 34, 0.04);
     line-height: 3.6rem;
     text-align: center;
     font-size: 1.4rem;
@@ -73,8 +73,11 @@
       font-weight: 700;
       text-transform: capitalize;
       color: black;
-      &:focus, &:active, &:hover, &:visited {
-        background-color: transparent!important;
+      &:focus,
+      &:active,
+      &:hover,
+      &:visited {
+        background-color: transparent !important;
         box-shadow: none;
         color: black;
       }
@@ -107,7 +110,6 @@
   }
 }
 
-
 .dropdownItem {
   height: 3.6rem;
   border-bottom: 1px solid #f6f6f6;
@@ -119,7 +121,8 @@
   -webkit-font-smoothing: antialiased;
   cursor: pointer;
 
-  &:focus, &:active {
+  &:focus,
+  &:active {
     outline: 0;
     background-color: rgb(255, 255, 255) !important;
     color: rgba(50, 55, 64, 0.75);
@@ -138,7 +141,8 @@
   }
 }
 
-.relationNaturePicker { /* stylelint-disable */
+.relationNaturePicker {
+  /* stylelint-disable */
   display: flex;
   width: 29.5rem;
   position: relative;
@@ -147,7 +151,7 @@
   padding-right: 25px;
   justify-content: space-around;
 
-  img:hover{
+  img:hover {
     cursor: pointer;
   }
 }
@@ -158,7 +162,7 @@
   top: 9.2rem;
   height: 2px;
   width: 100%;
-  background-color: #1C5DE7;
+  background-color: #1c5de7;
   z-index: 0;
 }
 
@@ -174,14 +178,14 @@
   text-align: center;
   margin: 0;
   line-height: 22px;
-  > span:nth-child(1), span:nth-child(3) {
+  > span:nth-child(1),
+  span:nth-child(3) {
     text-transform: capitalize;
   }
   > span:nth-child(2) {
-    color: #1C5DE7;
+    color: #1c5de7;
   }
 }
-
 
 .divider {
   width: 100%;

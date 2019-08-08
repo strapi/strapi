@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalHeader } from 'reactstrap';
 import styles from './styles.scss';
@@ -35,4 +35,5 @@ WrapperModal.propTypes = {
   onToggle: PropTypes.func.isRequired,
 };
 
-export default WrapperModal;
+export default memo(WrapperModal);
+export { WrapperModal };

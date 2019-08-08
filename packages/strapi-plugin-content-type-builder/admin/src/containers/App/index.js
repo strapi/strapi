@@ -50,6 +50,7 @@ import {
   setTemporaryAttribute,
   setTemporaryAttributeRelation,
   updateTempContentType,
+  updateTempGroup,
 } from './actions';
 
 import reducer from './reducer';
@@ -133,21 +134,8 @@ export class App extends React.Component {
       return newGroup;
     }
 
-    return get(
-      modifiedDataGroup,
-      [this.getFeatureNameFromSearch(), 'schema'],
-      {}
-    );
+    return get(modifiedDataGroup, this.getFeatureNameFromSearch(), {});
   };
-
-  // getFeatureName = () => {
-  //   const { modifiedDataGroup } = this.props;
-  //   return get(
-  //     modifiedDataGroup,
-  //     [this.getFeatureNameFromSearch(), 'schema', 'name'],
-  //     {}
-  //   );
-  // };
 
   getFeatureNameFromSearch = () =>
     getQueryParameters(this.getSearch(), `${this.getFeatureType()}Name`);
@@ -217,6 +205,7 @@ export class App extends React.Component {
       resetExistingGroupMainInfos,
       resetNewContentTypeMainInfos,
       updateTempContentType,
+      updateTempGroup,
     } = this.props;
 
     if (isLoading) {
@@ -261,7 +250,7 @@ export class App extends React.Component {
         push,
         resetExistingFeatureMainInfos: resetExistingGroupMainInfos,
         resetNewFeatureMainInfos: () => {},
-        updateTempFeature: () => {},
+        updateTempFeature: updateTempGroup,
       },
     ];
 
@@ -323,6 +312,7 @@ App.propTypes = {
   resetNewContentTypeMainInfos: PropTypes.func.isRequired,
   shouldRefetchData: PropTypes.bool,
   updateTempContentType: PropTypes.func.isRequired,
+  updateTempGroup: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectApp();
@@ -356,6 +346,7 @@ export function mapDispatchToProps(dispatch) {
       setTemporaryAttribute,
       setTemporaryAttributeRelation,
       updateTempContentType,
+      updateTempGroup,
     },
     dispatch
   );

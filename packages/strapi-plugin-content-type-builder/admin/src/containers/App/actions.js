@@ -3,10 +3,19 @@
  * App actions
  *
  */
-import { cloneDeep, pick, set, camelCase } from 'lodash';
+import {
+  cloneDeep,
+  isEmpty,
+  pick,
+  toInteger,
+  toNumber,
+  set,
+  camelCase,
+} from 'lodash';
 import { fromJS, OrderedMap } from 'immutable';
 import {
   ADD_ATTRIBUTE_RELATION,
+  ADD_ATTRIBUTE_RELATION_GROUP,
   ADD_ATTRIBUTE_TO_EXISITING_CONTENT_TYPE,
   ADD_ATTRIBUTE_TO_EXISTING_GROUP,
   ADD_ATTRIBUTE_TO_TEMP_CONTENT_TYPE,
@@ -15,6 +24,7 @@ import {
   CLEAR_TEMPORARY_ATTRIBUTE,
   CLEAR_TEMPORARY_ATTRIBUTE_GROUP,
   CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
+  CLEAR_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
   CREATE_TEMP_CONTENT_TYPE,
   CREATE_TEMP_GROUP,
   DELETE_GROUP,
@@ -32,11 +42,15 @@ import {
   ON_CHANGE_ATTRIBUTE,
   ON_CHANGE_ATTRIBUTE_GROUP,
   ON_CHANGE_RELATION,
+  ON_CHANGE_RELATION_GROUP,
   ON_CHANGE_RELATION_NATURE,
+  ON_CHANGE_RELATION_NATURE_GROUP,
   ON_CHANGE_RELATION_TARGET,
+  ON_CHANGE_RELATION_TARGET_GROUP,
   RESET_NEW_CONTENT_TYPE_MAIN_INFOS,
   RESET_EDIT_EXISTING_CONTENT_TYPE,
   RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
+  RESET_EDIT_EXISTING_GROUP,
   RESET_EXISTING_GROUP_MAIN_INFOS,
   RESET_EDIT_TEMP_CONTENT_TYPE,
   RESET_EDIT_TEMP_GROUP,
@@ -44,9 +58,11 @@ import {
   SAVE_EDITED_ATTRIBUTE,
   SAVE_EDITED_ATTRIBUTE_GROUP,
   SAVE_EDITED_ATTRIBUTE_RELATION,
+  SAVE_EDITED_ATTRIBUTE_RELATION_GROUP,
   SET_TEMPORARY_ATTRIBUTE,
   SET_TEMPORARY_ATTRIBUTE_GROUP,
   SET_TEMPORARY_ATTRIBUTE_RELATION,
+  SET_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
   SUBMIT_CONTENT_TYPE,
   SUBMIT_CONTENT_TYPE_SUCCEEDED,
   SUBMIT_GROUP,
@@ -56,6 +72,7 @@ import {
   SUBMIT_TEMP_GROUP,
   SUBMIT_TEMP_GROUP_SUCCEEDED,
   UPDATE_TEMP_CONTENT_TYPE,
+  UPDATE_TEMP_GROUP,
   ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
   ON_CHANGE_EXISTING_GROUP_MAIN_INFOS,
 } from './constants';
@@ -65,6 +82,14 @@ export function addAttributeRelation(isModelTemporary, modelName) {
     type: ADD_ATTRIBUTE_RELATION,
     isModelTemporary,
     modelName,
+  };
+}
+
+export function addAttributeRelationGroup(isGroupTemporary, groupName) {
+  return {
+    type: ADD_ATTRIBUTE_RELATION_GROUP,
+    isGroupTemporary,
+    groupName,
   };
 }
 
@@ -122,6 +147,12 @@ export function clearTemporaryAttributeGroup() {
 export function clearTemporaryAttributeRelation() {
   return {
     type: CLEAR_TEMPORARY_ATTRIBUTE_RELATION,
+  };
+}
+
+export function clearTemporaryAttributeRelationGroup() {
+  return {
+    type: CLEAR_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
   };
 }
 
@@ -214,18 +245,17 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
   }, {});
 
   const initialDataGroup = data.reduce((acc, current) => {
-    const {
-      schema: { attributes, name },
-      uid,
-    } = current;
+    const { schema, uid } = current;
+    const { attributes, name } = schema;
 
     const group = {
-      ...current,
+      ...schema,
+      attributes: buildGroupAttributes(attributes),
+      uid,
       name: name || uid,
       isTemporary: false,
     };
-    set(group, ['schema', 'attributes'], buildGroupAttributes(attributes));
-    acc[current.uid] = group;
+    acc[uid] = group;
 
     return acc;
   }, {});
@@ -238,13 +268,13 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
     } = current;
 
     acc.push({
+      uid,
       description: description || '',
       fields: Object.keys(attributes).length,
       icon: 'fa-cube',
       isTemporary: false,
       name: name || uid,
-      source,
-      uid,
+      source: source || null,
     });
 
     return acc;
@@ -279,12 +309,9 @@ export function onChangeExistingGroupMainInfos({ target }) {
       ? camelCase(target.value.trim()).toLowerCase()
       : target.value;
 
-  const array = target.name.split('.');
-  array.splice(1, 0, 'schema');
-
   return {
     type: ON_CHANGE_EXISTING_GROUP_MAIN_INFOS,
-    keys: array,
+    keys: target.name.split('.'),
     value,
   };
 }
@@ -350,10 +377,29 @@ export function onChangeRelation({ target }) {
   };
 }
 
+export function onChangeRelationGroup({ target }) {
+  const value =
+    target.name === 'unique' ? target.value : target.value.split(' ').join('');
+
+  return {
+    type: ON_CHANGE_RELATION_GROUP,
+    keys: target.name.split('.'),
+    value,
+  };
+}
+
 export function onChangeRelationNature(nature, currentModel) {
   return {
     type: ON_CHANGE_RELATION_NATURE,
     currentModel,
+    nature,
+  };
+}
+
+export function onChangeRelationNatureGroup(nature, currentGroup) {
+  return {
+    type: ON_CHANGE_RELATION_NATURE_GROUP,
+    currentGroup,
     nature,
   };
 }
@@ -363,6 +409,19 @@ export function onChangeRelationTarget(model, currentModel, isEditing = false) {
     type: ON_CHANGE_RELATION_TARGET,
     currentModel,
     model,
+    isEditing,
+  };
+}
+
+export function onChangeRelationTargetGroup(
+  group,
+  currentGroup,
+  isEditing = false
+) {
+  return {
+    type: ON_CHANGE_RELATION_TARGET_GROUP,
+    currentGroup,
+    group,
     isEditing,
   };
 }
@@ -384,6 +443,13 @@ export function resetExistingContentTypeMainInfos(contentTypeName) {
   return {
     type: RESET_EXISTING_CONTENT_TYPE_MAIN_INFOS,
     contentTypeName,
+  };
+}
+
+export function resetEditExistingGroup(groupName) {
+  return {
+    type: RESET_EDIT_EXISTING_GROUP,
+    groupName,
   };
 }
 
@@ -451,6 +517,19 @@ export function saveEditedAttributeRelation(
   };
 }
 
+export function saveEditedAttributeRelationGroup(
+  attributeIndex,
+  isGroupTemporary,
+  featureName
+) {
+  return {
+    type: SAVE_EDITED_ATTRIBUTE_RELATION_GROUP,
+    attributeIndex,
+    isGroupTemporary,
+    featureName,
+  };
+}
+
 export function setTemporaryAttribute(
   attributeName,
   isModelTemporary,
@@ -494,6 +573,25 @@ export function setTemporaryAttributeRelation(
   };
 }
 
+export function setTemporaryAttributeRelationGroup(
+  target,
+  isGroupTemporary,
+  source,
+  attributeIndex,
+  attributeName,
+  isEditing
+) {
+  return {
+    type: SET_TEMPORARY_ATTRIBUTE_RELATION_GROUP,
+    attributeIndex,
+    attributeName,
+    isEditing,
+    isGroupTemporary,
+    source,
+    target,
+  };
+}
+
 export function submitContentType(oldContentTypeName, data, context, source) {
   const attributes = formatModelAttributes(data.attributes);
   const body = Object.assign(cloneDeep(data), { attributes });
@@ -509,6 +607,8 @@ export function submitContentType(oldContentTypeName, data, context, source) {
 
 export function submitGroup(oldGroupName, data, context, source) {
   const attributes = formatGroupAttributes(data.attributes);
+  delete data['uid'];
+  delete data['isTemporary'];
   const body = Object.assign(cloneDeep(data), { attributes });
 
   return {
@@ -550,7 +650,7 @@ export function submitTempContentTypeSucceeded() {
 }
 
 export function submitTempGroup(data, context) {
-  const attributes = formatGroupAttributes(data.schema.attributes);
+  const attributes = formatGroupAttributes(data.attributes);
   const body = Object.assign(cloneDeep(data), { attributes });
 
   return {
@@ -566,10 +666,15 @@ export function submitTempGroupSucceeded() {
   };
 }
 
-submitTempGroupSucceeded;
 export function updateTempContentType() {
   return {
     type: UPDATE_TEMP_CONTENT_TYPE,
+  };
+}
+
+export function updateTempGroup() {
+  return {
+    type: UPDATE_TEMP_GROUP,
   };
 }
 
@@ -580,7 +685,10 @@ export const buildModelAttributes = attributes => {
       acc[current.name] = Object.assign(current.params, {
         enum: current.params.enum.join('\n'),
       });
-    } else if (current.params.nature === 'oneWay') {
+    } else if (
+      current.params.nature === 'oneWay' ||
+      current.params.nature === 'manyWay'
+    ) {
       acc[current.name] = Object.assign(current.params, { key: '-' });
     } else {
       acc[current.name] = current.params;
@@ -631,15 +739,44 @@ export const formatModelAttributes = attributes =>
 
 export const buildGroupAttributes = attributes =>
   Object.keys(attributes).reduce((acc, current) => {
-    const attribute = { name: current, ...attributes[current] };
+    if (
+      attributes[current].nature === 'oneWay' ||
+      attributes[current].nature === 'manyWay'
+    ) {
+      const attribute = Object.assign(attributes[current], {
+        key: '-',
+        name: current,
+      });
 
-    return acc.concat(attribute);
+      return acc.concat(attribute);
+    } else if (attributes[current].type === 'enumeration') {
+      return acc.concat({
+        name: current,
+        ...attributes[current],
+        enum: attributes[current].enum.join('\n'),
+      });
+    } else {
+      return acc.concat({ name: current, ...attributes[current] });
+    }
   }, []);
 
 export const formatGroupAttributes = attributes => {
   const formattedAttributes = attributes.reduce((acc, current) => {
-    acc[current.name] = current;
-    delete current['name'];
+    const { name, ...newAttribute } = current;
+    const { type } = newAttribute;
+
+    if (type === 'enumeration') {
+      newAttribute.enum = newAttribute.enum.split('\n');
+    }
+
+    if (type === 'integer' && !isEmpty(newAttribute.default)) {
+      newAttribute.default = toInteger(newAttribute.default);
+    }
+    if (['decimal', 'float'].includes(type) && !isEmpty(newAttribute.default)) {
+      newAttribute.default = toNumber(newAttribute.default);
+    }
+
+    acc[name] = newAttribute;
 
     return acc;
   }, {});

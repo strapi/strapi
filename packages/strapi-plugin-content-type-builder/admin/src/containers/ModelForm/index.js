@@ -60,7 +60,7 @@ class ModelForm extends React.Component {
     const { emitEvent } = this.context;
     const { actionType, featureType, featureToEditName, push } = this.props;
     const model =
-      actionType === 'edit' ? `&modelName=${featureToEditName}` : '';
+      actionType === 'edit' ? `&${featureType}Name=${featureToEditName}` : '';
 
     if (to === 'advanced') {
       emitEvent('didSelectContentTypeSettings');
@@ -97,6 +97,12 @@ class ModelForm extends React.Component {
     if (alreadyTakenContentTypeNames.includes(modifiedData.name)) {
       formErrors = {
         name: [{ id: `${pluginId}.error.contentTypeName.taken` }],
+      };
+    }
+
+    if (!new RegExp('^[A-Za-z][_0-9A-Za-z]*$').test(modifiedData.name)) {
+      formErrors = {
+        name: [{ id: `${pluginId}.error.validation.regex.name` }],
       };
     }
 

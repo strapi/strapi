@@ -18,6 +18,7 @@ import ButtonModalPrimary from '../../components/ButtonModalPrimary';
 import ButtonModalSecondary from '../../components/ButtonModalSecondary';
 import ButtonModalSuccess from '../../components/ButtonModalSuccess';
 import FooterModal from '../../components/FooterModal';
+import FormModal from '../../components/FormModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
@@ -228,7 +229,7 @@ class RelationForm extends React.Component {
 
   renderRelationForm = () => {
     const {
-      modifiedData: { key, name, nature, plugin, target },
+      modifiedData,
       models,
       modelToEditName,
       onChange,
@@ -236,6 +237,8 @@ class RelationForm extends React.Component {
       source,
     } = this.props;
     const { formErrors, didCheckErrors } = this.state;
+
+    const { key, name, nature, plugin, target } = modifiedData;
 
     return (
       <RelationWrapper>
@@ -272,10 +275,14 @@ class RelationForm extends React.Component {
   };
 
   render() {
-    const { actionType, activeTab, attributeToEditName, isOpen } = this.props;
+    const {
+      actionType,
+      activeTab,
+      attributeToEditName,
+      featureName,
+      isOpen,
+    } = this.props;
     const { showForm } = this.state;
-    const titleContent =
-      actionType === 'create' ? 'relation' : attributeToEditName;
     const content =
       activeTab === 'base' || !activeTab
         ? this.renderRelationForm()
@@ -292,14 +299,22 @@ class RelationForm extends React.Component {
           <section>
             <HeaderModalTitle>
               <img src={this.getIcon()} alt="ct" />
-              <span>{titleContent}</span>
+              <span>{featureName}</span>
             </HeaderModalTitle>
           </section>
           <section>
             <HeaderModalTitle>
-              <FormattedMessage
-                id={`${pluginId}.popUpForm.${actionType || 'create'}`}
-              />
+              {actionType === 'create' ? (
+                <>
+                  <FormattedMessage id={`${pluginId}.popUpForm.create`} />
+                  &nbsp;
+                  <FormattedMessage
+                    id={`${pluginId}.popUpForm.attributes.relation.name`}
+                  />
+                </>
+              ) : (
+                <span>{attributeToEditName}</span>
+              )}
             </HeaderModalTitle>
             <div className="settings-tabs">
               <HeaderModalNavContainer>
@@ -309,25 +324,10 @@ class RelationForm extends React.Component {
             <hr />
           </section>
         </HeaderModal>
-
-        {/* <HeaderModal>
-          <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
-            <FormattedMessage
-              id={`${pluginId}.popUpForm.${actionType || 'create'}`}
-            />
-            &nbsp;
-            <span style={{ fontStyle: 'italic', textTransform: 'capitalize' }}>
-              {titleContent}
-            </span>
-            &nbsp;
-            <FormattedMessage id={`${pluginId}.popUpForm.field`} />
-          </div>
-          <HeaderModalNavContainer>
-            {NAVLINKS.map(this.renderNavLink)}
-          </HeaderModalNavContainer>
-        </HeaderModal> */}
         <form onSubmit={this.handleSubmitAndContinue}>
-          <BodyModal>{showForm && content}</BodyModal>
+          <FormModal>
+            <BodyModal>{showForm && content}</BodyModal>
+          </FormModal>
           <FooterModal>
             <section>
               <ButtonModalPrimary
@@ -363,9 +363,10 @@ RelationForm.defaultProps = {
   activeTab: 'base',
   alreadyTakenAttributes: [],
   attributeToEditName: '',
+  featureName: null,
+  featureType: 'model',
   isOpen: false,
   isUpdatingTemporaryContentType: false,
-  featureType: 'model',
   models: [],
   modelToEditName: '',
   source: null,
@@ -376,10 +377,11 @@ RelationForm.propTypes = {
   activeTab: PropTypes.string,
   alreadyTakenAttributes: PropTypes.array,
   attributeToEditName: PropTypes.string,
+  featureName: PropTypes.string,
+  featureType: PropTypes.string,
   initData: PropTypes.func.isRequired,
   isOpen: PropTypes.bool,
   isUpdatingTemporaryContentType: PropTypes.bool,
-  featureType: PropTypes.string,
   models: PropTypes.array,
   modelToEditName: PropTypes.string,
   modifiedData: PropTypes.object.isRequired,

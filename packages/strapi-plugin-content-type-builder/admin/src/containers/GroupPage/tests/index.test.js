@@ -38,14 +38,26 @@ const renderComponent = (props = {}) => {
 
 const basePath = '/plugins/content-type-builder/groups';
 const props = {
+  addAttributeRelationGroup: jest.fn(),
   addAttributeToExistingGroup: jest.fn(),
   addAttributeToTempGroup: jest.fn(),
   clearTemporaryAttributeGroup: jest.fn(),
+  clearTemporaryAttributeRelationGroup: jest.fn(),
   deleteGroupAttribute: jest.fn(),
   groups: [
     {
       icon: 'fa-cube',
       name: 'tests',
+      description: '',
+      fields: 3,
+      source: null,
+      isTemporary: false,
+    },
+  ],
+  models: [
+    {
+      icon: 'fa-cube',
+      name: 'model',
       description: '',
       fields: 2,
       source: null,
@@ -60,23 +72,29 @@ const props = {
       uid: 'tests',
       name: 'Tests',
       source: null,
-      schema: {
-        connection: 'default',
-        collectionName: 'tests',
-        description: 'tests description',
-        attributes: [
-          {
-            name: 'name',
-            type: 'string',
-            required: true,
-          },
-          {
-            name: 'quantity',
-            type: 'float',
-            required: true,
-          },
-        ],
-      },
+      connection: 'default',
+      collectionName: 'tests',
+      description: 'tests description',
+      attributes: [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'modelRelation',
+          nature: 'oneWay',
+          target: 'model',
+          dominant: false,
+          unique: false,
+          key: '-',
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+      ],
     },
   },
   location: {
@@ -88,23 +106,29 @@ const props = {
       uid: 'tests',
       name: 'Tests',
       source: null,
-      schema: {
-        connection: 'default',
-        collectionName: 'tests',
-        description: 'tests description',
-        attributes: [
-          {
-            name: 'name',
-            type: 'string',
-            required: true,
-          },
-          {
-            name: 'quantity',
-            type: 'float',
-            required: true,
-          },
-        ],
-      },
+      connection: 'default',
+      collectionName: 'tests',
+      description: 'tests description',
+      attributes: [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+        },
+        {
+          name: 'modelRelation',
+          nature: 'oneWay',
+          target: 'model',
+          dominant: false,
+          unique: false,
+          key: '-',
+        },
+        {
+          name: 'quantity',
+          type: 'float',
+          required: true,
+        },
+      ],
     },
   },
   match: {
@@ -116,19 +140,36 @@ const props = {
     collectionName: '',
     connection: '',
     name: '',
-    schema: {
-      attributes: [],
-      description: '',
-    },
+    attributes: [],
+    description: '',
   },
   onChangeAttributeGroup: jest.fn(),
+  onChangeRelationGroup: jest.fn(),
+  onChangeRelationNatureGroup: jest.fn(),
+  onChangeRelationTargetGroup: jest.fn(),
   resetEditTempGroup: jest.fn(),
+  resetEditExistingGroup: jest.fn(),
   saveEditedAttributeGroup: jest.fn(),
+  saveEditedAttributeRelationGroup: jest.fn(),
   setTemporaryAttributeGroup: jest.fn(),
+  setTemporaryAttributeRelationGroup: jest.fn(),
   submitTempGroup: jest.fn(),
   submitGroup: jest.fn(),
   temporaryAttributeGroup: {},
+  temporaryAttributeRelationGroup: {
+    name: '',
+    columnName: '',
+    dominant: false,
+    targetColumnName: '',
+    key: '-',
+    nature: 'oneWay',
+    plugin: '',
+    target: '',
+    unique: false,
+  },
 };
+
+const wait = async () => new Promise(resolve => setTimeout(resolve, 100));
 
 describe('CTB <GroupPage />', () => {
   it('should not crash', () => {
@@ -202,6 +243,7 @@ describe('CTB <GroupPage />', () => {
     const wrapper = shallow(<GroupPage {...props} />);
     expect(wrapper.state()).toEqual({
       showWarning: false,
+      removePrompt: false,
       attrToDelete: null,
     });
 
@@ -211,6 +253,7 @@ describe('CTB <GroupPage />', () => {
 
     expect(wrapper.state()).toEqual({
       showWarning: true,
+      removePrompt: false,
       attrToDelete: null,
     });
   });
@@ -227,9 +270,9 @@ describe('CTB <GroupPage />', () => {
   });
 
   it('should call the openAttributesModal when clicking on the EmptyAttributesBlock', () => {
-    props.initialDataGroup.tests.schema.attributes = [];
-    props.modifiedDataGroup.tests.schema.attributes = [];
-    props.newGroup.schema.attributes = [];
+    props.initialDataGroup.tests.attributes = [];
+    props.modifiedDataGroup.tests.attributes = [];
+    props.newGroup.attributes = [];
 
     const wrapper = shallow(<GroupPage {...props} />);
     const spyOnClick = jest.spyOn(wrapper.instance(), 'openAttributesModal');
@@ -261,7 +304,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
   });
 
   describe('OpenAttributesModal', () => {
-    it('should display a notification if thee modal cannot be opened', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
       props.canOpenModal = false;
 
@@ -273,6 +316,8 @@ describe('CTB <GroupPage />, lifecycle', () => {
       );
       const { openAttributesModal } = wrapper.instance();
       openAttributesModal();
+
+      await wait();
 
       expect(spyOnDisplayNotification).toHaveBeenCalled();
     });
@@ -295,7 +340,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
       expect(spyOnDisplayNotification).toHaveBeenCalled();
     });
 
-    it('should call setTempororaryAttributeGroup if ifTemporary is true', () => {
+    it('should call setTempororaryAttributeGroup if ifTemporary is true', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
       props.canOpenModal = true;
 
@@ -309,15 +354,47 @@ describe('CTB <GroupPage />, lifecycle', () => {
         true,
         'tests'
       );
+
+      await wait();
+
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=attributeForm&attributeType=string&settingType=base&actionType=edit&attributeName=0',
+      });
     });
 
-    it('should handle the <number> type correctly', () => {
+    it('should open attribute modal with relation attributeType', async () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
+      props.canOpenModal = true;
+
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const { handleClickEditAttribute } = wrapper.instance();
+      handleClickEditAttribute(1, null);
+
+      expect(props.setTemporaryAttributeGroup).toHaveBeenCalledWith(
+        1,
+        true,
+        'tests'
+      );
+
+      await wait();
+
+      expect(props.history.push).toHaveBeenCalledWith({
+        search:
+          'modalType=attributeForm&attributeType=relation&settingType=base&actionType=edit&attributeName=1',
+      });
+    });
+
+    it('should handle the <number> type correctly', async () => {
       topCompo = renderComponent(props);
       const wrapper = topCompo.find(GroupPage);
 
       const { handleClickEditAttribute } = wrapper.instance();
 
       handleClickEditAttribute(0, 'float');
+
+      await wait();
 
       expect(context.emitEvent).toHaveBeenCalledWith('willEditFieldOfGroup');
       expect(props.history.push).toHaveBeenCalledWith({
@@ -340,12 +417,13 @@ describe('CTB <GroupPage />, lifecycle', () => {
       const { handleSubmit } = wrapper.instance();
 
       handleSubmit();
-
       expect(props.addAttributeToTempGroup).toHaveBeenCalledWith(search);
     });
 
     it('should call addAttributeToExistingGroup when isTemporary is false', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
+      const attrIndex = '0';
+      props.location.search = `attributeName=${attrIndex}`;
       props.canOpenModal = true;
 
       const search = 'chooseAttributes';
@@ -366,12 +444,34 @@ describe('CTB <GroupPage />, lifecycle', () => {
         search: 'modalType=chooseAttributes',
       });
     });
+
+    it('should call addAttributeRelationGroup when attributeType is a relation', () => {
+      props.groups.find(item => item.name == 'tests').isTemporary = true;
+      const attrType = 'relation';
+      const attrIndex = '1';
+      props.location.search = `attributeType=${attrType}&attributeName=${attrIndex}`;
+      props.canOpenModal = true;
+
+      expect(true).toBe(true);
+      topCompo = renderComponent(props);
+      const wrapper = topCompo.find(GroupPage);
+      const { handleSubmit } = wrapper.instance();
+
+      handleSubmit();
+
+      expect(props.addAttributeRelationGroup).toHaveBeenCalledWith(
+        true,
+        'tests'
+      );
+    });
   });
 
   describe('HandleSubmitEdit', () => {
     it('should call saveEditedAttributeGroup with right params', () => {
-      const attrIndex = '0';
-      props.location.search = `attributeName=${attrIndex}`;
+      props.groups.find(item => item.name == 'tests').isTemporary = false;
+      const attrType = 'relation';
+      const attrIndex = '1';
+      props.location.search = `attributeType=${attrType}&attributeName=${attrIndex}`;
 
       topCompo = renderComponent(props);
       const wrapper = topCompo.find(GroupPage);
@@ -379,7 +479,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
 
       handleSubmitEdit();
 
-      expect(props.saveEditedAttributeGroup).toHaveBeenCalledWith(
+      expect(props.saveEditedAttributeRelationGroup).toHaveBeenCalledWith(
         attrIndex,
         false,
         'tests'
@@ -403,7 +503,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
   });
 
   describe('OpenEditFeatureModal', () => {
-    it('should display a notification if thee modal cannot be opened', () => {
+    it('should display a notification if thee modal cannot be opened', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
       props.canOpenModal = false;
 
@@ -416,10 +516,12 @@ describe('CTB <GroupPage />, lifecycle', () => {
       const { openEditFeatureModal } = wrapper.instance();
       openEditFeatureModal();
 
+      await wait();
+
       expect(spyOnDisplayNotification).toHaveBeenCalled();
     });
 
-    it('should redirect to the right url if isTemporary is true', () => {
+    it('should redirect to the right url if isTemporary is true', async () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
       props.canOpenModal = true;
 
@@ -428,6 +530,8 @@ describe('CTB <GroupPage />, lifecycle', () => {
 
       const { openEditFeatureModal } = wrapper.instance();
       openEditFeatureModal();
+
+      await wait();
 
       expect(props.history.push).toHaveBeenCalledWith({
         search:
@@ -454,7 +558,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = true;
       props.newGroup.name = 'tests';
 
-      props.newGroup.schema.attributes = [
+      props.newGroup.attributes = [
         {
           name: 'name',
           type: 'string',
@@ -477,7 +581,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
     it('should call submitGroup with modifiedDataGroup param when isTemporary is false', () => {
       props.groups.find(item => item.name == 'tests').isTemporary = false;
 
-      props.initialDataGroup.tests.schema.attributes = [
+      props.initialDataGroup.tests.attributes = [
         {
           name: 'name',
           type: 'string',
@@ -489,7 +593,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
           required: true,
         },
       ];
-      props.modifiedDataGroup.tests.schema.attributes = [
+      props.modifiedDataGroup.tests.attributes = [
         {
           name: 'firstname',
           type: 'string',
@@ -558,10 +662,11 @@ describe('CTB <GroupPage />, lifecycle', () => {
       handleClickOnTrashIcon(0);
       expect(wrapper.state()).toEqual({
         attrToDelete: 0,
+        removePrompt: false,
         showWarning: true,
       });
       handleDeleteAttribute();
-      const keys = ['modifiedDataGroup', 'tests', 'schema', 'attributes', 0];
+      const keys = ['modifiedDataGroup', 'tests', 'attributes', 0];
       expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
       expect(context.emitEvent).toHaveBeenCalledWith('willDeleteFieldOfGroup');
     });
@@ -580,7 +685,7 @@ describe('CTB <GroupPage />, lifecycle', () => {
       handleClickOnTrashIcon(0);
       handleDeleteAttribute();
 
-      const keys = ['newGroup', 'schema', 'attributes', 0];
+      const keys = ['newGroup', 'attributes', 0];
       expect(props.deleteGroupAttribute).toHaveBeenCalledWith(keys);
       expect(context.emitEvent).toHaveBeenCalledWith('willDeleteFieldOfGroup');
     });
