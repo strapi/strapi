@@ -110,6 +110,7 @@ describe('Test type boolean', () => {
 
     expect(updateRes.statusCode).toBe(200);
     expect(updateRes.body).toMatchObject({
+      id: res.body.id,
       field: false,
     });
   });

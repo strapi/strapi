@@ -32,7 +32,53 @@ describe('Test type password', () => {
     });
   });
 
-  test.todo('Reading entry, returns correct value');
+  test('Create entry with value input Formdata', async () => {
+    const res = await rq.post('/content-manager/explorer/withpassword', {
+      body: {
+        field: 1234567,
+      },
+    });
 
-  test.todo('Updating entry sets the right value and format');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      field: '1234567',
+    });
+  });
+
+  test('Reading entry returns correct value', async () => {
+    const res = await rq.get('/content-manager/explorer/withpassword');
+
+    expect(res.statusCode).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          field: expect.any(String),
+        }),
+      ])
+    );
+  });
+
+  test('Updating entry sets the right value and format', async () => {
+    const res = await rq.post('/content-manager/explorer/withpassword', {
+      body: {
+        field: 'somePassword',
+      },
+    });
+
+    const updateRes = await rq.put(
+      `/content-manager/explorer/withpassword/${res.body.id}`,
+      {
+        body: {
+          field: 'otherPwd',
+        },
+      }
+    );
+
+    expect(updateRes.statusCode).toBe(200);
+    expect(updateRes.body).toMatchObject({
+      id: res.body.id,
+      field: 'otherPwd',
+    });
+  });
 });
