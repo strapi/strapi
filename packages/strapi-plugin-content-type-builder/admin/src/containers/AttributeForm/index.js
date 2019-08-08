@@ -72,6 +72,12 @@ class AttributeForm extends React.Component {
       formErrors = { name: [{ id: `${pluginId}.error.attribute.taken` }] };
     }
 
+    if (get(modifiedData, 'name', '') === 'id') {
+      formErrors = {
+        name: [{ id: `${pluginId}.error.attribute.forbidden` }],
+      };
+    }
+
     formErrors = Object.keys(formValidations).reduce((acc, current) => {
       const { custom, validations } = formValidations[current];
       const value = modifiedData[current];

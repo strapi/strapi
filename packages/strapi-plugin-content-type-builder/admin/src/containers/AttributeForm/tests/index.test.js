@@ -315,7 +315,7 @@ describe('<AttributeForm />', () => {
         );
       });
 
-      it('should not submit if thee form has an error', () => {
+      it('should not submit if the form has an error', () => {
         wrapper = renderComponent(props);
 
         const { handleSubmitAndContinue } = wrapper.instance();
