@@ -692,6 +692,9 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
       // Initialize lifecycle callbacks.
       loadedModel.initialize = function() {
+        // Load bookshelf plugin arguments from model options
+        this.constructor.__super__.initialize.apply(this, arguments);
+
         const lifecycle = {
           creating: 'beforeCreate',
           created: 'afterCreate',
