@@ -2,7 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Dropdown, DropdownItem, DropdownToggle } from 'reactstrap';
 
-import FeaturePicker from '../index';
+import { FeaturePicker } from '../index';
 
 describe('CTB <FeaturePicker />', () => {
   it('should use the defaultProps', () => {
@@ -13,6 +13,7 @@ describe('CTB <FeaturePicker />', () => {
     expect(onClick).toBeDefined();
     expect(onClick()).toBe(undefined);
   });
+
   describe('<FeaturePicker /> render', () => {
     let wrapper;
     const setIsOpen = jest.fn();
@@ -43,6 +44,7 @@ describe('CTB <FeaturePicker />', () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
+
     it('should display plugin if it exists', () => {
       props.main = true;
       props.plugin = 'users-permissions';

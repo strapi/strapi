@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
@@ -43,4 +43,5 @@ LeftMenuLink.propTypes = {
   to: PropTypes.string.isRequired,
 };
 
-export default LeftMenuLink;
+export default memo(LeftMenuLink);
+export { LeftMenuLink };

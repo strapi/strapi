@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { ModalBody } from 'reactstrap';
 
@@ -29,4 +29,5 @@ BodyModal.propTypes = {
   children: PropTypes.node,
 };
 
-export default BodyModal;
+export default memo(BodyModal);
+export { BodyModal };

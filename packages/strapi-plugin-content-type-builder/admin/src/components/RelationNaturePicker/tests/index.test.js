@@ -2,7 +2,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import RelationNaturePicker from '../index';
+import { RelationNaturePicker } from '../index';
 
 describe('<RelationNaturePicker />', () => {
   it('should not crash', () => {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { capitalize } from 'lodash';
 import { Collapse } from 'reactstrap';
@@ -24,11 +24,9 @@ function ListRowCollapse({
   type,
 }) {
   const [isOpen, setIsOpen] = useState(false);
-
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
-
   const src = target ? attributeIcons.relation : attributeIcons[ico];
 
   const handleClick = () => {
@@ -212,4 +210,4 @@ ListRowCollapse.propTypes = {
   type: PropTypes.string,
 };
 
-export default ListRowCollapse;
+export default memo(ListRowCollapse);

@@ -2,7 +2,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { FormattedMessage } from 'react-intl';
 
-import ListRow from '../index';
+import { ListRow } from '../index';
 import StyledListRow from '../StyledListRow';
 
 describe('<ListRow />', () => {

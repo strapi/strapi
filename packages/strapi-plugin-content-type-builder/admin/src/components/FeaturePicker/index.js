@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -60,4 +60,5 @@ FeaturePicker.propTypes = {
   selectedFeature: PropTypes.string,
 };
 
-export default FeaturePicker;
+export default memo(FeaturePicker);
+export { FeaturePicker };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { InputTextWithErrors as InputText } from 'strapi-helper-plugin';
 
@@ -11,7 +11,7 @@ const RelationBox = ({
   errors,
   featureName,
   features,
-  main,
+  isMain,
   nature,
   onChange,
   onClick,
@@ -23,7 +23,7 @@ const RelationBox = ({
   return (
     <StyledRelationBox>
       <div className="box-header">
-        {main ? (
+        {isMain ? (
           <p>
             <i className="fa fa-caret-square-o-right" />
             {featureName}
@@ -47,7 +47,7 @@ const RelationBox = ({
           disabled={
             value === '-' || nature === 'oneWay' || nature === 'manyWay'
           }
-          name={main ? 'name' : 'key'}
+          name={isMain ? 'name' : 'key'}
           onChange={onChange}
           type="text"
           value={nature === 'oneWay' || nature === 'manyWay' ? '-' : value}
@@ -63,7 +63,7 @@ RelationBox.defaultProps = {
   errors: [],
   featureName: '',
   features: [],
-  main: false,
+  isMain: false,
   nature: null,
   onClick: () => {},
   plugin: null,
@@ -77,7 +77,7 @@ RelationBox.propTypes = {
   errors: PropTypes.array,
   featureName: PropTypes.string,
   features: PropTypes.array,
-  main: PropTypes.bool,
+  isMain: PropTypes.bool,
   nature: PropTypes.string,
   onChange: PropTypes.func.isRequired,
   onClick: PropTypes.func,
@@ -87,4 +87,5 @@ RelationBox.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default RelationBox;
+export default memo(RelationBox);
+export { RelationBox };

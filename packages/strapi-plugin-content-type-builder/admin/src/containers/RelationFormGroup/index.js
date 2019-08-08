@@ -253,7 +253,7 @@ class RelationFormGroup extends React.Component {
           didCheckErrors={didCheckErrors}
           errors={get(formErrors, 'name', [])}
           featureName={featureToEditName}
-          main
+          isMain
           onChange={onChange}
           source={source}
           value={name}

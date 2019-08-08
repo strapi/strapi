@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 
 import pluginId from '../../pluginId';
@@ -33,4 +33,5 @@ const DocumentationSection = () => (
   </ul>
 );
 
-export default DocumentationSection;
+export default memo(DocumentationSection);
+export { DocumentationSection };

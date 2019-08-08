@@ -747,15 +747,15 @@ export const buildGroupAttributes = attributes =>
         key: '-',
         name: current,
       });
+
       return acc.concat(attribute);
+    } else if (attributes[current].type === 'enumeration') {
+      return acc.concat({
+        name: current,
+        ...attributes[current],
+        enum: attributes[current].enum.join('\n'),
+      });
     } else {
-      if (attributes[current].type === 'enumeration') {
-        return acc.concat({
-          name: current,
-          ...attributes[current],
-          enum: attributes[current].enum.join('\n'),
-        });
-      }
       return acc.concat({ name: current, ...attributes[current] });
     }
   }, []);
@@ -777,6 +777,7 @@ export const formatGroupAttributes = attributes => {
     }
 
     acc[name] = newAttribute;
+
     return acc;
   }, {});
 

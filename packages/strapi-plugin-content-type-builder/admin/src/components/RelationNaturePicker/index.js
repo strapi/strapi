@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { truncate } from 'lodash';
 import { FormattedMessage } from 'react-intl';
@@ -51,7 +51,7 @@ const RelationNaturePicker = ({ featureName, onClick, nature, target }) => {
         </div>
         <div className="nature-txt">
           <span>{truncate(leftName, { length: 24 })}</span>
-          &nbsp; <FormattedMessage id={`${pluginId}.relation.${nature}`} />{' '}
+          &nbsp; <FormattedMessage id={`${pluginId}.relation.${nature}`} />
           &nbsp;
           <span>{truncate(rightName, { length: 24 })}</span>
         </div>
@@ -74,4 +74,5 @@ RelationNaturePicker.propTypes = {
   target: PropTypes.string,
 };
 
-export default RelationNaturePicker;
+export default memo(RelationNaturePicker);
+export { RelationNaturePicker };

@@ -2,7 +2,7 @@ import React from 'react';
 import { FormattedMessage } from 'react-intl';
 import { shallow } from 'enzyme';
 
-import DocumentationSection from '../index';
+import { DocumentationSection } from '../index';
 
 describe('<DocumentationSection />', () => {
   it('should not crash', () => {

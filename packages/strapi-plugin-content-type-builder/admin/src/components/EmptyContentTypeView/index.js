@@ -4,7 +4,7 @@
  *
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Button } from 'strapi-helper-plugin';
@@ -47,4 +47,5 @@ EmptyContentTypeView.propTypes = {
   type: PropTypes.string,
 };
 
-export default EmptyContentTypeView;
+export default memo(EmptyContentTypeView);
+export { EmptyContentTypeView };
