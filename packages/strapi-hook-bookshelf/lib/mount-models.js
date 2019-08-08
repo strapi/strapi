@@ -418,12 +418,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     try {
       // External function to map key that has been updated with `columnName`
       const mapper = (params = {}) => {
-        if (definition.client === 'mysql' || definition.client === 'sqlite3') {
-          Object.keys(params).map(key => {
-            const attr = definition.attributes[key] || {};
-            params[key] = castValueFromType(attr.type, params[key]);
-          });
-        }
+        Object.keys(params).map(key => {
+          const attr = definition.attributes[key] || {};
+          params[key] = castValueFromType(attr.type, params[key], definition);
+        });
 
         return _.mapKeys(params, (value, key) => {
           const attr = definition.attributes[key] || {};
@@ -869,10 +867,13 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
   return Promise.all(updates);
 };
 
-const castValueFromType = (type, value) => {
+const castValueFromType = (type, value, definition) => {
   switch (type) {
     case 'json': {
-      return JSON.stringify(value);
+      if (definition.client === 'mysql' || definition.client === 'sqlite3') {
+        return JSON.stringify(value);
+      }
+      return value;
     }
     // TODO: handle real date format 1970-01-01
     case 'date':
