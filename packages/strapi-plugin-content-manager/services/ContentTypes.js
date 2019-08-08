@@ -87,6 +87,10 @@ module.exports = {
               };
             }
           } else {
+            if (attribute.type === 'timestampUpdate') {
+              attribute.type = 'timestamp';
+            }
+
             acc[key] = attribute;
           }
           return acc;
