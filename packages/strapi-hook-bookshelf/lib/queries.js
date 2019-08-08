@@ -279,6 +279,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
         );
       } else {
         validateNonRepeatableInput(groupValue, { key, ...attr });
+
+        if (groupValue === null) return;
         await createGroupAndLink({ value: groupValue, order: 1 });
       }
     }
@@ -374,6 +376,8 @@ module.exports = function createQueryBuilder({ model, modelKey, strapi }) {
           groupModel,
           transacting,
         });
+
+        if (groupValue === null) return;
 
         await updateOrCreateGroupAndLink({ value: groupValue, order: 1 });
       }
@@ -560,6 +564,16 @@ function validateRepeatableInput(value, { key, min, max }) {
     throw err;
   }
 
+  value.forEach(val => {
+    if (typeof val !== 'object' || Array.isArray(val) || val === null) {
+      const err = new Error(
+        `Group ${key} as invalid items. Expected each items to be objects`
+      );
+      err.status = 400;
+      throw err;
+    }
+  });
+
   if (min && value.length < min) {
     const err = new Error(`Group ${key} must contain at least ${min} items`);
     err.status = 400;
@@ -573,7 +587,7 @@ function validateRepeatableInput(value, { key, min, max }) {
 }
 
 function validateNonRepeatableInput(value, { key, required }) {
-  if (typeof value !== 'object') {
+  if (typeof value !== 'object' || Array.isArray(value)) {
     const err = new Error(`Group ${key} should be an object`);
     err.status = 400;
     throw err;

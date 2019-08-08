@@ -69,6 +69,8 @@ module.exports = ({ model, modelKey, strapi }) => {
         await entry.save();
       } else {
         validateNonRepeatableInput(groupValue, { key, ...attr });
+        if (groupValue === null) return;
+
         const groupEntry = await strapi.query(group).create(groupValue);
         entry[key] = [
           {
@@ -124,6 +126,8 @@ module.exports = ({ model, modelKey, strapi }) => {
         validateNonRepeatableInput(groupValue, { key, ...attr });
 
         await deleteOldGroups(entry, groupValue, { key, groupModel });
+
+        if (groupValue === null) return;
 
         const group = await updateOrCreateGroup(groupValue);
         entry[key] = [
@@ -389,6 +393,16 @@ function validateRepeatableInput(value, { key, min, max }) {
     throw err;
   }
 
+  value.forEach(val => {
+    if (typeof val !== 'object' || Array.isArray(val) || val === null) {
+      const err = new Error(
+        `Group ${key} as invalid items. Expected each items to be objects`
+      );
+      err.status = 400;
+      throw err;
+    }
+  });
+
   if (min && value.length < min) {
     const err = new Error(`Group ${key} must contain at least ${min} items`);
     err.status = 400;
@@ -402,7 +416,7 @@ function validateRepeatableInput(value, { key, min, max }) {
 }
 
 function validateNonRepeatableInput(value, { key, required }) {
-  if (typeof value !== 'object') {
+  if (typeof value !== 'object' || Array.isArray(value)) {
     const err = new Error(`Group ${key} should be an object`);
     err.status = 400;
     throw err;

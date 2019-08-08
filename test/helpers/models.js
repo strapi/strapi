@@ -1,6 +1,28 @@
 const waitRestart = require('./waitRestart');
 
 module.exports = ({ rq }) => {
+  async function createGroup(data) {
+    await rq({
+      url: '/content-type-builder/groups',
+      method: 'POST',
+      body: {
+        connection: 'default',
+        ...data,
+      },
+    });
+
+    await waitRestart();
+  }
+
+  async function deleteGroup(name) {
+    await rq({
+      url: `/content-type-builder/groups/${name}`,
+      method: 'DELETE',
+    });
+
+    await waitRestart();
+  }
+
   function createModelWithType(name, type, opts = {}) {
     return createModel({
       connection: 'default',
@@ -21,7 +43,10 @@ module.exports = ({ rq }) => {
     await rq({
       url: '/content-type-builder/models',
       method: 'POST',
-      body: data,
+      body: {
+        connection: 'default',
+        ...data,
+      },
     });
 
     await waitRestart();
@@ -49,6 +74,9 @@ module.exports = ({ rq }) => {
   }
 
   return {
+    createGroup,
+    deleteGroup,
+
     createModels,
     createModel,
     createModelWithType,

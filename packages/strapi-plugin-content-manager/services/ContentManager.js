@@ -13,7 +13,7 @@ module.exports = {
   },
 
   fetchAll(params, query) {
-    const { query: request, source, populate = [], ...filters } = query;
+    const { query: request, source, populate, ...filters } = query;
 
     const queryFilter = !_.isEmpty(request)
       ? {
