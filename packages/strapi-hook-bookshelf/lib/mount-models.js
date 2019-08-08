@@ -876,25 +876,16 @@ const castValueFromType = (type, value, definition) => {
       return value;
     }
     // TODO: handle real date format 1970-01-01
-    case 'date':
-    case 'datetime': {
-      const date = dateFns.parse(value);
-
-      if (!dateFns.isValid(date)) {
-        throw new Error(
-          `Invalid ${type} format, expected a timestamp or an ISO date`
-        );
-      }
-
-      return date;
-    }
     // TODO: handle real time format 12:00:00
     case 'time':
-    case 'timestamp': {
+    case 'timestamp':
+    case 'date':
+    case 'datetime': {
       const date = dateFns.parse(value);
       if (dateFns.isValid(date)) return date;
 
       date.setTime(value);
+
       if (!dateFns.isValid(date)) {
         throw new Error(
           `Invalid ${type} format, expected a timestamp or an ISO date`

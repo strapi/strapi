@@ -20,22 +20,20 @@ describe('Test type date', () => {
   }, 60000);
 
   test('Create entry with valid value JSON', async () => {
-    const now = new Date();
-
     const res = await rq.post('/content-manager/explorer/withdate', {
       body: {
-        field: now,
+        field: '2019-08-08T10:10:57.000Z',
       },
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
-      field: now.toISOString(),
+      field: '2019-08-08T10:10:57.000Z',
     });
   });
 
   test('Create entry with valid value FormData', async () => {
-    const now = new Date();
+    const now = new Date(2019, 0, 12);
 
     const res = await rq.post('/content-manager/explorer/withdate', {
       formData: {
@@ -50,7 +48,7 @@ describe('Test type date', () => {
   });
 
   test('Create entry with timestamp value should be converted to ISO', async () => {
-    const now = new Date();
+    const now = new Date(2016, 4, 8);
 
     const res = await rq.post('/content-manager/explorer/withdate', {
       body: {
@@ -64,12 +62,25 @@ describe('Test type date', () => {
     });
   });
 
-  test('Throws on invalid date format', async () => {
-    const now = new Date();
+  test('Accepts string timestamp', async () => {
+    const now = new Date(2000, 0, 1);
 
     const res = await rq.post('/content-manager/explorer/withdate', {
       body: {
         field: `${now.getTime()}`,
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toMatchObject({
+      field: now.toISOString(),
+    });
+  });
+
+  test('Throws on invalid date format', async () => {
+    const res = await rq.post('/content-manager/explorer/withdate', {
+      body: {
+        field: 'azdazindoaizdnoainzd',
       },
     });
 
@@ -87,7 +98,7 @@ describe('Test type date', () => {
   });
 
   test('Updating entry sets the right value and format JSON', async () => {
-    const now = new Date();
+    const now = new Date(2018, 7, 5);
 
     const res = await rq.post('/content-manager/explorer/withdate', {
       body: {
@@ -95,7 +106,7 @@ describe('Test type date', () => {
       },
     });
 
-    const newDate = new Date();
+    const newDate = new Date(2017, 10, 23);
     const updateRes = await rq.put(
       `/content-manager/explorer/withdate/${res.body.id}`,
       {

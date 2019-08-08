@@ -45,18 +45,7 @@ describe('Test type boolean', () => {
     });
   });
 
-  test('Set null on invalid boolean value', async () => {
-    const res = await rq.post('/content-manager/explorer/withboolean', {
-      formData: {
-        data: JSON.stringify({ field: 'random' }),
-      },
-    });
-
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
-      field: null,
-    });
-  });
+  test.todo('Throws on invalid boolean value');
 
   test('Convert integer to boolean value', async () => {
     let res = await rq.post('/content-manager/explorer/withboolean', {
