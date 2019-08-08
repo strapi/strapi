@@ -3,7 +3,7 @@ const container = require('markdown-it-container');
 const title = 'Strapi Documentation';
 const description = 'The headless CMS developers love.';
 
-const head = require('./config/head')({title, description});
+const head = require('./config/head')({ title, description });
 const markdown = require('./config/markdown');
 
 const versions_one = require('./config/versions/1.x.x');
@@ -50,9 +50,7 @@ module.exports = {
     sidebar: {
       '/3.0.0-beta.x/': versions_three_beta,
       '/3.0.0-alpha.x/': versions_three_alpha,
-      '/1.x.x/': versions_one
+      '/1.x.x/': versions_one,
     },
   },
 };
-
-

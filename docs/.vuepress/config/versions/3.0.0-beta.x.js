@@ -74,8 +74,9 @@ module.exports = [
     title: '👑 Contribution Guide',
     children: [
       '/3.0.0-beta.x/community/contributing-guide.md',
-      '/3.0.0-beta.x/community/code-of-conduct.md',
+      '/3.0.0-beta.x/community/contribute-with-code.md',
       '/3.0.0-beta.x/community/contribute-with-docs.md',
+      '/3.0.0-beta.x/community/code-of-conduct.md',
     ],
   },
   {

@@ -3,7 +3,7 @@ const url = 'https://strapi.io/documentation/';
 const ogprefix = 'og: http://ogp.me/ns#';
 const color = '#2F80ED';
 
-module.exports = ({title, description}) => {
+module.exports = ({ title, description }) => {
   return [
     ['link', { rel: 'icon', href: `/rocket.png` }],
     ['meta', { name: 'theme-color', content: color }],
