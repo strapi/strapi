@@ -26,7 +26,7 @@ describe.each([
 
     await modelsUtils.createModelWithType('withgroup', 'group', {
       group: 'somegroup',
-      repeatable: false,
+      repeatable: true,
       required: false,
     });
 
@@ -44,18 +44,23 @@ describe.each([
     test('Creating entry with JSON works', async () => {
       const res = await rq.post('/', {
         body: {
-          field: {
-            name: 'someString',
-          },
+          field: [
+            {
+              name: 'someString',
+            },
+          ],
         },
       });
 
       expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.field)).toBe(true);
       expect(res.body.field).toEqual(
-        expect.objectContaining({
-          id: expect.anything(),
-          name: 'someString',
-        })
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.anything(),
+            name: 'someString',
+          }),
+        ])
       );
     });
 
@@ -63,23 +68,28 @@ describe.each([
       const res = await rq.post('/', {
         formData: {
           data: JSON.stringify({
-            field: {
-              name: 'someValue',
-            },
+            field: [
+              {
+                name: 'someValue',
+              },
+            ],
           }),
         },
       });
 
       expect(res.statusCode).toBe(200);
+      expect(Array.isArray(res.body.field)).toBe(true);
       expect(res.body.field).toEqual(
-        expect.objectContaining({
-          id: expect.anything(),
-          name: 'someValue',
-        })
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.anything(),
+            name: 'someValue',
+          }),
+        ])
       );
     });
 
-    test.each([[], 'someString', 128219, false])(
+    test.each(['someString', 128219, false, {}, null])(
       'Throws if the field is not an object %p',
       async value => {
         const res = await rq.post('/', {
@@ -92,15 +102,15 @@ describe.each([
       }
     );
 
-    test('Can send a null value', async () => {
+    test('Can send an empty array', async () => {
       const res = await rq.post('/', {
         body: {
-          field: null,
+          field: [],
         },
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.field).toBe(null);
+      expect(res.body.field).toEqual([]);
     });
 
     test('Can send input without the group field', async () => {
@@ -109,35 +119,69 @@ describe.each([
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.field).toBe(null);
+      expect(res.body.field).toEqual([]);
     });
   });
 
   describe('GET entries', () => {
+    test('Data is orderd in the order sent', async () => {
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              name: 'firstString',
+            },
+            {
+              name: 'someString',
+            },
+          ],
+        },
+      });
+
+      const getRes = await rq.get(`/${res.body.id}`);
+      expect(getRes.statusCode).toBe(200);
+      expect(Array.isArray(getRes.body.field)).toBe(true);
+
+      expect(getRes.body.field[0]).toMatchObject({
+        name: 'firstString',
+      });
+      expect(getRes.body.field[1]).toMatchObject({
+        name: 'someString',
+      });
+    });
+
     test('Should return entries with their nested groups', async () => {
       const res = await rq.get('/');
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
       res.body.forEach(entry => {
-        if (entry.field === null) return;
+        expect(Array.isArray(entry.field)).toBe(true);
 
-        expect(entry.field).toMatchObject({
-          name: expect.any(String),
-        });
+        if (entry.field.length === 0) return;
+
+        expect(entry.field).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              name: expect.any(String),
+            }),
+          ])
+        );
       });
     });
   });
 
   describe('PUT entry', () => {
-    test.each([[], 'someString', 128219, false])(
+    test.each(['someString', 128219, false, {}, null])(
       'Throws when sending invalid updated field %p',
       async value => {
         const res = await rq.post('/', {
           body: {
-            field: {
-              name: 'someString',
-            },
+            field: [
+              {
+                name: 'someString',
+              },
+            ],
           },
         });
 
@@ -157,12 +201,74 @@ describe.each([
       }
     );
 
+    test('Updates order at each request', async () => {
+      const res = await rq.post('/', {
+        body: {
+          field: [
+            {
+              name: 'someString',
+            },
+            {
+              name: 'otherString',
+            },
+          ],
+        },
+      });
+
+      expect(res.body.field[0]).toMatchObject({
+        name: 'someString',
+      });
+      expect(res.body.field[1]).toMatchObject({
+        name: 'otherString',
+      });
+
+      const updateRes = await rq.put(`/${res.body.id}`, {
+        body: {
+          field: [
+            {
+              name: 'otherString',
+            },
+            {
+              name: 'someString',
+            },
+          ],
+        },
+      });
+
+      expect(updateRes.statusCode).toBe(200);
+      expect(Array.isArray(updateRes.body.field)).toBe(true);
+
+      expect(updateRes.body.field[0]).toMatchObject({
+        name: 'otherString',
+      });
+      expect(updateRes.body.field[1]).toMatchObject({
+        name: 'someString',
+      });
+
+      const getRes = await rq.get(`/${res.body.id}`);
+
+      expect(getRes.statusCode).toBe(200);
+      expect(Array.isArray(getRes.body.field)).toBe(true);
+
+      expect(getRes.body.field[0]).toMatchObject({
+        name: 'otherString',
+      });
+      expect(getRes.body.field[1]).toMatchObject({
+        name: 'someString',
+      });
+    });
+
     test('Keeps the previous value if group not sent', async () => {
       const res = await rq.post('/', {
         body: {
-          field: {
-            name: 'someString',
-          },
+          field: [
+            {
+              name: 'someString',
+            },
+            {
+              name: 'otherString',
+            },
+          ],
         },
       });
 
@@ -179,24 +285,26 @@ describe.each([
       expect(getRes.body).toEqual(res.body);
     });
 
-    test('Removes previous group if null sent', async () => {
+    test('Removes previous groups if empty array sent', async () => {
       const res = await rq.post('/', {
         body: {
-          field: {
-            name: 'someString',
-          },
+          field: [
+            {
+              name: 'someString',
+            },
+          ],
         },
       });
 
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
-          field: null,
+          field: [],
         },
       });
 
       const expectResult = {
         id: res.body.id,
-        field: null,
+        field: [],
       };
 
       expect(updateRes.statusCode).toBe(200);
@@ -208,30 +316,41 @@ describe.each([
       expect(getRes.body).toMatchObject(expectResult);
     });
 
-    test('Replaces the previous group if sent without id', async () => {
+    test('Replaces the previous groups if sent without id', async () => {
       const res = await rq.post('/', {
         body: {
-          field: {
-            name: 'someString',
-          },
+          field: [
+            {
+              name: 'someString',
+            },
+          ],
         },
       });
 
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
-          field: {
-            name: 'new String',
-          },
+          field: [
+            {
+              name: 'new String',
+            },
+          ],
         },
       });
 
       expect(updateRes.statusCode).toBe(200);
-      expect(updateRes.body.field.id).not.toBe(res.body.field.id);
+
+      const oldIds = res.body.field.map(val => val.id);
+      updateRes.body.field.forEach(val => {
+        expect(oldIds.includes(val.id)).toBe(false);
+      });
+
       expect(updateRes.body).toMatchObject({
         id: res.body.id,
-        field: {
-          name: 'new String',
-        },
+        field: [
+          {
+            name: 'new String',
+          },
+        ],
       });
 
       const getRes = await rq.get(`/${res.body.id}`);
@@ -239,57 +358,95 @@ describe.each([
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toMatchObject({
         id: res.body.id,
-        field: {
-          name: 'new String',
-        },
+        field: [
+          {
+            name: 'new String',
+          },
+        ],
       });
     });
 
     test('Throws on invalid id in group', async () => {
       const res = await rq.post('/', {
         body: {
-          field: {
-            name: 'someString',
-          },
+          field: [
+            {
+              name: 'someString',
+            },
+          ],
         },
       });
 
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
-          field: {
-            id: 'invalid_id',
-            name: 'new String',
-          },
+          field: [
+            {
+              id: 'invalid_id',
+              name: 'new String',
+            },
+          ],
         },
       });
 
       expect(updateRes.statusCode).toBe(400);
     });
 
-    test('Updates group if previsous group id is sent', async () => {
+    test('Updates group with ids, create new ones and removes old ones', async () => {
       const res = await rq.post('/', {
         body: {
-          field: {
-            name: 'someString',
-          },
+          field: [
+            {
+              name: 'one',
+            },
+            {
+              name: 'two',
+            },
+            {
+              name: 'three',
+            },
+          ],
         },
       });
 
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
-          field: {
-            id: res.body.field.id, // send old id to update the previous group
-            name: 'new String',
-          },
+          field: [
+            {
+              id: res.body.field[0].id, // send old id to update the previous group
+              name: 'newOne',
+            },
+            {
+              name: 'newTwo',
+            },
+            {
+              id: res.body.field[2].id,
+              name: 'three',
+            },
+            {
+              name: 'four',
+            },
+          ],
         },
       });
 
       const expectedResult = {
         id: res.body.id,
-        field: {
-          id: res.body.field.id,
-          name: 'new String',
-        },
+        field: [
+          {
+            id: res.body.field[0].id,
+            name: 'newOne',
+          },
+          {
+            name: 'newTwo',
+          },
+          {
+            id: res.body.field[2].id,
+            name: 'three',
+          },
+          {
+            name: 'four',
+          },
+        ],
       };
 
       expect(updateRes.statusCode).toBe(200);
@@ -306,9 +463,17 @@ describe.each([
     test('Returns entry with groups', async () => {
       const res = await rq.post('/', {
         body: {
-          field: {
-            name: 'someString',
-          },
+          field: [
+            {
+              name: 'someString',
+            },
+            {
+              name: 'someOtherString',
+            },
+            {
+              name: 'otherSomeString',
+            },
+          ],
         },
       });
 
