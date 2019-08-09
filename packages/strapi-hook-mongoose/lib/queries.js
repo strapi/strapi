@@ -267,9 +267,10 @@ module.exports = ({ model, modelKey, strapi }) => {
     const relations = pickRelations(values);
     const data = omitExernalValues(values);
 
+    // update groups first in case it fails don't update the entity
+    await updateGroups(entry, values);
     // Update entry with no-relational data.
     await entry.updateOne(data);
-    await updateGroups(entry, values);
 
     // Update relational data and return the entry.
     return model.updateRelations(Object.assign(params, { values: relations }));

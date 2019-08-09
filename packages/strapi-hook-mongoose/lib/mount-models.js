@@ -348,10 +348,10 @@ const createOnFetchPopulateFn = ({
       ) {
         this._mongooseOptions.populate[name].path = `${name}.ref`;
       } else {
-        this._mongooseOptions.populate[name] = {
+        _.set(this._mongooseOptions, ['populate', name], {
           path: `${name}.ref`,
           _docs: {},
-        };
+        });
       }
     });
 
