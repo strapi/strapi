@@ -1,0 +1,26 @@
+{
+  "info": {
+    "name": "ingredient",
+    "description": ""
+  },
+  "connection": "default",
+  "collectionName": "groups_ingredients",
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "pictures": {
+      "collection": "file",
+      "via": "related",
+      "plugin": "upload",
+      "required": false
+    },
+    "price": {
+      "type": "decimal"
+    }
+  }
+}

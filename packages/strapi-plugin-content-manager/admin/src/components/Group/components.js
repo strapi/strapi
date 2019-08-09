@@ -1,19 +1,30 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Button = styled.div`
   width: 100%;
-  height: 34px;
+  height: 37px;
+  margin-bottom: 27px;
   text-align: center;
-  background-color: #fafafb;
-  border-radius: 2px;
+  border: 1px solid #e3e9f3;
+  border-top: 1px solid
+    ${({ doesPreviousFieldContainErrorsAndIsClosed }) =>
+      doesPreviousFieldContainErrorsAndIsClosed ? '#FFA784' : '#e3e9f3'};
+
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
+  ${({ withBorderRadius }) => {
+    if (withBorderRadius) {
+      return css`
+        border-radius: 2px;
+      `;
+    }
+  }}
 
-  color: #333740;
+  color: #007eff;
   font-size: 12px;
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
-  line-height: 35px;
+  line-height: 37px;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -31,14 +42,70 @@ const Flex = styled.div`
 `;
 
 const GroupCollapseWrapper = styled(Flex)`
-  height: 34px;
-  margin-bottom: 2px;
-  padding: 0 20px;
+  height: 36px;
+  padding: 0 15px;
   justify-content: space-between;
-  line-height: 34px;
-  background-color: #ffffff;
+  border: 1px solid ${({ hasErrors, isOpen }) => {
+    if (hasErrors) {
+      return '#FFA784';
+    } else if (isOpen) {
+      return '#AED4FB';
+    } else {
+      return '#e3e9f3';
+    }
+  }}
+
+  ${({ doesPreviousFieldContainErrorsAndIsOpen }) => {
+    if (doesPreviousFieldContainErrorsAndIsOpen) {
+      return css`
+        border-top: 1px solid #ffa784;
+      `;
+    }
+  }}
+
+
+
+  ${({ isFirst }) => {
+    if (isFirst) {
+      return css`
+        border-top-right-radius: 2px;
+        border-top-left-radius: 2px;
+      `;
+    }
+  }}
+  border-bottom: 0;
+  line-height: 36px;
   font-size: 13px;
-  border-radius: 2px;
+  font-weight: 500;
+
+  background-color: ${({ hasErrors, isOpen }) => {
+    if (hasErrors && isOpen) {
+      return '#FFE9E0';
+    } else if (isOpen) {
+      return '#E6F0FB';
+    } else {
+      return '#ffffff';
+    }
+  }}
+
+  ${({ hasErrors, isOpen }) => {
+    if (hasErrors) {
+      return css`
+        color: #f64d0a;
+        font-weight: 600;
+      `;
+    }
+
+    if (isOpen) {
+      return css`
+        color: #007eff;
+        font-weight: 600;
+      `;
+    }
+  }}
+
+
+
   button,
   i,
   img {
@@ -47,6 +114,7 @@ const GroupCollapseWrapper = styled(Flex)`
       outline: 0;
     }
   }
+  webkit-font-smoothing: antialiased;
 `;
 
 const ImgWrapper = styled.div`
@@ -55,11 +123,35 @@ const ImgWrapper = styled.div`
   margin: auto;
   margin-right: 19px;
   border-radius: 50%;
-  background-color: #e3e9f3;
+  background-color: ${({ hasErrors, isOpen }) => {
+    if (hasErrors) {
+      return '#FAA684';
+    } else if (isOpen) {
+      return '#AED4FB';
+    } else {
+      return '#e3e9f3';
+    }
+  }}
   text-align: center;
   line-height: 21px;
 
   ${({ isOpen }) => !isOpen && 'transform: rotate(180deg)'}
 `;
 
-export { Button, Flex, GroupCollapseWrapper, ImgWrapper };
+const FormWrapper = styled.div`
+  padding-top: 27px;
+  padding-left: 15px;
+  padding-right: 15px;
+  border-top: 1px solid
+    ${({ hasErrors, isOpen }) => {
+      if (hasErrors) {
+        return '#ffa784';
+      } else if (isOpen) {
+        return '#AED4FB';
+      } else {
+        return '#e3e9f3';
+      }
+    }};
+`;
+
+export { Button, Flex, FormWrapper, GroupCollapseWrapper, ImgWrapper };

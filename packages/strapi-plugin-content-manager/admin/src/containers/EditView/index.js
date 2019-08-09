@@ -459,6 +459,15 @@ function EditView({
                   );
 
                   if (fieldsRow.length === 1 && group.type === 'group') {
+                    const groupErrorKeys = Object.keys(errors)
+                      .filter(errorKey => errorKey.includes(name))
+                      .map(errorKey =>
+                        errorKey
+                          .split('.')
+                          .slice(0, 2)
+                          .join('.')
+                      );
+
                     return (
                       <Group
                         {...group}
@@ -469,6 +478,7 @@ function EditView({
                             keys: keys.split('.'),
                           });
                         }}
+                        groupErrorKeys={groupErrorKeys}
                         groupValue={groupValue}
                         key={key}
                         isRepeatable={group.repeatable || false}

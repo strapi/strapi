@@ -6,18 +6,27 @@ import { DragSource, DropTarget } from 'react-dnd';
 import { Collapse } from 'reactstrap';
 
 import pluginId from '../../pluginId';
-
 import ItemTypes from '../../utils/ItemTypes';
 import Grab from '../../assets/images/grab_icon.svg';
 import Logo from '../../assets/images/caret_top.svg';
+import GrabBlue from '../../assets/images/grab_icon_blue.svg';
+import GrabError from '../../assets/images/grab_icon_error.svg';
 
-import { Flex, GroupCollapseWrapper, ImgWrapper } from './components';
+import {
+  Flex,
+  FormWrapper,
+  GroupCollapseWrapper,
+  ImgWrapper,
+} from './components';
 import Form from './Form';
 
 function GroupCollapse({
   connectDragSource,
   connectDropTarget,
+  doesPreviousFieldContainErrorsAndIsOpen,
+  hasErrors,
   isDragging,
+  isFirst,
   isOpen,
   layout,
   modifiedData,
@@ -43,12 +52,30 @@ function GroupCollapse({
   connectDragSource(ref);
   connectDropTarget(ref);
 
+  // TODO change when the error caret top is available
+  const logo = hasErrors ? Logo : Logo;
+  let grab = isOpen ? GrabBlue : Grab;
+
+  if (hasErrors) {
+    grab = GrabError;
+  }
+
   return (
     <Fragment>
-      <GroupCollapseWrapper onClick={onClick} ref={ref} style={{ opacity }}>
-        <Flex style={{ fontWeight: 500 }}>
-          <ImgWrapper isOpen={isOpen}>
-            <img src={Logo} alt="logo" />
+      <GroupCollapseWrapper
+        doesPreviousFieldContainErrorsAndIsOpen={
+          doesPreviousFieldContainErrorsAndIsOpen
+        }
+        hasErrors={hasErrors}
+        isFirst={isFirst}
+        isOpen={isOpen}
+        onClick={onClick}
+        ref={ref}
+        style={{ opacity }}
+      >
+        <Flex>
+          <ImgWrapper hasErrors={hasErrors} isOpen={isOpen}>
+            <img src={logo} alt="logo" />
           </ImgWrapper>
           <FormattedMessage
             id={`${pluginId}.containers.Edit.pluginHeader.title.new`}
@@ -66,17 +93,17 @@ function GroupCollapse({
           >
             <i className="fa fa-trash" />
           </button>
-          <button type="button" style={{ lineHeight: '32px' }}>
+          <button type="button" style={{ lineHeight: '36px' }}>
             <img
-              src={Grab}
+              src={grab}
               alt="grab icon"
               style={{ verticalAlign: 'unset' }}
             />
           </button>
         </Flex>
       </GroupCollapseWrapper>
-      <Collapse isOpen={isOpen}>
-        <div style={{ paddingTop: '25px' }}>
+      <Collapse isOpen={isOpen} style={{ backgroundColor: '#f5f5f5' }}>
+        <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
           {fields.map((fieldRow, key) => {
             return (
               <div className="row" key={key}>
@@ -97,7 +124,7 @@ function GroupCollapse({
               </div>
             );
           })}
-        </div>
+        </FormWrapper>
       </Collapse>
     </Fragment>
   );
@@ -105,8 +132,11 @@ function GroupCollapse({
 
 GroupCollapse.defaultProps = {
   addRelation: () => {},
+  doesPreviousFieldContainErrorsAndIsOpen: false,
+  hasErrors: false,
   isCreating: true,
   isDragging: false,
+  isFirst: false,
   isOpen: false,
   layout: {},
   move: () => {},
@@ -116,7 +146,10 @@ GroupCollapse.defaultProps = {
 GroupCollapse.propTypes = {
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
+  doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
+  hasErrors: PropTypes.bool,
   isDragging: PropTypes.bool,
+  isFirst: PropTypes.bool,
   isOpen: PropTypes.bool,
   layout: PropTypes.object,
   modifiedData: PropTypes.object,

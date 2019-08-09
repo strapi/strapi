@@ -22,7 +22,8 @@
       "type": "text"
     },
     "published": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": true
     },
     "json": {
       "type": "json"
@@ -39,6 +40,10 @@
     },
     "content": {
       "type": "richtext"
+    },
+    "tags": {
+      "collection": "tag",
+      "via": "articles"
     }
   }
 }

@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 const SubWrapper = styled.div`
   background: #ffffff;
+  // background: red;
   border-radius: 2px;
   box-shadow: 0 2px 4px #e3e9f3;
 `;
