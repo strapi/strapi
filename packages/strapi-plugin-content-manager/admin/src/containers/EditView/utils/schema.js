@@ -20,6 +20,14 @@ const errorsTrads = {
   required: 'components.Input.error.validation.required',
 };
 
+yup.addMethod(yup.mixed, 'defined', function() {
+  return this.test(
+    'defined',
+    errorsTrads.required,
+    value => value !== undefined
+  );
+});
+
 const getAttributes = data => get(data, ['schema', 'attributes'], {});
 
 const createYupSchema = (model, { groups }) => {
@@ -54,7 +62,7 @@ const createYupSchema = (model, { groups }) => {
             ? yup.array().of(groupSchema)
             : groupSchema;
         groupSchema =
-          attribute.required === true ? groupSchema.required() : groupSchema;
+          attribute.required === true ? groupSchema.defined() : groupSchema;
         acc[current] = groupSchema;
       }
       return acc;

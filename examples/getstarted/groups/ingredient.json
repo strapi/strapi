@@ -21,6 +21,9 @@
     },
     "price": {
       "type": "decimal"
+    },
+    "tags": {
+      "collection": "tag"
     }
   }
 }
