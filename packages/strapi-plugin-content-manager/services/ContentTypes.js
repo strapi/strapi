@@ -58,9 +58,6 @@ module.exports = {
     return {
       ...pickSchemaFields(contentType),
       attributes: {
-        [contentType.primaryKey]: {
-          type: contentType.primaryKeyType,
-        },
         id: {
           type: contentType.primaryKeyType,
         },

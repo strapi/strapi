@@ -20,6 +20,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     // Set the default values to model settings.
     _.defaults(definition, {
       primaryKey: '_id',
+      primaryKeyType: 'string',
     });
 
     if (!plugin) {

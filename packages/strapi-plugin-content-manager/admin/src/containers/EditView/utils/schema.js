@@ -63,7 +63,11 @@ const createYupSchema = (model, { groups }) => {
 };
 const createYupSchemaAttribute = (type, validations) => {
   let schema = yup.mixed();
-  if (['string', 'text', 'email', 'password', 'enumeration'].includes(type)) {
+  if (
+    ['string', 'text', 'richtext', 'email', 'password', 'enumeration'].includes(
+      type
+    )
+  ) {
     schema = yup.string();
   }
   if (type === 'json') {
@@ -103,6 +107,7 @@ const createYupSchemaAttribute = (type, validations) => {
   if (['date', 'datetime'].includes(type)) {
     schema = yup.date().typeError();
   }
+
   Object.keys(validations).forEach(validation => {
     const validationValue = validations[validation];
     if (
