@@ -40,7 +40,7 @@ describe.each([
   afterAll(async () => {
     await modelsUtils.deleteGroup('somegroup');
     await modelsUtils.deleteModel('withgroup');
-  });
+  }, 60000);
 
   describe('POST new entry', () => {
     test('Creating entry with JSON works', async () => {
