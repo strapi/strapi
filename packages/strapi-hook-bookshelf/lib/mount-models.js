@@ -418,12 +418,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     try {
       // External function to map key that has been updated with `columnName`
       const mapper = (params = {}) => {
-        if (definition.client === 'mysql' || definition.client === 'sqlite3') {
-          Object.keys(params).map(key => {
-            const attr = definition.attributes[key] || {};
-            params[key] = castValueFromType(attr.type, params[key]);
-          });
-        }
+        Object.keys(params).map(key => {
+          const attr = definition.attributes[key] || {};
+          params[key] = castValueFromType(attr.type, params[key], definition);
+        });
 
         return _.mapKeys(params, (value, key) => {
           const attr = definition.attributes[key] || {};
@@ -764,8 +762,10 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           ];
 
           const formatter = attributes => {
-            Object.keys(attributes).map(key => {
+            Object.keys(attributes).forEach(key => {
               const attr = definition.attributes[key] || {};
+
+              if (attributes[key] === null) return;
 
               if (attr.type === 'json') {
                 attributes[key] = JSON.parse(attributes[key]);
@@ -776,11 +776,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
                   return;
                 }
 
-                const strVal =
-                  attributes[key] !== null
-                    ? attributes[key].toString()
-                    : attributes[key];
-
+                const strVal = attributes[key].toString();
                 if (strVal === '1') {
                   attributes[key] = true;
                 } else if (strVal === '0') {
@@ -790,8 +786,15 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
                 }
               }
 
-              if (attr.type === 'date' && definition.client == 'sqlite3') {
+              if (attr.type === 'date' && definition.client === 'sqlite3') {
                 attributes[key] = dateFns.parse(attributes[key]);
+              }
+
+              if (
+                attr.type === 'biginteger' &&
+                definition.client === 'sqlite3'
+              ) {
+                attributes[key] = attributes[key].toString();
               }
             });
           };
@@ -869,29 +872,28 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
   return Promise.all(updates);
 };
 
-const castValueFromType = (type, value) => {
+const castValueFromType = (type, value, definition) => {
+  // do not cast null values
+  if (value === null) return null;
+
   switch (type) {
     case 'json': {
-      return JSON.stringify(value);
+      if (definition.client === 'mysql' || definition.client === 'sqlite3') {
+        return JSON.stringify(value);
+      }
+      return value;
     }
     // TODO: handle real date format 1970-01-01
-    case 'date':
-    case 'datetime': {
-      const date = dateFns.parse(value);
-
-      if (!dateFns.isValid(date)) {
-        throw new Error(`Invalid ${type} format, expected a `);
-      }
-
-      return date;
-    }
     // TODO: handle real time format 12:00:00
     case 'time':
-    case 'timestamp': {
+    case 'timestamp':
+    case 'date':
+    case 'datetime': {
       const date = dateFns.parse(value);
       if (dateFns.isValid(date)) return date;
 
       date.setTime(value);
+
       if (!dateFns.isValid(date)) {
         throw new Error(
           `Invalid ${type} format, expected a timestamp or an ISO date`

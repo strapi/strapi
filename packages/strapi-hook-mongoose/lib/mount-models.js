@@ -20,6 +20,7 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
     // Set the default values to model settings.
     _.defaults(definition, {
       primaryKey: '_id',
+      primaryKeyType: 'string',
     });
 
     if (!plugin) {
@@ -347,10 +348,10 @@ const createOnFetchPopulateFn = ({
       ) {
         this._mongooseOptions.populate[name].path = `${name}.ref`;
       } else {
-        this._mongooseOptions.populate[name] = {
+        _.set(this._mongooseOptions, ['populate', name], {
           path: `${name}.ref`,
           _docs: {},
-        };
+        });
       }
     });
 
