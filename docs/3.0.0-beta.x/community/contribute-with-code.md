@@ -1,19 +1,19 @@
 # Contribute with Code
 
-**NOTE:** All efforts to contribute are highly appreciated, we recommend you talk to a maintainer **prior** to spending a lot of time making a pull request that may not align with the project roadmap.
+**NOTE:** All efforts to contribute are highly appreciated, we recommend you talk to a maintainer **before** to spending much time making a pull request that may not align with the project roadmap.
 
 ## Before Submitting a Pull Request
 
-**Before submitting your pull request** make sure the following requirements are fulfilled:
+**Before submitting your pull request**, fulfill the following requirements:
 
 - Fork the repository and create your branch from `master`.
 - Run `yarn setup` in the repository root.
-- If you’ve fixed a bug or added code that should be tested, add the tests and then link the corresponding issue in either your commit or your PR!
+- If you’ve fixed a bug or added code that should be tested, add the tests, and then link the corresponding issue in either your commit or your PR!
 - Ensure the test suites are passing:
   - `yarn test:unit`
   - `yarn test:front`
-- Make sure your code lints (`yarn lint`).
-- When you write the Pull Request, please follow the [Pull Request Template](https://github.com/strapi/strapi/blob/master/.github/PULL_REQUEST_TEMPLATE.md)
+- Use a linter on your code (`yarn lint`).
+- When you write the Pull Request, please follow the [Pull Request Template](https://github.com/strapi/strapi/blob/master/.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Technical Requirements
 
@@ -48,7 +48,7 @@ cd strapi && yarn setup
 
 #### 4. 🚀 Start the example application
 
-**Go to the getstarted application**
+**Go to the "/getstarted" application**
 
 ```bash
 cd strapi/examples/getstarted
@@ -59,7 +59,7 @@ The server (API) is available at http://localhost:1337.
 
 **Note:** Contributions involving the UI of any part of the administration panel, should complete the following step and take advantage of the additional tools.
 
-**Start the administration panel server**
+**Start the administration panel server**.
 
 ```bash
 cd strapi/packages/strapi-admin
@@ -75,7 +75,7 @@ The administration panel is available at http://localhost:4000/admin
 - `yarn watch` starts yarn watch in all packages.
 - `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
 - `yarn setup` installs the dependencies.
-- `yarn lint` lints the codebase.
+- `yarn lint` runs a linter on the codebase.
 - `yarn test:clean` removes the coverage.
 - `yarn test:front` runs the front-end related tests.
 - `yarn test:front:watch` runs an interactive test watcher for the front-end.
