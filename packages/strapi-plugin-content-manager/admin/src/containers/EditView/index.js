@@ -397,6 +397,12 @@ function EditView({
         });
       }}
       pathname={pathname}
+      resetErrors={() => {
+        dispatch({
+          type: 'SET_ERRORS',
+          errors: {},
+        });
+      }}
       search={search}
     >
       <BackHeader onClick={() => redirectToPreviousPage()} />

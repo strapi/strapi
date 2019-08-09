@@ -11,9 +11,11 @@ function reducer(state, action) {
           .push(fromJS({ isOpen: true }));
       });
     case 'COLLAPSE_ALL':
-      return state.update('collapses', list =>
-        list.map(obj => obj.update('isOpen', () => false))
-      );
+      return state
+        .update('collapsesToOpen', () => fromJS([]))
+        .update('collapses', list =>
+          list.map(obj => obj.update('isOpen', () => false))
+        );
     case 'OPEN_COLLAPSES_THAT_HAVE_ERRORS':
       return state
         .update('collapsesToOpen', () => fromJS(action.collapsesToOpen))

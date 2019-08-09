@@ -26,7 +26,7 @@ function Group({
   onChange,
   removeField,
 }) {
-  const { didCheckErrors, errors } = useEditView();
+  const { didCheckErrors, errors, resetErrors } = useEditView();
   const fields = get(layout, ['layouts', 'edit'], []);
   const [state, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, groupValue)
@@ -187,6 +187,7 @@ function Group({
                   });
                   removeField(`${name}.${index}`, shouldAddEmptyField);
                 }}
+                resetErrors={resetErrors}
               />
             );
           })}
