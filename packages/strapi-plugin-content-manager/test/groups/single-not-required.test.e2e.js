@@ -153,7 +153,10 @@ describe.each([
         const getRes = await rq.get(`/${res.body.id}`);
 
         expect(getRes.statusCode).toBe(200);
-        expect(getRes.body).toEqual(res.body);
+        expect(getRes.body).toMatchObject({
+          id: res.body.id,
+          field: res.body.field,
+        });
       }
     );
 
@@ -171,12 +174,18 @@ describe.each([
       });
 
       expect(updateRes.statusCode).toBe(200);
-      expect(updateRes.body).toEqual(res.body);
+      expect(updateRes.body).toMatchObject({
+        id: res.body.id,
+        field: res.body.field,
+      });
 
       const getRes = await rq.get(`/${res.body.id}`);
 
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body).toEqual(res.body);
+      expect(getRes.body).toMatchObject({
+        id: res.body.id,
+        field: res.body.field,
+      });
     });
 
     test('Removes previous group if null sent', async () => {
