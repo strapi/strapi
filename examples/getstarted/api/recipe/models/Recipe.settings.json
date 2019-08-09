@@ -35,6 +35,10 @@
     "mainIngredient": {
       "group": "ingredient",
       "type": "group"
+    },
+    "articles": {
+      "collection": "article",
+      "via": "recipe"
     }
   }
 }

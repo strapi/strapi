@@ -2,7 +2,9 @@ import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
+
 import pluginId from '../../pluginId';
+
 import Grab from '../../assets/images/grab_icon.svg';
 import Logo from '../../assets/images/caret_top.svg';
 import LogoGrey from '../../assets/images/caret_top_grey.svg';
@@ -10,7 +12,9 @@ import LogoError from '../../assets/images/caret_top_error.svg';
 import GrabBlue from '../../assets/images/grab_icon_blue.svg';
 import GrabError from '../../assets/images/grab_icon_error.svg';
 
-import { Flex, FullWidthCarret, ImgWrapper, Wrapper } from './components';
+import PreviewCarret from '../PreviewCarret';
+
+import { Flex, ImgWrapper, Wrapper } from './components';
 
 // eslint-disable-next-line react/display-name
 const GroupBanner = forwardRef(
@@ -47,9 +51,7 @@ const GroupBanner = forwardRef(
     return (
       <div ref={ref}>
         {isDragging ? (
-          <FullWidthCarret>
-            <div />
-          </FullWidthCarret>
+          <PreviewCarret isGroup />
         ) : (
           <Wrapper
             doesPreviousFieldContainErrorsAndIsOpen={

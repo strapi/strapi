@@ -44,6 +44,10 @@
     "tags": {
       "collection": "tag",
       "via": "articles"
+    },
+    "recipe": {
+      "model": "recipe",
+      "via": "articles"
     }
   }
 }

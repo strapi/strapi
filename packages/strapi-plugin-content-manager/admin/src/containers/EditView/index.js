@@ -465,6 +465,8 @@ function EditView({
                   );
 
                   if (fieldsRow.length === 1 && group.type === 'group') {
+                    // Array containing all the keys with of the error object created by YUP
+                    // It is used only to know if whether or not we need to apply an orange border to the n+1 field item
                     const groupErrorKeys = Object.keys(errors)
                       .filter(errorKey => errorKey.includes(name))
                       .map(errorKey =>

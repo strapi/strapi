@@ -66,19 +66,4 @@ const InfoLabel = styled.div`
   color: #007eff;
 `;
 
-const FullWidthCarret = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  height: 30px;
-  width: 100%;
-  margin-bottom: 6px;
-  border-radius: 2px;
-  > div {
-    background: #007eff;
-    height: 2px;
-    width: 100%;
-  }
-`;
-
-export { FullWidthCarret, Wrapper, Field, InfoLabel };
+export { Wrapper, Field, InfoLabel };
