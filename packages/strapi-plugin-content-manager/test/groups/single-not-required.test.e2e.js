@@ -5,12 +5,15 @@ const { createAuthRequest } = require('../../../../test/helpers/request');
 let modelsUtils;
 let rq;
 
-describe('Non repeatable and Non required group', () => {
+describe.each([
+  ['CONTENT MANAGER', '/content-manager/explorer/withgroup'],
+  ['GENERATED API', '/withgroups'],
+])('[%s] => Non repeatable and Not required group for', (_, path) => {
   beforeAll(async () => {
     const token = await registerAndLogin();
-    rq = createAuthRequest(token);
+    const authRq = createAuthRequest(token);
 
-    modelsUtils = createModelsUtils({ rq });
+    modelsUtils = createModelsUtils({ rq: authRq });
 
     await modelsUtils.createGroup({
       name: 'somegroup',
@@ -26,6 +29,10 @@ describe('Non repeatable and Non required group', () => {
       repeatable: false,
       required: false,
     });
+
+    rq = authRq.defaults({
+      baseUrl: `http://localhost:1337${path}`,
+    });
   }, 60000);
 
   afterAll(async () => {
@@ -35,7 +42,7 @@ describe('Non repeatable and Non required group', () => {
 
   describe('POST new entry', () => {
     test('Creating entry with JSON works', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         body: {
           field: {
             name: 'someString',
@@ -53,7 +60,7 @@ describe('Non repeatable and Non required group', () => {
     });
 
     test('Creating entry with formdata works', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         formData: {
           data: JSON.stringify({
             field: {
@@ -75,7 +82,7 @@ describe('Non repeatable and Non required group', () => {
     test.each([[], 'someString', 128219, false])(
       'Throws if the field is not an object %p',
       async value => {
-        const res = await rq.post('/content-manager/explorer/withgroup', {
+        const res = await rq.post('/', {
           body: {
             field: value,
           },
@@ -86,7 +93,7 @@ describe('Non repeatable and Non required group', () => {
     );
 
     test('Can send a null value', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         body: {
           field: null,
         },
@@ -97,7 +104,7 @@ describe('Non repeatable and Non required group', () => {
     });
 
     test('Can send input without the group field', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         body: {},
       });
 
@@ -108,7 +115,7 @@ describe('Non repeatable and Non required group', () => {
 
   describe('GET entries', () => {
     test('Should return entries with their nested groups', async () => {
-      const res = await rq.get('/content-manager/explorer/withgroup');
+      const res = await rq.get('/');
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -124,7 +131,7 @@ describe('Non repeatable and Non required group', () => {
 
   describe('PUT entry', () => {
     test('Keeps the previous value if group not sent', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         body: {
           field: {
             name: 'someString',
@@ -132,26 +139,21 @@ describe('Non repeatable and Non required group', () => {
         },
       });
 
-      const updateRes = await rq.put(
-        `/content-manager/explorer/withgroup/${res.body.id}`,
-        {
-          body: {},
-        }
-      );
+      const updateRes = await rq.put(`/${res.body.id}`, {
+        body: {},
+      });
 
       expect(updateRes.statusCode).toBe(200);
       expect(updateRes.body).toEqual(res.body);
 
-      const getRes = await rq.get(
-        `/content-manager/explorer/withgroup/${res.body.id}`
-      );
+      const getRes = await rq.get(`/${res.body.id}`);
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toEqual(res.body);
     });
 
     test('Removes previous group if null sent', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         body: {
           field: {
             name: 'someString',
@@ -159,14 +161,11 @@ describe('Non repeatable and Non required group', () => {
         },
       });
 
-      const updateRes = await rq.put(
-        `/content-manager/explorer/withgroup/${res.body.id}`,
-        {
-          body: {
-            field: null,
-          },
-        }
-      );
+      const updateRes = await rq.put(`/${res.body.id}`, {
+        body: {
+          field: null,
+        },
+      });
 
       const expectResult = {
         id: res.body.id,
@@ -176,16 +175,14 @@ describe('Non repeatable and Non required group', () => {
       expect(updateRes.statusCode).toBe(200);
       expect(updateRes.body).toMatchObject(expectResult);
 
-      const getRes = await rq.get(
-        `/content-manager/explorer/withgroup/${res.body.id}`
-      );
+      const getRes = await rq.get(`/${res.body.id}`);
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toMatchObject(expectResult);
     });
 
     test('Replaces the previous group if sent without id', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         body: {
           field: {
             name: 'someString',
@@ -193,16 +190,13 @@ describe('Non repeatable and Non required group', () => {
         },
       });
 
-      const updateRes = await rq.put(
-        `/content-manager/explorer/withgroup/${res.body.id}`,
-        {
-          body: {
-            field: {
-              name: 'new String',
-            },
+      const updateRes = await rq.put(`/${res.body.id}`, {
+        body: {
+          field: {
+            name: 'new String',
           },
-        }
-      );
+        },
+      });
 
       expect(updateRes.statusCode).toBe(200);
       expect(updateRes.body.field.id).not.toBe(res.body.field.id);
@@ -213,9 +207,7 @@ describe('Non repeatable and Non required group', () => {
         },
       });
 
-      const getRes = await rq.get(
-        `/content-manager/explorer/withgroup/${res.body.id}`
-      );
+      const getRes = await rq.get(`/${res.body.id}`);
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toMatchObject({
@@ -227,7 +219,7 @@ describe('Non repeatable and Non required group', () => {
     });
 
     test('Throws on invalid id in group', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         body: {
           field: {
             name: 'someString',
@@ -235,23 +227,20 @@ describe('Non repeatable and Non required group', () => {
         },
       });
 
-      const updateRes = await rq.put(
-        `/content-manager/explorer/withgroup/${res.body.id}`,
-        {
-          body: {
-            field: {
-              id: 'invalid_id',
-              name: 'new String',
-            },
+      const updateRes = await rq.put(`/${res.body.id}`, {
+        body: {
+          field: {
+            id: 'invalid_id',
+            name: 'new String',
           },
-        }
-      );
+        },
+      });
 
       expect(updateRes.statusCode).toBe(400);
     });
 
     test('Updates group if previsous group id is sent', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         body: {
           field: {
             name: 'someString',
@@ -259,17 +248,14 @@ describe('Non repeatable and Non required group', () => {
         },
       });
 
-      const updateRes = await rq.put(
-        `/content-manager/explorer/withgroup/${res.body.id}`,
-        {
-          body: {
-            field: {
-              id: res.body.field.id, // send old id to update the previous group
-              name: 'new String',
-            },
+      const updateRes = await rq.put(`/${res.body.id}`, {
+        body: {
+          field: {
+            id: res.body.field.id, // send old id to update the previous group
+            name: 'new String',
           },
-        }
-      );
+        },
+      });
 
       const expectedResult = {
         id: res.body.id,
@@ -282,9 +268,7 @@ describe('Non repeatable and Non required group', () => {
       expect(updateRes.statusCode).toBe(200);
       expect(updateRes.body).toMatchObject(expectedResult);
 
-      const getRes = await rq.get(
-        `/content-manager/explorer/withgroup/${res.body.id}`
-      );
+      const getRes = await rq.get(`/${res.body.id}`);
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toMatchObject(expectedResult);
@@ -293,7 +277,7 @@ describe('Non repeatable and Non required group', () => {
 
   describe('DELETE entry', () => {
     test('Returns entry with groups', async () => {
-      const res = await rq.post('/content-manager/explorer/withgroup', {
+      const res = await rq.post('/', {
         body: {
           field: {
             name: 'someString',
@@ -301,16 +285,12 @@ describe('Non repeatable and Non required group', () => {
         },
       });
 
-      const deleteRes = await rq.delete(
-        `/content-manager/explorer/withgroup/${res.body.id}`
-      );
+      const deleteRes = await rq.delete(`/${res.body.id}`);
 
       expect(deleteRes.statusCode).toBe(200);
       expect(deleteRes.body).toMatchObject(res.body);
 
-      const getRes = await rq.get(
-        `/content-manager/explorer/withgroup/${res.body.id}`
-      );
+      const getRes = await rq.get(`/${res.body.id}`);
 
       expect(getRes.statusCode).toBe(404);
     });
