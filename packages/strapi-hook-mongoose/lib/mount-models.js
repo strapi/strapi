@@ -272,6 +272,20 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
       definition.collectionName
     );
 
+    Model.on('index', error => {
+      if (error) {
+        if (error.code === 11000) {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${error.message}`
+          );
+        } else {
+          strapi.log.error(
+            `An index error happened, it wasn't applied.\n\t- ${error.message}`
+          );
+        }
+      }
+    });
+
     if (!plugin) {
       global[definition.globalName] = Model;
     }

@@ -222,8 +222,15 @@ module.exports = async ({
         await ORM.knex.transaction(trx => rebuildTable(trx));
         await generateIndexes(table);
       } catch (err) {
-        strapi.log.error('Migration failed');
-        strapi.log.error(err);
+        if (err.message.includes('UNIQUE constraint failed')) {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.stack}`
+          );
+        } else {
+          strapi.log.error(`Migration failed`);
+          strapi.log.error(err);
+        }
+
         return false;
       }
     } else {
@@ -250,7 +257,24 @@ module.exports = async ({
         });
       };
 
-      await ORM.knex.transaction(trx => alterTable(trx));
+      try {
+        await ORM.knex.transaction(trx => alterTable(trx));
+      } catch (err) {
+        if (err.code === '23505' && definition.client === 'pg') {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.message}\n\t- ${err.detail}`
+          );
+        } else if (definition.client === 'mysql' && err.errno === 1062) {
+          strapi.log.error(
+            `Unique constraint fails, make sure to update your data and restart to apply the unique constraint.\n\t- ${err.sqlMessage}`
+          );
+        } else {
+          strapi.log.error(`Migration failed`);
+          strapi.log.error(err);
+        }
+
+        return false;
+      }
     }
 
     await storeTable(table, attributes);
