@@ -80,7 +80,13 @@ module.exports = {
    */
 
   create(ctx) {
-    return strapi.services.product.create(ctx.request.body);
+    if (ctx.is('multipart')) {
+      // parse the specific strapi's formData format and return the data and the files
+      const { data, files } = this.parseMultipartData(ctx);
+      return service.create(data, { files });
+    }
+
+    return service.create(ctx.request.body);
   },
 };
 ```
@@ -96,7 +102,13 @@ module.exports = {
    */
 
   update(ctx) {
-    return strapi.services.product.update(ctx.params, ctx.request.body);
+    if (ctx.is('multipart')) {
+      // parse the specific strapi's formData format and return the data and the files
+      const { data, files } = this.parseMultipartData(ctx);
+      return service.update(ctx.params, data, { files });
+    }
+
+    return service.update(ctx.params, ctx.request.body);
   },
 };
 ```
