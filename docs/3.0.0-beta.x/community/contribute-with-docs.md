@@ -15,7 +15,7 @@ Four different **types of content** exist in the documentation:
 - Reference Topics
 - Explanations
 
-Below are explanations for each category of content. The overall key is to know who is your audience and then writing for that audience.
+Below are explanations for each category of content. The overall key is to know who is your audience and then write for that audience.
 
 ### Tutorials
 
@@ -123,4 +123,76 @@ module.exports = [
 
 ### Docs Style Guide
 
-This style guide exists to show and explain the standards and style of how our documentation is written. We are offering this style guide to help you stay consistent with the existing documentation. More important, these suggestions and this guide have been found to help communicate complex topics effectively.
+This style guide exists to show and explain the standards and style of how our documentation is written. We are offering this style guide to help you stay consistent with the existing documentation.
+
+#### Favor _Yarn_ commands over _npm_ commands
+
+We now recommend users develop using Yarn. Therefore, the documentation will show commands first using `yarn` and then showing the equivalent `npm` command. Please consider the below examples:
+
+**Example**
+
+- Install Strapi with the following commands:
+
+Using **Yarn**:
+
+```
+yarn create strapi-app my-project --quickstart
+```
+
+Using **npm/npx**:
+
+```
+npx create-strapi-app my-project --quickstart
+```
+
+**Example**
+
+- You can access the Strapi Help instructions from your command line with:
+
+Using **Yarn**:
+
+```
+yarn strapi
+```
+
+Using **npm**:
+
+```
+npm run strapi help
+```
+
+#### When giving instructions, say, _"you"_ not _"we"_
+
+Clear and concise intructions and language can help individuals to get the full advantages from using the Docs. Whenever an action needs to be done, you will use the word, "you" rather than "we". To clarify this, consider the following examples:
+
+**Example**
+
+1. **"You will next open your Chrome browser. Then, open a tab."**
+2. **"We will next open our Chrome browser. Then, we will open a tab."**
+
+In the above, the #1 phrase is clearly written and the reader knows what is expected. In the #2 phrase , the additional words "we will" is needed to keep the sentence relatively clear. Note: "Then, we open a tab." - is awkward and unclear.
+
+**Example**
+
+1. **"Download Node.js and install it onto your computer."**
+2. **"We download Node.js and then we install it onto our computers."**
+
+In the above, the #1 phrase is clear. #2 is actually confusing.
+
+Therefore, when you write instructions, use "you". This will help to keep your documentation clearly written.
+
+#### Ensure you use trade, project and service providers names correctly
+
+Strapi is back-end and front-end agnostic. Many different front-ends and databases can (and will) be used. In addition, to front-ends and back-ends, many packages, tools and third-party service providers are often used with Strapi. Referring to the projects and services correctly is important. If you use incorrect terms to refer to external services, users could get confused when further research outside the Strapi docs is required.
+
+Common project and how to refer to them:
+
+| Name                | Correct usage |                   Example                   |
+| ------------------- | :-----------: | :-----------------------------------------: |
+| Node, NODE, node.js |    Node.js    |   The Node.js Twitter account is @nodejs.   |
+| npm, NPM            |      npm      | The current stable version of npm is here.  |
+| PM2, pm2, Pm2       |      pm2      | Guys just installed pm2 on my live server.  |
+| React, react.js     |     React     | React allows you to interface with other... |
+| Strapi, Strapi.js   |    Strapi     |   Get ready to get Strapi up and running.   |
+| Vue, VUE, Vue.js    | Vue or Vue.js |  My favorite component library for Vue...   |
+| yarn, YARN, Yarn    |     Yarn      | You can use Yarn to keep it all up to date. |
