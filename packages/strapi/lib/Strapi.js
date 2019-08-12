@@ -366,60 +366,39 @@ class Strapi extends EventEmitter {
   }
 
   async runBootstrapFunctions() {
-    const execBootstrap = fn => {
-      if (!fn) return Promise.resolve();
+    const timeoutMs = this.config.bootstrapTimeout || 3500;
+    const warnOnTimeout = () =>
+      setTimeout(() => {
+        this.log.warn(
+          `The bootstrap function is taking unusually long to execute (${timeoutMs} miliseconds).`
+        );
+        this.log.warn('Make sure you call it?');
+      }, timeoutMs);
 
-      return new Promise((resolve, reject) => {
-        const timeoutMs = this.config.bootstrapTimeout || 3500;
-        const timer = setTimeout(() => {
-          this.log.warn(
-            `The bootstrap function is taking unusually long to execute (${timeoutMs} miliseconds).`
-          );
-          this.log.warn('Make sure you call it?');
-        }, timeoutMs);
+    async function execBootstrap(fn) {
+      if (!fn) return;
 
-        let ranBootstrapFn = false;
+      const timer = warnOnTimeout();
+      try {
+        await fn();
+      } finally {
+        clearTimeout(timer);
+      }
+    }
 
-        try {
-          fn(err => {
-            if (ranBootstrapFn) {
-              this.log.error(
-                'You called the callback in `strapi.config.boostrap` more than once!'
-              );
-
-              return reject();
-            }
-
-            ranBootstrapFn = true;
-            clearTimeout(timer);
-
-            if (err instanceof Error) {
-              return reject(err);
-            }
-            return resolve(err);
-          });
-        } catch (e) {
-          if (ranBootstrapFn) {
-            this.log.error(
-              'The bootstrap function threw an error after its callback was called.'
-            );
-
-            return reject(e);
-          }
-
-          ranBootstrapFn = true;
-          clearTimeout(timer);
-
-          return resolve(e);
-        }
+    const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
+      return execBootstrap(
+        _.get(this.plugins[plugin], 'config.functions.bootstrap')
+      ).catch(err => {
+        strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
+        strapi.log.error(err);
+        strapi.stop();
       });
-    };
+    });
 
-    return Promise.all(
-      Object.values(this.plugins).map(plugin =>
-        execBootstrap(_.get(plugin, 'config.functions.bootstrap'))
-      )
-    ).then(() => execBootstrap(this.config.functions.bootstrap));
+    await Promise.all(pluginBoostraps);
+
+    return execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
   }
 
   async freeze() {
