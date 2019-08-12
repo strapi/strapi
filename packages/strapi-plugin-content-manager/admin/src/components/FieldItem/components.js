@@ -46,22 +46,6 @@ const Carret = styled.div`
   background: #007eff;
 `;
 
-const FullWidthCarret = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  height: 30px;
-  width: 100%;
-  padding: 0 5px;
-  margin-bottom: 6px;
-  border-radius: 2px;
-  > div {
-    width: 100%;
-    height: 2px;
-    background: #007eff;
-  }
-`;
-
 const NameWrapper = styled.div`
   position: relative;
   height: 30px;
@@ -123,4 +107,4 @@ const Wrapper = styled.div`
   }
 `;
 
-export { Carret, FullWidthCarret, InfoLabel, Link, NameWrapper, Wrapper };
+export { Carret, InfoLabel, Link, NameWrapper, Wrapper };

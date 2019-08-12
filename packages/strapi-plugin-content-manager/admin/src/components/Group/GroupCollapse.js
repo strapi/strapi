@@ -1,23 +1,25 @@
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { DragSource, DropTarget } from 'react-dnd';
+import { getEmptyImage } from 'react-dnd-html5-backend';
 import { Collapse } from 'reactstrap';
 
-import pluginId from '../../pluginId';
-
 import ItemTypes from '../../utils/ItemTypes';
-import Grab from '../../assets/images/grab_icon.svg';
-import Logo from '../../assets/images/caret_top.svg';
 
-import { Flex, GroupCollapseWrapper, ImgWrapper } from './components';
+import GroupBanner from '../GroupBanner';
+
+import { FormWrapper } from './components';
 import Form from './Form';
 
 function GroupCollapse({
   connectDragSource,
   connectDropTarget,
+  connectDragPreview,
+  doesPreviousFieldContainErrorsAndIsOpen,
+  hasErrors,
   isDragging,
+  isFirst,
   isOpen,
   layout,
   modifiedData,
@@ -30,53 +32,36 @@ function GroupCollapse({
     () => get(layout, ['settings', 'mainField'], 'id'),
     [layout]
   );
-  const displayedValue = get(
-    modifiedData,
-    [...name.split('.'), mainField],
-    null
-  );
 
   const fields = get(layout, ['layouts', 'edit'], []);
   const ref = React.useRef(null);
-  const opacity = isDragging ? 0.2 : 1;
 
   connectDragSource(ref);
   connectDropTarget(ref);
 
+  useEffect(() => {
+    connectDragPreview(getEmptyImage(), { captureDraggingState: true });
+  }, [connectDragPreview]);
+
   return (
     <Fragment>
-      <GroupCollapseWrapper onClick={onClick} ref={ref} style={{ opacity }}>
-        <Flex style={{ fontWeight: 500 }}>
-          <ImgWrapper isOpen={isOpen}>
-            <img src={Logo} alt="logo" />
-          </ImgWrapper>
-          <FormattedMessage
-            id={`${pluginId}.containers.Edit.pluginHeader.title.new`}
-          >
-            {msg => {
-              return <span>{displayedValue || msg}</span>;
-            }}
-          </FormattedMessage>
-        </Flex>
-        <Flex>
-          <button
-            type="button"
-            style={{ marginRight: 8 }}
-            onClick={removeField}
-          >
-            <i className="fa fa-trash" />
-          </button>
-          <button type="button" style={{ lineHeight: '32px' }}>
-            <img
-              src={Grab}
-              alt="grab icon"
-              style={{ verticalAlign: 'unset' }}
-            />
-          </button>
-        </Flex>
-      </GroupCollapseWrapper>
-      <Collapse isOpen={isOpen}>
-        <div style={{ paddingTop: '25px' }}>
+      <GroupBanner
+        doesPreviousFieldContainErrorsAndIsOpen={
+          doesPreviousFieldContainErrorsAndIsOpen
+        }
+        hasErrors={hasErrors}
+        isFirst={isFirst}
+        isDragging={isDragging}
+        isOpen={isOpen}
+        modifiedData={modifiedData}
+        mainField={mainField}
+        name={name}
+        onClick={onClick}
+        ref={ref}
+        removeField={removeField}
+      />
+      <Collapse isOpen={isOpen} style={{ backgroundColor: '#f5f5f5' }}>
+        <FormWrapper hasErrors={hasErrors} isOpen={isOpen}>
           {fields.map((fieldRow, key) => {
             return (
               <div className="row" key={key}>
@@ -97,7 +82,7 @@ function GroupCollapse({
               </div>
             );
           })}
-        </div>
+        </FormWrapper>
       </Collapse>
     </Fragment>
   );
@@ -105,8 +90,11 @@ function GroupCollapse({
 
 GroupCollapse.defaultProps = {
   addRelation: () => {},
+  doesPreviousFieldContainErrorsAndIsOpen: false,
+  hasErrors: false,
   isCreating: true,
   isDragging: false,
+  isFirst: false,
   isOpen: false,
   layout: {},
   move: () => {},
@@ -114,9 +102,13 @@ GroupCollapse.defaultProps = {
 };
 
 GroupCollapse.propTypes = {
+  connectDragPreview: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,
+  doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
+  hasErrors: PropTypes.bool,
   isDragging: PropTypes.bool,
+  isFirst: PropTypes.bool,
   isOpen: PropTypes.bool,
   layout: PropTypes.object,
   modifiedData: PropTypes.object,
@@ -149,24 +141,29 @@ export default DropTarget(
     {
       beginDrag: props => {
         props.collapseAll();
+        props.resetErrors();
 
         return {
           id: props.id,
+          mainField: get(props.layout, ['settings', 'mainField'], 'id'),
+          modifiedData: props.modifiedData,
+          name: props.name,
           originalIndex: props.findField(props.id).index,
         };
       },
+      // COMMENTING ON PURPOSE NOT SURE IF WE ALLOW DROPPING OUTSIDE THE DROP TARGET
+      // endDrag(props, monitor) {
+      //   const { id: droppedId, originalIndex } = monitor.getItem();
+      //   const didDrop = monitor.didDrop();
 
-      endDrag(props, monitor) {
-        const { id: droppedId, originalIndex } = monitor.getItem();
-        const didDrop = monitor.didDrop();
-
-        if (!didDrop) {
-          props.move(droppedId, originalIndex, props.groupName);
-        }
-      },
+      //   if (!didDrop) {
+      //     props.move(droppedId, originalIndex, props.groupName);
+      //   }
+      // },
     },
     (connect, monitor) => ({
       connectDragSource: connect.dragSource(),
+      connectDragPreview: connect.dragPreview(),
       isDragging: monitor.isDragging(),
     })
   )(GroupCollapse)
