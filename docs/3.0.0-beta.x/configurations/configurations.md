@@ -83,9 +83,36 @@ The `bootstrap` function is called at every server start. You can use it to add 
 
 Here are some use cases:
 
-- Create an admin user if there isn't.
+- Create an admin user if there isn't one.
 - Fill the database with some necessary data.
 - Check that the database is up-and-running.
+- Load some envrionments variables.
+
+The bootstrap function can be synchronous or asynchronous
+
+**Synchronous**
+
+```js
+module.exports = () => {
+  // some sync code
+};
+```
+
+**Return a promise**
+
+```js
+module.exports = () => {
+  return new Promise(/* some code */);
+};
+```
+
+**Be async**
+
+```js
+module.exports = async () => {
+  await someSetup();
+};
+```
 
 ### CRON tasks
 
