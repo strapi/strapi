@@ -217,7 +217,7 @@ module.exports = {
         if (options.input && options.input.data) {
           context.request.body = options.input.data || {};
         } else {
-          context.request.body = {};
+          context.request.body = options;
         }
 
         if (isController) {
