@@ -7,17 +7,18 @@
   },
   "options": {
     "increments": true,
-    "timestamps": true,
-    "comment": ""
+    "timestamps": false
   },
   "attributes": {
     "name": {
       "type": "string"
     },
-    "articles": {
+    "linkedArticles": {
       "collection": "article",
-      "dominant": true,
-      "via": "tags"
+      "via": "manyTags"
+    },
+    "date": {
+      "type": "date"
     }
   }
 }
