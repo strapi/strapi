@@ -462,18 +462,14 @@ module.exports = {
     return Promise.resolve();
   },
 
-  async initialize(cb) {
+  async initialize() {
     const roleCount = await strapi.query('role', 'users-permissions').count();
 
     // It has already been initialized.
     if (roleCount > 0) {
-      try {
-        await this.updatePermissions();
-        await this.removeDuplicate();
-        return cb();
-      } catch (err) {
-        return cb(err);
-      }
+      await this.updatePermissions();
+      await this.removeDuplicate();
+      return;
     }
 
     // Create two first default roles.
@@ -490,7 +486,7 @@ module.exports = {
       }),
     ]);
 
-    this.updatePermissions().then(() => cb(), err => cb(err));
+    return this.updatePermissions();
   },
 
   async updateRole(roleID, body) {

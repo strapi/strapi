@@ -9,7 +9,7 @@
  */
 const _ = require('lodash');
 
-module.exports = async cb => {
+module.exports = async () => {
   // set plugin store
   const pluginStore = strapi.store({
     environment: strapi.config.environment,
@@ -27,26 +27,20 @@ module.exports = async cb => {
     strapi.plugins.upload.config.providers.push(require(installedProvider));
   }
 
-  try {
-    // if provider config does not exist set one by default
-    const config = await pluginStore.get({ key: 'provider' });
+  // if provider config does not exist set one by default
+  const config = await pluginStore.get({ key: 'provider' });
 
-    if (!config) {
-      const provider = _.find(strapi.plugins.upload.config.providers, {
-        provider: 'local',
-      });
+  if (!config) {
+    const provider = _.find(strapi.plugins.upload.config.providers, {
+      provider: 'local',
+    });
 
-      const value = _.assign({}, provider, {
-        enabled: true,
-        // by default limit size to 1 GB
-        sizeLimit: 1000000,
-      });
+    const value = _.assign({}, provider, {
+      enabled: true,
+      // by default limit size to 1 GB
+      sizeLimit: 1000000,
+    });
 
-      await pluginStore.set({ key: 'provider', value });
-    }
-  } catch (err) {
-    strapi.log.error(err);
-    strapi.stop();
+    await pluginStore.set({ key: 'provider', value });
   }
-  cb();
 };

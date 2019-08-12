@@ -10,8 +10,8 @@ const {
 /**
  * Synchronize content manager schemas
  */
-module.exports = cb => {
-  syncSchemas().then(() => cb(), err => cb(err));
+module.exports = () => {
+  return syncSchemas();
 };
 
 async function syncSchemas() {
