@@ -1,19 +1,24 @@
 .editor {
   max-height: 555px;
-  min-height: 303px;
+  min-height: 294px;
   overflow: auto;
   padding: 20px 20px 0 20px;
   font-size: 16px;
   background-color: #fff;
   line-height: 24px !important;
-  font-family: "OpenSans";
+  font-family: 'OpenSans';
   cursor: text;
 
   // TODO define rules for header's margin
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     margin: 0;
     line-height: 24px !important;
-    font-family: "OpenSans";
+    font-family: 'OpenSans';
   }
 
   h1 {
@@ -52,7 +57,8 @@
     margin-top: 0;
   }
 
-  ul, ol {
+  ul,
+  ol {
     padding: 0;
     margin-top: 27px;
   }
@@ -67,19 +73,19 @@
   }
 }
 
-h1+.editorParagraph{
+h1 + .editorParagraph {
   margin-top: 31px;
 }
 
-.editorParagraph+* {
+.editorParagraph + * {
   margin-bottom: -2px !important;
 }
 
-.editorParagraph+.editorBlockquote {
+.editorParagraph + .editorBlockquote {
   margin-bottom: 32px !important;
 }
 
-.editorBlockquote+ul {
+.editorBlockquote + ul {
   margin-top: 38px !important;
 }
 
@@ -137,7 +143,7 @@ h1+.editorParagraph{
   margin-left: 15px;
   margin-right: 5px;
   > select {
-    box-shadow: 0 0 0 rgba(0,0,0,0)!important;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0) !important;
   }
 }
 
@@ -152,12 +158,12 @@ h1+.editorParagraph{
   width: 100%;
   padding: 0 17px;
   justify-content: space-between;
-  background-color: #FAFAFB;
+  background-color: #fafafb;
   line-height: 30px;
   font-size: 12px;
   font-family: Lato;
   background-color: #fff;
-  border-bottom: 1px solid #F3F4F4;
+  border-bottom: 1px solid #f3f4f4;
   line-height: 49px;
   font-size: 13px;
   > div:first-child {
@@ -173,7 +179,7 @@ h1+.editorParagraph{
   margin-left: 15px;
   > select {
     min-width: 110px !important;
-    box-shadow: 0 0 0 rgba(0,0,0,0)!important;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0) !important;
   }
 }
 
@@ -182,14 +188,15 @@ h1+.editorParagraph{
   min-width: 32px;
   padding-left: 10px;
   padding-right: 10px;
-  border: 1px solid rgba(16,22,34,0.10);
+  border: 1px solid rgba(16, 22, 34, 0.1);
   border-radius: 3px;
-  background: #F3F4F4;
+  background: #f3f4f4;
   font-size: 13px;
   font-weight: 500;
   text-align: center;
   cursor: pointer;
-  &:focus, &:active {
+  &:focus,
+  &:active {
     outline: 0;
   }
 }

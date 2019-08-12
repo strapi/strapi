@@ -397,6 +397,12 @@ function EditView({
         });
       }}
       pathname={pathname}
+      resetErrors={() => {
+        dispatch({
+          type: 'SET_ERRORS',
+          errors: {},
+        });
+      }}
       search={search}
     >
       <BackHeader onClick={() => redirectToPreviousPage()} />
@@ -459,6 +465,17 @@ function EditView({
                   );
 
                   if (fieldsRow.length === 1 && group.type === 'group') {
+                    // Array containing all the keys with of the error object created by YUP
+                    // It is used only to know if whether or not we need to apply an orange border to the n+1 field item
+                    const groupErrorKeys = Object.keys(errors)
+                      .filter(errorKey => errorKey.includes(name))
+                      .map(errorKey =>
+                        errorKey
+                          .split('.')
+                          .slice(0, 2)
+                          .join('.')
+                      );
+
                     return (
                       <Group
                         {...group}
@@ -469,6 +486,7 @@ function EditView({
                             keys: keys.split('.'),
                           });
                         }}
+                        groupErrorKeys={groupErrorKeys}
                         groupValue={groupValue}
                         key={key}
                         isRepeatable={group.repeatable || false}

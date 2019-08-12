@@ -7,7 +7,8 @@ import GrabIconBlue from '../../assets/images/icon_grab_blue.svg';
 import ClickOverHint from '../../components/ClickOverHint';
 import RemoveIcon from '../../components/DraggedRemovedIcon';
 import EditIcon from '../../components/FieldEditIcon';
-import { Field, InfoLabel, FullWidthCarret } from './components';
+import PreviewCarret from '../../components/PreviewCarret';
+import { Field, InfoLabel } from './components';
 
 import ItemTypes from '../../utils/ItemTypes';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -50,9 +51,7 @@ function ListField({
     >
       {isDragging ? (
         <div style={{ width: '100%', height: 30, background: 'transparent' }}>
-          <FullWidthCarret>
-            <div />
-          </FullWidthCarret>
+          <PreviewCarret />
         </div>
       ) : (
         <>

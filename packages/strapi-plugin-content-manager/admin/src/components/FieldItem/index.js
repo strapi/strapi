@@ -8,14 +8,8 @@ import GrabIcon from '../../assets/images/icon_grab.svg';
 import ClickOverHint from '../ClickOverHint';
 import EditIcon from '../FieldEditIcon';
 import RemoveIcon from '../DraggedRemovedIcon';
-import {
-  Carret,
-  FullWidthCarret,
-  InfoLabel,
-  Link,
-  NameWrapper,
-  Wrapper,
-} from './components';
+import PreviewCarret from '../PreviewCarret';
+import { Carret, InfoLabel, Link, NameWrapper, Wrapper } from './components';
 
 const FieldItem = forwardRef(
   (
@@ -91,9 +85,7 @@ const FieldItem = forwardRef(
       >
         <Wrapper>
           {dragStart && size === 12 ? (
-            <FullWidthCarret>
-              <div />
-            </FullWidthCarret>
+            <PreviewCarret />
           ) : (
             <Fragment>
               {showLeftCarret && <Carret style={carretStyle} />}

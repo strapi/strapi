@@ -1,19 +1,30 @@
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 const Button = styled.div`
   width: 100%;
-  height: 34px;
+  height: 37px;
+  margin-bottom: 27px;
   text-align: center;
-  background-color: #fafafb;
-  border-radius: 2px;
+  border: 1px solid #e3e9f3;
+  border-top: 1px solid
+    ${({ doesPreviousFieldContainErrorsAndIsClosed }) =>
+      doesPreviousFieldContainErrorsAndIsClosed ? '#FFA784' : '#e3e9f3'};
+
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
+  ${({ withBorderRadius }) => {
+    if (withBorderRadius) {
+      return css`
+        border-radius: 2px;
+      `;
+    }
+  }}
 
-  color: #333740;
+  color: #007eff;
   font-size: 12px;
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
-  line-height: 35px;
+  line-height: 37px;
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -22,44 +33,20 @@ const Button = styled.div`
   }
 `;
 
-const Flex = styled.div`
-  display: flex;
-  > button {
-    cursor: pointer;
-    padding-top: 0;
-  }
+const FormWrapper = styled.div`
+  padding-top: 27px;
+  padding-left: 15px;
+  padding-right: 15px;
+  border-top: 1px solid
+    ${({ hasErrors, isOpen }) => {
+      if (hasErrors) {
+        return '#ffa784';
+      } else if (isOpen) {
+        return '#AED4FB';
+      } else {
+        return '#e3e9f3';
+      }
+    }};
 `;
 
-const GroupCollapseWrapper = styled(Flex)`
-  height: 34px;
-  margin-bottom: 2px;
-  padding: 0 20px;
-  justify-content: space-between;
-  line-height: 34px;
-  background-color: #ffffff;
-  font-size: 13px;
-  border-radius: 2px;
-  button,
-  i,
-  img {
-    &:active,
-    &:focus {
-      outline: 0;
-    }
-  }
-`;
-
-const ImgWrapper = styled.div`
-  width: 21px;
-  height: 21px;
-  margin: auto;
-  margin-right: 19px;
-  border-radius: 50%;
-  background-color: #e3e9f3;
-  text-align: center;
-  line-height: 21px;
-
-  ${({ isOpen }) => !isOpen && 'transform: rotate(180deg)'}
-`;
-
-export { Button, Flex, GroupCollapseWrapper, ImgWrapper };
+export { Button, FormWrapper };

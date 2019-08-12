@@ -89,13 +89,6 @@
       "repeatable": true,
       "min": 1,
       "max": 10
-    },
-    "yoyo": {
-      "group": "ingredients",
-      "required": true,
-      "repeatable": true,
-      "min": 1,
-      "type": "group"
     }
   }
 }

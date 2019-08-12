@@ -243,7 +243,7 @@ function SettingViewModel({
         );
       });
 
-      return ['id', ...options];
+      return options;
     }
 
     return input.selectOptions;
