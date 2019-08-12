@@ -32,7 +32,7 @@ strapi.query('post').findOne({ title: 'my title' });
 ```js
 strapi
   .query('post')
-  .findOne({ title: 'my title', created_at: '2019-01-01T00:00:00.000Z' });
+  .findOne({ title: 'my title', created_at: '2019-01-01T00:00:00Z' });
 ```
 
 **Find one by id and populate a relation**
@@ -65,7 +65,7 @@ strapi.query('post').find({ _limit: 10, id_in: [1, 2] });
 ```js
 strapi
   .query('post')
-  .find({ date_gt: '2019-01-01T00:00:00.000Z', _sort: 'title:desc' });
+  .find({ date_gt: '2019-01-01T00:00:00Z', _sort: 'title:desc' });
 ```
 
 **Find by id not in and populate a relation. Skip the first ten results**
@@ -132,7 +132,7 @@ strapi.query('post').update(
 );
 ```
 
-When updating an entry with its groups beware that if you send the groups without any `id` the previous groups will be deleted and replaced. You can update the groups by sending there `id` :
+When updating an entry with its groups beware that if you send the groups without any `id` the previous groups will be deleted and replaced. You can update the groups by sending their `id` with the rest of the fields:
 
 **Update by id and update previous groups**
 
@@ -193,22 +193,95 @@ strapi.query('post').delete({ lang: 'en' });
 
 ### `count`
 
+Returns the count of entries matching Strapi filters.
+
+#### Examples
+
+**Count by lang**
+
+```js
+strapi.query('post').count({ lang: 'en' });
+```
+
+**Count by title contains**
+
+```js
+strapi.query('post').count({ title_contains: 'food' });
+```
+
+**Count by date less than**
+
+```js
+strapi.query('post').count({ date_lt: '2019-08-01T00:00:00Z' });
+```
+
 ### `search`
+
+Returns entries base on a search on all fields allowing it. (this feature will return all entries on sqlite).
+
+#### Examples
+
+**Search first ten starting at 20**
+
+```js
+strapi.query('post').search({ _q: 'my search query', _limit: 10, _start: 20 });
+```
+
+**Search and sort**
+
+```js
+strapi
+  .query('post')
+  .search({ _q: 'my search query', _limit: 100, _sort: 'date:desc' });
+```
 
 ### `countSearch`
 
+Returns the total count of entries mattching a search. (this feature will return all entries on sqlite).
+
+#### Example
+
+```js
+strapi.query('post').countSearch({ _q: 'my search query' });
+```
+
 ## Custom Queries
 
-In Strapi's [core services](./services.md#core-services) you can see we call a `strapi.query` function.
+When you want to customize your services or create new ones you will have to build your queries with the underlying ORM models.
 
-When customizing your model services you might want to implement some custom database queries. directly with the underlying ORM (bookshelf or mongoose).
+To access the underlying model:
 
-To achieve that you can take some inspiration from the current code in the ORM queries utils.
+```js
+strapi.query(modelName, plugin).model;
+```
+
+Then you can run any queries available on the model. You should refer to the specific ORM documentation for more details:
 
 ### Bookshelf
 
-You can see the current implementation of bookshelf queries [here](https://github.com/strapi/strapi/tree/master/packages/strapi-hook-bookshelf/lib/queries.js)
+Documentation: [https://bookshelfjs.org/](https://bookshelfjs.org/)
 
-### Mongoose`
+**Example**
 
-You can see the current implementation of mongoose queries [here](https://github.com/strapi/strapi/tree/master/packages/strapi-hook-mongoose/lib/queries.js)
+```js
+strapi
+  .query('post')
+  .model.query(qb => {
+    qb.where('id', 1);
+  })
+  .fetch();
+```
+
+### Mongoose
+
+Documentation: [https://mongoosejs.com/](https://mongoosejs.com/)
+
+**Example**
+
+```js
+strapi
+  .query('post')
+  .model.find({
+    { date: { $gte: '2019-01-01T00.00.00Z }
+  });
+```
