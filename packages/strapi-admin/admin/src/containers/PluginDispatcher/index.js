@@ -10,6 +10,8 @@ import { get } from 'lodash';
 
 import Helmet from 'react-helmet';
 import { BlockerComponent } from 'strapi-helper-plugin';
+
+import { LOGIN_LOGO } from '../../config';
 import ErrorBoundary from '../ErrorBoundary';
 
 export function PluginDispatcher(props) {
@@ -46,7 +48,11 @@ export function PluginDispatcher(props) {
     <div>
       <Helmet title={`Strapi - ${name}`} />
       <ErrorBoundary>
-        <PluginEntryComponent {...props} {...blockerComponentProps} />
+        <PluginEntryComponent
+          {...props}
+          {...blockerComponentProps}
+          assets={{ loginLogo: LOGIN_LOGO }}
+        />
       </ErrorBoundary>
     </div>
   );

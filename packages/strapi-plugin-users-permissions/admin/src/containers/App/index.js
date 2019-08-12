@@ -29,13 +29,15 @@ class App extends React.Component {
     }
   }
 
+  renderRoute = props => <AuthPage {...this.props} {...props} />;
+
   render() {
     return (
       <div className={pluginId}>
         <Switch>
           <Route
             path={`/plugins/${pluginId}/auth/:authType/:id?`}
-            component={AuthPage}
+            render={this.renderRoute}
             exact
           />
           <Route
