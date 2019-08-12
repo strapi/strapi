@@ -205,27 +205,39 @@ module.exports = {
           primaryKey = strapi.models[normalizedName].primaryKey;
         }
 
-        context.params = Query.convertToParams(
-          options.input.where || {},
-          primaryKey
-        );
+        if (options.input && options.input.where) {
+          context.params = Query.convertToParams(
+            options.input.where || {},
+            primaryKey
+          );
+        } else {
+          context.params = {};
+        }
 
-        context.request.body = options.input.data || {};
+        if (options.input && options.input.data) {
+          context.request.body = options.input.data || {};
+        } else {
+          context.request.body = {};
+        }
 
         if (isController) {
           const values = await resolver.call(null, context);
 
           if (ctx.body) {
-            return {
-              [pluralize.singular(normalizedName)]: ctx.body,
-            };
+            return options.input
+              ? {
+                  [pluralize.singular(normalizedName)]: ctx.body,
+                }
+              : ctx.body;
           }
 
           const body = values && values.toJSON ? values.toJSON() : values;
 
-          return {
-            [pluralize.singular(normalizedName)]: body,
-          };
+          return options.input
+            ? {
+                [pluralize.singular(normalizedName)]: body,
+              }
+            : body;
         }
 
         return resolver.call(null, obj, options, context);
