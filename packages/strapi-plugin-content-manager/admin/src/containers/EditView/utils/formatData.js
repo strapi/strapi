@@ -54,7 +54,9 @@ export const cleanData = (retrievedData, ctLayout, groupLayouts) => {
                 })
               : value;
           } else {
-            cleanedData = recursiveCleanData(value, groupLayouts[group]);
+            cleanedData = value
+              ? recursiveCleanData(value, groupLayouts[group])
+              : value;
           }
           break;
         default:

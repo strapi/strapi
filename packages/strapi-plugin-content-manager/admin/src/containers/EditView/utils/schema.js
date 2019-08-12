@@ -62,7 +62,9 @@ const createYupSchema = (model, { groups }) => {
             ? yup.array().of(groupSchema)
             : groupSchema;
         groupSchema =
-          attribute.required === true ? groupSchema.defined() : groupSchema;
+          attribute.required === true
+            ? groupSchema.defined()
+            : groupSchema.nullable();
         acc[current] = groupSchema;
       }
       return acc;

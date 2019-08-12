@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer, memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import { get, size } from 'lodash';
 
 import pluginId from '../../pluginId';
 import { useEditView } from '../../contexts/EditView';
@@ -72,7 +72,7 @@ function Group({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [didCheckErrors]);
 
-  const groupValueLength = groupValue.length;
+  const groupValueLength = size(groupValue);
 
   return (
     <>
