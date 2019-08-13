@@ -154,6 +154,7 @@ function syncLayouts(configuration, schema) {
 }
 
 const appendToEditLayout = (layout = [], keysToAppend, schema) => {
+  if (keysToAppend.length === 0) return layout;
   let currentRowIndex = Math.max(layout.length - 1, 0);
 
   // init currentRow if necessary
