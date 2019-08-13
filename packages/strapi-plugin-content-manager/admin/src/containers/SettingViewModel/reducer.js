@@ -28,12 +28,12 @@ import {
 } from './constants';
 
 export const initialState = fromJS({
-  initialData: fromJS({}),
+  initialData: {},
   isLoading: true,
   itemFormType: '',
   itemNameToSelect: '',
   listFieldToEditIndex: 0,
-  modifiedData: fromJS({}),
+  modifiedData: {},
   shouldToggleModalSubmit: true,
 });
 

@@ -214,7 +214,7 @@ function SettingViewModel({
       .filter(key => {
         const type = get(attributes, [key, 'type'], '');
 
-        return !['json', 'relation', 'group'].includes(type) && !!type;
+        return !['json', 'relation', 'group', 'media'].includes(type) && !!type;
       })
       .filter(field => {
         return !getListDisplayedFields().includes(field);
@@ -257,6 +257,8 @@ function SettingViewModel({
       reorderDiffRow(dragIndex, hoverIndex, dragRowIndex, hoverRowIndex);
     }
   };
+
+  console.log(modifiedData);
 
   return (
     <LayoutDndProvider
