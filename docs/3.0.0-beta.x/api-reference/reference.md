@@ -4,7 +4,6 @@
   - [.admin](#strapi-admin)
   - [.api](#strapi-api)
   - [.app](#strapiapp)
-  - [.bootstrap()](#strapi-bootstrap)
   - [.config](#strapi-config)
   - [.controllers](#strapi-controllers)
   - [.hook](#strapi-hook)
@@ -24,7 +23,7 @@
 
 ## strapi.admin
 
-This object contains the controllers, models, services and configurations contained in the `./admin` folder.
+This object contains the controllers, models, services and configurations contained in the `strapi-admin` package.
 
 ## strapi.api
 
@@ -34,14 +33,6 @@ And by using `strapi.api[:name]` you can access the controllers, services, the m
 ## strapi.app
 
 Returns the Koa instance.
-
-## strapi.bootstrap
-
-Returns a `Promise`. When resolved, it means that the `./config/functions/bootstrap.js` has been executed. Otherwise, it throws an error.
-
-::: note
-You can also access to the bootstrap function through `strapi.config.functions.boostrap`.
-:::
 
 ## strapi.config
 
