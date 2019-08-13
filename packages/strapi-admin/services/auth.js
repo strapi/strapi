@@ -13,9 +13,8 @@ const sanitizeUser = user => {
  * @param {object} admon - admin user
  */
 const createJwtToken = admin => {
-  const payload = _.pick(admin.toJSON ? admin.toJSON() : admin, ['_id', 'id']);
   return strapi.plugins['users-permissions'].services.jwt.issue({
-    ...payload,
+    id: admin.id,
     isAdmin: true,
   });
 };

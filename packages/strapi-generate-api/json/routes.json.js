@@ -16,9 +16,6 @@ const _ = require('lodash');
 
 module.exports = scope => {
   function generateRoutes() {
-    const tokenID =
-      scope.args.tpl && scope.args.tpl !== 'mongoose' ? 'id' : '_id';
-
     const routes = {
       routes: [
         {
@@ -39,7 +36,7 @@ module.exports = scope => {
         },
         {
           method: 'GET',
-          path: '/' + scope.idPluralized + '/:' + tokenID,
+          path: '/' + scope.idPluralized + '/:id',
           handler: scope.globalID + '.findOne',
           config: {
             policies: [],
@@ -55,7 +52,7 @@ module.exports = scope => {
         },
         {
           method: 'PUT',
-          path: '/' + scope.idPluralized + '/:' + tokenID,
+          path: '/' + scope.idPluralized + '/:id',
           handler: scope.globalID + '.update',
           config: {
             policies: [],
@@ -63,12 +60,12 @@ module.exports = scope => {
         },
         {
           method: 'DELETE',
-          path: '/' + scope.idPluralized + '/:' + tokenID,
+          path: '/' + scope.idPluralized + '/:id',
           handler: scope.globalID + '.delete',
           config: {
             policies: [],
           },
-        }
+        },
       ],
     };
 

@@ -97,7 +97,7 @@ module.exports = {
 
   fetch(params) {
     return strapi.query('file', 'upload').findOne({
-      id: params._id || params.id,
+      id: params.id,
     });
   },
 
