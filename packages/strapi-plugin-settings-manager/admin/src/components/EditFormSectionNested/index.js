@@ -31,7 +31,7 @@ class EditFormSectionNested extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.value !== this.props.values) {
       this.checkForNestedForm(nextProps);
     }
@@ -62,9 +62,7 @@ class EditFormSectionNested extends React.Component {
   render() {
     return (
       <div
-        className={`${this.props.styles.stmpadded} ${
-          this.props.styles.stmnesTedFormContainer
-        }`}
+        className={`${this.props.styles.stmpadded} ${this.props.styles.stmnesTedFormContainer}`}
       >
         <div className="row">
           {map(this.props.section, (item, key) => {

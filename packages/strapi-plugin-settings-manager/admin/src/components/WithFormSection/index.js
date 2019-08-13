@@ -66,7 +66,7 @@ const WithFormSection = InnerComponent =>
       }
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
       if (
         nextProps.section !== this.props.section ||
         nextProps.cancelAction !== this.props.cancelAction

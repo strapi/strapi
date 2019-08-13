@@ -59,7 +59,7 @@ class InputNumber extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.errors !== nextProps.errors) {
       this.setState({
         errors: uniqBy(union(this.state.errors, nextProps.errors), 'id'),

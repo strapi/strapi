@@ -15,7 +15,8 @@ import InputSpacer from '../InputSpacer';
 
 import styles from './styles.scss';
 
-class InputNumberWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputNumberWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -32,7 +33,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -56,7 +57,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -99,7 +100,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
         className={cn(
           styles.containerInputNumber,
           customBootstrapClass,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >
@@ -132,7 +133,7 @@ class InputNumberWithErrors extends React.Component { // eslint-disable-line rea
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
           name={name}
           style={errorsStyle}
         />
@@ -205,10 +206,7 @@ InputNumberWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,
@@ -216,10 +214,7 @@ InputNumberWithErrors.propTypes = {
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]),
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };
 
 export default InputNumberWithErrors;

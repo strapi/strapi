@@ -21,7 +21,7 @@ const PLUGINS_WITH_CONFIG = ['content-manager', 'email', 'upload'];
 class Row extends React.Component {
   state = { showModal: false };
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.pluginActionSucceeded !== this.props.pluginActionSucceeded) {
       this.setState({ showModal: false });
     }

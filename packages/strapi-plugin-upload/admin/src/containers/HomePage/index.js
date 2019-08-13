@@ -51,7 +51,7 @@ export class HomePage extends React.Component {
     deleteData: this.props.deleteData,
   });
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!isEmpty(this.props.location.search)) {
       const _page = parseInt(this.getURLParams('_page'), 10);
       const _limit = parseInt(this.getURLParams('_limit'), 10);
@@ -64,7 +64,7 @@ export class HomePage extends React.Component {
     this.props.getData();
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.deleteSuccess !== this.props.deleteSuccess) {
       this.props.getData();
     }

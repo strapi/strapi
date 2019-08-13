@@ -330,7 +330,7 @@ export class ContentTypePage extends React.Component {
     this.props.dataFetch(this.props.match.params.contentTypeName);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (
       nextProps.match.params.contentTypeName !==
       this.props.match.params.contentTypeName
