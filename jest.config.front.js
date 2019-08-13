@@ -7,7 +7,7 @@ module.exports = {
     'packages/strapi-plugin-*/admin/src/InjectedComponents/tests/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
     '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
-    '!packages/strapi-plugin-*/admin/src/utils/*.js',
+    'packages/strapi-plugin-*/admin/src/utils/*.js',
     '!packages/strapi-plugin-*/admin/src/lifecycles/*.js',
     '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
   ],

@@ -97,5 +97,6 @@ export {
   formatLayout,
   getFieldType,
   getInputSize,
+  getRowSize,
   unformatLayout,
 };
