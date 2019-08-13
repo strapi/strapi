@@ -81,7 +81,7 @@ module.exports = {
 
   create(ctx) {
     if (ctx.is('multipart')) {
-      // parse the specific strapi's formData format and return the data and the files
+      // Parses strapi's formData format
       const { data, files } = this.parseMultipartData(ctx);
       return service.create(data, { files });
     }
@@ -103,7 +103,7 @@ module.exports = {
 
   update(ctx) {
     if (ctx.is('multipart')) {
-      // parse the specific strapi's formData format and return the data and the files
+      // Parses strapi's formData format
       const { data, files } = this.parseMultipartData(ctx);
       return service.update(ctx.params, data, { files });
     }

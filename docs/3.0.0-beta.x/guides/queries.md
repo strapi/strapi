@@ -4,7 +4,7 @@ Strapi provides a utility function `strapi.query` to make database queries.
 
 You can just call `strapi.query(modelName, pluginName)` to access the query API for any model.
 
-Those queries handle for you specific Strapi features like `groups` `filters` and `search`.
+These queries handle for you specific Strapi features like `groups`, `filters` and `search`.
 
 ## API Reference
 
@@ -32,7 +32,7 @@ strapi.query('post').findOne({ title: 'my title' });
 ```js
 strapi
   .query('post')
-  .findOne({ title: 'my title', created_at: '2019-01-01T00:00:00Z' });
+  .findOne({ title: 'my title', date: '2019-01-01T00:00:00Z' });
 ```
 
 **Find one by id and populate a relation**
@@ -174,7 +174,7 @@ strapi.query('post').update(
 
 ### `delete`
 
-Deletes and entry and return it's value before deletion.
+Deletes and entry and return its value before deletion.
 You can delete multiple entries at once with the passed params.
 
 #### Examples
@@ -217,7 +217,7 @@ strapi.query('post').count({ date_lt: '2019-08-01T00:00:00Z' });
 
 ### `search`
 
-Returns entries base on a search on all fields allowing it. (this feature will return all entries on sqlite).
+Returns entries based on a search on all fields allowing it. (this feature will return all entries on sqlite).
 
 #### Examples
 
@@ -237,7 +237,7 @@ strapi
 
 ### `countSearch`
 
-Returns the total count of entries mattching a search. (this feature will return all entries on sqlite).
+Returns the total count of entries based on a search. (this feature will return all entries on sqlite).
 
 #### Example
 
