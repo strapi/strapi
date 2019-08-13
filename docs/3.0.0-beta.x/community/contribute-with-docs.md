@@ -117,7 +117,7 @@ module.exports = [
 
 ```
 
-### Adding / Modifying / Deleting Content
+### Adding / Modifying / Deleting Content from the Docs
 
 ### Submitting an Externally Hosted Tutorial
 
@@ -144,6 +144,8 @@ Using **npm/npx**:
 ```
 npx create-strapi-app my-project --quickstart
 ```
+
+---
 
 **Example**
 
@@ -181,7 +183,7 @@ In the above, the #1 phrase is clear. #2 is actually confusing.
 
 Therefore, when you write instructions, use "you". This will help to keep your documentation clearly written.
 
-#### Ensure you use trade, project and service providers names correctly
+#### Ensure you use trade, project and service provider names correctly
 
 Strapi is back-end and front-end agnostic. Many different front-ends and databases can (and will) be used. In addition, to front-ends and back-ends, many packages, tools and third-party service providers are often used with Strapi. Referring to the projects and services correctly is important. If you use incorrect terms to refer to external services, users could get confused when further research outside the Strapi docs is required.
 
