@@ -5,22 +5,22 @@ module.exports = async (ctx, next) => {
 
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
-      const { _id, id, isAdmin = false } = await strapi.plugins[
+      const { id, isAdmin = false } = await strapi.plugins[
         'users-permissions'
       ].services.jwt.getToken(ctx);
 
-      if ((id || _id) === undefined) {
+      if (id === undefined) {
         throw new Error('Invalid token: Token did not contain required fields');
       }
 
       if (isAdmin) {
         ctx.state.admin = await strapi
           .query('administrator', 'admin')
-          .findOne({ id: _id || id });
+          .findOne({ id });
       } else {
         ctx.state.user = await strapi
           .query('user', 'users-permissions')
-          .findOne({ id: _id || id });
+          .findOne({ id });
       }
     } catch (err) {
       return handleErrors(ctx, err, 'unauthorized');
@@ -87,7 +87,7 @@ module.exports = async (ctx, next) => {
     .query('permission', 'users-permissions')
     .findOne(
       {
-        role: role._id || role.id,
+        role: role.id,
         type: route.plugin || 'application',
         controller: route.controller,
         action: route.action,

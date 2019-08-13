@@ -28,7 +28,7 @@ module.exports = {
             ).forEach(action => {
               acc.push(
                 strapi.query('permission', 'users-permissions').create({
-                  role: role._id || role.id,
+                  role: role.id,
                   type,
                   controller,
                   action: action.toLowerCase(),
@@ -72,7 +72,7 @@ module.exports = {
       acc.push(
         strapi.query('user', 'users-permissions').update(
           {
-            id: user._id || user.id,
+            id: user.id,
           },
           {
             role: publicRoleID,
@@ -87,7 +87,7 @@ module.exports = {
     role.permissions.forEach(permission => {
       arrayOfPromises.push(
         strapi.query('permission', 'users-permissions').delete({
-          id: permission._id || permission.id,
+          id: permission.id,
         })
       );
     });
@@ -225,8 +225,6 @@ module.exports = {
       .find({ _sort: 'name' }, []);
 
     for (let i = 0; i < roles.length; ++i) {
-      roles[i].id = roles[i].id || roles[i]._id;
-
       roles[i].nb_users = await strapi
         .query('user', 'users-permissions')
         .count({ role: roles[i].id });
@@ -411,7 +409,7 @@ module.exports = {
           toAdd.map(action => {
             const data = {
               ...defaultPolicy(action, role),
-              ...{ role: role.id || role._id },
+              role: role.id,
             };
 
             return query.create(data);
