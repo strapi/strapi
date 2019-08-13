@@ -1,4 +1,4 @@
-import { isEmpty } from 'lodash';
+import { isEmpty, toString } from 'lodash';
 /**
  * Generate filters object from string
  * @param  {String} search
@@ -18,10 +18,31 @@ const generateFiltersFromSearch = search => {
     .reduce((acc, curr) => {
       const [name, value] = curr.split('=');
       const split = name.split('_');
-      const filter = split.length > 1 ? `_${split[1]}` : '=';
+      let filter = `_${split[split.length - 1]}`;
+
+      if (
+        ![
+          '_ne',
+          '_lt',
+          '_lte',
+          '_gt',
+          '_gte',
+          '_contains',
+          '_containss',
+          '_in',
+          '_nin',
+        ].includes(filter)
+      ) {
+        filter = '=';
+      }
+      const toSlice = filter === '=' ? split.length : split.length - 1;
 
       acc.push({
-        name: split[0].replace('?', ''),
+        name: split
+          .slice(0, toSlice)
+          .join('_')
+
+          .replace('?', ''),
         filter,
         value: decodeURIComponent(value),
       });
@@ -32,7 +53,7 @@ const generateFiltersFromSearch = search => {
 
 const generateSearchFromFilters = filters => {
   return Object.keys(filters)
-    .filter(key => !isEmpty(filters[key]))
+    .filter(key => !isEmpty(toString(filters[key])))
     .map(key => {
       let ret = `${key}=${filters[key]}`;
 

@@ -451,6 +451,10 @@ function EditView({
             <div className="col-md-12 col-lg-9">
               <MainWrapper>
                 {fields.map((fieldsRow, key) => {
+                  if (fieldsRow.length === 0) {
+                    return null;
+                  }
+
                   const [{ name }] = fieldsRow;
                   const group = get(layout, ['schema', 'attributes', name], {});
                   const groupMetas = get(
