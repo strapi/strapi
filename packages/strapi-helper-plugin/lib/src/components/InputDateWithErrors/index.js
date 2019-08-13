@@ -21,7 +21,8 @@ import InputSpacer from '../InputSpacer';
 
 import styles from './styles.scss';
 
-class InputDateWithErrors extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputDateWithErrors extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -38,7 +39,7 @@ class InputDateWithErrors extends React.Component { // eslint-disable-line react
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Show required error if the input's value is received after the compo is mounted
     if (!isEmpty(nextProps.value) && !this.state.hasInitialValue) {
       this.setState({ hasInitialValue: true });
@@ -53,16 +54,16 @@ class InputDateWithErrors extends React.Component { // eslint-disable-line react
   }
 
   /**
-  * Set the errors depending on the validations given to the input
-  * @param  {Object} target
-  */
+   * Set the errors depending on the validations given to the input
+   * @param  {Object} target
+   */
   handleBlur = ({ target }) => {
     // Prevent from displaying error if the input is initially isEmpty
     if (!isEmpty(get(target, 'value')) || this.state.hasInitialValue) {
       const errors = validateInput(target.value, this.props.validations);
       this.setState({ errors, hasInitialValue: true });
     }
-  }
+  };
 
   render() {
     const {
@@ -102,9 +103,10 @@ class InputDateWithErrors extends React.Component { // eslint-disable-line react
     return (
       <div
         className={cn(
-          !isEmpty(customBootstrapClass) && customBootstrapClass || 'col-md-4',
+          (!isEmpty(customBootstrapClass) && customBootstrapClass) ||
+            'col-md-4',
           styles.containerDate,
-          !isEmpty(className) && className,
+          !isEmpty(className) && className
         )}
         style={style}
       >
@@ -136,7 +138,7 @@ class InputDateWithErrors extends React.Component { // eslint-disable-line react
         />
         <InputErrors
           className={errorsClassName}
-          errors={!noErrorsDescription && this.state.errors || []}
+          errors={(!noErrorsDescription && this.state.errors) || []}
           name={name}
           style={errorsStyle}
         />
@@ -208,20 +210,14 @@ InputDateWithErrors.propTypes = {
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
   noErrorsDescription: PropTypes.bool,
-  onBlur: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.func,
-  ]),
+  onBlur: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.object,
-  ]),
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
 
 export default InputDateWithErrors;

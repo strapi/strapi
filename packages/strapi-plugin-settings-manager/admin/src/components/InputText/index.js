@@ -61,7 +61,7 @@ class InputText extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!this.isSame(nextProps)) {
       const errors = isEmpty(nextProps.errors)
         ? []

@@ -64,13 +64,13 @@ export class HomePage extends React.Component {
     document.addEventListener('keyup', this.handleKeyBoardShortCut);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.dataToEdit !== this.props.dataToEdit) {
       this.setState({ showModalEdit: !isEmpty(nextProps.dataToEdit) });
     }
   }
 
-  componentWillUpdate(nextProps) {
+  UNSAFE_componentWillUpdate(nextProps) {
     const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced'];
     const shouldRedirect =
       allowedPaths.filter(el => el === nextProps.match.params.settingType)
@@ -122,9 +122,7 @@ export class HomePage extends React.Component {
       this.props.history.push(`${this.props.location.pathname}/create`);
     } else if (this.props.match.params.settingType === 'providers') {
       this.props.history.push(
-        `${this.props.location.pathname}#add::${
-          this.props.match.params.settingType
-        }`,
+        `${this.props.location.pathname}#add::${this.props.match.params.settingType}`
       );
     }
   };
@@ -142,7 +140,7 @@ export class HomePage extends React.Component {
     const formErrors = checkFormValidity(
       this.props.match.params.settingType,
       modifiedObject,
-      this.props.dataToEdit,
+      this.props.dataToEdit
     );
 
     if (isEqual(initObject, modifiedObject)) {
@@ -322,7 +320,7 @@ function mapDispatchToProps(dispatch) {
       submit,
       unsetDataToEdit,
     },
-    dispatch,
+    dispatch
   );
 }
 
@@ -330,7 +328,7 @@ const mapStateToProps = selectHomePage();
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = strapi.injectReducer({
   key: 'homePage',
@@ -342,5 +340,5 @@ const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(injectIntl(HomePage));

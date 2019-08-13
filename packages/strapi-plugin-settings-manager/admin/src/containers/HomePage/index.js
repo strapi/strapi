@@ -109,7 +109,7 @@ export class HomePage extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // check if params slug updated
     if (
       this.props.match.params.slug !== nextProps.match.params.slug &&

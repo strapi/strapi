@@ -26,7 +26,7 @@ class InputSearchContainer extends React.Component {
     value: '',
   };
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.didDeleteUser !== this.props.didDeleteUser) {
       this.setState({
         users: nextProps.values,
@@ -52,8 +52,8 @@ class InputSearchContainer extends React.Component {
     const filteredUsers = isEmpty(target.value)
       ? this.state.users
       : this.state.users.filter(user =>
-        includes(toLower(user.name), toLower(target.value)),
-      );
+          includes(toLower(user.name), toLower(target.value))
+        );
 
     if (isEmpty(filteredUsers) && !isEmpty(target.value)) {
       this.props.getUser(target.value);
@@ -106,7 +106,7 @@ class InputSearchContainer extends React.Component {
             className={cn(
               'input-group-addon',
               styles.addon,
-              this.state.isFocused && styles.addonFocus,
+              this.state.isFocused && styles.addonFocus
             )}
           />
           <FormattedMessage id="users-permissions.InputSearch.placeholder">
@@ -114,7 +114,7 @@ class InputSearchContainer extends React.Component {
               <input
                 className={cn(
                   'form-control',
-                  !isEmpty(this.state.errors) ? 'is-invalid' : '',
+                  !isEmpty(this.state.errors) ? 'is-invalid' : ''
                 )}
                 id={this.props.name}
                 name={this.props.name}
@@ -134,7 +134,7 @@ class InputSearchContainer extends React.Component {
         <div
           className={cn(
             styles.ulContainer,
-            this.state.isFocused && styles.ulFocused,
+            this.state.isFocused && styles.ulFocused
           )}
         >
           <ul>

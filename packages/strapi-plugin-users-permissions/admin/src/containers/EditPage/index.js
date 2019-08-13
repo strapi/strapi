@@ -83,7 +83,7 @@ export class EditPage extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     // Redirect user to HomePage if submit ok
     if (nextProps.editPage.didSubmit !== this.props.editPage.didSubmit) {
       this.props.history.push('/plugins/users-permissions/roles');
@@ -218,7 +218,7 @@ export class EditPage extends React.Component {
         type: 'submit',
         disabled: isEqual(
           this.props.editPage.modifiedData,
-          this.props.editPage.initialData,
+          this.props.editPage.initialData
         ),
       },
     ];
@@ -364,13 +364,13 @@ function mapDispatchToProps(dispatch) {
       resetProps,
       resetShouldDisplayPoliciesHint,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 const withReducer = strapi.injectReducer({
   key: 'editPage',
@@ -382,5 +382,5 @@ const withSaga = strapi.injectSaga({ key: 'editPage', saga, pluginId });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(EditPage);

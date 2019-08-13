@@ -27,7 +27,7 @@ class PluginLeftMenuLink extends React.Component {
     this.setState({ environmentIndex });
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.state.environmentIndex === -1 && nextProps.envParams) {
       this.setState({
         environmentIndex: findIndex(nextProps.environments, [
@@ -52,9 +52,9 @@ class PluginLeftMenuLink extends React.Component {
     if (!isEmpty(this.props.environments)) {
       url = this.props.environmentsRequired
         ? `${this.props.link.slug}/${get(this.props.environments, [
-          this.state.environmentIndex,
-          'name',
-        ])}`
+            this.state.environmentIndex,
+            'name',
+          ])}`
         : `${this.props.link.slug}`;
     }
 
