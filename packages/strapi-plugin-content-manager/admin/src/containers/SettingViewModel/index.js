@@ -258,8 +258,6 @@ function SettingViewModel({
     }
   };
 
-  console.log(modifiedData);
-
   return (
     <LayoutDndProvider
       attributes={getAttributes}

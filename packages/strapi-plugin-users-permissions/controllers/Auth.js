@@ -122,9 +122,9 @@ module.exports = {
         );
       } else {
         ctx.send({
-          jwt: strapi.plugins['users-permissions'].services.jwt.issue(
-            _.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])
-          ),
+          jwt: strapi.plugins['users-permissions'].services.jwt.issue({
+            id: user.id,
+          }),
           user: _.omit(user.toJSON ? user.toJSON() : user, [
             'password',
             'resetPasswordToken',
@@ -157,9 +157,9 @@ module.exports = {
       }
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(
-          _.pick(user, ['_id', 'id'])
-        ),
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue({
+          id: user.id,
+        }),
         user: _.omit(user.toJSON ? user.toJSON() : user, [
           'password',
           'resetPasswordToken',
@@ -203,9 +203,9 @@ module.exports = {
         .update({ id: user.id }, user);
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue(
-          _.pick(user.toJSON ? user.toJSON() : user, ['_id', 'id'])
-        ),
+        jwt: strapi.plugins['users-permissions'].services.jwt.issue({
+          id: user.id,
+        }),
         user: _.omit(user.toJSON ? user.toJSON() : user, [
           'password',
           'resetPasswordToken',
@@ -418,7 +418,7 @@ module.exports = {
       params.email = params.email.toLowerCase();
     }
 
-    params.role = role._id || role.id;
+    params.role = role.id;
     params.password = await strapi.plugins[
       'users-permissions'
     ].services.user.hashPassword(params);
@@ -535,12 +535,12 @@ module.exports = {
   async emailConfirmation(ctx) {
     const params = ctx.query;
 
-    const user = await strapi.plugins['users-permissions'].services.jwt.verify(
-      params.confirmation
-    );
+    const decodedToken = await strapi.plugins[
+      'users-permissions'
+    ].services.jwt.verify(params.confirmation);
 
     await strapi.plugins['users-permissions'].services.user.edit(
-      _.pick(user, ['_id', 'id']),
+      { id: decodedToken.id },
       { confirmed: true }
     );
 

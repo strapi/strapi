@@ -97,7 +97,7 @@ exports.connect = (provider, query) => {
         // Create the new user.
         const params = _.assign(profile, {
           provider: provider,
-          role: defaultRole._id || defaultRole.id,
+          role: defaultRole.id,
         });
 
         const createdUser = await strapi

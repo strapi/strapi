@@ -48,7 +48,7 @@ module.exports = {
       .query('role', 'users-permissions')
       .findOne({ type: 'public' });
 
-    const publicRoleID = publicRole.id || publicRole._id;
+    const publicRoleID = publicRole.id;
 
     const roleID = ctx.params.role;
 
