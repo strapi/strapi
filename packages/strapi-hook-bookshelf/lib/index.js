@@ -35,7 +35,7 @@ const isBookshelfConnection = ({ connector }) =>
   connector === 'strapi-hook-bookshelf';
 
 module.exports = function(strapi) {
-  function initialize(cb) {
+  function initialize() {
     const { connections } = strapi.config;
     const GLOBALS = {};
 
@@ -80,7 +80,7 @@ module.exports = function(strapi) {
         ]);
       });
 
-    return Promise.all(connectionsPromises).then(() => cb(), err => cb(err));
+    return Promise.all(connectionsPromises);
   }
 
   function mountGroups(connectionName, ctx) {

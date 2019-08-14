@@ -45,7 +45,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: cb => {
+    initialize: () => {
       // For each connection in the config register a new Knex connection.
       _.forEach(
         _.pickBy(strapi.config.connections, {
@@ -257,8 +257,6 @@ module.exports = strapi => {
           }
         }
       );
-
-      cb();
     },
   };
 
