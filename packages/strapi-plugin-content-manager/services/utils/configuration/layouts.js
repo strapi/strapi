@@ -76,9 +76,9 @@ function syncLayouts(configuration, schema) {
   const { list = [], editRelations = [], edit = [] } =
     configuration.layouts || {};
 
-  const cleanList = list.filter(attr => isListable(schema, attr));
+  let cleanList = list.filter(attr => isListable(schema, attr));
 
-  const cleanEditRelations = editRelations.filter(attr =>
+  let cleanEditRelations = editRelations.filter(attr =>
     hasRelationAttribute(schema, attr)
   );
 
@@ -106,29 +106,18 @@ function syncLayouts(configuration, schema) {
 
   cleanEdit = appendToEditLayout(cleanEdit, elementsToReAppend, schema);
 
-  let layout = {
-    list: cleanList.length > 0 ? cleanList : createDefaultListLayout(schema),
-    editRelations:
-      cleanEditRelations.length > 0
-        ? cleanEditRelations
-        : createDefaultEditRelationsLayout(schema),
-    edit: cleanEdit.length > 0 ? cleanEdit : createDefaultEditLayout(schema),
-  };
-
   const newAttributes = _.difference(
     Object.keys(schema.attributes),
     Object.keys(configuration.metadatas)
   );
 
-  if (newAttributes.length === 0) return layout;
-
   /** Add new attributes where they belong */
 
-  if (layout.list.length < DEFAULT_LIST_LENGTH) {
+  if (cleanList.length < DEFAULT_LIST_LENGTH) {
     // add newAttributes
     // only add valid listable attributes
-    layout.list = _.uniq(
-      layout.list
+    cleanList = _.uniq(
+      cleanList
         .concat(newAttributes.filter(key => isListable(schema, key)))
         .slice(0, DEFAULT_LIST_LENGTH)
     );
@@ -140,7 +129,7 @@ function syncLayouts(configuration, schema) {
       hasRelationAttribute(schema, key)
     );
 
-    layout.editRelations = _.uniq(layout.editRelations.concat(newRelations));
+    cleanEditRelations = _.uniq(cleanEditRelations.concat(newRelations));
   }
 
   // add new attributes to edit view
@@ -148,9 +137,16 @@ function syncLayouts(configuration, schema) {
     hasEditableAttribute(schema, key)
   );
 
-  layout.edit = appendToEditLayout(layout.edit, newEditAttributes, schema);
+  cleanEdit = appendToEditLayout(cleanEdit, newEditAttributes, schema);
 
-  return layout;
+  return {
+    list: cleanList.length > 0 ? cleanList : createDefaultListLayout(schema),
+    edit: cleanEdit.length > 0 ? cleanEdit : createDefaultEditLayout(schema),
+    editRelations:
+      cleanEditRelations.length > 0
+        ? cleanEditRelations
+        : createDefaultEditRelationsLayout(schema),
+  };
 }
 
 const appendToEditLayout = (layout = [], keysToAppend, schema) => {
