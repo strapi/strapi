@@ -332,16 +332,21 @@ function EditView({
         emitEvent('didSaveEntry');
         redirectToPreviousPage();
       } catch (err) {
-        console.log('send data error', err);
-        emitEvent('didNotSaveEntry', { error: err });
-        // TODO handle errors from the API
-        strapi.notification.error(
-          `${pluginId}.containers.EditView.notification.errors`
+        const error = get(
+          err,
+          ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
+          'SERVER ERROR'
         );
+
+        console.log('Server error please check the following log');
+        console.log(error);
+
+        setIsSubmitting(false);
+        emitEvent('didNotSaveEntry', { error: err });
+        strapi.notification.error(error);
       }
     } catch (err) {
       setIsSubmitting(false);
-      console.log({ err });
       const errors = get(err, 'inner', []).reduce((acc, curr) => {
         acc[
           curr.path
