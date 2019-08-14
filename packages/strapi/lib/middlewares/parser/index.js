@@ -13,7 +13,7 @@ module.exports = strapi => {
      */
 
     initialize() {
-      strapi.app.use(
+      strapi.router.use(
         body({
           patchKoa: true,
           ...strapi.config.middleware.settings.parser,

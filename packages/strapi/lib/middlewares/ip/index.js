@@ -14,7 +14,7 @@ module.exports = strapi => {
     initialize() {
       const { whiteList, blackList } = strapi.config.middleware.settings.ip;
 
-      strapi.app.use(
+      strapi.router.use(
         ip({
           whitelist: whiteList,
           blacklist: blackList,

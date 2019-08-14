@@ -13,7 +13,7 @@ module.exports = strapi => {
      */
 
     initialize() {
-      strapi.app.use(async (ctx, next) => {
+      strapi.router.use(async (ctx, next) => {
         if (ctx.request.admin) return await next();
 
         return await convert(csp(strapi.config.middleware.settings.csp))(

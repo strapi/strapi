@@ -10,13 +10,10 @@ const _ = require('lodash');
 // Strapi utilities.
 const finder = require('strapi-utils').finder;
 const regex = require('strapi-utils').regex;
-const joijson = require('strapi-utils').joijson;
 const policyUtils = require('strapi-utils').policy;
-const { Joi } = require('koa-joi-router');
 
 module.exports = strapi =>
   function routerChecker(value, endpoint, plugin) {
-    const builder = joijson.builder(Joi);
     const route = regex.detectRoute(endpoint);
 
     // Define controller and action names.
@@ -74,30 +71,9 @@ module.exports = strapi =>
       }
     });
 
-    // Init validate.
-    const validate = {};
-
-    if (
-      _.isString(_.get(value, 'config.validate')) &&
-      !_.isEmpty(_.get(value, 'config.validate'))
-    ) {
-      const validator = _.get(
-        strapi.api,
-        currentApiName + '.validators.' + value.config.validate
-      );
-
-      _.merge(
-        validate,
-        _.mapValues(validator, value => {
-          return builder.build(value);
-        })
-      );
-    }
-
     return {
       route,
       policies,
       action,
-      validate,
     };
   };

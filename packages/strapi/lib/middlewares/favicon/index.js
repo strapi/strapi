@@ -25,7 +25,7 @@ module.exports = strapi => {
         path: faviconPath,
       } = strapi.config.middleware.settings.favicon;
 
-      strapi.app.use(
+      strapi.router.use(
         favicon(resolve(dir, faviconPath), {
           maxAge,
         })

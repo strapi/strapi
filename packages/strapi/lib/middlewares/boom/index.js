@@ -53,7 +53,7 @@ module.exports = strapi => {
       this.createResponses();
 
       strapi.errors = Boom;
-      strapi.app.use(async (ctx, next) => {
+      strapi.router.use(async (ctx, next) => {
         try {
           // App logic.
           await next();

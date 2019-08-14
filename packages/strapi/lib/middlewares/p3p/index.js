@@ -16,7 +16,7 @@ module.exports = strapi => {
      */
 
     initialize() {
-      strapi.app.use(async (ctx, next) => {
+      strapi.router.use(async (ctx, next) => {
         if (ctx.request.admin) return next();
 
         return await convert(p3p(strapi.config.middleware.settings.p3p))(

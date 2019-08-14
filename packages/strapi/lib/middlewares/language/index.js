@@ -34,7 +34,7 @@ module.exports = strapi => {
         'locales'
       );
 
-      strapi.app.use(
+      strapi.router.use(
         i18n(strapi.app, {
           directory,
           locales: Object.keys(get(strapi.config, 'locales', {})),

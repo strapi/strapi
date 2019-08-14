@@ -12,7 +12,7 @@ module.exports = strapi => {
      */
 
     initialize() {
-      strapi.app.use(compress());
+      strapi.router.use(compress());
     },
   };
 };

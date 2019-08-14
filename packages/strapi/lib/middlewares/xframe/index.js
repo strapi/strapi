@@ -16,7 +16,7 @@ module.exports = strapi => {
     initialize() {
       const defaults = require('./defaults.json');
 
-      strapi.app.use(async (ctx, next) => {
+      strapi.router.use(async (ctx, next) => {
         if (ctx.request.admin) {
           return await convert(xframe(defaults.xframe))(ctx, next);
         }

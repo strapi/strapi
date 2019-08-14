@@ -5,7 +5,7 @@ const uploadFiles = require('../../utils/upload-files');
 
 module.exports = async (ctx, next) => {
   const { source } = ctx.request.query;
-  const { model } = ctx.request.params;
+  const { model } = ctx.params;
 
   const target = source === 'admin' ? strapi.admin : strapi.plugins[source];
 

@@ -38,7 +38,7 @@ module.exports = strapi => {
       }
 
       if (requests && strapi.log.levelVal <= 20) {
-        strapi.app.use(async (ctx, next) => {
+        strapi.router.use(async (ctx, next) => {
           const start = Date.now();
           await next();
           const delta = Math.ceil(Date.now() - start);

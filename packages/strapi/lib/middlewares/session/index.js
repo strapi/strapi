@@ -43,8 +43,8 @@ module.exports = strapi => {
             strapi.config.middleware.settings.session
           );
 
-          strapi.app.use(session(options, strapi.app));
-          strapi.app.use((ctx, next) => {
+          strapi.router.use(session(options, strapi.app));
+          strapi.router.use((ctx, next) => {
             ctx.state = ctx.state || {};
             ctx.state.session = ctx.session || {};
 
@@ -61,8 +61,8 @@ module.exports = strapi => {
           strapi.config.middleware.settings.session
         );
 
-        strapi.app.use(session(options, strapi.app));
-        strapi.app.use((ctx, next) => {
+        strapi.router.use(session(options, strapi.app));
+        strapi.router.use((ctx, next) => {
           ctx.state = ctx.state || {};
           ctx.state.session = ctx.session || {};
 

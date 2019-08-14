@@ -57,7 +57,7 @@ module.exports = strapi => {
           consolidate[engine];
         });
 
-        strapi.app.use(
+        strapi.router.use(
           koaViews(
             path.resolve(strapi.config.appPath, strapi.config.paths.views),
             opts

@@ -13,7 +13,7 @@ module.exports = strapi => {
      */
 
     initialize() {
-      strapi.app.use(async (ctx, next) => {
+      strapi.router.use(async (ctx, next) => {
         await next();
 
         // Call custom responses.
