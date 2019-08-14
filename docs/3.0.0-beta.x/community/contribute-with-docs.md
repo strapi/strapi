@@ -1,21 +1,33 @@
 # Contribute with Docs
 
-All efforts to contribute to the [Docs](https://strapi.io/documentation/3.0.0-beta.x/) are highly appreciated, we recommend you talk to a maintainer before spending much time making a pull request that may not align with the project roadmap. You are welcome to create tutorials, articles, and videos for your blog or channels without speaking to a maintainer.
+All efforts to contribute to the [Docs](https://strapi.io/documentation/3.0.0-beta.x/) are highly appreciated, we recommend **[TODO: NEEDS EDITING TO REFERENCE THE OUTLINE STEPS]** you talk to a maintainer before spending much time making a pull request that may not align with the project roadmap. You are welcome to create tutorials, articles, and videos for your blog or channels without speaking to a maintainer.
 
 ## General Guidelines
 
 Please review the following guidelines and recommendations regarding contributing with Docs to the Strapi project.
 
-## Types of Documentation
+Broadly speaking, if you want to contribute documentation, you will either:
+
+1. Create completely new documentation for a topic that has not been documented, or
+2. Improve existing documentation with additional examples, adding more context, fixing grammar and typos or doing [translations](/3.0.0-beta.x/community/contribute-with-docs.html#translations).
+
+Each way of contributing has a specific workflow which should be followed to ensure maximum effeciency in your contributions to the documentation. Before discussing [The Workflow](/3.0.0-beta.x/community/contribute-with-docs.html#the-workflow), please review and understand the following concepts:
+
+- Review the [Categories of Documentation](/3.0.0-beta.x/community/contribute-with-docs.html#categories-of-documentation)
+
+## Categories of Documentation
 
 Four different **types of content** exist in the documentation:
 
-- Tutorials
-- How-to's
-- Reference Topics
-- Explanations
+a. **Tutorials**
 
-Below are explanations for each category of content. The overall key is to know who is your audience and then write for that audience.
+b. **How-tos**
+
+c. **Reference Topics**
+
+d. **Explanations**
+
+Below are explanations for each category of content. The overall key is to know who is your audience and then write for that audience, both which are covered later in this contributing guide.
 
 ### Tutorials
 
@@ -117,6 +129,13 @@ module.exports = [
 
 ```
 
+===========================
+
+you will start with two steps:
+
+- Determine the audience or type of developer you're writing the documentation for,
+- Determine the Category of Documentation you want to write.
+
 ### Adding / Modifying / Deleting Content from the Docs
 
 ### Submitting an Externally Hosted Tutorial
@@ -189,7 +208,7 @@ Strapi is back-end and front-end agnostic. Many different front-ends and databas
 
 Common project and how to refer to them:
 
-| Name                | Correct usage |                   Example                   |
+| Incorrect Usage     | Correct usage |                   Example                   |
 | ------------------- | :-----------: | :-----------------------------------------: |
 | Node, NODE, node.js |    Node.js    |   The Node.js Twitter account is @nodejs.   |
 | npm, NPM            |      npm      | The current stable version of npm is here.  |
@@ -198,3 +217,10 @@ Common project and how to refer to them:
 | Strapi, Strapi.js   |    Strapi     |   Get ready to get Strapi up and running.   |
 | Vue, VUE, Vue.js    | Vue or Vue.js |  My favorite component library for Vue...   |
 | yarn, YARN, Yarn    |     Yarn      | You can use Yarn to keep it all up to date. |
+| NPX, Npx, npx       |      npx      | Run packages without downloading using npx. |
+
+#### Noting Includes with comments including path
+
+### Translations
+
+Thank you for your interest in helping with the translation of the documentation. Please open an issue on GitHub stating your desire to translate the documentation.

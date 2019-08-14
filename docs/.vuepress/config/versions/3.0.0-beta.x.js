@@ -1,6 +1,6 @@
 module.exports = [
   {
-    collapsable: false,
+    collapsable: true,
     title: '🚀 Getting started',
     children: [
       '/3.0.0-beta.x/getting-started/introduction',
