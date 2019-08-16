@@ -6,6 +6,7 @@ const path = require('path');
 const { EventEmitter } = require('events');
 const fse = require('fs-extra');
 const Koa = require('koa');
+const range = require('koa-range');
 const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
 const utils = require('./utils');
@@ -228,14 +229,7 @@ class Strapi extends EventEmitter {
   async load() {
     await this.enhancer();
 
-    this.app.use(async (ctx, next) => {
-      if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
-        ctx.set('strapi', 'You are so French!');
-        ctx.status = 204;
-      } else {
-        await next();
-      }
-    });
+    this.app.use(range);
 
     const [
       config,

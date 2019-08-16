@@ -37,6 +37,7 @@
     "koa-qs": "^2.0.0",
     "koa-session": "^5.5.1",
     "koa-static": "^4.0.1",
+    "koa-range": "^0.3.0",
     "lodash": "^4.17.5",
     "minimatch": "^3.0.4",
     "node-fetch": "^1.7.3",
