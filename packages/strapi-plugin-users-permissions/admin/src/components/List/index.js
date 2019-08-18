@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { map, omitBy, size } from 'lodash';
+import { map, size } from 'lodash';
 import cn from 'classnames';
 
 // Components from strapi-helper-plugin
@@ -97,8 +97,6 @@ function List({
   showLoaders,
   values,
 }) {
-  const object = omitBy(data, v => v.name === 'server'); // Remove the server key when displaying providers
-
   return (
     <div className={styles.list}>
       <div className={styles.flex}>
@@ -125,14 +123,14 @@ function List({
         className={cn(
           styles.ulContainer,
           showLoaders && styles.loadingContainer,
-          showLoaders && settingType === 'roles' && styles.loadingContainerRole,
+          showLoaders && settingType === 'roles' && styles.loadingContainerRole
         )}
       >
         {showLoaders ? (
           <LoadingIndicator />
         ) : (
           <ul className={noButton ? styles.listPadded : ''}>
-            {map(object, item => (
+            {map(data, item => (
               <ListRow
                 deleteData={deleteData}
                 item={item}
