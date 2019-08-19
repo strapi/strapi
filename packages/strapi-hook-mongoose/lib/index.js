@@ -37,7 +37,7 @@ const isMongooseConnection = ({ connector }) =>
   connector === 'strapi-hook-mongoose';
 
 module.exports = function(strapi) {
-  function initialize(cb) {
+  function initialize() {
     const { connections } = strapi.config;
 
     const connectionsPromises = Object.keys(connections)
@@ -101,7 +101,7 @@ module.exports = function(strapi) {
             ? 'Make sure your MongoDB database is running...'
             : message;
 
-          return cb(errMsg);
+          throw new Error(errMsg);
         }
 
         const initFunctionPath = path.resolve(
@@ -131,7 +131,7 @@ module.exports = function(strapi) {
         ]);
       });
 
-    return Promise.all(connectionsPromises).then(() => cb(), err => cb(err));
+    return Promise.all(connectionsPromises);
   }
 
   function mountGroups(connectionName, ctx) {

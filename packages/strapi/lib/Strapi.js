@@ -319,10 +319,7 @@ class Strapi extends EventEmitter {
     await Promise.all([
       initializeMiddlewares.call(this),
       initializeHooks.call(this),
-    ]).catch(err => {
-      console.error(err);
-      throw err;
-    });
+    ]);
   }
 
   reload() {
@@ -463,7 +460,7 @@ class Strapi extends EventEmitter {
     }
 
     const orm = strapi.hook[model.orm];
-    const query = orm.load().queries({ model, modelKey, strapi: this });
+    const query = orm.load.queries({ model, modelKey, strapi: this });
     Object.assign(query, {
       orm: connector,
       primaryKey: model.primaryKey,
