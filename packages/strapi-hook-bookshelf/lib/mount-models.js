@@ -220,7 +220,9 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
           details.attribute = singular(details.collection);
           details.column = targetModel.primaryKey;
 
-          let options = [];
+          // Set this info to be able to see if this field is a real database's field.
+          details.isVirtual = true;
+
           if (nature === 'manyWay') {
             const joinTableName = `${definition.collectionName}__${_.snakeCase(
               name
@@ -232,7 +234,21 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
 
             const otherKey = `${details.attribute}_${details.column}`;
 
-            options = [joinTableName, foreignKey, otherKey];
+            loadedModel[name] = function() {
+              const targetBookshelfModel = GLOBALS[globalId];
+              let collection = this.belongsToMany(
+                targetBookshelfModel,
+                joinTableName,
+                foreignKey,
+                otherKey
+              );
+
+              if (Array.isArray(details.withPivot)) {
+                return collection.withPivot(details.withPivot);
+              }
+
+              return collection;
+            };
           } else {
             const joinTableName =
               _.get(details, 'collectionName') ||
@@ -256,28 +272,27 @@ module.exports = ({ models, target, plugin = false }, ctx) => {
               relationship.attribute = singular(details.via);
             }
 
-            const foreignKey = `${relationship.attribute}_${relationship.column}`;
-            const otherKey = `${details.attribute}_${details.column}`;
+            loadedModel[name] = function() {
+              const targetBookshelfModel = GLOBALS[globalId];
 
-            options = [joinTableName, foreignKey, otherKey];
+              const foreignKey = `${relationship.attribute}_${relationship.column}`;
+              const otherKey = `${details.attribute}_${details.column}`;
+
+              let collection = this.belongsToMany(
+                targetBookshelfModel,
+                joinTableName,
+                foreignKey,
+                otherKey
+              );
+
+              if (Array.isArray(details.withPivot)) {
+                return collection.withPivot(details.withPivot);
+              }
+
+              return collection;
+            };
           }
 
-          // Set this info to be able to see if this field is a real database's field.
-          details.isVirtual = true;
-
-          loadedModel[name] = function() {
-            const targetBookshelfModel = GLOBALS[globalId];
-            let collection = this.belongsToMany(
-              targetBookshelfModel,
-              ...options
-            );
-
-            if (Array.isArray(details.withPivot)) {
-              return collection.withPivot(details.withPivot);
-            }
-
-            return collection;
-          };
           break;
         }
         case 'morphOne': {
