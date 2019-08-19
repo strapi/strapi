@@ -94,7 +94,7 @@ const mountHooks = (name, files, hooks) => {
       Object.defineProperty(hooks[name], 'load', {
         configurable: false,
         enumerable: true,
-        get: () => require(file),
+        get: () => require(file)(strapi),
       });
       hooks[name].dependencies = dependencies;
       return;

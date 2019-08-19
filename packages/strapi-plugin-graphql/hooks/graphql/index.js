@@ -52,7 +52,7 @@ module.exports = strapi => {
       );
     },
 
-    initialize: function(cb) {
+    initialize: function() {
       const {
         typeDefs,
         resolvers,
@@ -63,7 +63,7 @@ module.exports = strapi => {
           'The GraphQL schema has not been generated because it is empty'
         );
 
-        return cb();
+        return;
       }
 
       const serverParams = {
@@ -101,8 +101,6 @@ module.exports = strapi => {
         app: strapi.app,
         path: strapi.plugins.graphql.config.endpoint,
       });
-
-      cb();
     },
   };
 };

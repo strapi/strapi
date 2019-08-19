@@ -136,7 +136,7 @@ const buildQuery = ({ model, filters = {}, ...rest }) => {
   const orm = strapi.hook[model.orm];
 
   // call the orm's buildQuery implementation
-  return orm.load().buildQuery({ model, filters, ...rest });
+  return orm.load.buildQuery({ model, filters, ...rest });
 };
 
 module.exports = buildQuery;

@@ -570,7 +570,7 @@ module.exports = {
       );
     }
 
-    const convertor = strapi.hook[connector].load().getQueryParams;
+    const convertor = strapi.hook[connector].load.getQueryParams;
     const convertParams = {
       where: {},
       sort: '',
