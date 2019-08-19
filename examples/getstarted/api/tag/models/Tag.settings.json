@@ -13,12 +13,12 @@
     "name": {
       "type": "string"
     },
+    "date": {
+      "type": "date"
+    },
     "linkedArticles": {
       "collection": "article",
       "via": "manyTags"
-    },
-    "date": {
-      "type": "date"
     }
   }
 }

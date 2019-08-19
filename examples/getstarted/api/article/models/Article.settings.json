@@ -89,6 +89,10 @@
       "repeatable": true,
       "min": 1,
       "max": 10
+    },
+    "author": {
+      "model": "user",
+      "plugin": "users-permissions"
     }
   }
 }

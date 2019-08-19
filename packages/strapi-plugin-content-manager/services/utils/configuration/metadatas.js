@@ -26,6 +26,16 @@ function createDefaultMetadatas(schema) {
   };
 }
 
+function createDefaultMainField(schema) {
+  if (!schema) return 'id';
+
+  return (
+    Object.keys(schema.attributes).find(
+      key => schema.attributes[key].type === 'string'
+    ) || 'id'
+  );
+}
+
 function createDefaultMetadata(schema, name) {
   const edit = {
     label: _.upperFirst(name),
@@ -36,7 +46,9 @@ function createDefaultMetadata(schema, name) {
   };
 
   if (isRelation(schema.attributes[name])) {
-    edit.mainField = 'id';
+    const { targetModel, plugin } = schema.attributes[name];
+    const targetSchema = getTargetSchema(targetModel, plugin);
+    edit.mainField = createDefaultMainField(targetSchema);
   }
 
   _.assign(
@@ -119,7 +131,11 @@ async function syncMetadatas(configuration, schema) {
     if (!targetSchema) return acc;
 
     if (!isSortable(targetSchema, edit.mainField)) {
-      _.set(updatedMeta, ['edit', 'mainField'], 'id');
+      _.set(
+        updatedMeta,
+        ['edit', 'mainField'],
+        createDefaultMainField(targetSchema)
+      );
       _.set(acc, [key], updatedMeta);
       return acc;
     }
