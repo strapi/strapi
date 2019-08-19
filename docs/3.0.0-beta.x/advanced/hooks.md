@@ -22,12 +22,8 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: cb => {
-      // Write your code here.
-
-      // this.defaults['your_config'] to access to your configs.
-
-      cb();
+    async initialize() {
+      // await someAsyncCode()
     },
   };
 
