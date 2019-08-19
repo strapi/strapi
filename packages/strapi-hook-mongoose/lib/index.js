@@ -96,12 +96,12 @@ module.exports = function(strapi) {
               }/`,
             connectOptions
           );
-        } catch ({ message }) {
-          const errMsg = message.includes(`:${port}`)
-            ? 'Make sure your MongoDB database is running...'
-            : message;
-
-          throw new Error(errMsg);
+        } catch (error) {
+          const err = new Error(
+            `Error connecting to the Mongo database. ${error.message}`
+          );
+          delete err.stack;
+          throw err;
         }
 
         const initFunctionPath = path.resolve(
