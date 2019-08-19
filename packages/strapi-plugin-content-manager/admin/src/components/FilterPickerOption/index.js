@@ -47,7 +47,12 @@ function FilterPickerOption({
           onClick={() => onRemoveFilter(index)}
         />
         <InputSelect
-          onChange={onChange}
+          onChange={e => {
+            // Change the attribute
+            onChange(e);
+            // Change the default filter so it reset to the common one which is '='
+            onChange({ target: { name: `${index}.filter`, value: '=' } });
+          }}
           name={`${index}.name`}
           value={get(modifiedData, [index, 'name'], '')}
           selectOptions={allowedAttributes.map(attr => attr.name)}

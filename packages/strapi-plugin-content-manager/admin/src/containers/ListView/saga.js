@@ -1,6 +1,6 @@
 import { all, fork, put, call, takeLatest } from 'redux-saga/effects';
 import { request } from 'strapi-helper-plugin';
-import { set, unset } from 'lodash';
+import { clone, set, unset } from 'lodash';
 import pluginId from '../../pluginId';
 
 import {
@@ -15,21 +15,22 @@ const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 // eslint-disable-next-line require-yield
 export function* getData({ uid, params }) {
   try {
-    const _start = (params._page - 1) * parseInt(params._limit, 10);
+    const clonedParams = clone(params);
+    const _start = (clonedParams._page - 1) * parseInt(clonedParams._limit, 10);
 
-    set(params, '_start', _start);
-    unset(params, '_page');
+    set(clonedParams, '_start', _start);
+    unset(clonedParams, '_page');
 
-    if (params._q === '') {
-      unset(params, '_q');
+    if (clonedParams._q === '') {
+      unset(clonedParams, '_q');
     }
 
-    const search = Object.keys(params)
+    const search = Object.keys(clonedParams)
       .reduce((acc, current) => {
         if (current !== 'filters') {
-          acc.push(`${current}=${params[current]}`);
+          acc.push(`${current}=${clonedParams[current]}`);
         } else {
-          const filters = params[current].reduce((acc, curr) => {
+          const filters = clonedParams[current].reduce((acc, curr) => {
             const key =
               curr.filter === '=' ? curr.name : `${curr.name}${curr.filter}`;
             acc.push(`${key}=${curr.value}`);
