@@ -2,16 +2,19 @@
 
 const parseMultipartData = require('./utils/parse-multipart');
 
+const proto = {
+  parseMultipartData,
+};
+
 /**
  * default bookshelf controller
  *
  */
 module.exports = ({ service }) => {
-  return {
+  return Object.assign(Object.create(proto), {
     /**
      * expose some utils so the end users can use them
      */
-    parseMultipartData,
 
     /**
      * Retrieve records.
@@ -88,5 +91,5 @@ module.exports = ({ service }) => {
     delete(ctx) {
       return service.delete(ctx.params);
     },
-  };
+  });
 };
