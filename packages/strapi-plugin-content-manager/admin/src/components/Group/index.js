@@ -100,9 +100,9 @@ function Group({
         <div
           style={{
             margin: '0 10px',
-            padding: '0 15px',
+            padding: '0 20px',
             paddingTop: 21,
-            backgroundColor: '#f5f5f5',
+            backgroundColor: '#F7F8F8',
             marginBottom: 18,
           }}
         >

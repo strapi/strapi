@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { capitalize } from 'lodash';
 import { Collapse } from 'reactstrap';
@@ -23,7 +23,9 @@ function ListRowCollapse({
   target,
   type,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const isOpen = true;
+  // Keep this
+  // const [isOpen, setIsOpen] = useState(true);
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type)
     ? 'number'
     : type;
@@ -39,9 +41,10 @@ function ListRowCollapse({
     onClickGoTo(groups[group]);
   };
 
-  const toggle = () => {
-    setIsOpen(prevState => !prevState);
-  };
+  // Keep this
+  // const toggle = () => {
+  //   setIsOpen(prevState => !prevState);
+  // };
 
   const getGroupFields = () => {
     const { attributes } = groups[group];
@@ -49,11 +52,13 @@ function ListRowCollapse({
   };
 
   const actionOnRowClick = () => {
-    if (type === 'group') {
-      toggle();
-    } else {
-      handleClick();
-    }
+    handleClick();
+    // Keep this
+    // if (type === 'group') {
+    //   toggle();
+    // } else {
+    //   handleClick();
+    // }
   };
 
   return (

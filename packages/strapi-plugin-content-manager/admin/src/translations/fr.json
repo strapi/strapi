@@ -1,6 +1,8 @@
 {
   "models": "Types de Contenus",
+  "models.numbered": "Types de Contenus ({number})",
   "groups": "Groupes",
+  "groups.numbered": "Groupes ({number})",
   "EditRelations.title": "Données associées",
   "components.AddFilterCTA.add": "Filtres",
   "components.AddFilterCTA.hide": "Filtres",

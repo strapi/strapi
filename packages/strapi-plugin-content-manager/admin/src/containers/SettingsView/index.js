@@ -30,7 +30,7 @@ import makeSelectSettingsView from './selectors';
 import form from './forms.json';
 
 const getUrl = to => `/plugins/${pluginId}/ctm-configurations${to}`;
-const getNavTrad = trad => `${pluginId}.${trad}`;
+const getNavTrad = trad => `${pluginId}.${trad}.numbered`;
 
 function SettingsView({
   getData,
@@ -163,10 +163,13 @@ function SettingsView({
               {
                 name: getNavTrad('models'),
                 to: getUrl('/models'),
+                values: { number: models.length },
               },
               {
                 name: getNavTrad('groups'),
                 to: getUrl('/groups'),
+                disabled: groups.length === 0,
+                values: { number: groups.length },
               },
             ]}
             style={{ marginTop: '4.4rem' }}

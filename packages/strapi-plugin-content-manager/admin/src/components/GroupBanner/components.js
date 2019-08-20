@@ -6,11 +6,17 @@ const Flex = styled.div`
     cursor: pointer;
     padding-top: 0;
   }
+  .trash-icon {
+    color: #4b515a;
+  }
+  .button-wrapper {
+    line-height: 35px;
+  }
 `;
 
 const ImgWrapper = styled.div`
-  width: 21px;
-  height: 21px;
+  width: 19px;
+  height: 19px;
   margin: auto;
   margin-right: 19px;
   border-radius: 50%;
@@ -20,18 +26,18 @@ const ImgWrapper = styled.div`
     } else if (isOpen) {
       return '#AED4FB';
     } else {
-      return '#e3e9f3';
+      return '#F3F4F4';
     }
   }}
   text-align: center;
-  line-height: 21px;
+  line-height: 19px;
 
   ${({ isOpen }) => !isOpen && 'transform: rotate(180deg)'}
 `;
 
 const Wrapper = styled(Flex)`
   height: 36px;
-  padding: 0 15px;
+  padding: 0 10px 0 15px;
   justify-content: space-between;
   border: 1px solid ${({ hasErrors, isOpen }) => {
     if (hasErrors) {
@@ -65,6 +71,7 @@ const Wrapper = styled(Flex)`
   line-height: 36px;
   font-size: 13px;
   font-weight: 500;
+  cursor: pointer;
 
   background-color: ${({ hasErrors, isOpen }) => {
     if (hasErrors && isOpen) {
