@@ -11,7 +11,7 @@
   "Auth.form.error.confirmed": "Адрес электронной почты не подтвержден.",
   "Auth.form.error.email.invalid": "Неправильный адрес электронной почты.",
   "Auth.form.error.email.provide": "Укажите свое имя пользователя или адрес электронной почты.",
-  "Auth.form.error.email.taken": "Данный Email уже используется",
+  "Auth.form.error.email.taken": "Данный email уже используется",
   "Auth.form.error.invalid": "Неверный логин или пароль.",
   "Auth.form.error.noAdminAccess": "У вас нет доступа к панели администрирования.",
   "Auth.form.error.params.provide": "Неправильные параметры.",
