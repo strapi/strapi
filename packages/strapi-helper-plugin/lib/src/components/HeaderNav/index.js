@@ -28,15 +28,29 @@ function HeaderNav({ links, style }) {
           <NavLink
             key={link.name}
             className={styles.headerLink}
-            style={{ backgroundColor: linkColor }}
+            style={{
+              backgroundColor: linkColor,
+              cursor: link.disabled ? 'not-allowed' : 'pointer',
+            }}
             to={link.to}
             activeClassName={styles.linkActive}
             isActive={(match, location) => {
               return location.pathname === link.to.split('?')[0];
             }}
+            onClick={e => {
+              if (link.disabled) {
+                e.preventDefault();
+
+                return;
+              }
+            }}
           >
             <div className={`${styles.linkText} text-center`}>
-              <FormattedMessage id={link.name} defaultMessage={link.name} />
+              <FormattedMessage
+                id={link.name}
+                defaultMessage={link.name}
+                values={link.values}
+              />
               {link.active && <div className={styles.notifPoint} />}
             </div>
           </NavLink>
