@@ -609,7 +609,17 @@ export class ModelPage extends React.Component {
             />
           ) : (
             <ListWrapper>
-              <ListHeader button={{ ...buttonProps }}>
+              <ListHeader
+                button={{
+                  ...buttonProps,
+                  style: {
+                    position: 'absolute',
+                    top: '1.8rem',
+                    right: '10px',
+                    outline: 0,
+                  },
+                }}
+              >
                 <div className="list-header-title">
                   {title.map(item => {
                     return (

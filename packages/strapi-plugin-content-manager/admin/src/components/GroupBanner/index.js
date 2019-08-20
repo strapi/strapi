@@ -84,7 +84,7 @@ const GroupBanner = forwardRef(
               >
                 <i className="fa fa-trash" />
               </button>
-              <button type="button" style={{ lineHeighet: '35px' }}>
+              <button type="button">
                 <img
                   src={grab}
                   alt="grab icon"

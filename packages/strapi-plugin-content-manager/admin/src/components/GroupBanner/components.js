@@ -71,6 +71,7 @@ const Wrapper = styled(Flex)`
   line-height: 36px;
   font-size: 13px;
   font-weight: 500;
+  cursor: pointer;
 
   background-color: ${({ hasErrors, isOpen }) => {
     if (hasErrors && isOpen) {

@@ -138,6 +138,7 @@ class HomePage extends React.Component {
                 label: `${pluginId}.button.${type}.create`,
                 onClick: this.handleClick,
               }}
+              style={{ paddingBottom: '0.8rem' }}
             />
             <List>
               <table>
