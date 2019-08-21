@@ -26,7 +26,13 @@ function Group({
   onChange,
   removeField,
 }) {
-  const { didCheckErrors, errors, resetErrors, resetGroupData } = useEditView();
+  const {
+    checkFormErrors,
+    didCheckErrors,
+    errors,
+    resetErrors,
+    resetGroupData,
+  } = useEditView();
   const fields = get(layout, ['layouts', 'edit'], []);
   const [state, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, groupValue)
@@ -104,7 +110,7 @@ function Group({
                 resetGroupData(name);
               }}
             >
-              <FormattedMessage id="reset" />
+              <FormattedMessage id={`${pluginId}.components.Group.reset`} />
               <div />
             </ResetGroup>
           )}
@@ -147,6 +153,7 @@ function Group({
             return (
               <GroupCollapse
                 key={field._temp__id}
+                checkFormErrors={checkFormErrors}
                 collapseAll={() => {
                   dispatch({
                     type: 'COLLAPSE_ALL',

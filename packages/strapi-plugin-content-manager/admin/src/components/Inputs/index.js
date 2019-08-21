@@ -44,7 +44,15 @@ const getInputType = (type = '') => {
   }
 };
 
-function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
+function Inputs({
+  autoFocus,
+  keys,
+  layout,
+  modifiedData,
+  name,
+  onBlur,
+  onChange,
+}) {
   const { didCheckErrors, errors } = useEditView();
   const attribute = useMemo(
     () => get(layout, ['schema', 'attributes', name], {}),
@@ -92,6 +100,7 @@ function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
       }}
       multiple={get(attribute, 'multiple', false)}
       name={name}
+      onBlur={onBlur}
       onChange={onChange}
       selectOptions={get(attribute, 'enum', [])}
       type={getInputType(type)}
@@ -104,6 +113,7 @@ function Inputs({ autoFocus, keys, layout, modifiedData, name, onChange }) {
 
 Inputs.defaultProps = {
   autoFocus: false,
+  onBlur: null,
 };
 
 Inputs.propTypes = {
@@ -112,6 +122,7 @@ Inputs.propTypes = {
   layout: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
+  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
 };
 

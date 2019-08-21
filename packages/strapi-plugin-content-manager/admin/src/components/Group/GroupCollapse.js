@@ -13,6 +13,7 @@ import { FormWrapper } from './components';
 import Form from './Form';
 
 function GroupCollapse({
+  checkFormErrors,
   connectDragSource,
   connectDropTarget,
   connectDragPreview,
@@ -70,12 +71,14 @@ function GroupCollapse({
 
                   return (
                     <Form
+                      checkFormErrors={checkFormErrors}
                       key={keys}
                       modifiedData={modifiedData}
                       keys={keys}
                       fieldName={field.name}
                       layout={layout}
                       onChange={onChange}
+                      shouldCheckErrors={hasErrors}
                     />
                   );
                 })}
@@ -102,6 +105,7 @@ GroupCollapse.defaultProps = {
 };
 
 GroupCollapse.propTypes = {
+  checkFormErrors: PropTypes.func.isRequired,
   connectDragPreview: PropTypes.func.isRequired,
   connectDragSource: PropTypes.func.isRequired,
   connectDropTarget: PropTypes.func.isRequired,

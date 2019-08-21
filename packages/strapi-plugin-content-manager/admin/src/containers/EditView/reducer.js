@@ -30,7 +30,6 @@ function reducer(state, action) {
         ]);
 
         if (action.isRepeatable === false) {
-          console.log(defaultAttribute.toJS());
           return fromJS(defaultAttribute);
         }
 

@@ -6,7 +6,15 @@ import { get } from 'lodash';
 import Inputs from '../Inputs';
 import SelectWrapper from '../SelectWrapper';
 
-const Form = ({ keys, layout, modifiedData, fieldName, onChange }) => {
+const Form = ({
+  checkFormErrors,
+  keys,
+  layout,
+  modifiedData,
+  fieldName,
+  onChange,
+  shouldCheckErrors,
+}) => {
   const currentField = useMemo(() => {
     // We are not providing any deps to the hook in purpose
     // We don't need any recalculation there since these values are not changed in the component's lifecycle
@@ -37,6 +45,7 @@ const Form = ({ keys, layout, modifiedData, fieldName, onChange }) => {
       modifiedData={modifiedData}
       keys={keys}
       name={fieldName}
+      onBlur={shouldCheckErrors ? checkFormErrors : null}
       onChange={({ target: { value } }) => {
         onChange({
           target: { name: keys, value },
@@ -46,12 +55,19 @@ const Form = ({ keys, layout, modifiedData, fieldName, onChange }) => {
   );
 };
 
+Form.defaultProps = {
+  checkFormErrors: () => {},
+  shouldCheckErrors: false,
+};
+
 Form.propTypes = {
+  checkFormErrors: PropTypes.func,
   fieldName: PropTypes.string.isRequired,
   keys: PropTypes.string.isRequired,
   layout: PropTypes.object.isRequired,
   modifiedData: PropTypes.object.isRequired,
   onChange: PropTypes.func.isRequired,
+  shouldCheckErrors: PropTypes.bool,
 };
 
 export default memo(Form);

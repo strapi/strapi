@@ -277,6 +277,32 @@ function EditView({
     return componentToInject;
   };
 
+  const checkFormErrors = async () => {
+    const schema = createYupSchema(layout, { groups: groupLayoutsData });
+    let errors = {};
+
+    try {
+      // Validate the form using yup
+      await schema.validate(modifiedData, { abortEarly: false });
+    } catch (err) {
+      errors = get(err, 'inner', []).reduce((acc, curr) => {
+        acc[
+          curr.path
+            .split('[')
+            .join('.')
+            .split(']')
+            .join('')
+        ] = [{ id: curr.message }];
+
+        return acc;
+      }, {});
+    }
+    dispatch({
+      type: 'SET_ERRORS',
+      errors,
+    });
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     const schema = createYupSchema(layout, { groups: groupLayoutsData });
@@ -379,6 +405,7 @@ function EditView({
           value,
         });
       }}
+      checkFormErrors={checkFormErrors}
       didCheckErrors={didCheckErrors}
       errors={errors}
       moveRelation={(dragIndex, overIndex, name) => {
