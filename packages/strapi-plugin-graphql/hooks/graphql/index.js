@@ -81,6 +81,8 @@ module.exports = strapi => {
         validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
         tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
         playground: false,
+        cors: false,
+        bodyParserConfig: true,
       };
 
       // Disable GraphQL Playground in production environment.
