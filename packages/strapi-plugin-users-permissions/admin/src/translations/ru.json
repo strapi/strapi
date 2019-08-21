@@ -38,7 +38,7 @@
   "Auth.form.register.confirmPassword.label": "Подтверждение пароля",
   "Auth.form.register.email.label": "Email",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
-  "Auth.form.register.news.label": "Держите меня в курсе новых возможностей и предстоящих улучшений.",
+
   "Auth.form.register.password.label": "Пароль",
   "Auth.form.register.username.label": "Имя пользователя",
   "Auth.form.register.username.placeholder": "John Doe",

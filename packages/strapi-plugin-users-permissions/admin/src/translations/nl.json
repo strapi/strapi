@@ -38,7 +38,7 @@
   "Auth.form.register.confirmPassword.label": "Wachtwoord Bevestigen",
   "Auth.form.register.email.label": "E-mail",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
-  "Auth.form.register.news.label": "Houd mij op de hoogte van nieuwe functies en nog komende verbeteringen.",
+
   "Auth.form.register.password.label": "Wachtwoord",
   "Auth.form.register.username.label": "Gebruikersnaam",
   "Auth.form.register.username.placeholder": "John Doe",

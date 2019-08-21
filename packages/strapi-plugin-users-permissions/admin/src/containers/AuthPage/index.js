@@ -254,12 +254,55 @@ export class AuthPage extends React.Component {
     const isForgotEmailSent =
       this.isAuthType('forgot-password') && submitSuccess;
     return map(inputs, (input, key) => {
-      const label = isForgotEmailSent
+      let label = isForgotEmailSent
         ? {
             id:
               'users-permissions.Auth.form.forgot-password.email.label.success',
           }
         : get(input, 'label');
+
+      if (input.name === 'news') {
+        const handleClick = (e, to) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const win = window.open(`https://strapi.io/${to}`, '_blank');
+          win.focus();
+        };
+
+        const terms = (
+          <FormattedMessage
+            id={`${pluginId}.Auth.privacy-policy-agreement.terms`}
+          >
+            {content => (
+              <span
+                style={{ color: '#0097f7', cursor: 'pointer' }}
+                onClick={e => handleClick(e, 'terms')}
+              >
+                {content}
+              </span>
+            )}
+          </FormattedMessage>
+        );
+        const policy = (
+          <FormattedMessage
+            id={`${pluginId}.Auth.privacy-policy-agreement.policy`}
+          >
+            {content => (
+              <span
+                style={{ color: '#0097f7', cursor: 'pointer' }}
+                onClick={e => handleClick(e, 'policy')}
+              >
+                {content}
+              </span>
+            )}
+          </FormattedMessage>
+        );
+
+        label = () => (
+          <FormattedMessage id={input.label.id} values={{ terms, policy }} />
+        );
+      }
 
       return (
         <Input
