@@ -221,6 +221,8 @@ export class Admin extends React.Component {
     return <PluginDispatcher {...this.props} {...props} {...this.helpers} />;
   };
 
+  renderRoute = (props, Component) => <Component {...this.props} {...props} />;
+
   render() {
     const {
       admin: { isLoading, showLogoutComponent, showMenu, strapiVersion },
@@ -256,7 +258,11 @@ export class Admin extends React.Component {
           {showMenu ? <Header /> : ''}
           <div className={this.getContentWrapperStyle().sub}>
             <Switch>
-              <Route path="/" component={HomePage} exact />
+              <Route
+                path="/"
+                render={props => this.renderRoute(props, HomePage)}
+                exact
+              />
               <Route
                 path="/plugins/:pluginId"
                 render={this.renderPluginDispatcher}

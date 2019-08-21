@@ -3,8 +3,7 @@
  * SocialLink
  */
 
-import React from 'react';
-import cn from 'classnames';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 
 import Gh from '../../assets/images/social_gh.png';
@@ -14,7 +13,7 @@ import So from '../../assets/images/social_so.png';
 import Twitter from '../../assets/images/social_twitter.png';
 import Reddit from '../../assets/images/social_reddit.png';
 
-import styles from './styles.scss';
+import { SocialLinkWrapper } from './components';
 
 /* eslint-disable jsx-a11y/alt-text */
 function getSrc(name) {
@@ -36,36 +35,22 @@ function getSrc(name) {
   }
 }
 
-class SocialLink extends React.PureComponent {
-  state = { imgLoaded: false };
-
-  handleImgLoaded = () => this.setState({ imgLoaded: true });
-
-  render() {
-    const { link, name } = this.props;
-    const { imgLoaded } = this.state;
-
-    return (
-      <div className={cn(styles.socialLink, 'col-md-6 col-lg-6')}>
-        <a href={link} target="_blank" rel="noopener noreferrer">
-          <div>
-            {!imgLoaded && (
-              <div className={styles.spinner}>
-                <div />
-              </div>
-            )}
-            <img src={getSrc(name)} onLoad={this.handleImgLoaded} />
-          </div>
-          <span>{name}</span>
-        </a>
-      </div>
-    );
-  }
-}
+const SocialLink = ({ link, name }) => {
+  return (
+    <SocialLinkWrapper className="col-6">
+      <a href={link} target="_blank" rel="noopener noreferrer">
+        <div>
+          <img src={getSrc(name)} />
+        </div>
+        <span>{name}</span>
+      </a>
+    </SocialLinkWrapper>
+  );
+};
 
 SocialLink.propTypes = {
   link: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
 };
 
-export default SocialLink;
+export default memo(SocialLink);

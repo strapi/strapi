@@ -154,5 +154,12 @@
   "notification.error": "Une erreur est survenue",
   "notification.error.layout": "Impossible de récupérer le layout de l'admin",
   "request.error.model.unknown": "Le model n'existe pas",
-  "app.utils.delete": "Supprimer"
+  "app.utils.delete": "Supprimer",
+  "HomePage.helmet.title": "Accueil",
+  "HomePage.welcome.congrats": "Bravo!",
+  "HomePage.welcome.congrats.content": "Vous êtes connecté en tant que premier Administrateur. Afin de découvrir les fonctionnalités proposées par Strapi,",
+  "HomePage.welcome.congrats.content.bold": "nous vous conseillons de créer votre premier Type de Contenu.",
+  "HomePage.community": "Rejoignez la Communauté",
+  "HomePage.roadmap": "Regardez notre roadmap",
+  "HomePage.greetings": "Bonjour {name}!"
 }
