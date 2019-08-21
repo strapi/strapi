@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import ReactGA from 'react-ga';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
@@ -83,12 +82,7 @@ export class Admin extends React.Component {
   });
 
   componentDidMount() {
-    // Initialize Google Analytics
-    // Refer to ../../../doc/disable-tracking.md for more information
     /* istanbul ignore next */
-    ReactGA.initialize('UA-54313258-9', {
-      testMode: process.env.NODE_ENV === 'test',
-    });
     // Retrieve the main settings of the application
     this.props.getInitData();
   }
@@ -110,13 +104,6 @@ export class Admin extends React.Component {
 
     if (prevProps.location.pathname !== pathname) {
       getHook('willSecure');
-
-      /* istanbul ignore if */
-      if (this.isAcceptingTracking()) {
-        ReactGA.pageview(pathname, {
-          testMode: process.env.NODE_ENV === 'test',
-        });
-      }
     }
 
     if (prevProps.admin.isSecured !== isSecured && isSecured) {
