@@ -56,7 +56,6 @@
     "react-dnd": "^9.0.1",
     "react-dnd-html5-backend": "^9.0.0",
     "react-dom": "^16.9.0",
-    "react-ga": "^2.4.1",
     "react-helmet": "^5.2.0",
     "react-intl": "^2.8.0",
     "react-loadable": "^5.5.0",

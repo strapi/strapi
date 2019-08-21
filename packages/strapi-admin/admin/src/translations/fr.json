@@ -80,7 +80,7 @@
   "app.components.ListPluginsPage.description": "Liste des plugins installés dans le projet.",
   "app.components.ListPluginsPage.helmet.title": "List plugins",
   "app.components.Logout.profile": "Profil",
-  "app.components.Logout.logout": "Connectez - Out",
+  "app.components.Logout.logout": "Se déconnecter",
   "app.components.ListPluginsPage.title": "Plugins",
   "app.components.NotFoundPage.back": "Retourner à la page d'accueil",
   "app.components.NotFoundPage.description": "Page introuvable",
@@ -154,5 +154,12 @@
   "notification.error": "Une erreur est survenue",
   "notification.error.layout": "Impossible de récupérer le layout de l'admin",
   "request.error.model.unknown": "Le model n'existe pas",
-  "app.utils.delete": "Supprimer"
+  "app.utils.delete": "Supprimer",
+  "HomePage.helmet.title": "Accueil",
+  "HomePage.welcome.congrats": "Bravo!",
+  "HomePage.welcome.congrats.content": "Vous êtes connecté en tant que premier Administrateur. Afin de découvrir les fonctionnalités proposées par Strapi,",
+  "HomePage.welcome.congrats.content.bold": "nous vous conseillons de créer votre premier Type de Contenu.",
+  "HomePage.community": "Rejoignez la Communauté",
+  "HomePage.roadmap": "Voire la roadmap",
+  "HomePage.greetings": "Bonjour {name}!"
 }

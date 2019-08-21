@@ -87,7 +87,6 @@
       "type": "group",
       "group": "ingredients",
       "repeatable": true,
-      "min": 1,
       "max": 10
     },
     "author": {

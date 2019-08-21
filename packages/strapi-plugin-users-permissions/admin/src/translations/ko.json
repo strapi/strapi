@@ -35,7 +35,7 @@
   "Auth.form.register.confirmPassword.label": "패스워드 확인",
   "Auth.form.register.email.label": "이메일",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
-  "Auth.form.register.news.label": "새로운 기능 및 개선 사항 등을 업데이트 받겠습니다.",
+
   "Auth.form.register.password.label": "패스워드",
   "Auth.form.register.username.label": "아이디",
   "Auth.form.register.username.placeholder": "JohnDoe",

@@ -35,7 +35,7 @@
   "Auth.form.register.confirmPassword.label": "确认密码",
   "Auth.form.register.email.label": "邮箱",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
-  "Auth.form.register.news.label": "让我了解新特性和即将到来的改进。",
+
   "Auth.form.register.password.label": "密码",
   "Auth.form.register.username.label": "用户名",
   "Auth.form.register.username.placeholder": "John Doe",
