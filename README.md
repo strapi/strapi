@@ -99,7 +99,7 @@ Enjoy 🎉
 ## Features
 
 - **Modern Admin Panel:** Elegant, entirely customizable and a fully extensible admin panel.
-- **Secure by default:** Reusable policies, CSRF, CORS, P3P, Xframe, XSS, and more.
+- **Secure by default:** Reusable policies, CORS, CSP, P3P, Xframe, XSS, and more.
 - **Plugins Oriented:** Install auth system, content management, custom plugins, and more, in seconds.
 - **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
 - **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
