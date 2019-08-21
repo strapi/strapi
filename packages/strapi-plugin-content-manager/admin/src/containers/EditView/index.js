@@ -128,7 +128,7 @@ function EditView({
             defaultRepeatable: defaultForm,
           };
 
-          if (current.repeatable === false) {
+          if (current.repeatable !== true) {
             acc[current.key] = {
               toSet: defaultForm,
               defaultRepeatable: defaultForm,
@@ -346,6 +346,7 @@ function EditView({
         strapi.notification.error(error);
       }
     } catch (err) {
+      console.log({ formErrors: err });
       setIsSubmitting(false);
       const errors = get(err, 'inner', []).reduce((acc, curr) => {
         acc[
@@ -406,6 +407,12 @@ function EditView({
         dispatch({
           type: 'SET_ERRORS',
           errors: {},
+        });
+      }}
+      resetGroupData={groupName => {
+        dispatch({
+          type: 'RESET_GROUP_DATA',
+          groupName,
         });
       }}
       search={search}
@@ -489,10 +496,11 @@ function EditView({
                       <Group
                         {...group}
                         {...groupMetas}
-                        addField={keys => {
+                        addField={(keys, isRepeatable = true) => {
                           dispatch({
                             type: 'ADD_FIELD_TO_GROUP',
                             keys: keys.split('.'),
+                            isRepeatable,
                           });
                         }}
                         groupErrorKeys={groupErrorKeys}

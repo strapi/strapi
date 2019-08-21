@@ -77,7 +77,8 @@
     },
     "fb_cta": {
       "type": "group",
-      "group": "facebook_cta"
+      "group": "facebookcta_yrez",
+      "required": true
     },
     "mainIngredient": {
       "type": "group",

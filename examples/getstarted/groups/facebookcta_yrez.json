@@ -1,13 +1,14 @@
 {
   "info": {
-    "name": "Facebook CTA",
+    "name": "facebookcta_yrez",
     "description": "test"
   },
   "connection": "default",
   "collectionName": "cta_facebook_aa",
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "default": "soupettefsfdsrazeraz"
     },
     "description": {
       "type": "text"

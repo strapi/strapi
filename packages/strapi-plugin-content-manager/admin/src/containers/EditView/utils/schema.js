@@ -54,19 +54,44 @@ const createYupSchema = (model, { groups }) => {
       }
 
       if (attribute.type === 'group') {
-        let groupSchema = createYupSchema(groups[attribute.group], {
+        const groupFieldSchema = createYupSchema(groups[attribute.group], {
           groups,
         });
-        groupSchema =
-          attribute.repeatable === true
-            ? yup.array().of(groupSchema)
-            : groupSchema;
-        groupSchema =
-          attribute.required === true
-            ? groupSchema.defined()
-            : groupSchema.nullable();
-        acc[current] = groupSchema;
+
+        if (attribute.repeatable === true) {
+          const groupSchema =
+            attribute.required === true
+              ? yup
+                  .array()
+                  .of(groupFieldSchema)
+                  .defined()
+              : yup
+                  .array()
+                  .of(groupFieldSchema)
+                  .nullable();
+
+          acc[current] = groupSchema;
+
+          return acc;
+        } else {
+          const groupSchema = yup.lazy(obj => {
+            if (obj !== undefined) {
+              return attribute.required === true
+                ? groupFieldSchema.defined()
+                : groupFieldSchema.nullable();
+            }
+
+            return attribute.required === true
+              ? yup.object().defined()
+              : yup.object().nullable();
+          });
+
+          acc[current] = groupSchema;
+
+          return acc;
+        }
       }
+
       return acc;
     }, {})
   );
