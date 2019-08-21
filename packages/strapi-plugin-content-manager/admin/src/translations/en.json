@@ -1,6 +1,8 @@
 {
   "models": "Content Types",
+  "models.numbered": "Content Types ({number})",
   "groups": "Groups",
+  "groups.numbered": "Groups ({number})",
   "EditRelations.title": "Relational data",
   "components.AddFilterCTA.add": "Filters",
   "components.AddFilterCTA.hide": "Filters",

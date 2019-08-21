@@ -75,15 +75,16 @@ const GroupBanner = forwardRef(
                 }}
               </FormattedMessage>
             </Flex>
-            <Flex>
+            <Flex className="button-wrapper">
               <button
+                className="trash-icon"
                 type="button"
-                style={{ marginRight: 8 }}
+                style={{ marginRight: 6 }}
                 onClick={removeField}
               >
                 <i className="fa fa-trash" />
               </button>
-              <button type="button" style={{ lineHeight: '36px' }}>
+              <button type="button">
                 <img
                   src={grab}
                   alt="grab icon"
