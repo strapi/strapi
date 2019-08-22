@@ -40,6 +40,7 @@ const FieldForm = ({
   onChange,
   selectOptions,
 }) => {
+  console.log({ metadatas });
   return (
     <div className={className}>
       <SettingFormWrapper style={{ marginTop: '3px' }}>
@@ -67,6 +68,7 @@ const FieldForm = ({
 
               return (
                 <Input
+                  data-testId="input"
                   inputDescription={
                     meta === 'mainField'
                       ? {
@@ -107,3 +109,4 @@ FieldForm.propTypes = {
 };
 
 export default memo(FieldForm);
+export { FieldForm, getInputProps };
