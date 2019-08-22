@@ -6,6 +6,7 @@ const path = require('path');
 const { EventEmitter } = require('events');
 const fse = require('fs-extra');
 const Koa = require('koa');
+const Router = require('koa-router');
 const _ = require('lodash');
 const { logger, models } = require('strapi-utils');
 const utils = require('./utils');
@@ -64,6 +65,7 @@ class Strapi extends EventEmitter {
 
     // Expose `koa`.
     this.app = new Koa();
+    this.router = new Router();
 
     // Mount the HTTP server.
     this.server = http.createServer(this.app.callback());
@@ -150,6 +152,8 @@ class Strapi extends EventEmitter {
       await this.freeze();
       // Init first start
       utils.init(this.config);
+
+      this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
       // Launch server.
       this.server.listen(this.config.port, async err => {
@@ -315,11 +319,8 @@ class Strapi extends EventEmitter {
     initCoreStore(this);
 
     // Initialize hooks and middlewares.
-
-    await Promise.all([
-      initializeMiddlewares.call(this),
-      initializeHooks.call(this),
-    ]);
+    await initializeMiddlewares.call(this);
+    await initializeHooks.call(this);
   }
 
   reload() {

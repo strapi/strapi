@@ -7,10 +7,7 @@
   },
   "options": {
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -19,6 +16,11 @@
       "required": true,
       "minLength": 5,
       "type": "string"
+    },
+    "cover": {
+      "model": "file",
+      "via": "related",
+      "plugin": "upload"
     },
     "menu": {
       "model": "menu",
@@ -31,13 +33,7 @@
       "model": "address"
     },
     "price_range": {
-      "enum": [
-        "very_cheap",
-        "cheap",
-        "average",
-        "expensive",
-        "very_expensive"
-      ],
+      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
       "type": "enumeration"
     },
     "description": {
