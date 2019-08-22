@@ -38,9 +38,25 @@ class AttributeForm extends React.Component {
   state = { didCheckErrors: false, formErrors: {}, showForm: false };
 
   getCurrentForm = () => {
-    const { activeTab, attributeType } = this.props;
+    const { activeTab, attributeType, modifiedData } = this.props;
+    const isRepeatable = get(modifiedData, 'repeatable', false);
+    const form = get(
+      supportedAttributes,
+      [attributeType, activeTab, 'items'],
+      []
+    );
 
-    return get(supportedAttributes, [attributeType, activeTab, 'items'], []);
+    if (
+      activeTab === 'advanced' &&
+      attributeType === 'group' &&
+      !isRepeatable
+    ) {
+      const slicedForm = form.slice(0, 1);
+
+      return slicedForm;
+    }
+
+    return form;
   };
 
   getIcon = () => {

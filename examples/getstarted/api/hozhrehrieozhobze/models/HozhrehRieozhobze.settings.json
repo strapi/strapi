@@ -1,0 +1,16 @@
+{
+  "connection": "default",
+  "collectionName": "hozhrehRieozhobzes",
+  "info": {
+    "name": "hozhrehRieozhobze",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "comment": ""
+  },
+  "attributes": {
+    
+  }
+}

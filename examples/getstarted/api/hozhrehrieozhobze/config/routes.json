@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/hozhrehRieozhobzes",
+      "handler": "HozhrehRieozhobze.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/hozhrehRieozhobzes/count",
+      "handler": "HozhrehRieozhobze.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/hozhrehRieozhobzes/:id",
+      "handler": "HozhrehRieozhobze.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/hozhrehRieozhobzes",
+      "handler": "HozhrehRieozhobze.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/hozhrehRieozhobzes/:id",
+      "handler": "HozhrehRieozhobze.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/hozhrehRieozhobzes/:id",
+      "handler": "HozhrehRieozhobze.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}
