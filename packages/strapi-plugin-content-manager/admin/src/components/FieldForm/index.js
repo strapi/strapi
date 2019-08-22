@@ -40,7 +40,6 @@ const FieldForm = ({
   onChange,
   selectOptions,
 }) => {
-  console.log({ metadatas });
   return (
     <div className={className}>
       <SettingFormWrapper style={{ marginTop: '3px' }}>

@@ -17,15 +17,22 @@ import Container from '../../components/Container';
 import Group from '../../components/Group';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
-import init, { setDefaultForm } from './init';
+import createYupSchema from './utils/schema';
+import setDefaultForm from './utils/createDefaultForm';
+import getInjectedComponents from './utils/getComponents';
+import init from './init';
 import reducer, { initialState } from './reducer';
 import { LinkWrapper, MainWrapper, SubWrapper } from './components';
-import createYupSchema from './utils/schema';
 import {
   getMediaAttributes,
   cleanData,
   mapDataKeysToFilesToUpload,
 } from './utils/formatData';
+import {
+  getDefaultGroupValues,
+  retrieveDisplayedGroups,
+  retrieveGroupLayoutsToFetch,
+} from './utils/groups';
 
 const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
 
@@ -40,31 +47,14 @@ function EditView({
   },
   plugins,
 }) {
+  const abortController = new AbortController();
+  const { signal } = abortController;
   const layout = get(layouts, [slug], {});
   const isCreatingEntry = id === 'create';
   const attributes = get(layout, ['schema', 'attributes'], {});
-  const submitAbortController = new AbortController();
-  const submitSignal = submitAbortController.signal;
-  const groups = Object.keys(attributes).reduce((acc, current) => {
-    const { group, repeatable, type, min } = get(attributes, [current], {
-      group: '',
-      type: '',
-      repeatable,
-    });
-
-    if (type === 'group') {
-      acc.push({ key: current, group, repeatable, isOpen: !repeatable, min });
-    }
-
-    return acc;
-  }, []);
-  const groupLayoutsToGet = groups
-    .filter(
-      (current, index) =>
-        groups.findIndex(el => el.group === current.group) === index
-    )
-    .map(({ group }) => group);
-
+  const groups = retrieveDisplayedGroups(attributes);
+  const groupLayoutsToGet = retrieveGroupLayoutsToFetch(groups);
+  // States
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningDelete, setWarningDelete] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,19 +78,13 @@ function EditView({
     isLoadingForLayouts || (!isCreatingEntry && isLoading);
 
   useEffect(() => {
-    // Cancel requests
-    const abortControllerFetchData = new AbortController();
-    const abortControllerLayouts = new AbortController();
-    const signalFetchData = abortControllerFetchData.signal;
-    const signalFetchLayouts = abortControllerLayouts.signal;
-
     const fetchGroupLayouts = async () => {
       try {
         const data = await Promise.all(
           groupLayoutsToGet.map(uid =>
             request(`/${pluginId}/groups/${uid}`, {
               method: 'GET',
-              signal: signalFetchLayouts,
+              signal,
             })
           )
         );
@@ -110,33 +94,9 @@ function EditView({
 
           return acc;
         }, {});
+
         // Retrieve all the default values for the repeatables and init the form
-        const defaultGroupValues = groups.reduce((acc, current) => {
-          const defaultForm = setDefaultForm(
-            get(groupLayouts, [current.group, 'schema', 'attributes'], {})
-          );
-          const arr = [];
-
-          if (current.min && current.repeatable === true) {
-            for (let i = 0; i < current.min; i++) {
-              arr.push({ ...defaultForm, _temp__id: i });
-            }
-          }
-
-          acc[current.key] = {
-            toSet: arr,
-            defaultRepeatable: defaultForm,
-          };
-
-          if (current.repeatable !== true) {
-            acc[current.key] = {
-              toSet: defaultForm,
-              defaultRepeatable: defaultForm,
-            };
-          }
-
-          return acc;
-        }, {});
+        const defaultGroupValues = getDefaultGroupValues(groups, groupLayouts);
 
         dispatch({
           type: 'GET_GROUP_LAYOUTS_SUCCEEDED',
@@ -157,7 +117,7 @@ function EditView({
         const data = await request(getRequestUrl(`${slug}/${id}`), {
           method: 'GET',
           params: { source },
-          signal: signalFetchData,
+          signal,
         });
 
         dispatch({
@@ -183,9 +143,7 @@ function EditView({
     }
 
     return () => {
-      abortControllerFetchData.abort();
-      abortControllerLayouts.abort();
-      submitAbortController.abort();
+      abortController.abort();
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -233,49 +191,6 @@ function EditView({
   const displayedRelations = get(layout, ['layouts', 'editRelations'], []);
   const hasRelations = displayedRelations.length > 0;
   const fields = get(layout, ['layouts', 'edit'], []);
-  /**
-   * Retrieve external links from injected components
-   * @type {Array} List of external links to display
-   */
-  const retrieveLinksContainerComponent = () => {
-    const componentToInject = Object.keys(plugins).reduce((acc, current) => {
-      // Retrieve injected compos from plugin
-      // if compo can be injected in left.links area push the compo in the array
-      const currentPlugin = plugins[current];
-      const injectedComponents = get(currentPlugin, 'injectedComponents', []);
-
-      const compos = injectedComponents
-        .filter(compo => {
-          return (
-            compo.plugin === `${pluginId}.editPage` &&
-            compo.area === 'right.links'
-          );
-        })
-        .map(compo => {
-          const Component = compo.component;
-
-          return (
-            <Component
-              currentEnvironment={currentEnvironment}
-              getModelName={() => slug}
-              getSource={() => source}
-              getContentTypeBuilderBaseUrl={() =>
-                '/plugins/content-type-builder/models/'
-              }
-              {...compo.props}
-              key={compo.key}
-              onClick={() => {
-                emitEvent('willEditContentTypeFromEditView');
-              }}
-            />
-          );
-        });
-
-      return [...acc, ...compos];
-    }, []);
-
-    return componentToInject;
-  };
 
   const checkFormErrors = async () => {
     const schema = createYupSchema(layout, { groups: groupLayoutsData });
@@ -350,7 +265,7 @@ function EditView({
             headers,
             params: { source },
             body: formData,
-            signal: submitSignal,
+            signal,
           },
           false,
           false
@@ -363,13 +278,13 @@ function EditView({
           ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
           'SERVER ERROR'
         );
-
-        console.log('Server error please check the following log');
-        console.log(error);
+        const errorSuffix = error.includes('Auth.form')
+          ? 'users-permissions.'
+          : '';
 
         setIsSubmitting(false);
         emitEvent('didNotSaveEntry', { error: err });
-        strapi.notification.error(error);
+        strapi.notification.error(`${errorSuffix}${error}`);
       }
     } catch (err) {
       console.log({ formErrors: err });
@@ -640,7 +555,14 @@ function EditView({
                       emitEvent('willEditContentTypeLayoutFromEditView');
                     }}
                   />
-                  {retrieveLinksContainerComponent()}
+                  {getInjectedComponents(
+                    'right.links',
+                    plugins,
+                    currentEnvironment,
+                    slug,
+                    source,
+                    emitEvent
+                  )}
                 </ul>
               </LinkWrapper>
             </div>
