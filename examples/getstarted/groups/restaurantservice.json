@@ -1,0 +1,19 @@
+{
+  "info": {
+    "name": "restaurantservice",
+    "description": ""
+  },
+  "connection": "default",
+  "collectionName": "groups_restaurantservices",
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "is_available": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    }
+  }
+}

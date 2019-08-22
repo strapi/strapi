@@ -1,0 +1,27 @@
+{
+  "connection": "default",
+  "collectionName": "menusections",
+  "info": {
+    "name": "menusection",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
+    "comment": ""
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "minLength": 6
+    },
+    "dishes": {
+      "group": "dish",
+      "type": "group"
+    }
+  }
+}
