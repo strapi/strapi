@@ -128,7 +128,7 @@ function EditView({
             defaultRepeatable: defaultForm,
           };
 
-          if (current.repeatable === false) {
+          if (current.repeatable !== true) {
             acc[current.key] = {
               toSet: defaultForm,
               defaultRepeatable: defaultForm,
@@ -277,6 +277,32 @@ function EditView({
     return componentToInject;
   };
 
+  const checkFormErrors = async () => {
+    const schema = createYupSchema(layout, { groups: groupLayoutsData });
+    let errors = {};
+
+    try {
+      // Validate the form using yup
+      await schema.validate(modifiedData, { abortEarly: false });
+    } catch (err) {
+      errors = get(err, 'inner', []).reduce((acc, curr) => {
+        acc[
+          curr.path
+            .split('[')
+            .join('.')
+            .split(']')
+            .join('')
+        ] = [{ id: curr.message }];
+
+        return acc;
+      }, {});
+    }
+    dispatch({
+      type: 'SET_ERRORS',
+      errors,
+    });
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
     const schema = createYupSchema(layout, { groups: groupLayoutsData });
@@ -346,6 +372,7 @@ function EditView({
         strapi.notification.error(error);
       }
     } catch (err) {
+      console.log({ formErrors: err });
       setIsSubmitting(false);
       const errors = get(err, 'inner', []).reduce((acc, curr) => {
         acc[
@@ -378,6 +405,7 @@ function EditView({
           value,
         });
       }}
+      checkFormErrors={checkFormErrors}
       didCheckErrors={didCheckErrors}
       errors={errors}
       moveRelation={(dragIndex, overIndex, name) => {
@@ -406,6 +434,12 @@ function EditView({
         dispatch({
           type: 'SET_ERRORS',
           errors: {},
+        });
+      }}
+      resetGroupData={groupName => {
+        dispatch({
+          type: 'RESET_GROUP_DATA',
+          groupName,
         });
       }}
       search={search}
@@ -489,10 +523,11 @@ function EditView({
                       <Group
                         {...group}
                         {...groupMetas}
-                        addField={keys => {
+                        addField={(keys, isRepeatable = true) => {
                           dispatch({
                             type: 'ADD_FIELD_TO_GROUP',
                             keys: keys.split('.'),
+                            isRepeatable,
                           });
                         }}
                         groupErrorKeys={groupErrorKeys}

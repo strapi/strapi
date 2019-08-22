@@ -28,6 +28,8 @@
   "components.FiltersPickWrapper.hide": "Hide",
   "components.Group.notification.info.minimum-requirement": "A field has been added to your group to match the minimum requirement",
   "components.Group.notification.info.maximum-requirement": "You have already reached the maximum number of fields",
+  "components.Group.empty.repeatable": "No entry yet. Click on the button below to add one.",
+  "components.Group.reset": "Reset entry",
   "components.LimitSelect.itemsPerPage": "Items per page",
   "components.Search.placeholder": "Search for an entry...",
   "components.TableDelete.delete": "Delete all",

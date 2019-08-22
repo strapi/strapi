@@ -29,6 +29,10 @@ function reducer(state, action) {
           'defaultRepeatable',
         ]);
 
+        if (action.isRepeatable === false) {
+          return fromJS(defaultAttribute);
+        }
+
         if (list) {
           const max = getMax(list);
 
@@ -77,6 +81,7 @@ function reducer(state, action) {
                 fromJS(defaultGroupValues[current].toSet)
               );
             }
+
             return acc;
           }, obj);
         } else {
@@ -129,10 +134,9 @@ function reducer(state, action) {
         );
       }
 
-      return newState.updateIn(
-        ['modifiedData', ...action.keys],
-        () => action.value
-      );
+      return newState.updateIn(['modifiedData', ...action.keys], () => {
+        return action.value;
+      });
     }
     case 'ON_REMOVE_FIELD':
       return state
@@ -154,7 +158,20 @@ function reducer(state, action) {
     case 'REMOVE_RELATION':
       return state.removeIn(['modifiedData', ...action.keys.split('.')]);
     case 'RESET_FORM':
-      return state.update('modifiedData', () => state.get('initialData'));
+      return state
+        .update('modifiedData', () => state.get('initialData'))
+        .update('errors', () => fromJS({}))
+        .update('didCheckErrors', v => !v);
+    case 'RESET_GROUP_DATA': {
+      const groupPath = ['modifiedData', action.groupName];
+
+      return state
+        .updateIn(groupPath, () =>
+          state.getIn(['initialData', action.groupName])
+        )
+        .update('errors', () => fromJS({}))
+        .update('didCheckErrors', v => !v);
+    }
     case 'SET_COLLAPSES_COMPONENTS_STATE':
       return state.update('collapses', () => fromJS(action.collapses));
     case 'SET_ERRORS':

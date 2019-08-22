@@ -26,6 +26,8 @@
   "components.FiltersPickWrapper.hide": "Fermer",
   "components.Group.notification.info.minimum-requirement": "Un champ a été rajouté pour remplir les conditions minimales",
   "components.Group.notification.info.maximum-requirement": "Le nombre maximal de champs est atteint",
+  "components.Group.empty.repeatable": "Il n'a pas encore d'entrée. Cliquez sur le bouton pour en ajouter une.",
+  "components.Group.reset": "Supprimer l'entrée",
   "components.LimitSelect.itemsPerPage": "Éléments par page",
   "components.Search.placeholder": "Rechercher une entrée...",
   "components.TableDelete.delete": "Tout supprimer",

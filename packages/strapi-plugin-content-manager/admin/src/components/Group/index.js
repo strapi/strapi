@@ -5,11 +5,11 @@ import { get, size } from 'lodash';
 
 import pluginId from '../../pluginId';
 import { useEditView } from '../../contexts/EditView';
-import { Button } from './components';
-import Form from './Form';
+import { Button, EmptyGroup, P, ResetGroup } from './components';
 import GroupCollapse from './GroupCollapse';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import NonRepeatableGroup from './NonRepeatableGroup';
 
 function Group({
   addField,
@@ -26,7 +26,13 @@ function Group({
   onChange,
   removeField,
 }) {
-  const { didCheckErrors, errors, resetErrors } = useEditView();
+  const {
+    checkFormErrors,
+    didCheckErrors,
+    errors,
+    resetErrors,
+    resetGroupData,
+  } = useEditView();
   const fields = get(layout, ['layouts', 'edit'], []);
   const [state, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, groupValue)
@@ -73,6 +79,7 @@ function Group({
   }, [didCheckErrors]);
 
   const groupValueLength = size(groupValue);
+  const isInitialized = get(modifiedData, name, null) !== null;
 
   return (
     <>
@@ -83,6 +90,7 @@ function Group({
             paddingTop: 0,
             marginTop: '-2px',
             paddingBottom: isRepeatable ? 7 : 14,
+            position: 'relative',
           }}
         >
           <span
@@ -94,45 +102,46 @@ function Group({
             {label}&nbsp;
             {isRepeatable && `(${groupValueLength})`}
           </span>
+          {!isRepeatable && isInitialized && (
+            <ResetGroup
+              onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                resetGroupData(name);
+              }}
+            >
+              <FormattedMessage id={`${pluginId}.components.Group.reset`} />
+              <div />
+            </ResetGroup>
+          )}
         </div>
       </div>
-      {!isRepeatable ? (
-        <div
-          style={{
-            margin: '0 10px',
-            padding: '0 20px',
-            paddingTop: 21,
-            backgroundColor: '#F7F8F8',
-            marginBottom: 18,
-          }}
-        >
-          {fields.map((fieldRow, key) => {
-            return (
-              <div className="row" key={key}>
-                {fieldRow.map(field => {
-                  const keys = `${name}.${field.name}`;
 
-                  return (
-                    <Form
-                      key={keys}
-                      modifiedData={modifiedData}
-                      keys={keys}
-                      fieldName={field.name}
-                      layout={layout}
-                      onChange={onChange}
-                    />
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
+      {!isRepeatable ? (
+        <NonRepeatableGroup
+          addField={addField}
+          isInitialized={isInitialized}
+          fields={fields}
+          modifiedData={modifiedData}
+          layout={layout}
+          name={name}
+          onChange={onChange}
+        />
       ) : (
         <div
           style={{
             margin: '0 10px',
           }}
         >
+          {groupValue.length === 0 && (
+            <EmptyGroup>
+              <FormattedMessage
+                id={`${pluginId}.components.Group.empty.repeatable`}
+              >
+                {msg => <P>{msg}</P>}
+              </FormattedMessage>
+            </EmptyGroup>
+          )}
           {groupValue.map((field, index) => {
             const groupFieldName = `${name}.${index}`;
             const doesPreviousFieldContainErrorsAndIsOpen =
@@ -144,6 +153,7 @@ function Group({
             return (
               <GroupCollapse
                 key={field._temp__id}
+                checkFormErrors={checkFormErrors}
                 collapseAll={() => {
                   dispatch({
                     type: 'COLLAPSE_ALL',
