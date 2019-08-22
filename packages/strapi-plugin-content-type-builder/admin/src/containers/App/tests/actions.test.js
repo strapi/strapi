@@ -608,13 +608,13 @@ describe('App actions', () => {
     it('has a type of ON_CHANGE_NEW_CONTENT_TYPE_MAIN_INFOS and returns the correct data tolowercase if the name is equal to name', () => {
       const e = {
         target: {
-          name: 'name',
+          name: 'article.name',
           value: 'testWith spaces and stuff ',
         },
       };
       const expected = {
         type: ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
-        keys: ['name'],
+        keys: ['article', 'name'],
         value: 'testwithspacesandstuff',
       };
 
@@ -624,13 +624,13 @@ describe('App actions', () => {
     it('should not return the data tolowercase if the name is not equal to name', () => {
       const e = {
         target: {
-          name: 'test',
+          name: 'article.test',
           value: 'testWith spaces and stuff',
         },
       };
       const expected = {
         type: ON_CHANGE_EXISTING_CONTENT_TYPE_MAIN_INFOS,
-        keys: ['test'],
+        keys: ['article', 'test'],
         value: 'testWith spaces and stuff',
       };
 
@@ -684,22 +684,6 @@ describe('App actions', () => {
         type: ON_CHANGE_ATTRIBUTE,
         keys: ['test'],
         value: 'test ',
-      };
-
-      expect(onChangeAttribute(e)).toEqual(expected);
-    });
-
-    it('should remove the spaces if the user is modifying the name input', () => {
-      const e = {
-        target: {
-          name: 'name',
-          value: 'attribute with space',
-        },
-      };
-      const expected = {
-        type: ON_CHANGE_ATTRIBUTE,
-        keys: ['name'],
-        value: 'attributewithspace',
       };
 
       expect(onChangeAttribute(e)).toEqual(expected);
