@@ -6,6 +6,6 @@
   "EditForm.Input.select.label": "Провайдеры",
   "EditForm.Input.toggle.label": "Активировать отправку писем",
   "notification.config.success": "Настройки успешно обновлены",
-  "plugin.description.long": "Отсылка почты.",
-  "plugin.description.short": "Отсылка почты."
+  "plugin.description.long": "Отправка почты.",
+  "plugin.description.short": "Отправка почты."
 }
