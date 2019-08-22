@@ -292,7 +292,7 @@ export function getDataSucceeded({ allModels, models }, connections, { data }) {
 
 export function onChangeExistingContentTypeMainInfos({ target }) {
   const value =
-    target.name === 'name'
+    target.name.split('.')[1] === 'name'
       ? camelCase(target.value.trim()).toLowerCase()
       : target.value;
 
@@ -304,15 +304,10 @@ export function onChangeExistingContentTypeMainInfos({ target }) {
 }
 
 export function onChangeExistingGroupMainInfos({ target }) {
-  const value =
-    target.name === 'name'
-      ? camelCase(target.value.trim()).toLowerCase()
-      : target.value;
-
   return {
     type: ON_CHANGE_EXISTING_GROUP_MAIN_INFOS,
     keys: target.name.split('.'),
-    value,
+    value: target.value,
   };
 }
 
@@ -330,39 +325,26 @@ export function onChangeNewContentTypeMainInfos({ target }) {
 }
 
 export function onChangeNewGroupMainInfos({ target }) {
-  const value =
-    target.name === 'name'
-      ? camelCase(target.value.trim()).toLowerCase()
-      : target.value;
-
   return {
     type: ON_CHANGE_NEW_GROUP_MAIN_INFOS,
     keys: target.name.split('.'),
-    value,
+    value: target.value,
   };
 }
 
 export function onChangeAttribute({ target }) {
-  const value = target.name.includes('name')
-    ? target.value.split(' ').join('')
-    : target.value;
-
   return {
     type: ON_CHANGE_ATTRIBUTE,
     keys: target.name.split('.'),
-    value: value,
+    value: target.value,
   };
 }
 
 export function onChangeAttributeGroup({ target }) {
-  const value = target.name.includes('name')
-    ? target.value.split(' ').join('')
-    : target.value;
-
   return {
     type: ON_CHANGE_ATTRIBUTE_GROUP,
     keys: target.name.split('.'),
-    value: value,
+    value: target.value,
   };
 }
 

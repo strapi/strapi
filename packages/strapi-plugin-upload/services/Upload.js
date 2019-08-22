@@ -83,7 +83,9 @@ module.exports = {
       const res = await strapi.plugins['upload'].services.upload.add(file);
 
       // Remove temp file
-      fs.unlinkSync(file.tmpPath);
+      if (file.tmpPath) {
+        fs.unlinkSync(file.tmpPath);
+      }
       return res;
     };
 
