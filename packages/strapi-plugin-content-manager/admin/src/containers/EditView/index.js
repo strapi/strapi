@@ -53,7 +53,6 @@ function EditView({
   const isCreatingEntry = id === 'create';
   const attributes = get(layout, ['schema', 'attributes'], {});
   const groups = retrieveDisplayedGroups(attributes);
-  console.log({ groups });
   const groupLayoutsToGet = retrieveGroupLayoutsToFetch(groups);
   // States
   const [showWarningCancel, setWarningCancel] = useState(false);
@@ -95,11 +94,9 @@ function EditView({
 
           return acc;
         }, {});
-        console.log({ groupLayouts });
 
         // Retrieve all the default values for the repeatables and init the form
         const defaultGroupValues = getDefaultGroupValues(groups, groupLayouts);
-        console.log({ defaultGroupValues });
 
         dispatch({
           type: 'GET_GROUP_LAYOUTS_SUCCEEDED',
