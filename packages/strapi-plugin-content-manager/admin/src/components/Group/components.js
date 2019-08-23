@@ -76,14 +76,16 @@ const NonRepeatableWrapper = styled.div`
         margin-bottom: 21px !important;
         background-color: #fafafb;
         text-align: center;
+        cursor: pointer;
+        border-radius: 2px;
 
         > div {
           position: absolute;
           top: 30px;
           left: calc(50% - 18px);
-          line-height: 36px;
           height: 36px;
           width: 36px;
+          line-height: 38px;
           border-radius: 50%;
           background-color: #f3f4f4;
           cursor: pointer;
@@ -94,9 +96,15 @@ const NonRepeatableWrapper = styled.div`
             color: #b4b6ba;
           }
         }
+        border: 1px solid transparent;
 
         &:hover {
+          border: 1px solid #aed4fb;
           background-color: #e6f0fb;
+
+          > p {
+            color: #007eff;
+          }
 
           > div {
             background-color: #aed4fb;
@@ -104,7 +112,6 @@ const NonRepeatableWrapper = styled.div`
               content: '\f067';
               font-family: FontAwesome;
               font-size: 15px;
-
               color: #007eff;
             }
           }
