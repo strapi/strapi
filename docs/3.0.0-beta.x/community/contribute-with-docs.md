@@ -293,14 +293,19 @@ Common projects and how to refer to them:
 
 | Incorrect Usage     | Correct usage |                   Example                   |
 | ------------------- | :-----------: | :-----------------------------------------: |
+| mariadb, mariaDB    |    MariaDB    |    The power and flexibility of MariaDB.    |
+| mongo, mongodb      |    MongoDB    |     MongoDB is a document database, ...     |
+| mysql, MYSQL        |     MySQL     |  You can discuss issues with MySQL users.   |
 | Node, NODE, node.js |    Node.js    |   The Node.js Twitter account is @nodejs.   |
 | npm, NPM            |      npm      | The current stable version of npm is here.  |
+| NPX, Npx, npx       |      npx      | Run packages without downloading using npx. |
 | PM2, pm2, Pm2       |      pm2      | Guys just installed pm2 on my live server.  |
+| postgressql         |  PostgreSQL   |  Want to learn more about PostgreSQL, ...   |
 | React, react.js     |     React     | React allows you to interface with other... |
+| SqLite, sqlite      |    SQLite     |       SQLite is in the public domain.       |
 | Strapi, Strapi.js   |    Strapi     |   Get ready to get Strapi up and running.   |
 | Vue, VUE, Vue.js    | Vue or Vue.js |  My favorite component library for Vue...   |
 | yarn, YARN, Yarn    |     Yarn      | You can use Yarn to keep it all up to date. |
-| NPX, Npx, npx       |      npx      | Run packages without downloading using npx. |
 
 ---
 
