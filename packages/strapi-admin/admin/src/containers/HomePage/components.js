@@ -69,7 +69,6 @@ const P = styled.p`
   padding-right: 30px;
   color: #5c5f66;
   font-size: 14px;
-
   b {
     font-weight: 600;
   }
@@ -89,21 +88,15 @@ const ALink = styled.a`
   display: inline-block;
   position: relative;
   height: 34px;
-  margin-top: 16px;
   padding-right: 20px;
-
   border-radius: 3px;
-
   text-overflow: ellipsis;
   overflow: hidden;
   line-height: 34px;
   font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
 
   &:before {
     content: '\f105';
-    font-size: 18px;
     font-weight: 600;
     margin-right: 10px;
     font-family: 'FontAwesome';
@@ -128,34 +121,45 @@ const ALink = styled.a`
     background: #ffffff;
   }
 
-  ${({ type }) => {
-    if (type === 'documentation') {
-      return css`
-        padding-left: 20px;
-        color: #ffffff;
-        background-color: #005fea;
-        &:hover {
+  ${({ type }) =>
+    type === 'blog' || type === 'documentation'
+      ? css`
+          padding-left: 20px;
+          margin-top: 16px;
           color: #ffffff;
-        }
-      `;
-    } else if (type === 'blog') {
-      return css`
-        padding-left: 20px;
-        background-color: #333740;
-        color: #ffffff;
-        &:hover {
-          color: #ffffff;
-        }
-      `;
-    } else {
-      return css`
-        color: #005fea;
-        &:hover {
+          text-transform: uppercase;
+          font-size: 13px;
+          font-weight: 500;
+          &:before {
+            font-size: 16px;
+          }
+          &:hover {
+            color: #ffffff;
+          }
+        `
+      : css`
+          margin-top: 9px;
+          font-size: 14px;
           color: #005fea;
-        }
-      `;
-    }
-  }}
+          &:before {
+            font-size: 12px;
+          }
+          &:hover {
+            color: #005fea;
+          }
+        `}
+  
+  ${({ type }) =>
+    type === 'blog' &&
+    css`
+      background-color: #333740;
+    `}
+
+  ${({ type }) =>
+    type === 'documentation' &&
+    css`
+      background-color: #005fea;
+    `}
 `;
 
 const Separator = styled.div`
@@ -168,19 +172,24 @@ const LinkWrapper = styled.a`
   position: relative;
   padding: 21px 30px;
   padding-left: 95px;
-
   height: auto;
   line-height: 18px;
   background-color: #f7f8f8;
+
   &:hover,
   focus,
   active {
-
     text-decoration: none;
     outline: 0;
   }
 
   &:before {
+    position: absolute;
+    left: 30px;
+    top: 38px;
+    font-family: 'FontAwesome';
+    font-size: 38px;
+
     ${({ type }) => {
       if (type === 'doc') {
         return css`
@@ -194,13 +203,6 @@ const LinkWrapper = styled.a`
         color: #f0811e;
       `;
     }}
-    position: absolute;
-    left: 30px;
-    top: 38px;
-
-
-    font-family: 'FontAwesome';
-    font-size: 38px;
   }
 
   > p {
@@ -220,31 +222,31 @@ const LinkWrapper = styled.a`
 `;
 
 const SocialLinkWrapper = styled.div`
-  height: 54px;
+  position: relative;
+  height: 24px;
+  margin-bottom: 30px;
   font-size: 14px;
   font-weight: 500;
-  position: relative;
   a {
+    display: block;
     width: 100%;
+    height: 100%;
     color: #333740 !important;
     text-decoration: none;
     line-height: 18px;
-
-    div {
+    img,
+    span {
       display: inline-block;
-      height: 25px;
-      width: 25px;
-      text-align: center;
-      vertical-align: top;
+      vertical-align: middle;
     }
-
     img {
-      max-height: 25px;
-      max-width: 25px;
+      height: 24px;
+      width: 24px;
     }
     span {
-      margin-left: 11px;
-      width: calc(100% - 36px);
+      width: calc(100% - 24px);
+      padding-left: 11px;
+      font-weight: 600;
     }
     &:hover {
       text-decoration: none;
