@@ -365,6 +365,7 @@ describe('Test Graphql API End to End', () => {
             mutation deletePost($input: deletePostInput) {
               deletePost(input: $input) {
                 post {
+                  id
                   name
                   bigint
                 }
@@ -381,6 +382,15 @@ describe('Test Graphql API End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
+        expect(res.body).toMatchObject({
+          data: {
+            deletePost: {
+              post: {
+                id: post.id,
+              },
+            },
+          },
+        });
       }
     });
   });
