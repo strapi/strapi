@@ -326,7 +326,7 @@ module.exports = ({ model, modelKey, strapi }) => {
       })
     );
 
-    return entry;
+    return entry.toObject ? entry.toObject() : null;
   }
 
   function search(params, populate) {
