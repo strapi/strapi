@@ -1,6 +1,6 @@
 # Tutorial
 
-This Tutorial is written for developers who prefer a more detailed step-by-step introduction. (A less detailed version can be found at [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html).) This tutorial will take you through the beginning steps of how you could start a project like "FoodAdvisor" ([Github](https://github.com/strapi/foodadvisor/))([Demo](https://foodadvisor.strapi.io/)). You will get a good overview of many of the features that developers love about using Strapi.
+This Tutorial is written for developers who prefer a more detailed step-by-step introduction. (A less detailed version can be found at [Quick Start Guide](/3.0.0-beta.x/getting-started/quick-start.html).) This tutorial will take you through the beginning steps of how you could start a project like **"FoodAdvisor"** ([Github](https://github.com/strapi/foodadvisor/))([Demo](https://foodadvisor.strapi.io/)). You will get a good overview of many of the features that developers love about using Strapi.
 
 **[TODO: Create NEW Video]**
 
@@ -36,7 +36,7 @@ Use **only one** of the following commands to create a new Strapi project:
 - (Using **yarn** to install the Strapi project (**recommended**). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
 
 ```bash
-yarn create strapi-app my-project
+yarn create strapi-app my-project --quickstart
 ```
 
 **or**
@@ -44,7 +44,7 @@ yarn create strapi-app my-project
 - (Using **npm/npx** to install the Strapi project.)
 
 ```bash
-npx create-strapi-app my-project
+npx create-strapi-app my-project --quickstart
 ```
 
 ---
@@ -129,7 +129,7 @@ Building your admin UI with development configuration ...
 
 ```
 
-**[TODO: Add an updated image of the new user registration page]**
+![Strapi Registration Page](../assets/getting-started/tutorial/strapi-beta-registration-page.png 'Strapi Registration Page')
 
 ::: tip NOTE
 Using the `--quickstart` flag will install Strapi using a [SQLite](https://www.sqlite.org/index.html) database. You may always leave off the **--flag**, but you will simply need to follow a few configuration steps for a your database. **You will need to have your database choice installed and running locally, prior to creating your project.**
@@ -149,26 +149,26 @@ The first step is to create an **Administrator** (or "root user") for your proje
 - Check **Receive news**, this is optional but **recommended**
 - Click the **Ready to Start** button
 
-**[TODO: Add a image for the completed Adminstrator registration form]**
+![Completed Registration Page](../assets/getting-started/tutorial/completed-registration-page.png 'Completed Registration Page')
 
 After your **Administrator** registration is complete, you will see the Strapi _Administration Dashboard_:
 
-**[TODO: Add an image of the Strapi Adminstration Dashboard]**
+**[TODO: Add an image showing Adminstration Dashboard]**
 
 **Administrators** and front-end **Users** are separate roles.
 
-**A.** An **Administrator** has access and rights to the backend of Strapi. They have the ability to add content, add plugins, upload images, etc. An **Adminstrator** does **not** author or have any relation to actual content.
+**A.** An **Administrator** has access and rights to the Administration Dashboard (or backend) of Strapi. **Administrators** have the ability to add content, add plugins, upload images, etc. An **Adminstrator** does **not** author or have any relation to actual content.
 
 **B.** A front-end **User** is someone who interacts with your project through the front-end. A front-end **User** is someone who authors an article, makes a purchase, has an account, leaves a review, leaves a comment, etc.
 
-At this point, you have created an **Administrator**, now you will need to create a front-end **User**.
+At this point, you have created an **Administrator**, now you will want to create a front-end **User**.
 
-- Click on `Users` located under **CONTENT TYPES** in the left-hand menu.
-- Click the blue **+ Add New User** button in the top right corner.
-- Next, complete the `Username`, `Email`, and `Password` fields.
-- Select `ON` for the **Confirmed** toggle field.
-- To the right, under **Role**, select `Authenticated`.
-- Save the new user by clicked the blue **Save** button (top right).
+- Click on `Users` located under **CONTENT TYPES** in the left-hand menu
+- Click the blue **+ Add New User** button in the top right corner
+- Next, complete the `Username`, `Email`, and `Password` fields
+- Select `ON` for the **Confirmed** toggle field
+- To the right, under **Role**, select `Authenticated`
+- Save the new user by clicked the blue **Save** button (top right)
 
 **[TODO: Add an image showing entered user]**
 
@@ -194,69 +194,73 @@ Go to the **Content Type Builder** plugin, located in the left menu: **PLUGINS**
 
 **[TODO: Add an image of the Add Content Type dashboard]**
 
-1. Complete these steps to **add a new Content Type**:
+1. Complete these steps to **Create a Content Type**:
 
-- Click the **"+ Add Content Type"** button to add a new **Content Type**.
+- Click the `+ Create a Content Type` button to add a new **Content Type**
 - Enter a **Name** for your new **Content Type** (call this `restaurant`), and you can write `Restaurant Listings` for the **Description**.
-- Click the **Save** button.
+- Click the `Done` button
 
 **[TODO: Add an image of the entry form showing a singular NAME]**
 
 ::: tip NOTE
 
-Content Type **Name** is always **singular**. For example, `restaurant` not `restaurants`.
+The Content Type **Name** is always **singular**. For example, `restaurant` not `restaurants`.
 
 :::
 
-Now, you are ready to add the **Content Type** fields.
+2. You are now at the field selection panel for adding fields to your **Restaurant Content Type**:
 
-2. The following steps add a **String** field for the **Name** of the **Restaurant**:
+You are now ready to add your first field, a **String** field for the **Restaurant** name.
 
 **[TODO: Add an image of Add New Field form]**
 
-You are now at the screen to add fields for your **Restaurant Content Type**.
-
-- Click on the **String** field.
+- Click on the `String` field
 - In the **Name** field, type `Restaurant`. This will be the name of the restaurant.
 
 **[TODO: Add an image of Input String Field image]**
 
-You are under the **BASE SETTINGS** tab, for adding a new **String** type called, `Restaurant`.
-
-- Click on the **ADVANCED SETTINGS** tab.
-- Check the **Required field** which means, _"This field is required for each restaurant and is not optional"_.
-- Check the **Unique field**, which means, _"Each restaurant is to have a unique name"_.
-- Click the **Continue** button.
+- Click on the `ADVANCED SETTINGS` tab
+- Check the `Required field` checkbox
+- Check the `Unique field` checkbox
+- Click the `Add Another Field` button
 
 **[TODO: Add an image of Input String ADVANCED SETTINGS]**
 
-You are now ready to add the second field, a **Text** field for the **Restaurant** description.
+You are now ready to add the second field, a **Rich Text** field for the **Restaurant** description.
 
-- Click the **+ Add New Field** button.
+**[TODO: Add an image of the added Name field and to add a new RICH TEXT field]**
 
-**[TODO: Add an image of the added Name field and to add a new TEXT field]**
+- Click the `Rich Text` field
 
-- Click the **Text** field.
-
-**[TODO: Add an image of the add a new TEXT field dialog box of fields]**
+**[TODO: Add an image of the add a new RICH TEXT field dialog box of fields]**
 
 - In the **Name** field, type `Description`. This will be the description of the **Restaurant**.
+- Click the `Add Another Field` button
 
 **[TODO: Add an image of the add a new TEXT field to add DESCRIPTION]**
 
-You are under the **BASE SETTINGS** tab, for adding a new **Text** type called, `Description`.
+You are now ready to add the third field, a **Media** field for the **Restaurant** thumbnail image.
 
-- Click on the **ADVANCED SETTINGS** tab.
-- Check **Display as a WYSIWYG**. This field will provide a rich text editor.
-- Click the **Continue** button.
+**[TODO: Add an image of the added Name field and to add a new MEDIA field]**
 
-**[TODO: Add an image of the Advanced Settings Text Field]**
+- Click the `Media` field
 
-- Click the **Save** button.
+**[TODO: Add an image of the add a new MEDIA field dialog box of fields]**
+
+- In the **Name** field, type `Image`
+- Click on the **ADVANCED SETTINGS** tab
+- Check the `Required field` checkbox
+- Click the `Done` button
+
+**[TODO: Add an image of the add a new TEXT field to add DESCRIPTION]**
+
+Your new Content Type called **Restaurant** is ready to be `Saved`.
+
+- Click the `Save` button
 
 **[TODO: Add an image of Save Restaurant Image]**
 
-- Wait for Strapi to restart.
+- Wait for Strapi to restart
 
 **[TODO: Add an image of the SAVING OF STRAPI wait]**
 
@@ -272,41 +276,35 @@ After Strapi has restarted, you are ready continue to create the `Category` **Co
 
 1. Complete these steps to **add a new Content Type**:
 
-- Click the **"+ Add Content Type"** button to add a new **Content Type**.
+- Click the `+ Add Content Type` button to add a new **Content Type**.
 - Enter a **Name** for your new **Content Type** (call this `category`), and you can write `Restaurant Categories` for the **Description**.
-- Click the **Save** button.
+- Click the `Done` button.
 
 **[TODO: Add an image of the Category Content Type Name and Description]\***
 
-Now, you are ready to add the content type fields.
-
-2. The following steps add a **String** field for the **Name** of the **Category**:
+2. Now, you are ready to add the **Content Type** fields:
 
 [TODO: Add an image of Add New Field form for Category]
 
 You are now at the screen to add fields for your **Category Content Type**.
 
-- Click on the **String** field.
+- Click on the `String` field.
 - In the **Name** field, type `Category`. This will be the name of the category.
 
 [TODO: Add an image of Input String Field image for category]
 
-You are under the **BASE SETTINGS** tab, for adding a **String** type called, `Category`.
-
-- Click on the **ADVANCED SETTINGS** tab.
-- Check the **Required field** which means, "This field is required for each category and is not optional".
-- Check the **Unique field**, which means, "Each category is to have a unique name".
-- Click the **Continue** button.
+- Click on the `ADVANCED SETTINGS` tab
+- Check the `Required field` checkbox
+- Check the `Unique field` checkbox
+- Click the `Add Another Field` button
 
 [TODO: Add an image of Input String ADVANCED SETTINGS]
 
-You are now ready to add the second field, a **Relation** field for creating a **Many to Many** relationship between the **Category Content Type** and **Restaurant Content Type**.
-
-- Click the **+ Add New Field** button.
+You are now ready to add the second field, a **Relation** field for creating a **Many to Many** relationship between the **Category** and **Restaurant** Content Types.
 
 [TODO: Add an image of the added Name field and to add a new Relation field]
 
-- Click on the **Relation** field.
+- Click on the `Relation` field.
 
 [TODO: Add an image of the add a new TCategory Click Relation Field]
 
@@ -314,16 +312,16 @@ This will bring you to the **Add New Relation** screen.
 
 [TODO: Add an image of the add a new Add new Relation Field screen]
 
-- Click on _right dropdown_ with **Permission (Users-Permissions)** and change it to **Restaurant**.
+- Click on _right dropdown_ with `Permission (Users-Permissions)` and change it to `Restaurant`.
 
 [TODO: Add an image of the add a new Change Permission to Restaurant]
 
-- Click the **Many to Many** icon (in the middle). It should now read, **"Categories has and belongs to many Restaurants"**.
-- Click the **Save** button.
+- Click the `Many to Many` icon (from the middle icon choices). It should now read, **"Categories has and belongs to many Restaurants"**.
+- Click the `Done` button.
 
 [TODO: Add an image of the add a new Category Has Many To Many Relation]
 
-- Click the **Save** button.
+- Click the `Save` button.
 
 [TODO: Add an image of the add Now Save Category]
 
