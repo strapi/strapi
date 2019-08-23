@@ -477,6 +477,12 @@ export class GroupPage extends React.Component {
       kind: 'secondaryHotlineAdd',
       label: `${pluginId}.button.attributes.add`,
       onClick: () => this.openAttributesModal(),
+      style: {
+        // position: 'absolute',
+        // top: '1.8rem',
+        right: '10px',
+        // outline: 0,
+      },
     };
 
     return (

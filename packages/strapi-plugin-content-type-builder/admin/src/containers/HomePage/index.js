@@ -137,6 +137,7 @@ class HomePage extends React.Component {
                 kind: 'secondaryHotlineAdd',
                 label: `${pluginId}.button.${type}.create`,
                 onClick: this.handleClick,
+                style: { right: 10 },
               }}
               style={{ paddingBottom: '0.8rem' }}
             />

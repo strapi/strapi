@@ -117,7 +117,10 @@ function ListLayout({
         <Add data={availableData} onClick={addField} />
       </div>
       <div className="col-lg-7 col-md-12">
-        <FormWrapper onSubmit={onSubmit} style={{ minHeight: 246 }}>
+        <FormWrapper
+          onSubmit={onSubmit}
+          style={{ minHeight: 246, paddingLeft: 15 }}
+        >
           {form.map(input => {
             return (
               <Input
