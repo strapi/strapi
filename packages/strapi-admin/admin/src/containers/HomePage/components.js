@@ -205,7 +205,10 @@ const LinkWrapper = styled.a`
 
   > p {
     margin: 0;
-    font-size: 16px;
+    font-size: 13px;
+    &:first-child {
+      font-size: 16px;
+    }
     color: #919BAE;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -241,7 +244,7 @@ const SocialLinkWrapper = styled.div`
     }
     span {
       margin-left: 11px;
-      width: calc(100% - 40px);
+      width: calc(100% - 36px);
     }
     &:hover {
       text-decoration: none;

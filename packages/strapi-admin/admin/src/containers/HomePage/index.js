@@ -196,7 +196,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
           </div>
 
           <div className="col-4">
-            <Block>
+            <Block style={{ paddingRight: 30 }}>
               <FormattedMessage id="HomePage.community">
                 {msg => <h2>{msg}</h2>}
               </FormattedMessage>
@@ -216,7 +216,12 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
               </FormattedMessage>
               <div
                 className="row social-wrapper"
-                style={{ display: 'flex', margin: 0, marginTop: 43 }}
+                style={{
+                  display: 'flex',
+                  margin: 0,
+                  marginTop: 43,
+                  marginLeft: -15,
+                }}
               >
                 {SOCIAL_LINKS.map((value, key) => (
                   <SocialLink key={key} {...value} />

@@ -7,7 +7,7 @@ const BlogPost = ({ error, isFirst, isLoading, title, content, link }) => {
     return (
       <>
         <LoadingBar style={{ marginBottom: 13 }} />
-        <LoadingBar style={{ width: '40%', marginBottom: 30 }} />
+        <LoadingBar style={{ width: '40%', marginBottom: 31 }} />
       </>
     );
   }
