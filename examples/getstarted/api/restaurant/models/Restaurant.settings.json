@@ -7,7 +7,10 @@
   },
   "options": {
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "attributes": {
@@ -29,11 +32,14 @@
     "categories": {
       "collection": "category"
     },
-    "address": {
-      "model": "address"
-    },
     "price_range": {
-      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
+      "enum": [
+        "very_cheap",
+        "cheap",
+        "average",
+        "expensive",
+        "very_expensive"
+      ],
       "type": "enumeration"
     },
     "description": {
@@ -57,6 +63,9 @@
       "required": true,
       "repeatable": true,
       "type": "group"
+    },
+    "address": {
+      "model": "address"
     }
   }
 }

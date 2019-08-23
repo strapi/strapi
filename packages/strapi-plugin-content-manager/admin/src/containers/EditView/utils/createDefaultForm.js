@@ -15,6 +15,10 @@ const setDefaultForm = attributes => {
       acc[current] = null;
     }
 
+    if (type === 'json' && required === true) {
+      acc[current] = {};
+    }
+
     if (defaultValue !== undefined) {
       acc[current] = defaultValue;
     }

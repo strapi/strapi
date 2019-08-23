@@ -53,6 +53,7 @@ function EditView({
   const isCreatingEntry = id === 'create';
   const attributes = get(layout, ['schema', 'attributes'], {});
   const groups = retrieveDisplayedGroups(attributes);
+  console.log({ groups });
   const groupLayoutsToGet = retrieveGroupLayoutsToFetch(groups);
   // States
   const [showWarningCancel, setWarningCancel] = useState(false);
