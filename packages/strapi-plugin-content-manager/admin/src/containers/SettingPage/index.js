@@ -7,7 +7,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
-import { findIndex, get, isEmpty, upperFirst } from 'lodash';
+import { findIndex, get, has, isEmpty, upperFirst } from 'lodash';
 import cn from 'classnames';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { DragDropContext } from 'react-dnd';
@@ -191,8 +191,8 @@ class SettingPage extends React.PureComponent {
       .filter(attr => {
         return (
           findIndex(this.getListDisplay(), ['name', attr]) === -1 &&
-          !Object.prototype.hasOwnProperty.call(attributes[attr], 'collection') &&
-          !Object.prototype.hasOwnProperty.call(attributes[attr], 'model')
+          !has(attributes[attr], 'collection') &&
+          !has(attributes[attr], 'model')
         );
       })
       .map(attr => {

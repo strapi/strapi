@@ -27,7 +27,7 @@ module.exports = strapi => {
       if (_.isPlainObject(views) && !_.isEmpty(views)) {
         const opts = _.clone(views);
 
-        if (Object.prototype.hasOwnProperty.call(opts, 'default')) {
+        if (_.has(opts, 'default')) {
           opts.extension = opts.default;
           delete opts.default;
         }

@@ -56,7 +56,7 @@ module.exports = strapi => {
           // Exclude routes with prefix.
           const excludedRoutes = _.omitBy(
             plugin.config.routes,
-            o => !Object.prototype.hasOwnProperty.call(o.config, 'prefix')
+            o => !_.has(o.config, 'prefix')
           );
 
           _.forEach(

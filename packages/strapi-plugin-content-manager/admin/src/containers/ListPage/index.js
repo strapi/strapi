@@ -13,6 +13,7 @@ import {
   capitalize,
   findIndex,
   get,
+  has,
   isEmpty,
   isUndefined,
   toInteger,
@@ -141,8 +142,8 @@ export class ListPage extends React.Component {
 
     return Object.keys(attributes).filter(attr => {
       return (
-        !Object.prototype.hasOwnProperty.call(attributes[attr], 'collection') &&
-        !Object.prototype.hasOwnProperty.call(attributes[attr], 'model')
+        !has(attributes[attr], 'collection') &&
+        !has(attributes[attr], 'model')
       );
     });
   };

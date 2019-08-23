@@ -30,8 +30,8 @@ module.exports = async (ctx, next) => {
     if (controller && action) {
       // Redirect to specific controller.
       if (
-        Object.prototype.hasOwnProperty.call(ctx.request.body, 'fields') &&
-        Object.prototype.hasOwnProperty.call(ctx.request.body, 'files')
+        _.has(ctx.request.body, 'fields') &&
+        _.has(ctx.request.body, 'files')
       ) {
         let { files, fields } = ctx.request.body;
 

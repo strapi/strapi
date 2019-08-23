@@ -21,7 +21,7 @@ module.exports = {
     // This is not a Bookshelf collection, only the name.
     if (_.isString(collectionIdentity) && !_.isUndefined(models)) {
       const PK = _.findKey(_.get(models, collectionIdentity + '.attributes'), o => {
-        return Object.prototype.hasOwnProperty.call(o, 'primary');
+        return _.has(o, 'primary');
       });
 
       if (!_.isEmpty(PK)) {

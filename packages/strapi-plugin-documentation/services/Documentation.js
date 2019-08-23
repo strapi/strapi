@@ -381,8 +381,8 @@ module.exports = {
       (acc, curr) => {
         const attribute = attributes[curr];
         const isField =
-          !Object.prototype.hasOwnProperty.call(attribute, 'model') &&
-          !Object.prototype.hasOwnProperty.call(attribute, 'collection');
+          !_.has(attribute, 'model') &&
+          !_.has(attribute, 'collection');
 
         if (attribute.required) {
           acc.required.push(curr);
@@ -1525,8 +1525,8 @@ module.exports = {
       .map(attr => {
         const attribute = modelAttributes[attr];
         const isField =
-          !Object.prototype.hasOwnProperty.call(attribute, 'model') &&
-          !Object.prototype.hasOwnProperty.call(attribute, 'collection');
+          !_.has(attribute, 'model') &&
+          !_.has(attribute, 'collection');
 
         if (!isField) {
           const name = attribute.model || attribute.collection;
@@ -1730,7 +1730,7 @@ module.exports = {
   mergeComponents: (initObj, srcObj) => {
     const cleanedObj = Object.keys(_.get(initObj, 'schemas', {})).reduce(
       (acc, current) => {
-        const targetObj = Object.prototype.hasOwnProperty.call(_.get(srcObj, ['schemas'], {}), current)
+        const targetObj = _.has(_.get(srcObj, ['schemas'], {}), current)
           ? srcObj
           : initObj;
 
@@ -1750,7 +1750,7 @@ module.exports = {
 
   mergePaths: function(initObj, srcObj) {
     return Object.keys(initObj.paths).reduce((acc, current) => {
-      if (Object.prototype.hasOwnProperty.call(_.get(srcObj, ['paths'], {}), current)) {
+      if (_.has(_.get(srcObj, ['paths'], {}), current)) {
         const verbs = Object.keys(initObj.paths[current]).reduce(
           (acc1, curr) => {
             const verb = this.mergeVerbObject(

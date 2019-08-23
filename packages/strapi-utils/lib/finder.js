@@ -15,7 +15,7 @@ module.exports = (api, controller) => {
     throw new Error('Should be an object');
   }
 
-  if (_.isObject(controller) && Object.prototype.hasOwnProperty.call(controller, 'identity')) {
+  if (_.isObject(controller) && _.has(controller, 'identity')) {
     controller = controller.identity.toLowerCase();
   } else if (_.isString(controller)) {
     controller = controller.toLowerCase();

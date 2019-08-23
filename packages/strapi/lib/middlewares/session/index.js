@@ -24,7 +24,7 @@ module.exports = strapi => {
         strapi.config.hooks.session.secretKeys;
 
       if (
-        Object.prototype.hasOwnProperty.call(strapi.config.middleware.settings.session, 'client') &&
+        _.has(strapi.config.middleware.settings.session, 'client') &&
         _.isString(strapi.config.middleware.settings.session.client) &&
         strapi.config.middleware.settings.session.client !== 'cookie'
       ) {
@@ -52,7 +52,7 @@ module.exports = strapi => {
           });
         }
       } else if (
-        Object.prototype.hasOwnProperty.call(strapi.config.middleware.settings.session, 'client') &&
+        _.has(strapi.config.middleware.settings.session, 'client') &&
         _.isString(strapi.config.middleware.settings.session.client) &&
         strapi.config.middleware.settings.session.client === 'cookie'
       ) {

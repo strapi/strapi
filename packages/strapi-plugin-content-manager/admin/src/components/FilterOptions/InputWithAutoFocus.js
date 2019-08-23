@@ -5,7 +5,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 
 import {
   InputDate,
@@ -36,7 +36,7 @@ class InputWithAutoFocus extends React.Component {
     if (this.props.filterToFocus === this.props.index) {
       return new Promise(resolve => {
         setTimeout(() => {
-          if (Object.prototype.hasOwnProperty.call(this.inputEl, 'openCalendar')) {
+          if (has(this.inputEl, 'openCalendar')) {
             this.inputEl.openCalendar();
           } else {
             this.inputEl.focus();

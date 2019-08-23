@@ -73,8 +73,8 @@ module.exports = {
   add: async (params, values, source) => {
     // Multipart/form-data.
     if (
-      Object.prototype.hasOwnProperty.call(values, 'fields') &&
-      Object.prototype.hasOwnProperty.call(values, 'files')
+      _.has(values, 'fields') &&
+      _.has(values, 'files')
     ) {
       // Silent recursive parser.
       const parser = value => {
@@ -138,8 +138,8 @@ module.exports = {
   edit: async (params, values, source) => {
     // Multipart/form-data.
     if (
-      Object.prototype.hasOwnProperty.call(values, 'fields') &&
-      Object.prototype.hasOwnProperty.call(values, 'files')
+      _.has(values, 'fields') &&
+      _.has(values, 'files')
     ) {
       // Silent recursive parser.
       const parser = value => {
