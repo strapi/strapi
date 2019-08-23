@@ -160,6 +160,6 @@
   "HomePage.welcome.congrats.content": "Vous êtes connecté en tant que premier Administrateur. Afin de découvrir les fonctionnalités proposées par Strapi,",
   "HomePage.welcome.congrats.content.bold": "nous vous conseillons de créer votre premier Type de Contenu.",
   "HomePage.community": "Rejoignez la Communauté",
-  "HomePage.roadmap": "Voire la roadmap",
+  "HomePage.roadmap": "Voir la roadmap",
   "HomePage.greetings": "Bonjour {name}!"
 }

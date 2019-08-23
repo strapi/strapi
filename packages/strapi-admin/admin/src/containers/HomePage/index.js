@@ -170,7 +170,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
                   </ALink>
                 )}
               </FormattedMessage>
-              <Separator style={{ marginTop: 38, marginBottom: 17 }} />
+              <Separator style={{ marginTop: 37, marginBottom: 36 }} />
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 {FIRST_BLOCK_LINKS.map((data, index) => {
                   const type = index === 0 ? 'doc' : 'code';
@@ -196,12 +196,14 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
           </div>
 
           <div className="col-4">
-            <Block style={{ paddingRight: 30 }}>
+            <Block style={{ paddingRight: 30, paddingBottom: 0 }}>
               <FormattedMessage id="HomePage.community">
                 {msg => <h2>{msg}</h2>}
               </FormattedMessage>
               <FormattedMessage id="app.components.HomePage.community.content">
-                {content => <P style={{ marginTop: 7 }}>{content}</P>}
+                {content => (
+                  <P style={{ marginTop: 7, marginBottom: 0 }}>{content}</P>
+                )}
               </FormattedMessage>
               <FormattedMessage id="HomePage.roadmap">
                 {msg => (
@@ -214,12 +216,14 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
                   </ALink>
                 )}
               </FormattedMessage>
+
+              <Separator style={{ marginTop: 18 }} />
               <div
                 className="row social-wrapper"
                 style={{
                   display: 'flex',
                   margin: 0,
-                  marginTop: 43,
+                  marginTop: 36,
                   marginLeft: -15,
                 }}
               >
