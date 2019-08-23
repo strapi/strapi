@@ -28,7 +28,7 @@ module.exports = {
   moduleNameMapper: {
     '.*\\.(css|less|styl|scss|sass)$':
       '<rootDir>/test/config/front/mocks/cssModule.js',
-    '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+    '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
       '<rootDir>/test/config/front/mocks/image.js',
   },
   rootDir: process.cwd(),
@@ -40,7 +40,7 @@ module.exports = {
   testRegex: 'tests/.*\\.test\\.js$',
   transform: {
     '^.+\\.js$': 'babel-jest',
-    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
       '<rootDir>/fileTransformer.js',
   },
   transformIgnorePatterns: [
