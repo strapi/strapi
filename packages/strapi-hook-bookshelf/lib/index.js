@@ -110,7 +110,7 @@ module.exports = function(strapi) {
               definition.databaseName = getDatabaseName(connection);
               definition.client = _.get(connection.settings, 'client');
               _.defaults(definition, {
-                primaryKey: 'id',
+                primaryKey: _.get(definition, 'options.idAttribute', 'id'),
                 primaryKeyType: _.get(
                   definition,
                   'options.idAttributeType',
@@ -352,9 +352,9 @@ module.exports = function(strapi) {
                         const model = findModelByAssoc({ assoc });
 
                         return {
-                          [`${prefix}${assoc.alias}.${
-                            model.collectionName
-                          }`]: function(query) {
+                          [`${prefix}${assoc.alias}.${model.collectionName}`]: function(
+                            query
+                          ) {
                             query.orderBy('created_at', 'desc');
                           },
                         };
@@ -602,9 +602,7 @@ module.exports = function(strapi) {
                     const columnName = details.plugin
                       ? _.get(
                           strapi.plugins,
-                          `${details.plugin}.models.${
-                            details.model
-                          }.attributes.${FK}.columnName`,
+                          `${details.plugin}.models.${details.model}.attributes.${FK}.columnName`,
                           FK
                         )
                       : _.get(
