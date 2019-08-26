@@ -17,7 +17,10 @@ import styles from './styles.scss';
 function LeftMenuLink(props) {
   const isLinkActive = startsWith(
     props.location.pathname.replace('/admin', '').concat('/'),
-    props.destination.replace(props.pluginSuffixUrl, '').concat('/')
+
+    props.destination
+      .replace(props.suffixUrlToReplaceForLeftMenuHighlight, '')
+      .concat('/')
   );
 
   const plugin =
@@ -87,11 +90,13 @@ LeftMenuLink.propTypes = {
   }).isRequired,
   pluginSuffixUrl: PropTypes.string,
   source: PropTypes.string,
+  suffixUrlToReplaceForLeftMenuHighlight: PropTypes.string,
 };
 
 LeftMenuLink.defaultProps = {
   pluginSuffixUrl: '',
   source: '',
+  suffixUrlToReplaceForLeftMenuHighlight: '',
 };
 
 export default LeftMenuLink;
