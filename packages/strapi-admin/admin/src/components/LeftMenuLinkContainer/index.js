@@ -81,6 +81,9 @@ function LeftMenuLinkContainer({ plugins, ...rest }) {
             label={get(plugin, 'name')}
             destination={destination}
             pluginSuffixUrl={pluginSuffixUrl}
+            suffixUrlToReplaceForLeftMenuHighlight={
+              plugin.suffixUrlToReplaceForLeftMenuHighlight || ''
+            }
           />
         );
       }
