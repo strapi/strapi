@@ -477,9 +477,6 @@ export class GroupPage extends React.Component {
       kind: 'secondaryHotlineAdd',
       label: `${pluginId}.button.attributes.add.another`,
       onClick: () => this.openAttributesModal(),
-      style: {
-        right: '10px',
-      },
     };
 
     return (
@@ -511,7 +508,14 @@ export class GroupPage extends React.Component {
             />
           ) : (
             <ListWrapper>
-              <ListHeader button={{ ...buttonProps }}>
+              <ListHeader
+                button={{
+                  ...buttonProps,
+                  style: {
+                    right: '15px',
+                  },
+                }}
+              >
                 <div className="list-header-title">
                   {title.map(item => {
                     return (

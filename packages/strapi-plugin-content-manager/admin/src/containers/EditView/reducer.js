@@ -10,6 +10,7 @@ const initialState = fromJS({
   isLoadingForLayouts: true,
   modifiedData: {},
   defaultGroupValues: {},
+  defaultForm: {},
 });
 
 const getMax = arr => {
@@ -66,6 +67,7 @@ function reducer(state, action) {
       });
     case 'GET_DATA_SUCCEEDED':
       return state
+        .update('defaultForm', () => fromJS(action.defaultForm))
         .update('initialData', () => fromJS(action.data))
         .update('modifiedData', () => fromJS(action.data))
         .update('isLoading', () => false);
@@ -166,8 +168,9 @@ function reducer(state, action) {
       const groupPath = ['modifiedData', action.groupName];
 
       return state
-        .updateIn(groupPath, () =>
-          state.getIn(['initialData', action.groupName])
+        .updateIn(
+          groupPath,
+          () => state.getIn(['defaultForm', action.groupName]) || null
         )
         .update('errors', () => fromJS({}))
         .update('didCheckErrors', v => !v);

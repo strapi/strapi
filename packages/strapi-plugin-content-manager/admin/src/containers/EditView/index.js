@@ -123,6 +123,7 @@ function EditView({
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
+          defaultForm: setDefaultForm(get(layout, ['schema', 'attributes'])),
         });
         fetchGroupLayouts();
       } catch (err) {
@@ -138,6 +139,7 @@ function EditView({
       dispatch({
         type: 'INIT',
         data: setDefaultForm(get(layout, ['schema', 'attributes'])),
+        defaultForm: setDefaultForm(get(layout, ['schema', 'attributes'])),
       });
       fetchGroupLayouts();
     }
