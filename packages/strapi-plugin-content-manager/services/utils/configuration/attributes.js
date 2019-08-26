@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const NON_SORTABLES = ['group', 'json', 'relation'];
+const NON_SORTABLES = ['group', 'json', 'relation', 'media'];
 
 const isListable = (schema, name) => {
   return isSortable(schema, name) && schema.attributes[name].type != 'password';

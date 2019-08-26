@@ -29,7 +29,7 @@ import WrapperModal from '../../components/WrapperModal';
 import Icon from '../../assets/icons/icon_type_ct.png';
 import IconGroup from '../../assets/icons/icon_type_groups.png';
 
-import supportedAttributes from './supportedAttributes.json';
+import supportedAttributes from './supportedAttributes';
 
 const NAVLINKS = [{ id: 'base' }, { id: 'advanced' }];
 
@@ -39,24 +39,16 @@ class AttributeForm extends React.Component {
 
   getCurrentForm = () => {
     const { activeTab, attributeType, modifiedData } = this.props;
-    const isRepeatable = get(modifiedData, 'repeatable', false);
-    const form = get(
-      supportedAttributes,
-      [attributeType, activeTab, 'items'],
-      []
-    );
+    const attributeConfig = get(supportedAttributes, [
+      attributeType,
+      activeTab,
+    ]);
+    const items =
+      typeof attributeConfig === 'function'
+        ? get(attributeConfig(modifiedData), 'items', [])
+        : get(attributeConfig, 'items', []);
 
-    if (
-      activeTab === 'advanced' &&
-      attributeType === 'group' &&
-      !isRepeatable
-    ) {
-      const slicedForm = form.slice(0, 1);
-
-      return slicedForm;
-    }
-
-    return form;
+    return items;
   };
 
   getIcon = () => {

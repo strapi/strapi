@@ -75,6 +75,10 @@ const createLoaders = strapi => {
     const pluginsNames = await fs.readdir(pluginsDir);
 
     for (let pluginFolder of pluginsNames) {
+      // ignore files
+      const stat = await fs.stat(path.resolve(pluginsDir, pluginFolder));
+      if (!stat.isDirectory()) continue;
+
       const dir = path.resolve(pluginsDir, pluginFolder, 'middlewares');
       await loadMiddlewaresInDir(dir, middlewares);
     }
