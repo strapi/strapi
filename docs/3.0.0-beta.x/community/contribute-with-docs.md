@@ -77,7 +77,7 @@ Please read the following sections before moving to create documentation. (Eithe
 
 ### Technical Requirements
 
-1. You have [Node](https://nodejs.org/en/) at v10.x.x.
+1. You have [Node v10.x.x](https://nodejs.org/en/download/) (LTS) or [Node v12.x.x](https://nodejs.org/en/download/current/) and [Yarn v1.2.0+](https://yarnpkg.com/en/).
 2. You are familiar with Git, and have it installed on your development environment.
 
 - Ensure you're using the [required versions of Node.js and npm](/3.0.0-beta.x/getting-started/install-requirements.html).

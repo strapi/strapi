@@ -17,7 +17,7 @@
 
 ## Technical Requirements
 
-- You have [Node](https://nodejs.org/en/) at v10.x.x only and [Yarn](https://yarnpkg.com/en/) at v1.2.0+.
+- You have [Node v10.x.x](https://nodejs.org/en/download/) (LTS) or [Node v12.x.x](https://nodejs.org/en/download/current/) and [Yarn v1.2.0+](https://yarnpkg.com/en/).
 - You are familiar with Git, and have it installed on your development environment.
 
 ## Development Workflow

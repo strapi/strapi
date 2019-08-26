@@ -4,13 +4,13 @@ This page covers installing the basic requirements for Strapi.
 
 ## Basic Installation Requirements
 
-Strapi only requires [Node.js](https://nodejs.org). The current recommended version to run strapi is `Node v10` (current `LTS`).
+Strapi only requires [Node.js](https://nodejs.org). Both [Node v10.x.x](https://nodejs.org/en/download/) (LTS) and [Node v12.x.x](https://nodejs.org/en/download/current/) are supported versions for use with Strapi.
 
 This is all that is needed before Strapi can run on your local environment.
 
 ## Installing Node.js
 
-You can install `Node.js` and `npm` for `Windows 10`, `Ubuntu 18.04` and `Mac O/S Mojave` with the following instructions.
+You can install `Node.js` and `npm` for `Windows 10`, `Ubuntu 18.04` and `Mac O/S Mojave` with the following instructions. (You can easily replace the _Node.js v10.x.x_ below with the installation of _Node.js v12.x.x_ )
 
 #### Installation Instructions for each Operating System:
 
@@ -38,7 +38,7 @@ Verify Node.js has correctly installed:
 
 ```shell
 node -v
-## You should see "v10.x.x
+## You should see "v10.x.x"
 ```
 
 Next, verify npm has correctly installed:
