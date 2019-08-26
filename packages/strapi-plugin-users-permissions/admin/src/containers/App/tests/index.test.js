@@ -14,14 +14,14 @@ const renderComponent = properties =>
   mount(
     React.createElement(
       props => (
-        <IntlProvider locale='en' defaultLocale='en' messages={messages}>
+        <IntlProvider locale="en" defaultLocale="en" messages={messages}>
           <Router>
             <App {...props} />
           </Router>
         </IntlProvider>
       ),
-      properties,
-    ),
+      properties
+    )
   );
 
 describe('<App />', () => {
@@ -42,14 +42,6 @@ describe('<App />', () => {
     shallow(<App {...props} />);
   });
 
-  it('should redirect the user on mount if the url has two params', () => {
-    const renderedComponent = renderComponent(props);
-
-    expect(props.history.push).toHaveBeenCalledWith('/plugins/users-permissions/roles');
-
-    renderedComponent.unmount();
-  });
-
   it('should not redirect the user on mount if the url more than two params', () => {
     const otherProps = Object.assign(props, {
       location: { pathname: '/plugins/users-permissions/roles' },
@@ -67,9 +59,13 @@ describe('<App />', () => {
     });
     const renderedComponent = renderComponent(otherProps);
 
-    renderedComponent.setProps({ location: { pathname: '/plugins/users-permissions' } });
+    renderedComponent.setProps({
+      location: { pathname: '/plugins/users-permissions' },
+    });
 
-    expect(props.history.push).toHaveBeenCalledWith('/plugins/users-permissions/roles');
+    expect(props.history.push).toHaveBeenCalledWith(
+      '/plugins/users-permissions/roles'
+    );
 
     renderedComponent.unmount();
   });
@@ -80,7 +76,9 @@ describe('<App />', () => {
     });
     const renderedComponent = renderComponent(otherProps);
 
-    renderedComponent.setProps({ location: { pathname: '/plugins/users-permissions/auth/login' } });
+    renderedComponent.setProps({
+      location: { pathname: '/plugins/users-permissions/auth/login' },
+    });
     expect(props.history.push).not.toHaveBeenCalled();
 
     renderedComponent.unmount();

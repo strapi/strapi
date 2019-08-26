@@ -5,10 +5,12 @@ const Button = styled.div`
   height: 37px;
   margin-bottom: 27px;
   text-align: center;
-  border: 1px solid #e3e9f3;
+  border: 1px solid rgba(227, 233, 243, 0.75);
   border-top: 1px solid
     ${({ doesPreviousFieldContainErrorsAndIsClosed }) =>
-      doesPreviousFieldContainErrorsAndIsClosed ? '#FFA784' : '#e3e9f3'};
+      doesPreviousFieldContainErrorsAndIsClosed
+        ? '#FFA784'
+        : 'rgba(227, 233, 243, 0.75)'};
 
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
@@ -44,15 +46,16 @@ const FormWrapper = styled.div`
       } else if (isOpen) {
         return '#AED4FB';
       } else {
-        return '#e3e9f3';
+        return 'rgba(227, 233, 243, 0.75)';
       }
     }};
 `;
 
 const EmptyGroup = styled.div`
   height: 72px;
-  border: 1px solid #e3e9f3;
-  border-radius: 2px;
+  border: 1px solid rgba(227, 233, 243, 0.75);
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
   border-bottom: 0;
   line-height: 73px;
   text-align: center;
@@ -65,7 +68,7 @@ const P = styled.p`
 `;
 
 const NonRepeatableWrapper = styled.div`
-  margin: 0 10px !important;
+  margin: 0 15px !important;
   padding: 0 20px !important;
 
   ${({ isEmpty }) => {
@@ -130,7 +133,7 @@ const NonRepeatableWrapper = styled.div`
 const ResetGroup = styled.div`
   position: absolute;
   top: 0;
-  right: 10px;
+  right: 15px;
   display: flex;
 
   cursor: pointer;

@@ -70,7 +70,9 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
   const handleClick = e => {
     e.preventDefault();
 
-    push('/plugins/content-type-builder/models');
+    push(
+      '/plugins/content-type-builder/models/user&source=users-permissions?modalType=model&settingType=base&actionType=create'
+    );
   };
   const hasAlreadyCreatedContentTypes =
     get(

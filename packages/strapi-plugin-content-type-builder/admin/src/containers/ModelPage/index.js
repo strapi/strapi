@@ -576,7 +576,7 @@ export class ModelPage extends React.Component {
 
     const buttonProps = {
       kind: 'secondaryHotlineAdd',
-      label: `${pluginId}.button.attributes.add`,
+      label: `${pluginId}.button.attributes.add.another`,
       onClick: () => this.handleClickOpenModalChooseAttributes(),
     };
 

@@ -475,13 +475,10 @@ export class GroupPage extends React.Component {
 
     const buttonProps = {
       kind: 'secondaryHotlineAdd',
-      label: `${pluginId}.button.attributes.add`,
+      label: `${pluginId}.button.attributes.add.another`,
       onClick: () => this.openAttributesModal(),
       style: {
-        // position: 'absolute',
-        // top: '1.8rem',
         right: '10px',
-        // outline: 0,
       },
     };
 

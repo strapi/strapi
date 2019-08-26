@@ -302,7 +302,6 @@ class AttributeForm extends React.Component {
       attributeToEditName,
       attributeType,
       featureName,
-      featureType,
       isOpen,
     } = this.props;
     const { showForm } = this.state;
@@ -353,7 +352,7 @@ class AttributeForm extends React.Component {
           <FooterModal>
             <section>
               <ButtonModalPrimary
-                message={`${pluginId}.form.button.add.${featureType}`}
+                message={`${pluginId}.form.button.add.field`}
                 type="submit"
                 add
               />

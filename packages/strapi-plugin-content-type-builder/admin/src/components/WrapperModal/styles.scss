@@ -3,7 +3,7 @@
 }
 
 .modal {
-  background-color: white;
+  background-color: transparent;
   max-width: 92rem !important;
   margin-left: auto !important;
   margin-right: auto !important;
@@ -13,6 +13,8 @@
     padding-right: 0;
     border: none;
     border-radius: 2px;
+    background-color: white;
+    overflow: hidden;
   }
 }
 

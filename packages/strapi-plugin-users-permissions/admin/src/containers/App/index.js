@@ -17,12 +17,6 @@ import HomePage from '../HomePage';
 import NotFoundPage from '../NotFoundPage';
 
 class App extends React.Component {
-  componentDidMount() {
-    if (!this.props.location.pathname.split('/')[3]) {
-      this.props.history.push('/plugins/users-permissions/roles');
-    }
-  }
-
   componentDidUpdate() {
     if (!this.props.location.pathname.split('/')[3]) {
       this.props.history.push('/plugins/users-permissions/roles');
