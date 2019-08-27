@@ -318,14 +318,6 @@ export class GroupPage extends React.Component {
 
   handleGoBack = () => {
     this.props.history.goBack();
-
-    // const {
-    //   location: { pathname },
-    // } = this.props;
-
-    // const backPathname = pathname.substr(0, pathname.lastIndexOf('/'));
-
-    // this.props.history.push(backPathname);
   };
 
   handleSubmit = (shouldContinue = false) => {
@@ -723,6 +715,7 @@ GroupPage.propTypes = {
   groups: PropTypes.array.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
+    goBack: PropTypes.func.isRequired,
   }),
   initialDataGroup: PropTypes.object.isRequired,
   location: PropTypes.shape({

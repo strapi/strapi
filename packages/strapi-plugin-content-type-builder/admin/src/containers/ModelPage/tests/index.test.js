@@ -63,7 +63,9 @@ describe('<ModelPage />', () => {
       clearTemporaryAttribute: jest.fn(),
       clearTemporaryAttributeRelation: jest.fn(),
       createTempContentType: jest.fn(),
+      deleteModel: jest.fn(),
       deleteModelAttribute: jest.fn(),
+      deleteTemporaryModel: jest.fn(),
       history: {
         push: jest.fn(),
       },
@@ -364,7 +366,9 @@ describe('<ModelPage /> lifecycle', () => {
       clearTemporaryAttribute: jest.fn(),
       clearTemporaryAttributeRelation: jest.fn(),
       createTempContentType: jest.fn(),
+      deleteModel: jest.fn(),
       deleteModelAttribute: jest.fn(),
+      deleteTemporaryModel: jest.fn(),
       history: {
         push: jest.fn(),
       },
@@ -670,7 +674,8 @@ describe('<ModelPage /> lifecycle', () => {
       handleClickOnTrashIcon('username');
 
       expect(wrapper.state()).toEqual({
-        showWarning: true,
+        showDeleteAttrWarning: true,
+        showDeleteWarning: false,
         removePrompt: false,
         attrToDelete: 'username',
       });
@@ -719,24 +724,26 @@ describe('<ModelPage /> lifecycle', () => {
     });
   });
 
-  describe('ToggleModalWarning', () => {
-    it('should change the showWarning on modal toggle', () => {
+  describe('toggleDeleteAttrModalWarning', () => {
+    it('should change the showDeleteAttrWarning on modal toggle', () => {
       topCompo = renderComponent(props);
 
       const wrapper = topCompo.find(ModelPage);
       expect(wrapper.state()).toEqual({
         attrToDelete: null,
-        showWarning: false,
+        showDeleteAttrWarning: false,
+        showDeleteWarning: false,
         removePrompt: false,
       });
 
-      const { toggleModalWarning } = wrapper.instance();
+      const { toggleDeleteAttrModalWarning } = wrapper.instance();
 
-      toggleModalWarning();
+      toggleDeleteAttrModalWarning();
 
       expect(wrapper.state()).toEqual({
         attrToDelete: null,
-        showWarning: true,
+        showDeleteAttrWarning: true,
+        showDeleteWarning: false,
         removePrompt: false,
       });
     });

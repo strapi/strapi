@@ -69,6 +69,7 @@ const props = {
   ],
   history: {
     push: jest.fn(),
+    goBack: jest.fn(),
   },
   initialDataGroup: {
     tests: {
@@ -236,9 +237,7 @@ describe('CTB <GroupPage />', () => {
       const { handleGoBack } = shallow(<GroupPage {...props} />).instance();
       handleGoBack();
 
-      expect(props.history.push).toHaveBeenCalledWith(
-        '/plugins/content-type-builder/groups'
-      );
+      expect(props.history.goBack).toHaveBeenCalled();
     });
   });
 

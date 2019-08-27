@@ -73,7 +73,6 @@ function ListRowCollapse({
         groupFieldsLength() > 0 ? 'is-open' : '',
       ]}
     >
-      {/* {groupFieldsLength} */}
       <td>
         <div onClick={actionOnRowClick}>
           <table>

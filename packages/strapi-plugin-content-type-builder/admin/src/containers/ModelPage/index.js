@@ -383,13 +383,6 @@ export class ModelPage extends React.Component {
 
   handleGoBack = () => {
     this.props.history.goBack();
-
-    // const {
-    //   location: { pathname },
-    // } = this.props;
-    // const backPathname = pathname.substr(0, pathname.lastIndexOf('/'));
-
-    // this.props.history.push(backPathname);
   };
 
   handleRedirectToGroup = group => {
