@@ -48,8 +48,12 @@ function ListRowCollapse({
 
   const getGroupFields = () => {
     const { attributes } = groups[group];
-    return attributes;
+
+    return attributes || [];
   };
+
+  const groupFieldsLength = () =>
+    type === 'group' ? getGroupFields().length : 0;
 
   const actionOnRowClick = () => {
     handleClick();
@@ -66,9 +70,10 @@ function ListRowCollapse({
       className={[
         target ? 'relation-row' : '',
         configurable ? 'clickable' : '',
-        isOpen ? 'is-open' : '',
+        groupFieldsLength() > 0 ? 'is-open' : '',
       ]}
     >
+      {/* {groupFieldsLength} */}
       <td>
         <div onClick={actionOnRowClick}>
           <table>

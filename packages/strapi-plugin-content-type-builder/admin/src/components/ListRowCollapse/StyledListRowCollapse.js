@@ -132,25 +132,24 @@ const StyedListRowCollapse = styled.tr`
     }
   }
   &.clickable {
-    &.is-open,
-    &:hover {
+    &:not(.is-open):hover {
+      > td > div:first-of-type {
+        cursor: pointer;
+        background-color: ${colors.grey};
+      }
       & + tr {
-        div:not(.collapse-body) {
-          table tr {
-            &:before {
-              background-color: transparent;
-            }
-          }
+        div:not(.collapse-body) table tr:before {
+          background-color: transparent;
         }
       }
     }
-    &:hover {
+  }
+  &.is-open {
+    > td {
       div:not(.collapse-body) {
-        table tr {
+        table tr:hover {
           cursor: pointer;
           background-color: ${colors.grey};
-          &:before {
-          }
         }
       }
     }
