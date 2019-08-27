@@ -12,7 +12,7 @@ import styles from './styles.scss';
 
 /* eslint-disable jsx-a11y/anchor-is-valid */
 class GlobalPagination extends React.Component {
-  getLastPageNumber = () => Math.ceil(this.props.count / this.props.params._limit);
+  getLastPageNumber = () => Math.ceil(this.props.count / this.props.params._limit) || 1;
 
   handleDotsClick = (e) => e.preventDefault();
 
