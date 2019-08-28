@@ -376,7 +376,8 @@ function appReducer(state = initialState, action) {
             .findIndex(group => group.get('uid') === action.uid),
         ])
         .removeIn(['initialDataGroup', action.uid])
-        .removeIn(['modifiedDataGroup', action.uid]);
+        .removeIn(['modifiedDataGroup', action.uid])
+        .update('shouldRefetchData', v => !v);
     case DELETE_MODEL_ATTRIBUTE: {
       const pathToModelName = action.keys
         .slice()
