@@ -242,6 +242,7 @@ const SocialLinkWrapper = styled.div`
     img {
       height: 24px;
       width: 24px;
+      object-fit: contain;
     }
     span {
       width: calc(100% - 24px);
