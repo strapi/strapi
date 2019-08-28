@@ -51,7 +51,7 @@
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
-    "bootstrap": "^4.0.0-alpha.6",
+    "bootstrap": "^4.3.1",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
@@ -63,7 +63,7 @@
     "react-intl": "^2.8.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
-    "reactstrap": "^5.0.0",
+    "reactstrap": "^8.0.1",
     "styled-components": "^4.3.1",
     "whatwg-fetch": "^2.0.3"
   },
