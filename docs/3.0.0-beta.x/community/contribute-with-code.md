@@ -1,6 +1,8 @@
 # Contribute with Code
 
-**NOTE:** All efforts to contribute are highly appreciated, we recommend you talk to a maintainer **before** to spending much time making a pull request that may not align with the project roadmap.
+We accept all kinds of Pull Requests, including bug fixes, new features, and documentation.
+
+**NOTE:** We encourage you to discuss your proposed Pull Request with maintainers or core team members before submitting new features. In this way, you may get tips and other useful information (e.g., upcoming breaking changes) and you ensure your pull request aligns with the project roadmap.
 
 ## Before Submitting a Pull Request
 
@@ -24,21 +26,19 @@
 
 To facilitate the contribution, we have reduced the number of commands necessary to install the Strapi development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](/3.0.0-beta.x/getting-started/install-requirements.html)
+Please follow the instructions below:
 
-Then, please follow the instructions below:
-
-#### 1. ▪ Fork the [repository](https://github.com/strapi/strapi)
+### 1.🍴Fork the [repository](https://github.com/strapi/strapi)
 
 [Go to the repository](https://github.com/strapi/strapi) and fork it to your own GitHub account.
 
-#### 2. 💿 Clone from your repository
+### 2. 💿 Clone from your repository
 
 ```bash
 git clone git@github.com:YOUR_USERNAME/strapi.git
 ```
 
-#### 3. ⏳ Install the dependencies
+### 3. ⏳ Install the dependencies
 
 Go to the root of the repository.
 
@@ -46,7 +46,7 @@ Go to the root of the repository.
 cd strapi && yarn setup
 ```
 
-#### 4. 🚀 Start the example application
+### 4. 🚀 Start the example application
 
 **Go to the "/getstarted" application**
 
@@ -70,9 +70,9 @@ The administration panel is available at http://localhost:4000/admin
 
 **Awesome! You are now able to contribute to Strapi.**
 
-#### 5. Available commands
+### 5. Available commands
 
-- `yarn watch` starts yarn watch in all packages.
+- `yarn watch` starts yarn watch (use this command to trigger an automatic rebuild of the administration panel while developing).
 - `yarn build` builds the `strapi-helper-plugin` (use this command when you develop in the administration panel).
 - `yarn setup` installs the dependencies.
 - `yarn lint` runs a linter on the codebase.
@@ -94,10 +94,10 @@ The administration panel is available at http://localhost:4000/admin
 You can run the test suites using different databases:
 
 ```bash
-$ node test/e2e.js sqlite
-$ node test/e2e.js mongo
-$ node test/e2e.js postgres
-$ node test/e2e.js mysql
+node test/e2e.js sqlite
+node test/e2e.js mongo
+node test/e2e.js postgres
+node test/e2e.js mysql
 ```
 
 ---

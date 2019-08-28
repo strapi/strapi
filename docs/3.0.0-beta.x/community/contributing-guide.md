@@ -11,13 +11,13 @@ The two additional ways to contribute to Strapi include contributing **Documenta
 
 Some people choose to support Strapi by [purchasing Swag from our Store](https://strapi.io/shop), (and then proudly wearing it!).
 
-Any way you choose to contribute to Strapi is welcomed and appreciated.
+All contributions are highly appreciated and welcomed.
 
 ## Open-Source & MIT Licensed
 
 Strapi is open-source under the [MIT license](https://github.com/strapi/strapi/blob/master/LICENSE.md). All work done is available on [GitHub](https://github.com/strapi/strapi).
 
-The core team, as well as any contributors, send pull requests which then go through the same validation process.
+The core team, as well as any contributors, send pull requests which go through the same validation process.
 
 ## Code of Conduct
 
@@ -25,7 +25,7 @@ The [Code of Conduct](/3.0.0-beta.x/community/code-of-conduct.md) governs this p
 
 ## Feature Requests
 
-Feature Requests by the community are highly encouraged. Please feel free to submit a [feature request](https://portal.productboard.com/strapi) or to upvote 👍 [an existing feature request](https://portal.productboard.com/strapi) in the ProductBoard.
+Feature Requests by the community are highly encouraged. Please feel free to submit a [feature request](https://portal.productboard.com/strapi) or upvote 👍 [an existing feature request](https://portal.productboard.com/strapi) in the ProductBoard.
 
 ## Bugs
 

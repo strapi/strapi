@@ -6,6 +6,7 @@
   "dependencies": {
     "cache-loader": "1.2.2",
     "directory-tree": "^2.1.0",
+    "markdown-it": "^9.1.0",
     "markdown-it-decorate": "^1.2.2",
     "markdown-it-include": "^1.1.0",
     "vue-tabs-component": "^1.5.0",
@@ -14,5 +15,6 @@
   },
   "devDependencies": {
     "markdown-it-container": "^2.0.0"
-  }
+  },
+  "license": "MIT"
 }

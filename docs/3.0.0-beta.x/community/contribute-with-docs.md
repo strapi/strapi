@@ -1,6 +1,8 @@
 # Contribute with Docs
 
-All efforts to contribute to the [Docs](https://strapi.io/documentation/3.0.0-beta.x/) are highly appreciated, we recommend [these guidelines](/3.0.0-beta.x/community/contribute-with-docs.html#the-workflow) **and** that you talk to a maintainer before spending much time making a pull request that may not align with the project roadmap.
+All efforts to contribute to the [Docs](https://strapi.io/documentation/3.0.0-beta.x/) are highly appreciated, we recommend [these guidelines](/3.0.0-beta.x/community/contribute-with-docs.html#the-workflow). We accept all kinds of Pull Requests, including bug fixes, documentation, and tutorials.
+
+**NOTE:** We encourage you to discuss your proposed Pull Request with maintainers or core team members before submitting new features. In this way, you may get tips and other useful information (e.g., upcoming breaking changes) and you ensure your pull request aligns with the project roadmap.
 
 You are welcome to create tutorials, articles, and videos for your blog or channels without speaking to a maintainer.
 
@@ -96,12 +98,21 @@ git clone git@github.com:YOUR_USERNAME/strapi.git
 
 ```bash
 cd strapi/docs
+
+yarn install
+
+# OR
+
 npm install
 ```
 
 - Start the docs development server and open the documentation in the browser:
 
 ```bash
+yarn dev
+
+# OR
+
 npm run dev
 ```
 
@@ -136,7 +147,6 @@ module.exports = [
       '/3.0.0-beta.x/getting-started/example-tutorial',  // <- Added here
     ],
   },
-
 ```
 
 For example, if you now wanted the **left-hand** menu to have a link to **Example Tutorial**, you would need to add an `h1` tag with `Example Tutorial`, like the below example:
@@ -162,26 +172,25 @@ module.exports = [
       '/3.0.0-beta.x/getting-started/example-tutorial',  // <- Added here
     ],
   },
-
 ```
 
 Therefore, images are placed in `./assets/getting-started/example-tuturial/image.png`, like this:
 
-```
+```md
 DOCS
 └───.vuepress
 └───.3.0.0-beta.x
-│   └───getting-started
-│   │   └───example-tutorial.md         // Markdown File
-│   │
-│   └───assets                          // Image Assets
-│   │   └───getting-started             // Directory of the Markdown file
-│   │       └───example-tutorial        // Name of the Markdown File
-│   │           image1.jpg
-│   │           image2.jpg
-│   │           image2.jpg
-│   │
-│   └───etc
+│ └───getting-started
+│ │ └───example-tutorial.md // Markdown File
+│ │
+│ └───assets // Image Assets
+│ │ └───getting-started // Directory of the Markdown file
+│ │ └───example-tutorial // Name of the Markdown File
+│ │ image1.jpg
+│ │ image2.jpg
+│ │ image2.jpg
+│ │
+│ └───etc
 ```
 
 **Note:** Images are not linked outside the documentation, but **can** link to an image saved in a different directory. Mainly if the image already exists.
@@ -200,6 +209,8 @@ Submitting new documentation generally involves submitting new [Tutorials](/3.0.
 - Create a GitHub repo with your app for the **Tutorial** or for the code for the **How-to**.
 - Show this code to the Strapi Maintainer and address any feedback
 - Following the [Docs Style Guide](http://localhost:8080/documentation/3.0.0-beta.x/community/contribute-with-docs.html#docs-style-guide) below, write your Tutorial and make a pull request.
+
+The above steps allow proceeding confidently, knowing your contribution can be accepted.
 
 #### Tips
 
@@ -235,13 +246,13 @@ We recommend that users develop using the Yarn package manager. Therefore, the d
 
 Using **Yarn**:
 
-```
+```bash
 yarn create strapi-app my-project --quickstart
 ```
 
 Using **npm/npx**:
 
-```
+```bash
 npx create-strapi-app my-project --quickstart
 ```
 
@@ -251,13 +262,13 @@ npx create-strapi-app my-project --quickstart
 
 Using **Yarn**:
 
-```
+```bash
 yarn strapi
 ```
 
 Using **npm**:
 
-```
+```bash
 npm run strapi help
 ```
 
@@ -315,21 +326,19 @@ If you use images in the documentation, it is a best practice to include both HT
 
 Markdown example,
 
-```
-![alt-text](/src/of/the/image.png) 'title of image')
+```md
+![alt-text](/src/of/the/image.png 'title of image')
 ```
 
 The following example generates the following logo.
 
-```
+```md
 ![The Strapi Logo](../assets/contribution-guide/contribute-with-docs/strapi-logo.png 'Strapi Logo')
 ```
 
 #### The Strapi Logo
 
 ![The Strapi Logo](../assets/contribution-guide/contribute-with-docs/strapi-logo.png 'Strapi Logo')
-
----
 
 #### Use an unordered list for action steps, number the large sections
 
@@ -347,13 +356,12 @@ First, you will set-up a Nuxt.js project.
 
 - Install the **Vue CLI** from your terminal.
 
-```
+```bash
 yarn global add @vue/cli
 
 # OR
 
 npm install -g @vue/cli
-
 ```
 
 **Example #2**
@@ -369,12 +377,10 @@ Getting started with a Node.js:
 node -v
 ```
 
-- Verify the verion of Git:
+- Verify the version of Git:
 
 ```bash
-
 git --version
-
 ```
 
 ---
@@ -392,7 +398,6 @@ See the examples below:
 `Path: ./Projects/`
 
 ```bash
-
 mkdir strapi-tutorial && cd strapi-tutorial
 ```
 
@@ -410,7 +415,6 @@ yarn strapi install graphql
 # OR
 
 npm run strapi install graphql
-
 ```
 
 Indicating the `Path ./` ensures that there are fewer possibilities for errors and misunderstanding.
@@ -443,7 +447,7 @@ Never assume steps are apparent. Please make your documentation clear to follow 
 
 Occasionally, specific concepts or exceptions need to be pointed out _in context_ to the individual reading the documentation. The way to do this is using **Note:**. The markdown is as follows:
 
-```
+```md
 **Note:** Important point
 ```
 
@@ -464,9 +468,7 @@ There are three scenarios with backticks:
 Use triple backticks before and after code. Enclosing `yarn create strapi-app my-project` in triple backticks generates the following:
 
 ```bash
-
 yarn create strapi-app my-project
-
 ```
 
 **Example #2**
@@ -480,6 +482,26 @@ Use enclosing ticks in the middle of a phrase to enclose a command.
 Use enclosing ticks in the middle of a phrase to indicate a link to be clicked.
 
 - Click on the `Save` button
+
+---
+
+#### Use American English
+
+Use **American English**, over _British English_, for terminology and word spellings.
+
+**Example**
+
+```md
+- American English - CORRECT
+
+"I watched the behavior of the browser."
+
+- British English - INCORRECT
+
+" watched the behaviour of the browsers."
+```
+
+---
 
 ### Translations
 
