@@ -22,7 +22,7 @@
   "button.attributes.add.another": "Add Another Field",
   "button.contentType.add": "Add a Content Type",
   "button.delete.title": "Delete",
-  "button.delete.label": "Make you sure what you are doing, you might lose data",
+  "button.delete.label": "Make you sure you understand what you are doing",
   "button.group.add": "Add a Group",
   "button.models.create": "Create a Content Type",
   "button.groups.create": "Create a Group",

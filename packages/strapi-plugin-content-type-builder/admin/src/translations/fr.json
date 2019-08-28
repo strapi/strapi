@@ -21,7 +21,7 @@
   "button.attributes.add.another": "Ajouter un autre champ",
   "button.contentType.add": "Ajouter un Type de Contenu",
   "button.delete.title": "Supprimer",
-  "button.delete.label": "Êtes-vous sûr de vouloir supprimer ? Vous risquez de perdre des données",
+  "button.delete.label": "Êtes-vous sûr de vouloir supprimer ?",
   "button.group.add": "Ajouter un Groupe",
   "button.models.create": "Créer un Type de Contenu",
   "button.groups.create": "Créer un Groupe",

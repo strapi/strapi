@@ -196,6 +196,7 @@ h1 + .editorParagraph {
   text-align: center;
   text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
   cursor: pointer;
   &:focus,
   &:active {
@@ -205,7 +206,7 @@ h1 + .editorParagraph {
 
 .toggleModeWrapper {
   margin-left: auto;
-  margin-right: 15px;
+  padding-right: 15px;
   padding-top: 8px;
 }
 
