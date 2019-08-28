@@ -665,26 +665,28 @@ export class ModelPage extends React.Component {
               </div>
             </ListWrapper>
           )}
-          <div className="trash-btn-wrapper">
-            <TrashButton
-              onClick={e => {
-                e.stopPropagation();
+          {!this.getSource() && (
+            <div className="trash-btn-wrapper">
+              <TrashButton
+                onClick={e => {
+                  e.stopPropagation();
 
-                if (canOpenModal || this.isUpdatingTemporaryContentType()) {
-                  this.toggleDeleteModalWarning(true);
-                } else {
-                  strapi.notification.info(
-                    `${pluginId}.notification.info.work.notSaved`
-                  );
-                }
-              }}
-            >
-              <div>
-                <FormattedMessage id={`${pluginId}.button.delete.title`} />
-              </div>
-              <FormattedMessage id={`${pluginId}.button.delete.label`} />
-            </TrashButton>
-          </div>
+                  if (canOpenModal || this.isUpdatingTemporaryContentType()) {
+                    this.toggleDeleteModalWarning(true);
+                  } else {
+                    strapi.notification.info(
+                      `${pluginId}.notification.info.work.notSaved`
+                    );
+                  }
+                }}
+              >
+                <div>
+                  <FormattedMessage id={`${pluginId}.button.delete.title`} />
+                </div>
+                <FormattedMessage id={`${pluginId}.button.delete.label`} />
+              </TrashButton>
+            </div>
+          )}
         </ViewContainer>
 
         <AttributesModalPicker
