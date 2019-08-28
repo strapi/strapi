@@ -410,7 +410,8 @@ function appReducer(state = initialState, action) {
             .findIndex(model => model.get('name') === action.modelName),
         ])
         .removeIn(['initialData', action.modelName])
-        .removeIn(['modifiedData', action.modelName]);
+        .removeIn(['modifiedData', action.modelName])
+        .update('shouldRefetchData', v => !v);
     case DELETE_TEMPORARY_GROUP:
       return state
         .removeIn([
