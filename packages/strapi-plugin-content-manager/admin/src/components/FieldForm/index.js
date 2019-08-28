@@ -67,7 +67,6 @@ const FieldForm = ({
 
               return (
                 <Input
-                  data-testId="input"
                   inputDescription={
                     meta === 'mainField'
                       ? {

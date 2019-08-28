@@ -39,6 +39,7 @@ const Li = styled.li`
   justify-content: space-between;
   height: 27px;
   background-color: transparent !important;
+  margin-bottom: 9px;
 
   &:active {
     .dragHandle {

@@ -7,10 +7,10 @@
 import styled from 'styled-components';
 
 const TrashButton = styled.div`
-  cursor: pointer;
-  color: #4b515a;
   height: 24px;
   line-height: 24px;
+  color: #4b515a;
+  cursor: pointer;
   div,
   div + span {
     display: inline-block;
@@ -30,8 +30,8 @@ const TrashButton = styled.div`
     }
   }
   div + span {
-    margin-right: 10px;
     display: none;
+    margin-right: 10px;
   }
   :hover {
     color: #f64d0a;
