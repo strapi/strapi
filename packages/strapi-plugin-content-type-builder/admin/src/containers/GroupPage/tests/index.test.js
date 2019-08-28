@@ -593,62 +593,6 @@ describe('CTB <GroupPage />, lifecycle', () => {
         description: '',
       };
     });
-
-    it('should call submitGroup with modifiedDataGroup param when isTemporary is false', () => {
-      props.groups.find(item => item.name == 'tests').isTemporary = false;
-      props.initialDataGroup.tests.attributes = [
-        {
-          name: 'name',
-          type: 'string',
-          required: true,
-        },
-        {
-          name: 'modelRelation',
-          nature: 'oneWay',
-          target: 'model',
-          dominant: false,
-          unique: false,
-          key: '-',
-        },
-        {
-          name: 'quantity',
-          type: 'float',
-          required: true,
-        },
-      ];
-
-      props.modifiedDataGroup.tests.attributes = [
-        {
-          name: 'names',
-          type: 'string',
-          required: true,
-        },
-        {
-          name: 'modelRelation',
-          nature: 'oneWay',
-          target: 'model',
-          dominant: false,
-          unique: false,
-          key: '-',
-        },
-        {
-          name: 'quantity',
-          type: 'float',
-          required: true,
-        },
-      ];
-
-      topCompo = renderComponent(props);
-      const wrapper = topCompo.find(GroupPage);
-
-      expect(wrapper.find(ViewContainer)).toHaveLength(1);
-
-      const { pluginHeaderActions } = wrapper.find(ViewContainer).props();
-
-      pluginHeaderActions[1].onClick();
-
-      expect(props.submitGroup).toHaveBeenCalled();
-    });
   });
 
   describe('DeleteGroupAttribute', () => {

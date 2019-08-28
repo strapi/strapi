@@ -431,7 +431,7 @@ export class GroupPage extends React.Component {
 
     return (
       groups.findIndex(group => group.name === this.getFeatureDisplayName()) ===
-        -1 || this.isTryingToEditAnUnknownAttribute()
+      -1
     );
   };
 
@@ -488,20 +488,20 @@ export class GroupPage extends React.Component {
       removePrompt,
     } = this.state;
 
-    // if (this.shouldRedirect()) {
-    //   if (groups[0]) {
-    //     const { uid, source } = groups[0];
-    //     const to = source ? `${uid}&source=${source}` : uid;
+    if (this.shouldRedirect()) {
+      if (groups[0]) {
+        const { uid, source } = groups[0];
+        const to = source ? `${uid}&source=${source}` : uid;
 
-    //     return <Redirect to={to} />;
-    //   }
+        return <Redirect to={to} />;
+      }
 
-    //   const { name, source } = models[0];
-    //   const base = `/plugins/${pluginId}/models/${name}`;
-    //   const to = source ? `${base}&source=${source}` : base;
+      const { name, source } = models[0];
+      const base = `/plugins/${pluginId}/models/${name}`;
+      const to = source ? `${base}&source=${source}` : base;
 
-    //   return <Redirect to={to} />;
-    // }
+      return <Redirect to={to} />;
+    }
 
     const attributes = this.getFeatureAttributes();
     const attributesNumber = this.getFeatureAttributesLength();

@@ -368,10 +368,15 @@ function appReducer(state = initialState, action) {
     case DELETE_GROUP_ATTRIBUTE:
       return state.removeIn(action.keys);
     case DELETE_GROUP_SUCCEEDED:
-      return state.removeIn([
-        'groups',
-        state.get('groups').findIndex(group => group.get('uid') === action.uid),
-      ]);
+      return state
+        .removeIn([
+          'groups',
+          state
+            .get('groups')
+            .findIndex(group => group.get('uid') === action.uid),
+        ])
+        .removeIn(['initialDataGroup', action.uid])
+        .removeIn(['modifiedDataGroup', action.uid]);
     case DELETE_MODEL_ATTRIBUTE: {
       const pathToModelName = action.keys
         .slice()
@@ -406,12 +411,15 @@ function appReducer(state = initialState, action) {
         .removeIn(['initialData', action.modelName])
         .removeIn(['modifiedData', action.modelName]);
     case DELETE_TEMPORARY_GROUP:
-      return state.removeIn([
-        'groups',
-        state
-          .get('groups')
-          .findIndex(group => group.get('isTemporary') === true),
-      ]);
+      return state
+        .removeIn([
+          'groups',
+          state
+            .get('groups')
+            .findIndex(group => group.get('isTemporary') === true),
+        ])
+        .update('newGroup', () => fromJS(initialState.get('newGroup')))
+        .update('newGroupClone', () => fromJS(initialState.get('newGroup')));
     case DELETE_TEMPORARY_MODEL:
       return state
         .removeIn([
