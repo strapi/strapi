@@ -191,7 +191,7 @@ const DropDownWrapper = styled.div`
 `;
 
 const FooterWrapper = styled.div`
-  margin-top: 2.5rem;
+  padding-top: 3rem;
 `;
 
 const Label = styled.label`
