@@ -130,7 +130,7 @@ function Group({
       ) : (
         <div
           style={{
-            margin: '0 10px',
+            margin: '0 15px',
           }}
         >
           {groupValue.length === 0 && (
@@ -221,7 +221,7 @@ function Group({
                 `${pluginId}.components.Group.notification.info.maximum-requirement`
               );
             }}
-            withBorderRadius={groupValue.length === 0}
+            withBorderRadius={false}
           >
             <i className="fa fa-plus" />
             <FormattedMessage

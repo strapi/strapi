@@ -185,7 +185,7 @@ class AttributesPickerModal extends React.Component {
             </HeaderModalTitle>
           </section>
         </HeaderModal>
-        <BodyModal style={{ paddingBottom: '3rem' }}>
+        <BodyModal style={{ paddingTop: '0.4rem', paddingBottom: '3rem' }}>
           {attributes.map(this.renderAttribute)}
         </BodyModal>
         <FooterModal />

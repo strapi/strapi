@@ -371,7 +371,7 @@ function ListView({
                 </DropDownWrapper>
               </div>
             </div>
-            <div className="row" style={{ paddingTop: '25px' }}>
+            <div className="row" style={{ paddingTop: '30px' }}>
               <div className="col-12">
                 <CustomTable
                   data={data}

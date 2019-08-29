@@ -5,10 +5,12 @@ const Button = styled.div`
   height: 37px;
   margin-bottom: 27px;
   text-align: center;
-  border: 1px solid #e3e9f3;
+  border: 1px solid rgba(227, 233, 243, 0.75);
   border-top: 1px solid
     ${({ doesPreviousFieldContainErrorsAndIsClosed }) =>
-      doesPreviousFieldContainErrorsAndIsClosed ? '#FFA784' : '#e3e9f3'};
+      doesPreviousFieldContainErrorsAndIsClosed
+        ? '#FFA784'
+        : 'rgba(227, 233, 243, 0.75)'};
 
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
@@ -44,15 +46,16 @@ const FormWrapper = styled.div`
       } else if (isOpen) {
         return '#AED4FB';
       } else {
-        return '#e3e9f3';
+        return 'rgba(227, 233, 243, 0.75)';
       }
     }};
 `;
 
 const EmptyGroup = styled.div`
   height: 72px;
-  border: 1px solid #e3e9f3;
-  border-radius: 2px;
+  border: 1px solid rgba(227, 233, 243, 0.75);
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
   border-bottom: 0;
   line-height: 73px;
   text-align: center;
@@ -65,7 +68,7 @@ const P = styled.p`
 `;
 
 const NonRepeatableWrapper = styled.div`
-  margin: 0 10px !important;
+  margin: 0 15px !important;
   padding: 0 20px !important;
 
   ${({ isEmpty }) => {
@@ -76,14 +79,16 @@ const NonRepeatableWrapper = styled.div`
         margin-bottom: 21px !important;
         background-color: #fafafb;
         text-align: center;
+        cursor: pointer;
+        border-radius: 2px;
 
         > div {
           position: absolute;
           top: 30px;
           left: calc(50% - 18px);
-          line-height: 36px;
           height: 36px;
           width: 36px;
+          line-height: 38px;
           border-radius: 50%;
           background-color: #f3f4f4;
           cursor: pointer;
@@ -94,9 +99,15 @@ const NonRepeatableWrapper = styled.div`
             color: #b4b6ba;
           }
         }
+        border: 1px solid transparent;
 
         &:hover {
+          border: 1px solid #aed4fb;
           background-color: #e6f0fb;
+
+          > p {
+            color: #007eff;
+          }
 
           > div {
             background-color: #aed4fb;
@@ -104,7 +115,6 @@ const NonRepeatableWrapper = styled.div`
               content: '\f067';
               font-family: FontAwesome;
               font-size: 15px;
-
               color: #007eff;
             }
           }
@@ -123,7 +133,7 @@ const NonRepeatableWrapper = styled.div`
 const ResetGroup = styled.div`
   position: absolute;
   top: 0;
-  right: 10px;
+  right: 15px;
   display: flex;
 
   cursor: pointer;

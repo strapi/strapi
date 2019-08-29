@@ -249,16 +249,18 @@ const attributes = {
         },
       ],
     },
-    advanced: {
-      items: [
+    advanced: data => {
+      const options = data.enum ? data.enum.split('\n') : [];
+      const items = [
         {
           customBootstrapClass: 'col-md-7',
           label: {
             id: 'content-type-builder.form.attribute.settings.default',
           },
-          name: 'default',
-          type: 'string',
+          name: 'enumDefault',
+          type: 'select',
           value: '',
+          selectOptions: options,
           validations: {},
         },
         {
@@ -306,7 +308,9 @@ const attributes = {
               'content-type-builder.form.attribute.item.uniqueField.description',
           },
         },
-      ],
+      ];
+
+      return { items };
     },
   },
   group: {

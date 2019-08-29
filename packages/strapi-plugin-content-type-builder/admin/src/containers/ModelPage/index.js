@@ -22,6 +22,7 @@ import {
   ListTitle,
   ListWrapper,
   PopUpWarning,
+  TrashButton,
   routerPropTypes,
   getQueryParameters,
 } from 'strapi-helper-plugin';
@@ -39,7 +40,9 @@ import {
   addAttributeToExistingContentType,
   addAttributeToTempContentType,
   clearTemporaryAttribute,
+  deleteModel,
   deleteModelAttribute,
+  deleteTemporaryModel,
   onChangeAttribute,
   resetEditExistingContentType,
   resetEditTempContentType,
@@ -53,7 +56,12 @@ import styles from './styles.scss';
 /* eslint-disable no-extra-boolean-cast */
 export class ModelPage extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
-  state = { attrToDelete: null, removePrompt: false, showWarning: false };
+  state = {
+    attrToDelete: null,
+    removePrompt: false,
+    showDeleteAttrWarning: false,
+    showDeleteWarning: false,
+  };
   featureType = 'model';
 
   componentDidMount() {
@@ -353,7 +361,7 @@ export class ModelPage extends React.Component {
     const { canOpenModal } = this.props;
 
     if (canOpenModal || this.isUpdatingTemporaryContentType()) {
-      this.setState({ showWarning: true, attrToDelete });
+      this.setState({ showDeleteAttrWarning: true, attrToDelete });
       emitEvent('willDeleteFieldOfContentType');
     } else {
       this.displayNotificationCTNotSaved();
@@ -370,16 +378,11 @@ export class ModelPage extends React.Component {
       : ['modifiedData', this.getModelName(), 'attributes', attrToDelete];
 
     deleteModelAttribute(keys);
-    this.setState({ attrToDelete: null, showWarning: false });
+    this.setState({ attrToDelete: null, showDeleteAttrWarning: false });
   };
 
   handleGoBack = () => {
-    const {
-      location: { pathname },
-    } = this.props;
-    const backPathname = pathname.substr(0, pathname.lastIndexOf('/'));
-
-    this.props.history.push(backPathname);
+    this.props.history.goBack();
   };
 
   handleRedirectToGroup = group => {
@@ -491,8 +494,15 @@ export class ModelPage extends React.Component {
     );
   };
 
-  toggleModalWarning = () =>
-    this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+  toggleDeleteAttrModalWarning = () =>
+    this.setState(prevState => ({
+      showDeleteAttrWarning: !prevState.showDeleteAttrWarning,
+    }));
+
+  toggleDeleteModalWarning = () =>
+    this.setState(prevState => ({
+      showDeleteWarning: !prevState.showDeleteWarning,
+    }));
 
   wait = async () => {
     this.setState({ removePrompt: true });
@@ -525,8 +535,11 @@ export class ModelPage extends React.Component {
 
   render() {
     const {
+      canOpenModal,
       clearTemporaryAttribute,
       clearTemporaryAttributeRelation,
+      deleteModel,
+      deleteTemporaryModel,
       history: { push },
       groups,
       location: { search },
@@ -539,7 +552,11 @@ export class ModelPage extends React.Component {
       temporaryAttribute,
       temporaryAttributeRelation,
     } = this.props;
-    const { showWarning, removePrompt } = this.state;
+    const {
+      showDeleteAttrWarning,
+      showDeleteWarning,
+      removePrompt,
+    } = this.state;
 
     if (this.shouldRedirect()) {
       const { name, source } = models[0];
@@ -576,7 +593,7 @@ export class ModelPage extends React.Component {
 
     const buttonProps = {
       kind: 'secondaryHotlineAdd',
-      label: `${pluginId}.button.attributes.add`,
+      label: `${pluginId}.button.attributes.add.another`,
       onClick: () => this.handleClickOpenModalChooseAttributes(),
     };
 
@@ -648,6 +665,28 @@ export class ModelPage extends React.Component {
               </div>
             </ListWrapper>
           )}
+          {!this.getSource() && (
+            <div className="trash-btn-wrapper">
+              <TrashButton
+                onClick={e => {
+                  e.stopPropagation();
+
+                  if (canOpenModal || this.isUpdatingTemporaryContentType()) {
+                    this.toggleDeleteModalWarning(true);
+                  } else {
+                    strapi.notification.info(
+                      `${pluginId}.notification.info.work.notSaved`
+                    );
+                  }
+                }}
+              >
+                <div>
+                  <FormattedMessage id={`${pluginId}.button.delete.title`} />
+                </div>
+                <FormattedMessage id={`${pluginId}.button.delete.label`} />
+              </TrashButton>
+            </div>
+          )}
         </ViewContainer>
 
         <AttributesModalPicker
@@ -672,15 +711,7 @@ export class ModelPage extends React.Component {
           onSubmitEdit={this.handleSubmitEdit}
           push={push}
         />
-        <PopUpWarning
-          isOpen={showWarning}
-          toggleModal={this.toggleModalWarning}
-          content={{
-            message: `${pluginId}.popUpWarning.bodyMessage.attribute.delete`,
-          }}
-          popUpWarningType="danger"
-          onConfirm={this.handleDeleteAttribute}
-        />
+
         <RelationForm
           actionType={actionType}
           activeTab={settingType}
@@ -701,6 +732,33 @@ export class ModelPage extends React.Component {
           onSubmitEdit={this.handleSubmitEdit}
           push={push}
           source={this.getSource()}
+        />
+
+        <PopUpWarning
+          isOpen={showDeleteWarning}
+          toggleModal={this.toggleDeleteModalWarning}
+          content={{
+            message: `${pluginId}.popUpWarning.bodyMessage.contentType.delete`,
+          }}
+          type="danger"
+          onConfirm={() => {
+            if (this.isUpdatingTemporaryContentType()) {
+              deleteTemporaryModel();
+            } else {
+              deleteModel(this.getModelName(), this.context);
+            }
+            this.toggleDeleteModalWarning(false);
+          }}
+        />
+
+        <PopUpWarning
+          isOpen={showDeleteAttrWarning}
+          toggleModal={this.toggleDeleteAttrModalWarning}
+          content={{
+            message: `${pluginId}.popUpWarning.bodyMessage.attribute.delete`,
+          }}
+          popUpWarningType="danger"
+          onConfirm={this.handleDeleteAttribute}
         />
       </div>
     );
@@ -729,7 +787,9 @@ ModelPage.propTypes = {
   clearTemporaryAttributeRelation: PropTypes.func.isRequired,
   connections: PropTypes.array,
   createTempContentType: PropTypes.func.isRequired,
+  deleteModel: PropTypes.func.isRequired,
   deleteModelAttribute: PropTypes.func.isRequired,
+  deleteTemporaryModel: PropTypes.func.isRequired,
   initialData: PropTypes.object.isRequired,
   models: PropTypes.array.isRequired,
   modifiedData: PropTypes.object.isRequired,
@@ -757,7 +817,9 @@ export function mapDispatchToProps(dispatch) {
       addAttributeToExistingContentType,
       addAttributeToTempContentType,
       clearTemporaryAttribute,
+      deleteModel,
       deleteModelAttribute,
+      deleteTemporaryModel,
       onChangeAttribute,
       resetEditExistingContentType,
       resetEditTempContentType,

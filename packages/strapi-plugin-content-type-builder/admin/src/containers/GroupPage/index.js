@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { get, isEqual } from 'lodash';
@@ -25,6 +26,7 @@ import {
   ListTitle,
   ListWrapper,
   PopUpWarning,
+  TrashButton,
 } from 'strapi-helper-plugin';
 
 import {
@@ -33,7 +35,9 @@ import {
   addAttributeToExistingGroup,
   clearTemporaryAttributeGroup,
   clearTemporaryAttributeRelationGroup,
+  deleteGroup,
   deleteGroupAttribute,
+  deleteTemporaryGroup,
   onChangeAttributeGroup,
   onChangeRelationGroup,
   onChangeRelationNatureGroup,
@@ -50,7 +54,12 @@ import {
 
 /* eslint-disable no-extra-boolean-cast */
 export class GroupPage extends React.Component {
-  state = { attrToDelete: null, removePrompt: false, showWarning: false };
+  state = {
+    attrToDelete: null,
+    removePrompt: false,
+    showDeleteAttrWarning: false,
+    showDeleteWarning: false,
+  };
   featureType = 'group';
 
   componentDidMount() {
@@ -283,7 +292,7 @@ export class GroupPage extends React.Component {
     const { canOpenModal } = this.props;
 
     if (canOpenModal || this.isUpdatingTempFeature()) {
-      this.setState({ showWarning: true, attrToDelete });
+      this.setState({ showDeleteAttrWarning: true, attrToDelete });
       emitEvent('willDeleteFieldOfGroup');
     } else {
       this.displayNotificationCTNotSaved();
@@ -304,17 +313,11 @@ export class GroupPage extends React.Component {
         ];
 
     deleteGroupAttribute(keys);
-    this.setState({ attrToDelete: null, showWarning: false });
+    this.setState({ attrToDelete: null, showDeleteAttrWarning: false });
   };
 
   handleGoBack = () => {
-    const {
-      location: { pathname },
-    } = this.props;
-
-    const backPathname = pathname.substr(0, pathname.lastIndexOf('/'));
-
-    this.props.history.push(backPathname);
+    this.props.history.goBack();
   };
 
   handleSubmit = (shouldContinue = false) => {
@@ -423,8 +426,24 @@ export class GroupPage extends React.Component {
 
   setPrompt = () => this.setState({ removePrompt: false });
 
-  toggleModalWarning = () =>
-    this.setState(prevState => ({ showWarning: !prevState.showWarning }));
+  shouldRedirect = () => {
+    const { groups } = this.props;
+
+    return (
+      groups.findIndex(group => group.name === this.getFeatureDisplayName()) ===
+      -1
+    );
+  };
+
+  toggleDeleteAttrModalWarning = () =>
+    this.setState(prevState => ({
+      showDeleteAttrWarning: !prevState.showDeleteAttrWarning,
+    }));
+
+  toggleDeleteModalWarning = () =>
+    this.setState(prevState => ({
+      showDeleteWarning: !prevState.showDeleteWarning,
+    }));
 
   wait = async () => {
     this.setState({ removePrompt: true });
@@ -447,9 +466,13 @@ export class GroupPage extends React.Component {
 
   render() {
     const {
+      canOpenModal,
       clearTemporaryAttributeGroup,
       clearTemporaryAttributeRelationGroup,
+      deleteGroup,
+      deleteTemporaryGroup,
       history: { push },
+      groups,
       models,
       onChangeAttributeGroup,
       onChangeRelationGroup,
@@ -459,7 +482,26 @@ export class GroupPage extends React.Component {
       temporaryAttributeRelationGroup,
       setTemporaryAttributeRelationGroup,
     } = this.props;
-    const { showWarning, removePrompt } = this.state;
+    const {
+      showDeleteAttrWarning,
+      showDeleteWarning,
+      removePrompt,
+    } = this.state;
+
+    if (this.shouldRedirect()) {
+      if (groups[0]) {
+        const { uid, source } = groups[0];
+        const to = source ? `${uid}&source=${source}` : uid;
+
+        return <Redirect to={to} />;
+      }
+
+      const { name, source } = models[0];
+      const base = `/plugins/${pluginId}/models/${name}`;
+      const to = source ? `${base}&source=${source}` : base;
+
+      return <Redirect to={to} />;
+    }
 
     const attributes = this.getFeatureAttributes();
     const attributesNumber = this.getFeatureAttributesLength();
@@ -475,7 +517,7 @@ export class GroupPage extends React.Component {
 
     const buttonProps = {
       kind: 'secondaryHotlineAdd',
-      label: `${pluginId}.button.attributes.add`,
+      label: `${pluginId}.button.attributes.add.another`,
       onClick: () => this.openAttributesModal(),
     };
 
@@ -508,7 +550,14 @@ export class GroupPage extends React.Component {
             />
           ) : (
             <ListWrapper>
-              <ListHeader button={{ ...buttonProps }}>
+              <ListHeader
+                button={{
+                  ...buttonProps,
+                  style: {
+                    right: '15px',
+                  },
+                }}
+              >
                 <div className="list-header-title">
                   {title.map(item => {
                     return (
@@ -537,6 +586,26 @@ export class GroupPage extends React.Component {
               </div>
             </ListWrapper>
           )}
+          <div className="trash-btn-wrapper">
+            <TrashButton
+              onClick={e => {
+                e.stopPropagation();
+
+                if (canOpenModal || this.isUpdatingTempFeature()) {
+                  this.toggleDeleteModalWarning(true);
+                } else {
+                  strapi.notification.info(
+                    `${pluginId}.notification.info.work.notSaved`
+                  );
+                }
+              }}
+            >
+              <div>
+                <FormattedMessage id={`${pluginId}.button.delete.title`} />
+              </div>
+              <FormattedMessage id={`${pluginId}.button.delete.label`} />
+            </TrashButton>
+          </div>
         </ViewContainer>
 
         <AttributesModalPicker
@@ -595,8 +664,25 @@ export class GroupPage extends React.Component {
         />
 
         <PopUpWarning
-          isOpen={showWarning}
-          toggleModal={this.toggleModalWarning}
+          isOpen={showDeleteWarning}
+          toggleModal={this.toggleDeleteModalWarning}
+          content={{
+            message: `${pluginId}.popUpWarning.bodyMessage.groups.delete`,
+          }}
+          type="danger"
+          onConfirm={() => {
+            if (this.isUpdatingTempFeature()) {
+              deleteTemporaryGroup();
+            } else {
+              deleteGroup(this.getFeatureName(), this.context);
+            }
+            this.toggleDeleteModalWarning(false);
+          }}
+        />
+
+        <PopUpWarning
+          isOpen={showDeleteAttrWarning}
+          toggleModal={this.toggleDeleteAttrModalWarning}
           content={{
             message: `${pluginId}.popUpWarning.bodyMessage.attribute.delete`,
           }}
@@ -623,10 +709,13 @@ GroupPage.propTypes = {
   canOpenModal: PropTypes.bool,
   clearTemporaryAttributeGroup: PropTypes.func.isRequired,
   clearTemporaryAttributeRelationGroup: PropTypes.func.isRequired,
+  deleteGroup: PropTypes.func.isRequired,
   deleteGroupAttribute: PropTypes.func.isRequired,
+  deleteTemporaryGroup: PropTypes.func.isRequired,
   groups: PropTypes.array.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
+    goBack: PropTypes.func.isRequired,
   }),
   initialDataGroup: PropTypes.object.isRequired,
   location: PropTypes.shape({
@@ -665,7 +754,9 @@ export function mapDispatchToProps(dispatch) {
       addAttributeToTempGroup,
       clearTemporaryAttributeGroup,
       clearTemporaryAttributeRelationGroup,
+      deleteGroup,
       deleteGroupAttribute,
+      deleteTemporaryGroup,
       onChangeAttributeGroup,
       onChangeRelationGroup,
       onChangeRelationNatureGroup,

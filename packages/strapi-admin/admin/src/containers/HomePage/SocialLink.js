@@ -39,9 +39,7 @@ const SocialLink = ({ link, name }) => {
   return (
     <SocialLinkWrapper className="col-6">
       <a href={link} target="_blank" rel="noopener noreferrer">
-        <div>
-          <img src={getSrc(name)} />
-        </div>
+        <img src={getSrc(name)} />
         <span>{name}</span>
       </a>
     </SocialLinkWrapper>

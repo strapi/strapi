@@ -84,6 +84,9 @@ const StyedListRowCollapse = styled.tr`
                 top: 0;
                 height: 100%;
                 padding-right: 30px;
+                button:last-of-type {
+                  padding-right: 0;
+                }
                 i {
                   margin: auto;
                 }
@@ -132,25 +135,24 @@ const StyedListRowCollapse = styled.tr`
     }
   }
   &.clickable {
-    &.is-open,
-    &:hover {
+    &:not(.is-open):hover {
+      > td > div:first-of-type {
+        cursor: pointer;
+        background-color: ${colors.grey};
+      }
       & + tr {
-        div:not(.collapse-body) {
-          table tr {
-            &:before {
-              background-color: transparent;
-            }
-          }
+        div:not(.collapse-body) table tr:before {
+          background-color: transparent;
         }
       }
     }
-    &:hover {
+  }
+  &.is-open {
+    > td {
       div:not(.collapse-body) {
-        table tr {
+        table tr:hover {
           cursor: pointer;
           background-color: ${colors.grey};
-          &:before {
-          }
         }
       }
     }

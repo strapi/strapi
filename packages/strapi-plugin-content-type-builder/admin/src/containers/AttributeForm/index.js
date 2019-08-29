@@ -128,9 +128,29 @@ class AttributeForm extends React.Component {
     return formErrors;
   };
 
-  getFormValidations = () => {
-    const { attributeType } = this.props;
+  getForm = () => {
+    const { attributeType, modifiedData } = this.props;
     const form = supportedAttributes[attributeType];
+
+    return Object.keys(form).reduce((acc, current) => {
+      const attributeConfig = get(supportedAttributes, [
+        attributeType,
+        current,
+      ]);
+
+      const items =
+        typeof form[current] === 'function'
+          ? attributeConfig(modifiedData)
+          : attributeConfig;
+
+      acc[current] = items;
+
+      return acc;
+    }, {});
+  };
+
+  getFormValidations = () => {
+    const form = this.getForm();
 
     return Object.keys(form).reduce((acc, current) => {
       return {
@@ -294,7 +314,6 @@ class AttributeForm extends React.Component {
       attributeToEditName,
       attributeType,
       featureName,
-      featureType,
       isOpen,
     } = this.props;
     const { showForm } = this.state;
@@ -345,7 +364,7 @@ class AttributeForm extends React.Component {
           <FooterModal>
             <section>
               <ButtonModalPrimary
-                message={`${pluginId}.form.button.add.${featureType}`}
+                message={`${pluginId}.form.button.add.field`}
                 type="submit"
                 add
               />

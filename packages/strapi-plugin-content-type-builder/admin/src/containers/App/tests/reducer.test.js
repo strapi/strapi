@@ -644,7 +644,8 @@ describe('appReducer', () => {
     const expected = state
       .set('modifiedData', Map({}))
       .set('initialData', Map({}))
-      .set('models', List([]));
+      .set('models', List([]))
+      .set('shouldRefetchData', true);
 
     expect(appReducer(state, deleteModelSucceeded('product'))).toEqual(
       expected

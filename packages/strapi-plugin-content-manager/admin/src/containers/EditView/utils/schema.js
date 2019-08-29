@@ -133,7 +133,7 @@ const createYupSchemaAttribute = (type, validations) => {
   if (type === 'email') {
     schema = schema.email(errorsTrads.email);
   }
-  if (type === 'number') {
+  if (['number', 'integer', 'biginteger', 'float', 'decimal'].includes(type)) {
     schema = yup
       .number()
       .transform(cv => (isNaN(cv) ? undefined : cv))

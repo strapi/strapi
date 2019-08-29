@@ -28,7 +28,8 @@ const plugin = {
   mainComponent: Comp,
   name: pluginPkg.strapi.name,
   preventComponentRendering: false,
-  suffixUrl: '/ctm-configurations/models',
+  suffixUrl: () => '/ctm-configurations/models',
+  suffixUrlToReplaceForLeftMenuHighlight: '/models',
   trads,
 };
 

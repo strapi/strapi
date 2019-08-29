@@ -1,5 +1,7 @@
 .controlsContainer {
   display: flex;
+  box-sizing: border-box;
+  overflow-x: scroll;
   background-color: #f3f4f4;
 
   select {

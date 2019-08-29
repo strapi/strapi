@@ -331,7 +331,7 @@ class RelationForm extends React.Component {
           <FooterModal>
             <section>
               <ButtonModalPrimary
-                message={`${pluginId}.form.button.add`}
+                message={`${pluginId}.form.button.add.field`}
                 type="submit"
                 add
               />

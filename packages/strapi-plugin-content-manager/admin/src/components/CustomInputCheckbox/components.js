@@ -2,6 +2,7 @@ import styled, { css } from 'styled-components';
 
 const Label = styled.label`
   cursor: pointer;
+  position: relative;
   > input {
     display: none;
   }
@@ -9,7 +10,7 @@ const Label = styled.label`
     content: '';
     position: absolute;
     left: 15px;
-    ${props => (props.isAll ? 'top: 5px;' : 'top: 19px;')}
+    top: calc(50% - 9px);
     width: 14px;
     height: 14px;
     border: 1px solid rgba(16, 22, 34, 0.15);
@@ -23,7 +24,7 @@ const Label = styled.label`
         &:after {
           content: '\f068';
           position: absolute;
-          top: 5px;
+          top: calc(50% - 9px);
           left: 18px;
           font-size: 10px;
           font-family: 'FontAwesome';
@@ -40,7 +41,7 @@ const Label = styled.label`
         &:after {
           content: '\f00c';
           position: absolute;
-          top: 5px;
+          top: calc(50% - 9px);
           left: 17px;
           font-size: 10px;
           font-family: 'FontAwesome';
@@ -58,7 +59,7 @@ const Label = styled.label`
         &:after {
           content: '\f00c';
           position: absolute;
-          top: 0px;
+          top: calc(50% - 11px);
           left: 17px;
           font-size: 10px;
           font-family: 'FontAwesome';

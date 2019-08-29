@@ -107,3 +107,4 @@ FieldForm.propTypes = {
 };
 
 export default memo(FieldForm);
+export { FieldForm, getInputProps };

@@ -17,8 +17,8 @@ const NonRepeatableGroup = ({
 }) => {
   if (!isInitialized) {
     return (
-      <NonRepeatableWrapper isEmpty>
-        <div onClick={() => addField(name, false)} />
+      <NonRepeatableWrapper isEmpty onClick={() => addField(name, false)}>
+        <div />
         <FormattedMessage id={`${pluginId}.components.Group.empty.repeatable`}>
           {msg => <P style={{ paddingTop: 75 }}>{msg}</P>}
         </FormattedMessage>
