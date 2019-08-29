@@ -7,6 +7,7 @@ import { IcoContainer } from 'strapi-helper-plugin';
 import { useListView } from '../../contexts/ListView';
 
 import CustomInputCheckbox from '../CustomInputCheckbox';
+import MediaPreviewList from '../MediaPreviewList';
 
 import { ActionContainer, Truncate, Truncated } from './styledComponents';
 
@@ -46,18 +47,31 @@ const getDisplayedValue = (type, value, name) => {
     }
     case 'password':
       return '••••••••';
+    case 'media':
+    case 'file':
+    case 'files':
+      return value;
     default:
       return '-';
   }
 };
 
-function Row({ goTo, isBulkable, row, headers }) {
+function Row({ goTo, isBulkable, isHoverable, row, headers }) {
   const {
     entriesToDelete,
     onChangeBulk,
     onClickDelete,
     schema,
   } = useListView();
+
+  const renderMediaList = files => {
+    return (
+      <MediaPreviewList
+        files={files}
+        hoverable={isHoverable}
+      ></MediaPreviewList>
+    );
+  };
 
   return (
     <>
@@ -76,20 +90,31 @@ function Row({ goTo, isBulkable, row, headers }) {
       {headers.map(header => {
         return (
           <td key={header.name}>
-            <Truncate>
-              <Truncated>
-                {getDisplayedValue(
+            {get(schema, ['attributes', header.name, 'type']) !== 'media' ? (
+              <Truncate>
+                <Truncated>
+                  {getDisplayedValue(
+                    get(schema, ['attributes', header.name, 'type'], 'string'),
+                    row[header.name],
+                    header.name
+                  )}
+                </Truncated>
+              </Truncate>
+            ) : (
+              renderMediaList(
+                getDisplayedValue(
                   get(schema, ['attributes', header.name, 'type'], 'string'),
                   row[header.name],
                   header.name
-                )}
-              </Truncated>
-            </Truncate>
+                )
+              )
+            )}
           </td>
         );
       })}
       <ActionContainer>
         <IcoContainer
+          style={{ minWidth: 'inherit', width: '100%' }}
           icons={[
             {
               icoType: 'pencil',
