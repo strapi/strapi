@@ -11,6 +11,7 @@ Strapi gives you many possible deployment options for your project or applicatio
 - [Digital Ocean](#digital-ocean)
 - [Heroku](#heroku)
 - [Docker](#docker)
+- [Google App Engine Standard with Google Cloud SQL](#google-app-engine-with-google-cloud-sql)
 
 ---
 
@@ -1449,3 +1450,67 @@ You can also deploy using [Docker](https://hub.docker.com/r/strapi/strapi)
 :::
 
 The method below describes regular deployment using the built-in mechanisms.
+
+## Google App Engine Standard with Google Cloud SQL
+
+First setup you Google Cloud SQL MySQL database, create an user and assign it with an password. Remember these credentials as you'll be needing them later on in this guide. More information about how to create a Google Cloud SQL MySQL database is to be found here: https://cloud.google.com/sql/docs/mysql/
+
+After you've got the database in place you've to configure your Strapi project to support gcloud deployments. To do this you've to add a `/app.<staging|production>.yaml` file with at least the following content:
+
+```runtime: nodejs10
+
+env_variables:
+  NODE_ENV: <staging|production>
+  MYSQL_DATABASE: <mysql-database-name>
+  MYSQL_USERNAME: <mysql-database-username>
+  MYSQL_PASSWORD: <mysql-database-password>
+  INSTANCE_CONNECTION_NAME: "<cloud-sql-instance-connection-name>"
+beta_settings:
+  cloud_sql_instances: "<cloud-sql-instance-connection-name>"
+```
+
+Then make sure the `\<environment>\database.json` is setup correctly. Note that for Google Cloud you need to provide the `socketPath` with the `cloudsql` socket path.
+
+```{
+  "defaultConnection": "default",
+  "connections": {
+    "default": {
+      "connector": "strapi-hook-bookshelf",
+      "settings": {
+        "client": "mysql",
+        "host": "${process.env.MYSQL_HOST || '127.0.0.1'}",
+        "port": "${process.env.MYSQL_PORT || '3306'}",
+        "database": "${process.env.MYSQL_DATABASE}",
+        "username": "${process.env.MYSQL_USERNAME}",
+        "password": "${process.env.MYSQL_PASSWORD}",
+        "socketPath": "/cloudsql/${process.env.INSTANCE_CONNECTION_NAME}"
+      },
+      "options": {
+      }
+    }
+  }
+}
+```
+
+More information about connecting your App Engine to MySQL is to be found here: https://cloud.google.com/sql/docs/mysql/connect-app-engine
+
+::: warning NOTE
+If the App Engine is running in a different project as the MySQL database you should execute additional steps to add/configure a service account. For more info see the links above.
+:::
+
+After you've configured your Strapi project you can start deploying. This can be done by executing the following command.
+
+`gcloud app deploy app.staging.yaml --project <project-name> --quiet`
+
+Or you can create npm tasks to do so.
+
+```
+  ...
+  "scripts": {
+     ...
+    "gcp-deploy-staging": "gcloud app deploy app.staging.yaml --project <project-name> --quiet",
+    "gcp-deploy-production": "gcloud app deploy app.production.yaml --project <project-name> --quiet"
+    ...
+  }
+  ...
+```
