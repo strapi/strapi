@@ -1455,12 +1455,12 @@ The method below describes regular deployment using the built-in mechanisms.
 
 First setup you Google Cloud SQL MySQL database, create an user and assign it with an password. Remember these credentials as you'll be needing them later on in this guide. More information about how to create a Google Cloud SQL MySQL database is to be found here: https://cloud.google.com/sql/docs/mysql/
 
-After you've got the database in place you've to configure your Strapi project to support gcloud deployments. To do this you've to add a `/app.<staging|production>.yaml` file with at least the following content:
+After you've got the database in place you've to configure your Strapi project to support gcloud deployments. To do this you've to add a `/app.<environment>.yaml` file with at least the following content:
 
 ```runtime: nodejs10
 
 env_variables:
-  NODE_ENV: <staging|production>
+  NODE_ENV: <environment>
   MYSQL_DATABASE: <mysql-database-name>
   MYSQL_USERNAME: <mysql-database-username>
   MYSQL_PASSWORD: <mysql-database-password>
@@ -1500,7 +1500,7 @@ If the App Engine is running in a different project as the MySQL database you sh
 
 After you've configured your Strapi project you can start deploying. This can be done by executing the following command.
 
-`gcloud app deploy app.staging.yaml --project <project-name> --quiet`
+`gcloud app deploy app.<environment>.yaml --project <project-name> --quiet`
 
 Or you can create npm tasks to do so.
 
