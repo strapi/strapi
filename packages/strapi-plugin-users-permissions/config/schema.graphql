@@ -20,9 +20,21 @@ module.exports = {
       description: String
       type: String
     }
+
+    input UsersPermissionsLoginInput {
+      identifier: String
+      password: String
+      provider: String = "local"
+    }
+
+    type UsersPermissionsLoginPayload {
+      jwt: String
+      user: UsersPermissionsUser
+    }
   `,
   query: `
     me: UsersPermissionsMe
+    login(input: UsersPermissionsLoginInput): UsersPermissionsLoginPayload
   `,
   resolver: {
     UsersPermissionsMe: {
@@ -53,6 +65,20 @@ module.exports = {
           await strapi.plugins['users-permissions'].controllers.userspermissions.getRoles(context);
 
           return context.body.roles;
+        }
+      },
+      login: {
+        resolverOf: 'Auth.callback',
+        resolver: async (obj, options, {context}) => {
+          context.params = {...context.params, provider: options.input.provider};
+          context.request.body = _.toPlainObject(options.input);
+
+          await strapi.plugins['users-permissions'].controllers.auth.callback(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          return {
+            user: output.user || output, jwt: output.jwt
+          };
         }
       }
     },
