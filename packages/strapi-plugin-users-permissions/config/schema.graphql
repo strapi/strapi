@@ -36,6 +36,9 @@ module.exports = {
     me: UsersPermissionsMe
     login(input: UsersPermissionsLoginInput): UsersPermissionsLoginPayload
   `,
+  mutation: `
+    register(input: UserInput): UsersPermissionsLoginPayload
+  `,
   resolver: {
     UsersPermissionsMe: {
       id(obj) {
@@ -157,6 +160,20 @@ module.exports = {
 
           return {
             user
+          };
+        }
+      },
+      register: {
+        description: 'Register a user',
+        resolverOf: 'Auth.register',
+        resolver: async (obj, options, {context}) => {
+          context.request.body = _.toPlainObject(options.input);
+
+          await strapi.plugins['users-permissions'].controllers.auth.register(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          return {
+            user: output.user || output, jwt: output.jwt
           };
         }
       }
