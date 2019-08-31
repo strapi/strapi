@@ -23,7 +23,11 @@ module.exports = {
     // Extract custom resolver or type description.
     const { resolver: handler = {} } = _schema;
 
-    const queryName = `${action}${_.capitalize(name)}`;
+    let queryName = `${action}${_.capitalize(name)}`;
+
+    if (_.has(handler, `Mutation.${action}`)) {
+      queryName = action;
+    }
 
     // Retrieve policies.
     const policies = _.get(handler, `Mutation.${queryName}.policies`, []);
