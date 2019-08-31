@@ -138,7 +138,10 @@ module.exports = ({ model, modelKey }) => {
  * @param {*} params
  */
 const buildSearchQuery = (qb, model, params) => {
-  const query = (params._q || '').replace(/[^a-zA-Z0-9.-\s]+/g, '');
+  const query = (params._q || '').replace(
+    /[^\u0400-\u04FF\u002Ba-zA-Z0-9.-\s]+/g,
+    ''
+  );
 
   const associations = model.associations.map(x => x.alias);
 
