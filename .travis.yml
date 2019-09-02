@@ -59,7 +59,7 @@ jobs:
     - <<: *e2e_tests
       name: 'E2E Mysql'
       before_install:
-        - mysql -e 'CREATE DATABASE strapi_test;'
+        - mysql -e 'CREATE DATABASE strapi_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'
       env:
         - DB_STRING='--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=travis --dbpassword='
 
@@ -73,7 +73,6 @@ jobs:
       <<: *install_mongo
       env:
         - DB_STRING='--dbclient=mongo --dbhost=localhost --dbport=27017 --dbname=strapi_test --dbusername= --dbpassword='
-
     # - name: 'Cypress tests'
     #   <<: *install_mongo
     #   install:
