@@ -91,6 +91,9 @@ module.exports = {
         : pluralize.plural(name);
     }
 
+    // Retrieve policies.
+    const policies = _.get(handler, `Query.${queryName}.policies`, []);
+
     // Retrieve resolverOf.
     const resolverOf = _.get(handler, `Query.${queryName}.resolverOf`, '');
 
@@ -232,18 +235,8 @@ module.exports = {
       );
     }
 
-    // Retrieve policies.
-    let policies = [];
-
     if (strapi.plugins['users-permissions']) {
-      policies.push('plugins.users-permissions.permissions');
-    }
-
-    if (_.get(handler, `Query.${queryName}.policies`)) {
-      policies = _.concat(
-        policies,
-        _.get(handler, `Query.${queryName}.policies`)
-      );
+      policies.unshift('plugins.users-permissions.permissions');
     }
 
     // Populate policies.
