@@ -139,7 +139,7 @@ module.exports = ({ model, modelKey }) => {
  */
 const buildSearchQuery = (qb, model, params) => {
   const query = (params._q || '').replace(
-    /[^\u0400-\u04FF\u002Ba-zA-Z0-9.-\s]+/g,
+    /[^\u0400-\u04FFa-zA-Z0-9.-\s]+/g,
     ''
   );
 
@@ -201,7 +201,7 @@ const buildSearchQuery = (qb, model, params) => {
           : `to_tsvector('${attribute}')`
       );
 
-      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ to_tsquery(?)`, query);
+      qb.orWhereRaw(`${searchQuery.join(' || ')} @@ plainto_tsquery(?)`, query);
       break;
     }
   }

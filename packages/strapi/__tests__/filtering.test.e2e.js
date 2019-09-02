@@ -1121,7 +1121,7 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          _q: 'Product+description',
+          _q: 'Product description',
         },
       });
 
@@ -1133,7 +1133,7 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          _q: 'Опис+на+продукт',
+          _q: 'Опис на продукт',
         },
       });
 
