@@ -94,11 +94,6 @@ const Wrapper = styled.div`
         }
       }
     }
-    & + div {
-      ul {
-        margin-bottom: -4px;
-      }
-    }
   }
 `;
 

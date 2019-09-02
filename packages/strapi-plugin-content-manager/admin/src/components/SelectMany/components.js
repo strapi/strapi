@@ -5,7 +5,7 @@ const ListWrapper = styled.div`
   max-height: 116px;
 
   > ul {
-    margin: 4px -20px 0;
+    margin: 0 -20px 0;
     padding: 0 20px !important;
     list-style: none !important;
     overflow: auto;
@@ -37,14 +37,13 @@ const Li = styled.li`
   flex-wrap: nowrap;
   align-content: center;
   justify-content: space-between;
-  height: 27px;
-  background-color: transparent !important;
-  margin-bottom: 9px;
-
+  height: 18px;
+  margin-top: 9px;
+  &:last-of-type {
+    margin-bottom: 0px;
+  }
   &:active {
     .dragHandle {
-      // cursor: pointer;
-
       > span {
         background: #aed4fb;
       }
@@ -132,7 +131,7 @@ const Li = styled.li`
       display: inline-block;
       height: 100%;
       padding-right: 0px;
-      line-height: 27px;
+      line-height: 18px;
       text-align: right;
       white-space: nowrap;
       overflow: hidden;

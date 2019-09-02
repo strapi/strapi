@@ -28,6 +28,11 @@
     },
     "country": {
       "model": "country"
+    },
+    "abcnhfdnhbgfderftghnnhgtfrertghnhgres": {
+      "collection": "abc",
+      "dominant": true,
+      "via": "addresses"
     }
   }
 }

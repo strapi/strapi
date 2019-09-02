@@ -38,6 +38,13 @@ const StyledViewContainer = styled.div`
       padding-top: 3.4rem;
       display: flex;
       justify-content: flex-end;
+      > div {
+        height: 30px;
+        line-height: 30px;
+        > div {
+          padding: 0 15px;
+        }
+      }
     }
   }
 `;
