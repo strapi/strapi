@@ -3,17 +3,10 @@
 const _ = require('lodash');
 const { isSortable } = require('./attributes');
 
-const getDefaultMainField = schema => {
-  if (schema.modelType == 'group') {
-    // find first group attribute that is sortable
-    return (
-      Object.keys(schema.attributes).find(key => isSortable(schema, key)) ||
-      'id'
-    );
-  }
-
-  return 'id';
-};
+const getDefaultMainField = schema =>
+  Object.keys(schema.attributes).find(
+    key => schema.attributes[key].type === 'string'
+  ) || 'id';
 
 /**
  * Retunrs a configuration default settings
