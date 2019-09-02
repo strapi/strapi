@@ -1,45 +1,40 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
-// Public node modules.
 const _ = require('lodash');
+const compose = require('koa-compose');
 
 module.exports = strapi => {
   const routerChecker = require('./routerChecker')(strapi);
 
-  return (value, plugin, router) => cb => {
+  return (value, plugin, router) => {
     if (_.isEmpty(_.get(value, 'method')) || _.isEmpty(_.get(value, 'path'))) {
       return;
     }
 
     const endpoint = `${value.method} ${value.path}`;
 
-    try {
-      const { policies, action, validate } = routerChecker(value, endpoint, plugin);
+    const { policies, action, validate } = routerChecker(
+      value,
+      endpoint,
+      plugin
+    );
 
-      if (_.isUndefined(action) || !_.isFunction(action)) {
-        return strapi.log.warn(`Ignored attempt to bind route '${endpoint}' to unknown controller/action.`);
-      }
-
-      router.route(
-        _.omitBy(
-          {
-            method: value.method,
-            path: value.path,
-            handler: _.remove(
-              [strapi.koaMiddlewares.compose(policies), action],
-              o => _.isFunction(o)
-            ),
-            validate
-          },
-          _.isEmpty
-        )
+    if (_.isUndefined(action) || !_.isFunction(action)) {
+      return strapi.log.warn(
+        `Ignored attempt to bind route '${endpoint}' to unknown controller/action.`
       );
-    } catch (err) {
-      cb(err);
     }
+
+    router.route(
+      _.omitBy(
+        {
+          method: value.method,
+          path: value.path,
+          handler: _.remove([compose(policies), action], o => _.isFunction(o)),
+          validate,
+        },
+        _.isEmpty
+      )
+    );
   };
 };

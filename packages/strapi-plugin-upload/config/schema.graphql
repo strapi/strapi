@@ -1,9 +1,43 @@
+const _ = require('lodash');
+
 module.exports = {
+  mutation: `
+    upload(refId: ID, ref: String, source: String, file: Upload!): UploadFile!
+  `,
   resolver: {
     Query: {
       file: false,
       files: {
         resolver: 'Upload.find'
+      }
+    },
+    Mutation: {
+      createFile: false,
+      updateFile: false,
+      deleteFile: false,
+      upload: {
+        description: 'Upload one or many files',
+        resolver: async (obj, { file, ...fields}, { context }) => {
+          // Construct context to fit with koa-parser guidelines
+          // and avoid to update our business logic too much.
+          context.request.body = {
+            files: {
+              files: await file
+            },
+            fields
+          };
+
+          // Call controller action.
+          await strapi.plugins.upload.controllers.upload.upload(context);
+
+          // Handle case when the user is uploading only one file.
+          if (_.isArray(context.body) && context.body.length === 1) {
+            return context.body[0];
+          }
+
+          // Return response.
+          return context.body;
+        }
       }
     }
   }

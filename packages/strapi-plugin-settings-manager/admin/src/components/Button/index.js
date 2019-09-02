@@ -14,30 +14,54 @@ import styles from './styles.scss';
 class Button extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   render() {
-    const label = this.props.handlei18n ? <FormattedMessage id={`settings-manager.${this.props.label}`} /> : this.props.label;
+    const label = this.props.handlei18n ? (
+      <FormattedMessage id={`settings-manager.${this.props.label}`} />
+    ) : (
+      this.props.label
+    );
     const addShape = this.props.addShape ? <i className="fa fa-plus" /> : '';
 
     const buttonProps = Object.assign({}, this.props);
-    const propsToDelete = ['addShape', 'buttonBackground', 'buttonSize', 'handlei18n', 'label', 'loader'];
+    const propsToDelete = [
+      'addShape',
+      'buttonBackground',
+      'buttonSize',
+      'handlei18n',
+      'label',
+      'loader',
+    ];
 
-    propsToDelete.map((value) => delete buttonProps[value]);
+    propsToDelete.map(value => delete buttonProps[value]);
 
     if (this.props.loader) {
       return (
         <button
           type="button"
-          className={cn(styles.loader, styles.primary)}
+          className={cn(styles.stmloader, styles.stmprimary)}
           disabled
         >
-          <div className={styles.saving}>
-            <p></p><p></p><p></p>
+          <div className={styles.stmsaving}>
+            <p />
+            <p />
+            <p />
           </div>
         </button>
       );
     }
+    const stmClassNameSize = `stm${this.props.buttonSize}`;
+    const stmClassName2 = `stm${this.props.buttonBackground}`;
+
     return (
-      <button className={`${styles[this.props.buttonSize]} ${styles[this.props.buttonBackground]} ${styles.button}`} {...buttonProps}>
-        {addShape}{label}
+      <button
+        className={cn(
+          styles[stmClassNameSize],
+          styles[stmClassName2],
+          styles.stmbutton,
+        )}
+        {...buttonProps}
+      >
+        {addShape}
+        {label}
       </button>
     );
   }

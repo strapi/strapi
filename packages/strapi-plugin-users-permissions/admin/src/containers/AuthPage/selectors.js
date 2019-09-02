@@ -1,9 +1,10 @@
 import { createSelector } from 'reselect';
+import pluginId from '../../pluginId';
 
 /**
  * Direct selector to the authPage state domain
  */
-const selectAuthPageDomain = () => (state) => state.get('authPage');
+const selectAuthPageDomain = () => (state) => state.get(`${pluginId}_authPage`);
 
 /**
  * Default selector used by AuthPage

@@ -4,6 +4,9 @@
  * Export shared utilities
  */
 
+const convertRestQueryParams = require('./convertRestQueryParams');
+const buildQuery = require('./buildQuery');
+
 module.exports = {
   cli: require('./cli'),
   commander: require('./commander'),
@@ -14,5 +17,8 @@ module.exports = {
   logger: require('./logger'),
   models: require('./models'),
   policy: require('./policy'),
-  regex: require('./regex')
+  regex: require('./regex'),
+  templateConfiguration: require('./templateConfiguration'),
+  convertRestQueryParams,
+  buildQuery,
 };

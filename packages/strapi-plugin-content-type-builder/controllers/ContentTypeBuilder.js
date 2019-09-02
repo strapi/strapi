@@ -1,18 +1,31 @@
 'use strict';
 
-const fs = require('fs');
 const _ = require('lodash');
 
 const Service = require('../services/ContentTypeBuilder');
+const { escapeNewlines } = require('../utils/helpers.js');
 
 module.exports = {
+  /**
+   * Returns the list of models and there details
+   */
   getModels: async ctx => {
-    ctx.send({ models: Service.getModels() });
+    const models = Service.getModels();
+    const arrayOfPromises = [];
+    models.forEach(currentModel => {
+      const model = Service.getModel(currentModel.name, currentModel.source);
+
+      arrayOfPromises.push(model);
+    });
+    const allModels = await Promise.all(arrayOfPromises);
+
+    ctx.send({ allModels, models });
   },
 
   getModel: async ctx => {
-    const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
     const { source } = ctx.request.query;
+
+    const Service = strapi.plugins['content-type-builder'].services.contenttypebuilder;
 
     let { model } = ctx.params;
 
@@ -24,7 +37,9 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.unknown' }] }]);
     }
 
-    ctx.send({ model: Service.getModel(model, source) });
+    const modelLayout = await Service.getModel(model, source);
+
+    ctx.send({ model: modelLayout });
   },
 
   getConnections: async ctx => {
@@ -32,54 +47,58 @@ module.exports = {
   },
 
   createModel: async ctx => {
-    const { name, description, connection, collectionName, attributes = [], plugin } = ctx.request.body;
+    const { name, description, connection, collectionName, attributes = [] } = ctx.request.body;
 
     if (!name) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.name.missing' }] }]);
     if (!_.includes(Service.getConnections(), connection)) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.connection.unknow' }] }]);
     if (strapi.models[name]) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.exist' }] }]);
     if (!_.isNaN(parseFloat(name[0]))) return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.name' }] }]);
 
-    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes, name, plugin);
+    const [formatedAttributes, attributesErrors] = Service.formatAttributes(attributes, name);
 
     if (!_.isEmpty(attributesErrors)) {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
+    const _description = escapeNewlines(description, '\\n');
+
     strapi.reload.isWatching = false;
 
-    await Service.appearance(formatedAttributes, name, 'content-manager');
+    await Service.appearance(formatedAttributes, name);
 
-    await Service.generateAPI(name, description, connection, collectionName, []);
-
-    const modelFilePath = Service.getModelPath(name, plugin);
+    const apiName = _.toLower(name);
+    await Service.generateAPI(apiName, _description, connection, collectionName, []);
 
     try {
-      const modelJSON = _.cloneDeep(require(modelFilePath));
+      const modelJSON = Service.readModel(name, { api: apiName });
 
       modelJSON.attributes = formatedAttributes;
 
-      const clearRelationsErrors = Service.clearRelations(name, plugin);
-
-      if (!_.isEmpty(clearRelationsErrors)) {
-        return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
-      }
-
-      const createRelationsErrors = Service.createRelations(name, attributes, plugin);
+      const createRelationsErrors = Service.createRelations(name, attributes);
 
       if (!_.isEmpty(createRelationsErrors)) {
         return ctx.badRequest(null, [{ messages: createRelationsErrors }]);
       }
 
       try {
-        fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
-
+        Service.writeModel(name, modelJSON, { api: apiName });
+        
+        if (_.isEmpty(strapi.api)) {
+          strapi.emit('didCreateFirstContentType');
+        } else {
+          strapi.emit('didCreateContentType');
+        }
+        
         ctx.send({ ok: true });
-
-        strapi.reload();
+        
+        setImmediate(() => strapi.reload());
       } catch (e) {
+        strapi.log.error(e);
+        strapi.emit('didNotCreateContentType', e);
         return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
       }
     } catch (e) {
+      strapi.log.error(e);
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.read' }] }]);
     }
   },
@@ -101,24 +120,28 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: attributesErrors }]);
     }
 
-    let modelFilePath = Service.getModelPath(model, plugin);
+    const _description = escapeNewlines(description);
+
+    // let modelFilePath = Service.getModelPath(model, plugin);
 
     strapi.reload.isWatching = false;
 
     if (name !== model) {
-      await Service.generateAPI(name, description, connection, collectionName, []);
+      await Service.generateAPI(name, _description, connection, collectionName, []);
     }
 
-    await Service.appearance(formatedAttributes, name, plugin ? plugin : 'content-manager');
+    await Service.appearance(formatedAttributes, name, plugin);
 
     try {
-      const modelJSON = _.cloneDeep(require(modelFilePath));
+      // const modelJSON = _.cloneDeep(require(modelFilePath));
+      const modelData = plugin ? strapi.plugins[plugin].models[model.toLowerCase()] : strapi.models[model.toLowerCase()];
+      const modelJSON = _.cloneDeep(_.pick(modelData, ['connection', 'collectionName', 'info', 'options', 'attributes']));
 
       modelJSON.connection = connection;
       modelJSON.collectionName = collectionName;
       modelJSON.info = {
         name,
-        description
+        description: _description
       };
       modelJSON.attributes = formatedAttributes;
 
@@ -145,19 +168,25 @@ module.exports = {
           return ctx.badRequest(null, [{ messages: removeModelErrors }]);
         }
 
-        modelFilePath = Service.getModelPath(name, plugin);
+        // modelFilePath = Service.getModelPath(name, plugin);
       }
 
       try {
-        fs.writeFileSync(modelFilePath, JSON.stringify(modelJSON, null, 2), 'utf8');
+        if (plugin) {
+          await Service.writeModel(name, modelJSON, { plugin });
+        } else {
+          await Service.writeModel(name, modelJSON, { api: name !== model ? name.toLowerCase() : modelData.apiName});
+        }
 
         ctx.send({ ok: true });
 
         strapi.reload();
       } catch (e) {
+        strapi.log.error(e);
         return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.write' }] }]);
       }
     } catch (e) {
+      strapi.log.error(e);
       return ctx.badRequest(null, [{ messages: [{ id: 'request.error.model.read' }] }]);
     }
   },
@@ -169,7 +198,7 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    const clearRelationsErrors = Service.clearRelations(model);
+    const clearRelationsErrors = Service.clearRelations(model, undefined, true);
 
     if (!_.isEmpty(clearRelationsErrors)) {
       return ctx.badRequest(null, [{ messages: clearRelationsErrors }]);
@@ -181,17 +210,23 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: removeModelErrors }]);
     }
 
+    const pluginStore = strapi.store({
+      environment: '',
+      type: 'plugin',
+      name: 'content-manager'
+    });
+
+    const schema = await pluginStore.get({ key: 'schema' });
+
+    delete schema.layout[model];
+
+    await pluginStore.set({ key: 'schema', value: schema });
+
     ctx.send({ ok: true });
 
     strapi.reload();
   },
-
-  autoReload: async ctx => {
-    ctx.send({
-      autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false),
-    });
-  },
-
+  
   checkTableExists: async ctx => {
     // Get connection
     const { connection } = ctx.params;
@@ -207,7 +242,7 @@ module.exports = {
       return ctx.badRequest(null, [{ messages: [{ id: 'Connection doesn\'t exist' }] }]);
     }
 
-    if (connector === 'strapi-bookshelf') {
+    if (connector === 'strapi-hook-bookshelf') {
       try {
         const tableExists = await strapi.connections[connection].schema.hasTable(model);
 

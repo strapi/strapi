@@ -5,7 +5,8 @@
  */
 
 // Node.js core.
-const path = require('path');
+const { resolve } = require('path');
+const favicon = require('koa-favicon');
 
 /**
  * Favicon hook
@@ -17,17 +18,18 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
-      strapi.app.use(
-        strapi.koaMiddlewares.favicon(
-          path.resolve(strapi.config.appPath, strapi.config.middleware.settings.favicon.path),
-          {
-            maxAge: strapi.config.middleware.settings.favicon.maxAge
-          }
-        )
-      );
+    initialize() {
+      const { dir } = strapi;
+      const {
+        maxAge,
+        path: faviconPath,
+      } = strapi.config.middleware.settings.favicon;
 
-      cb();
-    }
+      strapi.app.use(
+        favicon(resolve(dir, faviconPath), {
+          maxAge,
+        })
+      );
+    },
   };
 };

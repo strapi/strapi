@@ -12,21 +12,24 @@ import { createStructuredSelector } from 'reselect';
 import PropTypes from 'prop-types';
 import { isEmpty, get } from 'lodash';
 import { Switch, Route } from 'react-router-dom';
+import pluginId from '../../pluginId';
 
-import injectSaga from 'utils/injectSaga';
-import getQueryParameters from 'utils/getQueryParameters';
+import { getQueryParameters, LoadingIndicatorPage } from 'strapi-helper-plugin';
+import EmptyAttributesView from '../../components/EmptyAttributesView';
 
-import Home from 'containers/Home';
-import EditPage from 'containers/EditPage';
-import ListPage from 'containers/ListPage';
-import LoadingIndicatorPage from 'components/LoadingIndicatorPage';
-import EmptyAttributesView from 'components/EmptyAttributesView';
+import EditPage from '../EditPage';
+import ListPage from '../ListPage';
+import SettingsPage from '../SettingsPage';
+import SettingPage from '../SettingPage';
 
+import { loadModels } from './actions';
 import {
-  loadModels,
-} from './actions';
-import { makeSelectLoading, makeSelectModels, makeSelectModelEntries } from './selectors';
+  makeSelectLoading,
+  makeSelectModelEntries,
+  makeSelectSchema,
+} from './selectors';
 
+import reducer from './reducer';
 import saga from './sagas';
 
 class App extends React.Component {
@@ -38,31 +41,68 @@ class App extends React.Component {
     if (this.props.loading) {
       return <LoadingIndicatorPage />;
     }
-
+    const { schema } = this.props;
     const currentModelName = this.props.location.pathname.split('/')[3];
     const source = getQueryParameters(this.props.location.search, 'source');
+    const attrPath =
+      source === 'content-manager'
+        ? ['models', currentModelName, 'editDisplay', 'availableFields']
+        : [
+          'models',
+          'plugins',
+          source,
+          currentModelName,
+          'editDisplay',
+          'availableFields',
+        ];
+    const relationsPath =
+      source === 'content-manager'
+        ? ['models', currentModelName, 'editDisplay', 'relations']
+        : [
+          'models',
+          'plugins',
+          source,
+          currentModelName,
+          'editDisplay',
+          'relations',
+        ];
 
-    if (currentModelName && source && isEmpty(get(this.props.models.plugins, [source, 'models', currentModelName, 'attributes']))) {
-      if (currentModelName && isEmpty(get(this.props.models.models, [currentModelName, 'attributes']))) {
-        return <EmptyAttributesView currentModelName={currentModelName} history={this.props.history} modelEntries={this.props.modelEntries} />;
-      }
+    if (
+      currentModelName &&
+      source &&
+      isEmpty(get(schema, attrPath)) &&
+      isEmpty(get(schema, relationsPath))
+    ) {
+      return (
+        <EmptyAttributesView
+          currentModelName={currentModelName}
+          history={this.props.history}
+          modelEntries={this.props.modelEntries}
+        />
+      );
     }
 
     return (
       <div className="content-manager">
         <Switch>
-          <Route path="/plugins/content-manager/:slug/:id" component={EditPage} />
+          <Route
+            path="/plugins/content-manager/ctm-configurations/:viewType/:slug/:source?/:endPoint?"
+            component={SettingPage}
+          />
+          <Route
+            path="/plugins/content-manager/ctm-configurations"
+            component={SettingsPage}
+          />
+          <Route
+            path="/plugins/content-manager/:slug/:id"
+            component={EditPage}
+          />
           <Route path="/plugins/content-manager/:slug" component={ListPage} />
-          <Route path="/plugins/content-manager" component={Home} />
         </Switch>
       </div>
     );
   }
 }
-
-App.contextTypes = {
-  router: PropTypes.object.isRequired,
-};
 
 App.propTypes = {
   history: PropTypes.object.isRequired,
@@ -70,10 +110,7 @@ App.propTypes = {
   loadModels: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   modelEntries: PropTypes.number.isRequired,
-  models: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.object,
-  ]).isRequired,
+  schema: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
 };
 
 export function mapDispatchToProps(dispatch) {
@@ -88,13 +125,18 @@ export function mapDispatchToProps(dispatch) {
 const mapStateToProps = createStructuredSelector({
   loading: makeSelectLoading(),
   modelEntries: makeSelectModelEntries(),
-  models: makeSelectModels(),
+  schema: makeSelectSchema(),
 });
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withSaga = injectSaga({ key: 'global', saga });
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
+const withReducer = strapi.injectReducer({ key: 'global', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'global', saga, pluginId });
 
 export default compose(
+  withReducer,
   withSaga,
   withConnect,
 )(App);

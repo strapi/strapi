@@ -14,6 +14,13 @@
   color: #333740;
   transition: all 0.15s ease;
   overflow: hidden;
+  z-index: 10;
+
+  // The last notification must appear from
+  // the background of the previous one.
+  &:last-child {
+    z-index: 1;
+  }
 }
 
 .notification:hover {

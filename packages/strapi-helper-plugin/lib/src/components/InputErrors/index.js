@@ -23,6 +23,7 @@ function InputErrors(props) {
               styles.errorContainer,
               !isEmpty(props.className) && props.className,
             )}
+            id={`errorOf${props.name}`}
             key={key}
             style={divStyle}
           >
@@ -37,12 +38,14 @@ function InputErrors(props) {
 InputErrors.defaultProps = {
   className: '',
   errors: [],
+  name: '',
   style: {},
 };
 
 InputErrors.propTypes = {
   className: PropTypes.string,
   errors: PropTypes.array,
+  name: PropTypes.string,
   style: PropTypes.object,
 };
 

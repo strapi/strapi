@@ -1,0 +1,191 @@
+.relationWrapper {
+  width: 100%;
+  display: flex;
+  padding: 2.7rem 15px;
+  .relationNatureWrapper {
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    padding: 0 25px;
+    margin-bottom: 5px;
+    > img {
+      z-index: 2;
+    }
+    &:before {
+      content: "";
+      position: absolute;
+      top: 20px;
+      left: 0;
+      height: 2px;
+      width: 100%;
+      background-color: #1c5de7;
+      z-index: 0;
+    }
+  }
+}
+
+.relationBox {
+  display: inline-block;
+  height: 13.8rem;
+  width: 20rem;
+  background-color: #fcfcfc;
+  box-shadow: 0 1px 2px #cad2df;
+  z-index: 9999;
+  border-radius: 2px;
+  .relationBoxHeader {
+    height: 3.6rem;
+    width: 100%;
+    padding-top: .1rem;
+    background-color: rgba(16,22,34,.04);
+    line-height: 3.6rem;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    text-transform: capitalize;
+    > p {
+      padding: 0 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      > i {
+        margin-right: 8px;
+      }
+    }
+  }
+  .relationBoxBody {
+    padding-top: 10px;
+  }
+}
+
+.dropDown {
+  > div {
+    width: 100%;
+    > button {
+      position: relative;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      background-color: transparent;
+      border: none;
+      line-height: 3.6rem;
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-transform: capitalize;
+      color: black;
+      &:focus, &:active, &:hover, &:visited {
+        background-color: transparent!important;
+        box-shadow: none;
+        color: black;
+      }
+      &:after {
+        position: absolute;
+        top: calc(50% - 0.1rem);
+        right: 10px;
+      }
+
+      > p {
+        margin-top: -1px;
+        margin-bottom: 0;
+        padding: 0 20px 0 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        > i {
+          margin-right: 8px;
+        }
+      }
+    }
+    > div {
+      max-height: 180px;
+      max-width: 100%;
+      margin-top: -4px;
+      padding: 0;
+      border-radius: 0;
+      overflow: scroll;
+    }
+  }
+}
+
+
+.dropdownItem {
+  height: 3.6rem;
+  border-bottom: 1px solid #f6f6f6;
+  font-size: 1.3rem;
+  font-family: Lato;
+  font-weight: 400;
+  font-family: Lato;
+  text-transform: capitalize;
+  -webkit-font-smoothing: antialiased;
+  cursor: pointer;
+
+  &:focus, &:active {
+    outline: 0;
+    background-color: rgb(255, 255, 255) !important;
+    color: rgba(50, 55, 64, 0.75);
+  }
+
+  > p {
+    color: rgba(50, 55, 64, 0.75);
+    line-height: 3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    i {
+      margin-right: 10px;
+    }
+  }
+}
+
+.relationNaturePicker { /* stylelint-disable */
+  display: flex;
+  width: 29.5rem;
+  position: relative;
+  padding-top: 4.5rem;
+  padding-left: 25px;
+  padding-right: 25px;
+  justify-content: space-around;
+
+  img:hover{
+    cursor: pointer;
+  }
+}
+
+.relationNaturePicker::before {
+  content: '';
+  position: absolute;
+  top: 9.2rem;
+  height: 2px;
+  width: 100%;
+  background-color: #1C5DE7;
+  z-index: 0;
+}
+
+.infoContainer {
+  margin-bottom: 10px;
+  padding-top: 1px;
+  padding-right: 10px;
+  padding-left: 10px;
+  word-wrap: break-word;
+  line-height: 1.8rem !important;
+  text-align: center;
+  font-size: 1.3rem;
+  text-align: center;
+  margin: 0;
+  line-height: 22px;
+  > span:nth-child(1), span:nth-child(3) {
+    text-transform: capitalize;
+  }
+  > span:nth-child(2) {
+    color: #1C5DE7;
+  }
+}
+
+
+.divider {
+  width: 100%;
+  margin-top: 1.3rem;
+  margin-bottom: 2.3rem;
+  border-bottom: 1px solid rgba(14, 22, 34, 0.04);
+}

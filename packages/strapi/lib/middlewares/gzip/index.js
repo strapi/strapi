@@ -3,6 +3,7 @@
 /**
  * Gzip hook
  */
+const compress = require('koa-compress');
 
 module.exports = strapi => {
   return {
@@ -10,10 +11,8 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
-      strapi.app.use(strapi.koaMiddlewares.compress());
-
-      cb();
-    }
+    initialize() {
+      strapi.app.use(compress());
+    },
   };
 };

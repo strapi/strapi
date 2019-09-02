@@ -15,7 +15,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize() {
       this.delegator = delegate(strapi.app.context, 'response');
       this.createResponses();
 
@@ -25,14 +25,27 @@ module.exports = strapi => {
           // App logic.
           await next();
         } catch (error) {
-          // Log error.
-          console.error(error);
+          // emit error if configured
+          if (
+            _.get(strapi, 'config.currentEnvironment.server.emitErrors', false)
+          ) {
+            strapi.app.emit('error', error, ctx);
+          }
 
-          // Wrap error into a Boom's response.
-          ctx.status = error.status || 500;
-          ctx.body = _.get(ctx.body, 'isBoom')
-            ? ctx.body || error && error.message
-            : Boom.wrap(error, ctx.status, ctx.body || error.message);
+          // Log error.
+          strapi.log.error(error);
+
+          // if the error is a boom error (e.g throw strapi.errors.badRequest)
+          if (error.isBoom) {
+            ctx.status = error.output.statusCode;
+            ctx.body = error.output.payload;
+          } else {
+            // Wrap error into a Boom's response.
+            ctx.status = error.status || 500;
+            ctx.body = _.get(ctx.body, 'isBoom')
+              ? ctx.body || (error && error.message)
+              : Boom.wrap(error, ctx.status);
+          }
         }
 
         if (ctx.response.headers.location) {
@@ -40,7 +53,7 @@ module.exports = strapi => {
         }
 
         // Empty body is considered as `notFound` response.
-        if (!ctx.body) {
+        if (!ctx.body && ctx.body !== 0) {
           ctx.notFound();
         }
 
@@ -52,12 +65,10 @@ module.exports = strapi => {
         ctx.status = ctx.body.isBoom ? ctx.body.output.statusCode : ctx.status;
         ctx.body = ctx.body.isBoom ? ctx.body.output.payload : ctx.body;
       });
-
-      cb();
     },
 
     // Custom function to avoid ctx.body repeat
-    createResponses: function() {
+    createResponses() {
       Object.keys(Boom).forEach(key => {
         strapi.app.response[key] = function(...rest) {
           const error = Boom[key](...rest) || {};
@@ -79,9 +90,7 @@ module.exports = strapi => {
         this.body = data;
       };
 
-      this.delegator
-        .method('send')
-        .method('created');
-    }
+      this.delegator.method('send').method('created');
+    },
   };
 };

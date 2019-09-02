@@ -1,32 +1,48 @@
 /**
-*
-* Logout
-*
-*/
+ *
+ * Logout
+ *
+ */
 
+/* eslint-disable */
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
+import { withRouter } from 'react-router-dom';
 import { get } from 'lodash';
-import PropTypes from 'prop-types';
-import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
-import auth from 'utils/auth';
+import {
+  ButtonDropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+} from 'reactstrap';
+import { auth } from 'strapi-helper-plugin';
 
 import styles from './styles.scss';
 
-class Logout extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class Logout extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   state = { isOpen: false };
 
   handleGoTo = () => {
     const id = get(auth.getUserInfo(), 'id') || get(auth.getUserInfo(), '_id');
-    this.context.router.history.push({
-      pathname: `/plugins/content-manager/user/${id}`,
-      search: '?redirectUrl=/plugins/content-manager/user/?page=0&limit=0&sort=id&source=users-permissions',
+    this.props.history.push({
+      pathname: `/plugins/content-manager/administrator/${id}`,
+      search:
+        '?redirectUrl=/plugins/content-manager/administrator/?page=0&limit=0&sort=id&source=admin',
     });
-  }
+  };
+
+  handleGoToAdministrator = () => {
+    this.props.history.push({
+      pathname: '/plugins/content-manager/administrator',
+      search: '?source=admin',
+    });
+  };
 
   handleLogout = () => {
     auth.clearAppStorage();
-    this.context.router.history.push('/plugins/users-permissions/auth/login');
-  }
+    this.props.history.push('/plugins/users-permissions/auth/login');
+  };
 
   toggle = () => this.setState({ isOpen: !this.state.isOpen });
 
@@ -40,10 +56,16 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
           </DropdownToggle>
           <DropdownMenu className={styles.dropDownContent}>
             <DropdownItem onClick={this.handleGoTo} className={styles.item}>
-              Profile
+              <FormattedMessage id="app.components.Logout.profile" />
+            </DropdownItem>
+            <DropdownItem
+              onClick={this.handleGoToAdministrator}
+              className={styles.item}
+            >
+              <FormattedMessage id="app.components.Logout.admin" />
             </DropdownItem>
             <DropdownItem onClick={this.handleLogout}>
-              Logout
+              <FormattedMessage id="app.components.Logout.logout" />
               <i className="fa fa-sign-out" />
             </DropdownItem>
           </DropdownMenu>
@@ -53,9 +75,4 @@ class Logout extends React.Component { // eslint-disable-line react/prefer-state
   }
 }
 
-
-Logout.contextTypes = {
-  router: PropTypes.object,
-};
-
-export default Logout;
+export default withRouter(Logout);

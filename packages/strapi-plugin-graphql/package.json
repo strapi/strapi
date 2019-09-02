@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.0.0-alpha.12.6",
+  "version": "3.0.0-beta.15",
   "description": "This is the description of the plugin.",
   "strapi": {
     "name": "graphql",
@@ -8,28 +8,27 @@
     "description": "Description of graphql plugin."
   },
   "scripts": {
-    "analyze:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf stats.json",
-    "preanalyze": "npm run analyze:clean",
-    "analyze": "node ./node_modules/strapi-helper-plugin/lib/internals/scripts/analyze.js",
-    "prebuild": "npm run build:clean && npm run test",
-    "build:dev": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node ./node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=production node node_modules/strapi-helper-plugin/node_modules/.bin/webpack --config node_modules/strapi-helper-plugin/lib/internals/webpack/webpack.prod.babel.js --color -p --progress",
-    "build:clean": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/rimraf admin/build",
-    "start": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/cross-env NODE_ENV=development node ./node_modules/strapi-helper-plugin/lib/server",
-    "generate": "node ./node_modules/plop/plop.js --plopfile node_modules/strapi-helper-plugin/lib/internals/generators/index.js",
-    "prettier": "node ./node_modules/strapi-helper-plugin/node_modules/.bin/prettier --single-quote --trailing-comma es5 --write \"{admin,__{tests,mocks}__}/**/*.js\"",
-    "test": "echo \"Error: no test specified\""
+    "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "apollo-server-koa": "^1.3.3",
-    "glob": "^7.1.2",
-    "graphql": "^0.13.2",
+    "apollo-server-koa": "^2.5.0",
+    "dataloader": "^1.4.0",
+    "glob": "^7.1.4",
+    "graphql": "^14.3.0",
     "graphql-depth-limit": "^1.1.0",
-    "graphql-playground-middleware-koa": "^1.6.1",
-    "graphql-tools": "^2.23.1",
-    "graphql-type-json": "^0.2.0",
+    "graphql-playground-middleware-koa": "^1.6.12",
+    "graphql-tools": "^4.0.4",
+    "graphql-type-datetime": "^0.2.4",
+    "graphql-type-json": "^0.3.0",
+    "graphql-type-long": "^0.1.1",
+    "koa-compose": "^4.0.0",
     "pluralize": "^7.0.0",
-    "strapi-utils": "3.0.0-alpha.12.6"
+    "strapi-utils": "3.0.0-beta.15"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "koa": "^2.1.0",
+    "rimraf": "^2.6.3"
   },
   "author": {
     "name": "A Strapi developer",
@@ -44,8 +43,9 @@
     }
   ],
   "engines": {
-    "node": ">= 9.0.0",
-    "npm": ">= 5.3.0"
+    "node": ">=10.0.0",
+    "npm": ">=6.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
 }

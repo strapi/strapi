@@ -8,10 +8,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isArray, isObject } from 'lodash';
+import cn from 'classnames';
 
-import ImgPreview from 'components/ImgPreview';
-import InputFileDetails from 'components/InputFileDetails';
+import ImgPreview from '../ImgPreview';
+import InputFileDetails from '../InputFileDetails';
 
 import styles from './styles.scss';
 
@@ -38,6 +39,10 @@ class InputFile extends React.Component {
   handleChange = ({ target }) => this.addFilesToProps(target.files);
 
   addFilesToProps = (files) => {
+    if (files.length === 0) {
+      return;
+    }
+
     const initAcc = this.props.multiple ? cloneDeep(this.props.value) : {};
     const value = Object.keys(files).reduce((acc, current) => {
 
@@ -55,7 +60,8 @@ class InputFile extends React.Component {
       type: 'file',
       value,
     };
-
+    
+    this.inputFile.value = '';
     this.setState({ isUploading: !this.state.isUploading });
     this.props.onChange({ target });
   }
@@ -71,11 +77,12 @@ class InputFile extends React.Component {
     if (this.props.multiple) {
       value.splice(this.state.position, 1);
     }
+
     // Update the parent's props
     const target = {
       name: this.props.name,
       type: 'file',
-      value,
+      value: Object.keys(value).length === 0 ? '' : value,
     };
 
     this.props.onChange({ target });
@@ -94,6 +101,19 @@ class InputFile extends React.Component {
     this.setState({ position: newPosition });
   }
 
+  isVisibleDetails = () => {
+    const {value} = this.props;
+
+    if (!value ||
+      (isArray(value) && value.length === 0) || 
+      (isObject(value) && Object.keys(value).length === 0)
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
   render() {
     const {
       multiple,
@@ -104,39 +124,43 @@ class InputFile extends React.Component {
 
     return (
       <div>
-        <ImgPreview
-          didDeleteFile={this.state.didDeleteFile}
-          files={value}
-          isUploading={this.state.isUploading}
-          multiple={multiple}
-          name={name}
-          onChange={onChange}
-          onBrowseClick={this.handleClick}
-          onDrop={this.onDrop}
-          position={this.state.position}
-          updateFilePosition={this.updateFilePosition}
-        />
-        <label style={{ width: '100%'}}>
-          <input
-            className={styles.inputFile}
+        <div className={cn("form-control", styles.inputFileControlForm, this.props.error && 'is-invalid')}>
+          <ImgPreview
+            didDeleteFile={this.state.didDeleteFile}
+            files={value}
+            isUploading={this.state.isUploading}
             multiple={multiple}
             name={name}
-            onChange={this.handleChange}
-            type="file"
-            ref={(input) => this.inputFile = input}
+            onChange={onChange}
+            onBrowseClick={this.handleClick}
+            onDrop={this.onDrop}
+            position={this.state.position}
+            updateFilePosition={this.updateFilePosition}
           />
+          <label style={{ marginBottom: 0, width: '100%' }}>
+            <input
+              className={styles.inputFile}
+              multiple={multiple}
+              name={name}
+              onChange={this.handleChange}
+              type="file"
+              ref={(input) => this.inputFile = input}
+            />
 
-          <div className={styles.buttonContainer}>
-            <i className="fa fa-plus" />
-            <FormattedMessage id="app.components.InputFile.newFile" />
-          </div>
-        </label>
-        <InputFileDetails
-          file={value[this.state.position] || value[0] || value}
-          multiple={multiple}
-          number={value.length}
-          onFileDelete={this.handleFileDelete}
-        />
+            <div className={styles.buttonContainer}>
+              <i className="fa fa-plus" />
+              <FormattedMessage id="app.components.InputFile.newFile" />
+            </div>
+          </label>
+        </div>
+        {this.isVisibleDetails() && (
+          <InputFileDetails
+            file={value[this.state.position] || value[0] || value}
+            multiple={multiple}
+            number={value.length}
+            onFileDelete={this.handleFileDelete}
+          />
+        )}
       </div>
     );
   }
@@ -146,9 +170,12 @@ InputFile.defaultProps = {
   multiple: false,
   setLabel: () => {},
   value: [],
+  error: false,
+
 };
 
 InputFile.propTypes = {
+  error: PropTypes.bool,
   multiple: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,

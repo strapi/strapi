@@ -1,0 +1,59 @@
+{
+  "name": "product",
+  "description": "",
+  "connection": "default",
+  "attributes": [
+    {
+      "name": "name",
+      "params": {
+        "required": true,
+        "type": "string"
+      }
+    },
+    {
+      "name": "description",
+      "params": {
+        "type": "text",
+        "appearance": {
+          "WYSIWYG": false
+        }
+      }
+    },
+    {
+      "name": "price",
+      "params": {
+        "type": "integer",
+        "default": 0
+      }
+    },
+    {
+      "name": "bool",
+      "params": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    {
+      "name": "bool1",
+      "params": {
+        "type": "boolean",
+        "default": true
+      }
+    },
+    {
+      "name": "email",
+      "params": {
+        "type": "email"
+      }
+    },
+    {
+      "name": "tags",
+      "params": {
+        "dominant": true,
+        "key": "products",
+        "nature": "manyToMany",
+        "target": "tag"
+      }
+    }
+  ]
+}

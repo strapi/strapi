@@ -1,0 +1,32 @@
+.footerModal {
+  padding: .8rem 1rem 2.8rem 1rem;
+  border: none;
+  > button {
+    height: 3rem;
+    margin-right: 1.8rem;
+    position: relative;
+    border-radius: 0.3rem;
+    text-transform: capitalize;
+    font-family: Lato;
+    cursor: pointer;
+    &:focus {
+      outline: 0;
+    }
+    > i {
+      margin-right: 1.3rem;
+    }
+    &:hover {
+     &::after {
+       position: absolute;
+       width: 100%;
+       height: 100%;
+       top: 0;
+       left: 0;
+       border-radius: 0.3rem;
+       content: '';
+       opacity: 0.1;
+       background: #FFFFFF;
+     }
+    }
+  }
+}

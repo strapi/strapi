@@ -10,7 +10,7 @@ const path = require('path');
 // Public node modules.
 const _ = require('lodash');
 const consolidate = require('consolidate');
-const views = require('koa-views');
+const koaViews = require('koa-views');
 
 /**
  * Public assets hook
@@ -22,12 +22,10 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
-      if (
-        _.isPlainObject(strapi.config.middleware.settings.views) &&
-        !_.isEmpty(strapi.config.middleware.settings.views)
-      ) {
-        const opts = _.clone(strapi.config.middleware.settings.views);
+    initialize() {
+      const { views } = strapi.config.middleware.settings;
+      if (_.isPlainObject(views) && !_.isEmpty(views)) {
+        const opts = _.clone(views);
 
         if (opts.hasOwnProperty('default')) {
           opts.extension = opts.default;
@@ -60,14 +58,12 @@ module.exports = strapi => {
         });
 
         strapi.app.use(
-          views(
+          koaViews(
             path.resolve(strapi.config.appPath, strapi.config.paths.views),
             opts
           )
         );
       }
-
-      cb();
-    }
+    },
   };
 };

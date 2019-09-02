@@ -1,8 +1,8 @@
 /**
-*
-* PluginLeftMenuLink
-*
-*/
+ *
+ * PluginLeftMenuLink
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -11,7 +11,8 @@ import { FormattedMessage } from 'react-intl';
 import { get, isEmpty, findIndex } from 'lodash';
 import styles from './styles.scss';
 
-class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class PluginLeftMenuLink extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
     this.state = {
@@ -20,17 +21,27 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
   }
 
   componentDidMount() {
-    const environmentIndex = this.props.envParams ? findIndex(this.props.environments, ['name', this.props.envParams]) : 0;
+    const environmentIndex = this.props.envParams
+      ? findIndex(this.props.environments, ['name', this.props.envParams])
+      : 0;
     this.setState({ environmentIndex });
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.state.environmentIndex === -1 && nextProps.envParams) {
-      this.setState({ environmentIndex: findIndex(nextProps.environments, ['name', nextProps.envParams]) });
+      this.setState({
+        environmentIndex: findIndex(nextProps.environments, [
+          'name',
+          nextProps.envParams,
+        ]),
+      });
     }
 
     if (nextProps.envParams && nextProps.envParams !== this.props.envParams) {
-      const environmentIndex = findIndex(nextProps.environments, ['name', nextProps.envParams]);
+      const environmentIndex = findIndex(nextProps.environments, [
+        'name',
+        nextProps.envParams,
+      ]);
       this.setState({ environmentIndex });
     }
   }
@@ -39,18 +50,27 @@ class PluginLeftMenuLink extends React.Component { // eslint-disable-line react/
     let url;
 
     if (!isEmpty(this.props.environments)) {
-      url = this.props.environmentsRequired ?
-        `${this.props.link.slug}/${get(this.props.environments, [this.state.environmentIndex, 'name'])}`
+      url = this.props.environmentsRequired
+        ? `${this.props.link.slug}/${get(this.props.environments, [
+          this.state.environmentIndex,
+          'name',
+        ])}`
         : `${this.props.link.slug}`;
     }
 
     return (
-      <li className={styles.pluginLeftMenuLink}>
-        <NavLink className={styles.link} to={`/plugins/settings-manager/${url}`} activeClassName={styles.linkActive}>
+      <li className={styles.stmpluginLeftMenuLink}>
+        <NavLink
+          className={styles.stmlink}
+          to={`/plugins/settings-manager/${url}`}
+          activeClassName={styles.stmlinkActive}
+        >
           <div>
             <i className={`fa fa-${this.props.link.icon}`} />
           </div>
-          <span><FormattedMessage id={`settings-manager.${this.props.link.name}`} /></span>
+          <span>
+            <FormattedMessage id={`settings-manager.${this.props.link.name}`} />
+          </span>
         </NavLink>
       </li>
     );

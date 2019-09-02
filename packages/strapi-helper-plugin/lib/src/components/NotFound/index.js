@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import Button from 'components/Button';
+import Button from '../Button';
 
 import styles from './styles.scss';
 

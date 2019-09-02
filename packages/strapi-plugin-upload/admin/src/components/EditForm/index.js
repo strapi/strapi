@@ -10,23 +10,30 @@ import PropTypes from 'prop-types';
 // You can find these components in either
 // ./node_modules/strapi-helper-plugin/lib/src
 // or strapi/packages/strapi-helper-plugin/lib/src
-import Input from 'components/InputsIndex';
+import { InputsIndex as Input } from 'strapi-helper-plugin';
 
 import styles from './styles.scss';
 
-class EditForm extends React.Component  {
-  getProviderForm = () => get(this.props.settings, ['providers', this.props.selectedProviderIndex, 'auth'], {});
+class EditForm extends React.Component {
+  getProviderForm = () =>
+    get(
+      this.props.settings,
+      ['providers', this.props.selectedProviderIndex, 'auth'],
+      {},
+    );
 
-  generateSelectOptions = () => (
-    Object.keys(get(this.props.settings, 'providers', {})).reduce((acc, current) => {
-      const option = {
-        id: get(this.props.settings, ['providers', current, 'name']),
-        value: get(this.props.settings, ['providers', current, 'provider']),
-      };
-      acc.push(option);
-      return acc;
-    }, [])
-  )
+  generateSelectOptions = () =>
+    Object.keys(get(this.props.settings, 'providers', {})).reduce(
+      (acc, current) => {
+        const option = {
+          id: get(this.props.settings, ['providers', current, 'name']),
+          value: get(this.props.settings, ['providers', current, 'provider']),
+        };
+        acc.push(option);
+        return acc;
+      },
+      [],
+    );
 
   render() {
     return (
@@ -34,7 +41,9 @@ class EditForm extends React.Component  {
         <div className="row">
           <Input
             customBootstrapClass="col-md-6"
-            inputDescription={{ id: 'upload.EditForm.Input.select.inputDescription' }}
+            inputDescription={{
+              id: 'upload.EditForm.Input.select.inputDescription',
+            }}
             inputClassName={styles.inputStyle}
             label={{ id: 'upload.EditForm.Input.select.label' }}
             name="provider"
@@ -50,7 +59,10 @@ class EditForm extends React.Component  {
               {map(this.getProviderForm(), (value, key) => (
                 <Input
                   didCheckErrors={this.props.didCheckErrors}
-                  errors={get(this.props.formErrors, [findIndex(this.props.formErrors, ['name', key]), 'errors'])}
+                  errors={get(this.props.formErrors, [
+                    findIndex(this.props.formErrors, ['name', key]),
+                    'errors',
+                  ])}
                   key={key}
                   label={{ id: value.label }}
                   name={key}
@@ -72,10 +84,11 @@ class EditForm extends React.Component  {
             name="sizeLimit"
             onChange={this.props.onChange}
             type="number"
+            step={0.01}
             value={get(this.props.modifiedData, 'sizeLimit', 1) / 1000}
           />
         </div>
-        <div className={styles.separator} style={{ marginTop: '-4px'}} />
+        <div className={styles.separator} style={{ marginTop: '-4px' }} />
         <div className="row">
           <Input
             label={{ id: 'upload.EditForm.Input.toggle.label' }}

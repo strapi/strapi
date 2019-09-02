@@ -4,22 +4,20 @@
 
 .notification-enter {
   opacity: 0.01;
-  right: -45rem;
+  top: -60px;
 }
 
 .notification-enter.notification-enter-active {
   opacity: 1;
   transition: all 400ms ease-in;
-  right: 0;
+  top: 0;
 }
 
 .notification-exit {
   opacity: 1;
-  right: 0;
 }
 
 .notification-exit.notification-exit-active {
   opacity: 0.01;
   transition: all 400ms ease-in;
-  right: -45rem;
 }

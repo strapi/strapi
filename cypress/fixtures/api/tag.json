@@ -1,0 +1,14 @@
+{
+  "name": "tag",
+  "description": "",
+  "connection": "default",
+  "attributes": [
+    {
+      "name": "name",
+      "params": {
+        "required": true,
+        "type": "string"
+      }
+    }
+  ]
+}

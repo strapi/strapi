@@ -2,9 +2,13 @@
 @import '../../styles/variables/variables';
 
 .notificationsContainer { /* stylelint-disable */
-  position: absolute;
+  position: fixed;
   top: 72px;
-  right: 15px;
+  left: 240px;
+  right: 0;
   z-index: 1000;
   list-style: none;
+  width: 300px;
+  margin: 0 auto;
+  overflow-y: hidden;
 }

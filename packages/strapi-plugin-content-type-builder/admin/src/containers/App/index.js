@@ -1,104 +1,185 @@
 /**
  *
- * This component is the skeleton around the actual pages, and should only
- * contain code that should be seen on all pages. (e.g. navigation bar)
+ * App
  *
  */
 
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-// import { withRouter } from 'react-router';
-import { createStructuredSelector } from 'reselect';
-import { Switch, Route, withRouter } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import { pluginId } from 'app';
+import { Switch, Route } from 'react-router-dom';
 
-import HomePage from 'containers/HomePage';
-import ModelPage from 'containers/ModelPage';
-import NotFoundPage from 'containers/NotFoundPage';
-import formSaga from 'containers/Form/sagas';
-import formReducer from 'containers/Form/reducer';
+import { NotFound } from 'strapi-helper-plugin';
 
-// Other containers actions
-import { makeSelectShouldRefetchContentType } from 'containers/Form/selectors';
+import pluginId from '../../pluginId';
 
-// Utils
-import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
-import { storeData } from '../../utils/storeData';
+import HomePage from '../HomePage';
+import ModelPage from '../ModelPage';
+
+import Loader from './Loader';
+
+import {
+  addAttributeRelation,
+  cancelNewContentType,
+  clearTemporaryAttributeRelation,
+  createTempContentType,
+  deleteModel,
+  deleteTemporaryModel,
+  getData,
+  onChangeExistingContentTypeMainInfos,
+  onChangeNewContentTypeMainInfos,
+  onChangeRelation,
+  onChangeRelationNature,
+  onChangeRelationTarget,
+  resetExistingContentTypeMainInfos,
+  resetNewContentTypeMainInfos,
+  resetProps,
+  saveEditedAttribute,
+  saveEditedAttributeRelation,
+  setTemporaryAttribute,
+  setTemporaryAttributeRelation,
+  updateTempContentType,
+} from './actions';
+
+import reducer from './reducer';
+import saga from './saga';
+import makeSelectApp from './selectors';
 
 import styles from './styles.scss';
-import { modelsFetch } from './actions';
-import saga from './sagas';
 
-/* eslint-disable consistent-return */
-class App extends React.Component {
+const ROUTES = [
+  {
+    component: HomePage,
+    to: `/plugins/${pluginId}`,
+  },
+  {
+    component: ModelPage,
+    to: `/plugins/${pluginId}/models/:modelName`,
+  },
+];
+
+export class App extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   componentDidMount() {
-    this.props.modelsFetch();
+    this.props.getData();
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.shouldRefetchContentType !== this.props.shouldRefetchContentType) {
-      this.props.modelsFetch();
+  /* istanbul ignore next */
+  componentDidUpdate(prevProps) {
+    if (prevProps.shouldRefetchData !== this.props.shouldRefetchData) {
+      this.props.getData();
     }
   }
 
-
   componentWillUnmount() {
-    // Empty the app localStorage
-    storeData.clearAppStorage();
+    this.props.resetProps();
   }
 
-  render() {
+  canOpenModal = () => {
+    const { models } = this.props;
+
+    return models.every(model => model.isTemporary === false);
+  };
+
+  renderRoute = route => {
+    const { component: Component, to } = route;
+
+    /* istanbul ignore next */
     return (
-      <div className={`${pluginId} ${styles.app}`}>
+      <Route
+        key={to}
+        exact
+        path={to}
+        render={props => (
+          <Component
+            {...this.props}
+            {...props}
+            canOpenModal={this.canOpenModal()}
+          />
+        )}
+      />
+    );
+  };
+
+  render() {
+    const { isLoading } = this.props;
+
+    if (isLoading) {
+      return <Loader />;
+    }
+
+    return (
+      <div className={styles.app}>
         <Switch>
-          <Route exact path="/plugins/content-type-builder" component={HomePage} />
-          <Route exact path="/plugins/content-type-builder/models/:modelName" component={ModelPage} />
-          <Route path="" component={NotFoundPage} />
+          {ROUTES.map(this.renderRoute)}
+          <Route component={NotFound} />
         </Switch>
       </div>
     );
   }
 }
 
-App.contextTypes = {
-  plugins: PropTypes.object,
-  router: PropTypes.object.isRequired,
-  updatePlugin: PropTypes.func,
+App.defaultProps = {
+  shouldRefetchData: false,
 };
 
 App.propTypes = {
-  modelsFetch: PropTypes.func.isRequired,
-  shouldRefetchContentType: PropTypes.bool,
+  addAttributeRelation: PropTypes.func.isRequired,
+  cancelNewContentType: PropTypes.func.isRequired,
+  deleteModel: PropTypes.func.isRequired,
+  getData: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  models: PropTypes.array.isRequired,
+  onChangeExistingContentTypeMainInfos: PropTypes.func.isRequired,
+  onChangeNewContentTypeMainInfos: PropTypes.func.isRequired,
+  resetProps: PropTypes.func.isRequired,
+  saveEditedAttribute: PropTypes.func.isRequired,
+  saveEditedAttributeRelation: PropTypes.func.isRequired,
+  setTemporaryAttribute: PropTypes.func.isRequired,
+  setTemporaryAttributeRelation: PropTypes.func.isRequired,
+  shouldRefetchData: PropTypes.bool,
 };
 
-App.defaultProps = {
-  shouldRefetchContentType: false,
-};
+const mapStateToProps = makeSelectApp();
 
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      modelsFetch,
+      addAttributeRelation,
+      cancelNewContentType,
+      clearTemporaryAttributeRelation,
+      createTempContentType,
+      deleteModel,
+      deleteTemporaryModel,
+      getData,
+      onChangeExistingContentTypeMainInfos,
+      onChangeNewContentTypeMainInfos,
+      onChangeRelation,
+      onChangeRelationNature,
+      onChangeRelationTarget,
+      resetExistingContentTypeMainInfos,
+      resetNewContentTypeMainInfos,
+      resetProps,
+      saveEditedAttribute,
+      saveEditedAttributeRelation,
+      setTemporaryAttribute,
+      setTemporaryAttributeRelation,
+      updateTempContentType,
     },
-    dispatch
+    dispatch,
   );
 }
 
-const mapStateToProps = createStructuredSelector({
-  shouldRefetchContentType: makeSelectShouldRefetchContentType(),
-});
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
+const withReducer = strapi.injectReducer({ key: 'app', reducer, pluginId });
+const withSaga = strapi.injectSaga({ key: 'app', saga, pluginId });
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withSaga = injectSaga({ key: 'global', saga });
-const withFormReducer = injectReducer({ key: 'form', reducer: formReducer });
-const withFormSaga = injectSaga({ key: 'form', saga: formSaga });
 export default compose(
-  withFormReducer,
-  withFormSaga,
+  withReducer,
   withSaga,
-  withRouter,
   withConnect,
 )(App);

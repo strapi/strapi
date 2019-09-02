@@ -1,23 +1,28 @@
 /**
-*
-* EditFormSectionSubNested
-*
-*/
+ *
+ * EditFormSectionSubNested
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
-import WithFormSection from 'components/WithFormSection';
+import WithFormSection from '../WithFormSection';
 
 /* eslint-disable react/require-default-props  */
-class EditFormSectionSubNested extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class EditFormSectionSubNested extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
     return (
-      <div className={`${this.props.styles.padded} ${this.props.styles.subNestedFormContainer}`}>
+      <div
+        className={`${this.props.styles.stmpadded} ${
+          this.props.styles.stmsubNestedFormContainer
+        }`}
+      >
         <div className="row">
-          {map(this.props.section, (item, key) => (
-            this.props.renderInput(item, key)
-          ))}
+          {map(this.props.section, (item, key) =>
+            this.props.renderInput(item, key),
+          )}
         </div>
       </div>
     );
@@ -26,10 +31,7 @@ class EditFormSectionSubNested extends React.Component { // eslint-disable-line 
 
 EditFormSectionSubNested.propTypes = {
   renderInput: PropTypes.func,
-  section: PropTypes.oneOfType([
-    PropTypes.array,
-    PropTypes.object,
-  ]),
+  section: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
   styles: PropTypes.object,
 };
 

@@ -1,0 +1,11 @@
+{
+  "ConfigPage.description": "Configurar el plugin de correo electrónico",
+  "ConfigPage.title": "Correo electrónico - Configuración",
+  "EditForm.Input.number.label": "Tamaño máximo permitido (en MB)",
+  "EditForm.Input.select.inputDescription": "Los correos electrónicos se pueden enviar con el proveedor predeterminado (Sendmail) o con un proveedor externo.",
+  "EditForm.Input.select.label": "Proveedores",
+  "EditForm.Input.toggle.label": "Habilitar envío de correo electrónico",
+  "notification.config.success": "Se ha actualizado la configuración",
+  "plugin.description.long": "Enviar correos electrónicos.",
+  "plugin.description.short": "Enviar correos electrónicos."
+}

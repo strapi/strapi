@@ -1,4 +1,12 @@
 {
-  "plugin.description.short": "Wysyłaj E-maile",
-  "plugin.description.long": "Wysyłaj E-maile"
+  "ConfigPage.description": "Skonfiguruj plugin email",
+  "ConfigPage.title": "Email - Ustawienia",
+  "EditForm.Input.number.label": "Maksymalny dozwolony rozmiar (w MB)",
+  "EditForm.Input.select.inputDescription": "E-maile mogą być wysyłane z wykorzystaniem domyślnego (Sendmail) albo zewnętrznego dostawcy",
+  "EditForm.Input.select.label": "Dostawcy",
+  "EditForm.Input.toggle.label": "Włącz wysyłkę e-maili",
+  "notification.config.success": "Ustawienia zostały zaktualizowane",
+  "plugin.description.long": "Wysyłaj E-maile",
+  "plugin.description.short": "Wysyłaj E-maile"
 }
+

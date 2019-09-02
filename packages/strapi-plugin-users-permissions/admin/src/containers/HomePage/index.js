@@ -12,16 +12,15 @@ import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 import { clone, get, includes, isEqual, isEmpty } from 'lodash';
 
-// Design
-import EditForm from 'components/EditForm';
-import HeaderNav from 'components/HeaderNav';
-import List from 'components/List';
-import PluginHeader from 'components/PluginHeader';
-import PopUpForm from 'components/PopUpForm';
+import { HeaderNav, PluginHeader } from 'strapi-helper-plugin';
+// import PluginHeader from 'components/PluginHeader';
 
-// Utils
-import injectReducer from 'utils/injectReducer';
-import injectSaga from 'utils/injectSaga';
+import pluginId from '../../pluginId';
+
+// Design
+import EditForm from '../../components/EditForm';
+import List from '../../components/List';
+import PopUpForm from '../../components/PopUpForm';
 
 // Selectors
 import selectHomePage from './selectors';
@@ -52,12 +51,12 @@ const keyBoardShortCuts = [18, 78];
 export class HomePage extends React.Component {
   state = { mapKey: {}, showModalEdit: false };
 
-  getChildContext = () => (
-    {
-      setDataToEdit: this.props.setDataToEdit,
-      unsetDataToEdit: this.props.unsetDataToEdit,
-    }
-  );
+  getChildContext = () => ({
+    pathname: this.props.location.pathname,
+    push: this.props.history.push,
+    setDataToEdit: this.props.setDataToEdit,
+    unsetDataToEdit: this.props.unsetDataToEdit,
+  });
 
   componentDidMount() {
     this.props.fetchData(this.props.match.params.settingType);
@@ -73,7 +72,9 @@ export class HomePage extends React.Component {
 
   componentWillUpdate(nextProps) {
     const allowedPaths = ['roles', 'providers', 'email-templates', 'advanced'];
-    const shouldRedirect = allowedPaths.filter(el => el === nextProps.match.params.settingType).length === 0;
+    const shouldRedirect =
+      allowedPaths.filter(el => el === nextProps.match.params.settingType)
+        .length === 0;
 
     if (shouldRedirect) {
       this.props.history.push('/404');
@@ -85,7 +86,9 @@ export class HomePage extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.match.params.settingType !== this.props.match.params.settingType) {
+    if (
+      prevProps.match.params.settingType !== this.props.match.params.settingType
+    ) {
       this.props.fetchData(this.props.match.params.settingType);
     }
   }
@@ -98,7 +101,7 @@ export class HomePage extends React.Component {
 
   getEndPoint = () => this.props.match.params.settingType;
 
-  handleKeyBoardShortCut = (e) => {
+  handleKeyBoardShortCut = e => {
     if (includes(keyBoardShortCuts, e.keyCode)) {
       const mapKey = clone(this.state.mapKey);
       mapKey[e.keyCode] = e.type === 'keydown';
@@ -110,23 +113,37 @@ export class HomePage extends React.Component {
         this.handleButtonClick();
       }
     }
-
-  }
+  };
 
   handleButtonClick = () => {
     // TODO change open modal URL
     if (this.props.match.params.settingType === 'roles') {
+      this.context.emitEvent('willCreateRole');
       this.props.history.push(`${this.props.location.pathname}/create`);
     } else if (this.props.match.params.settingType === 'providers') {
-      this.props.history.push(`${this.props.location.pathname}#add::${this.props.match.params.settingType}`);
+      this.props.history.push(
+        `${this.props.location.pathname}#add::${
+          this.props.match.params.settingType
+        }`,
+      );
     }
-  }
+  };
 
-  handleSubmit = (e) => {
+  handleSubmit = e => {
     e.preventDefault();
-    const modifiedObject = get(this.props.modifiedData, [this.getEndPoint(), this.props.dataToEdit]);
-    const initObject = get(this.props.initialData, [this.getEndPoint(), this.props.dataToEdit]);
-    const formErrors = checkFormValidity(this.props.match.params.settingType, modifiedObject, this.props.dataToEdit);
+    const modifiedObject = get(this.props.modifiedData, [
+      this.getEndPoint(),
+      this.props.dataToEdit,
+    ]);
+    const initObject = get(this.props.initialData, [
+      this.getEndPoint(),
+      this.props.dataToEdit,
+    ]);
+    const formErrors = checkFormValidity(
+      this.props.match.params.settingType,
+      modifiedObject,
+      this.props.dataToEdit,
+    );
 
     if (isEqual(initObject, modifiedObject)) {
       return this.props.unsetDataToEdit();
@@ -134,11 +151,30 @@ export class HomePage extends React.Component {
 
     if (isEmpty(formErrors)) {
       this.setState({ showModalEdit: false });
-      this.props.submit(this.props.match.params.settingType);
+      this.props.submit(this.props.match.params.settingType, this.context);
     } else {
       this.props.setFormErrors(formErrors);
     }
-  }
+  };
+
+  headerNavLinks = [
+    {
+      name: 'users-permissions.HeaderNav.link.roles',
+      to: '/plugins/users-permissions/roles',
+    },
+    {
+      name: 'users-permissions.HeaderNav.link.providers',
+      to: '/plugins/users-permissions/providers',
+    },
+    {
+      name: 'users-permissions.HeaderNav.link.emailTemplates',
+      to: '/plugins/users-permissions/email-templates',
+    },
+    {
+      name: 'users-permissions.HeaderNav.link.advancedSettings',
+      to: '/plugins/users-permissions/advanced',
+    },
+  ];
 
   pluginHeaderActions = [
     {
@@ -158,17 +194,43 @@ export class HomePage extends React.Component {
   showLoaders = () => {
     const { data, isLoading, modifiedData } = this.props;
     const isAdvanded = this.getEndPoint() === 'advanced';
-    
-    return isLoading && get(data, this.getEndPoint()) === undefined && !isAdvanded || isLoading && isAdvanded &&  get(modifiedData, this.getEndPoint()) === undefined;
-  }
+
+    return (
+      (isLoading &&
+        get(data, this.getEndPoint()) === undefined &&
+        !isAdvanded) ||
+      (isLoading &&
+        isAdvanded &&
+        get(modifiedData, this.getEndPoint()) === undefined)
+    );
+  };
 
   render() {
-    const { data, didCheckErrors, formErrors, modifiedData, initialData, match, dataToEdit } = this.props;
-    const headerActions = match.params.settingType === 'advanced' && !isEqual(modifiedData, initialData) ?
-      this.pluginHeaderActions : [];
-    const noButtonList = match.params.settingType === 'email-templates' || match.params.settingType === 'providers';
-    const component = match.params.settingType === 'advanced' ?
-      <EditForm onChange={this.props.onChange} values={get(modifiedData, this.getEndPoint(), {})} showLoaders={this.showLoaders()} /> : (
+    const {
+      data,
+      didCheckErrors,
+      formErrors,
+      modifiedData,
+      initialData,
+      match,
+      dataToEdit,
+    } = this.props;
+    const headerActions =
+      match.params.settingType === 'advanced' &&
+      !isEqual(modifiedData, initialData)
+        ? this.pluginHeaderActions
+        : [];
+    const noButtonList =
+      match.params.settingType === 'email-templates' ||
+      match.params.settingType === 'providers';
+    const component =
+      match.params.settingType === 'advanced' ? (
+        <EditForm
+          onChange={this.props.onChange}
+          values={get(modifiedData, this.getEndPoint(), {})}
+          showLoaders={this.showLoaders()}
+        />
+      ) : (
         <List
           data={get(data, this.getEndPoint(), [])}
           deleteData={this.props.deleteData}
@@ -179,17 +241,19 @@ export class HomePage extends React.Component {
           values={get(modifiedData, this.getEndPoint(), {})}
         />
       );
-    
+
     return (
       <div>
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={e => e.preventDefault()}>
           <div className={cn('container-fluid', styles.containerFluid)}>
             <PluginHeader
               title={{ id: 'users-permissions.HomePage.header.title' }}
-              description={{ id: 'users-permissions.HomePage.header.description' }}
+              description={{
+                id: 'users-permissions.HomePage.header.description',
+              }}
               actions={headerActions}
             />
-            <HeaderNav />
+            <HeaderNav links={this.headerNavLinks} />
             {component}
           </div>
           <PopUpForm
@@ -201,7 +265,7 @@ export class HomePage extends React.Component {
             onChange={this.props.onChange}
             onSubmit={this.handleSubmit}
             settingType={match.params.settingType}
-            values={get(modifiedData,[this.getEndPoint(), dataToEdit], {})}
+            values={get(modifiedData, [this.getEndPoint(), dataToEdit], {})}
           />
         </form>
       </div>
@@ -210,8 +274,14 @@ export class HomePage extends React.Component {
 }
 
 HomePage.childContextTypes = {
+  pathname: PropTypes.string,
+  push: PropTypes.func,
   setDataToEdit: PropTypes.func,
   unsetDataToEdit: PropTypes.func,
+};
+
+HomePage.contextTypes = {
+  emitEvent: PropTypes.func,
 };
 
 HomePage.defaultProps = {};
@@ -239,7 +309,6 @@ HomePage.propTypes = {
   unsetDataToEdit: PropTypes.func.isRequired,
 };
 
-
 function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
@@ -259,10 +328,16 @@ function mapDispatchToProps(dispatch) {
 
 const mapStateToProps = selectHomePage();
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-const withReducer = injectReducer({ key: 'homePage', reducer });
-const withSaga = injectSaga({ key: 'homePage', saga });
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
+const withReducer = strapi.injectReducer({
+  key: 'homePage',
+  reducer,
+  pluginId,
+});
+const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
 
 export default compose(
   withReducer,

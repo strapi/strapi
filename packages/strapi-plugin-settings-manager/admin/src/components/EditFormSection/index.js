@@ -1,31 +1,50 @@
 /**
-*
-* EditFormSection
-*
-*/
+ *
+ * EditFormSection
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map, isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 // HOC Form
-import WithFormSection from 'components/WithFormSection';
+import WithFormSection from '../WithFormSection';
 // nested form
-import EditFormSectionNested from 'components/EditFormSectionNested';
+import EditFormSectionNested from '../EditFormSectionNested';
 
 /* eslint-disable react/require-default-props  */
-class EditFormSection extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class EditFormSection extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
-    const sectionName = isEmpty(this.props.section.name) ? '' : <FormattedMessage id={`settings-manager.${this.props.section.name}`} />;
-    const spacer = !isEmpty(sectionName) ? <div className={this.props.styles.spacer} /> : '';
-    const sectionNameSpacer = !sectionName ? <div style={{height: '.2rem'}} /> : '';
-    const sectionDescription = this.props.section.description ? <div className={this.props.styles.sectionDescription}>{this.props.section.description}</div> : '';
+    const sectionName = isEmpty(this.props.section.name) ? (
+      ''
+    ) : (
+      <FormattedMessage id={`settings-manager.${this.props.section.name}`} />
+    );
+    const spacer = !isEmpty(sectionName) ? (
+      <div className={this.props.styles.stmspacer} />
+    ) : (
+      ''
+    );
+    const sectionNameSpacer = !sectionName ? (
+      <div style={{ height: '.2rem' }} />
+    ) : (
+      ''
+    );
+    const sectionDescription = this.props.section.description ? (
+      <div className={this.props.styles.stmsectionDescription}>
+        {this.props.section.description}
+      </div>
+    ) : (
+      ''
+    );
     return (
-      <div className={this.props.styles.editFormSection}>
+      <div className={this.props.styles.stmeditFormSection}>
         <div className="container-fluid">
           <div className="row">
             <div className="col-md-12">
-              <span className={this.props.styles.sectionHeader}>
+              <span className={this.props.styles.stmsectionHeader}>
                 {sectionName}
               </span>
               {sectionDescription}
@@ -33,10 +52,9 @@ class EditFormSection extends React.Component { // eslint-disable-line react/pre
               {sectionNameSpacer}
             </div>
             {map(this.props.section.items, (item, key) => {
-
               if (this.props.showNestedForm) {
                 return (
-                  <div key={key} style={{width: '100%'}}>
+                  <div key={key} style={{ width: '100%' }}>
                     {this.props.renderInput(item, key)}
                     <EditFormSectionNested
                       section={item.items}

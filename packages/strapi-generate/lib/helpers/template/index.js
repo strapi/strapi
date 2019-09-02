@@ -48,7 +48,9 @@ module.exports = function (options, cb) {
     }
 
     try {
-      const compiled = _.template(contents);
+      const compiled = _.template(contents, {
+        interpolate: /<%=([\s\S]+?)%>/g
+      });
       contents = compiled(options);
 
       // With Lodash templates, HTML entities are escaped by default.

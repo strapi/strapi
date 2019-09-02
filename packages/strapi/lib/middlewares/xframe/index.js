@@ -1,8 +1,7 @@
 'use strict';
 
-/**
- * Module dependencies
- */
+const convert = require('koa-convert');
+const { xframe } = require('koa-lusca');
 
 /**
  * CRON hook
@@ -14,31 +13,22 @@ module.exports = strapi => {
      * Initialize the hook
      */
 
-    initialize: function(cb) {
+    initialize() {
       const defaults = require('./defaults.json');
-      
-      strapi.app.use(
-        async (ctx, next) => {
-          if (ctx.request.admin) {
-            return await strapi.koaMiddlewares.convert(
-              strapi.koaMiddlewares.lusca.xframe({
-                enabled: defaults.xframe.enabled,
-                value: defaults.xframe.value
-              })
-            )(ctx, next);
-          } else if (strapi.config.currentEnvironment.security.xframe.enabled) {
-            return await strapi.koaMiddlewares.convert(
-              strapi.koaMiddlewares.lusca.xframe({
-                value: strapi.config.middleware.settings.xframe.value
-              })
-            )(ctx, next);
-          }
 
-          await next();
+      strapi.app.use(async (ctx, next) => {
+        if (ctx.request.admin) {
+          return await convert(xframe(defaults.xframe))(ctx, next);
         }
-      );
 
-      cb();
-    }
+        if (strapi.config.currentEnvironment.security.xframe.enabled) {
+          return await convert(
+            xframe(strapi.config.middleware.settings.xframe.value)
+          )(ctx, next);
+        }
+
+        await next();
+      });
+    },
   };
 };

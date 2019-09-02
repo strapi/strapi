@@ -1,0 +1,95 @@
+.attrWrapper {
+  position: relative;
+  height: 30px;
+  width: 100%;
+  margin-bottom: 6px;
+  display: flex;
+  padding-left: 10px;
+  justify-content: space-between;
+  background: #FAFAFB;
+  line-height: 28px;
+  color: #333740;
+  border: 1px solid #E3E9F3;
+  border-radius: 2px;
+  &:hover{
+    cursor: move;
+  }
+  > img {
+    align-self: flex-start;
+    vertical-align: top;
+    max-width: 8px;
+    margin-right: 10px;
+    margin-top: 11px;
+  }
+}
+
+.customHeight {
+  height: 84px !important;
+}
+
+.editIcon {
+  width: 30px;
+  background: #E6F0FB;
+  height: 84px;
+  cursor: pointer;
+  text-align: center;
+  float: right;
+
+  &:after {
+    display: inline-block;
+    content: '';
+    width: 10px;
+    height: 10px;
+    margin: auto;
+    margin-top: -3px;
+    background-image: url('../../assets/images/icon-edit-blue.svg');
+  }
+}
+
+.editingVariableAttr {
+  background: #E6F0FB!important;
+  border: 1px solid #AED4FB!important;
+}
+
+.info {
+  position: absolute;
+  top: 0;
+  right: 40px;
+  color: #B4B6BA;
+  font-style: italic;
+}
+
+.infoLabel {
+  position: absolute;
+  top: 0;
+  right: 40px;
+  color: #858B9A;
+  font-weight: 400;
+}
+
+.infoLabelHover{
+  color: #007EFF; 
+}
+
+.truncated {
+  overflow: hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  width: calc(100% - 50px);
+  display: block;
+}
+
+.shrink {
+  transform: scale(0.5);
+}
+
+.carret {
+  width: 2px;
+  border-radius: 2px;
+  background: #007EFF;
+}
+
+.editing {
+  color: #007EFF;
+  font-weight: 500;
+}

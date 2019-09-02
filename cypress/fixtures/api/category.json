@@ -1,0 +1,23 @@
+{
+  "name": "category",
+  "description": "",
+  "connection": "default",
+  "attributes": [
+    {
+      "name": "name",
+      "params": {
+        "required": true,
+        "unique": true,
+        "type": "string"
+      }
+    },
+    {
+      "name": "products",
+      "params": {
+        "key": "category",
+        "nature": "oneToMany",
+        "target": "product"
+      }
+    }
+  ]
+}

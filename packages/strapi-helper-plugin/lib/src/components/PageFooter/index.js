@@ -10,10 +10,11 @@ import cn from 'classnames';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
-import GlobalPagination from 'components/GlobalPagination';
+import GlobalPagination from '../GlobalPagination';
 
 import styles from './styles.scss';
 
+/* eslint-disable jsx-a11y/label-has-for */
 function PageFooter(props) {
   return (
     <div className={cn('row', styles.pageFooter)} style={props.style}>
@@ -29,6 +30,7 @@ function PageFooter(props) {
                   name: 'params._limit',
                   value: parseInt(e.target.value, 10),
                 };
+                props.context.emitEvent('willChangeNumberOfEntriesPerPage');
                 props.onChangeParams({ target });
               }}
               value={get(props, ['params', '_limit'], 10)}
@@ -53,6 +55,7 @@ function PageFooter(props) {
 }
 
 PageFooter.defaultProps = {
+  context: {},
   count: 1,
   onChangeParams: () => {},
   params: {
@@ -63,6 +66,7 @@ PageFooter.defaultProps = {
 };
 
 PageFooter.propTypes = {
+  context: PropTypes.object,
   count: PropTypes.number,
   onChangeParams: PropTypes.func,
   params: PropTypes.object,

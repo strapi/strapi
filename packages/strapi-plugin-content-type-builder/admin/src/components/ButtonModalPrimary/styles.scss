@@ -1,0 +1,51 @@
+.buttonModalPrimary {
+  height: 3rem;
+  min-width: 11rem;
+  margin-left: 1.9rem!important;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  border: none!important;
+  border-radius: 3px;
+  color: white!important;
+  line-height: 1.6rem;
+  font-family: Lato!important;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-font-smoothing: antialiased;
+  &:focus {
+    outline: 0;
+  }
+  &:hover, &:active {
+    border: none!important;
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    color: white;
+  }
+}
+
+.buttonModalPrimaryAdd {
+  min-width: 12rem;
+  margin-left: 17px!important;
+  padding: 0 15px;
+  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  border: none!important;
+  border-radius: 3px;
+  color: white;
+  font-family: Lato!important;
+  font-weight: 600;
+  &:focus {
+    outline: 0;
+  }
+  &:hover, &:active {
+    border: none!important;
+    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
+    color: white;
+  }
+  &:before {
+    content: '\F067';
+    font-family: 'FontAwesome';
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin-right: 13px;
+  }
+  -webkit-font-smoothing: antialiased;
+}

@@ -124,11 +124,12 @@ export function languagesFetchSucceeded(appLanguages, listLanguages) {
 }
 
 
-export function editSettings(newSettings, endPoint) {
+export function editSettings(newSettings, endPoint, context) {
   return {
     type: EDIT_SETTINGS,
     newSettings,
     endPoint,
+    context
   };
 }
 
@@ -230,11 +231,12 @@ export function databasesFetchSucceeded(listDatabases, availableDatabases) {
   };
 }
 
-export function newDatabasePost(endPoint, data) {
+export function newDatabasePost(endPoint, data, context) {
   return {
     type: NEW_DATABASE_POST,
     endPoint,
     data,
+    context
   };
 }
 
@@ -284,11 +286,12 @@ export function specificDatabaseFetchSucceeded(db) {
   };
 }
 
-export function databaseEdit(data, apiUrl) {
+export function databaseEdit(data, apiUrl, context) {
   return {
     type: DATABASE_EDIT,
     data,
     apiUrl,
+    context
   };
 }
 

@@ -330,12 +330,5 @@ module.exports = {
     !_.isEmpty(updateErrors) ? ctx.badRequest(null, Service.formatErrors(updateErrors)) : ctx.send({ ok: true });
 
     strapi.reload();
-  },
-
-  autoReload: async ctx => {
-    ctx.send({
-      autoReload: _.get(strapi.config.environments, 'development.server.autoReload', false),
-      environment: strapi.config.environment,
-    });
   }
 };

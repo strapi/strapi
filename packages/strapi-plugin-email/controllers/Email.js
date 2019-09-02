@@ -28,9 +28,9 @@ module.exports = {
       return;
     }
 
-    let options = ctx.request.body; 
+    let options = ctx.request.body;
 
-    await strapi.plugins.email.services.send(options, config);
+    await strapi.plugins.email.services.email.send(options, config);
 
     // Send 200 `ok`
     ctx.send({});
@@ -48,7 +48,7 @@ module.exports = {
   },
 
   getSettings: async (ctx) => {
-    let config = await strapi.plugins.email.services.email.getProviderConfig(ctx.params.environment); 
+    let config = await strapi.plugins.email.services.email.getProviderConfig(ctx.params.environment);
 
     ctx.send({
       providers: strapi.plugins.email.config.providers,

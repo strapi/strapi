@@ -12,7 +12,12 @@ function SupportUsCta() {
   return (
     <FormattedMessage id="app.components.HomePage.support.link">
       {message => (
-        <a href="https://strapi.io/shop" target="_blank" className={styles.supportUsCta}>
+        <a
+          href="https://strapi.io/shop"
+          target="_blank"
+          className={styles.supportUsCta}
+          rel="noopener noreferrer"
+        >
           {message}
         </a>
       )}

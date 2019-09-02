@@ -11,7 +11,7 @@ import { Modal, ModalHeader, ModalBody } from 'reactstrap';
 import { map } from 'lodash';
 import cn from 'classnames';
 
-import Official from 'components/Official';
+import Official from '../Official';
 // import StarsContainer from 'components/StarsContainer';
 
 import styles from './styles.scss';

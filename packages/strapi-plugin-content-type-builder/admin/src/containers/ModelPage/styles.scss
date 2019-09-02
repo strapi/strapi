@@ -4,7 +4,7 @@
 }
 
 .componentsContainer {
-  padding: 0 1.5rem 0 1.5rem;
+  padding: 18px 1.5rem 0 1.5rem;
 }
 
 .leftMenuSpan {
@@ -25,9 +25,26 @@
 
 .iconPlus {
   > div {
-
     > i {
       -webkit-font-smoothing: subpixel-antialiased;
     }
+  }
+}
+
+
+.linkContainer {
+  display: flex;
+  margin-left: 2rem;
+  margin-right: .5rem;
+  padding-top: 1rem;
+  padding-left: 1rem;
+  min-height: 3.4rem;
+  color: #1C8FE5 !important;
+  text-decoration: none !important;
+  line-height: 1.6rem;
+  cursor: pointer;
+  > div {
+    width: 1.3rem;
+    margin-right: 1rem;
   }
 }

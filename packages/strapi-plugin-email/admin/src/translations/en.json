@@ -1,14 +1,11 @@
 {
-  "ConfigPage.title": "Email - Settings",
   "ConfigPage.description": "Configure the email plugin",
-
+  "ConfigPage.title": "Email - Settings",
   "EditForm.Input.number.label": "Maximum size allowed (in MB)",
-  "EditForm.Input.select.label": "Providers",
   "EditForm.Input.select.inputDescription": "Emails can be sent with the default provider (Sendmail) or an external provider",
+  "EditForm.Input.select.label": "Providers",
   "EditForm.Input.toggle.label": "Enable email send",
-
-  "plugin.description.short": "Send emails.",
+  "notification.config.success": "The settings has been updated",
   "plugin.description.long": "Send emails.",
-
-  "notification.config.success": "The settings has been updated"
+  "plugin.description.short": "Send emails."
 }

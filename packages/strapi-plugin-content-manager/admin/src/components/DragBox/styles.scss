@@ -1,0 +1,25 @@
+.dragBox {
+  height: 30px !important;
+  width: 100%;
+  margin-bottom: 6px;
+  box-shadow: 0!important;
+  padding-left: 10px;
+  justify-content: space-between;
+  background: #E6F0FB !important;
+  line-height: 30px;
+  // box-sizing: border-box;
+  border: 1px solid #AED4FB!important;
+  border-radius: 2px;
+  color: #007EFF;
+  font-weight: 500;
+
+  > img {
+    max-width: 8px;
+    margin-right: 10px;
+    margin-top: -1px;
+  }
+
+  > span:last-child {
+    background:#AED4FB;
+  }
+}

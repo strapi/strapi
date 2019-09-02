@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import styles from './styles.scss';
 
 function Official(props) {
-
   return (
     <button className={styles.wrapper} style={props.style}>
       <i className="fa fa-star" />

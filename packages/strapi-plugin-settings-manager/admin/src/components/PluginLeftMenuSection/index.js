@@ -1,20 +1,22 @@
 /**
-*
-* PluginLeftMenuSection
-*
-*/
+ *
+ * PluginLeftMenuSection
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import PluginLeftMenuLink from 'components/PluginLeftMenuLink';
+import PluginLeftMenuLink from '../PluginLeftMenuLink';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props  */
-class PluginLeftMenuSection extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class PluginLeftMenuSection extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
-    const environmentsRequired = this.props.section.name === 'menu.section.environments';
+    const environmentsRequired =
+      this.props.section.name === 'menu.section.environments';
     const links = map(this.props.section.items, (item, index) => (
       <PluginLeftMenuLink
         key={index}
@@ -26,13 +28,13 @@ class PluginLeftMenuSection extends React.Component { // eslint-disable-line rea
     ));
 
     return (
-      <div className={styles.pluginLeftMenuSection}>
+      <div className={styles.stmpluginLeftMenuSection}>
         <p>
-          <FormattedMessage id={`settings-manager.${this.props.section.name}`} />
+          <FormattedMessage
+            id={`settings-manager.${this.props.section.name}`}
+          />
         </p>
-        <ul>
-          {links}
-        </ul>
+        <ul>{links}</ul>
       </div>
     );
   }

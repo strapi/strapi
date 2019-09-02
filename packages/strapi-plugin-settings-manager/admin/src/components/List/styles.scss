@@ -1,27 +1,23 @@
-.listContainer { /* stylelint-disable */
-  // margin-right: 15px;
-}
-
-.listSubContainer {
+.stmlistSubContainer {
   margin: 0 3.3rem;
   padding: 1rem 2.8rem 0rem 2.8rem;
   border-radius: 0.2rem;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 
-  box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
+  box-shadow: 0 0.2rem 0.4rem 0 #e3e9f3;
 }
 
-.paddedTopList {
-  margin-top: 2.7rem!important;
+.stmpaddedTopList {
+  margin-top: 2.7rem !important;
 }
 
-.flex {
+.stmflex {
   display: flex;
   justify-content: space-between;
   margin-top: 0.8rem;
 }
 
-.titleContainer {
+.stmtitleContainer {
   color: #333740;
   font-family: Lato;
   font-size: 1.8rem;
@@ -32,16 +28,15 @@
 
 button {
   &:focus {
-
-    outline: 0!important;
+    outline: 0 !important;
   }
 }
 
-.ulContainer {
+.stmulContainer {
   padding-top: 1.3rem;
   margin: 0 3.3rem;
-  background-color: #FFFFFF;
-  box-shadow: 0 0.2rem 0.4rem 0 #E3E9F3;
+  background-color: #ffffff;
+  box-shadow: 0 0.2rem 0.4rem 0 #e3e9f3;
   > ul {
     list-style: none;
     padding: 0;
@@ -50,42 +45,40 @@ button {
       line-height: 5.2rem;
       font-size: 1.3rem;
       position: relative;
-      &:first-child .language {
-        margin-top: .3rem;
+      &:first-child .stmlanguage {
+        margin-top: 0.3rem;
       }
-      .language {
-        margin-top: .1rem;
+      .stmlanguage {
+        margin-top: 0.1rem;
       }
-      &:last-child .borderBottom {
+      &:last-child .stmborderBottom {
         border-bottom: none;
       }
       &:hover {
-        .hoveredLanguage {
+        .stmhoveredLanguage {
           position: absolute;
-          top: -.2rem;
+          top: -0.2rem;
           min-height: 5.4rem;
           width: 100%;
-          background-color: rgba(14,22,34,0.03);
+          background-color: rgba(14, 22, 34, 0.03);
         }
       }
     }
-
   }
 }
 
-.li:first-child .language {
+.stmli:first-child .stmlanguage {
   margin-top: 11rem;
 }
-.liSpacer {
-  height: .2rem!important;
+.stmliSpacer {
+  height: 0.2rem !important;
 }
 
-.borderBottom {
-  border-bottom: 1px solid rgba(14,22,34,0.04);
-
+.stmborderBottom {
+  border-bottom: 1px solid rgba(14, 22, 34, 0.04);
 }
 
-.flexLi {
+.stmflexLi {
   display: flex;
   justify-content: space-between;
   margin: 0 4.1rem 0 2.8rem;
@@ -93,7 +86,7 @@ button {
   align-items: center;
 }
 
-.flexLiLanguage {
+.stmflexLiLanguage {
   display: flex;
   // justify-content: space-between;
   margin: 0 4.1rem 0 2.8rem;
@@ -104,34 +97,35 @@ button {
   }
 }
 
-.flexLeft {
+.stmflexLeft {
   display: flex;
   align-items: flex-start;
 }
 
-.marged {
+.stmmarged {
   margin-left: 1rem;
 }
 
-.flexed {
+.stmflexed,
+.stmlabel {
   display: flex;
 }
 
-.label {
+.stmlabel {
+  align-items: center;
+  line-height: 1;
   width: 15rem;
   height: 5.2rem;
-  line-height: 5.2rem;
   margin-left: 5rem;
   color: #333740;
   font-weight: 600;
-
 }
 
-.capitalized {
+.stmcapitalized {
   text-transform: capitalize;
 }
 
-.centered {
+.stmcentered {
   width: 25rem;
   text-align: right;
   display: block;
@@ -143,9 +137,9 @@ button {
   }
 }
 
-.italicText {
+.stmitalicText {
   font-family: Lato;
-  color: #49515A;
+  color: #49515a;
   font-style: italic;
   height: 100%;
   height: 5.2rem;
@@ -153,62 +147,64 @@ button {
   padding-right: 1rem;
 }
 
-.normal {
+.stmnormal {
   font-family: Lato;
-  color: #1C5DE7;
+  color: #1c5de7;
   cursor: pointer;
 }
 
-.primary {
+.stmprimary {
   height: 3rem;
-  font-family: Lato!important;
-  margin-left: 1.9rem!important;
+  font-family: Lato !important;
+  margin-left: 1.9rem !important;
   cursor: pointer;
   font-family: Lato;
   &:focus {
     outline: 0;
   }
-  border: none!important;
+  border: none !important;
   width: 15rem;
   line-height: 1.6rem;
   font-weight: 600;
   border-radius: 3px;
-  background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
   -webkit-font-smoothing: antialiased;
-  color: white!important;
-  &:active, &:focus, &:hover {
-    box-shadow: inset 1px 1px 3px rgba(0,0,0,.15);
-    background: linear-gradient(315deg, #0097F6 0%, #005EEA 100%);
+  color: white !important;
+  &:active,
+  &:focus,
+  &:hover {
+    box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(315deg, #0097f6 0%, #005eea 100%);
     background-color: transparent;
     border: none;
- }
+  }
 }
 
-.secondary {
+.stmsecondary {
   font-family: Lato;
-  color: #F64D0A;
-  border: 0.1rem solid #F64D0A;
+  color: #f64d0a;
+  border: 0.1rem solid #f64d0a;
   background-color: transparent;
   cursor: pointer;
   &:hover {
-    color: #F64D0A;
+    color: #f64d0a;
     background-color: white;
-    border: 0.1rem solid #F64D0A;
+    border: 0.1rem solid #f64d0a;
   }
   height: 3rem;
-  color: #F64D0A;
-  border: 0.1rem solid #F64D0A;
+  color: #f64d0a;
+  border: 0.1rem solid #f64d0a;
   position: relative;
   border-radius: 3px;
 }
 
-.bordered {
+.stmbordered {
   margin-left: 3rem;
   margin-right: 3rem;
-  border-bottom: 1px solid #F6F6F6;
+  border-bottom: 1px solid #f6f6f6;
 }
 
-.dbHost {
+.stmdbHost {
   width: 22rem;
   text-align: center;
   display: block;
@@ -217,48 +213,46 @@ button {
   text-overflow: ellipsis;
 }
 
-.noBorder {
-  border: none!important;
+.stmnoBorder {
+  border: none !important;
 }
 
-.flexStart {
-  justify-content: flex-start!important;
+.stmflexStart {
+  justify-content: flex-start !important;
 }
 
-.italicText {
-  color: #49515A;
+.stmitalicText {
+  color: #49515a;
   font-style: italic;
 }
 
-.normal {
-  color: #1C5DE7;
+.stmnormal {
+  color: #1c5de7;
   padding-top: 0rem;
 }
 
-.lighter {
+.stmlighter {
   color: #333740;
 }
 
-
-.modalPosition {
-  margin-top: 22rem ;
+.stmmodalPosition {
+  margin-top: 22rem;
   margin-left: 25%;
-  width: 50%!important;
+  width: 50% !important;
   max-width: none;
   position: relative;
 }
 
-.modalBody {
+.stmmodalBody {
   padding: 0;
   padding-top: 2.1rem;
-
 }
 
-.modalFooter {
+.stmmodalFooter {
   margin-top: 1.5rem;
   margin-bottom: 1.1rem;
   > input {
-    margin-top: 1.3rem!important;
+    margin-top: 1.3rem !important;
   }
   > button {
     &:focus {
@@ -267,25 +261,25 @@ button {
   }
 }
 
-.mHeader {
+.stmmHeader {
   padding-top: 1.6rem;
   padding-bottom: 1rem;
   > h4 {
     font-family: Lato;
-    font-weight: bold!important;
-    font-size: 1.8rem!important;
-
+    font-weight: bold !important;
+    font-size: 1.8rem !important;
   }
   > button {
     z-index: 999;
     margin-top: -2rem;
     margin-right: -1.5rem;
-    color: #C3C5C8;
+    color: #c3c5c8;
     opacity: 1;
     font-size: 1.8rem;
     font-weight: 100;
-    &:hover, &:focus {
-      color: #C3C5C8;
+    &:hover,
+    &:focus {
+      color: #c3c5c8;
       opacity: 1;
       outline: 0;
     }
@@ -303,106 +297,99 @@ button {
   }
 }
 
-
-.squared {
+.stmsquared {
   margin-top: 1.6rem;
   height: 2rem;
   width: 3.5rem;
-  padding-top: .2rem;
+  padding-top: 0.2rem;
   border-radius: 2px;
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 1.3rem;
   font-weight: 400;
   line-height: 1.6rem;
   text-align: center;
-
 }
 
-.orange {
-  background-color: #FFB500;
+.stmorange {
+  background-color: #ffb500;
 }
 
-.leftSpaced {
+.stmleftSpaced {
   margin-left: 1rem;
 }
 
-.buttonContainer {
+.stmbuttonContainer {
   > button {
     margin-right: 0;
   }
 }
 
-.trashContainer {
+.stmtrashContainer {
   // width: 5rem;
   margin-left: 6rem;
   cursor: pointer;
 }
 
-.spacer {
+.stmspacer {
   height: 1.6rem;
   margin-bottom: 1.6rem;
-  border-bottom: 1px solid rgba(14,22,34,0.04);
+  border-bottom: 1px solid rgba(14, 22, 34, 0.04);
 }
 
-.spacerSmall {
+.stmspacerSmall {
   margin-bottom: 0rem;
 }
 
-
-.ico {
-  color: #0E1622;
+.stmico {
+  color: #0e1622;
   > i {
     font-size: 1.1rem;
   }
 }
 
-
-
-.databaseFont {
+.stmdatabaseFont {
   font-size: 1.3rem;
   &:hover {
     height: 5.2rem;
-    background-color: rgba(14,22,34,0.03);
+    background-color: rgba(14, 22, 34, 0.03);
   }
 }
 
-.flagContainer {
+.stmflagContainer {
   width: 33%;
   margin-left: 1rem;
   height: 5.2rem;
   line-height: 5.2rem;
 
   > div:first-of-type {
-    background-image: url('assets/images/unknow_flag.png');
+    background-image: url('../../assets/images/unknow_flag.png');
     background-size: 1.3333em auto;
     background-position: left center;
   }
 }
 
-
-.bottomSpacer {
+.stmbottomSpacer {
   height: 1.2rem;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 }
 
 @keyframes blink {
   0% {
-    opacity: .2;
+    opacity: 0.2;
   }
   20% {
     opacity: 1;
   }
   100% {
-    opacity: .2;
+    opacity: 0.2;
   }
 }
 
-.saving {
+.stmsaving {
   margin-top: -1.2rem;
 }
 
-
-.saving span {
+.stmsaving span {
   animation-name: blink;
   animation-duration: 1.4s;
   animation-iteration-count: infinite;
@@ -410,10 +397,10 @@ button {
   font-size: 5rem;
 }
 
-.saving span:nth-child(2) {
-  animation-delay: .2s;
+.stmsaving span:nth-child(2) {
+  animation-delay: 0.2s;
 }
 
-.saving span:nth-child(3) {
-  animation-delay: .4s;
+.stmsaving span:nth-child(3) {
+  animation-delay: 0.4s;
 }

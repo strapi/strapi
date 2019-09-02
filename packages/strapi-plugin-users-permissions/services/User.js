@@ -29,7 +29,7 @@ module.exports = {
       }, values, 'users-permissions');
     }
 
-    return strapi.query('user', 'users-permissions').create(values);
+    return strapi.plugins['users-permissions'].queries('user', 'users-permissions').create(values);
   },
 
   /**
@@ -54,7 +54,7 @@ module.exports = {
       return await strapi.plugins['content-manager'].services['contentmanager'].edit(params, values, 'users-permissions');
     }
 
-    return strapi.query('user', 'users-permissions').update(_.assign(params, values));
+    return strapi.plugins['users-permissions'].queries('user', 'users-permissions').update(_.assign(params, values));
   },
 
   /**
@@ -64,7 +64,7 @@ module.exports = {
    */
 
   fetch: (params) => {
-    return strapi.query('user', 'users-permissions').findOne(_.pick(params, ['_id', 'id']));
+    return strapi.plugins['users-permissions'].queries('user', 'users-permissions').findOne(_.pick(params, ['_id', 'id']));
   },
 
   /**
@@ -73,8 +73,8 @@ module.exports = {
    * @return {Promise}
    */
 
-  fetchAll: (params) => {
-    return strapi.query('user', 'users-permissions').find(strapi.utils.models.convertParams('user', params));
+  fetchAll: (params, populate) => {
+    return strapi.plugins['users-permissions'].queries('user', 'users-permissions').find(params, populate);
   },
 
   hashPassword: function (user = {}) {
@@ -82,7 +82,7 @@ module.exports = {
       if (!user.password || this.isHashed(user.password)) {
         resolve(null);
       } else {
-        bcrypt.hash(user.password, 10, (err, hash) => {
+        bcrypt.hash(`${user.password}`, 10, (err, hash) => {
           resolve(hash);
         });
       }
@@ -109,10 +109,10 @@ module.exports = {
       params.model = 'user';
       params.id = (params._id || params.id);
 
-      await strapi.plugins['content-manager'].services['contentmanager'].delete(params, {source: 'users-permissions'});
+      return await strapi.plugins['content-manager'].services['contentmanager'].delete(params, {source: 'users-permissions'});
     }
 
-    return strapi.query('user', 'users-permissions').delete(params);
+    return strapi.plugins['users-permissions'].queries('user', 'users-permissions').delete(params);
   },
 
   removeAll: async (params, query) => {
@@ -125,7 +125,7 @@ module.exports = {
     }
 
     // TODO remove this logic when we develop plugins' dependencies
-    const primaryKey = strapi.query('user', 'users-permissions').primaryKey;
+    const primaryKey = strapi.plugins['users-permissions'].queries('user', 'users-permissions').primaryKey;
     const toRemove = Object.keys(query).reduce((acc, curr) => {
       if (curr !== 'source') {
         return acc.concat([query[curr]]);
@@ -134,7 +134,7 @@ module.exports = {
       return acc;
     }, []);
 
-    return strapi.query('user', 'users-permissions').deleteMany({
+    return strapi.plugins['users-permissions'].queries('user', 'users-permissions').deleteMany({
       [primaryKey]: toRemove,
     });
   },

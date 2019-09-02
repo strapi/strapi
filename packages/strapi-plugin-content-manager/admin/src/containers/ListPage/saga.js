@@ -1,18 +1,6 @@
-// Dependencies.
-import { LOCATION_CHANGE } from 'react-router-redux';
-import {
-  call,
-  cancel,
-  fork,
-  put,
-  select,
-  take,
-  takeLatest,
-} from 'redux-saga/effects';
-
+import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
 // Utils.
-import request from 'utils/request';
-
+import { request } from 'strapi-helper-plugin';
 // Actions
 import {
   deleteDataSuccess,
@@ -20,16 +8,9 @@ import {
   getDataSucceeded,
 } from './actions';
 // Constants
-import {
-  DELETE_DATA,
-  DELETE_SEVERAL_DATA,
-  GET_DATA,
-} from './constants';
+import { DELETE_DATA, DELETE_SEVERAL_DATA, GET_DATA } from './constants';
 // Selectors
-import {
-  makeSelectFilters,
-  makeSelectParams,
-} from './selectors';
+import { makeSelectFilters, makeSelectParams } from './selectors';
 
 export function* dataGet(action) {
   try {
@@ -41,7 +22,8 @@ export function* dataGet(action) {
     // Params to get the model's records
     const recordsURL = `/content-manager/explorer/${currentModel}`;
     const filtersObj = filters.reduce((acc, curr) => {
-      const key = curr.filter === '=' ? curr.attr : `${curr.attr}${curr.filter}`;
+      const key =
+        curr.filter === '=' ? curr.attr : `${curr.attr}${curr.filter}`;
       const filter = {
         [key]: curr.value,
       };
@@ -50,8 +32,10 @@ export function* dataGet(action) {
       return acc;
     }, {});
 
-    const _start = (_page - 1 ) * _limit;
-    const sortValue = _sort.includes('-') ? `${_sort.replace('-', '')}:DESC` : `${_sort}:ASC`;
+    const _start = (_page - 1) * _limit;
+    const sortValue = _sort.includes('-')
+      ? `${_sort.replace('-', '')}:DESC`
+      : `${_sort}:ASC`;
     const params = Object.assign(filtersObj, {
       _limit,
       _start,
@@ -62,19 +46,19 @@ export function* dataGet(action) {
     if (_q !== '') {
       params._q = _q;
     }
-    
-    const response = yield [
+
+    const response = yield all([
       call(request, countURL, { method: 'GET', params }),
       call(request, recordsURL, { method: 'GET', params }),
-    ];
+    ]);
 
     yield put(getDataSucceeded(response));
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('notification.error');
   }
 }
 
-export function* dataDelete({ id, modelName, source }) {
+export function* dataDelete({ id, modelName, source, context }) {
   try {
     const requestUrl = `/content-manager/explorer/${modelName}/${id}`;
     const params = {};
@@ -82,6 +66,8 @@ export function* dataDelete({ id, modelName, source }) {
     if (source !== undefined) {
       params.source = source;
     }
+
+    context.emitEvent('willDeleteEntry');
 
     yield call(request, requestUrl, {
       method: 'DELETE',
@@ -91,15 +77,20 @@ export function* dataDelete({ id, modelName, source }) {
     strapi.notification.success('content-manager.success.record.delete');
 
     yield put(deleteDataSuccess(id));
-  } catch(err) {
+
+    context.emitEvent('didDeleteEntry');
+  } catch (err) {
     strapi.notification.error('content-manager.error.record.delete');
   }
 }
 
 export function* dataDeleteAll({ entriesToDelete, model, source }) {
   try {
-    const params = Object.assign(entriesToDelete, source !== undefined ? { source } : {});
-    
+    const params = Object.assign(
+      entriesToDelete,
+      source !== undefined ? { source } : {},
+    );
+
     yield call(request, `/content-manager/explorer/deleteAll/${model}`, {
       method: 'DELETE',
       params,
@@ -107,20 +98,24 @@ export function* dataDeleteAll({ entriesToDelete, model, source }) {
 
     yield put(deleteSeveralDataSuccess());
     yield call(dataGet, { currentModel: model, source });
-  } catch(err) {
+    strapi.notification.success('content-manager.success.record.delete');
+  } catch (err) {
     strapi.notification.error('content-manager.error.record.delete');
   }
 }
 
 // All sagas to be loaded
 function* defaultSaga() {
-  const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
+  yield fork(takeLatest, GET_DATA, dataGet);
+
+  // TODO fix router (Other PR)
+  // const loadDataWatcher = yield fork(takeLatest, GET_DATA, dataGet);
   yield fork(takeLatest, DELETE_DATA, dataDelete);
   yield fork(takeLatest, DELETE_SEVERAL_DATA, dataDeleteAll);
 
-  yield take(LOCATION_CHANGE);
+  // yield take(LOCATION_CHANGE);
 
-  yield cancel(loadDataWatcher);
+  // yield cancel(loadDataWatcher);
 }
 
 export default defaultSaga;

@@ -1,16 +1,17 @@
-$linkcolour: #F5F5F5;
+$linkcolour: #f5f5f5;
 
-.headerNav { /* stylelint-disable */
-
+.stmheaderNav {
+  /* stylestmlint-disable */
 }
 
-.headerContainer {
+.stmheaderContainer {
   display: flex;
   flex-direction: row;
   margin: 0 1.8rem;
   border-radius: 2px;
   > a {
-    box-shadow: 1px 0 0px rgba(0,0,0,0.05), inset 0px -1px 0px -2px rgba(0,0,0,0.05);
+    box-shadow: 1px 0 0px rgba(0, 0, 0, 0.05),
+      inset 0px -1px 0px -2px rgba(0, 0, 0, 0.05);
     background-color: $linkcolour;
     &:first-child {
       border-radius: 2px 0 0 0;
@@ -21,7 +22,7 @@ $linkcolour: #F5F5F5;
   }
 }
 
-.headerLink {
+.stmheaderLink {
   position: relative;
   display: flex;
   flex: 1 100%;
@@ -35,42 +36,41 @@ $linkcolour: #F5F5F5;
   line-height: 1.6rem;
 }
 
-
-.linkActive:first-child {
-  background-color: #FFFFFF!important;
-  font-weight: bold;
-  text-decoration: none !important;
-  box-shadow: 1px 0 0 rgba(0,0,0,0.05);
-  border-top: 0.2rem solid #1C5DE7;
+.stmlinkActive {
+  &:first-child {
+    background-color: #ffffff !important;
+    font-weight: bold;
+    text-decoration: none !important;
+    box-shadow: 1px 0 0 rgba(0, 0, 0, 0.05);
+    border-top: 0.2rem solid #1c5de7;
+  }
+  &:last-child {
+    background-color: #ffffff !important;
+    font-weight: bold;
+    text-decoration: none !important;
+    box-shadow: -1px 0 0 rgba(0, 0, 0, 0.05);
+    border-top: 0.2rem solid #1c5de7;
+  }
+  &:not(:first-child, :last-child) {
+    background-color: #ffffff !important;
+    font-weight: bold;
+    text-decoration: none !important;
+    box-shadow: 1px 0 0 rgba(0, 0, 0, 0.05), -1px 0 0 rgba(0, 0, 0, 0.05) !important;
+    border-top: 0.2rem solid #1c5de7;
+  }
 }
 
-.linkActive:last-child {
-  background-color: #FFFFFF!important;
-  font-weight: bold;
-  text-decoration: none !important;
-  box-shadow: -1px 0 0 rgba(0,0,0,0.05);
-  border-top: 0.2rem solid #1C5DE7;
-}
-
-.linkActive:not(:first-child, :last-child) {
-  background-color: #FFFFFF!important;
-  font-weight: bold;
-  text-decoration: none !important;
-  box-shadow: 1px 0 0 rgba(0,0,0,0.05), -1px 0 0 rgba(0,0,0,0.05) !important;
-  border-top: 0.2rem solid #1C5DE7;
-}
-
-.linkText {
+.stmlinkText {
   display: flex;
   margin: auto;
   text-transform: capitalize;
 }
 
-.notifPoint {
-	height: 0.4rem;
+.stmnotifPoint {
+  height: 0.4rem;
   width: 0.4rem;
   margin: 1px 0 0 0.7rem;
   align-self: center;
   border-radius: 0.5rem;
-  background-color: #27B70F;
+  background-color: #27b70f;
 }

@@ -1,8 +1,9 @@
-.pluginLeftMenu { /* stylelint-disable */
+.stmpluginLeftMenu {
+  /* stylelint-disable */
   min-height: calc(100vh - 6rem); // TODO should be a global variable
   border-radius: 1px;
   // background-color: rgba(14,22,34,0.03);
-  background-color: #F2F3F4;
-  box-shadow: inset 0 0 0.2rem 0 rgba(0,0,0,0.05);
-  padding-top: .4rem;
+  background-color: #f2f3f4;
+  box-shadow: inset 0 0 0.2rem 0 rgba(0, 0, 0, 0.05);
+  padding-top: 0.4rem;
 }

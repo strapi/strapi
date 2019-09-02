@@ -1,15 +1,15 @@
 /**
-*
-* InputToggle
-* Customization
-*  - customBootstrapClass : string
-*   overrides the default col-md-4 class
-*
-* Required
-*  - handleChange: function
-*  - target: string
-*  - isChecked: bool
-*/
+ *
+ * InputToggle
+ * Customization
+ *  - customBootstrapClass : string
+ *   overrides the default col-md-4 class
+ *
+ * Required
+ *  - handleChange: function
+ *  - target: string
+ *  - isChecked: bool
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -17,7 +17,8 @@ import { FormattedMessage } from 'react-intl';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props  */
-class InputToggle extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class InputToggle extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
     this.state = {
@@ -36,7 +37,7 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
     }
   }
 
-  handleToggle = (e) => {
+  handleToggle = e => {
     e.preventDefault();
     let isChecked = this.state.isChecked;
 
@@ -44,7 +45,7 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
     if (e.target.id === 'on' && !this.state.isChecked) {
       isChecked = true;
     } else if (e.target.id === 'off' && this.state.isChecked) {
-      isChecked  = false;
+      isChecked = false;
     }
     const target = {
       name: this.props.target,
@@ -52,21 +53,54 @@ class InputToggle extends React.Component { // eslint-disable-line react/prefer-
     };
     this.setState({ isChecked });
     this.props.handleChange({ target });
-  }
+  };
 
   render() {
-    const btnClassOff = this.state.isChecked ? 'btn ' : `btn ${styles.gradientOff}`;
-    const btnClassOn = this.state.isChecked ? `btn ${styles.gradientOn}` : 'btn';
-    const customBootstrapClass = this.props.customBootstrapClass ? this.props.customBootstrapClass : 'col-md-4';
-    const label = this.props.hiddenLabel ? ''
-      : <div className={styles.toggleLabel}><FormattedMessage id={`settings-manager.${this.props.name}`} /></div>;
-    const resized = this.props.hiddenLabel ? { marginTop: '-1rem'} : { marginTop: ''};
+    const btnClassOff = this.state.isChecked
+      ? 'btn '
+      : `btn ${styles.stmgradientOff}`;
+    const btnClassOn = this.state.isChecked
+      ? `btn ${styles.stmgradientOn}`
+      : 'btn';
+    const customBootstrapClass = this.props.customBootstrapClass
+      ? this.props.customBootstrapClass
+      : 'col-md-4';
+    const label = this.props.hiddenLabel ? (
+      ''
+    ) : (
+      <div className={styles.stmtoggleLabel}>
+        <FormattedMessage id={`settings-manager.${this.props.name}`} />
+      </div>
+    );
+    const resized = this.props.hiddenLabel
+      ? { marginTop: '-1rem' }
+      : { marginTop: '' };
     return (
-      <div className={`${customBootstrapClass} ${styles.container}`} style={resized}>
+      <div
+        className={`${customBootstrapClass} ${styles.stmcontainer}`}
+        style={resized}
+      >
         {label}
-        <div className={`${styles.inputToggle} btn-group`} data-toggle="buttons">
-          <button type="button" className={btnClassOff} id="off" onClick={this.handleToggle}>OFF</button>
-          <button type="button" className={btnClassOn} id="on" onClick={this.handleToggle}>ON</button>
+        <div
+          className={`${styles.stminputToggle} btn-group`}
+          data-toggle="buttons"
+        >
+          <button
+            type="button"
+            className={btnClassOff}
+            id="off"
+            onClick={this.handleToggle}
+          >
+            OFF
+          </button>
+          <button
+            type="button"
+            className={btnClassOn}
+            id="on"
+            onClick={this.handleToggle}
+          >
+            ON
+          </button>
         </div>
       </div>
     );

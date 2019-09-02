@@ -9,8 +9,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import cn from 'classnames';
 
-import Li from 'components/Li';
-import ListHeader from 'components/ListHeader';
+import Li from '../Li';
+import ListHeader from '../ListHeader';
 
 import styles from './styles.scss';
 

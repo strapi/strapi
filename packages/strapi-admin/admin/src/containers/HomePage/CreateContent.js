@@ -3,7 +3,7 @@
  * CreateContent
  *
  */
-
+/* eslint-disable */
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
@@ -13,9 +13,13 @@ function CreateContent() {
       {message => (
         <p>
           {message}
-          <span style={{ fontStyle: 'italic', fontWeight: '500' }}>Content Type Builder</span>
+          <span style={{ fontStyle: 'italic', fontWeight: '500' }}>
+            Content Type Builder
+          </span>
           <FormattedMessage id="app.components.HomePage.createBlock.content.second" />
-          <span style={{ fontStyle: 'italic', fontWeight: '500' }}>"Quick Start"</span>
+          <span style={{ fontStyle: 'italic', fontWeight: '500' }}>
+            "Quick Start"
+          </span>
           <FormattedMessage id="app.components.HomePage.createBlock.content.tutorial" />
         </p>
       )}

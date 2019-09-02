@@ -40,6 +40,7 @@ class InputSearch extends React.Component {
      tabIndex,
      value,
    } = this.props;
+   const formattedPlaceholder = placeholder === '' ? 'app.utils.placeholder.defaultMessage' : placeholder;
 
    return (
      <div className={cn(styles.inputSearch, 'input-group', !isEmpty(className) && className)} style={style}>
@@ -51,7 +52,7 @@ class InputSearch extends React.Component {
            !deactivateErrorHighlight && error && styles.errorAddon,
          )}
        />
-       <FormattedMessage id={placeholder} defaultMessage={placeholder}>
+       <FormattedMessage id={formattedPlaceholder} defaultMessage={formattedPlaceholder}>
          {(message) => (
            <input
              autoFocus={autoFocus}

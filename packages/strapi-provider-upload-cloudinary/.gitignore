@@ -1,0 +1,9 @@
+# Don't check auto-generated stuff into git
+node_modules
+package-lock.json
+
+
+# Cruft
+.DS_Store
+npm-debug.log
+.idea

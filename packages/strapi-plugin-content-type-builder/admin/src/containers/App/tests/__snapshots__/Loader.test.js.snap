@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Loader /> should not crash 1`] = `
+<div>
+  <div>
+    <div>
+      <div />
+    </div>
+  </div>
+</div>
+`;

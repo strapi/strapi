@@ -7,9 +7,6 @@
  * This gives you an opportunity to set up your data model,
  * run jobs, or perform some special logic.
  */
-
-const path = require('path');
-const fs = require('fs');
 const _ = require('lodash');
 
 module.exports = async cb => {
@@ -17,52 +14,38 @@ module.exports = async cb => {
   const pluginStore = strapi.store({
     environment: strapi.config.environment,
     type: 'plugin',
-    name: 'email'
+    name: 'email',
   });
 
   strapi.plugins.email.config.providers = [];
 
-  const loadProviders = (basePath, cb) => {
-    fs.readdir(path.join(basePath, 'node_modules'), async (err, node_modules) => {
-      // get all email providers
-      const emails = _.filter(node_modules, (node_module) => {
-        return _.startsWith(node_module, ('strapi-email'));
+  const installedProviders = Object.keys(strapi.config.info.dependencies)
+    .filter(d => d.startsWith('strapi-provider-email-'))
+    .concat('strapi-provider-email-sendmail');
+
+  for (let installedProvider of _.uniq(installedProviders)) {
+    strapi.plugins.email.config.providers.push(require(installedProvider));
+  }
+
+  try {
+    // if provider config does not exist set one by default
+    const config = await pluginStore.get({ key: 'provider' });
+
+    if (!config) {
+      const provider = _.find(strapi.plugins.email.config.providers, {
+        provider: 'sendmail',
       });
 
-      // mount all providers to get configs
-      _.forEach(emails, (node_module) => {
-        strapi.plugins.email.config.providers.push(
-          require(path.join(`${basePath}/node_modules/${node_module}`))
-        );
+      const value = _.assign({}, provider, {
+        // TODO: set other default settings here
       });
 
-      try {
-        // if provider config not exist set one by default
-        const config = await pluginStore.get({key: 'provider'});
+      await pluginStore.set({ key: 'provider', value });
+    }
+  } catch (err) {
+    strapi.log.error(err);
+    strapi.stop();
+  }
 
-        if (!config) {
-          const provider = _.find(strapi.plugins.email.config.providers, {provider: 'sendmail'});
-
-          const value = _.assign({}, provider, {
-            // TODO: set other default settings here
-          });
-
-          await pluginStore.set({key: 'provider', value});
-        }
-      } catch (err) {
-        strapi.log.error(`Can't load ${config.provider} email provider.`);
-        strapi.log.warn(`Please install strapi-email-${config.provider} --save in ${path.join(strapi.config.appPath, 'plugins', 'email')} folder.`);
-        strapi.stop();
-      }
-
-      cb();
-    });
-  };
-
-  // Load providers from the plugins' node_modules.
-  loadProviders(path.join(strapi.config.appPath, 'plugins', 'email'), () => {
-    // Load providers from the root node_modules.
-    loadProviders(path.join(strapi.config.appPath), cb);
-  });
-
+  cb();
 };

@@ -1,25 +1,26 @@
 /**
-*
-* EditForm
-*
-*/
+ *
+ * EditForm
+ *
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import Button from 'components/Button';
-import EditFormSection from 'components/EditFormSection';
+import Button from '../Button';
+import EditFormSection from '../EditFormSection';
 import styles from './styles.scss';
 
 /* eslint-disable react/require-default-props  */
-class EditForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
+class EditForm extends React.Component {
+  // eslint-disable-line react/prefer-stateless-function
   render() {
     const buttonStyle = this.props.showLoader ? { display: 'none' } : {};
     return (
-      <div className={styles.editForm}>
+      <div className={styles.stmeditForm}>
         <form onSubmit={this.props.onSubmit} autoComplete="nope">
-          <div className={styles.formContainer}>
+          <div className={styles.stmformContainer}>
             {map(this.props.sections, (section, key) => {
               let line;
               // display hr only if next section
@@ -27,7 +28,7 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
                 line = <hr />;
               }
               return (
-                <div key={key} className={styles.sectionContainer}>
+                <div key={key} className={styles.stmsectionContainer}>
                   <EditFormSection
                     section={section}
                     values={this.props.values}
@@ -40,15 +41,29 @@ class EditForm extends React.Component { // eslint-disable-line react/prefer-sta
               );
             })}
           </div>
-          <div className={styles.buttonContainer}>
+          <div className={styles.stmbuttonContainer}>
             <FormattedMessage id="settings-manager.form.button.cancel">
-              {(message) => (
-                <Button type="button" label={message} buttonSize={"buttonMd"} buttonBackground={"secondary"} onClick={this.props.onCancel} style={buttonStyle} />
+              {message => (
+                <Button
+                  type="button"
+                  label={message}
+                  buttonSize={'buttonMd'}
+                  buttonBackground={'secondary'}
+                  onClick={this.props.onCancel}
+                  style={buttonStyle}
+                />
               )}
             </FormattedMessage>
             <FormattedMessage id="settings-manager.form.button.save">
-              {(message) => (
-                <Button type="submit" loader={this.props.showLoader} label={message} buttonSize={"buttonLg"} buttonBackground={"primary"} onClick={this.props.onSubmit} />
+              {message => (
+                <Button
+                  type="submit"
+                  loader={this.props.showLoader}
+                  label={message}
+                  buttonSize={'buttonLg'}
+                  buttonBackground={'primary'}
+                  onClick={this.props.onSubmit}
+                />
               )}
             </FormattedMessage>
           </div>

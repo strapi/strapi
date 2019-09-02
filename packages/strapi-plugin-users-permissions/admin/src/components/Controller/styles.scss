@@ -11,6 +11,17 @@
 
   }
 }
+.someChecked {
+  &:after {
+    content: '\f068';
+    position: absolute;
+    top: 0px; left: 3px;
+    font-size: 10px;
+    font-family: 'FontAwesome';
+    font-weight: 100;
+    color: #1C5DE7;
+  }
+}
 
 .controller {
   padding: 1px 43px 0 28px;
@@ -67,3 +78,4 @@
   margin-left: 15px;
   background-color: #F6F6F6;
 }
+

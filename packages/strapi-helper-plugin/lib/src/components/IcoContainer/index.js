@@ -2,7 +2,7 @@ import React from 'react';
 import { map } from 'lodash';
 import PropTypes from 'prop-types';
 
-import Ico from 'components/Ico';
+import Ico from '../Ico';
 import styles from './styles.scss';
 
 function IcoContainer({ icons }) {

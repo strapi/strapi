@@ -1,30 +1,19 @@
-// import { LOCATION_CHANGE } from 'react-router-redux';
-import { call, fork, put, select, takeLatest } from 'redux-saga/effects';
-import request from 'utils/request';
-
-import {
-  getSettingsSucceeded,
-  submitSucceeded,
-} from './actions';
-import {
-  GET_SETTINGS,
-  SUBMIT,
-} from './constants';
-import {
-  makeSelectEnv,
-  makeSelectModifiedData,
-} from './selectors';
+import { all, call, fork, put, select, takeLatest } from 'redux-saga/effects';
+import { request } from 'strapi-helper-plugin';
+import { getSettingsSucceeded, submitSucceeded } from './actions';
+import { GET_SETTINGS, SUBMIT } from './constants';
+import { makeSelectEnv, makeSelectModifiedData } from './selectors';
 
 export function* settingsGet(action) {
   try {
     const requestURL = `/upload/settings/${action.env}`;
-    const response = yield [
+    const response = yield all([
       call(request, requestURL, { method: 'GET' }),
       call(request, '/upload/environments', { method: 'GET' }),
-    ];
+    ]);
 
     yield put(getSettingsSucceeded(response[0], response[1].environments));
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('notification.error');
   }
 }
@@ -47,7 +36,7 @@ export function* submit() {
     // Update reducer with optimisticResponse
     strapi.notification.success('upload.notification.config.success');
     yield put(submitSucceeded(body));
-  } catch(err) {
+  } catch (err) {
     strapi.notification.error('notification.error');
     // TODO handle error PUT
   }

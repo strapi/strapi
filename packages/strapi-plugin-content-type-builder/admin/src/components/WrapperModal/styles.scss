@@ -1,0 +1,46 @@
+.wrapperModal {
+  font-family: Lato;
+}
+
+.modal {
+  padding-top: 2px;
+  > div {
+    width: 74.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    border:none;
+    border-radius: 2px;
+  }
+}
+
+.headerModalWrapper {
+  margin: 0 2.9rem;
+  padding: 1.4rem 0 2.8rem 0;
+  border-bottom: 1px solid #F6F6F6;
+  position: relative;
+  > button {
+    margin-right: -2.5rem;
+    color: #C3C5C8;
+    opacity: 1;
+    font-size: 1.8rem;
+    font-weight: 100;
+    &:hover, &:focus {
+      color: #C3C5C8;
+      opacity: 1;
+      outline: 0!important;
+      cursor: pointer;
+    }
+    > span {
+      display: none;
+    }
+    &:before {
+      -webkit-font-smoothing: antialiased;
+      content: '\F00d';
+      font-family: 'FontAwesome';
+      font-weight: 400;
+      font-size: 1.2rem;
+      margin-right: 10px;
+    }
+    z-index: 999;
+  }
+}

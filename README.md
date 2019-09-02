@@ -1,93 +1,163 @@
-<p align="center"><img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" /></p>
+<p align="center">
+  <a href="https://strapi.io">
+    <img src="https://blog.strapi.io/content/images/2017/10/logo.png" width="318px" alt="Strapi logo" />
+  </a>
+</p>
 <h3 align="center">API creation made simple, secure and fast.</h3>
-<p align="center">The most advanced open-source Content Management Framework to build powerful API with no effort.</p>
+<p align="center">The most advanced open-source Headless-CMS to build powerful APIs with no effort.</p>
 <br />
 <p align="center">
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/v/strapi.svg" alt="Dependency Status" />
+    <img src="https://img.shields.io/npm/v/strapi/beta.svg" alt="NPM Version" />
   </a>
   <a href="https://www.npmjs.org/package/strapi">
-    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Dependency Status" />
+    <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
   </a>
   <a href="https://travis-ci.org/strapi/strapi">
-    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Dependency Status" />
+    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
   </a>
   <a href="http://slack.strapi.io">
-    <img src="http://strapi-slack.herokuapp.com/badge.svg" alt="Dependency Status" />
+    <img src="https://slack.strapi.io/badge.svg" alt="Strapi on Slack" />
   </a>
 </p>
 
 <br>
 
-<p align="center"><img src="https://blog.strapi.io/content/images/2017/10/Github-Preview.png" /></p>
+<p align="center">
+  <a href="https://strapi.io">
+    <img src="https://blog.strapi.io/content/images/2018/08/github_preview-2.png" />
+  </a>
+</p>
 
 <br>
 
-## Quick start
+Strapi is a free and open-source Headless CMS delivering your content anywhere you need.
 
-We've been working on a major update to Strapi for several months now, rewriting the core framework and the administration panel. Performances has been increased, Developer eXperience has been improved and a brand new plugins
-ecosystem has been introduced. **Both versions are available, we still recommend you to use v1 for production usage.**.
+- **Keep control over your data**. With Strapi, you know where your data is stored and you keep full control at any time.
+- **Self hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Netlify, Heroku, a VPS or a dedicated server. You can scale as you grow, 100% independently.
+- **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgresQL, MySQL, MariaDB, SQLite.
+- **Customisable**. You can easily build your own logic by fully customising APIs, routes or plugins to perfectly fit your needs.
+
+## Getting Started
+
+<a href="https://strapi.io/documentation/3.0.0-beta.x/getting-started/quick-start.html" target="_blank">Read the Getting Started tutorial</a> or follow the steps below:
+
+#### 🖐 Requirements
+
+**Supported operating systems**:
+
+- Ubuntu 18.04/Debian 9.x
+- CentOS/RHEL 8
+- MacOS Mojave
+- Windows 10
+- Docker - [Docker-Repo](https://github.com/strapi/strapi-docker)
+
+(Please note that Strapi may work on other operating systems, but these are not tested nor officially supported at this time.)
+
+**Node:**
+
+- NodeJS >= 10.x
+- NPM >= 6.x
+
+**Database:**
+
+- MongoDB >= 3.6
+- MySQL >= 5.6
+- MariaDB >= 10.1
+- PostgreSQL >= 10
+- SQLite >= 3
+
+#### ⏳ Installation
+
+```bash
+npm install strapi@beta -g
+```
+
+**We recommend always using the latest version of Strapi to start your new projects**.
+
+This project is currently in **Beta**. Large breaking changes are unlikely at this stage of the project, but using the latest version of Strapi ensures you have all the latest features and updates. New releases are usually shipped every two weeks to fix/enhance the project.
+
+#### 🏗 Create a new project
+
+```bash
+strapi new my-project
+```
+
+This command will generate a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
+
+#### 🚀 Start your project
+
+```bash
+cd my-project
+strapi develop
+```
+
+Congratulations, you made it!
+
+Enjoy 🎉
+
+## Features
+
+- **Modern Admin Panel:** Elegant, entirely customizable and a fully extensible admin panel.
+- **Secure by default:** Reusable policies, CSRF, CORS, P3P, Xframe, XSS, and more.
+- **Plugins Oriented:** Install auth system, content management, custom plugins, and more, in seconds.
+- **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
+- **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
+- **Powerful CLI:** Scaffold projects and APIs on the fly.
+- **SQL & NoSQL databases:** Works with Mongo, Postgres, MySQL, MariaDB, SQLite.
+
+**[See more on our website](https://strapi.io/overview)**.
+
+### Try on Heroku
+
+You can also give it a try using Heroku in one click!
 
 <a href="https://heroku.com/deploy?template=https://github.com/strapi/strapi-heroku-app">
   <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
 </a>
 
-#### Alpha
+Be aware that the Content Type Builder won't work due to the restriction of writing files on the Heroku servers. If you would like to change/edit/add Content Types, you need to follow these steps:
 
-The alpha has support for the latest version of Node.js (v9) and npm (v5).
-```bash
-npm install strapi@alpha -g
-```
+1. Click the button above and deploy your app
+2. Clone that repo by using `heroku git:clone -a` followed by your repo's name
+3. Go into the cloned projects' folder using `cd` followed by your repo's name
+4. Add the Heroku boilerplate as a remote by running `git remote add boilerplate https://github.com/strapi/strapi-heroku-app`
+5. Pull from this new origin by running `git pull boilerplate master`
 
-#### Stable
-This is the production-ready version of Strapi (v1). You should also consider that the migration to v3 will not be easy due to many breaking changes.
-```bash
-npm install strapi -g
-```
+## Contributing
 
-Read the [Getting started](https://strapi.io/getting-started) page to create your first project using Strapi.
-
-## Features
-
-- **Modern Admin Panel:**
-  Elegant, entirely customizable and fully extensible admin panel.
-- **Secure by default:** Reusable policies, CSRF, CORS, P3P, Xframe, XSS, and more.
-- **Plugins Oriented:** Install auth system, content management, custom plugins, and more, in seconds.
-- **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performances.
-- **Front-end Agnostic:** Use any front-end frameworks (React, Vue, Angular, etc.), mobile apps or even IoT.
-- **Powerful CLI:** Scaffold projects and APIs on the fly.
-- **SQL & NoSQL databases:** Work with Mongo as a main database, also supports Postgres, MySQL, etc.
-
-## Philosophy ?
-
-> At [Strapi](https://strapi.io), everything we do we believe in changing the status quo of web development. Our products are simple to use, user friendly and production-ready.
-
-Web and mobile applications needed a powerful, simple to use and production-ready API-driven solution. That's why we created Strapi, an open-source Content Management Framework (CMF) for exposing your content (data, media) accross multi-devices.
-
-Halfway between a CMS and a framework, Strapi takes advantages of both worlds. A powerful dashboard to easily manage your content with a flexible framework layer to develop and integrate specific features.
+Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull Request to the project.
 
 ## Support
 
 For more information on the upcoming version, please take a look to our [ROADMAP](https://github.com/strapi/strapi/projects).
 
-### Community support
+#### Community support
 
-For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of this channel to ask question:
+For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask question:
 
 - [StackOverflow](http://stackoverflow.com/questions/tagged/strapi)
-- [Slack](http://slack.strapi.io) (highly recommended for realtime support)
-- [GitHub](https://github.com/strapi/strapi)
-- [Twitter](https://twitter.com/strapijs)
-- [Facebook](https://www.facebook.com/Strapi-616063331867161).
+- [Slack](http://slack.strapi.io) (Highly recommended for faster support)
+- [GitHub](https://github.com/strapi/strapi) (Bug reports, contributions)
+- [ProductBoard](https://portal.productboard.com/strapi/tabs/2-under-consideration) (Roadmap, Feature requests)
+- [Twitter](https://twitter.com/strapijs) (Get news fast)
+- [Facebook](https://www.facebook.com/Strapi-616063331867161)
+- [YouTube Channel](https://www.youtube.com/strapi) (Learn from Video Tutorials)
 
-### Professional support
+## Migration
 
-[Strapi Solutions](https://strapi.io), the company behind Strapi, provides a full range of solutions to get better results, faster. We're always looking for the next challenge: coaching, consulting, training, customization, etc. [Drop us an email](mailto:support@strapi.io) to see how we can help you.
+Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki to keep your projects up-to-date.
 
-### Migration
+## Roadmap
 
-Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki to keep your Strapi projects updated.
+Check out our [roadmap](https://portal.productboard.com/strapi) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
+
+## Sponsors
+
+[Become a sponsor](https://opencollective.com/strapi#sponsor) and get your logo on our README on GitHub with a link to your site.
+
+<a href="https://opencollective.com/strapi#contributors"><img src="https://opencollective.com/strapi/tiers/sponsor.svg"/></a>
 
 ## License
 
-[MIT License](LICENSE.md) Copyright (c) 2015-2018 [Strapi Solutions](https://strapi.io/).
+[MIT License](LICENSE.md) Copyright (c) 2015-2019 [Strapi Solutions](https://strapi.io/).

@@ -1,0 +1,11 @@
+{
+  "components": {
+    "schemas": {
+      "Foo": {
+        "properties": {
+          "bar": "string"
+        }
+      }
+    }
+  }
+}

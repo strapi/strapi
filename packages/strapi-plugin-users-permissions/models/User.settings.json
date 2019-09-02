@@ -1,8 +1,12 @@
 {
   "connection": "default",
+  "collectionName": "users-permissions_user",
   "info": {
     "name": "user",
     "description": ""
+  },
+  "options": {
+    "timestamps": true
   },
   "attributes": {
     "username": {
@@ -32,6 +36,16 @@
       "type": "string",
       "configurable": false,
       "private": true
+    },
+    "confirmed": {
+      "type": "boolean",
+      "default": false,
+      "configurable": false
+    },
+    "blocked": {
+      "type": "boolean",
+      "default": false,
+      "configurable": false
     },
     "role": {
       "model": "role",

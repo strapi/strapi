@@ -1,0 +1,83 @@
+.attributeLi {
+  min-height: 5.3rem;
+  margin-top: 0!important;
+  list-style: none;
+  font-size: 1.3rem;
+  line-height: 5.3rem;
+
+  &:last-child .flex {
+    border-bottom: none;
+  }
+}
+
+.editable {
+  &:hover {
+    background-color: #F7F8F8;
+  }
+
+  cursor: pointer;
+}
+
+.flex {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 5.3rem 0 3.8rem;
+  // border-bottom: 1px solid black;
+  border-bottom: 1px solid rgba(14,22,34,0.04);
+}
+
+.nameContainer {
+  display: flex;
+  width: 30rem;
+  align-items: center;
+
+  > img{
+    display: inline-block;
+    width: 35px;
+    height: 20px;
+    margin-top: -2px;
+  }
+
+  > div {
+    margin-left: 3.9rem;
+    color: #333740;
+    font-weight: 600;
+  }
+}
+
+.relationContainer {
+  width: 30rem;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mainField {
+  width: 10rem;
+  text-align: right;
+  font-style: italic;
+}
+
+.icoContainer {
+  width: 7rem;
+  display: flex;
+  justify-content: flex-end;
+  opacity: .75;
+  > div {
+    width: 23px;
+    height: 100%;
+    color: #0E1622;
+  >  i {
+      z-index: 0;
+      font-size: 1.1rem;
+    }
+  }
+  > div:last-child {
+    margin-left: 0;
+  }
+}
+
+.relation {
+  background: linear-gradient(135deg, rgba(28,93,231,0.05) 0%, rgba(239,243,253,0) 100%);
+}

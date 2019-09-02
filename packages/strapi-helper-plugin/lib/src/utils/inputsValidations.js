@@ -3,7 +3,7 @@ import { includes, mapKeys, reject } from 'lodash';
  * [validateInput description]
  * @param  {String || Number} value  Input's value
  * @param  {Object} inputValidations
- * @param  {String} [type='text']    Optionnal: the input's type only for email
+ * @param  {String} [type='text']    Optional: the input's type only for email
  * @return {Array}                  Array of errors to be displayed
  */
 
@@ -23,7 +23,7 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
         }
         break;
       case 'maxLength':
-        if (value.length > validationValue) {
+        if (value && value.length > validationValue) {
           errors.push({ id: 'components.Input.error.validation.maxLength' });
         }
         break;
@@ -33,12 +33,12 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
         }
         break;
       case 'minLength':
-        if (value.length < validationValue) {
+        if (!value || value.length < validationValue) {
           errors.push({ id: 'components.Input.error.validation.minLength' });
         }
         break;
       case 'required':
-        if (value.length === 0) {
+        if (value == null || value.length === 0) {
           errors.push({ id: 'components.Input.error.validation.required' });
         }
         break;

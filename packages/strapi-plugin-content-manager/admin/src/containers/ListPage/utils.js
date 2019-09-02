@@ -50,8 +50,17 @@ const generateSearchFromParams = params =>
     return acc;
   }, '');
 
+  /**
+* Generate the redirect URI when editing an entry
+* @type {String}
+*/
+const generateRedirectURI = function ({ model, search } = {}) {
+  return `?redirectUrl=/plugins/content-manager/${(model || this.getCurrentModelName()).toLowerCase()}${(search || this.generateSearch())}`;
+};
+
 export {
   generateFiltersFromSearch,
   generateSearchFromFilters,
   generateSearchFromParams,
+  generateRedirectURI,
 };

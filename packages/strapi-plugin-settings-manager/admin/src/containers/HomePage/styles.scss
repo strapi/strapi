@@ -1,14 +1,15 @@
-.home { /* stylelint-disable */
-  background: rgba(14,22,34,0.02);
+.stmhome {
+  /* stylelint-disable */
+  background: rgba(14, 22, 34, 0.02);
   min-height: calc(100vh - 6rem); // TODO shoukd be variable
   padding: 0;
 }
 
-.left {
+.stmleft {
   opacity: 0.3;
 }
 
-.flagContainer {
+.stmflagContainer {
   margin-left: 1rem;
   background-position: 0;
   > span {
@@ -16,10 +17,10 @@
   }
 }
 
-.modalLanguageLabel {
+.stmmodalLanguageLabel {
   padding-bottom: 10px;
 }
 
-.popUpSpacer {
+.stmpopUpSpacer {
   height: 1rem;
 }
