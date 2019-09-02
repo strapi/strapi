@@ -14,36 +14,6 @@ const StyledMediaPreviewList = styled.div`
     position: absolute;
     top: 0;
     ${createCSS()};
-    div {
-      position: relative;
-      &::before {
-        content: '-';
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background: white;
-        color: transparent;
-        opacity: 0;
-      }
-    }
-    div + img {
-      display: none;
-    }
-  }
-  &.hoverable {
-    > div {
-      :hover {
-        z-index: ${max + 1};
-        div {
-          &::before {
-            opacity: 0.6;
-          }
-        }
-        div + img {
-          display: block;
-        }
-      }
-    }
   }
 `;
 
@@ -64,30 +34,63 @@ function createCSS() {
   `;
 }
 
+//34373F gris +5 FAFAFB
+
 const MediaPreviewItem = styled.div`
   width: ${sizes.small};
   height: ${sizes.small};
-  img {
-    display: block;
-    object-fit: cover;
-  }
+
   div {
     width: 100%;
     height: 100%;
     overflow: hidden;
     border-radius: calc(${sizes.small} / 2);
-    img:first-of-type {
+  }
+`;
+
+const MediaPreviewImage = styled(MediaPreviewItem)`
+  img {
+    display: block;
+    object-fit: cover;
+  }
+  div {
+    position: relative;
+    &::before {
+      content: '-';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: white;
+      color: transparent;
+      opacity: 0;
+    }
+    img {
       width: 100%;
       height: 100%;
     }
   }
   div + img {
+    display: none;
     width: ${sizes.big};
     height: ${sizes.big};
     border-radius: calc(${sizes.big} / 2);
     margin-top: calc(-${sizes.big} - ${sizes.small} - 5px);
     margin-left: calc((-${sizes.big} + ${sizes.small}) / 2);
   }
+
+  &.hoverable {
+    :hover {
+      z-index: ${max + 1};
+      div {
+        &::before {
+          opacity: 0.6;
+        }
+      }
+      div + img {
+        display: block;
+      }
+    }
+  }
 `;
 
-export { MediaPreviewItem, StyledMediaPreviewList };
+export { MediaPreviewImage, MediaPreviewItem, StyledMediaPreviewList };

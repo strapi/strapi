@@ -6,6 +6,7 @@ import DefaultIcon from '../../assets/images/media/na.svg';
 
 import {
   StyledMediaPreviewList,
+  MediaPreviewImage,
   MediaPreviewItem,
 } from './StyledMediaPreviewList';
 
@@ -13,36 +14,32 @@ function MediaPreviewList({ hoverable, files }) {
   const baseUrl = strapi.backendURL;
 
   const renderImage = image => {
-    const { ext, mime, name, url } = image;
+    const { name, url } = image;
 
     return (
-      <MediaPreviewItem>
-        {includes(mime, 'image') ? (
-          <>
-            <div>
-              <img src={`${baseUrl}${url}`} alt={`${name}`} />
-            </div>
-            <img src={`${baseUrl}${url}`} alt={`${name}`} />
-          </>
-        ) : (
-          <div>{ext}</div>
-        )}
-      </MediaPreviewItem>
+      <MediaPreviewImage className={hoverable ? 'hoverable' : ''}>
+        <div>
+          <img src={`${baseUrl}${url}`} alt={`${name}`} />
+        </div>
+        <img src={`${baseUrl}${url}`} alt={`${name}`} />
+      </MediaPreviewImage>
     );
   };
 
-  const renderMultipleList = images => {
-    return images.map(image => {
+  const renderMultipleList = files => {
+    return files.map(file => {
+      const { mime } = file;
+      // Check file type
       return (
-        <React.Fragment key={JSON.stringify(image)}>
-          {renderImage(image)}
+        <React.Fragment key={JSON.stringify(file)}>
+          {includes(mime, 'image') ? renderImage(file) : <p>{mime}</p>}
         </React.Fragment>
       );
     });
   };
 
   return !!files && !isEmpty(files) ? (
-    <StyledMediaPreviewList className={hoverable ? 'hoverable' : ''}>
+    <StyledMediaPreviewList>
       {!isArray(files) ? renderImage(files) : renderMultipleList(files)}
     </StyledMediaPreviewList>
   ) : (
