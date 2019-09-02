@@ -29,6 +29,9 @@ module.exports = {
       queryName = action;
     }
 
+    // Retrieve policies.
+    const policies = _.get(handler, `Mutation.${queryName}.policies`, []);
+
     // Retrieve resolverOf.
     const resolverOf = _.get(handler, `Mutation.${queryName}.resolverOf`, '');
 
@@ -155,19 +158,8 @@ module.exports = {
       );
     }
 
-    // Retrieve policies.
-    let policies = [];
-
     if (strapi.plugins['users-permissions']) {
-      policies.push('plugins.users-permissions.permissions');
-    }
-
-    // Retrieve policies.
-    if (_.get(handler, `Mutation.${queryName}.policies`)) {
-      policies = _.concat(
-        policies,
-        _.get(handler, `Mutation.${queryName}.policies`)
-      );
+      policies.unshift('plugins.users-permissions.permissions');
     }
 
     // Populate policies.
