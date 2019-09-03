@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { URL } = require('url');
 
 const { createController, createService } = require('../core-api');
 const getURLFromSegments = require('../utils/url-from-segments');
