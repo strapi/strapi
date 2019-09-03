@@ -211,7 +211,7 @@ describe('Filtering API', () => {
     });
 
     describe('Filter null', () => {
-      test('Should return only one match', async () => {
+      test('Should return only matching items', async () => {
         const res = await rq({
           method: 'GET',
           url: '/products',
@@ -220,9 +220,11 @@ describe('Filtering API', () => {
           },
         });
 
+        const matching = data.products.filter(x => x.price === null);
         expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBe(2);
-        expect(res.body[0]).toMatchObject(data.products[3]);
+        expect(res.body.length).toBe(matching.length);
+        expect(res.body).toMatchObject(matching);
+        expect(res.body).toEqual(expect.arrayContaining(matching));
       });
 
       test('Should return three matches', async () => {
