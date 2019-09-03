@@ -133,9 +133,9 @@ class AttributesPickerModal extends React.Component {
     this.setState(prevState => ({ isDisplayed: !prevState.isDisplayed }));
 
   handleToggle = () => {
-    const { push } = this.props;
+    const { push, redirectUrl } = this.props;
 
-    push({ search: '' });
+    push({ search: `${redirectUrl}` });
   };
 
   updateNodeToFocus = position => this.setState({ nodeToFocus: position });
@@ -203,6 +203,7 @@ AttributesPickerModal.defaultProps = {
   isOpen: false,
   featureName: null,
   featureType: 'model',
+  redirectUrl: '',
 };
 
 AttributesPickerModal.propTypes = {
@@ -210,6 +211,7 @@ AttributesPickerModal.propTypes = {
   featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   push: PropTypes.func.isRequired,
+  redirectUrl: PropTypes.string,
 };
 
 export default AttributesPickerModal;

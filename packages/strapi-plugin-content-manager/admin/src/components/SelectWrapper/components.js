@@ -5,6 +5,10 @@ const Wrapper = styled.div`
   margin-bottom: 27px;
 
   label {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 1.3rem;
     font-weight: 500;
   }

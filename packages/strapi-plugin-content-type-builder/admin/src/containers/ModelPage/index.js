@@ -386,12 +386,24 @@ export class ModelPage extends React.Component {
   };
 
   handleRedirectToGroup = group => {
+    const {
+      history: { push },
+    } = this.props;
+
     const { source, uid } = group;
 
-    const base = `/plugins/${pluginId}/groups/${uid}`;
-    const to = source ? `${base}&source=${source}` : base;
+    const baseTo = `/plugins/${pluginId}/groups/${uid}`;
+    const to = source ? `${baseTo}&source=${source}` : baseTo;
 
-    this.props.history.push(to);
+    const baseFrom = `?redirectUrl=/plugins/content-type-builder/models/${this.getModelName()}`;
+    const from = this.getSource()
+      ? `${baseFrom}&source=${this.getSource()}`
+      : baseFrom;
+
+    push({
+      pathname: `${to}`,
+      search: `${from}`,
+    });
   };
 
   handleSubmit = (shouldContinue = false) => {
