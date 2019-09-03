@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
-const cleanUpSearchQuery = require('./utils');
 
 module.exports = ({ model, modelKey }) => {
   return {
@@ -139,7 +138,7 @@ module.exports = ({ model, modelKey }) => {
  * @param {*} params
  */
 const buildSearchQuery = (qb, model, params) => {
-  const query = cleanUpSearchQuery(params._q);
+  const query = params._q;
 
   const associations = model.associations.map(x => x.alias);
 

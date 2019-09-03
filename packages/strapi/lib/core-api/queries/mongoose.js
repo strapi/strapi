@@ -1,6 +1,5 @@
 const _ = require('lodash');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
-const cleanUpSearchQuery = require('./utils');
 
 module.exports = ({ model, modelKey, strapi }) => {
   const assocs = model.associations.map(ast => ast.alias);
@@ -109,10 +108,9 @@ module.exports = ({ model, modelKey, strapi }) => {
 
     search(params, populate) {
       // Convert `params` object to filters compatible with Mongo.
-      const query = cleanUpSearchQuery(params._q);
       const filters = strapi.utils.models.convertParams(modelKey, params);
 
-      const $or = buildSearchOr(model, query);
+      const $or = buildSearchOr(model, params._q);
 
       return model
         .find({ $or })
@@ -123,8 +121,7 @@ module.exports = ({ model, modelKey, strapi }) => {
     },
 
     countSearch(params) {
-      const query = cleanUpSearchQuery(params._q);
-      const $or = buildSearchOr(model, query);
+      const $or = buildSearchOr(model, params._q);
       return model.find({ $or }).countDocuments();
     },
   };
