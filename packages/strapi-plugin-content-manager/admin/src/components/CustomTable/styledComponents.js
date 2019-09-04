@@ -105,11 +105,7 @@ const Icon = styled.i`
   }}
 `;
 
-const Truncate = styled.div`
-  // display: table;
-  // table-layout: fixed;
-  // width: 100%;
-`;
+const Truncate = styled.div``;
 
 const Truncated = styled.p`
   overflow-x: hidden;

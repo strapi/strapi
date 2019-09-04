@@ -380,9 +380,7 @@ function EditView({
                 label: `${pluginId}.containers.Edit.submit`,
                 type: 'submit',
                 loader: isSubmitting,
-                style: isSubmitting
-                  ? { marginRight: '18px', flexGrow: 2 }
-                  : { flexGrow: 2 },
+                style: isSubmitting ? { marginRight: '18px' } : {},
                 disabled: isSubmitting, // TODO STATE WHEN SUBMITING
               },
             ]}
