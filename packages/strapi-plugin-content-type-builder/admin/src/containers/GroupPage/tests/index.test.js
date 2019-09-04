@@ -69,7 +69,6 @@ const props = {
   ],
   history: {
     push: jest.fn(),
-    goBack: jest.fn(),
   },
   initialDataGroup: {
     tests: {
@@ -229,15 +228,6 @@ describe('CTB <GroupPage />', () => {
       const { getSource } = shallow(<GroupPage {...props} />).instance();
 
       expect(getSource()).toEqual(null);
-    });
-  });
-
-  describe('HandleGoBack', () => {
-    it('should go to previous page', () => {
-      const { handleGoBack } = shallow(<GroupPage {...props} />).instance();
-      handleGoBack();
-
-      expect(props.history.goBack).toHaveBeenCalled();
     });
   });
 

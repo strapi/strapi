@@ -14,7 +14,6 @@ import { get, isEqual, pickBy } from 'lodash';
 import { Prompt } from 'react-router';
 
 import {
-  BackHeader,
   Button,
   EmptyAttributesBlock,
   List,
@@ -381,10 +380,6 @@ export class ModelPage extends React.Component {
     this.setState({ attrToDelete: null, showDeleteAttrWarning: false });
   };
 
-  handleGoBack = () => {
-    this.props.history.goBack();
-  };
-
   handleRedirectToGroup = group => {
     const {
       history: { push },
@@ -395,14 +390,8 @@ export class ModelPage extends React.Component {
     const baseTo = `/plugins/${pluginId}/groups/${uid}`;
     const to = source ? `${baseTo}&source=${source}` : baseTo;
 
-    const baseFrom = `?redirectUrl=/plugins/content-type-builder/models/${this.getModelName()}`;
-    const from = this.getSource()
-      ? `${baseFrom}&source=${this.getSource()}`
-      : baseFrom;
-
     push({
       pathname: `${to}`,
-      search: `${from}`,
     });
   };
 
@@ -611,7 +600,6 @@ export class ModelPage extends React.Component {
 
     return (
       <div className={styles.modelpage}>
-        <BackHeader onClick={this.handleGoBack} />
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
           {msg => (
             <Prompt

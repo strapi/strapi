@@ -23,6 +23,8 @@ import GroupPage from '../GroupPage';
 
 import Loader from './Loader';
 
+import BackButton from '../../components/BackButton';
+
 import {
   addAttributeRelation,
   cancelNewContentType,
@@ -77,6 +79,11 @@ const ROUTES = [
 
 export class App extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  state = {
+    routerHistory: [],
+    number: 1,
+  };
+
   componentDidMount() {
     this.props.getData();
   }
@@ -85,6 +92,13 @@ export class App extends React.Component {
   componentDidUpdate(prevProps) {
     if (prevProps.shouldRefetchData !== this.props.shouldRefetchData) {
       this.props.getData();
+    }
+    if (prevProps.location !== this.props.location) {
+      if (prevProps.location.pathname !== this.getPathname()) {
+        this.addRouterHistory(prevProps.location.pathname);
+      } else {
+        this.addHistoryCount();
+      }
     }
   }
 
@@ -101,7 +115,47 @@ export class App extends React.Component {
     );
   };
 
+  addRouterHistory = pathname => {
+    if (this.getLastPathname() !== this.getPathname()) {
+      this.setState(prevState => {
+        return {
+          routerHistory: [...prevState.routerHistory, pathname],
+          number: prevState.number + 1,
+        };
+      });
+    }
+  };
+
+  addHistoryCount = () => {
+    this.setState(prevState => {
+      return {
+        routerHistory: [...prevState.routerHistory],
+        number: prevState.number + 1,
+      };
+    });
+  };
+
+  removeRouterHistory = () => {
+    const array = [...this.state.routerHistory];
+    const index = array.length - 1;
+
+    if (index !== -1) {
+      array.splice(index, 1);
+      this.setState(prevState => {
+        return { routerHistory: array, number: prevState.number + 1 };
+      });
+    }
+  };
+
   getSearch = () => this.props.location.search;
+
+  getPathname = () => this.props.location.pathname;
+
+  getLastPathname = () => {
+    const { routerHistory } = this.state;
+
+    return routerHistory[routerHistory.length - 1];
+  };
 
   getActionType = () => {
     return getQueryParameters(this.getSearch(), 'actionType');
@@ -139,6 +193,24 @@ export class App extends React.Component {
 
   getFeatureNameFromSearch = () =>
     getQueryParameters(this.getSearch(), `${this.getFeatureType()}Name`);
+
+  handleGoBack = async () => {
+    const { history } = this.props;
+    const { routerHistory, number } = this.state;
+
+    await this.wait();
+
+    if (routerHistory.length > 0) {
+      history.push(this.getLastPathname());
+      this.removeRouterHistory();
+    } else {
+      history.go(-number);
+    }
+  };
+
+  wait = async () => {
+    return new Promise(resolve => setTimeout(resolve, 200));
+  };
 
   isUpdatingTemporaryModel = (modelName = this.getFeatureNameFromSearch()) => {
     const { models } = this.props;
@@ -194,7 +266,7 @@ export class App extends React.Component {
       createTempGroup,
       groups,
       history: { push },
-      location: { pathname, search },
+      location: { search },
       isLoading,
       models,
       onChangeExistingContentTypeMainInfos,
@@ -227,7 +299,7 @@ export class App extends React.Component {
         modifiedData: this.getFormDataForModel(),
         onChangeExistingFeatureMainInfos: onChangeExistingContentTypeMainInfos,
         onChangeNewFeatureMainInfos: onChangeNewContentTypeMainInfos,
-        pathname,
+        pathname: this.getPathname(),
         push,
         resetExistingFeatureMainInfos: resetExistingContentTypeMainInfos,
         resetNewFeatureMainInfos: resetNewContentTypeMainInfos,
@@ -246,7 +318,7 @@ export class App extends React.Component {
         modifiedData: this.getFormDataForGroup(),
         onChangeExistingFeatureMainInfos: onChangeExistingGroupMainInfos,
         onChangeNewFeatureMainInfos: onChangeNewGroupMainInfos,
-        pathname,
+        pathname: this.getPathname(),
         push,
         resetExistingFeatureMainInfos: resetExistingGroupMainInfos,
         resetNewFeatureMainInfos: () => {},
@@ -264,6 +336,7 @@ export class App extends React.Component {
         }}
       >
         <div className={styles.app}>
+          <BackButton onClick={this.handleGoBack}></BackButton>
           <Switch>
             {ROUTES.map(this.renderRoute)}
             <Route component={NotFound} />

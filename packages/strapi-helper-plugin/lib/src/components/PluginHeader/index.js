@@ -6,7 +6,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
 
 import PluginHeaderTitle from '../PluginHeaderTitle';
 import PluginHeaderActions from '../PluginHeaderActions';
