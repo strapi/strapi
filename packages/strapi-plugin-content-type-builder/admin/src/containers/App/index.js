@@ -81,7 +81,7 @@ export class App extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = {
     routerHistory: [],
-    number: 1,
+    historyCount: 1,
   };
 
   componentDidMount() {
@@ -97,7 +97,7 @@ export class App extends React.Component {
       if (prevProps.location.pathname !== this.getPathname()) {
         this.addRouterHistory(prevProps.location.pathname);
       } else {
-        this.addHistoryCount();
+        this.increaseHistoryCount();
       }
     }
   }
@@ -120,17 +120,17 @@ export class App extends React.Component {
       this.setState(prevState => {
         return {
           routerHistory: [...prevState.routerHistory, pathname],
-          number: prevState.number + 1,
+          historyCount: prevState.historyCount + 1,
         };
       });
     }
   };
 
-  addHistoryCount = () => {
+  increaseHistoryCount = () => {
     this.setState(prevState => {
       return {
         routerHistory: [...prevState.routerHistory],
-        number: prevState.number + 1,
+        historyCount: prevState.historyCount + 1,
       };
     });
   };
@@ -142,7 +142,10 @@ export class App extends React.Component {
     if (index !== -1) {
       array.splice(index, 1);
       this.setState(prevState => {
-        return { routerHistory: array, number: prevState.number + 1 };
+        return {
+          routerHistory: array,
+          historyCount: prevState.historyCount + 1,
+        };
       });
     }
   };
@@ -196,7 +199,7 @@ export class App extends React.Component {
 
   handleGoBack = async () => {
     const { history } = this.props;
-    const { routerHistory, number } = this.state;
+    const { routerHistory, historyCount } = this.state;
 
     await this.wait();
 
@@ -204,7 +207,7 @@ export class App extends React.Component {
       history.push(this.getLastPathname());
       this.removeRouterHistory();
     } else {
-      history.go(-number);
+      history.go(-historyCount);
     }
   };
 

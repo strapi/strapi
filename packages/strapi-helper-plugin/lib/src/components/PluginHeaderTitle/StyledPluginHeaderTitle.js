@@ -24,11 +24,11 @@ const StyledPluginHeaderTitle = styled.div`
       padding-right: 18px;
     }
     i {
-      font-size: 14px;
       position: absolute;
       right: 0;
       top: 0;
       margin-top: 9px;
+      font-size: 14px;
       color: rgba(16, 22, 34, 0.35);
       cursor: pointer;
     }

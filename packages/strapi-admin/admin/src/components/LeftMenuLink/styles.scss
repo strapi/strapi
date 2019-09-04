@@ -70,9 +70,9 @@
   }
   span {
     display: inline-block;
+    width: 100%;
     padding-right: 1rem;
     padding-left: 2.6rem;
-    width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -98,7 +98,7 @@
 
 .linkLabel {
   display: inline-block;
+  width: 100%;
   padding-right: 1rem;
   padding-left: 2.6rem;
-  width: 100%;
 }
