@@ -381,12 +381,15 @@ export class ModelPage extends React.Component {
   };
 
   handleRedirectToGroup = group => {
+    const {
+      history: { push },
+    } = this.props;
     const { source, uid } = group;
 
     const base = `/plugins/${pluginId}/groups/${uid}`;
     const to = source ? `${base}&source=${source}` : base;
 
-    this.props.history.push(to);
+    push(to);
   };
 
   handleSubmit = (shouldContinue = false) => {
