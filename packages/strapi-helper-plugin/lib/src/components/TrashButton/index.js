@@ -43,4 +43,5 @@ const TrashButton = styled.div`
     }
   }
 `;
+
 export default TrashButton;

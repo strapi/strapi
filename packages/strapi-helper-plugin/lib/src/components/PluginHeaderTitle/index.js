@@ -11,7 +11,7 @@ import { isEmpty, isFunction, isObject } from 'lodash';
 
 import LoadingBar from '../LoadingBar';
 
-import styles from './styles.scss';
+import StyledPluginHeaderTitle from './StyledPluginHeaderTitle';
 
 function PluginHeaderTitle({
   description,
@@ -25,28 +25,26 @@ function PluginHeaderTitle({
   const contentDescription = formatData(description);
 
   return (
-    <div>
-      <div style={{ display: 'flex' }}>
-        <h1 className={styles.pluginHeaderTitleName} id={titleId}>
-          {contentTitle}&nbsp;
+    <StyledPluginHeaderTitle>
+      <div className="header-title">
+        <h1 id={titleId}>
+          {contentTitle}
+          {icon && (
+            <i
+              className={`${icon}`}
+              id="editCTName"
+              onClick={onClickIcon}
+              role="button"
+            />
+          )}
         </h1>
-        {icon && (
-          <i
-            className={`${icon} ${styles.icon}`}
-            id="editCTName"
-            onClick={onClickIcon}
-            role="button"
-          />
-        )}
       </div>
       {withDescriptionAnim ? (
         <LoadingBar style={{ marginTop: '13px' }} />
       ) : (
-        <p className={styles.pluginHeaderTitleDescription}>
-          {contentDescription}&nbsp;
-        </p>
+        <p className="header-subtitle">{contentDescription}&nbsp;</p>
       )}
-    </div>
+    </StyledPluginHeaderTitle>
   );
 }
 

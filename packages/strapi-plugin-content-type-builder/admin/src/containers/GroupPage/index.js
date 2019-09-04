@@ -17,7 +17,6 @@ import ViewContainer from '../ViewContainer';
 import RelationFormGroup from '../RelationFormGroup';
 
 import {
-  BackHeader,
   Button,
   EmptyAttributesBlock,
   getQueryParameters,
@@ -316,10 +315,6 @@ export class GroupPage extends React.Component {
     this.setState({ attrToDelete: null, showDeleteAttrWarning: false });
   };
 
-  handleGoBack = () => {
-    this.props.history.goBack();
-  };
-
   handleSubmit = (shouldContinue = false) => {
     const {
       addAttributeRelationGroup,
@@ -523,7 +518,6 @@ export class GroupPage extends React.Component {
 
     return (
       <>
-        <BackHeader onClick={this.handleGoBack} />
         <FormattedMessage id={`${pluginId}.prompt.content.unsaved`}>
           {msg => (
             <Prompt
@@ -715,7 +709,6 @@ GroupPage.propTypes = {
   groups: PropTypes.array.isRequired,
   history: PropTypes.shape({
     push: PropTypes.func.isRequired,
-    goBack: PropTypes.func.isRequired,
   }),
   initialDataGroup: PropTypes.object.isRequired,
   location: PropTypes.shape({
