@@ -17,7 +17,12 @@ function MediaPreviewList({ hoverable, files }) {
   const getFileType = fileName => fileName.split('.').slice(-1)[0];
 
   const renderImage = image => {
-    const { name, url } = image;
+    const { name, size, url } = image;
+
+    // TODO !! - Specific UI for size > 200MB
+    if (size > 200) {
+      return renderFile(image);
+    }
 
     return (
       <MediaPreviewImage className={hoverable ? 'hoverable' : ''}>
@@ -30,13 +35,13 @@ function MediaPreviewList({ hoverable, files }) {
   };
 
   const renderFile = file => {
-    const { ext, name } = file;
+    const { name } = file;
     const fileType = getFileType(name);
 
     return (
       <MediaPreviewFile className={hoverable ? 'hoverable' : ''}>
         <div>
-          <span>{ext}</span>
+          <span>{fileType}</span>
           <i className={`fa fa-file-${fileType}-o`} />
         </div>
         <span>{name}</span>
@@ -88,7 +93,7 @@ function MediaPreviewList({ hoverable, files }) {
 }
 
 MediaPreviewList.default = {
-  hoverable: false,
+  hoverable: true,
   files: null,
 };
 

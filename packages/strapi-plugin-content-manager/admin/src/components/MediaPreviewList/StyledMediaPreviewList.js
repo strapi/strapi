@@ -67,6 +67,7 @@ const MediaPreviewFile = styled(MediaPreviewItem)`
     span {
       display: block;
       padding: 0 3px;
+      text-transform: uppercase;
     }
     i {
       position: absolute;
