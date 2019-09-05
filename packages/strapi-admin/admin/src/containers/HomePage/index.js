@@ -5,11 +5,10 @@
  */
 /* eslint-disable */
 import React, { memo } from 'react';
-import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { get, upperFirst } from 'lodash';
 import { auth } from 'strapi-helper-plugin';
-import favicon from '../../favicon.ico';
+import PageTitle from '../../components/PageTitle';
 
 import useFetch from './hooks';
 import {
@@ -103,12 +102,7 @@ const HomePage = ({ global: { plugins }, history: { push } }) => {
   return (
     <>
       <FormattedMessage id="HomePage.helmet.title">
-        {title => (
-          <Helmet
-            title={title}
-            link={[{ rel: 'icon', type: 'image/png', href: favicon }]}
-          />
-        )}
+        {title => <PageTitle title={title} />}
       </FormattedMessage>
       <Container className="container-fluid">
         <div className="row">

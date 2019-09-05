@@ -21,6 +21,7 @@ import { SHOW_TUTORIALS } from '../../config';
 
 import Header from '../../components/Header/index';
 import Logout from '../../components/Logout';
+import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 
 import ComingSoonPage from '../ComingSoonPage';
 import LeftMenu from '../LeftMenu';
@@ -62,8 +63,6 @@ import {
 import makeSelectAdmin from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-
-import NavTopRightWrapper from './NavTopRightWrapper';
 
 import styles from './styles.scss';
 
