@@ -377,7 +377,6 @@ function ListView({
                   data={data}
                   headers={getTableHeaders()}
                   isBulkable={getLayoutSettingRef.current('bulkable')}
-                  isHoverable={true}
                   onChangeParams={handleChangeParams}
                   slug={slug}
                 />

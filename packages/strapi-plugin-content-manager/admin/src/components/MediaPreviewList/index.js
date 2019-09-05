@@ -19,7 +19,6 @@ function MediaPreviewList({ hoverable, files }) {
   const renderImage = image => {
     const { name, size, url } = image;
 
-    // TODO !! - Specific UI for size > 200MB
     if (size > 2000) {
       return renderFile(image);
     }
