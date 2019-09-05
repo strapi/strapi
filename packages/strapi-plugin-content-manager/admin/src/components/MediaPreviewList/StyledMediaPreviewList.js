@@ -34,17 +34,69 @@ function createCSS() {
   `;
 }
 
-//34373F gris +5 FAFAFB
-
 const MediaPreviewItem = styled.div`
   width: ${sizes.small};
   height: ${sizes.small};
-
   div {
     width: 100%;
     height: 100%;
     overflow: hidden;
     border-radius: calc(${sizes.small} / 2);
+    background-color: #fafafb;
+  }
+  &.hoverable {
+    :hover {
+      z-index: ${max + 1};
+    }
+  }
+`;
+
+const MediaPreviewFile = styled(MediaPreviewItem)`
+  div {
+    position: relative;
+    background-color: #9fa7b6;
+    color: white;
+    text-align: center;
+    line-height: ${sizes.small};
+    font-size: 13px;
+    i {
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 15px;
+      width: 100%;
+      height: 100%;
+      &:before {
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+        line-height: 35px;
+        background: #9fa7b6;
+      }
+    }
+  }
+  div + span {
+    display: none;
+    color: #333740;
+    position: absolute;
+    left: 100%;
+    bottom: -10px;
+  }
+  &.hoverable {
+    :hover {
+      div + span {
+        display: block;
+      }
+    }
+  }
+`;
+
+const MediaPreviewText = styled(MediaPreviewItem)`
+  div {
+    font-size: 13px;
+    color: #333740;
+    text-align: center;
+    line-height: ${sizes.small};
   }
 `;
 
@@ -52,6 +104,7 @@ const MediaPreviewImage = styled(MediaPreviewItem)`
   img {
     display: block;
     object-fit: cover;
+    background-color: #fafafb;
   }
   div {
     position: relative;
@@ -80,7 +133,6 @@ const MediaPreviewImage = styled(MediaPreviewItem)`
 
   &.hoverable {
     :hover {
-      z-index: ${max + 1};
       div {
         &::before {
           opacity: 0.6;
@@ -93,4 +145,10 @@ const MediaPreviewImage = styled(MediaPreviewItem)`
   }
 `;
 
-export { MediaPreviewImage, MediaPreviewItem, StyledMediaPreviewList };
+export {
+  MediaPreviewFile,
+  MediaPreviewImage,
+  MediaPreviewItem,
+  MediaPreviewText,
+  StyledMediaPreviewList,
+};

@@ -252,6 +252,7 @@ function ListView({
   };
   const tableHeaders = [...getTableHeaders(), imgHeader, iconsHeader];
 
+  console.log(data);
   return (
     <>
       <ListViewProvider
