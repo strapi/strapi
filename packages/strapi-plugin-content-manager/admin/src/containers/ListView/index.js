@@ -237,22 +237,6 @@ function ListView({
     },
   ];
 
-  // TODO - Remove when media is enable in List Layout
-  const imgHeader = {
-    label: 'Image',
-    name: 'image',
-    searchable: false,
-    sortable: false,
-  };
-  const iconsHeader = {
-    label: 'Icons',
-    name: 'icons',
-    searchable: false,
-    sortable: false,
-  };
-  const tableHeaders = [...getTableHeaders(), imgHeader, iconsHeader];
-
-  console.log(data);
   return (
     <>
       <ListViewProvider
@@ -391,7 +375,7 @@ function ListView({
               <div className="col-12">
                 <CustomTable
                   data={data}
-                  headers={tableHeaders}
+                  headers={getTableHeaders()}
                   isBulkable={getLayoutSettingRef.current('bulkable')}
                   isHoverable={true}
                   onChangeParams={handleChangeParams}
