@@ -42,7 +42,6 @@ import makeSelecApp from '../App/selectors';
 import injectSaga from '../../utils/injectSaga';
 import injectReducer from '../../utils/injectReducer';
 
-import localeToggleReducer from '../LocaleToggle/reducer';
 import {
   resetLocaleDefaultClassName,
   setLocaleCustomClassName,
@@ -361,15 +360,15 @@ const withConnect = connect(
 );
 const withReducer = injectReducer({ key: 'admin', reducer });
 const withSaga = injectSaga({ key: 'admin', saga });
-const withLocaleToggleReducer = injectReducer({
-  key: 'localeToggle',
-  reducer: localeToggleReducer,
-});
+// const withLocaleToggleReducer = injectReducer({
+//   key: 'localeToggle',
+//   reducer: localeToggleReducer,
+// });
 const withHooks = injectHooks({ key: 'admin' });
 
 export default compose(
   withReducer,
-  withLocaleToggleReducer,
+  // withLocaleToggleReducer,
   withSaga,
   withConnect,
   withHooks

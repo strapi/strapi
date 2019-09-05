@@ -20,6 +20,7 @@ import NotFoundPage from '../NotFoundPage';
 import NotificationProvider from '../NotificationProvider';
 import AppLoader from '../AppLoader';
 import styles from './styles.scss';
+import AuthPage from '../AuthPage';
 
 function App(props) {
   return (
@@ -34,6 +35,13 @@ function App(props) {
           return (
             <div className={styles.container}>
               <Switch>
+                <Route
+                  path="/auth/:authType"
+                  render={routerProps => (
+                    <AuthPage {...props} {...routerProps} />
+                  )}
+                  exact
+                />
                 <Route
                   path="/"
                   render={router => <Admin {...props} {...router} />}
