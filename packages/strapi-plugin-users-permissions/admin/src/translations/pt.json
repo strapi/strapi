@@ -127,6 +127,7 @@
   "PopUpForm.Providers.facebook.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação do Facebook",
   "PopUpForm.Providers.github.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação de GitHub",
   "PopUpForm.Providers.google.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação da Google",
+  "PopUpForm.Providers.instagram.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação da Instagram",
   "PopUpForm.Providers.key.label": "ID de Client",
   "PopUpForm.Providers.key.placeholder": "TEXTO",
   "PopUpForm.Providers.linkedin2.providerConfig.redirectURL": "Endereço de redirecionamento para adicionar às configurações da sua aplicação de Linkedin",

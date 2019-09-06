@@ -304,7 +304,7 @@ input UserInput {
 }
 
 type UsersPermissionsMe {
-  _id: ID!
+  id: ID!
   username: String!
   email: String!
   confirmed: Boolean
@@ -313,7 +313,7 @@ type UsersPermissionsMe {
 }
 
 type UsersPermissionsMeRole {
-  _id: ID!
+  id: ID!
   name: String!
   description: String
   type: String
