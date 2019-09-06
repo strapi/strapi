@@ -18,7 +18,6 @@ function CustomTable({
     push,
   },
   isBulkable,
-  isHoverable,
 }) {
   const {
     emitEvent,
@@ -68,7 +67,6 @@ function CustomTable({
           >
             <Row
               isBulkable={isBulkable}
-              isHoverable={isHoverable}
               headers={headers}
               row={row}
               goTo={handleGoTo}

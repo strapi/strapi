@@ -56,7 +56,7 @@ const getDisplayedValue = (type, value, name) => {
   }
 };
 
-function Row({ goTo, isBulkable, isHoverable, row, headers }) {
+function Row({ goTo, isBulkable, row, headers }) {
   const {
     entriesToDelete,
     onChangeBulk,
@@ -65,12 +65,7 @@ function Row({ goTo, isBulkable, isHoverable, row, headers }) {
   } = useListView();
 
   const renderMediaList = files => {
-    return (
-      <MediaPreviewList
-        files={files}
-        hoverable={isHoverable}
-      ></MediaPreviewList>
-    );
+    return <MediaPreviewList files={files}></MediaPreviewList>;
   };
 
   return (

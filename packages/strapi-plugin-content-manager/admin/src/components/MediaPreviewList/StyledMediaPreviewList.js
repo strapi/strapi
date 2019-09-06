@@ -52,13 +52,23 @@ const MediaPreviewItem = styled.div`
 `;
 
 const MediaPreviewFile = styled(MediaPreviewItem)`
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   div {
     position: relative;
     background-color: #9fa7b6;
     color: white;
     text-align: center;
     line-height: ${sizes.small};
-    font-size: 13px;
+    font-size: 11px;
+    span {
+      display: block;
+      padding: 0 3px;
+      text-transform: uppercase;
+    }
     i {
       position: absolute;
       left: 0;
@@ -77,10 +87,12 @@ const MediaPreviewFile = styled(MediaPreviewItem)`
   }
   div + span {
     display: none;
-    color: #333740;
     position: absolute;
-    left: 100%;
+    left: 120%;
     bottom: -10px;
+    display: none;
+    max-width: 150px;
+    color: #333740;
   }
   &.hoverable {
     :hover {
