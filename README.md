@@ -44,7 +44,7 @@ Strapi is a free and open source headless CMS delivering your content anywhere y
 
 ### ⏳ Installation
 
-Install Strapi with this **Quickstart** command to install and create a Strapi project instantly:
+Install Strapi with this **Quickstart** command to create a Strapi project instantly:
 
 - (Use **yarn** to install the Strapi project (recommended). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
 
