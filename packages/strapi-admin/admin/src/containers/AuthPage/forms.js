@@ -1,4 +1,5 @@
 import * as yup from 'yup';
+import { translatedErrors } from 'strapi-helper-plugin';
 
 const form = {
   'forgot-password': {
@@ -18,8 +19,8 @@ const form = {
     schema: yup.object({
       email: yup
         .string()
-        .email()
-        .required(),
+        .email(translatedErrors.email)
+        .required(translatedErrors.required),
     }),
   },
   login: {
@@ -56,8 +57,8 @@ const form = {
       ],
     ],
     schema: yup.object({
-      identifier: yup.string().required(),
-      password: yup.string().required(),
+      identifier: yup.string().required(translatedErrors.required),
+      password: yup.string().required(translatedErrors.required),
     }),
   },
   register: {
@@ -70,7 +71,7 @@ const form = {
           },
           name: 'text',
           type: 'text',
-          placeholder: 'Auth.form.register.username',
+          placeholder: 'Auth.form.register.username.placeholder',
         },
       ],
       [
@@ -115,16 +116,16 @@ const form = {
     schema: yup.object({
       email: yup
         .string()
-        .email()
-        .required(),
-      username: yup.string().required(),
+        .email(translatedErrors.email)
+        .required(translatedErrors.required),
+      username: yup.string().required(translatedErrors.required),
       password: yup
         .string()
-        .min(6)
-        .required(),
+        .min(6, translatedErrors.minLength)
+        .required(translatedErrors.required),
       passwordConfirmation: yup
         .string()
-        .min(6)
+        .min(6, translatedErrors.minLength)
         .oneOf([yup.ref('password'), null])
         .required({ id: 'components.Input.error.password.noMatch' }),
     }),
@@ -166,14 +167,14 @@ const form = {
       ],
     ],
     schema: yup.object({
-      code: yup.string().required(),
+      code: yup.string().required(translatedErrors.required),
       password: yup
         .string()
-        .min(6)
-        .required(),
+        .min(6, translatedErrors.minLength)
+        .required(translatedErrors.required),
       passwordConfirmation: yup
         .string()
-        .min(6)
+        .min(6, translatedErrors.required)
         .oneOf([yup.ref('password'), null])
         .required({ id: 'components.Input.error.password.noMatch' }),
     }),

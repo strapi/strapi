@@ -1,9 +1,85 @@
 import React, { memo } from 'react';
+import { FormattedMessage } from 'react-intl';
+import PropTypes from 'prop-types';
 
-// import { InputsIndex as Inputs } from 'strapi-helper-plugin';
+import { InputsIndex as Inputs } from 'strapi-helper-plugin';
+import CustomLabel from './CustomLabel';
 
-const Input = () => {
-  return <div />;
+const Input = ({
+  autoFocus,
+  customBootstrapClass,
+  label,
+  name,
+  onChange,
+  placeholder,
+  type,
+  value,
+}) => {
+  let inputLabel = label;
+
+  if (name === 'news') {
+    const handleClick = (e, to) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const win = window.open(`https://strapi.io/${to}`, '_blank');
+      win.focus();
+    };
+
+    const terms = (
+      <FormattedMessage id="Auth.privacy-policy-agreement.terms">
+        {content => (
+          <span
+            style={{ color: '#0097f7', cursor: 'pointer' }}
+            onClick={e => handleClick(e, 'terms')}
+          >
+            {content}
+          </span>
+        )}
+      </FormattedMessage>
+    );
+    const policy = (
+      <FormattedMessage id="Auth.privacy-policy-agreement.policy">
+        {content => (
+          <span
+            style={{ color: '#0097f7', cursor: 'pointer' }}
+            onClick={e => handleClick(e, 'policy')}
+          >
+            {content}
+          </span>
+        )}
+      </FormattedMessage>
+    );
+
+    inputLabel = <CustomLabel id={label.id} values={{ terms, policy }} />;
+  }
+
+  return (
+    <Inputs
+      autoFocus={autoFocus}
+      customBootstrapClass={customBootstrapClass || 'col-12'}
+      didCheckErrors={false}
+      errors={{}}
+      label={inputLabel}
+      name={name}
+      onChange={onChange}
+      placeholder={placeholder}
+      type={type}
+      validations={{ required: true }}
+      value={value}
+    />
+  );
+};
+
+Input.propTypes = {
+  autoFocus: PropTypes.bool,
+  customBootstrapClass: PropTypes.string,
+  label: PropTypes.object,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
+  type: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
 };
 
 export default memo(Input);
