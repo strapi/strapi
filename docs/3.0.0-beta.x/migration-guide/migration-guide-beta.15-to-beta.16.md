@@ -30,19 +30,72 @@ Your package.json would look like this:
 
 Then run either `yarn install` or `npm install`.
 
+## Building your administration panel
+
+This new release introduces changes to the administration panel than require rebuild it.
+
+Start by deleting your current build:
+
+```bash
+rm -rf ./build
+```
+
+Build the administration panel:
+
+```bash
+yarn build
+# or
+npm run build
+```
+
 ## Updating your code
 
 ### Custom controllers and services
 
 If you are using [core services](../guides/services.md), you previously needed to call `result.toJSON()` or `result.toObject()` to get a plain javascript object. This is not the case anymore, you will now receive a simple object directly.
 
-The same goes for `strapi.query()` if you use it. Read more abour **Queries** [here](../guides/queries.md).
+**Before**:
 
-Kepp in mind that if you are running custom ORM queries with Bookshelf or Mongoose you will still have to call `toJSON` or `toObject`. Check out this section for [custom queries](../guides/queries.html#api-reference).
+```js
+module.exports = {
+  async findOne(id) {
+    const result = await strapi.services.restaurant.findOne(id);
+    return result.toJSON();
+  },
+};
+```
+
+**After**:
+
+```js
+module.exports = {
+  findOne(id) {
+    return strapi.services.restaurant.findOne(id);
+  },
+};
+```
+
+The same modification was made to `strapi.query()`. Read more about **Queries** [here](../guides/queries.md).
+
+Keep in mind that if you are running custom ORM queries with Bookshelf or Mongoose you will still have to call `toJSON` or `toObject`. Check out this section about [custom queries](../guides/queries.html#api-reference).
 
 ### Bootstrap function
 
 The function exported in `config/functions/bootstrap.js` previsouly received a callback. This is not the case anymore. You can either use an async function, return a promise or simply run a synchronous function.
+
+**Before**
+
+```js
+module.exports = {
+  defaults: {},
+  initialize(cb) {
+    // code
+    cb();
+  },
+};
+```
+
+**After**
 
 **Async**
 
@@ -70,7 +123,21 @@ module.exports = () => {
 
 ### Custom hooks
 
-If you have custom [hooks](../advanced/hooks.md) the `initialize` function will not receive a callback anymore. You can either use an async function, return a promise or simply run a synchronous function.
+If you have custom [hooks](../advanced/hooks.md) in your project, the `initialize` function will not receive a callback anymore. You can either use an async function, return a promise or simply run a synchronous function.
+
+**Before**
+
+```js
+module.exports = {
+  defaults: {},
+  initialize(cb) {
+    // code
+    cb();
+  },
+};
+```
+
+**After**
 
 **Async**
 
