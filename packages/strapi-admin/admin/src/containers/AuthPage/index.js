@@ -2,7 +2,7 @@ import React, { memo, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
-import { Redirect } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { Button, getYupInnerErrors } from 'strapi-helper-plugin';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LogoStrapi from '../../assets/images/logo_strapi.png';
@@ -73,7 +73,7 @@ const AuthPage = ({
             )}
           </div>
           {/* TODO Forgot success style */}
-          <div className="formContainer borderred">
+          <div className="formContainer bordered">
             <form onSubmit={handleSubmit}>
               <div className="container-fluid">
                 {/* TODO ERROR CONTAINER */}
@@ -95,16 +95,40 @@ const AuthPage = ({
                       );
                     });
                   })}
-                  <div className="col-6 loginButton">
+                  <div
+                    className={`${
+                      authType === 'login'
+                        ? 'col-6 loginButton'
+                        : 'col-12 buttonContainer'
+                    }`}
+                  >
                     <Button
                       type="submit"
                       label="Auth.form.button.login"
                       primary
+                      style={
+                        authType === 'forgot-password' ? { width: '100%' } : {}
+                      }
                     />
                   </div>
                 </div>
               </div>
             </form>
+          </div>
+          <div className="linkContainer">
+            {authType !== 'register' && authType !== 'reset-password' && (
+              <Link
+                to={`/auth/${
+                  authType === 'login' ? 'forgot-password' : 'login'
+                }`}
+              >
+                <FormattedMessage
+                  id={`Auth.link.${
+                    authType === 'login' ? 'forgot-password' : 'ready'
+                  }`}
+                />
+              </Link>
+            )}
           </div>
           {authType === 'register' && (
             <div className="logoContainer">

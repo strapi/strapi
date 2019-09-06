@@ -39,7 +39,8 @@ const Wrapper = styled.div`
     width: 41.6rem;
     text-align: center;
     margin: auto;
-    padding: 13px 30px 0 30px;
+    // padding: 13px 30px 0 30px;
+    padding: 8px 30px 0 30px;
     line-height: 18px;
     color: #333740;
   }
