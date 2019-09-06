@@ -60,7 +60,7 @@ yarn create strapi-app my-project --quickstart
 npx create-strapi-app my-project --quickstart
 ```
 
-This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
+This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload). The **Quickstart** command installs Strapi using a **SQLite** database which is used for prototyping in development.
 
 Enjoy 🎉
 
@@ -127,11 +127,7 @@ Be aware that the Content Type Builder won't work due to the restriction of writ
 
 Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull Request to the project.
 
-## Support
-
-For more information on the upcoming version, please take a look at our [ROADMAP](https://github.com/strapi/strapi/projects).
-
-#### Community support
+## Community support
 
 For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask a question:
 
