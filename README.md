@@ -152,12 +152,6 @@ Follow our [migration guides](https://github.com/strapi/strapi/wiki) on the wiki
 
 Check out our [roadmap](https://portal.productboard.com/strapi) to get informed of the latest features released and the upcoming ones. You may also give us insights and vote for a specific feature.
 
-## Sponsors
-
-[Become a sponsor](https://opencollective.com/strapi#sponsor) and get your logo on our README on GitHub with a link to your site.
-
-<a href="https://opencollective.com/strapi#contributors"><img src="https://opencollective.com/strapi/tiers/sponsor.svg"/></a>
-
 ## License
 
 [MIT License](LICENSE.md) Copyright (c) 2015-2019 [Strapi Solutions](https://strapi.io/).
