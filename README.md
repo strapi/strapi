@@ -34,8 +34,8 @@
 Strapi is a free and open-source Headless CMS delivering your content anywhere you need.
 
 - **Keep control over your data**. With Strapi, you know where your data is stored and you keep full control at any time.
-- **Self hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Netlify, Heroku, a VPS or a dedicated server. You can scale as you grow, 100% independently.
-- **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgresQL, MySQL, MariaDB, SQLite.
+- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Netlify, Heroku, a VPS or a dedicated server. You can scale as you grow, 100% independently.
+- **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgreSQL, MySQL, MariaDB, SQLite.
 - **Customisable**. You can easily build your own logic by fully customising APIs, routes or plugins to perfectly fit your needs.
 
 ## Getting Started
@@ -130,7 +130,7 @@ Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull
 
 ## Support
 
-For more information on the upcoming version, please take a look to our [ROADMAP](https://github.com/strapi/strapi/projects).
+For more information on the upcoming version, please take a look at our [ROADMAP](https://github.com/strapi/strapi/projects).
 
 #### Community support
 
