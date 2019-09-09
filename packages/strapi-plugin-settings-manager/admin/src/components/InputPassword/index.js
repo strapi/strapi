@@ -36,7 +36,7 @@ class InputPassword extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!this.isSame(nextProps)) {
       this.setState({ errors: nextProps.errors });
     }
@@ -56,7 +56,7 @@ class InputPassword extends React.Component {
     return (
       size(this.props.errors) === size(nextProps.errors) &&
       this.props.errors.every(
-        (error, index) => error.id === nextProps.errors[index].id,
+        (error, index) => error.id === nextProps.errors[index].id
       )
     );
   };
@@ -151,9 +151,7 @@ class InputPassword extends React.Component {
     return (
       <div className={`${bootStrapClass}`}>
         <div
-          className={`${
-            this.props.styles.stminputText
-          } ${bootStrapClassDanger}`}
+          className={`${this.props.styles.stminputText} ${bootStrapClassDanger}`}
         >
           <label htmlFor={this.props.name}>
             <FormattedMessage id={`settings-manager.${this.props.name}`} />

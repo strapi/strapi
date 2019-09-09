@@ -1,5 +1,7 @@
 {
   "Auth.advanced.allow_register": "",
+  "Auth.privacy-policy-agreement.terms": "terms",
+  "Auth.privacy-policy-agreement.policy": "privacy policy",
   "Auth.form.button.forgot-password": "Send Email",
   "Auth.form.button.forgot-password.success": "Send again",
   "Auth.form.button.login": "Log in",
@@ -38,7 +40,7 @@
   "Auth.form.register.confirmPassword.label": "Confirmation Password",
   "Auth.form.register.email.label": "Email",
   "Auth.form.register.email.placeholder": "johndoe@gmail.com",
-  "Auth.form.register.news.label": "Keep me updated about the new features and upcoming improvements.",
+  "Auth.form.register.news.label": "Keep me updated about the new features and upcoming improvements (by doing this you accept the {terms} and the {policy}).",
   "Auth.form.register.password.label": "Password",
   "Auth.form.register.username.label": "Username",
   "Auth.form.register.username.placeholder": "John Doe",

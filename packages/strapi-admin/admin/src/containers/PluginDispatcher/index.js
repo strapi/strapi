@@ -10,6 +10,9 @@ import { get } from 'lodash';
 
 import Helmet from 'react-helmet';
 import { BlockerComponent } from 'strapi-helper-plugin';
+import favicon from '../../favicon.ico';
+
+import { LOGIN_LOGO } from '../../config';
 import ErrorBoundary from '../ErrorBoundary';
 
 export function PluginDispatcher(props) {
@@ -44,9 +47,16 @@ export function PluginDispatcher(props) {
 
   return (
     <div>
-      <Helmet title={`Strapi - ${name}`} />
+      <Helmet
+        title={`Strapi - ${name}`}
+        link={[{ rel: 'icon', type: 'image/png', href: favicon }]}
+      />
       <ErrorBoundary>
-        <PluginEntryComponent {...props} {...blockerComponentProps} />
+        <PluginEntryComponent
+          {...props}
+          {...blockerComponentProps}
+          assets={{ loginLogo: LOGIN_LOGO }}
+        />
       </ErrorBoundary>
     </div>
   );

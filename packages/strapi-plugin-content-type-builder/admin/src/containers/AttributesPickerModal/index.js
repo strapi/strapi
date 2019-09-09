@@ -7,6 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { has } from 'lodash';
+import { FormattedMessage } from 'react-intl';
 
 import pluginId from '../../pluginId';
 
@@ -16,6 +17,9 @@ import FooterModal from '../../components/FooterModal';
 import HeaderModal from '../../components/HeaderModal';
 import HeaderModalTitle from '../../components/HeaderModalTitle';
 import WrapperModal from '../../components/WrapperModal';
+
+import Icon from '../../assets/icons/icon_type_ct.png';
+import IconGroup from '../../assets/icons/icon_type_groups.png';
 
 import attributes from './attributes.json';
 
@@ -56,6 +60,12 @@ class AttributesPickerModal extends React.Component {
 
       return attr.type !== 'media';
     });
+  };
+
+  getIcon = () => {
+    const { featureType } = this.props;
+
+    return featureType === 'model' ? Icon : IconGroup;
   };
 
   addEventListener = () => {
@@ -106,9 +116,7 @@ class AttributesPickerModal extends React.Component {
         e.preventDefault();
 
         push({
-          search: `modalType=attributeForm&attributeType=${
-            attributes[nodeToFocus].type
-          }&settingType=base&actionType=create`,
+          search: `modalType=attributeForm&attributeType=${attributes[nodeToFocus].type}&settingType=base&actionType=create`,
         });
         break;
       default:
@@ -134,8 +142,12 @@ class AttributesPickerModal extends React.Component {
   updateNodeToFocus = position => this.setState({ nodeToFocus: position });
 
   renderAttribute = (attribute, index) => {
+    const { featureType } = this.props;
     const { isDisplayed, nodeToFocus } = this.state;
 
+    if (attribute.type === featureType) {
+      return null;
+    }
     return (
       <AttributeOption
         autoFocus={nodeToFocus === index}
@@ -150,7 +162,7 @@ class AttributesPickerModal extends React.Component {
   };
 
   render() {
-    const { isOpen } = this.props;
+    const { featureName, featureType, isOpen } = this.props;
 
     return (
       <WrapperModal
@@ -160,11 +172,21 @@ class AttributesPickerModal extends React.Component {
         onOpened={this.handleOnOpened}
       >
         <HeaderModal>
-          <HeaderModalTitle
-            title={`${pluginId}.popUpForm.choose.attributes.header.title`}
-          />
+          <section>
+            <HeaderModalTitle>
+              <img src={this.getIcon()} alt="feature" />
+              <span>&nbsp;{featureName}</span>
+            </HeaderModalTitle>
+          </section>
+          <section>
+            <HeaderModalTitle>
+              <FormattedMessage
+                id={`${pluginId}.popUpForm.choose.attributes.header.subtitle.${featureType}`}
+              />
+            </HeaderModalTitle>
+          </section>
         </HeaderModal>
-        <BodyModal style={{ paddingTop: '2.3rem' }}>
+        <BodyModal style={{ paddingTop: '0.4rem', paddingBottom: '3rem' }}>
           {attributes.map(this.renderAttribute)}
         </BodyModal>
         <FooterModal />
@@ -180,9 +202,13 @@ AttributesPickerModal.contextTypes = {
 
 AttributesPickerModal.defaultProps = {
   isOpen: false,
+  featureName: null,
+  featureType: 'model',
 };
 
 AttributesPickerModal.propTypes = {
+  featureName: PropTypes.string,
+  featureType: PropTypes.string,
   isOpen: PropTypes.bool,
   push: PropTypes.func.isRequired,
 };

@@ -48,28 +48,23 @@ module.exports = strapi => {
             ])
           ) {
             route.config.prefix = '';
-            route.path = `/${
-              strapi.plugins.documentation.config['x-strapi-config'].path
-            }${route.path}`.replace('//', '/');
+            route.path = `/${strapi.plugins.documentation.config['x-strapi-config'].path}${route.path}`.replace(
+              '//',
+              '/'
+            );
           }
 
           return route;
         }
       );
 
-      strapi.router.route({
-        method: 'GET',
-        path: '/plugins/documentation/*.*',
-        handler: [
-          async (ctx, next) => {
-            ctx.url = path.basename(ctx.url);
+      strapi.router.get('/plugins/documentation/*', async (ctx, next) => {
+        ctx.url = path.basename(ctx.url);
 
-            return await koaStatic(swaggerUi.getAbsoluteFSPath(), {
-              maxage: strapi.config.middleware.settings.public.maxAge,
-              defer: true,
-            })(ctx, next);
-          },
-        ],
+        return await koaStatic(swaggerUi.getAbsoluteFSPath(), {
+          maxage: strapi.config.middleware.settings.public.maxAge,
+          defer: true,
+        })(ctx, next);
       });
     },
   };

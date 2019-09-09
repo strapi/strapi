@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
 import { isEmpty, isObject, map } from 'lodash';
 import cn from 'classnames';
 
@@ -23,7 +24,7 @@ function InputSelect(props) {
         'form-control',
         !props.deactivateErrorHighlight && props.error && 'is-invalid',
         !isEmpty(props.className) && props.className,
-        props.disabled && styles.inputSelectDisabled,
+        props.disabled && styles.inputSelectDisabled
       )}
       disabled={props.disabled}
       id={props.name}
@@ -36,6 +37,15 @@ function InputSelect(props) {
       tabIndex={props.tabIndex}
       value={props.value}
     >
+      {props.withOptionPlaceholder && (
+        <FormattedMessage id="components.InputSelect.option.placeholder">
+          {msg => (
+            <option disabled hidden value="">
+              {msg}
+            </option>
+          )}
+        </FormattedMessage>
+      )}
       {map(props.selectOptions, (option, key) => {
         if (isObject(option)) {
           if (option.label) {
@@ -70,6 +80,7 @@ InputSelect.defaultProps = {
   onFocus: () => {},
   style: {},
   tabIndex: '0',
+  withOptionPlaceholder: false,
 };
 
 InputSelect.propTypes = {
@@ -92,11 +103,12 @@ InputSelect.propTypes = {
         value: PropTypes.string.isRequired,
       }),
       PropTypes.string,
-    ]),
+    ])
   ).isRequired,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   value: PropTypes.string.isRequired,
+  withOptionPlaceholder: PropTypes.bool,
 };
 
 export default InputSelect;

@@ -1,18 +1,20 @@
 .buttonModalSecondary {
-  min-width: 100px;
   font-family: Lato;
-  color: #F64D0A;
-  border: 0.1rem solid #F64D0A;
+  color: #f64d0a;
+  border: 0.1rem solid #f64d0a;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
   cursor: pointer;
   background-color: transparent;
-  &:hover, &:active {
-    color: #F64D0A;
+  &:hover,
+  &:active {
+    color: #f64d0a;
     background-color: white;
-    border: 0.1rem solid #F64D0A;
+    border: 0.1rem solid #f64d0a;
   }
   height: 3rem;
-  color: #F64D0A;
-  border: 0.1rem solid #F64D0A;
+  color: #f64d0a;
+  border: 0.1rem solid #f64d0a;
   position: relative;
   border-radius: 3px;
 }
