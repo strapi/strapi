@@ -29,7 +29,7 @@ module.exports = opts => {
     },
     devDependencies: {
       'babel-eslint': '^10.0.0',
-      eslint: '^6.2.0',
+      eslint: '^6.3.0',
       'eslint-config-airbnb': '^18.0.0',
       'eslint-plugin-import': '^2.18.0',
       'eslint-plugin-react': '^7.14.0',
