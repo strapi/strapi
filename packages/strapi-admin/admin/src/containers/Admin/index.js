@@ -72,7 +72,7 @@ export class Admin extends React.Component {
 
   getChildContext = () => ({
     emitEvent: this.props.emitEvent,
-    currentEnvironment: this.props.admin.currentEnvironment,
+    currentEnvironment: this.props.global.currentEnvironment,
     disableGlobalOverlayBlocker: this.props.disableGlobalOverlayBlocker,
     enableGlobalOverlayBlocker: this.props.enableGlobalOverlayBlocker,
     plugins: this.props.global.plugins,
@@ -127,6 +127,7 @@ export class Admin extends React.Component {
     this.props.setAppError();
   }
 
+  // TODO remove
   getContentWrapperStyle = () => {
     const {
       admin: { showMenu },
@@ -155,14 +156,6 @@ export class Admin extends React.Component {
     showLogout: this.props.showLogout,
     unsetAppSecured: this.props.unsetAppSecured,
     updatePlugin: this.props.updatePlugin,
-  };
-
-  isAcceptingTracking = () => {
-    const {
-      admin: { uuid },
-    } = this.props;
-
-    return !!uuid;
   };
 
   /**
@@ -202,8 +195,14 @@ export class Admin extends React.Component {
 
   render() {
     const {
-      admin: { isLoading, showLogoutComponent, showMenu, strapiVersion },
-      global: { blockApp, overlayBlockerData, plugins, showGlobalAppBlocker },
+      admin: { isLoading, showLogoutComponent, showMenu },
+      global: {
+        blockApp,
+        overlayBlockerData,
+        plugins,
+        showGlobalAppBlocker,
+        strapiVersion,
+      },
     } = this.props;
 
     if (isLoading) {
@@ -245,7 +244,12 @@ export class Admin extends React.Component {
                 render={this.renderPluginDispatcher}
               />
               <Route path="/plugins" component={ComingSoonPage} />
-              <Route path="/list-plugins" component={ListPluginsPage} exact />
+              <Route
+                path="/list-plugins"
+                render={props => this.renderRoute(props, ListPluginsPage)}
+                exact
+              />
+              {/* <Route path="/list-plugins" component={ListPluginsPage} exact /> */}
               <Route
                 path="/marketplace"
                 render={this.renderMarketPlace}
@@ -288,8 +292,6 @@ Admin.propTypes = {
     layout: PropTypes.object,
     showLogoutComponent: PropTypes.bool,
     showMenu: PropTypes.bool,
-    strapiVersion: PropTypes.string,
-    uuid: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   emitEvent: PropTypes.func.isRequired,
@@ -299,9 +301,11 @@ Admin.propTypes = {
   getSecuredData: PropTypes.func.isRequired,
   global: PropTypes.shape({
     blockApp: PropTypes.bool,
+    currentEnvironment: PropTypes.string.isRequired,
     overlayBlockerData: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
     plugins: PropTypes.object,
     showGlobalAppBlocker: PropTypes.bool,
+    strapiVersion: PropTypes.string,
   }).isRequired,
   hideLeftMenu: PropTypes.func.isRequired,
   hideLogout: PropTypes.func.isRequired,

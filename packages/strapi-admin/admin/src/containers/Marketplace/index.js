@@ -55,7 +55,7 @@ class Marketplace extends React.Component {
 
   renderPluginCard = plugin => {
     const {
-      admin: { autoReload, currentEnvironment },
+      global: { autoReload, currentEnvironment },
       availablePlugins,
       downloadPlugin,
       history,
@@ -118,10 +118,13 @@ Marketplace.childContextTypes = {
 Marketplace.defaultProps = {};
 
 Marketplace.propTypes = {
-  admin: PropTypes.object.isRequired,
   availablePlugins: PropTypes.array.isRequired,
   downloadPlugin: PropTypes.func.isRequired,
   getAvailableAndInstalledPlugins: PropTypes.func.isRequired,
+  global: PropTypes.shape({
+    autoReload: PropTypes.bool.isRequired,
+    currentEnvironment: PropTypes.string.isRequired,
+  }),
   history: PropTypes.object.isRequired,
   installedPlugins: PropTypes.array.isRequired,
   isLoading: PropTypes.bool.isRequired,
@@ -137,13 +140,13 @@ function mapDispatchToProps(dispatch) {
       getAvailableAndInstalledPlugins,
       resetProps,
     },
-    dispatch,
+    dispatch
   );
 }
 
 const withConnect = connect(
   mapStateToProps,
-  mapDispatchToProps,
+  mapDispatchToProps
 );
 
 /* Remove this line if the container doesn't have a route and
@@ -159,5 +162,5 @@ const withSaga = injectSaga({ key: 'marketplace', saga });
 export default compose(
   withReducer,
   withSaga,
-  withConnect,
+  withConnect
 )(Marketplace);
