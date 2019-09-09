@@ -425,8 +425,9 @@ export class GroupPage extends React.Component {
     const { groups } = this.props;
 
     return (
-      groups.findIndex(group => group.name === this.getFeatureDisplayName()) ===
-      -1
+      groups.findIndex(
+        group => (group.uid || group.name) === this.getFeatureName()
+      ) === -1
     );
   };
 
