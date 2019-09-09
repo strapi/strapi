@@ -1,0 +1,19 @@
+{
+  "info": {
+    "name": "dish",
+    "description": ""
+  },
+  "connection": "default",
+  "collectionName": "groups_dishes",
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text"
+    },
+    "price": {
+      "type": "float"
+    }
+  }
+}

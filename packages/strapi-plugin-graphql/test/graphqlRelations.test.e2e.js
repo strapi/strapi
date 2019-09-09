@@ -16,21 +16,15 @@ const documentModel = {
     {
       name: 'name',
       params: {
-        appearance: {
-          WYSIWYG: false,
-        },
         multiple: false,
-        type: 'string',
+        type: 'richtext',
       },
     },
     {
       name: 'content',
       params: {
-        appearance: {
-          WYSIWYG: true,
-        },
         multiple: false,
-        type: 'text',
+        type: 'richtext',
       },
     },
   ],
@@ -45,11 +39,8 @@ const labelModel = {
     {
       name: 'name',
       params: {
-        appearance: {
-          WYSIWYG: false,
-        },
         multiple: false,
-        type: 'string',
+        type: 'richtext',
       },
     },
     {
@@ -338,6 +329,7 @@ describe('Test Graphql Relations API End to End', () => {
             mutation deleteLabel($input: deleteLabelInput) {
               deleteLabel(input: $input) {
                 label {
+                  id
                   name
                 }
               }
@@ -353,6 +345,15 @@ describe('Test Graphql Relations API End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
+        expect(res.body).toMatchObject({
+          data: {
+            deleteLabel: {
+              label: {
+                id: label.id,
+              },
+            },
+          },
+        });
       }
 
       const res = await graphqlQuery({
@@ -392,6 +393,7 @@ describe('Test Graphql Relations API End to End', () => {
             mutation deleteDocument($input: deleteDocumentInput) {
               deleteDocument(input: $input) {
                 document {
+                  id
                   name
                 }
               }
@@ -407,6 +409,15 @@ describe('Test Graphql Relations API End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
+        expect(res.body).toMatchObject({
+          data: {
+            deleteDocument: {
+              document: {
+                id: document.id,
+              },
+            },
+          },
+        });
       }
     });
   });

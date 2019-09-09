@@ -1,32 +1,32 @@
 /**
- * 
+ *
  * Block
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-
-import styles from './styles.scss';
+import { Wrapper, Sub } from './components';
 
 const renderMsg = msg => <p>{msg}</p>;
 
 const Block = ({ children, description, style, title }) => (
   <div className="col-md-12">
-    <div className={styles.ctmBlock} style={style}>
-      <div className={styles.ctmBlockTitle}>
-        {!!title && <FormattedMessage id={title} />}
-        {!!description && (
-          <FormattedMessage id={description}>
-            {renderMsg}
-          </FormattedMessage>
+    <Wrapper style={style}>
+      <Sub>
+        {!!title && (
+          <p>
+            <FormattedMessage id={title} />
+          </p>
         )}
-      </div>
+        {!!description && (
+          <FormattedMessage id={description}>{renderMsg}</FormattedMessage>
+        )}
+      </Sub>
       {children}
-    </div>
+    </Wrapper>
   </div>
 );
-
 
 Block.defaultProps = {
   children: null,
@@ -42,4 +42,4 @@ Block.propTypes = {
   title: PropTypes.string,
 };
 
-export default Block;
+export default memo(Block);
